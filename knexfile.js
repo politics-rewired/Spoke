@@ -1,41 +1,12 @@
-const {
-  DB_USE_SSL = 'false',
-  DB_JSON = global.DB_JSON,
-  DB_HOST = '127.0.0.1',
-  DB_PORT = '5432',
-  DB_MIN_POOL = 2,
-  DB_MAX_POOL = 10,
-  DB_TYPE,
-  DB_NAME,
-  DB_PASSWORD,
-  DB_USER,
-  DATABASE_URL,
-  NODE_ENV
-} = process.env
-const min = parseInt(DB_MIN_POOL, 10)
-const max = parseInt(DB_MAX_POOL, 10)
+const { DB_USE_SSL, DB_TYPE, DB_JSON = global.DB_JSON, DB_HOST, DB_PORT, DB_NAME, DB_PASSWORD, DB_USER, DB_MIN_POOL = 2, DB_MAX_POOL = 10, DATABASE_URL } = process.env
 
-const pg = require('pg')
+const useSSL = DB_USE_SSL && (DB_USE_SSL.toLowerCase() === 'true' || DB_USE_SSL === '1')
 
-const useSSL = DB_USE_SSL === '1' || DB_USE_SSL.toLowerCase() === 'true'
-if (useSSL) pg.defaults.ssl = true
-// see https://github.com/tgriesser/knex/issues/852
+// TODO if useSSL then pg.defaults.ssl = true (figure out whether pg should be imported here)
 
 let config
 
-if (NODE_ENV === 'test') {
-  config = {
-    client: 'pg',
-    connection: {
-      host: DB_HOST,
-      port: DB_PORT,
-      database: 'spoke_test',
-      password: 'spoke_test',
-      user: 'spoke_test',
-      ssl: useSSL
-    }
-  }
-} else if (DB_JSON) {
+if (DB_JSON) {
   config = JSON.parse(DB_JSON)
 } else if (DB_TYPE) {
   config = {
@@ -48,14 +19,20 @@ if (NODE_ENV === 'test') {
       user: DB_USER,
       ssl: useSSL
     },
-    pool: { min, max }
+    pool: {
+      min: DB_MIN_POOL,
+      max: DB_MAX_POOL
+    }
   }
 } else if (DATABASE_URL) {
   const dbType = DATABASE_URL.match(/^\w+/)[0]
   config = {
     client: (/postgres/.test(dbType) ? 'pg' : dbType),
     connection: DATABASE_URL,
-    pool: { min, max },
+    pool: {
+      min: DB_MIN_POOL,
+      max: DB_MAX_POOL
+    },
     ssl: useSSL
   }
 } else {
@@ -66,4 +43,11 @@ if (NODE_ENV === 'test') {
   }
 }
 
-module.exports = config
+export default {
+  development: config,
+  staging: config,
+  production: config,
+  test: {
+
+  }
+}
