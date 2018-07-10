@@ -5,12 +5,21 @@ const {
   DB_PORT = '5432',
   DB_MIN_POOL = 2,
   DB_MAX_POOL = 10,
+  // free resouces are destroyed after this many milliseconds
+  DB_IDLE_TIMEOUT_MS = 30000,
+  // how often to check for idle resources to destroy
+  DB_REAP_INTERVAL_MS = 1000,
   DB_TYPE,
   DB_NAME,
   DB_PASSWORD,
   DB_USER,
-  DATABASE_URL
+  DATABASE_URL,
+  NODE_ENV
 } = process.env
+const min = parseInt(DB_MIN_POOL, 10)
+const max = parseInt(DB_MAX_POOL, 10)
+const idleTimeoutMillis = parseInt(DB_IDLE_TIMEOUT_MS)
+const reapIntervalMillis = parseInt(DB_REAP_INTERVAL_MS)
 
 const pg = require('pg')
 
@@ -20,7 +29,19 @@ if (useSSL) pg.defaults.ssl = true
 
 let config
 
-if (DB_JSON) {
+if (NODE_ENV === 'test') {
+  config = {
+    client: 'pg',
+    connection: {
+      host: DB_HOST,
+      port: DB_PORT,
+      database: 'spoke_test',
+      password: 'spoke_test',
+      user: 'spoke_test',
+      ssl: useSSL
+    }
+  }
+} else if (DB_JSON) {
   config = JSON.parse(DB_JSON)
 } else if (DB_TYPE) {
   config = {
@@ -33,20 +54,14 @@ if (DB_JSON) {
       user: DB_USER,
       ssl: useSSL
     },
-    pool: {
-      min: DB_MIN_POOL,
-      max: DB_MAX_POOL
-    }
+    pool: { min, max, idleTimeoutMillis, reapIntervalMillis }
   }
 } else if (DATABASE_URL) {
   const dbType = DATABASE_URL.match(/^\w+/)[0]
   config = {
     client: (/postgres/.test(dbType) ? 'pg' : dbType),
     connection: DATABASE_URL,
-    pool: {
-      min: DB_MIN_POOL,
-      max: DB_MAX_POOL
-    },
+    pool: { min, max, idleTimeoutMillis, reapIntervalMillis },
     ssl: useSSL
   }
 } else {
@@ -57,21 +72,4 @@ if (DB_JSON) {
   }
 }
 
-const test = {
-  client: 'pg',
-  connection: {
-    host: DB_HOST,
-    port: DB_PORT,
-    database: 'spoke_test',
-    password: 'spoke_test',
-    user: 'spoke_test',
-    ssl: useSSL
-  }
-}
-
-module.exports = {
-  development: config,
-  staging: config,
-  production: config,
-  test
-}
+module.exports = config
