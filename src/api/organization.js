@@ -16,7 +16,8 @@ export const schema = `
     uuid: String
     name: String
     campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): PaginatedCampaigns
-    people(role: String, campaignId: String): [User]
+    people(role: String, campaignId: String, offset: Int): [User]
+    peopleCount: Int
     optOuts: [OptOut]
     threeClickEnabled: Boolean
     optOutMessage: String
