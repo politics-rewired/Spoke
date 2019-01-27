@@ -5,6 +5,7 @@ import gql from 'graphql-tag'
 import { StyleSheet, css } from 'aphrodite'
 import wrapMutations from './hoc/wrap-mutations'
 import theme from '../styles/theme'
+import SpokeLogoSVG from '../styles/assets/spoke_logo'
 import { withRouter } from 'react-router'
 
 const styles = StyleSheet.create({
@@ -103,10 +104,7 @@ class Home extends React.Component {
     return (
       <div className={css(styles.container)}>
         <div className={css(styles.logoDiv)}>
-          <img
-            src='https://s3-us-west-1.amazonaws.com/spoke-public/spoke_logo.svg'
-            className={css(styles.logoImg)}
-          />
+          <span className={css(styles.logoImg)} dangerouslySetInnerHTML={{ __html: SpokeLogoSVG }} />
         </div>
         <div className={css(styles.content)}>
           {this.renderContent()}
