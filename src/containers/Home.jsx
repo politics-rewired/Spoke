@@ -7,8 +7,6 @@ import wrapMutations from './hoc/wrap-mutations'
 import theme from '../styles/theme'
 import { withRouter } from 'react-router'
 
-// import { ReactComponent as SpokeLogoSVG } from '../styles/assets/spoke_logo.svg'
-
 const styles = StyleSheet.create({
   container: {
     marginTop: '5vh',
@@ -105,7 +103,10 @@ class Home extends React.Component {
     return (
       <div className={css(styles.container)}>
         <div className={css(styles.logoDiv)}>
-          <img className={css(styles.logoImg)} src='https://politics-rewired.surge.sh/spoke_logo.svg' />
+          <img
+            src='https://politics-rewired.surge.sh/spoke_logo.svg'
+            className={css(styles.logoImg)}
+          />
         </div>
         <div className={css(styles.content)}>
           {this.renderContent()}
