@@ -225,6 +225,7 @@ export class IncomingMessageList extends Component {
           onPreviousPageClick={this.handlePreviousPageClick}
           onRowSizeChange={this.handleRowSizeChanged}
           onRowSelection={this.handleRowsSelected}
+          rowSizeList={[10, 30, 50, 100, 500, 1000, 2000]}
           selectedRows={this.state.selectedRows}
         />
         <Dialog
