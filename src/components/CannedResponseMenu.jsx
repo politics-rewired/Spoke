@@ -62,7 +62,6 @@ class CannedResponseMenu extends React.Component {
         >
           <List>
             {this.renderCannedResponses({ scripts: campaignCannedResponses, subheader: 'Suggested', showAddScriptButton: false })}
-            {this.renderCannedResponses({ scripts: userCannedResponses, subheader: 'Personal', showAddScriptButton: true })}
           </List>
         </Popover>
       </div>
