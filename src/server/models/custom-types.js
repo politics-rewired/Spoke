@@ -32,7 +32,7 @@ export function timestamp() {
     .default(r.now())
 }
 
-export function optionTimestamp() {
+export function optionalTimestamp() {
   return type
     .date()
 }
