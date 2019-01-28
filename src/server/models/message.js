@@ -31,7 +31,7 @@ const Message = thinky.createModel('message', type.object().schema({
   queued_at: timestamp(),
   sent_at: timestamp(),
   service_response_at: timestamp(),
-  send_before: timestamp()
+  send_before: timestamp().allowNull(true)
 }).allowExtra(false), { noAutoCreation: true,
                         dependencies: [User, Assignment] })
 
