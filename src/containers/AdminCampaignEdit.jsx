@@ -420,6 +420,8 @@ class AdminCampaignEdit extends React.Component {
   }
 
   renderHeader() {
+    const title = this.props.campaignData && this.props.campaignData.campaign && this.props.campaignData.campaign.title
+
     const notStarting = this.props.campaignData.campaign.isStarted ? (
       <div
         {...dataTest('campaignIsStarted')}
@@ -441,6 +443,7 @@ class AdminCampaignEdit extends React.Component {
           fontSize: 16
         }}
       >
+        {title && <h1> {title} </h1>}
           {this.state.startingCampaign ? (
             <div
               style={{
