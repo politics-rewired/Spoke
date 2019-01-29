@@ -3,7 +3,7 @@ import Auth0Strategy from 'passport-auth0'
 import AuthHasher from 'passport-local-authenticate'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { userLoggedIn } from './models/cacheable_queries'
-import { User } from './models'
+import { User, Organization } from './models'
 import wrap from './wrap'
 
 export function setupAuth0Passport() {
@@ -58,7 +58,12 @@ export function setupAuth0Passport() {
         is_superadmin: false
       }
       await User.save(userData)
-      res.redirect(req.query.state || 'terms')
+
+      const organizations = await Organization.filter({})
+      const uuid = organizations[0].uuid
+      const joinUrl = `${process.env.BASE_URL}/${uuid}/join`
+
+      res.redirect(req.query.state == '/' ? joinUrl : req.query.state)
       return
     }
     res.redirect(req.query.state || '/')
