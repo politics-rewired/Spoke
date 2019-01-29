@@ -314,10 +314,15 @@ export class AssignmentTexterContact extends React.Component {
 
   handleOpenPopover = (event) => {
     event.preventDefault()
-    this.setState({
-      responsePopoverAnchorEl: event.currentTarget,
-      responsePopoverOpen: true
-    })
+    const { assignment } = this.props
+    const { userCannedResponses, campaignCannedResponses } = assignment
+    const isCannedResponseEnabled = userCannedResponses.length + campaignCannedResponses.length > 0
+    if (isCannedResponseEnabled) {
+      this.setState({
+        responsePopoverAnchorEl: event.currentTarget,
+        responsePopoverOpen: true
+      })
+    }
   }
 
   handleClosePopover = () => {
@@ -610,6 +615,8 @@ export class AssignmentTexterContact extends React.Component {
 
   renderActionToolbar() {
     const { contact, campaign, assignment, navigationToolbarChildren, onFinishContact } = this.props
+    const { userCannedResponses, campaignCannedResponses } = assignment
+    const isCannedResponseEnabled = userCannedResponses.length + campaignCannedResponses.length > 0
     const { justSentNew } = this.state
     const { messageStatus } = contact
     const size = document.documentElement.clientWidth
@@ -664,6 +671,7 @@ export class AssignmentTexterContact extends React.Component {
                 style={inlineStyles.mobileCannedReplies}
                 label='Canned replies'
                 onTouchTap={this.handleOpenPopover}
+                disabled={!isCannedResponseEnabled}
               />
               {this.renderNeedsResponseToggleButton(contact)}
               <div
@@ -691,6 +699,7 @@ export class AssignmentTexterContact extends React.Component {
               <RaisedButton
                 label='Canned responses'
                 onTouchTap={this.handleOpenPopover}
+                disabled={!isCannedResponseEnabled}
               />
               <RaisedButton
                 {...dataTest('optOut')}
