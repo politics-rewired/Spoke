@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Check from 'material-ui/svg-icons/action/check-circle'
 import Empty from '../components/Empty'
+import TexterRequest from '../components/TexterRequest'
 import AssignmentSummary from '../components/AssignmentSummary'
 import loadData from './hoc/load-data'
 import gql from 'graphql-tag'
@@ -55,10 +56,15 @@ class TexterTodoList extends React.Component {
     const renderedTodos = this.renderTodoList(todos)
 
     const empty = (
-      <Empty
-        title='You have nothing to do!'
-        icon={<Check />}
-      />
+      <div>
+        <Empty
+          title='You have nothing to do!'
+          icon={<Check />}
+        />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 50}}>
+          <TexterRequest user={this.props.data.currentUser} />
+        </div>
+      </div>
     )
 
     return (
@@ -82,6 +88,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
     query: gql`query getTodos($organizationId: String!, $needsMessageFilter: ContactsFilter, $needsResponseFilter: ContactsFilter, $badTimezoneFilter: ContactsFilter, $completedConvosFilter: ContactsFilter, $pastMessagesFilter: ContactsFilter, $skippedMessagesFilter: ContactsFilter) {
       currentUser {
         id
+        email
         terms
         todos(organizationId: $organizationId) {
           id

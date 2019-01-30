@@ -3,6 +3,7 @@ import GraphQLDate from 'graphql-date'
 import GraphQLJSON from 'graphql-type-json'
 import { GraphQLError } from 'graphql/error'
 import isUrl from 'is-url'
+import request from 'superagent'
 import { organizationCache } from '../models/cacheable_queries/organization'
 
 import { gzip, log, makeTree } from '../../lib'
@@ -1114,6 +1115,18 @@ const rootMutations = {
         )
 
       return await reassignConversations(campaignIdContactIdsMap, campaignIdMessagesIdsMap, newTexterUserId)
+    },
+    requestTexts: async (_, { count, email }, { user }) => {
+      try {
+        const response = await request
+          .post(process.env.TFB_URL)
+          .set('Authorization', `Token ${process.env.TFB_TOKEN}`)
+          .send({ count, email })
+
+        return response.body.message;
+      } catch (e) {
+        return e.response.body.message;
+      }
     }
   }
 }
