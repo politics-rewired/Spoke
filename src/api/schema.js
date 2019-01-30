@@ -211,6 +211,7 @@ const rootSchema = `
     userAgreeTerms(userId: String!): User
     reassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserId:String!):[CampaignIdAssignmentId],
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
+    requestTexts(count: Int!, email: String!): String!
   }
 
   schema {
