@@ -322,6 +322,14 @@ export default class CampaignTextersForm extends React.Component {
     this.onChange({ texters: textersToAdd })
   }
 
+  removeEmptyTexters() {
+    this.onChange({
+      texters: this.props.formValues.texters
+        .filter(t => t.assignment.contactsCount !== 0 || t.assignment.needsMessageCount !== 0)
+      }
+    )
+  }
+
   getDisplayName(texterId) {
     let texterObj = this.props.orgTexters.find(o => o.id === texterId)
     return texterObj.displayName
@@ -461,6 +469,11 @@ export default class CampaignTextersForm extends React.Component {
                 {...dataTest('addAll')}
                 label='Add All'
                 onTouchTap={(() => this.addAllTexters())}
+              />
+              <RaisedButton
+                {...dataTest('addAll')}
+                label='Remove Empty'
+                onTouchTap={(() => this.removeEmptyTexters())}
               />
             </div>
           </div>
