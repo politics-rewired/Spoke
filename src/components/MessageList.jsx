@@ -11,15 +11,32 @@ const styles = {
     fontSize: '13px',
     fontStyle: 'italic'
   },
-  sent: {
+  bubble: {
+    color: 'white',
+    padding: '10px',
+    borderRadius: '5px',
+    marginBottom: '10px',
     fontSize: '13px',
-    textAlign: 'right',
-    marginLeft: '24px'
+    fontWeight: 'normal',
   },
-  received: {
-    fontSize: '13px',
-    marginRight: '24px'
-  }
+  sentBubble: {
+    marginRight: '10px',
+    marginLeft: '20%',
+    backgroundColor: 'rgb(33, 150, 243)',
+    // Mobile
+    '@media(max-width: 450px)': {
+      marginLeft: '30px'
+    },
+  },
+  receivedBubble: {
+    marginLeft: '10px',
+    marginRight: '20%',
+    backgroundColor: '#AAAAAA',
+    // Mobile
+    '@media(max-width: 450px)': {
+      marginRight: '30px'
+    },
+  },
 }
 
 const MessageList = function MessageList(props) {
@@ -41,15 +58,19 @@ const MessageList = function MessageList(props) {
 
   return (
     <List>
-      {messages.map(message => (
-        <ListItem
-          disabled
-          style={message.isFromContact ? styles.received : styles.sent}
-          key={message.id}
-          primaryText={message.text}
-          secondaryText={moment(message.createdAt).fromNow()}
-        />
-      ))}
+      {messages.map(message => {
+        const specialStyle = message.isFromContact ? styles.receivedBubble : styles.sentBubble
+        const style = Object.assign({}, styles.bubble, specialStyle)
+        return (
+          <ListItem
+            disabled
+            style={style}
+            key={message.id}
+            primaryText={message.text}
+            secondaryText={moment(message.createdAt).fromNow()}
+          />
+        )
+      })}
       {optOutItem}
     </List>
   )
