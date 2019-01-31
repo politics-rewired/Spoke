@@ -66,7 +66,7 @@ class TexterRequest extends React.Component {
         <GSForm ref='requestForm' schema={inputSchema} value={{ email, count }}
           onSubmit={this.submit}
         >
-          <label for="count"> Count: </label>
+          <label htmlFor="count"> Count: </label>
           <TextField
             name='count'
             label='Count'
