@@ -7,6 +7,7 @@ import { organizationCache } from '../models/cacheable_queries/organization'
 
 import { gzip, log, makeTree } from '../../lib'
 import { applyScript } from '../../lib/scripts'
+import { hasRole } from '../../lib/permissions'
 import { assignTexters, exportCampaign, loadContactsFromDataWarehouse, uploadContacts } from '../../workers/jobs'
 import {
   Assignment,
@@ -873,7 +874,7 @@ const rootMutations = {
 
       return []
     },
-    sendMessage: async (_, { message, campaignContactId }, { loaders }) => {
+    sendMessage: async (_, { message, campaignContactId }, { user, loaders }) => {
       const contact = await loaders.campaignContact.load(campaignContactId)
       const campaign = await loaders.campaign.load(contact.campaign_id)
       if (contact.assignment_id !== parseInt(message.assignmentId) || campaign.is_archived) {
@@ -882,6 +883,23 @@ const rootMutations = {
           message: 'Your assignment has changed'
         })
       }
+
+      const assignment = await loaders.assignment.load(contact.assignment_id)
+      const currentRoles = (await r
+        .knex('user_organization')
+        .where({
+          user_id: user.id,
+          organization_id: campaign.organization_id,
+        })
+        .select('role')).map(res => res.role)
+      const isAdmin = hasRole('SUPERVOLUNTEER', currentRoles)
+      if (!isAdmin && assignment.user_id !== user.id) {
+        throw new GraphQLError({
+          status: 403,
+          message: 'You are not authorized to send a message for this assignment!'
+        })
+      }
+
       const organization = await r
         .table('campaign')
         .get(contact.campaign_id)
