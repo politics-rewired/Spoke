@@ -33,6 +33,10 @@ function cleanHeaders(event) {
 }
 
 exports.handler = (event, context, handleCallback) => {
+  // Database connection pool means the event loop will never be empty so don't wait for it to be
+  // See: https://github.com/tgriesser/knex/issues/1875#issuecomment-321033705
+  context.callbackWaitsForEmptyEventLoop = false
+
   // Note: When lambda is called with invoke() we MUST call handleCallback with a success
   // or Lambda will re-run/re-try the invocation twice:
   // https://docs.aws.amazon.com/lambda/latest/dg/retries-on-errors.html
