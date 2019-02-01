@@ -216,7 +216,10 @@ class AdminCampaignStats extends React.Component {
                       <RaisedButton
                         {...dataTest('copyCampaign')}
                         label='Copy Campaign'
-                        onTouchTap={async() => await this.props.mutations.copyCampaign(this.props.params.campaignId)}
+                        onTouchTap={async() => {
+                          await this.props.mutations.copyCampaign(this.props.params.campaignId)
+                          this.setState({ campaignJustCopied: true })
+                        }}
                       />)
                     ] : null}
                 </div>
@@ -256,6 +259,14 @@ class AdminCampaignStats extends React.Component {
           autoHideDuration={5000}
           onRequestClose={() => {
             this.setState({ exportMessageOpen: false })
+          }}
+        />
+        <Snackbar
+          open={this.state.campaignJustCopied}
+          message='Campaign successfully copied. Click "Campaigns" to see it'
+          autoHideDuration={5000}
+          onRequestClose={() => {
+            this.setState({ campaignJustCopied: false })
           }}
         />
       </div>
