@@ -58,7 +58,7 @@ class TexterTodoList extends React.Component {
     const empty = (
       <div>
         <Empty
-          title='You have nothing to do!'
+          title='Waiting for replies!'
           icon={<Check />}
         />
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 50}}>
@@ -143,7 +143,8 @@ const mapQueriesToProps = ({ ownProps }) => ({
         isOptedOut: false,
         validTimezone: true
       }
-    }
+    },
+    pollInterval: 10000
   }
 })
 
