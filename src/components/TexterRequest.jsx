@@ -62,7 +62,7 @@ class TexterRequest extends React.Component {
 
     return (
       <div>
-        <div> Ready for more texts? Just tell us how many. </div>
+        <div> Ready for texts? Just tell us how many. </div>
         <GSForm ref='requestForm' schema={inputSchema} value={{ email, count }}
           onSubmit={this.submit}
         >
