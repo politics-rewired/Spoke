@@ -56,9 +56,6 @@ export class IncomingMessageList extends Component {
     this.handlePreviousPageClick = this.handlePreviousPageClick.bind(this)
     this.handleRowSizeChanged = this.handleRowSizeChanged.bind(this)
     this.handleRowsSelected = this.handleRowsSelected.bind(this)
-
-    this.handleOpenConversation = this.handleOpenConversation.bind(this)
-    this.handleCloseConversation = this.handleCloseConversation.bind(this)
   }
 
   componentDidUpdate(prevProps) {
@@ -193,7 +190,7 @@ export class IncomingMessageList extends Component {
     this.props.onConversationSelected(rowsSelected, selectedConversations)
   }
 
-  handleOpenConversation(index) {
+  handleOpenConversation = (index) => {
     const conversation = this.props.conversations.conversations.conversations[index]
     const activeConversation = {
       contact: conversation.contact,
@@ -202,7 +199,7 @@ export class IncomingMessageList extends Component {
     this.setState({ activeConversation })
   }
 
-  handleCloseConversation() {
+  handleCloseConversation = () => {
     this.setState({ activeConversation: undefined })
   }
 
