@@ -5,11 +5,19 @@ import { StyleSheet, css } from 'aphrodite'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 
-import loadData from '../../containers//hoc/load-data'
+import loadData from '../../containers/hoc/load-data'
 import wrapMutations from '../../containers/hoc/wrap-mutations'
-import MessageResponse from './MessageResponse';
+import MessageColumn from './MessageColumn'
+import SurveyColumn from './SurveyColumn'
 
 const styles = StyleSheet.create({
+  container: {
+    display: 'flex',
+  },
+  column: {
+    flex: 1,
+    padding: '0 10px 0 10px'
+  },
   conversationRow: {
     color: 'white',
     padding: '10px',
@@ -17,41 +25,6 @@ const styles = StyleSheet.create({
     fontWeight: 'normal',
   }
 })
-
-class MessageList extends Component {
-  componentDidMount() {
-    this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight)
-  }
-
-  componentDidUpdate() {
-    this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight)
-  }
-
-  render() {
-    return  (
-      <div ref="messageWindow" style={{maxHeight: '300px', overflowY: 'scroll'}}>
-        {this.props.messages.map((message, index) => {
-          const isFromContact = message.isFromContact
-          const messageStyle = {
-            marginLeft: isFromContact ? undefined : '60px',
-            marginRight: isFromContact ? '60px' : undefined,
-            backgroundColor: isFromContact ? '#AAAAAA' : 'rgb(33, 150, 243)',
-          }
-
-          return (
-            <p key={index} className={css(styles.conversationRow)} style={messageStyle}>
-              {message.text}
-            </p>
-          )
-        })}
-      </div>
-    )
-  }
-}
-
-MessageList.propTypes = {
-  messages: PropTypes.arrayOf(PropTypes.object),
-}
 
 class ConversationPreviewBody extends Component {
   constructor(props) {
@@ -70,9 +43,19 @@ class ConversationPreviewBody extends Component {
 
   render() {
     return (
-      <div>
-        <MessageList messages={this.state.messages} />
-        <MessageResponse conversation={this.props.conversation} messagesChanged={this.messagesChanged} />
+      <div className={css(styles.container)}>
+        <div className={css(styles.column)}>
+          <MessageColumn
+            messages={this.state.messages}
+            conversation={this.props.conversation}
+            messagesChanged={this.messagesChanged}
+          />
+        </div>
+        <div className={css(styles.column)}>
+          <SurveyColumn
+            contactId={'1'}
+          />
+        </div>
       </div>
     )
   }
@@ -125,12 +108,18 @@ class ConversationPreviewModal extends Component {
       />
     ]
 
+    const customContentStyle = {
+      width: '100%',
+      maxWidth: 'none',
+    };
+
     return (
       <Dialog
-        title='Messages'
+        title='Conversation Review'
         open={isOpen}
         actions={primaryActions}
         modal={false}
+        contentStyle={customContentStyle}
         onRequestClose={this.props.onRequestClose}
       >
         <div>
