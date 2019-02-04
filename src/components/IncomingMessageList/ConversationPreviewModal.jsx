@@ -42,6 +42,7 @@ class ConversationPreviewBody extends Component {
   }
 
   render() {
+    const contactId = this.props.conversation.contact.id
     return (
       <div className={css(styles.container)}>
         <div className={css(styles.column)}>
@@ -52,9 +53,7 @@ class ConversationPreviewBody extends Component {
           />
         </div>
         <div className={css(styles.column)}>
-          <SurveyColumn
-            contactId={'1'}
-          />
+          <SurveyColumn contactId={contactId} />
         </div>
       </div>
     )
