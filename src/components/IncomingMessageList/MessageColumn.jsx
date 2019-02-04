@@ -50,15 +50,16 @@ MessageList.propTypes = {
 }
 
 const MessageColumn = (props) => {
-  const { id, optOut } = props.conversation.contact
+  const { isOptedOut } = props
+  const { id } = props.conversation.contact
   return (
     <div>
       <h4>Messages</h4>
       <MessageList messages={props.messages} />
-      {!optOut.cell &&
+      {!isOptedOut &&
         <MessageResponse conversation={props.conversation} messagesChanged={props.messagesChanged} />
       }
-      {optOut.cell &&
+      {isOptedOut &&
         <MessageOptOut contactId={id} handleOptIn={props.handleOptIn} />
       }
     </div>

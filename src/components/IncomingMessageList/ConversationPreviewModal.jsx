@@ -39,10 +39,6 @@ class ConversationPreviewBody extends Component {
     this.setState({ messages })
   }
 
-  handleOptIn = () => {
-    console.log('Opted Back in!')
-  }
-
   render() {
     const contactId = this.props.conversation.contact.id
     return (
@@ -51,8 +47,9 @@ class ConversationPreviewBody extends Component {
           <MessageColumn
             messages={this.state.messages}
             conversation={this.props.conversation}
+            isOptedOut={this.props.isOptedOut}
             messagesChanged={this.messagesChanged}
-            handleOptIn={this.handleOptIn}
+            handleOptIn={this.props.handleOptIn}
           />
         </div>
         <div className={css(styles.column)}>
@@ -64,7 +61,9 @@ class ConversationPreviewBody extends Component {
 }
 
 ConversationPreviewBody.propTypes = {
-  conversation: PropTypes.object
+  conversation: PropTypes.object,
+  isOptedOut: PropTypes.bool,
+  handleOptIn: PropTypes.func
 }
 
 class ConversationPreviewModal extends Component {
@@ -72,8 +71,15 @@ class ConversationPreviewModal extends Component {
     super(props)
 
     this.state = {
-      optOutError: ''
+      optOutError: '',
+      isOptedOut: true
     }
+  }
+
+  componentWillReceiveProps(props) {
+    const { conversation } = props,
+          isOptedOut = conversation && !!conversation.contact.optOut.cell
+    this.setState({ isOptedOut })
   }
 
   handleClickOptOut = async () => {
@@ -93,10 +99,13 @@ class ConversationPreviewModal extends Component {
     }
   }
 
+  handleOptIn = async () => {
+    this.setState({ isOptedOut: false })
+  }
+
   render() {
     const { conversation } = this.props,
-          isOpen = conversation !== undefined,
-          isOptedIn = conversation && !conversation.contact.optOut.cell
+          isOpen = conversation !== undefined
 
     const primaryActions = [
       <FlatButton
@@ -106,7 +115,7 @@ class ConversationPreviewModal extends Component {
       />
     ]
 
-    if (isOptedIn) {
+    if (!this.state.isOptedOut) {
       const optOutButton = (
         <FlatButton
           label="Opt-Out"
@@ -132,7 +141,13 @@ class ConversationPreviewModal extends Component {
         onRequestClose={this.props.onRequestClose}
       >
         <div>
-          {isOpen && <ConversationPreviewBody {...this.props} />}
+          {isOpen &&
+            <ConversationPreviewBody
+              conversation={this.props.conversation}
+              isOptedOut={this.state.isOptedOut}
+              handleOptIn={this.handleOptIn}
+            />
+          }
           <Dialog
             title='Error Opting Out'
             open={!!this.state.optOutError}

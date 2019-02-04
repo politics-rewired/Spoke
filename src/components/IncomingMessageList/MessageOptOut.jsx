@@ -34,7 +34,8 @@ class MessageOptOut extends Component {
     console.log(`Opt-In ${contactId}`)
     setTimeout(() => {
       this.setState({isDisabled: false})
-    }, 3000)
+      this.props.handleOptIn()
+    }, 1500)
   }
 
   render() {
