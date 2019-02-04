@@ -33,12 +33,14 @@ class ConversationPreviewBody extends Component {
     this.state = {
       messages: props.conversation.contact.messages
     }
-
-    this.messagesChanged = this.messagesChanged.bind(this)
   }
 
-  messagesChanged(messages) {
+  messagesChanged = (messages) => {
     this.setState({ messages })
+  }
+
+  handleOptIn = () => {
+    console.log('Opted Back in!')
   }
 
   render() {
@@ -50,6 +52,7 @@ class ConversationPreviewBody extends Component {
             messages={this.state.messages}
             conversation={this.props.conversation}
             messagesChanged={this.messagesChanged}
+            handleOptIn={this.handleOptIn}
           />
         </div>
         <div className={css(styles.column)}>
@@ -92,20 +95,27 @@ class ConversationPreviewModal extends Component {
 
   render() {
     const { conversation } = this.props,
-          isOpen = conversation !== undefined
+          isOpen = conversation !== undefined,
+          isOptedIn = conversation && !conversation.contact.optOut.cell
 
     const primaryActions = [
-      <FlatButton
-        label="Opt-Out"
-        secondary={true}
-        onClick={this.handleClickOptOut}
-      />,
       <FlatButton
         label="Close"
         primary={true}
         onClick={this.props.onRequestClose}
       />
     ]
+
+    if (isOptedIn) {
+      const optOutButton = (
+        <FlatButton
+          label="Opt-Out"
+          secondary={true}
+          onClick={this.handleClickOptOut}
+        />
+      )
+      primaryActions.unshift(optOutButton)
+    }
 
     const customContentStyle = {
       width: '100%',

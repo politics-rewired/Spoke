@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { StyleSheet, css } from 'aphrodite'
 
-import MessageResponse from './MessageResponse';
+import MessageResponse from './MessageResponse'
+import MessageOptOut from './MessageOptOut'
 
 const styles = StyleSheet.create({
   conversationRow: {
@@ -49,11 +50,17 @@ MessageList.propTypes = {
 }
 
 const MessageColumn = (props) => {
+  const { id, optOut } = props.conversation.contact
   return (
     <div>
       <h4>Messages</h4>
       <MessageList messages={props.messages} />
-      <MessageResponse conversation={props.conversation} messagesChanged={props.messagesChanged} />
+      {!optOut.cell &&
+        <MessageResponse conversation={props.conversation} messagesChanged={props.messagesChanged} />
+      }
+      {optOut.cell &&
+        <MessageOptOut contactId={id} handleOptIn={props.handleOptIn} />
+      }
     </div>
   )
 }
