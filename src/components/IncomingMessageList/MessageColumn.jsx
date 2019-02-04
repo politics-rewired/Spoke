@@ -24,7 +24,7 @@ class MessageList extends Component {
 
   render() {
     return  (
-      <div ref="messageWindow" style={{maxHeight: '100%', overflowY: 'scroll'}}>
+      <div ref="messageWindow" style={{maxHeight: '400px', overflowY: 'scroll'}}>
         {this.props.messages.map((message, index) => {
           const isFromContact = message.isFromContact
           const messageStyle = {
@@ -51,6 +51,7 @@ MessageList.propTypes = {
 const MessageColumn = (props) => {
   return (
     <div>
+      <h4>Messages</h4>
       <MessageList messages={props.messages} />
       <MessageResponse conversation={props.conversation} messagesChanged={props.messagesChanged} />
     </div>
