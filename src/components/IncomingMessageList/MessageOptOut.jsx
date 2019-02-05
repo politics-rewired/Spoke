@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import { connect } from 'react-apollo'
+import gql from 'graphql-tag'
 import FlatButton from 'material-ui/FlatButton'
 import RaisedButton from 'material-ui/RaisedButton'
 import Dialog from 'material-ui/Dialog'
@@ -22,20 +24,22 @@ class MessageOptOut extends Component {
     this.setState({ isConfirmationOpen: false })
   }
 
-  handleClickOptIn = () => {
-    const { contactId } = this.props
+  handleClickOptIn = async () => {
+    const { contact } = this.props,
+          { cell } = contact
 
     this.setState({
       isDisabled: true,
       isConfirmationOpen: false
     })
 
-    // Fake executing opt-in mutation
-    console.log(`Opt-In ${contactId}`)
-    setTimeout(() => {
-      this.setState({isDisabled: false})
+    const result = await this.props.mutations.removeOptOut(cell)
+    this.setState({isDisabled: false})
+    if (result.errors) {
+      console.error(result.errors)
+    } else if (result.data) {
       this.props.handleOptIn()
-    }, 1500)
+    }
   }
 
   render() {
@@ -78,8 +82,21 @@ class MessageOptOut extends Component {
 }
 
 MessageOptOut.propTypes = {
-  contactId: PropTypes.string,
+  contact: PropTypes.object,
   handleOptIn: PropTypes.func
 }
 
-export default MessageOptOut
+const mapMutationsToProps = () => ({
+  removeOptOut: (cell) => ({
+    mutation: gql`
+      mutation removeOptOut($cell:Phone!) {
+        removeOptOut(cell:$cell)
+      }
+    `,
+    variables: { cell }
+  })
+})
+
+export default connect({
+  mapMutationsToProps
+})(MessageOptOut)

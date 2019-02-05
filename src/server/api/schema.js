@@ -821,6 +821,51 @@ const rootMutations = {
 
       return loaders.campaignContact.load(campaignContactId)
     },
+    removeOptOut: async (_, { cell }, { loaders, user }) => {
+      // We assume that OptOuts are shared across orgs
+      // const sharingOptOuts = !!process.env.OPTOUTS_SHARE_ALL_ORGS
+
+      // Authorization (checking across all organizations)
+      let userRoles = await r.knex('user_organization')
+        .where({ user_id: user.id })
+        .select('role')
+      userRoles = userRoles.map(role => role.role)
+      userRoles = Array.from(new Set(userRoles))
+      const isAdmin = hasRole('SUPERVOLUNTEER', userRoles)
+      if (!isAdmin) {
+        throw new GraphQLError('You are not authorized to access that resource.')
+      }
+
+      await r.knex.transaction(trx => {
+        // Remove all references in the opt out table
+        const optOuts = r.knex('opt_out').transacting(trx).where({ cell }).del()
+        // Update all "cached" values for campaign contacts
+        const contactUpdates = r.knex('campaign_contact').transacting(trx)
+          .where(
+            'id',
+            'in',
+            r.knex('campaign_contact')
+              .leftJoin('campaign', 'campaign_contact.campaign_id', 'campaign.id')
+              .where({
+                'campaign_contact.cell': cell,
+                'campaign.is_archived': false
+              })
+              .select('campaign_contact.id')
+          )
+          .update({
+            is_opted_out: false
+          })
+
+        Promise.all([optOuts, contactUpdates])
+          .then(trx.commit)
+          .catch(trx.rollback)
+      })
+
+      // We don't care about Redis
+      // await cacheableData.optOut.clearCache(...)
+
+      return true
+    },
     bulkSendMessages: async (_, { assignmentId }, loaders) => {
       if (!process.env.ALLOW_SEND_ALL || !process.env.NOT_IN_USA) {
         log.error('Not allowed to send all messages at once')
