@@ -4,7 +4,7 @@ import { connect } from 'react-apollo'
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 
-class SurveyItemBody extends Component {
+class SurveyItem extends Component {
   constructor(props) {
     super(props)
 
@@ -61,7 +61,7 @@ class SurveyItemBody extends Component {
   }
 }
 
-const mapSurveyItemMutationsToProps = () => ({
+const mapMutationsToProps = () => ({
   updateQuestionResponses: (questionResponses, campaignContactId) => ({
     mutation: gql`
       mutation updateQuestionResponses($questionResponses:[QuestionResponseInput], $campaignContactId: String!) {
@@ -90,60 +90,6 @@ const mapSurveyItemMutationsToProps = () => ({
   })
 })
 
-const SurveyItem = connect({
-  mapMutationsToProps: mapSurveyItemMutationsToProps
-})(SurveyItemBody)
-
-const SurveyColumn = (props) => {
-  return (
-    <div>
-      <h4>Survey Responses</h4>
-      {props.data.loading &&
-        <p>Loading...</p>
-      }
-      {props.data.errors && <p>{props.data.errors.message}</p>}
-      <div style={{maxHeight: '400px', overflowY: 'scroll'}}>
-        {props.data.contact && props.data.contact.questionResponseValues.map(value => {
-          return (
-            <SurveyItem
-              key={value.interactionStepId}
-              questionResponse={value}
-              contactId={props.data.contact.id}
-            />
-          )
-        })}
-      </div>
-      {props.data.contact && props.data.contact.questionResponseValues.length === 0 &&
-        <p>No survey question responses for this conversation.</p>
-      }
-    </div>
-  )
-}
-
-const mapSurveyColumnQueriesToProps = ({ ownProps }) => ({
-  data: {
-    query: gql`query getSurveyResponses($contactId: String!) {
-      contact(id: $contactId) {
-        id
-        questionResponseValues {
-          interactionStepId
-          value
-          question {
-            text
-            answerOptions {
-              value
-            }
-          }
-        }
-      }
-    }`,
-    variables: {
-      contactId: ownProps.contactId
-    },
-    forceFetch: true
-  }
-})
-
 export default connect({
-  mapQueriesToProps: mapSurveyColumnQueriesToProps
-})(SurveyColumn)
+  mapMutationsToProps
+})(SurveyItem)

@@ -2,9 +2,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { StyleSheet, css } from 'aphrodite'
 
-import MessageResponse from './MessageResponse'
-import MessageOptOut from './MessageOptOut'
-
 const styles = StyleSheet.create({
   conversationRow: {
     color: 'white',
@@ -49,21 +46,4 @@ MessageList.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.object),
 }
 
-const MessageColumn = (props) => {
-  const { isOptedOut } = props
-  const { contact } = props.conversation
-  return (
-    <div>
-      <h4>Messages</h4>
-      <MessageList messages={props.messages} />
-      {!isOptedOut &&
-        <MessageResponse conversation={props.conversation} messagesChanged={props.messagesChanged} />
-      }
-      {isOptedOut &&
-        <MessageOptOut contact={contact} handleOptIn={props.handleOptIn} />
-      }
-    </div>
-  )
-}
-
-export default MessageColumn
+export default MessageList

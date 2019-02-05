@@ -1,12 +1,9 @@
-import React, { Component } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-import gql from 'graphql-tag'
 import { StyleSheet, css } from 'aphrodite'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 
-import loadData from '../../containers/hoc/load-data'
-import wrapMutations from '../../containers/hoc/wrap-mutations'
 import MessageColumn from './MessageColumn'
 import SurveyColumn from './SurveyColumn'
 
@@ -26,139 +23,54 @@ const styles = StyleSheet.create({
   }
 })
 
-class ConversationPreviewBody extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      messages: props.conversation.contact.messages
-    }
-  }
-
-  messagesChanged = (messages) => {
-    this.setState({ messages })
-  }
-
-  render() {
-    const contactId = this.props.conversation.contact.id
-    return (
-      <div className={css(styles.container)}>
-        <div className={css(styles.column)}>
-          <MessageColumn
-            messages={this.state.messages}
-            conversation={this.props.conversation}
-            isOptedOut={this.props.isOptedOut}
-            messagesChanged={this.messagesChanged}
-            handleOptIn={this.props.handleOptIn}
-          />
-        </div>
-        <div className={css(styles.column)}>
-          <SurveyColumn contactId={contactId} />
-        </div>
+const ConversationPreviewBody = (props) => {
+  const { conversation } = props,
+        contactId = conversation.contact.id
+  return (
+    <div className={css(styles.container)}>
+      <div className={css(styles.column)}>
+        <MessageColumn conversation={conversation} />
       </div>
-    )
-  }
+      <div className={css(styles.column)}>
+        <SurveyColumn contactId={contactId} />
+      </div>
+    </div>
+  )
 }
 
 ConversationPreviewBody.propTypes = {
   conversation: PropTypes.object,
-  isOptedOut: PropTypes.bool,
-  handleOptIn: PropTypes.func
 }
 
-class ConversationPreviewModal extends Component {
-  constructor(props) {
-    super(props)
+const ConversationPreviewModal = (props) => {
+  const { conversation, onRequestClose } = props,
+        isOpen = conversation !== undefined
 
-    this.state = {
-      optOutError: '',
-      isOptedOut: true
-    }
+  const primaryActions = [
+    <FlatButton
+      label="Close"
+      primary={true}
+      onClick={onRequestClose}
+    />
+  ]
+
+  const customContentStyle = {
+    width: '100%',
+    maxWidth: 'none',
   }
 
-  componentWillReceiveProps(props) {
-    const { conversation } = props,
-          isOptedOut = conversation && !!conversation.contact.optOut.cell
-    this.setState({ isOptedOut })
-  }
-
-  handleClickOptOut = async () => {
-    const { contact } = this.props.conversation
-    const optOut = {
-      cell: contact.cell,
-      assignmentId: contact.assignmentId
-    }
-    try {
-      const response = await this.props.mutations.createOptOut(optOut, campaignContactId)
-      if (response.errors) {
-        const errorText = response.errors.join('\n')
-        throw new Error(errorText)
-      }
-    } catch (error) {
-      this.setState({ optOutError: error.message })
-    }
-  }
-
-  handleOptIn = async () => {
-    this.setState({ isOptedOut: false })
-  }
-
-  render() {
-    const { conversation } = this.props,
-          isOpen = conversation !== undefined
-
-    const primaryActions = [
-      <FlatButton
-        label="Close"
-        primary={true}
-        onClick={this.props.onRequestClose}
-      />
-    ]
-
-    if (!this.state.isOptedOut) {
-      const optOutButton = (
-        <FlatButton
-          label="Opt-Out"
-          secondary={true}
-          onClick={this.handleClickOptOut}
-        />
-      )
-      primaryActions.unshift(optOutButton)
-    }
-
-    const customContentStyle = {
-      width: '100%',
-      maxWidth: 'none',
-    };
-
-    return (
-      <Dialog
-        title='Conversation Review'
-        open={isOpen}
-        actions={primaryActions}
-        modal={false}
-        contentStyle={customContentStyle}
-        onRequestClose={this.props.onRequestClose}
-      >
-        <div>
-          {isOpen &&
-            <ConversationPreviewBody
-              conversation={this.props.conversation}
-              isOptedOut={this.state.isOptedOut}
-              handleOptIn={this.handleOptIn}
-            />
-          }
-          <Dialog
-            title='Error Opting Out'
-            open={!!this.state.optOutError}
-            modal={false}
-          >
-            <p>{this.state.optOutError}</p>
-          </Dialog>
-        </div>
-      </Dialog>
-    )
-  }
+  return (
+    <Dialog
+      title='Conversation Review'
+      open={isOpen}
+      actions={primaryActions}
+      modal={false}
+      contentStyle={customContentStyle}
+      onRequestClose={onRequestClose}
+    >
+      {isOpen && <ConversationPreviewBody conversation={conversation} />}
+    </Dialog>
+  )
 }
 
 ConversationPreviewModal.propTypes = {
@@ -166,26 +78,4 @@ ConversationPreviewModal.propTypes = {
   onRequestClose: PropTypes.func
 }
 
-const mapMutationsToProps = () => ({
-  createOptOut: (optOut, campaignContactId) => ({
-    mutation: gql`
-      mutation createOptOut($optOut: OptOutInput!, $campaignContactId: String!) {
-        createOptOut(optOut: $optOut, campaignContactId: $campaignContactId) {
-          id
-          optOut {
-            id
-            createdAt
-          }
-        }
-      }
-    `,
-    variables: {
-      optOut,
-      campaignContactId
-    }
-  })
-})
-
-export default loadData(wrapMutations(ConversationPreviewModal), {
-  mapMutationsToProps
-})
+export default ConversationPreviewModal
