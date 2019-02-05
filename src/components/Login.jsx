@@ -4,7 +4,12 @@ import { isClient } from '../lib'
 
 const Login = ({ location }) => (
   <div>
-    {isClient() ? window.AuthService.login(location.query.nextUrl) : ''}
+    {window.PASSPORT_STRATEGY == 'slack' 
+      // If Slack strategy, the server needs to initiate the redirect
+      // Force reload will hit the server redirect (as opposed to client routing)
+      ? window.location.reload()
+      : isClient() ? window.AuthService.login(location.query.nextUrl) : ''
+    }
   </div>
 )
 
