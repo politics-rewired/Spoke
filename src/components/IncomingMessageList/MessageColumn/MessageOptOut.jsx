@@ -106,8 +106,12 @@ class MessageOptOut extends Component {
 
     return (
       <div>
-        {isOptedOut &&
-          <div>
+        <div style={{ display: 'flex' }}>
+          <p style={{ flexGrow: '1' }}>
+            {isOptedOut ? 'This user has been opted out. Would you like to opt them back in?': ''}
+          </p>
+          <div style={{ flexShrink: '1' }}>
+          {isOptedOut &&
             <RaisedButton
               label="Opt-In"
               backgroundColor="#ff0033"
@@ -115,19 +119,17 @@ class MessageOptOut extends Component {
               onClick={this.openOptInConfirmation}
               style={{ float: 'right' }}
             />
-            <p style={{marginRight: '150px'}}>This user has been opted out. Would you like to opt them back in?</p>
-        </div>
-        }
-        {!isOptedOut &&
-          <div style={{ textAlign: 'right' }}>
+          }
+          {!isOptedOut &&
             <RaisedButton
               label="Opt-Out"
               secondary={true}
               disabled={this.state.isMakingRequest}
               onClick={this.handleClickOptOut}
             />
+          }
           </div>
-        }
+        </div>
         <Dialog
           title={dialogTitle}
           actions={dialogActions}

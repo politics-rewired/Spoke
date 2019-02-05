@@ -22,7 +22,7 @@ class MessageList extends Component {
 
   render() {
     return  (
-      <div ref="messageWindow" style={{maxHeight: '400px', overflowY: 'scroll'}}>
+      <div ref="messageWindow" style={{maxHeight: '380px', overflowY: 'scroll'}}>
         {this.props.messages.map((message, index) => {
           const isFromContact = message.isFromContact
           const messageStyle = {
