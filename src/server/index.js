@@ -84,6 +84,7 @@ app.use(cookieSession({
   },
   secret: process.env.SESSION_SECRET || global.SESSION_SECRET
 }))
+
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -154,6 +155,7 @@ const executableSchema = makeExecutableSchema({
   resolvers,
   allowUndefinedInResolve: false
 })
+
 addMockFunctionsToSchema({
   schema: executableSchema,
   mocks,
@@ -167,6 +169,7 @@ app.use('/graphql', graphqlExpress((request) => ({
     user: request.user
   }
 })))
+
 app.get('/graphiql', graphiqlExpress({
   endpointURL: '/graphql'
 }))

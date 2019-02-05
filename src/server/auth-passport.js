@@ -12,7 +12,8 @@ export function setupSlackPassport() {
   const strategy = new passportSlack.Strategy({
     clientID: process.env.SLACK_CLIENT_ID,
     clientSecret: process.env.SLACK_CLIENT_SECRET,
-    callbackURL: `${process.env.BASE_URL}/login-callback`
+    callbackURL: `${process.env.BASE_URL}/login-callback`,
+    authorizationURL: 'https://runbernierun2020.slack.com/oauth/authorize'
   }, function (accessToken, scopes, team, { bot, incomingWebhook }, { user: userProfile , team: teamProfile }, done) {
     done(null, userProfile)
   })
@@ -20,7 +21,8 @@ export function setupSlackPassport() {
   passport.use(strategy)
 
   passport.serializeUser((user, done) => {
-    return done(null, user)
+    const auth0Id = user.id;
+    return done(null, auth0Id)
   })
 
   passport.deserializeUser(wrap(async (id, done) => {
