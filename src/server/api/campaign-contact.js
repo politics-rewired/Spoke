@@ -40,9 +40,17 @@ export const resolvers = {
       if (campaignContact.message_status === 'needsMessage') {
         return [] // it's the beginning, so there won't be any
       }
-      return await r.knex('question_response')
+      const qr_results = await r.knex('question_response')
+        .join('interaction_step as istep', 'question_response.interaction_step_id', 'istep.id')
         .where('question_response.campaign_contact_id', campaignContact.id)
-        .select('value', 'interaction_step_id')
+        .select('value', 'interaction_step_id', 'istep.question as istep_question', 'istep.id as istep_id')
+      return qr_results.map(qr_result => {
+        const question = {
+          id: qr_result.istep_id,
+          question: qr_result.istep_question
+        }
+        return Object.assign({}, qr_result, { question })
+      })
     },
     questionResponses: async (campaignContact, _, { loaders }) => {
       const results = await r.knex('question_response as qres')
