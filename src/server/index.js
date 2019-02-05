@@ -11,7 +11,7 @@ import mocks from './api/mocks'
 import { createLoaders, createTablesIfNecessary } from './models'
 import passport from 'passport'
 import cookieSession from 'cookie-session'
-import { setupAuth0Passport, setupLocalAuthPassport } from './auth-passport'
+import { setupAuth0Passport, setupLocalAuthPassport, setupSlackPassport } from './auth-passport'
 import wrap from './wrap'
 import { log } from '../lib'
 import nexmo from './api/lib/nexmo'
@@ -35,6 +35,10 @@ if (!process.env.PASSPORT_STRATEGY && !global.PASSPORT_STRATEGY) {
   const loginStrategy = process.env.PASSPORT_STRATEGY || global.PASSPORT_STRATEGY
   if (loginStrategy === 'localauthexperimental') {
     loginCallbacks = setupLocalAuthPassport()
+  }
+
+  if (loginStrategy === 'slack') {
+    loginCallbacks = setupSlackPassport()
   }
 }
 
@@ -137,7 +141,12 @@ app.get('/logout-callback', (req, res) => {
 })
 
 if (loginCallbacks) {
-  app.get('/login-callback', ...loginCallbacks)
+  if ((process.env.PASSPORT_STRATEGY || global.PASSPORT_STRATEGY) == 'slack') {
+    app.get('/login', loginCallbacks.first)
+    app.get('/login-callback', loginCallbacks.callback, loginCallbacks.after)
+  } else {
+    app.get('/login-callback', ...loginCallbacks)
+  }
 }
 
 const executableSchema = makeExecutableSchema({
@@ -161,7 +170,6 @@ app.use('/graphql', graphqlExpress((request) => ({
 app.get('/graphiql', graphiqlExpress({
   endpointURL: '/graphql'
 }))
-
 
 // This middleware should be last. Return the React app only if no other route is hit.
 app.use(appRenderer)

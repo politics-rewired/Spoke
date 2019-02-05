@@ -65,6 +65,7 @@
   },
   "homepage": "https://github.com/MoveOnOrg/Spoke/#readme",
   "dependencies": {
+    "@aoberoi/passport-slack": "^1.0.5",
     "aphrodite": "^0.4.1",
     "apollo-client": "^0.4.7",
     "apollo-server-express": "^1.2.0",

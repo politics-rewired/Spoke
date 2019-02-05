@@ -1,10 +1,89 @@
 import passport from 'passport'
 import Auth0Strategy from 'passport-auth0'
+import passportSlack from '@aoberoi/passport-slack'
 import AuthHasher from 'passport-local-authenticate'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { userLoggedIn } from './models/cacheable_queries'
 import { User, Organization } from './models'
 import wrap from './wrap'
+import { split } from 'apollo-link';
+
+export function setupSlackPassport() {
+  const strategy = new passportSlack.Strategy({
+    clientID: process.env.SLACK_CLIENT_ID,
+    clientSecret: process.env.SLACK_CLIENT_SECRET,
+    callbackURL: `${process.env.BASE_URL}/login-callback`
+  }, function (accessToken, scopes, team, { bot, incomingWebhook }, { user: userProfile , team: teamProfile }, done) {
+    done(null, userProfile)
+  })
+
+  passport.use(strategy)
+
+  passport.serializeUser((user, done) => {
+    return done(null, user)
+  })
+
+  passport.deserializeUser(wrap(async (id, done) => {
+    const user = await userLoggedIn(id)
+    return done(null, user || false)
+  }))
+
+  return {
+    first: passport.authenticate('slack', {
+      scope: ['identity.basic', 'identity.email', 'identity.team']
+    }),
+    callback: passport.authenticate('slack', {
+        failureRedirect: '/login',
+    }),
+    after: async (req, res) => {
+      const user = req.user
+      const auth0Id = user && user.id
+      if (!auth0Id) { throw new Error('Null user in login callback') }
+      const existingUser = await User.filter({ auth0_id: auth0Id })
+
+      if (existingUser.length === 0) {
+        let first_name, last_name;
+        const splitName = user.name.split(' ')
+        if (splitName.length == 1) {
+          first_name = splitName[0]
+          last_name = ''
+        } else if (splitName.length == 2) {
+          first_name = splitName[0]
+          last_name = splitName[1]
+        } else {
+          first_name = splitName[0]
+          last_name = splitName.slice(1, splitName.length + 1).join(' ')
+        }
+
+        const userData = {
+          auth0_id: auth0Id,
+          // eslint-disable-next-line no-underscore-dangle
+          first_name,
+          // eslint-disable-next-line no-underscore-dangle
+          last_name,
+          cell: 'unknown',
+          // eslint-disable-next-line no-underscore-dangle
+          email: user.email,
+          is_superadmin: false
+        }
+
+        await User.save(userData)
+
+        const organizations = await Organization.filter({})
+
+        if (organizations[0]) {
+          const uuid = organizations[0].uuid
+          const joinUrl = `${process.env.BASE_URL}/${uuid}/join`
+          return res.redirect(req.query.state == '/' ? joinUrl : req.query.state)
+        } else {
+          return res.redirect(req.query.state || '/')
+        }
+      }
+
+      return res.redirect(req.query.state || '/')
+    }
+  }
+}
 
 export function setupAuth0Passport() {
   const strategy = new Auth0Strategy({

@@ -4,7 +4,10 @@ import { isClient } from '../lib'
 
 const Login = ({ location }) => (
   <div>
-    {isClient() ? window.AuthService.login(location.query.nextUrl) : ''}
+    {window.PASSPORT_STRATEGY == 'slack' 
+      ? window.location.reload()
+      : isClient() ? window.AuthService.login(location.query.nextUrl) : ''
+    }
   </div>
 )
 
