@@ -9,12 +9,17 @@ import wrap from './wrap'
 import { split } from 'apollo-link';
 
 export function setupSlackPassport() {
-  const strategy = new passportSlack.Strategy({
+  const options = {
     clientID: process.env.SLACK_CLIENT_ID,
     clientSecret: process.env.SLACK_CLIENT_SECRET,
-    callbackURL: `${process.env.BASE_URL}/login-callback`,
-    authorizationURL: 'https://runbernierun2020.slack.com/oauth/authorize'
-  }, function (accessToken, scopes, team, { bot, incomingWebhook }, { user: userProfile , team: teamProfile }, done) {
+    callbackURL: `${process.env.BASE_URL}/login-callback`
+  }
+
+  if (process.env.SLACK_TEAM_NAME) {
+    options.authorizationURL = `https://${process.env.SLACK_TEAM_NAME}.slack.com/oauth/authorize`
+  }
+
+  const strategy = new passportSlack.Strategy(options, function (accessToken, scopes, team, { bot, incomingWebhook }, { user: userProfile , team: teamProfile }, done) {
     done(null, userProfile)
   })
 
