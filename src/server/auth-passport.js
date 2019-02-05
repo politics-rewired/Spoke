@@ -44,7 +44,8 @@ export function setupSlackPassport() {
     }),
     after: async (req, res) => {
       const user = req.user
-      const auth0Id = user && user.id
+      // set slack_id to auth0Id to avoid changing the schema
+      const auth0Id = user && user.id   
       if (!auth0Id) { throw new Error('Null user in login callback') }
       const existingUser = await User.filter({ auth0_id: auth0Id })
 
