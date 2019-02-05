@@ -3,20 +3,13 @@ import PropTypes from 'prop-types'
 import Form from 'react-formal'
 import yup from 'yup'
 import gql from 'graphql-tag'
-import { StyleSheet, css } from 'aphrodite'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 
-import loadData from '../../containers//hoc/load-data'
-import wrapMutations from '../../containers/hoc/wrap-mutations'
-import GSForm from '../../components/forms/GSForm'
-import SendButton from '../../components/SendButton'
-
-const styles = StyleSheet.create({
-  messageField: {
-    padding: '0px 8px',
-  },
-})
+import loadData from '../../../containers/hoc/load-data'
+import wrapMutations from '../../../containers/hoc/wrap-mutations'
+import GSForm from '../../forms/GSForm'
+import SendButton from '../../SendButton'
 
 class MessageResponse extends Component {
   constructor(props) {
@@ -90,7 +83,7 @@ class MessageResponse extends Component {
     ]
 
     return (
-      <div className={css(styles.messageField)}>
+      <div>
         <GSForm
           ref='messageForm'
           schema={messageSchema}
@@ -98,24 +91,22 @@ class MessageResponse extends Component {
           onSubmit={this.handleMessageFormSubmit}
           onChange={this.handleMessageFormChange}
         >
-          <div style={{position: 'relative'}}>
-            <div style={{position: 'absolute', right: 0, bottom: 0, width: '120px'}}>
-              <SendButton
-                threeClickEnabled={false}
-                onFinalTouchTap={this.handleClickSendMessageButton}
-                disabled={isSendDisabled}
-              />
-            </div>
-            <div style={{marginRight: '120px'}}>
-              <Form.Field
-                name='messageText'
-                label='Send a response'
-                multiLine
-                fullWidth
-                disabled={isSending}
-                rowsMax={6}
-              />
-            </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <Form.Field
+              name='messageText'
+              label='Send a response'
+              multiLine
+              fullWidth
+              disabled={isSending}
+              rowsMax={6}
+              style={{ flexGrow: '1' }}
+            />
+            <SendButton
+              threeClickEnabled={false}
+              onFinalTouchTap={this.handleClickSendMessageButton}
+              disabled={isSendDisabled}
+              style={{ flexShrink: '1' }}
+            />
           </div>
         </GSForm>
         <Dialog
