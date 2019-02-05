@@ -803,15 +803,18 @@ const rootMutations = {
 
     createOptOut: async (_, { optOut, campaignContactId }, { loaders, user }) => {
       const contact = await loaders.campaignContact.load(campaignContactId)
-      await assignmentRequired(user, contact.assignment_id)
-
-      const { assignmentId, cell, reason } = optOut
       let organizationId = contact.organization_id
-
       if (!organizationId) {
         const campaign = await loaders.campaign.load(contact.campaign_id)
         organizationId = campaign.organization_id
       }
+      try {
+        await assignmentRequired(user, contact.assignment_id)
+      } catch(error) {
+        await accessRequired(user, organizationId, 'SUPERVOLUNTEER')
+      }
+
+      const { assignmentId, cell, reason } = optOut
       await cacheableData.optOut.save({
         cell,
         reason,
