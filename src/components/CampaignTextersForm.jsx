@@ -486,7 +486,7 @@ export default class CampaignTextersForm extends React.Component {
                   flex: '1 1 50%'
                 }}
               >
-                {`Assigned contacts: ${assignedContacts}/${this.formValues().contactsCount}`}
+                {`Assigned contacts: ${assignedContacts}/${this.formValues().contactsCount}. Left unassigned: ${this.formValues().contactsCount - assignedContacts}`}
               </div>
               <div
                 className={css(styles.splitToggle)}

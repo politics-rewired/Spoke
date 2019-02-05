@@ -8,11 +8,15 @@ import loadData from './hoc/load-data'
 import gql from 'graphql-tag'
 import { withRouter } from 'react-router'
 
+const dueBySortFn = (x, y) => (x.dueBy > y.dueBy ? -1 : 1)
+const needSortFn = (x, y) => ((x.unmessagedCount + x.unrepliedCount) > (y.unmessagedCount + y.unrepliedCount) ? -1 : 1)
+const SORT_METHOD = dueBySortFn
+
 class TexterTodoList extends React.Component {
   renderTodoList(assignments) {
     const organizationId = this.props.params.organizationId
     return assignments
-      .sort((x, y) => ((x.unmessagedCount + x.unrepliedCount) > (y.unmessagedCount + y.unrepliedCount) ? -1 : 1))
+      .sort()
       .map((assignment) => {
         if (assignment.unmessagedCount > 0 ||
             assignment.unrepliedCount > 0 ||
@@ -101,6 +105,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             introHtml
             primaryColor
             logoImageUrl
+            dueBy
           }
           maxContacts
           unmessagedCount: contactsCount(contactsFilter: $needsMessageFilter)
