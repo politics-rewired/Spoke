@@ -924,16 +924,20 @@ const rootMutations = {
       return []
     },
     sendMessage: async (_, { message, campaignContactId }, { user, loaders }) => {
-      const record = await r.knex('campaign_contact')
+      console.log({ message, campaignContactId })
+      const record = (await r.knex('campaign_contact')
         .join('campaign', 'campaign_contact.campaign_id', 'campaign.id')
-          .where({ 'campaign_contact.id': campaignContactId })
+          .where({ 'campaign_contact.id': parseInt(campaignContactId) })
           .where({ 'campaign.is_archived': false })
           .where({ 'campaign_contact.assignment_id': parseInt(message.assignmentId) })
         .join('assignment', 'campaign_contact.assignment_id', 'assignment.id')
         .join('organization', 'organization.id', 'campaign.organization_id')
-        .leftJoin('opt_out', 'opt_out.organization_id', 'organization.id')
-          .where({ 'opt_out.cell': message.contactNumber })
+        .leftJoin('opt_out', {
+          'opt_out.organization_id': 'organization.id',
+          'opt_out.cell': 'campaign_contact.cell'
+        })
         .select(
+          'campaign_contact.id as cc_id',
           'campaign_contact.assignment_id as assignment_id',
           'campaign_contact.message_status as cc_message_status',
           'campaign.is_archived as is_archived',
@@ -945,8 +949,12 @@ const rootMutations = {
           'assignment.user_id as a_assignment_user_id',
           'organization.texting_hours_enforced as o_texting_hours_enforced',
           'organization.texting_hours_end as o_texting_hours_end',
-          'EXISTS(opt_out.id) as is_opted_out'
-        )
+          'opt_out.id as is_opted_out',
+          'campaign_contact.timezone_offset as contact_timezone_offset'
+        ))[0]
+      
+      console.log(record)
+
       if (!record) {
         throw new GraphQLError({
           status: 400,
@@ -972,7 +980,7 @@ const rootMutations = {
         }
       }
 
-      if (record.is_opted_out) {
+      if (!!record.is_opted_out) {
         throw new GraphQLError({
           status: 400,
           message: 'Skipped sending because this contact was already opted out'
@@ -1008,10 +1016,10 @@ const rootMutations = {
       const replaceCurlyApostrophes = rawText => rawText.replace(/[\u2018\u2019]/g, "'")
 
       let contactTimezone = {}
-      if (contact.timezone_offset) {
+      if (record.contact_timezone_offset) {
         // couldn't look up the timezone by zip record, so we load it
         // from the campaign_contact directly if it's there
-        const [offset, hasDST] = contact.timezone_offset.split('_')
+        const [offset, hasDST] = record.contact_timezone_offset.split('_')
         contactTimezone.offset = parseInt(offset, 10)
         contactTimezone.hasDST = hasDST === '1'
       }
@@ -1067,14 +1075,21 @@ const rootMutations = {
           ? 'convo'
           : 'messaged'
       }
+
+      console.log(contactUpdate)
+
       const contactSavePromise = r.knex('campaign_contact')
         .update(contactUpdate)
+        .where({ id: record.cc_id })
         .returning('*')
+
       service.sendMessage(messageInstance)
 
-      const [_message, contact] = await Promise.all([messageSavePromise, contactSavePromise])
+      const [_message, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
+      const contact = contactUpdateResult[0]
       return contact
 
+      // Unreachable code who did this
       if (JOBS_SAME_PROCESS) {
         const service = serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE]
         log.info(
