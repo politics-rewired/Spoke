@@ -375,8 +375,12 @@ export class AssignmentTexterContact extends React.Component {
     } else {
       log.error(e)
       this.setState({
-        snackbarError: 'Something went wrong!'
+        snackbarError: 'Error: Please wait a few seconds and try again.'
       })
+
+      setTimeout(() => {
+        this.setState({ snackbarError: undefined, disabled: false })
+      }, 5000)
     }
   }
 
@@ -388,7 +392,10 @@ export class AssignmentTexterContact extends React.Component {
         return // stops from multi-send
       }
       this.setState({ disabled: true })
-      await this.props.mutations.sendMessage(message, contact.id)
+      const response = await this.props.mutations.sendMessage(message, contact.id)
+      if (response.errors) {
+        throw new Error(response.errors[0])
+      }
 
       await this.handleSubmitSurveys()
       this.props.onFinishContact()
