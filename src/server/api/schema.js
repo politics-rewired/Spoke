@@ -924,7 +924,6 @@ const rootMutations = {
       return []
     },
     sendMessage: async (_, { message, campaignContactId }, { user, loaders }) => {
-      console.log({ message, campaignContactId })
       const record = (await r.knex('campaign_contact')
         .join('campaign', 'campaign_contact.campaign_id', 'campaign.id')
           .where({ 'campaign_contact.id': parseInt(campaignContactId) })
@@ -953,13 +952,8 @@ const rootMutations = {
           'campaign_contact.timezone_offset as contact_timezone_offset'
         ))[0]
       
-      console.log(record)
-
       if (!record) {
-        throw new GraphQLError({
-          status: 400,
-          message: 'Your assignment has changed'
-        })
+        throw new GraphQLError('Your assignment has changed')
       }
 
       // This block will only need to be evaluated if message is sent from admin Message Review
@@ -973,18 +967,12 @@ const rootMutations = {
           .pluck('role')
         const isAdmin = hasRole('SUPERVOLUNTEER', currentRoles)
         if (!isAdmin) {
-          throw new GraphQLError({
-            status: 403,
-            message: 'You are not authorized to send a message for this assignment!'
-          })
+          throw new GraphQLError('You are not authorized to send a message for this assignment!')
         }
       }
 
       if (!!record.is_opted_out) {
-        throw new GraphQLError({
-          status: 400,
-          message: 'Skipped sending because this contact was already opted out'
-        })
+        throw new GraphQLError('Skipped sending because this contact was already opted out')
       }
 
       // const zipData = await r.table('zip_code')
@@ -1007,10 +995,7 @@ const rootMutations = {
       const { contactNumber, text } = message
 
       if (text.length > (process.env.MAX_MESSAGE_LENGTH || 99999)) {
-        throw new GraphQLError({
-          status: 400,
-          message: 'Message was longer than the limit'
-        })
+        throw new GraphQLError('Message was longer than the limit')
       }
 
       const replaceCurlyApostrophes = rawText => rawText.replace(/[\u2018\u2019]/g, "'")
@@ -1024,7 +1009,6 @@ const rootMutations = {
         contactTimezone.hasDST = hasDST === '1'
       }
 
-      console.log(record)
       const {
         c_override_hours,
         c_timezone,
@@ -1047,10 +1031,7 @@ const rootMutations = {
       const sendBeforeDate = sendBefore ? sendBefore.toDate() : null
 
       if (sendBeforeDate && sendBeforeDate <= Date.now()) {
-        throw new GraphQLError({
-          status: 400,
-          message: 'Outside permitted texting time for this recipient'
-        })
+        throw new GraphQLError('Outside permitted texting time for this recipient')
       }
 
       const messageInstance = new Message({
@@ -1076,7 +1057,6 @@ const rootMutations = {
           : 'messaged'
       }
 
-      console.log(contactUpdate)
 
       const contactSavePromise = r.knex('campaign_contact')
         .update(contactUpdate)
