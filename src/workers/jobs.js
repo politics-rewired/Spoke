@@ -10,8 +10,11 @@ import { getLastMessage, saveNewIncomingMessage } from '../server/api/lib/messag
 import AWS from 'aws-sdk'
 import Papa from 'papaparse'
 import moment from 'moment'
+import _ from 'lodash'
 import { sendEmail } from '../server/mail'
 import { Notifications, sendUserNotification } from '../server/notifications'
+
+const CHUNK_SIZE = 1000
 
 const zipMemoization = {}
 let warehouseConnection = null
@@ -154,9 +157,7 @@ export async function uploadContacts(job) {
   await r.table('campaign_contact')
     .getAll(campaignId, { index: 'campaign_id' })
     .delete()
-  const maxPercentage = 100
   let contacts = await gunzip(new Buffer(job.payload, 'base64'))
-  const chunkSize = 1000
   contacts = JSON.parse(contacts)
 
   const maxContacts = parseInt(orgFeatures.hasOwnProperty('maxContacts')
@@ -167,8 +168,6 @@ export async function uploadContacts(job) {
     contacts = contacts.slice(0, maxContacts)
   }
 
-  const numChunks = Math.ceil(contacts.length / chunkSize)
-
   for (let index = 0; index < contacts.length; index++) {
     const datum = contacts[index]
     if (datum.zip) {
@@ -177,11 +176,12 @@ export async function uploadContacts(job) {
     }
   }
 
-  for (let index = 0; index < numChunks; index++) {
-    await updateJob(job, Math.round((maxPercentage / numChunks) * index))
-    const savePortion = contacts.slice(index * chunkSize, (index + 1) * chunkSize)
-    await CampaignContact.save(savePortion)
-  }
+  const contactChunks = _.chunk(contacts, CHUNK_SIZE)
+  contactChunks.forEach((chunk, index, chunks) => {
+    const percentComplete = Math.round(index / chunks.length * 100)
+    await updateJob(job, percentComplete)
+    await CampaignContact.save(chunk)
+  })
 
   const optOutCellCount = await r.knex('campaign_contact')
     .whereIn('cell', function optouts() {
@@ -565,16 +565,14 @@ export async function assignTexters(job) {
     }
   }).filter((ele) => ele !== null)
 
-  for (const assignId in demotedTexters) {
+  const demotedAssignmentIds = Object.keys(demotedTexters)
+  const demotedChunks = _.chunk(demotedAssignmentIds, CHUNK_SIZE)
+  for (const assignmentIds in demotedChunks) {
     // Here we unassign ALL the demotedTexters contacts (not just the demotion count)
     // because they will get reapportioned below
     await r.knex('campaign_contact')
-      .where('id', 'in',
-             r.knex('campaign_contact')
-             .where('assignment_id', assignId)
-             .where('message_status', 'needsMessage')
-             .select('id')
-            )
+      .where('assignment_id', 'in', assignmentIds)
+      .where({ message_status: 'needsMessage' })
       .update({ assignment_id: null })
       .catch(log.error)
   }
