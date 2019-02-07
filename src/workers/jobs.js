@@ -622,7 +622,6 @@ export async function assignTexters(job) {
 
         availableContacts = availableContacts - contactsToAssign
         const existingAssignment = currentAssignments.find((ele) => ele.user_id === texterId)
-        let assignment = null
         if (existingAssignment) {
           const { id, user_id } = existingAssignment
           if (!dynamic) {
@@ -712,7 +711,7 @@ export async function assignTexters(job) {
           await Promise.all(updatedChunk.map(async directive => await assignContacts(directive)))
           // Wait to send notification until all contacts have been updated
           await sendUserNotification({
-            type: Notifications.ASSIGNMENT_UPDATED,
+            type: Notifications.ASSIGNMENT_CREATED,
             assignment
           })
         }
