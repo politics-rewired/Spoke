@@ -48,14 +48,18 @@ export async function getUsers(organizationId, cursor, campaignsFilter, role) {
     usersQuery = usersQuery.limit(cursor.limit).offset(cursor.offset)
     const users = await usersQuery
 
-    const usersCountQuery = buildUsersQuery(r.knex.countDistinct('user.id'), organizationId, campaignsFilter, role)
+    const userCountQuery = buildUsersQuery(
+      r.knex.distinct('user.id').select(),
+      organizationId,
+      campaignsFilter,
+      role
+    )
 
-    const usersCountArray = await usersCountQuery
-
+    const usersCount = await r.getCount(userCountQuery)
     const pageInfo = {
       limit: cursor.limit,
       offset: cursor.offset,
-      total: usersCountArray[0].count
+      total: usersCount
     }
 
     return {
