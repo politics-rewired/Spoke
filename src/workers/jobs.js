@@ -177,8 +177,10 @@ export async function uploadContacts(job) {
   }
 
   const contactChunks = _.chunk(contacts, CHUNK_SIZE)
-  await Promise.all(contactChunks.map(async (chunk, index, chunks) => {
-    const percentComplete = Math.round(index / chunks.length * 100)
+  let chunksCompleted = 0
+  await Promise.all(contactChunks.map(async chunk => {
+    chunksCompleted = chunksCompleted + 1
+    const percentComplete = Math.round(chunksCompleted / contactChunks.length * 100)
     await updateJob(job, percentComplete)
     await CampaignContact.save(chunk)
   }))
@@ -581,8 +583,7 @@ export async function assignTexters(job) {
           .update({ assignment_id: null })
       }
 
-      let percentComplete = 20
-      await updateJob(job, percentComplete)
+      await updateJob(job, 20)
 
       let availableContacts = await r.getCount(r.knex('campaign_contact')
         .transacting(trx)
@@ -590,9 +591,6 @@ export async function assignTexters(job) {
           assignment_id: null,
           campaign_id: cid
         }))
-
-      // Updating texters accounts for 75% of total job
-      const texterWorkPercent = 75 / texters.length
 
       const newAssignments = [],
             existingAssignments = [],
@@ -652,8 +650,9 @@ export async function assignTexters(job) {
           })
         }
 
-        percentComplete = percentComplete + texterWorkPercent
-        await updateJob(job, Math.floor(percentComplete))
+        // Updating texters accounts for 75% of total job
+        const textingWork = Math.floor(75 / texters.length * (index + 1))
+        await updateJob(job, textingWork + 20)
       } // end texters.forEach
 
       // Update dynamic assignments
@@ -673,8 +672,6 @@ export async function assignTexters(job) {
           .whereIn('id', function() {
             this.select('id')
               .from('campaign_contact')
-              // TODO - do we need transaction here?
-              // .transacting(trx)
               .forUpdate()
               .where({
                 assignment_id: null,
