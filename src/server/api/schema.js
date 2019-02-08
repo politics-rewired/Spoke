@@ -959,7 +959,7 @@ const rootMutations = {
           'opt_out.id as is_opted_out',
           'campaign_contact.timezone_offset as contact_timezone_offset'
         ))[0]
-      
+
       if (!record) {
         throw new GraphQLError('Your assignment has changed')
       }
@@ -1042,40 +1042,45 @@ const rootMutations = {
         throw new GraphQLError('Outside permitted texting time for this recipient')
       }
 
-      const messageInstance = new Message({
-        text: replaceCurlyApostrophes(text),
-        contact_number: contactNumber,
-        user_number: '',
-        assignment_id: message.assignmentId,
-        send_status: JOBS_SAME_PROCESS ? 'SENDING' : 'QUEUED',
-        service: process.env.DEFAULT_SERVICE || '',
-        is_from_contact: false,
-        queued_at: new Date(),
-        send_before: sendBeforeDate
-      })
-
-      const messageSavePromise = messageInstance.save()
+      const messageSavePromise = r.knex('message')
+        .insert({
+          text: replaceCurlyApostrophes(text),
+          contact_number: contactNumber,
+          user_number: '',
+          assignment_id: message.assignmentId,
+          send_status: JOBS_SAME_PROCESS ? 'SENDING' : 'QUEUED',
+          service: process.env.DEFAULT_SERVICE || '',
+          is_from_contact: false,
+          queued_at: new Date(),
+          send_before: sendBeforeDate
+        })
+        .returning('*')
 
       const { cc_message_status } = record
+      const contactSavePromise = (async () => {
+        await r.knex('campaign_contact')
+          .update({
+            updated_at: r.knex.fn.now(),
+            message_status: (cc_message_status === 'needsResponse' || cc_message_status === 'convo')
+              ? 'convo'
+              : 'messaged'
+          })
+          .where({ id: record.cc_id })
+
+        const contact = await r.knex('campaign_contact')
+          .select('*')
+          .where({ 'id': record.cc_id })
+          .first()
+        return contact
+      })()
+
+      const [messageInstance, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
+
+      // Send message after we are sure messageInstance has been persisted
       const service = serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE]
-      const contactUpdate = {
-        updated_at: r.knex.fn.now(),
-        message_status: (cc_message_status === 'needsResponse' || cc_message_status === 'convo')
-          ? 'convo'
-          : 'messaged'
-      }
+      await service.sendMessage(messageInstance)
 
-
-      const contactSavePromise = r.knex('campaign_contact')
-        .update(contactUpdate)
-        .where({ id: record.cc_id })
-        .returning('*') // MySQL supports this for single inserts
-
-      service.sendMessage(messageInstance)
-
-      const [_message, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
-      const contact = contactUpdateResult[0]
-      return contact
+      return contactUpdateResult
 
       // Unreachable code who did this
       if (JOBS_SAME_PROCESS) {
