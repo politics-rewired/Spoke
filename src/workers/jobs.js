@@ -519,16 +519,11 @@ export async function assignTexters(job) {
   const texters = payload.texters
   const currentAssignments = await r.knex('assignment')
     .where('assignment.campaign_id', cid)
-    .joinRaw('left join campaign_contact allcontacts'
-             + ' ON (allcontacts.assignment_id = assignment.id)')
+    .leftJoin('campaign_contact', 'campaign_contact.assignment_id', 'assignment.id')
     .groupBy('user_id', 'assignment.id')
-    .select('user_id',
-            'assignment.id as id',
-            r.knex.raw("SUM(CASE WHEN allcontacts.message_status = 'needsMessage' THEN 1 ELSE 0 END) as needs_message_count"),
-            r.knex.raw('COUNT(allcontacts.id) as full_contact_count'),
-            'max_contacts'
-           )
-    .catch(log.error)
+    .select('user_id', 'assignment.id as id', 'max_contacts')
+    .select(r.knex.raw("SUM(CASE campaign_contact.message_status WHEN 'needsMessage' THEN 1 ELSE 0 END) as needs_message_count"))
+    .select(r.knex.raw('COUNT(campaign_contact.id) as full_contact_count'))
 
   const unchangedTexters = {} // max_contacts and needsMessageCount unchanged
   const demotedTexters = {} // needsMessageCount reduced
@@ -666,19 +661,22 @@ export async function assignTexters(job) {
 
       const assignContacts = async (directive) => {
         const { assignment, contactsToAssign } = directive
+        // Look up in separate query as MySQL does not support LIMIT within subquery
+        const contactIds = await r.knex('campaign_contact')
+          .transacting(trx)
+          .select('id')
+          .forUpdate()
+          .where({
+            assignment_id: null,
+            campaign_id: assignment.campaign_id
+          })
+          .limit(contactsToAssign)
+          .map(result => result.id)
+
         await r.knex('campaign_contact')
           .transacting(trx)
           .update({ assignment_id: assignment.id })
-          .whereIn('id', function() {
-            this.select('id')
-              .from('campaign_contact')
-              .forUpdate()
-              .where({
-                assignment_id: null,
-                campaign_id: assignment.campaign_id
-              })
-              .limit(contactsToAssign)
-          })
+          .whereIn('id', contactIds)
       }
 
       // Assign contacts for updated existing assignments and notify users
@@ -699,13 +697,13 @@ export async function assignTexters(job) {
       const newAssignmentChunks = _.chunk(newAssignments, CHUNK_SIZE)
       await Promise.all(newAssignmentChunks.map(async chunk => {
         const assignmentInserts = await Promise.all(chunk.map(async directive => directive.assignment))
-        const assignments = await r.knex('assignment')
+        const assignmentIds = await r.knex('assignment')
           .transacting(trx)
           .insert(assignmentInserts)
-          .returning(['id', 'user_id', 'campaign_id', 'max_contacts'])
-        console.log('insert results', assignments)
-        const updatedChunk = await Promise.all(assignments.map(async (assignment, index) => {
-          const { contactsToAssign } = chunk[index]
+        const updatedChunk = await Promise.all(assignmentIds.map(async (assignmentId, index) => {
+          // We have to do this because MySQL does not support returning multiple columns from a bulk insert
+          let { contactsToAssign, assignment } = chunk[index]
+          assignment.id = assignmentId
           return { assignment, contactsToAssign }
         }))
         if (!dynamic) {
@@ -721,19 +719,22 @@ export async function assignTexters(job) {
         }
       }))
 
+      // dynamic assignments, having zero initially is ok
       if (!campaign.use_dynamic_assignment) {
-        // dynamic assignments, having zero initially is ok
+        // Look up in separate query as MySQL does not support LIMIT within subquery
+        const assignmentIds = await r.knex('assignment')
+          .transacting(trx)
+          .select('assignment.id as id')
+          .where('assignment.campaign_id', cid)
+          .leftJoin('campaign_contact', 'assignment.id', 'campaign_contact.assignment_id')
+          .groupBy('assignment.id')
+          .havingRaw('COUNT(campaign_contact.id) = 0')
+          .map(result => result.id)
+
         await r.knex('assignment')
           .transacting(trx)
           .delete()
-          .whereIn('id', function() {
-            this.select('assignment.id as id')
-              .from('assignment')
-              .where('assignment.campaign_id', cid)
-              .leftJoin('campaign_contact', 'assignment.id', 'campaign_contact.assignment_id')
-              .groupBy('assignment.id')
-              .havingRaw('COUNT(campaign_contact.id) = 0')
-          })
+          .whereIn('id', assignmentIds)
       }
 
       if (job.id) {

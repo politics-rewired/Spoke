@@ -4,6 +4,7 @@ import GraphQLJSON from 'graphql-type-json'
 import { GraphQLError } from 'graphql/error'
 import isUrl from 'is-url'
 import request from 'superagent'
+import _ from 'lodash'
 import { organizationCache } from '../models/cacheable_queries/organization'
 
 import { gzip, log, makeTree } from '../../lib'
@@ -114,6 +115,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         cell: datum.cell,
         external_id: datum.external_id,
         custom_fields: datum.customFields,
+        message_status: 'needsMessage',
+        is_opted_out: false,
         zip: datum.zip
       }
       modelData.campaign_id = id
@@ -170,8 +173,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
 
   if (campaign.hasOwnProperty('interactionSteps')) {
-    await accessRequired(user, organizationId, 'SUPERVOLUNTEER', /* superadmin*/ true)
-    await updateInteractionSteps(id, [campaign.interactionSteps], origCampaignRecord)
+    // TODO: debug why { script: '' } is even being sent from the client in the first place
+    if (!_.isEqual(campaign.interactionSteps, { script: '' })) {
+      await accessRequired(user, organizationId, 'SUPERVOLUNTEER', /* superadmin*/ true)
+      await updateInteractionSteps(id, [campaign.interactionSteps], origCampaignRecord)
+    }
   }
 
   if (campaign.hasOwnProperty('cannedResponses')) {
@@ -699,9 +705,11 @@ const rootMutations = {
         })
       }
 
+      // TODO - fix table creation to use correct default values
       const newOrganization = await Organization.save({
         name,
-        uuid: uuidv4()
+        uuid: uuidv4(),
+        features: ''
       })
       await UserOrganization.save({
         role: 'OWNER',
@@ -1061,7 +1069,7 @@ const rootMutations = {
       const contactSavePromise = r.knex('campaign_contact')
         .update(contactUpdate)
         .where({ id: record.cc_id })
-        .returning('*')
+        .returning('*') // MySQL supports this for single inserts
 
       service.sendMessage(messageInstance)
 
