@@ -1,3 +1,4 @@
+import knex from 'knex'
 const {
   DB_USE_SSL = 'false',
   DB_JSON = global.DB_JSON,
@@ -72,4 +73,4 @@ if (NODE_ENV === 'test') {
   }
 }
 
-module.exports = config
+export default knex(config)
