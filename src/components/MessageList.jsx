@@ -16,7 +16,7 @@ const styles = {
     padding: '10px',
     borderRadius: '5px',
     marginBottom: '10px',
-    fontSize: '13px',
+    fontSize: '15px',
     fontWeight: 'normal',
   },
   sentBubble: {
