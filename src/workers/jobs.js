@@ -1,5 +1,5 @@
 import { r, datawarehouse, cacheableData,
-         Assignment, Campaign, CampaignContact, Organization, User, 
+         Assignment, Campaign, CampaignContact, Organization, User,
          UserOrganization } from '../server/models'
 import { log, gunzip, zipToTimeZone, convertOffsetsToStrings } from '../lib'
 import { updateJob } from './lib'
@@ -10,8 +10,11 @@ import { getLastMessage, saveNewIncomingMessage } from '../server/api/lib/messag
 import AWS from 'aws-sdk'
 import Papa from 'papaparse'
 import moment from 'moment'
+import _ from 'lodash'
 import { sendEmail } from '../server/mail'
 import { Notifications, sendUserNotification } from '../server/notifications'
+
+const CHUNK_SIZE = 1000
 
 const zipMemoization = {}
 let warehouseConnection = null
@@ -154,9 +157,7 @@ export async function uploadContacts(job) {
   await r.table('campaign_contact')
     .getAll(campaignId, { index: 'campaign_id' })
     .delete()
-  const maxPercentage = 100
   let contacts = await gunzip(new Buffer(job.payload, 'base64'))
-  const chunkSize = 1000
   contacts = JSON.parse(contacts)
 
   const maxContacts = parseInt(orgFeatures.hasOwnProperty('maxContacts')
@@ -167,8 +168,6 @@ export async function uploadContacts(job) {
     contacts = contacts.slice(0, maxContacts)
   }
 
-  const numChunks = Math.ceil(contacts.length / chunkSize)
-
   for (let index = 0; index < contacts.length; index++) {
     const datum = contacts[index]
     if (datum.zip) {
@@ -177,17 +176,20 @@ export async function uploadContacts(job) {
     }
   }
 
-  for (let index = 0; index < numChunks; index++) {
-    await updateJob(job, Math.round((maxPercentage / numChunks) * index))
-    const savePortion = contacts.slice(index * chunkSize, (index + 1) * chunkSize)
-    await CampaignContact.save(savePortion)
-  }
+  const contactChunks = _.chunk(contacts, CHUNK_SIZE)
+  let chunksCompleted = 0
+  await Promise.all(contactChunks.map(async chunk => {
+    chunksCompleted = chunksCompleted + 1
+    const percentComplete = Math.round(chunksCompleted / contactChunks.length * 100)
+    await updateJob(job, percentComplete)
+    await CampaignContact.save(chunk)
+  }))
 
   const optOutCellCount = await r.knex('campaign_contact')
     .whereIn('cell', function optouts() {
       this.select('cell').from('opt_out').where('organization_id', campaign.organization_id)
     })
-    
+
   const deleteOptOutCells = await r.knex('campaign_contact')
     .whereIn('cell', getOptOutSubQuery(campaign.organization_id))
     .where('campaign_id', campaignId)
@@ -531,6 +533,7 @@ export async function assignTexters(job) {
   const unchangedTexters = {} // max_contacts and needsMessageCount unchanged
   const demotedTexters = {} // needsMessageCount reduced
   const dynamic = campaign.use_dynamic_assignment
+
   // detect changed assignments
   currentAssignments.map((assignment) => {
     const texter = texters.filter((texter) => parseInt(texter.id, 10) === assignment.user_id)[0]
@@ -565,118 +568,188 @@ export async function assignTexters(job) {
     }
   }).filter((ele) => ele !== null)
 
-  for (const assignId in demotedTexters) {
-    // Here we unassign ALL the demotedTexters contacts (not just the demotion count)
-    // because they will get reapportioned below
-    await r.knex('campaign_contact')
-      .where('id', 'in',
-             r.knex('campaign_contact')
-             .where('assignment_id', assignId)
-             .where('message_status', 'needsMessage')
-             .select('id')
-            )
-      .update({ assignment_id: null })
-      .catch(log.error)
-  }
-
-  await updateJob(job, 20)
-
-  let availableContacts = await r.table('campaign_contact')
-    .getAll(null, { index: 'assignment_id' })
-    .filter({ campaign_id: cid })
-    .count()
-  // Go through all the submitted texters and create assignments
-  const texterCount = texters.length
-
-  for (let index = 0; index < texterCount; index++) {
-    const texter = texters[index]
-    const texterId = parseInt(texter.id, 10)
-    let maxContacts = null // no limit
-
-    if (texter.maxContacts || texter.maxContacts === 0) {
-      maxContacts = Math.min(parseInt(texter.maxContacts, 10),
-        parseInt(process.env.MAX_CONTACTS_PER_TEXTER || texter.maxContacts, 10))
-    } else if (process.env.MAX_CONTACTS_PER_TEXTER) {
-      maxContacts = parseInt(process.env.MAX_CONTACTS_PER_TEXTER, 10)
-    }
-
-    if (unchangedTexters[texterId]) {
-      continue 
-    }
-
-    const contactsToAssign = Math.min(availableContacts, texter.needsMessageCount)
-
-    if (contactsToAssign === 0) {
-      // avoid creating a new assignment when the texter should get 0
-      if (!campaign.use_dynamic_assignment) {
-        continue
+  // We are now performing writes
+  r.knex.transaction(trx => {
+    const execute = async () => {
+      const demotedAssignmentIds = Object.keys(demotedTexters)
+      const demotedChunks = _.chunk(demotedAssignmentIds, CHUNK_SIZE)
+      for (const assignmentIds of demotedChunks) {
+        // Here we unassign ALL the demotedTexters contacts (not just the demotion count)
+        // because they will get reapportioned below
+        await r.knex('campaign_contact')
+          .transacting(trx)
+          .where('assignment_id', 'in', assignmentIds)
+          .where({ message_status: 'needsMessage' })
+          .update({ assignment_id: null })
       }
-    }
-    availableContacts = availableContacts - contactsToAssign
-    const existingAssignment = currentAssignments.find((ele) => ele.user_id === texterId)
-    let assignment = null
-    if (existingAssignment) {
-      if (!dynamic) {
-        assignment = new Assignment({ id: existingAssignment.id,
-                                     user_id: existingAssignment.user_id,
-                                     campaign_id: cid }) // for notification
-      } else {
+
+      await updateJob(job, 20)
+
+      let availableContacts = await r.getCount(r.knex('campaign_contact')
+        .transacting(trx)
+        .where({
+          assignment_id: null,
+          campaign_id: cid
+        }))
+
+      const newAssignments = [],
+            existingAssignments = [],
+            dynamicAssignments = []
+      // Do not use `async texter => ...` parallel execution here because `availableContacts`
+      // needs to be synchronously updated
+      for (let index = 0; index < texters.length; index++) {
+        const texter = texters[index]
+        const texterId = parseInt(texter.id, 10)
+        let maxContacts = null // no limit
+
+        const texterMax = parseInt(texter.maxContacts, 10)
+        const envMax = parseInt(process.env.MAX_CONTACTS_PER_TEXTER, 10)
+        if (!isNaN(texterMax)) {
+          maxContacts = Math.min(texterMax, envMax) || texterMax
+        } else if (!isNaN(envMax)) {
+          maxContacts = envMax
+        }
+
+        if (unchangedTexters[texterId]) {
+          continue
+        }
+
+        const contactsToAssign = Math.min(availableContacts, texter.needsMessageCount)
+        // Avoid creating a new assignment when the texter should get 0
+        if (contactsToAssign === 0 && !campaign.use_dynamic_assignment) {
+          continue
+        }
+
+        availableContacts = availableContacts - contactsToAssign
+        const existingAssignment = currentAssignments.find((ele) => ele.user_id === texterId)
+        if (existingAssignment) {
+          const { id, user_id } = existingAssignment
+          if (!dynamic) {
+            existingAssignments.push({
+              assignment: {
+                campaign_id: cid,
+                id,
+                user_id
+              },
+              contactsToAssign
+            })
+          } else {
+            dynamicAssignments.push({
+              max_contacts: maxContacts,
+              id
+            })
+          }
+        } else {
+          newAssignments.push({
+            assignment: {
+              user_id: texterId,
+              campaign_id: cid,
+              max_contacts: maxContacts
+            },
+            contactsToAssign
+          })
+        }
+
+        // Updating texters accounts for 75% of total job
+        const textingWork = Math.floor(75 / texters.length * (index + 1))
+        await updateJob(job, textingWork + 20)
+      } // end texters.forEach
+
+      // Update dynamic assignments
+      await Promise.all(dynamicAssignments.map(async assignment => {
+        const { id, max_contacts } = assignment
         await r.knex('assignment')
-        .where({ id: existingAssignment.id })
-        .update({ max_contacts: maxContacts })
+          .transacting(trx)
+          .where({ id })
+          .update({ max_contacts })
+      }))
+
+      const assignContacts = async (directive) => {
+        const { assignment, contactsToAssign } = directive
+        await r.knex('campaign_contact')
+          .transacting(trx)
+          .update({ assignment_id: assignment.id })
+          .whereIn('id', function() {
+            this.select('id')
+              .from('campaign_contact')
+              .forUpdate()
+              .where({
+                assignment_id: null,
+                campaign_id: assignment.campaign_id
+              })
+              .limit(contactsToAssign)
+          })
       }
-    } else {
-      assignment = await new Assignment({
-        user_id: texterId,
-        campaign_id: cid,
-        max_contacts: maxContacts
-      }).save()
-    }
 
-    if (!campaign.use_dynamic_assignment) {
-      await r.knex('campaign_contact')
-        .where('id', 'in',
-               r.knex('campaign_contact')
-               .where({ assignment_id: null,
-                        campaign_id: cid
-                      })
-               .limit(contactsToAssign)
-               .select('id'))
-        .update({ assignment_id: assignment.id })
-        .catch(log.error)
-
-      if (existingAssignment) {
-        // We can't rely on an observer because nothing
-        // about the actual assignment object changes
+      // Assign contacts for updated existing assignments and notify users
+      await Promise.all(existingAssignments.map(async directive => {
+        await assignContacts(directive)
+        // Wait to send notification until all contacts have been updated
+        // We can't rely on an observer because nothing about the actual assignment object changes
+        const { assignment } = directive
         await sendUserNotification({
           type: Notifications.ASSIGNMENT_UPDATED,
           assignment
         })
+        // TODO - this ^^ should send an email, but in fact it does nothing!
+        // `sendUserNotification()` has no if/else clause for ASSIGNMENT_UPDATED
+      }))
+
+      // Create new assignments, assign contacts, and notify users
+      const newAssignmentChunks = _.chunk(newAssignments, CHUNK_SIZE)
+      await Promise.all(newAssignmentChunks.map(async chunk => {
+        const assignmentInserts = await Promise.all(chunk.map(async directive => directive.assignment))
+        const assignments = await r.knex('assignment')
+          .transacting(trx)
+          .insert(assignmentInserts)
+          .returning(['id', 'user_id', 'campaign_id', 'max_contacts'])
+        console.log('insert results', assignments)
+        const updatedChunk = await Promise.all(assignments.map(async (assignment, index) => {
+          const { contactsToAssign } = chunk[index]
+          return { assignment, contactsToAssign }
+        }))
+        if (!dynamic) {
+          await Promise.all(updatedChunk.map(async directive => await assignContacts(directive)))
+          // Wait to send notification until all contacts have been updated
+          await Promise.all(updatedChunk.map(async directive => {
+            const { assignment } = directive
+            await sendUserNotification({
+              type: Notifications.ASSIGNMENT_CREATED,
+              assignment
+            })
+          }))
+        }
+      }))
+
+      if (!campaign.use_dynamic_assignment) {
+        // dynamic assignments, having zero initially is ok
+        await r.knex('assignment')
+          .transacting(trx)
+          .delete()
+          .whereIn('id', function() {
+            this.select('assignment.id as id')
+              .from('assignment')
+              .where('assignment.campaign_id', cid)
+              .leftJoin('campaign_contact', 'assignment.id', 'campaign_contact.assignment_id')
+              .groupBy('assignment.id')
+              .havingRaw('COUNT(campaign_contact.id) = 0')
+          })
+      }
+
+      if (job.id) {
+        await r.knex('job_request')
+          .delete()
+          .where({ id: job.id })
       }
     }
 
-    await updateJob(job, Math.floor((75 / texterCount) * (index + 1)) + 20)
-  } // endfor
-
-  if (!campaign.use_dynamic_assignment) {
-    // dynamic assignments, having zero initially is ok
-    const assignmentsToDelete = r.knex('assignment')
-      .where('assignment.campaign_id', cid)
-      .leftJoin('campaign_contact', 'assignment.id', 'campaign_contact.assignment_id')
-      .groupBy('assignment.id')
-      .havingRaw('COUNT(campaign_contact.id) = 0')
-      .select('assignment.id as id')
-
-    await r.knex('assignment')
-      .where('id', 'in', assignmentsToDelete)
-      .delete()
-      .catch(log.error)
-  }
-
-
-  if (job.id) {
-    await r.table('job_request').get(job.id).delete()
-  }
+    execute()
+      .then(trx.commit)
+      .catch(error => {
+        console.error('Rolling back!', error)
+        trx.rollback(error)
+      })
+  })
 }
 
 export async function exportCampaign(job) {
