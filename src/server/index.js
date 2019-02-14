@@ -20,6 +20,8 @@ import { seedZipCodes } from './seeds/seed-zip-codes'
 import { runMigrations } from '../migrations'
 import { setupUserNotificationObservers } from './notifications'
 import { TwimlResponse } from 'twilio'
+import basicAuth from 'express-basic-auth'
+import { giveUserMoreTexts } from './api/assignment'
 
 process.on('uncaughtException', (ex) => {
   log.error(ex)
@@ -173,6 +175,21 @@ app.use('/graphql', graphqlExpress((request) => ({
 app.get('/graphiql', graphiqlExpress({
   endpointURL: '/graphql'
 }))
+
+app.post('/autoassign',
+  basicAuth({ users: { [process.env.ASSIGNMENT_USERNAME]: process.env.ASSIGNMENT_PASSWORD } }),
+  async (req, res) => {
+  if (!req.body.slack_id) return res.status(400).json({error: 'Missing parameter `slack_id` in POST body.'})
+  if (!req.body.count) return res.status(400).json({error: 'Missing parameter `count` in POST body.'})
+  
+  try {
+    const numberAssigned = await giveUserMoreTexts(req.body.slack_id, req.body.count)
+    return res.json({ numberAssigned })
+  } catch (ex) {
+    console.log(ex)
+    return res.status(500).json({error: ex.message})
+  }
+})
 
 // This middleware should be last. Return the React app only if no other route is hit.
 app.use(appRenderer)

@@ -1,6 +1,7 @@
 import { mapFieldsToModel } from './lib/utils'
 import { Assignment, r, cacheableData } from '../models'
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from '../../lib'
+import _ from 'lodash'
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -91,6 +92,104 @@ export function getContacts(assignment, contactsFilter, organization, campaign, 
   }
 
   return query
+}
+
+export async function giveUserMoreTexts(auth0Id, count) {
+  // Fetch DB info
+  const [matchingUsers, campaignContactGroups] = await Promise.all([
+    await r.knex("user").where({ auth0_id: auth0Id }), 
+    await r.knex('campaign_contact')
+      .select([
+        'campaign_id',
+        r.knex.raw('assignment_id is null as unassigned')
+      ])
+      .count('id as total_count')
+      .groupBy('campaign_id')
+      .groupByRaw('assignment_id is null')
+  ])
+
+  const user = matchingUsers[0];
+  if (!user) {
+    throw new Error(`No user found with id ${auth0Id}`)
+  }
+
+  // Process campaigns, extracting relevant info
+  const campaignIds = campaignContactGroups.map(ccg => ccg.campaign_id)
+  const campaignsInfo = campaignIds.map((acc, campaignId) => {
+    const assignedBatch = campaignContactGroups.find(ccg => ccg.campaign_id === campaignId && ccg.unassigned == false);
+    const unassignedBatch = campaignContactGroups.find(ccg => ccg.campaign_id === campaignId && ccg.unassigned == true);
+    const assignedCount = assignedBatch ? parseInt(assignedBatch.total_count) : 0
+    const unassignedCount = unassignedBatch ? parseInt(unassignedBatch.total_count) : 0
+
+    return {
+      id: campaignId, 
+      assignmentProgress: assignedCount / (assignedCount + unassignedCount),
+      leftUnassigned: unassignedCount
+    }
+  })
+
+  // Determine which campaign to assign to
+  let campaignIdToAssignTo;
+  let countToAssign = count;
+  const campaignsWithEnoughLeftUnassigned = campaignsInfo.filter(c => c.leftUnassigned >= count)
+  if (campaignsWithEnoughLeftUnassigned.length == 0) {
+    const campaignWithMostToAssignTo = _.sortBy(campaignsInfo, c => c.leftUnassigned).reverse();
+    if (campaignWithMostToAssignTo[0].leftUnassigned == 0) {
+      throw new Error('There are no campaigns left to assign a texter to')
+    } else {
+      campaignIdToAssignTo = campaignWithMostToAssignTo[0].id;
+      countToAssign = campaignWithMostToAssignTo[0].leftUnassigned;
+    }
+  } else {
+    campaignIdToAssignTo = _.sortBy(campaignsWithEnoughLeftUnassigned, c => c.assignmentProgress)[0].id;
+  }
+
+  // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
+  let numberOfAddedContacts;
+  await r.knex.transaction(async trx => {
+    let assignmentId;
+    const existingAssignment = (await r.knex('assignment').where({
+      user_id: user.id,
+      campaign_id: campaignIdToAssignTo 
+    }))[0]
+
+    if (!existingAssignment) {
+      const inserted = await r.knex('assignment').insert({
+        user_id: user.id,
+        campaign_id: campaignIdToAssignTo,
+        max_contacts: countToAssign
+      }).returning('*')
+      const newAssignment = inserted[0];
+      assignmentId = newAssignment.id;
+    } else {
+      assignmentId = existingAssignment.id;
+      if (existingAssignment.max_contacts) {
+        await r.knex('assignment').update({
+          max_contacts: countToAssign + existingAssignment.max_contacts
+        }).where({ id: existingAssignment.id })
+      }
+    }
+
+    // Can do this in one query in Postgres, but in order
+    // to do it in MySQL, we need to find the contacts first
+    // and then update them by ID since MySQL doesn't support
+    // `returning` on updates
+    const contactsToUpdate = await r.knex('campaign_contact')
+      .select('id')
+      .where({
+        assignment_id: null,
+        campaign_id: campaignIdToAssignTo
+      })
+      .limit(countToAssign)
+
+    const updated_result = await r.knex('campaign_contact')
+      .whereIn('id', contactsToUpdate.map(c => c.id ))
+      .update({ assignment_id: assignmentId })
+    
+    numberOfAddedContacts = contactsToUpdate.length
+  })
+
+  return numberOfAddedContacts;
 }
 
 export const resolvers = {
