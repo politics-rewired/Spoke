@@ -10,6 +10,10 @@ import { withRouter } from 'react-router'
 import Check from 'material-ui/svg-icons/action/check-circle'
 import Empty from '../components/Empty'
 import RaisedButton from 'material-ui/RaisedButton'
+import gql from 'graphql-tag'
+import loadData from '../containers/hoc/load-data'
+import wrapMutations from '../containers/hoc/wrap-mutations'
+const SEND_DELAY = 800;
 
 const styles = StyleSheet.create({
   container: {
@@ -37,7 +41,8 @@ class AssignmentTexter extends React.Component {
       // currentContactIndex: 0,
       contactCache: {},
       loading: false,
-      direction: 'right'
+      direction: 'right',
+      errors: []
     }
   }
 
@@ -263,7 +268,73 @@ class AssignmentTexter extends React.Component {
     ]
   }
 
+  sendMessage = (contact_id, payload) => {
+    const { message } = payload
+    const isLastOne = !this.hasNext()
+
+    const sendMessagePromise = this.props.mutations.sendMessage(message, contact_id)
+      .then(response => {
+        if (response.errors) throw new Error(response.errors)
+        console.log(`Successfully send message to ${contact_id}`) 
+      })
+      .catch(this.handleSendMessageError(contact_id))
+
+    const promises = [sendMessagePromise]
+    if (payload.questionResponseObjects)
+      promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id))
+
+    if (payload.deletionIds)
+      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact.id))
+    
+    Promise.all(promises)
+      .then(() => { 
+        console.log(`Successfully recorded all info for ${contact_id}`)
+        if (isLastOne) this.handleFinishContact()
+      })
+
+    if (!isLastOne) {
+      setTimeout(() => this.handleFinishContact(), SEND_DELAY)
+    }
+  }
+
+  goBackToTodos = () => {
+    const { campaign } = this.props.assignment
+    this.props.router.push(`/app/${campaign.organization.id}/todos`)
+  }
+
+  handleSendMessageError = (contact_id) => (e) => {
+    let error_id = `${Math.floor(Math.random() * 100000)}`
+    let error = {id: error_id}
+
+    if (e.status === 402) {
+      this.goBackToTodos()
+    } else {
+      error.snackbarError = e.message
+
+      if (e.message.includes('Your assignment has changed')) {
+        error.snackbarActionTitle = 'Back to todos'
+        error.snackbarOnTouchTap = this.goBackToTodos
+      } else if (e.message.includes('Skipped sending because this contact was already opted out')) {
+        // opt out or send message Error
+        error.snackbarActionTitle = 'A previous contact had been opted out'
+      } else {
+        error.snackbarError = 'Error: Please wait a few seconds and try again.'
+      }
+
+      error.snackbarError = `Error for contact ${contact_id}: ${error.snackbarError.replace('Error: GraphQL error:', '')}`
+
+      this.setState({ errors: this.state.errors.concat([error]) })
+
+      setTimeout(() => {
+        this.setState({ errors: this.state.errors.filter(e => e.id !== error_id) })
+      }, 2000)
+      
+      throw e;
+    }
+  }
+
   renderTexter() {
+    const { errors } = this.state
     const { assignment } = this.props
     const { campaign, texter } = assignment
     const contact = this.currentContact()
@@ -292,6 +363,16 @@ class AssignmentTexter extends React.Component {
         onFinishContact={this.handleFinishContact}
         refreshData={this.props.refreshData}
         onExitTexter={this.handleExitTexter}
+        errors={errors}
+        mutations={{
+          createOptOut: this.props.mutations.createOptOut,
+          editCampaignContactMessageStatus: this.props.mutations.editCampaignContactMessageStatus,
+          deleteQuestionResponses: this.props.mutations.deleteQuestionResponses,
+          updateQuestionResponses: this.props.mutations.updateQuestionResponses,
+          updateQuestionResponses: this.props.mutations.updateQuestionResponses,
+          bulkSendMessages: this.props.mutations.bulkSendMessages,
+        }}
+        sendMessage={this.sendMessage}
       />
     )
   }
@@ -331,4 +412,100 @@ AssignmentTexter.propTypes = {
   organizationId: PropTypes.string
 }
 
-export default withRouter(AssignmentTexter)
+const mapMutationsToProps = () => ({
+  createOptOut: (optOut, campaignContactId) => ({
+    mutation: gql`
+      mutation createOptOut($optOut: OptOutInput!, $campaignContactId: String!) {
+        createOptOut(optOut: $optOut, campaignContactId: $campaignContactId) {
+          id
+          optOut {
+            id
+            createdAt
+          }
+        }
+      }
+    `,
+    variables: {
+      optOut,
+      campaignContactId
+    }
+  }),
+  editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({
+    mutation: gql`
+      mutation editCampaignContactMessageStatus($messageStatus: String!, $campaignContactId: String!) {
+        editCampaignContactMessageStatus(messageStatus:$messageStatus, campaignContactId: $campaignContactId) {
+          id
+          messageStatus
+        }
+      }
+    `,
+    variables: {
+      messageStatus,
+      campaignContactId
+    }
+  }),
+  deleteQuestionResponses: (interactionStepIds, campaignContactId) => ({
+    mutation: gql`
+      mutation deleteQuestionResponses($interactionStepIds:[String], $campaignContactId: String!) {
+        deleteQuestionResponses(interactionStepIds: $interactionStepIds, campaignContactId: $campaignContactId) {
+          id
+        }
+      }
+    `,
+    variables: {
+      interactionStepIds,
+      campaignContactId
+    }
+  }),
+  updateQuestionResponses: (questionResponses, campaignContactId) => ({
+    mutation: gql`
+      mutation updateQuestionResponses($questionResponses:[QuestionResponseInput], $campaignContactId: String!) {
+        updateQuestionResponses(questionResponses: $questionResponses, campaignContactId: $campaignContactId) {
+          id
+        }
+      }
+    `,
+    variables: {
+      questionResponses,
+      campaignContactId
+    }
+  }),
+  sendMessage: (message, campaignContactId) => ({
+    mutation: gql`
+      mutation sendMessage($message: MessageInput!, $campaignContactId: String!) {
+        sendMessage(message: $message, campaignContactId: $campaignContactId) {
+          id
+          messageStatus
+          messages {
+            id
+            createdAt
+            text
+            isFromContact
+          }
+        }
+      }
+    `,
+    variables: {
+      message,
+      campaignContactId
+    }
+  }),
+  bulkSendMessages: (assignmentId) => ({
+    mutation: gql`
+      mutation bulkSendMessages($assignmentId: Int!) {
+        bulkSendMessages(assignmentId: $assignmentId) {
+          id
+        }
+      }
+    `,
+    variables: {
+      assignmentId
+    }
+  })
+})
+
+export default loadData(wrapMutations(
+  withRouter(AssignmentTexter)), {
+    mapMutationsToProps
+  })
+
