@@ -14,6 +14,7 @@ import Chip from '../components/Chip'
 import loadData from './hoc/load-data'
 import wrapMutations from './hoc/wrap-mutations'
 import Empty from '../components/Empty'
+import LoadingIndicator from '../components/LoadingIndicator'
 import { dataTest } from '../lib/attributes'
 
 const campaignInfoFragment = `
@@ -134,6 +135,9 @@ class CampaignList extends React.Component {
   }
 
   render() {
+    if (this.props.data.loading) {
+      return <LoadingIndicator />
+    }
     const { campaigns } = this.props.data.organization
     return campaigns.length === 0 ? (
       <Empty
