@@ -53,11 +53,13 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
     campaignsQuery = campaignsQuery.limit(cursor.limit).offset(cursor.offset)
     const campaigns = await campaignsQuery
 
-    const campaignsCount = await r.getCount(buildCampaignQuery(
-      r.knex.select('id'),
+    const campaignsCountQuery = buildCampaignQuery(
+      r.knex.count('*'),
       organizationId,
       campaignsFilter
-    ))
+    )
+
+    const campaignsCount = await r.parseCount(campaignsCountQuery)
 
     const pageInfo = {
       limit: cursor.limit,
