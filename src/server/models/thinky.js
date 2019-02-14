@@ -69,6 +69,24 @@ thinkyConn.r.getCount = async (query) => {
   return Number((await query.count('* as count').first()).count)
 }
 
+/**
+ * Helper method to parse the result of a knex `count` query (see above).
+ */
+thinkyConn.r.parseCount = async (query) => {
+  if (Array.isArray(query)) {
+    return query.length
+  }
+
+  const result = (await query)[0]
+  const keys = Object.keys(result)
+  if (keys.length === 1) {
+    const countKey = keys[0]
+    return result[countKey]
+  }
+
+  throw new Error('Multiple columns returned by the query!')
+}
+
 if (process.env.REDIS_URL) {
   thinkyConn.r.redis = redis.createClient({ url: process.env.REDIS_URL })
 } else if (process.env.REDIS_FAKE) {

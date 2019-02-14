@@ -57,7 +57,7 @@ export function getContacts(assignment, contactsFilter, organization, campaign, 
           // missing timezone ok
           validOffsets.push('')
         }
-        query = query.whereIn('timezone_offset', validOffsets).orWhere({ timezone_offset: null })
+        query = query.whereIn('timezone_offset', validOffsets)
       } else if (validTimezone === false) {
         if (!defaultTimezoneIsBetweenTextingHours(config)) {
           // missing timezones are not ok to text
@@ -84,11 +84,9 @@ export function getContacts(assignment, contactsFilter, organization, campaign, 
 
   if (!forCount) {
     if (contactsFilter && contactsFilter.messageStatus === 'convo') {
-      query = query.orderBy('message_status', 'desc')
-      query = query.orderBy('updated_at', 'desc')
+      query = query.orderByRaw('message_status DESC, updated_at DESC')
     } else {
-      query = query.orderBy('message_status', 'desc')
-      query = query.orderBy('updated_at', 'asc')
+      query = query.orderByRaw('message_status DESC, updated_at')
     }
   }
 

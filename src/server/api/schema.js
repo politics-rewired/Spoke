@@ -705,11 +705,9 @@ const rootMutations = {
         })
       }
 
-      // TODO - fix table creation to use correct default values
       const newOrganization = await Organization.save({
         name,
-        uuid: uuidv4(),
-        features: ''
+        uuid: uuidv4()
       })
       await UserOrganization.save({
         role: 'OWNER',

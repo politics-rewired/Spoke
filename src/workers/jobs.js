@@ -194,9 +194,6 @@ export async function uploadContacts(job) {
     .whereIn('cell', getOptOutSubQuery(campaign.organization_id))
     .where('campaign_id', campaignId)
     .delete()
-    .then(result => {
-      console.log('deleted result: ' + result);
-    })
 
   if (deleteOptOutCells) {
     jobMessages.push(`Number of contacts excluded due to their opt-out status: ${optOutCellCount}`)
