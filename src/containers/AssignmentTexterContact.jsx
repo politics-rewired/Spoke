@@ -14,8 +14,6 @@ import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar'
 import { Card, CardActions, CardTitle } from 'material-ui/Card'
 import Divider from 'material-ui/Divider'
 import { applyScript } from '../lib/scripts'
-import gql from 'graphql-tag'
-import loadData from './hoc/load-data'
 import yup from 'yup'
 import GSForm from '../components/forms/GSForm'
 import Form from 'react-formal'
@@ -27,7 +25,6 @@ import CircularProgress from 'material-ui/CircularProgress'
 import Snackbar from 'material-ui/Snackbar'
 import { getChildren, getTopMostParent, interactionStepForId, log, isBetweenTextingHours } from '../lib'
 import { withRouter } from 'react-router'
-import wrapMutations from './hoc/wrap-mutations'
 import Empty from '../components/Empty'
 import CreateIcon from 'material-ui/svg-icons/content/create'
 import { dataTest } from '../lib/attributes'
@@ -247,6 +244,12 @@ export class AssignmentTexterContact extends React.Component {
     document.body.removeEventListener('keydown', this.onEnter)
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.errors.length !== nextProps.length) {
+      this.state.disabled = false
+    }
+  }
+
   onEnter(evt) {
     if (evt.keyCode === 13) {
       evt.preventDefault()
@@ -385,26 +388,17 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   handleMessageFormSubmit = async ({ messageText }) => {
-    try {
-      const { contact } = this.props
-      const message = this.createMessageToContact(messageText)
-      if (this.state.disabled) {
-        return // stops from multi-send
-      }
-      this.setState({ disabled: true })
-      const response = await this.props.mutations.sendMessage(message, contact.id)
-      if (response.errors) {
-        throw new Error(response.errors[0])
-      }
+    const { contact } = this.props
+    const message = this.createMessageToContact(messageText)
+    if (this.state.disabled) return // stops from multi-send
 
-      await this.handleSubmitSurveys()
-      this.props.onFinishContact()
-    } catch (e) {
-      this.handleSendMessageError(e)
-    }
+    this.setState({ disabled: true })
+
+    const payload = Object.assign({ message }, this.gatherSurveyChanges())
+    this.props.sendMessage(contact.id, payload)
   }
 
-  handleSubmitSurveys = async () => {
+  gatherSurveyChanges = async () => {
     const { contact } = this.props
 
     const deletionIds = []
@@ -427,12 +421,11 @@ export class AssignmentTexterContact extends React.Component {
         deletionIds.push(interactionStepId)
       }
     }
-    if (questionResponseObjects.length) {
-      await this.props.mutations.updateQuestionResponses(questionResponseObjects, contact.id)
-    }
-    if (deletionIds.length) {
-      await this.props.mutations.deleteQuestionResponses(deletionIds, contact.id)
-    }
+
+    const changes = {}
+    if (questionResponseObjects.length) changes.questionResponseObjects = questionResponseObjects
+    if (deletionIds.length) changes.deletionIds = deletionIds
+    return changes
   }
 
   handleClickCloseContactButton = async () => {
@@ -446,7 +439,7 @@ export class AssignmentTexterContact extends React.Component {
     await this.props.mutations.editCampaignContactMessageStatus(messageStatus, contact.id)
   }
 
-  handleOptOut = async () => {
+  handleOptOut = () => {
     const optOutMessageText = this.state.optOutMessageText
     const { contact } = this.props
     const { assignment } = this.props
@@ -455,22 +448,20 @@ export class AssignmentTexterContact extends React.Component {
       return // stops from multi-send
     }
     this.setState({ disabled: true })
-    try {
-      if (optOutMessageText.length) {
-        await this.props.mutations.sendMessage(message, contact.id)
-      }
 
-      const optOut = {
+    const payload = {
+      optOut: {
         cell: contact.cell,
         assignmentId: assignment.id
       }
-
-      await this.handleSubmitSurveys()
-      await this.props.mutations.createOptOut(optOut, contact.id)
-      this.props.onFinishContact()
-    } catch (e) {
-      this.handleSendMessageError(e)
     }
+
+    if (optOutMessageText.length) {
+      payload.message = message
+    }
+
+    Object.assign(payload, this.gatherSurveyChanges())
+    this.props.sendMessage(contact.id, payload)
   }
 
   handleOpenDialog = () => {
@@ -898,6 +889,17 @@ export class AssignmentTexterContact extends React.Component {
           action={this.state.snackbarActionTitle}
           onActionTouchTap={this.state.snackbarOnTouchTap}
         />
+        {this.props.errors.map((err, idx) =>
+          <Snackbar 
+            key={err.id}
+            style={Object.assign({}, inlineStyles.snackbar, {bottom: idx * 50, width: 700})}
+            open={true}
+            message={err.snackbarError || ''}
+            action={err.snackbarActionTitle}
+            onActionClick={err.snackbarOnTouchTap}
+            transitionDuration={0}
+          />
+        )}
       </div>
     )
   }
@@ -917,99 +919,4 @@ AssignmentTexterContact.propTypes = {
   onRefreshAssignmentContacts: PropTypes.func
 }
 
-const mapMutationsToProps = () => ({
-  createOptOut: (optOut, campaignContactId) => ({
-    mutation: gql`
-      mutation createOptOut($optOut: OptOutInput!, $campaignContactId: String!) {
-        createOptOut(optOut: $optOut, campaignContactId: $campaignContactId) {
-          id
-          optOut {
-            id
-            createdAt
-          }
-        }
-      }
-    `,
-    variables: {
-      optOut,
-      campaignContactId
-    }
-  }),
-  editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({
-    mutation: gql`
-      mutation editCampaignContactMessageStatus($messageStatus: String!, $campaignContactId: String!) {
-        editCampaignContactMessageStatus(messageStatus:$messageStatus, campaignContactId: $campaignContactId) {
-          id
-          messageStatus
-        }
-      }
-    `,
-    variables: {
-      messageStatus,
-      campaignContactId
-    }
-  }),
-  deleteQuestionResponses: (interactionStepIds, campaignContactId) => ({
-    mutation: gql`
-      mutation deleteQuestionResponses($interactionStepIds:[String], $campaignContactId: String!) {
-        deleteQuestionResponses(interactionStepIds: $interactionStepIds, campaignContactId: $campaignContactId) {
-          id
-        }
-      }
-    `,
-    variables: {
-      interactionStepIds,
-      campaignContactId
-    }
-  }),
-  updateQuestionResponses: (questionResponses, campaignContactId) => ({
-    mutation: gql`
-      mutation updateQuestionResponses($questionResponses:[QuestionResponseInput], $campaignContactId: String!) {
-        updateQuestionResponses(questionResponses: $questionResponses, campaignContactId: $campaignContactId) {
-          id
-        }
-      }
-    `,
-    variables: {
-      questionResponses,
-      campaignContactId
-    }
-  }),
-  sendMessage: (message, campaignContactId) => ({
-    mutation: gql`
-      mutation sendMessage($message: MessageInput!, $campaignContactId: String!) {
-        sendMessage(message: $message, campaignContactId: $campaignContactId) {
-          id
-          messageStatus
-          messages {
-            id
-            createdAt
-            text
-            isFromContact
-          }
-        }
-      }
-    `,
-    variables: {
-      message,
-      campaignContactId
-    }
-  }),
-  bulkSendMessages: (assignmentId) => ({
-    mutation: gql`
-      mutation bulkSendMessages($assignmentId: Int!) {
-        bulkSendMessages(assignmentId: $assignmentId) {
-          id
-        }
-      }
-    `,
-    variables: {
-      assignmentId
-    }
-  })
-})
-
-export default loadData(wrapMutations(
-  withRouter(AssignmentTexterContact)), {
-    mapMutationsToProps
-  })
+export default withRouter(AssignmentTexterContact)
