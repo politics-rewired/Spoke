@@ -82,12 +82,7 @@ export function setupSlackPassport() {
         if (organizations[0]) {
           const uuid = organizations[0].uuid
           const joinUrl = `${process.env.BASE_URL}/${uuid}/join`
-          return res.redirect(
-            ['/','', undefined].includes(req.query.state)
-              ? joinUrl :
-              req.query.state == ''
-                ? '/'
-                : req.query.state)
+          return res.redirect(joinUrl)
         } else {
           return res.redirect(req.query.state || '/')
         }
