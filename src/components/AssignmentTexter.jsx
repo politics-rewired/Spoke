@@ -13,7 +13,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import gql from 'graphql-tag'
 import loadData from '../containers/hoc/load-data'
 import wrapMutations from '../containers/hoc/wrap-mutations'
-const SEND_DELAY = 500;
+const SEND_DELAY = 500
 
 const styles = StyleSheet.create({
   container: {
@@ -303,8 +303,7 @@ class AssignmentTexter extends React.Component {
   }
 
   handleSendMessageError = (contact_id) => (e) => {
-    let error_id = `${Math.floor(Math.random() * 100000)}`
-    let error = {id: error_id}
+    let error = {id: contact_id}
 
     if (e.status === 402) {
       this.goBackToTodos()
@@ -326,7 +325,7 @@ class AssignmentTexter extends React.Component {
       this.setState({ errors: this.state.errors.concat([error]) })
 
       setTimeout(() => {
-        this.setState({ errors: this.state.errors.filter(e => e.id !== error_id) })
+        this.setState({ errors: this.state.errors.filter(e => e.id !== contact_id) })
       }, 2000)
       
       throw e;
