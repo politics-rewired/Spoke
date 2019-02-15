@@ -13,8 +13,7 @@ CREATE TABLE spoke_prod.assignment (
     user_id int(11) NOT NULL,
     campaign_id int(11) NOT NULL,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    max_contacts int(11),
-    PRIMARY KEY (id)
+    max_contacts int(11)
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.campaign (
@@ -34,8 +33,7 @@ CREATE TABLE spoke_prod.campaign (
     texting_hours_enforced bool DEFAULT 1,
     texting_hours_start int(11) DEFAULT 9,
     texting_hours_end int(11) DEFAULT 21,
-    timezone varchar(255) DEFAULT 'US/Eastern',
-    PRIMARY KEY (id)
+    timezone varchar(255) DEFAULT 'US/Eastern'
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.campaign_contact (
@@ -52,8 +50,7 @@ CREATE TABLE spoke_prod.campaign_contact (
     updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     message_status varchar(255) DEFAULT 'needsMessage',
     is_opted_out bool DEFAULT 0,
-    timezone_offset varchar(255) DEFAULT '',
-    PRIMARY KEY (id)
+    timezone_offset varchar(255) DEFAULT ''
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.canned_response (
@@ -62,8 +59,7 @@ CREATE TABLE spoke_prod.canned_response (
     text text NOT NULL,
     title text NOT NULL,
     user_id int(11),
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.interaction_step (
@@ -75,16 +71,14 @@ CREATE TABLE spoke_prod.interaction_step (
     parent_interaction_id int(11),
     answer_option varchar(255) DEFAULT '',
     answer_actions varchar(255) DEFAULT '',
-    is_deleted bool DEFAULT 0 NOT NULL,
-    PRIMARY KEY (id)
+    is_deleted bool DEFAULT 0 NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.invite (
     id int(11) NOT NULL AUTO_INCREMENT,
     is_valid bool NOT NULL,
     hash text,
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.job_request (
@@ -98,30 +92,14 @@ CREATE TABLE spoke_prod.job_request (
     assigned bool DEFAULT 0,
     `status` int(11) DEFAULT 0,
     updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.log (
     id int(11) NOT NULL AUTO_INCREMENT,
     message_sid text NOT NULL,
     body text,
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE=MyISAM;
-
-CREATE TABLE spoke_prod.lookup_tool_migrations (
-    id int(11) NOT NULL AUTO_INCREMENT,
-    name varchar(255),
-    batch int(11),
-    migration_time timestamp,
-    PRIMARY KEY (id)
-) ENGINE=MyISAM;
-
-CREATE TABLE spoke_prod.lookup_tool_migrations_lock (
-    `index` int(11) NOT NULL,
-    is_locked int(11),
-    PRIMARY KEY (`index`)
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.message (
@@ -140,14 +118,12 @@ CREATE TABLE spoke_prod.message (
     queued_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     sent_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     service_response_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    send_before timestamp,
-    PRIMARY KEY (id)
+    send_before timestamp
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.migrations (
     id int(11) NOT NULL AUTO_INCREMENT,
-    completed int(11) NOT NULL,
-    PRIMARY KEY (id)
+    completed int(11) NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.opt_out (
@@ -156,8 +132,7 @@ CREATE TABLE spoke_prod.opt_out (
     assignment_id int(11) NOT NULL,
     organization_id int(11) NOT NULL,
     reason_code varchar(255) DEFAULT '',
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.organization (
@@ -168,8 +143,7 @@ CREATE TABLE spoke_prod.organization (
     features varchar(255) DEFAULT '',
     texting_hours_enforced bool DEFAULT 0,
     texting_hours_start int(11) DEFAULT 9,
-    texting_hours_end int(11) DEFAULT 21,
-    PRIMARY KEY (id)
+    texting_hours_end int(11) DEFAULT 21
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.pending_message_part (
@@ -180,19 +154,7 @@ CREATE TABLE spoke_prod.pending_message_part (
     service_message text NOT NULL,
     user_number varchar(255) DEFAULT '',
     contact_number text NOT NULL,
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
-) ENGINE=MyISAM;
-
-CREATE TABLE spoke_prod.phone_data (
-    `number` varchar(255) NOT NULL,
-    caller_name varchar(255),
-    country_code varchar(255),
-    national_format varchar(255),
-    mobile_country_code varchar(255),
-    mobile_network_code varchar(255),
-    carrier_name varchar(255),
-    carrier_type varchar(255)
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.question_response (
@@ -200,8 +162,7 @@ CREATE TABLE spoke_prod.question_response (
     campaign_contact_id int(11) NOT NULL,
     interaction_step_id int(11) NOT NULL,
     value text NOT NULL,
-    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.`user` (
@@ -214,8 +175,7 @@ CREATE TABLE spoke_prod.`user` (
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     assigned_cell text,
     is_superadmin bool,
-    terms bool DEFAULT 0,
-    PRIMARY KEY (id)
+    terms bool DEFAULT 0
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.user_cell (
@@ -223,16 +183,14 @@ CREATE TABLE spoke_prod.user_cell (
     cell text NOT NULL,
     user_id int(11) NOT NULL,
     service text,
-    is_primary bool,
-    PRIMARY KEY (id)
+    is_primary bool
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.user_organization (
     id int(11) NOT NULL AUTO_INCREMENT,
     user_id int(11) NOT NULL,
     organization_id int(11) NOT NULL,
-    role text NOT NULL,
-    PRIMARY KEY (id)
+    role text NOT NULL
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.zip_code (
@@ -242,8 +200,7 @@ CREATE TABLE spoke_prod.zip_code (
     latitude real NOT NULL,
     longitude real NOT NULL,
     timezone_offset real NOT NULL,
-    has_dst bool NOT NULL,
-    PRIMARY KEY (zip)
+    has_dst bool NOT NULL
 ) ENGINE=MyISAM;
 
 
@@ -252,79 +209,172 @@ CREATE TABLE spoke_prod.zip_code (
 --   (Most are created with the table syntax)
 -- ------------------------------------------
 
--- ALTER TABLE spoke_prod.assignment
---     ADD CONSTRAINT assignment_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.assignment
+    ADD CONSTRAINT assignment_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.campaign_contact
---     ADD CONSTRAINT campaign_contact_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.campaign_contact
+    ADD CONSTRAINT campaign_contact_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.campaign
---     ADD CONSTRAINT campaign_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.campaign
+    ADD CONSTRAINT campaign_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.canned_response
---     ADD CONSTRAINT canned_response_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.canned_response
+    ADD CONSTRAINT canned_response_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.interaction_step
---     ADD CONSTRAINT interaction_step_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.interaction_step
+    ADD CONSTRAINT interaction_step_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.invite
---     ADD CONSTRAINT invite_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.invite
+    ADD CONSTRAINT invite_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.job_request
---     ADD CONSTRAINT job_request_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.job_request
+    ADD CONSTRAINT job_request_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.log
---     ADD CONSTRAINT log_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.log
+    ADD CONSTRAINT log_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.lookup_tool_migrations_lock
---     ADD CONSTRAINT lookup_tool_migrations_lock_pkey PRIMARY KEY (index);
+ALTER TABLE spoke_prod.message
+    ADD CONSTRAINT message_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.lookup_tool_migrations
---     ADD CONSTRAINT lookup_tool_migrations_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.migrations
+    ADD CONSTRAINT migrations_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.message
---     ADD CONSTRAINT message_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.opt_out
+    ADD CONSTRAINT opt_out_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.migrations
---     ADD CONSTRAINT migrations_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.organization
+    ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.opt_out
---     ADD CONSTRAINT opt_out_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.pending_message_part
+    ADD CONSTRAINT pending_message_part_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.organization
---     ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.question_response
+    ADD CONSTRAINT question_response_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.pending_message_part
---     ADD CONSTRAINT pending_message_part_pkey PRIMARY KEY (id);
+ALTER TABLE spoke_prod.user_cell
+    ADD CONSTRAINT user_cell_pkey PRIMARY KEY (id);
 
-ALTER TABLE spoke_prod.phone_data
-    ADD CONSTRAINT phone_data_number_unique UNIQUE (`number`);
+ALTER TABLE spoke_prod.user_organization
+    ADD CONSTRAINT user_organization_pkey PRIMARY KEY (id);
 
-ALTER TABLE spoke_prod.phone_data
-    ADD CONSTRAINT phone_data_pkey PRIMARY KEY (`number`);
+ALTER TABLE spoke_prod.`user`
+    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 
--- ALTER TABLE spoke_prod.question_response
---     ADD CONSTRAINT question_response_pkey PRIMARY KEY (id);
-
--- ALTER TABLE spoke_prod.user_cell
---     ADD CONSTRAINT user_cell_pkey PRIMARY KEY (id);
-
--- ALTER TABLE spoke_prod.user_organization
---     ADD CONSTRAINT user_organization_pkey PRIMARY KEY (id);
-
--- ALTER TABLE spoke_prod."user"
---     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
-
--- ALTER TABLE spoke_prod.zip_code
---     ADD CONSTRAINT zip_code_pkey PRIMARY KEY (zip);
+ALTER TABLE spoke_prod.zip_code
+    ADD CONSTRAINT zip_code_pkey PRIMARY KEY (zip);
 
 
 -- ----------------
 -- Create indices
 -- ----------------
 
-CREATE INDEX phone_data_carrier_type_index ON spoke_prod.phone_data(carrier_type) USING btree;
+-- Assignment
+CREATE INDEX assignment_user_id_index
+    ON spoke_prod.assignment(user_id) USING btree;
 
+CREATE INDEX assignment_campaign_id_index
+    ON spoke_prod.assignment(campaign_id) USING btree;
+
+-- Campaign
+CREATE INDEX campaign_organization_id_index
+    ON spoke_prod.campaign(organization_id) USING btree;
+
+-- Campaign Contact
+CREATE INDEX campaign_contact_assignment_id_index
+    ON spoke_prod.campaign_contact(assignment_id) USING btree;
+
+CREATE INDEX campaign_contact_campaign_id_index
+    ON spoke_prod.campaign_contact(campaign_id) USING btree;
+
+CREATE INDEX campaign_contact_cell_index
+    ON spoke_prod.campaign_contact(cell) USING btree;
+
+CREATE INDEX campaign_contact_campaign_id_assignment_id_index
+    ON spoke_prod.campaign_contact(campaign_id,assignment_id) USING btree;
+
+CREATE INDEX campaign_contact_assignment_id_timezone_offset_index
+    ON spoke_prod.campaign_contact(assignment_id, timezone_offset) USING btree;
+
+-- Canned Response
+
+CREATE INDEX canned_response_campaign_id_index
+    ON spoke_prod.canned_response(campaign_id) USING btree;
+
+CREATE INDEX canned_response_user_id_index
+    ON spoke_prod.canned_response(user_id) USING btree;
+
+-- Interaction Step
+
+CREATE INDEX interaction_step_parent_interaction_id_index
+    ON spoke_prod.interaction_step(parent_interaction_id) USING btree;
+
+CREATE INDEX interaction_step_campaign_id_index
+    ON spoke_prod.interaction_step(campaign_id) USING btree;
+
+-- Invite
+
+CREATE INDEX invite_is_valid_index
+    ON spoke_prod.invite(is_valid) USING btree;
+
+-- Job Request
+
+CREATE INDEX job_request_queue_name_index
+    ON spoke_prod.job_request(queue_name) USING btree;
+
+-- Message
+
+CREATE INDEX message_assignment_id_index
+    ON spoke_prod.message(assignment_id) USING btree;
+
+CREATE INDEX message_send_status_index
+    ON spoke_prod.message(send_status) USING btree;
+
+CREATE INDEX message_user_number_index
+    ON spoke_prod.message(user_number) USING btree;
+
+CREATE INDEX message_contact_number_index
+    ON spoke_prod.message(contact_number) USING btree;
+
+CREATE INDEX message_service_id_index
+    ON spoke_prod.message(service_id) USING btree;
+
+-- Opt Out
+
+CREATE INDEX opt_out_cell_index
+    ON spoke_prod.opt_out(cell) USING btree;
+
+CREATE INDEX opt_out_assignment_id_index
+    ON spoke_prod.opt_out(assignment_id) USING btree;
+
+CREATE INDEX opt_out_organization_id_index
+    ON spoke_prod.opt_out(organization_id) USING btree;
+
+-- Question Response
+
+CREATE INDEX question_response_campaign_contact_id_index
+    ON spoke_prod.question_response(campaign_contact_id) USING btree;
+
+CREATE INDEX question_response_interaction_step_id_index
+    ON spoke_prod.question_response(interaction_step_id) USING btree;
+
+-- Pending Message Part
+
+CREATE INDEX pending_message_part_parent_id_index
+    ON spoke_prod.pending_message_part(parent_id) USING btree;
+
+CREATE INDEX pending_message_part_service_index
+    ON spoke_prod.pending_message_part(`service`) USING btree;
+
+-- User Organization
+
+CREATE INDEX user_organization_user_id_index
+    ON spoke_prod.user_organization(user_id) USING btree;
+
+CREATE INDEX user_organization_organization_id_index
+    ON spoke_prod.user_organization(organization_id) USING btree;
+
+CREATE INDEX user_organization_organization_id_user_id_index
+    ON spoke_prod.user_organization(organization_id,user_id) USING btree;
 
 -- ----------------
 -- Add Foreign Keys
