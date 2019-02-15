@@ -269,22 +269,28 @@ class AssignmentTexter extends React.Component {
   }
 
   sendMessage = (contact_id, payload) => {
-    const { message } = payload
     const isLastOne = !this.hasNext()
 
-    const sendMessagePromise = this.props.mutations.sendMessage(message, contact_id)
-      .then(response => {
-        if (response.errors) throw new Error(response.errors)
-        console.log(`Successfully send message to ${contact_id}`) 
-      })
-      .catch(this.handleSendMessageError(contact_id))
+    const promises = []
 
-    const promises = [sendMessagePromise]
+    if (payload.message) 
+      promises.push(
+        this.props.mutations.sendMessage(payload.message, contact_id)
+          .then(response => {
+            if (response.errors) throw new Error(response.errors)
+            console.log(`Successfully send message to ${contact_id}`) 
+          })
+          .catch(this.handleSendMessageError(contact_id))
+      )
+
     if (payload.questionResponseObjects)
       promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id))
 
     if (payload.deletionIds)
-      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact.id))
+      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id))
+
+    if (payload.optOut)
+      promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id))
     
     Promise.all(promises)
       .then(() => { 
@@ -364,11 +370,7 @@ class AssignmentTexter extends React.Component {
         onExitTexter={this.handleExitTexter}
         errors={errors}
         mutations={{
-          createOptOut: this.props.mutations.createOptOut,
           editCampaignContactMessageStatus: this.props.mutations.editCampaignContactMessageStatus,
-          deleteQuestionResponses: this.props.mutations.deleteQuestionResponses,
-          updateQuestionResponses: this.props.mutations.updateQuestionResponses,
-          updateQuestionResponses: this.props.mutations.updateQuestionResponses,
           bulkSendMessages: this.props.mutations.bulkSendMessages,
         }}
         sendMessage={this.sendMessage}

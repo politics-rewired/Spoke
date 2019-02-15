@@ -439,7 +439,7 @@ export class AssignmentTexterContact extends React.Component {
     await this.props.mutations.editCampaignContactMessageStatus(messageStatus, contact.id)
   }
 
-  handleOptOut = async () => {
+  handleOptOut = () => {
     const optOutMessageText = this.state.optOutMessageText
     const { contact } = this.props
     const { assignment } = this.props
@@ -448,22 +448,20 @@ export class AssignmentTexterContact extends React.Component {
       return // stops from multi-send
     }
     this.setState({ disabled: true })
-    try {
-      if (optOutMessageText.length) {
-        await this.props.sendMessage(message, contact.id)
-      }
 
-      const optOut = {
+    const payload = {
+      optOut: {
         cell: contact.cell,
         assignmentId: assignment.id
       }
-
-      await this.handleSubmitSurveys()
-      await this.props.mutations.createOptOut(optOut, contact.id)
-      this.props.onFinishContact()
-    } catch (e) {
-      this.handleSendMessageError(e)
     }
+
+    if (optOutMessageText.length) {
+      payload.message = message
+    }
+
+    Object.assign(payload, this.gatherSurveyChanges())
+    this.props.sendMessage(contact.id, payload)
   }
 
   handleOpenDialog = () => {
