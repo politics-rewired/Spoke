@@ -24,7 +24,7 @@ export default class CampaignTextingHoursForm extends React.Component {
     textingHoursEnforced: yup.boolean(),
     textingHoursStart: yup.number().integer(),
     textingHoursEnd: yup.number().integer(),
-    timezone: yup.string()
+    timezone: yup.string().required()
   })
 
   fireOnChangeIfTheFormValuesChanged(fieldName, newValue) {
@@ -159,20 +159,22 @@ export default class CampaignTextingHoursForm extends React.Component {
       >
         <CampaignFormSectionHeading
           title='Texting hours for campaign'
-          subtitle='You can use the texting-hours configuration for your organization, or configure texting hours for this campaign.'
+          subtitle='Please configure texting hours for each campaign, noting the time zone of the individuals in the list you are uploading.'
         />
 
-        {this.addToggleFormField(
+        {/* Removed because it will always be true */}
+        {/*this.addToggleFormField(
           'overrideOrganizationTextingHours',
           'Override organization texting hours?'
-        )}
+        )*/}
 
         {this.props.formValues.overrideOrganizationTextingHours ? (
           <div>
-            {this.addToggleFormField(
+            {/* Removed because it will always be true */}
+            {/*this.addToggleFormField(
               'textingHoursEnforced',
               'Texting hours enforced?'
-            )}
+            )*/}
 
             {this.props.formValues.textingHoursEnforced ? (
               <div>

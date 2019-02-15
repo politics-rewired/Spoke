@@ -929,6 +929,10 @@ const rootMutations = {
 
       return []
     },
+    // We've modified campaign creation on the client so that overrideOrganizationHours is always true
+    // and enforce_texting_hours is always true
+    // as a result, we're forcing admins to think about the time zone of each campaign
+    // and saving a join on this query.
     sendMessage: async (_, { message, campaignContactId }, { user, loaders }) => {
       const record = (await r.knex('campaign_contact')
         .join('campaign', 'campaign_contact.campaign_id', 'campaign.id')
@@ -936,9 +940,8 @@ const rootMutations = {
           .where({ 'campaign.is_archived': false })
           .where({ 'campaign_contact.assignment_id': parseInt(message.assignmentId) })
         .join('assignment', 'campaign_contact.assignment_id', 'assignment.id')
-        .join('organization', 'organization.id', 'campaign.organization_id')
         .leftJoin('opt_out', {
-          'opt_out.organization_id': 'organization.id',
+          // 'opt_out.organization_id': 'campaign.organization.id',
           'opt_out.cell': 'campaign_contact.cell'
         })
         .select(
@@ -952,15 +955,17 @@ const rootMutations = {
           'campaign.texting_hours_end as c_texting_hours_end',
           'campaign.texting_hours_enforced as c_texting_hours_enforced',
           'assignment.user_id as a_assignment_user_id',
-          'organization.texting_hours_enforced as o_texting_hours_enforced',
-          'organization.texting_hours_end as o_texting_hours_end',
           'opt_out.id as is_opted_out',
           'campaign_contact.timezone_offset as contact_timezone_offset'
         ))[0]
-
+      
       if (!record) {
         throw new GraphQLError('Your assignment has changed')
       }
+
+      // setting defaults based on new forced conditions
+      record.o_texting_hours_enforced = true;
+      record.o_texting_hours_end = 21;
 
       // This block will only need to be evaluated if message is sent from admin Message Review
       if (record.a_assignment_user_id !== user.id) {
@@ -1072,7 +1077,8 @@ const rootMutations = {
         return contact
       })()
 
-      const [messageInstance, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
+      const [messageInsertResult, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
+      const messageInstance = Array.isArray(messageInsertResult) ? messageInsertResult[0] : messageInsertResult;
 
       // Send message after we are sure messageInstance has been persisted
       const service = serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE]
