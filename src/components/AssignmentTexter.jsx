@@ -13,7 +13,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import gql from 'graphql-tag'
 import loadData from '../containers/hoc/load-data'
 import wrapMutations from '../containers/hoc/wrap-mutations'
-const SEND_DELAY = 800;
+const SEND_DELAY = 500;
 
 const styles = StyleSheet.create({
   container: {
