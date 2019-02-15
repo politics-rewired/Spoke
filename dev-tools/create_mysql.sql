@@ -268,7 +268,113 @@ ALTER TABLE spoke_prod.zip_code
 -- Create indices
 -- ----------------
 
+-- Assignment
+CREATE INDEX assignment_user_id_index
+    ON spoke_prod.assignment(user_id) USING btree;
 
+CREATE INDEX assignment_campaign_id_index
+    ON spoke_prod.assignment(campaign_id) USING btree;
+
+-- Campaign
+CREATE INDEX campaign_organization_id_index
+    ON spoke_prod.campaign(organization_id) USING btree;
+
+-- Campaign Contact
+CREATE INDEX campaign_contact_assignment_id_index
+    ON spoke_prod.campaign_contact(assignment_id) USING btree;
+
+CREATE INDEX campaign_contact_campaign_id_index
+    ON spoke_prod.campaign_contact(campaign_id) USING btree;
+
+CREATE INDEX campaign_contact_cell_index
+    ON spoke_prod.campaign_contact(cell) USING btree;
+
+CREATE INDEX campaign_contact_campaign_id_assignment_id_index
+    ON spoke_prod.campaign_contact(campaign_id,assignment_id) USING btree;
+
+CREATE INDEX campaign_contact_assignment_id_timezone_offset_index
+    ON spoke_prod.campaign_contact(assignment_id, timezone_offset) USING btree;
+
+-- Canned Response
+
+CREATE INDEX canned_response_campaign_id_index
+    ON spoke_prod.canned_response(campaign_id) USING btree;
+
+CREATE INDEX canned_response_user_id_index
+    ON spoke_prod.canned_response(user_id) USING btree;
+
+-- Interaction Step
+
+CREATE INDEX interaction_step_parent_interaction_id_index
+    ON spoke_prod.interaction_step(parent_interaction_id) USING btree;
+
+CREATE INDEX interaction_step_campaign_id_index
+    ON spoke_prod.interaction_step(campaign_id) USING btree;
+
+-- Invite
+
+CREATE INDEX invite_is_valid_index
+    ON spoke_prod.invite(is_valid) USING btree;
+
+-- Job Request
+
+CREATE INDEX job_request_queue_name_index
+    ON spoke_prod.job_request(queue_name) USING btree;
+
+-- Message
+
+CREATE INDEX message_assignment_id_index
+    ON spoke_prod.message(assignment_id) USING btree;
+
+CREATE INDEX message_send_status_index
+    ON spoke_prod.message(send_status) USING btree;
+
+CREATE INDEX message_user_number_index
+    ON spoke_prod.message(user_number) USING btree;
+
+CREATE INDEX message_contact_number_index
+    ON spoke_prod.message(contact_number) USING btree;
+
+CREATE INDEX message_service_id_index
+    ON spoke_prod.message(service_id) USING btree;
+
+-- Opt Out
+
+CREATE INDEX opt_out_cell_index
+    ON spoke_prod.opt_out(cell) USING btree;
+
+CREATE INDEX opt_out_assignment_id_index
+    ON spoke_prod.opt_out(assignment_id) USING btree;
+
+CREATE INDEX opt_out_organization_id_index
+    ON spoke_prod.opt_out(organization_id) USING btree;
+
+-- Question Response
+
+CREATE INDEX question_response_campaign_contact_id_index
+    ON spoke_prod.question_response(campaign_contact_id) USING btree;
+
+CREATE INDEX question_response_interaction_step_id_index
+    ON spoke_prod.question_response(interaction_step_id) USING btree;
+
+-- Pending Message Part
+
+CREATE INDEX pending_message_part_parent_id_index
+    ON spoke_prod.pending_message_part(parent_id) USING btree;
+
+CREATE INDEX pending_message_part_service_index
+    ON spoke_prod.pending_message_part(`service`) USING btree;
+
+-- User Organization
+
+CREATE INDEX user_organization_user_id_index
+    ON spoke_prod.user_organization(user_id) USING btree;
+
+CREATE INDEX user_organization_organization_id_index
+    ON spoke_prod.user_organization(organization_id) USING btree;
+
+CREATE INDEX user_organization_organization_id_user_id_index
+    ON spoke_prod.user_organization(organization_id,user_id) USING btree;
 
 -- ----------------
 -- Add Foreign Keys
