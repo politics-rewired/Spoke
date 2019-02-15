@@ -34,7 +34,7 @@ CREATE TABLE spoke_prod.campaign (
     texting_hours_enforced bool DEFAULT 1,
     texting_hours_start int(11) DEFAULT 9,
     texting_hours_end int(11) DEFAULT 21,
-    timezone varchar(255) DEFAULT 'US/Eastern',
+    timezone varchar(255),
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
