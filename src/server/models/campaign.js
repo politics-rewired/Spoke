@@ -48,9 +48,6 @@ const Campaign = thinky.createModel('campaign', type.object().schema({
     .default(21),
   timezone: type
     .string()
-    .required()
-    .default('US/Eastern')
-
 
 }).allowExtra(false), { noAutoCreation: true })
 

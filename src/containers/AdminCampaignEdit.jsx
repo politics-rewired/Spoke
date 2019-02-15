@@ -67,13 +67,18 @@ const campaignInfoFragment = `
   editors
 `
 
+const valueOverrides = {
+  overrideOrganizationTextingHours: true,
+  textingHoursEnforced: true
+}
+
 class AdminCampaignEdit extends React.Component {
   constructor(props) {
     super(props)
     const isNew = props.location.query.new
     this.state = {
       expandedSection: isNew ? 0 : null,
-      campaignFormValues: props.campaignData.campaign,
+      campaignFormValues: Object.assign(props.campaignData.campaign, valueOverrides),
       startingCampaign: false
     }
   }
@@ -126,7 +131,7 @@ class AdminCampaignEdit extends React.Component {
     }
 
     this.setState({
-      campaignFormValues: pushToFormValues
+      campaignFormValues: Object.assign({}, pushToFormValues, valueOverrides)
     })
   }
 
