@@ -102,18 +102,6 @@ CREATE TABLE spoke_prod.log (
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.lookup_tool_migrations (
-    id int(11) NOT NULL AUTO_INCREMENT,
-    name varchar(255),
-    batch int(11),
-    migration_time timestamp
-) ENGINE=MyISAM;
-
-CREATE TABLE spoke_prod.lookup_tool_migrations_lock (
-    `index` int(11) NOT NULL,
-    is_locked int(11)
-) ENGINE=MyISAM;
-
 CREATE TABLE spoke_prod.message (
     id int(11) NOT NULL AUTO_INCREMENT,
     user_id int(11),
@@ -167,17 +155,6 @@ CREATE TABLE spoke_prod.pending_message_part (
     user_number varchar(255) DEFAULT '',
     contact_number text NOT NULL,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
-) ENGINE=MyISAM;
-
-CREATE TABLE spoke_prod.phone_data (
-    `number` varchar(255) NOT NULL,
-    caller_name varchar(255),
-    country_code varchar(255),
-    national_format varchar(255),
-    mobile_country_code varchar(255),
-    mobile_network_code varchar(255),
-    carrier_name varchar(255),
-    carrier_type varchar(255)
 ) ENGINE=MyISAM;
 
 CREATE TABLE spoke_prod.question_response (
@@ -256,12 +233,6 @@ ALTER TABLE spoke_prod.job_request
 ALTER TABLE spoke_prod.log
     ADD CONSTRAINT log_pkey PRIMARY KEY (id);
 
-ALTER TABLE spoke_prod.lookup_tool_migrations_lock
-    ADD CONSTRAINT lookup_tool_migrations_lock_pkey PRIMARY KEY (index);
-
-ALTER TABLE spoke_prod.lookup_tool_migrations
-    ADD CONSTRAINT lookup_tool_migrations_pkey PRIMARY KEY (id);
-
 ALTER TABLE spoke_prod.message
     ADD CONSTRAINT message_pkey PRIMARY KEY (id);
 
@@ -277,12 +248,6 @@ ALTER TABLE spoke_prod.organization
 ALTER TABLE spoke_prod.pending_message_part
     ADD CONSTRAINT pending_message_part_pkey PRIMARY KEY (id);
 
-ALTER TABLE spoke_prod.phone_data
-    ADD CONSTRAINT phone_data_number_unique UNIQUE (`number`);
-
-ALTER TABLE spoke_prod.phone_data
-    ADD CONSTRAINT phone_data_pkey PRIMARY KEY (`number`);
-
 ALTER TABLE spoke_prod.question_response
     ADD CONSTRAINT question_response_pkey PRIMARY KEY (id);
 
@@ -292,7 +257,7 @@ ALTER TABLE spoke_prod.user_cell
 ALTER TABLE spoke_prod.user_organization
     ADD CONSTRAINT user_organization_pkey PRIMARY KEY (id);
 
-ALTER TABLE spoke_prod."user"
+ALTER TABLE spoke_prod.`user`
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 
 ALTER TABLE spoke_prod.zip_code
@@ -303,7 +268,6 @@ ALTER TABLE spoke_prod.zip_code
 -- Create indices
 -- ----------------
 
-CREATE INDEX phone_data_carrier_type_index ON spoke_prod.phone_data(carrier_type) USING btree;
 
 
 -- ----------------
