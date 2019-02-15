@@ -4,6 +4,7 @@ import GraphQLJSON from 'graphql-type-json'
 import { GraphQLError } from 'graphql/error'
 import isUrl from 'is-url'
 import request from 'superagent'
+import _ from 'lodash'
 import { organizationCache } from '../models/cacheable_queries/organization'
 
 import { gzip, log, makeTree } from '../../lib'
@@ -114,6 +115,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         cell: datum.cell,
         external_id: datum.external_id,
         custom_fields: datum.customFields,
+        message_status: 'needsMessage',
+        is_opted_out: false,
         zip: datum.zip
       }
       modelData.campaign_id = id
@@ -170,8 +173,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
 
   if (campaign.hasOwnProperty('interactionSteps')) {
-    await accessRequired(user, organizationId, 'SUPERVOLUNTEER', /* superadmin*/ true)
-    await updateInteractionSteps(id, [campaign.interactionSteps], origCampaignRecord)
+    // TODO: debug why { script: '' } is even being sent from the client in the first place
+    if (!_.isEqual(campaign.interactionSteps, { script: '' })) {
+      await accessRequired(user, organizationId, 'SUPERVOLUNTEER', /* superadmin*/ true)
+      await updateInteractionSteps(id, [campaign.interactionSteps], origCampaignRecord)
+    }
   }
 
   if (campaign.hasOwnProperty('cannedResponses')) {
@@ -951,7 +957,7 @@ const rootMutations = {
           'opt_out.id as is_opted_out',
           'campaign_contact.timezone_offset as contact_timezone_offset'
         ))[0]
-      
+
       if (!record) {
         throw new GraphQLError('Your assignment has changed')
       }
@@ -1034,40 +1040,45 @@ const rootMutations = {
         throw new GraphQLError('Outside permitted texting time for this recipient')
       }
 
-      const messageInstance = new Message({
-        text: replaceCurlyApostrophes(text),
-        contact_number: contactNumber,
-        user_number: '',
-        assignment_id: message.assignmentId,
-        send_status: JOBS_SAME_PROCESS ? 'SENDING' : 'QUEUED',
-        service: process.env.DEFAULT_SERVICE || '',
-        is_from_contact: false,
-        queued_at: new Date(),
-        send_before: sendBeforeDate
-      })
-
-      const messageSavePromise = messageInstance.save()
-
-      const { cc_message_status } = record
-      const service = serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE]
-      const contactUpdate = {
-        updated_at: r.knex.fn.now(),
-        message_status: (cc_message_status === 'needsResponse' || cc_message_status === 'convo')
-          ? 'convo'
-          : 'messaged'
-      }
-
-
-      const contactSavePromise = r.knex('campaign_contact')
-        .update(contactUpdate)
-        .where({ id: record.cc_id })
+      const messageSavePromise = r.knex('message')
+        .insert({
+          text: replaceCurlyApostrophes(text),
+          contact_number: contactNumber,
+          user_number: '',
+          assignment_id: message.assignmentId,
+          send_status: JOBS_SAME_PROCESS ? 'SENDING' : 'QUEUED',
+          service: process.env.DEFAULT_SERVICE || '',
+          is_from_contact: false,
+          queued_at: new Date(),
+          send_before: sendBeforeDate
+        })
         .returning('*')
 
-      service.sendMessage(messageInstance)
+      const { cc_message_status } = record
+      const contactSavePromise = (async () => {
+        await r.knex('campaign_contact')
+          .update({
+            updated_at: r.knex.fn.now(),
+            message_status: (cc_message_status === 'needsResponse' || cc_message_status === 'convo')
+              ? 'convo'
+              : 'messaged'
+          })
+          .where({ id: record.cc_id })
 
-      const [_message, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
-      const contact = contactUpdateResult[0]
-      return contact
+        const contact = await r.knex('campaign_contact')
+          .select('*')
+          .where({ 'id': record.cc_id })
+          .first()
+        return contact
+      })()
+
+      const [messageInstance, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
+
+      // Send message after we are sure messageInstance has been persisted
+      const service = serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE]
+      await service.sendMessage(messageInstance)
+
+      return contactUpdateResult
 
       // Unreachable code who did this
       if (JOBS_SAME_PROCESS) {
