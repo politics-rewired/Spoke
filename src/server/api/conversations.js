@@ -173,9 +173,9 @@ export async function getConversations(
 
   /* Query #3 -- get the count of all conversations matching the criteria.
   * We need this to show total number of conversations to support paging */
-  const conversationsCount = await r.getCount(getConversationsJoinsAndWhereClause(
+  const conversationsCount = await r.parseCount(getConversationsJoinsAndWhereClause(
     // Only grab one field in order to minimize bandwidth
-    r.knex.select('campaign_contact.id'),
+    r.knex.count('*'),
     organizationId,
     campaignsFilter,
     assignmentsFilter,
