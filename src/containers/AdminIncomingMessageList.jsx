@@ -183,6 +183,18 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
+  markForSecondPass = async () => {
+    await this.props.mutations.markForSecondPass(
+      this.props.params.organizationId,
+      this.state.campaignIdsContactIds
+    )
+
+    this.setState({
+      utc: Date.now().toString(),
+      needsRender: true
+    })
+  }
+
   async handlePageChange(page) {
     await this.setState({
       page,
@@ -194,18 +206,18 @@ export class AdminIncomingMessageList extends Component {
     await this.setState({ needsRender: true, pageSize })
   }
 
-  async handleRowSelection(selectedRows, data) {
+  handleRowSelection(selectedRows, data) {
     if (this.state.previousSelectedRows === 'all' && selectedRows !== 'all') {
-      await this.setState({
+      this.setState({
         previousSelectedRows: [],
         campaignIdsContactIds: [],
-        needsRender: false
+        needsRender: true
       })
     } else {
-      await this.setState({
+      this.setState({
         previousSelectedRows: selectedRows,
         campaignIdsContactIds: data,
-        needsRender: false
+        needsRender: true
       })
     }
   }
@@ -315,6 +327,7 @@ export class AdminIncomingMessageList extends Component {
       offset: this.state.page * this.state.pageSize,
       limit: this.state.pageSize
     }
+
     return (
       <div>
         <h3> Message Review </h3>
@@ -368,6 +381,11 @@ export class AdminIncomingMessageList extends Component {
               people={this.state.reassignmentTexters}
               onReassignRequested={this.handleReassignRequested}
               onReassignAllMatchingRequested={this.handleReassignAllMatchingRequested}
+              markForSecondPass={this.markForSecondPass}
+              contactsAreSelected={
+                this.state.previousSelectedRows === 'all' ||
+                (Array.isArray(this.state.previousSelectedRows) && this.state.previousSelectedRows.length > 0)
+              }
               conversationCount={this.state.conversationCount}
             />
             <br />
@@ -435,6 +453,22 @@ const mapMutationsToProps = () => ({
       }
     `,
     variables: { organizationId, campaignIdsContactIds, newTexterUserId }
+  }),
+  markForSecondPass: (organizationId, campaignIdsContactIds) => ({
+    mutation: gql`
+      mutation markForSecondPass(
+        $organizationId: String!
+        $campaignIdsContactIds: [CampaignIdContactId]!
+      ) {
+        markForSecondPass(
+          organizationId: $organizationId
+          campaignIdsContactIds: $campaignIdsContactIds
+        ) {
+          id
+        }
+      }
+    `,
+    variables: { organizationId, campaignIdsContactIds }
   }),
   bulkReassignCampaignContacts: (
     organizationId,

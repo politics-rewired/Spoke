@@ -211,6 +211,7 @@ const rootSchema = `
     assignUserToCampaign(organizationUuid: String!, campaignId: String!): Campaign
     userAgreeTerms(userId: String!): User
     reassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserId:String!):[CampaignIdAssignmentId],
+    markForSecondPass(organizationId: String!, campaignIdsContactIds: [CampaignIdContactId]!): [CampaignContact]
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!): String!
   }

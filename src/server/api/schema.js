@@ -1194,6 +1194,24 @@ const rootMutations = {
 
       return await reassignConversations(campaignIdContactIdsMap, campaignIdMessagesIdsMap, newTexterUserId)
     },
+    markForSecondPass: async (_ignore, { organizationId, campaignIdsContactIds }, { user }) => {
+      // verify permissions
+      await accessRequired(user, organizationId, 'SUPERVOLUNTEER', true)
+      
+      let affectedCampaignContactIds = []
+      const groupedByCampaign = _.groupBy(campaignIdsContactIds, c => c.campaignId)
+
+      await Promise.all(Object.keys(groupedByCampaign).map(async campaignId => {
+        const campaignContactIds = groupedByCampaign[campaignId].map(c => c.campaignContactId)
+        affectedCampaignContactIds = affectedCampaignContactIds.concat(campaignContactIds)
+        return r.knex('campaign_contact')
+          .update({ message_status: 'needsMessage' })
+          .where({ campaign_id: campaignId })
+          .whereIn('id', campaignContactIds)
+      }))
+
+      return affectedCampaignContactIds.map(id => { id })
+    },
     bulkReassignCampaignContacts: async (
       _,
       { organizationId, campaignsFilter, assignmentsFilter, contactsFilter, newTexterUserId },
