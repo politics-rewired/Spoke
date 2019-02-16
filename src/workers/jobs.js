@@ -698,7 +698,6 @@ export async function assignTexters(job) {
           .transacting(trx)
           .insert(assignmentInserts)
           .returning('id')
-        console.log(assignmentIds)
         const updatedChunk = await Promise.all(assignmentIds.map(async (assignmentId, index) => {
           // We have to do this because MySQL does not support returning multiple columns from a bulk insert
           let { contactsToAssign, assignment } = chunk[index]
