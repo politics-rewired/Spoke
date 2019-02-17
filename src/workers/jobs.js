@@ -658,6 +658,7 @@ export async function assignTexters(job) {
 
       const assignContacts = async (directive) => {
         const { assignment, contactsToAssign } = directive
+
         // Look up in separate query as MySQL does not support LIMIT within subquery
         const contactIds = await r.knex('campaign_contact')
           .transacting(trx)
@@ -669,7 +670,7 @@ export async function assignTexters(job) {
           })
           .limit(contactsToAssign)
           .map(result => result.id)
-        
+
 
         await r.knex('campaign_contact')
           .transacting(trx)
@@ -694,12 +695,20 @@ export async function assignTexters(job) {
       // Create new assignments, assign contacts, and notify users
       const newAssignmentChunks = _.chunk(newAssignments, CHUNK_SIZE)
       await Promise.all(newAssignmentChunks.map(async chunk => {
-        const assignmentInserts = await Promise.all(chunk.map(async directive => directive.assignment))
-        const assignmentIds = await r.knex('assignment')
-          .transacting(trx)
-          .insert(assignmentInserts)
-          .returning('id')
-        
+        // Must not do a bulk insert in order to be MySQL compatible
+        const assignmentIds = await Promise.all(chunk.map(async directive => {
+          const assignmentIds = await r.knex('assignment')
+            .transacting(trx)
+            .insert([directive.assignment])
+            .returning('id')
+          return assignmentIds[0]
+        }))
+
+        // const assignmentIds = await r.knex('assignment')
+        //   .transacting(trx)
+        //   .insert(assignmentInserts)
+        //   .returning('id')
+
         const updatedChunk = await Promise.all(assignmentIds.map(async (assignmentId, index) => {
           // We have to do this because MySQL does not support returning multiple columns from a bulk insert
           let { contactsToAssign, assignment } = chunk[index]
@@ -711,7 +720,7 @@ export async function assignTexters(job) {
             await assignContacts(directive)
           }
           // await Promise.all(updatedChunk.map(async directive => await assignContacts(directive)))
-          // Original MySQL compatible way it was written doesn't work sequentially 
+          // Original MySQL compatible way it was written doesn't work sequentially
           // since all of the selects run at the same time, and select the same contacts for updating
           // Potential solutions to make it concurrent:
           // 1. Skip locked
@@ -739,7 +748,7 @@ export async function assignTexters(job) {
           .groupBy('assignment.id')
           .havingRaw('COUNT(campaign_contact.id) = 0')
           .map(result => result.id)
-        
+
         await r.knex('assignment')
           .transacting(trx)
           .delete()
