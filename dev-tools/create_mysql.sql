@@ -1,6 +1,9 @@
 -- Thinky does not create the MySQL columns correctly.
 -- Run this script instead to initially create the Spoke schema.
 
+-- Delete all tables:
+-- DROP TABLE `assignment`; DROP TABLE `campaign`; DROP TABLE `campaign_contact`; DROP TABLE `canned_response`; DROP TABLE `interaction_step`; DROP TABLE `invite`; DROP TABLE `job_request`; DROP TABLE `log`; DROP TABLE `message`; DROP TABLE `migrations`; DROP TABLE `opt_out`; DROP TABLE `organization`; DROP TABLE `pending_message_part`; DROP TABLE `question_response`; DROP TABLE `user`; DROP TABLE `user_cell`; DROP TABLE `user_organization`; DROP TABLE `zip_code`;
+
 SET autocommit=0;
 START TRANSACTION;
 
