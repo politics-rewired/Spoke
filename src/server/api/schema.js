@@ -1045,19 +1045,21 @@ const rootMutations = {
         throw new GraphQLError('Outside permitted texting time for this recipient')
       }
 
+      const toInsert = {
+        text: replaceCurlyApostrophes(text),
+        contact_number: contactNumber,
+        user_number: '',
+        assignment_id: message.assignmentId,
+        send_status: JOBS_SAME_PROCESS ? 'SENDING' : 'QUEUED',
+        service: process.env.DEFAULT_SERVICE || '',
+        is_from_contact: false,
+        queued_at: new Date(),
+        send_before: sendBeforeDate
+      }
+
       const messageSavePromise = r.knex('message')
-        .insert({
-          text: replaceCurlyApostrophes(text),
-          contact_number: contactNumber,
-          user_number: '',
-          assignment_id: message.assignmentId,
-          send_status: JOBS_SAME_PROCESS ? 'SENDING' : 'QUEUED',
-          service: process.env.DEFAULT_SERVICE || '',
-          is_from_contact: false,
-          queued_at: new Date(),
-          send_before: sendBeforeDate
-        })
-        .returning('*')
+        .insert(toInsert)
+        .returning(Object.keys(toInsert))
 
       const { cc_message_status } = record
       const contactSavePromise = (async () => {
@@ -1079,10 +1081,11 @@ const rootMutations = {
 
       const [messageInsertResult, contactUpdateResult] = await Promise.all([messageSavePromise, contactSavePromise])
       const messageInstance = Array.isArray(messageInsertResult) ? messageInsertResult[0] : messageInsertResult;
+      toInsert.id = messageInstance.id || messageInstance
 
       // Send message after we are sure messageInstance has been persisted
       const service = serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE]
-      await service.sendMessage(messageInstance)
+      service.sendMessage(toInsert)
 
       return contactUpdateResult
 
