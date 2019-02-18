@@ -1240,11 +1240,12 @@ const rootMutations = {
           .send({ count, email })
         
         if (response.body.is_autoapproved) {
-          const result = await giveUserMoreTexts(user.auth0_id, count)
+          await giveUserMoreTexts(user.auth0_id, count)
         }
 
         return response.body.message;
       } catch (e) {
+        await giveUserMoreTexts(user.auth0_id, count)
         return e.response.body.message;
       }
     }
