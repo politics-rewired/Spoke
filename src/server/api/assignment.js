@@ -145,7 +145,6 @@ export async function giveUserMoreTexts(auth0Id, count) {
   }
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
-  let numberOfAddedContacts;
   await r.knex.transaction(async trx => {
     let assignmentId;
     const existingAssignment = (await r.knex('assignment').where({
@@ -174,22 +173,18 @@ export async function giveUserMoreTexts(auth0Id, count) {
     // to do it in MySQL, we need to find the contacts first
     // and then update them by ID since MySQL doesn't support
     // `returning` on updates
-    const contactsToUpdate = await r.knex('campaign_contact')
-      .select('id')
+    // NVM! Doing this in one query to avoid concurrency issues,
+    // and instead not returning the count
+    await r.knex('campaign_contact')
       .where({
         assignment_id: null,
         campaign_id: campaignIdToAssignTo
       })
-      .limit(countToAssign)
-
-    const updated_result = await r.knex('campaign_contact')
-      .whereIn('id', contactsToUpdate.map(c => c.id ))
       .update({ assignment_id: assignmentId })
-    
-    numberOfAddedContacts = contactsToUpdate.length
+      .limit(countToAssign)
   })
 
-  return numberOfAddedContacts;
+  return true;
 }
 
 export const resolvers = {

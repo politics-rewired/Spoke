@@ -65,9 +65,6 @@ class TexterTodoList extends React.Component {
           title='Waiting for replies!'
           icon={<Check />}
         />
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 50}}>
-          <TexterRequest user={this.props.data.currentUser} />
-        </div>
       </div>
     )
 
@@ -76,6 +73,9 @@ class TexterTodoList extends React.Component {
         {renderedTodos.length === 0 ?
           empty : renderedTodos
         }
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 50}}>
+          <TexterRequest user={this.props.data.currentUser} />
+        </div>
       </div>
     )
   }
