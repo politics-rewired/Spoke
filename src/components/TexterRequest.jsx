@@ -65,7 +65,7 @@ class TexterRequest extends React.Component {
       return (
         <div>
           <h3> Submitted Successfully – Thank you! </h3>
-          <p> Give us a few minutes to assign your texts. If you requested your texts after hours, you’ll get them when texting opens at 9am ET :). </p>
+          <p> Give us a few minutes to assign your texts. You'll receive an email notification when we've done so. If you requested your texts after hours, you’ll get them when texting opens at 9am ET :). </p>
         </div>
       )
     }
