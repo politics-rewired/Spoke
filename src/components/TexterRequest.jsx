@@ -33,6 +33,16 @@ class TexterRequest extends React.Component {
           error: `Unrecognized email: please make sure you're logged into Spoke with the same email as Slack.`,
           submitting: false
         })
+      } else if (message === "Not created; a shift already requested < 10 mins ago.") {
+        this.setState({
+          submitting: false,
+          finished: true
+        })
+      } else {
+        this.setState({
+          error: message,
+          submitting: false
+        })
       }
     } catch (e) {
       console.log(e)

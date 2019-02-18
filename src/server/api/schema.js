@@ -1238,6 +1238,10 @@ const rootMutations = {
           .post(process.env.TFB_URL)
           .set('Authorization', `Token ${process.env.TFB_TOKEN}`)
           .send({ count, email })
+        
+        if (response.body.is_autoapproved) {
+          await giveUserMoreTexts(user.auth0_id, count)
+        }
 
         return response.body.message;
       } catch (e) {
