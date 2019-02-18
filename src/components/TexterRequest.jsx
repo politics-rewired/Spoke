@@ -26,7 +26,7 @@ class TexterRequest extends React.Component {
       const response = await this.props.mutations.requestTexts({ count, email })
       const message = response.data.requestTexts
 
-      if (message === 'Created shift request successfully') {
+      if (message.includes('Created')) {
         this.setState({ submitting: false, finished: true })
       } else if (message === 'Unrecognized email' ) {
         this.setState({
