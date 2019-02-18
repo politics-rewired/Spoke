@@ -1,8 +1,9 @@
 const rollbarScript = process.env.ROLLBAR_CLIENT_TOKEN ?
   `<script>
-    var _rollbarConfig = {
+    window._rollbarConfig = {
         accessToken: "${process.env.ROLLBAR_CLIENT_TOKEN}",
-        enabled: ${process.env.NODE_ENV === 'production'},
+        // enabled: ${process.env.NODE_ENV === 'production'},
+        enabled: true,
         captureUncaught: true,
         captureUnhandledRejections: true,
         payload: {
@@ -70,6 +71,7 @@ export default function renderIndex(html, css, assetMap, store) {
       window.TERMS_REQUIRE="${process.env.TERMS_REQUIRE || ''}"
       window.TZ="${process.env.TZ || ''}"
       window.DST_REFERENCE_TIMEZONE="${process.env.DST_REFERENCE_TIMEZONE || 'America/New_York'}"
+      window.ROLLBAR_CLIENT_TOKEN="${process.env.ROLLBAR_CLIENT_TOKEN}"
     </script>
     <script src="${assetMap['bundle.js']}"></script>
   </body>

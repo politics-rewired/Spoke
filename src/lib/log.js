@@ -10,8 +10,19 @@ if (isClient()) {
   const existingErrorLogger = logInstance.error
   logInstance.error = (...err) => {
     const errObj = err
-    if (window.Rollbar) {
-      window.Rollbar.error(...errObj)
+    if (window.rollbar) {
+        window.rollbar.init({
+          accessToken: window.ROLLBAR_CLIENT_TOKEN,
+          // enabled: ${process.env.NODE_ENV === 'production'},
+          enabled: true,
+          captureUncaught: true,
+          captureUnhandledRejections: true,
+          payload: {
+            environment: "${process.env.NODE_ENV}"
+          }
+        })
+      // console.log(window.rollbar)
+      window.rollbar.error(...errObj)
     }
     existingErrorLogger.call(...errObj)
   }
