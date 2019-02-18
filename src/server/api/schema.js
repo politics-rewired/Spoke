@@ -29,7 +29,7 @@ import {
 } from '../models'
 // import { isBetweenTextingHours } from '../../lib/timezones'
 import { Notifications, sendUserNotification } from '../notifications'
-import { resolvers as assignmentResolvers } from './assignment'
+import { resolvers as assignmentResolvers, giveUserMoreTexts } from './assignment'
 import { getCampaigns, resolvers as campaignResolvers } from './campaign'
 import { resolvers as campaignContactResolvers } from './campaign-contact'
 import { resolvers as cannedResponseResolvers } from './canned-response'
@@ -1240,7 +1240,7 @@ const rootMutations = {
           .send({ count, email })
         
         if (response.body.is_autoapproved) {
-          await giveUserMoreTexts(user.auth0_id, count)
+          const result = await giveUserMoreTexts(user.auth0_id, count)
         }
 
         return response.body.message;
