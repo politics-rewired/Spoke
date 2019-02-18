@@ -1,6 +1,7 @@
 import { mapFieldsToModel } from './lib/utils'
 import { Assignment, r, cacheableData } from '../models'
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from '../../lib'
+import { Notifications, sendUserNotification } from '../notifications'
 import _ from 'lodash'
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
@@ -182,6 +183,13 @@ export async function giveUserMoreTexts(auth0Id, count) {
       })
       .update({ assignment_id: assignmentId })
       .limit(countToAssign)
+    
+    const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
+    
+    await sendUserNotification({
+      type: Notifications.ASSIGNMENT_UPDATED,
+      assignment
+    })
   })
 
   return true;
