@@ -1,4 +1,5 @@
 import { r } from '../../models'
+import log from '../../../lib/log'
 
 export async function getLastMessage({ contactNumber, service }) {
   const lastMessage = await r.table('message')
@@ -19,7 +20,7 @@ export async function saveNewIncomingMessage(messageInstance) {
   if (messageInstance.service_id) {
     const countResult = await r.getCount(r.knex('message').where('service_id', messageInstance.service_id))
     if (countResult) {
-      console.error('DUPLICATE MESSAGE SAVED', countResult.count, messageInstance)
+      log.error('DUPLICATE MESSAGE SAVED', countResult.count, messageInstance)
     }
   }
   await messageInstance.save()

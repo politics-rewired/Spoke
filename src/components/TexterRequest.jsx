@@ -45,7 +45,7 @@ class TexterRequest extends React.Component {
         })
       }
     } catch (e) {
-      console.log(e)
+      log.error(e)
       this.setState({ error: e, submitting: false })
     } 
   }

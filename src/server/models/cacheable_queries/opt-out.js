@@ -1,4 +1,5 @@
 import { r, OptOut } from '../../models'
+import { log } from '../../../lib'
 
 // STRUCTURE
 // maybe HASH by organization, so optout-<organization_id> has a <cell> key
@@ -24,7 +25,7 @@ const loadMany = async (organizationId) => {
       await r.redis.saddAsync(hashKey, cellOptOuts.slice(100 * i100, 100 * i100 + 100))
     }
     await r.redis.expire(hashKey, 86400)
-    console.log(`CACHE: Loaded optouts for ${organizationId}`)
+    log.info(`CACHE: Loaded optouts for ${organizationId}`)
   }
 }
 

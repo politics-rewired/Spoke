@@ -33,7 +33,7 @@ const jobMap = {
 
 export async function processJobs() {
   setupUserNotificationObservers()
-  console.log('Running processJobs')
+  log.info('Running processJobs')
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
@@ -57,7 +57,7 @@ export async function checkMessageQueue() {
     return
   }
 
-  console.log('checking if messages are in message queue')
+  log.info('checking if messages are in message queue')
   while (true) {
     try {
       await sleep(10000)
@@ -70,7 +70,7 @@ export async function checkMessageQueue() {
 
 const messageSenderCreator = (subQuery, defaultStatus) => {
   return async (event) => {
-    console.log('Running a message sender')
+    log.info('Running a message sender')
     setupUserNotificationObservers()
     let delay = 1100
     if (event && event.delay) {
@@ -129,14 +129,14 @@ export const failedDayMessageSender = messageSenderCreator(function (mQuery) {
 export async function handleIncomingMessages() {
   setupUserNotificationObservers()
   if (process.env.DEBUG_INCOMING_MESSAGES) {
-    console.log('Running handleIncomingMessages')
+    log.info('Running handleIncomingMessages')
   }
   // eslint-disable-next-line no-constant-condition
   let i = 0
   while (true) {
     try {
       if (process.env.DEBUG_SCALING) {
-        console.log('entering handleIncomingMessages. round: ', ++i)
+        log.info('entering handleIncomingMessages. round: ', ++i)
       }
       const countPendingMessagePart = await r.knex('pending_message_part')
       .count('id AS total').then(total => {
@@ -145,12 +145,12 @@ export async function handleIncomingMessages() {
         return totalCount
       })
       if (process.env.DEBUG_SCALING) {
-        console.log('counting handleIncomingMessages. count: ', countPendingMessagePart)
+        log.info('counting handleIncomingMessages. count: ', countPendingMessagePart)
       }
       await sleep(500)
       if (countPendingMessagePart > 0) {
         if (process.env.DEBUG_SCALING) {
-          console.log('running handleIncomingMessages')
+          log.info('running handleIncomingMessages')
         }
         await handleIncomingMessageParts()
       }
@@ -169,7 +169,7 @@ export async function runDatabaseMigrations(event, dispatcher, eventCallback) {
 
 export async function loadContactsFromDataWarehouseFragmentJob(event, dispatcher, eventCallback) {
   const eventAsJob = event
-  console.log('LAMBDA INVOCATION job-processes', event)
+  log.info('LAMBDA INVOCATION job-processes', event)
   try {
     const rv = await loadContactsFromDataWarehouseFragment(eventAsJob)
     if (eventCallback) {
@@ -211,7 +211,7 @@ export async function dispatchProcesses(event, dispatcher, eventCallback) {
       // / not using dispatcher, but another interesting model would be
       // / to dispatch processes to other lambda invocations
       // dispatcher({'command': p})
-      console.log('process', p)
+      log.info('process', p)
       toDispatch[p]().then()
     }
   }
