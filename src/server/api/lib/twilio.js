@@ -127,10 +127,21 @@ async function sendMessage(message, trx) {
       log.warn('Message not marked as a twilio message', message.id)
     }
 
+    const useMultipleMessagingServices = !!process.env.TWILIO_MESSAGE_SERVICE_SIDS
+    let messageServiceSid;
+    let messagingServiceSid
+    if (!useMultipleMessagingServices) {
+      messagingServiceSid = process.env.TWILIO_MESSAGE_SERVICE_SID
+    } else {
+      const messagingServiceIds = process.env.TWILIO_MESSAGE_SERVICE_SIDS.split(',')
+      messagingServiceSid = messagingServiceIds[deterministicIntWithinRange(message.contact_number, messagingServiceIds.length)]
+    }
+
+
     const messageParams = Object.assign({
       to: message.contact_number,
       body: message.text,
-      messagingServiceSid: process.env.TWILIO_MESSAGE_SERVICE_SID,
+      messagingServiceSid: messagingServiceSid,
       statusCallback: process.env.TWILIO_STATUS_CALLBACK_URL
     }, parseMessageText(message))
 
@@ -169,6 +180,7 @@ async function sendMessage(message, trx) {
       if (err) {
         hasError = true
         log.error('Error sending message', err)
+        console.error(err)
         messageToSave.service_response += JSON.stringify(err)
       }
       if (response) {
@@ -261,6 +273,21 @@ async function handleIncomingMessage(message) {
     await r.knex('pending_message_part').where('id', partId).delete()
   }
   return partId
+}
+
+function deterministicIntWithinRange(string, maxSize) {
+  const hash = hashStr(string);
+  const index = hash % maxSize;
+  return index;
+}
+
+function hashStr(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    let charCode = str.charCodeAt(i);
+    hash += charCode;
+  }
+  return hash;
 }
 
 export default {
