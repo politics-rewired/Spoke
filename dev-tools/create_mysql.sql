@@ -11,7 +11,7 @@ START TRANSACTION;
 -- Create tables
 -- ----------------
 
-CREATE TABLE spoke_prod.assignment (
+CREATE TABLE assignment (
     id int(11) NOT NULL AUTO_INCREMENT,
     user_id int(11) NOT NULL,
     campaign_id int(11) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE spoke_prod.assignment (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.campaign (
+CREATE TABLE campaign (
     id int(11) NOT NULL AUTO_INCREMENT,
     organization_id int(11) NOT NULL,
     title varchar(255) DEFAULT '',
@@ -41,7 +41,7 @@ CREATE TABLE spoke_prod.campaign (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.campaign_contact (
+CREATE TABLE campaign_contact (
     id int(11) NOT NULL AUTO_INCREMENT,
     campaign_id int(11) NOT NULL,
     assignment_id int(11),
@@ -59,7 +59,7 @@ CREATE TABLE spoke_prod.campaign_contact (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.canned_response (
+CREATE TABLE canned_response (
     id int(11) NOT NULL AUTO_INCREMENT,
     campaign_id int(11) NOT NULL,
     `text` text NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE spoke_prod.canned_response (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.interaction_step (
+CREATE TABLE interaction_step (
     id int(11) NOT NULL AUTO_INCREMENT,
     campaign_id int(11) NOT NULL,
     question varchar(255) DEFAULT '',
@@ -82,7 +82,7 @@ CREATE TABLE spoke_prod.interaction_step (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.invite (
+CREATE TABLE invite (
     id int(11) NOT NULL AUTO_INCREMENT,
     is_valid bool NOT NULL,
     `hash` text,
@@ -90,7 +90,7 @@ CREATE TABLE spoke_prod.invite (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.job_request (
+CREATE TABLE job_request (
     id int(11) NOT NULL AUTO_INCREMENT,
     campaign_id int(11) NOT NULL,
     payload text NOT NULL,
@@ -105,7 +105,7 @@ CREATE TABLE spoke_prod.job_request (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.log (
+CREATE TABLE log (
     id int(11) NOT NULL AUTO_INCREMENT,
     message_sid text NOT NULL,
     body text,
@@ -113,7 +113,7 @@ CREATE TABLE spoke_prod.log (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.message (
+CREATE TABLE message (
     id int(11) NOT NULL AUTO_INCREMENT,
     user_id int(11),
     user_number varchar(255) DEFAULT '',
@@ -133,13 +133,13 @@ CREATE TABLE spoke_prod.message (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.migrations (
+CREATE TABLE migrations (
     id int(11) NOT NULL AUTO_INCREMENT,
     completed int(11) NOT NULL,
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.opt_out (
+CREATE TABLE opt_out (
     id int(11) NOT NULL AUTO_INCREMENT,
     cell varchar(15) NOT NULL,
     assignment_id int(11) NOT NULL,
@@ -149,7 +149,7 @@ CREATE TABLE spoke_prod.opt_out (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.organization (
+CREATE TABLE organization (
     id int(11) NOT NULL AUTO_INCREMENT,
     uuid text,
     `name` text NOT NULL,
@@ -161,7 +161,7 @@ CREATE TABLE spoke_prod.organization (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.pending_message_part (
+CREATE TABLE pending_message_part (
     id int(11) NOT NULL AUTO_INCREMENT,
     `service` varchar(100) NOT NULL,
     service_id text NOT NULL,
@@ -173,7 +173,7 @@ CREATE TABLE spoke_prod.pending_message_part (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.question_response (
+CREATE TABLE question_response (
     id int(11) NOT NULL AUTO_INCREMENT,
     campaign_contact_id int(11) NOT NULL,
     interaction_step_id int(11) NOT NULL,
@@ -182,7 +182,7 @@ CREATE TABLE spoke_prod.question_response (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.`user` (
+CREATE TABLE `user` (
     id int(11) NOT NULL AUTO_INCREMENT,
     auth0_id text NOT NULL,
     first_name text NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE spoke_prod.`user` (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.user_cell (
+CREATE TABLE user_cell (
     id int(11) NOT NULL AUTO_INCREMENT,
     cell text NOT NULL,
     user_id int(11) NOT NULL,
@@ -205,7 +205,7 @@ CREATE TABLE spoke_prod.user_cell (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.user_organization (
+CREATE TABLE user_organization (
     id int(11) NOT NULL AUTO_INCREMENT,
     user_id int(11) NOT NULL,
     organization_id int(11) NOT NULL,
@@ -213,7 +213,7 @@ CREATE TABLE spoke_prod.user_organization (
     PRIMARY KEY (id)
 ) ENGINE=MyISAM;
 
-CREATE TABLE spoke_prod.zip_code (
+CREATE TABLE zip_code (
     zip VARCHAR(5) NOT NULL,
     city text NOT NULL,
     `state` text NOT NULL,
@@ -231,179 +231,179 @@ CREATE TABLE spoke_prod.zip_code (
 
 -- Assignment
 CREATE INDEX assignment_user_id_index
-    ON spoke_prod.assignment(user_id) USING btree;
+    ON assignment(user_id) USING btree;
 
 CREATE INDEX assignment_campaign_id_index
-    ON spoke_prod.assignment(campaign_id) USING btree;
+    ON assignment(campaign_id) USING btree;
 
 -- Campaign
 CREATE INDEX campaign_organization_id_index
-    ON spoke_prod.campaign(organization_id) USING btree;
+    ON campaign(organization_id) USING btree;
 
 -- Campaign Contact
 CREATE INDEX campaign_contact_assignment_id_index
-    ON spoke_prod.campaign_contact(assignment_id) USING btree;
+    ON campaign_contact(assignment_id) USING btree;
 
 CREATE INDEX campaign_contact_campaign_id_index
-    ON spoke_prod.campaign_contact(campaign_id) USING btree;
+    ON campaign_contact(campaign_id) USING btree;
 
 CREATE INDEX campaign_contact_cell_index
-    ON spoke_prod.campaign_contact(cell) USING btree;
+    ON campaign_contact(cell) USING btree;
 
 CREATE INDEX campaign_contact_campaign_id_assignment_id_index
-    ON spoke_prod.campaign_contact(campaign_id,assignment_id) USING btree;
+    ON campaign_contact(campaign_id,assignment_id) USING btree;
 
 CREATE INDEX campaign_contact_assignment_id_timezone_offset_index
-    ON spoke_prod.campaign_contact(assignment_id, timezone_offset) USING btree;
+    ON campaign_contact(assignment_id, timezone_offset) USING btree;
 
 -- Canned Response
 
 CREATE INDEX canned_response_campaign_id_index
-    ON spoke_prod.canned_response(campaign_id) USING btree;
+    ON canned_response(campaign_id) USING btree;
 
 CREATE INDEX canned_response_user_id_index
-    ON spoke_prod.canned_response(user_id) USING btree;
+    ON canned_response(user_id) USING btree;
 
 -- Interaction Step
 
 CREATE INDEX interaction_step_parent_interaction_id_index
-    ON spoke_prod.interaction_step(parent_interaction_id) USING btree;
+    ON interaction_step(parent_interaction_id) USING btree;
 
 CREATE INDEX interaction_step_campaign_id_index
-    ON spoke_prod.interaction_step(campaign_id) USING btree;
+    ON interaction_step(campaign_id) USING btree;
 
 -- Invite
 
 CREATE INDEX invite_is_valid_index
-    ON spoke_prod.invite(is_valid) USING btree;
+    ON invite(is_valid) USING btree;
 
 -- Job Request
 
 CREATE INDEX job_request_queue_name_index
-    ON spoke_prod.job_request(queue_name) USING btree;
+    ON job_request(queue_name) USING btree;
 
 -- Message
 
 CREATE INDEX message_assignment_id_index
-    ON spoke_prod.message(assignment_id) USING btree;
+    ON message(assignment_id) USING btree;
 
 CREATE INDEX message_send_status_index
-    ON spoke_prod.message(send_status) USING btree;
+    ON message(send_status) USING btree;
 
 CREATE INDEX message_user_number_index
-    ON spoke_prod.message(user_number) USING btree;
+    ON message(user_number) USING btree;
 
 CREATE INDEX message_contact_number_index
-    ON spoke_prod.message(contact_number) USING btree;
+    ON message(contact_number) USING btree;
 
 CREATE INDEX message_service_id_index
-    ON spoke_prod.message(service_id) USING btree;
+    ON message(service_id) USING btree;
 
 -- Opt Out
 
 CREATE INDEX opt_out_cell_index
-    ON spoke_prod.opt_out(cell) USING btree;
+    ON opt_out(cell) USING btree;
 
 CREATE INDEX opt_out_assignment_id_index
-    ON spoke_prod.opt_out(assignment_id) USING btree;
+    ON opt_out(assignment_id) USING btree;
 
 CREATE INDEX opt_out_organization_id_index
-    ON spoke_prod.opt_out(organization_id) USING btree;
+    ON opt_out(organization_id) USING btree;
 
 -- Question Response
 
 CREATE INDEX question_response_campaign_contact_id_index
-    ON spoke_prod.question_response(campaign_contact_id) USING btree;
+    ON question_response(campaign_contact_id) USING btree;
 
 CREATE INDEX question_response_interaction_step_id_index
-    ON spoke_prod.question_response(interaction_step_id) USING btree;
+    ON question_response(interaction_step_id) USING btree;
 
 -- Pending Message Part
 
 CREATE INDEX pending_message_part_parent_id_index
-    ON spoke_prod.pending_message_part(parent_id) USING btree;
+    ON pending_message_part(parent_id) USING btree;
 
 CREATE INDEX pending_message_part_service_index
-    ON spoke_prod.pending_message_part(`service`) USING btree;
+    ON pending_message_part(`service`) USING btree;
 
 -- User Organization
 
 CREATE INDEX user_organization_user_id_index
-    ON spoke_prod.user_organization(user_id) USING btree;
+    ON user_organization(user_id) USING btree;
 
 CREATE INDEX user_organization_organization_id_index
-    ON spoke_prod.user_organization(organization_id) USING btree;
+    ON user_organization(organization_id) USING btree;
 
 CREATE INDEX user_organization_organization_id_user_id_index
-    ON spoke_prod.user_organization(organization_id,user_id) USING btree;
+    ON user_organization(organization_id,user_id) USING btree;
 
 -- ----------------
 -- Add Foreign Keys
 -- ----------------
 
-ALTER TABLE spoke_prod.assignment
-    ADD CONSTRAINT assignment_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES spoke_prod.campaign(id);
+ALTER TABLE assignment
+    ADD CONSTRAINT assignment_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES campaign(id);
 
-ALTER TABLE spoke_prod.assignment
-    ADD CONSTRAINT assignment_user_id_foreign FOREIGN KEY (user_id) REFERENCES spoke_prod.`user`(id);
+ALTER TABLE assignment
+    ADD CONSTRAINT assignment_user_id_foreign FOREIGN KEY (user_id) REFERENCES `user`(id);
 
-ALTER TABLE spoke_prod.campaign_contact
-    ADD CONSTRAINT campaign_contact_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES spoke_prod.assignment(id);
+ALTER TABLE campaign_contact
+    ADD CONSTRAINT campaign_contact_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES assignment(id);
 
-ALTER TABLE spoke_prod.campaign_contact
-    ADD CONSTRAINT campaign_contact_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES spoke_prod.campaign(id);
+ALTER TABLE campaign_contact
+    ADD CONSTRAINT campaign_contact_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES campaign(id);
 
-ALTER TABLE spoke_prod.campaign
-    ADD CONSTRAINT campaign_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES spoke_prod.organization(id);
+ALTER TABLE campaign
+    ADD CONSTRAINT campaign_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES organization(id);
 
-ALTER TABLE spoke_prod.canned_response
-    ADD CONSTRAINT canned_response_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES spoke_prod.campaign(id);
+ALTER TABLE canned_response
+    ADD CONSTRAINT canned_response_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES campaign(id);
 
-ALTER TABLE spoke_prod.canned_response
-    ADD CONSTRAINT canned_response_user_id_foreign FOREIGN KEY (user_id) REFERENCES spoke_prod.`user`(id);
+ALTER TABLE canned_response
+    ADD CONSTRAINT canned_response_user_id_foreign FOREIGN KEY (user_id) REFERENCES `user`(id);
 
-ALTER TABLE spoke_prod.interaction_step
-    ADD CONSTRAINT interaction_step_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES spoke_prod.campaign(id);
+ALTER TABLE interaction_step
+    ADD CONSTRAINT interaction_step_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES campaign(id);
 
-ALTER TABLE spoke_prod.interaction_step
-    ADD CONSTRAINT interaction_step_parent_interaction_id_foreign FOREIGN KEY (parent_interaction_id) REFERENCES spoke_prod.interaction_step(id);
+ALTER TABLE interaction_step
+    ADD CONSTRAINT interaction_step_parent_interaction_id_foreign FOREIGN KEY (parent_interaction_id) REFERENCES interaction_step(id);
 
-ALTER TABLE spoke_prod.job_request
-    ADD CONSTRAINT job_request_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES spoke_prod.campaign(id);
+ALTER TABLE job_request
+    ADD CONSTRAINT job_request_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES campaign(id);
 
-ALTER TABLE spoke_prod.message
-    ADD CONSTRAINT message_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES spoke_prod.assignment(id);
+ALTER TABLE message
+    ADD CONSTRAINT message_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES assignment(id);
 
-ALTER TABLE spoke_prod.message
-    ADD CONSTRAINT message_user_id_foreign FOREIGN KEY (user_id) REFERENCES spoke_prod.`user`(id);
+ALTER TABLE message
+    ADD CONSTRAINT message_user_id_foreign FOREIGN KEY (user_id) REFERENCES `user`(id);
 
-ALTER TABLE spoke_prod.opt_out
-    ADD CONSTRAINT opt_out_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES spoke_prod.assignment(id);
+ALTER TABLE opt_out
+    ADD CONSTRAINT opt_out_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES assignment(id);
 
-ALTER TABLE spoke_prod.opt_out
-    ADD CONSTRAINT opt_out_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES spoke_prod.organization(id);
+ALTER TABLE opt_out
+    ADD CONSTRAINT opt_out_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES organization(id);
 
-ALTER TABLE spoke_prod.question_response
-    ADD CONSTRAINT question_response_campaign_contact_id_foreign FOREIGN KEY (campaign_contact_id) REFERENCES spoke_prod.campaign_contact(id);
+ALTER TABLE question_response
+    ADD CONSTRAINT question_response_campaign_contact_id_foreign FOREIGN KEY (campaign_contact_id) REFERENCES campaign_contact(id);
 
-ALTER TABLE spoke_prod.question_response
-    ADD CONSTRAINT question_response_interaction_step_id_foreign FOREIGN KEY (interaction_step_id) REFERENCES spoke_prod.interaction_step(id);
+ALTER TABLE question_response
+    ADD CONSTRAINT question_response_interaction_step_id_foreign FOREIGN KEY (interaction_step_id) REFERENCES interaction_step(id);
 
-ALTER TABLE spoke_prod.user_cell
-    ADD CONSTRAINT user_cell_user_id_foreign FOREIGN KEY (user_id) REFERENCES spoke_prod.`user`(id);
+ALTER TABLE user_cell
+    ADD CONSTRAINT user_cell_user_id_foreign FOREIGN KEY (user_id) REFERENCES `user`(id);
 
-ALTER TABLE spoke_prod.user_organization
-    ADD CONSTRAINT user_organization_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES spoke_prod.organization(id);
+ALTER TABLE user_organization
+    ADD CONSTRAINT user_organization_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES organization(id);
 
-ALTER TABLE spoke_prod.user_organization
-    ADD CONSTRAINT user_organization_user_id_foreign FOREIGN KEY (user_id) REFERENCES spoke_prod.`user`(id);
+ALTER TABLE user_organization
+    ADD CONSTRAINT user_organization_user_id_foreign FOREIGN KEY (user_id) REFERENCES `user`(id);
 
 
 -- -------------
 -- Peg migration
 -- -------------
 
-INSERT INTO spoke_prod.migrations (completed) VALUES (14);
+INSERT INTO migrations (completed) VALUES (14);
 
 COMMIT;
 
