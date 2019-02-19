@@ -100,7 +100,7 @@ export const optOutCache = {
     }
 
     // update all organization's active campaigns as well
-    const contactIds = r.knex('campaign_contact')
+    const contactIds = await r.knex('campaign_contact')
       .leftJoin('campaign', 'campaign_contact.campaign_id', 'campaign.id')
       .where(updateOrgOrInstanceOptOuts)
       .pluck('campaign_contact.id')
