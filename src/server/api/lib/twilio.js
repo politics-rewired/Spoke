@@ -4,7 +4,6 @@ import { Log, Message, PendingMessagePart, r } from '../../models'
 import { log } from '../../../lib'
 import { getLastMessage, saveNewIncomingMessage } from './message-sending'
 import faker from 'faker'
-import './test-pending-message-part'
 
 let twilio = null
 const MAX_SEND_ATTEMPTS = 5
