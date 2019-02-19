@@ -93,7 +93,7 @@ class Home extends React.Component {
         Spoke is a new way to run campaigns using text messaging.
         </div>
         <div>
-          <a id='login' className={css(styles.link_dark_bg)} href='/login' onClick={this.handleOrgInviteClick}>Login and get started</a>
+          <a id='login' className={css(styles.link_dark_bg)} href='https://www.bernietext.com/auth/login/slack/' onClick={this.handleOrgInviteClick}>Login and get started</a>
         </div>
       </div>
     )
