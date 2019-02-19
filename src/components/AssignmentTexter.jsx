@@ -285,16 +285,27 @@ class AssignmentTexter extends React.Component {
       )
 
     if (payload.questionResponseObjects)
-      promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id))
+      promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id)
+          .then(response => { 
+            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`) 
+          })
+      )
 
     if (payload.deletionIds)
-      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id))
+      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id).then(
+        response => {
+            log.info(`Successfully deleted question response: ${JSON.stringify(response)}`) 
+        }
+      ))
 
     if (payload.optOut)
-      promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id))
+      promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id).then(response => {
+            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`) 
+      }))
     
     Promise.all(promises)
-      .then(() => { 
+      .then(promises => { 
+        console.log(promises)
         log.info(`Successfully recorded all info for ${contact_id}`)
         if (isLastOne) this.handleFinishContact()
       })
