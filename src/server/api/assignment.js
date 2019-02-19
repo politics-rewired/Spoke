@@ -97,16 +97,19 @@ export function getContacts(assignment, contactsFilter, organization, campaign, 
 
 export async function giveUserMoreTexts(auth0Id, count) {
   // Fetch DB info
-  const [matchingUsers, campaignContactGroups] = await Promise.all([
-    await r.knex("user").where({ auth0_id: auth0Id }), 
-    await r.knex('campaign_contact')
+  const [matchingUsers, campaignContactGroups, activeCampaignIds] = await Promise.all([
+    r.knex("user").where({ auth0_id: auth0Id }), 
+    r.knex('campaign_contact')
       .select([
         'campaign_id',
         r.knex.raw('assignment_id is null as unassigned')
       ])
       .count('id as total_count')
       .groupBy('campaign_id')
-      .groupByRaw('assignment_id is null')
+      .groupByRaw('assignment_id is null'),
+    r.knex('campaign')
+      .select('id')
+      .where({ is_archived: false, is_started: true })
   ])
 
   const user = matchingUsers[0];
@@ -115,8 +118,9 @@ export async function giveUserMoreTexts(auth0Id, count) {
   }
 
   // Process campaigns, extracting relevant info
-  const campaignIds = campaignContactGroups.map(ccg => ccg.campaign_id)
-  const campaignsInfo = campaignIds.map((acc, campaignId) => {
+  const justIds = activeCampaignIds.map(c => c.id)
+  // const campaignIds = campaignContactGroups.map(ccg => ccg.campaign_id).filter(id => justIds.includes({ id }))
+  const campaignsInfo = justIds.map((campaignId) => {
     const assignedBatch = campaignContactGroups.find(ccg => ccg.campaign_id === campaignId && ccg.unassigned == false);
     const unassignedBatch = campaignContactGroups.find(ccg => ccg.campaign_id === campaignId && ccg.unassigned == true);
     const assignedCount = assignedBatch ? parseInt(assignedBatch.total_count) : 0
@@ -129,21 +133,34 @@ export async function giveUserMoreTexts(auth0Id, count) {
     }
   })
 
-  // Determine which campaign to assign to
-  let campaignIdToAssignTo;
+  // Determine which campaign to assign to – optimize to finish at once
+  // let campaignIdToAssignTo;
+  // let countToAssign = count;
+  // const campaignsWithEnoughLeftUnassigned = campaignsInfo.filter(c => c.leftUnassigned >= count)
+  // if (campaignsWithEnoughLeftUnassigned.length == 0) {
+  //   const campaignWithMostToAssignTo = _.sortBy(campaignsInfo, c => c.leftUnassigned).reverse();
+  //   if (campaignWithMostToAssignTo[0].leftUnassigned == 0) {
+  //     throw new Error('There are no campaigns left to assign a texter to')
+  //   } else {
+  //     campaignIdToAssignTo = campaignWithMostToAssignTo[0].id;
+  //     countToAssign = campaignWithMostToAssignTo[0].leftUnassigned;
+  //   }
+  // } else {
+  //   campaignIdToAssignTo = _.sortBy(campaignsWithEnoughLeftUnassigned, c => c.assignmentProgress)[0].id;
+  // }
+
+  // Determine which campaign to assign to – optimize to pick winners
+  let campaignIdToAssignTo
   let countToAssign = count;
-  const campaignsWithEnoughLeftUnassigned = campaignsInfo.filter(c => c.leftUnassigned >= count)
-  if (campaignsWithEnoughLeftUnassigned.length == 0) {
-    const campaignWithMostToAssignTo = _.sortBy(campaignsInfo, c => c.leftUnassigned).reverse();
-    if (campaignWithMostToAssignTo[0].leftUnassigned == 0) {
-      throw new Error('There are no campaigns left to assign a texter to')
-    } else {
-      campaignIdToAssignTo = campaignWithMostToAssignTo[0].id;
-      countToAssign = campaignWithMostToAssignTo[0].leftUnassigned;
-    }
+  const campaignsWithUnassigned = campaignsInfo.filter(c => c.leftUnassigned > 0)
+  if (campaignsWithUnassigned.length == 0) {
+    throw new Error('There are no campaigns left to assign a texter to')
   } else {
-    campaignIdToAssignTo = _.sortBy(campaignsWithEnoughLeftUnassigned, c => c.assignmentProgress)[0].id;
+    const campaignToAssignTo = _.sortBy(campaignsWithUnassigned, c => c.leftUnassigned)[0]
+    campaignIdToAssignTo = campaignToAssignTo.id
+    countToAssign = Math.min(countToAssign, campaignToAssignTo.leftUnassigned)
   }
+
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
   await r.knex.transaction(async trx => {
@@ -176,13 +193,18 @@ export async function giveUserMoreTexts(auth0Id, count) {
     // `returning` on updates
     // NVM! Doing this in one query to avoid concurrency issues,
     // and instead not returning the count
-    await r.knex('campaign_contact')
+    const idsToUpdate = await r.knex('campaign_contact')
       .where({
         assignment_id: null,
         campaign_id: campaignIdToAssignTo
       })
-      .update({ assignment_id: assignmentId })
       .limit(countToAssign)
+      .select('id')
+      .map(c => c.id)
+
+    const updateResult = await r.knex('campaign_contact')
+      .whereIn('id', idsToUpdate)
+      .update({ assignment_id: assignmentId })
     
     const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
     
