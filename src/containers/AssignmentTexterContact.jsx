@@ -392,7 +392,8 @@ export class AssignmentTexterContact extends React.Component {
     const message = this.createMessageToContact(messageText)
     if (this.state.disabled) return // stops from multi-send
 
-    this.setState({ disabled: true })
+    this.state.disabled = true;
+    this.forceUpdate()
 
     const payload = Object.assign({ message }, this.gatherSurveyChanges())
     this.props.sendMessage(contact.id, payload)
