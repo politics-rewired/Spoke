@@ -1,7 +1,7 @@
 'use strict'
 const AWS = require('aws-sdk')
 const awsServerlessExpress = require('aws-serverless-express')
-import { log } from './log'
+const { log } = require('./log')
 let app, server, jobs
 try {
   app = require('./build/server/server/index')
