@@ -193,27 +193,22 @@ export async function giveUserMoreTexts(auth0Id, count) {
     // `returning` on updates
     // NVM! Doing this in one query to avoid concurrency issues,
     // and instead not returning the count
-    const idsToUpdate = await r.knex('campaign_contact')
+    await r.knex('campaign_contact')
       .where({
         assignment_id: null,
         campaign_id: campaignIdToAssignTo
       })
-      .limit(countToAssign)
-      .select('id')
-      .map(c => c.id)
-
-    const updateResult = await r.knex('campaign_contact')
-      .whereIn('id', idsToUpdate)
       .update({ assignment_id: assignmentId })
+      .limit(countToAssign)
+
+    // const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
     
-    const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
-    
-    if (process.env.SEND_ASSIGNMENT_API_EMAILS) {
-      await sendUserNotification({
-        type: Notifications.ASSIGNMENT_UPDATED,
-        assignment
-      })
-    }
+    // if (process.env.SEND_ASSIGNMENT_API_EMAILS) {
+    //   await sendUserNotification({
+    //     type: Notifications.ASSIGNMENT_UPDATED,
+    //     assignment
+    //   })
+    // }
   })
 
   return true;
