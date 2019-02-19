@@ -51,7 +51,7 @@ export function setupSlackPassport() {
 
       if (existingUser.length === 0) {
         let first_name, last_name;
-        const splitName = user.name.split(' ')
+        const splitName = user.name ? user.name.split(' ') : ['First', 'Last']
         if (splitName.length == 1) {
           first_name = splitName[0]
           last_name = ''
