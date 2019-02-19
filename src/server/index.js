@@ -8,7 +8,7 @@ import { resolvers } from './api/schema'
 import { schema } from '../api/schema'
 import { accessRequired } from './api/errors'
 import mocks from './api/mocks'
-import { createLoaders, createTablesIfNecessary } from './models'
+import { createLoaders, createTablesIfNecessary, r } from './models'
 import passport from 'passport'
 import cookieSession from 'cookie-session'
 import { setupAuth0Passport, setupLocalAuthPassport, setupSlackPassport } from './auth-passport'
@@ -22,6 +22,10 @@ import { setupUserNotificationObservers } from './notifications'
 import { TwimlResponse } from 'twilio'
 import basicAuth from 'express-basic-auth'
 import { giveUserMoreTexts } from './api/assignment'
+import googleLibPhoneNumber from 'google-libphonenumber'
+
+const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
+const PNF = googleLibPhoneNumber.PhoneNumberFormat;
 
 process.on('uncaughtException', (ex) => {
   log.error(ex)
@@ -189,6 +193,24 @@ app.post('/autoassign',
     console.log(ex)
     return res.status(500).json({error: ex.message})
   }
+})
+
+function normalize(rawNumber) {
+  const number = phoneUtil.parseAndKeepRawInput(rawNumber, "US");
+  return phoneUtil.format(number, PNF.E164);
+}
+
+app.post('/remove-number-from-campaign', async (req, res) => {
+  if (!req.query.secret || req.query.secret !== process.env.CONTACT_REMOVAL_SECRET)
+    return res.sendStatus(403)
+
+  log.info(`Removing user matching ${JSON.stringify(req.body)}`)
+  const phone = req.body.phone;
+
+  if (!phone) { return res.status(400).json({ error: 'Missing `phone` in request body' }) }
+  const normalizedPhone = normalize(phone)
+  await r.knex('campaign_contact').where({ cell: normalizedPhone }).del()
+  return res.sendStatus(200)
 })
 
 // This middleware should be last. Return the React app only if no other route is hit.
