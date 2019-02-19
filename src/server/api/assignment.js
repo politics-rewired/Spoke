@@ -186,10 +186,12 @@ export async function giveUserMoreTexts(auth0Id, count) {
     
     const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
     
-    await sendUserNotification({
-      type: Notifications.ASSIGNMENT_UPDATED,
-      assignment
-    })
+    if (process.env.SEND_ASSIGNMENT_API_EMAILS) {
+      await sendUserNotification({
+        type: Notifications.ASSIGNMENT_UPDATED,
+        assignment
+      })
+    }
   })
 
   return true;
