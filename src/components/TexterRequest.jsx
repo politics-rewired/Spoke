@@ -40,7 +40,7 @@ class TexterRequest extends React.Component {
         })
       } else {
         this.setState({
-          error: message,
+          finished: true,
           submitting: false
         })
       }
