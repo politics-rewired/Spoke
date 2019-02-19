@@ -2,6 +2,18 @@ import { r } from '../../models'
 import log from '../../../lib/log'
 
 export async function getLastMessage({ contactNumber, service }) {
+  const lastMessages = await r.knex('message')
+    .where({
+      contact_number: contactNumber,
+      is_from_contact: false,
+      service
+    })
+    .orderBy('created_at', 'desc')
+    .limit(1)
+    .pluck('assignment_id')
+
+  return lastMessages[0] || null
+
   const lastMessage = await r.table('message')
     .getAll(contactNumber, { index: 'contact_number' })
     .filter({
