@@ -152,15 +152,16 @@ export async function giveUserMoreTexts(auth0Id, count) {
   // Determine which campaign to assign to – optimize to pick winners
   let campaignIdToAssignTo
   let countToAssign = count;
-  const campaignsWithUnassigned = campaignsInfo.filter(c => c.leftUnassigned > 0)
-  console.log(campaignsInfo)
-  if (campaignsWithUnassigned.length == 0) {
-    throw new Error('There are no campaigns left to assign a texter to')
-  } else {
-    const campaignToAssignTo = _.sortBy(campaignsWithUnassigned, c => c.leftUnassigned)[0]
-    campaignIdToAssignTo = campaignToAssignTo.id
-    countToAssign = Math.min(countToAssign, campaignToAssignTo.leftUnassigned)
-  }
+  // const campaignsWithUnassigned = campaignsInfo.filter(c => c.leftUnassigned > 0)
+  // console.log(campaignsInfo)
+  // if (campaignsWithUnassigned.length == 0) {
+  //   throw new Error('There are no campaigns left to assign a texter to')
+  // } else {
+  //   const campaignToAssignTo = _.sortBy(campaignsWithUnassigned, c => c.leftUnassigned)[0]
+  //   campaignIdToAssignTo = campaignToAssignTo.id
+  //   countToAssign = Math.min(countToAssign, campaignToAssignTo.leftUnassigned)
+  // }
+  campaignIdToAssignTo = process.env.CAMPAIGN_ID_TO_ASSIGN_TO;
 
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
