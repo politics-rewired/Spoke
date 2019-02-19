@@ -6,7 +6,6 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { userLoggedIn } from './models/cacheable_queries'
 import { User, Organization, r } from './models'
 import wrap from './wrap'
-import { log } from './lib'
 import { split } from 'apollo-link';
 
 export function setupSlackPassport() {
@@ -93,21 +92,8 @@ export function setupSlackPassport() {
         }
       }
 
-      try {
-        const organizations = await Organization.filter({})
-        if (organizations[0]) {
-          const organization_id = organizations[0].id
 
-          const orgMemberships = await r.knex('user_organization').where({ user_id: existingUser[0].id})
-          if (orgMemberships.length == 0) {
-            await r.knex('user_organization').insert({ user_id: existingUser[0].id, organization_id, role: 'TEXTER' })
-          }
-        }
-      } catch (ex) {
-        log.error(ex)
-      }
-
-      return res.redirect(req.query.state || '/')
+      return res.redirect('https://text.berniesanders.com/f5a2a334-8e02-4de5-b99e-766a7e312cbb/join')
     }
   }
 }
