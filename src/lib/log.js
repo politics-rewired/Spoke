@@ -18,7 +18,7 @@ if (isClient()) {
           captureUncaught: true,
           captureUnhandledRejections: true,
           payload: {
-            environment: "${process.env.NODE_ENV}"
+            environment: 'production'
           }
         })
       // console.log(window.rollbar)
