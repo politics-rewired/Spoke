@@ -195,6 +195,8 @@ export async function giveUserMoreTexts(auth0Id, count) {
     // `returning` on updates
     // NVM! Doing this in one query to avoid concurrency issues,
     // and instead not returning the count
+    console.log(campaignIdToAssignTo)
+
     await r.knex('campaign_contact')
       .where({
         assignment_id: null,
