@@ -1,6 +1,6 @@
 import winston from 'winston'
 import expressWinston from 'express-winston'
-import winstonMongodb from 'winston-mongodb'
+import 'winston-mongodb'
 
 expressWinston.requestWhitelist.push('body')
 
