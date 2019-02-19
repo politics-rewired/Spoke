@@ -201,7 +201,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
     await r.knex('campaign_contact')
       .where({
         assignment_id: null,
-        campaign_id: campaignIdToAssignTo
+        campaign_id: parseInt(campaignIdToAssignTo)
       })
       .update({ assignment_id: assignmentId })
       .limit(parseInt(countToAssign))
