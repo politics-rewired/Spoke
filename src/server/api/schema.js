@@ -1052,7 +1052,7 @@ const rootMutations = {
 
       const messageSavePromise = r.knex('message')
         .insert(toInsert)
-        .returning(Object.keys(toInsert))
+        .returning(Object.keys(toInsert).concat(['id']))
 
       const { cc_message_status } = record
       const contactSavePromise = (async () => {
