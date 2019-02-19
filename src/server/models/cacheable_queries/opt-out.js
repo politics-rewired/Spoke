@@ -88,12 +88,16 @@ export const optOutCache = {
       }
     }
     // database
-    await new OptOut({
-      assignment_id: assignmentId,
-      organization_id: organizationId,
-      reason_code: reason,
-      cell
-    }).save()
+    try {
+      await new OptOut({
+        assignment_id: assignmentId,
+        organization_id: organizationId,
+        reason_code: reason,
+        cell
+      }).save()
+    } catch (error) {
+      console.error(error)
+    }
 
     // update all organization's active campaigns as well
     const contactIds = r.knex('campaign_contact')
