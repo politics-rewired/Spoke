@@ -23,6 +23,7 @@ import { TwimlResponse } from 'twilio'
 import basicAuth from 'express-basic-auth'
 import { giveUserMoreTexts } from './api/assignment'
 import googleLibPhoneNumber from 'google-libphonenumber'
+import requestLogging from '../lib/request-logging'
 
 const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
 const PNF = googleLibPhoneNumber.PhoneNumberFormat;
@@ -93,6 +94,8 @@ app.use(cookieSession({
 
 app.use(passport.initialize())
 app.use(passport.session())
+
+app.use(requestLogging)
 
 app.post('/nexmo', wrap(async (req, res) => {
   try {
