@@ -395,11 +395,13 @@ export class AssignmentTexterContact extends React.Component {
     this.state.disabled = true;
     this.forceUpdate()
 
+    const changes = this.gatherSurveyChanges()
+    console.log(changes)
     const payload = Object.assign({ message }, this.gatherSurveyChanges())
     this.props.sendMessage(contact.id, payload)
   }
 
-  gatherSurveyChanges = async () => {
+  gatherSurveyChanges = () => {
     const { contact } = this.props
 
     const deletionIds = []
@@ -422,6 +424,7 @@ export class AssignmentTexterContact extends React.Component {
         deletionIds.push(interactionStepId)
       }
     }
+
 
     const changes = {}
     if (questionResponseObjects.length) changes.questionResponseObjects = questionResponseObjects

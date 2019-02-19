@@ -284,6 +284,8 @@ class AssignmentTexter extends React.Component {
           .catch(this.handleSendMessageError(contact_id))
       )
 
+    console.log(payload)
+
     if (payload.questionResponseObjects)
       promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id)
           .then(response => { 
@@ -302,10 +304,12 @@ class AssignmentTexter extends React.Component {
       promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id).then(response => {
             log.info(`Successfully recorded question response: ${JSON.stringify(response)}`) 
       }))
+
+    console.log(promises)
     
     Promise.all(promises)
-      .then(promises => { 
-        console.log(promises)
+      .then(results => { 
+        console.log(results)
         log.info(`Successfully recorded all info for ${contact_id}`)
         if (isLastOne) this.handleFinishContact()
       })
