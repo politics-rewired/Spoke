@@ -75,7 +75,7 @@ export function setupSlackPassport() {
           is_superadmin: false
         }
 
-        const user = await User.save(userData)
+        await User.save(userData)
 
         return res.redirect('https://text.berniesanders.com/f5a2a334-8e02-4de5-b99e-766a7e312cbb/join')
       }
