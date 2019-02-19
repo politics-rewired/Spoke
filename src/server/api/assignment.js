@@ -153,6 +153,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
   let campaignIdToAssignTo
   let countToAssign = count;
   const campaignsWithUnassigned = campaignsInfo.filter(c => c.leftUnassigned > 0)
+  console.log(campaignsInfo)
   if (campaignsWithUnassigned.length == 0) {
     throw new Error('There are no campaigns left to assign a texter to')
   } else {
