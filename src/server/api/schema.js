@@ -783,24 +783,17 @@ const rootMutations = {
         return { found: false }
       }
 
-      const updatedCount = await r
+      const updateResult = await r
         .knex('campaign_contact')
-        .where(
-          'id',
-          'in',
-          r
-            .knex('campaign_contact')
-            .where({
-              assignment_id: null,
-              campaign_id: campaign.id
-            })
-            .limit(numberContacts)
-            .select('id')
-        )
+        .where({
+          assignment_id: null,
+          campaign_id: campaign.id
+        })
+        .limit(numberContacts)
         .update({ assignment_id: assignmentId })
         .catch(log.error)
 
-      if (updatedCount > 0) {
+      if (updateResult > 0) {
         return { found: true }
       } else {
         return { found: false }
