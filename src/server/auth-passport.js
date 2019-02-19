@@ -4,7 +4,7 @@ import passportSlack from '@aoberoi/passport-slack'
 import AuthHasher from 'passport-local-authenticate'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { userLoggedIn } from './models/cacheable_queries'
-import { User, Organization } from './models'
+import { User, Organization, r } from './models'
 import wrap from './wrap'
 import { split } from 'apollo-link';
 
@@ -75,9 +75,13 @@ export function setupSlackPassport() {
           is_superadmin: false
         }
 
-        await User.save(userData)
+        const user = await User.save(userData)
 
         const organizations = await Organization.filter({})
+
+        if (organizations[0]) {
+          await knex('user_organization').insert({ user_id: user.id, organization_id: organizations[0] })
+        }
 
         if (organizations[0]) {
           const uuid = organizations[0].uuid
@@ -85,6 +89,16 @@ export function setupSlackPassport() {
           return res.redirect(joinUrl)
         } else {
           return res.redirect(req.query.state || '/')
+        }
+      }
+
+      const organizations = await Organization.filter({})
+      if (organizations[0]) {
+        const organization_id = organizations[0].id
+
+        const orgMemberships = await r.knex('user_organization').where({ user_id: existingUser[0].id})
+        if (orgMemberships.length == 0) {
+          await r.knex('user_organization').insert({ user_id: existingUser[0].id, organization_id, role: 'TEXTER' })
         }
       }
 
