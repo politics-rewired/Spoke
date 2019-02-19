@@ -189,7 +189,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
       }
     }
 
-    countToAssign = count;
+    let countToAssign = count;
     console.log({ countToAssign, campaignIdToAssignTo })
     // Can do this in one query in Postgres, but in order
     // to do it in MySQL, we need to find the contacts first
@@ -198,13 +198,20 @@ export async function giveUserMoreTexts(auth0Id, count) {
     // NVM! Doing this in one query to avoid concurrency issues,
     // and instead not returning the count
 
-    await r.knex('campaign_contact')
+    const ids = await r.knex('campaign_contact')
+      .select('id')
       .where({
         assignment_id: null,
-        campaign_id: parseInt(campaignIdToAssignTo)
+        campaign_id: campaignIdToAssignTo
       })
+      .limit(countToAssign)
+      .map(c => c.id)
+    
+    const updated_result = await r.knex('campaign_contact')
       .update({ assignment_id: assignmentId })
-      .limit(parseInt(countToAssign))
+      .whereIn('id', ids)
+    
+    console.log({ids, updated_result})
 
     // const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
     
