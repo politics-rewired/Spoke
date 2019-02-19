@@ -1,6 +1,7 @@
 import minilog from 'minilog'
 import { isClient } from './is-client'
-const rollbar = require('rollbar')
+const Rollbar = require('rollbar')
+let rollbar = undefined
 let logInstance = null
 
 if (isClient()) {
@@ -9,8 +10,19 @@ if (isClient()) {
   const existingErrorLogger = logInstance.error
   logInstance.error = (...err) => {
     const errObj = err
-    if (window.Rollbar) {
-      window.Rollbar.error(...errObj)
+    if (window.rollbar) {
+        window.rollbar.init({
+          accessToken: window.ROLLBAR_CLIENT_TOKEN,
+          // enabled: ${process.env.NODE_ENV === 'production'},
+          enabled: true,
+          captureUncaught: true,
+          captureUnhandledRejections: true,
+          payload: {
+            environment: 'production'
+          }
+        })
+      // console.log(window.rollbar)
+      window.rollbar.error(...errObj)
     }
     existingErrorLogger.call(...errObj)
   }
@@ -18,7 +30,11 @@ if (isClient()) {
   let enableRollbar = false
   if (process.env.NODE_ENV === 'production' && process.env.ROLLBAR_ACCESS_TOKEN) {
     enableRollbar = true
-    rollbar.init(process.env.ROLLBAR_ACCESS_TOKEN)
+    rollbar = new Rollbar({
+      accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+      captureUncaught: true,
+      captureUnhandledRejections: true
+    })
   }
 
   minilog.suggest.deny(/.*/, process.env.NODE_ENV === 'development' ? 'debug' : 'debug')
@@ -32,11 +48,11 @@ if (isClient()) {
   logInstance.error = (err) => {
     if (enableRollbar) {
       if (typeof err === 'object') {
-        rollbar.handleError(err)
+        rollbar.error(err)
       } else if (typeof err === 'string') {
-        rollbar.reportMessage(err)
+        rollbar.critical(err)
       } else {
-        rollbar.reportMessage('Got backend error with no error message')
+        rollbar.error('Got backend error with no error message')
       }
     }
 

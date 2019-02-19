@@ -424,14 +424,14 @@ const rootMutations = {
             role: 'TEXTER'
           }).error(function(error) {
             // Unexpected errors
-            console.log("error on userOrganization save", error)
+            log.error("error on userOrganization save", error)
           });
 
         } else { // userOrg exists
-          console.log('existing userOrg ' + userOrg.id + ' user ' + user.id + ' organizationUuid ' + organizationUuid )
+          log.error('existing userOrg ' + userOrg.id + ' user ' + user.id + ' organizationUuid ' + organizationUuid )
         }
       } else { // no organization 
-        console.log('no organization with id ' + organizationUuid + ' for user ' + user.id)
+        log.error('no organization with id ' + organizationUuid + ' for user ' + user.id)
       }
       return organization
     },
@@ -1154,7 +1154,7 @@ const rootMutations = {
             const handler = require(`../action_handlers/${interactionStepAction}.js`)
             handler.processAction(qr, interactionStepResult[0], campaignContactId)
           } catch (err) {
-            console.error(
+            log.error(
               'Handler for InteractionStep',
               interactionStepId,
               'Does Not Exist:',

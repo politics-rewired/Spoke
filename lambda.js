@@ -1,6 +1,7 @@
 'use strict'
 const AWS = require('aws-sdk')
 const awsServerlessExpress = require('aws-serverless-express')
+import { log } from './log'
 let app, server, jobs
 try {
   app = require('./build/server/server/index')
@@ -8,7 +9,7 @@ try {
   jobs = require('./build/server/workers/job-processes')
 } catch(err) {
   if (!global.TEST_ENVIRONMENT) {
-    console.error(`Unable to load built server: ${err}`)
+    log.error(`Unable to load built server: ${err}`)
   }
   app = require('./src/server/index')
   server = awsServerlessExpress.createServer(app.default)
@@ -37,7 +38,7 @@ exports.handler = (event, context, handleCallback) => {
   // or Lambda will re-run/re-try the invocation twice:
   // https://docs.aws.amazon.com/lambda/latest/dg/retries-on-errors.html
   if (process.env.LAMBDA_DEBUG_LOG) {
-    console.log('LAMBDA EVENT', event)
+    log.info('LAMBDA EVENT', event)
   }
   if (!event.command) {
     // default web server stuff
@@ -47,7 +48,7 @@ exports.handler = (event, context, handleCallback) => {
     if (process.env.DEBUG_SCALING) {
       const endTime = (context.getRemainingTimeInMillis ? context.getRemainingTimeInMillis() : 0)
       if ((endTime - startTime) > 3000) { //3 seconds
-        console.log('SLOW_RESPONSE milliseconds:', endTime-startTime, event)
+        log.error('SLOW_RESPONSE milliseconds:', endTime-startTime, event)
       }
     }
 
@@ -60,7 +61,7 @@ exports.handler = (event, context, handleCallback) => {
         process.env[a] = event.env[a]
       }
     }
-    console.log('Running ' + event.command)
+    log.info('Running ' + event.command)
     if (event.command in jobs) {
       const job = jobs[event.command]
       // behavior and arguments documented here:
@@ -74,7 +75,7 @@ exports.handler = (event, context, handleCallback) => {
               Payload: JSON.stringify(dataToSend)
             }, function(err, dataReceived) {
               if (err) {
-                console.error('Failed to invoke Lambda job: ', err)
+                log.error('Failed to invoke Lambda job: ', err)
               }
               if (callback) {
                 callback(err, dataReceived)
@@ -83,7 +84,7 @@ exports.handler = (event, context, handleCallback) => {
           },
           handleCallback)
     } else {
-      console.error('Unfound command sent as a Lambda event: ' + event.command)
+      log.error('Unfound command sent as a Lambda event: ' + event.command)
     }
   }
 }

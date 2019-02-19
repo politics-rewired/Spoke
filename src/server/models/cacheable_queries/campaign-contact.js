@@ -1,5 +1,6 @@
 import { r, CampaignContact } from '../../models'
 import { optOutCache } from './opt-out'
+import { log } from '../../../lib'
 
 // <campaignContactId>
 //   - assignmentId
@@ -96,7 +97,7 @@ export const campaignContactCache = {
             cell: cacheData.cell,
             organizationId: cacheData.organization_id })
         }
-        console.log('fromCache', cacheData)
+        log.info('fromCache', cacheData)
         return cacheData
       }
     }

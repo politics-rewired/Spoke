@@ -186,7 +186,7 @@ app.post('/autoassign',
     const numberAssigned = await giveUserMoreTexts(req.body.slack_id, req.body.count)
     return res.json({ numberAssigned })
   } catch (ex) {
-    console.log(ex)
+    log.error(ex)
     return res.status(500).json({error: ex.message})
   }
 })

@@ -169,7 +169,6 @@ async function sendMessage(message, trx) {
       if (err) {
         hasError = true
         log.error('Error sending message', err)
-        console.log('Error sending message', err)
         messageToSave.service_response += JSON.stringify(err)
       }
       if (response) {

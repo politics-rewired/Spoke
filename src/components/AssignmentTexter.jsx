@@ -13,6 +13,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import gql from 'graphql-tag'
 import loadData from '../containers/hoc/load-data'
 import wrapMutations from '../containers/hoc/wrap-mutations'
+import { log } from '../lib/log'
 const SEND_DELAY = 500
 
 const styles = StyleSheet.create({
@@ -278,7 +279,7 @@ class AssignmentTexter extends React.Component {
         this.props.mutations.sendMessage(payload.message, contact_id)
           .then(response => {
             if (response.errors) throw new Error(response.errors)
-            console.log(`Successfully send message to ${contact_id}`) 
+            log.info(`Successfully send message to ${contact_id}`) 
           })
           .catch(this.handleSendMessageError(contact_id))
       )
@@ -294,7 +295,7 @@ class AssignmentTexter extends React.Component {
     
     Promise.all(promises)
       .then(() => { 
-        console.log(`Successfully recorded all info for ${contact_id}`)
+        log.info(`Successfully recorded all info for ${contact_id}`)
         if (isLastOne) this.handleFinishContact()
       })
 
