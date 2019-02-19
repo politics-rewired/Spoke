@@ -433,7 +433,6 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   handleClickCloseContactButton = async () => {
-    await this.handleSubmitSurveys()
     await this.handleEditMessageStatus('closed')
     this.props.onFinishContact()
   }

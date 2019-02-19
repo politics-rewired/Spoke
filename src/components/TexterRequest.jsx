@@ -12,7 +12,7 @@ import gql from 'graphql-tag'
 
 class TexterRequest extends React.Component {
   state = {
-    count: 500,
+    count: 2000,
     email: undefined,
     submitting: false,
     error: undefined,
