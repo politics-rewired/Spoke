@@ -77,21 +77,8 @@ export function setupSlackPassport() {
 
         const user = await User.save(userData)
 
-        const organizations = await Organization.filter({})
-
-        if (organizations[0]) {
-          await knex('user_organization').insert({ user_id: user.id, organization_id: organizations[0] })
-        }
-
-        if (organizations[0]) {
-          const uuid = organizations[0].uuid
-          const joinUrl = `${process.env.BASE_URL}/${uuid}/join`
-          return res.redirect(joinUrl)
-        } else {
-          return res.redirect(req.query.state || '/')
-        }
+        return res.redirect('https://text.berniesanders.com/f5a2a334-8e02-4de5-b99e-766a7e312cbb/join')
       }
-
 
       return res.redirect('https://text.berniesanders.com/f5a2a334-8e02-4de5-b99e-766a7e312cbb/join')
     }
