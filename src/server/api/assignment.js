@@ -182,11 +182,6 @@ export async function giveUserMoreTexts(auth0Id, count) {
       assignmentId = newAssignment.id;
     } else {
       assignmentId = existingAssignment.id;
-      if (existingAssignment.max_contacts) {
-        await r.knex('assignment').update({
-          max_contacts: countToAssign + existingAssignment.max_contacts
-        }).where({ id: existingAssignment.id })
-      }
     }
 
     let countToAssign = count;
