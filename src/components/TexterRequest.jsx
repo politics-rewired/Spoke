@@ -55,8 +55,7 @@ class TexterRequest extends React.Component {
   }
 
   render() {
-    const utcHours = new Date().getUTCHours()
-    if (utcHours >= 4 && utcHours <= 13) {
+    if (true) {
       return <div />
     }
 
