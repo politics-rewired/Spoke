@@ -8,9 +8,13 @@ export const resolvers = {
       'text',
       'userNumber',
       'contactNumber',
-      'createdAt',
       'isFromContact'
     ], Message),
-    'campaignId': (instance) => instance['campaign_id']
+    'campaignId': (instance) => instance['campaign_id'],
+    'createdAt': (instance) => {
+      const createdAt = new Date(instance.created_at)
+      createdAt.setHours(createdAt.getHours() - 5)
+      return createdAt
+    }
   }
 }
