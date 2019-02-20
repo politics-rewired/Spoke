@@ -52,17 +52,11 @@ const styles = StyleSheet.create({
 })
 
 export default class CampaignContactsForm extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      uploading: false,
-      validationStats: null,
-      contactUploadError: null,
-      selectedCampaignIds: []
-    }
-
-    this.handleCampaignExclusionChange = this.handleCampaignExclusionChange.bind(this)
+  state = {
+    uploading: false,
+    validationStats: null,
+    contactUploadError: null,
+    selectedCampaignIds: []
   }
 
   handleCampaignExclusionChange = (event, index, values) => {
