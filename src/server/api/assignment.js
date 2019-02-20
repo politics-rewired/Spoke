@@ -178,7 +178,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
         campaign_id: campaignIdToAssignTo,
         max_contacts: countToAssign
       }).returning('*')
-      assignmentId = insert[0] ? inserted[0].id : inserted.id
+      assignmentId = inserted[0] ? inserted[0].id : inserted.id
     } else {
       assignmentId = existingAssignment.id;
     }
