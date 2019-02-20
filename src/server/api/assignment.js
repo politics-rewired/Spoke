@@ -1,137 +1,170 @@
-import { mapFieldsToModel } from './lib/utils'
-import { Assignment, r, cacheableData } from '../models'
-import { getOffsets, defaultTimezoneIsBetweenTextingHours } from '../../lib'
-import { Notifications, sendUserNotification } from '../notifications'
-import _ from 'lodash'
+import { mapFieldsToModel } from "./lib/utils";
+import { Assignment, r, cacheableData } from "../models";
+import { getOffsets, defaultTimezoneIsBetweenTextingHours } from "../../lib";
+import { Notifications, sendUserNotification } from "../notifications";
+import _ from "lodash";
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
   messageStatusFilter
 ) {
   if (!messageStatusFilter) {
-    return queryParameter
+    return queryParameter;
   }
 
-  let query = queryParameter
-  if (messageStatusFilter === 'needsMessageOrResponse') {
-    query.whereIn('message_status', ['needsResponse', 'needsMessage'])
+  let query = queryParameter;
+  if (messageStatusFilter === "needsMessageOrResponse") {
+    query.whereIn("message_status", ["needsResponse", "needsMessage"]);
   } else {
-    query = query.whereIn('message_status', messageStatusFilter.split(','))
+    query = query.whereIn("message_status", messageStatusFilter.split(","));
   }
-  return query
+  return query;
 }
 
-export function getContacts(assignment, contactsFilter, organization, campaign, forCount = false) {
+export function getContacts(
+  assignment,
+  contactsFilter,
+  organization,
+  campaign,
+  forCount = false
+) {
   // / returns list of contacts eligible for contacting _now_ by a particular user
-  const textingHoursEnforced = organization.texting_hours_enforced
-  const textingHoursStart = organization.texting_hours_start
-  const textingHoursEnd = organization.texting_hours_end
+  const textingHoursEnforced = organization.texting_hours_enforced;
+  const textingHoursStart = organization.texting_hours_start;
+  const textingHoursEnd = organization.texting_hours_end;
 
   // 24-hours past due - why is this 24 hours offset?
-  const includePastDue = (contactsFilter && contactsFilter.includePastDue)
-  const pastDue = (campaign.due_by
-                   && Number(campaign.due_by) + 24 * 60 * 60 * 1000 < Number(new Date()))
-  const config = { textingHoursStart, textingHoursEnd, textingHoursEnforced }
+  const includePastDue = contactsFilter && contactsFilter.includePastDue;
+  const pastDue =
+    campaign.due_by &&
+    Number(campaign.due_by) + 24 * 60 * 60 * 1000 < Number(new Date());
+  const config = { textingHoursStart, textingHoursEnd, textingHoursEnforced };
 
   if (campaign.override_organization_texting_hours) {
-    const textingHoursStart = campaign.texting_hours_start
-    const textingHoursEnd = campaign.texting_hours_end
-    const textingHoursEnforced = campaign.texting_hours_enforced
-    const timezone = campaign.timezone
+    const textingHoursStart = campaign.texting_hours_start;
+    const textingHoursEnd = campaign.texting_hours_end;
+    const textingHoursEnforced = campaign.texting_hours_enforced;
+    const timezone = campaign.timezone;
 
-    config.campaignTextingHours = { textingHoursStart, textingHoursEnd, textingHoursEnforced, timezone }
+    config.campaignTextingHours = {
+      textingHoursStart,
+      textingHoursEnd,
+      textingHoursEnforced,
+      timezone
+    };
   }
 
-  const [validOffsets, invalidOffsets] = getOffsets(config)
-  if (!includePastDue && pastDue && contactsFilter && contactsFilter.messageStatus === 'needsMessage') {
-    return []
+  const [validOffsets, invalidOffsets] = getOffsets(config);
+  if (
+    !includePastDue &&
+    pastDue &&
+    contactsFilter &&
+    contactsFilter.messageStatus === "needsMessage"
+  ) {
+    return [];
   }
 
-  let query = r.knex('campaign_contact').where({
+  let query = r.knex("campaign_contact").where({
     assignment_id: assignment.id
-  })
+  });
 
   if (contactsFilter) {
-    const validTimezone = contactsFilter.validTimezone
+    const validTimezone = contactsFilter.validTimezone;
     if (validTimezone !== null) {
       if (validTimezone === true) {
         if (defaultTimezoneIsBetweenTextingHours(config)) {
           // missing timezone ok
-          validOffsets.push('')
+          validOffsets.push("");
         }
-        query = query.whereIn('timezone_offset', validOffsets)
+        query = query.whereIn("timezone_offset", validOffsets);
       } else if (validTimezone === false) {
         if (!defaultTimezoneIsBetweenTextingHours(config)) {
           // missing timezones are not ok to text
-          invalidOffsets.push('')
+          invalidOffsets.push("");
         }
-        query = query.whereIn('timezone_offset', invalidOffsets)
+        query = query.whereIn("timezone_offset", invalidOffsets);
       }
     }
 
     query = addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
       query,
-      ((contactsFilter && contactsFilter.messageStatus) ||
-       (pastDue
-        // by default if asking for 'send later' contacts we include only those that need replies
-        ? 'needsResponse'
-        // we do not want to return closed/messaged
-        : 'needsMessageOrResponse'))
-    )
+      (contactsFilter && contactsFilter.messageStatus) ||
+        (pastDue
+          ? // by default if asking for 'send later' contacts we include only those that need replies
+            "needsResponse"
+          : // we do not want to return closed/messaged
+            "needsMessageOrResponse")
+    );
 
-    if (Object.prototype.hasOwnProperty.call(contactsFilter, 'isOptedOut')) {
-      query = query.where('is_opted_out', contactsFilter.isOptedOut)
+    if (Object.prototype.hasOwnProperty.call(contactsFilter, "isOptedOut")) {
+      query = query.where("is_opted_out", contactsFilter.isOptedOut);
     }
   }
 
   if (!forCount) {
-    if (contactsFilter && contactsFilter.messageStatus === 'convo') {
-      query = query.orderByRaw('message_status DESC, updated_at DESC')
+    if (contactsFilter && contactsFilter.messageStatus === "convo") {
+      query = query.orderByRaw("message_status DESC, updated_at DESC");
     } else {
-      query = query.orderByRaw('message_status DESC, updated_at')
+      query = query.orderByRaw("message_status DESC, updated_at");
     }
   }
 
-  return query
+  return query;
 }
 
 export async function giveUserMoreTexts(auth0Id, count) {
+  console.log(auth0_id);
   // Fetch DB info
-  const [matchingUsers, campaignContactGroups, activeCampaignIds] = await Promise.all([
-    r.knex("user").where({ auth0_id: auth0Id }), 
-    r.knex('campaign_contact')
+  const [
+    matchingUsers,
+    campaignContactGroups,
+    activeCampaignIds
+  ] = await Promise.all([
+    r.knex("user").where({ auth0_id: auth0Id }),
+    r
+      .knex("campaign_contact")
       .select([
-        'campaign_id',
-        r.knex.raw('assignment_id is null as unassigned')
+        "campaign_id",
+        r.knex.raw("assignment_id is null as unassigned")
       ])
-      .count('id as total_count')
-      .groupBy('campaign_id')
-      .groupByRaw('assignment_id is null'),
-    r.knex('campaign')
-      .select('id')
+      .count("id as total_count")
+      .groupBy("campaign_id")
+      .groupByRaw("assignment_id is null"),
+    r
+      .knex("campaign")
+      .select("id")
       .where({ is_archived: false, is_started: true })
-  ])
+  ]);
 
   const user = matchingUsers[0];
+  console.log(user);
   if (!user) {
-    throw new Error(`No user found with id ${auth0Id}`)
+    throw new Error(`No user found with id ${auth0Id}`);
   }
 
   // Process campaigns, extracting relevant info
-  const justIds = activeCampaignIds.map(c => c.id)
+  const justIds = activeCampaignIds.map(c => c.id);
   // const campaignIds = campaignContactGroups.map(ccg => ccg.campaign_id).filter(id => justIds.includes({ id }))
-  const campaignsInfo = justIds.map((campaignId) => {
-    const assignedBatch = campaignContactGroups.find(ccg => ccg.campaign_id === campaignId && ccg.unassigned == false);
-    const unassignedBatch = campaignContactGroups.find(ccg => ccg.campaign_id === campaignId && ccg.unassigned == true);
-    const assignedCount = assignedBatch ? parseInt(assignedBatch.total_count) : 0
-    const unassignedCount = unassignedBatch ? parseInt(unassignedBatch.total_count) : 0
+  const campaignsInfo = justIds.map(campaignId => {
+    const assignedBatch = campaignContactGroups.find(
+      ccg => ccg.campaign_id === campaignId && ccg.unassigned == false
+    );
+    const unassignedBatch = campaignContactGroups.find(
+      ccg => ccg.campaign_id === campaignId && ccg.unassigned == true
+    );
+    const assignedCount = assignedBatch
+      ? parseInt(assignedBatch.total_count)
+      : 0;
+    const unassignedCount = unassignedBatch
+      ? parseInt(unassignedBatch.total_count)
+      : 0;
 
     return {
-      id: campaignId, 
+      id: campaignId,
       assignmentProgress: assignedCount / (assignedCount + unassignedCount),
       leftUnassigned: unassignedCount
-    }
-  })
+    };
+  });
 
   // Determine which campaign to assign to – optimize to finish at once
   // let campaignIdToAssignTo;
@@ -150,7 +183,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
   // }
 
   // Determine which campaign to assign to – optimize to pick winners
-  let campaignIdToAssignTo
+  let campaignIdToAssignTo;
   let countToAssign = count;
   // const campaignsWithUnassigned = campaignsInfo.filter(c => c.leftUnassigned > 0)
   // console.log(campaignsInfo)
@@ -163,33 +196,35 @@ export async function giveUserMoreTexts(auth0Id, count) {
   // }
   campaignIdToAssignTo = process.env.CAMPAIGN_ID_TO_ASSIGN_TO;
 
-
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
   await r.knex.transaction(async trx => {
     let assignmentId;
-    const existingAssignment = (await r.knex('assignment').where({
+    const existingAssignment = (await r.knex("assignment").where({
       user_id: user.id,
-      campaign_id: campaignIdToAssignTo 
-    }))[0]
+      campaign_id: campaignIdToAssignTo
+    }))[0];
 
     if (!existingAssignment) {
-      const inserted = await r.knex('assignment').insert({
-        user_id: user.id,
-        campaign_id: campaignIdToAssignTo,
-        max_contacts: countToAssign
-      }).returning('*')
-      console.log(inserted)
-      assignmentId = inserted[0] 
-        ? inserted[0].id 
+      const inserted = await r
+        .knex("assignment")
+        .insert({
+          user_id: user.id,
+          campaign_id: campaignIdToAssignTo,
+          max_contacts: countToAssign
+        })
+        .returning("*");
+      console.log(inserted);
+      assignmentId = inserted[0]
+        ? inserted[0].id
           ? inserted[0].id
           : inserted[0]
-        : inserted.id
+        : inserted.id;
     } else {
       assignmentId = existingAssignment.id;
     }
 
     let countToAssign = count;
-    console.log({ countToAssign, campaignIdToAssignTo })
+    console.log({ countToAssign, campaignIdToAssignTo });
     // Can do this in one query in Postgres, but in order
     // to do it in MySQL, we need to find the contacts first
     // and then update them by ID since MySQL doesn't support
@@ -197,61 +232,69 @@ export async function giveUserMoreTexts(auth0Id, count) {
     // NVM! Doing this in one query to avoid concurrency issues,
     // and instead not returning the count
 
-    const ids = await r.knex('campaign_contact')
-      .select('id')
+    const ids = await r
+      .knex("campaign_contact")
+      .select("id")
       .where({
         assignment_id: null,
         campaign_id: campaignIdToAssignTo
       })
       .limit(countToAssign)
-      .map(c => c.id)
-    
-    console.log({ ids, assignmentId })
-    
-    const updated_result = await r.knex('campaign_contact')
+      .map(c => c.id);
+
+    console.log({ ids, assignmentId });
+
+    const updated_result = await r
+      .knex("campaign_contact")
       .update({ assignment_id: assignmentId })
-      .whereIn('id', ids)
-    
-    console.log({ids, updated_result})
+      .whereIn("id", ids);
+
+    console.log({ ids, updated_result });
 
     // const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
-    
+
     // if (process.env.SEND_ASSIGNMENT_API_EMAILS) {
     //   await sendUserNotification({
     //     type: Notifications.ASSIGNMENT_UPDATED,
     //     assignment
     //   })
     // }
-  })
+  });
 
   return true;
 }
 
 export const resolvers = {
   Assignment: {
-    ...mapFieldsToModel(['id', 'maxContacts'], Assignment),
-    texter: async (assignment, _, { loaders }) => (
+    ...mapFieldsToModel(["id", "maxContacts"], Assignment),
+    texter: async (assignment, _, { loaders }) =>
       assignment.texter
-      ? assignment.texter
-      : loaders.user.load(assignment.user_id)
-    ),
-    campaign: async (assignment, _, { loaders }) => loaders.campaign.load(assignment.campaign_id),
+        ? assignment.texter
+        : loaders.user.load(assignment.user_id),
+    campaign: async (assignment, _, { loaders }) =>
+      loaders.campaign.load(assignment.campaign_id),
     contactsCount: async (assignment, { contactsFilter }) => {
-      const campaign = await r.table('campaign').get(assignment.campaign_id)
+      const campaign = await r.table("campaign").get(assignment.campaign_id);
 
-      const organization = await r.table('organization').get(campaign.organization_id)
+      const organization = await r
+        .table("organization")
+        .get(campaign.organization_id);
 
-      return await r.getCount(getContacts(assignment, contactsFilter, organization, campaign, true))
+      return await r.getCount(
+        getContacts(assignment, contactsFilter, organization, campaign, true)
+      );
     },
     contacts: async (assignment, { contactsFilter }) => {
-      const campaign = await r.table('campaign').get(assignment.campaign_id)
+      const campaign = await r.table("campaign").get(assignment.campaign_id);
 
-      const organization = await r.table('organization').get(campaign.organization_id)
-      return getContacts(assignment, contactsFilter, organization, campaign)
+      const organization = await r
+        .table("organization")
+        .get(campaign.organization_id);
+      return getContacts(assignment, contactsFilter, organization, campaign);
     },
     campaignCannedResponses: async assignment =>
       await cacheableData.cannedResponse.query({
-        userId: '',
+        userId: "",
         campaignId: assignment.campaign_id
       }),
     userCannedResponses: async assignment =>
@@ -260,4 +303,4 @@ export const resolvers = {
         campaignId: assignment.campaign_id
       })
   }
-}
+};
