@@ -113,7 +113,7 @@ export function getContacts(
 }
 
 export async function giveUserMoreTexts(auth0Id, count) {
-  console.log(auth0_id);
+  console.log(`Starting to give ${auth0Id} ${count} texts`);
   // Fetch DB info
   const [
     matchingUsers,
