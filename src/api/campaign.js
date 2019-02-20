@@ -50,6 +50,7 @@ export const schema = `
     textingHoursStart: Int
     textingHoursEnd: Int
     timezone: String
+    createdAt: Date
   }
 
   type CampaignsList {

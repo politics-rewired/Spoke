@@ -302,7 +302,7 @@ class AdminCampaignEdit extends React.Component {
     }, {
       title: 'Contacts',
       content: CampaignContactsForm,
-      keys: ['contacts', 'contactsCount', 'customFields', 'contactSql'],
+      keys: ['contacts', 'contactsCount', 'customFields', 'contactSql', 'excludeCampaignIds'],
       checkCompleted: () => this.state.campaignFormValues.contactsCount > 0,
       checkSaved: () => (
         // Must be false for save to be tried
@@ -319,7 +319,8 @@ class AdminCampaignEdit extends React.Component {
       extraProps: {
         optOuts: [], // this.props.organizationData.organization.optOuts, // <= doesn't scale
         datawarehouseAvailable: this.props.campaignData.campaign.datawarehouseAvailable,
-        jobResultMessage: ((this.props.pendingJobsData.campaign.pendingJobs.filter((job) => (/contacts/.test(job.jobType)))[0] || {}).resultMessage || '')
+        jobResultMessage: ((this.props.pendingJobsData.campaign.pendingJobs.filter((job) => (/contacts/.test(job.jobType)))[0] || {}).resultMessage || ''),
+        otherCampaigns: this.props.organizationData.organization.campaigns.filter(campaign => campaign.id != this.props.params.campaignId)
       }
     }, {
       title: 'Texters',
@@ -680,6 +681,11 @@ const mapQueriesToProps = ({ ownProps }) => ({
           firstName
           lastName
           displayName
+        }
+        campaigns {
+          id
+          title
+          createdAt
         }
       }
     }`,
