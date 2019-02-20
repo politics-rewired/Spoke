@@ -202,6 +202,8 @@ export async function giveUserMoreTexts(auth0Id, count) {
       .limit(countToAssign)
       .map(c => c.id)
     
+    console.log(ids)
+    
     const updated_result = await r.knex('campaign_contact')
       .update({ assignment_id: assignmentId })
       .whereIn('id', ids)
