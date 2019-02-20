@@ -178,8 +178,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
         campaign_id: campaignIdToAssignTo,
         max_contacts: countToAssign
       }).returning('*')
-      const newAssignment = inserted[0];
-      assignmentId = newAssignment.id;
+      assignmentId = insert[0] ? inserted[0].id : inserted.id
     } else {
       assignmentId = existingAssignment.id;
     }
