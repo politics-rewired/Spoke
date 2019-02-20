@@ -179,7 +179,11 @@ export async function giveUserMoreTexts(auth0Id, count) {
         max_contacts: countToAssign
       }).returning('*')
       console.log(inserted)
-      assignmentId = inserted[0] ? inserted[0].id : inserted.id
+      assignmentId = inserted[0] 
+        ? inserted[0].id 
+          ? inserted[0].id
+          : inserted[0]
+        : inserted.id
     } else {
       assignmentId = existingAssignment.id;
     }
