@@ -160,7 +160,8 @@ export const resolvers = {
       'textingHoursEnforced',
       'textingHoursStart',
       'textingHoursEnd',
-      'timezone'
+      'timezone',
+      'createdAt'
     ], Campaign),
     dueBy: (campaign) => (
       (campaign.due_by instanceof Date || !campaign.due_by)
