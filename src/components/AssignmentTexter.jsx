@@ -14,7 +14,7 @@ import gql from 'graphql-tag'
 import loadData from '../containers/hoc/load-data'
 import wrapMutations from '../containers/hoc/wrap-mutations'
 import { log } from '../lib/log'
-const SEND_DELAY = 500
+const SEND_DELAY = 100
 
 const styles = StyleSheet.create({
   container: {

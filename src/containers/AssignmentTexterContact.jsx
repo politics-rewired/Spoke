@@ -253,6 +253,7 @@ export class AssignmentTexterContact extends React.Component {
   onEnter(evt) {
     if (evt.keyCode === 13) {
       evt.preventDefault()
+      document.body.removeEventListener('keydown', this.onEnter)
       // pressing the Enter key submits
       if (this.state.optOutDialogOpen) {
         this.handleOptOut()
