@@ -55,6 +55,11 @@ class TexterRequest extends React.Component {
   }
 
   render() {
+    const utcHours = new Date().getUTCHours()
+    if (utcHours >= 4 && utcHours <= 12) {
+      return <div />
+    }
+
     const { email, count, error, submitting, finished } = this.state
     const inputSchema = yup.object({
       count: yup.number().required(),
