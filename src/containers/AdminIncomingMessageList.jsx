@@ -72,7 +72,9 @@ export class AdminIncomingMessageList extends Component {
     includeActiveCampaigns: true,
     conversationCount: 0,
     includeNotOptedOutConversations: true,
-    includeOptedOutConversations: false
+    includeOptedOutConversations: false,
+    selectedRows: [],
+    campaignIdsContactIds: []
   }
 
   shouldComponentUpdate(dummy, nextState) {
@@ -173,20 +175,13 @@ export class AdminIncomingMessageList extends Component {
     await this.setState({ needsRender: true, pageSize })
   }
 
-  handleRowSelection = async (selectedRows, data) => {
-    if (this.state.previousSelectedRows === 'all' && selectedRows !== 'all') {
-      this.setState({
-        previousSelectedRows: [],
-        campaignIdsContactIds: [],
-        needsRender: true
-      })
-    } else {
-      this.setState({
-        previousSelectedRows: selectedRows,
-        campaignIdsContactIds: data,
-        needsRender: true
-      })
-    }
+  handleRowSelection = async (newSelectedRows, data) => {
+    const isDeselectAll = this.state.selectedRows === 'all' && newSelectedRows !== 'all'
+    this.setState({
+      selectedRows: isDeselectAll ? [] : newSelectedRows,
+      campaignIdsContactIds: isDeselectAll ? [] : data,
+      needsRender: true
+    })
   }
 
   handleCampaignsReceived = async (campaigns) => {
@@ -285,9 +280,12 @@ export class AdminIncomingMessageList extends Component {
   conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
 
   render() {
+    const { selectedRows, page, pageSize } = this.state
+    const areContactsSelected = selectedRows === 'all' || (Array.isArray(selectedRows) && selectedRows.length > 0)
+
     const cursor = {
-      offset: this.state.page * this.state.pageSize,
-      limit: this.state.pageSize
+      offset: page * pageSize,
+      limit: pageSize
     }
 
     return (
@@ -344,10 +342,7 @@ export class AdminIncomingMessageList extends Component {
               onReassignRequested={this.handleReassignRequested}
               onReassignAllMatchingRequested={this.handleReassignAllMatchingRequested}
               markForSecondPass={this.markForSecondPass}
-              contactsAreSelected={
-                this.state.previousSelectedRows === 'all' ||
-                (Array.isArray(this.state.previousSelectedRows) && this.state.previousSelectedRows.length > 0)
-              }
+              contactsAreSelected={areContactsSelected}
               conversationCount={this.state.conversationCount}
             />
             <br />
@@ -357,6 +352,7 @@ export class AdminIncomingMessageList extends Component {
               contactsFilter={this.state.contactsFilter}
               campaignsFilter={this.state.campaignsFilter}
               assignmentsFilter={this.state.assignmentsFilter}
+              selectedRows={this.state.selectedRows}
               utc={this.state.utc}
               onPageChanged={this.handlePageChange}
               onPageSizeChanged={this.handlePageSizeChange}

@@ -11,19 +11,15 @@ import ConversationPreviewModal from './ConversationPreviewModal';
 
 import { MESSAGE_STATUSES } from '../../components/IncomingMessageFilter'
 
-function prepareDataTableData(conversations) {
-  return conversations.map((conversation, index) => {
-    return {
-      campaignTitle: conversation.campaign.title,
-      texter: conversation.texter.displayName,
-      to: conversation.contact.firstName + ' ' + conversation.contact.lastName + (conversation.contact.optOut.cell ? '⛔️' : ''),
-      status: conversation.contact.messageStatus,
-      messages: conversation.contact.messages,
-      updatedAt: conversation.contact.updatedAt,
-      index
-    }
-  })
-}
+const prepareDataTableData = (conversations) => conversations.map((conversation, index) => ({
+  campaignTitle: conversation.campaign.title,
+  texter: conversation.texter.displayName,
+  to: conversation.contact.firstName + ' ' + conversation.contact.lastName + (conversation.contact.optOut.cell ? '⛔️' : ''),
+  status: conversation.contact.messageStatus,
+  messages: conversation.contact.messages,
+  updatedAt: conversation.contact.updatedAt,
+  index
+}))
 
 function prepareSelectedRowsData(conversations, rowsSelected) {
   let selection = rowsSelected
@@ -46,7 +42,6 @@ function prepareSelectedRowsData(conversations, rowsSelected) {
 export class IncomingMessageList extends Component {
 
   state = {
-    selectedRows:[],
     activeConversation: undefined
   }
 
@@ -186,7 +181,6 @@ export class IncomingMessageList extends Component {
   }
 
   handleRowsSelected = (rowsSelected) => {
-    this.setState({selectedRows: rowsSelected})
     const conversations = this.props.conversations.conversations.conversations
     const selectedConversations = prepareSelectedRowsData(conversations, rowsSelected)
     this.props.onConversationSelected(rowsSelected, selectedConversations)
@@ -231,7 +225,7 @@ export class IncomingMessageList extends Component {
           onRowSizeChange={this.handleRowSizeChanged}
           onRowSelection={this.handleRowsSelected}
           rowSizeList={[10, 30, 50, 100, 500, 1000, 2000]}
-          selectedRows={this.state.selectedRows}
+          selectedRows={this.props.selectedRows}
         />
         <ConversationPreviewModal
           conversation={this.state.activeConversation}
@@ -248,6 +242,7 @@ IncomingMessageList.propTypes = {
   contactsFilter: type.object,
   campaignsFilter: type.object,
   assignmentsFilter: type.object,
+  selectedRows: type.arrayOf(type.object),
   onPageChanged: type.func,
   onPageSizeChanged: type.func,
   onConversationSelected: type.func,
