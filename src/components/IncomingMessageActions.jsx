@@ -29,34 +29,19 @@ const styles = StyleSheet.create({
 })
 
 class IncomingMessageActions extends Component {
-  constructor(props) {
-    super(props)
-
-    this.onReassignmentClicked = this.onReassignmentClicked.bind(this)
-    this.onReassignAllMatchingClicked = this.onReassignAllMatchingClicked.bind(
-      this
-    )
-    this.onReassignChanged = this.onReassignChanged.bind(
-      this
-    )
-
-    this.handleConfirmDialogCancel = this.handleConfirmDialogCancel.bind(this)
-    this.handleConfirmDialogReassign = this.handleConfirmDialogReassign.bind(this)
-
-    this.state = {
-      confirmDialogOpen: false
-    }
+  state = {
+    confirmDialogOpen: false
   }
 
-  onReassignmentClicked() {
+  onReassignmentClicked = () => {
     this.props.onReassignRequested(this.state.reassignTo)
   }
 
-  onReassignAllMatchingClicked() {
+  onReassignAllMatchingClicked = () => {
     this.setState({confirmDialogOpen: true})
   }
 
-  onReassignChanged(selection, index) {
+  onReassignChanged = (selection, index) => {
     let texterUserId = undefined
     if (index === -1) {
       const texter = this.props.texters.find(texter => {
@@ -77,11 +62,11 @@ class IncomingMessageActions extends Component {
     }
   }
 
-  handleConfirmDialogCancel() {
+  handleConfirmDialogCancel = () => {
     this.setState({confirmDialogOpen: false})
   }
 
- handleConfirmDialogReassign() {
+ handleConfirmDialogReassign = () => {
    this.setState({confirmDialogOpen: false})
    this.props.onReassignAllMatchingRequested(this.state.reassignTo)
  }
