@@ -247,7 +247,6 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
 
     if (conversationRow.mess_id) {
       campaignIdMessagesIdsMap.get(conversationRow.cmp_id).push(conversationRow.mess_id)
-
     }
   }
 
@@ -256,6 +255,53 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
     campaignIdMessagesIdsMap
   }
 }
+
+export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
+  organizationId,
+  campaignsFilter,
+  assignmentsFilter,
+  contactsFilter
+) {
+  let query = r.knex.select(
+    'campaign_contact.id as cc_id',
+    'campaign.id as cmp_id',
+    'message.id as mess_id',
+  )
+
+  query = getConversationsJoinsAndWhereClause(
+    query,
+    organizationId,
+    campaignsFilter,
+    assignmentsFilter,
+    contactsFilter
+  )
+
+  query = query.leftJoin('message', table => {
+    table
+      .on('message.assignment_id', '=', 'assignment.id')
+      .andOn('message.contact_number', '=', 'campaign_contact.cell')
+  })
+
+  query = query
+    .orderBy('cc_id')
+
+  const conversationRows = await query
+  const result = {}
+  conversationRows.forEach(row => {
+    result[row.cc_id] = {
+      campaign_id: row.cmp_id,
+      messages: []
+    }
+  })
+
+  conversationRows.forEach(row => {
+    if (row.mess_id) {
+      result[row.cc_id].messages.push(row.mess_id)
+    }
+  })
+  return Object.entries(result)
+}
+
 
 export async function reassignConversations(campaignIdContactIdsMap, campaignIdMessagesIdsMap, newTexterUserId) {
   // ensure existence of assignments

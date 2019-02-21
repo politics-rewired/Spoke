@@ -134,6 +134,7 @@
     "react-formal": "^0.18.5",
     "react-router": "^2.5.2",
     "react-router-redux": "^4.0.5",
+    "react-select": "^2.0.0",
     "react-tap-event-plugin": "^2.0.0",
     "redis": "^2.8.0",
     "redux": "^3.7.2",
