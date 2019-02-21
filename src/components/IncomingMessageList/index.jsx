@@ -11,19 +11,15 @@ import ConversationPreviewModal from './ConversationPreviewModal';
 
 import { MESSAGE_STATUSES } from '../../components/IncomingMessageFilter'
 
-function prepareDataTableData(conversations) {
-  return conversations.map((conversation, index) => {
-    return {
-      campaignTitle: conversation.campaign.title,
-      texter: conversation.texter.displayName,
-      to: conversation.contact.firstName + ' ' + conversation.contact.lastName + (conversation.contact.optOut.cell ? '⛔️' : ''),
-      status: conversation.contact.messageStatus,
-      messages: conversation.contact.messages,
-      updatedAt: conversation.contact.updatedAt,
-      index
-    }
-  })
-}
+const prepareDataTableData = (conversations) => conversations.map((conversation, index) => ({
+  campaignTitle: conversation.campaign.title,
+  texter: conversation.texter.displayName,
+  to: conversation.contact.firstName + ' ' + conversation.contact.lastName + (conversation.contact.optOut.cell ? '⛔️' : ''),
+  status: conversation.contact.messageStatus,
+  messages: conversation.contact.messages,
+  updatedAt: conversation.contact.updatedAt,
+  index
+}))
 
 function prepareSelectedRowsData(conversations, rowsSelected) {
   let selection = rowsSelected
@@ -44,19 +40,9 @@ function prepareSelectedRowsData(conversations, rowsSelected) {
 }
 
 export class IncomingMessageList extends Component {
-  constructor(props) {
-    super(props)
 
-    this.state = {
-      selectedRows:[],
-      activeConversation: undefined
-    }
-
-    this.prepareTableColumns = this.prepareTableColumns.bind(this)
-    this.handleNextPageClick = this.handleNextPageClick.bind(this)
-    this.handlePreviousPageClick = this.handlePreviousPageClick.bind(this)
-    this.handleRowSizeChanged = this.handleRowSizeChanged.bind(this)
-    this.handleRowsSelected = this.handleRowsSelected.bind(this)
+  state = {
+    activeConversation: undefined
   }
 
   componentDidUpdate(prevProps) {
@@ -75,7 +61,7 @@ export class IncomingMessageList extends Component {
     }
   }
 
-  prepareTableColumns() {
+  prepareTableColumns = () => {
     return [
       {
         key: 'campaignTitle',
@@ -175,7 +161,7 @@ export class IncomingMessageList extends Component {
     ]
   }
 
-  handleNextPageClick() {
+  handleNextPageClick = () => {
     const { limit, offset, total } = this.props.conversations.conversations.pageInfo
     const currentPage = Math.floor(offset / limit)
     const maxPage = Math.floor(total / limit)
@@ -183,19 +169,18 @@ export class IncomingMessageList extends Component {
     this.props.onPageChanged(newPage)
   }
 
-  handlePreviousPageClick() {
+  handlePreviousPageClick = () => {
     const { limit, offset } = this.props.conversations.conversations.pageInfo
     const currentPage = Math.floor(offset / limit)
     const newPage = Math.max(0, currentPage - 1)
     this.props.onPageChanged(newPage)
   }
 
-  handleRowSizeChanged(index, value) {
+  handleRowSizeChanged = (index, value) => {
     this.props.onPageSizeChanged(value)
   }
 
-  handleRowsSelected(rowsSelected) {
-    this.setState({selectedRows: rowsSelected})
+  handleRowsSelected = (rowsSelected) => {
     const conversations = this.props.conversations.conversations.conversations
     const selectedConversations = prepareSelectedRowsData(conversations, rowsSelected)
     this.props.onConversationSelected(rowsSelected, selectedConversations)
@@ -240,7 +225,7 @@ export class IncomingMessageList extends Component {
           onRowSizeChange={this.handleRowSizeChanged}
           onRowSelection={this.handleRowsSelected}
           rowSizeList={[10, 30, 50, 100, 500, 1000, 2000]}
-          selectedRows={this.state.selectedRows}
+          selectedRows={this.props.selectedRows}
         />
         <ConversationPreviewModal
           conversation={this.state.activeConversation}
@@ -257,6 +242,7 @@ IncomingMessageList.propTypes = {
   contactsFilter: type.object,
   campaignsFilter: type.object,
   assignmentsFilter: type.object,
+  selectedRows: type.arrayOf(type.object),
   onPageChanged: type.func,
   onPageSizeChanged: type.func,
   onConversationSelected: type.func,

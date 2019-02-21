@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import Dialog from 'material-ui/Dialog'
+import FlatButton from 'material-ui/FlatButton'
 import _ from 'lodash'
 
 import IncomingMessageActions from '../components/IncomingMessageActions'
@@ -55,53 +57,27 @@ function getContactsFilterForConversationOptOutStatus(
 }
 
 export class AdminIncomingMessageList extends Component {
-  constructor(props) {
-    super(props)
 
-    this.state = {
-      page: 0,
-      pageSize: 10,
-      campaignsFilter: { isArchived: false },
-      contactsFilter: { isOptedOut: false },
-      assignmentsFilter: {},
-      needsRender: false,
-      utc: Date.now().toString(),
-      campaigns: [],
-      reassignmentTexters: [],
-      campaignTexters: [],
-      includeArchivedCampaigns: false,
-      conversationCount: 0,
-      includeActiveCampaigns: true,
-      conversationCount: 0,
-      includeNotOptedOutConversations: true,
-      includeOptedOutConversations: false
-    }
-
-    this.handlePageChange = this.handlePageChange.bind(this)
-    this.handlePageSizeChange = this.handlePageSizeChange.bind(this)
-    this.handleRowSelection = this.handleRowSelection.bind(this)
-    this.handleCampaignsReceived = this.handleCampaignsReceived.bind(this)
-    this.handleCampaignTextersReceived = this.handleCampaignTextersReceived.bind(
-      this
-    )
-    this.handleReassignmentTextersReceived = this.handleReassignmentTextersReceived.bind(
-      this
-    )
-    this.handleTexterChanged = this.handleTexterChanged.bind(this)
-    this.handleArchivedCampaignsToggled = this.handleArchivedCampaignsToggled.bind(
-      this
-    )
-    this.handleActiveCampaignsToggled = this.handleActiveCampaignsToggled.bind(
-      this
-    )
-    this.conversationCountChanged = this.conversationCountChanged.bind(this)
-    this.handleNotOptedOutConversationsToggled = this.handleNotOptedOutConversationsToggled.bind(
-      this
-    )
-    this.handleOptedOutConversationsToggled = this.handleOptedOutConversationsToggled.bind(
-      this
-    )
-    this.conversationCountChanged = this.conversationCountChanged.bind(this)
+  state = {
+    page: 0,
+    pageSize: 10,
+    campaignsFilter: { isArchived: false },
+    contactsFilter: { isOptedOut: false },
+    assignmentsFilter: {},
+    needsRender: false,
+    utc: Date.now().toString(),
+    campaigns: [],
+    reassignmentTexters: [],
+    campaignTexters: [],
+    includeArchivedCampaigns: false,
+    conversationCount: 0,
+    includeActiveCampaigns: true,
+    conversationCount: 0,
+    includeNotOptedOutConversations: true,
+    includeOptedOutConversations: false,
+    selectedRows: [],
+    campaignIdsContactIds: [],
+    reassignmentAlert: undefined,
   }
 
   shouldComponentUpdate(dummy, nextState) {
@@ -131,7 +107,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleTexterChanged(texterId) {
+  handleTexterChanged = async (texterId) => {
     const assignmentsFilter = {}
     if (texterId >= 0) {
       assignmentsFilter.texterId = texterId
@@ -153,29 +129,49 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
+  closeReassignmentDialog = () => this.setState({ reassignmentAlert: undefined })
+
+  handleReassignmentCommon = async (fn) => {
+    let newState = {
+      needsRender: true,
+      reassignmentAlert: {
+        title: 'Success!',
+        message: 'Your reassignment request succeeded'
+      }
+    }
+    try {
+      await fn()
+      newState.selectedRows = []
+    } catch (error) {
+      newState.reassignmentAlert = {
+        title: 'Error',
+        message: `There was an error: ${error}`
+      }
+    }
+
+    newState.utc = Date.now().toString()
+    this.setState(newState)
+  }
+
   handleReassignRequested = async (newTexterUserIds) => {
-    await this.props.mutations.megaReassignCampaignContacts(
-      this.props.params.organizationId,
-      this.state.campaignIdsContactIds,
-      newTexterUserIds
-    )
-    this.setState({
-      utc: Date.now().toString(),
-      needsRender: true
+    await this.handleReassignmentCommon(async () => {
+      await this.props.mutations.megaReassignCampaignContacts(
+        this.props.params.organizationId,
+        this.state.campaignIdsContactIds,
+        newTexterUserIds
+      )
     })
   }
 
   handleReassignAllMatchingRequested = async (newTexterUserIds) => {
-    await this.props.mutations.megaBulkReassignCampaignContacts(
-      this.props.params.organizationId,
-      this.state.campaignsFilter || {},
-      this.state.assignmentsFilter || {},
-      this.state.contactsFilter || {},
-      newTexterUserIds
-    )
-    this.setState({
-      utc: Date.now().toString(),
-      needsRender: true
+    await this.handleReassignmentCommon(async () => {
+      await this.props.mutations.megaBulkReassignCampaignContacts(
+        this.props.params.organizationId,
+        this.state.campaignsFilter || {},
+        this.state.assignmentsFilter || {},
+        this.state.contactsFilter || {},
+        newTexterUserIds
+      )
     })
   }
 
@@ -191,46 +187,39 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handlePageChange(page) {
+  handlePageChange = async (page) => {
     await this.setState({
       page,
       needsRender: true
     })
   }
 
-  async handlePageSizeChange(pageSize) {
+  handlePageSizeChange = async (pageSize) => {
     await this.setState({ needsRender: true, pageSize })
   }
 
-  handleRowSelection(selectedRows, data) {
-    if (this.state.previousSelectedRows === 'all' && selectedRows !== 'all') {
-      this.setState({
-        previousSelectedRows: [],
-        campaignIdsContactIds: [],
-        needsRender: true
-      })
-    } else {
-      this.setState({
-        previousSelectedRows: selectedRows,
-        campaignIdsContactIds: data,
-        needsRender: true
-      })
-    }
+  handleRowSelection = async (newSelectedRows, data) => {
+    const isDeselectAll = this.state.selectedRows === 'all' && newSelectedRows !== 'all'
+    this.setState({
+      selectedRows: isDeselectAll ? [] : newSelectedRows,
+      campaignIdsContactIds: isDeselectAll ? [] : data,
+      needsRender: true
+    })
   }
 
-  async handleCampaignsReceived(campaigns) {
+  handleCampaignsReceived = async (campaigns) => {
     this.setState({ campaigns, needsRender: true })
   }
 
-  async handleCampaignTextersReceived(campaignTexters) {
+  handleCampaignTextersReceived = async (campaignTexters) => {
     this.setState({ campaignTexters, needsRender: true })
   }
 
-  async handleReassignmentTextersReceived(reassignmentTexters) {
+  handleReassignmentTextersReceived = async (reassignmentTexters) => {
     this.setState({ reassignmentTexters, needsRender: true })
   }
 
-  async handleNotOptedOutConversationsToggled() {
+  handleNotOptedOutConversationsToggled = async () => {
     if (
       this.state.includeNotOptedOutConversations &&
       !this.state.includeOptedOutConversations
@@ -255,7 +244,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleOptedOutConversationsToggled() {
+  handleOptedOutConversationsToggled = async () => {
     const includeNotOptedOutConversations =
       this.state.includeNotOptedOutConversations ||
       !this.state.includeOptedOutConversations
@@ -277,7 +266,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleActiveCampaignsToggled() {
+  handleActiveCampaignsToggled = async () => {
     if (
       this.state.includeActiveCampaigns &&
       !this.state.includeArchivedCampaigns
@@ -295,7 +284,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleArchivedCampaignsToggled() {
+  handleArchivedCampaignsToggled = async () => {
     const includeActiveCampaigns =
       this.state.includeActiveCampaigns || !this.state.includeArchivedCampaigns
 
@@ -311,17 +300,15 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  conversationCountChanged(conversationCount) {
-    this.setState({
-      conversationCount
-    })
-
-  }
+  conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
 
   render() {
+    const { selectedRows, page, pageSize, reassignmentAlert } = this.state
+    const areContactsSelected = selectedRows === 'all' || (Array.isArray(selectedRows) && selectedRows.length > 0)
+
     const cursor = {
-      offset: this.state.page * this.state.pageSize,
-      limit: this.state.pageSize
+      offset: page * pageSize,
+      limit: pageSize
     }
 
     return (
@@ -378,10 +365,7 @@ export class AdminIncomingMessageList extends Component {
               onReassignRequested={this.handleReassignRequested}
               onReassignAllMatchingRequested={this.handleReassignAllMatchingRequested}
               markForSecondPass={this.markForSecondPass}
-              contactsAreSelected={
-                this.state.previousSelectedRows === 'all' ||
-                (Array.isArray(this.state.previousSelectedRows) && this.state.previousSelectedRows.length > 0)
-              }
+              contactsAreSelected={areContactsSelected}
               conversationCount={this.state.conversationCount}
             />
             <br />
@@ -391,6 +375,7 @@ export class AdminIncomingMessageList extends Component {
               contactsFilter={this.state.contactsFilter}
               campaignsFilter={this.state.campaignsFilter}
               assignmentsFilter={this.state.assignmentsFilter}
+              selectedRows={this.state.selectedRows}
               utc={this.state.utc}
               onPageChanged={this.handlePageChange}
               onPageSizeChanged={this.handlePageSizeChange}
@@ -399,6 +384,21 @@ export class AdminIncomingMessageList extends Component {
             />
           </div>
         )}
+        <Dialog
+          title={reassignmentAlert && reassignmentAlert.title}
+          actions={[
+            <FlatButton
+              label="Ok"
+              primary={true}
+              onClick={this.closeReassignmentDialog}
+            />
+          ]}
+          modal={false}
+          open={!!reassignmentAlert}
+          onRequestClose={this.closeReassignmentDialog}
+        >
+          {reassignmentAlert && reassignmentAlert.message}
+        </Dialog>
       </div>
     )
   }
