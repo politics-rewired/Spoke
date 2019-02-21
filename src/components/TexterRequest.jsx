@@ -55,9 +55,9 @@ class TexterRequest extends React.Component {
   }
 
   render() {
-    // if (true) {
-    //   return <div />
-    // }
+    if (!process.env.SHOW_TEXTER_REQUEST_FORM) {
+      return <div />
+    }
 
     const { email, count, error, submitting, finished } = this.state
     const inputSchema = yup.object({
