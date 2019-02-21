@@ -282,12 +282,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  conversationCountChanged = (conversationCount) => {
-    this.setState({
-      conversationCount
-    })
-
-  }
+  conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
 
   render() {
     const cursor = {

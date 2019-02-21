@@ -44,19 +44,10 @@ function prepareSelectedRowsData(conversations, rowsSelected) {
 }
 
 export class IncomingMessageList extends Component {
-  constructor(props) {
-    super(props)
 
-    this.state = {
-      selectedRows:[],
-      activeConversation: undefined
-    }
-
-    this.prepareTableColumns = this.prepareTableColumns.bind(this)
-    this.handleNextPageClick = this.handleNextPageClick.bind(this)
-    this.handlePreviousPageClick = this.handlePreviousPageClick.bind(this)
-    this.handleRowSizeChanged = this.handleRowSizeChanged.bind(this)
-    this.handleRowsSelected = this.handleRowsSelected.bind(this)
+  state = {
+    selectedRows:[],
+    activeConversation: undefined
   }
 
   componentDidUpdate(prevProps) {
@@ -75,7 +66,7 @@ export class IncomingMessageList extends Component {
     }
   }
 
-  prepareTableColumns() {
+  prepareTableColumns = () => {
     return [
       {
         key: 'campaignTitle',
@@ -175,7 +166,7 @@ export class IncomingMessageList extends Component {
     ]
   }
 
-  handleNextPageClick() {
+  handleNextPageClick = () => {
     const { limit, offset, total } = this.props.conversations.conversations.pageInfo
     const currentPage = Math.floor(offset / limit)
     const maxPage = Math.floor(total / limit)
@@ -183,18 +174,18 @@ export class IncomingMessageList extends Component {
     this.props.onPageChanged(newPage)
   }
 
-  handlePreviousPageClick() {
+  handlePreviousPageClick = () => {
     const { limit, offset } = this.props.conversations.conversations.pageInfo
     const currentPage = Math.floor(offset / limit)
     const newPage = Math.max(0, currentPage - 1)
     this.props.onPageChanged(newPage)
   }
 
-  handleRowSizeChanged(index, value) {
+  handleRowSizeChanged = (index, value) => {
     this.props.onPageSizeChanged(value)
   }
 
-  handleRowsSelected(rowsSelected) {
+  handleRowsSelected = (rowsSelected) => {
     this.setState({selectedRows: rowsSelected})
     const conversations = this.props.conversations.conversations.conversations
     const selectedConversations = prepareSelectedRowsData(conversations, rowsSelected)
