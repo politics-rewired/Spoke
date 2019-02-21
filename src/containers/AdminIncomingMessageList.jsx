@@ -74,7 +74,8 @@ export class AdminIncomingMessageList extends Component {
     includeNotOptedOutConversations: true,
     includeOptedOutConversations: false,
     selectedRows: [],
-    campaignIdsContactIds: []
+    campaignIdsContactIds: [],
+    reassignmentAlert: '',
   }
 
   shouldComponentUpdate(dummy, nextState) {
@@ -127,29 +128,45 @@ export class AdminIncomingMessageList extends Component {
   }
 
   handleReassignRequested = async (newTexterUserIds) => {
-    await this.props.mutations.megaReassignCampaignContacts(
-      this.props.params.organizationId,
-      this.state.campaignIdsContactIds,
-      newTexterUserIds
-    )
-    this.setState({
-      utc: Date.now().toString(),
-      needsRender: true
-    })
+    let newState = {
+      needsRender: true,
+      reassignmentAlert: 'Success!'
+    }
+    try {
+      await this.props.mutations.megaReassignCampaignContacts(
+        this.props.params.organizationId,
+        this.state.campaignIdsContactIds,
+        newTexterUserIds
+      )
+      newState.selectedRows = []
+    } catch (error) {
+      newState.reassignmentAlert = error
+    }
+
+    newState.utc = Date.now().toString()
+    this.setState(newState)
   }
 
   handleReassignAllMatchingRequested = async (newTexterUserIds) => {
-    await this.props.mutations.megaBulkReassignCampaignContacts(
-      this.props.params.organizationId,
-      this.state.campaignsFilter || {},
-      this.state.assignmentsFilter || {},
-      this.state.contactsFilter || {},
-      newTexterUserIds
-    )
-    this.setState({
-      utc: Date.now().toString(),
-      needsRender: true
-    })
+    let newState = {
+      needsRender: true,
+      reassignmentAlert: 'Success!'
+    }
+    try {
+      await this.props.mutations.megaBulkReassignCampaignContacts(
+        this.props.params.organizationId,
+        this.state.campaignsFilter || {},
+        this.state.assignmentsFilter || {},
+        this.state.contactsFilter || {},
+        newTexterUserIds
+      )
+      newState.selectedRows = []
+    } catch (error) {
+      newState.reassignmentAlert = error
+    }
+
+    newState.utc = Date.now().toString()
+    this.setState(newState)
   }
 
   markForSecondPass = async () => {
