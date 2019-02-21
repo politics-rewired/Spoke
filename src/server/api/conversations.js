@@ -139,8 +139,8 @@ export async function getConversations(
         .andOn('campaign_contact.cell', 'opt_out.cell')
     })
     .orderBy('campaign_contact.updated_at')
+    .orderBy('message.created_at') // "ORDER BY -position DESC, id DESC" for nulls last
     .orderBy('cc_id')
-    .orderBy('message.created_at')
 
   const conversationRows = await query
 
@@ -336,7 +336,8 @@ export async function reassignConversations(campaignIdContactIdsMap, campaignIdM
         .where('campaign_id', campaignId)
         .whereIn('id', campaignContactIds)
         .update({
-          assignment_id: assignmentId
+          assignment_id: assignmentId,
+          updated_at: r.knex.fn.now()
         })
 
       returnCampaignIdAssignmentIds.push({
