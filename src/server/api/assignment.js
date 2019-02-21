@@ -137,21 +137,9 @@ export async function giveUserMoreTexts(auth0Id, count) {
   ]);
 
   const user = matchingUsers[0];
-  console.log(user);
   if (!user) {
     throw new Error(`No user found with id ${auth0Id}`);
   }
-
-  // const campaignsToAssignTo = await r.knex('campaign_contact')
-  //   .select('campaign_id')
-  //   .join('campaign', { 'campaign_contact.campaign_id': 'campaign.id'})
-  //   .whereNull('assignment_id')
-  //   .where({ 'campaign.is_started' : true, 'campaign.is_archived' : false })
-  //   .whereRaw(`campaign.texting_hours_end > hour(CONVERT_TZ(now(), 'UTC', campaign.timezone)) + 1`)
-  //   .whereRaw(`campaign.texting_hours_start < hour(CONVERT_TZ(now(), 'UTC', campaign.timezone))`)
-  //   .groupBy('campaign_contact.campaign_id')
-  //   .orderBy('campaign.id')
-  //   .limit(1)
 
   const result = await r.knex.raw(`
     select campaign_id
@@ -165,6 +153,24 @@ export async function giveUserMoreTexts(auth0Id, count) {
     order by campaign.id
     limit 1;
   `)
+
+  /* Sample return:
+    [ [ RowDataPacket { campaign_id: 1 } ],
+      [ FieldPacket {
+          catalog: 'def',
+          db: 'spoke_prod',
+          table: 'campaign_contact',
+          orgTable: 'campaign_contact',
+          name: 'campaign_id',
+          orgName: 'campaign_id',
+          charsetNr: 63,
+          length: 11,
+          type: 3,
+          flags: 20489,
+          decimals: 0,
+          default: undefined,
+          zeroFill: false,
+          protocol41: true } ] ] */
 
   const campaignsToAssignTo = result[0]
   
@@ -205,7 +211,6 @@ export async function giveUserMoreTexts(auth0Id, count) {
     }
 
     let countToAssign = count;
-    console.log({ countToAssign, campaignIdToAssignTo });
     // Can do this in one query in Postgres, but in order
     // to do it in MySQL, we need to find the contacts first
     // and then update them by ID since MySQL doesn't support
@@ -231,6 +236,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
       .whereIn("id", ids);
 
 
+    console.log(`Updated ${updated_result}`)
     return updated_result
   });
 
