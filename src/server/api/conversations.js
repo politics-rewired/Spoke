@@ -144,8 +144,6 @@ export async function getConversations(
 
   const conversationRows = await query
 
-  console.log(conversationRows)
-
   /* collapse the rows to produce an array of objects, with each object
   * containing the fields for one conversation, each having an array of
   * message objects */
