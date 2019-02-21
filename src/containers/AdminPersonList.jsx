@@ -260,12 +260,10 @@ const mapQueriesToProps = ({ ownProps }) => ({
       organization(id: $organizationId) {
         id
         uuid
-        campaigns(campaignsFilter: { isArchived: false }) {
-          ... on CampaignsList{
-            campaigns{
-              id
-              title
-            }
+        campaigns(campaignsFilter: { isArchived: false }, cursor: {offset: 0, limit: 5000}) {
+          campaigns{
+            id
+            title
           }
         }
       }
