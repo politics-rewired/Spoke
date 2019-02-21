@@ -1391,6 +1391,8 @@ const rootMutations = {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
+      console.log('mega newTexterUserIds', newTexterUserIds)
+
       // group contactIds by campaign
       // group messages by campaign
       const campaignIdContactIdsMap = new Map();
@@ -1453,6 +1455,9 @@ const rootMutations = {
     ) => {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      console.log('megaBulk newTexterUserIds', newTexterUserIds)
+
       const {
         campaignIdContactIdsMap,
         campaignIdMessagesIdsMap
