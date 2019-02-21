@@ -25,7 +25,17 @@ export const resolvers = {
       'external_id'
     ], CampaignContact),
     updatedAt: async (campaignContact) => {
-      const updatedAt = new Date(campaignContact.updated_at)
+      let updatedAt
+      if (campaignContact.updated_at) {
+        updatedAt = campaignContact.updated_at
+      } else if (Array.isArray(campaignContact.messages)) {
+        const latestMessage = campaignContact.messages[campaignContact.messages.length - 1]
+        updatedAt = latestMessage.created_at
+      } else {
+        updatedAt = campaignContact.created_at
+      }
+
+      updatedAt = new Date(updatedAt)
       updatedAt.setHours(updatedAt.getHours() - 5)
       return updatedAt
     },
