@@ -44,6 +44,7 @@ import { resolvers as cannedResponseResolvers } from "./canned-response";
 import {
   getConversations,
   getCampaignIdMessageIdsAndCampaignIdContactIdsMaps,
+  getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked,
   reassignConversations,
   resolvers as conversationsResolver
 } from "./conversations";
@@ -1310,6 +1311,40 @@ const rootMutations = {
       const contact = loaders.campaignContact.load(campaignContactId);
       return contact;
     },
+    markForSecondPass: async (
+      _ignore,
+      { organizationId, campaignIdsContactIds },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER", true);
+
+      let affectedCampaignContactIds = [];
+      const groupedByCampaign = _.groupBy(
+        campaignIdsContactIds,
+        c => c.campaignId
+      );
+
+      await Promise.all(
+        Object.keys(groupedByCampaign).map(async campaignId => {
+          const campaignContactIds = groupedByCampaign[campaignId].map(
+            c => c.campaignContactId
+          );
+          affectedCampaignContactIds = affectedCampaignContactIds.concat(
+            campaignContactIds
+          );
+          return r
+            .knex("campaign_contact")
+            .update({ message_status: "needsMessage" })
+            .where({ campaign_id: campaignId })
+            .whereIn("id", campaignContactIds);
+        })
+      );
+
+      return affectedCampaignContactIds.map(id => {
+        id;
+      });
+    },
     reassignCampaignContacts: async (
       _,
       { organizationId, campaignIdsContactIds, newTexterUserId },
@@ -1348,39 +1383,62 @@ const rootMutations = {
         newTexterUserId
       );
     },
-    markForSecondPass: async (
+    megaReassignCampaignContacts: async (
       _ignore,
-      { organizationId, campaignIdsContactIds },
+      { organizationId, campaignIdsContactIds, newTexterUserIds },
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "SUPERVOLUNTEER", true);
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-      let affectedCampaignContactIds = [];
-      const groupedByCampaign = _.groupBy(
-        campaignIdsContactIds,
-        c => c.campaignId
-      );
+      // group contactIds by campaign
+      // group messages by campaign
+      const campaignIdContactIdsMap = new Map();
+      const campaignIdMessagesIdsMap = new Map();
 
-      await Promise.all(
-        Object.keys(groupedByCampaign).map(async campaignId => {
-          const campaignContactIds = groupedByCampaign[campaignId].map(
-            c => c.campaignContactId
-          );
-          affectedCampaignContactIds = affectedCampaignContactIds.concat(
-            campaignContactIds
-          );
-          return r
-            .knex("campaign_contact")
-            .update({ message_status: "needsMessage" })
-            .where({ campaign_id: campaignId })
-            .whereIn("id", campaignContactIds);
+      const aggregated = {}
+      const campaignContactIdsToMessageIds = campaignIdsContactIds.forEach(campaignIdContactId => {
+        aggregated[campaignIdContactId.campaignContactId] = {
+          campaign_id: campaignIdContactId.campaignId,
+          messages: campaignIdContactId.messageIds
+        }
+      })
+      const result = Object.entries(aggregated)
+      const numberOfCampaignContactsToReassign = result.length
+      const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
+      const response = []
+      const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter)
+      for (let [idx, chunk] of chunks.entries()) {
+        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
+        const campaignIdContactIdsMap = new Map()
+        const campaignIdMessageIdsMap = new Map()
+
+        console.log({ idx, chunk, user: newTexterUserIds[idx]})
+
+        Object.keys(byCampaignId).forEach(campaign_id => {
+          chunk.filter(x => x[1].campaign_id === campaign_id).forEach(x => {
+            if (!campaignIdContactIdsMap.has(campaign_id)) campaignIdContactIdsMap.set(campaign_id, [])
+            if (!campaignIdMessageIdsMap.has(campaign_id)) campaignIdMessageIdsMap.set(campaign_id, [])
+            campaignIdContactIdsMap.get(campaign_id).push(x[0])
+            x[1].messages.forEach(message_id => {
+              campaignIdMessageIdsMap.get(campaign_id).push(message_id)
+            })
+          })
         })
-      );
 
-      return affectedCampaignContactIds.map(id => {
-        id;
-      });
+        console.log({ campaignIdContactIdsMap, campaignIdMessageIdsMap })
+
+        const responses = await reassignConversations(
+          campaignIdContactIdsMap,
+          campaignIdMessagesIdsMap,
+          newTexterUserIds[idx]
+        );
+        for (let r of responses) {
+          response.push(r)
+        }
+      }
+
+      return response;
     },
     bulkReassignCampaignContacts: async (
       _,
@@ -1410,6 +1468,59 @@ const rootMutations = {
         campaignIdMessagesIdsMap,
         newTexterUserId
       );
+    },
+    megaBulkReassignCampaignContacts: async (
+      _ignore,
+      {
+        organizationId,
+        campaignsFilter,
+        assignmentsFilter,
+        contactsFilter,
+        newTexterUserIds
+      },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      const campaignContactIdsToMessageIds = await getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
+        organizationId,
+        campaignsFilter,
+        assignmentsFilter,
+        contactsFilter
+      )
+
+      const numberOfCampaignContactsToReassign = campaignContactIdsToMessageIds.length
+      const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
+      const response = []
+      const chunks = _.chunk(campaignContactIdsToMessageIds, numberOfCampaignContactsPerNextTexter)
+      for (let [idx, chunk] of chunks.entries()) {
+        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
+        const campaignIdContactIdsMap = new Map()
+        const campaignIdMessageIdsMap = new Map()
+
+        Object.keys(byCampaignId).forEach(campaign_id => {
+          chunk.filter(x => x[1].campaign_id === parseInt(campaign_id)).forEach(x => {
+            if (!campaignIdContactIdsMap.has(campaign_id)) campaignIdContactIdsMap.set(campaign_id, [])
+            if (!campaignIdMessageIdsMap.has(campaign_id)) campaignIdMessageIdsMap.set(campaign_id, [])
+            campaignIdContactIdsMap.get(campaign_id).push(x[0])
+            x[1].messages.forEach(message_id => {
+              campaignIdMessageIdsMap.get(campaign_id).push(message_id)
+            })
+          })
+        })
+
+        const responses = await reassignConversations(
+          campaignIdContactIdsMap,
+          campaignIdMessageIdsMap,
+          newTexterUserIds[idx]
+        );
+        for (let r of responses) {
+          response.push(r)
+        }
+      }
+
+      return response;
     },
     requestTexts: async (_, { count, email }, { user }) => {
       try {

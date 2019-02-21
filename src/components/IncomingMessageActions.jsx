@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
 import type from "prop-types";
 
-import AutoComplete from "material-ui/AutoComplete";
+import Select from 'react-select'
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog"
 import { getHighestRole } from "../lib/permissions";
 import FlatButton from "material-ui/FlatButton";
 import { css, StyleSheet } from "aphrodite";
 import theme from "../styles/theme";
-import { dataSourceItem } from './utils'
 
 const styles = StyleSheet.create({
   container: {
@@ -29,74 +28,42 @@ const styles = StyleSheet.create({
 })
 
 class IncomingMessageActions extends Component {
-  constructor(props) {
-    super(props)
-
-    this.onReassignmentClicked = this.onReassignmentClicked.bind(this)
-    this.onReassignAllMatchingClicked = this.onReassignAllMatchingClicked.bind(
-      this
-    )
-    this.onReassignChanged = this.onReassignChanged.bind(
-      this
-    )
-
-    this.handleConfirmDialogCancel = this.handleConfirmDialogCancel.bind(this)
-    this.handleConfirmDialogReassign = this.handleConfirmDialogReassign.bind(this)
-
-    this.state = {
-      confirmDialogOpen: false
-    }
+  state = {
+    selectedTexters: [],
+    confirmDialogOpen: false
   }
 
-  onReassignmentClicked() {
-    this.props.onReassignRequested(this.state.reassignTo)
+  onReassignmentClicked = () => {
+    const { selectedTexters } = this.state
+    const texterIds = selectedTexters.map(texter => texter.value)
+    this.props.onReassignRequested(texterIds)
   }
 
-  onReassignAllMatchingClicked() {
+  onReassignAllMatchingClicked = () => {
     this.setState({confirmDialogOpen: true})
   }
 
-  onReassignChanged(selection, index) {
-    let texterUserId = undefined
-    if (index === -1) {
-      const texter = this.props.texters.find(texter => {
-        this.setState({ reassignTo: undefined })
-        return texter.displayName === selection
-      })
-      if (texter) {
-        texterUserId = texter.id
-      }
-    } else {
-      texterUserId = selection.value.key
-    }
-    if (texterUserId) {
-      this.setState({ reassignTo: parseInt(texterUserId, 10) });
-    } else {
-      this.setState({ reassignTo: undefined })
-
-    }
+  handleTextersChanged = (selectedTexters) => {
+    this.setState({ selectedTexters })
   }
 
-  handleConfirmDialogCancel() {
+  handleConfirmDialogCancel = () => {
     this.setState({confirmDialogOpen: false})
   }
 
- handleConfirmDialogReassign() {
-   this.setState({confirmDialogOpen: false})
-   this.props.onReassignAllMatchingRequested(this.state.reassignTo)
- }
+  handleConfirmDialogReassign = () => {
+    this.setState({confirmDialogOpen: false})
+    const { selectedTexters } = this.state
+    const texterIds = selectedTexters.map(texter => texter.value)
+    this.props.onReassignAllMatchingRequested(texterIds)
+  }
 
   render() {
-    const texterNodes = !this.props.people
-      ? []
-      : this.props.people.map(user => {
-        const userId = parseInt(user.id, 10)
-        const label = user.displayName + ' ' + getHighestRole(user.roles)
-        return dataSourceItem(label, userId)
-      })
-    texterNodes.sort((left, right) => {
-      return left.text.localeCompare(right.text, 'en', { sensitivity: 'base' })
-    })
+    let texters = this.props.people || []
+    texters = texters.map(texter => ({
+      value: parseInt(texter.id, 10),
+      label: texter.displayName + ' ' + getHighestRole(texter.roles)
+    }))
 
     const confirmDialogActions = [
       <FlatButton
@@ -111,6 +78,8 @@ class IncomingMessageActions extends Component {
       />
     ]
 
+    const { selectedTexters } = this.state
+    const hasSeletedTexters = selectedTexters.length > 0
     return (
       <Card>
         <CardHeader
@@ -119,7 +88,7 @@ class IncomingMessageActions extends Component {
           showExpandableButton
         />
         <CardText expandable>
-          <div className={css(styles.container)}>
+          <div>
             <p>
               In order to do a second pass on contacts who haven't responded,
               select a batch of contacts based on a Contact message status of
@@ -136,30 +105,21 @@ class IncomingMessageActions extends Component {
               Then, change the first message in the campaign script to reflect that you're
               texting them a second time!
             </p>
-            <div className={css(styles.flexColumn)}>
-              <AutoComplete
-                filter={AutoComplete.caseInsensitiveFilter}
-                maxSearchResults={8}
-                onFocus={() => this.setState({
-                  reassignTo: undefined,
-                  texterSearchText: ''
-                })}
-                onUpdateInput={texterSearchText =>
-                  this.setState({ texterSearchText })
-                }
-                searchText={this.state.texterSearchText}
-                dataSource={texterNodes}
-                hintText={'Search for a texter'}
-                floatingLabelText={'Reassign to ...'}
-                onNewRequest={this.onReassignChanged}
+            <p>
+              <Select
+                onChange={this.handleTextersChanged}
+                options={texters}
+                isMulti
+                placeholder="Select at least one texter"
               />
-            </div>
-            <div className={css(styles.spacer)}/>
+            </p>
+          </div>
+          <div className={css(styles.container)}>
             <div className={css(styles.flexColumn)}>
               <FlatButton
                 label={'Reassign selected'}
                 onClick={this.onReassignmentClicked}
-                disabled={!this.state.reassignTo}
+                disabled={!hasSeletedTexters}
               />
             </div>
             {this.props.conversationCount ? (
@@ -167,7 +127,7 @@ class IncomingMessageActions extends Component {
                 <FlatButton
                   label={`Reassign all ${this.props.conversationCount} matching`}
                   onClick={this.onReassignAllMatchingClicked}
-                  disabled={!this.state.reassignTo}
+                  disabled={!hasSeletedTexters}
                 />
               </div>) : ''
             }
