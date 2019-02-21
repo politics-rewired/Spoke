@@ -55,7 +55,7 @@ class TexterRequest extends React.Component {
   }
 
   render() {
-    if (false) {
+    if (window.SHOW_TEXTER_REQUEST_FORM !== 'true') {
       return <div />
     }
 
