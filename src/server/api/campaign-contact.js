@@ -24,6 +24,11 @@ export const resolvers = {
       'assignmentId',
       'external_id'
     ], CampaignContact),
+    updatedAt: async (campaignContact) => {
+      const updatedAt = new Date(campaignContact.updated_at)
+      updatedAt.setHours(updatedAt.getHours() - 5)
+      return updatedAt
+    },
     messageStatus: async (campaignContact, _, { loaders }) => {
       if (campaignContact.message_status) {
         return campaignContact.message_status

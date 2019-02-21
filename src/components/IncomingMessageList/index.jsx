@@ -19,6 +19,7 @@ function prepareDataTableData(conversations) {
       to: conversation.contact.firstName + ' ' + conversation.contact.lastName + (conversation.contact.optOut.cell ? '⛔️' : ''),
       status: conversation.contact.messageStatus,
       messages: conversation.contact.messages,
+      updatedAt: conversation.contact.updatedAt,
       index
     }
   })
@@ -112,6 +113,16 @@ export class IncomingMessageList extends Component {
           whiteSpace: 'pre-line'
         },
         render: (columnKey, row) => MESSAGE_STATUSES[row.status].name
+      },
+      {
+        key: 'updatedAt',
+        label: 'Updated At',
+        style: {
+          textOverflow: 'ellipsis',
+          overflow: 'scroll',
+          whiteSpace: 'pre-line'
+        },
+        render: (columnKey, row) => new Date(row.updatedAt).toLocaleString()
       },
       {
         key: 'latestMessage',
@@ -297,6 +308,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
               optOut {
                 cell
               }
+              updatedAt
             }
             campaign {
               id
