@@ -26,7 +26,7 @@ export const resolvers = {
     ], CampaignContact),
     updatedAt: async (campaignContact) => {
       let updatedAt
-      if (campaignContact.updated_at) {
+      if (campaignContact.updated_at && campaignContact.updated_at !== '0000-00-00 00:00:00') {
         updatedAt = campaignContact.updated_at
       } else if (Array.isArray(campaignContact.messages)) {
         const latestMessage = campaignContact.messages[campaignContact.messages.length - 1]
