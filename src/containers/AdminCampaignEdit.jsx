@@ -320,7 +320,7 @@ class AdminCampaignEdit extends React.Component {
         optOuts: [], // this.props.organizationData.organization.optOuts, // <= doesn't scale
         datawarehouseAvailable: this.props.campaignData.campaign.datawarehouseAvailable,
         jobResultMessage: ((this.props.pendingJobsData.campaign.pendingJobs.filter((job) => (/contacts/.test(job.jobType)))[0] || {}).resultMessage || ''),
-        otherCampaigns: this.props.organizationData.organization.campaigns.filter(campaign => campaign.id != this.props.params.campaignId)
+        otherCampaigns: this.props.organizationData.organization.campaigns.campaigns.filter(campaign => campaign.id != this.props.params.campaignId)
       }
     }, {
       title: 'Texters',
@@ -682,10 +682,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
           lastName
           displayName
         }
-        campaigns {
-          id
-          title
-          createdAt
+        campaigns(cursor: {offset: 0, limit: 5000}) {
+          campaigns {
+            id
+            title
+            createdAt
+          }
         }
       }
     }`,
