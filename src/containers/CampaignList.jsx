@@ -191,11 +191,9 @@ const mapQueriesToProps = ({ ownProps }) => ({
     query: gql`query adminGetCampaigns($organizationId: String!, $campaignsFilter: CampaignsFilter) {
       organization(id: $organizationId) {
         id
-        campaigns(campaignsFilter: $campaignsFilter) {
-          ... on CampaignsList{
-            campaigns{
-              ${campaignInfoFragment}
-            }
+        campaigns(campaignsFilter: $campaignsFilter, cursor: {offset: 0, limit: 5000}) {
+          campaigns{
+            ${campaignInfoFragment}
           }
         }
       }
