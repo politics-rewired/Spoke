@@ -115,27 +115,7 @@ export function getContacts(
 export async function giveUserMoreTexts(auth0Id, count) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
   // Fetch DB info
-  const [
-    matchingUsers,
-    campaignContactGroups,
-    activeCampaignIds
-  ] = await Promise.all([
-    r.knex("user").where({ auth0_id: auth0Id }),
-    r
-      .knex("campaign_contact")
-      .select([
-        "campaign_id",
-        r.knex.raw("assignment_id is null as unassigned")
-      ])
-      .count("id as total_count")
-      .groupBy("campaign_id")
-      .groupByRaw("assignment_id is null"),
-    r
-      .knex("campaign")
-      .select("id")
-      .where({ is_archived: false, is_started: true })
-  ]);
-
+  const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id })
   const user = matchingUsers[0];
   if (!user) {
     throw new Error(`No user found with id ${auth0Id}`);
@@ -210,6 +190,8 @@ export async function giveUserMoreTexts(auth0Id, count) {
       assignmentId = existingAssignment.id;
     }
 
+    console.log(`Assigning to assignment id ${assignmentId}`)
+
     let countToAssign = count;
     // Can do this in one query in Postgres, but in order
     // to do it in MySQL, we need to find the contacts first
@@ -227,8 +209,8 @@ export async function giveUserMoreTexts(auth0Id, count) {
       })
       .limit(countToAssign)
       .map(c => c.id);
-
-    console.log({ ids, assignmentId });
+    
+    console.log(`Found ${ids.length} to assign`)
 
     const updated_result = await r
       .knex("campaign_contact")
