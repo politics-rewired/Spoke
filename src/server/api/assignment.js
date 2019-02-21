@@ -142,62 +142,43 @@ export async function giveUserMoreTexts(auth0Id, count) {
     throw new Error(`No user found with id ${auth0Id}`);
   }
 
-  // Process campaigns, extracting relevant info
-  const justIds = activeCampaignIds.map(c => c.id);
-  // const campaignIds = campaignContactGroups.map(ccg => ccg.campaign_id).filter(id => justIds.includes({ id }))
-  const campaignsInfo = justIds.map(campaignId => {
-    const assignedBatch = campaignContactGroups.find(
-      ccg => ccg.campaign_id === campaignId && ccg.unassigned == false
-    );
-    const unassignedBatch = campaignContactGroups.find(
-      ccg => ccg.campaign_id === campaignId && ccg.unassigned == true
-    );
-    const assignedCount = assignedBatch
-      ? parseInt(assignedBatch.total_count)
-      : 0;
-    const unassignedCount = unassignedBatch
-      ? parseInt(unassignedBatch.total_count)
-      : 0;
+  // const campaignsToAssignTo = await r.knex('campaign_contact')
+  //   .select('campaign_id')
+  //   .join('campaign', { 'campaign_contact.campaign_id': 'campaign.id'})
+  //   .whereNull('assignment_id')
+  //   .where({ 'campaign.is_started' : true, 'campaign.is_archived' : false })
+  //   .whereRaw(`campaign.texting_hours_end > hour(CONVERT_TZ(now(), 'UTC', campaign.timezone)) + 1`)
+  //   .whereRaw(`campaign.texting_hours_start < hour(CONVERT_TZ(now(), 'UTC', campaign.timezone))`)
+  //   .groupBy('campaign_contact.campaign_id')
+  //   .orderBy('campaign.id')
+  //   .limit(1)
 
-    return {
-      id: campaignId,
-      assignmentProgress: assignedCount / (assignedCount + unassignedCount),
-      leftUnassigned: unassignedCount
-    };
-  });
+  const result = await r.knex.raw(`
+    select campaign_id
+    from campaign_contact 
+    join campaign on campaign_contact.campaign_id = campaign.id
+    where assignment_id is null
+      and campaign.is_started = true and campaign.is_archived = false
+      and campaign.texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone)) + 1
+      and campaign.texting_hours_start < hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone))
+    group by campaign_contact.campaign_id
+    order by campaign.id
+    limit 1;
+  `)
 
-  // Determine which campaign to assign to – optimize to finish at once
-  // let campaignIdToAssignTo;
-  // let countToAssign = count;
-  // const campaignsWithEnoughLeftUnassigned = campaignsInfo.filter(c => c.leftUnassigned >= count)
-  // if (campaignsWithEnoughLeftUnassigned.length == 0) {
-  //   const campaignWithMostToAssignTo = _.sortBy(campaignsInfo, c => c.leftUnassigned).reverse();
-  //   if (campaignWithMostToAssignTo[0].leftUnassigned == 0) {
-  //     throw new Error('There are no campaigns left to assign a texter to')
-  //   } else {
-  //     campaignIdToAssignTo = campaignWithMostToAssignTo[0].id;
-  //     countToAssign = campaignWithMostToAssignTo[0].leftUnassigned;
-  //   }
-  // } else {
-  //   campaignIdToAssignTo = _.sortBy(campaignsWithEnoughLeftUnassigned, c => c.assignmentProgress)[0].id;
-  // }
-
+  const campaignsToAssignTo = result[0]
+  
+  if (campaignsToAssignTo.length == 0) {
+    throw new Error('Could not find a suitable campaign to assign to.')
+  }
+  
   // Determine which campaign to assign to – optimize to pick winners
-  let campaignIdToAssignTo;
+  let campaignIdToAssignTo = campaignsToAssignTo[0].campaign_id
   let countToAssign = count;
-  // const campaignsWithUnassigned = campaignsInfo.filter(c => c.leftUnassigned > 0)
-  // console.log(campaignsInfo)
-  // if (campaignsWithUnassigned.length == 0) {
-  //   throw new Error('There are no campaigns left to assign a texter to')
-  // } else {
-  //   const campaignToAssignTo = _.sortBy(campaignsWithUnassigned, c => c.leftUnassigned)[0]
-  //   campaignIdToAssignTo = campaignToAssignTo.id
-  //   countToAssign = Math.min(countToAssign, campaignToAssignTo.leftUnassigned)
-  // }
-  campaignIdToAssignTo = process.env.CAMPAIGN_ID_TO_ASSIGN_TO;
+  console.log(`Assigning ${countToAssign} on campaign ${campaignIdToAssignTo}`)
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
-  await r.knex.transaction(async trx => {
+  const updated_result = await r.knex.transaction(async trx => {
     let assignmentId;
     const existingAssignment = (await r.knex("assignment").where({
       user_id: user.id,
@@ -249,19 +230,11 @@ export async function giveUserMoreTexts(auth0Id, count) {
       .update({ assignment_id: assignmentId })
       .whereIn("id", ids);
 
-    console.log({ ids, updated_result });
 
-    // const assignment = await r.knex('assignment').where({ id: assignmentId }).first()
-
-    // if (process.env.SEND_ASSIGNMENT_API_EMAILS) {
-    //   await sendUserNotification({
-    //     type: Notifications.ASSIGNMENT_UPDATED,
-    //     assignment
-    //   })
-    // }
+    return updated_result
   });
 
-  return true;
+  return updated_result;
 }
 
 export const resolvers = {
