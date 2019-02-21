@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import Dialog from 'material-ui/Dialog'
+import FlatButton from 'material-ui/FlatButton'
 import _ from 'lodash'
 
 import IncomingMessageActions from '../components/IncomingMessageActions'
@@ -75,7 +77,7 @@ export class AdminIncomingMessageList extends Component {
     includeOptedOutConversations: false,
     selectedRows: [],
     campaignIdsContactIds: [],
-    reassignmentAlert: '',
+    reassignmentAlert: undefined,
   }
 
   shouldComponentUpdate(dummy, nextState) {
@@ -127,32 +129,42 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  handleReassignRequested = async (newTexterUserIds) => {
+  closeReassignmentDialog = () => this.setState({ reassignmentAlert: undefined })
+
+  handleReassignmentCommon = async (fn) => {
     let newState = {
       needsRender: true,
-      reassignmentAlert: 'Success!'
+      reassignmentAlert: {
+        title: 'Success!',
+        message: 'Your reassignment request succeeded'
+      }
     }
     try {
-      await this.props.mutations.megaReassignCampaignContacts(
-        this.props.params.organizationId,
-        this.state.campaignIdsContactIds,
-        newTexterUserIds
-      )
+      await fn()
       newState.selectedRows = []
     } catch (error) {
-      newState.reassignmentAlert = error
+      newState.reassignmentAlert = {
+        title: 'Error',
+        message: `There was an error: ${error}`
+      }
     }
 
     newState.utc = Date.now().toString()
     this.setState(newState)
   }
 
+  handleReassignRequested = async (newTexterUserIds) => {
+    await this.handleReassignmentCommon(async () => {
+      await this.props.mutations.megaReassignCampaignContacts(
+        this.props.params.organizationId,
+        this.state.campaignIdsContactIds,
+        newTexterUserIds
+      )
+    })
+  }
+
   handleReassignAllMatchingRequested = async (newTexterUserIds) => {
-    let newState = {
-      needsRender: true,
-      reassignmentAlert: 'Success!'
-    }
-    try {
+    await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaBulkReassignCampaignContacts(
         this.props.params.organizationId,
         this.state.campaignsFilter || {},
@@ -160,13 +172,7 @@ export class AdminIncomingMessageList extends Component {
         this.state.contactsFilter || {},
         newTexterUserIds
       )
-      newState.selectedRows = []
-    } catch (error) {
-      newState.reassignmentAlert = error
-    }
-
-    newState.utc = Date.now().toString()
-    this.setState(newState)
+    })
   }
 
   markForSecondPass = async () => {
@@ -297,7 +303,7 @@ export class AdminIncomingMessageList extends Component {
   conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
 
   render() {
-    const { selectedRows, page, pageSize } = this.state
+    const { selectedRows, page, pageSize, reassignmentAlert } = this.state
     const areContactsSelected = selectedRows === 'all' || (Array.isArray(selectedRows) && selectedRows.length > 0)
 
     const cursor = {
@@ -378,6 +384,21 @@ export class AdminIncomingMessageList extends Component {
             />
           </div>
         )}
+        <Dialog
+          title={reassignmentAlert && reassignmentAlert.title}
+          actions={[
+            <FlatButton
+              label="Ok"
+              primary={true}
+              onClick={this.closeReassignmentDialog}
+            />
+          ]}
+          modal={false}
+          open={!!reassignmentAlert}
+          onRequestClose={this.closeReassignmentDialog}
+        >
+          {reassignmentAlert && reassignmentAlert.message}
+        </Dialog>
       </div>
     )
   }
