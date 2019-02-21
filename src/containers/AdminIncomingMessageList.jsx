@@ -77,9 +77,6 @@ export class AdminIncomingMessageList extends Component {
       includeOptedOutConversations: false
     }
 
-    this.handleCampaignChanged = this.handleCampaignChanged.bind(this)
-    this.handleMessageFilterChange = this.handleMessageFilterChange.bind(this)
-    this.handleReassignRequested = this.handleReassignRequested.bind(this)
     this.handleReassignAllMatchingRequested = this.handleReassignAllMatchingRequested.bind(this)
     this.handlePageChange = this.handlePageChange.bind(this)
     this.handlePageSizeChange = this.handlePageSizeChange.bind(this)
@@ -120,7 +117,7 @@ export class AdminIncomingMessageList extends Component {
     return true
   }
 
-  async handleCampaignChanged(campaignId) {
+  handleCampaignChanged = async (campaignId) => {
     const campaignsFilter = getCampaignsFilterForCampaignArchiveStatus(
       this.state.includeActiveCampaigns,
       this.state.includeArchivedCampaigns
@@ -146,7 +143,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleMessageFilterChange(messagesFilter) {
+  handleMessageFilterChange = async (messagesFilter) => {
     const contactsFilter = Object.assign(
       _.omit(this.state.contactsFilter, ['messageStatus']),
       { messageStatus: messagesFilter }
@@ -157,7 +154,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleReassignRequested(newTexterUserId) {
+  handleReassignRequested = async (newTexterUserId) => {
     await this.props.mutations.reassignCampaignContacts(
       this.props.params.organizationId,
       this.state.campaignIdsContactIds,
