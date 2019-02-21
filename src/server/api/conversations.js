@@ -144,6 +144,8 @@ export async function getConversations(
 
   const conversationRows = await query
 
+  console.log(conversationRows)
+
   /* collapse the rows to produce an array of objects, with each object
   * containing the fields for one conversation, each having an array of
   * message objects */
@@ -156,20 +158,16 @@ export async function getConversations(
     'is_from_contact'
   ]
 
-  let ccId = undefined
-  let conversation = undefined
-  const conversations = []
-  for (const conversationRow of conversationRows) {
-    if (ccId !== conversationRow.cc_id) {
-      ccId = conversationRow.cc_id
-      conversation = _.omit(conversationRow, messageFields)
-      conversation.messages = []
-      conversations.push(conversation)
-    }
-    conversation.messages.push(
-      mapQueryFieldsToResolverFields(_.pick(conversationRow, messageFields), { mess_id: 'id' })
-    )
-  }
+  const groupedContacts = _.groupBy(conversationRows, 'cc_id')
+  const conversations = Object.keys(groupedContacts).map(contactId => {
+    const contactMessages = groupedContacts[contactId]
+    const firstRow = contactMessages[0]
+    const conversation = _.omit(firstRow, messageFields)
+    conversation.messages = contactMessages.map(message => {
+      return mapQueryFieldsToResolverFields(_.pick(message, messageFields), { mess_id: 'id' })
+    })
+    return conversation
+  })
 
   /* Query #3 -- get the count of all conversations matching the criteria.
   * We need this to show total number of conversations to support paging */
