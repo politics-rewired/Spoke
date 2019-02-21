@@ -212,7 +212,7 @@ app.post('/remove-number-from-campaign', async (req, res) => {
 
   if (!phone) { return res.status(400).json({ error: 'Missing `phone` in request body' }) }
   const normalizedPhone = normalize(phone)
-  await r.knex('campaign_contact').where({ cell: normalizedPhone }).del()
+  await r.knex('campaign_contact').where({ cell: normalizedPhone, message_status: 'needsMessage' }).del()
   return res.sendStatus(200)
 })
 
