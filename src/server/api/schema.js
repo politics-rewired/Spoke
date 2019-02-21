@@ -1515,6 +1515,12 @@ const rootMutations = {
           })
         })
 
+        console.log({
+          campaignIdContactIdsMap,
+          campaignIdMessageIdsMap,
+          userId: newTexterUserIds[idx]
+        })
+
         const responses = await reassignConversations(
           campaignIdContactIdsMap,
           campaignIdMessageIdsMap,
