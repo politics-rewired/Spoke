@@ -55,53 +55,24 @@ function getContactsFilterForConversationOptOutStatus(
 }
 
 export class AdminIncomingMessageList extends Component {
-  constructor(props) {
-    super(props)
 
-    this.state = {
-      page: 0,
-      pageSize: 10,
-      campaignsFilter: { isArchived: false },
-      contactsFilter: { isOptedOut: false },
-      assignmentsFilter: {},
-      needsRender: false,
-      utc: Date.now().toString(),
-      campaigns: [],
-      reassignmentTexters: [],
-      campaignTexters: [],
-      includeArchivedCampaigns: false,
-      conversationCount: 0,
-      includeActiveCampaigns: true,
-      conversationCount: 0,
-      includeNotOptedOutConversations: true,
-      includeOptedOutConversations: false
-    }
-
-    this.handlePageChange = this.handlePageChange.bind(this)
-    this.handlePageSizeChange = this.handlePageSizeChange.bind(this)
-    this.handleRowSelection = this.handleRowSelection.bind(this)
-    this.handleCampaignsReceived = this.handleCampaignsReceived.bind(this)
-    this.handleCampaignTextersReceived = this.handleCampaignTextersReceived.bind(
-      this
-    )
-    this.handleReassignmentTextersReceived = this.handleReassignmentTextersReceived.bind(
-      this
-    )
-    this.handleTexterChanged = this.handleTexterChanged.bind(this)
-    this.handleArchivedCampaignsToggled = this.handleArchivedCampaignsToggled.bind(
-      this
-    )
-    this.handleActiveCampaignsToggled = this.handleActiveCampaignsToggled.bind(
-      this
-    )
-    this.conversationCountChanged = this.conversationCountChanged.bind(this)
-    this.handleNotOptedOutConversationsToggled = this.handleNotOptedOutConversationsToggled.bind(
-      this
-    )
-    this.handleOptedOutConversationsToggled = this.handleOptedOutConversationsToggled.bind(
-      this
-    )
-    this.conversationCountChanged = this.conversationCountChanged.bind(this)
+  state = {
+    page: 0,
+    pageSize: 10,
+    campaignsFilter: { isArchived: false },
+    contactsFilter: { isOptedOut: false },
+    assignmentsFilter: {},
+    needsRender: false,
+    utc: Date.now().toString(),
+    campaigns: [],
+    reassignmentTexters: [],
+    campaignTexters: [],
+    includeArchivedCampaigns: false,
+    conversationCount: 0,
+    includeActiveCampaigns: true,
+    conversationCount: 0,
+    includeNotOptedOutConversations: true,
+    includeOptedOutConversations: false
   }
 
   shouldComponentUpdate(dummy, nextState) {
@@ -131,7 +102,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleTexterChanged(texterId) {
+  handleTexterChanged = async (texterId) => {
     const assignmentsFilter = {}
     if (texterId >= 0) {
       assignmentsFilter.texterId = texterId
@@ -191,18 +162,18 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handlePageChange(page) {
+  handlePageChange = async (page) => {
     await this.setState({
       page,
       needsRender: true
     })
   }
 
-  async handlePageSizeChange(pageSize) {
+  handlePageSizeChange = async (pageSize) => {
     await this.setState({ needsRender: true, pageSize })
   }
 
-  handleRowSelection(selectedRows, data) {
+  handleRowSelection = async (selectedRows, data) => {
     if (this.state.previousSelectedRows === 'all' && selectedRows !== 'all') {
       this.setState({
         previousSelectedRows: [],
@@ -218,19 +189,19 @@ export class AdminIncomingMessageList extends Component {
     }
   }
 
-  async handleCampaignsReceived(campaigns) {
+  handleCampaignsReceived = async (campaigns) => {
     this.setState({ campaigns, needsRender: true })
   }
 
-  async handleCampaignTextersReceived(campaignTexters) {
+  handleCampaignTextersReceived = async (campaignTexters) => {
     this.setState({ campaignTexters, needsRender: true })
   }
 
-  async handleReassignmentTextersReceived(reassignmentTexters) {
+  handleReassignmentTextersReceived = async (reassignmentTexters) => {
     this.setState({ reassignmentTexters, needsRender: true })
   }
 
-  async handleNotOptedOutConversationsToggled() {
+  handleNotOptedOutConversationsToggled = async () => {
     if (
       this.state.includeNotOptedOutConversations &&
       !this.state.includeOptedOutConversations
@@ -255,7 +226,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleOptedOutConversationsToggled() {
+  handleOptedOutConversationsToggled = async () => {
     const includeNotOptedOutConversations =
       this.state.includeNotOptedOutConversations ||
       !this.state.includeOptedOutConversations
@@ -277,7 +248,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleActiveCampaignsToggled() {
+  handleActiveCampaignsToggled = async () => {
     if (
       this.state.includeActiveCampaigns &&
       !this.state.includeArchivedCampaigns
@@ -295,7 +266,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  async handleArchivedCampaignsToggled() {
+  handleArchivedCampaignsToggled = async () => {
     const includeActiveCampaigns =
       this.state.includeActiveCampaigns || !this.state.includeArchivedCampaigns
 
@@ -311,7 +282,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  conversationCountChanged(conversationCount) {
+  conversationCountChanged = (conversationCount) => {
     this.setState({
       conversationCount
     })
