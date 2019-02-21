@@ -157,10 +157,8 @@ export async function uploadContacts(job) {
   await r.table('campaign_contact')
     .getAll(campaignId, { index: 'campaign_id' })
     .delete()
-  let jobPayload = await gunzip(new Buffer(job.payload, 'base64'))
-  jobPayload = JSON.parse(jobPayload)
-  let { contacts, excludeCampaignIds = [] } = jobPayload
-  
+  let contacts = await gunzip(new Buffer(job.payload, 'base64'))
+  contacts = JSON.parse(contacts)
 
   const maxContacts = parseInt(orgFeatures.hasOwnProperty('maxContacts')
                                 ? orgFeatures.maxContacts
@@ -199,17 +197,6 @@ export async function uploadContacts(job) {
 
   if (deleteOptOutCells) {
     jobMessages.push(`Number of contacts excluded due to their opt-out status: ${optOutCellCount}`)
-  }
-
-  const exclusionCellCount = await r.knex('campaign_contact')
-    .whereIn('cell', function () {
-      this.select('cell').from('campaign_contact').whereIn('campaign_id', excludeCampaignIds)
-    })
-    .where('campaign_id', campaignId)
-    .delete()
-
-  if (exclusionCellCount) {
-    jobMessages.push(`Number of contacts excluded due to campaign exclusion list: ${exclusionCellCount}`)
   }
 
   if (job.id) {

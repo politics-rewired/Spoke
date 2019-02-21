@@ -1,8 +1,5 @@
 import type from 'prop-types'
 import React from 'react'
-import sortBy from 'lodash/sortBy'
-import SelectField from 'material-ui/SelectField'
-import MenuItem from 'material-ui/MenuItem'
 import RaisedButton from 'material-ui/RaisedButton'
 import GSForm from '../components/forms/GSForm'
 import Form from 'react-formal'
@@ -55,12 +52,7 @@ export default class CampaignContactsForm extends React.Component {
   state = {
     uploading: false,
     validationStats: null,
-    contactUploadError: null,
-    selectedCampaignIds: []
-  }
-
-  handleCampaignExclusionChange = (event, index, values) => {
-    this.setState({ selectedCampaignIds: values })
+    contactUploadError: null
   }
 
   validateSql = (sql) => {
@@ -125,41 +117,13 @@ export default class CampaignContactsForm extends React.Component {
       uploading: false,
       contactUploadError: null
     })
-    const { selectedCampaignIds } = this.state
     const contactCollection = {
       contactsCount: contacts.length,
-      excludeCampaignIds: selectedCampaignIds,
       contactSql: null,
       customFields,
       contacts
     }
     this.props.onChange(contactCollection)
-  }
-
-  renderCampaignExclusion() {
-    const { selectedCampaignIds } = this.state
-
-    return (
-      <div>
-        <p>You can also filter out contacts from this upload that are already uploaded to an existing Spoke campaigns (regardless of whether they have been texted yet in that campaign).</p>
-        <SelectField
-          multiple
-          hintText='Existing campaigns'
-          value={selectedCampaignIds}
-          onChange={this.handleCampaignExclusionChange}
-        >
-          {sortBy(this.props.otherCampaigns, ['createdAt'], ['desc']).map(campaign => (
-            <MenuItem
-              key={campaign.id}
-              insetChildren={true}
-              checked={selectedCampaignIds && selectedCampaignIds.indexOf(campaign.id) > -1}
-              value={campaign.id}
-              primaryText={campaign.title}
-            />
-          ))}
-        </SelectField>
-      </div>
-    )
   }
 
   renderContactStats() {
@@ -249,7 +213,6 @@ export default class CampaignContactsForm extends React.Component {
     const { contactUploadError, contactSqlError } = this.state
     return (
       <div>
-        {this.renderCampaignExclusion()}
         {!this.props.jobResultMessage ? '' : (
           <div>
             <CampaignFormSectionHeading title='Job Outcome' />
@@ -365,6 +328,5 @@ CampaignContactsForm.propTypes = {
   onSubmit: type.func,
   saveDisabled: type.bool,
   saveLabel: type.string,
-  jobResultMessage: type.string,
-  otherCampaigns: type.array
+  jobResultMessage: type.string
 }
