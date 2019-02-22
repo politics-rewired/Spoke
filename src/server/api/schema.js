@@ -1226,6 +1226,7 @@ const rootMutations = {
         .post(process.env.TFB_BAD_WORD_URL)
         .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
         .send({ user_id: user.auth0_id, message: toInsert.text })
+        .end()
 
       return contactUpdateResult;
 
