@@ -1221,6 +1221,13 @@ const rootMutations = {
         serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
       service.sendMessage(toInsert);
 
+      // Send message to BernieSMS to be checked for bad words
+      request
+        .post(process.env.TFB_BAD_WORD_URL)
+        .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
+        .send({ user_id: user.auth0_id, message: toInsert.text })
+        .end()
+
       return contactUpdateResult;
 
       // Unreachable code who did this
