@@ -1398,8 +1398,6 @@ const rootMutations = {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-      console.log('mega newTexterUserIds', newTexterUserIds)
-
       // group contactIds by campaign
       // group messages by campaign
       const campaignIdContactIdsMap = new Map();
@@ -1417,9 +1415,6 @@ const rootMutations = {
       const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
       const response = []
       const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter)
-      console.log(1412)
-      console.log(result.length)
-      console.log(chunks.length)
       for (let [idx, chunk] of chunks.entries()) {
         const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
         const campaignIdContactIdsMap = new Map()
@@ -1437,8 +1432,6 @@ const rootMutations = {
           })
         })
 
-        console.log(1430)
-        console.log({ campaignIdContactIdsMap, campaignIdMessageIdsMap, user: newTexterUserIds[idx] })
 
         const responses = await reassignConversations(
           campaignIdContactIdsMap,
@@ -1523,12 +1516,6 @@ const rootMutations = {
               campaignIdMessageIdsMap.get(campaign_id).push(message_id)
             })
           })
-        })
-
-        console.log({
-          campaignIdContactIdsMap,
-          campaignIdMessageIdsMap,
-          userId: newTexterUserIds[idx]
         })
 
         const responses = await reassignConversations(
