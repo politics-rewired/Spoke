@@ -128,7 +128,6 @@ export async function giveUserMoreTexts(auth0Id, count) {
     where assignment_id is null
       and campaign.is_started = true and campaign.is_archived = false
       and campaign.texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone)) + 1
-      and campaign.texting_hours_start < hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone))
     group by campaign_contact.campaign_id
     order by campaign.id
     limit 1;
