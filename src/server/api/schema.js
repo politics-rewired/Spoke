@@ -1229,20 +1229,6 @@ const rootMutations = {
         .end()
 
       return contactUpdateResult;
-
-      // Unreachable code who did this
-      if (JOBS_SAME_PROCESS) {
-        const service =
-          serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
-        log.info(
-          `Sending (${service}): ${messageInstance.user_number} -> ${
-            messageInstance.contact_number
-          }\nMessage: ${messageInstance.text}`
-        );
-        service.sendMessage(messageInstance);
-      }
-
-      return contact;
     },
     deleteQuestionResponses: async (
       _,
