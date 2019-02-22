@@ -217,6 +217,7 @@ const rootSchema = `
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]!):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!): String!
+    releaseUnsentMessages(campaignId: String!): Int!
   }
 
   schema {
