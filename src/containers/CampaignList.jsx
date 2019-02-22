@@ -16,6 +16,7 @@ import wrapMutations from './hoc/wrap-mutations'
 import Empty from '../components/Empty'
 import LoadingIndicator from '../components/LoadingIndicator'
 import { dataTest } from '../lib/attributes'
+import RaisedButton from 'material-ui/RaisedButton'
 
 const campaignInfoFragment = `
   id
@@ -114,22 +115,26 @@ class CampaignList extends React.Component {
           this.props.router.push(campaignUrl))}
         secondaryText={secondaryText}
         leftIcon={leftIcon}
-        rightIconButton={adminPerms ?
-          (campaign.isArchived ? (
-            <IconButton
-              tooltip='Unarchive'
-              onTouchTap={async () => this.props.mutations.unarchiveCampaign(campaign.id)}
-            >
-              <UnarchiveIcon />
-            </IconButton>
-          ) : (
+        rightIconButton={adminPerms ? []
+          .concat(campaign.isArchived ? [(
+              <IconButton tooltip='Unarchive' onTouchTap={async () => this.props.mutations.unarchiveCampaign(campaign.id)} >
+                <UnarchiveIcon />
+              </IconButton>
+            )] : [(
               <IconButton
                 tooltip='Archive'
                 onTouchTap={async () => this.props.mutations.archiveCampaign(campaign.id)}
               >
                 <ArchiveIcon />
               </IconButton>
-            )) : null}
+              )]
+          ).concat(campaign.hasUnsentInitialMessages ? [
+            <RaisedButton onTouchTap={() => this.props.mutations.releaseUnsentMessages(campaign.id)}>
+              Release Unsent Messages
+            </RaisedButton>
+          ] : [])
+          : []
+        }
       />
     )
   }
@@ -182,6 +187,12 @@ const mapMutationsToProps = () => ({
           ${campaignInfoFragment}
         }
       }`,
+    variables: { campaignId }
+  }),
+  releaseUnsentMessages: (campaignId) ({
+    mutation: gql`mutation releaseUnsentMessages($campaignId: String!) {
+      releaseUnsentMessages:(id: $campaignId) 
+    }`,
     variables: { campaignId }
   })
 })

@@ -1551,6 +1551,16 @@ const rootMutations = {
       } catch (e) {
         return e.response.body.message;
       }
+    },
+    releaseUnsentMessages: async (_, { campaignId }, { user }) => {
+      const updatedCount = await r.knex('campaign_contact').where({
+        campaign_id: parseInt(campaignId),
+        message_status: 'needsMessage'
+      }).update({
+        assignment_id: null
+      })
+
+      return updatedCount;
     }
   }
 };
