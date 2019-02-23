@@ -26,7 +26,8 @@ import requestLogging from '../lib/request-logging'
 
 const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
 const PNF = googleLibPhoneNumber.PhoneNumberFormat;
-import knex from './knex'
+
+require('dotenv').config()
 
 process.on('uncaughtException', (ex) => {
   log.error(ex)
@@ -60,11 +61,11 @@ if (!process.env.SUPPRESS_DATABASE_AUTOCREATE) {
       seedZipCodes()
     }
     if (!didCreate && !process.env.SUPPRESS_MIGRATIONS) {
-      knex.migrate.latest()
+      r.k.migrate.latest()
     }
   })
 } else if (!process.env.SUPPRESS_MIGRATIONS) {
-  knex.migrate.latest()
+  r.k.migrate.latest()
 }
 
 setupUserNotificationObservers()
