@@ -333,7 +333,7 @@ const rootMutations = {
         .replace(/[^a-zA-Z1-9]+/g, "")}`;
       await saveNewIncomingMessage(
         new Message({
-          campaign_ocntact_id: contact.id,
+          campaign_contact_id: contact.id,
           contact_number: contactNumber,
           user_number: userNumber,
           is_from_contact: true,
@@ -1224,11 +1224,14 @@ const rootMutations = {
       service.sendMessage(toInsert);
 
       // Send message to BernieSMS to be checked for bad words
-      request
-        .post(process.env.TFB_BAD_WORD_URL)
-        .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
-        .send({ user_id: user.auth0_id, message: toInsert.text })
-        .end()
+      const badWordUrl = process.env.TFB_BAD_WORD_URL
+      if (badWordUrl) {
+        request
+          .post(process.env.TFB_BAD_WORD_URL)
+          .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
+          .send({ user_id: user.auth0_id, message: toInsert.text })
+          then(log.info, log.error)
+      }
 
       return contactUpdateResult;
     },
