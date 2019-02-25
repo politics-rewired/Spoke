@@ -249,6 +249,11 @@ export const resolvers = {
         return currentEditors(r.redis, campaign, user)
       }
       return ''
-    }
+    },
+    creator: async (campaign, _, { loaders }) => (
+      campaign.creator_id
+      ? loaders.user.load(campaign.creator_id)
+      : null
+    )
   }
 }

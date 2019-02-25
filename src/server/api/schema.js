@@ -826,6 +826,7 @@ const rootMutations = {
       );
       const campaignInstance = new Campaign({
         organization_id: campaign.organizationId,
+        creator_id: user.id,
         title: campaign.title,
         description: campaign.description,
         due_by: campaign.dueBy,
@@ -842,6 +843,7 @@ const rootMutations = {
 
       const campaignInstance = new Campaign({
         organization_id: campaign.organization_id,
+        creator_id: user.id,
         title: "COPY - " + campaign.title,
         description: campaign.description,
         due_by: campaign.dueBy,
