@@ -80,7 +80,7 @@ const operations = {
   }
 }
 
-class CampaignList extends React.Component {
+export class CampaignList extends React.Component {
   state ={
     inProgress: undefined,
     error: undefined,
