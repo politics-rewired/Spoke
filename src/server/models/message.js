@@ -36,6 +36,7 @@ const Message = thinky.createModel('message', type.object().schema({
 }).allowExtra(false), { noAutoCreation: true,
                         dependencies: [User, Assignment] })
 
+Message.ensureIndex('campaign_contact_id')
 Message.ensureIndex('user_id')
 Message.ensureIndex('assignment_id')
 Message.ensureIndex('send_status')
