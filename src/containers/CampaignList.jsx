@@ -17,6 +17,9 @@ import Empty from '../components/Empty'
 import LoadingIndicator from '../components/LoadingIndicator'
 import { dataTest } from '../lib/attributes'
 import RaisedButton from 'material-ui/RaisedButton'
+import IconMenu from 'material-ui/IconMenu'
+import MenuItem from 'material-ui/MenuItem'
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 
 const campaignInfoFragment = `
   id
@@ -45,6 +48,14 @@ const inlineStyles = {
 }
 
 class CampaignList extends React.Component {
+  state ={
+    inProgress: undefined,
+    error: undefined,
+    finished: undefined
+  }
+
+  start = (operation, campaignId) => () => this.setState({ inProgress: { [operation]: campaignId } })
+
   renderRow(campaign) {
     const {
       isStarted,
@@ -56,7 +67,7 @@ class CampaignList extends React.Component {
 
 
     let listItemStyle = {}
-    let leftIcon = ''
+    let leftIcon;
     if (isArchived) {
       listItemStyle = inlineStyles.past
     } else if (!isStarted || hasUnassignedContacts) {
@@ -115,26 +126,7 @@ class CampaignList extends React.Component {
           this.props.router.push(campaignUrl))}
         secondaryText={secondaryText}
         leftIcon={leftIcon}
-        rightIconButton={adminPerms ? []
-          .concat(campaign.isArchived ? [(
-              <IconButton tooltip='Unarchive' onTouchTap={async () => this.props.mutations.unarchiveCampaign(campaign.id)} >
-                <UnarchiveIcon />
-              </IconButton>
-            )] : [(
-              <IconButton
-                tooltip='Archive'
-                onTouchTap={async () => this.props.mutations.archiveCampaign(campaign.id)}
-              >
-                <ArchiveIcon />
-              </IconButton>
-              )]
-          ).concat(campaign.hasUnsentInitialMessages ? [
-            <RaisedButton onTouchTap={() => this.props.mutations.releaseUnsentMessages(campaign.id)}>
-              Release Unsent Messages
-            </RaisedButton>
-          ] : [])
-          : []
-        }
+        rightIconButton={adminPerms && this.renderMenu(campaign)}
       />
     )
   }
@@ -150,10 +142,26 @@ class CampaignList extends React.Component {
         icon={<SpeakerNotesIcon />}
       />
     ) : (
-        <List>
-          {campaigns.campaigns.map((campaign) => this.renderRow(campaign))}
-        </List>
+        <div>
+          <List>
+            {campaigns.campaigns.map((campaign) => this.renderRow(campaign))}
+          </List>
+        </div>
       )
+  }
+
+  renderMenu(campaign) {
+    return (
+      <IconMenu
+        iconButtonElement={<IconButton onClick={console.log}><MoreVertIcon /></IconButton>}
+        onClick={console.log}
+      >
+        <MenuItem primaryText="Release Unsent Messages" onClick={this.start('releaseUnsentMessages', campaign.id)} />
+        {!campaign.isArchived && <MenuItem primaryText="Archive Campaign" leftIcon={<ArchiveIcon />} onClick={() => this.props.mutations.archiveCampaign(campaign.id)} />}
+        {campaign.isArchived && <MenuItem primaryText="Unarchive Campaign" leftIcon={<UnarchiveIcon />} onClick={() => this.props.mutations.unarchiveCampaign(campaign.id)} />}
+
+      </IconMenu>
+    )
   }
 }
 
@@ -189,7 +197,7 @@ const mapMutationsToProps = () => ({
       }`,
     variables: { campaignId }
   }),
-  releaseUnsentMessages: (campaignId) ({
+  releaseUnsentMessages: (campaignId) => ({
     mutation: gql`mutation releaseUnsentMessages($campaignId: String!) {
       releaseUnsentMessages:(id: $campaignId) 
     }`,
