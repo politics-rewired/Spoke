@@ -1,6 +1,18 @@
 -- Create new column
 ALTER TABLE `message` ADD campaign_contact_id INT(11) AFTER id;
 
+-- Count matchable
+SELECT
+    SUM(IF(CC.id IS NULL, 0, 1)) AS matchable,
+    SUM(IF(CC.id IS NULL, 1, 0)) AS unmatchable
+FROM
+    `message` AS M
+    INNER JOIN assignment AS A
+        ON M.assignment_id = A.id
+    LEFT JOIN campaign_contact AS CC
+        ON M.contact_number = CC.cell
+        AND CC.assignment_id = A.id;
+
 -- Backfill
 -- Approach from: https://stackoverflow.com/a/11588758
 UPDATE
