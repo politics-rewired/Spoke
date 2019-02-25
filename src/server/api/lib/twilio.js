@@ -44,6 +44,7 @@ async function convertMessagePartsToMessage(messageParts) {
     contactNumber
   })
   return new Message({
+    campaign_contact_id: lastMessage.campaign_contact_id,
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,
