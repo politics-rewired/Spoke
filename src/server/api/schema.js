@@ -333,6 +333,7 @@ const rootMutations = {
         .replace(/[^a-zA-Z1-9]+/g, "")}`;
       await saveNewIncomingMessage(
         new Message({
+          campaign_contact_id: contact.id,
           contact_number: contactNumber,
           user_number: userNumber,
           is_from_contact: true,
@@ -1169,6 +1170,8 @@ const rootMutations = {
       }
 
       const toInsert = {
+        user_id: user.id,
+        campaign_contact_id: campaignContactId,
         text: replaceCurlyApostrophes(text),
         contact_number: contactNumber,
         user_number: "",
@@ -1221,21 +1224,17 @@ const rootMutations = {
         serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
       service.sendMessage(toInsert);
 
-      return contactUpdateResult;
-
-      // Unreachable code who did this
-      if (JOBS_SAME_PROCESS) {
-        const service =
-          serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
-        log.info(
-          `Sending (${service}): ${messageInstance.user_number} -> ${
-            messageInstance.contact_number
-          }\nMessage: ${messageInstance.text}`
-        );
-        service.sendMessage(messageInstance);
+      // Send message to BernieSMS to be checked for bad words
+      const badWordUrl = process.env.TFB_BAD_WORD_URL
+      if (badWordUrl) {
+        request
+          .post(process.env.TFB_BAD_WORD_URL)
+          .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
+          .send({ user_id: user.auth0_id, message: toInsert.text })
+          then(log.info, log.error)
       }
 
-      return contact;
+      return contactUpdateResult;
     },
     deleteQuestionResponses: async (
       _,
@@ -1391,8 +1390,6 @@ const rootMutations = {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-      console.log('mega newTexterUserIds', newTexterUserIds)
-
       // group contactIds by campaign
       // group messages by campaign
       const campaignIdContactIdsMap = new Map();
@@ -1410,9 +1407,6 @@ const rootMutations = {
       const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
       const response = []
       const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter)
-      console.log(1412)
-      console.log(result.length)
-      console.log(chunks.length)
       for (let [idx, chunk] of chunks.entries()) {
         const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
         const campaignIdContactIdsMap = new Map()
@@ -1430,8 +1424,6 @@ const rootMutations = {
           })
         })
 
-        console.log(1430)
-        console.log({ campaignIdContactIdsMap, campaignIdMessageIdsMap, user: newTexterUserIds[idx] })
 
         const responses = await reassignConversations(
           campaignIdContactIdsMap,
@@ -1516,12 +1508,6 @@ const rootMutations = {
               campaignIdMessageIdsMap.get(campaign_id).push(message_id)
             })
           })
-        })
-
-        console.log({
-          campaignIdContactIdsMap,
-          campaignIdMessageIdsMap,
-          userId: newTexterUserIds[idx]
         })
 
         const responses = await reassignConversations(

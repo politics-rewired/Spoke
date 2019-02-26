@@ -164,6 +164,16 @@ const migrations = [
       })
       console.log('added send_before column to message table')
     }
+  },
+  { auto: true, // 14
+    date: '2019-02-25',
+    migrate: async function() {
+      await r.knex.schema.alterTable('message', (table) => {
+        table.integer('campaign_contact_id').unsigned()
+        table.foreign('campaign_contact_id').references('campaign_contact.id')
+      })
+      console.log('added campaign_contact_id column to message table')
+    }
   }
   /* migration template
      {auto: true, //if auto is false, then it will block the migration running automatically
