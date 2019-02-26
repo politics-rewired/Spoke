@@ -211,17 +211,20 @@ export async function giveUserMoreTexts(auth0Id, count) {
     
     console.log(`Found ${ids.length} to assign`)
 
-    const updated_result = await r
-      .knex("campaign_contact")
+    const campaign_contacts_updated_result = await r.knex("campaign_contact")
       .update({ assignment_id: assignmentId })
       .whereIn("id", ids);
 
+    const messages_updated_result = await r.knex('message')
+      .update({ assignment_id: assignmentId })
+      .whereIn('campaign_contact_id', ids)
 
-    console.log(`Updated ${updated_result}`)
-    return updated_result
+
+    console.log(`Updated ${campaign_contacts_updated_result} campaign contacts and ${messages_updated_result} messages.`)
+    return campaign_contacts_updated_result
   });
 
-  return updated_result;
+  return campaign_contacts_updated_result
 }
 
 export const resolvers = {
