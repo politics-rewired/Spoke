@@ -155,9 +155,10 @@ export const resolvers = {
       return await loaders.zipCode.load(mainZip)
     },
     messages: async (campaignContact) => {
-      if (campaignContact.message_status === 'needsMessage') {
-        return [] // it's the beginning, so there won't be any
-      }
+      // Uncommenting this out for the second pass scenario
+      // if (campaignContact.message_status === 'needsMessage') {
+      //   return [] // it's the beginning, so there won't be any
+      // }
 
       if ('messages' in campaignContact) {
         return campaignContact.messages
@@ -169,7 +170,7 @@ export const resolvers = {
           contact_number: campaignContact.cell
         })
         .orderBy('created_at')
-
+      
       return messages
     },
     optOut: async (campaignContact, _, { loaders }) => {
