@@ -1,8 +1,9 @@
+require('dotenv').config()
 const _ = require('lodash')
 
 const config = {
   client: 'mysql',
-  connection: 'mysql://spoke:tHXtEb6YZ4P3SZfT9kzJyKykCg4mTbGgYsSTXUph4@bernie-pgbouncer.politicsrewired.com:4006/spoke_prod',
+  connection: process.env.DATABASE_URL,
   pool: {
     min: 2,
     max: 10
