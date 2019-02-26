@@ -1170,6 +1170,7 @@ const rootMutations = {
       }
 
       const toInsert = {
+        user_id: user.id,
         campaign_contact_id: campaignContactId,
         text: replaceCurlyApostrophes(text),
         contact_number: contactNumber,
