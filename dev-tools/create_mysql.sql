@@ -73,7 +73,7 @@ CREATE TABLE interaction_step (
     id int(11) NOT NULL AUTO_INCREMENT,
     campaign_id int(11) NOT NULL,
     question varchar(255) DEFAULT '',
-    script varchar(255) DEFAULT '',
+    script text DEFAULT '',
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     parent_interaction_id int(11),
     answer_option varchar(255) DEFAULT '',
