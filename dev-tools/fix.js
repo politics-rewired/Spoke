@@ -21,6 +21,7 @@ const papa = require('papaparse')
 const rows = papa.parse(fs.readFileSync('../DUMP3.csv').toString()).data
 
 async function fixCsvRow([message_id, new_assignment_id]) {
+	// console.log(({ message_id: typeof message_id, new_assignment_id: typeof new_assignment_id}))
 	int_message_id = parseInt(message_id)
 	int_new_assignment_id = parseInt(new_assignment_id)
 	if (isNaN(int_message_id) || isNaN(int_new_assignment_id)) {
