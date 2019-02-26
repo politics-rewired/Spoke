@@ -44,13 +44,14 @@ async function convertMessagePartsToMessage(messageParts) {
     contactNumber
   })
   return new Message({
+    campaign_contact_id: lastMessage && lastMessage.campaign_contact_id,
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,
     text,
     service_response: JSON.stringify(serviceMessages),
     service_id: serviceMessages[0].MessagingServiceSid,
-    assignment_id: lastMessage.assignment_id,
+    assignment_id: lastMessage && lastMessage.assignment_id,
     service: 'twilio',
     send_status: 'DELIVERED'
   })
