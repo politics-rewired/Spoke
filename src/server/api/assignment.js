@@ -224,7 +224,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
     return campaign_contacts_updated_result
   });
 
-  return campaign_contacts_updated_result
+  return updated_result
 }
 
 export const resolvers = {
