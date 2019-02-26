@@ -24,6 +24,7 @@ const Message = thinky.createModel('message', type.object().schema({
   // will be several json strings appended together, so JSON.parse will NOT work
   service_response: optionalString(),
   assignment_id: requiredString(),
+  campaign_contact_id: requiredString(),
   service: optionalString(),
   service_id: optionalString().stopReference(),
   send_status: requiredString().enum('QUEUED', 'SENDING', 'SENT', 'DELIVERED', 'ERROR', 'PAUSED', 'NOT_ATTEMPTED'),
@@ -35,6 +36,7 @@ const Message = thinky.createModel('message', type.object().schema({
 }).allowExtra(false), { noAutoCreation: true,
                         dependencies: [User, Assignment] })
 
+Message.ensureIndex('campaign_contact_id')
 Message.ensureIndex('user_id')
 Message.ensureIndex('assignment_id')
 Message.ensureIndex('send_status')
