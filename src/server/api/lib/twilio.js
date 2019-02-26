@@ -41,6 +41,7 @@ async function convertMessagePartsToMessage(messageParts) {
     .join('')
 
   const lastMessage = await getLastMessage({
+    service: 'twilio',
     contactNumber
   })
   return new Message({
