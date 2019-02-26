@@ -333,7 +333,7 @@ const rootMutations = {
         .replace(/[^a-zA-Z1-9]+/g, "")}`;
       await saveNewIncomingMessage(
         new Message({
-          campaign_ocntact_id: contact.id,
+          campaign_contact_id: contact.id,
           contact_number: contactNumber,
           user_number: userNumber,
           is_from_contact: true,
