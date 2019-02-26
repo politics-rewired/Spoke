@@ -2,16 +2,15 @@ import { r } from '../../models'
 import log from '../../../lib/log'
 
 export async function getLastMessage({ contactNumber, service }) {
-  const lastMessage = await r.table('message')
-    .getAll(contactNumber, { index: 'contact_number' })
-    .filter({
+  const lastMessage = await r.knex('message')
+    .where({
+      contact_number: contactNumber,
       is_from_contact: false,
       service
     })
-    .orderBy(r.desc('created_at'))
+    .orderBy('created_at', 'desc')
     .limit(1)
-    .pluck('assignment_id')(0)
-    .default(null)
+    .first('assignment_id', 'campaign_contact_id')
 
   return lastMessage
 }

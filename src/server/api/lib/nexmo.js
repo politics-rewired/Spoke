@@ -24,8 +24,8 @@ async function convertMessagePartsToMessage(messageParts) {
     .join('')
 
   const lastMessage = await getLastMessage({
-    contactNumber,
-    service: 'nexmo'
+    service: 'nexmo',
+    contactNumber
   })
 
   return new Message({
