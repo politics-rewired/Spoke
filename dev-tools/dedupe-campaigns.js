@@ -113,7 +113,34 @@ async function main() {
   // }
 }
 
-main()
+// main()
+//   .then(() => process.exit(0))
+//   .catch(error => {
+//     console.error(error);
+//     process.exit(1);
+//   });
+
+async function go() {
+  const sql = `
+    SELECT campaign_contact.id
+    FROM campaign_contact
+    WHERE campaign_contact.campaign_id = 69
+      AND campaign_contact.cell IN (
+        SELECT cell
+        FROM campaign_contact
+        WHERE campaign_contact.campaign_id = 68
+      )
+  `;
+  const [ids, _] = await db.raw(sql)
+  const actualIds = ids.map(elem => elem.id);
+  const result = await db('campaign_contact')
+    .where({ campaign_id: 69 })
+    .whereIn('id', actualIds)
+    .del();
+  console.log(result);
+}
+
+go()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);
