@@ -1,8 +1,7 @@
 import type from 'prop-types'
 import React from 'react'
 import sortBy from 'lodash/sortBy'
-import SelectField from 'material-ui/SelectField'
-import MenuItem from 'material-ui/MenuItem'
+import Select from 'react-select'
 import RaisedButton from 'material-ui/RaisedButton'
 import GSForm from '../components/forms/GSForm'
 import Form from 'react-formal'
@@ -59,8 +58,9 @@ export default class CampaignContactsForm extends React.Component {
     selectedCampaignIds: []
   }
 
-  handleCampaignExclusionChange = (event, index, values) => {
-    this.setState({ selectedCampaignIds: values })
+  handleCampaignExclusionChange = (selectedOptions, { action, option }) => {
+    const selectedCampaignIds = selectedOptions.map(option => option.value)
+    this.setState({ selectedCampaignIds })
   }
 
   validateSql = (sql) => {
@@ -137,27 +137,25 @@ export default class CampaignContactsForm extends React.Component {
   }
 
   renderCampaignExclusion() {
-    const { selectedCampaignIds } = this.state
+    const sortedCampaigns = sortBy(this.props.otherCampaigns, ['createdAt'], ['desc'])
+    const options = sortedCampaigns.map(campaign => ({
+      label: campaign.title,
+      value: campaign.id
+    }))
 
     return (
       <div>
         <p>You can also filter out contacts from this upload that are already uploaded to an existing Spoke campaigns (regardless of whether they have been texted yet in that campaign).</p>
-        <SelectField
-          multiple
-          hintText='Existing campaigns'
-          value={selectedCampaignIds}
+        <Select
+          name="Campaigns"
+          placeholder="Select existing campaigns"
+          isMulti
+          options={options}
+          defaultValue={[]}
           onChange={this.handleCampaignExclusionChange}
-        >
-          {sortBy(this.props.otherCampaigns, ['createdAt'], ['desc']).map(campaign => (
-            <MenuItem
-              key={campaign.id}
-              insetChildren={true}
-              checked={selectedCampaignIds && selectedCampaignIds.indexOf(campaign.id) > -1}
-              value={campaign.id}
-              primaryText={campaign.title}
-            />
-          ))}
-        </SelectField>
+          className="basic-multi-select"
+          classNamePrefix="select"
+        />
       </div>
     )
   }
