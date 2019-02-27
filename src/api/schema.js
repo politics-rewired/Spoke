@@ -213,10 +213,11 @@ const rootSchema = `
     userAgreeTerms(userId: String!): User
     reassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserId:String!):[CampaignIdAssignmentId],
     megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]!):[CampaignIdAssignmentId],
-    markForSecondPass(organizationId: String!, campaignIdsContactIds: [CampaignIdContactId]!): [CampaignContact]
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]!):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!): String!
+    releaseUnsentMessages(campaignId: String!): String!
+    markForSecondPass(campaignId: String!): String!
   }
 
   schema {
