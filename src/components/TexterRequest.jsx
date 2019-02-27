@@ -11,12 +11,18 @@ import yup from 'yup'
 import gql from 'graphql-tag'
 
 class TexterRequest extends React.Component {
-  state = {
-    count: 300,
-    email: undefined,
-    submitting: false,
-    error: undefined,
-    finished: false
+  constructor(props) {
+    super(props)
+
+    const texterRequestCount = parseInt(window.TEXTER_REQUEST_FORM_COUNT, 10) || 0
+    this.state = {
+      // Set default assignment size to 1000 if TEXTER_REQUEST_FORM_COUNT is not set to unlimited
+      count: texterRequestCount >= 0 ? texterRequestCount : 1000,
+      email: undefined,
+      submitting: false,
+      error: undefined,
+      finished: false
+    }
   }
 
   submit = async () => {
@@ -55,7 +61,9 @@ class TexterRequest extends React.Component {
   }
 
   render() {
-    if (window.SHOW_TEXTER_REQUEST_FORM !== 'true') {
+    // Disable form for non-int values or 0; -1 is unlimited
+    const textRequest = parseInt(window.TEXTER_REQUEST_FORM_COUNT, 10) || 0
+    if (textRequest === 0) {
       return <div />
     }
 
@@ -76,7 +84,10 @@ class TexterRequest extends React.Component {
 
     return (
       <div>
-        <div> Ready for texts? Just tell us how many (currently limited to 300/person). </div>
+        <div>
+          Ready for texts? Just tell us how many
+          {textRequest > 0 ? ` (currently limited to ${textRequest}/person)` : ''}.
+        </div>
         <GSForm ref='requestForm' schema={inputSchema} value={{ email, count }}
           onSubmit={this.submit}
         >
@@ -88,7 +99,8 @@ class TexterRequest extends React.Component {
             value={count}
             onChange={e => {
               const formVal = parseInt(e.target.value, 10) || 0
-              const count = Math.min(300, formVal)
+              let count = textRequest > 0 ? Math.min(textRequest, formVal) : formVal
+              count = Math.max(count, 0)
               this.setState({ count })
             }}
           />
