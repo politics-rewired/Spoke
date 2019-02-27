@@ -153,7 +153,7 @@ class AssignmentTexter extends React.Component {
     }
   }
 
-  getContact(contacts, index) {
+  getContact = (contacts, index) => {
     if (contacts.length > index) {
       return contacts[index]
     }
@@ -166,18 +166,18 @@ class AssignmentTexter extends React.Component {
     this.updateCurrentContactIndex(newIndex)
   }
 
-  updateCurrentContactIndex(newIndex) {
+  updateCurrentContactIndex = (newIndex) => {
     this.setState({
       currentContactIndex: newIndex
     })
     this.getContactData(newIndex)
   }
 
-  hasPrevious() {
+  hasPrevious = () => {
     return this.state.currentContactIndex > 0
   }
 
-  hasNext() {
+  hasNext = () => {
     return this.state.currentContactIndex < this.contactCount() - 1
   }
 
@@ -218,12 +218,12 @@ class AssignmentTexter extends React.Component {
     this.props.router.push('/app/' + (this.props.organizationId || ''))
   }
 
-  contactCount() {
+  contactCount = () => {
     const { contacts } = this.props
     return contacts.length
   }
 
-  currentContact() {
+  currentContact = () => {
     const { contacts } = this.props
 
     // If the index has got out of sync with the contacts available, then rewind to the start
@@ -235,7 +235,7 @@ class AssignmentTexter extends React.Component {
     return this.getContact(contacts, 0)
   }
 
-  renderNavigationToolbarChildren() {
+  renderNavigationToolbarChildren = () => {
     const { allContactsCount } = this.props
     const remainingContacts = this.contactCount()
     const messagedContacts = allContactsCount - remainingContacts
@@ -352,7 +352,7 @@ class AssignmentTexter extends React.Component {
     }
   }
 
-  renderTexter() {
+  renderTexter = () => {
     const { errors } = this.state
     const { assignment } = this.props
     const { campaign, texter } = assignment
@@ -391,7 +391,7 @@ class AssignmentTexter extends React.Component {
       />
     )
   }
-  renderEmpty() {
+  renderEmpty = () => {
     return (
       <div>
         <Empty
@@ -405,6 +405,7 @@ class AssignmentTexter extends React.Component {
       </div>
     )
   }
+
   render() {
     const { contacts } = this.props.assignment
     return (
