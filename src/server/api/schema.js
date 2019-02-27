@@ -1558,14 +1558,20 @@ const rootMutations = {
           assignment_id: null
         })
 
-        await trx('message').update({ assignment_id: null }).whereRaw(`
-          message.campaign_contact_id in (
-            select id from campaign_contact
-            where assignment_id is null
-            and campaign_id = ?
-          )
-        `, [campaignId])
+        // console.log(query.toSQL().toNative())
 
+        // const updatedCount = await query
+
+        // await trx('message')
+        //   .whereRaw(`
+        //     message.campaign_contact_id in (
+        //       select id from campaign_contact
+        //       where assignment_id is null
+        //       and campaign_id = ?
+        //     )
+        //   `, [campaignId])
+        //   .update({ assignment_id: null })
+        
         return updatedCount
       })
 
