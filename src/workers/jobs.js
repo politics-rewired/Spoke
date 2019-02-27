@@ -201,12 +201,13 @@ export async function uploadContacts(job) {
     jobMessages.push(`Number of contacts excluded due to their opt-out status: ${optOutCellCount}`)
   }
 
+  const cellsToExclude = await r.knex('campaign_contact')
+    .whereIn('campaign_id', excludeCampaignIds)
+    .pluck('cell')
   const exclusionCellCount = await r.knex('campaign_contact')
-    .whereIn('cell', function () {
-      this.select('cell').from('campaign_contact').whereIn('campaign_id', excludeCampaignIds)
-    })
+    .whereIn('cell', cellsToExclude)
     .where('campaign_id', campaignId)
-    .delete()
+    .del()
 
   if (exclusionCellCount) {
     jobMessages.push(`Number of contacts excluded due to campaign exclusion list: ${exclusionCellCount}`)
