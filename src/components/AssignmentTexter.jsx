@@ -42,7 +42,6 @@ class AssignmentTexter extends React.Component {
       // currentContactIndex: 0,
       contactCache: {},
       loading: false,
-      direction: 'right',
       errors: []
     }
   }
@@ -196,15 +195,14 @@ class AssignmentTexter extends React.Component {
       return
     }
 
-    // this.props.refreshData()
-    this.setState({ direction: 'right' }, () => this.incrementCurrentContactIndex(1))
+    this.incrementCurrentContactIndex(1)
   }
 
   handleNavigatePrevious = () => {
     if (!this.hasPrevious()) {
       return
     }
-    this.setState({ direction: 'left' }, () => this.incrementCurrentContactIndex(-1))
+    this.incrementCurrentContactIndex(-1)
   }
 
   handleCannedResponseChange = (script) => {
