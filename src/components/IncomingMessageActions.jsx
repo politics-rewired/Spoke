@@ -115,13 +115,13 @@ class IncomingMessageActions extends Component {
             </p>
           </div>
           <div className={css(styles.container)}>
-            <div className={css(styles.flexColumn)}>
+            {/* <div className={css(styles.flexColumn)}>
               <FlatButton
                 label={'Reassign selected'}
                 onClick={this.onReassignmentClicked}
                 disabled={!hasSeletedTexters}
               />
-            </div>
+            </div> */}
             {this.props.conversationCount ? (
               <div className={css(styles.flexColumn)}>
                 <FlatButton
@@ -142,7 +142,7 @@ class IncomingMessageActions extends Component {
               }
             </Dialog>
           </div>
-          <br/>
+          {/* <br/>
           <div>
             <FlatButton
               label="Reset Message Status"
@@ -150,7 +150,7 @@ class IncomingMessageActions extends Component {
               onClick={this.props.markForSecondPass}
               disabled={!this.props.contactsAreSelected}
             />
-          </div>
+          </div> */}
         </CardText>
       </Card>
     )
