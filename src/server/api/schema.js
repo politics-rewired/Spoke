@@ -1329,25 +1329,28 @@ const rootMutations = {
         "Mark Campaign for Second Pass", will only mark contacts for a second
         pass that do not have a more recently created membership in another campaign.
       */
-      const [skippingCells, _dbJunk] = await r.knex.raw(`
-        select cell from campaign_contact
-        where campaign_id = ${campaignId}
-        and campaign_contact.message_status = 'messaged'
-        and campaign_contact.cell in (
-          select cell
-          from campaign_contact as other_campaign_contact
-          where other_campaign_contact.created_at > campaign_contact.created_at
-        )
-      `)
+      const skippingCells = await r.knex('campaign_contact')
+        .select('cell')
+        .where({
+          campaign_id: parseInt(campaignId),
+          message_status: 'messaged'
+        })
+        .whereRaw(`
+          campaign_contact.cell in (
+            select cell
+            from campaign_contact as other_campaign_contact
+            where other_campaign_contact.created_at > campaign_contact.created_at
+          )
+        `)
 
       const updateResult = await r.knex('campaign_contact')
           .update({ message_status: 'needsMessage' })
           .where({
-            id: parseInt(campaignId),
+            campaign_id: parseInt(campaignId),
             message_status: 'messaged'
           })
-          .whereNotIn('cell', skippingCells)
-          
+          .whereNotIn('cell', skippingCells.map(cc => cc.cell))
+
       return `Marked ${updateResult} campaign contacts for a second pass.\
         Did not mark ${skippingCells.length} contacts because they were\
         present in another, more recent campaign.`
