@@ -6,6 +6,7 @@ import wrapMutations from '../containers/hoc/wrap-mutations'
 import GSForm from './forms/GSForm'
 import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
+import Paper from 'material-ui/Paper'
 import Form from 'react-formal'
 import yup from 'yup'
 import gql from 'graphql-tag'
@@ -64,7 +65,14 @@ class TexterRequest extends React.Component {
     // Disable form for non-int values or 0; -1 is unlimited
     const textRequest = parseInt(window.TEXTER_REQUEST_FORM_COUNT, 10) || 0
     if (textRequest === 0) {
-      return <div />
+      return (
+        <Paper>
+          <div style={{ padding: '20px' }}>
+            <h3> No texts available right now </h3>
+            <p> Watch Slack for an announcement on when new texts are available! </p>
+          </div>
+        </Paper>
+      )
     }
 
     const { email, count, error, submitting, finished } = this.state
