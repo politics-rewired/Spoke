@@ -1,8 +1,7 @@
 import gql from 'graphql-tag'
 import PropTypes from 'prop-types'
 import { Component } from 'react'
-import { withRouter } from 'react-router'
-import loadData from './hoc/load-data'
+import { connect } from 'react-apollo'
 
 export class PaginatedCampaignsRetriever extends Component {
   constructor(props) {
@@ -107,4 +106,6 @@ PaginatedCampaignsRetriever.propTypes = {
   pageSize: PropTypes.number.isRequired
 }
 
-export default loadData(withRouter(PaginatedCampaignsRetriever), { mapQueriesToProps })
+export default connect({
+  mapQueriesToProps
+})(PaginatedCampaignsRetriever)
