@@ -1558,7 +1558,7 @@ const rootMutations = {
           assignment_id: null
         })
 
-        await trx('message').update({ assigment_id: null }).whereRaw(`
+        await trx('message').update({ assignment_id: null }).whereRaw(`
           message.campaign_contact_id in (
             select id from campaign_contact
             where assignment_id is null
