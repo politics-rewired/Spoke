@@ -16,9 +16,10 @@ import wrapMutations from './hoc/wrap-mutations'
 import Empty from '../components/Empty'
 import LoadingIndicator from '../components/LoadingIndicator'
 import { dataTest } from '../lib/attributes'
-import RaisedButton from 'material-ui/RaisedButton'
+import Dialog from 'material-ui/Dialog'
 import IconMenu from 'material-ui/IconMenu'
 import MenuItem from 'material-ui/MenuItem'
+import FlatButton from 'material-ui/FlatButton'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 
 const campaignInfoFragment = `
@@ -47,14 +48,51 @@ const inlineStyles = {
   }
 }
 
+const operations = {
+  releaseUnsentMessages: {
+    title: campaign => `Release Unsent Messages for ${campaign.title}`,
+    body: () => `Releasing unsent messages for this campaign will cause unsent messages in this campaign\
+      from texter's assignments. This means that these texters will no longer be able to send\
+      these messages, but these messages will become available to assign via the autoassignment\
+      functionality.`
+  },
+  markForSecondPass: {
+    title: campaign => `Mark Unresponded to Messages in ${campaign.title} for a Second Pass`,
+    body: () => `Marking unresponded to messages for this campaign will reset the state of messages that have\
+      not been responded to by the contact, causing them to show up as needing a first text, as long as the campaign\
+      is not past due. After running this operation, the texts will still be assigned to the same texter, so please\
+      run 'Release Unsent Messages' after if you'd like these second pass messages to be available for auto-assignment.`
+  }
+}
+
 class CampaignList extends React.Component {
   state ={
     inProgress: undefined,
     error: undefined,
+    executing: false,
     finished: undefined
   }
 
-  start = (operation, campaignId) => () => this.setState({ inProgress: { [operation]: campaignId } })
+  start = (operation, campaign) => () => this.setState({ inProgress: [operation, campaign]  })
+  clearInProgress = () => this.setState({
+    inProgress: undefined, 
+    error: undefined, 
+    executing: false,
+    finished: undefined
+  })
+
+  executeOperation = () => {
+    this.setState({ executing: true })
+    const [operationName, campaign] = this.state.inProgress
+
+    this.props.mutations[operationName](campaign.id)
+      .then(resp => {
+        this.setState({finished: resp.data[operationName], executing: false })
+      })
+      .catch(error => {
+        this.setState({ error, executing: false })
+      })
+  }
 
   renderRow(campaign) {
     const {
@@ -121,17 +159,24 @@ class CampaignList extends React.Component {
         style={listItemStyle}
         key={campaign.id}
         primaryText={primaryText}
-        onTouchTap={() => (!isStarted ?
+        onClick={() => (!isStarted ?
           this.props.router.push(`${campaignUrl}/edit`) :
           this.props.router.push(campaignUrl))}
         secondaryText={secondaryText}
         leftIcon={leftIcon}
         rightIconButton={adminPerms && this.renderMenu(campaign)}
-      />
+        
+      >
+        {/* <div onClick={console.log} style={{zIndex: 500 * 500}}>
+        </div> */}
+      </ListItem>
     )
   }
 
   render() {
+    const { inProgress, error, finished, executing } = this.state
+    console.log(this.state)
+
     if (this.props.data.loading) {
       return <LoadingIndicator />
     }
@@ -143,6 +188,35 @@ class CampaignList extends React.Component {
       />
     ) : (
         <div>
+          {inProgress && 
+            <Dialog 
+              title={operations[inProgress[0]].title(inProgress[1])}
+              onRequestClose={this.clearInProgress} open={true}
+              actions={ finished
+                ? [<FlatButton label="Done" primary={true} onClick={this.clearInProgress} />]
+                : [<FlatButton
+                    label="Cancel"
+                    primary={true}
+                    disabled={executing}
+                    onClick={this.clearInProgress}
+                  />,
+                  <FlatButton
+                    label="Execute Operation"
+                    primary={true}
+                    onClick={this.executeOperation}
+                  />]
+              }
+            >
+              {executing
+                ? <LoadingIndicator />
+                : error
+                  ? <span style={{color: 'red'}}> {JSON.stringify(error)} </span>
+                  : finished
+                    ? finished
+                    : operations[inProgress[0]].body(inProgress[1])
+              }
+            </Dialog>
+          }
           <List>
             {campaigns.campaigns.map((campaign) => this.renderRow(campaign))}
           </List>
@@ -156,7 +230,8 @@ class CampaignList extends React.Component {
         iconButtonElement={<IconButton onClick={console.log}><MoreVertIcon /></IconButton>}
         onClick={console.log}
       >
-        <MenuItem primaryText="Release Unsent Messages" onClick={this.start('releaseUnsentMessages', campaign.id)} />
+        <MenuItem primaryText="Release Unsent Messages" onClick={this.start('releaseUnsentMessages', campaign)} />
+        <MenuItem primaryText="Mark for a Second Pass" onClick={this.start('markForSecondPass', campaign)} />
         {!campaign.isArchived && <MenuItem primaryText="Archive Campaign" leftIcon={<ArchiveIcon />} onClick={() => this.props.mutations.archiveCampaign(campaign.id)} />}
         {campaign.isArchived && <MenuItem primaryText="Unarchive Campaign" leftIcon={<UnarchiveIcon />} onClick={() => this.props.mutations.unarchiveCampaign(campaign.id)} />}
 
@@ -199,8 +274,14 @@ const mapMutationsToProps = () => ({
   }),
   releaseUnsentMessages: (campaignId) => ({
     mutation: gql`mutation releaseUnsentMessages($campaignId: String!) {
-      releaseUnsentMessages:(id: $campaignId) 
-    }`,
+        releaseUnsentMessages(campaignId: $campaignId)
+      }`,
+    variables: { campaignId }
+  }),
+  markForSecondPass: (campaignId) => ({
+    mutation: gql`mutation markForSecondPass($campaignId: String!) {
+        markForSecondPass(campaignId: $campaignId)
+      }`,
     variables: { campaignId }
   })
 })
