@@ -1550,11 +1550,23 @@ const rootMutations = {
       }
     },
     releaseUnsentMessages: async (_, { campaignId }, { user }) => {
-      const updatedCount = await r.knex('campaign_contact').where({
-        campaign_id: parseInt(campaignId),
-        message_status: 'needsMessage'
-      }).update({
-        assignment_id: null
+      const updatedCount = await r.knex.transaction(async trx => {
+        const updatedCount = await trx('campaign_contact').where({
+          campaign_id: parseInt(campaignId),
+          message_status: 'needsMessage'
+        }).update({
+          assignment_id: null
+        })
+
+        await trx('message').update({ assigment_id: null }).whereRaw(`
+          message.campaign_contact_id in (
+            select id from campaign_contact
+            where assignment_id is null
+            and campaign_id = ?
+          )
+        `, [campaignId])
+
+        return updatedCount
       })
 
       return `Released ${updatedCount} unsent messages for reassignment`;
