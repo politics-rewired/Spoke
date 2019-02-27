@@ -12,7 +12,7 @@ import gql from 'graphql-tag'
 
 class TexterRequest extends React.Component {
   state = {
-    count: 2000,
+    count: 300,
     email: undefined,
     submitting: false,
     error: undefined,
@@ -76,7 +76,7 @@ class TexterRequest extends React.Component {
 
     return (
       <div>
-        <div> Ready for texts? Just tell us how many. </div>
+        <div> Ready for texts? Just tell us how many (currently limited to 300/person). </div>
         <GSForm ref='requestForm' schema={inputSchema} value={{ email, count }}
           onSubmit={this.submit}
         >
@@ -86,7 +86,11 @@ class TexterRequest extends React.Component {
             label='Count'
             type='number'
             value={count}
-            onChange={e => this.setState({ count: e.target.value })}
+            onChange={e => {
+              const formVal = parseInt(e.target.value, 10) || 0
+              const count = Math.min(300, formVal)
+              this.setState({ count })
+            }}
           />
           <br/>
           <RaisedButton primary={true} onClick={this.submit} disabled={submitting} fullWidth> Request More Texts </RaisedButton>
