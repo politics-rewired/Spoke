@@ -1316,37 +1316,41 @@ const rootMutations = {
     },
     markForSecondPass: async (
       _ignore,
-      { organizationId, campaignIdsContactIds },
+      { campaignId },
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "SUPERVOLUNTEER", true);
+      const organizationId = (await r.knex('campaign')
+        .where({ id: parseInt(campaignId) }))[0].organization_id
 
-      let affectedCampaignContactIds = [];
-      const groupedByCampaign = _.groupBy(
-        campaignIdsContactIds,
-        c => c.campaignId
-      );
+      await accessRequired(user, organizationId, "ADMIN", true);
 
-      await Promise.all(
-        Object.keys(groupedByCampaign).map(async campaignId => {
-          const campaignContactIds = groupedByCampaign[campaignId].map(
-            c => c.campaignContactId
-          );
-          affectedCampaignContactIds = affectedCampaignContactIds.concat(
-            campaignContactIds
-          );
-          return r
-            .knex("campaign_contact")
-            .update({ message_status: "needsMessage" })
-            .where({ campaign_id: campaignId })
-            .whereIn("id", campaignContactIds);
-        })
-      );
+      /*
+        "Mark Campaign for Second Pass", will only mark contacts for a second
+        pass that do not have a more recently created membership in another campaign.
+      */
+      const [skippingCells, _dbJunk] = await r.knex.raw(`
+        select cell from campaign_contact
+        where campaign_id = ${campaignId}
+        and campaign_contact.message_status = 'messaged'
+        and campaign_contact.cell in (
+          select cell
+          from campaign_contact as other_campaign_contact
+          where other_campaign_contact.created_at > campaign_contact.created_at
+        )
+      `)
 
-      return affectedCampaignContactIds.map(id => {
-        id;
-      });
+      const updateResult = await r.knex('campaign_contact')
+          .update({ message_status: 'needsMessage' })
+          .where({
+            id: parseInt(campaignId),
+            message_status: 'messaged'
+          })
+          .whereNotIn('cell', skippingCells)
+          
+      return `Marked ${updateResult} campaign contacts for a second pass.\
+        Did not mark ${skippingCells.length} contacts because they were\
+        present in another, more recent campaign.`
     },
     reassignCampaignContacts: async (
       _,
@@ -1550,7 +1554,7 @@ const rootMutations = {
         assignment_id: null
       })
 
-      return updatedCount;
+      return `Released ${updatedCount} unsent messages for reassignment`;
     }
   }
 };
