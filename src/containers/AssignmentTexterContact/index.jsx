@@ -710,6 +710,7 @@ export class AssignmentTexterContact extends React.Component {
       return (
         <SendButtonArrow
           onClick={this.handleClickSendMessageButton}
+          onFinalTouchTap={this.handleClickSendMessageButton}
           disabled={this.state.disabled}
         />
       )
