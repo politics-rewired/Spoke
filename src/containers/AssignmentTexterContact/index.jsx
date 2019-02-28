@@ -20,13 +20,13 @@ import BulkSendButton from '../../components/BulkSendButton'
 import SendButtonArrow from '../../components/SendButtonArrow'
 import CircularProgress from 'material-ui/CircularProgress'
 import Snackbar from 'material-ui/Snackbar'
-import { getChildren, getTopMostParent, interactionStepForId, log, isBetweenTextingHours } from '../../lib'
+import { getChildren, getTopMostParent, interactionStepForId, log } from '../../lib'
 import { withRouter } from 'react-router'
 import Empty from '../../components/Empty'
 import CreateIcon from 'material-ui/svg-icons/content/create'
 import { dataTest } from '../../lib/attributes'
-import { getContactTimezone } from '../../lib/timezones'
 
+import { isContactBetweenTextingHours } from './utils'
 import TopFixedSection from './TopFixedSection'
 
 const styles = StyleSheet.create({
@@ -182,7 +182,7 @@ export class AssignmentTexterContact extends React.Component {
     } else if (contact.optOut) {
       disabledText = 'Skipping opt-out...'
       disabled = true
-    } else if (!this.isContactBetweenTextingHours(contact)) {
+    } else if (!isContactBetweenTextingHours(contact, campaign)) {
       disabledText = "Refreshing ..."
       disabled = true
     }
@@ -205,10 +205,10 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   componentDidMount() {
-    const { contact } = this.props
+    const { contact, campaign } = this.props
     if (contact.optOut) {
       this.skipContact()
-    } else if (!this.isContactBetweenTextingHours(contact)) {
+    } else if (!isContactBetweenTextingHours(contact, campaign)) {
       setTimeout(() => {
         this.props.refreshData()
         this.setState({ disabled: false })
@@ -458,39 +458,6 @@ export class AssignmentTexterContact extends React.Component {
     if (this.props.contact.messageStatus === 'needsMessage') {
       this.setState({ justSentNew: true })
     }
-  }
-
-  isContactBetweenTextingHours = (contact) => {
-    const { campaign } = this.props
-
-    let timezoneData = null
-
-    if (contact.location && contact.location.timezone && contact.location.timezone.offset) {
-      const { hasDST, offset } = contact.location.timezone
-
-      timezoneData = { hasDST, offset }
-    } else {
-      const location = getContactTimezone(this.props.campaign, contact.location)
-      if (location) {
-        const timezone = location.timezone
-        if (timezone) {
-          timezoneData = timezone
-        }
-      }
-    }
-
-    const { textingHoursStart, textingHoursEnd, textingHoursEnforced } = campaign.organization
-    const config = {
-      textingHoursStart,
-      textingHoursEnd,
-      textingHoursEnforced
-    }
-
-    if (campaign.overrideOrganizationTextingHours) {
-      config.campaignTextingHours = { textingHoursStart, textingHoursEnd, textingHoursEnforced, timezone }
-    }
-
-    return isBetweenTextingHours(timezoneData, config)
   }
 
   optOutSchema = yup.object({
