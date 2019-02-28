@@ -133,18 +133,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
     limit 1;
   `
 
-  const withoutTimeConstraints = `
-    select campaign_id
-    from campaign_contact 
-    join campaign on campaign_contact.campaign_id = campaign.id
-    where assignment_id is null
-      and campaign.is_started = true and campaign.is_archived = false
-    group by campaign_contact.campaign_id
-    order by campaign.id
-    limit 1;
-  `
-
-  const result = await r.knex.raw(withoutTimeConstraints)
+  const result = await r.knex.raw(mainQuery)
 
   /* Sample return:
     [ [ RowDataPacket { campaign_id: 1 } ],

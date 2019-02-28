@@ -13,5 +13,6 @@ export const schema = `
     textingHoursEnd: Int
     textRequestFormEnabled: Boolean
     textRequestMaxCount: Int
+    textsAvailable: Boolean
   }
 `
