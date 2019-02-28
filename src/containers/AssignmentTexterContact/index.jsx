@@ -477,7 +477,13 @@ export class AssignmentTexterContact extends React.Component {
     messageText: yup.string().required("Can't send empty message").max(window.MAX_MESSAGE_LENGTH)
   })
 
-  handleMessageFormChange = ({ messageText }) => this.setState({ messageText })
+  handleMessageFormChange = ({ messageText }) => {
+    const { messageStatus } = this.props.contact
+    // Do not allow deviating from the script for the first message of a campaign
+    if (messageStatus !== 'needsMessage') {
+      this.setState({ messageText })
+    }
+  }
 
   renderSurveySection() {
     const { contact } = this.props
@@ -716,7 +722,7 @@ export class AssignmentTexterContact extends React.Component {
           schema={this.messageSchema}
           value={{ messageText: this.state.messageText }}
           onSubmit={this.handleMessageFormSubmit}
-          onChange={(messageStatus === 'needsMessage' ? '' : this.handleMessageFormChange)}
+          onChange={this.handleMessageFormChange}
         >
           <Form.Field
             className={css(styles.textField)}
