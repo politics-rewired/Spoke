@@ -17,10 +17,10 @@ const styles = StyleSheet.create({
     height: 40
   },
   arrowButton: {
-    '@media(min-width: 450px)': {
+    '@media(minWidth: 450px)': {
       display: 'none !important'
     },
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       display: 'block !important'
     },
     position: 'absolute',
