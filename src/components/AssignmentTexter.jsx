@@ -136,18 +136,28 @@ class AssignmentTexter extends React.Component {
 
     if (getIds.length) {
       this.setState({ loading: true })
-      const contactData = await this.props.loadContacts(getIds)
-      const { data: { getAssignmentContacts } } = contactData
-      if (getAssignmentContacts) {
-        const newContactData = {}
-        getAssignmentContacts.forEach(newContact => {
-          newContactData[newContact.id] = newContact
+
+      await this.props.loadContacts(getIds)
+        .then(response => {
+          if (response.errors) throw new Error(response.errors)
+          const { getAssignmentContacts } = response.data
+          if (!getAssignmentContacts) throw new Error('No assignment contacts returned!')
+          return getAssignmentContacts
         })
-        this.setState({
-          loading: false,
-          contactCache: { ...this.state.contactCache,
-                          ...newContactData } })
-      }
+        .then(getAssignmentContacts => {
+          const foldIn = (contactCache, newContact) => {
+            contactCache[newContact.id] = newContact
+            return contactCache
+          }
+          const oldCache = Object.assign({}, this.state.contactCache)
+          const contactCache = getAssignmentContacts.reduce(foldIn, oldCache)
+
+          this.setState({
+            loading: false,
+            contactCache
+          })
+        })
+        .catch(log.error)
     }
   }
 
