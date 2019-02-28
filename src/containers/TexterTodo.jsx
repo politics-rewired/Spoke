@@ -38,13 +38,6 @@ const contactDataFragment = `
 `
 
 class TexterTodo extends React.Component {
-  constructor() {
-    super()
-    this.assignContactsIfNeeded = this.assignContactsIfNeeded.bind(this)
-    this.refreshData = this.refreshData.bind(this)
-    this.loadContacts = this.loadContacts.bind(this)
-  }
-
   componentWillMount() {
     const { assignment } = this.props.data
     this.assignContactsIfNeeded()
