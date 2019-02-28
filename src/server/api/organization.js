@@ -34,6 +34,22 @@ export const resolvers = {
     textingHoursEnforced: (organization) => organization.texting_hours_enforced,
     optOutMessage: (organization) => (organization.features && organization.features.indexOf('opt_out_message') !== -1 ? JSON.parse(organization.features).opt_out_message : process.env.OPT_OUT_MESSAGE) || 'I\'m opting you out of texts immediately. Have a great day.',
     textingHoursStart: (organization) => organization.texting_hours_start,
-    textingHoursEnd: (organization) => organization.texting_hours_end
+    textingHoursEnd: (organization) => organization.texting_hours_end,
+    textRequestFormEnabled: (organization) => {
+      try {
+        const features = JSON.parse(organization.features)
+        return features.textRequestFormEnabled || false;
+      } catch (ex) {
+        return false
+      }
+    },
+    textRequestMaxCount: (organization) => {
+      try {
+        const features = JSON.parse(organization.features)
+        return parseInt(features.textRequestMaxCount);
+      } catch (ex) {
+        return null
+      }
+    }
   }
 }
