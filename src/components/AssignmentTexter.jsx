@@ -272,43 +272,37 @@ class AssignmentTexter extends React.Component {
 
     const promises = []
 
+    const catchError = response => {
+      if (response.errors) {
+        throw new Error(response.errors)
+      }
+      return response
+    }
+
     if (payload.message) 
       promises.push(
         this.props.mutations.sendMessage(payload.message, contact_id)
-          .then(response => {
-            if (response.errors) throw new Error(response.errors)
-            log.info(`Successfully send message to ${contact_id}`) 
-          })
+          .then(catchError)
           .catch(this.handleSendMessageError(contact_id))
       )
 
-    console.log(payload)
-
     if (payload.questionResponseObjects)
       promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id)
-          .then(response => { 
-            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`) 
-          })
-      )
+        .then(catchError))
 
     if (payload.deletionIds)
-      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id).then(
-        response => {
-            log.info(`Successfully deleted question response: ${JSON.stringify(response)}`) 
-        }
-      ))
+      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id)
+        .then(catchError))
 
-    if (payload.optOut)
-      promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id).then(response => {
-            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`) 
-      }))
-
-    console.log(promises)
-    
     Promise.all(promises)
-      .then(results => { 
-        console.log(results)
-        log.info(`Successfully recorded all info for ${contact_id}`)
+      .then(results => {
+        if (payload.optOut) {
+          return this.props.mutations.createOptOut(payload.optOut, contact_id).then(response => {
+            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`)
+          })
+        }
+      })
+      .then(_ => {
         if (isLastOne) this.handleFinishContact()
       })
 

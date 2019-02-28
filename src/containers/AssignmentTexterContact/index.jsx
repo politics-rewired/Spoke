@@ -245,7 +245,7 @@ export class AssignmentTexterContact extends React.Component {
     }
   }
 
-  setDisabled = async (disabled = true) => {
+  setDisabled = (disabled = true) => {
     this.setState({ disabled })
   }
 
@@ -344,10 +344,10 @@ export class AssignmentTexterContact extends React.Component {
     if (this.state.disabled) {
       return // stops from multi-send
     }
-    this.setState({ disabled: true })
-
-    // Actually deliver the payload asyncronously
-    this.submitAction(messageText)
+    this.setState({ disabled: true }, () => {
+      // Actually deliver the payload asyncronously
+      this.submitAction(messageText)
+    })
   }
 
   submitAction = async (messageText) => {
@@ -355,7 +355,6 @@ export class AssignmentTexterContact extends React.Component {
     const message = this.createMessageToContact(messageText)
     const changes = this.gatherSurveyChanges()
     const payload = Object.assign({ message }, changes)
-    console.log(payload)
     this.props.sendMessage(contact.id, payload)
   }
 
@@ -461,6 +460,7 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   handleClickSendMessageButton = () => {
+    this.setState({ alreadySent: true })
     this.refs.form.submit()
     if (this.props.contact.messageStatus === 'needsMessage') {
       this.setState({ justSentNew: true })
@@ -539,7 +539,7 @@ export class AssignmentTexterContact extends React.Component {
     const { contact, campaign, assignment, navigationToolbarChildren, onFinishContact } = this.props
     const { userCannedResponses, campaignCannedResponses } = assignment
     const isCannedResponseEnabled = userCannedResponses.length + campaignCannedResponses.length > 0
-    const { justSentNew } = this.state
+    const { justSentNew, alreadySent } = this.state
     const { messageStatus } = contact
     const size = document.documentElement.clientWidth
 
@@ -552,7 +552,7 @@ export class AssignmentTexterContact extends React.Component {
             >
               <SendButton
                 threeClickEnabled={campaign.organization.threeClickEnabled}
-                onFinalTouchTap={this.handleClickSendMessageButton}
+                onFinalTouchTap={alreadySent ? undefined : this.handleClickSendMessageButton}
                 disabled={this.state.disabled}
               />
               {window.NOT_IN_USA && window.ALLOW_SEND_ALL && window.BULK_SEND_CHUNK_SIZE ? <BulkSendButton
