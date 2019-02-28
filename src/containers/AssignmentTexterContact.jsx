@@ -357,38 +357,6 @@ export class AssignmentTexterContact extends React.Component {
     this.props.router.push(`/app/${campaign.organization.id}/todos`)
   }
 
-  handleSendMessageError = (e) => {
-    if (e.status === 402) {
-      this.goBackToTodos()
-    } else if (e.status === 400) {
-      const newState = {
-        snackbarError: e.message
-      }
-
-      if (e.message === 'Your assignment has changed') {
-        newState.snackbarActionTitle = 'Back to todos'
-        newState.snackbarOnTouchTap = this.goBackToTodos
-        this.setState(newState)
-      } else {
-        // opt out or send message Error
-        this.setState({
-          disabled: true,
-          disabledText: e.message
-        })
-        this.skipContact()
-      }
-    } else {
-      log.error(e)
-      this.setState({
-        snackbarError: 'Error: Please wait a few seconds and try again.'
-      })
-
-      setTimeout(() => {
-        this.setState({ snackbarError: undefined, disabled: false })
-      }, 5000)
-    }
-  }
-
   handleMessageFormSubmit = async ({ messageText }) => {
     const { contact } = this.props
     const message = this.createMessageToContact(messageText)
