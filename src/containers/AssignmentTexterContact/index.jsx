@@ -139,11 +139,6 @@ const inlineStyles = {
   dialogButton: {
     display: 'inline-block'
   },
-  toolbarIconButton: {
-    position: 'absolute',
-    top: 0
-    // without this the toolbar icons are not centered vertically
-  },
   actionToolbar: {
     backgroundColor: 'white',
     '@media(min-width: 450px)': {
