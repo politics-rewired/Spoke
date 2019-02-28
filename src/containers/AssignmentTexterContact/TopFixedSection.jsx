@@ -14,7 +14,6 @@ const buttonStyle = {
 
 const TopFixedSection = (props) => {
   const { contact, campaign, onExitTexter } = props
-  console.log(props)
 
   return (
     <ContactToolbar
