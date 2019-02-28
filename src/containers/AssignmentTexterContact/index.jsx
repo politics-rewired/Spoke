@@ -232,6 +232,7 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   onEnter = (evt) => {
+    // Only handle <enter>
     if (evt.keyCode === 13) {
       evt.preventDefault()
       document.body.removeEventListener('keydown', this.onEnter)
@@ -338,17 +339,23 @@ export class AssignmentTexterContact extends React.Component {
     this.props.router.push(`/app/${campaign.organization.id}/todos`)
   }
 
-  handleMessageFormSubmit = async ({ messageText }) => {
+  handleMessageFormSubmit = ({ messageText }) => {
+    // Process the submit synchronously
+    if (this.state.disabled) {
+      return // stops from multi-send
+    }
+    this.setState({ disabled: true })
+
+    // Actually deliver the payload asyncronously
+    this.submitAction(messageText)
+  }
+
+  submitAction = async (messageText) => {
     const { contact } = this.props
     const message = this.createMessageToContact(messageText)
-    if (this.state.disabled) return // stops from multi-send
-
-    this.state.disabled = true;
-    this.forceUpdate()
-
     const changes = this.gatherSurveyChanges()
-    console.log(changes)
-    const payload = Object.assign({ message }, this.gatherSurveyChanges())
+    const payload = Object.assign({ message }, changes)
+    console.log(payload)
     this.props.sendMessage(contact.id, payload)
   }
 
@@ -697,9 +704,9 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderCorrectSendButton() {
-    const { campaign } = this.props
-    const { contact } = this.props
-    if (contact.messageStatus === 'messaged' || contact.messageStatus === 'convo' || contact.messageStatus === 'needsResponse') {
+    const { messageStatus } = this.props.contact
+    const validStates = ['messaged', 'convo', 'needsResponse']
+    if (validStates.indexOf(messageStatus) > -1) {
       return (
         <SendButtonArrow
           onClick={this.handleClickSendMessageButton}
