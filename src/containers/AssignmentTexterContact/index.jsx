@@ -1,15 +1,12 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { StyleSheet, css } from 'aphrodite'
-import ContactToolbar from '../../components/ContactToolbar'
 import MessageList from '../../components/MessageList'
 import CannedResponseMenu from '../../components/CannedResponseMenu'
 import AssignmentTexterSurveys from '../../components/AssignmentTexterSurveys'
 import RaisedButton from 'material-ui/RaisedButton'
 import FlatButton from 'material-ui/FlatButton'
-import NavigateHomeIcon from 'material-ui/svg-icons/action/home'
 import { grey100 } from 'material-ui/styles/colors'
-import IconButton from 'material-ui/IconButton/IconButton'
 import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar'
 import { Card, CardActions, CardTitle } from 'material-ui/Card'
 import Divider from 'material-ui/Divider'
@@ -29,6 +26,8 @@ import Empty from '../../components/Empty'
 import CreateIcon from 'material-ui/svg-icons/content/create'
 import { dataTest } from '../../lib/attributes'
 import { getContactTimezone } from '../../lib/timezones'
+
+import TopFixedSection from './TopFixedSection'
 
 const styles = StyleSheet.create({
   mobile: {
@@ -139,14 +138,6 @@ const inlineStyles = {
   },
   dialogButton: {
     display: 'inline-block'
-  },
-  exitTexterIconButton: {
-    float: 'right',
-    height: '50px',
-    zIndex: 100,
-    position: 'absolute',
-    top: 0,
-    right: '-30'
   },
   toolbarIconButton: {
     position: 'absolute',
@@ -529,16 +520,6 @@ export class AssignmentTexterContact extends React.Component {
 
   handleMessageFormChange = ({ messageText }) => this.setState({ messageText })
 
-  renderMiddleScrollingSection() {
-    const { contact } = this.props
-    return (
-      <MessageList
-        contact={contact}
-        messages={contact.messages}
-      />
-    )
-  }
-
   renderSurveySection() {
     const { contact } = this.props
     const { messages } = contact
@@ -691,27 +672,6 @@ export class AssignmentTexterContact extends React.Component {
     return ''
   }
 
-  renderTopFixedSection() {
-    const { contact } = this.props
-    return (
-      <ContactToolbar
-        campaign={this.props.campaign}
-        campaignContact={contact}
-        onOptOut={this.handleNavigateNext}
-        rightToolbarIcon={(
-          <IconButton
-            onTouchTap={this.props.onExitTexter}
-            style={inlineStyles.exitTexterIconButton}
-            tooltip='Return Home'
-            tooltipPosition='bottom-center'
-          >
-            <NavigateHomeIcon />
-          </IconButton>
-        )}
-      />
-    )
-  }
-
   renderCannedResponsePopover() {
     const { campaign, assignment, texter } = this.props
     const { userCannedResponses, campaignCannedResponses } = assignment
@@ -829,25 +789,41 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   render() {
+    const { disabled } = this.state
+    const { campaign, contact, onExitTexter } = this.props
+
+    const backgroundColor = contact.messageStatus === 'needsResponse'
+      ? 'rgba(83, 180, 119, 0.25)'
+      : ''
+
     return (
       <div>
-        {this.state.disabled ? (
+        {disabled && (
           <div className={css(styles.overlay)}>
             <CircularProgress size={0.5} />
             {this.state.disabledText}
           </div>
-        ) : ''
-        }
-        <div className={css(styles.container)} style={this.props.contact.messageStatus === 'needsResponse' ? { backgroundColor: 'rgba(83, 180, 119, 0.25)' } : {}}>
+        )}
+        <div
+          className={css(styles.container)}
+          style={{ backgroundColor }}
+        >
           <div className={css(styles.topFixedSection)}>
-            {this.renderTopFixedSection()}
+            <TopFixedSection
+              campaign={campaign}
+              contact={contact}
+              onExitTexter={onExitTexter}
+            />
           </div>
           <div
             {...dataTest('messageList')}
             ref='messageScrollContainer'
             className={css(styles.middleScrollingSection)}
           >
-            {this.renderMiddleScrollingSection()}
+            <MessageList
+              contact={contact}
+              messages={contact.messages}
+            />
           </div>
           <div className={css(styles.bottomFixedSection)}>
             {this.renderBottomFixedSection()}
