@@ -119,9 +119,9 @@ class Settings extends React.Component {
 
   renderTexterRequestFormSettings() {
     const { textRequestFormEnabled: propsEnabled, textRequestMaxCount: propsCount } = this.props.data.organization
-    if (!this.state.textRequestFormEnabled)
+    if (this.state.textRequestFormEnabled === undefined)
       this.state.textRequestFormEnabled = propsEnabled
-    if (!this.state.textRequestMaxCount)
+    if (this.state.textRequestMaxCount === undefined)
       this.state.textRequestMaxCount = propsCount
 
     const { textRequestFormEnabled, textRequestMaxCount } = this.state
