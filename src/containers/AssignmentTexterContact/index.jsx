@@ -163,8 +163,7 @@ export class AssignmentTexterContact extends React.Component {
   constructor(props) {
     super(props)
 
-    const { assignment, campaign } = this.props
-    const { contact } = this.props
+    const { assignment, campaign, contact } = this.props
     const questionResponses = this.getInitialQuestionResponses(contact.questionResponseValues)
     const availableSteps = this.getAvailableInteractionSteps(questionResponses)
 
@@ -216,9 +215,7 @@ export class AssignmentTexterContact extends React.Component {
       }, 1500)
     }
 
-    const node = this.refs.messageScrollContainer
-    // Does not work without this setTimeout
-    setTimeout(() => { node.scrollTop = Math.floor(node.scrollHeight) }, 0)
+    this.refs.messageScrollContainer.scrollTo(0, this.refs.messageScrollContainer.scrollHeight)
 
     // note: key*down* is necessary to stop propagation of keyup for the textarea element
     document.body.addEventListener('keydown', this.onEnter)
