@@ -56,6 +56,7 @@ function getContactsFilterForConversationOptOutStatus(
   return {}
 }
 
+/* Initialized as objects to later facillitate shallow comparison */
 const initialCampaignsFilter = { isArchived: false }
 const initialContactsFilter = { isOptedOut: false }
 const initialAssignmentsFilter = {}
@@ -306,6 +307,11 @@ export class AdminIncomingMessageList extends Component {
 
   conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
 
+  /*
+    Shallow comparison here done intentionally – we want to know if its changed, not if it's different,
+    since we want to allow the user to make the same query as the default one, but we don't want to
+    pre-emptively run the default (and most expensive) one
+  */
   haveFiltersChangedFromDefaults = () => {
     const { campaignsFilter, contactsFilter, assignmentsFilter } = this.state
     return campaignsFilter !== initialCampaignsFilter 
