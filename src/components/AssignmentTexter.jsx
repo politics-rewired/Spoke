@@ -151,7 +151,7 @@ class AssignmentTexter extends React.Component {
     }
   }
 
-  getContact = (contactIds, index) => {
+  getContactId = (contactIds, index) => {
     if (contactIds.length > index) {
       return contactIds[index]
     }
@@ -226,11 +226,11 @@ class AssignmentTexter extends React.Component {
 
     // If the index has got out of sync with the contacts available, then rewind to the start
     if (typeof this.state.currentContactIndex !== 'undefined') {
-      return this.getContact(contactIds, this.state.currentContactIndex)
+      return this.getContactId(contactIds, this.state.currentContactIndex)
     }
 
     this.updateCurrentContactIndex(0)
-    return this.getContact(contactIds, 0)
+    return this.getContactId(contactIds, 0)
   }
 
   renderNavigationToolbarChildren = () => {
