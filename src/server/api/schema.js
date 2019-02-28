@@ -558,6 +558,24 @@ const rootMutations = {
 
       return await loaders.organization.load(organizationId);
     },
+    updateTextRequestFormSettings: async (_, { organizationId, textRequestFormEnabled, textRequestMaxCount }, { user, loaders }) => {
+      await accessRequired(user, organizationId, 'ADMIN')
+
+      const currentOrganization = await Organization.get(organizationId)
+      let currentFeatures = {}
+      try {
+        currentFeatures = JSON.parse(currentOrganization.features);
+      } catch (ex) {
+        // do nothing
+      }
+
+      const nextFeatures = Object.assign({}, currentFeatures, { textRequestFormEnabled, textRequestMaxCount })
+      await Organization.get(organizationId).update({
+        features: JSON.stringify(nextFeatures)
+      })
+
+      return await loaders.organization.load(organizationId)
+    },
     updateOptOutMessage: async (
       _,
       { organizationId, optOutMessage },

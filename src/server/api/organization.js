@@ -34,6 +34,38 @@ export const resolvers = {
     textingHoursEnforced: (organization) => organization.texting_hours_enforced,
     optOutMessage: (organization) => (organization.features && organization.features.indexOf('opt_out_message') !== -1 ? JSON.parse(organization.features).opt_out_message : process.env.OPT_OUT_MESSAGE) || 'I\'m opting you out of texts immediately. Have a great day.',
     textingHoursStart: (organization) => organization.texting_hours_start,
-    textingHoursEnd: (organization) => organization.texting_hours_end
+    textingHoursEnd: (organization) => organization.texting_hours_end,
+    textRequestFormEnabled: (organization) => {
+      try {
+        const features = JSON.parse(organization.features)
+        return features.textRequestFormEnabled || false;
+      } catch (ex) {
+        return false
+      }
+    },
+    textRequestMaxCount: (organization) => {
+      try {
+        const features = JSON.parse(organization.features)
+        return parseInt(features.textRequestMaxCount);
+      } catch (ex) {
+        return null
+      }
+    },
+    textsAvailable: async (organization) => {
+      const mainQuery = `
+        select campaign_id
+        from campaign_contact 
+        join campaign on campaign_contact.campaign_id = campaign.id
+        where assignment_id is null
+          and campaign.is_started = true and campaign.is_archived = false
+          and campaign.texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone)) + 1
+        group by campaign_contact.campaign_id
+        order by campaign.id
+        limit 1;
+      `
+
+      const result = await r.knex.raw(mainQuery)
+      return result[0].length > 0;
+    }
   }
 }
