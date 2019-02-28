@@ -56,14 +56,19 @@ function getContactsFilterForConversationOptOutStatus(
   return {}
 }
 
+/* Initialized as objects to later facillitate shallow comparison */
+const initialCampaignsFilter = { isArchived: false }
+const initialContactsFilter = { isOptedOut: false }
+const initialAssignmentsFilter = {}
+
 export class AdminIncomingMessageList extends Component {
 
   state = {
     page: 0,
     pageSize: 10,
-    campaignsFilter: { isArchived: false },
-    contactsFilter: { isOptedOut: false },
-    assignmentsFilter: {},
+    campaignsFilter: initialCampaignsFilter,
+    contactsFilter: initialContactsFilter,
+    assignmentsFilter: initialAssignmentsFilter,
     needsRender: false,
     utc: Date.now().toString(),
     campaigns: [],
@@ -302,6 +307,18 @@ export class AdminIncomingMessageList extends Component {
 
   conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
 
+  /*
+    Shallow comparison here done intentionally – we want to know if its changed, not if it's different,
+    since we want to allow the user to make the same query as the default one, but we don't want to
+    pre-emptively run the default (and most expensive) one
+  */
+  haveFiltersChangedFromDefaults = () => {
+    const { campaignsFilter, contactsFilter, assignmentsFilter } = this.state
+    return campaignsFilter !== initialCampaignsFilter 
+      || contactsFilter !== initialContactsFilter
+      || assignmentsFilter !== initialAssignmentsFilter
+  }
+
   render() {
     const { selectedRows, page, pageSize, reassignmentAlert } = this.state
     const areContactsSelected = selectedRows === 'all' || (Array.isArray(selectedRows) && selectedRows.length > 0)
@@ -366,19 +383,22 @@ export class AdminIncomingMessageList extends Component {
             conversationCount={this.state.conversationCount}
           />
           <br />
-          <IncomingMessageList
-            organizationId={this.props.params.organizationId}
-            cursor={cursor}
-            contactsFilter={this.state.contactsFilter}
-            campaignsFilter={this.state.campaignsFilter}
-            assignmentsFilter={this.state.assignmentsFilter}
-            selectedRows={this.state.selectedRows}
-            utc={this.state.utc}
-            onPageChanged={this.handlePageChange}
-            onPageSizeChanged={this.handlePageSizeChange}
-            onConversationSelected={this.handleRowSelection}
-            onConversationCountChanged={this.conversationCountChanged}
-          />
+          {this.haveFiltersChangedFromDefaults() 
+            ? <IncomingMessageList
+                organizationId={this.props.params.organizationId}
+                cursor={cursor}
+                contactsFilter={this.state.contactsFilter}
+                campaignsFilter={this.state.campaignsFilter}
+                assignmentsFilter={this.state.assignmentsFilter}
+                selectedRows={this.state.selectedRows}
+                utc={this.state.utc}
+                onPageChanged={this.handlePageChange}
+                onPageSizeChanged={this.handlePageSizeChange}
+                onConversationSelected={this.handleRowSelection}
+                onConversationCountChanged={this.conversationCountChanged}
+              />
+            : <h3> Please select filters in order to start searching! </h3>
+          }
         </div>
         <Dialog
           title={reassignmentAlert && reassignmentAlert.title}
