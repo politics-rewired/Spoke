@@ -217,8 +217,6 @@ export class AssignmentTexterContact extends React.Component {
       optOutDialogOpen: false,
       currentInteractionStep: availableSteps.length > 0 ? availableSteps[availableSteps.length - 1] : null
     }
-    this.onEnter = this.onEnter.bind(this)
-    this.setDisabled = this.setDisabled.bind(this)
   }
 
   componentDidMount() {
@@ -250,7 +248,7 @@ export class AssignmentTexterContact extends React.Component {
     }
   }
 
-  onEnter(evt) {
+  onEnter = (evt) => {
     if (evt.keyCode === 13) {
       evt.preventDefault()
       document.body.removeEventListener('keydown', this.onEnter)
@@ -267,7 +265,7 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ disabled })
   }
 
-  getAvailableInteractionSteps(questionResponses) {
+  getAvailableInteractionSteps = (questionResponses) => {
     const allInteractionSteps = this.props.campaign.interactionSteps
     const availableSteps = []
 
@@ -291,7 +289,7 @@ export class AssignmentTexterContact extends React.Component {
     return availableSteps
   }
 
-  getInitialQuestionResponses(questionResponseValues) {
+  getInitialQuestionResponses = (questionResponseValues) => {
     const questionResponses = {}
     questionResponseValues.forEach((questionResponse) => {
       questionResponses[questionResponse.interactionStepId] = questionResponse.value
@@ -299,7 +297,7 @@ export class AssignmentTexterContact extends React.Component {
 
     return questionResponses
   }
-  getMessageTextFromScript(script) {
+  getMessageTextFromScript = (script) => {
     const { campaign, contact, texter } = this.props
 
     return script ? applyScript({
@@ -310,7 +308,7 @@ export class AssignmentTexterContact extends React.Component {
     }) : null
   }
 
-  getStartingMessageText() {
+  getStartingMessageText = () => {
     const { contact, campaign } = this.props
     return contact.messageStatus == 'needsMessage'
       ? this.getMessageTextFromScript(getTopMostParent(campaign.interactionSteps).script)
@@ -340,7 +338,7 @@ export class AssignmentTexterContact extends React.Component {
     this.handleChangeScript(cannedResponseScript)
   }
 
-  createMessageToContact(text) {
+  createMessageToContact = (text) => {
     const { texter, assignment } = this.props
     const { contact } = this.props
 
@@ -479,7 +477,7 @@ export class AssignmentTexterContact extends React.Component {
     }
   }
 
-  isContactBetweenTextingHours(contact) {
+  isContactBetweenTextingHours = (contact) => {
     const { campaign } = this.props
 
     let timezoneData = null
