@@ -1,20 +1,23 @@
-import PropTypes from 'prop-types'
 import React from 'react'
-import { ToolbarTitle } from 'material-ui/Toolbar'
+import PropTypes from 'prop-types'
+import { withRouter } from 'react-router'
+import gql from 'graphql-tag'
+
+import { StyleSheet, css } from 'aphrodite'
 import IconButton from 'material-ui/IconButton/IconButton'
+import RaisedButton from 'material-ui/RaisedButton'
+import { ToolbarTitle } from 'material-ui/Toolbar'
 import NavigateBeforeIcon from 'material-ui/svg-icons/image/navigate-before'
 import NavigateNextIcon from 'material-ui/svg-icons/image/navigate-next'
-import AssignmentTexterContact from '../containers/AssignmentTexterContact'
-import { StyleSheet, css } from 'aphrodite'
-import { withRouter } from 'react-router'
 import Check from 'material-ui/svg-icons/action/check-circle'
-import Empty from '../components/Empty'
-import LoadingIndicator from '../components/LoadingIndicator'
-import RaisedButton from 'material-ui/RaisedButton'
-import gql from 'graphql-tag'
+
+import { log } from '../lib/log'
 import loadData from '../containers/hoc/load-data'
 import wrapMutations from '../containers/hoc/wrap-mutations'
-import { log } from '../lib/log'
+import AssignmentTexterContact from '../containers/AssignmentTexterContact'
+import Empty from '../components/Empty'
+import LoadingIndicator from '../components/LoadingIndicator'
+
 const SEND_DELAY = 100
 
 const styles = StyleSheet.create({
@@ -36,15 +39,11 @@ const styles = StyleSheet.create({
 })
 
 class AssignmentTexter extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      // currentContactIndex: 0,
-      contactCache: {},
-      loading: false,
-      errors: []
-    }
+  state = {
+    currentContactIndex: undefined,
+    contactCache: {},
+    loading: false,
+    errors: []
   }
 
   componentWillMount() {
@@ -359,7 +358,6 @@ class AssignmentTexter extends React.Component {
       <AssignmentTexterContact
         key={contact.id}
         assignment={assignment}
-        campaignContactId={contact.id}
         contact={contact}
         texter={texter}
         campaign={campaign}
