@@ -81,12 +81,12 @@ class TexterTodo extends React.Component {
 
   render() {
     const { assignment } = this.props.data
-    const contacts = assignment.contacts
+    const contactIds = assignment.contacts.map(contact => contact.id)
     const allContactsCount = assignment.allContactsCount
     return (
       <AssignmentTexter
         assignment={assignment}
-        contacts={contacts}
+        contactIds={contactIds}
         allContactsCount={allContactsCount}
         assignContactsIfNeeded={this.assignContactsIfNeeded}
         refreshData={this.refreshData}
