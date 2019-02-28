@@ -82,7 +82,7 @@ class AssignmentTexterSurveys extends Component {
       />
     )
 
-    menuItems.push(<Divider />)
+    menuItems.push(<Divider key={'divider'} />)
     menuItems.push(
       <MenuItem
         key='clear'
@@ -101,7 +101,7 @@ class AssignmentTexterSurveys extends Component {
     const { question } = step
 
     return question.text ? (
-      <div>
+      <div key={step.id}>
         <SelectField
           style={isCurrentStep ? styles.currentStepSelect : styles.previousStepSelect}
           onChange={(event, index, value) => this.handleSelectChange(step, index, value)}

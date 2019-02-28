@@ -1,19 +1,23 @@
-import PropTypes from 'prop-types'
 import React from 'react'
-import { ToolbarTitle } from 'material-ui/Toolbar'
+import PropTypes from 'prop-types'
+import { withRouter } from 'react-router'
+import gql from 'graphql-tag'
+
+import { StyleSheet, css } from 'aphrodite'
 import IconButton from 'material-ui/IconButton/IconButton'
+import RaisedButton from 'material-ui/RaisedButton'
+import { ToolbarTitle } from 'material-ui/Toolbar'
 import NavigateBeforeIcon from 'material-ui/svg-icons/image/navigate-before'
 import NavigateNextIcon from 'material-ui/svg-icons/image/navigate-next'
-import AssignmentTexterContact from '../containers/AssignmentTexterContact'
-import { StyleSheet, css } from 'aphrodite'
-import { withRouter } from 'react-router'
 import Check from 'material-ui/svg-icons/action/check-circle'
-import Empty from '../components/Empty'
-import RaisedButton from 'material-ui/RaisedButton'
-import gql from 'graphql-tag'
+
+import { log } from '../lib/log'
 import loadData from '../containers/hoc/load-data'
 import wrapMutations from '../containers/hoc/wrap-mutations'
-import { log } from '../lib/log'
+import AssignmentTexterContact from '../containers/AssignmentTexterContact'
+import Empty from '../components/Empty'
+import LoadingIndicator from '../components/LoadingIndicator'
+
 const SEND_DELAY = 100
 
 const styles = StyleSheet.create({
@@ -35,16 +39,11 @@ const styles = StyleSheet.create({
 })
 
 class AssignmentTexter extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      // currentContactIndex: 0,
-      contactCache: {},
-      loading: false,
-      direction: 'right',
-      errors: []
-    }
+  state = {
+    currentContactIndex: undefined,
+    contactCache: {},
+    loading: false,
+    errors: []
   }
 
   componentWillMount() {
@@ -57,7 +56,7 @@ class AssignmentTexter extends React.Component {
     }
 
     // When we send a message that changes the contact status,
-    // then if parent.refreshData is called, then props.contacts
+    // then if parent.refreshData is called, then props.contactIds
     // will return a new list with the last contact removed and
     // presumably our currentContactIndex will be off.
     // In fact, without the code below, we will 'double-jump' each message
@@ -65,10 +64,10 @@ class AssignmentTexter extends React.Component {
     // Below, we update our index with the contact that matches our current index.
     if (typeof nextState.currentContactIndex !== 'undefined'
         && nextState.currentContactIndex === this.state.currentContactIndex
-        && nextProps.contacts.length !== this.props.contacts.length
-        && this.props.contacts[this.state.currentContactIndex]) {
-      const curId = this.props.contacts[this.state.currentContactIndex].id
-      const nextIndex = nextProps.contacts.findIndex((c) => c.id === curId)
+        && nextProps.contactIds.length !== this.props.contactIds.length
+        && this.props.contactIds[this.state.currentContactIndex]) {
+      const curId = this.props.contactIds[this.state.currentContactIndex]
+      const nextIndex = nextProps.contactIds.indexOf(curId)
       if (nextIndex !== nextState.currentContactIndex) {
         // eslint-disable-next-line no-param-reassign
         nextState.currentContactIndex = nextIndex
@@ -115,50 +114,51 @@ class AssignmentTexter extends React.Component {
 
   */
   getContactData = async (newIndex, force = false) => {
-    const { contacts } = this.props
+    const { contactIds } = this.props
     const BATCH_GET = 10 // how many to get at once
     const BATCH_FORWARD = 5 // when to reach out and get more
     let getIds = []
     // if we don't have current data, get that
-    if (contacts[newIndex]
-        && !this.state.contactCache[contacts[newIndex].id]) {
-      getIds = contacts
+    if (contactIds[newIndex]
+        && !this.state.contactCache[contactIds[newIndex]]) {
+      getIds = contactIds
         .slice(newIndex, newIndex + BATCH_GET)
-        .map((c) => c.id)
         .filter((cId) => !force || !this.state.contactCache[cId])
     }
     // if we DO have current data, but don't have data base BATCH_FORWARD...
     if (!getIds.length
-        && contacts[newIndex + BATCH_FORWARD]
-        && !this.state.contactCache[contacts[newIndex + BATCH_FORWARD].id]) {
-      getIds = contacts
+        && contactIds[newIndex + BATCH_FORWARD]
+        && !this.state.contactCache[contactIds[newIndex + BATCH_FORWARD]]) {
+      getIds = contactIds
         .slice(newIndex + BATCH_FORWARD, newIndex + BATCH_FORWARD + BATCH_GET)
-        .map((c) => c.id)
         .filter((cId) => !force || !this.state.contactCache[cId])
     }
 
     if (getIds.length) {
       this.setState({ loading: true })
-      const contactData = await this.props.loadContacts(getIds)
-      const { data: { getAssignmentContacts } } = contactData
-      if (getAssignmentContacts) {
-        const newContactData = {}
-        getAssignmentContacts.forEach((c) => {
-          newContactData[c.id] = c
-        })
-        this.setState({
-          loading: false,
-          contactCache: { ...this.state.contactCache,
-                          ...newContactData } })
-      }
-    }
-  }
 
-  getContact(contacts, index) {
-    if (contacts.length > index) {
-      return contacts[index]
+      await this.props.loadContacts(getIds)
+        .then(response => {
+          if (response.errors) throw new Error(response.errors)
+          const { getAssignmentContacts } = response.data
+          if (!getAssignmentContacts) throw new Error('No assignment contacts returned!')
+          return getAssignmentContacts
+        })
+        .then(getAssignmentContacts => {
+          const foldIn = (contactCache, newContact) => {
+            contactCache[newContact.id] = newContact
+            return contactCache
+          }
+          const oldCache = Object.assign({}, this.state.contactCache)
+          const contactCache = getAssignmentContacts.reduce(foldIn, oldCache)
+
+          this.setState({
+            loading: false,
+            contactCache
+          })
+        })
+        .catch(log.error)
     }
-    return null
   }
 
   incrementCurrentContactIndex = (increment) => {
@@ -167,18 +167,18 @@ class AssignmentTexter extends React.Component {
     this.updateCurrentContactIndex(newIndex)
   }
 
-  updateCurrentContactIndex(newIndex) {
+  updateCurrentContactIndex = (newIndex) => {
     this.setState({
       currentContactIndex: newIndex
     })
     this.getContactData(newIndex)
   }
 
-  hasPrevious() {
+  hasPrevious = () => {
     return this.state.currentContactIndex > 0
   }
 
-  hasNext() {
+  hasNext = () => {
     return this.state.currentContactIndex < this.contactCount() - 1
   }
 
@@ -196,15 +196,14 @@ class AssignmentTexter extends React.Component {
       return
     }
 
-    // this.props.refreshData()
-    this.setState({ direction: 'right' }, () => this.incrementCurrentContactIndex(1))
+    this.incrementCurrentContactIndex(1)
   }
 
   handleNavigatePrevious = () => {
     if (!this.hasPrevious()) {
       return
     }
-    this.setState({ direction: 'left' }, () => this.incrementCurrentContactIndex(-1))
+    this.incrementCurrentContactIndex(-1)
   }
 
   handleCannedResponseChange = (script) => {
@@ -220,24 +219,20 @@ class AssignmentTexter extends React.Component {
     this.props.router.push('/app/' + (this.props.organizationId || ''))
   }
 
-  contactCount() {
-    const { contacts } = this.props
-    return contacts.length
+  contactCount = () => {
+    const { contactIds } = this.props
+    return contactIds.length
   }
 
-  currentContact() {
-    const { contacts } = this.props
-
-    // If the index has got out of sync with the contacts available, then rewind to the start
-    if (typeof this.state.currentContactIndex !== 'undefined') {
-      return this.getContact(contacts, this.state.currentContactIndex)
-    }
-
-    this.updateCurrentContactIndex(0)
-    return this.getContact(contacts, 0)
+  currentContact = () => {
+    const { contactIds } = this.props
+    const { currentContactIndex, contactCache } = this.state
+    const contactId = contactIds[currentContactIndex]
+    const contact = contactCache[contactId]
+    return contact
   }
 
-  renderNavigationToolbarChildren() {
+  renderNavigationToolbarChildren = () => {
     const { allContactsCount } = this.props
     const remainingContacts = this.contactCount()
     const messagedContacts = allContactsCount - remainingContacts
@@ -251,16 +246,19 @@ class AssignmentTexter extends React.Component {
     const title = `${currentIndex} of ${ofHowMany}`
     return [
       <ToolbarTitle
+        key='title'
         className={css(styles.navigationToolbarTitle)}
         text={title}
       />,
       <IconButton
+        key='previous'
         onTouchTap={this.handleNavigatePrevious}
         disabled={!this.hasPrevious()}
       >
         <NavigateBeforeIcon />
       </IconButton>,
       <IconButton
+        key='next'
         onTouchTap={this.handleNavigateNext}
         disabled={!this.hasNext()}
       >
@@ -274,43 +272,37 @@ class AssignmentTexter extends React.Component {
 
     const promises = []
 
+    const catchError = response => {
+      if (response.errors) {
+        throw new Error(response.errors)
+      }
+      return response
+    }
+
     if (payload.message) 
       promises.push(
         this.props.mutations.sendMessage(payload.message, contact_id)
-          .then(response => {
-            if (response.errors) throw new Error(response.errors)
-            log.info(`Successfully send message to ${contact_id}`) 
-          })
+          .then(catchError)
           .catch(this.handleSendMessageError(contact_id))
       )
 
-    console.log(payload)
-
     if (payload.questionResponseObjects)
       promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id)
-          .then(response => { 
-            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`) 
-          })
-      )
+        .then(catchError))
 
     if (payload.deletionIds)
-      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id).then(
-        response => {
-            log.info(`Successfully deleted question response: ${JSON.stringify(response)}`) 
-        }
-      ))
+      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id)
+        .then(catchError))
 
-    if (payload.optOut)
-      promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id).then(response => {
-            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`) 
-      }))
-
-    console.log(promises)
-    
     Promise.all(promises)
-      .then(results => { 
-        console.log(results)
-        log.info(`Successfully recorded all info for ${contact_id}`)
+      .then(results => {
+        if (payload.optOut) {
+          return this.props.mutations.createOptOut(payload.optOut, contact_id).then(response => {
+            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`)
+          })
+        }
+      })
+      .then(_ => {
         if (isLastOne) this.handleFinishContact()
       })
 
@@ -354,30 +346,23 @@ class AssignmentTexter extends React.Component {
     }
   }
 
-  renderTexter() {
+  renderTexter = () => {
     const { errors } = this.state
     const { assignment } = this.props
     const { campaign, texter } = assignment
     const contact = this.currentContact()
-    const navigationToolbarChildren = this.renderNavigationToolbarChildren()
-    const contactData = this.state.contactCache[contact.id]
-    if (!contactData) {
-      const self = this
-      setTimeout(() => {
-        if (self.state.contactCache[contact.id]) {
-          self.forceUpdate()
-        } else if (!self.state.loading) {
-          self.updateCurrentContactIndex(self.state.currentContactIndex)
-        }
-      }, 200)
-      return null
+
+    // render() will automatically be called again once contentCache is updated, just wait for now
+    if (!contact) {
+      return <LoadingIndicator />
     }
+
+    const navigationToolbarChildren = this.renderNavigationToolbarChildren()
     return (
       <AssignmentTexterContact
         key={contact.id}
         assignment={assignment}
-        campaignContactId={contact.id}
-        contact={contactData}
+        contact={contact}
         texter={texter}
         campaign={campaign}
         navigationToolbarChildren={navigationToolbarChildren}
@@ -393,7 +378,7 @@ class AssignmentTexter extends React.Component {
       />
     )
   }
-  renderEmpty() {
+  renderEmpty = () => {
     return (
       <div>
         <Empty
@@ -407,11 +392,12 @@ class AssignmentTexter extends React.Component {
       </div>
     )
   }
+
   render() {
-    const { contacts } = this.props.assignment
+    const { contactIds } = this.props
     return (
       <div className={css(styles.container)}>
-        {contacts.length === 0 ? this.renderEmpty() : this.renderTexter()}
+        {contactIds.length === 0 ? this.renderEmpty() : this.renderTexter()}
       </div>
     )
   }
@@ -420,7 +406,7 @@ class AssignmentTexter extends React.Component {
 AssignmentTexter.propTypes = {
   currentUser: PropTypes.object,
   assignment: PropTypes.object,      // current assignment
-  contacts: PropTypes.array,   // contacts for current assignment
+  contactIds: PropTypes.arrayOf(PropTypes.string),   // contacts for current assignment
   allContactsCount: PropTypes.number,
   router: PropTypes.object,
   refreshData: PropTypes.func,

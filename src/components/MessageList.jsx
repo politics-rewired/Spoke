@@ -24,7 +24,7 @@ const styles = {
     marginLeft: '20%',
     backgroundColor: 'rgb(33, 150, 243)',
     // Mobile
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginLeft: '30px'
     },
   },
@@ -33,7 +33,7 @@ const styles = {
     marginRight: '20%',
     backgroundColor: '#AAAAAA',
     // Mobile
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginRight: '30px'
     },
   },

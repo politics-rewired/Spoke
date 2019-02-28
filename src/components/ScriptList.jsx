@@ -162,9 +162,9 @@ ScriptList.propTypes = {
   onSelectCannedResponse: PropTypes.func,
   showAddScriptButton: PropTypes.bool,
   customFields: PropTypes.array,
-  campaignId: PropTypes.number,
+  campaignId: PropTypes.string,
   mutations: PropTypes.object,
-  texterId: PropTypes.number
+  texterId: PropTypes.string
 }
 
 const mapMutationsToProps = () => ({

@@ -17,10 +17,10 @@ const styles = StyleSheet.create({
     height: 40
   },
   arrowButton: {
-    '@media(min-width: 450px)': {
+    '@media(minWidth: 450px)': {
       display: 'none !important'
     },
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       display: 'block !important'
     },
     position: 'absolute',
@@ -43,7 +43,6 @@ class SendButtonArrow extends Component {
           className={css(styles.arrowButton)}
           onClick={this.handleTouchTap}
           disabled={this.props.disabled}
-          primary
         >
           <NavigationArrowForward className={css(styles.icon)} />
         </IconButton>
@@ -53,9 +52,8 @@ class SendButtonArrow extends Component {
 }
 
 SendButtonArrow.propTypes = {
-  threeClickEnabled: PropTypes.boolean,
-  onClick: PropTypes.function,
-  disabled: PropTypes.boolean
+  onClick: PropTypes.func,
+  disabled: PropTypes.bool
 }
 
 export default SendButtonArrow

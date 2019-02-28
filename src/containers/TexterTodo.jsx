@@ -38,13 +38,6 @@ const contactDataFragment = `
 `
 
 class TexterTodo extends React.Component {
-  constructor() {
-    super()
-    this.assignContactsIfNeeded = this.assignContactsIfNeeded.bind(this)
-    this.refreshData = this.refreshData.bind(this)
-    this.loadContacts = this.loadContacts.bind(this)
-  }
-
   componentWillMount() {
     const { assignment } = this.props.data
     this.assignContactsIfNeeded()
@@ -81,12 +74,12 @@ class TexterTodo extends React.Component {
 
   render() {
     const { assignment } = this.props.data
-    const contacts = assignment.contacts
+    const contactIds = assignment.contacts.map(contact => contact.id)
     const allContactsCount = assignment.allContactsCount
     return (
       <AssignmentTexter
         assignment={assignment}
-        contacts={contacts}
+        contactIds={contactIds}
         allContactsCount={allContactsCount}
         assignContactsIfNeeded={this.assignContactsIfNeeded}
         refreshData={this.refreshData}

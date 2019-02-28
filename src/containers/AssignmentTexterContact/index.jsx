@@ -1,43 +1,42 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { StyleSheet, css } from 'aphrodite'
-import ContactToolbar from '../components/ContactToolbar'
-import MessageList from '../components/MessageList'
-import CannedResponseMenu from '../components/CannedResponseMenu'
-import AssignmentTexterSurveys from '../components/AssignmentTexterSurveys'
+import MessageList from '../../components/MessageList'
+import CannedResponseMenu from '../../components/CannedResponseMenu'
+import AssignmentTexterSurveys from '../../components/AssignmentTexterSurveys'
 import RaisedButton from 'material-ui/RaisedButton'
 import FlatButton from 'material-ui/FlatButton'
-import NavigateHomeIcon from 'material-ui/svg-icons/action/home'
 import { grey100 } from 'material-ui/styles/colors'
-import IconButton from 'material-ui/IconButton/IconButton'
 import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar'
 import { Card, CardActions, CardTitle } from 'material-ui/Card'
 import Divider from 'material-ui/Divider'
-import { applyScript } from '../lib/scripts'
+import { applyScript } from '../../lib/scripts'
 import yup from 'yup'
-import GSForm from '../components/forms/GSForm'
+import GSForm from '../../components/forms/GSForm'
 import Form from 'react-formal'
-import GSSubmitButton from '../components/forms/GSSubmitButton'
-import SendButton from '../components/SendButton'
-import BulkSendButton from '../components/BulkSendButton'
-import SendButtonArrow from '../components/SendButtonArrow'
+import GSSubmitButton from '../../components/forms/GSSubmitButton'
+import SendButton from '../../components/SendButton'
+import BulkSendButton from '../../components/BulkSendButton'
+import SendButtonArrow from '../../components/SendButtonArrow'
 import CircularProgress from 'material-ui/CircularProgress'
 import Snackbar from 'material-ui/Snackbar'
-import { getChildren, getTopMostParent, interactionStepForId, log, isBetweenTextingHours } from '../lib'
+import { getChildren, getTopMostParent, interactionStepForId, log } from '../../lib'
 import { withRouter } from 'react-router'
-import Empty from '../components/Empty'
+import Empty from '../../components/Empty'
 import CreateIcon from 'material-ui/svg-icons/content/create'
-import { dataTest } from '../lib/attributes'
-import { getContactTimezone } from '../lib/timezones'
+import { dataTest } from '../../lib/attributes'
+
+import { isContactBetweenTextingHours } from './utils'
+import TopFixedSection from './TopFixedSection'
 
 const styles = StyleSheet.create({
   mobile: {
-    '@media(min-width: 425px)': {
+    '@media(minWidth: 425px)': {
       display: 'none !important'
     }
   },
   desktop: {
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       display: 'none !important'
     }
   },
@@ -102,12 +101,12 @@ const styles = StyleSheet.create({
   },
   messageField: {
     padding: '0px 8px',
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginBottom: '8%'
     }
   },
   textField: {
-    '@media(max-width: 350px)': {
+    '@media(maxWidth: 350px)': {
       overflowY: 'scroll !important'
     }
   },
@@ -118,10 +117,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   lgMobileToolBar: {
-    '@media(max-width: 449px) and (min-width: 300px)': {
+    '@media(maxWidth: 449px) and (minWidth: 300px)': {
       display: 'inline-block'
     },
-    '@media(max-width: 320px) and (min-width: 300px)': {
+    '@media(maxWidth: 320px) and (minWidth: 300px)': {
       marginLeft: '-30px !important'
     }
   }
@@ -133,32 +132,19 @@ const inlineStyles = {
     bottom: '-5'
   },
   mobileCannedReplies: {
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginBottom: '1'
     }
   },
   dialogButton: {
     display: 'inline-block'
   },
-  exitTexterIconButton: {
-    float: 'right',
-    height: '50px',
-    zIndex: 100,
-    position: 'absolute',
-    top: 0,
-    right: '-30'
-  },
-  toolbarIconButton: {
-    position: 'absolute',
-    top: 0
-    // without this the toolbar icons are not centered vertically
-  },
   actionToolbar: {
     backgroundColor: 'white',
     '@media(min-width: 450px)': {
       marginBottom: 5
     },
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginBottom: 50
     }
   },
@@ -177,8 +163,7 @@ export class AssignmentTexterContact extends React.Component {
   constructor(props) {
     super(props)
 
-    const { assignment, campaign } = this.props
-    const { contact } = this.props
+    const { assignment, campaign, contact } = this.props
     const questionResponses = this.getInitialQuestionResponses(contact.questionResponseValues)
     const availableSteps = this.getAvailableInteractionSteps(questionResponses)
 
@@ -197,7 +182,7 @@ export class AssignmentTexterContact extends React.Component {
     } else if (contact.optOut) {
       disabledText = 'Skipping opt-out...'
       disabled = true
-    } else if (!this.isContactBetweenTextingHours(contact)) {
+    } else if (!isContactBetweenTextingHours(contact, campaign)) {
       disabledText = "Refreshing ..."
       disabled = true
     }
@@ -217,24 +202,20 @@ export class AssignmentTexterContact extends React.Component {
       optOutDialogOpen: false,
       currentInteractionStep: availableSteps.length > 0 ? availableSteps[availableSteps.length - 1] : null
     }
-    this.onEnter = this.onEnter.bind(this)
-    this.setDisabled = this.setDisabled.bind(this)
   }
 
   componentDidMount() {
-    const { contact } = this.props
+    const { contact, campaign } = this.props
     if (contact.optOut) {
       this.skipContact()
-    } else if (!this.isContactBetweenTextingHours(contact)) {
+    } else if (!isContactBetweenTextingHours(contact, campaign)) {
       setTimeout(() => {
         this.props.refreshData()
         this.setState({ disabled: false })
       }, 1500)
     }
 
-    const node = this.refs.messageScrollContainer
-    // Does not work without this setTimeout
-    setTimeout(() => { node.scrollTop = Math.floor(node.scrollHeight) }, 0)
+    this.refs.messageScrollContainer.scrollTo(0, this.refs.messageScrollContainer.scrollHeight)
 
     // note: key*down* is necessary to stop propagation of keyup for the textarea element
     document.body.addEventListener('keydown', this.onEnter)
@@ -250,7 +231,8 @@ export class AssignmentTexterContact extends React.Component {
     }
   }
 
-  onEnter(evt) {
+  onEnter = (evt) => {
+    // Only handle <enter>
     if (evt.keyCode === 13) {
       evt.preventDefault()
       document.body.removeEventListener('keydown', this.onEnter)
@@ -263,11 +245,11 @@ export class AssignmentTexterContact extends React.Component {
     }
   }
 
-  setDisabled = async (disabled = true) => {
+  setDisabled = (disabled = true) => {
     this.setState({ disabled })
   }
 
-  getAvailableInteractionSteps(questionResponses) {
+  getAvailableInteractionSteps = (questionResponses) => {
     const allInteractionSteps = this.props.campaign.interactionSteps
     const availableSteps = []
 
@@ -291,7 +273,7 @@ export class AssignmentTexterContact extends React.Component {
     return availableSteps
   }
 
-  getInitialQuestionResponses(questionResponseValues) {
+  getInitialQuestionResponses = (questionResponseValues) => {
     const questionResponses = {}
     questionResponseValues.forEach((questionResponse) => {
       questionResponses[questionResponse.interactionStepId] = questionResponse.value
@@ -299,7 +281,7 @@ export class AssignmentTexterContact extends React.Component {
 
     return questionResponses
   }
-  getMessageTextFromScript(script) {
+  getMessageTextFromScript = (script) => {
     const { campaign, contact, texter } = this.props
 
     return script ? applyScript({
@@ -310,7 +292,7 @@ export class AssignmentTexterContact extends React.Component {
     }) : null
   }
 
-  getStartingMessageText() {
+  getStartingMessageText = () => {
     const { contact, campaign } = this.props
     return contact.messageStatus == 'needsMessage'
       ? this.getMessageTextFromScript(getTopMostParent(campaign.interactionSteps).script)
@@ -340,7 +322,7 @@ export class AssignmentTexterContact extends React.Component {
     this.handleChangeScript(cannedResponseScript)
   }
 
-  createMessageToContact(text) {
+  createMessageToContact = (text) => {
     const { texter, assignment } = this.props
     const { contact } = this.props
 
@@ -357,49 +339,22 @@ export class AssignmentTexterContact extends React.Component {
     this.props.router.push(`/app/${campaign.organization.id}/todos`)
   }
 
-  handleSendMessageError = (e) => {
-    if (e.status === 402) {
-      this.goBackToTodos()
-    } else if (e.status === 400) {
-      const newState = {
-        snackbarError: e.message
-      }
-
-      if (e.message === 'Your assignment has changed') {
-        newState.snackbarActionTitle = 'Back to todos'
-        newState.snackbarOnTouchTap = this.goBackToTodos
-        this.setState(newState)
-      } else {
-        // opt out or send message Error
-        this.setState({
-          disabled: true,
-          disabledText: e.message
-        })
-        this.skipContact()
-      }
-    } else {
-      log.error(e)
-      this.setState({
-        snackbarError: 'Error: Please wait a few seconds and try again.'
-      })
-
-      setTimeout(() => {
-        this.setState({ snackbarError: undefined, disabled: false })
-      }, 5000)
+  handleMessageFormSubmit = ({ messageText }) => {
+    // Process the submit synchronously
+    if (this.state.disabled) {
+      return // stops from multi-send
     }
+    this.setState({ disabled: true }, () => {
+      // Actually deliver the payload asyncronously
+      this.submitAction(messageText)
+    })
   }
 
-  handleMessageFormSubmit = async ({ messageText }) => {
+  submitAction = async (messageText) => {
     const { contact } = this.props
     const message = this.createMessageToContact(messageText)
-    if (this.state.disabled) return // stops from multi-send
-
-    this.state.disabled = true;
-    this.forceUpdate()
-
     const changes = this.gatherSurveyChanges()
-    console.log(changes)
-    const payload = Object.assign({ message }, this.gatherSurveyChanges())
+    const payload = Object.assign({ message }, changes)
     this.props.sendMessage(contact.id, payload)
   }
 
@@ -505,43 +460,11 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   handleClickSendMessageButton = () => {
+    this.setState({ alreadySent: true })
     this.refs.form.submit()
     if (this.props.contact.messageStatus === 'needsMessage') {
       this.setState({ justSentNew: true })
     }
-  }
-
-  isContactBetweenTextingHours(contact) {
-    const { campaign } = this.props
-
-    let timezoneData = null
-
-    if (contact.location && contact.location.timezone && contact.location.timezone.offset) {
-      const { hasDST, offset } = contact.location.timezone
-
-      timezoneData = { hasDST, offset }
-    } else {
-      const location = getContactTimezone(this.props.campaign, contact.location)
-      if (location) {
-        const timezone = location.timezone
-        if (timezone) {
-          timezoneData = timezone
-        }
-      }
-    }
-
-    const { textingHoursStart, textingHoursEnd, textingHoursEnforced } = campaign.organization
-    const config = {
-      textingHoursStart,
-      textingHoursEnd,
-      textingHoursEnforced
-    }
-
-    if (campaign.overrideOrganizationTextingHours) {
-      config.campaignTextingHours = { textingHoursStart, textingHoursEnd, textingHoursEnforced, timezone }
-    }
-
-    return isBetweenTextingHours(timezoneData, config)
   }
 
   optOutSchema = yup.object({
@@ -549,7 +472,7 @@ export class AssignmentTexterContact extends React.Component {
   })
 
   skipContact = () => {
-    setTimeout(this.props.onFinishContact, 1500)
+    this.props.onFinishContact()
   }
 
   bulkSendMessages = async (assignmentId) => {
@@ -561,16 +484,12 @@ export class AssignmentTexterContact extends React.Component {
     messageText: yup.string().required("Can't send empty message").max(window.MAX_MESSAGE_LENGTH)
   })
 
-  handleMessageFormChange = ({ messageText }) => this.setState({ messageText })
-
-  renderMiddleScrollingSection() {
-    const { contact } = this.props
-    return (
-      <MessageList
-        contact={contact}
-        messages={contact.messages}
-      />
-    )
+  handleMessageFormChange = ({ messageText }) => {
+    const { messageStatus } = this.props.contact
+    // Do not allow deviating from the script for the first message of a campaign
+    if (messageStatus !== 'needsMessage') {
+      this.setState({ messageText })
+    }
   }
 
   renderSurveySection() {
@@ -620,7 +539,7 @@ export class AssignmentTexterContact extends React.Component {
     const { contact, campaign, assignment, navigationToolbarChildren, onFinishContact } = this.props
     const { userCannedResponses, campaignCannedResponses } = assignment
     const isCannedResponseEnabled = userCannedResponses.length + campaignCannedResponses.length > 0
-    const { justSentNew } = this.state
+    const { justSentNew, alreadySent } = this.state
     const { messageStatus } = contact
     const size = document.documentElement.clientWidth
 
@@ -633,7 +552,7 @@ export class AssignmentTexterContact extends React.Component {
             >
               <SendButton
                 threeClickEnabled={campaign.organization.threeClickEnabled}
-                onFinalTouchTap={this.handleClickSendMessageButton}
+                onFinalTouchTap={alreadySent ? undefined : this.handleClickSendMessageButton}
                 disabled={this.state.disabled}
               />
               {window.NOT_IN_USA && window.ALLOW_SEND_ALL && window.BULK_SEND_CHUNK_SIZE ? <BulkSendButton
@@ -709,8 +628,6 @@ export class AssignmentTexterContact extends React.Component {
                 secondary
                 label='Opt out'
                 onTouchTap={this.handleOpenDialog}
-                tooltip='Opt out this contact'
-                tooltipPosition='top-center'
               />
               <div
                 style={{ float: 'right', marginLeft: 20 }}
@@ -723,27 +640,6 @@ export class AssignmentTexterContact extends React.Component {
       )
     }
     return ''
-  }
-
-  renderTopFixedSection() {
-    const { contact } = this.props
-    return (
-      <ContactToolbar
-        campaign={this.props.campaign}
-        campaignContact={contact}
-        onOptOut={this.handleNavigateNext}
-        rightToolbarIcon={(
-          <IconButton
-            onTouchTap={this.props.onExitTexter}
-            style={inlineStyles.exitTexterIconButton}
-            tooltip='Return Home'
-            tooltipPosition='bottom-center'
-          >
-            <NavigateHomeIcon />
-          </IconButton>
-        )}
-      />
-    )
   }
 
   renderCannedResponsePopover() {
@@ -808,13 +704,12 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderCorrectSendButton() {
-    const { campaign } = this.props
-    const { contact } = this.props
-    if (contact.messageStatus === 'messaged' || contact.messageStatus === 'convo' || contact.messageStatus === 'needsResponse') {
+    const { messageStatus } = this.props.contact
+    const validStates = ['messaged', 'convo', 'needsResponse']
+    if (validStates.indexOf(messageStatus) > -1) {
       return (
         <SendButtonArrow
-          threeClickEnabled={campaign.organization.threeClickEnabled}
-          onFinalTouchTap={this.handleClickSendMessageButton}
+          onClick={this.handleClickSendMessageButton}
           disabled={this.state.disabled}
         />
       )
@@ -823,18 +718,16 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderBottomFixedSection() {
-    const { optOutDialogOpen } = this.state
-    const { contact } = this.props
-    const { messageStatus } = contact
+    const { optOutDialogOpen, messageText } = this.state
 
     const message = (optOutDialogOpen) ? '' : (
       <div className={css(styles.messageField)}>
         <GSForm
           ref='form'
           schema={this.messageSchema}
-          value={{ messageText: this.state.messageText }}
+          value={{ messageText }}
           onSubmit={this.handleMessageFormSubmit}
-          onChange={(messageStatus === 'needsMessage' ? '' : this.handleMessageFormChange)}
+          onChange={this.handleMessageFormChange}
         >
           <Form.Field
             className={css(styles.textField)}
@@ -863,25 +756,41 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   render() {
+    const { disabled } = this.state
+    const { campaign, contact, onExitTexter } = this.props
+
+    const backgroundColor = contact.messageStatus === 'needsResponse'
+      ? 'rgba(83, 180, 119, 0.25)'
+      : ''
+
     return (
       <div>
-        {this.state.disabled ? (
+        {disabled && (
           <div className={css(styles.overlay)}>
             <CircularProgress size={0.5} />
             {this.state.disabledText}
           </div>
-        ) : ''
-        }
-        <div className={css(styles.container)} style={this.props.contact.messageStatus === 'needsResponse' ? { backgroundColor: 'rgba(83, 180, 119, 0.25)' } : {}}>
+        )}
+        <div
+          className={css(styles.container)}
+          style={{ backgroundColor }}
+        >
           <div className={css(styles.topFixedSection)}>
-            {this.renderTopFixedSection()}
+            <TopFixedSection
+              campaign={campaign}
+              contact={contact}
+              onExitTexter={onExitTexter}
+            />
           </div>
           <div
             {...dataTest('messageList')}
             ref='messageScrollContainer'
             className={css(styles.middleScrollingSection)}
           >
-            {this.renderMiddleScrollingSection()}
+            <MessageList
+              contact={contact}
+              messages={contact.messages}
+            />
           </div>
           <div className={css(styles.bottomFixedSection)}>
             {this.renderBottomFixedSection()}
@@ -892,7 +801,7 @@ export class AssignmentTexterContact extends React.Component {
           open={!!this.state.snackbarError}
           message={this.state.snackbarError || ''}
           action={this.state.snackbarActionTitle}
-          onActionTouchTap={this.state.snackbarOnTouchTap}
+          onActionClick={this.state.snackbarOnTouchTap}
         />
         {this.props.errors.map((err, idx) =>
           <Snackbar 
@@ -911,6 +820,7 @@ export class AssignmentTexterContact extends React.Component {
 }
 
 AssignmentTexterContact.propTypes = {
+  errors: PropTypes.array,
   contact: PropTypes.object,
   campaign: PropTypes.object,
   assignment: PropTypes.object,
