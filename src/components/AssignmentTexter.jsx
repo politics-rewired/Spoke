@@ -249,16 +249,19 @@ class AssignmentTexter extends React.Component {
     const title = `${currentIndex} of ${ofHowMany}`
     return [
       <ToolbarTitle
+        key='title'
         className={css(styles.navigationToolbarTitle)}
         text={title}
       />,
       <IconButton
+        key='previous'
         onTouchTap={this.handleNavigatePrevious}
         disabled={!this.hasPrevious()}
       >
         <NavigateBeforeIcon />
       </IconButton>,
       <IconButton
+        key='next'
         onTouchTap={this.handleNavigateNext}
         disabled={!this.hasNext()}
       >

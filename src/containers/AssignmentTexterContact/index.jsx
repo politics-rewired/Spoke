@@ -31,12 +31,12 @@ import TopFixedSection from './TopFixedSection'
 
 const styles = StyleSheet.create({
   mobile: {
-    '@media(min-width: 425px)': {
+    '@media(minWidth: 425px)': {
       display: 'none !important'
     }
   },
   desktop: {
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       display: 'none !important'
     }
   },
@@ -101,12 +101,12 @@ const styles = StyleSheet.create({
   },
   messageField: {
     padding: '0px 8px',
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginBottom: '8%'
     }
   },
   textField: {
-    '@media(max-width: 350px)': {
+    '@media(maxWidth: 350px)': {
       overflowY: 'scroll !important'
     }
   },
@@ -117,10 +117,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   lgMobileToolBar: {
-    '@media(max-width: 449px) and (min-width: 300px)': {
+    '@media(maxWidth: 449px) and (minWidth: 300px)': {
       display: 'inline-block'
     },
-    '@media(max-width: 320px) and (min-width: 300px)': {
+    '@media(maxWidth: 320px) and (minWidth: 300px)': {
       marginLeft: '-30px !important'
     }
   }
@@ -132,7 +132,7 @@ const inlineStyles = {
     bottom: '-5'
   },
   mobileCannedReplies: {
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginBottom: '1'
     }
   },
@@ -144,7 +144,7 @@ const inlineStyles = {
     '@media(min-width: 450px)': {
       marginBottom: 5
     },
-    '@media(max-width: 450px)': {
+    '@media(maxWidth: 450px)': {
       marginBottom: 50
     }
   },
@@ -651,8 +651,6 @@ export class AssignmentTexterContact extends React.Component {
                 secondary
                 label='Opt out'
                 onTouchTap={this.handleOpenDialog}
-                tooltip='Opt out this contact'
-                tooltipPosition='top-center'
               />
               <div
                 style={{ float: 'right', marginLeft: 20 }}
@@ -734,8 +732,7 @@ export class AssignmentTexterContact extends React.Component {
     if (contact.messageStatus === 'messaged' || contact.messageStatus === 'convo' || contact.messageStatus === 'needsResponse') {
       return (
         <SendButtonArrow
-          threeClickEnabled={campaign.organization.threeClickEnabled}
-          onFinalTouchTap={this.handleClickSendMessageButton}
+          onClick={this.handleClickSendMessageButton}
           disabled={this.state.disabled}
         />
       )
@@ -829,7 +826,7 @@ export class AssignmentTexterContact extends React.Component {
           open={!!this.state.snackbarError}
           message={this.state.snackbarError || ''}
           action={this.state.snackbarActionTitle}
-          onActionTouchTap={this.state.snackbarOnTouchTap}
+          onActionClick={this.state.snackbarOnTouchTap}
         />
         {this.props.errors.map((err, idx) =>
           <Snackbar 
@@ -848,6 +845,7 @@ export class AssignmentTexterContact extends React.Component {
 }
 
 AssignmentTexterContact.propTypes = {
+  errors: PropTypes.array,
   contact: PropTypes.object,
   campaign: PropTypes.object,
   assignment: PropTypes.object,

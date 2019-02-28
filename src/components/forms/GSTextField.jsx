@@ -1,10 +1,12 @@
 import React from 'react'
 import TextField from 'material-ui/TextField'
 import GSFormField from './GSFormField'
+import omit from 'lodash/omit'
 
 export default class GSTextField extends GSFormField {
   render() {
     let value = this.props.value
+    const safeProps = omit(this.props, 'errors')
     return (
       <TextField
         floatingLabelText={this.floatingLabelText()}
@@ -12,7 +14,7 @@ export default class GSTextField extends GSFormField {
           zIndex: 0
         }}
         onFocus={(event) => event.target.select()}
-        {...this.props}
+        {...safeProps}
         value={value}
         onChange={(event) => {
           this.props.onChange(event.target.value)
