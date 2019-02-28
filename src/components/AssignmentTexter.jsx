@@ -9,6 +9,7 @@ import { StyleSheet, css } from 'aphrodite'
 import { withRouter } from 'react-router'
 import Check from 'material-ui/svg-icons/action/check-circle'
 import Empty from '../components/Empty'
+import LoadingIndicator from '../components/LoadingIndicator'
 import RaisedButton from 'material-ui/RaisedButton'
 import gql from 'graphql-tag'
 import loadData from '../containers/hoc/load-data'
@@ -151,20 +152,13 @@ class AssignmentTexter extends React.Component {
     }
   }
 
-  getContactId = (contactIds, index) => {
-    if (contactIds.length > index) {
-      return contactIds[index]
-    }
-    return null
-  }
-
   incrementCurrentContactIndex = (increment) => {
     let newIndex = this.state.currentContactIndex
     newIndex = newIndex + increment
     this.updateCurrentContactIndex(newIndex)
   }
 
-  updateCurrentContactIndex = (newIndex) => {
+  updateCurrentContactIndex = async (newIndex) => {
     this.setState({
       currentContactIndex: newIndex
     })
@@ -223,14 +217,10 @@ class AssignmentTexter extends React.Component {
 
   currentContact = () => {
     const { contactIds } = this.props
-
-    // If the index has got out of sync with the contacts available, then rewind to the start
-    if (typeof this.state.currentContactIndex !== 'undefined') {
-      return this.getContactId(contactIds, this.state.currentContactIndex)
-    }
-
-    this.updateCurrentContactIndex(0)
-    return this.getContactId(contactIds, 0)
+    const { currentContactIndex, contactCache } = this.state
+    const contactId = contactIds[currentContactIndex]
+    const contact = contactCache[contactId]
+    return contact
   }
 
   renderNavigationToolbarChildren = () => {
@@ -357,26 +347,20 @@ class AssignmentTexter extends React.Component {
     const { errors } = this.state
     const { assignment } = this.props
     const { campaign, texter } = assignment
-    const contactId = this.currentContact()
-    const navigationToolbarChildren = this.renderNavigationToolbarChildren()
-    const contactData = this.state.contactCache[contactId]
-    if (!contactData) {
-      const self = this
-      setTimeout(() => {
-        if (self.state.contactCache[contactId]) {
-          self.forceUpdate()
-        } else if (!self.state.loading) {
-          self.updateCurrentContactIndex(self.state.currentContactIndex)
-        }
-      }, 200)
-      return null
+    const contact = this.currentContact()
+
+    // render() will automatically be called again once contentCache is updated, just wait for now
+    if (!contact) {
+      return <LoadingIndicator />
     }
+
+    const navigationToolbarChildren = this.renderNavigationToolbarChildren()
     return (
       <AssignmentTexterContact
-        key={contactId}
+        key={contact.id}
         assignment={assignment}
-        campaignContactId={contactId}
-        contact={contactData}
+        campaignContactId={contact.id}
+        contact={contact}
         texter={texter}
         campaign={campaign}
         navigationToolbarChildren={navigationToolbarChildren}
