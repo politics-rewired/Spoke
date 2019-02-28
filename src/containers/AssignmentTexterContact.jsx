@@ -515,7 +515,7 @@ export class AssignmentTexterContact extends React.Component {
   })
 
   skipContact = () => {
-    setTimeout(this.props.onFinishContact, 1500)
+    this.props.onFinishContact()
   }
 
   bulkSendMessages = async (assignmentId) => {
