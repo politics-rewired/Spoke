@@ -711,16 +711,14 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderBottomFixedSection() {
-    const { optOutDialogOpen } = this.state
-    const { contact } = this.props
-    const { messageStatus } = contact
+    const { optOutDialogOpen, messageText } = this.state
 
     const message = (optOutDialogOpen) ? '' : (
       <div className={css(styles.messageField)}>
         <GSForm
           ref='form'
           schema={this.messageSchema}
-          value={{ messageText: this.state.messageText }}
+          value={{ messageText }}
           onSubmit={this.handleMessageFormSubmit}
           onChange={this.handleMessageFormChange}
         >
