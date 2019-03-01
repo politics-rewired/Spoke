@@ -42,9 +42,7 @@ const formatTextingHours = (hour) => moment(hour, 'H').format('h a')
 class Settings extends React.Component {
 
   state = {
-    formIsSubmitting: false,
-    textRequestFormEnabled: undefined,
-    textRequestMaxCount: undefined
+    formIsSubmitting: false
   }
 
   handleSubmitTextingHoursForm = async ({ textingHoursStart, textingHoursEnd }) => {
@@ -55,11 +53,6 @@ class Settings extends React.Component {
   handleOpenTextingHoursDialog = () => this.setState({ textingHoursDialogOpen: true })
 
   handleCloseTextingHoursDialog = () => this.setState({ textingHoursDialogOpen: false })
-
-  handleSubmitTexterRequestFormSettings = async ({ textRequestFormEnabled, textRequestMaxCount }) => {
-    const response = await this.props.mutations.updateTextRequestFormSettings({textRequestFormEnabled, textRequestMaxCount})
-    this.setState(response.data.updateTextRequestFormSettings)
-  }
 
   renderTextingHoursForm() {
     const { organization } = this.props.data
@@ -117,53 +110,6 @@ class Settings extends React.Component {
     )
   }
 
-  renderTexterRequestFormSettings() {
-    const { textRequestFormEnabled: propsEnabled, textRequestMaxCount: propsCount } = this.props.data.organization
-    if (this.state.textRequestFormEnabled === undefined)
-      this.state.textRequestFormEnabled = propsEnabled
-    if (this.state.textRequestMaxCount === undefined)
-      this.state.textRequestMaxCount = propsCount
-
-    const { textRequestFormEnabled, textRequestMaxCount } = this.state
-
-    const formSchema = yup.object({
-      textRequestFormEnabled: yup.boolean().required(),
-      textRequestMaxCount: yup.number()
-    })
-
-    return (
-      <GSForm
-        schema={formSchema}
-        ref={ref => this.textRequestFormRef = ref}
-      >
-        <Toggle
-          label='Enable text request form?'
-          name='textRequestFormEnabled'
-          fullWidth
-          toggled={textRequestFormEnabled}
-          onToggle={(_, isToggled) => this.setState({ textRequestFormEnabled: isToggled })}
-        />
-        <Form.Field
-          label='How many texts should texters be able to request?'
-          name='textRequestMaxCount'
-          type='number'
-          defaultValue={textRequestMaxCount}
-          onChange={n => this.setState({ textRequestMaxCount: n })}
-          disabled={!textRequestFormEnabled}
-          fullWidth
-        />
-        <Form.Button
-          type='submit'
-          label="Update Text Request Form"
-          onClick={async () => {
-            const { textRequestFormEnabled, textRequestMaxCount } = this.state
-            await this.handleSubmitTexterRequestFormSettings({ textRequestFormEnabled, textRequestMaxCount })
-          }}
-        />
-      </GSForm>
-    )
-  }
-
   render() {
     const { organization } = this.props.data
     const { optOutMessage } = organization
@@ -199,10 +145,6 @@ class Settings extends React.Component {
 
             </GSForm>
             </div>
-          </CardText>
-
-          <CardText>
-            {this.renderTexterRequestFormSettings()}
           </CardText>
 
           <CardText>
@@ -297,22 +239,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
       organizationId: ownProps.params.organizationId,
       optOutMessage
     }
-  }),
-  updateTextRequestFormSettings: ({ textRequestFormEnabled, textRequestMaxCount }) => ({
-    mutation: gql`
-      mutation updateTextRequestFormSettings($organizationId: String!, $textRequestFormEnabled: Boolean!, $textRequestMaxCount: Int!) {
-        updateTextRequestFormSettings(
-          organizationId: $organizationId,
-          textRequestFormEnabled: $textRequestFormEnabled,
-          textRequestMaxCount: $textRequestMaxCount
-        ) {
-          id
-          textRequestFormEnabled
-          textRequestMaxCount
-        }
-      }`,
-    variables: { organizationId: ownProps.params.organizationId, textRequestFormEnabled, textRequestMaxCount }
   })
+
 })
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -325,8 +253,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
         textingHoursStart
         textingHoursEnd
         optOutMessage
-        textRequestFormEnabled
-        textRequestMaxCount
       }
     }`,
     variables: {
