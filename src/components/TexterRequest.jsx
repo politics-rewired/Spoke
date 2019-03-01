@@ -15,9 +15,10 @@ class TexterRequest extends React.Component {
   constructor(props) {
     super(props)
 
+    const texterRequestCount = parseInt(window.TEXTER_REQUEST_FORM_COUNT, 10) || 0
     this.state = {
       // Set default assignment size to 1000 if TEXTER_REQUEST_FORM_COUNT is not set to unlimited
-      count: this.props.organization.textRequestMaxCount,
+      count: texterRequestCount >= 0 ? texterRequestCount : 1000,
       email: undefined,
       submitting: false,
       error: undefined,
@@ -62,8 +63,8 @@ class TexterRequest extends React.Component {
 
   render() {
     // Disable form for non-int values or 0; -1 is unlimited
-    const { textsAvailable, textRequestFormEnabled, textRequestMaxCount } = this.props.organization
-    if (!(textsAvailable && textRequestFormEnabled)) {
+    const textRequest = parseInt(window.TEXTER_REQUEST_FORM_COUNT, 10) || 0
+    if (textRequest === 0) {
       return (
         <Paper>
           <div style={{ padding: '20px' }}>
@@ -93,7 +94,7 @@ class TexterRequest extends React.Component {
       <div>
         <div>
           Ready for texts? Just tell us how many
-          {textRequestMaxCount > 0 ? ` (currently limited to ${textRequestMaxCount}/person)` : ''}.
+          {textRequest > 0 ? ` (currently limited to ${textRequest}/person)` : ''}.
         </div>
         <GSForm ref='requestForm' schema={inputSchema} value={{ email, count }}
           onSubmit={this.submit}
@@ -106,7 +107,7 @@ class TexterRequest extends React.Component {
             value={count}
             onChange={e => {
               const formVal = parseInt(e.target.value, 10) || 0
-              let count = textRequestMaxCount > 0 ? Math.min(textRequestMaxCount, formVal) : formVal
+              let count = textRequest > 0 ? Math.min(textRequest, formVal) : formVal
               count = Math.max(count, 0)
               this.setState({ count })
             }}

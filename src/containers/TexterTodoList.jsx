@@ -74,7 +74,7 @@ class TexterTodoList extends React.Component {
           empty : renderedTodos
         }
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 50}}>
-          <TexterRequest user={this.props.data.currentUser} organization={this.props.data.organization} />
+          <TexterRequest user={this.props.data.currentUser} />
         </div>
       </div>
     )
@@ -115,11 +115,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
           pastMessagesCount: contactsCount(contactsFilter: $pastMessagesFilter)
           skippedMessagesCount: contactsCount(contactsFilter: $skippedMessagesFilter)
         }
-      }
-      organization(id: $organizationId) {
-        textRequestFormEnabled
-        textRequestMaxCount
-        textsAvailable
       }
     }`,
     variables: {
