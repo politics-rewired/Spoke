@@ -10,6 +10,7 @@ import Paper from 'material-ui/Paper'
 import Form from 'react-formal'
 import yup from 'yup'
 import gql from 'graphql-tag'
+import LoadingIndicator from './LoadingIndicator';
 
 class TexterRequest extends React.Component {
   constructor(props) {
@@ -17,12 +18,17 @@ class TexterRequest extends React.Component {
 
     this.state = {
       // Set default assignment size to 1000 if TEXTER_REQUEST_FORM_COUNT is not set to unlimited
-      count: this.props.organization.textRequestMaxCount,
+      count: this.props.data.organization.textRequestMaxCount,
       email: undefined,
       submitting: false,
       error: undefined,
       finished: false
     }
+  }
+
+  componentDidMount() {
+    this.props.data.refetch()
+    this.props.data.startPolling(10000)
   }
 
   submit = async () => {
@@ -62,7 +68,13 @@ class TexterRequest extends React.Component {
 
   render() {
     // Disable form for non-int values or 0; -1 is unlimited
-    const { textsAvailable, textRequestFormEnabled, textRequestMaxCount } = this.props.organization
+    if (this.props.data.loading) {
+      return (
+        <LoadingIndicator />
+      )
+    }
+
+    const { textsAvailable, textRequestFormEnabled, textRequestMaxCount } = this.props.data.organization
     if (!(textsAvailable && textRequestFormEnabled)) {
       return (
         <Paper>
@@ -122,6 +134,21 @@ class TexterRequest extends React.Component {
   }
 }
 
+const mapQueriesToProps = ({ ownProps }) => ({
+  data: {
+    query: gql`query currentUser($organizationId: String!) {
+      organization(id: $organizationId) {
+        textRequestFormEnabled
+        textRequestMaxCount
+        textsAvailable
+      }
+    }`,
+    variables: {
+      organizationId: ownProps.organizationId
+    }
+  }
+})
+
 
 const mapMutationsToProps = () => ({
   requestTexts: ({count, email}) => ({
@@ -133,11 +160,13 @@ const mapMutationsToProps = () => ({
     variables: {
       count,
       email
-    }
+    },
+    pollInterval: 10000
   })
 })
 
 export default loadData(wrapMutations(TexterRequest), {
+  mapQueriesToProps,
   mapMutationsToProps
 })
 
