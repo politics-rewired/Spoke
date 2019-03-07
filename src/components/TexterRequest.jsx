@@ -50,6 +50,11 @@ class TexterRequest extends React.Component {
           submitting: false,
           finished: true
         })
+      } else if (message === 'No texts available at the moment') {
+        this.setState({
+          error: message,
+          submitting: false
+        })
       } else {
         this.setState({
           finished: true,
@@ -57,7 +62,7 @@ class TexterRequest extends React.Component {
         })
       }
     } catch (e) {
-      log.error(e)
+      console.error(e)
       this.setState({ error: e, submitting: false })
     } 
   }
@@ -74,17 +79,21 @@ class TexterRequest extends React.Component {
       )
     }
 
-    const { textsAvailable, textRequestFormEnabled, textRequestMaxCount } = this.props.data.organization
-    if (!(textsAvailable && textRequestFormEnabled)) {
-      return (
-        <Paper>
-          <div style={{ padding: '20px' }}>
-            <h3> No texts available right now </h3>
-            <p> Watch Slack for an announcement on when new texts are available! </p>
-          </div>
-        </Paper>
-      )
-    }
+    // const { textsAvailable, textRequestFormEnabled, textRequestMaxCount } = this.props.data.organization
+    // if (!(textsAvailable && textRequestFormEnabled)) {
+    //   return (
+    //     <Paper>
+    //       <div style={{ padding: '20px' }}>
+    //         <h3> No texts available right now </h3>
+    //         <p> Watch Slack for an announcement on when new texts are available! </p>
+    //       </div>
+    //     </Paper>
+    //   )
+    // }
+
+    const textsAvailable = true
+    const textRequestFormEnabled = true
+    const textRequestMaxCount = 500
 
     const { email, count, error, submitting, finished } = this.state
     const inputSchema = yup.object({
@@ -150,16 +159,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
 })
 
 
-const mapMutationsToProps = () => ({
+const mapMutationsToProps = ({ ownProps }) => ({
   requestTexts: ({count, email}) => ({
     mutation: gql`
-      mutation requestTexts($count: Int!, $email: String!) {
-        requestTexts(count: $count, email: $email)
+      mutation requestTexts($count: Int!, $email: String!, $organizationId: String!) {
+        requestTexts(count: $count, email: $email, organizationId: $organizationId)
       }
     `,
     variables: {
       count,
-      email
+      email,
+      organizationId: ownProps.organizationId
     },
     pollInterval: 10000
   })

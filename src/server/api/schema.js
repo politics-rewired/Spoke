@@ -1551,18 +1551,47 @@ const rootMutations = {
 
       return response;
     },
-    requestTexts: async (_, { count, email }, { user }) => {
+    requestTexts: async (_, { count, email, organizationId }, { user, loaders }) => {
       try {
-        const response = await request
-          .post(process.env.TFB_URL)
-          .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
-          .send({ count, email });
+        const formEnabled = await (async () => {
+          const organization = await r.knex('organization').select('features').where({ id: organizationId }).first()
 
-        if (response.body.is_autoapproved) {
-          await giveUserMoreTexts(user.auth0_id, count);
+          try {
+            const features = JSON.parse(organization.features)
+            return features.textRequestFormEnabled || false;
+          } catch (ex) {
+            return false
+          }
+        })()
+
+        if (formEnabled) {
+          const textsAvailable = await (async () => {
+            const ccsAvailableQuery = `
+              select campaign_contact.id
+              from campaign_contact
+              join campaign on campaign.id = campaign_contact.campaign_id
+              where assignment_id is null
+                and campaign.is_started = true 
+                and campaign.is_archived = false
+              limit 1;
+            `
+
+            const result = await r.knex.raw(ccsAvailableQuery)
+            return result[0].length > 0;
+          })()
+
+          if (textsAvailable) {
+            const response = await request
+              .post(process.env.TFB_URL)
+              .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
+              .send({ count, email });
+
+            return response.body.message;
+          }
         }
 
-        return response.body.message;
+
+        return 'No texts available at the moment'
       } catch (e) {
         return e.response.body.message;
       }

@@ -216,7 +216,7 @@ const rootSchema = `
     megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]!):[CampaignIdAssignmentId],
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]!):[CampaignIdAssignmentId]
-    requestTexts(count: Int!, email: String!): String!
+    requestTexts(count: Int!, email: String!, organizationId: String!): String!
     releaseUnsentMessages(campaignId: String!): String!
     markForSecondPass(campaignId: String!): String!
   }
