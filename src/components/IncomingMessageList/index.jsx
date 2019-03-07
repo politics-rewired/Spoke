@@ -11,10 +11,16 @@ import ConversationPreviewModal from './ConversationPreviewModal';
 
 import { MESSAGE_STATUSES } from '../../components/IncomingMessageFilter'
 
+const formatContactName = (contact) => {
+  const { firstName, lastName, optOut } = contact
+  const suffix = (optOut && optOut.cell) ? ' ⛔' : ''
+  return `${firstName} ${lastName}${suffix}`
+}
+
 const prepareDataTableData = (conversations) => conversations.map((conversation, index) => ({
   campaignTitle: conversation.campaign.title,
   texter: conversation.texter.displayName,
-  to: conversation.contact.firstName + ' ' + conversation.contact.lastName + (conversation.contact.optOut.cell ? '⛔️' : ''),
+  to: formatContactName(conversation.contact),
   status: conversation.contact.messageStatus,
   messages: conversation.contact.messages,
   updatedAt: conversation.contact.updatedAt,
