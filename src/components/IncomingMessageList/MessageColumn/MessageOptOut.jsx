@@ -54,17 +54,28 @@ class MessageOptOut extends Component {
           { cell } = contact
 
     this.setState({ isMakingRequest: true })
-    this.handleCloseAlert()
 
-    const result = await this.props.mutations.removeOptOut(cell)
-    this.setState({isMakingRequest: false})
-    if (result.errors) {
+    try {
+      const response = await this.props.mutations.removeOptOut(cell)
+      if (response.errors) {
+        throw response.errors
+      }
+      this.props.optOutChanged(false)
+    } catch (error) {
+      const dialogActions = [
+        <FlatButton
+          label="Close"
+          primary={true}
+          onClick={this.handleCloseAlert}
+        />
+      ]
       this.setState({
         dialogTitle: 'Error Submitting',
-        dialogText: result.errors.message,
+        dialogText: error.message,
+        dialogActions
       })
-    } else if (result.data) {
-      this.props.optOutChanged(false)
+    } finally {
+      this.setState({ isMakingRequest: false })
     }
   }
 
