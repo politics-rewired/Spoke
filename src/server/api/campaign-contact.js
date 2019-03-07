@@ -174,14 +174,15 @@ export const resolvers = {
       return messages
     },
     optOut: async (campaignContact, _, { loaders }) => {
+      // `opt_out_cell` is a non-standard property from the conversations query
       if ('opt_out_cell' in campaignContact) {
         return {
           cell: campaignContact.opt_out_cell
         }
       } else {
-        let isOptedOut = null
-        if (typeof campaignContact.is_opted_out !== 'undefined') {
-          isOptedOut = campaignContact.is_opted_out
+        let isOptedOut = false
+        if (campaignContact.is_opted_out !== undefined) {
+          isOptedOut = Boolean(campaignContact.is_opted_out)
         } else {
           let organizationId = campaignContact.organization_id
           if (!organizationId) {
@@ -189,13 +190,20 @@ export const resolvers = {
             organizationId = campaign.organization_id
           }
 
-          const isOptedOut = await cacheableData.optOut.query({
+          isOptedOut = await cacheableData.optOut.query({
             cell: campaignContact.cell,
             organizationId
           })
         }
-        // fake ID so we don't need to look up existance
-        return (isOptedOut ? { id: 'optout' } : null)
+
+        if (isOptedOut) {
+          // fake ID so we don't need to look up existance
+          return  {
+            id: 'optout',
+            cell: campaignContact.cell
+          }
+        }
+        return null
       }
     }
   }

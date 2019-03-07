@@ -9,7 +9,7 @@ class MessageColumn extends Component {
     super(props)
 
     const { conversation } = props
-    const isOptedOut = !!conversation.contact.optOut.cell
+    const isOptedOut = (conversation.contact.optOut && !!conversation.contact.optOut.cell)
     this.state = {
       messages: conversation.contact.messages,
       isOptedOut

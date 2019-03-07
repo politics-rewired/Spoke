@@ -61,6 +61,7 @@ class MessageOptOut extends Component {
         throw response.errors
       }
       this.props.optOutChanged(false)
+      this.handleCloseAlert()
     } catch (error) {
       const dialogActions = [
         <FlatButton
@@ -168,8 +169,7 @@ const mapMutationsToProps = () => ({
         createOptOut(optOut: $optOut, campaignContactId: $campaignContactId) {
           id
           optOut {
-            id
-            createdAt
+            cell
           }
         }
       }

@@ -918,6 +918,8 @@ const rootMutations = {
         organizationId
       });
 
+      // Force reload with updated `is_opted_out` status
+      loaders.campaignContact.clear(campaignContactId)
       return loaders.campaignContact.load(campaignContactId);
     },
     removeOptOut: async (_, { cell }, { loaders, user }) => {
@@ -945,33 +947,26 @@ const rootMutations = {
           .transacting(trx)
           .where({ cell })
           .del();
+
         // Update all "cached" values for campaign contacts
-        const contactUpdates = r
-          .knex("campaign_contact")
+        const contactUpdates = r.knex('campaign_contact')
           .transacting(trx)
-          .where(
-            "id",
-            "in",
-            r
-              .knex("campaign_contact")
-              .leftJoin(
-                "campaign",
-                "campaign_contact.campaign_id",
-                "campaign.id"
-              )
-              .where({
-                "campaign_contact.cell": cell,
-                "campaign.is_archived": false
-              })
-              .select("campaign_contact.id")
-          )
-          .update({
-            is_opted_out: false
-          });
+          .leftJoin("campaign", "campaign_contact.campaign_id", "campaign.id")
+          .where({
+            "campaign_contact.cell": cell,
+            "campaign.is_archived": false
+          })
+          .pluck("campaign_contact.id")
+          .then(contactIds => {
+            return r.knex('campaign_contact')
+              .transacting(trx)
+              .whereIn("id", contactIds)
+              .update({ is_opted_out: false })
+          })
 
         Promise.all([optOuts, contactUpdates])
           .then(trx.commit)
-          .catch(trx.rollback);
+          .catch(trx.rollback)
       });
 
       // We don't care about Redis
