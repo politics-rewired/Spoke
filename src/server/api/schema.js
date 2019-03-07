@@ -1398,6 +1398,8 @@ const rootMutations = {
       { organizationId, campaignIdsContactIds, newTexterUserIds },
       { user }
     ) => {
+      console.log('megaBulk newTexterUserIds', newTexterUserIds)
+
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
@@ -1461,8 +1463,6 @@ const rootMutations = {
     ) => {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      console.log('megaBulk newTexterUserIds', newTexterUserIds)
 
       const {
         campaignIdContactIdsMap,
