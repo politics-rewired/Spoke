@@ -31,12 +31,12 @@ import TopFixedSection from './TopFixedSection'
 
 const styles = StyleSheet.create({
   mobile: {
-    '@media(minWidth: 425px)': {
+    '@media(min-width: 425px)': {
       display: 'none !important'
     }
   },
   desktop: {
-    '@media(maxWidth: 450px)': {
+    '@media(max-width: 450px)': {
       display: 'none !important'
     }
   },
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     }
   },
   textField: {
-    '@media(maxWidth: 350px)': {
+    '@media(max-width: 350px)': {
       overflowY: 'scroll !important'
     }
   },
@@ -117,10 +117,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   lgMobileToolBar: {
-    '@media(maxWidth: 449px) and (minWidth: 300px)': {
+    '@media(max-width: 449px) and (min-width: 300px)': {
       display: 'inline-block'
     },
-    '@media(maxWidth: 320px) and (minWidth: 300px)': {
+    '@media(max-width: 320px) and (min-width: 300px)': {
       marginLeft: '-30px !important'
     }
   }
@@ -132,7 +132,7 @@ const inlineStyles = {
     bottom: '-5'
   },
   mobileCannedReplies: {
-    '@media(maxWidth: 450px)': {
+    '@media(max-width: 450px)': {
       marginBottom: '1'
     }
   },
@@ -144,7 +144,7 @@ const inlineStyles = {
     '@media(min-width: 450px)': {
       marginBottom: 5
     },
-    '@media(maxWidth: 450px)': {
+    '@media(max-width: 450px)': {
       marginBottom: 50
     }
   },
