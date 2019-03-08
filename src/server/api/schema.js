@@ -1355,71 +1355,30 @@ const rootMutations = {
         Did not mark ${skippingCells.length} contacts because they were\
         present in another, more recent campaign.`
     },
-    reassignCampaignContacts: async (
-      _,
-      { organizationId, campaignIdsContactIds, newTexterUserId },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      // group contactIds by campaign
-      // group messages by campaign
-      const campaignIdContactIdsMap = new Map();
-      const campaignIdMessagesIdsMap = new Map();
-      for (const campaignIdContactId of campaignIdsContactIds) {
-        const {
-          campaignId,
-          campaignContactId,
-          messageIds
-        } = campaignIdContactId;
-
-        if (!campaignIdContactIdsMap.has(campaignId)) {
-          campaignIdContactIdsMap.set(campaignId, []);
-        }
-
-        campaignIdContactIdsMap.get(campaignId).push(campaignContactId);
-
-        if (!campaignIdMessagesIdsMap.has(campaignId)) {
-          campaignIdMessagesIdsMap.set(campaignId, []);
-        }
-
-        campaignIdMessagesIdsMap.get(campaignId).push(...messageIds);
-      }
-
-      return await reassignConversations(
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap,
-        newTexterUserId
-      );
-    },
     megaReassignCampaignContacts: async (
       _ignore,
       { organizationId, campaignIdsContactIds, newTexterUserIds },
       { user }
     ) => {
-      console.log('megaBulk newTexterUserIds', newTexterUserIds)
-
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
       // group contactIds by campaign
       // group messages by campaign
-      const campaignIdContactIdsMap = new Map();
-      const campaignIdMessagesIdsMap = new Map();
-
       const aggregated = {}
-      const campaignContactIdsToMessageIds = campaignIdsContactIds.forEach(campaignIdContactId => {
+      campaignIdsContactIds.forEach(campaignIdContactId => {
         aggregated[campaignIdContactId.campaignContactId] = {
           campaign_id: campaignIdContactId.campaignId,
           messages: campaignIdContactId.messageIds
         }
       })
+
       const result = Object.entries(aggregated)
       const numberOfCampaignContactsToReassign = result.length
       const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
       const response = []
       const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter)
+
       for (let [idx, chunk] of chunks.entries()) {
         const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
         const campaignIdContactIdsMap = new Map()
@@ -1437,10 +1396,9 @@ const rootMutations = {
           })
         })
 
-
         const responses = await reassignConversations(
           campaignIdContactIdsMap,
-          campaignIdMessagesIdsMap,
+          campaignIdMessageIdsMap,
           newTexterUserIds[idx]
         );
         for (let r of responses) {
@@ -1449,36 +1407,6 @@ const rootMutations = {
       }
 
       return response;
-    },
-    bulkReassignCampaignContacts: async (
-      _,
-      {
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        contactsFilter,
-        newTexterUserId
-      },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      const {
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap
-      } = await getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        contactsFilter
-      );
-
-      return await reassignConversations(
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap,
-        newTexterUserId
-      );
     },
     megaBulkReassignCampaignContacts: async (
       _ignore,
@@ -1533,7 +1461,75 @@ const rootMutations = {
 
       return response;
     },
-    requestTexts: async (_, { count, email }, { user }) => {
+    reassignCampaignContacts: async (
+      _,
+      { organizationId, campaignIdsContactIds, newTexterUserId },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      // group contactIds by campaign
+      // group messages by campaign
+      const campaignIdContactIdsMap = new Map();
+      const campaignIdMessagesIdsMap = new Map();
+      for (const campaignIdContactId of campaignIdsContactIds) {
+        const {
+          campaignId,
+          campaignContactId,
+          messageIds
+        } = campaignIdContactId;
+
+        if (!campaignIdContactIdsMap.has(campaignId)) {
+          campaignIdContactIdsMap.set(campaignId, []);
+        }
+
+        campaignIdContactIdsMap.get(campaignId).push(campaignContactId);
+
+        if (!campaignIdMessagesIdsMap.has(campaignId)) {
+          campaignIdMessagesIdsMap.set(campaignId, []);
+        }
+
+        campaignIdMessagesIdsMap.get(campaignId).push(...messageIds);
+      }
+
+      return await reassignConversations(
+        campaignIdContactIdsMap,
+        campaignIdMessagesIdsMap,
+        newTexterUserId
+      );
+    },
+    bulkReassignCampaignContacts: async (
+      _,
+      {
+        organizationId,
+        campaignsFilter,
+        assignmentsFilter,
+        contactsFilter,
+        newTexterUserId
+      },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      const {
+        campaignIdContactIdsMap,
+        campaignIdMessagesIdsMap
+      } = await getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
+        organizationId,
+        campaignsFilter,
+        assignmentsFilter,
+        contactsFilter
+      );
+
+      return await reassignConversations(
+        campaignIdContactIdsMap,
+        campaignIdMessagesIdsMap,
+        newTexterUserId
+      );
+    },
+    requestTexts: async (_, { count, email, organizationId }, { user, loaders }) => {
       try {
         const response = await request
           .post(process.env.TFB_URL)
@@ -1558,21 +1554,7 @@ const rootMutations = {
           assignment_id: null
         })
 
-        // console.log(query.toSQL().toNative())
-
-        // const updatedCount = await query
-
-        // await trx('message')
-        //   .whereRaw(`
-        //     message.campaign_contact_id in (
-        //       select id from campaign_contact
-        //       where assignment_id is null
-        //       and campaign_id = ?
-        //     )
-        //   `, [campaignId])
-        //   .update({ assignment_id: null })
-        
-        return updatedCount
+       return updatedCount
       })
 
       return `Released ${updatedCount} unsent messages for reassignment`;
