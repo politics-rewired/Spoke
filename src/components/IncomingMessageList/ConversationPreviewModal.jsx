@@ -25,14 +25,14 @@ const styles = StyleSheet.create({
 
 const ConversationPreviewBody = (props) => {
   const { conversation } = props,
-        contactId = conversation.contact.id
+        { contact, campaign } = conversation
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.column)}>
         <MessageColumn conversation={conversation} />
       </div>
       <div className={css(styles.column)}>
-        <SurveyColumn contactId={contactId} />
+        <SurveyColumn contact={contact} campaign={campaign} />
       </div>
     </div>
   )
@@ -68,7 +68,12 @@ const ConversationPreviewModal = (props) => {
       contentStyle={customContentStyle}
       onRequestClose={onRequestClose}
     >
-      {isOpen && <ConversationPreviewBody conversation={conversation} />}
+      {isOpen && (
+        <ConversationPreviewBody
+          key={conversation.contact.id}
+          conversation={conversation}
+        />
+      )}
     </Dialog>
   )
 }

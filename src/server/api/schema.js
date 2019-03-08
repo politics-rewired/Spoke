@@ -1241,7 +1241,13 @@ const rootMutations = {
       { loaders, user }
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
-      await assignmentRequired(user, contact.assignment_id);
+      try {
+        await assignmentRequired(user, contact.assignment_id);
+      } catch (error) {
+        const campaign = await r.knex('campaign').where({ id: contact.campaign_id }).first()
+        const organizationId = campaign.organization_id
+        await accessRequired(user, organizationId, 'SUPERVOLUNTEER')
+      }
       // TODO: maybe undo action_handler
       await r
         .table("question_response")
