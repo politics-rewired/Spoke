@@ -39,7 +39,7 @@ const textIncludingMms = (text, serviceMessages) => {
   })
   if (mediaUrls.length > 0) {
     const warningText = `Spoke Message:\n\nThis message contained ${mediaUrls.length} ` +
-      'multimedia attachment(s) which Spoke does not display for your safety.'
+      'multimedia attachment(s) which Spoke does not display.'
 
     if (text === '') {
       text = warningText
