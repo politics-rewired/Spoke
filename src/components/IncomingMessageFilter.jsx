@@ -68,6 +68,8 @@ export const ALL_TEXTERS = -1
 
 export const TEXTER_FILTERS = [[ALL_TEXTERS, 'All Texters']]
 
+const IDLE_KEY_TIME = 500
+
 class IncomingMessageFilter extends Component {
   constructor(props) {
     super(props)
@@ -82,6 +84,8 @@ class IncomingMessageFilter extends Component {
     )
     this.onTexterSelected = this.onTexterSelected.bind(this)
     this.onCampaignSelected = this.onCampaignSelected.bind(this)
+
+    this.submitNameUpdateTimeout = undefined
   }
 
   onMessageFilterSelectChanged(event, index, values) {
@@ -134,8 +138,26 @@ class IncomingMessageFilter extends Component {
     }
   }
 
-  onContactFirstNameChanged = ev => this.setState({ firstName: ev.target.value })
-  onContactLastNameChanged = ev => this.setState({ lastName: ev.target.value })
+  onContactNameChanged = ev => {
+    const name = ev.target.value
+    let firstName, lastName;
+    const splitName = name ? name.split(' ') : ['First', 'Last']
+    if (splitName.length == 1) {
+      firstName = splitName[0]
+      lastName = ''
+    } else if (splitName.length == 2) {
+      firstName = splitName[0]
+      lastName = splitName[1]
+    } else {
+      firstName = splitName[0]
+      lastName = splitName.slice(1, splitName.length + 1).join(' ')
+    }
+
+    this.state.firstName = firstName
+    this.state.lastName = lastName
+    clearTimeout(this.submitNameUpdateTimeout)
+    this.submitNameUpdateTimeout = setTimeout(this.searchByNewContactName, IDLE_KEY_TIME)
+  }
 
   searchByNewContactName = () => { 
     const { firstName, lastName } = this.state
@@ -272,18 +294,7 @@ class IncomingMessageFilter extends Component {
               />
             </div>
             <div className={css(styles.spacer)} />
-            <Card>
-              <CardTitle> 
-                Filter by Contact Name
-                <IconButton onClick={this.searchByNewContactName}>
-                  <UpdateIcon />
-                </IconButton>
-              </CardTitle>
-              <CardText>
-                <TextField onChange={this.onContactFirstNameChanged} floatingLabelText='First Name' fullWidth={true} />
-                <TextField onChange={this.onContactLastNameChanged} floatingLabelText='Last Name' fullWidth={true} />
-              </CardText>
-            </Card>
+            <TextField onChange={this.onContactNameChanged} fullWidth={true} floatingLabelText="Filter by Contact Name in Slack" />
           </div>
         </CardText>
       </Card>
