@@ -49,8 +49,17 @@ class SurveyColumn extends Component {
       this.setState({ isMakingRequest: true })
       const { contact } = this.props
       let { questionResponses } = this.state
+      const affectedSteps = this.getResponsesFrom(iStepId)
 
       try {
+        // Delete response for this and all children (unless this is a single question change)
+        if (affectedSteps.length > 1 || !value) {
+          const iStepIds = affectedSteps.map(iStep => iStep.id)
+          const response = await deleteQuestionResponses(iStepIds, contact.id)
+          if (response.errors) throw response.errors
+          iStepIds.forEach(iStepId => delete questionResponses[iStepId])
+        }
+
         if (value) {
           const input = {
             campaignContactId: contact.id,
@@ -60,10 +69,6 @@ class SurveyColumn extends Component {
           const response = await updateQuestionResponses([input], contact.id)
           if (response.errors) throw response.errors
           questionResponses[iStepId] = value
-        } else {
-          const response = await deleteQuestionResponses([iStepId], contact.id)
-          if (response.errors) throw response.errors
-          delete questionResponses[iStepId]
         }
       } catch (error) {
         this.setState({ requestError: error.message })
@@ -101,17 +106,14 @@ class SurveyColumn extends Component {
 
     return (
       <div style={{maxHeight: '400px', overflowY: 'scroll'}}>
-        {renderSteps.map((iStep, index, stepArray) => {
+        {renderSteps.map(iStep => {
           const responseValue = questionResponses[iStep.id]
-          // Disable if this is not the last _answered_ question
-          const nextStep = stepArray[index + 1]
-          const disabled = isMakingRequest || !!(nextStep && questionResponses[nextStep.id])
           return (
             <SelectField
               key={iStep.id}
               floatingLabelText={iStep.questionText}
               value={responseValue}
-              disabled={disabled}
+              disabled={isMakingRequest}
               onChange={this.createHandler(iStep.id)}
               style={{ width: '100%' }}
             >
