@@ -26,7 +26,7 @@ class SurveyColumn extends Component {
     const { questionResponses } = this.state
 
     const iSteps = []
-    let currentStep = interactionSteps.find(iStep => iStep.id === startingStepId)
+    let currentStep = interactionSteps.find(iStep => iStep.questionText && iStep.id === startingStepId)
     while (currentStep) {
       const children = interactionSteps.filter(iStep => iStep.parentInteractionId === currentStep.id)
       iSteps.push(Object.assign({}, currentStep, { children }))
@@ -52,16 +52,16 @@ class SurveyColumn extends Component {
     const { interactionSteps } = this.props.campaign
     const { questionResponses } = this.state
 
-    if (interactionSteps.length === 0) {
-      return <p>No survey question responses for this conversation.</p>
-    }
-
     let startingStep = interactionSteps.find(iStep => iStep.parentInteractionId === null)
-    const iSteps = this.getResponsesFrom(startingStep.id)
+    const renderSteps = this.getResponsesFrom(startingStep.id)
+
+    if (renderSteps.length === 0) {
+      return <p>No answerable questions for this campaign.</p>
+    }
 
     return (
       <div style={{maxHeight: '400px', overflowY: 'scroll'}}>
-        {iSteps.map((iStep, index, stepArray) => {
+        {renderSteps.map((iStep, index, stepArray) => {
           const responseValue = questionResponses[iStep.id]
           // Disable if this is not the last _answered_ question
           const nextStep = stepArray[index + 1]
