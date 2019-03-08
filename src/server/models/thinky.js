@@ -46,7 +46,13 @@ if (process.env.DB_JSON || global.DB_JSON) {
     connection: process.env.DATABASE_URL,
     pool: {
       min: parseInt(process.env.DB_MIN_POOL || 2, 10),
-      max: parseInt(process.env.DB_MAX_POOL || 10, 10)
+      max: parseInt(process.env.DB_MAX_POOL || 10, 10),
+      afterCreate: function (conn, done) {
+        const setCollation = 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;'
+        conn.query(setCollation, function (error, _results, _fields) {
+          done(error, conn)
+        })
+      }
     },
     ssl: use_ssl
   }
