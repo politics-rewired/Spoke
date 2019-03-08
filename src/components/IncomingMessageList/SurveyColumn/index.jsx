@@ -15,14 +15,14 @@ class SurveyColumn extends Component {
     questionResponses: {}
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const { interactionSteps } = this.props.campaign
     const questionResponses = interactionSteps.filter(iStep => iStep.questionResponse)
       .reduce((collector, iStep) => {
         collector[iStep.id] = iStep.questionResponse.value
         return collector
       }, {})
-    this.setState({ questionResponses })
+    this.state.questionResponses = questionResponses
   }
 
   getResponsesFrom = (startingStepId) => {
