@@ -3,11 +3,15 @@ import gql from 'graphql-tag'
 import { connect } from 'react-apollo'
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
+import Dialog from 'material-ui/Dialog'
+import FlatButton from 'material-ui/FlatButton'
 
 import LoadingIndicator from '../../LoadingIndicator'
 
 class SurveyColumn extends Component {
   state = {
+    isMakingRequest: false,
+    requestError: '',
     questionResponses: {}
   }
 
@@ -40,17 +44,45 @@ class SurveyColumn extends Component {
   }
 
   createHandler = (iStepId) => {
+    const { updateQuestionResponses, deleteQuestionResponses } = this.props.mutations
     return async (event, index, value) => {
+      this.setState({ isMakingRequest: true })
+      const { contact } = this.props
       let { questionResponses } = this.state
-      questionResponses[iStepId] = value
-      console.log(questionResponses)
-      this.setState({ questionResponses })
+
+      try {
+        if (value) {
+          const input = {
+            campaignContactId: contact.id,
+            interactionStepId: iStepId,
+            value
+          }
+          const response = await updateQuestionResponses([input], contact.id)
+          if (response.errors) throw response.errors
+          questionResponses[iStepId] = value
+        } else {
+          const response = await deleteQuestionResponses([iStepId], contact.id)
+          if (response.errors) throw response.errors
+          delete questionResponses[iStepId]
+        }
+      } catch (error) {
+        this.setState({ requestError: error.message })
+      } finally {
+        this.setState({
+          isMakingRequest: false,
+          questionResponses
+        })
+      }
     }
+  }
+
+  handleCloseError = () => {
+    this.setState({ requestError: '' })
   }
 
   render() {
     const { interactionSteps } = this.props.campaign
-    const { questionResponses } = this.state
+    const { isMakingRequest, questionResponses } = this.state
 
     let startingStep = interactionSteps.find(iStep => iStep.parentInteractionId === null)
     const renderSteps = this.getResponsesFrom(startingStep.id)
@@ -59,13 +91,21 @@ class SurveyColumn extends Component {
       return <p>No answerable questions for this campaign.</p>
     }
 
+    const errorActions = [
+      <FlatButton
+        label="OK"
+        primary={true}
+        onClick={this.handleCloseError}
+      />
+    ]
+
     return (
       <div style={{maxHeight: '400px', overflowY: 'scroll'}}>
         {renderSteps.map((iStep, index, stepArray) => {
           const responseValue = questionResponses[iStep.id]
           // Disable if this is not the last _answered_ question
           const nextStep = stepArray[index + 1]
-          const disabled = nextStep && questionResponses[nextStep.id]
+          const disabled = isMakingRequest || !!(nextStep && questionResponses[nextStep.id])
           return (
             <SelectField
               key={iStep.id}
@@ -82,20 +122,33 @@ class SurveyColumn extends Component {
             </SelectField>
           )
         })}
+        <Dialog
+          title="Error Updating Question Response"
+          actions={errorActions}
+          modal={false}
+          open={!!this.state.requestError}
+          onRequestClose={this.handleCloseError}
+        >
+          {this.state.requestError}
+        </Dialog>
       </div>
     )
   }
 }
 
 const SurveyColumnWrapper = (props) => {
-  const { surveyQuestions } = props
+  const { surveyQuestions, mutations, contact} = props
   return (
     <div>
       <h4>Survey Responses</h4>
       {surveyQuestions.loading && <LoadingIndicator />}
       {surveyQuestions.errors && <p>{surveyQuestions.errors.message}</p>}
       {surveyQuestions.campaign && (
-        <SurveyColumn campaign={surveyQuestions.campaign} />
+        <SurveyColumn
+          campaign={surveyQuestions.campaign}
+          contact={contact}
+          mutations={mutations}
+        />
       )}
     </div>
   )
