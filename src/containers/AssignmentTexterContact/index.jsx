@@ -140,13 +140,14 @@ const inlineStyles = {
     display: 'inline-block'
   },
   actionToolbar: {
+    height: 118,
     backgroundColor: 'white',
     '@media(min-width: 450px)': {
       marginBottom: 5
     },
     '@media(max-width: 450px)': {
-      marginBottom: 50
-    }
+      marginBottom: 50,
+    },
   },
 
   actionToolbarFirst: {
