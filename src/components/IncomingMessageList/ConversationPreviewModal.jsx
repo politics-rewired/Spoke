@@ -68,7 +68,12 @@ const ConversationPreviewModal = (props) => {
       contentStyle={customContentStyle}
       onRequestClose={onRequestClose}
     >
-      {isOpen && <ConversationPreviewBody conversation={conversation} />}
+      {isOpen && (
+        <ConversationPreviewBody
+          key={conversation.contact.id}
+          conversation={conversation}
+        />
+      )}
     </Dialog>
   )
 }
