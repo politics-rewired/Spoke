@@ -17,7 +17,6 @@ class TexterRequest extends React.Component {
     super(props)
 
     this.state = {
-      // Set default assignment size to 1000 if TEXTER_REQUEST_FORM_COUNT is not set to unlimited
       count: this.props.data.organization.textRequestMaxCount,
       email: undefined,
       submitting: false,
@@ -28,7 +27,6 @@ class TexterRequest extends React.Component {
 
   componentDidMount() {
     this.props.data.refetch()
-    this.props.data.startPolling(10000)
   }
 
   submit = async () => {
@@ -62,7 +60,7 @@ class TexterRequest extends React.Component {
         })
       }
     } catch (e) {
-      console.error(e)
+      log.error(e)
       this.setState({ error: e, submitting: false })
     } 
   }
@@ -72,28 +70,23 @@ class TexterRequest extends React.Component {
   }
 
   render() {
-    // Disable form for non-int values or 0; -1 is unlimited
     if (this.props.data.loading) {
       return (
         <LoadingIndicator />
       )
     }
 
-    // const { textsAvailable, textRequestFormEnabled, textRequestMaxCount } = this.props.data.organization
-    // if (!(textsAvailable && textRequestFormEnabled)) {
-    //   return (
-    //     <Paper>
-    //       <div style={{ padding: '20px' }}>
-    //         <h3> No texts available right now </h3>
-    //         <p> Watch Slack for an announcement on when new texts are available! </p>
-    //       </div>
-    //     </Paper>
-    //   )
-    // }
-
-    const textsAvailable = true
-    const textRequestFormEnabled = true
-    const textRequestMaxCount = 500
+    const { textsAvailable, textRequestFormEnabled, textRequestMaxCount } = this.props.data.organization
+    if (!(textsAvailable && textRequestFormEnabled)) {
+      return (
+        <Paper>
+          <div style={{ padding: '20px' }}>
+            <h3> No texts available right now </h3>
+            <p> Watch Slack for an announcement on when new texts are available! </p>
+          </div>
+        </Paper>
+      )
+    }
 
     const { email, count, error, submitting, finished } = this.state
     const inputSchema = yup.object({
@@ -154,7 +147,8 @@ const mapQueriesToProps = ({ ownProps }) => ({
     }`,
     variables: {
       organizationId: ownProps.organizationId
-    }
+    },
+    pollInterval: 10000
   }
 })
 
@@ -170,8 +164,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       count,
       email,
       organizationId: ownProps.organizationId
-    },
-    pollInterval: 10000
+    }
   })
 })
 
