@@ -31,6 +31,26 @@ function webhook() {
   }
 }
 
+const textIncludingMms = (text, serviceMessages) => {
+  const mediaUrls = []
+  serviceMessages.forEach(serviceMessage => {
+    const mediaUrlKeys = Object.keys(serviceMessage).filter(key => key.startsWith('MediaUrl'))
+    mediaUrlKeys.forEach(key => mediaUrls.push(serviceMessage[key]))
+  })
+  if (mediaUrls.length > 0) {
+    const warningText = `Spoke Message:\n\nThis message contained ${mediaUrls.length} ` +
+      'multimedia attachment(s) which Spoke does not display for your safety.'
+
+    if (text === '') {
+      text = warningText
+    } else {
+      text = `${text}\n\n${warningText}`
+    }
+  }
+
+  return text
+}
+
 async function convertMessagePartsToMessage(messageParts) {
   const firstPart = messageParts[0]
   const userNumber = firstPart.user_number
@@ -49,7 +69,7 @@ async function convertMessagePartsToMessage(messageParts) {
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,
-    text,
+    text: textIncludingMms(text, serviceMessages),
     service_response: JSON.stringify(serviceMessages),
     service_id: serviceMessages[0].MessagingServiceSid,
     assignment_id: lastMessage && lastMessage.assignment_id,
