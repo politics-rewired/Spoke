@@ -69,6 +69,7 @@ export class AdminIncomingMessageList extends Component {
     campaignsFilter: initialCampaignsFilter,
     contactsFilter: initialContactsFilter,
     assignmentsFilter: initialAssignmentsFilter,
+    contactNameFilter: undefined,
     needsRender: false,
     utc: Date.now().toString(),
     campaigns: [],
@@ -130,6 +131,13 @@ export class AdminIncomingMessageList extends Component {
     )
     await this.setState({
       contactsFilter,
+      needsRender: true
+    })
+  }
+
+  searchByContactName = ({firstName, lastName}) => {
+    this.setState({
+      contactNameFilter: { firstName, lastName },
       needsRender: true
     })
   }
@@ -313,10 +321,11 @@ export class AdminIncomingMessageList extends Component {
     pre-emptively run the default (and most expensive) one
   */
   haveFiltersChangedFromDefaults = () => {
-    const { campaignsFilter, contactsFilter, assignmentsFilter } = this.state
+    const { campaignsFilter, contactsFilter, assignmentsFilter, contactNameFilter } = this.state
     return campaignsFilter !== initialCampaignsFilter 
       || contactsFilter !== initialContactsFilter
       || assignmentsFilter !== initialAssignmentsFilter
+      || contactNameFilter !== undefined
   }
 
   render() {
@@ -355,6 +364,7 @@ export class AdminIncomingMessageList extends Component {
             onCampaignChanged={this.handleCampaignChanged}
             onTexterChanged={this.handleTexterChanged}
             onMessageFilterChanged={this.handleMessageFilterChange}
+            searchByContactName={this.searchByContactName}
             assignmentsFilter={this.state.assignmentsFilter}
             onActiveCampaignsToggled={this.handleActiveCampaignsToggled}
             onArchivedCampaignsToggled={this.handleArchivedCampaignsToggled}
@@ -390,6 +400,7 @@ export class AdminIncomingMessageList extends Component {
                 contactsFilter={this.state.contactsFilter}
                 campaignsFilter={this.state.campaignsFilter}
                 assignmentsFilter={this.state.assignmentsFilter}
+                contactNameFilter={this.state.contactNameFilter}
                 selectedRows={this.state.selectedRows}
                 utc={this.state.utc}
                 onPageChanged={this.handlePageChange}

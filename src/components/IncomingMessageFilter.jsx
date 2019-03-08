@@ -2,9 +2,12 @@ import React, { Component } from 'react'
 import type from 'prop-types'
 import Toggle from 'material-ui/Toggle'
 
-import { Card, CardHeader, CardText } from 'material-ui/Card'
+import { Card, CardHeader, CardText, CardTitle } from 'material-ui/Card'
 import AutoComplete from 'material-ui/AutoComplete'
 import SelectField from 'material-ui/SelectField'
+import TextField from 'material-ui/TextField'
+import IconButton from 'material-ui/IconButton'
+import UpdateIcon from 'material-ui/svg-icons/action/update'
 import MenuItem from 'material-ui/MenuItem'
 import theme from '../styles/theme'
 import { dataSourceItem } from './utils'
@@ -69,7 +72,10 @@ class IncomingMessageFilter extends Component {
   constructor(props) {
     super(props)
 
-    this.state = {}
+    this.state = {
+      firstName: undefined,
+      lastName: undefined
+    }
 
     this.onMessageFilterSelectChanged = this.onMessageFilterSelectChanged.bind(
       this
@@ -126,6 +132,14 @@ class IncomingMessageFilter extends Component {
     if (texterUserId) {
       this.props.onTexterChanged(parseInt(texterUserId, 10))
     }
+  }
+
+  onContactFirstNameChanged = ev => this.setState({ firstName: ev.target.value })
+  onContactLastNameChanged = ev => this.setState({ lastName: ev.target.value })
+
+  searchByNewContactName = () => { 
+    const { firstName, lastName } = this.state
+    this.props.searchByContactName({ firstName, lastName })
   }
 
   render() {
@@ -257,6 +271,19 @@ class IncomingMessageFilter extends Component {
                 onNewRequest={this.onTexterSelected}
               />
             </div>
+            <div className={css(styles.spacer)} />
+            <Card>
+              <CardTitle> 
+                Filter by Contact Name
+                <IconButton onClick={this.searchByNewContactName}>
+                  <UpdateIcon />
+                </IconButton>
+              </CardTitle>
+              <CardText>
+                <TextField onChange={this.onContactFirstNameChanged} floatingLabelText='First Name' fullWidth={true} />
+                <TextField onChange={this.onContactLastNameChanged} floatingLabelText='Last Name' fullWidth={true} />
+              </CardText>
+            </Card>
           </div>
         </CardText>
       </Card>

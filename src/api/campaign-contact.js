@@ -17,6 +17,11 @@ export const schema = `
     state: String
   }
 
+  input ContactNameFilter {
+    firstName: String
+    lastName: String
+  }
+
   type CampaignContact {
     id: ID
     firstName: String

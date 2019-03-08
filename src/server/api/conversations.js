@@ -9,7 +9,8 @@ function getConversationsJoinsAndWhereClause(
   organizationId,
   campaignsFilter,
   assignmentsFilter,
-  contactsFilter
+  contactsFilter,
+  contactNameFilter
 ) {
   let query = queryParam
     .leftJoin('campaign_contact', 'campaign.id', 'campaign_contact.campaign_id')
@@ -22,6 +23,13 @@ function getConversationsJoinsAndWhereClause(
   if (assignmentsFilter) {
     if ('texterId' in assignmentsFilter && assignmentsFilter.texterId !== null)
       query = query.where({ 'assignment.user_id': assignmentsFilter.texterId })
+  }
+
+  if (contactNameFilter) {
+    if (contactNameFilter.firstName) 
+      query = query.where('campaign_contact.first_name', 'like', `${contactNameFilter.firstName}%`)
+    if (contactNameFilter.lastName) 
+      query = query.where('campaign_contact.last_name', 'like', `${contactNameFilter.lastName}%`)
   }
 
   query = addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
@@ -65,6 +73,7 @@ export async function getConversations(
   campaignsFilter,
   assignmentsFilter,
   contactsFilter,
+  contactNameFilter,
   utc
 ) {
   /* Query #1 == get campaign_contact.id for all the conversations matching
@@ -76,7 +85,8 @@ export async function getConversations(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
-    contactsFilter
+    contactsFilter,
+    contactNameFilter
   )
 
   offsetLimitQuery = offsetLimitQuery
@@ -121,7 +131,8 @@ export async function getConversations(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
-    contactsFilter
+    contactsFilter,
+    contactNameFilter
   )
 
   query = query.whereIn('campaign_contact.id', ccIds)
@@ -175,7 +186,8 @@ export async function getConversations(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
-    contactsFilter
+    contactsFilter,
+    contactNameFilter
   ))
 
   const pageInfo = {
@@ -207,7 +219,8 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
-    contactsFilter
+    contactsFilter,
+    contactNameFilter
   )
 
   query = query.leftJoin('message', table => {
@@ -269,7 +282,8 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
-    contactsFilter
+    contactsFilter,
+    contactNameFilter
   )
 
   query = query.leftJoin('message', table => {
