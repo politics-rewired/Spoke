@@ -8,12 +8,17 @@ import LoadingIndicator from '../../LoadingIndicator'
 
 class SurveyColumn extends Component {
   state = {
-    interactionSteps: []
+    questionResponses: {}
   }
 
   componentDidMount() {
     const { interactionSteps } = this.props.campaign
-    this.setState({ interactionSteps })
+    const questionResponses = interactionSteps.filter(iStep => iStep.questionResponse)
+      .reduce((collector, iStep) => {
+        collector[iStep.id] = iStep.questionResponse.value
+        return collector
+      }, {})
+    this.setState({ questionResponses })
   }
 
   createHandler = (iStepId) => {
@@ -23,7 +28,8 @@ class SurveyColumn extends Component {
   }
 
   render() {
-    const { interactionSteps } = this.state
+    const { interactionSteps } = this.props.campaign
+    const { questionResponses } = this.state
 
     if (interactionSteps.length === 0) {
       return <p>No survey question responses for this conversation.</p>
@@ -34,18 +40,14 @@ class SurveyColumn extends Component {
     while (currentStep) {
       const children = interactionSteps.filter(iStep => iStep.parentInteractionId === currentStep.id)
       iSteps.push(Object.assign({}, currentStep, { children }))
-      if (currentStep.questionResponse) {
-        const value = currentStep.questionResponse.value
-        currentStep = interactionSteps.find(iStep => iStep.answerOption === value)
-      } else {
-        currentStep = null
-      }
+      const value = questionResponses[currentStep.id]
+      currentStep = value ? interactionSteps.find(iStep => iStep.answerOption === value) : null
     }
 
     return (
       <div style={{maxHeight: '400px', overflowY: 'scroll'}}>
         {iSteps.map(iStep => {
-          const responseValue = iStep.questionResponse && iStep.questionResponse.value
+          const responseValue = questionResponses[iStep.id]
           return (
             <SelectField
               key={iStep.id}
@@ -74,7 +76,7 @@ const SurveyColumnWrapper = (props) => {
       <h4>Survey Responses</h4>
       {surveyQuestions.loading && <LoadingIndicator />}
       {surveyQuestions.errors && <p>{surveyQuestions.errors.message}</p>}
-      {!surveyQuestions.loading && (
+      {surveyQuestions.campaign && (
         <SurveyColumn campaign={surveyQuestions.campaign} />
       )}
     </div>
