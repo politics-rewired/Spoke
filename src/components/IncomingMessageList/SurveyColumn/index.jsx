@@ -21,9 +21,30 @@ class SurveyColumn extends Component {
     this.setState({ questionResponses })
   }
 
+  getResponsesFrom = (startingStepId) => {
+    const { interactionSteps } = this.props.campaign
+    const { questionResponses } = this.state
+
+    const iSteps = []
+    let currentStep = interactionSteps.find(iStep => iStep.id === startingStepId)
+    while (currentStep) {
+      const children = interactionSteps.filter(iStep => iStep.parentInteractionId === currentStep.id)
+      iSteps.push(Object.assign({}, currentStep, { children }))
+      const value = questionResponses[currentStep.id]
+      currentStep = value
+        // Only show actionable questions
+        ? interactionSteps.find(iStep => iStep.questionText && iStep.answerOption === value)
+        : null
+    }
+    return iSteps
+  }
+
   createHandler = (iStepId) => {
     return async (event, index, value) => {
-      console.log(iStepId, value)
+      let { questionResponses } = this.state
+      questionResponses[iStepId] = value
+      console.log(questionResponses)
+      this.setState({ questionResponses })
     }
   }
 
@@ -35,25 +56,22 @@ class SurveyColumn extends Component {
       return <p>No survey question responses for this conversation.</p>
     }
 
-    const iSteps = []
-    let currentStep = interactionSteps.find(iStep => iStep.parentInteractionId === null)
-    while (currentStep) {
-      const children = interactionSteps.filter(iStep => iStep.parentInteractionId === currentStep.id)
-      iSteps.push(Object.assign({}, currentStep, { children }))
-      const value = questionResponses[currentStep.id]
-      currentStep = value ? interactionSteps.find(iStep => iStep.answerOption === value) : null
-    }
+    let startingStep = interactionSteps.find(iStep => iStep.parentInteractionId === null)
+    const iSteps = this.getResponsesFrom(startingStep.id)
 
     return (
       <div style={{maxHeight: '400px', overflowY: 'scroll'}}>
-        {iSteps.map(iStep => {
+        {iSteps.map((iStep, index, stepArray) => {
           const responseValue = questionResponses[iStep.id]
+          // Disable if this is not the last _answered_ question
+          const nextStep = stepArray[index + 1]
+          const disabled = nextStep && questionResponses[nextStep.id]
           return (
             <SelectField
               key={iStep.id}
               floatingLabelText={iStep.questionText}
               value={responseValue}
-              disabled={false}
+              disabled={disabled}
               onChange={this.createHandler(iStep.id)}
               style={{ width: '100%' }}
             >
@@ -83,7 +101,7 @@ const SurveyColumnWrapper = (props) => {
   )
 }
 
-const mapSurveyColumnQueriesToProps = ({ ownProps }) => ({
+const mapQueriesToProps = ({ ownProps }) => ({
   surveyQuestions: {
     query: gql`query getSurveyQuestions($campaignId: String!, $contactId: String!) {
       campaign(id: $campaignId) {
@@ -112,6 +130,36 @@ const mapSurveyColumnQueriesToProps = ({ ownProps }) => ({
   }
 })
 
+const mapMutationsToProps = () => ({
+  updateQuestionResponses: (questionResponses, campaignContactId) => ({
+    mutation: gql`
+      mutation updateQuestionResponses($questionResponses:[QuestionResponseInput], $campaignContactId: String!) {
+        updateQuestionResponses(questionResponses: $questionResponses, campaignContactId: $campaignContactId) {
+          id
+        }
+      }
+    `,
+    variables: {
+      questionResponses,
+      campaignContactId
+    }
+  }),
+  deleteQuestionResponses: (interactionStepIds, campaignContactId) => ({
+    mutation: gql`
+      mutation deleteQuestionResponses($interactionStepIds:[String], $campaignContactId: String!) {
+        deleteQuestionResponses(interactionStepIds: $interactionStepIds, campaignContactId: $campaignContactId) {
+          id
+        }
+      }
+    `,
+    variables: {
+      interactionStepIds,
+      campaignContactId
+    }
+  })
+})
+
 export default connect({
-  mapQueriesToProps: mapSurveyColumnQueriesToProps
+  mapQueriesToProps,
+  mapMutationsToProps
 })(SurveyColumnWrapper)
