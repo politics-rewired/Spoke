@@ -194,11 +194,7 @@ export class IncomingMessageList extends Component {
 
   handleOpenConversation = (index) => {
     const conversation = this.props.conversations.conversations.conversations[index]
-    const activeConversation = {
-      contact: conversation.contact,
-      texter: conversation.texter
-    }
-    this.setState({ activeConversation })
+    this.setState({ activeConversation: conversation })
   }
 
   handleCloseConversation = () => {
