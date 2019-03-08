@@ -1660,6 +1660,7 @@ const rootResolvers = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
+        contactNameFilter,
         utc
       },
       { user }
@@ -1672,6 +1673,7 @@ const rootResolvers = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
+        contactNameFilter,
         utc
       );
     },

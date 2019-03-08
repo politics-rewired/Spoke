@@ -261,6 +261,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         $contactsFilter: ContactsFilter
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
+        $contactNameFilter: ContactNameFilter
         $utc: String
       ) {
         conversations(
@@ -269,6 +270,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
           campaignsFilter: $campaignsFilter
           contactsFilter: $contactsFilter
           assignmentsFilter: $assignmentsFilter
+          contactNameFilter: $contactNameFilter
           utc: $utc
         ) {
           pageInfo {
@@ -312,6 +314,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       contactsFilter: ownProps.contactsFilter,
       campaignsFilter: ownProps.campaignsFilter,
       assignmentsFilter: ownProps.assignmentsFilter,
+      contactNameFilter: ownProps.contactNameFilter,
       utc: ownProps.utc
     },
     forceFetch: true
