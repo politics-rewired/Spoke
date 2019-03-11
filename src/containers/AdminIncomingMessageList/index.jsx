@@ -78,7 +78,6 @@ export class AdminIncomingMessageList extends Component {
     includeArchivedCampaigns: false,
     conversationCount: 0,
     includeActiveCampaigns: true,
-    conversationCount: 0,
     includeNotOptedOutConversations: true,
     includeOptedOutConversations: false,
     selectedRows: [],
@@ -109,6 +108,7 @@ export class AdminIncomingMessageList extends Component {
 
     await this.setState({
       campaignsFilter,
+      campaignIdsContactIds: [],
       needsRender: true
     })
   }
@@ -120,6 +120,7 @@ export class AdminIncomingMessageList extends Component {
     }
     await this.setState({
       assignmentsFilter,
+      campaignIdsContactIds: [],
       needsRender: true
     })
   }
@@ -131,6 +132,7 @@ export class AdminIncomingMessageList extends Component {
     )
     await this.setState({
       contactsFilter,
+      campaignIdsContactIds: [],
       needsRender: true
     })
   }
@@ -138,6 +140,7 @@ export class AdminIncomingMessageList extends Component {
   searchByContactName = ({firstName, lastName}) => {
     this.setState({
       contactNameFilter: { firstName, lastName },
+      campaignIdsContactIds: [],
       needsRender: true
     })
   }
@@ -147,6 +150,7 @@ export class AdminIncomingMessageList extends Component {
   handleReassignmentCommon = async (fn) => {
     let newState = {
       needsRender: true,
+      campaignIdsContactIds: [],
       reassignmentAlert: {
         title: 'Success!',
         message: 'Your reassignment request succeeded'
@@ -313,7 +317,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
+  conversationCountChanged = (conversationCount) => this.setState({ conversationCount, needsRender: true })
 
   /*
     Shallow comparison here done intentionally – we want to know if its changed, not if it's different,

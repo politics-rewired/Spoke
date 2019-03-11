@@ -294,7 +294,7 @@ class IncomingMessageFilter extends Component {
               />
             </div>
             <div className={css(styles.spacer)} />
-            <TextField onChange={this.onContactNameChanged} fullWidth={true} floatingLabelText="Filter by Contact Name in Slack" />
+            <TextField onChange={this.onContactNameChanged} fullWidth={true} floatingLabelText="Filter by Contact Name" />
           </div>
         </CardText>
       </Card>
