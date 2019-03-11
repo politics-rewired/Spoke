@@ -87,7 +87,7 @@ ALTER TABLE campaign_contact CHANGE zip zip VARCHAR(255) CHARACTER SET utf8mb4 C
 ALTER TABLE campaign_contact CHANGE custom_fields custom_fields TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- custom_fields changing to text
 ALTER TABLE campaign_contact CHANGE message_status message_status VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-ALTER TABLE campaign_contact CHANGE timezone_offset timezone_offset VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE campaign_contact CHANGE timezone_offset timezone_offset VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ---------- canned_response - both were already text
 ALTER TABLE canned_response CHANGE title title TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
