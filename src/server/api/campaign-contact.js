@@ -1,5 +1,5 @@
 import { CampaignContact, r, cacheableData } from '../models'
-import { mapFieldsToModel } from './lib/utils'
+import { mapFieldsToModel, normalizeTimezone } from './lib/utils'
 import { log, getTopMostParent, zipToTimeZone } from '../../lib'
 
 export const resolvers = {
@@ -35,9 +35,7 @@ export const resolvers = {
         updatedAt = campaignContact.created_at
       }
 
-      updatedAt = new Date(updatedAt)
-      updatedAt.setHours(updatedAt.getHours() - 5)
-      return updatedAt
+      return normalizeTimezone(updatedAt)
     },
     messageStatus: async (campaignContact, _, { loaders }) => {
       if (campaignContact.message_status) {
