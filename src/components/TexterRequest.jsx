@@ -17,7 +17,7 @@ class TexterRequest extends React.Component {
     super(props)
 
     this.state = {
-      count: this.props.data.organization.textRequestMaxCount,
+      count: this.props.data.organization ? this.props.data.organization.textRequestMaxCount : undefined,
       email: undefined,
       submitting: false,
       error: undefined,
