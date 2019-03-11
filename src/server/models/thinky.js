@@ -47,6 +47,11 @@ if (process.env.DB_JSON || global.DB_JSON) {
     pool: {
       min: parseInt(process.env.DB_MIN_POOL || 2, 10),
       max: parseInt(process.env.DB_MAX_POOL || 10, 10),
+      // free resouces are destroyed after this many milliseconds
+      idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT_MS || 30000),
+      // how often to check for idle resources to destroy
+      reapIntervalMillis: parseInt(process.env.DB_REAP_INTERVAL_MS || 1000),
+      // Set connection to utf8mb4 collation
       afterCreate: function (conn, done) {
         const setCollation = 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;'
         conn.query(setCollation, function (error, _results, _fields) {

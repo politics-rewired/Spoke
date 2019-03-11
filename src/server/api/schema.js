@@ -558,6 +558,24 @@ const rootMutations = {
 
       return await loaders.organization.load(organizationId);
     },
+    updateTextRequestFormSettings: async (_, { organizationId, textRequestFormEnabled, textRequestMaxCount }, { user, loaders }) => {
+      await accessRequired(user, organizationId, 'ADMIN')
+
+      const currentOrganization = await Organization.get(organizationId)
+      let currentFeatures = {}
+      try {
+        currentFeatures = JSON.parse(currentOrganization.features);
+      } catch (ex) {
+        // do nothing
+      }
+
+      const nextFeatures = Object.assign({}, currentFeatures, { textRequestFormEnabled, textRequestMaxCount })
+      await Organization.get(organizationId).update({
+        features: JSON.stringify(nextFeatures)
+      })
+
+      return await loaders.organization.load(organizationId)
+    },
     updateOptOutMessage: async (
       _,
       { organizationId, optOutMessage },
@@ -1241,7 +1259,13 @@ const rootMutations = {
       { loaders, user }
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
-      await assignmentRequired(user, contact.assignment_id);
+      try {
+        await assignmentRequired(user, contact.assignment_id);
+      } catch (error) {
+        const campaign = await r.knex('campaign').where({ id: contact.campaign_id }).first()
+        const organizationId = campaign.organization_id
+        await accessRequired(user, organizationId, 'SUPERVOLUNTEER')
+      }
       // TODO: maybe undo action_handler
       await r
         .table("question_response")
@@ -1350,44 +1374,6 @@ const rootMutations = {
         Did not mark ${skippingCells.length} contacts because they were\
         present in another, more recent campaign.`
     },
-    reassignCampaignContacts: async (
-      _,
-      { organizationId, campaignIdsContactIds, newTexterUserId },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      // group contactIds by campaign
-      // group messages by campaign
-      const campaignIdContactIdsMap = new Map();
-      const campaignIdMessagesIdsMap = new Map();
-      for (const campaignIdContactId of campaignIdsContactIds) {
-        const {
-          campaignId,
-          campaignContactId,
-          messageIds
-        } = campaignIdContactId;
-
-        if (!campaignIdContactIdsMap.has(campaignId)) {
-          campaignIdContactIdsMap.set(campaignId, []);
-        }
-
-        campaignIdContactIdsMap.get(campaignId).push(campaignContactId);
-
-        if (!campaignIdMessagesIdsMap.has(campaignId)) {
-          campaignIdMessagesIdsMap.set(campaignId, []);
-        }
-
-        campaignIdMessagesIdsMap.get(campaignId).push(...messageIds);
-      }
-
-      return await reassignConversations(
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap,
-        newTexterUserId
-      );
-    },
     megaReassignCampaignContacts: async (
       _ignore,
       { organizationId, campaignIdsContactIds, newTexterUserIds },
@@ -1398,21 +1384,20 @@ const rootMutations = {
 
       // group contactIds by campaign
       // group messages by campaign
-      const campaignIdContactIdsMap = new Map();
-      const campaignIdMessagesIdsMap = new Map();
-
       const aggregated = {}
-      const campaignContactIdsToMessageIds = campaignIdsContactIds.forEach(campaignIdContactId => {
+      campaignIdsContactIds.forEach(campaignIdContactId => {
         aggregated[campaignIdContactId.campaignContactId] = {
           campaign_id: campaignIdContactId.campaignId,
           messages: campaignIdContactId.messageIds
         }
       })
+
       const result = Object.entries(aggregated)
       const numberOfCampaignContactsToReassign = result.length
       const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
       const response = []
       const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter)
+
       for (let [idx, chunk] of chunks.entries()) {
         const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
         const campaignIdContactIdsMap = new Map()
@@ -1430,10 +1415,9 @@ const rootMutations = {
           })
         })
 
-
         const responses = await reassignConversations(
           campaignIdContactIdsMap,
-          campaignIdMessagesIdsMap,
+          campaignIdMessageIdsMap,
           newTexterUserIds[idx]
         );
         for (let r of responses) {
@@ -1442,38 +1426,6 @@ const rootMutations = {
       }
 
       return response;
-    },
-    bulkReassignCampaignContacts: async (
-      _,
-      {
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        contactsFilter,
-        newTexterUserId
-      },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      console.log('megaBulk newTexterUserIds', newTexterUserIds)
-
-      const {
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap
-      } = await getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        contactsFilter
-      );
-
-      return await reassignConversations(
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap,
-        newTexterUserId
-      );
     },
     megaBulkReassignCampaignContacts: async (
       _ignore,
@@ -1528,18 +1480,115 @@ const rootMutations = {
 
       return response;
     },
-    requestTexts: async (_, { count, email }, { user }) => {
-      try {
-        const response = await request
-          .post(process.env.TFB_URL)
-          .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
-          .send({ count, email });
+    reassignCampaignContacts: async (
+      _,
+      { organizationId, campaignIdsContactIds, newTexterUserId },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-        if (response.body.is_autoapproved) {
-          await giveUserMoreTexts(user.auth0_id, count);
+      // group contactIds by campaign
+      // group messages by campaign
+      const campaignIdContactIdsMap = new Map();
+      const campaignIdMessagesIdsMap = new Map();
+      for (const campaignIdContactId of campaignIdsContactIds) {
+        const {
+          campaignId,
+          campaignContactId,
+          messageIds
+        } = campaignIdContactId;
+
+        if (!campaignIdContactIdsMap.has(campaignId)) {
+          campaignIdContactIdsMap.set(campaignId, []);
         }
 
-        return response.body.message;
+        campaignIdContactIdsMap.get(campaignId).push(campaignContactId);
+
+        if (!campaignIdMessagesIdsMap.has(campaignId)) {
+          campaignIdMessagesIdsMap.set(campaignId, []);
+        }
+
+        campaignIdMessagesIdsMap.get(campaignId).push(...messageIds);
+      }
+
+      return await reassignConversations(
+        campaignIdContactIdsMap,
+        campaignIdMessagesIdsMap,
+        newTexterUserId
+      );
+    },
+    bulkReassignCampaignContacts: async (
+      _,
+      {
+        organizationId,
+        campaignsFilter,
+        assignmentsFilter,
+        contactsFilter,
+        newTexterUserId
+      },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      const {
+        campaignIdContactIdsMap,
+        campaignIdMessagesIdsMap
+      } = await getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
+        organizationId,
+        campaignsFilter,
+        assignmentsFilter,
+        contactsFilter
+      );
+
+      return await reassignConversations(
+        campaignIdContactIdsMap,
+        campaignIdMessagesIdsMap,
+        newTexterUserId
+      );
+    },
+    requestTexts: async (_, { count, email, organizationId }, { user, loaders }) => {
+      try {
+        const formEnabled = await (async () => {
+          const organization = await r.knex('organization').select('features').where({ id: organizationId }).first()
+
+          try {
+            const features = JSON.parse(organization.features)
+            return features.textRequestFormEnabled || false;
+          } catch (ex) {
+            return false
+          }
+        })()
+
+        if (formEnabled) {
+          const textsAvailable = await (async () => {
+            const ccsAvailableQuery = `
+              select campaign_contact.id
+              from campaign_contact
+              join campaign on campaign.id = campaign_contact.campaign_id
+              where assignment_id is null
+                and campaign.is_started = true 
+                and campaign.is_archived = false
+              limit 1;
+            `
+
+            const result = await r.knex.raw(ccsAvailableQuery)
+            return result[0].length > 0;
+          })()
+
+          if (textsAvailable) {
+            const response = await request
+              .post(process.env.TFB_URL)
+              .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
+              .send({ count, email });
+
+            return response.body.message;
+          }
+        }
+
+
+        return 'No texts available at the moment'
       } catch (e) {
         return e.response.body.message;
       }
@@ -1553,21 +1602,7 @@ const rootMutations = {
           assignment_id: null
         })
 
-        // console.log(query.toSQL().toNative())
-
-        // const updatedCount = await query
-
-        // await trx('message')
-        //   .whereRaw(`
-        //     message.campaign_contact_id in (
-        //       select id from campaign_contact
-        //       where assignment_id is null
-        //       and campaign_id = ?
-        //     )
-        //   `, [campaignId])
-        //   .update({ assignment_id: null })
-        
-        return updatedCount
+       return updatedCount
       })
 
       return `Released ${updatedCount} unsent messages for reassignment`;
@@ -1672,6 +1707,7 @@ const rootResolvers = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
+        contactNameFilter,
         utc
       },
       { user }
@@ -1684,6 +1720,7 @@ const rootResolvers = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
+        contactNameFilter,
         utc
       );
     },

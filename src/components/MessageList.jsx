@@ -66,7 +66,9 @@ const MessageList = function MessageList(props) {
             disabled
             style={style}
             key={message.id}
-            primaryText={message.text}
+            primaryText={(
+              <span style={{ whiteSpace: 'pre-wrap' }}>{message.text}</span>
+            )}
             secondaryText={moment(message.createdAt).fromNow()}
           />
         )

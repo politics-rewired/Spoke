@@ -194,11 +194,7 @@ export class IncomingMessageList extends Component {
 
   handleOpenConversation = (index) => {
     const conversation = this.props.conversations.conversations.conversations[index]
-    const activeConversation = {
-      contact: conversation.contact,
-      texter: conversation.texter
-    }
-    this.setState({ activeConversation })
+    this.setState({ activeConversation: conversation })
   }
 
   handleCloseConversation = () => {
@@ -265,6 +261,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         $contactsFilter: ContactsFilter
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
+        $contactNameFilter: ContactNameFilter
         $utc: String
       ) {
         conversations(
@@ -273,6 +270,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
           campaignsFilter: $campaignsFilter
           contactsFilter: $contactsFilter
           assignmentsFilter: $assignmentsFilter
+          contactNameFilter: $contactNameFilter
           utc: $utc
         ) {
           pageInfo {
@@ -316,6 +314,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       contactsFilter: ownProps.contactsFilter,
       campaignsFilter: ownProps.campaignsFilter,
       assignmentsFilter: ownProps.assignmentsFilter,
+      contactNameFilter: ownProps.contactNameFilter,
       utc: ownProps.utc
     },
     forceFetch: true

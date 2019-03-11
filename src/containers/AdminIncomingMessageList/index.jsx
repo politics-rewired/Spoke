@@ -69,6 +69,7 @@ export class AdminIncomingMessageList extends Component {
     campaignsFilter: initialCampaignsFilter,
     contactsFilter: initialContactsFilter,
     assignmentsFilter: initialAssignmentsFilter,
+    contactNameFilter: undefined,
     needsRender: false,
     utc: Date.now().toString(),
     campaigns: [],
@@ -77,7 +78,6 @@ export class AdminIncomingMessageList extends Component {
     includeArchivedCampaigns: false,
     conversationCount: 0,
     includeActiveCampaigns: true,
-    conversationCount: 0,
     includeNotOptedOutConversations: true,
     includeOptedOutConversations: false,
     selectedRows: [],
@@ -108,6 +108,7 @@ export class AdminIncomingMessageList extends Component {
 
     await this.setState({
       campaignsFilter,
+      campaignIdsContactIds: [],
       needsRender: true
     })
   }
@@ -119,6 +120,7 @@ export class AdminIncomingMessageList extends Component {
     }
     await this.setState({
       assignmentsFilter,
+      campaignIdsContactIds: [],
       needsRender: true
     })
   }
@@ -130,6 +132,15 @@ export class AdminIncomingMessageList extends Component {
     )
     await this.setState({
       contactsFilter,
+      campaignIdsContactIds: [],
+      needsRender: true
+    })
+  }
+
+  searchByContactName = ({firstName, lastName}) => {
+    this.setState({
+      contactNameFilter: { firstName, lastName },
+      campaignIdsContactIds: [],
       needsRender: true
     })
   }
@@ -139,6 +150,7 @@ export class AdminIncomingMessageList extends Component {
   handleReassignmentCommon = async (fn) => {
     let newState = {
       needsRender: true,
+      campaignIdsContactIds: [],
       reassignmentAlert: {
         title: 'Success!',
         message: 'Your reassignment request succeeded'
@@ -305,7 +317,7 @@ export class AdminIncomingMessageList extends Component {
     })
   }
 
-  conversationCountChanged = (conversationCount) => this.setState({ conversationCount })
+  conversationCountChanged = (conversationCount) => this.setState({ conversationCount, needsRender: true })
 
   /*
     Shallow comparison here done intentionally – we want to know if its changed, not if it's different,
@@ -313,10 +325,11 @@ export class AdminIncomingMessageList extends Component {
     pre-emptively run the default (and most expensive) one
   */
   haveFiltersChangedFromDefaults = () => {
-    const { campaignsFilter, contactsFilter, assignmentsFilter } = this.state
+    const { campaignsFilter, contactsFilter, assignmentsFilter, contactNameFilter } = this.state
     return campaignsFilter !== initialCampaignsFilter 
       || contactsFilter !== initialContactsFilter
       || assignmentsFilter !== initialAssignmentsFilter
+      || contactNameFilter !== undefined
   }
 
   render() {
@@ -355,6 +368,7 @@ export class AdminIncomingMessageList extends Component {
             onCampaignChanged={this.handleCampaignChanged}
             onTexterChanged={this.handleTexterChanged}
             onMessageFilterChanged={this.handleMessageFilterChange}
+            searchByContactName={this.searchByContactName}
             assignmentsFilter={this.state.assignmentsFilter}
             onActiveCampaignsToggled={this.handleActiveCampaignsToggled}
             onArchivedCampaignsToggled={this.handleArchivedCampaignsToggled}
@@ -390,6 +404,7 @@ export class AdminIncomingMessageList extends Component {
                 contactsFilter={this.state.contactsFilter}
                 campaignsFilter={this.state.campaignsFilter}
                 assignmentsFilter={this.state.assignmentsFilter}
+                contactNameFilter={this.state.contactNameFilter}
                 selectedRows={this.state.selectedRows}
                 utc={this.state.utc}
                 onPageChanged={this.handlePageChange}

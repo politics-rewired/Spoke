@@ -2,9 +2,12 @@ import React, { Component } from 'react'
 import type from 'prop-types'
 import Toggle from 'material-ui/Toggle'
 
-import { Card, CardHeader, CardText } from 'material-ui/Card'
+import { Card, CardHeader, CardText, CardTitle } from 'material-ui/Card'
 import AutoComplete from 'material-ui/AutoComplete'
 import SelectField from 'material-ui/SelectField'
+import TextField from 'material-ui/TextField'
+import IconButton from 'material-ui/IconButton'
+import UpdateIcon from 'material-ui/svg-icons/action/update'
 import MenuItem from 'material-ui/MenuItem'
 import theme from '../styles/theme'
 import { dataSourceItem } from './utils'
@@ -65,17 +68,24 @@ export const ALL_TEXTERS = -1
 
 export const TEXTER_FILTERS = [[ALL_TEXTERS, 'All Texters']]
 
+const IDLE_KEY_TIME = 500
+
 class IncomingMessageFilter extends Component {
   constructor(props) {
     super(props)
 
-    this.state = {}
+    this.state = {
+      firstName: undefined,
+      lastName: undefined
+    }
 
     this.onMessageFilterSelectChanged = this.onMessageFilterSelectChanged.bind(
       this
     )
     this.onTexterSelected = this.onTexterSelected.bind(this)
     this.onCampaignSelected = this.onCampaignSelected.bind(this)
+
+    this.submitNameUpdateTimeout = undefined
   }
 
   onMessageFilterSelectChanged(event, index, values) {
@@ -126,6 +136,32 @@ class IncomingMessageFilter extends Component {
     if (texterUserId) {
       this.props.onTexterChanged(parseInt(texterUserId, 10))
     }
+  }
+
+  onContactNameChanged = ev => {
+    const name = ev.target.value
+    let firstName, lastName;
+    const splitName = name ? name.split(' ') : ['First', 'Last']
+    if (splitName.length == 1) {
+      firstName = splitName[0]
+      lastName = ''
+    } else if (splitName.length == 2) {
+      firstName = splitName[0]
+      lastName = splitName[1]
+    } else {
+      firstName = splitName[0]
+      lastName = splitName.slice(1, splitName.length + 1).join(' ')
+    }
+
+    this.state.firstName = firstName
+    this.state.lastName = lastName
+    clearTimeout(this.submitNameUpdateTimeout)
+    this.submitNameUpdateTimeout = setTimeout(this.searchByNewContactName, IDLE_KEY_TIME)
+  }
+
+  searchByNewContactName = () => { 
+    const { firstName, lastName } = this.state
+    this.props.searchByContactName({ firstName, lastName })
   }
 
   render() {
@@ -257,6 +293,8 @@ class IncomingMessageFilter extends Component {
                 onNewRequest={this.onTexterSelected}
               />
             </div>
+            <div className={css(styles.spacer)} />
+            <TextField onChange={this.onContactNameChanged} fullWidth={true} floatingLabelText="Filter by Contact Name" />
           </div>
         </CardText>
       </Card>

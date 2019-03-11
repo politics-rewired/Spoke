@@ -115,22 +115,20 @@ class IncomingMessageActions extends Component {
             </p>
           </div>
           <div className={css(styles.container)}>
-            {/* <div className={css(styles.flexColumn)}>
+            <div className={css(styles.flexColumn)}>
               <FlatButton
                 label={'Reassign selected'}
                 onClick={this.onReassignmentClicked}
                 disabled={!hasSeletedTexters}
               />
-            </div> */}
-            {this.props.conversationCount ? (
-              <div className={css(styles.flexColumn)}>
-                <FlatButton
-                  label={`Reassign all ${this.props.conversationCount} matching`}
-                  onClick={this.onReassignAllMatchingClicked}
-                  disabled={!hasSeletedTexters}
-                />
-              </div>) : ''
-            }
+            </div>
+            <div className={css(styles.flexColumn)}>
+              <FlatButton
+                label={`Reassign all ${this.props.conversationCount} matching`}
+                onClick={this.onReassignAllMatchingClicked}
+                disabled={!hasSeletedTexters || this.props.conversationCount === 0}
+              />
+            </div>
             <Dialog
               actions={confirmDialogActions}
               open={this.state.confirmDialogOpen}

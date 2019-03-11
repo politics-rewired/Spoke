@@ -74,7 +74,7 @@ class TexterTodoList extends React.Component {
           empty : renderedTodos
         }
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 50}}>
-          <TexterRequest user={this.props.data.currentUser} />
+          <TexterRequest user={this.props.data.currentUser} organizationId={this.props.params.organizationId} />
         </div>
       </div>
     )

@@ -176,7 +176,7 @@ const rootSchema = `
     assignment(id:String!): Assignment
     organizations: [Organization]
     availableActions(organizationId:String!): [Action]
-    conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, utc:String): PaginatedConversations
+    conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter, utc:String): PaginatedConversations
     campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
     people(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String): UsersReturn
   }
@@ -195,6 +195,7 @@ const rootSchema = `
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
+    updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestMaxCount: Int!): Organization
     updateOptOutMessage( organizationId: String!, optOutMessage: String!): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
@@ -215,7 +216,7 @@ const rootSchema = `
     megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]!):[CampaignIdAssignmentId],
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]!):[CampaignIdAssignmentId]
-    requestTexts(count: Int!, email: String!): String!
+    requestTexts(count: Int!, email: String!, organizationId: String!): String!
     releaseUnsentMessages(campaignId: String!): String!
     markForSecondPass(campaignId: String!): String!
   }
