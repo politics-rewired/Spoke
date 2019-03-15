@@ -231,6 +231,7 @@ export class IncomingMessageList extends Component {
         />
         <ConversationPreviewModal
           conversation={this.state.activeConversation}
+          organizationId={this.props.organizationId}
           onRequestClose={this.handleCloseConversation}
         />
       </div>
@@ -294,6 +295,8 @@ const mapQueriesToProps = ({ ownProps }) => ({
                 id
                 text
                 isFromContact
+                createdAt
+                userId
               }
               optOut {
                 cell

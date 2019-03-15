@@ -64,7 +64,7 @@ import { resolvers as organizationResolvers } from "./organization";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
-import { getUsers, resolvers as userResolvers } from "./user";
+import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
@@ -1734,11 +1734,19 @@ const rootResolvers = {
     },
     people: async (
       _,
-      { organizationId, cursor, campaignsFilter, role },
+      { organizationId, cursor, campaignsFilter, role},
       { user }
     ) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       return getUsers(organizationId, cursor, campaignsFilter, role);
+    },
+    peopleByUserIds: async(
+      _,
+      { organizationId, userIds },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER")
+      return getUsersById(userIds)
     }
   }
 };

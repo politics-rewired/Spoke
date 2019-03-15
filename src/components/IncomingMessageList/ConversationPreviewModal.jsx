@@ -29,7 +29,7 @@ const ConversationPreviewBody = (props) => {
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.column)}>
-        <MessageColumn conversation={conversation} />
+        <MessageColumn conversation={conversation} organizationId={props.organizationId} />
       </div>
       <div className={css(styles.column)}>
         <SurveyColumn contact={contact} campaign={campaign} />
@@ -72,6 +72,7 @@ const ConversationPreviewModal = (props) => {
         <ConversationPreviewBody
           key={conversation.contact.id}
           conversation={conversation}
+          organizationId={props.organizationId}
         />
       )}
     </Dialog>
