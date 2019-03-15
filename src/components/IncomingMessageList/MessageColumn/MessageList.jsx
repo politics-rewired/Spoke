@@ -51,7 +51,12 @@ class MessageList extends Component {
               <p key={index} className={css(styles.conversationRow)} style={messageStyle}>
                 {message.text}
               </p>
-              <p style={senderInfoStyle}> {`Sent by ${senderName} ${moment(message.createdAt).fromNow()}`} </p>
+              <p style={senderInfoStyle}>
+                {message.isFromContact
+                  ? `Received at ${moment(message.createdAt).fromNow()}`
+                  : `Sent by ${senderName} ${moment(message.createdAt).fromNow()}`
+                }
+              </p>
             </div>
           )
         })}
