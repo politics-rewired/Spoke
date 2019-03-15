@@ -32,7 +32,7 @@ class MessageColumn extends Component {
     return (
       <div>
         <h4>Messages</h4>
-        <MessageList messages={messages} />
+        <MessageList messages={messages} organizationId={this.props.organizationId} />
         {!isOptedOut &&
           <MessageResponse conversation={conversation} messagesChanged={this.messagesChanged} />
         }

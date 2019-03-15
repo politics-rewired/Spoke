@@ -66,6 +66,11 @@ export async function getUsers(organizationId, cursor, campaignsFilter, role) {
   }
 }
 
+export async function getUsersById(userIds) {
+  let usersQuery = r.knex('user').select('id', 'first_name', 'last_name').whereIn('id', userIds)
+  return usersQuery
+}
+
 export const resolvers = {
   UsersReturn: {
     __resolveType(obj) {

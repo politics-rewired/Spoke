@@ -13,6 +13,7 @@ export const resolvers = {
     'campaignId': (instance) => instance['campaign_id'],
     'createdAt': (instance) => {
       return normalizeTimezone(instance.created_at)
-    }
+    },
+    'userId': (instance) => instance['user_id']
   }
 }
