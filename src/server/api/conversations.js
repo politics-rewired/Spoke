@@ -139,8 +139,8 @@ export async function getConversations(
 
   query = query.leftJoin('message', table => {
     table
-      .on('message.assignment_id', '=', 'assignment.id')
-      .andOn('message.contact_number', '=', 'campaign_contact.cell')
+      .on('message.contact_number', '=', 'campaign_contact.cell')
+      .andOn('message.campaign_contact_id', '=', 'campaign_contact.id')
   })
 
   query = query
