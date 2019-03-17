@@ -1593,11 +1593,24 @@ const rootMutations = {
         return e.response.body.message;
       }
     },
-    releaseUnsentMessages: async (_, { campaignId }, { user }) => {
+    releaseMessages: async (_, { campaignId, target }, { user }) => {
+      let messageStatus
+      switch (target) {
+        case 'UNSENT':
+          messageStatus = 'needsMessage'
+          break
+        case 'UNREPLIED':
+          messageStatus = 'needsResponse'
+          break
+
+        default:
+          throw new Error(`Unknown ReleaseActionTarget '${target}'`)
+      }
+
       const updatedCount = await r.knex.transaction(async trx => {
         const updatedCount = await trx('campaign_contact').where({
           campaign_id: parseInt(campaignId),
-          message_status: 'needsMessage'
+          message_status: messageStatus
         }).update({
           assignment_id: null
         })
@@ -1605,7 +1618,7 @@ const rootMutations = {
        return updatedCount
       })
 
-      return `Released ${updatedCount} unsent messages for reassignment`;
+      return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;
     }
   }
 };

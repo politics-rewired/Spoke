@@ -52,9 +52,10 @@ const operations = {
   releaseUnsentMessages: {
     title: campaign => `Release Unsent Messages for ${campaign.title}`,
     body: () => `Releasing unsent messages for this campaign will cause unsent messages in this campaign\
-      from texter's assignments. This means that these texters will no longer be able to send\
+      to be removed from texter's assignments. This means that these texters will no longer be able to send\
       these messages, but these messages will become available to assign via the autoassignment\
-      functionality.`
+      functionality.`,
+    mutationName: 'releaseMessages'
   },
   markForSecondPass: {
     title: campaign => `Mark Unresponded to Messages in ${campaign.title} for a Second Pass`,
@@ -62,6 +63,14 @@ const operations = {
       not been responded to by the contact, causing them to show up as needing a first text, as long as the campaign\
       is not past due. After running this operation, the texts will still be assigned to the same texter, so please\
       run 'Release Unsent Messages' after if you'd like these second pass messages to be available for auto-assignment.`
+  },
+  releaseUnrepliedMessages: {
+    title: campaign => `Release Unreplied Conversations for ${campaign.title}`,
+    body: () => `Releasing unreplied messages for this campaign will cause unreplied messages in this campaign\
+      to be removed from texter's assignments. This means that these texters will no longer be able to respond\
+      to these conversations, but these conversations will become available to assign via the autoassignment\
+      functionality.`,
+    mutationName: 'releaseMessages'
   }
 }
 
@@ -87,7 +96,8 @@ class CampaignList extends React.Component {
 
     this.props.mutations[operationName](campaign.id)
       .then(resp => {
-        this.setState({finished: resp.data[operationName], executing: false })
+        const mutationName = operations[operationName].mutationName || operationName
+        this.setState({finished: resp.data[mutationName], executing: false })
       })
       .catch(error => {
         this.setState({ error, executing: false })
@@ -223,11 +233,11 @@ class CampaignList extends React.Component {
   renderMenu(campaign) {
     return (
       <IconMenu
-        iconButtonElement={<IconButton onClick={console.log}><MoreVertIcon /></IconButton>}
-        onClick={console.log}
+        iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
       >
         <MenuItem primaryText="Release Unsent Messages" onClick={this.start('releaseUnsentMessages', campaign)} />
         <MenuItem primaryText="Mark for a Second Pass" onClick={this.start('markForSecondPass', campaign)} />
+        <MenuItem primaryText="Release Unreplied Conversations" onClick={this.start('releaseUnrepliedMessages', campaign)} />
         {!campaign.isArchived && <MenuItem primaryText="Archive Campaign" leftIcon={<ArchiveIcon />} onClick={() => this.props.mutations.archiveCampaign(campaign.id)} />}
         {campaign.isArchived && <MenuItem primaryText="Unarchive Campaign" leftIcon={<UnarchiveIcon />} onClick={() => this.props.mutations.unarchiveCampaign(campaign.id)} />}
 
@@ -269,16 +279,28 @@ const mapMutationsToProps = () => ({
     variables: { campaignId }
   }),
   releaseUnsentMessages: (campaignId) => ({
-    mutation: gql`mutation releaseUnsentMessages($campaignId: String!) {
-        releaseUnsentMessages(campaignId: $campaignId)
+    mutation: gql`mutation releaseUnsentMessages($campaignId: String!, $target: ReleaseActionTarget!) {
+        releaseMessages(campaignId: $campaignId, target: $target)
       }`,
-    variables: { campaignId }
+    variables: {
+      target: 'UNSENT',
+      campaignId
+    }
   }),
   markForSecondPass: (campaignId) => ({
     mutation: gql`mutation markForSecondPass($campaignId: String!) {
         markForSecondPass(campaignId: $campaignId)
       }`,
     variables: { campaignId }
+  }),
+  releaseUnrepliedMessages: (campaignId) => ({
+    mutation: gql`mutation releaseUnrepliedMessages($campaignId: String!, $target: ReleaseActionTarget!) {
+        releaseMessages(campaignId: $campaignId, target: $target)
+      }`,
+    variables: {
+      target: 'UNREPLIED',
+      campaignId
+    }
   })
 })
 

@@ -140,6 +140,11 @@ const rootSchema = `
     messageIds: [Int]!
   }
 
+  enum ReleaseActionTarget {
+    UNSENT
+    UNREPLIED
+  }
+
   type CampaignIdAssignmentId {
     campaignId: String!
     assignmentId: String!
@@ -217,7 +222,7 @@ const rootSchema = `
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]!):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!, organizationId: String!): String!
-    releaseUnsentMessages(campaignId: String!): String!
+    releaseMessages(campaignId: String!, target: ReleaseActionTarget!): String!
     markForSecondPass(campaignId: String!): String!
   }
 
