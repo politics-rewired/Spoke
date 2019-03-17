@@ -993,7 +993,7 @@ const rootMutations = {
 
       return contactIds.map(contactId => ({
         id: contactId,
-        opt_out_cell: null
+        is_opted_out: false
       }));
     },
     bulkSendMessages: async (_, { assignmentId }, loaders) => {
