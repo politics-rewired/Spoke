@@ -29,6 +29,7 @@ const campaignInfoFragment = `
   isArchived
   hasUnassignedContacts
   hasUnsentInitialMessages
+  hasUnhandledMessages
   description
   dueBy
 `
@@ -109,7 +110,8 @@ class CampaignList extends React.Component {
       isStarted,
       isArchived,
       hasUnassignedContacts,
-      hasUnsentInitialMessages
+      hasUnsentInitialMessages,
+      hasUnhandledMessages
     } = campaign
     const { adminPerms } = this.props
 
@@ -139,6 +141,10 @@ class CampaignList extends React.Component {
 
     if (isStarted && hasUnsentInitialMessages) {
       tags.push('Unsent initial messages')
+    }
+
+    if (isStarted && hasUnhandledMessages) {
+      tags.push('Unhandled replies')
     }
 
     const primaryText = (
@@ -181,7 +187,6 @@ class CampaignList extends React.Component {
 
   render() {
     const { inProgress, error, finished, executing } = this.state
-    console.log(this.state)
 
     if (this.props.data.loading) {
       return <LoadingIndicator />

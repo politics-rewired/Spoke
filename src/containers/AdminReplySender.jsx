@@ -57,7 +57,7 @@ class AdminReplySender extends React.Component {
 
   renderMessageSendingForm(contact) {
     return (
-      <div className={css(styles.infoContainer)}>
+      <div key={contact.id} className={css(styles.infoContainer)}>
         <div className={css(styles.header)}>
           {`${contact.firstName} ${contact.lastName}: ${contact.cell}`}
         </div>
@@ -101,7 +101,7 @@ class AdminReplySender extends React.Component {
     return (
       <div>
         {data.campaign.contacts.map((contact) => {
-          if (contact.messageStatus === 'messaged') {
+          if (contact.messageStatus === 'messaged' || contact.messageStatus === 'convo') {
             return this.renderMessageSendingForm(contact)
           }
           return ''
