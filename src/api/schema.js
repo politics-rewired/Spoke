@@ -200,7 +200,7 @@ const rootSchema = `
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
     createOptOut(optOut:OptOutInput!, campaignContactId:String!):CampaignContact,
-    removeOptOut(cell:Phone!):Boolean,
+    removeOptOut(cell:Phone!):[CampaignContact],
     editCampaignContactMessageStatus(messageStatus: String!, campaignContactId:String!): CampaignContact,
     deleteQuestionResponses(interactionStepIds:[String], campaignContactId:String!): CampaignContact,
     updateQuestionResponses(questionResponses:[QuestionResponseInput], campaignContactId:String!): CampaignContact,

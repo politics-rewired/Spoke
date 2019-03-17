@@ -182,7 +182,12 @@ const mapMutationsToProps = () => ({
   removeOptOut: (cell) => ({
     mutation: gql`
       mutation removeOptOut($cell:Phone!) {
-        removeOptOut(cell:$cell)
+        removeOptOut(cell:$cell) {
+          id
+          optOut {
+            cell
+          }
+        }
       }
     `,
     variables: { cell }
