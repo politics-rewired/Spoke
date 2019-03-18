@@ -220,13 +220,13 @@ export class AssignmentTexterContact extends React.Component {
 
     const messageTextField = this.getMessageFieldRef()
     messageTextField.addEventListener('keydown', this.onEnterDown)
-    messageTextField.addEventListener('keyup', this.onEnterUp)
+    document.body.addEventListener('keyup', this.onEnterUp)
   }
 
   componentWillUnmount() {
     const messageTextField = this.getMessageFieldRef()
     messageTextField.removeEventListener('keydown', this.onEnterDown)
-    messageTextField.removeEventListener('keyup', this.onEnterUp)
+    document.body.removeEventListener('keyup', this.onEnterUp)
   }
 
   componentWillReceiveProps(nextProps) {
