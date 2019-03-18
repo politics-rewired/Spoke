@@ -90,7 +90,7 @@ export async function getConversations(
   )
 
   offsetLimitQuery = offsetLimitQuery
-    .orderBy('campaign_contact.updated_at')
+    .orderBy('campaign_contact.updated_at', 'DESC')
     .orderBy('cc_id')
   offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset)
 
@@ -145,15 +145,13 @@ export async function getConversations(
       .andOn('message.contact_number', '=', 'campaign_contact.cell')
   })
 
+  // Sorting has already happened in Query 1 and will happen in the JS grouping below
   query = query
     .leftJoin('opt_out', table => {
       table
         .on('opt_out.organization_id', '=',  'campaign.organization_id')
         .andOn('campaign_contact.cell', 'opt_out.cell')
     })
-    .orderBy('campaign_contact.updated_at')
-    .orderBy('message.created_at') // "ORDER BY -position DESC, id DESC" for nulls last
-    .orderBy('cc_id')
 
   const conversationRows = await query
 
@@ -171,15 +169,21 @@ export async function getConversations(
   ]
 
   const groupedContacts = _.groupBy(conversationRows, 'cc_id')
-  const conversations = Object.keys(groupedContacts).map(contactId => {
-    const contactMessages = groupedContacts[contactId]
-    const firstRow = contactMessages[0]
-    const conversation = _.omit(firstRow, messageFields)
-    conversation.messages = contactMessages.map(message => {
-      return mapQueryFieldsToResolverFields(_.pick(message, messageFields), { mess_id: 'id' })
+  const conversations = Object.keys(groupedContacts)
+    .map(contactId => {
+      const contactMessages = groupedContacts[contactId]
+      const firstRow = contactMessages[0]
+      const conversation = _.omit(firstRow, messageFields)
+      conversation.messages = contactMessages
+        // Sort ASC to display most recent _messages_ last
+        .sort((messageA, messageB) => messageA.created_at - messageB.created_at)
+        .map(message => {
+          return mapQueryFieldsToResolverFields(_.pick(message, messageFields), { mess_id: 'id' })
+        })
+      return conversation
     })
-    return conversation
-  })
+    // Sort DESC to display most recent _conversations_ first
+    .sort((convA, convB) => convB.updated_at - convA.updated_at)
 
   /* Query #3 -- get the count of all conversations matching the criteria.
   * We need this to show total number of conversations to support paging */
