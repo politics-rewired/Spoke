@@ -51,10 +51,6 @@ class AssignmentTexter extends React.Component {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    if (this.contactCount() === 0) {
-      setTimeout(() => window.location.reload(), 5000)
-    }
-
     // When we send a message that changes the contact status,
     // then if parent.refreshData is called, then props.contactIds
     // will return a new list with the last contact removed and
@@ -74,6 +70,7 @@ class AssignmentTexter extends React.Component {
       }
     }
   }
+
   /*
     getContactData is a place where we've hit scaling issues in the past, and will be important
     to think carefully about for scaling considerations in the future.
