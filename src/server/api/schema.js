@@ -958,7 +958,7 @@ const rootMutations = {
         );
       }
 
-      await r.knex.transaction(trx => {
+      const contactIds = await r.knex.transaction(async trx => {
         // Remove all references in the opt out table
         const optOuts = r
           .knex("opt_out")
@@ -980,17 +980,21 @@ const rootMutations = {
               .transacting(trx)
               .whereIn("id", contactIds)
               .update({ is_opted_out: false })
+              // Return updated contactIds from Promise chain
+              .then(_ => contactIds)
           })
 
-        Promise.all([optOuts, contactUpdates])
-          .then(trx.commit)
-          .catch(trx.rollback)
-      });
+        const [_optOutRes, contactIds] = await Promise.all([optOuts, contactUpdates])
+        return contactIds
+      })
 
       // We don't care about Redis
       // await cacheableData.optOut.clearCache(...)
 
-      return true;
+      return contactIds.map(contactId => ({
+        id: contactId,
+        is_opted_out: false
+      }));
     },
     bulkSendMessages: async (_, { assignmentId }, loaders) => {
       if (!process.env.ALLOW_SEND_ALL || !process.env.NOT_IN_USA) {
