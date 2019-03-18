@@ -54,6 +54,14 @@ export const resolvers = {
         return defaultValue
       }
     },
+    textRequestReplyAge: (organization) => {
+      try {
+        const features = JSON.parse(organization.features)
+        return parseInt(features.textRequestReplyAge);
+      } catch (ex) {
+        return null
+      }
+    },
     textRequestMaxCount: (organization) => {
       try {
         const features = JSON.parse(organization.features)
