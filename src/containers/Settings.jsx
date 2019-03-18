@@ -60,7 +60,8 @@ class Settings extends React.Component {
 
   handleCloseTextingHoursDialog = () => this.setState({ textingHoursDialogOpen: false })
 
-  handleSubmitTexterRequestFormSettings = async (payload) => {
+  handleSubmitTexterRequestFormSettings = async ({ textRequestFormEnabled, textRequestType, textRequestMaxCount }) => {
+    const payload = {textRequestFormEnabled, textRequestType, textRequestMaxCount}
     const response = await this.props.mutations.updateTextRequestFormSettings(payload)
     this.setState(response.data.updateTextRequestFormSettings)
   }
@@ -122,28 +123,19 @@ class Settings extends React.Component {
   }
 
   renderTexterRequestFormSettings() {
-    const {
-      textRequestFormEnabled: propsEnabled,
-      textRequestType: propsType,
-      textRequestReplyAge: propsReplyAge,
-      textRequestMaxCount: propsCount
-    } = this.props.data.organization
-
+    const { textRequestFormEnabled: propsEnabled, textRequestType: propsType, textRequestMaxCount: propsCount } = this.props.data.organization
     if (this.state.textRequestFormEnabled === undefined)
       this.state.textRequestFormEnabled = propsEnabled
     if (this.state.textRequestType === undefined)
       this.state.textRequestType = propsType
-    if (this.state.textRequestReplyAge === undefined)
-      this.state.textRequestReplyAge = propsReplyAge
     if (this.state.textRequestMaxCount === undefined)
       this.state.textRequestMaxCount = propsCount
 
-    const { textRequestFormEnabled, textRequestMaxCount, textRequestReplyAge, textRequestType } = this.state
+    const { textRequestFormEnabled, textRequestMaxCount, textRequestType } = this.state
 
     const formSchema = yup.object({
       textRequestFormEnabled: yup.boolean().required(),
       textRequestType: yup.mixed().oneOf(Object.values(TextRequestType)),
-      textRequestReplyAge: yup.number(),
       textRequestMaxCount: yup.number()
     })
 
@@ -168,17 +160,6 @@ class Settings extends React.Component {
           <MenuItem value={TextRequestType.UNSENT} primaryText="Unsent Initial Messages" />
           <MenuItem value={TextRequestType.UNREPLIED} primaryText="Unhandled Replies" />
         </SelectField>
-        {textRequestType === TextRequestType.UNREPLIED && (
-          <Form.Field
-            label='How old (in hours) must unreplied messages be?'
-            name='textRequestReplyAge'
-            type='number'
-            defaultValue={textRequestReplyAge}
-            onChange={n => this.setState({ textRequestReplyAge: n })}
-            disabled={!textRequestFormEnabled}
-            fullWidth
-          />
-        )}
         <Form.Field
           label='How many texts should texters be able to request?'
           name='textRequestMaxCount'
@@ -192,9 +173,8 @@ class Settings extends React.Component {
           type='submit'
           label="Update Text Request Form"
           onClick={async () => {
-            const { textRequestFormEnabled, textRequestType, textRequestReplyAge, textRequestMaxCount } = this.state
-            const payload = { textRequestFormEnabled, textRequestType, textRequestReplyAge, textRequestMaxCount }
-            await this.handleSubmitTexterRequestFormSettings(payload)
+            const { textRequestFormEnabled, textRequestType, textRequestMaxCount } = this.state
+            await this.handleSubmitTexterRequestFormSettings({ textRequestFormEnabled, textRequestType, textRequestMaxCount })
           }}
         />
       </GSForm>
@@ -335,20 +315,18 @@ const mapMutationsToProps = ({ ownProps }) => ({
       optOutMessage
     }
   }),
-  updateTextRequestFormSettings: ({ textRequestFormEnabled, textRequestType, textRequestReplyAge, textRequestMaxCount }) => ({
+  updateTextRequestFormSettings: ({ textRequestFormEnabled, textRequestType, textRequestMaxCount }) => ({
     mutation: gql`
-      mutation updateTextRequestFormSettings($organizationId: String!, $textRequestFormEnabled: Boolean!, $textRequestType: String!, $textRequestReplyAge: Float!, $textRequestMaxCount: Int!) {
+      mutation updateTextRequestFormSettings($organizationId: String!, $textRequestFormEnabled: Boolean!, $textRequestType: String!, $textRequestMaxCount: Int!) {
         updateTextRequestFormSettings(
           organizationId: $organizationId,
           textRequestFormEnabled: $textRequestFormEnabled
           textRequestType: $textRequestType
-          textRequestReplyAge: $textRequestReplyAge
           textRequestMaxCount: $textRequestMaxCount
         ) {
           id
           textRequestFormEnabled
           textRequestType
-          textRequestReplyAge
           textRequestMaxCount
         }
       }`,
@@ -356,7 +334,6 @@ const mapMutationsToProps = ({ ownProps }) => ({
       organizationId: ownProps.params.organizationId,
       textRequestFormEnabled,
       textRequestType,
-      textRequestReplyAge,
       textRequestMaxCount
     }
   })
@@ -374,7 +351,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
         optOutMessage
         textRequestFormEnabled
         textRequestType
-        textRequestReplyAge
         textRequestMaxCount
       }
     }`,
