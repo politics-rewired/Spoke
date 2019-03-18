@@ -9,6 +9,7 @@ export default class GSTextField extends GSFormField {
     const safeProps = omit(this.props, 'errors')
     return (
       <TextField
+        ref='textField'
         floatingLabelText={this.floatingLabelText()}
         floatingLabelStyle={{
           zIndex: 0

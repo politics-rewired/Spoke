@@ -218,12 +218,15 @@ export class AssignmentTexterContact extends React.Component {
 
     this.refs.messageScrollContainer.scrollTo(0, this.refs.messageScrollContainer.scrollHeight)
 
-    // note: key*down* is necessary to stop propagation of keyup for the textarea element
-    document.body.addEventListener('keydown', this.onEnter)
+    const messageTextField = this.getMessageFieldRef()
+    messageTextField.addEventListener('keydown', this.onEnterDown)
+    messageTextField.addEventListener('keyup', this.onEnterUp)
   }
 
   componentWillUnmount() {
-    document.body.removeEventListener('keydown', this.onEnter)
+    const messageTextField = this.getMessageFieldRef()
+    messageTextField.removeEventListener('keydown', this.onEnterDown)
+    messageTextField.removeEventListener('keyup', this.onEnterUp)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -232,12 +235,24 @@ export class AssignmentTexterContact extends React.Component {
     }
   }
 
-  onEnter = (evt) => {
-    // Only handle <enter>
-    if (evt.keyCode === 13) {
-      evt.preventDefault()
-      document.body.removeEventListener('keydown', this.onEnter)
-      // pressing the Enter key submits
+  getMessageFieldRef = () => {
+    return this.refs.messageText.refs.input.refs.textField.input.refs.input
+  }
+
+  // Allow <shift> + <enter> to add newlines rather than submitting
+  onEnterDown = (event) => {
+    const keyCode = event.keyCode || event.which
+    if (keyCode === 13 && !event.shiftKey) {
+      event.preventDefault()
+      return false
+    }
+  }
+
+  // Handle submission on <enter> *up* to prevent holding enter
+  onEnterUp = (event) => {
+    const keyCode = event.keyCode || event.which
+    if (keyCode === 13  && !event.shiftKey) {
+      event.preventDefault()
       if (this.state.optOutDialogOpen) {
         this.handleOptOut()
       } else {
@@ -342,10 +357,10 @@ export class AssignmentTexterContact extends React.Component {
 
   handleMessageFormSubmit = ({ messageText }) => {
     // Process the submit synchronously
-    if (this.state.disabled) {
+    if (this.state.alreadySent || this.state.disabled) {
       return // stops from multi-send
     }
-    this.setState({ disabled: true }, () => {
+    this.setState({ disabled: true, alreadySent: true }, () => {
       // Actually deliver the payload asyncronously
       this.submitAction(messageText)
     })
@@ -461,7 +476,6 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   handleClickSendMessageButton = () => {
-    this.setState({ alreadySent: true })
     this.refs.form.submit()
     if (this.props.contact.messageStatus === 'needsMessage') {
       this.setState({ justSentNew: true })
@@ -482,7 +496,7 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   messageSchema = yup.object({
-    messageText: yup.string().required("Can't send empty message").max(window.MAX_MESSAGE_LENGTH)
+    messageText: yup.string().trim().required("Can't send empty message").max(window.MAX_MESSAGE_LENGTH)
   })
 
   handleMessageFormChange = ({ messageText }) => {
@@ -720,7 +734,7 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderBottomFixedSection() {
-    const { optOutDialogOpen, messageText } = this.state
+    const { optOutDialogOpen, messageText, alreadySent } = this.state
 
     const message = (optOutDialogOpen) ? '' : (
       <div className={css(styles.messageField)}>
@@ -728,10 +742,11 @@ export class AssignmentTexterContact extends React.Component {
           ref='form'
           schema={this.messageSchema}
           value={{ messageText }}
-          onSubmit={this.handleMessageFormSubmit}
+          onSubmit={alreadySent ? undefined : this.handleMessageFormSubmit}
           onChange={this.handleMessageFormChange}
         >
           <Form.Field
+            ref='messageText'
             className={css(styles.textField)}
             name='messageText'
             label='Your message'
