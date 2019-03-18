@@ -4,6 +4,8 @@ import { accessRequired } from './errors'
 import { buildCampaignQuery, getCampaigns } from './campaign'
 import { buildUserOrganizationQuery } from './user'
 
+import { TextRequestType } from '../../api/organization'
+
 export const resolvers = {
   Organization: {
     ...mapFieldsToModel([
@@ -41,6 +43,15 @@ export const resolvers = {
         return features.textRequestFormEnabled || false;
       } catch (ex) {
         return false
+      }
+    },
+    textRequestType: (organization) => {
+      const defaultValue = TextRequestType.UNSENT
+      try {
+        const features = JSON.parse(organization.features)
+        return features.textRequestType || defaultValue
+      } catch (ex) {
+        return defaultValue
       }
     },
     textRequestMaxCount: (organization) => {

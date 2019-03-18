@@ -10,9 +10,12 @@ import GSSubmitButton from '../components/forms/GSSubmitButton'
 import FlatButton from 'material-ui/FlatButton'
 import yup from 'yup'
 import { Card, CardText, CardActions, CardHeader } from 'material-ui/Card'
+import SelectField from 'material-ui/SelectField'
+import MenuItem from 'material-ui/MenuItem'
 import { StyleSheet, css } from 'aphrodite'
 import Toggle from 'material-ui/Toggle'
 import moment from 'moment'
+import { TextRequestType } from '../api/organization'
 const styles = StyleSheet.create({
   section: {
     margin: '10px 0'
@@ -44,6 +47,7 @@ class Settings extends React.Component {
   state = {
     formIsSubmitting: false,
     textRequestFormEnabled: undefined,
+    textRequestType: undefined,
     textRequestMaxCount: undefined
   }
 
@@ -56,8 +60,9 @@ class Settings extends React.Component {
 
   handleCloseTextingHoursDialog = () => this.setState({ textingHoursDialogOpen: false })
 
-  handleSubmitTexterRequestFormSettings = async ({ textRequestFormEnabled, textRequestMaxCount }) => {
-    const response = await this.props.mutations.updateTextRequestFormSettings({textRequestFormEnabled, textRequestMaxCount})
+  handleSubmitTexterRequestFormSettings = async ({ textRequestFormEnabled, textRequestType, textRequestMaxCount }) => {
+    const payload = {textRequestFormEnabled, textRequestType, textRequestMaxCount}
+    const response = await this.props.mutations.updateTextRequestFormSettings(payload)
     this.setState(response.data.updateTextRequestFormSettings)
   }
 
@@ -118,16 +123,19 @@ class Settings extends React.Component {
   }
 
   renderTexterRequestFormSettings() {
-    const { textRequestFormEnabled: propsEnabled, textRequestMaxCount: propsCount } = this.props.data.organization
+    const { textRequestFormEnabled: propsEnabled, textRequestType: propsType, textRequestMaxCount: propsCount } = this.props.data.organization
     if (this.state.textRequestFormEnabled === undefined)
       this.state.textRequestFormEnabled = propsEnabled
+    if (this.state.textRequestType === undefined)
+      this.state.textRequestType = propsType
     if (this.state.textRequestMaxCount === undefined)
       this.state.textRequestMaxCount = propsCount
 
-    const { textRequestFormEnabled, textRequestMaxCount } = this.state
+    const { textRequestFormEnabled, textRequestMaxCount, textRequestType } = this.state
 
     const formSchema = yup.object({
       textRequestFormEnabled: yup.boolean().required(),
+      textRequestType: yup.mixed().oneOf(Object.values(TextRequestType)),
       textRequestMaxCount: yup.number()
     })
 
@@ -143,6 +151,15 @@ class Settings extends React.Component {
           toggled={textRequestFormEnabled}
           onToggle={(_, isToggled) => this.setState({ textRequestFormEnabled: isToggled })}
         />
+        <SelectField
+          floatingLabelText="Type of texts to assign"
+          value={textRequestType}
+          onChange={(_event, _index, textRequestType) => this.setState({ textRequestType })}
+          disabled={!textRequestFormEnabled}
+        >
+          <MenuItem value={TextRequestType.UNSENT} primaryText="Unsent Initial Messages" />
+          <MenuItem value={TextRequestType.UNREPLIED} primaryText="Unhandled Replies" />
+        </SelectField>
         <Form.Field
           label='How many texts should texters be able to request?'
           name='textRequestMaxCount'
@@ -156,8 +173,8 @@ class Settings extends React.Component {
           type='submit'
           label="Update Text Request Form"
           onClick={async () => {
-            const { textRequestFormEnabled, textRequestMaxCount } = this.state
-            await this.handleSubmitTexterRequestFormSettings({ textRequestFormEnabled, textRequestMaxCount })
+            const { textRequestFormEnabled, textRequestType, textRequestMaxCount } = this.state
+            await this.handleSubmitTexterRequestFormSettings({ textRequestFormEnabled, textRequestType, textRequestMaxCount })
           }}
         />
       </GSForm>
@@ -298,20 +315,27 @@ const mapMutationsToProps = ({ ownProps }) => ({
       optOutMessage
     }
   }),
-  updateTextRequestFormSettings: ({ textRequestFormEnabled, textRequestMaxCount }) => ({
+  updateTextRequestFormSettings: ({ textRequestFormEnabled, textRequestType, textRequestMaxCount }) => ({
     mutation: gql`
-      mutation updateTextRequestFormSettings($organizationId: String!, $textRequestFormEnabled: Boolean!, $textRequestMaxCount: Int!) {
+      mutation updateTextRequestFormSettings($organizationId: String!, $textRequestFormEnabled: Boolean!, $textRequestType: String!, $textRequestMaxCount: Int!) {
         updateTextRequestFormSettings(
           organizationId: $organizationId,
-          textRequestFormEnabled: $textRequestFormEnabled,
+          textRequestFormEnabled: $textRequestFormEnabled
+          textRequestType: $textRequestType
           textRequestMaxCount: $textRequestMaxCount
         ) {
           id
           textRequestFormEnabled
+          textRequestType
           textRequestMaxCount
         }
       }`,
-    variables: { organizationId: ownProps.params.organizationId, textRequestFormEnabled, textRequestMaxCount }
+    variables: {
+      organizationId: ownProps.params.organizationId,
+      textRequestFormEnabled,
+      textRequestType,
+      textRequestMaxCount
+    }
   })
 })
 
@@ -326,6 +350,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         textingHoursEnd
         optOutMessage
         textRequestFormEnabled
+        textRequestType
         textRequestMaxCount
       }
     }`,

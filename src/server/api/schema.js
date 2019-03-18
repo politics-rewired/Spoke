@@ -558,7 +558,8 @@ const rootMutations = {
 
       return await loaders.organization.load(organizationId);
     },
-    updateTextRequestFormSettings: async (_, { organizationId, textRequestFormEnabled, textRequestMaxCount }, { user, loaders }) => {
+    updateTextRequestFormSettings: async (_, args, { user, loaders }) => {
+      const { organizationId, textRequestFormEnabled, textRequestType, textRequestMaxCount } = args
       await accessRequired(user, organizationId, 'ADMIN')
 
       const currentOrganization = await Organization.get(organizationId)
@@ -569,7 +570,8 @@ const rootMutations = {
         // do nothing
       }
 
-      const nextFeatures = Object.assign({}, currentFeatures, { textRequestFormEnabled, textRequestMaxCount })
+      let nextFeatures = { textRequestFormEnabled, textRequestType, textRequestMaxCount }
+      nextFeatures = Object.assign({}, currentFeatures, nextFeatures)
       await Organization.get(organizationId).update({
         features: JSON.stringify(nextFeatures)
       })
