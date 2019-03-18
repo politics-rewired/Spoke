@@ -236,6 +236,7 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   getMessageFieldRef = () => {
+    // Intercept enter key at the deepest underlying DOM <textarea> leaf
     return this.refs.messageText.refs.input.refs.textField.input.refs.input
   }
 
