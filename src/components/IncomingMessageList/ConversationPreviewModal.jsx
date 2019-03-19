@@ -61,7 +61,10 @@ const ConversationPreviewModal = (props) => {
 
   return (
     <Dialog
-      title='Conversation Review'
+      title={conversation
+        ? `Conversation Review: ${conversation.campaign.title}`
+        : 'Conversation Review'
+      }
       open={isOpen}
       actions={primaryActions}
       modal={false}
