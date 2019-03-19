@@ -21,6 +21,7 @@ import IconMenu from 'material-ui/IconMenu'
 import MenuItem from 'material-ui/MenuItem'
 import FlatButton from 'material-ui/FlatButton'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import TextField from 'material-ui/TextField'
 
 const campaignInfoFragment = `
   id
@@ -83,7 +84,7 @@ class CampaignList extends React.Component {
     finished: undefined
   }
 
-  start = (operation, campaign) => () => this.setState({ inProgress: [operation, campaign]  })
+  start = (operation, campaign, variables) => () => this.setState({ inProgress: [operation, campaign, variables]  })
   clearInProgress = () => this.setState({
     inProgress: undefined, 
     error: undefined, 
@@ -93,9 +94,9 @@ class CampaignList extends React.Component {
 
   executeOperation = () => {
     this.setState({ executing: true })
-    const [operationName, campaign] = this.state.inProgress
+    const [operationName, campaign, variables] = this.state.inProgress
 
-    this.props.mutations[operationName](campaign.id)
+    this.props.mutations[operationName](campaign.id, variables)
       .then(resp => {
         const mutationName = operations[operationName].mutationName || operationName
         this.setState({finished: resp.data[mutationName], executing: false })
@@ -224,7 +225,24 @@ class CampaignList extends React.Component {
                   ? <span style={{color: 'red'}}> {JSON.stringify(error)} </span>
                   : finished
                     ? finished
-                    : operations[inProgress[0]].body(inProgress[1])
+                    : inProgress[0] === 'releaseUnrepliedMessages'
+                      ? (<div>
+                          {operations[inProgress[0]].body(inProgress[1])}
+                          <br/>
+                          <p> 
+                            <label> How many hours ago should a conversation have been idle for it to be unassigned? </label> 
+                            <TextField type="number" floatingLabelText="Number of Hours" defaultValue={1}
+                              onChange={(ev, val) => this.setState(prevState => {
+                                const nextInProgress = prevState.inProgress.slice()
+                                nextInProgress[2] = { ageInHours: parseInt(val) }
+                                return {
+                                  inProgress: nextInProgress
+                                }
+                              })}
+                            />
+                          </p>
+                        </div>)
+                      : operations[inProgress[0]].body(inProgress[1])
               }
             </Dialog>
           }
@@ -242,7 +260,7 @@ class CampaignList extends React.Component {
       >
         <MenuItem primaryText="Release Unsent Messages" onClick={this.start('releaseUnsentMessages', campaign)} />
         <MenuItem primaryText="Mark for a Second Pass" onClick={this.start('markForSecondPass', campaign)} />
-        <MenuItem primaryText="Release Unreplied Conversations" onClick={this.start('releaseUnrepliedMessages', campaign)} />
+        <MenuItem primaryText="Release Unreplied Conversations" onClick={this.start('releaseUnrepliedMessages', campaign, { ageInHours: 1 })} />
         {!campaign.isArchived && <MenuItem primaryText="Archive Campaign" leftIcon={<ArchiveIcon />} onClick={() => this.props.mutations.archiveCampaign(campaign.id)} />}
         {campaign.isArchived && <MenuItem primaryText="Unarchive Campaign" leftIcon={<UnarchiveIcon />} onClick={() => this.props.mutations.unarchiveCampaign(campaign.id)} />}
 
@@ -298,13 +316,14 @@ const mapMutationsToProps = () => ({
       }`,
     variables: { campaignId }
   }),
-  releaseUnrepliedMessages: (campaignId) => ({
-    mutation: gql`mutation releaseUnrepliedMessages($campaignId: String!, $target: ReleaseActionTarget!) {
-        releaseMessages(campaignId: $campaignId, target: $target)
+  releaseUnrepliedMessages: (campaignId, { ageInHours }) => ({
+    mutation: gql`mutation releaseUnrepliedMessages($campaignId: String!, $target: ReleaseActionTarget!, $ageInHours: Int!) {
+        releaseMessages(campaignId: $campaignId, target: $target, ageInHours: $ageInHours)
       }`,
     variables: {
       target: 'UNREPLIED',
-      campaignId
+      campaignId,
+      ageInHours
     }
   })
 })

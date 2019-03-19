@@ -1595,7 +1595,7 @@ const rootMutations = {
         return e.response.body.message;
       }
     },
-    releaseMessages: async (_, { campaignId, target }, { user }) => {
+    releaseMessages: async (_, { campaignId, target, ageInHours }, { user }) => {
       let messageStatus
       switch (target) {
         case 'UNSENT':
@@ -1609,15 +1609,40 @@ const rootMutations = {
           throw new Error(`Unknown ReleaseActionTarget '${target}'`)
       }
 
-      const updatedCount = await r.knex.transaction(async trx => {
-        const updatedCount = await trx('campaign_contact').where({
-          campaign_id: parseInt(campaignId),
-          message_status: messageStatus
-        }).update({
-          assignment_id: null
-        })
+      let ageInHoursAgo
+      if (!!ageInHours) {
+        ageInHoursAgo = new Date()
+        ageInHoursAgo.setHours(new Date().getHours() - ageInHours)
+        ageInHoursAgo = ageInHoursAgo.toISOString()
+        console.log(ageInHoursAgo)
+      }
 
-       return updatedCount
+      const updatedCount = await r.knex.transaction(async trx => {
+        if (ageInHours) {
+          const result = await trx.raw(`
+              update campaign_contact
+              join (
+                select *
+                from message
+                where message.is_from_contact = true
+                order by message.created_at desc
+                limit 1
+              ) as message on message.campaign_contact_id = campaign_contact.id
+              set campaign_contact.assignment_id = null
+              where message.created_at < ?
+                and campaign_id = ?
+                and message_status = ?
+            `, [ageInHoursAgo, parseInt(campaignId), messageStatus])
+
+          return result[0].affectedRows
+        } else {
+          return await trx('campaign_contact').where({
+            campaign_id: parseInt(campaignId),
+            message_status: messageStatus
+          }).update({
+            assignment_id: null
+          })
+        }
       })
 
       return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;

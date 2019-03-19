@@ -112,6 +112,47 @@ export function getContacts(
   return query;
 }
 
+// Returns either "replies", "initials", or null
+export async function getCurrentAssignmentType() {
+  const organization = await r.knex('organization').select('features').where({ id: 1 }).first()
+  const features = {}
+  try {
+    const parsed = JSON.parse(organization.features)
+    Object.assign(features, parsed)
+  } catch (ex) {
+    // do nothing
+  }
+  return features.textRequestType
+}
+
+export async function currentAssignmentTarget() {
+  const assignmentType = await getCurrentAssignmentType()
+  const campaignContactStatus = {
+    UNREPLIED: 'needsResponse',
+    UNSENT: 'needsMessage'
+  }[assignmentType]
+
+  if (!campaignContactStatus) { return null }
+
+  const result = await r.knex.raw(`
+    select *
+    from campaign_contact 
+    join campaign on campaign_contact.campaign_id = campaign.id
+    where assignment_id is null
+      and campaign_contact.message_status = ?
+      and campaign.is_started = true and campaign.is_archived = false
+      and campaign.texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone)) + 1
+    group by campaign_contact.campaign_id
+    order by campaign.id
+    limit 1;
+  `, [campaignContactStatus])
+
+  const campaignsToAssignTo = result[0]
+  if (!campaignsToAssignTo[0]) { return null }
+
+  return { type: assignmentType, campaign: campaignsToAssignTo[0] }
+}
+
 export async function giveUserMoreTexts(auth0Id, count) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
   // Fetch DB info
@@ -120,49 +161,16 @@ export async function giveUserMoreTexts(auth0Id, count) {
   if (!user) {
     throw new Error(`No user found with id ${auth0Id}`);
   }
-
-  const mainQuery = `
-    select campaign_id
-    from campaign_contact 
-    join campaign on campaign_contact.campaign_id = campaign.id
-    where assignment_id is null
-      and campaign.is_started = true and campaign.is_archived = false
-      and campaign.texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone)) + 1
-    group by campaign_contact.campaign_id
-    order by campaign.id
-    limit 1;
-  `
-
-  const result = await r.knex.raw(mainQuery)
-
-  /* Sample return:
-    [ [ RowDataPacket { campaign_id: 1 } ],
-      [ FieldPacket {
-          catalog: 'def',
-          db: 'spoke_prod',
-          table: 'campaign_contact',
-          orgTable: 'campaign_contact',
-          name: 'campaign_id',
-          orgName: 'campaign_id',
-          charsetNr: 63,
-          length: 11,
-          type: 3,
-          flags: 20489,
-          decimals: 0,
-          default: undefined,
-          zeroFill: false,
-          protocol41: true } ] ] */
-
-  const campaignsToAssignTo = result[0]
-  
-  if (campaignsToAssignTo.length == 0) {
+ 
+  const assignmentInfo = await currentAssignmentTarget()
+  if (!assignmentInfo) {
     throw new Error('Could not find a suitable campaign to assign to.')
   }
   
   // Determine which campaign to assign to – optimize to pick winners
-  let campaignIdToAssignTo = campaignsToAssignTo[0].campaign_id
+  let campaignIdToAssignTo = assignmentInfo.campaign.id
   let countToAssign = count;
-  console.log(`Assigning ${countToAssign} on campaign ${campaignIdToAssignTo}`)
+  console.log(`Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${assignmentInfo.type}`)
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
   const updated_result = await r.knex.transaction(async trx => {
