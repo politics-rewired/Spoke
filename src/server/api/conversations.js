@@ -137,11 +137,7 @@ export async function getConversations(
 
   query = query.whereIn('campaign_contact.id', ccIds)
 
-  query = query.leftJoin('message', table => {
-    table
-      .on('message.contact_number', '=', 'campaign_contact.cell')
-      .andOn('message.campaign_contact_id', '=', 'campaign_contact.id')
-  })
+  query = query.leftJoin('message', 'message.campaign_contact_id', '=', 'campaign_contact.id')
 
   query = query
     .leftJoin('opt_out', table => {
