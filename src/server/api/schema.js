@@ -558,7 +558,8 @@ const rootMutations = {
 
       return await loaders.organization.load(organizationId);
     },
-    updateTextRequestFormSettings: async (_, { organizationId, textRequestFormEnabled, textRequestMaxCount }, { user, loaders }) => {
+    updateTextRequestFormSettings: async (_, args, { user, loaders }) => {
+      const { organizationId, textRequestFormEnabled, textRequestType, textRequestMaxCount } = args
       await accessRequired(user, organizationId, 'ADMIN')
 
       const currentOrganization = await Organization.get(organizationId)
@@ -569,7 +570,8 @@ const rootMutations = {
         // do nothing
       }
 
-      const nextFeatures = Object.assign({}, currentFeatures, { textRequestFormEnabled, textRequestMaxCount })
+      let nextFeatures = { textRequestFormEnabled, textRequestType, textRequestMaxCount }
+      nextFeatures = Object.assign({}, currentFeatures, nextFeatures)
       await Organization.get(organizationId).update({
         features: JSON.stringify(nextFeatures)
       })
@@ -1597,19 +1599,57 @@ const rootMutations = {
         return e.response.body.message;
       }
     },
-    releaseUnsentMessages: async (_, { campaignId }, { user }) => {
-      const updatedCount = await r.knex.transaction(async trx => {
-        const updatedCount = await trx('campaign_contact').where({
-          campaign_id: parseInt(campaignId),
-          message_status: 'needsMessage'
-        }).update({
-          assignment_id: null
-        })
+    releaseMessages: async (_, { campaignId, target, ageInHours }, { user }) => {
+      let messageStatus
+      switch (target) {
+        case 'UNSENT':
+          messageStatus = 'needsMessage'
+          break
+        case 'UNREPLIED':
+          messageStatus = 'needsResponse'
+          break
 
-       return updatedCount
+        default:
+          throw new Error(`Unknown ReleaseActionTarget '${target}'`)
+      }
+
+      let ageInHoursAgo
+      if (!!ageInHours) {
+        ageInHoursAgo = new Date()
+        ageInHoursAgo.setHours(new Date().getHours() - ageInHours)
+        ageInHoursAgo = ageInHoursAgo.toISOString()
+        console.log(ageInHoursAgo)
+      }
+
+      const updatedCount = await r.knex.transaction(async trx => {
+        if (ageInHours) {
+          const result = await trx.raw(`
+              update campaign_contact
+              join (
+                select *
+                from message
+                where message.is_from_contact = true
+                order by message.created_at desc
+                limit 1
+              ) as message on message.campaign_contact_id = campaign_contact.id
+              set campaign_contact.assignment_id = null
+              where message.created_at < ?
+                and campaign_id = ?
+                and message_status = ?
+            `, [ageInHoursAgo, parseInt(campaignId), messageStatus])
+
+          return result[0].affectedRows
+        } else {
+          return await trx('campaign_contact').where({
+            campaign_id: parseInt(campaignId),
+            message_status: messageStatus
+          }).update({
+            assignment_id: null
+          })
+        }
       })
 
-      return `Released ${updatedCount} unsent messages for reassignment`;
+      return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;
     }
   }
 };

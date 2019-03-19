@@ -227,6 +227,18 @@ export const resolvers = {
         .limit(1)
       return contacts.length > 0
     },
+    hasUnhandledMessages: async (campaign) => {
+      // TODO: restrict to sufficiently old values for updated_at
+      const contacts = await r.knex('campaign_contact')
+        .pluck('id')
+        .where({
+          campaign_id: campaign.id,
+          message_status: 'needsResponse',
+          is_opted_out: false
+        })
+        .limit(1)
+      return contacts.length > 0
+    },
     customFields: async (campaign) => (
       campaign.customFields
       || cacheableData.campaign.dbCustomFields(campaign.id)

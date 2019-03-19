@@ -35,6 +35,7 @@ export const schema = `
     contactsCount: Int
     hasUnassignedContacts: Boolean
     hasUnsentInitialMessages: Boolean
+    hasUnhandledMessages: Boolean
     customFields: [String]
     cannedResponses(userId: String): [CannedResponse]
     stats: CampaignStats,

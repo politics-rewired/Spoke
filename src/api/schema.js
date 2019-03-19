@@ -140,6 +140,11 @@ const rootSchema = `
     messageIds: [Int]!
   }
 
+  enum ReleaseActionTarget {
+    UNSENT
+    UNREPLIED
+  }
+
   type CampaignIdAssignmentId {
     campaignId: String!
     assignmentId: String!
@@ -196,7 +201,7 @@ const rootSchema = `
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
-    updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestMaxCount: Int!): Organization
+    updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
     updateOptOutMessage( organizationId: String!, optOutMessage: String!): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
@@ -218,7 +223,7 @@ const rootSchema = `
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]!):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!, organizationId: String!): String!
-    releaseUnsentMessages(campaignId: String!): String!
+    releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Int): String!
     markForSecondPass(campaignId: String!): String!
   }
 

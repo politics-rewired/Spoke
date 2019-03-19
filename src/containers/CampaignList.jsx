@@ -21,6 +21,8 @@ import IconMenu from 'material-ui/IconMenu'
 import MenuItem from 'material-ui/MenuItem'
 import FlatButton from 'material-ui/FlatButton'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import TextField from 'material-ui/TextField'
+import Paper from 'material-ui/Paper'
 
 const campaignInfoFragment = `
   id
@@ -29,6 +31,7 @@ const campaignInfoFragment = `
   isArchived
   hasUnassignedContacts
   hasUnsentInitialMessages
+  hasUnhandledMessages
   description
   dueBy
 `
@@ -52,9 +55,10 @@ const operations = {
   releaseUnsentMessages: {
     title: campaign => `Release Unsent Messages for ${campaign.title}`,
     body: () => `Releasing unsent messages for this campaign will cause unsent messages in this campaign\
-      from texter's assignments. This means that these texters will no longer be able to send\
+      to be removed from texter's assignments. This means that these texters will no longer be able to send\
       these messages, but these messages will become available to assign via the autoassignment\
-      functionality.`
+      functionality.`,
+    mutationName: 'releaseMessages'
   },
   markForSecondPass: {
     title: campaign => `Mark Unresponded to Messages in ${campaign.title} for a Second Pass`,
@@ -62,6 +66,14 @@ const operations = {
       not been responded to by the contact, causing them to show up as needing a first text, as long as the campaign\
       is not past due. After running this operation, the texts will still be assigned to the same texter, so please\
       run 'Release Unsent Messages' after if you'd like these second pass messages to be available for auto-assignment.`
+  },
+  releaseUnrepliedMessages: {
+    title: campaign => `Release Unreplied Conversations for ${campaign.title}`,
+    body: () => `Releasing unreplied messages for this campaign will cause unreplied messages in this campaign\
+      to be removed from texter's assignments. This means that these texters will no longer be able to respond\
+      to these conversations, but these conversations will become available to assign via the autoassignment\
+      functionality.`,
+    mutationName: 'releaseMessages'
   }
 }
 
@@ -73,7 +85,7 @@ class CampaignList extends React.Component {
     finished: undefined
   }
 
-  start = (operation, campaign) => () => this.setState({ inProgress: [operation, campaign]  })
+  start = (operation, campaign, variables) => () => this.setState({ inProgress: [operation, campaign, variables]  })
   clearInProgress = () => this.setState({
     inProgress: undefined, 
     error: undefined, 
@@ -83,11 +95,12 @@ class CampaignList extends React.Component {
 
   executeOperation = () => {
     this.setState({ executing: true })
-    const [operationName, campaign] = this.state.inProgress
+    const [operationName, campaign, variables] = this.state.inProgress
 
-    this.props.mutations[operationName](campaign.id)
+    this.props.mutations[operationName](campaign.id, variables)
       .then(resp => {
-        this.setState({finished: resp.data[operationName], executing: false })
+        const mutationName = operations[operationName].mutationName || operationName
+        this.setState({finished: resp.data[mutationName], executing: false })
       })
       .catch(error => {
         this.setState({ error, executing: false })
@@ -99,7 +112,8 @@ class CampaignList extends React.Component {
       isStarted,
       isArchived,
       hasUnassignedContacts,
-      hasUnsentInitialMessages
+      hasUnsentInitialMessages,
+      hasUnhandledMessages
     } = campaign
     const { adminPerms } = this.props
 
@@ -129,6 +143,10 @@ class CampaignList extends React.Component {
 
     if (isStarted && hasUnsentInitialMessages) {
       tags.push('Unsent initial messages')
+    }
+
+    if (isStarted && hasUnhandledMessages) {
+      tags.push('Unhandled replies')
     }
 
     const primaryText = (
@@ -171,12 +189,11 @@ class CampaignList extends React.Component {
 
   render() {
     const { inProgress, error, finished, executing } = this.state
-    console.log(this.state)
 
     if (this.props.data.loading) {
       return <LoadingIndicator />
     }
-    const { campaigns } = this.props.data.organization
+    const { campaigns, currentAssignmentTarget } = this.props.data.organization
     return campaigns.length === 0 ? (
       <Empty
         title='No campaigns'
@@ -209,9 +226,31 @@ class CampaignList extends React.Component {
                   ? <span style={{color: 'red'}}> {JSON.stringify(error)} </span>
                   : finished
                     ? finished
-                    : operations[inProgress[0]].body(inProgress[1])
+                    : inProgress[0] === 'releaseUnrepliedMessages'
+                      ? (<div>
+                          {operations[inProgress[0]].body(inProgress[1])}
+                          <br/>
+                          <p> 
+                            <label> How many hours ago should a conversation have been idle for it to be unassigned? </label> 
+                            <TextField type="number" floatingLabelText="Number of Hours" defaultValue={1}
+                              onChange={(ev, val) => this.setState(prevState => {
+                                const nextInProgress = prevState.inProgress.slice()
+                                nextInProgress[2] = { ageInHours: parseInt(val) }
+                                return {
+                                  inProgress: nextInProgress
+                                }
+                              })}
+                            />
+                          </p>
+                        </div>)
+                      : operations[inProgress[0]].body(inProgress[1])
               }
             </Dialog>
+          }
+          {currentAssignmentTarget &&
+            <Paper style={{padding: 10}}>
+              <h3> Currently Assigning {currentAssignmentTarget.type} to {currentAssignmentTarget.campaign.id}: {currentAssignmentTarget.campaign.title} </h3>
+            </Paper>
           }
           <List>
             {campaigns.campaigns.map((campaign) => this.renderRow(campaign))}
@@ -223,11 +262,11 @@ class CampaignList extends React.Component {
   renderMenu(campaign) {
     return (
       <IconMenu
-        iconButtonElement={<IconButton onClick={console.log}><MoreVertIcon /></IconButton>}
-        onClick={console.log}
+        iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
       >
         <MenuItem primaryText="Release Unsent Messages" onClick={this.start('releaseUnsentMessages', campaign)} />
         <MenuItem primaryText="Mark for a Second Pass" onClick={this.start('markForSecondPass', campaign)} />
+        <MenuItem primaryText="Release Unreplied Conversations" onClick={this.start('releaseUnrepliedMessages', campaign, { ageInHours: 1 })} />
         {!campaign.isArchived && <MenuItem primaryText="Archive Campaign" leftIcon={<ArchiveIcon />} onClick={() => this.props.mutations.archiveCampaign(campaign.id)} />}
         {campaign.isArchived && <MenuItem primaryText="Unarchive Campaign" leftIcon={<UnarchiveIcon />} onClick={() => this.props.mutations.unarchiveCampaign(campaign.id)} />}
 
@@ -269,16 +308,29 @@ const mapMutationsToProps = () => ({
     variables: { campaignId }
   }),
   releaseUnsentMessages: (campaignId) => ({
-    mutation: gql`mutation releaseUnsentMessages($campaignId: String!) {
-        releaseUnsentMessages(campaignId: $campaignId)
+    mutation: gql`mutation releaseUnsentMessages($campaignId: String!, $target: ReleaseActionTarget!) {
+        releaseMessages(campaignId: $campaignId, target: $target)
       }`,
-    variables: { campaignId }
+    variables: {
+      target: 'UNSENT',
+      campaignId
+    }
   }),
   markForSecondPass: (campaignId) => ({
     mutation: gql`mutation markForSecondPass($campaignId: String!) {
         markForSecondPass(campaignId: $campaignId)
       }`,
     variables: { campaignId }
+  }),
+  releaseUnrepliedMessages: (campaignId, { ageInHours }) => ({
+    mutation: gql`mutation releaseUnrepliedMessages($campaignId: String!, $target: ReleaseActionTarget!, $ageInHours: Int!) {
+        releaseMessages(campaignId: $campaignId, target: $target, ageInHours: $ageInHours)
+      }`,
+    variables: {
+      target: 'UNREPLIED',
+      campaignId,
+      ageInHours
+    }
   })
 })
 
@@ -287,6 +339,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
     query: gql`query adminGetCampaigns($organizationId: String!, $campaignsFilter: CampaignsFilter) {
       organization(id: $organizationId) {
         id
+        currentAssignmentTarget {
+          type
+          campaign {
+            id
+            title
+          }
+        }
         campaigns(campaignsFilter: $campaignsFilter, cursor: {offset: 0, limit: 5000}) {
           campaigns{
             ${campaignInfoFragment}

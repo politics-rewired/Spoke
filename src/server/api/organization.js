@@ -3,6 +3,9 @@ import { r, Organization } from '../models'
 import { accessRequired } from './errors'
 import { buildCampaignQuery, getCampaigns } from './campaign'
 import { buildUserOrganizationQuery } from './user'
+import { currentAssignmentTarget } from './assignment'
+
+import { TextRequestType } from '../../api/organization'
 
 export const resolvers = {
   Organization: {
@@ -43,6 +46,15 @@ export const resolvers = {
         return false
       }
     },
+    textRequestType: (organization) => {
+      const defaultValue = TextRequestType.UNSENT
+      try {
+        const features = JSON.parse(organization.features)
+        return features.textRequestType || defaultValue
+      } catch (ex) {
+        return defaultValue
+      }
+    },
     textRequestMaxCount: (organization) => {
       try {
         const features = JSON.parse(organization.features)
@@ -64,6 +76,9 @@ export const resolvers = {
 
       const result = await r.knex.raw(ccsAvailableQuery)
       return result[0].length > 0;
+    },
+    currentAssignmentTarget: async (organization) => {
+      return await currentAssignmentTarget(organization.id)
     }
   }
 }

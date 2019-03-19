@@ -1,4 +1,16 @@
+export const TextRequestType = Object.freeze({ UNSENT: 'UNSENT', UNREPLIED: 'UNREPLIED' })
+
 export const schema = `
+  enum TextRequestType {
+    UNSENT
+    UNREPLIED
+  }
+
+  type AssignmentTarget {
+    type: String!
+    campaign: Campaign
+  }
+
   type Organization {
     id: ID
     uuid: String
@@ -12,7 +24,9 @@ export const schema = `
     textingHoursStart: Int
     textingHoursEnd: Int
     textRequestFormEnabled: Boolean
+    textRequestType: TextRequestType
     textRequestMaxCount: Int
     textsAvailable: Boolean
+    currentAssignmentTarget: AssignmentTarget
   }
 `
