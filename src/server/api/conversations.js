@@ -139,11 +139,7 @@ export async function getConversations(
 
   query = query.whereIn('campaign_contact.id', ccIds)
 
-  query = query.leftJoin('message', table => {
-    table
-      .on('message.assignment_id', '=', 'assignment.id')
-      .andOn('message.contact_number', '=', 'campaign_contact.cell')
-  })
+  query = query.leftJoin('message', 'message.campaign_contact_id', '=', 'campaign_contact.id')
 
   // Sorting has already happened in Query 1 and will happen in the JS grouping below
   query = query
