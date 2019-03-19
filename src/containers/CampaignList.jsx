@@ -22,6 +22,7 @@ import MenuItem from 'material-ui/MenuItem'
 import FlatButton from 'material-ui/FlatButton'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import TextField from 'material-ui/TextField'
+import Paper from 'material-ui/Paper'
 
 const campaignInfoFragment = `
   id
@@ -192,7 +193,7 @@ class CampaignList extends React.Component {
     if (this.props.data.loading) {
       return <LoadingIndicator />
     }
-    const { campaigns } = this.props.data.organization
+    const { campaigns, currentAssignmentTarget } = this.props.data.organization
     return campaigns.length === 0 ? (
       <Empty
         title='No campaigns'
@@ -245,6 +246,11 @@ class CampaignList extends React.Component {
                       : operations[inProgress[0]].body(inProgress[1])
               }
             </Dialog>
+          }
+          {currentAssignmentTarget &&
+            <Paper style={{padding: 10}}>
+              <h3> Currently Assigning {currentAssignmentTarget.type} to {currentAssignmentTarget.campaign.id}: {currentAssignmentTarget.campaign.title} </h3>
+            </Paper>
           }
           <List>
             {campaigns.campaigns.map((campaign) => this.renderRow(campaign))}
@@ -333,6 +339,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
     query: gql`query adminGetCampaigns($organizationId: String!, $campaignsFilter: CampaignsFilter) {
       organization(id: $organizationId) {
         id
+        currentAssignmentTarget {
+          type
+          campaign {
+            id
+            title
+          }
+        }
         campaigns(campaignsFilter: $campaignsFilter, cursor: {offset: 0, limit: 5000}) {
           campaigns{
             ${campaignInfoFragment}

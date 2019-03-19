@@ -3,6 +3,7 @@ import { r, Organization } from '../models'
 import { accessRequired } from './errors'
 import { buildCampaignQuery, getCampaigns } from './campaign'
 import { buildUserOrganizationQuery } from './user'
+import { currentAssignmentTarget } from './assignment'
 
 import { TextRequestType } from '../../api/organization'
 
@@ -75,6 +76,9 @@ export const resolvers = {
 
       const result = await r.knex.raw(ccsAvailableQuery)
       return result[0].length > 0;
+    },
+    currentAssignmentTarget: async (organization) => {
+      return await currentAssignmentTarget(organization.id)
     }
   }
 }

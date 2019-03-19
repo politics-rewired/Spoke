@@ -6,6 +6,11 @@ export const schema = `
     UNREPLIED
   }
 
+  type AssignmentTarget {
+    type: String!
+    campaign: Campaign
+  }
+
   type Organization {
     id: ID
     uuid: String
@@ -22,5 +27,6 @@ export const schema = `
     textRequestType: TextRequestType
     textRequestMaxCount: Int
     textsAvailable: Boolean
+    currentAssignmentTarget: AssignmentTarget
   }
 `
