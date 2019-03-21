@@ -25,6 +25,8 @@ import { withRouter } from 'react-router'
 import Empty from '../../components/Empty'
 import CreateIcon from 'material-ui/svg-icons/content/create'
 import { dataTest } from '../../lib/attributes'
+import OptOutDialog from './OptOutDialog'
+import MessageTextField from './MessageTextField'
 
 import { isContactBetweenTextingHours } from './utils'
 import TopFixedSection from './TopFixedSection'
@@ -218,34 +220,16 @@ export class AssignmentTexterContact extends React.Component {
 
     this.refs.messageScrollContainer.scrollTo(0, this.refs.messageScrollContainer.scrollHeight)
 
-    const messageTextField = this.getMessageFieldRef()
-    messageTextField.addEventListener('keydown', this.onEnterDown)
     document.body.addEventListener('keyup', this.onEnterUp)
   }
 
   componentWillUnmount() {
-    const messageTextField = this.getMessageFieldRef()
-    messageTextField.removeEventListener('keydown', this.onEnterDown)
     document.body.removeEventListener('keyup', this.onEnterUp)
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors.length !== nextProps.length) {
       this.state.disabled = false
-    }
-  }
-
-  getMessageFieldRef = () => {
-    // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.messageText.refs.input.refs.textField.input.refs.input
-  }
-
-  // Allow <shift> + <enter> to add newlines rather than submitting
-  onEnterDown = (event) => {
-    const keyCode = event.keyCode || event.which
-    if (keyCode === 13 && !event.shiftKey) {
-      event.preventDefault()
-      return false
     }
   }
 
@@ -675,50 +659,6 @@ export class AssignmentTexterContact extends React.Component {
     />)
   }
 
-  renderOptOutDialog() {
-    if (!this.state.optOutDialogOpen) {
-      return ''
-    }
-    return (
-      <Card>
-        <CardTitle
-          className={css(styles.optOutCard)}
-          title='Opt out user'
-        />
-        <Divider />
-        <CardActions className={css(styles.optOutCard)}>
-          <GSForm
-            className={css(styles.optOutCard)}
-            schema={this.optOutSchema}
-            onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
-            value={{ optOutMessageText: this.state.optOutMessageText }}
-            onSubmit={this.handleOptOut}
-          >
-            <Form.Field
-              name='optOutMessageText'
-              fullWidth
-              autoFocus
-              multiLine
-            />
-            <div className={css(styles.dialogActions)}>
-              <FlatButton
-                style={inlineStyles.dialogButton}
-                label='Cancel'
-                onTouchTap={this.handleCloseDialog}
-              />
-              <Form.Button
-                type='submit'
-                style={inlineStyles.dialogButton}
-                component={GSSubmitButton}
-                label={this.state.optOutMessageText.length ? 'Send' : 'Opt Out without Text'}
-              />
-            </div>
-          </GSForm>
-        </CardActions>
-      </Card>
-    )
-  }
-
   renderCorrectSendButton() {
     const { messageStatus } = this.props.contact
     const validStates = ['messaged', 'convo', 'needsResponse']
@@ -746,15 +686,7 @@ export class AssignmentTexterContact extends React.Component {
           onSubmit={alreadySent ? undefined : this.handleMessageFormSubmit}
           onChange={this.handleMessageFormChange}
         >
-          <Form.Field
-            ref='messageText'
-            className={css(styles.textField)}
-            name='messageText'
-            label='Your message'
-            multiLine
-            fullWidth
-            rowsMax={6}
-          />
+          <MessageTextField />
           {this.renderCorrectSendButton()}
         </GSForm>
       </div>
@@ -767,7 +699,14 @@ export class AssignmentTexterContact extends React.Component {
           {message}
           {optOutDialogOpen ? '' : this.renderActionToolbar()}
         </div>
-        {this.renderOptOutDialog()}
+        {this.state.optOutDialogOpen && (
+          <OptOutDialog
+            optOutMessageText={this.state.optOutMessageText}
+            onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
+            onSubmit={this.handleOptOut}
+            handleCloseDialog={this.handleCloseDialog}
+          />
+        )}
         {this.renderCannedResponsePopover()}
       </div>
     )

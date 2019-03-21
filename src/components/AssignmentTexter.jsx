@@ -420,7 +420,7 @@ const mapMutationsToProps = () => ({
           id
           optOut {
             id
-            createdAt
+            cell
           }
         }
       }
