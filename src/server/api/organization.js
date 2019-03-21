@@ -64,18 +64,8 @@ export const resolvers = {
       }
     },
     textsAvailable: async (organization) => {
-      const ccsAvailableQuery = `
-        select campaign_contact.id
-        from campaign_contact
-        join campaign on campaign.id = campaign_contact.campaign_id
-        where assignment_id is null
-          and campaign.is_started = true 
-          and campaign.is_archived = false
-        limit 1;
-      `
-
-      const result = await r.knex.raw(ccsAvailableQuery)
-      return result[0].length > 0;
+      const assignmentTarget = await currentAssignmentTarget(organization.id)
+      return !!assignmentTarget;
     },
     currentAssignmentTarget: async (organization) => {
       return await currentAssignmentTarget(organization.id)
