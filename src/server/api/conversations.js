@@ -272,7 +272,8 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
   organizationId,
   campaignsFilter,
   assignmentsFilter,
-  contactsFilter
+  contactsFilter,
+  contactNameFilter
 ) {
   let query = r.knex.select(
     'campaign_contact.id as cc_id',
