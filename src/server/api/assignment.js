@@ -142,6 +142,7 @@ export async function currentAssignmentTarget() {
       and campaign_contact.message_status = ?
       and campaign.is_started = true and campaign.is_archived = false
       and campaign.texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone)) + 1
+      and campaign_contact.is_opted_out = false
     group by campaign_contact.campaign_id
     order by campaign.id
     limit 1;
@@ -209,12 +210,19 @@ export async function giveUserMoreTexts(auth0Id, count) {
     // NVM! Doing this in one query to avoid concurrency issues,
     // and instead not returning the count
 
+    const campaignContactStatus = {
+      UNREPLIED: 'needsResponse',
+      UNSENT: 'needsMessage'
+    }[assignmentInfo.type]
+
     const ids = await r
       .knex("campaign_contact")
       .select("id")
       .where({
         assignment_id: null,
-        campaign_id: campaignIdToAssignTo
+        campaign_id: campaignIdToAssignTo,
+        message_status: campaignContactStatus,
+        is_opted_out: false
       })
       .limit(countToAssign)
       .map(c => c.id);
