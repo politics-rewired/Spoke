@@ -1636,6 +1636,7 @@ const rootMutations = {
               where message.created_at < ?
                 and campaign_id = ?
                 and message_status = ?
+                and is_opted_out = false
             `, [ageInHoursAgo, parseInt(campaignId), messageStatus])
 
           return result[0].affectedRows
