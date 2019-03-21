@@ -65,7 +65,7 @@ export const resolvers = {
     },
     textsAvailable: async (organization) => {
       const assignmentTarget = await currentAssignmentTarget(organization.id)
-      return !!assignmentTarget;
+      return !!assignmentTarget
     },
     currentAssignmentTarget: async (organization) => {
       return await currentAssignmentTarget(organization.id)

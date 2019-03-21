@@ -135,7 +135,7 @@ export async function currentAssignmentTarget() {
   if (!campaignContactStatus) { return null }
 
   const result = await r.knex.raw(`
-    select *
+    select campaign.*
     from campaign_contact 
     join campaign on campaign_contact.campaign_id = campaign.id
     where assignment_id is null
