@@ -1643,7 +1643,8 @@ const rootMutations = {
         } else {
           return await trx('campaign_contact').where({
             campaign_id: parseInt(campaignId),
-            message_status: messageStatus
+            message_status: messageStatus,
+            is_opted_out: false
           }).update({
             assignment_id: null
           })
