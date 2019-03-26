@@ -187,18 +187,13 @@ export async function uploadContacts(job) {
     await CampaignContact.save(chunk)
   }))
 
-  const optOutCellCount = await r.knex('campaign_contact')
-    .whereIn('cell', function optouts() {
-      this.select('cell').from('opt_out').where('organization_id', campaign.organization_id)
-    })
-
   const deleteOptOutCells = await r.knex('campaign_contact')
     .whereIn('cell', getOptOutSubQuery(campaign.organization_id))
     .where('campaign_id', campaignId)
     .delete()
 
   if (deleteOptOutCells) {
-    jobMessages.push(`Number of contacts excluded due to their opt-out status: ${optOutCellCount}`)
+    jobMessages.push(`Number of contacts excluded due to their opt-out status: ${deleteOptOutCells}`)
   }
 
   const cellsToExclude = await r.knex('campaign_contact')
