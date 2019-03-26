@@ -95,7 +95,7 @@ app.use(cookieSession({
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.use(requestLogging)
+// app.use(requestLogging)
 
 app.post('/nexmo', wrap(async (req, res) => {
   try {
