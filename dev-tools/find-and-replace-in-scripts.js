@@ -35,6 +35,6 @@ async function main(find, replace) {
   }
 }
 
-main("b2020.me", "notme2020.us")
+main("usnot.me", "2020bs.me")
   .then(console.log)
   .catch(console.error);

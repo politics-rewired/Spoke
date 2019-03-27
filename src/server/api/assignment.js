@@ -127,10 +127,39 @@ export async function getCurrentAssignmentType() {
 
 export async function currentAssignmentTarget() {
   const assignmentType = await getCurrentAssignmentType()
-  const campaignId = parseInt(process.env.TEXTER_REQUEST_CAMPAIGN_ID, 10)
-  if (!campaignId) return null
 
-  const campaign = await r.knex('campaign').where({ id: campaignId }).first()
+  const campaignContactStatus = {
+    UNREPLIED: 'needsResponse',
+    UNSENT: 'needsMessage'
+  }[assignmentType]
+
+  if (!campaignContactStatus) { return null }
+
+  const eligibleCampaigns = await r.knex('campaign').where({
+    is_started: true,
+    is_archived: false
+  }).andWhere(
+    r.knex.raw(`texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone))`)
+  )
+
+  const hasContactsOfTypeToAssign = await Promise.all(eligibleCampaigns.map(async campaign => {
+    const contacts = await r.knex('campaign_contact')
+      .select('id')
+      .where({
+        assignment_id: null,
+        message_status: campaignContactStatus,
+        is_opted_out: false
+      })
+      .limit(1)
+
+    return contacts.length > 0
+  }))
+
+
+  const assignableCampaigns = eligibleCampaigns.filter((_campaign, idx) => hasContactsOfTypeToAssign[idx])
+  const campaign = assignableCampaigns[0]
+
+  if (!campaign) return null
 
   return { type: assignmentType, campaign }
 }
