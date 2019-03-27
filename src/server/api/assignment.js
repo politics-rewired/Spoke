@@ -126,6 +126,7 @@ export async function getCurrentAssignmentType() {
 }
 
 export async function currentAssignmentTarget() {
+  const assignmentType = await getCurrentAssignmentType()
   const campaignId = parseInt(process.env.TEXTER_REQUEST_CAMPAIGN_ID, 10)
   if (!campaignId) return null
 
