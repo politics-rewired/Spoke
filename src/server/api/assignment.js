@@ -148,7 +148,8 @@ export async function currentAssignmentTarget() {
       .where({
         assignment_id: null,
         message_status: campaignContactStatus,
-        is_opted_out: false
+        is_opted_out: false,
+        campaign_id: campaign.id
       })
       .limit(1)
 
