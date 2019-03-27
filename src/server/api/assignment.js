@@ -127,31 +127,12 @@ export async function getCurrentAssignmentType() {
 
 export async function currentAssignmentTarget() {
   const assignmentType = await getCurrentAssignmentType()
-  const campaignContactStatus = {
-    UNREPLIED: 'needsResponse',
-    UNSENT: 'needsMessage'
-  }[assignmentType]
+  const campaignId = parseInt(process.env.TEXTER_REQUEST_CAMPAIGN_ID, 10)
+  if (!campaignId) return null
 
-  if (!campaignContactStatus) { return null }
+  const campaign = await r.knex('campaign').where({ id: campaignId }).first()
 
-  const result = await r.knex.raw(`
-    select campaign.*
-    from campaign_contact 
-    join campaign on campaign_contact.campaign_id = campaign.id
-    where assignment_id is null
-      and campaign_contact.message_status = ?
-      and campaign.is_started = true and campaign.is_archived = false
-      and campaign.texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone))
-      and campaign_contact.is_opted_out = false
-    group by campaign_contact.campaign_id
-    order by campaign.id
-    limit 1;
-  `, [campaignContactStatus])
-
-  const campaignsToAssignTo = result[0]
-  if (!campaignsToAssignTo[0]) { return null }
-
-  return { type: assignmentType, campaign: campaignsToAssignTo[0] }
+  return { type: assignmentType, campaign }
 }
 
 export async function giveUserMoreTexts(auth0Id, count) {
