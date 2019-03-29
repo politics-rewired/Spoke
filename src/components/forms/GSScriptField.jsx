@@ -86,10 +86,7 @@ export default class GSScriptField extends GSFormField {
       <div>
         <TextField
           multiLine
-          onFocus={this.handleOpenDialog}
-          onTouchTap={(event) => {
-            event.stopPropagation()
-          }}
+          onClick={this.handleOpenDialog}
           floatingLabelText={this.floatingLabelText()}
           floatingLabelStyle={{
             zIndex: 0
