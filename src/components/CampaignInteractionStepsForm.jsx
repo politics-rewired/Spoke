@@ -90,7 +90,7 @@ export default class CampaignInteractionStepsForm extends React.Component {
     }
   }
 
-  handleFormChange(event) {
+  handleFormChange = (event) => {
     this.setState({
       interactionSteps: this.state.interactionSteps.map((is) => {
         if (is.id == event.id) {
@@ -128,7 +128,7 @@ export default class CampaignInteractionStepsForm extends React.Component {
             {...dataTest('childInteraction', !interactionStep.parentInteractionId)}
             schema={this.formSchema}
             value={interactionStep}
-            onChange={this.handleFormChange.bind(this)}
+            onChange={this.handleFormChange}
           >
             {interactionStep.parentInteractionId ? <Form.Field
               {...dataTest('answerOption')}
