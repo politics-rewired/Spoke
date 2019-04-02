@@ -31,17 +31,19 @@ export default class GSScriptField extends GSFormField {
     }, () => this.refs.dialogScriptInput.focus())
   }
 
-  handleCloseDialog = () => {
+  handleCancelDialog = () => {
+    // Reset any changes the user has made in the Editor
+    const script = this.props.value
     this.setState({
       open: false,
-      script: this.props.value
+      script
     })
   }
 
   handleSaveScript = () => {
     const value = this.state.script
     this.props.onChange(value)
-    this.handleCloseDialog()
+    this.setState({ open: false })
   }
 
   renderDialog() {
@@ -56,7 +58,7 @@ export default class GSScriptField extends GSFormField {
           <FlatButton
             {...dataTest('scriptCancel')}
             label='Cancel'
-            onTouchTap={this.handleCloseDialog}
+            onTouchTap={this.handleCancelDialog}
           />,
           <RaisedButton
             {...dataTest('scriptDone')}
@@ -67,7 +69,7 @@ export default class GSScriptField extends GSFormField {
         ]}
         modal
         open={open}
-        onRequestClose={this.handleCloseDialog}
+        onRequestClose={this.handleCancelDialog}
       >
         <ScriptEditor
           expandable
