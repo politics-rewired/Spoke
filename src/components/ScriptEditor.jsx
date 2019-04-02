@@ -94,7 +94,7 @@ class ScriptEditor extends React.Component {
 
   focus = () => this.refs.editor.focus()
 
-  onChange = (editorState) => {
+  onEditorChange = (editorState) => {
     this.setState({ editorState }, () => {
       const { onChange } = this.props
       if (onChange) {
@@ -176,7 +176,7 @@ class ScriptEditor extends React.Component {
           <Editor
             name={name}
             editorState={this.state.editorState}
-            onChange={this.onChange}
+            onChange={this.onEditorChange}
             ref='editor'
             spellCheck
           />
