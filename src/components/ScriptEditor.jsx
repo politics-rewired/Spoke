@@ -81,10 +81,6 @@ class ScriptEditor extends React.Component {
     this.state = {
       editorState
     }
-
-    this.focus = () => this.refs.editor.focus()
-    this.onChange = this.onChange.bind(this)
-    this.addCustomField = this.addCustomField.bind(this)
   }
 
   componentWillReceiveProps() {
@@ -96,7 +92,9 @@ class ScriptEditor extends React.Component {
     // this.setState({ editorState: this.getEditorState() })
   }
 
-  onChange(editorState) {
+  focus = () => this.refs.editor.focus()
+
+  onChange = (editorState) => {
     this.setState({ editorState }, () => {
       const { onChange } = this.props
       if (onChange) {
@@ -144,7 +142,7 @@ class ScriptEditor extends React.Component {
     ])
   }
 
-  addCustomField(field) {
+  addCustomField = (field) => {
     const textToInsert = delimit(field)
     const { editorState } = this.state
     const selection = editorState.getSelection()
