@@ -14,6 +14,7 @@ export const resolvers = {
     'createdAt': (instance) => {
       return normalizeTimezone(instance.created_at)
     },
-    'userId': (instance) => instance['user_id']
+    'userId': (instance) => instance['user_id'],
+    'sendStatus': (instance) => instance['send_status']
   }
 }
