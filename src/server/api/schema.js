@@ -750,6 +750,55 @@ const rootMutations = {
       }
       return editCampaign(id, campaign, loaders, user, origCampaign);
     },
+    bulkUpdateScript: async (_, { organizationId, findAndReplace }, { user, loaders }) => {
+      await accessRequired(user, organizationId, "ADMIN")
+
+      const scriptUpdatesResult = await r.knex.transaction(async trx => {
+        const { searchString, replaceString, includeArchived, campaignTitlePrefixes } = findAndReplace
+
+        let campaignIdQuery = r.knex('campaign')
+          .transacting(trx)
+          .pluck('id')
+        if (!includeArchived) {
+          campaignIdQuery = campaignIdQuery.where({ is_archived: false })
+        }
+        if (campaignTitlePrefixes.length > 0) {
+          campaignIdQuery = campaignIdQuery.where(function () {
+            for (const prefix of campaignTitlePrefixes) {
+              this.orWhere('title', 'like', `${prefix}%`)
+            }
+          })
+        }
+        const campaignIds = await campaignIdQuery
+
+        const interactionStepsToChange = await r.knex('interaction_step')
+          .transacting(trx)
+          .where('script', 'like', `%${searchString}%`)
+          .whereIn('campaign_id', campaignIds)
+
+        const scriptUpdates = []
+        for (let step of interactionStepsToChange) {
+          const newText = step.script.replace(new RegExp(searchString, 'g'), replaceString)
+
+          const scriptUpdate = {
+            campaignId: step.campaign_id,
+            found: step.script,
+            replaced: newText
+          }
+
+          await r.knex('interaction_step')
+            .transacting(trx)
+            .update({ script: newText })
+            .where({ id: step.id })
+
+          scriptUpdates.push(scriptUpdate)
+        }
+
+        return scriptUpdates
+      })
+
+      return scriptUpdatesResult
+    },
     deleteJob: async (_, { campaignId, id }, { user, loaders }) => {
       const campaign = await Campaign.get(campaignId);
       await accessRequired(user, campaign.organization_id, "ADMIN");
