@@ -42,6 +42,13 @@ const rootSchema = `
     customFields: String
   }
 
+  input BulkUpdateScriptInput {
+    searchString: String!
+    replaceString: String!
+    includeArchived: Boolean!
+    campaignTitlePrefixes: [String]!
+  }
+
   input OptOutInput {
     assignmentId: String!
     cell: Phone!
@@ -172,6 +179,12 @@ const rootSchema = `
     data: String!
   }
 
+  type ScriptUpdateResult {
+    campaignId: String!
+    found: String!
+    replaced: String!
+  }
+
   type RootQuery {
     currentUser: User
     organization(id:String!, utc:String): Organization
@@ -191,6 +204,7 @@ const rootSchema = `
     createInvite(invite:InviteInput!): Invite
     createCampaign(campaign:CampaignInput!): Campaign
     editCampaign(id:String!, campaign:CampaignInput!): Campaign
+    bulkUpdateScript(organizationId:String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateResult]
     deleteJob(campaignId:String!, id:String!): JobRequest
     copyCampaign(id: String!): Campaign
     exportCampaign(id:String!): JobRequest
