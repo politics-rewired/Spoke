@@ -102,6 +102,7 @@ class AdminPersonList extends React.Component {
 
   renderCampaignList() {
     const { organizationData: { organization } } = this.props
+    console.log(organization)
     const campaigns = organization ? organization.campaigns : []
     return (
       <DropDownMenu
@@ -278,7 +279,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
     variables: {
       organizationId: ownProps.params.organizationId,
       campaignId: ownProps.location.query.campaignId,
-      offset: ownProps.location.query.offset || 0
+      offset: ownProps.location.query.offset !== undefined ? ownProps.location.query.offset * 200 : 0
     },
     forceFetch: true
   },
@@ -291,8 +292,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
     }`,
     variables: {
       organizationId: ownProps.params.organizationId
-    },
-    forceFetch: true
+    }
   },
   organizationData: {
     query: gql`query getOrganizationData($organizationId: String!) {
@@ -309,8 +309,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
     }`,
     variables: {
       organizationId: ownProps.params.organizationId
-    },
-    forceFetch: true
+    }
   }
 })
 
