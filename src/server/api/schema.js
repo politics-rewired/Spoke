@@ -779,16 +779,19 @@ const rootMutations = {
         const scriptUpdates = []
         for (let step of interactionStepsToChange) {
           const newText = step.script.replace(new RegExp(searchString, 'g'), replaceString)
+
+          const scriptUpdate = {
+            campaignId: step.campaign_id,
+            found: step.script,
+            replaced: newText
+          }
+
           await r.knex('interaction_step')
             .transacting(trx)
             .update({ script: newText })
             .where({ id: step.id })
 
-          scriptUpdates.push({
-            campaignId: step.campaign_id,
-            found: step.script,
-            replaced: newText
-          })
+          scriptUpdates.push(scriptUpdate)
         }
 
         return scriptUpdates

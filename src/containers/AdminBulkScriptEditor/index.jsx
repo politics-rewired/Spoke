@@ -59,6 +59,7 @@ class AdminBulkScriptEditor extends Component {
   handleSubmitJob = async () => {
     this.setState({ isSubmitting: true })
     const findAndReplace = pick(this.state, ['searchString', 'replaceString', 'includeArchived', 'campaignTitlePrefixes'])
+    findAndReplace.campaignTitlePrefixes = findAndReplace.campaignTitlePrefixes.map(prefix => prefix.value)
     try {
       const response = await this.props.mutations.bulkUpdateScript(findAndReplace)
       if (response.errors) throw response.errors
@@ -149,14 +150,18 @@ class AdminBulkScriptEditor extends Component {
             modal={false}
             open
             autoScrollBodyContent
+            contentStyle={{
+              width: '100%',
+              maxWidth: 'none'
+            }}
             onRequestClose={this.handleClose}
           >
             <ul>
               {this.state.result.map((replacedText, index) => (
                 <li key={index}>
                   Campaign ID: {replacedText.campaignId}<br />
-                  Found: {replacedText.found}<br />
-                  Replaced with: {replacedText.replaced}
+                  Found: <span  style={styles.code}>{replacedText.found}</span><br />
+                  Replaced with: <span style={styles.code}>{replacedText.replaced}</span>
                 </li>
               ))}
             </ul>
@@ -176,6 +181,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
       mutation bulkUpdateScript($organizationId: String!, $findAndReplace: BulkUpdateScriptInput!) {
         bulkUpdateScript(organizationId: $organizationId, findAndReplace: $findAndReplace) {
           campaignId
+          found
+          replaced
         }
       }
     `,
