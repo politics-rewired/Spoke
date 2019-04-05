@@ -1411,11 +1411,25 @@ const rootMutations = {
 
     megaReassignCampaignContacts: async (
       _ignore,
-      { organizationId, campaignIdsContactIds, newTexterUserIds },
+      { organizationId, campaignIdsContactIds, newTexterUserIds, shouldUnassign },
       { user }
     ) => {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      if (shouldUnassign) {
+        const campaignContactIdsToUnassign = campaignIdsContactIds.map(cc => cc.campaignContactId)
+
+        const updated_result = await r.knex('campaign_contact')
+          .update({ assignment_id: null })
+          .whereIn('id', campaignContactIdsToUnassign)
+
+        return campaignContactIdsToUnassign.map(cc => ({
+          campaignId: cc.campaignId,
+          assignmentId: null
+        }))
+      }
+
 
       // group contactIds by campaign
       // group messages by campaign
@@ -1470,12 +1484,14 @@ const rootMutations = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
-        newTexterUserIds
+        newTexterUserIds,
+        shouldUnassign
       },
       { user }
     ) => {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
 
       const campaignContactIdsToMessageIds = await getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
         organizationId,
@@ -1483,6 +1499,23 @@ const rootMutations = {
         assignmentsFilter,
         contactsFilter
       )
+
+      if (shouldUnassign) {
+        const campaignContactIdsToUnassign = campaignContactIdsToMessageIds.map(([ccId, _]) => ccId);
+
+        console.log(campaignContactIdsToUnassign)
+
+        const updated_result = await r.knex('campaign_contact')
+          .update({ assignment_id: null })
+          .whereIn('id', campaignContactIdsToUnassign)
+
+        return campaignContactIdsToUnassign.map(cc => ({
+          campaignId: cc.campaignId,
+          assignmentId: null
+        }))
+      }
+
+      return null
 
       const numberOfCampaignContactsToReassign = campaignContactIdsToMessageIds.length
       const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
@@ -1651,7 +1684,6 @@ const rootMutations = {
         ageInHoursAgo = new Date()
         ageInHoursAgo.setHours(new Date().getHours() - ageInHours)
         ageInHoursAgo = ageInHoursAgo.toISOString()
-        console.log(ageInHoursAgo)
       }
 
       const updatedCount = await r.knex.transaction(async trx => {

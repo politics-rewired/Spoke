@@ -3,6 +3,7 @@ import type from "prop-types";
 
 import Select from 'react-select'
 import { Card, CardHeader, CardText } from "material-ui/Card";
+import {Tabs, Tab} from 'material-ui/Tabs';
 import Dialog from "material-ui/Dialog"
 import { getHighestRole } from "../lib/permissions";
 import FlatButton from "material-ui/FlatButton";
@@ -39,7 +40,15 @@ class IncomingMessageActions extends Component {
     this.props.onReassignRequested(texterIds)
   }
 
+  onUnassignClicked = () => {
+    this.props.onUnassignRequested()
+  }
+
   onReassignAllMatchingClicked = () => {
+    this.setState({confirmDialogOpen: true})
+  }
+
+  onUnassignAllMatchingClicked = () => {
     this.setState({confirmDialogOpen: true})
   }
 
@@ -58,6 +67,11 @@ class IncomingMessageActions extends Component {
     this.props.onReassignAllMatchingRequested(texterIds)
   }
 
+  handleConfirmDialogUnassign = () => {
+    this.setState({confirmDialogOpen: false})
+    this.props.onUnassignAllMatchingRequested()
+  }
+
   render() {
     let texters = this.props.people || []
     texters = texters.map(texter => ({
@@ -65,16 +79,16 @@ class IncomingMessageActions extends Component {
       label: texter.displayName + ' ' + getHighestRole(texter.roles)
     }))
 
-    const confirmDialogActions = [
+    const confirmDialogActions = (actionVerb, confirmAction) => [
       <FlatButton
         label="Cancel"
         primary={true}
         onClick={this.handleConfirmDialogCancel}
       />,
       <FlatButton
-        label="Reassign"
+        label={actionVerb || "Reassign"}
         primary={true}
-        onClick={this.handleConfirmDialogReassign}
+        onClick={confirmAction}
       />
     ]
 
@@ -88,58 +102,79 @@ class IncomingMessageActions extends Component {
           showExpandableButton
         />
         <CardText expandable>
-          <div>
-            <p>
-              In order to do a second pass on contacts who haven't responded,
-              select a batch of contacts based on a Contact message status of
-              "First Message Sent", which means they've been sent a message,
-              but haven't replied.
-            </p>
-            <p>
-              Once you have the batch selected, first reassign them to another
-              texter by clicking Reassign Selected, and then click "Reset Message
-              Status". The selected messages will now have a status of "Needs First Message",
-              which means that they will show up in the texter view as needing a message.
-            </p>
-            <p>
-              Then, change the first message in the campaign script to reflect that you're
-              texting them a second time!
-            </p>
-            <p>
-              <Select
-                onChange={this.handleTextersChanged}
-                options={texters}
-                isMulti
-                placeholder="Select at least one texter"
-              />
-            </p>
-          </div>
-          <div className={css(styles.container)}>
-            <div className={css(styles.flexColumn)}>
-              <FlatButton
-                label={'Reassign selected'}
-                onClick={this.onReassignmentClicked}
-                disabled={!hasSeletedTexters}
-              />
-            </div>
-            <div className={css(styles.flexColumn)}>
-              <FlatButton
-                label={`Reassign all ${this.props.conversationCount} matching`}
-                onClick={this.onReassignAllMatchingClicked}
-                disabled={!hasSeletedTexters || this.props.conversationCount === 0}
-              />
-            </div>
-            <Dialog
-              actions={confirmDialogActions}
-              open={this.state.confirmDialogOpen}
-              modal={true}
-              onRequestClose={this.handleConfirmDialogCancel}
-            >
-              {
-                `Reassign all ${this.props.conversationCount} matching conversations?`
-              }
-            </Dialog>
-          </div>
+          <Tabs>
+            <Tab label="Reassign">
+              <div>
+                <p>
+                  <Select
+                    onChange={this.handleTextersChanged}
+                    options={texters}
+                    isMulti
+                    placeholder="Select at least one texter"
+                  />
+                </p>
+              </div>
+
+              <div className={css(styles.container)}>
+                <div className={css(styles.flexColumn)}>
+                  <FlatButton
+                    label={'Reassign selected'}
+                    onClick={this.onReassignmentClicked}
+                    disabled={!hasSeletedTexters}
+                  />
+                </div>
+                <div className={css(styles.flexColumn)}>
+                  <FlatButton
+                    label={`Reassign all ${this.props.conversationCount} matching`}
+                    onClick={this.onReassignAllMatchingClicked}
+                    disabled={!hasSeletedTexters || this.props.conversationCount === 0}
+                  />
+                </div>
+                <Dialog
+                  actions={confirmDialogActions('Reassign', this.handleConfirmDialogReassign)}
+                  open={this.state.confirmDialogOpen}
+                  modal={true}
+                  onRequestClose={this.handleConfirmDialogCancel}
+                >
+                  {
+                    `Reassign all ${this.props.conversationCount} matching conversations?`
+                  }
+                </Dialog>
+              </div>
+
+            </Tab>
+            <Tab label="Unassign">
+
+              <div className={css(styles.container)}>
+                <div className={css(styles.flexColumn)}>
+                  <FlatButton
+                    label={'Unassign selected'}
+                    onClick={this.onUnassignClicked}
+                    disabled={this.props.conversationCount === 0}
+                  />
+                </div>
+                <div className={css(styles.flexColumn)}>
+                  <FlatButton
+                    label={`Unassign all ${this.props.conversationCount} matching`}
+                    onClick={this.onUnassignAllMatchingClicked}
+                    disabled={this.props.conversationCount === 0}
+                  />
+                </div>
+                <Dialog
+                  actions={confirmDialogActions('Unassign', this.handleConfirmDialogUnassign)}
+                  open={this.state.confirmDialogOpen}
+                  modal={true}
+                  onRequestClose={this.handleConfirmDialogCancel}
+                >
+                  {
+                    `Unassign all ${this.props.conversationCount} matching conversations?`
+                  }
+                </Dialog>
+              </div>
+
+            </Tab>
+          </Tabs>
+
           {/* <br/>
           <div>
             <FlatButton
