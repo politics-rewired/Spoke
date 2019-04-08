@@ -140,6 +140,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
   data: {
     query: gql`query currentUser($organizationId: String!) {
       organization(id: $organizationId) {
+        id
         textRequestFormEnabled
         textRequestMaxCount
         textsAvailable
