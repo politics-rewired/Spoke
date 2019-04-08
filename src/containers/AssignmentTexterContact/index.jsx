@@ -408,18 +408,16 @@ export class AssignmentTexterContact extends React.Component {
     }
     this.setState({ disabled: true })
 
-    const payload = {
-      optOut: {
-        cell: contact.cell,
-        assignmentId: assignment.id
-      }
+    const optOut = {
+      cell: contact.cell,
+      assignmentId: assignment.id
     }
 
     if (optOutMessageText.length) {
-      payload.message = this.createMessageToContact(optOutMessageText)
+      optOut.message = optOutMessageText
     }
 
-    Object.assign(payload, this.gatherSurveyChanges())
+    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges())
     this.props.sendMessage(contact.id, payload)
   }
 
