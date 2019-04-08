@@ -172,6 +172,7 @@ async function notifyIfAllAssigned(type, user, count) {
     const assignmentTarget = await currentAssignmentTarget()
     if (assignmentTarget == null) {
       await request.post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL).send({ type, user, count })
+      console.log(`Notified about out of ${type} to assign`)
     } 
   } else {
     console.log('Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset')
@@ -267,7 +268,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
   });
 
   // Async function, not awaiting because response to TFB does not depend on it
-  notifyIfAllAssigned(assignmentInfo.type, user.id, countToAssign)
+  notifyIfAllAssigned(assignmentInfo.type, auth0Id, countToAssign)
 
   return updated_result
 }
