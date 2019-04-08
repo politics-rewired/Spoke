@@ -1212,13 +1212,9 @@ const rootMutations = {
       });
 
       if (message) {
-        const messageInput = {
-          text: message,
-          assignmentId
-        }
         const checkOptOut = false
         try {
-          await sendMessage(messageInput, campaignContactId, user, checkOptOut)
+          await sendMessage(message, campaignContactId, user, checkOptOut)
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
           log.error(error)
