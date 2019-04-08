@@ -37,7 +37,7 @@ async function main() {
     })
     .whereIn('id', campaignContactIdsToRelease)
   
-  return `Released ${updateResult} unsent initials that had stayed untouched for an hour`
+  return `Released ${updateResult} unsent initials that had stayed untouched for the last hour`
 }
 
 main()
