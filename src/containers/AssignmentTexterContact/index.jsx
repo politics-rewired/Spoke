@@ -401,27 +401,23 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   handleOptOut = () => {
-    const optOutMessageText = this.state.optOutMessageText
-    const { contact } = this.props
-    const { assignment } = this.props
-    const message = this.createMessageToContact(optOutMessageText)
-    if (this.state.disabled) {
+    const { disabled, optOutMessageText } = this.state
+    const { assignment, contact } = this.props
+    if (disabled) {
       return // stops from multi-send
     }
     this.setState({ disabled: true })
 
-    const payload = {
-      optOut: {
-        cell: contact.cell,
-        assignmentId: assignment.id
-      }
+    const optOut = {
+      cell: contact.cell,
+      assignmentId: assignment.id
     }
 
     if (optOutMessageText.length) {
-      payload.message = message
+      optOut.message = optOutMessageText
     }
 
-    Object.assign(payload, this.gatherSurveyChanges())
+    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges())
     this.props.sendMessage(contact.id, payload)
   }
 
