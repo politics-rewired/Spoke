@@ -45,8 +45,8 @@ class TexterRequest extends React.Component {
         })
       } else if (message === "Not created; a shift already requested < 10 mins ago.") {
         this.setState({
-          submitting: false,
-          finished: true
+          error: 'Sorry - you just requested! Please wait 10 minutes.',
+          submitting: false
         })
       } else if (message === 'No texts available at the moment') {
         this.setState({
