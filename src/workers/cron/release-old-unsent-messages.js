@@ -28,7 +28,6 @@ async function main() {
   `, [oneHourAgo])
 
   const campaignContactIdsToRelease = selectResult[0].map(rdp => rdp.id)
-  console.log(campaignContactIdsToRelease)
 
   const updateResult = await db('campaign_contact')
     .update({
