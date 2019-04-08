@@ -34,6 +34,7 @@ const contactDataFragment = `
           createdAt
           text
           isFromContact
+          sendStatus
         }
 `
 
