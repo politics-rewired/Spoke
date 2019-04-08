@@ -241,10 +241,8 @@ export async function giveUserMoreTexts(auth0Id, count) {
     console.log(`Found ${ids.length} to assign`)
 
     const campaign_contacts_updated_result = await r.knex("campaign_contact")
-      .update({
-        assignment_id: assignmentId,
-        updated_at: r.knex.raw('now()')
-      })
+      .update({ assignment_id: assignmentId })
+      .update({ updated_at: r.knex.fn.now() })
       .whereIn("id", ids);
 
     const messages_updated_result = await r.knex('message')
