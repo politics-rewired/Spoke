@@ -3,6 +3,7 @@ import { Assignment, r, cacheableData } from "../models";
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from "../../lib";
 import { Notifications, sendUserNotification } from "../notifications";
 import _ from "lodash";
+import request from 'superagent'
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -165,6 +166,19 @@ export async function currentAssignmentTarget() {
   return { type: assignmentType, campaign }
 }
 
+const ASSIGNMENT_COMPLETE_NOTIFICATION_URL = process.env.ASSIGNMENT_COMPLETE_NOTIFICATION_URL
+async function notifyIfAllAssigned(type, user, count) {
+  if (ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
+    const assignmentTarget = await currentAssignmentTarget()
+    if (assignmentTarget == null) {
+      await request.post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL).send({ type, user, count })
+      console.log(`Notified about out of ${type} to assign`)
+    } 
+  } else {
+    console.log('Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset')
+  }
+}
+
 export async function giveUserMoreTexts(auth0Id, count) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
   // Fetch DB info
@@ -252,6 +266,9 @@ export async function giveUserMoreTexts(auth0Id, count) {
     console.log(`Updated ${campaign_contacts_updated_result} campaign contacts and ${messages_updated_result} messages.`)
     return campaign_contacts_updated_result
   });
+
+  // Async function, not awaiting because response to TFB does not depend on it
+  notifyIfAllAssigned(assignmentInfo.type, auth0Id, countToAssign)
 
   return updated_result
 }
