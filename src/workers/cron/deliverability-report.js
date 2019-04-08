@@ -24,7 +24,7 @@ const DOMAIN_REGEX = new RegExp(
 
 const db = require("knex")(config);
 
-module.exports = async function computeDeliverabilityReports() {
+async function main() {
   const results = await db.raw(`
     select DATE_FORMAT(period_ends_at, '%Y-%m-%dT%H:%i:%SZ') as period_ends_at
     from deliverability_report
@@ -122,7 +122,7 @@ module.exports = async function computeDeliverabilityReports() {
   const insertResult = await db("deliverability_report").insert(rows);
   console.log("Successfully inserted with value: ", insertResult);
   return main();
-};
+}
 
 async function firstMessageSentAt() {
   const firstMessage = await db("message")
@@ -156,3 +156,7 @@ function extractPath(text, domain) {
     return null;
   }
 }
+
+main()
+  .then(console.log)
+  .catch(console.error);
