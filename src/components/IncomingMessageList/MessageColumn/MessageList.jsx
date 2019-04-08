@@ -55,7 +55,7 @@ class MessageList extends Component {
                 {message.isFromContact
                   ? `Received at ${moment(message.createdAt).fromNow()}`
                   : message.sendStatus == 'ERROR'
-                    ? `Carrier rejected this message at ${moment(message.createdAt).fromNow()}`
+                    ? `Carrier rejected this message sent by ${senderName} at ${moment(message.createdAt).fromNow()}`
                     : `Sent by ${senderName} ${moment(message.createdAt).fromNow()}`
                 }
               </p>

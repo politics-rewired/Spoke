@@ -69,7 +69,7 @@ const MessageList = function MessageList(props) {
             primaryText={(
               <span style={{ whiteSpace: 'pre-wrap' }}>{message.text}</span>
             )}
-            secondaryText={moment(message.createdAt).fromNow()}
+            secondaryText={`${moment(message.createdAt).fromNow()}${message.sendStatus === 'ERROR' && ': Rejected by carrier'}`}
           />
         )
       })}

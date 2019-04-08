@@ -8,13 +8,13 @@ export const resolvers = {
       'text',
       'userNumber',
       'contactNumber',
-      'isFromContact'
+      'isFromContact',
+      'sendStatus'
     ], Message),
     'campaignId': (instance) => instance['campaign_id'],
     'createdAt': (instance) => {
       return normalizeTimezone(instance.created_at)
     },
-    'userId': (instance) => instance['user_id'],
-    'sendStatus': (instance) => instance['send_status']
+    'userId': (instance) => instance['user_id']
   }
 }
