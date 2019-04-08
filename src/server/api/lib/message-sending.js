@@ -26,7 +26,7 @@ export async function saveNewIncomingMessage(messageInstance) {
   // Prefer to match on campaign contact ID
   if (messageInstance.campaign_contact_id) {
     updateQuery = updateQuery.where({
-      campaign_contact_id: messageInstance.campaign_contact_id
+      id: messageInstance.campaign_contact_id
     })
   } else {
     updateQuery = updateQuery.where({
