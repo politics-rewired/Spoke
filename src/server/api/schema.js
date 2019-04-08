@@ -1203,13 +1203,27 @@ const rootMutations = {
         await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       }
 
-      const { assignmentId, cell, reason } = optOut;
+      const { assignmentId, cell, message, reason } = optOut
       await cacheableData.optOut.save({
         cell,
         reason,
         assignmentId,
         organizationId
       });
+
+      if (message) {
+        const messageInput = {
+          text: message,
+          assignmentId
+        }
+        const checkOptOut = false
+        try {
+          await sendMessage(messageInput, campaignContactId, user, checkOptOut)
+        } catch (error) {
+          // Log the sendMessage error, but return successful opt out creation
+          log.error(error)
+        }
+      }
 
       // Force reload with updated `is_opted_out` status
       loaders.campaignContact.clear(campaignContactId)
