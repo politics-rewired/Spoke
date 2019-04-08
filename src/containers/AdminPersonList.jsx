@@ -102,7 +102,6 @@ class AdminPersonList extends React.Component {
 
   renderCampaignList() {
     const { organizationData: { organization } } = this.props
-    console.log(organization)
     const campaigns = organization ? organization.campaigns : []
     return (
       <DropDownMenu
