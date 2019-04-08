@@ -291,14 +291,12 @@ class AssignmentTexter extends React.Component {
       promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id)
         .then(catchError))
 
+    if (payload.optOut) {
+      promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id)
+        .then(catchError))
+    }
+
     Promise.all(promises)
-      .then(results => {
-        if (payload.optOut) {
-          return this.props.mutations.createOptOut(payload.optOut, contact_id).then(response => {
-            log.info(`Successfully recorded question response: ${JSON.stringify(response)}`)
-          })
-        }
-      })
       .then(_ => {
         if (isLastOne) this.handleFinishContact()
       })
