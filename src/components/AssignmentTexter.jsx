@@ -301,6 +301,11 @@ class AssignmentTexter extends React.Component {
       console.log(`Escalate contact: ${contact_id}${message}`)
     }
 
+    if (payload.escalate) {
+      const message = payload.escalate.message ? ` with message '${payload.escalate.message}'` : ''
+      console.log(`Escalate contact: ${contact_id}${message}`)
+    }
+
     Promise.all(promises)
       .then(_ => {
         if (isLastOne) this.handleFinishContact()
