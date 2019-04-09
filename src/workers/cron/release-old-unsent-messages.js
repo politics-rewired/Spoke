@@ -16,8 +16,10 @@ const config = {
 const db = require("knex")(config);
 
 async function main() {
-  let oneHourAgo = new Date();
+  let oneHourAgo = new Date(),
+      oneWeekAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const selectResult = await db.raw(
     `
@@ -26,8 +28,9 @@ async function main() {
     where assignment_id is not null
       and message_status = 'needsMessage'
       and updated_at > ?
+      and updated_at < ?
   `,
-    [oneHourAgo]
+    [oneWeekAgo, oneHourAgo]
   );
 
   const campaignContactIdsToRelease = selectResult[0].map(rdp => rdp.id);
@@ -45,9 +48,9 @@ async function main() {
 main()
   .then(result => {
     console.log(result);
-    process.exit();
+    process.exit(0);
   })
   .catch(error => {
     console.error(error);
-    process.exit();
+    process.exit(1);
   });
