@@ -8,6 +8,7 @@ import Form from 'react-formal'
 import Dialog from 'material-ui/Dialog'
 import GSSubmitButton from '../components/forms/GSSubmitButton'
 import FlatButton from 'material-ui/FlatButton'
+import RaisedButton from 'material-ui/RaisedButton'
 import yup from 'yup'
 import { Card, CardText, CardActions, CardHeader } from 'material-ui/Card'
 import SelectField from 'material-ui/SelectField'
@@ -16,9 +17,10 @@ import { StyleSheet, css } from 'aphrodite'
 import Toggle from 'material-ui/Toggle'
 import moment from 'moment'
 import { TextRequestType } from '../api/organization'
+
 const styles = StyleSheet.create({
-  section: {
-    margin: '10px 0'
+  sectionCard: {
+    marginBottom: '20px'
   },
   sectionLabel: {
     opacity: 0.8,
@@ -38,12 +40,22 @@ const styles = StyleSheet.create({
 const inlineStyles = {
   dialogButton: {
     display: 'inline-block'
+  },
+  row: {
+    display: 'flex',
+    flexFlow: 'row wrap',
+    marginLeft: '-15px',
+    marginRight: '-15px'
+  },
+  column: {
+    paddingLeft: '15px',
+    paddingRight: '15px'
   }
 }
 
 const formatTextingHours = (hour) => moment(hour, 'H').format('h a')
-class Settings extends React.Component {
 
+class Settings extends React.Component {
   state = {
     formIsSubmitting: false,
     textRequestFormEnabled: undefined,
@@ -140,44 +152,59 @@ class Settings extends React.Component {
     })
 
     return (
-      <GSForm
-        schema={formSchema}
-        ref={ref => this.textRequestFormRef = ref}
-      >
-        <Toggle
-          label='Enable text request form?'
-          name='textRequestFormEnabled'
-          fullWidth
-          toggled={textRequestFormEnabled}
-          onToggle={(_, isToggled) => this.setState({ textRequestFormEnabled: isToggled })}
-        />
-        <SelectField
-          floatingLabelText="Type of texts to assign"
-          value={textRequestType}
-          onChange={(_event, _index, textRequestType) => this.setState({ textRequestType })}
-          disabled={!textRequestFormEnabled}
+      <Card className={css(styles.sectionCard)}>
+        <GSForm
+          schema={formSchema}
+          ref={ref => this.textRequestFormRef = ref}
         >
-          <MenuItem value={TextRequestType.UNSENT} primaryText="Unsent Initial Messages" />
-          <MenuItem value={TextRequestType.UNREPLIED} primaryText="Unhandled Replies" />
-        </SelectField>
-        <Form.Field
-          label='How many texts should texters be able to request?'
-          name='textRequestMaxCount'
-          type='number'
-          defaultValue={textRequestMaxCount}
-          onChange={n => this.setState({ textRequestMaxCount: n })}
-          disabled={!textRequestFormEnabled}
-          fullWidth
-        />
-        <Form.Button
-          type='submit'
-          label="Update Text Request Form"
-          onClick={async () => {
-            const { textRequestFormEnabled, textRequestType, textRequestMaxCount } = this.state
-            await this.handleSubmitTexterRequestFormSettings({ textRequestFormEnabled, textRequestType, textRequestMaxCount })
-          }}
-        />
-      </GSForm>
+          <CardHeader
+            title='Text Request Form'
+          />
+          <CardText>
+            <Toggle
+              label='Enable text request form?'
+              name='textRequestFormEnabled'
+              fullWidth
+              toggled={textRequestFormEnabled}
+              onToggle={(_, isToggled) => this.setState({ textRequestFormEnabled: isToggled })}
+            />
+            <div style={inlineStyles.row}>
+              <div style={inlineStyles.column}>
+                <SelectField
+                  floatingLabelText="Type of texts to assign"
+                  value={textRequestType}
+                  onChange={(_event, _index, textRequestType) => this.setState({ textRequestType })}
+                  disabled={!textRequestFormEnabled}
+                >
+                  <MenuItem value={TextRequestType.UNSENT} primaryText="Unsent Initial Messages" />
+                  <MenuItem value={TextRequestType.UNREPLIED} primaryText="Unhandled Replies" />
+                </SelectField>
+              </div>
+              <div style={{ ...inlineStyles.column, flexGrow: 1 }}>
+                <Form.Field
+                  label='How many texts should texters be able to request?'
+                  name='textRequestMaxCount'
+                  type='number'
+                  defaultValue={textRequestMaxCount}
+                  onChange={n => this.setState({ textRequestMaxCount: n })}
+                  disabled={!textRequestFormEnabled}
+                  fullWidth
+                />
+              </div>
+            </div>
+          </CardText>
+          <CardActions>
+            <Form.Button
+              type='submit'
+              label="Update Text Request Form"
+              onClick={async () => {
+                const { textRequestFormEnabled, textRequestType, textRequestMaxCount } = this.state
+                await this.handleSubmitTexterRequestFormSettings({ textRequestFormEnabled, textRequestType, textRequestMaxCount })
+              }}
+            />
+          </CardActions>
+        </GSForm>
+      </Card>
     )
   }
 
@@ -190,51 +217,42 @@ class Settings extends React.Component {
 
     return (
       <div>
-        <Card>
-          <CardHeader
-            title='Settings'
-          />
-          <CardText>
-            <div className={css(styles.section)}>
-
-            <GSForm
-              schema={formSchema}
-              onSubmit={this.props.mutations.updateOptOutMessage}
-              defaultValue={{ optOutMessage }}
-            >
-
+        <Card className={css(styles.sectionCard)}>
+          <GSForm
+            schema={formSchema}
+            onSubmit={this.props.mutations.updateOptOutMessage}
+            defaultValue={{ optOutMessage }}
+          >
+            <CardHeader title='Opt Out Message' />
+            <CardText>
               <Form.Field
                 label='Default Opt-Out Message'
                 name='optOutMessage'
                 fullWidth
               />
-
+            </CardText>
+            <CardActions>
               <Form.Button
                 type='submit'
                 label={this.props.saveLabel || 'Save Opt-Out Message'}
               />
+            </CardActions>
+          </GSForm>
+        </Card>
 
-            </GSForm>
-            </div>
-          </CardText>
+        {this.renderTexterRequestFormSettings()}
 
+        <Card className={css(styles.sectionCard)}>
+          <CardHeader title='Texting Hours' />
           <CardText>
-            {this.renderTexterRequestFormSettings()}
-          </CardText>
+            <Toggle
+              toggled={organization.textingHoursEnforced}
+              label='Enforce texting hours?'
+              onToggle={async (event, isToggled) => await this.props.mutations.updateTextingHoursEnforcement(isToggled)}
+            />
 
-          <CardText>
-            <div className={css(styles.section)}>
-              <span className={css(styles.sectionLabel)}>
-              </span>
-              <Toggle
-                toggled={organization.textingHoursEnforced}
-                label='Enforce texting hours?'
-                onToggle={async (event, isToggled) => await this.props.mutations.updateTextingHoursEnforcement(isToggled)}
-              />
-            </div>
-
-            {organization.textingHoursEnforced ? (
-              <div className={css(styles.section)}>
+            {organization.textingHoursEnforced && (
+              <div>
                 <span className={css(styles.sectionLabel)}>
                   Texting hours:
                 </span>
@@ -244,21 +262,19 @@ class Settings extends React.Component {
                     ` in your organisations local time. Timezone ${window.TZ}`
                   ) : ' in contacts local time (or 12pm-6pm EST if timezone is unknown)'}
               </div>
-            ) : ''}
+            )}
           </CardText>
           <CardActions>
-            {organization.textingHoursEnforced ? (
-              <FlatButton
+            {organization.textingHoursEnforced && (
+              <RaisedButton
                 label='Change texting hours'
                 primary
                 onTouchTap={this.handleOpenTextingHoursDialog}
               />
-            ) : ''}
+            )}
           </CardActions>
-        </Card>
-        <div>
           {this.renderTextingHoursForm()}
-        </div>
+        </Card>
       </div>
     )
   }
