@@ -676,28 +676,26 @@ export class AssignmentTexterContact extends React.Component {
   renderBottomFixedSection() {
     const { dialogType, messageText, alreadySent } = this.state
 
-    const message = (dialogType === TexterDialogType.OptOut) ? '' : (
-      <div className={css(styles.messageField)}>
-        <GSForm
-          ref='form'
-          schema={this.messageSchema}
-          value={{ messageText }}
-          onSubmit={alreadySent ? undefined : this.handleMessageFormSubmit}
-          onChange={this.handleMessageFormChange}
-        >
-          <MessageTextField />
-          {this.renderCorrectSendButton()}
-        </GSForm>
-      </div>
-    )
-
     return (
       <div>
         {this.renderSurveySection()}
-        <div>
-          {message}
-          {dialogType === TexterDialogType.OptOut ? '' : this.renderActionToolbar()}
-        </div>
+        {dialogType !== TexterDialogType.OptOut && (
+          <div>
+            <div className={css(styles.messageField)}>
+              <GSForm
+                ref='form'
+                schema={this.messageSchema}
+                value={{ messageText }}
+                onSubmit={alreadySent ? undefined : this.handleMessageFormSubmit}
+                onChange={this.handleMessageFormChange}
+              >
+                <MessageTextField />
+                {this.renderCorrectSendButton()}
+              </GSForm>
+            </div>
+            {this.renderActionToolbar()}
+          </div>
+        )}
         {dialogType === TexterDialogType.OptOut && (
           <OptOutDialog
             optOutMessageText={this.state.optOutMessageText}
