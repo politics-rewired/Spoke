@@ -27,11 +27,14 @@ import CreateIcon from 'material-ui/svg-icons/content/create'
 import { dataTest } from '../../lib/attributes'
 import OptOutDialog from './OptOutDialog'
 import MessageTextField from './MessageTextField'
+import EscalateButton from './EscalateButton'
 
 import { isContactBetweenTextingHours } from './utils'
 import TopFixedSection from './TopFixedSection'
 
 const TexterDialogType = Object.freeze({ None: 'None', OptOut: 'OptOut', Escalate: 'Escalate' })
+
+const DEFAULT_ESCALATE_TEXT = 'Great question! I\'m going to pass this on to someone more familiar with that specific topic area'
 
 const styles = StyleSheet.create({
   mobile: {
@@ -202,6 +205,7 @@ export class AssignmentTexterContact extends React.Component {
       snackbarActionTitle,
       snackbarOnTouchTap,
       optOutMessageText: campaign.organization.optOutMessage,
+      escalateMessageText: DEFAULT_ESCALATE_TEXT,
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
       dialogType: TexterDialogType.None,
@@ -428,6 +432,10 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.OptOut })
   }
 
+  handleOpenEscalateDialog = () => {
+    this.setState({ dialogType: TexterDialogType.Escalate })
+  }
+
   handleCloseDialog = () => {
     this.setState({ dialogType: TexterDialogType.None })
   }
@@ -628,6 +636,9 @@ export class AssignmentTexterContact extends React.Component {
                 label='Opt out'
                 onTouchTap={this.handleOpenOptOutDialog}
               />
+              <EscalateButton
+                onEscalate={this.handleOpenEscalateDialog}
+              />
               <div
                 style={{ float: 'right', marginLeft: 20 }}
               >
@@ -679,7 +690,7 @@ export class AssignmentTexterContact extends React.Component {
     return (
       <div>
         {this.renderSurveySection()}
-        {dialogType !== TexterDialogType.OptOut && (
+        {dialogType === TexterDialogType.None && (
           <div>
             <div className={css(styles.messageField)}>
               <GSForm
@@ -697,6 +708,14 @@ export class AssignmentTexterContact extends React.Component {
           </div>
         )}
         {dialogType === TexterDialogType.OptOut && (
+          <OptOutDialog
+            optOutMessageText={this.state.optOutMessageText}
+            onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
+            onSubmit={this.handleOptOut}
+            handleCloseDialog={this.handleCloseDialog}
+          />
+        )}
+        {dialogType === TexterDialogType.Escalate && (
           <OptOutDialog
             optOutMessageText={this.state.optOutMessageText}
             onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
