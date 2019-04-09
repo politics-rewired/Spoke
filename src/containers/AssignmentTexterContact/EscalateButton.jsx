@@ -70,7 +70,8 @@ class EscalateButton extends Component {
       <div>
         <RaisedButton
           label="Escalate"
-          secondary
+          labelColor="#FFFFFF"
+          backgroundColor="#F00000"
           onTouchTap={this.handleAdvanceStep}
         />
         <Dialog
