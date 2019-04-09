@@ -31,6 +31,8 @@ import MessageTextField from './MessageTextField'
 import { isContactBetweenTextingHours } from './utils'
 import TopFixedSection from './TopFixedSection'
 
+const TexterDialogType = Object.freeze({ None: 'None', OptOut: 'OptOut', Escalate: 'Escalate' })
+
 const styles = StyleSheet.create({
   mobile: {
     '@media(min-width: 425px)': {
@@ -202,7 +204,7 @@ export class AssignmentTexterContact extends React.Component {
       optOutMessageText: campaign.organization.optOutMessage,
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
-      optOutDialogOpen: false,
+      dialogType: TexterDialogType.None,
       currentInteractionStep: availableSteps.length > 0 ? availableSteps[availableSteps.length - 1] : null
     }
   }
@@ -238,7 +240,7 @@ export class AssignmentTexterContact extends React.Component {
     const keyCode = event.keyCode || event.which
     if (keyCode === 13  && !event.shiftKey) {
       event.preventDefault()
-      if (this.state.optOutDialogOpen) {
+      if (this.state.dialogType === TexterDialogType.OptOut) {
         this.handleOptOut()
       } else {
         this.handleClickSendMessageButton()
@@ -422,12 +424,12 @@ export class AssignmentTexterContact extends React.Component {
     this.props.sendMessage(contact.id, payload)
   }
 
-  handleOpenDialog = () => {
-    this.setState({ optOutDialogOpen: true })
+  handleOpenOptOutDialog = () => {
+    this.setState({ dialogType: TexterDialogType.OptOut })
   }
 
   handleCloseDialog = () => {
-    this.setState({ optOutDialogOpen: false })
+    this.setState({ dialogType: TexterDialogType.None })
   }
 
   handleChangeScript = (newScript) => {
@@ -583,7 +585,7 @@ export class AssignmentTexterContact extends React.Component {
                 {...dataTest('optOut')}
                 secondary
                 label='Opt out'
-                onTouchTap={this.handleOpenDialog}
+                onTouchTap={this.handleOpenOptOutDialog}
                 tooltip='Opt out this contact'
               />
               <RaisedButton
@@ -624,7 +626,7 @@ export class AssignmentTexterContact extends React.Component {
                 {...dataTest('optOut')}
                 secondary
                 label='Opt out'
-                onTouchTap={this.handleOpenDialog}
+                onTouchTap={this.handleOpenOptOutDialog}
               />
               <div
                 style={{ float: 'right', marginLeft: 20 }}
@@ -672,9 +674,9 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderBottomFixedSection() {
-    const { optOutDialogOpen, messageText, alreadySent } = this.state
+    const { dialogType, messageText, alreadySent } = this.state
 
-    const message = (optOutDialogOpen) ? '' : (
+    const message = (dialogType === TexterDialogType.OptOut) ? '' : (
       <div className={css(styles.messageField)}>
         <GSForm
           ref='form'
@@ -694,9 +696,9 @@ export class AssignmentTexterContact extends React.Component {
         {this.renderSurveySection()}
         <div>
           {message}
-          {optOutDialogOpen ? '' : this.renderActionToolbar()}
+          {dialogType === TexterDialogType.OptOut ? '' : this.renderActionToolbar()}
         </div>
-        {this.state.optOutDialogOpen && (
+        {dialogType === TexterDialogType.OptOut && (
           <OptOutDialog
             optOutMessageText={this.state.optOutMessageText}
             onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
