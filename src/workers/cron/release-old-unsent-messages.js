@@ -19,7 +19,7 @@ async function main() {
   let oneHourAgo = new Date(),
       oneWeekAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 1);
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const selectResult = await db.raw(
     `
