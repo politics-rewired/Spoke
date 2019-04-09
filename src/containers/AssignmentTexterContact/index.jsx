@@ -244,8 +244,11 @@ export class AssignmentTexterContact extends React.Component {
     const keyCode = event.keyCode || event.which
     if (keyCode === 13  && !event.shiftKey) {
       event.preventDefault()
-      if (this.state.dialogType === TexterDialogType.OptOut) {
+      const { dialogType } = this.state
+      if (dialogType === TexterDialogType.OptOut) {
         this.handleOptOut()
+      } else if (dialogType === TexterDialogType.Escalate) {
+        this.handleEscalate()
       } else {
         this.handleClickSendMessageButton()
       }
@@ -425,6 +428,24 @@ export class AssignmentTexterContact extends React.Component {
     }
 
     const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges())
+    this.props.sendMessage(contact.id, payload)
+  }
+
+  handleEscalate = () => {
+    const { disabled, escalateMessageText } = this.state
+    const { contact } = this.props
+    if (disabled) {
+      return // stops from multi-send
+    }
+    this.setState({ disabled: true })
+
+    const escalate = {}
+    if (escalateMessageText && escalateMessageText.length) {
+      const message = this.createMessageToContact(optOutMessageText)
+      escalate.message = message
+    }
+
+    const payload = Object.assign({}, { escalate })
     this.props.sendMessage(contact.id, payload)
   }
 
@@ -723,7 +744,7 @@ export class AssignmentTexterContact extends React.Component {
             messageText={this.state.escalateMessageText}
             submitTitle={this.state.escalateMessageText ? 'Send' : 'Escalate without Text'}
             onChange={({ messageText }) => this.setState({ escalateMessageText: messageText })}
-            onSubmit={this.handleOptOut}
+            onSubmit={this.handleEscalate}
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
