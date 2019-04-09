@@ -25,7 +25,7 @@ import { withRouter } from 'react-router'
 import Empty from '../../components/Empty'
 import CreateIcon from 'material-ui/svg-icons/content/create'
 import { dataTest } from '../../lib/attributes'
-import OptOutDialog from './OptOutDialog'
+import ContactActionDialog from './ContactActionDialog'
 import MessageTextField from './MessageTextField'
 import EscalateButton from './EscalateButton'
 
@@ -708,17 +708,21 @@ export class AssignmentTexterContact extends React.Component {
           </div>
         )}
         {dialogType === TexterDialogType.OptOut && (
-          <OptOutDialog
-            optOutMessageText={this.state.optOutMessageText}
-            onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
+          <ContactActionDialog
+            title='Opt out user'
+            messageText={this.state.optOutMessageText}
+            submitTitle={this.state.optOutMessageText ? 'Send' : 'Opt Out without Text'}
+            onChange={({ messageText }) => this.setState({ optOutMessageText: messageText })}
             onSubmit={this.handleOptOut}
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
         {dialogType === TexterDialogType.Escalate && (
-          <OptOutDialog
-            optOutMessageText={this.state.optOutMessageText}
-            onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
+          <ContactActionDialog
+            title='Escalate conversation'
+            messageText={this.state.escalateMessageText}
+            submitTitle={this.state.escalateMessageText ? 'Send' : 'Escalate without Text'}
+            onChange={({ messageText }) => this.setState({ escalateMessageText: messageText })}
             onSubmit={this.handleOptOut}
             handleCloseDialog={this.handleCloseDialog}
           />

@@ -11,7 +11,7 @@ import GSForm from '../../components/forms/GSForm'
 import GSSubmitButton from '../../components/forms/GSSubmitButton'
 
 const styles = StyleSheet.create({
-  optOutCard: {
+  contactActionCard: {
     '@media(max-width: 320px)': {
       padding: '2px 10px !important'
     },
@@ -26,24 +26,24 @@ const inlineStyles = {
   }
 }
 
-const optOutSchema = yup.object({
-  optOutMessageText: yup.string()
+const contactActionSchema = yup.object({
+  messageText: yup.string()
 })
 
-export default class OptOutDialog extends Component {
+class ContactActionDialog extends Component {
   componentDidMount() {
-    const optOutField = this.getOptOutFieldRef()
-    optOutField.addEventListener('keydown', this.onEnterDown)
+    const contactActionTextField = this.getContactActionTextFieldRef()
+    contactActionTextField.addEventListener('keydown', this.onEnterDown)
   }
 
   componentWillUnmount() {
-    const optOutField = this.getOptOutFieldRef()
-    optOutField.removeEventListener('keydown', this.onEnterDown)
+    const contactActionTextField = this.getContactActionTextFieldRef()
+    contactActionTextField.removeEventListener('keydown', this.onEnterDown)
   }
 
-  getOptOutFieldRef = () => {
+  getContactActionTextFieldRef = () => {
     // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.optOutText.refs.input.refs.textField.input.refs.input
+    return this.refs.contactActionText.refs.input.refs.textField.input.refs.input
   }
 
   // Allow <shift> + <enter> to add newlines rather than submitting
@@ -56,25 +56,25 @@ export default class OptOutDialog extends Component {
   }
 
   render() {
-    const { optOutMessageText, onChange, onSubmit, handleCloseDialog } = this.props
+    const { title, messageText, submitTitle, onChange, onSubmit, handleCloseDialog } = this.props
     return (
       <Card>
         <CardTitle
-          className={css(styles.optOutCard)}
-          title='Opt out user'
+          className={css(styles.contactActionCard)}
+          title={title}
         />
         <Divider />
-        <CardActions className={css(styles.optOutCard)}>
+        <CardActions className={css(styles.contactActionCard)}>
           <GSForm
-            className={css(styles.optOutCard)}
-            schema={optOutSchema}
+            className={css(styles.contactActionCard)}
+            schema={contactActionSchema}
             onChange={onChange}
-            value={{ optOutMessageText }}
+            value={{ messageText }}
             onSubmit={onSubmit}
           >
             <Form.Field
-              ref='optOutText'
-              name='optOutMessageText'
+              ref='contactActionText'
+              name='messageText'
               fullWidth
               autoFocus
               multiLine
@@ -89,7 +89,7 @@ export default class OptOutDialog extends Component {
                 type='submit'
                 style={inlineStyles.dialogButton}
                 component={GSSubmitButton}
-                label={optOutMessageText ? 'Send' : 'Opt Out without Text'}
+                label={submitTitle}
               />
             </div>
           </GSForm>
@@ -99,9 +99,13 @@ export default class OptOutDialog extends Component {
   }
 }
 
-OptOutDialog.propTypes = {
-  optOutMessageText: PropTypes.string,
-  onChange: PropTypes.func,
-  onSubmit: PropTypes.func,
-  handleCloseDialog: PropTypes.func
+ContactActionDialog.propTypes = {
+  title: PropTypes.string.isRequired,
+  messageText: PropTypes.string.isRequired,
+  submitTitle: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  handleCloseDialog: PropTypes.func.isRequired
 }
+
+export default ContactActionDialog
