@@ -7,6 +7,7 @@ import AdminPersonList from './containers/AdminPersonList'
 import AdminOptOutList from './containers/AdminOptOutList'
 import AdminBulkScriptEditor from './containers/AdminBulkScriptEditor'
 import AdminIncomingMessageList from './containers/AdminIncomingMessageList'
+import EscalatedConversationList from './containers/AdminIncomingMessageList/EscalatedConversationList'
 import AdminCampaignEdit from './containers/AdminCampaignEdit'
 import AdminReplySender from './containers/AdminReplySender'
 import TexterDashboard from './components/TexterDashboard'
@@ -43,6 +44,7 @@ export default function makeRoutes(requireAuth = () => {}) {
           </Route>
           <Route path='people' component={AdminPersonList} />
           <Route path='incoming' component={AdminIncomingMessageList} />
+          <Route path='escalated' component={EscalatedConversationList} />
           <Route path='bulk-script-editor' component={AdminBulkScriptEditor} />
           <Route path='settings' component={Settings} />
         </Route>

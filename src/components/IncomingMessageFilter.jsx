@@ -278,21 +278,23 @@ class IncomingMessageFilter extends Component {
               />
             </div>
             <div className={css(styles.spacer)} />
-            <div className={css(styles.flexColumn)}>
-              <AutoComplete
-                filter={AutoComplete.caseInsensitiveFilter}
-                maxSearchResults={8}
-                onFocus={() => this.setState({ texterSearchText: '' })}
-                onUpdateInput={texterSearchText =>
-                  this.setState({ texterSearchText })
-                }
-                searchText={this.state.texterSearchText}
-                dataSource={texterNodes}
-                hintText={'Search for a texter'}
-                floatingLabelText={'Texter'}
-                onNewRequest={this.onTexterSelected}
-              />
-            </div>
+            {this.props.isTexterFilterable && (
+              <div className={css(styles.flexColumn)}>
+                <AutoComplete
+                  filter={AutoComplete.caseInsensitiveFilter}
+                  maxSearchResults={8}
+                  onFocus={() => this.setState({ texterSearchText: '' })}
+                  onUpdateInput={texterSearchText =>
+                    this.setState({ texterSearchText })
+                  }
+                  searchText={this.state.texterSearchText}
+                  dataSource={texterNodes}
+                  hintText={'Search for a texter'}
+                  floatingLabelText={'Texter'}
+                  onNewRequest={this.onTexterSelected}
+                />
+              </div>
+            )}
             <div className={css(styles.spacer)} />
             <TextField onChange={this.onContactNameChanged} fullWidth={true} floatingLabelText="Filter by Contact Name" />
           </div>
@@ -302,7 +304,12 @@ class IncomingMessageFilter extends Component {
   }
 }
 
+IncomingMessageFilter.defaultProps = {
+  isTexterFilterable: true,
+}
+
 IncomingMessageFilter.propTypes = {
+  isTexterFilterable: type.bool.isRequired,
   onCampaignChanged: type.func.isRequired,
   onTexterChanged: type.func.isRequired,
   onActiveCampaignsToggled: type.func.isRequired,

@@ -88,6 +88,14 @@ export const resolvers = {
       } else {
         return cat
       }
+    },
+    escalationUserId: async (organization) => {
+      try {
+        const features = JSON.parse(organization.features)
+        return parseInt(features.escalationUserId);
+      } catch (ex) {
+        return null
+      }
     }
   }
 }

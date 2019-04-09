@@ -806,6 +806,26 @@ const rootMutations = {
       return await Organization.get(organizationId);
     },
 
+    updateEscalationUserId: async (_, { organizationId, escalationUserId }, { user, loaders }) => {
+      await accessRequired(user, organizationId, 'ADMIN')
+
+      const currentOrganization = await Organization.get(organizationId)
+      let currentFeatures = {}
+      try {
+        currentFeatures = JSON.parse(currentOrganization.features);
+      } catch (ex) {
+        // do nothing
+      }
+
+      const nextFeatures = Object.assign({}, currentFeatures, { escalationUserId })
+      console.log(nextFeatures)
+      await Organization.get(organizationId).update({
+        features: JSON.stringify(nextFeatures)
+      })
+
+      return await loaders.organization.load(organizationId)
+    },
+
     createInvite: async (_, { user }) => {
       if ((user && user.is_superadmin) || !process.env.SUPPRESS_SELF_INVITE) {
         const inviteInstance = new Invite({

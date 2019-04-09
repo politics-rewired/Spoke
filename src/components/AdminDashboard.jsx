@@ -80,6 +80,10 @@ class AdminDashboard extends React.Component {
       path: 'incoming',
       role: 'SUPERVOLUNTEER'
     }, {
+      name: 'Escalated Conversations',
+      path: 'escalated',
+      role: 'SUPERVOLUNTEER'
+    }, {
       name: 'Bulk Script Editor',
       path: 'bulk-script-editor',
       role: 'ADMIN'
