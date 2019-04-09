@@ -155,6 +155,7 @@ class Settings extends React.Component {
       <Card className={css(styles.sectionCard)}>
         <GSForm
           schema={formSchema}
+          defaultValue={{ textRequestMaxCount }}
           ref={ref => this.textRequestFormRef = ref}
         >
           <CardHeader
@@ -185,7 +186,6 @@ class Settings extends React.Component {
                   label='How many texts should texters be able to request?'
                   name='textRequestMaxCount'
                   type='number'
-                  defaultValue={textRequestMaxCount}
                   onChange={n => this.setState({ textRequestMaxCount: n })}
                   disabled={!textRequestFormEnabled}
                   fullWidth
@@ -210,9 +210,13 @@ class Settings extends React.Component {
 
   render() {
     const { organization } = this.props.data
-    const { optOutMessage } = organization
+    const { optOutMessage, escalationUserId } = organization
+
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
+    })
+    const escalateUserSchema = yup.object({
+      escalationUserId: yup.number()
     })
 
     return (
@@ -274,6 +278,30 @@ class Settings extends React.Component {
             )}
           </CardActions>
           {this.renderTextingHoursForm()}
+        </Card>
+
+        <Card className={css(styles.sectionCard)}>
+          <GSForm
+            schema={escalateUserSchema}
+            onSubmit={console.log}
+            defaultValue={{ escalationUserId }}
+          >
+            <CardHeader title='Conversation Escalation' />
+            <CardText>
+              To enable conversation escalation you must specify a user to which these conversations will be assigned.
+              <Form.Field
+                label='User ID for escalation handler'
+                name='escalationUserId'
+                fullWidth
+              />
+            </CardText>
+            <CardActions>
+              <Form.Button
+                type='submit'
+                label={'Save'}
+              />
+            </CardActions>
+          </GSForm>
         </Card>
       </div>
     )
