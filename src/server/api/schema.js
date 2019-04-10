@@ -1231,9 +1231,8 @@ const rootMutations = {
           text: message,
           assignmentId: campaignContact.assignment_id
         }
-        const skipOptOutCheck = true
         try {
-          await sendMessage(messageInput, campaignContactId, user, skipOptOutCheck)
+          await sendMessage(messageInput, campaignContactId, user)
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
           log.error(error)
