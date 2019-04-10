@@ -11,6 +11,8 @@ import pick from 'lodash/pick'
 
 import CampaignPrefixSelector from './CampaignPrefixSelector'
 
+const PROTECTED_CHARACTERS = ['/']
+
 const styles = {
   bold: {
     fontWeight: 'bold'
@@ -20,6 +22,7 @@ const styles = {
     marginBottom: '15px'
   },
   code: {
+    color: '#000000',
     backgroundColor: '#DDDDDD',
     fontFamily: 'monospace',
     fontSize: '1.2em',
@@ -34,6 +37,8 @@ class AdminBulkScriptEditor extends Component {
     isSubmitting: false,
     error: '',
     result: null,
+    flaggedCharacters: [],
+    confirmFlaggedCharacters: false,
     searchString: '',
     replaceString: '',
     includeArchived: true,
@@ -41,7 +46,8 @@ class AdminBulkScriptEditor extends Component {
   }
 
   handleChangeSearchString = (_event, searchString) => {
-    this.setState({ searchString })
+    const flaggedCharacters = PROTECTED_CHARACTERS.filter(character => searchString.indexOf(character) > -1)
+    this.setState({ searchString, flaggedCharacters })
   }
 
   handleChangeReplaceString = (_event, replaceString) => {
@@ -57,6 +63,20 @@ class AdminBulkScriptEditor extends Component {
   }
 
   handleSubmitJob = async () => {
+    const { flaggedCharacters } = this.state
+    if (flaggedCharacters.length > 0) {
+      this.setState({ confirmFlaggedCharacters: true })
+    } else {
+      this.submitJob()
+    }
+  }
+
+  handleConfirmSubmit = () => {
+    this.setState({ confirmFlaggedCharacters: false })
+    this.submitJob()
+  }
+
+  submitJob = async () => {
     this.setState({ isSubmitting: true })
     const findAndReplace = pick(this.state, ['searchString', 'replaceString', 'includeArchived', 'campaignTitlePrefixes'])
     findAndReplace.campaignTitlePrefixes = findAndReplace.campaignTitlePrefixes.map(prefix => prefix.value)
@@ -72,12 +92,36 @@ class AdminBulkScriptEditor extends Component {
   }
 
   handleClose = () => {
-    this.setState({ error: '', result: null })
+    this.setState({
+      confirmFlaggedCharacters: false,
+      error: '',
+      result: null
+    })
   }
 
   render() {
-    const { isSubmitting, searchString, replaceString, includeArchived, campaignTitlePrefixes } = this.state
+    const {
+      isSubmitting,
+      searchString,
+      flaggedCharacters,
+      confirmFlaggedCharacters,
+      replaceString,
+      includeArchived,
+      campaignTitlePrefixes
+    } = this.state
     const isSubmitDisabled = isSubmitting || !searchString
+
+    const flaggedCharacterActions = [
+      <FlatButton
+        label="Cancel"
+        onClick={this.handleClose}
+      />,
+      <FlatButton
+        label="Confirm"
+        primary={true}
+        onClick={this.handleConfirmSubmit}
+      />
+    ]
 
     const dialogActions = [
       <FlatButton
@@ -99,6 +143,13 @@ class AdminBulkScriptEditor extends Component {
             disabled={isSubmitting}
             onChange={this.handleChangeSearchString}
           />
+          {flaggedCharacters.length > 0 && (
+            <p style={{ color: '#FFAA00' }}>
+              Warning: Your search text contains the following special characters: {' '}
+              {flaggedCharacters.map(char => <span key={char} style={styles.code}>{char}</span>)}
+              {' '} Be careful with this!
+            </p>
+          )}
           <TextField
             hintText="...with this text"
             value={replaceString}
@@ -132,6 +183,17 @@ class AdminBulkScriptEditor extends Component {
           disabled={isSubmitDisabled}
           onClick={this.handleSubmitJob}
         />
+        {confirmFlaggedCharacters && (
+          <Dialog
+            title="Confirm Flagged Characters"
+            actions={flaggedCharacterActions}
+            open
+            onRequestClose={this.handleClose}
+          >
+            <p>Are you sure you want to run run a bulk script update with special characters?</p>
+            <p>If you don't know what this means, you should cancel and ask an admin!</p>
+          </Dialog>
+        )}
         {this.state.error && (
           <Dialog
             title="Error"
