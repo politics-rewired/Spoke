@@ -319,6 +319,65 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
 }
 
 
+export const reassignContacts = async (campaignContactIds, newTexterId) => {
+  const result = await r.knex.transaction(async trx => {
+    // Fetch more complete information for campaign contacts
+    const campaignContacts = await r.knex('campaign_contact')
+      .transacting(trx)
+      .select(['id', 'campaign_id'])
+      .whereIn('id', campaignContactIds)
+
+    // Batch update by campaign
+    const contactsByCampaignId = _.groupBy(campaignContacts, 'campaign_id')
+    const campaignIds = Object.keys(contactsByCampaignId)
+    await Promise.all(campaignIds.map(async campaignId => {
+      // See if newTexter already has an assignment for this campaign
+      const existingAssignment = await r.knex('assignment')
+        .transacting(trx)
+        .where({
+          campaign_id: campaignId,
+          user_id: newTexterId
+        })
+        .first('id')
+      let assignmentId = existingAssignment && existingAssignment.id
+      if (!assignmentId) {
+        // Create a new assignment if none exists
+        const inserted = await r.knex('assignment')
+          .transacting(trx)
+          .insert({
+            campaign_id: campaignId,
+            user_id: newTexterId
+          })
+          .returning('*')
+        // MySQL does not support `RETURNING` so we do some acrobatics to get the new assignment ID
+        assignmentId = inserted[0]
+          ? inserted[0].id
+            ? inserted[0].id
+            : inserted[0]
+          : inserted.id
+      }
+
+      // Update the contact's assignment
+      const contactIds = contactsByCampaignId[campaignId].map(contact => contact.id)
+      await r.knex('campaign_contact')
+        .transacting(trx)
+        .update({
+          assignment_id: assignmentId,
+          updated_at: r.knex.fn.now()
+        })
+        .whereIn('id', contactIds)
+
+      // Update the conversations messages
+      await r.knex('message')
+        .update({ assignment_id: assignmentId })
+        .whereIn('campaign_contact_id', contactIds)
+    }))
+    return campaignContactIds
+  })
+
+  return result
+}
+
 export async function reassignConversations(campaignIdContactIdsMap, campaignIdMessagesIdsMap, newTexterUserId) {
   // ensure existence of assignments
   const campaignIdAssignmentIdMap = new Map()
@@ -366,12 +425,7 @@ export async function reassignConversations(campaignIdContactIdsMap, campaignIdM
 
       await r
         .knex('message')
-        .whereIn(
-          'id',
-          messageIds.map(messageId => {
-            return messageId
-          })
-        )
+        .whereIn('id', messageIds)
         .update({
           assignment_id: assignmentId
         })

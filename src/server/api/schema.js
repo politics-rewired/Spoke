@@ -45,6 +45,7 @@ import {
   getConversations,
   getCampaignIdMessageIdsAndCampaignIdContactIdsMaps,
   getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked,
+  reassignContacts,
   reassignConversations,
   resolvers as conversationsResolver
 } from "./conversations";
@@ -817,8 +818,11 @@ const rootMutations = {
         // do nothing
       }
 
+      // Ensure the user actually exists
+      const escalationUser = await r.knex('user').where({ id: escalationUserId }).first('id')
+      if (!escalationUser) throw new GraphQLError('User with that ID does not exist!')
+
       const nextFeatures = Object.assign({}, currentFeatures, { escalationUserId })
-      console.log(nextFeatures)
       await Organization.get(organizationId).update({
         features: JSON.stringify(nextFeatures)
       })
@@ -1205,7 +1209,39 @@ const rootMutations = {
         return { found: false };
       }
     },
+    escalateConversation: async (_, {campaignContactId, message}, { user, loaders }) => {
+      let campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
+      await assignmentRequired(user, campaignContact.assignment_id)
 
+      const campaign = await loaders.campaign.load(campaignContact.campaign_id)
+      const organization = await Organization.get(campaign.organization_id)
+      let escalationUserId
+      try {
+        const features = JSON.parse(organization.features)
+        escalationUserId = parseInt(features.escalationUserId)
+      } catch (error) {
+        throw new GraphQLError(`No escalation user set for organization ${organization.name}!`)
+      }
+
+      await reassignContacts([campaignContactId], escalationUserId)
+      campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
+
+      if (message) {
+        const messageInput = {
+          text: message,
+          assignmentId: campaignContact.assignment_id
+        }
+        const skipOptOutCheck = true
+        try {
+          await sendMessage(messageInput, campaignContactId, user, skipOptOutCheck)
+        } catch (error) {
+          // Log the sendMessage error, but return successful opt out creation
+          log.error(error)
+        }
+      }
+
+      return campaignContact
+    },
     createOptOut: async (
       _,
       { optOut, campaignContactId },

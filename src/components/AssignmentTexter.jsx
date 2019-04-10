@@ -302,8 +302,9 @@ class AssignmentTexter extends React.Component {
     }
 
     if (payload.escalate) {
-      const message = payload.escalate.message ? ` with message '${payload.escalate.message}'` : ''
-      console.log(`Escalate contact: ${contact_id}${message}`)
+      const { message } = payload.escalate
+      promises.push(this.props.mutations.escalateContact(contact_id, message)
+        .then(catchError))
     }
 
     Promise.all(promises)
@@ -436,6 +437,20 @@ const mapMutationsToProps = () => ({
     variables: {
       optOut,
       campaignContactId
+    }
+  }),
+  escalateContact: (campaignContactId, message) => ({
+    mutation: gql`
+      mutation escalateConversation($campaignContactId: String!, $message: String) {
+        escalateConversation(campaignContactId: $campaignContactId, message: $message) {
+          id
+          assignmentId
+        }
+      }
+    `,
+    variables: {
+      campaignContactId,
+      message
     }
   }),
   editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({
