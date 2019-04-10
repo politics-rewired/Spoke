@@ -11,6 +11,8 @@ import pick from 'lodash/pick'
 
 import CampaignPrefixSelector from './CampaignPrefixSelector'
 
+const PROTECTED_CHARACTERS = ['/']
+
 const styles = {
   bold: {
     fontWeight: 'bold'
@@ -20,6 +22,7 @@ const styles = {
     marginBottom: '15px'
   },
   code: {
+    color: '#000000',
     backgroundColor: '#DDDDDD',
     fontFamily: 'monospace',
     fontSize: '1.2em',
@@ -34,6 +37,7 @@ class AdminBulkScriptEditor extends Component {
     isSubmitting: false,
     error: '',
     result: null,
+    flaggedCharacters: [],
     searchString: '',
     replaceString: '',
     includeArchived: true,
@@ -41,7 +45,8 @@ class AdminBulkScriptEditor extends Component {
   }
 
   handleChangeSearchString = (_event, searchString) => {
-    this.setState({ searchString })
+    const flaggedCharacters = PROTECTED_CHARACTERS.filter(character => searchString.indexOf(character) > -1)
+    this.setState({ searchString, flaggedCharacters })
   }
 
   handleChangeReplaceString = (_event, replaceString) => {
@@ -76,7 +81,14 @@ class AdminBulkScriptEditor extends Component {
   }
 
   render() {
-    const { isSubmitting, searchString, replaceString, includeArchived, campaignTitlePrefixes } = this.state
+    const {
+      isSubmitting,
+      searchString,
+      flaggedCharacters,
+      replaceString,
+      includeArchived,
+      campaignTitlePrefixes
+    } = this.state
     const isSubmitDisabled = isSubmitting || !searchString
 
     const dialogActions = [
@@ -99,6 +111,13 @@ class AdminBulkScriptEditor extends Component {
             disabled={isSubmitting}
             onChange={this.handleChangeSearchString}
           />
+          {flaggedCharacters.length > 0 && (
+            <p style={{ color: '#FFAA00' }}>
+              Warning: Your search text contains the following special characters: {' '}
+              {flaggedCharacters.map(char => <span key={char} style={styles.code}>{char}</span>)}
+              {' '} Be careful with this!
+            </p>
+          )}
           <TextField
             hintText="...with this text"
             value={replaceString}
