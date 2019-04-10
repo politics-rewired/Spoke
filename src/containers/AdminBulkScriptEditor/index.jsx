@@ -38,6 +38,7 @@ class AdminBulkScriptEditor extends Component {
     error: '',
     result: null,
     flaggedCharacters: [],
+    confirmFlaggedCharacters: false,
     searchString: '',
     replaceString: '',
     includeArchived: true,
@@ -62,6 +63,20 @@ class AdminBulkScriptEditor extends Component {
   }
 
   handleSubmitJob = async () => {
+    const { flaggedCharacters } = this.state
+    if (flaggedCharacters.length > 0) {
+      this.setState({ confirmFlaggedCharacters: true })
+    } else {
+      this.submitJob()
+    }
+  }
+
+  handleConfirmSubmit = () => {
+    this.setState({ confirmFlaggedCharacters: false })
+    this.submitJob()
+  }
+
+  submitJob = async () => {
     this.setState({ isSubmitting: true })
     const findAndReplace = pick(this.state, ['searchString', 'replaceString', 'includeArchived', 'campaignTitlePrefixes'])
     findAndReplace.campaignTitlePrefixes = findAndReplace.campaignTitlePrefixes.map(prefix => prefix.value)
@@ -77,7 +92,11 @@ class AdminBulkScriptEditor extends Component {
   }
 
   handleClose = () => {
-    this.setState({ error: '', result: null })
+    this.setState({
+      confirmFlaggedCharacters: false,
+      error: '',
+      result: null
+    })
   }
 
   render() {
@@ -85,11 +104,24 @@ class AdminBulkScriptEditor extends Component {
       isSubmitting,
       searchString,
       flaggedCharacters,
+      confirmFlaggedCharacters,
       replaceString,
       includeArchived,
       campaignTitlePrefixes
     } = this.state
     const isSubmitDisabled = isSubmitting || !searchString
+
+    const flaggedCharacterActions = [
+      <FlatButton
+        label="Cancel"
+        onClick={this.handleClose}
+      />,
+      <FlatButton
+        label="Confirm"
+        primary={true}
+        onClick={this.handleConfirmSubmit}
+      />
+    ]
 
     const dialogActions = [
       <FlatButton
@@ -151,6 +183,17 @@ class AdminBulkScriptEditor extends Component {
           disabled={isSubmitDisabled}
           onClick={this.handleSubmitJob}
         />
+        {confirmFlaggedCharacters && (
+          <Dialog
+            title="Confirm Flagged Characters"
+            actions={flaggedCharacterActions}
+            open
+            onRequestClose={this.handleClose}
+          >
+            <p>Are you sure you want to run run a bulk script update with special characters?</p>
+            <p>If you don't know what this means, you should cancel and ask an admin!</p>
+          </Dialog>
+        )}
         {this.state.error && (
           <Dialog
             title="Error"
