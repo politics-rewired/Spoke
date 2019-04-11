@@ -552,6 +552,7 @@ const rootMutations = {
       );
       return loaders.campaignContact.load(id);
     },
+
     exportCampaign: async (_, { id }, { user, loaders }) => {
       const campaign = await loaders.campaign.load(id);
       const organizationId = campaign.organization_id;
@@ -572,6 +573,7 @@ const rootMutations = {
       }
       return newJob;
     },
+
     editOrganizationRoles: async (
       _,
       { userId, organizationId, roles },
@@ -614,6 +616,7 @@ const rootMutations = {
       }
       return loaders.organization.load(organizationId);
     },
+
     editUser: async (_, { organizationId, userId, userData }, { user }) => {
       if (user.id !== userId) {
         // User can edit themselves
@@ -654,6 +657,7 @@ const rootMutations = {
         return userData;
       }
     },
+
     joinOrganization: async (_, { organizationUuid }, { user, loaders }) => {
       let organization;
       [organization] = await r
@@ -694,6 +698,7 @@ const rootMutations = {
       }
       return organization;
     },
+
     assignUserToCampaign: async (
       _,
       { organizationUuid, campaignId },
@@ -730,6 +735,7 @@ const rootMutations = {
       }
       return campaign;
     },
+
     updateTextingHours: async (
       _,
       { organizationId, textingHoursStart, textingHoursEnd },
@@ -745,6 +751,7 @@ const rootMutations = {
 
       return await Organization.get(organizationId);
     },
+
     updateTextingHoursEnforcement: async (
       _,
       { organizationId, textingHoursEnforced },
@@ -759,6 +766,7 @@ const rootMutations = {
 
       return await loaders.organization.load(organizationId);
     },
+
     updateTextRequestFormSettings: async (_, args, { user, loaders }) => {
       const { organizationId, textRequestFormEnabled, textRequestType, textRequestMaxCount } = args
       await accessRequired(user, organizationId, 'ADMIN')
@@ -779,6 +787,7 @@ const rootMutations = {
 
       return await loaders.organization.load(organizationId)
     },
+
     updateOptOutMessage: async (
       _,
       { organizationId, optOutMessage },
@@ -796,6 +805,7 @@ const rootMutations = {
 
       return await Organization.get(organizationId);
     },
+
     createInvite: async (_, { user }) => {
       if ((user && user.is_superadmin) || !process.env.SUPPRESS_SELF_INVITE) {
         const inviteInstance = new Invite({
@@ -806,6 +816,7 @@ const rootMutations = {
         return newInvite;
       }
     },
+
     createCampaign: async (_, { campaign }, { user, loaders }) => {
       await accessRequired(
         user,
@@ -824,6 +835,7 @@ const rootMutations = {
       const newCampaign = await campaignInstance.save();
       return editCampaign(newCampaign.id, campaign, loaders, user);
     },
+
     copyCampaign: async (_, { id }, { user, loaders }) => {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
@@ -899,6 +911,7 @@ const rootMutations = {
 
       return newCampaign;
     },
+
     unarchiveCampaign: async (_, { id }, { user, loaders }) => {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
@@ -907,6 +920,7 @@ const rootMutations = {
       cacheableData.campaign.reload(id);
       return campaign;
     },
+
     archiveCampaign: async (_, { id }, { user, loaders }) => {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
@@ -915,6 +929,7 @@ const rootMutations = {
       cacheableData.campaign.reload(id);
       return campaign;
     },
+
     startCampaign: async (_, { id }, { user, loaders }) => {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
@@ -928,6 +943,7 @@ const rootMutations = {
       });
       return campaign;
     },
+
     editCampaign: async (_, { id, campaign }, { user, loaders }) => {
       const origCampaign = await Campaign.get(id);
       if (campaign.organizationId) {
@@ -951,6 +967,7 @@ const rootMutations = {
       }
       return editCampaign(id, campaign, loaders, user, origCampaign);
     },
+
     bulkUpdateScript: async (_, { organizationId, findAndReplace }, { user, loaders }) => {
       await accessRequired(user, organizationId, "ADMIN")
 
@@ -1000,6 +1017,7 @@ const rootMutations = {
 
       return scriptUpdatesResult
     },
+
     deleteJob: async (_, { campaignId, id }, { user, loaders }) => {
       const campaign = await Campaign.get(campaignId);
       await accessRequired(user, campaign.organization_id, "ADMIN");
@@ -1012,6 +1030,7 @@ const rootMutations = {
         .delete();
       return { id };
     },
+
     createCannedResponse: async (_, { cannedResponse }, { user, loaders }) => {
       authRequired(user);
 
@@ -1043,6 +1062,7 @@ const rootMutations = {
         userId: cannedResponse.userId
       });
     },
+
     createOrganization: async (
       _,
       { name, userId, inviteId },
@@ -1076,6 +1096,7 @@ const rootMutations = {
 
       return newOrganization;
     },
+
     editCampaignContactMessageStatus: async (
       _,
       { messageStatus, campaignContactId },
@@ -1086,6 +1107,7 @@ const rootMutations = {
       contact.message_status = messageStatus;
       return await contact.save();
     },
+
     getAssignmentContacts: async (
       _,
       { assignmentId, contactIds, findNew },
@@ -1105,6 +1127,7 @@ const rootMutations = {
       }
       return contacts;
     },
+
     findNewCampaignContact: async (
       _,
       { assignmentId, numberContacts },
@@ -1192,6 +1215,7 @@ const rootMutations = {
       loaders.campaignContact.clear(campaignContactId)
       return loaders.campaignContact.load(campaignContactId);
     },
+
     removeOptOut: async (_, { cell }, { loaders, user }) => {
       // We assume that OptOuts are shared across orgs
       // const sharingOptOuts = !!process.env.OPTOUTS_SHARE_ALL_ORGS
@@ -1248,6 +1272,7 @@ const rootMutations = {
         is_opted_out: false
       }));
     },
+
     bulkSendMessages: async (_, { assignmentId }, loaders) => {
       if (!process.env.ALLOW_SEND_ALL || !process.env.NOT_IN_USA) {
         log.error("Not allowed to send all messages at once");
@@ -1305,6 +1330,7 @@ const rootMutations = {
 
       return [];
     },
+
     sendMessage: async (
       _,
       { message, campaignContactId },
@@ -1312,6 +1338,7 @@ const rootMutations = {
     ) => {
       return await sendMessage(user, campaignContactId, message)
     },
+
     deleteQuestionResponses: async (
       _,
       { interactionStepIds, campaignContactId },
@@ -1333,6 +1360,7 @@ const rootMutations = {
         .delete();
       return contact;
     },
+
     updateQuestionResponses: async (
       _,
       { questionResponses, campaignContactId },
@@ -1392,6 +1420,7 @@ const rootMutations = {
       const contact = loaders.campaignContact.load(campaignContactId);
       return contact;
     },
+
     markForSecondPass: async (
       _ignore,
       { campaignId },
@@ -1433,6 +1462,7 @@ const rootMutations = {
         Did not mark ${skippingCells.length} contacts because they were\
         present in another, more recent campaign.`
     },
+
     megaReassignCampaignContacts: async (
       _ignore,
       { organizationId, campaignIdsContactIds, newTexterUserIds },
@@ -1440,6 +1470,19 @@ const rootMutations = {
     ) => {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      if (newTexterUserIds == null) {
+        const campaignContactIdsToUnassign = campaignIdsContactIds.map(cc => cc.campaignContactId)
+
+        const updated_result = await r.knex('campaign_contact')
+          .update({ assignment_id: null })
+          .whereIn('id', campaignContactIdsToUnassign)
+
+        return campaignContactIdsToUnassign.map(cc => ({
+          campaignId: cc.campaignId,
+          assignmentId: null
+        }))
+      }
 
       // group contactIds by campaign
       // group messages by campaign
@@ -1486,6 +1529,7 @@ const rootMutations = {
 
       return response;
     },
+
     megaBulkReassignCampaignContacts: async (
       _ignore,
       {
@@ -1500,12 +1544,26 @@ const rootMutations = {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
+
       const campaignContactIdsToMessageIds = await getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
         organizationId,
         campaignsFilter,
         assignmentsFilter,
         contactsFilter
       )
+
+      if (newTexterUserIds == null) {
+        const campaignContactIdsToUnassign = campaignContactIdsToMessageIds.map(([ccId, _]) => ccId);
+
+        const updated_result = await r.knex('campaign_contact')
+          .update({ assignment_id: null })
+          .whereIn('id', campaignContactIdsToUnassign)
+
+        return campaignContactIdsToUnassign.map(cc => ({
+          campaignId: cc.campaignId,
+          assignmentId: null
+        }))
+      }
 
       const numberOfCampaignContactsToReassign = campaignContactIdsToMessageIds.length
       const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
@@ -1539,6 +1597,7 @@ const rootMutations = {
 
       return response;
     },
+
     reassignCampaignContacts: async (
       _,
       { organizationId, campaignIdsContactIds, newTexterUserId },
@@ -1577,6 +1636,7 @@ const rootMutations = {
         newTexterUserId
       );
     },
+
     bulkReassignCampaignContacts: async (
       _,
       {
@@ -1607,6 +1667,7 @@ const rootMutations = {
         newTexterUserId
       );
     },
+
     requestTexts: async (_, { count, email, organizationId }, { user, loaders }) => {
       try {
         const formEnabled = await (async () => {
@@ -1671,7 +1732,6 @@ const rootMutations = {
         ageInHoursAgo = new Date()
         ageInHoursAgo.setHours(new Date().getHours() - ageInHours)
         ageInHoursAgo = ageInHoursAgo.toISOString()
-        console.log(ageInHoursAgo)
       }
 
       const updatedCount = await r.knex.transaction(async trx => {

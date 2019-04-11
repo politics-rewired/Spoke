@@ -156,6 +156,7 @@ export class AdminIncomingMessageList extends Component {
         message: 'Your reassignment request succeeded'
       }
     }
+
     try {
       await fn()
       newState.selectedRows = []
@@ -188,6 +189,28 @@ export class AdminIncomingMessageList extends Component {
         this.state.assignmentsFilter || {},
         this.state.contactsFilter || {},
         newTexterUserIds
+      )
+    })
+  }
+
+  handleUnassignRequested = async () => {
+    await this.handleReassignmentCommon(async () => {
+      await this.props.mutations.megaReassignCampaignContacts(
+        this.props.params.organizationId,
+        this.state.campaignIdsContactIds,
+        null
+      )
+    })
+  }
+
+  handleUnassignAllMatchingRequested = async () => {
+    await this.handleReassignmentCommon(async () => {
+      await this.props.mutations.megaBulkReassignCampaignContacts(
+        this.props.params.organizationId,
+        this.state.campaignsFilter || {},
+        this.state.assignmentsFilter || {},
+        this.state.contactsFilter || {},
+        null
       )
     })
   }
@@ -392,6 +415,8 @@ export class AdminIncomingMessageList extends Component {
             people={this.state.reassignmentTexters}
             onReassignRequested={this.handleReassignRequested}
             onReassignAllMatchingRequested={this.handleReassignAllMatchingRequested}
+            onUnassignRequested={this.handleUnassignRequested}
+            onUnassignAllMatchingRequested={this.handleUnassignAllMatchingRequested}
             markForSecondPass={this.markForSecondPass}
             contactsAreSelected={areContactsSelected}
             conversationCount={this.state.conversationCount}
@@ -459,6 +484,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: { organizationId, campaignIdsContactIds, newTexterUserId }
   }),
+
   megaReassignCampaignContacts: (
     organizationId,
     campaignIdsContactIds,
@@ -468,7 +494,7 @@ const mapMutationsToProps = () => ({
       mutation megaReassignCampaignContacts(
         $organizationId: String!
         $campaignIdsContactIds: [CampaignIdContactId]!
-        $newTexterUserIds: [String]!
+        $newTexterUserIds: [String]
       ) {
         megaReassignCampaignContacts(
           organizationId: $organizationId
@@ -482,6 +508,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: { organizationId, campaignIdsContactIds, newTexterUserIds }
   }),
+
   markForSecondPass: (organizationId, campaignIdsContactIds) => ({
     mutation: gql`
       mutation markForSecondPass(
@@ -498,6 +525,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: { organizationId, campaignIdsContactIds }
   }),
+
   bulkReassignCampaignContacts: (
     organizationId,
     campaignsFilter,
@@ -511,7 +539,7 @@ const mapMutationsToProps = () => ({
         $contactsFilter: ContactsFilter
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
-        $newTexterUserId: String!
+        $newTexterUserId: String
         ) {
             bulkReassignCampaignContacts(
                 organizationId: $organizationId
@@ -527,6 +555,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: { organizationId, campaignsFilter, assignmentsFilter, contactsFilter, newTexterUserId }
   }),
+
   megaBulkReassignCampaignContacts: (
     organizationId,
     campaignsFilter,
@@ -540,7 +569,7 @@ const mapMutationsToProps = () => ({
       $contactsFilter: ContactsFilter
       $campaignsFilter: CampaignsFilter
       $assignmentsFilter: AssignmentsFilter
-      $newTexterUserIds: [String]!
+      $newTexterUserIds: [String]
       ) {
         megaBulkReassignCampaignContacts(
           organizationId: $organizationId
