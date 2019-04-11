@@ -297,7 +297,7 @@ async function updateInteractionSteps(
 // and enforce_texting_hours is always true
 // as a result, we're forcing admins to think about the time zone of each campaign
 // and saving a join on this query.
-async function sendMessage (user, campaignContactId, message, checkOptOut = true) {
+async function sendMessage (user, campaignContactId, message) {
   const record = (await r
     .knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
@@ -351,7 +351,7 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
     }
   }
 
-  if (checkOptOut && !!record.is_opted_out) {
+  if (!!record.is_opted_out) {
     throw new GraphQLError(
       "Skipped sending because this contact was already opted out"
     );
