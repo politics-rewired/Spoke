@@ -3,7 +3,7 @@ import { r, Organization } from '../models'
 import { accessRequired } from './errors'
 import { buildCampaignQuery, getCampaigns } from './campaign'
 import { buildUserOrganizationQuery } from './user'
-import { currentAssignmentTarget } from './assignment'
+import { currentAssignmentTarget, countLeft } from './assignment'
 
 import { TextRequestType } from '../../api/organization'
 
@@ -80,7 +80,9 @@ export const resolvers = {
       return !!assignmentTarget
     },
     currentAssignmentTarget: async (organization) => {
-      return await currentAssignmentTarget(organization.id)
+      const cat = await currentAssignmentTarget(organization.id)
+      const cl = await countLeft(cat.type, cat.campaign.id)
+      return Object.assign({}, cat, { countLeft: cl })
     }
   }
 }

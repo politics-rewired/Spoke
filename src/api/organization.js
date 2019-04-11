@@ -8,7 +8,8 @@ export const schema = `
 
   type AssignmentTarget {
     type: String!
-    campaign: Campaign
+    campaign: Campaign,
+    countLeft: Int
   }
 
   type Organization {
