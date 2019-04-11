@@ -82,10 +82,19 @@ class AdminPersonList extends React.Component {
       const offsetList = Array.apply(null, { length: Math.ceil(organization.peopleCount / LIMIT) })
       return (
         <DropDownMenu
-          value={Number(this.props.location.query.offset || 0)}
+          value={this.props.location.query.offset == 'all' ?
+            'all' : 
+            Number(this.props.location.query.offset || 0)}
           onChange={this.handleOffsetChange}
         >
-          {offsetList.map(
+          {[
+            <MenuItem
+              value="all"
+              primaryText="All"
+              key="all"
+            />
+          ].concat(
+            offsetList.map(
             (x,i) => (
               <MenuItem
                 value={i}
@@ -93,7 +102,7 @@ class AdminPersonList extends React.Component {
                 key={i+1}
               />
             )
-          )}
+          ))}
         </DropDownMenu>
       )
     }
