@@ -81,8 +81,13 @@ export const resolvers = {
     },
     currentAssignmentTarget: async (organization) => {
       const cat = await currentAssignmentTarget(organization.id)
-      const cl = await countLeft(cat.type, cat.campaign.id)
-      return Object.assign({}, cat, { countLeft: cl })
+
+      if (cat) {
+        const cl = await countLeft(cat.type, cat.campaign.id)
+        return Object.assign({}, cat, { countLeft: cl })
+      } else {
+        return cat
+      }
     }
   }
 }
