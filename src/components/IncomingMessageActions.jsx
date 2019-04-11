@@ -45,11 +45,11 @@ class IncomingMessageActions extends Component {
   }
 
   onReassignAllMatchingClicked = () => {
-    this.setState({confirmDialogOpen: true})
+    this.setState({confirmDialogOpen: 'reassign'})
   }
 
   onUnassignAllMatchingClicked = () => {
-    this.setState({confirmDialogOpen: true})
+    this.setState({confirmDialogOpen: 'unassign'})
   }
 
   handleTextersChanged = (selectedTexters) => {
@@ -132,7 +132,7 @@ class IncomingMessageActions extends Component {
                 </div>
                 <Dialog
                   actions={confirmDialogActions('Reassign', this.handleConfirmDialogReassign)}
-                  open={this.state.confirmDialogOpen}
+                  open={this.state.confirmDialogOpen == 'reassign'}
                   modal={true}
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
@@ -162,7 +162,7 @@ class IncomingMessageActions extends Component {
                 </div>
                 <Dialog
                   actions={confirmDialogActions('Unassign', this.handleConfirmDialogUnassign)}
-                  open={this.state.confirmDialogOpen}
+                  open={this.state.confirmDialogOpen == 'unassign'}
                   modal={true}
                   onRequestClose={this.handleConfirmDialogCancel}
                 >

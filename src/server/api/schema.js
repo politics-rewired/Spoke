@@ -1411,13 +1411,13 @@ const rootMutations = {
 
     megaReassignCampaignContacts: async (
       _ignore,
-      { organizationId, campaignIdsContactIds, newTexterUserIds, shouldUnassign },
+      { organizationId, campaignIdsContactIds, newTexterUserIds },
       { user }
     ) => {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-      if (shouldUnassign) {
+      if (newTexterUserIds == null) {
         const campaignContactIdsToUnassign = campaignIdsContactIds.map(cc => cc.campaignContactId)
 
         const updated_result = await r.knex('campaign_contact')
@@ -1429,7 +1429,6 @@ const rootMutations = {
           assignmentId: null
         }))
       }
-
 
       // group contactIds by campaign
       // group messages by campaign
@@ -1484,8 +1483,7 @@ const rootMutations = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
-        newTexterUserIds,
-        shouldUnassign
+        newTexterUserIds
       },
       { user }
     ) => {
@@ -1500,10 +1498,8 @@ const rootMutations = {
         contactsFilter
       )
 
-      if (shouldUnassign) {
+      if (newTexterUserIds == null) {
         const campaignContactIdsToUnassign = campaignContactIdsToMessageIds.map(([ccId, _]) => ccId);
-
-        console.log(campaignContactIdsToUnassign)
 
         const updated_result = await r.knex('campaign_contact')
           .update({ assignment_id: null })
@@ -1514,8 +1510,6 @@ const rootMutations = {
           assignmentId: null
         }))
       }
-
-      return null
 
       const numberOfCampaignContactsToReassign = campaignContactIdsToMessageIds.length
       const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
