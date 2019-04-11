@@ -4,7 +4,7 @@ import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } fro
 import { buildCampaignQuery } from './campaign'
 import { log } from '../../lib'
 
-function getConversationsJoinsAndWhereClause(
+async function getConversationsJoinsAndWhereClause(
   queryParam,
   organizationId,
   campaignsFilter,
@@ -23,6 +23,13 @@ function getConversationsJoinsAndWhereClause(
   if (assignmentsFilter) {
     if ('texterId' in assignmentsFilter && assignmentsFilter.texterId !== null)
       query = query.where({ 'assignment.user_id': assignmentsFilter.texterId })
+  }
+
+  const includeEscalated = assignmentsFilter && !!assignmentsFilter.includeEscalated
+  if (!includeEscalated) {
+    const { features } = await r.knex('organization').where({ id: organizationId }).first('features')
+    const { escalationUserId } = JSON.parse(features)
+    query = query.whereNot({ 'assignment.user_id': escalationUserId })
   }
 
   if (contactNameFilter) {
@@ -47,7 +54,7 @@ function getConversationsJoinsAndWhereClause(
     }
   }
 
-  return query
+  return { query }
 }
 
 /*
@@ -80,14 +87,14 @@ export async function getConversations(
   * the criteria with offset and limit. */
   let offsetLimitQuery = r.knex.select('campaign_contact.id as cc_id')
 
-  offsetLimitQuery = getConversationsJoinsAndWhereClause(
+  offsetLimitQuery = (await getConversationsJoinsAndWhereClause(
     offsetLimitQuery,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   offsetLimitQuery = offsetLimitQuery
     .orderBy('campaign_contact.updated_at', 'DESC')
@@ -129,14 +136,14 @@ export async function getConversations(
     'message.user_id'
   )
 
-  query = getConversationsJoinsAndWhereClause(
+  query = (await getConversationsJoinsAndWhereClause(
     query,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   query = query.whereIn('campaign_contact.id', ccIds)
 
@@ -185,7 +192,7 @@ export async function getConversations(
 
   /* Query #3 -- get the count of all conversations matching the criteria.
   * We need this to show total number of conversations to support paging */
-  const conversationsCount = await r.parseCount(getConversationsJoinsAndWhereClause(
+  const conversationsCount = await r.parseCount((await getConversationsJoinsAndWhereClause(
     // Only grab one field in order to minimize bandwidth
     r.knex.count('*'),
     organizationId,
@@ -193,7 +200,7 @@ export async function getConversations(
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  ))
+  )).query)
 
   const pageInfo = {
     limit: cursor.limit,
@@ -219,14 +226,14 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
     'message.id as mess_id',
   )
 
-  query = getConversationsJoinsAndWhereClause(
+  query = (await getConversationsJoinsAndWhereClause(
     query,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   query = query.leftJoin('message', table => {
     table
@@ -283,14 +290,14 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
     'message.id as mess_id',
   )
 
-  query = getConversationsJoinsAndWhereClause(
+  query = (await getConversationsJoinsAndWhereClause(
     query,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   query = query.leftJoin('message', table => {
     table

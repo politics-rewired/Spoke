@@ -67,7 +67,9 @@ export class AdminIncomingMessageList extends Component {
     super(props)
 
     const { escalationUserId: texterId } = props
-    const assignmentsFilter = texterId ? { texterId } : initialAssignmentsFilter
+    const assignmentsFilter = texterId
+      ? { includeEscalated: true, texterId }
+      : initialAssignmentsFilter
 
     this.state = {
       page: 0,
@@ -121,15 +123,19 @@ export class AdminIncomingMessageList extends Component {
   }
 
   handleTexterChanged = async (texterId) => {
-    const assignmentsFilter = {}
-    if (texterId >= 0) {
-      assignmentsFilter.texterId = texterId
-    }
+    const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter)
+    assignmentsFilter.texterId = (texterId >= 0) ? texterId : undefined
     await this.setState({
       assignmentsFilter,
       campaignIdsContactIds: [],
       needsRender: true
     })
+  }
+
+  handleIncludeEscalatedToggled = () => {
+    const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter)
+    assignmentsFilter.includeEscalated = !(assignmentsFilter && !!assignmentsFilter.includeEscalated)
+    this.setState({ assignmentsFilter })
   }
 
   handleMessageFilterChange = async (messagesFilter) => {
@@ -363,13 +369,15 @@ export class AdminIncomingMessageList extends Component {
   }
 
   render() {
-    const { selectedRows, page, pageSize, reassignmentAlert } = this.state
+    const { selectedRows, page, pageSize, reassignmentAlert, assignmentsFilter } = this.state
     const areContactsSelected = selectedRows === 'all' || (Array.isArray(selectedRows) && selectedRows.length > 0)
 
     const cursor = {
       offset: page * pageSize,
       limit: pageSize
     }
+
+    const includeEscalated = assignmentsFilter && !!assignmentsFilter.includeEscalated
 
     return (
       <div>
@@ -395,6 +403,8 @@ export class AdminIncomingMessageList extends Component {
           texters={this.state.campaignTexters}
           onCampaignChanged={this.handleCampaignChanged}
           onTexterChanged={this.handleTexterChanged}
+          includeEscalated={includeEscalated}
+          onIncludeEscalatedChanged={this.handleIncludeEscalatedToggled}
           onMessageFilterChanged={this.handleMessageFilterChange}
           searchByContactName={this.searchByContactName}
           assignmentsFilter={this.state.assignmentsFilter}
@@ -415,6 +425,7 @@ export class AdminIncomingMessageList extends Component {
             this.state.includeOptedOutConversations
           }
           isTexterFilterable={this.props.escalationUserId === undefined}
+          isIncludeEscalatedFilterable={this.props.escalationUserId === undefined}
         />
         <br />
         <IncomingMessageActions
@@ -433,6 +444,7 @@ export class AdminIncomingMessageList extends Component {
               contactsFilter={this.state.contactsFilter}
               campaignsFilter={this.state.campaignsFilter}
               assignmentsFilter={this.state.assignmentsFilter}
+              includeEscalated={includeEscalated}
               contactNameFilter={this.state.contactNameFilter}
               selectedRows={this.state.selectedRows}
               utc={this.state.utc}
