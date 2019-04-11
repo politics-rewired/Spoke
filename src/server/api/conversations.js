@@ -29,7 +29,9 @@ async function getConversationsJoinsAndWhereClause(
   if (!includeEscalated) {
     const { features } = await r.knex('organization').where({ id: organizationId }).first('features')
     const { escalationUserId } = JSON.parse(features)
-    query = query.whereNot({ 'assignment.user_id': escalationUserId })
+    query = query.where(function() {
+      this.whereNot({ 'assignment.user_id': escalationUserId }).orWhereNull('assignment.user_id')
+    })
   }
 
   if (contactNameFilter) {

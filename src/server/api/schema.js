@@ -1799,6 +1799,19 @@ const rootMutations = {
         ageInHoursAgo = ageInHoursAgo.toISOString()
       }
 
+      let escalationUserId
+      try {
+        const organization = await r.knex('organization')
+          .join('campaign', 'campaign.organization_id', 'organization.id')
+          .first('organization.features')
+          .where({ 'campaign.id': campaignId })
+        const features = JSON.parse(organization.features)
+        escalationUserId = parseInt(features.escalationUserId) || escalationUserId
+      } catch (_error) {
+        // noop
+        console.error(_error)
+      }
+
       const updatedCount = await r.knex.transaction(async trx => {
         if (ageInHours) {
           const result = await trx.raw(`
@@ -1810,22 +1823,31 @@ const rootMutations = {
                 order by message.created_at desc
                 limit 1
               ) as message on message.campaign_contact_id = campaign_contact.id
+              join assignment on asssignment.id = campaign_contact.assignment_id
               set campaign_contact.assignment_id = null
               where message.created_at < ?
-                and campaign_id = ?
+                and campaign_contact.campaign_id = ?
                 and message_status = ?
                 and is_opted_out = false
+                ${escalationUserId ? `and assignment.user_id <> ${escalationUserId}` : ''}
             `, [ageInHoursAgo, parseInt(campaignId), messageStatus])
 
           return result[0].affectedRows
         } else {
-          return await trx('campaign_contact').where({
-            campaign_id: parseInt(campaignId),
-            message_status: messageStatus,
-            is_opted_out: false
-          }).update({
-            assignment_id: null
-          })
+          let query =  trx('campaign_contact')
+            .where({
+              'campaign_contact.campaign_id': parseInt(campaignId),
+              message_status: messageStatus,
+              is_opted_out: false
+            })
+            .update({
+              assignment_id: null
+            })
+          if (escalationUserId) {
+            query = query.join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
+              .whereNot({ 'assignment.user_id': escalationUserId })
+          }
+          return await query
         }
       })
 
