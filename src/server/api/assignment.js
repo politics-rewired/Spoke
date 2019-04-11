@@ -157,7 +157,6 @@ export async function currentAssignmentTarget() {
     return contacts.length > 0
   }))
 
-
   const assignableCampaigns = eligibleCampaigns.filter((_campaign, idx) => hasContactsOfTypeToAssign[idx])
   const campaign = assignableCampaigns[0]
 
@@ -177,6 +176,24 @@ async function notifyIfAllAssigned(type, user, count) {
   } else {
     console.log('Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset')
   }
+}
+
+export async function countLeft(assignmentType, campaign) {
+  const campaignContactStatus = {
+    UNREPLIED: 'needsResponse',
+    UNSENT: 'needsMessage'
+  }[assignmentType]
+ 
+  const result = await r.parseCount(
+    r.knex('campaign_contact')
+      .count()
+      .where({
+        assignment_id: null,
+        message_status: campaignContactStatus,
+        campaign_id: campaign
+      })
+    )
+  return result;
 }
 
 export async function giveUserMoreTexts(auth0Id, count) {
