@@ -72,13 +72,10 @@ export const optOutCache = {
     return (dbResult.length > 0)
   },
   save: async ({ cell, organizationId, assignmentId, reason }) => {
-    const updateOrgOrInstanceOptOuts = (!sharingOptOuts ?
-      { 'campaign_contact.cell': cell,
-        'campaign.organization_id': organizationId,
-        'campaign.is_archived': false } :
-      { 'campaign_contact.cell': cell,
-        'campaign.is_archived': false
-      })
+    const updateQueryParams = { 'campaign_contact.cell': cell }
+    if (!sharingOptOuts) {
+      updateQueryParams['campaign.organization_id'] = organizationId
+    }
 
     if (r.redis) {
       const hashKey = orgCacheKey(organizationId)
@@ -102,7 +99,7 @@ export const optOutCache = {
     // update all organization's active campaigns as well
     const contactIds = await r.knex('campaign_contact')
       .leftJoin('campaign', 'campaign_contact.campaign_id', 'campaign.id')
-      .where(updateOrgOrInstanceOptOuts)
+      .where(updateQueryParams)
       .pluck('campaign_contact.id')
     await r
       .knex('campaign_contact')
