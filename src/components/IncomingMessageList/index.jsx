@@ -297,6 +297,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
                 isFromContact
                 createdAt
                 userId
+                sendStatus
               }
               optOut {
                 cell

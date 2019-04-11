@@ -3,6 +3,7 @@ import { Assignment, r, cacheableData } from "../models";
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from "../../lib";
 import { Notifications, sendUserNotification } from "../notifications";
 import _ from "lodash";
+import request from 'superagent'
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -156,13 +157,43 @@ export async function currentAssignmentTarget() {
     return contacts.length > 0
   }))
 
-
   const assignableCampaigns = eligibleCampaigns.filter((_campaign, idx) => hasContactsOfTypeToAssign[idx])
   const campaign = assignableCampaigns[0]
 
   if (!campaign) return null
 
   return { type: assignmentType, campaign }
+}
+
+const ASSIGNMENT_COMPLETE_NOTIFICATION_URL = process.env.ASSIGNMENT_COMPLETE_NOTIFICATION_URL
+async function notifyIfAllAssigned(type, user, count) {
+  if (ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
+    const assignmentTarget = await currentAssignmentTarget()
+    if (assignmentTarget == null) {
+      await request.post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL).send({ type, user, count })
+      console.log(`Notified about out of ${type} to assign`)
+    } 
+  } else {
+    console.log('Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset')
+  }
+}
+
+export async function countLeft(assignmentType, campaign) {
+  const campaignContactStatus = {
+    UNREPLIED: 'needsResponse',
+    UNSENT: 'needsMessage'
+  }[assignmentType]
+ 
+  const result = await r.parseCount(
+    r.knex('campaign_contact')
+      .count()
+      .where({
+        assignment_id: null,
+        message_status: campaignContactStatus,
+        campaign_id: campaign
+      })
+    )
+  return result;
 }
 
 export async function giveUserMoreTexts(auth0Id, count) {
@@ -242,16 +273,22 @@ export async function giveUserMoreTexts(auth0Id, count) {
 
     const campaign_contacts_updated_result = await r.knex("campaign_contact")
       .update({ assignment_id: assignmentId })
+      .update({ updated_at: r.knex.fn.now() })
       .whereIn("id", ids);
 
     const messages_updated_result = await r.knex('message')
-      .update({ assignment_id: assignmentId })
+      .update({
+        assignment_id: assignmentId,
+      })
       .whereIn('campaign_contact_id', ids)
 
 
     console.log(`Updated ${campaign_contacts_updated_result} campaign contacts and ${messages_updated_result} messages.`)
     return campaign_contacts_updated_result
   });
+
+  // Async function, not awaiting because response to TFB does not depend on it
+  notifyIfAllAssigned(assignmentInfo.type, auth0Id, countToAssign)
 
   return updated_result
 }

@@ -9,6 +9,7 @@ export const schema = `
     assignment: Assignment
     campaignId: String
     userId: ID
+    sendStatus: String
   }
 `
 

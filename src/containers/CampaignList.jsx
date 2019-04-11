@@ -250,6 +250,7 @@ class CampaignList extends React.Component {
           {currentAssignmentTarget &&
             <Paper style={{padding: 10}}>
               <h3> Currently Assigning {currentAssignmentTarget.type} to {currentAssignmentTarget.campaign.id}: {currentAssignmentTarget.campaign.title} </h3>
+              <h4> {currentAssignmentTarget.countLeft} Left </h4>
             </Paper>
           }
           <List>
@@ -345,6 +346,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             id
             title
           }
+          countLeft
         }
         campaigns(campaignsFilter: $campaignsFilter, cursor: {offset: 0, limit: 5000}) {
           campaigns{

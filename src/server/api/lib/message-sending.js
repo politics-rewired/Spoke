@@ -1,5 +1,4 @@
 import { r } from '../../models'
-import log from '../../../lib/log'
 
 export async function getLastMessage({ contactNumber, service }) {
   const lastMessage = await r.knex('message')
@@ -16,17 +15,25 @@ export async function getLastMessage({ contactNumber, service }) {
 }
 
 export async function saveNewIncomingMessage(messageInstance) {
-  // if (messageInstance.service_id) {
-  //   const countResult = await r.getCount(r.knex('message').where('service_id', messageInstance.service_id))
-  //   if (countResult) {
-  //     log.error('DUPLICATE MESSAGE SAVED', countResult.count, messageInstance)
-  //   }
-  // }
   await messageInstance.save()
 
-  await r.table('campaign_contact')
-    .getAll(messageInstance.assignment_id, { index: 'assignment_id' })
-    .filter({ cell: messageInstance.contact_number })
+  // Separate update fields according to: https://stackoverflow.com/a/42307979
+  let updateQuery = r.knex('campaign_contact')
+    .update({ message_status: 'needsResponse' })
+    .update('updated_at', r.knex.fn.now())
     .limit(1)
-    .update({ message_status: 'needsResponse', updated_at: 'now()' })
+
+  // Prefer to match on campaign contact ID
+  if (messageInstance.campaign_contact_id) {
+    updateQuery = updateQuery.where({
+      id: messageInstance.campaign_contact_id
+    })
+  } else {
+    updateQuery = updateQuery.where({
+      assignment_id: messageInstance.assignment_id,
+      cell: messageInstance.contact_number
+    })
+  }
+
+  await updateQuery
 }

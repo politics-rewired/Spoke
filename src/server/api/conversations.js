@@ -125,6 +125,7 @@ export async function getConversations(
     'message.created_at',
     'message.is_from_contact',
     'message.created_at',
+    'message.send_status',
     'message.user_id'
   )
 
@@ -161,7 +162,8 @@ export async function getConversations(
     'contact_number',
     'created_at',
     'is_from_contact',
-    'user_id'
+    'user_id',
+    'send_status'
   ]
 
   const groupedContacts = _.groupBy(conversationRows, 'cc_id')

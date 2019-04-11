@@ -293,6 +293,207 @@ async function updateInteractionSteps(
   });
 }
 
+// We've modified campaign creation on the client so that overrideOrganizationHours is always true
+// and enforce_texting_hours is always true
+// as a result, we're forcing admins to think about the time zone of each campaign
+// and saving a join on this query.
+async function sendMessage (user, campaignContactId, message) {
+  const record = (await r
+    .knex("campaign_contact")
+    .join("campaign", "campaign_contact.campaign_id", "campaign.id")
+    .where({ "campaign_contact.id": parseInt(campaignContactId) })
+    .where({ "campaign.is_archived": false })
+    .where({
+      "campaign_contact.assignment_id": parseInt(message.assignmentId)
+    })
+    .join("assignment", "campaign_contact.assignment_id", "assignment.id")
+    .leftJoin("opt_out", {
+      // 'opt_out.organization_id': 'campaign.organization.id',
+      "opt_out.cell": "campaign_contact.cell"
+    })
+    .select(
+      "campaign_contact.id as cc_id",
+      "campaign_contact.assignment_id as assignment_id",
+      "campaign_contact.message_status as cc_message_status",
+      "campaign.is_archived as is_archived",
+      "campaign.organization_id as organization_id",
+      "campaign.override_organization_texting_hours as c_override_hours",
+      "campaign.timezone as c_timezone",
+      "campaign.texting_hours_end as c_texting_hours_end",
+      "campaign.texting_hours_enforced as c_texting_hours_enforced",
+      "assignment.user_id as a_assignment_user_id",
+      "opt_out.id as is_opted_out",
+      "campaign_contact.timezone_offset as contact_timezone_offset"
+    ))[0];
+
+  if (!record) {
+    throw new GraphQLError("Your assignment has changed");
+  }
+
+  // setting defaults based on new forced conditions
+  record.o_texting_hours_enforced = true;
+  record.o_texting_hours_end = 21;
+
+  // This block will only need to be evaluated if message is sent from admin Message Review
+  if (record.a_assignment_user_id !== user.id) {
+    const currentRoles = await r
+      .knex("user_organization")
+      .where({
+        user_id: user.id,
+        organization_id: record.organization_id
+      })
+      .pluck("role");
+    const isAdmin = hasRole("SUPERVOLUNTEER", currentRoles);
+    if (!isAdmin) {
+      throw new GraphQLError(
+        "You are not authorized to send a message for this assignment!"
+      );
+    }
+  }
+
+  if (!!record.is_opted_out) {
+    throw new GraphQLError(
+      "Skipped sending because this contact was already opted out"
+    );
+  }
+
+  // const zipData = await r.table('zip_code')
+  //   .get(contact.zip)
+  //   .default(null)
+
+  // const config = {
+  //   textingHoursEnforced: organization.texting_hours_enforced,
+  //   textingHoursStart: organization.texting_hours_start,
+  //   textingHoursEnd: organization.texting_hours_end,
+  // }
+  // const offsetData = zipData ? { offset: zipData.timezone_offset, hasDST: zipData.has_dst } : null
+  // if (!isBetweenTextingHours(offsetData, config)) {
+  //   throw new GraphQLError({
+  //     status: 400,
+  //     message: "Skipped sending because it's now outside texting hours for this contact"
+  //   })
+  // }
+
+  const { contactNumber, text } = message;
+
+  if (text.length > (process.env.MAX_MESSAGE_LENGTH || 99999)) {
+    throw new GraphQLError("Message was longer than the limit");
+  }
+
+  const replaceCurlyApostrophes = rawText =>
+    rawText.replace(/[\u2018\u2019]/g, "'");
+
+  let contactTimezone = {};
+  if (record.contact_timezone_offset) {
+    // couldn't look up the timezone by zip record, so we load it
+    // from the campaign_contact directly if it's there
+    const [offset, hasDST] = record.contact_timezone_offset.split("_");
+    contactTimezone.offset = parseInt(offset, 10);
+    contactTimezone.hasDST = hasDST === "1";
+  }
+
+  const {
+    c_override_hours,
+    c_timezone,
+    c_texting_hours_end,
+    c_texting_hours_enforced,
+    o_texting_hours_enforced,
+    o_texting_hours_end
+  } = record;
+  const sendBefore = getSendBeforeTimeUtc(
+    contactTimezone,
+    {
+      textingHoursEnd: o_texting_hours_end,
+      textingHoursEnforced: o_texting_hours_enforced
+    },
+    {
+      textingHoursEnd: c_texting_hours_end,
+      overrideOrganizationTextingHours: c_override_hours,
+      textingHoursEnforced: c_texting_hours_enforced,
+      timezone: c_timezone
+    }
+  );
+
+  const sendBeforeDate = sendBefore ? sendBefore.toDate() : null;
+
+  if (sendBeforeDate && sendBeforeDate <= Date.now()) {
+    throw new GraphQLError(
+      "Outside permitted texting time for this recipient"
+    );
+  }
+
+  const toInsert = {
+    user_id: user.id,
+    campaign_contact_id: campaignContactId,
+    text: replaceCurlyApostrophes(text),
+    contact_number: contactNumber,
+    user_number: "",
+    assignment_id: message.assignmentId,
+    send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
+    service: process.env.DEFAULT_SERVICE || "",
+    is_from_contact: false,
+    queued_at: new Date(),
+    send_before: sendBeforeDate
+  };
+
+  const messageSavePromise = r
+    .knex("message")
+    .insert(toInsert)
+    .returning(Object.keys(toInsert).concat(["id"]));
+
+  const { cc_message_status } = record;
+  const contactSavePromise = (async () => {
+    await r
+      .knex("campaign_contact")
+      .update({
+        updated_at: r.knex.fn.now(),
+        message_status:
+          cc_message_status === "needsResponse" ||
+          cc_message_status === "convo"
+            ? "convo"
+            : "messaged"
+      })
+      .where({ id: record.cc_id });
+
+    const contact = await r
+      .knex("campaign_contact")
+      .select("*")
+      .where({ id: record.cc_id })
+      .first();
+    return contact;
+  })();
+
+  const [messageInsertResult, contactUpdateResult] = await Promise.all([
+    messageSavePromise,
+    contactSavePromise
+  ]);
+  const messageInstance = Array.isArray(messageInsertResult)
+    ? messageInsertResult[0]
+    : messageInsertResult;
+  toInsert.id = messageInstance.id || messageInstance;
+
+  // Send message after we are sure messageInstance has been persisted
+  const service =
+    serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
+  service.sendMessage(toInsert);
+
+  // Send message to BernieSMS to be checked for bad words
+  const badWordUrl = process.env.TFB_BAD_WORD_URL
+  if (badWordUrl) {
+    request
+      .post(badWordUrl)
+      .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
+      .send({ user_id: user.auth0_id, message: toInsert.text })
+      .end((err, res) => {
+        if (err) {
+          log.error(err)
+        }
+      })
+  }
+
+  return contactUpdateResult;
+}
+
 const rootMutations = {
   RootMutation: {
     userAgreeTerms: async (_, { userId }, { user, loaders }) => {
@@ -767,6 +968,56 @@ const rootMutations = {
       return editCampaign(id, campaign, loaders, user, origCampaign);
     },
 
+    bulkUpdateScript: async (_, { organizationId, findAndReplace }, { user, loaders }) => {
+      await accessRequired(user, organizationId, "ADMIN")
+
+      const scriptUpdatesResult = await r.knex.transaction(async trx => {
+        const { searchString, replaceString, includeArchived, campaignTitlePrefixes } = findAndReplace
+
+        let campaignIdQuery = r.knex('campaign')
+          .transacting(trx)
+          .pluck('id')
+        if (!includeArchived) {
+          campaignIdQuery = campaignIdQuery.where({ is_archived: false })
+        }
+        if (campaignTitlePrefixes.length > 0) {
+          campaignIdQuery = campaignIdQuery.where(function () {
+            for (const prefix of campaignTitlePrefixes) {
+              this.orWhere('title', 'like', `${prefix}%`)
+            }
+          })
+        }
+        const campaignIds = await campaignIdQuery
+
+        const interactionStepsToChange = await r.knex('interaction_step')
+          .transacting(trx)
+          .where('script', 'like', `%${searchString}%`)
+          .whereIn('campaign_id', campaignIds)
+
+        const scriptUpdates = []
+        for (let step of interactionStepsToChange) {
+          const newText = step.script.replace(new RegExp(searchString, 'g'), replaceString)
+
+          const scriptUpdate = {
+            campaignId: step.campaign_id,
+            found: step.script,
+            replaced: newText
+          }
+
+          await r.knex('interaction_step')
+            .transacting(trx)
+            .update({ script: newText })
+            .where({ id: step.id })
+
+          scriptUpdates.push(scriptUpdate)
+        }
+
+        return scriptUpdates
+      })
+
+      return scriptUpdatesResult
+    },
+
     deleteJob: async (_, { campaignId, id }, { user, loaders }) => {
       const campaign = await Campaign.get(campaignId);
       await accessRequired(user, campaign.organization_id, "ADMIN");
@@ -1080,209 +1331,12 @@ const rootMutations = {
       return [];
     },
 
-    // We've modified campaign creation on the client so that overrideOrganizationHours is always true
-    // and enforce_texting_hours is always true
-    // as a result, we're forcing admins to think about the time zone of each campaign
-    // and saving a join on this query.
     sendMessage: async (
       _,
       { message, campaignContactId },
       { user, loaders }
     ) => {
-      const record = (await r
-        .knex("campaign_contact")
-        .join("campaign", "campaign_contact.campaign_id", "campaign.id")
-        .where({ "campaign_contact.id": parseInt(campaignContactId) })
-        .where({ "campaign.is_archived": false })
-        .where({
-          "campaign_contact.assignment_id": parseInt(message.assignmentId)
-        })
-        .join("assignment", "campaign_contact.assignment_id", "assignment.id")
-        .leftJoin("opt_out", {
-          // 'opt_out.organization_id': 'campaign.organization.id',
-          "opt_out.cell": "campaign_contact.cell"
-        })
-        .select(
-          "campaign_contact.id as cc_id",
-          "campaign_contact.assignment_id as assignment_id",
-          "campaign_contact.message_status as cc_message_status",
-          "campaign.is_archived as is_archived",
-          "campaign.organization_id as organization_id",
-          "campaign.override_organization_texting_hours as c_override_hours",
-          "campaign.timezone as c_timezone",
-          "campaign.texting_hours_end as c_texting_hours_end",
-          "campaign.texting_hours_enforced as c_texting_hours_enforced",
-          "assignment.user_id as a_assignment_user_id",
-          "opt_out.id as is_opted_out",
-          "campaign_contact.timezone_offset as contact_timezone_offset"
-        ))[0];
-
-      if (!record) {
-        throw new GraphQLError("Your assignment has changed");
-      }
-
-      // setting defaults based on new forced conditions
-      record.o_texting_hours_enforced = true;
-      record.o_texting_hours_end = 21;
-
-      // This block will only need to be evaluated if message is sent from admin Message Review
-      if (record.a_assignment_user_id !== user.id) {
-        const currentRoles = await r
-          .knex("user_organization")
-          .where({
-            user_id: user.id,
-            organization_id: record.organization_id
-          })
-          .pluck("role");
-        const isAdmin = hasRole("SUPERVOLUNTEER", currentRoles);
-        if (!isAdmin) {
-          throw new GraphQLError(
-            "You are not authorized to send a message for this assignment!"
-          );
-        }
-      }
-
-      if (!!record.is_opted_out) {
-        throw new GraphQLError(
-          "Skipped sending because this contact was already opted out"
-        );
-      }
-
-      // const zipData = await r.table('zip_code')
-      //   .get(contact.zip)
-      //   .default(null)
-
-      // const config = {
-      //   textingHoursEnforced: organization.texting_hours_enforced,
-      //   textingHoursStart: organization.texting_hours_start,
-      //   textingHoursEnd: organization.texting_hours_end,
-      // }
-      // const offsetData = zipData ? { offset: zipData.timezone_offset, hasDST: zipData.has_dst } : null
-      // if (!isBetweenTextingHours(offsetData, config)) {
-      //   throw new GraphQLError({
-      //     status: 400,
-      //     message: "Skipped sending because it's now outside texting hours for this contact"
-      //   })
-      // }
-
-      const { contactNumber, text } = message;
-
-      if (text.length > (process.env.MAX_MESSAGE_LENGTH || 99999)) {
-        throw new GraphQLError("Message was longer than the limit");
-      }
-
-      const replaceCurlyApostrophes = rawText =>
-        rawText.replace(/[\u2018\u2019]/g, "'");
-
-      let contactTimezone = {};
-      if (record.contact_timezone_offset) {
-        // couldn't look up the timezone by zip record, so we load it
-        // from the campaign_contact directly if it's there
-        const [offset, hasDST] = record.contact_timezone_offset.split("_");
-        contactTimezone.offset = parseInt(offset, 10);
-        contactTimezone.hasDST = hasDST === "1";
-      }
-
-      const {
-        c_override_hours,
-        c_timezone,
-        c_texting_hours_end,
-        c_texting_hours_enforced,
-        o_texting_hours_enforced,
-        o_texting_hours_end
-      } = record;
-      const sendBefore = getSendBeforeTimeUtc(
-        contactTimezone,
-        {
-          textingHoursEnd: o_texting_hours_end,
-          textingHoursEnforced: o_texting_hours_enforced
-        },
-        {
-          textingHoursEnd: c_texting_hours_end,
-          overrideOrganizationTextingHours: c_override_hours,
-          textingHoursEnforced: c_texting_hours_enforced,
-          timezone: c_timezone
-        }
-      );
-
-      const sendBeforeDate = sendBefore ? sendBefore.toDate() : null;
-
-      if (sendBeforeDate && sendBeforeDate <= Date.now()) {
-        throw new GraphQLError(
-          "Outside permitted texting time for this recipient"
-        );
-      }
-
-      const toInsert = {
-        user_id: user.id,
-        campaign_contact_id: campaignContactId,
-        text: replaceCurlyApostrophes(text),
-        contact_number: contactNumber,
-        user_number: "",
-        assignment_id: message.assignmentId,
-        send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
-        service: process.env.DEFAULT_SERVICE || "",
-        is_from_contact: false,
-        queued_at: new Date(),
-        send_before: sendBeforeDate
-      };
-
-      const messageSavePromise = r
-        .knex("message")
-        .insert(toInsert)
-        .returning(Object.keys(toInsert).concat(["id"]));
-
-      const { cc_message_status } = record;
-      const contactSavePromise = (async () => {
-        await r
-          .knex("campaign_contact")
-          .update({
-            updated_at: r.knex.fn.now(),
-            message_status:
-              cc_message_status === "needsResponse" ||
-              cc_message_status === "convo"
-                ? "convo"
-                : "messaged"
-          })
-          .where({ id: record.cc_id });
-
-        const contact = await r
-          .knex("campaign_contact")
-          .select("*")
-          .where({ id: record.cc_id })
-          .first();
-        return contact;
-      })();
-
-      const [messageInsertResult, contactUpdateResult] = await Promise.all([
-        messageSavePromise,
-        contactSavePromise
-      ]);
-      const messageInstance = Array.isArray(messageInsertResult)
-        ? messageInsertResult[0]
-        : messageInsertResult;
-      toInsert.id = messageInstance.id || messageInstance;
-
-      // Send message after we are sure messageInstance has been persisted
-      const service =
-        serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
-      service.sendMessage(toInsert);
-
-      // Send message to BernieSMS to be checked for bad words
-      const badWordUrl = process.env.TFB_BAD_WORD_URL
-      if (badWordUrl) {
-        request
-          .post(badWordUrl)
-          .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
-          .send({ user_id: user.auth0_id, message: toInsert.text })
-          .end((err, res) => {
-            if (err) {
-              log.error(err)
-            }
-          })
-      }
-
-      return contactUpdateResult;
+      return await sendMessage(user, campaignContactId, message)
     },
 
     deleteQuestionResponses: async (
