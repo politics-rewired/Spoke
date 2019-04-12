@@ -1803,23 +1803,23 @@ const rootMutations = {
       const escalationUserId = (await getEscalationUserId(campaign.organization_id)) || null
 
       const updatedCount = await r.knex.transaction(async trx => {
-          let query =  trx('campaign_contact')
-            .where({
-              'campaign_contact.campaign_id': parseInt(campaignId),
-              message_status: messageStatus,
-              is_opted_out: false
-            })
-            .update({
-              assignment_id: null
-            })
-          if (ageInHours) {
-            query = query.where('campaign_contact.updated_at', '<', ageInHoursAgo)
-          }
-          if (escalationUserId) {
-            query = query.join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
-              .whereRaw(`(assignment.user_id is null or assignment.user_id <> ?)`, [escalationUserId])
-          }
-          return await query
+        let query =  trx('campaign_contact')
+          .where({
+            'campaign_contact.campaign_id': parseInt(campaignId),
+            message_status: messageStatus,
+            is_opted_out: false
+          })
+          .update({
+            assignment_id: null
+          })
+        if (ageInHours) {
+          query = query.where('campaign_contact.updated_at', '<', ageInHoursAgo)
+        }
+        if (escalationUserId) {
+          query = query.join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
+            .whereRaw(`(assignment.user_id is null or assignment.user_id <> ?)`, [escalationUserId])
+        }
+        return await query
       })
 
       return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;
