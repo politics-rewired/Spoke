@@ -1797,10 +1797,10 @@ const rootMutations = {
         ageInHoursAgo = ageInHoursAgo.toISOString()
       }
 
-      const campaign = await r.knex('campaign_contact')
+      const campaign = await r.knex('campaign')
         .where({ id: campaignId })
-        .pluck('organization_id')
-      const escalationUserId = await getEscalationUserId(campaign.organization_id)
+        .first('organization_id')
+      const escalationUserId = (await getEscalationUserId(campaign.organization_id)) || null
 
       const updatedCount = await r.knex.transaction(async trx => {
         if (ageInHours) {
@@ -1813,14 +1813,14 @@ const rootMutations = {
                 order by message.created_at desc
                 limit 1
               ) as message on message.campaign_contact_id = campaign_contact.id
-              join assignment on asssignment.id = campaign_contact.assignment_id
+              join assignment on assignment.id = campaign_contact.assignment_id
               set campaign_contact.assignment_id = null
               where message.created_at < ?
                 and campaign_contact.campaign_id = ?
                 and message_status = ?
                 and is_opted_out = false
-                ${escalationUserId ? `and assignment.user_id <> ${escalationUserId}` : ''}
-            `, [ageInHoursAgo, parseInt(campaignId), messageStatus])
+                and (assignment.user_id is null or assignment.user_id <> ?)
+            `, [ageInHoursAgo, parseInt(campaignId), messageStatus, escalationUserId])
 
           return result[0].affectedRows
         } else {
@@ -1835,7 +1835,7 @@ const rootMutations = {
             })
           if (escalationUserId) {
             query = query.join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
-              .whereNot({ 'assignment.user_id': escalationUserId })
+              .where(trx.raw(`(assignment.user_id is null or assignment.user_id <> ?)`, [escalationUserId]))
           }
           return await query
         }
