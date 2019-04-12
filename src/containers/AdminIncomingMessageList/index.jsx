@@ -432,6 +432,8 @@ export class AdminIncomingMessageList extends Component {
           people={this.state.reassignmentTexters}
           onReassignRequested={this.handleReassignRequested}
           onReassignAllMatchingRequested={this.handleReassignAllMatchingRequested}
+          onUnassignRequested={this.handleUnassignRequested}
+          onUnassignAllMatchingRequested={this.handleUnassignAllMatchingRequested}
           markForSecondPass={this.markForSecondPass}
           contactsAreSelected={areContactsSelected}
           conversationCount={this.state.conversationCount}
