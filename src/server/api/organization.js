@@ -110,6 +110,25 @@ export const resolvers = {
       } catch (ex) {
         return null
       }
+    },
+    escalatedConversationCount: async (organization) => {
+      let escalationUserId
+      try {
+        const features = JSON.parse(organization.features)
+        escalationUserId = parseInt(features.escalationUserId);
+      } catch (ex) {
+        // no-op
+      }
+
+      if (escalationUserId) {
+        const countQuery = r.knex('campaign_contact')
+          .join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
+          .where({ 'assignment.user_id': escalationUserId })
+          .count('*')
+        const escalatedCount = await r.parseCount(countQuery)
+        return escalatedCount
+      }
+      return 0
     }
   }
 }

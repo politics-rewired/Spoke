@@ -31,5 +31,6 @@ export const schema = `
     textsAvailable: Boolean
     currentAssignmentTarget: AssignmentTarget
     escalationUserId: Int
+    escalatedConversationCount: Int!
   }
 `

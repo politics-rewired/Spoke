@@ -63,6 +63,7 @@ class AdminDashboard extends React.Component {
   render() {
     const { location, children, params } = this.props
     const { roles } = this.props.data.currentUser
+    const { escalatedConversationCount } = this.props.escalatedConversationCount.organization
 
     // HACK: Setting params.adminPerms helps us hide non-supervolunteer functionality
     params.adminPerms = hasRole('ADMIN', roles || [])
@@ -80,9 +81,12 @@ class AdminDashboard extends React.Component {
       path: 'incoming',
       role: 'SUPERVOLUNTEER'
     }, {
-      name: 'Escalated Conversations',
+      name: 'Escalated Convos',
       path: 'escalated',
-      role: 'SUPERVOLUNTEER'
+      role: 'SUPERVOLUNTEER',
+      badge: {
+        count: escalatedConversationCount
+      }
     }, {
       name: 'Bulk Script Editor',
       path: 'bulk-script-editor',
@@ -136,6 +140,18 @@ const mapQueriesToProps = ({ ownProps }) => ({
     variables: {
       organizationId: ownProps.params.organizationId
     }
+  },
+  escalatedConversationCount: {
+    query: gql`query getEscalatedConversationCount($organizationId: String!) {
+      organization(id: $organizationId) {
+        id
+        escalatedConversationCount
+      }
+    }`,
+    variables: {
+      organizationId: ownProps.params.organizationId
+    },
+    pollInterval: 20000
   }
 })
 

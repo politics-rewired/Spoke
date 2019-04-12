@@ -3,6 +3,7 @@ import React from 'react'
 import Paper from 'material-ui/Paper'
 import { List, ListItem } from 'material-ui/List'
 import Divider from 'material-ui/Divider'
+import Avatar from 'material-ui/Avatar'
 import { withRouter } from 'react-router'
 import _ from 'lodash'
 import { dataTest, camelCase } from '../lib/attributes'
@@ -49,6 +50,14 @@ const Navigation = function Navigation(props) {
                 key={section.name}
                 primaryText={section.name}
                 onTouchTap={() => props.router.push(section.url)}
+                rightAvatar={section.badge && (
+                  <Avatar
+                    backgroundColor="#FFAA00"
+                    size={30}
+                  >
+                    {section.badge.count}
+                  </Avatar>
+                )}
               />
             ))}
             <Divider/>
