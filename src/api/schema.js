@@ -52,6 +52,7 @@ const rootSchema = `
   input OptOutInput {
     assignmentId: String!
     cell: Phone!
+    message: MessageInput
     reason: String
   }
 
