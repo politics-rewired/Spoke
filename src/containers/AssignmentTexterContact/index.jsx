@@ -449,6 +449,23 @@ export class AssignmentTexterContact extends React.Component {
     this.props.sendMessage(contact.id, payload)
   }
 
+  handleEscalate = () => {
+    const { disabled, escalateMessageText } = this.state
+    const { contact } = this.props
+    if (disabled) {
+      return // stops from multi-send
+    }
+    this.setState({ disabled: true })
+
+    const escalate = {}
+    if (escalateMessageText && escalateMessageText.length) {
+      escalate.message = escalateMessageText
+    }
+
+    const payload = Object.assign({}, { escalate })
+    this.props.sendMessage(contact.id, payload)
+  }
+
   handleOpenOptOutDialog = () => {
     this.setState({ dialogType: TexterDialogType.OptOut })
   }

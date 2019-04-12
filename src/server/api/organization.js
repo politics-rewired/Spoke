@@ -7,6 +7,20 @@ import { currentAssignmentTarget, countLeft } from './assignment'
 
 import { TextRequestType } from '../../api/organization'
 
+export const getEscalationUserId = async (organizationId) => {
+  let escalationUserId
+  try {
+    const organization = await r.knex('organization')
+      .where({ id: organizationId })
+      .first('organization.features')
+    const features = JSON.parse(organization.features)
+    escalationUserId = parseInt(features.escalationUserId)
+  } catch (error) {
+    // no-op
+  }
+  return escalationUserId
+}
+
 export const resolvers = {
   Organization: {
     ...mapFieldsToModel([
@@ -88,6 +102,33 @@ export const resolvers = {
       } else {
         return cat
       }
+    },
+    escalationUserId: async (organization) => {
+      try {
+        const features = JSON.parse(organization.features)
+        return parseInt(features.escalationUserId);
+      } catch (ex) {
+        return null
+      }
+    },
+    escalatedConversationCount: async (organization) => {
+      let escalationUserId
+      try {
+        const features = JSON.parse(organization.features)
+        escalationUserId = parseInt(features.escalationUserId);
+      } catch (ex) {
+        // no-op
+      }
+
+      if (escalationUserId) {
+        const countQuery = r.knex('campaign_contact')
+          .join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
+          .where({ 'assignment.user_id': escalationUserId })
+          .count('*')
+        const escalatedCount = await r.parseCount(countQuery)
+        return escalatedCount
+      }
+      return 0
     }
   }
 }

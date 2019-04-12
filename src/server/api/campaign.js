@@ -2,6 +2,7 @@ import { mapFieldsToModel } from './lib/utils'
 import { Campaign, JobRequest, r, cacheableData } from '../models'
 import { currentEditors } from '../models/cacheable_queries'
 import { getUsers } from './user';
+import { getEscalationUserId } from './organization'
 
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
@@ -229,14 +230,26 @@ export const resolvers = {
     },
     hasUnhandledMessages: async (campaign) => {
       // TODO: restrict to sufficiently old values for updated_at
-      const contacts = await r.knex('campaign_contact')
-        .pluck('id')
+      const escalationUserId = await getEscalationUserId(campaign.organization_id)
+
+      let contactsQuery =r.knex('campaign_contact')
+        .pluck('campaign_contact.id')
         .where({
-          campaign_id: campaign.id,
+          'campaign_contact.campaign_id': campaign.id,
           message_status: 'needsResponse',
           is_opted_out: false
         })
         .limit(1)
+
+        if (escalationUserId) {
+        contactsQuery = contactsQuery.join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
+          .where(function() {
+            this.whereNot({ 'assignment.user_id': escalationUserId })
+              .orWhereNull('assignment.user_id')
+          })
+      }
+
+      const contacts = await contactsQuery
       return contacts.length > 0
     },
     customFields: async (campaign) => (

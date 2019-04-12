@@ -45,6 +45,7 @@ import {
   getConversations,
   getCampaignIdMessageIdsAndCampaignIdContactIdsMaps,
   getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked,
+  reassignContacts,
   reassignConversations,
   resolvers as conversationsResolver
 } from "./conversations";
@@ -60,7 +61,7 @@ import { saveNewIncomingMessage } from "./lib/message-sending";
 import serviceMap from "./lib/services";
 import { resolvers as messageResolvers } from "./message";
 import { resolvers as optOutResolvers } from "./opt-out";
-import { resolvers as organizationResolvers } from "./organization";
+import { resolvers as organizationResolvers, getEscalationUserId } from "./organization";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
@@ -806,6 +807,29 @@ const rootMutations = {
       return await Organization.get(organizationId);
     },
 
+    updateEscalationUserId: async (_, { organizationId, escalationUserId }, { user, loaders }) => {
+      await accessRequired(user, organizationId, 'ADMIN')
+
+      const currentOrganization = await Organization.get(organizationId)
+      let currentFeatures = {}
+      try {
+        currentFeatures = JSON.parse(currentOrganization.features);
+      } catch (ex) {
+        // do nothing
+      }
+
+      // Ensure the user actually exists
+      const escalationUser = await r.knex('user').where({ id: escalationUserId }).first('id')
+      if (!escalationUser) throw new GraphQLError('User with that ID does not exist!')
+
+      const nextFeatures = Object.assign({}, currentFeatures, { escalationUserId })
+      await Organization.get(organizationId).update({
+        features: JSON.stringify(nextFeatures)
+      })
+
+      return await loaders.organization.load(organizationId)
+    },
+
     createInvite: async (_, { user }) => {
       if ((user && user.is_superadmin) || !process.env.SUPPRESS_SELF_INVITE) {
         const inviteInstance = new Invite({
@@ -1187,7 +1211,36 @@ const rootMutations = {
         return { found: false };
       }
     },
+    escalateConversation: async (_, {campaignContactId, message}, { user, loaders }) => {
+      let campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
+      await assignmentRequired(user, campaignContact.assignment_id)
 
+      const campaign = await r.knex('campaign_contact')
+        .where({ id: campaignContact.campaign_id })
+        .pluck('organization_id')
+      const escalationUserId = await getEscalationUserId(campaign.organization_id)
+      if (!escalationUserId) {
+        throw new GraphQLError(`No escalation user set for organization ${organization.name}!`)
+      }
+
+      await reassignContacts([campaignContactId], escalationUserId)
+      campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
+
+      if (message) {
+        const messageInput = {
+          text: message,
+          assignmentId: campaignContact.assignment_id
+        }
+        try {
+          await sendMessage(messageInput, campaignContactId, user)
+        } catch (error) {
+          // Log the sendMessage error, but return successful opt out creation
+          log.error(error)
+        }
+      }
+
+      return campaignContact
+    },
     createOptOut: async (
       _,
       { optOut, campaignContactId },
@@ -1746,34 +1799,29 @@ const rootMutations = {
         ageInHoursAgo = ageInHoursAgo.toISOString()
       }
 
-      const updatedCount = await r.knex.transaction(async trx => {
-        if (ageInHours) {
-          const result = await trx.raw(`
-              update campaign_contact
-              join (
-                select *
-                from message
-                where message.is_from_contact = true
-                order by message.created_at desc
-                limit 1
-              ) as message on message.campaign_contact_id = campaign_contact.id
-              set campaign_contact.assignment_id = null
-              where message.created_at < ?
-                and campaign_id = ?
-                and message_status = ?
-                and is_opted_out = false
-            `, [ageInHoursAgo, parseInt(campaignId), messageStatus])
+      const campaign = await r.knex('campaign')
+        .where({ id: campaignId })
+        .first('organization_id')
+      const escalationUserId = (await getEscalationUserId(campaign.organization_id)) || null
 
-          return result[0].affectedRows
-        } else {
-          return await trx('campaign_contact').where({
-            campaign_id: parseInt(campaignId),
+      const updatedCount = await r.knex.transaction(async trx => {
+        let query =  trx('campaign_contact')
+          .where({
+            'campaign_contact.campaign_id': parseInt(campaignId),
             message_status: messageStatus,
             is_opted_out: false
-          }).update({
+          })
+          .update({
             assignment_id: null
           })
+        if (ageInHours) {
+          query = query.where('campaign_contact.updated_at', '<', ageInHoursAgo)
         }
+        if (escalationUserId) {
+          query = query.join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
+            .whereRaw(`(assignment.user_id is null or assignment.user_id <> ?)`, [escalationUserId])
+        }
+        return await query
       })
 
       return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;

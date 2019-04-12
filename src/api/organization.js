@@ -30,5 +30,7 @@ export const schema = `
     textRequestMaxCount: Int
     textsAvailable: Boolean
     currentAssignmentTarget: AssignmentTarget
+    escalationUserId: Int
+    escalatedConversationCount: Int!
   }
 `

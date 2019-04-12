@@ -283,7 +283,7 @@ class Settings extends React.Component {
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={escalateUserSchema}
-            onSubmit={console.log}
+            onSubmit={this.props.mutations.updateEscaltedUserId}
             defaultValue={{ escalationUserId }}
           >
             <CardHeader title='Conversation Escalation' />
@@ -380,6 +380,20 @@ const mapMutationsToProps = ({ ownProps }) => ({
       textRequestType,
       textRequestMaxCount
     }
+  }),
+  updateEscaltedUserId: ({ escalationUserId }) => ({
+    mutation: gql`
+      mutation updateEscaltedUserId($organizationId: String!, $escalationUserId: Int) {
+        updateEscalationUserId(organizationId: $organizationId, escalationUserId: $escalationUserId) {
+          id
+          escalationUserId
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.params.organizationId,
+      escalationUserId
+    }
   })
 })
 
@@ -396,6 +410,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         textRequestFormEnabled
         textRequestType
         textRequestMaxCount
+        escalationUserId
       }
     }`,
     variables: {

@@ -232,6 +232,15 @@ class IncomingMessageFilter extends Component {
                 toggled={this.props.includeOptedOutConversations}
               />
             </div>
+            {this.props.isIncludeEscalatedFilterable && (
+              <div className={css(styles.toggleFlexColumn)}>
+                <Toggle
+                  label={'Include Escalated'}
+                  toggled={this.props.includeEscalated}
+                  onToggle={this.props.onIncludeEscalatedChanged}
+                />
+              </div>
+            )}
           </div>
 
           <div className={css(styles.container)}>
@@ -278,21 +287,23 @@ class IncomingMessageFilter extends Component {
               />
             </div>
             <div className={css(styles.spacer)} />
-            <div className={css(styles.flexColumn)}>
-              <AutoComplete
-                filter={AutoComplete.caseInsensitiveFilter}
-                maxSearchResults={8}
-                onFocus={() => this.setState({ texterSearchText: '' })}
-                onUpdateInput={texterSearchText =>
-                  this.setState({ texterSearchText })
-                }
-                searchText={this.state.texterSearchText}
-                dataSource={texterNodes}
-                hintText={'Search for a texter'}
-                floatingLabelText={'Texter'}
-                onNewRequest={this.onTexterSelected}
-              />
-            </div>
+            {this.props.isTexterFilterable && (
+              <div className={css(styles.flexColumn)}>
+                <AutoComplete
+                  filter={AutoComplete.caseInsensitiveFilter}
+                  maxSearchResults={8}
+                  onFocus={() => this.setState({ texterSearchText: '' })}
+                  onUpdateInput={texterSearchText =>
+                    this.setState({ texterSearchText })
+                  }
+                  searchText={this.state.texterSearchText}
+                  dataSource={texterNodes}
+                  hintText={'Search for a texter'}
+                  floatingLabelText={'Texter'}
+                  onNewRequest={this.onTexterSelected}
+                />
+              </div>
+            )}
             <div className={css(styles.spacer)} />
             <TextField onChange={this.onContactNameChanged} fullWidth={true} floatingLabelText="Filter by Contact Name" />
           </div>
@@ -302,9 +313,18 @@ class IncomingMessageFilter extends Component {
   }
 }
 
+IncomingMessageFilter.defaultProps = {
+  isTexterFilterable: true,
+  isIncludeEscalatedFilterable: true,
+}
+
 IncomingMessageFilter.propTypes = {
+  isTexterFilterable: type.bool.isRequired,
+  isIncludeEscalatedFilterable: type.bool.isRequired,
   onCampaignChanged: type.func.isRequired,
   onTexterChanged: type.func.isRequired,
+  includeEscalated: type.bool.isRequired,
+  onIncludeEscalatedChanged: type.func.isRequired,
   onActiveCampaignsToggled: type.func.isRequired,
   onArchivedCampaignsToggled: type.func.isRequired,
   includeArchivedCampaigns: type.bool.isRequired,

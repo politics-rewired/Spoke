@@ -4,7 +4,7 @@ import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } fro
 import { buildCampaignQuery } from './campaign'
 import { log } from '../../lib'
 
-function getConversationsJoinsAndWhereClause(
+async function getConversationsJoinsAndWhereClause(
   queryParam,
   organizationId,
   campaignsFilter,
@@ -23,6 +23,15 @@ function getConversationsJoinsAndWhereClause(
   if (assignmentsFilter) {
     if ('texterId' in assignmentsFilter && assignmentsFilter.texterId !== null)
       query = query.where({ 'assignment.user_id': assignmentsFilter.texterId })
+  }
+
+  const includeEscalated = assignmentsFilter && !!assignmentsFilter.includeEscalated
+  if (!includeEscalated) {
+    const { features } = await r.knex('organization').where({ id: organizationId }).first('features')
+    const { escalationUserId } = JSON.parse(features)
+    query = query.where(function() {
+      this.whereNot({ 'assignment.user_id': escalationUserId }).orWhereNull('assignment.user_id')
+    })
   }
 
   if (contactNameFilter) {
@@ -47,7 +56,7 @@ function getConversationsJoinsAndWhereClause(
     }
   }
 
-  return query
+  return { query }
 }
 
 /*
@@ -80,14 +89,14 @@ export async function getConversations(
   * the criteria with offset and limit. */
   let offsetLimitQuery = r.knex.select('campaign_contact.id as cc_id')
 
-  offsetLimitQuery = getConversationsJoinsAndWhereClause(
+  offsetLimitQuery = (await getConversationsJoinsAndWhereClause(
     offsetLimitQuery,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   offsetLimitQuery = offsetLimitQuery
     .orderBy('campaign_contact.updated_at', 'DESC')
@@ -129,14 +138,14 @@ export async function getConversations(
     'message.user_id'
   )
 
-  query = getConversationsJoinsAndWhereClause(
+  query = (await getConversationsJoinsAndWhereClause(
     query,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   query = query.whereIn('campaign_contact.id', ccIds)
 
@@ -185,7 +194,7 @@ export async function getConversations(
 
   /* Query #3 -- get the count of all conversations matching the criteria.
   * We need this to show total number of conversations to support paging */
-  const conversationsCount = await r.parseCount(getConversationsJoinsAndWhereClause(
+  const conversationsCount = await r.parseCount((await getConversationsJoinsAndWhereClause(
     // Only grab one field in order to minimize bandwidth
     r.knex.count('*'),
     organizationId,
@@ -193,7 +202,7 @@ export async function getConversations(
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  ))
+  )).query)
 
   const pageInfo = {
     limit: cursor.limit,
@@ -219,14 +228,14 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
     'message.id as mess_id',
   )
 
-  query = getConversationsJoinsAndWhereClause(
+  query = (await getConversationsJoinsAndWhereClause(
     query,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   query = query.leftJoin('message', table => {
     table
@@ -283,14 +292,14 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
     'message.id as mess_id',
   )
 
-  query = getConversationsJoinsAndWhereClause(
+  query = (await getConversationsJoinsAndWhereClause(
     query,
     organizationId,
     campaignsFilter,
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )
+  )).query
 
   query = query.leftJoin('message', table => {
     table
@@ -318,6 +327,65 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
   return Object.entries(result)
 }
 
+
+export const reassignContacts = async (campaignContactIds, newTexterId) => {
+  const result = await r.knex.transaction(async trx => {
+    // Fetch more complete information for campaign contacts
+    const campaignContacts = await r.knex('campaign_contact')
+      .transacting(trx)
+      .select(['id', 'campaign_id'])
+      .whereIn('id', campaignContactIds)
+
+    // Batch update by campaign
+    const contactsByCampaignId = _.groupBy(campaignContacts, 'campaign_id')
+    const campaignIds = Object.keys(contactsByCampaignId)
+    await Promise.all(campaignIds.map(async campaignId => {
+      // See if newTexter already has an assignment for this campaign
+      const existingAssignment = await r.knex('assignment')
+        .transacting(trx)
+        .where({
+          campaign_id: campaignId,
+          user_id: newTexterId
+        })
+        .first('id')
+      let assignmentId = existingAssignment && existingAssignment.id
+      if (!assignmentId) {
+        // Create a new assignment if none exists
+        const inserted = await r.knex('assignment')
+          .transacting(trx)
+          .insert({
+            campaign_id: campaignId,
+            user_id: newTexterId
+          })
+          .returning('*')
+        // MySQL does not support `RETURNING` so we do some acrobatics to get the new assignment ID
+        assignmentId = inserted[0]
+          ? inserted[0].id
+            ? inserted[0].id
+            : inserted[0]
+          : inserted.id
+      }
+
+      // Update the contact's assignment
+      const contactIds = contactsByCampaignId[campaignId].map(contact => contact.id)
+      await r.knex('campaign_contact')
+        .transacting(trx)
+        .update({
+          assignment_id: assignmentId,
+          updated_at: r.knex.fn.now()
+        })
+        .whereIn('id', contactIds)
+
+      // Update the conversations messages
+      await r.knex('message')
+        .update({ assignment_id: assignmentId })
+        .whereIn('campaign_contact_id', contactIds)
+    }))
+    return campaignContactIds
+  })
+
+  return result
+}
 
 export async function reassignConversations(campaignIdContactIdsMap, campaignIdMessagesIdsMap, newTexterUserId) {
   // ensure existence of assignments
@@ -366,12 +434,7 @@ export async function reassignConversations(campaignIdContactIdsMap, campaignIdM
 
       await r
         .knex('message')
-        .whereIn(
-          'id',
-          messageIds.map(messageId => {
-            return messageId
-          })
-        )
+        .whereIn('id', messageIds)
         .update({
           assignment_id: assignmentId
         })
