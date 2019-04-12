@@ -229,14 +229,35 @@ export const resolvers = {
     },
     hasUnhandledMessages: async (campaign) => {
       // TODO: restrict to sufficiently old values for updated_at
-      const contacts = await r.knex('campaign_contact')
-        .pluck('id')
+      let escalationUserId
+      try {
+        const organization = await r.knex('organization')
+          .where({ id: campaign.organization_id })
+          .first('organization.features')
+        const features = JSON.parse(organization.features)
+        escalationUserId = parseInt(features.escalationUserId)
+      } catch (error) {
+        throw new GraphQLError(`No escalation user set for organization ${organization.name}!`)
+      }
+
+      let contactsQuery =r.knex('campaign_contact')
+        .pluck('campaign_contact.id')
         .where({
-          campaign_id: campaign.id,
+          'campaign_contact.campaign_id': campaign.id,
           message_status: 'needsResponse',
           is_opted_out: false
         })
         .limit(1)
+
+        if (escalationUserId) {
+        contactsQuery = contactsQuery.join('assignment', 'assignment.id', 'campaign_contact.assignment_id')
+          .where(function() {
+            this.whereNot({ 'assignment.user_id': escalationUserId })
+              .orWhereNull('assignment.user_id')
+          })
+      }
+
+      const contacts = await contactsQuery
       return contacts.length > 0
     },
     customFields: async (campaign) => (
