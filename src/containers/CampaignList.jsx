@@ -34,6 +34,9 @@ const campaignInfoFragment = `
   hasUnhandledMessages
   description
   dueBy
+  creator {
+    displayName
+  }
 `
 
 const inlineStyles = {
@@ -77,7 +80,7 @@ const operations = {
   }
 }
 
-class CampaignList extends React.Component {
+export class CampaignList extends React.Component {
   state ={
     inProgress: undefined,
     error: undefined,
@@ -132,6 +135,7 @@ class CampaignList extends React.Component {
     }
 
     const dueByMoment = moment(campaign.dueBy)
+    const creatorName = campaign.creator ? campaign.creator.displayName : null
     const tags = []
     if (!isStarted) {
       tags.push('Not started')
@@ -161,6 +165,8 @@ class CampaignList extends React.Component {
           Campaign ID: {campaign.id}
           <br />
           {campaign.description}
+          {creatorName ?
+              (<span> &mdash; Created by {creatorName}</span>) : null}
           <br />
           {dueByMoment.isValid() ?
             dueByMoment.format('MMM D, YYYY') :
