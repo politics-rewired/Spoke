@@ -25,11 +25,16 @@ import { withRouter } from 'react-router'
 import Empty from '../../components/Empty'
 import CreateIcon from 'material-ui/svg-icons/content/create'
 import { dataTest } from '../../lib/attributes'
-import OptOutDialog from './OptOutDialog'
+import ContactActionDialog from './ContactActionDialog'
 import MessageTextField from './MessageTextField'
+import EscalateButton from './EscalateButton'
 
 import { isContactBetweenTextingHours } from './utils'
 import TopFixedSection from './TopFixedSection'
+
+const TexterDialogType = Object.freeze({ None: 'None', OptOut: 'OptOut', Escalate: 'Escalate' })
+
+const DEFAULT_ESCALATE_TEXT = 'Great question! I\'m going to pass this on to someone more familiar with that specific topic area'
 
 const styles = StyleSheet.create({
   mobile: {
@@ -200,9 +205,10 @@ export class AssignmentTexterContact extends React.Component {
       snackbarActionTitle,
       snackbarOnTouchTap,
       optOutMessageText: campaign.organization.optOutMessage,
+      escalateMessageText: DEFAULT_ESCALATE_TEXT,
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
-      optOutDialogOpen: false,
+      dialogType: TexterDialogType.None,
       currentInteractionStep: availableSteps.length > 0 ? availableSteps[availableSteps.length - 1] : null
     }
   }
@@ -238,8 +244,11 @@ export class AssignmentTexterContact extends React.Component {
     const keyCode = event.keyCode || event.which
     if (keyCode === 13  && !event.shiftKey) {
       event.preventDefault()
-      if (this.state.optOutDialogOpen) {
+      const { dialogType } = this.state
+      if (dialogType === TexterDialogType.OptOut) {
         this.handleOptOut()
+      } else if (dialogType === TexterDialogType.Escalate) {
+        this.handleEscalate()
       } else {
         this.handleClickSendMessageButton()
       }
@@ -422,12 +431,34 @@ export class AssignmentTexterContact extends React.Component {
     this.props.sendMessage(contact.id, payload)
   }
 
-  handleOpenDialog = () => {
-    this.setState({ optOutDialogOpen: true })
+  handleEscalate = () => {
+    const { disabled, escalateMessageText } = this.state
+    const { contact } = this.props
+    if (disabled) {
+      return // stops from multi-send
+    }
+    this.setState({ disabled: true })
+
+    const escalate = {}
+    if (escalateMessageText && escalateMessageText.length) {
+      const message = this.createMessageToContact(optOutMessageText)
+      escalate.message = message
+    }
+
+    const payload = Object.assign({}, { escalate })
+    this.props.sendMessage(contact.id, payload)
+  }
+
+  handleOpenOptOutDialog = () => {
+    this.setState({ dialogType: TexterDialogType.OptOut })
+  }
+
+  handleOpenEscalateDialog = () => {
+    this.setState({ dialogType: TexterDialogType.Escalate })
   }
 
   handleCloseDialog = () => {
-    this.setState({ optOutDialogOpen: false })
+    this.setState({ dialogType: TexterDialogType.None })
   }
 
   handleChangeScript = (newScript) => {
@@ -583,7 +614,7 @@ export class AssignmentTexterContact extends React.Component {
                 {...dataTest('optOut')}
                 secondary
                 label='Opt out'
-                onTouchTap={this.handleOpenDialog}
+                onTouchTap={this.handleOpenOptOutDialog}
                 tooltip='Opt out this contact'
               />
               <RaisedButton
@@ -624,7 +655,10 @@ export class AssignmentTexterContact extends React.Component {
                 {...dataTest('optOut')}
                 secondary
                 label='Opt out'
-                onTouchTap={this.handleOpenDialog}
+                onTouchTap={this.handleOpenOptOutDialog}
+              />
+              <EscalateButton
+                onEscalate={this.handleOpenEscalateDialog}
               />
               <div
                 style={{ float: 'right', marginLeft: 20 }}
@@ -672,35 +706,45 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderBottomFixedSection() {
-    const { optOutDialogOpen, messageText, alreadySent } = this.state
-
-    const message = (optOutDialogOpen) ? '' : (
-      <div className={css(styles.messageField)}>
-        <GSForm
-          ref='form'
-          schema={this.messageSchema}
-          value={{ messageText }}
-          onSubmit={alreadySent ? undefined : this.handleMessageFormSubmit}
-          onChange={this.handleMessageFormChange}
-        >
-          <MessageTextField />
-          {this.renderCorrectSendButton()}
-        </GSForm>
-      </div>
-    )
+    const { dialogType, messageText, alreadySent } = this.state
 
     return (
       <div>
         {this.renderSurveySection()}
-        <div>
-          {message}
-          {optOutDialogOpen ? '' : this.renderActionToolbar()}
-        </div>
-        {this.state.optOutDialogOpen && (
-          <OptOutDialog
-            optOutMessageText={this.state.optOutMessageText}
-            onChange={({ optOutMessageText }) => this.setState({ optOutMessageText })}
+        {dialogType === TexterDialogType.None && (
+          <div>
+            <div className={css(styles.messageField)}>
+              <GSForm
+                ref='form'
+                schema={this.messageSchema}
+                value={{ messageText }}
+                onSubmit={alreadySent ? undefined : this.handleMessageFormSubmit}
+                onChange={this.handleMessageFormChange}
+              >
+                <MessageTextField />
+                {this.renderCorrectSendButton()}
+              </GSForm>
+            </div>
+            {this.renderActionToolbar()}
+          </div>
+        )}
+        {dialogType === TexterDialogType.OptOut && (
+          <ContactActionDialog
+            title='Opt out user'
+            messageText={this.state.optOutMessageText}
+            submitTitle={this.state.optOutMessageText ? 'Send' : 'Opt Out without Text'}
+            onChange={({ messageText }) => this.setState({ optOutMessageText: messageText })}
             onSubmit={this.handleOptOut}
+            handleCloseDialog={this.handleCloseDialog}
+          />
+        )}
+        {dialogType === TexterDialogType.Escalate && (
+          <ContactActionDialog
+            title='Escalate conversation'
+            messageText={this.state.escalateMessageText}
+            submitTitle={this.state.escalateMessageText ? 'Send' : 'Escalate without Text'}
+            onChange={({ messageText }) => this.setState({ escalateMessageText: messageText })}
+            onSubmit={this.handleEscalate}
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
