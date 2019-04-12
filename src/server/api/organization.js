@@ -7,6 +7,20 @@ import { currentAssignmentTarget, countLeft } from './assignment'
 
 import { TextRequestType } from '../../api/organization'
 
+export const getEscalationUserId = async (organizationId) => {
+  let escalationUserId
+  try {
+    const organization = await r.knex('organization')
+      .where({ id: organizationId })
+      .first('organization.features')
+    const features = JSON.parse(organization.features)
+    escalationUserId = parseInt(features.escalationUserId)
+  } catch (error) {
+    // no-op
+  }
+  return escalationUserId
+}
+
 export const resolvers = {
   Organization: {
     ...mapFieldsToModel([

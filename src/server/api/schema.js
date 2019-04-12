@@ -61,7 +61,7 @@ import { saveNewIncomingMessage } from "./lib/message-sending";
 import serviceMap from "./lib/services";
 import { resolvers as messageResolvers } from "./message";
 import { resolvers as optOutResolvers } from "./opt-out";
-import { resolvers as organizationResolvers } from "./organization";
+import { resolvers as organizationResolvers, getEscalationUserId } from "./organization";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
@@ -1213,13 +1213,11 @@ const rootMutations = {
       let campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
       await assignmentRequired(user, campaignContact.assignment_id)
 
-      const campaign = await loaders.campaign.load(campaignContact.campaign_id)
-      const organization = await Organization.get(campaign.organization_id)
-      let escalationUserId
-      try {
-        const features = JSON.parse(organization.features)
-        escalationUserId = parseInt(features.escalationUserId)
-      } catch (error) {
+      const campaign = await r.knex('campaign_contact')
+        .where({ id: campaignContact.campaign_id })
+        .pluck('organization_id')
+      const escalationUserId = await getEscalationUserId(campaign.organization_id)
+      if (!escalationUserId) {
         throw new GraphQLError(`No escalation user set for organization ${organization.name}!`)
       }
 
@@ -1799,18 +1797,10 @@ const rootMutations = {
         ageInHoursAgo = ageInHoursAgo.toISOString()
       }
 
-      let escalationUserId
-      try {
-        const organization = await r.knex('organization')
-          .join('campaign', 'campaign.organization_id', 'organization.id')
-          .first('organization.features')
-          .where({ 'campaign.id': campaignId })
-        const features = JSON.parse(organization.features)
-        escalationUserId = parseInt(features.escalationUserId) || escalationUserId
-      } catch (_error) {
-        // noop
-        console.error(_error)
-      }
+      const campaign = await r.knex('campaign_contact')
+        .where({ id: campaignId })
+        .pluck('organization_id')
+      const escalationUserId = await getEscalationUserId(campaign.organization_id)
 
       const updatedCount = await r.knex.transaction(async trx => {
         if (ageInHours) {

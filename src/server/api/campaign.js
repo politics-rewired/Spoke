@@ -2,6 +2,7 @@ import { mapFieldsToModel } from './lib/utils'
 import { Campaign, JobRequest, r, cacheableData } from '../models'
 import { currentEditors } from '../models/cacheable_queries'
 import { getUsers } from './user';
+import { getEscalationUserId } from './organization'
 
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
@@ -229,16 +230,7 @@ export const resolvers = {
     },
     hasUnhandledMessages: async (campaign) => {
       // TODO: restrict to sufficiently old values for updated_at
-      let escalationUserId
-      try {
-        const organization = await r.knex('organization')
-          .where({ id: campaign.organization_id })
-          .first('organization.features')
-        const features = JSON.parse(organization.features)
-        escalationUserId = parseInt(features.escalationUserId)
-      } catch (error) {
-        throw new GraphQLError(`No escalation user set for organization ${organization.name}!`)
-      }
+      const escalationUserId = await getEscalationUserId(campaign.organization_id)
 
       let contactsQuery =r.knex('campaign_contact')
         .pluck('campaign_contact.id')
