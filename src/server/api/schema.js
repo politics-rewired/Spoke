@@ -1215,12 +1215,12 @@ const rootMutations = {
       let campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
       await assignmentRequired(user, campaignContact.assignment_id)
 
-      const campaign = await r.knex('campaign_contact')
+      const campaign = await r.knex('campaign')
         .where({ id: campaignContact.campaign_id })
-        .pluck('organization_id')
+        .first('organization_id')
       const escalationUserId = await getEscalationUserId(campaign.organization_id)
       if (!escalationUserId) {
-        throw new GraphQLError(`No escalation user set for organization ${organization.name}!`)
+        throw new GraphQLError(`No escalation user set for organization ${campaign.organization_id}!`)
       }
 
       await reassignContacts([campaignContactId], escalationUserId)
@@ -1232,7 +1232,7 @@ const rootMutations = {
           assignmentId: campaignContact.assignment_id
         }
         try {
-          await sendMessage(messageInput, campaignContactId, user)
+          await sendMessage(user, campaignContactId, messageInput)
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
           log.error(error)
@@ -1269,7 +1269,7 @@ const rootMutations = {
       if (message) {
         const checkOptOut = false
         try {
-          await sendMessage(message, campaignContactId, user, checkOptOut)
+          await sendMessage(user, campaignContactId, message, checkOptOut)
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
           log.error(error)
