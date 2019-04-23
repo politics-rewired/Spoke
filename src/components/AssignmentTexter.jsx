@@ -297,13 +297,7 @@ class AssignmentTexter extends React.Component {
     }
 
     if (payload.escalate) {
-      const message = payload.escalate.message ? ` with message '${payload.escalate.message}'` : ''
-      console.log(`Escalate contact: ${contact_id}${message}`)
-    }
-
-    if (payload.escalate) {
-      const { message } = payload.escalate
-      promises.push(this.props.mutations.escalateContact(contact_id, message)
+      promises.push(this.props.mutations.escalateContact(contact_id, payload.escalate)
         .then(catchError))
     }
 
@@ -424,7 +418,7 @@ AssignmentTexter.propTypes = {
 const mapMutationsToProps = () => ({
   createOptOut: (optOut, campaignContactId) => ({
     mutation: gql`
-      mutation createOptOut($optOut: OptOutInput!, $campaignContactId: String!) {
+      mutation createOptOut($optOut: ContactActionInput!, $campaignContactId: String!) {
         createOptOut(optOut: $optOut, campaignContactId: $campaignContactId) {
           id
           optOut {
@@ -439,10 +433,10 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  escalateContact: (campaignContactId, message) => ({
+  escalateContact: (campaignContactId, escalate) => ({
     mutation: gql`
-      mutation escalateConversation($campaignContactId: String!, $message: String) {
-        escalateConversation(campaignContactId: $campaignContactId, message: $message) {
+      mutation escalateConversation($campaignContactId: String!, $escalate: ContactActionInput!) {
+        escalateConversation(campaignContactId: $campaignContactId, escalate: $escalate) {
           id
           assignmentId
         }
@@ -450,7 +444,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: {
       campaignContactId,
-      message
+      escalate
     }
   }),
   editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({
