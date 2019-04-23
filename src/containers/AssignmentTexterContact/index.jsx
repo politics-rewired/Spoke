@@ -433,33 +433,20 @@ export class AssignmentTexterContact extends React.Component {
 
   handleEscalate = () => {
     const { disabled, escalateMessageText } = this.state
-    const { contact } = this.props
+    const { assignment, contact } = this.props
     if (disabled) {
       return // stops from multi-send
     }
     this.setState({ disabled: true })
 
-    const escalate = {}
+    const escalate = {
+      cell: contact.cell,
+      assignmentId: assignment.id
+    }
+
     if (escalateMessageText && escalateMessageText.length) {
-      const message = this.createMessageToContact(optOutMessageText)
+      const message = this.createMessageToContact(escalateMessageText)
       escalate.message = message
-    }
-
-    const payload = Object.assign({}, { escalate })
-    this.props.sendMessage(contact.id, payload)
-  }
-
-  handleEscalate = () => {
-    const { disabled, escalateMessageText } = this.state
-    const { contact } = this.props
-    if (disabled) {
-      return // stops from multi-send
-    }
-    this.setState({ disabled: true })
-
-    const escalate = {}
-    if (escalateMessageText && escalateMessageText.length) {
-      escalate.message = escalateMessageText
     }
 
     const payload = Object.assign({}, { escalate })

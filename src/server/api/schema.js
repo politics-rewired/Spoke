@@ -298,21 +298,17 @@ async function updateInteractionSteps(
 // and enforce_texting_hours is always true
 // as a result, we're forcing admins to think about the time zone of each campaign
 // and saving a join on this query.
-async function sendMessage (user, campaignContactId, message, checkOptOut = true) {
-  const record = (await r
-    .knex("campaign_contact")
+async function sendMessage (user, campaignContactId, message, checkOptOut = true, checkAssignment = true) {
+  const record = await r.knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId) })
     .where({ "campaign.is_archived": false })
-    .where({
-      "campaign_contact.assignment_id": parseInt(message.assignmentId)
-    })
     .join("assignment", "campaign_contact.assignment_id", "assignment.id")
     .leftJoin("opt_out", {
       // 'opt_out.organization_id': 'campaign.organization.id',
       "opt_out.cell": "campaign_contact.cell"
     })
-    .select(
+    .first(
       "campaign_contact.id as cc_id",
       "campaign_contact.assignment_id as assignment_id",
       "campaign_contact.message_status as cc_message_status",
@@ -325,9 +321,9 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
       "assignment.user_id as a_assignment_user_id",
       "opt_out.id as is_opted_out",
       "campaign_contact.timezone_offset as contact_timezone_offset"
-    ))[0];
+    )
 
-  if (!record) {
+  if (checkAssignment && (record.assignment_id != parseInt(message.assignmentId))) {
     throw new GraphQLError("Your assignment has changed");
   }
 
@@ -1211,7 +1207,7 @@ const rootMutations = {
         return { found: false };
       }
     },
-    escalateConversation: async (_, {campaignContactId, message}, { user, loaders }) => {
+    escalateConversation: async (_, { campaignContactId, escalate }, { user, loaders }) => {
       let campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
       await assignmentRequired(user, campaignContact.assignment_id)
 
@@ -1226,13 +1222,11 @@ const rootMutations = {
       await reassignContacts([campaignContactId], escalationUserId)
       campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
 
-      if (message) {
-        const messageInput = {
-          text: message,
-          assignmentId: campaignContact.assignment_id
-        }
+      if (escalate.message) {
         try {
-          await sendMessage(user, campaignContactId, messageInput)
+          const checkOptOut = true
+          const checkAssignment = false
+          await sendMessage(user, campaignContactId, escalate.message, checkOptOut, checkAssignment)
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
           log.error(error)

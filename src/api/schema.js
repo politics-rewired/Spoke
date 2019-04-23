@@ -49,7 +49,7 @@ const rootSchema = `
     campaignTitlePrefixes: [String]!
   }
 
-  input OptOutInput {
+  input ContactActionInput {
     assignmentId: String!
     cell: Phone!
     message: MessageInput
@@ -221,8 +221,8 @@ const rootSchema = `
     updateEscalationUserId(organizationId: String!, escalationUserId: Int): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
-    escalateConversation(campaignContactId: String!, message: String): CampaignContact
-    createOptOut(optOut:OptOutInput!, campaignContactId:String!):CampaignContact,
+    escalateConversation(campaignContactId: String!, escalate: ContactActionInput!): CampaignContact
+    createOptOut(optOut:ContactActionInput!, campaignContactId:String!):CampaignContact,
     removeOptOut(cell:Phone!):[CampaignContact],
     editCampaignContactMessageStatus(messageStatus: String!, campaignContactId:String!): CampaignContact,
     deleteQuestionResponses(interactionStepIds:[String], campaignContactId:String!): CampaignContact,
