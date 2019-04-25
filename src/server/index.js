@@ -17,7 +17,6 @@ import { log } from '../lib'
 import nexmo from './api/lib/nexmo'
 import twilio from './api/lib/twilio'
 import { seedZipCodes } from './seeds/seed-zip-codes'
-import { runMigrations } from '../migrations'
 import { setupUserNotificationObservers } from './notifications'
 import { TwimlResponse } from 'twilio'
 import basicAuth from 'express-basic-auth'
@@ -27,6 +26,8 @@ import requestLogging from '../lib/request-logging'
 
 const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
 const PNF = googleLibPhoneNumber.PhoneNumberFormat;
+
+require('dotenv').config()
 
 process.on('uncaughtException', (ex) => {
   log.error(ex)
@@ -60,11 +61,11 @@ if (!process.env.SUPPRESS_DATABASE_AUTOCREATE) {
       seedZipCodes()
     }
     if (!didCreate && !process.env.SUPPRESS_MIGRATIONS) {
-      runMigrations()
+      r.k.migrate.latest()
     }
   })
 } else if (!process.env.SUPPRESS_MIGRATIONS) {
-  runMigrations()
+  r.k.migrate.latest()
 }
 
 setupUserNotificationObservers()
