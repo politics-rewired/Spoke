@@ -200,6 +200,7 @@ export async function uploadContacts(job) {
     .whereIn('campaign_id', excludeCampaignIds)
     .pluck('cell')
   const exclusionCellCount = await r.knex('campaign_contact')
+    // TODO - MySQL Specific. cellsToExclude should be
     .whereIn('cell', cellsToExclude)
     .where('campaign_id', campaignId)
     .del()
@@ -668,7 +669,7 @@ export async function assignTexters(job) {
       const assignContacts = async (directive) => {
         const { assignment, contactsToAssign } = directive
 
-        // Look up in separate query as MySQL does not support LIMIT within subquery
+        // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
         const contactIds = await r.knex('campaign_contact')
           .transacting(trx)
           .select('id')
@@ -704,7 +705,7 @@ export async function assignTexters(job) {
       // Create new assignments, assign contacts, and notify users
       const newAssignmentChunks = _.chunk(newAssignments, CHUNK_SIZE)
       await Promise.all(newAssignmentChunks.map(async chunk => {
-        // Must not do a bulk insert in order to be MySQL compatible
+        // TODO - MySQL Specific. Must not do a bulk insert in order to be MySQL compatible
         const assignmentIds = await Promise.all(chunk.map(async directive => {
           const assignmentIds = await r.knex('assignment')
             .transacting(trx)
@@ -719,7 +720,7 @@ export async function assignTexters(job) {
         //   .returning('id')
 
         const updatedChunk = await Promise.all(assignmentIds.map(async (assignmentId, index) => {
-          // We have to do this because MySQL does not support returning multiple columns from a bulk insert
+          // TODO - MySQL Specific. We have to do this because MySQL does not support returning multiple columns from a bulk insert
           let { contactsToAssign, assignment } = chunk[index]
           assignment.id = assignmentId
           return { assignment, contactsToAssign }
@@ -748,7 +749,7 @@ export async function assignTexters(job) {
 
       // dynamic assignments, having zero initially is ok
       if (!campaign.use_dynamic_assignment) {
-        // Look up in separate query as MySQL does not support LIMIT within subquery
+        // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
         const assignmentIds = await r.knex('assignment')
           .transacting(trx)
           .select('assignment.id as id')

@@ -25,6 +25,7 @@ const DOMAIN_REGEX = new RegExp(
 const db = require("knex")(config);
 
 async function main() {
+  // TODO - MySQL Specific. date_format
   const results = await db.raw(`
     select DATE_FORMAT(period_ends_at, '%Y-%m-%dT%H:%i:%SZ') as period_ends_at
     from deliverability_report

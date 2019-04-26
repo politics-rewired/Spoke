@@ -97,6 +97,7 @@ export const optOutCache = {
     }
 
     // update all organization's active campaigns as well
+    // TODO - MySQL Specific. Getting contactIds can be done in subquery
     const contactIds = await r.knex('campaign_contact')
       .leftJoin('campaign', 'campaign_contact.campaign_id', 'campaign.id')
       .where(updateQueryParams)

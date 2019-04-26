@@ -196,6 +196,7 @@ async function sendMessage(message, trx) {
       // the send_before time, less 30 seconds
       // we subtract the MESSAGE_VALIDITY_PADDING_SECONDS seconds to allow time for the message to be sent by
       // a downstream service
+      // TODO - this is local timezone, not UTC
       const messageValidityPeriod = Math.ceil((message.send_before - Date.now())/1000) - MESSAGE_VALIDITY_PADDING_SECONDS
 
       if (messageValidityPeriod < 0) {

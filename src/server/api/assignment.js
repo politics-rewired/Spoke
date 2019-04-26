@@ -141,6 +141,7 @@ export async function currentAssignmentTarget() {
     is_archived: false,
     is_autoassign_enabled: true
   }).andWhere(
+    // TODO - MySQL Specific.
     r.knex.raw(`texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone))`)
   )
 
@@ -255,6 +256,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
       UNSENT: 'needsMessage'
     }[assignmentInfo.type]
 
+    // TODO - MySQL specific
     const ids = await r
       .knex("campaign_contact")
       .select("id")
