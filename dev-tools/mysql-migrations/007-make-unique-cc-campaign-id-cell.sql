@@ -70,7 +70,8 @@ update
   ) duplicates
 join
   message
-  on message.campaign_contact_id = duplicates.duplicate_id
+  on
+    message.campaign_contact_id = duplicates.duplicate_id
 set
   message.campaign_contact_id = duplicates.contact_id,
   message.assignment_id = duplciates.contact_assignment_id
@@ -130,7 +131,52 @@ set
 -- TODO: verify count query above is 0
 
 
--- 1.4 Delete duplicates
+-- 1.4 Update campaign contact message_status
+-- ------------------------------------------
+
+update
+  campaign_contact as contact
+join
+  campaign_contact as duplicate
+  on
+    duplicate.cell = contact.cell
+    and duplicate.campaign_id = contact.campaign_id
+left join
+  (
+    select
+      campaign_contact_id,
+      is_from_contact
+    from
+      message
+    where
+      message.campaign_contact_id = contact.id
+    order by
+      created_at desc
+    limit 1
+  ) message
+  on
+    message.campaign_contact_id = contact.id
+set
+  contact.message_status = IF(
+    (contact.message_status = 'closed' or duplicate.message_status = 'closed'),
+    'closed',
+    IF(
+      message.is_from_contact is null,
+      'needsMessage',
+      IF(
+        message.is_from_contact,
+        'needsResponse',
+        'convo'
+      )
+    )
+  )
+where
+  duplicate.id > contact.id
+  and contact.campaign_id = 411
+;
+
+
+-- 1.5 Delete duplicates
 -- ---------------------
 
 delete
