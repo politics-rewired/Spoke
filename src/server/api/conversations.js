@@ -409,16 +409,14 @@ export async function reassignConversations(campaignIdContactIdsMap, campaignIdM
     campaignIdAssignmentIdMap.set(campaignId, assignment.id)
   }
 
-  // do the reassignment
-  const returnCampaignIdAssignmentIds = []
+  const returnCampaignIdAssignmentIds = await r.knex.transaction(async trx => {
+    const result = []
 
-  // TODO(larry) do this in a transaction!
-  try {
     for (const [campaignId, campaignContactIds] of campaignIdContactIdsMap) {
       const assignmentId = campaignIdAssignmentIdMap.get(campaignId)
-
       await r
         .knex('campaign_contact')
+        .transacting(trx)
         .where('campaign_id', campaignId)
         .whereIn('id', campaignContactIds)
         .update({
@@ -426,24 +424,25 @@ export async function reassignConversations(campaignIdContactIdsMap, campaignIdM
           updated_at: r.knex.fn.now()
         })
 
-      returnCampaignIdAssignmentIds.push({
+      result.push({
         campaignId,
         assignmentId: assignmentId.toString()
       })
     }
+
     for (const [campaignId, messageIds] of campaignIdMessagesIdsMap) {
       const assignmentId = campaignIdAssignmentIdMap.get(campaignId)
-
       await r
         .knex('message')
+        .transacting(trx)
         .whereIn('id', messageIds)
         .update({
           assignment_id: assignmentId
         })
     }
-  } catch (error) {
-    log.error(error)
-  }
+
+    return result
+  })
 
   return returnCampaignIdAssignmentIds
 }
