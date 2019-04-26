@@ -219,10 +219,12 @@ export async function giveUserMoreTexts(auth0Id, count) {
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
   const updated_result = await r.knex.transaction(async trx => {
     let assignmentId;
-    const existingAssignment = (await r.knex("assignment").where({
-      user_id: user.id,
-      campaign_id: campaignIdToAssignTo
-    }))[0];
+    const existingAssignment = await r.knex("assignment")
+      .where({
+        user_id: user.id,
+        campaign_id: campaignIdToAssignTo
+      })
+      .first();
 
     if (!existingAssignment) {
       const inserted = await r
