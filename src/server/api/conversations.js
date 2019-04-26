@@ -359,13 +359,8 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
             campaign_id: campaignId,
             user_id: newTexterId
           })
-          .returning('*')
-        // MySQL does not support `RETURNING` so we do some acrobatics to get the new assignment ID
+          .returning('id')
         assignmentId = inserted[0]
-          ? inserted[0].id
-            ? inserted[0].id
-            : inserted[0]
-          : inserted.id
       }
 
       // Update the contact's assignment
