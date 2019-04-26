@@ -131,7 +131,58 @@ set
 -- TODO: verify count query above is 0
 
 
--- 1.4 Update campaign contact message_status
+-- 1.4 Delete duplicate question responses
+-- ------------------------------------------
+
+-- Get count
+
+select
+  count(*) as duplicate_count
+from
+  question_response as response
+join
+  question_response as duplicate
+  on
+    response.campaign_contact_id = duplicate.campaign_contact_id
+    and response.interaction_step_id = duplicate.interaction_step_id
+join
+  campaign_contact
+  on
+    campaign_contact.id = response.campaign_contact_id
+where
+  campaign_contact.campaign_id = 411
+  and duplicate.id > contact.id
+;
+
+-- Delete question responses
+
+delete from
+  question_response
+where
+  id in (
+    select
+      duplicate.id
+    from
+      question_response as response
+    join
+      question_response as duplicate
+      on
+        response.campaign_contact_id = duplicate.campaign_contact_id
+        and response.interaction_step_id = duplicate.interaction_step_id
+    join
+      campaign_contact
+      on
+        campaign_contact.id = response.campaign_contact_id
+    where
+      campaign_contact.campaign_id = 411
+      and duplicate.id > contact.id
+  )
+;
+
+-- TODO: verify count query above is 0
+
+
+-- 1.5 Update campaign contact message_status
 -- ------------------------------------------
 
 update
@@ -176,7 +227,7 @@ where
 ;
 
 
--- 1.5 Delete duplicates
+-- 1.6 Delete duplicates
 -- ---------------------
 
 delete
