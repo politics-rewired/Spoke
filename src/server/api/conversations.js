@@ -380,6 +380,7 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
 
       // Update the conversations messages
       await r.knex('message')
+        .transacting(trx)
         .update({ assignment_id: assignmentId })
         .whereIn('campaign_contact_id', contactIds)
     }))
