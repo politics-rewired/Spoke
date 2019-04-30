@@ -16,14 +16,14 @@ import { dataTest } from '../lib/attributes'
 class AdminCampaignList extends React.Component {
   state = {
     isCreating: false,
+    pageSize: 50,
     campaignsFilter: {
-      isArchived: false,
-      listSize: 0
+      isArchived: false
     }
   }
 
   handleClickNewButton = async () => {
-    const { organizationId } = this.props.params
+    const { organizationId, router } = this.props.params
     this.setState({ isCreating: true })
     const newCampaign = await this.props.mutations.createCampaign({
       title: 'New Campaign',
@@ -40,32 +40,25 @@ class AdminCampaignList extends React.Component {
       throw new Error(newCampaign.errors)
     }
 
-    this.props.router.push(
-      `/admin/${organizationId}/campaigns/${newCampaign.data.createCampaign.id}/edit?new=true`
-    )
+    const { id: campaignId } = newCampaign.data.createCampaign
+    router.push(`/admin/${organizationId}/campaigns/${campaignId}/edit?new=true`)
   }
 
   handleFilterChange = (event, index, value) => {
     this.setState({
       campaignsFilter: {
-        isArchived: value,
-        listSize: this.state.campaignsFilter.listSize
+        isArchived: value
       }
     })
   }
 
-  handleListSizeChange = (event, index, value) => {
-    this.setState({
-      campaignsFilter: {
-        isArchived: this.state.campaignsFilter.isArchived,
-        listSize: value
-      }
-    })
+  handlePageSizeChange = (event, index, pageSize) => {
+    this.setState({ pageSize })
   }
 
-  renderListSizeOptions() {
+  renderPageSizeOptions() {
     return (
-      <DropDownMenu value={this.state.campaignsFilter.listSize} onChange={this.handleListSizeChange} >
+      <DropDownMenu value={this.state.pageSize} onChange={this.handlePageSizeChange} >
         <MenuItem value={10} primaryText='10' />
         <MenuItem value={25} primaryText='25' />
         <MenuItem value={50} primaryText='50' />
@@ -84,15 +77,17 @@ class AdminCampaignList extends React.Component {
     )
   }
   render() {
+    const { pageSize } = this.state
     const { adminPerms } = this.props.params
     return (
       <div>
         {this.renderFilters()}
-        {this.renderListSizeOptions()}
+        {this.renderPageSizeOptions()}
         {this.state.isCreating ? <LoadingIndicator /> : (
           <CampaignList
-            campaignsFilter={this.state.campaignsFilter}
             organizationId={this.props.params.organizationId}
+            campaignsFilter={this.state.campaignsFilter}
+            pageSize={pageSize}
             adminPerms={adminPerms}
           />
         )}
