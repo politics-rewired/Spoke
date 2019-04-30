@@ -202,22 +202,41 @@ left join
     where
       message.campaign_contact_id = contact.id
     order by
+      created_at asc
+    limit 1
+  ) first_message
+  on
+    first_message.campaign_contact_id = contact.id
+left join
+  (
+    select
+      campaign_contact_id,
+      is_from_contact
+    from
+      message
+    where
+      message.campaign_contact_id = contact.id
+    order by
       created_at desc
     limit 1
-  ) message
+  ) last_message
   on
-    message.campaign_contact_id = contact.id
+    last_message.campaign_contact_id = contact.id
 set
-  contact.message_status = IF(
+  contact.message_status = IF (
     (contact.message_status = 'closed' or duplicate.message_status = 'closed'),
     'closed',
-    IF(
-      message.is_from_contact is null,
+    IF (
+      first_message.is_from_contact is null,
       'needsMessage',
-      IF(
-        message.is_from_contact,
+      IF (
+        last_message.is_from_contact,
         'needsResponse',
-        'convo'
+        IF (
+          last_message.id = first_message.id,
+          'messaged',
+          'convo'
+        )
       )
     )
   )
