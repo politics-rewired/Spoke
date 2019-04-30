@@ -8,7 +8,7 @@ select
   duplicate.cell as duplicate_cell,
   contact.campaign_id as contact_campaign_id,
   duplicate.campaign_id as duplicate_campaign_id,
-  contact.assignment_id as contact_assignment_id.
+  contact.assignment_id as contact_assignment_id,
   duplicate.assignment_id as duplicate_assignment_id
   -- count(*) as duplicate_count
 from
@@ -74,7 +74,7 @@ join
     message.campaign_contact_id = duplicates.duplicate_id
 set
   message.campaign_contact_id = duplicates.contact_id,
-  message.assignment_id = duplciates.contact_assignment_id
+  message.assignment_id = duplicates.contact_assignment_id
 ;
 
 -- TODO: verify count query above is 0
@@ -151,15 +151,14 @@ join
     campaign_contact.id = response.campaign_contact_id
 where
   campaign_contact.campaign_id = 411
-  and duplicate.id > contact.id
+  and duplicate.id > response.id
 ;
 
 -- Delete question responses
 
-delete from
-  question_response
-where
-  id in (
+create temporary table
+  tmp_qr
+as (
     select
       duplicate.id
     from
@@ -175,11 +174,23 @@ where
         campaign_contact.id = response.campaign_contact_id
     where
       campaign_contact.campaign_id = 411
-      and duplicate.id > contact.id
+      and duplicate.id > response.id
   )
 ;
 
+delete question_response from
+  question_response
+inner join
+  tmp_qr
+  on
+    tmp_qr.id = question_response.id
+;
+
 -- TODO: verify count query above is 0
+
+-- Remove temp table
+
+drop table tmp_qr;
 
 
 -- 1.5 Update campaign contact message_status
@@ -193,35 +204,33 @@ join
     duplicate.cell = contact.cell
     and duplicate.campaign_id = contact.campaign_id
 left join
-  (
-    select
-      campaign_contact_id,
-      is_from_contact
-    from
-      message
-    where
-      message.campaign_contact_id = contact.id
-    order by
-      created_at asc
-    limit 1
-  ) first_message
+  message first_message
   on
-    first_message.campaign_contact_id = contact.id
+    first_message.id = (
+      select
+        id
+      from
+        message
+      where
+        message.campaign_contact_id = contact.id
+      order by
+        created_at asc
+      limit 1
+    )
 left join
-  (
-    select
-      campaign_contact_id,
-      is_from_contact
-    from
-      message
-    where
-      message.campaign_contact_id = contact.id
-    order by
-      created_at desc
-    limit 1
-  ) last_message
+  message last_message
   on
-    last_message.campaign_contact_id = contact.id
+    last_message.id = (
+      select
+        id
+      from
+        message
+      where
+        message.campaign_contact_id = contact.id
+      order by
+        created_at desc
+      limit 1
+    )
 set
   contact.message_status = IF (
     (contact.message_status = 'closed' or duplicate.message_status = 'closed'),
@@ -249,27 +258,37 @@ where
 -- 1.6 Delete duplicates
 -- ---------------------
 
-delete
-from
-  campaign_contact
-where
-  id in (
-    select
-      duplicate.id as id
-    from
-      campaign_contact as contact
-    join
-      campaign_contact as duplicate
-      on
-        duplicate.cell = contact.cell
-        and duplicate.campaign_id = contact.campaign_id
-    where
-      duplicate.id > contact.id
-      and contact.campaign_id = 411
+create temporary table
+  tmp_dup
+as (
+  select
+    duplicate.id as id
+  from
+    campaign_contact as contact
+  join
+    campaign_contact as duplicate
+    on
+      duplicate.cell = contact.cell
+      and duplicate.campaign_id = contact.campaign_id
+  where
+    duplicate.id > contact.id
+    and contact.campaign_id = 411
   )
 ;
 
+delete campaign_contact from
+  campaign_contact
+inner join
+  tmp_dup
+  on
+    tmp_dup.id = campaign_contact.id
+;
+
 -- TODO: verify initial discovery count is 0
+
+-- Remove temp table
+
+drop table tmp_dup;
 
 -- TODO: steps 1.1 - 1.4 for other four affected campaigns
 
