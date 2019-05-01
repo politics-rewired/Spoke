@@ -13,17 +13,28 @@ import DropDownMenu from 'material-ui/DropDownMenu'
 import { MenuItem } from 'material-ui/Menu'
 import { dataTest } from '../lib/attributes'
 
+const styles = {
+  flexContainer: {
+    display: 'flex',
+    alignItems: 'baseline'
+  }
+}
+
+const DEFAULT_PAGE_SIZE = 25
+
 class AdminCampaignList extends React.Component {
   state = {
     isCreating: false,
+    pageSize: DEFAULT_PAGE_SIZE,
+    currentPageIndex: 0,
+    totalResults: undefined,
     campaignsFilter: {
-      isArchived: false,
-      listSize: 0
+      isArchived: false
     }
   }
 
   handleClickNewButton = async () => {
-    const { organizationId } = this.props.params
+    const { organizationId, router } = this.props.params
     this.setState({ isCreating: true })
     const newCampaign = await this.props.mutations.createCampaign({
       title: 'New Campaign',
@@ -40,37 +51,57 @@ class AdminCampaignList extends React.Component {
       throw new Error(newCampaign.errors)
     }
 
-    this.props.router.push(
-      `/admin/${organizationId}/campaigns/${newCampaign.data.createCampaign.id}/edit?new=true`
-    )
+    const { id: campaignId } = newCampaign.data.createCampaign
+    router.push(`/admin/${organizationId}/campaigns/${campaignId}/edit?new=true`)
   }
 
   handleFilterChange = (event, index, value) => {
     this.setState({
+      currentPageIndex: 0,
+      pageSize: DEFAULT_PAGE_SIZE,
       campaignsFilter: {
-        isArchived: value,
-        listSize: this.state.campaignsFilter.listSize
+        isArchived: value
       }
     })
   }
 
-  handleListSizeChange = (event, index, value) => {
+  handlePageSizeChange = (event, index, pageSize) => {
     this.setState({
-      campaignsFilter: {
-        isArchived: this.state.campaignsFilter.isArchived,
-        listSize: value
-      }
+      currentPageIndex: 0,
+      pageSize
     })
   }
 
-  renderListSizeOptions() {
+  onCurrentPageChange = (event, index, currentPageIndex) => {
+    this.setState({ currentPageIndex })
+  }
+
+  renderPageSizeOptions() {
     return (
-      <DropDownMenu value={this.state.campaignsFilter.listSize} onChange={this.handleListSizeChange} >
+      <DropDownMenu value={this.state.pageSize} onChange={this.handlePageSizeChange}>
         <MenuItem value={10} primaryText='10' />
         <MenuItem value={25} primaryText='25' />
         <MenuItem value={50} primaryText='50' />
         <MenuItem value={100} primaryText='100' />
         <MenuItem value={0} primaryText='All' />
+      </DropDownMenu>
+    )
+  }
+
+  renderPagesDropdown() {
+    const { pageSize, currentPageIndex, totalResults } = this.state
+
+    if (!totalResults || totalResults === 0) {
+      return 'N/A'
+    }
+
+    const pageCount = Math.ceil(totalResults / pageSize)
+    const pageArray = Array.apply(null, { length: pageCount }).map(Number.call, Number)
+    return (
+      <DropDownMenu value={currentPageIndex} onChange={this.onCurrentPageChange}>
+        {pageArray.map(pageIndex => (
+          <MenuItem key={pageIndex} value={pageIndex} primaryText={pageIndex + 1} />
+        ))}
       </DropDownMenu>
     )
   }
@@ -84,15 +115,24 @@ class AdminCampaignList extends React.Component {
     )
   }
   render() {
-    const { adminPerms } = this.props.params
+    const { pageSize, currentPageIndex, campaignsFilter } = this.state
+    const { organizationId, adminPerms } = this.props.params
     return (
       <div>
-        {this.renderFilters()}
-        {this.renderListSizeOptions()}
+        <div style={styles.flexContainer}>
+          {this.renderFilters()}
+          Page Size:
+          {this.renderPageSizeOptions()}
+          Page: {' '}
+          {this.renderPagesDropdown()}
+        </div>
         {this.state.isCreating ? <LoadingIndicator /> : (
           <CampaignList
-            campaignsFilter={this.state.campaignsFilter}
-            organizationId={this.props.params.organizationId}
+            organizationId={organizationId}
+            campaignsFilter={campaignsFilter}
+            pageSize={pageSize}
+            resultCountDidUpdate={totalResults => this.setState({ totalResults })}
+            currentPageIndex={currentPageIndex}
             adminPerms={adminPerms}
           />
         )}
