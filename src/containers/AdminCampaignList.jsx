@@ -13,10 +13,21 @@ import DropDownMenu from 'material-ui/DropDownMenu'
 import { MenuItem } from 'material-ui/Menu'
 import { dataTest } from '../lib/attributes'
 
+const styles = {
+  flexContainer: {
+    display: 'flex',
+    alignItems: 'baseline'
+  }
+}
+
+const DEFAULT_PAGE_SIZE = 25
+
 class AdminCampaignList extends React.Component {
   state = {
     isCreating: false,
-    pageSize: 50,
+    pageSize: DEFAULT_PAGE_SIZE,
+    currentPageIndex: 0,
+    totalResults: undefined,
     campaignsFilter: {
       isArchived: false
     }
@@ -46,6 +57,8 @@ class AdminCampaignList extends React.Component {
 
   handleFilterChange = (event, index, value) => {
     this.setState({
+      currentPageIndex: 0,
+      pageSize: DEFAULT_PAGE_SIZE,
       campaignsFilter: {
         isArchived: value
       }
@@ -53,17 +66,42 @@ class AdminCampaignList extends React.Component {
   }
 
   handlePageSizeChange = (event, index, pageSize) => {
-    this.setState({ pageSize })
+    this.setState({
+      currentPageIndex: 0,
+      pageSize
+    })
+  }
+
+  onCurrentPageChange = (event, index, currentPageIndex) => {
+    this.setState({ currentPageIndex })
   }
 
   renderPageSizeOptions() {
     return (
-      <DropDownMenu value={this.state.pageSize} onChange={this.handlePageSizeChange} >
+      <DropDownMenu value={this.state.pageSize} onChange={this.handlePageSizeChange}>
         <MenuItem value={10} primaryText='10' />
         <MenuItem value={25} primaryText='25' />
         <MenuItem value={50} primaryText='50' />
         <MenuItem value={100} primaryText='100' />
         <MenuItem value={0} primaryText='All' />
+      </DropDownMenu>
+    )
+  }
+
+  renderPagesDropdown() {
+    const { pageSize, currentPageIndex, totalResults } = this.state
+
+    if (!totalResults || totalResults === 0) {
+      return 'N/A'
+    }
+
+    const pageCount = Math.ceil(totalResults / pageSize)
+    const pageArray = Array.apply(null, { length: pageCount }).map(Number.call, Number)
+    return (
+      <DropDownMenu value={currentPageIndex} onChange={this.onCurrentPageChange}>
+        {pageArray.map(pageIndex => (
+          <MenuItem key={pageIndex} value={pageIndex} primaryText={pageIndex + 1} />
+        ))}
       </DropDownMenu>
     )
   }
@@ -77,17 +115,24 @@ class AdminCampaignList extends React.Component {
     )
   }
   render() {
-    const { pageSize } = this.state
-    const { adminPerms } = this.props.params
+    const { pageSize, currentPageIndex, campaignsFilter } = this.state
+    const { organizationId, adminPerms } = this.props.params
     return (
       <div>
-        {this.renderFilters()}
-        {this.renderPageSizeOptions()}
+        <div style={styles.flexContainer}>
+          {this.renderFilters()}
+          Page Size:
+          {this.renderPageSizeOptions()}
+          Page: {' '}
+          {this.renderPagesDropdown()}
+        </div>
         {this.state.isCreating ? <LoadingIndicator /> : (
           <CampaignList
-            organizationId={this.props.params.organizationId}
-            campaignsFilter={this.state.campaignsFilter}
+            organizationId={organizationId}
+            campaignsFilter={campaignsFilter}
             pageSize={pageSize}
+            resultCountDidUpdate={totalResults => this.setState({ totalResults })}
+            currentPageIndex={currentPageIndex}
             adminPerms={adminPerms}
           />
         )}
