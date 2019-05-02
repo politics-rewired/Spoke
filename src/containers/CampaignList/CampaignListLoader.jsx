@@ -69,6 +69,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             title
             isStarted
             isArchived
+            isAutoassignEnabled
             hasUnassignedContacts
             hasUnsentInitialMessages
             hasUnhandledMessages

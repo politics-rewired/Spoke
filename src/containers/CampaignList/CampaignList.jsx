@@ -64,6 +64,7 @@ export class CampaignList extends React.Component {
     const {
       isStarted,
       isArchived,
+      isAutoassignEnabled,
       hasUnassignedContacts,
       hasUnsentInitialMessages,
       hasUnhandledMessages
@@ -99,6 +100,10 @@ export class CampaignList extends React.Component {
 
     if (isStarted && hasUnhandledMessages) {
       tags.push('Unhandled replies')
+    }
+
+    if (isStarted && !isArchived && isAutoassignEnabled) {
+      tags.push('Autoassign eligible')
     }
 
     const primaryText = (
