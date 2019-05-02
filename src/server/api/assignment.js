@@ -138,7 +138,8 @@ export async function currentAssignmentTarget() {
 
   const eligibleCampaigns = await r.knex('campaign').where({
     is_started: true,
-    is_archived: false
+    is_archived: false,
+    is_autoassign_enabled: true
   }).andWhere(
     r.knex.raw(`texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone))`)
   )
