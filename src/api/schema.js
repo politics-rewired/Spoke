@@ -105,6 +105,7 @@ const rootSchema = `
     textingHoursEnforced: Boolean
     textingHoursStart: Int
     textingHoursEnd: Int
+    isAutoassignEnabled: Boolean
     timezone: String
   }
 

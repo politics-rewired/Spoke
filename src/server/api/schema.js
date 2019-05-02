@@ -88,6 +88,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     textingHoursEnforced,
     textingHoursStart,
     textingHoursEnd,
+    isAutoassignEnabled,
     timezone
   } = campaign;
   // some changes require ADMIN and we recheck below
@@ -113,6 +114,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_enforced: textingHoursEnforced,
     texting_hours_start: textingHoursStart,
     texting_hours_end: textingHoursEnd,
+    is_autoassign_enabled: isAutoassignEnabled,
     timezone
   };
 

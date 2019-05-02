@@ -20,6 +20,7 @@ import CampaignInteractionStepsForm from '../components/CampaignInteractionSteps
 import CampaignCannedResponsesForm from '../components/CampaignCannedResponsesForm'
 import { dataTest, camelCase } from '../lib/attributes'
 import CampaignTextingHoursForm from '../components/CampaignTextingHoursForm'
+import CampaignAutoassignModeForm from '../components/CampaignAutoassignModeForm'
 
 const campaignInfoFragment = `
   id
@@ -39,6 +40,7 @@ const campaignInfoFragment = `
   textingHoursEnforced
   textingHoursStart
   textingHoursEnd
+  isAutoassignEnabled
   timezone
   texters {
     id
@@ -364,6 +366,14 @@ class AdminCampaignEdit extends React.Component {
       keys: ['overrideOrganizationTextingHours', 'textingHoursEnforced', 'textingHoursStart', 'textingHoursEnd', 'timezone'],
       checkCompleted: () => true,
       blocksStarting: false,
+      expandAfterCampaignStarts: true,
+      expandableBySuperVolunteers: false
+    }, {
+      title: 'Autoassign Mode',
+      content: CampaignAutoassignModeForm,
+      keys: ['isAutoassignEnabled'],
+      checkCompleted: () => true,
+      blocksStarting: true,
       expandAfterCampaignStarts: true,
       expandableBySuperVolunteers: false
     }]
