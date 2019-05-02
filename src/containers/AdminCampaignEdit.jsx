@@ -40,6 +40,7 @@ const campaignInfoFragment = `
   textingHoursEnforced
   textingHoursStart
   textingHoursEnd
+  isAutoassignEnabled
   timezone
   texters {
     id

@@ -161,6 +161,7 @@ export const resolvers = {
       'textingHoursEnforced',
       'textingHoursStart',
       'textingHoursEnd',
+      'isAutoassignEnabled',
       'timezone',
       'createdAt'
     ], Campaign),
