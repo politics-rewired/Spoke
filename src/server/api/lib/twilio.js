@@ -141,7 +141,6 @@ const getMessageServiceSID = cell => {
 
   // Gather multiple messaging service SIDs (may be split across multiple env vars)
   const envVarKeys = Object.keys(process.env).filter(key => key.startsWith(`TWILIO_MESSAGE_SERVICE_SIDS`))
-  envVarKeys.sort()
 
   let messagingServiceIds = []
   for (const envVarKey of envVarKeys) {
@@ -149,6 +148,7 @@ const getMessageServiceSID = cell => {
     const newServiceIds = envVarValue.split(',').map(serviceSid => serviceSid.trim())
     messagingServiceIds = messagingServiceIds.concat(newServiceIds)
   }
+  messagingServiceIds.sort()
 
   const messagingServiceIndex = deterministicIntWithinRange(cell, messagingServiceIds.length)
   const messagingServiceId = messagingServiceIds[messagingServiceIndex]
