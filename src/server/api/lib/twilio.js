@@ -133,6 +133,31 @@ function parseMessageText(message) {
   return params
 }
 
+const getMessageServiceSID = cell => {
+  // Check for single message service
+  if (!!process.env.TWILIO_MESSAGE_SERVICE_SID) {
+    return process.env.TWILIO_MESSAGE_SERVICE_SID
+  }
+
+  // Gather multiple messaging service SIDs (may be split across multiple env vars)
+  const envVarKeys = Object.keys(process.env).filter(key => key.startsWith(`TWILIO_MESSAGE_SERVICE_SIDS`))
+  envVarKeys.sort()
+
+  let messagingServiceIds = []
+  for (const envVarKey of envVarKeys) {
+    const envVarValue = process.env[envVarKey]
+    const newServiceIds = envVarValue.split(',').map(serviceSid => serviceSid.trim())
+    messagingServiceIds = messagingServiceIds.concat(newServiceIds)
+  }
+
+  const messagingServiceIndex = deterministicIntWithinRange(cell, messagingServiceIds.length)
+  const messagingServiceId = messagingServiceIds[messagingServiceIndex]
+
+  if (!messagingServiceId) throw new Error(`Could not find Twilio message service SID for ${cell}!`)
+
+  return messagingServiceId
+}
+
 async function sendMessage(message, trx) {
   if (!twilio) {
     log.warn('cannot actually send SMS message -- twilio is not fully configured:', message.id)
@@ -149,16 +174,7 @@ async function sendMessage(message, trx) {
       log.warn('Message not marked as a twilio message', message.id)
     }
 
-    const useMultipleMessagingServices = !!process.env.TWILIO_MESSAGE_SERVICE_SIDS
-    let messageServiceSid;
-    let messagingServiceSid
-    if (!useMultipleMessagingServices) {
-      messagingServiceSid = process.env.TWILIO_MESSAGE_SERVICE_SID
-    } else {
-      const messagingServiceIds = process.env.TWILIO_MESSAGE_SERVICE_SIDS.split(',')
-      messagingServiceSid = messagingServiceIds[deterministicIntWithinRange(message.contact_number, messagingServiceIds.length)]
-    }
-
+    const messagingServiceSid = getMessageServiceSID(message.contact_number)
 
     const messageParams = Object.assign({
       to: message.contact_number,
