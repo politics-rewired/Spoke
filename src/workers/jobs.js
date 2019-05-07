@@ -895,10 +895,11 @@ export async function exportCampaign(job) {
   const messageCsv = Papa.unparse(finalCampaignMessages)
 
   if (process.env.AWS_ACCESS_AVAILABLE || (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)) {
+    const objectKeyPrefix = process.env.AWS_S3_KEY_PREFIX || ''
     try {
       const s3bucket = new AWS.S3({ params: { Bucket: process.env.AWS_S3_BUCKET_NAME } })
       const campaignTitle = campaign.title.replace(/ /g, '_').replace(/\//g, '_')
-      const key = `${campaignTitle}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.csv`
+      const key = `${objectKeyPrefix}${campaignTitle}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.csv`
       const messageKey = `${key}-messages.csv`
       let params = { Key: key, Body: campaignCsv }
       await s3bucket.putObject(params).promise()
