@@ -103,7 +103,7 @@ class Home extends React.Component {
           <a
             id="login"
             className={css(styles.link_dark_bg)}
-            href="https://www.bernietext.com/auth/login/slack/"
+            href="/login"
             onClick={this.handleOrgInviteClick}
           >
             Login and get started
