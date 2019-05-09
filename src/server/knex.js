@@ -62,10 +62,18 @@ if (NODE_ENV === 'test') {
   }
 } else if (DATABASE_URL) {
   const dbType = DATABASE_URL.match(/^\w+/)[0]
+  const mySqlAfterCreate = function (conn, done) {
+    // Set connection to utf8mb4 collation
+    const setCollation = 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;'
+    conn.query(setCollation, function (error, _results, _fields) {
+      done(error, conn)
+    })
+  }
+  const afterCreate = (/mysql/.test(dbType) ? mySqlAfterCreate : undefined)
   config = {
     client: (/postgres/.test(dbType) ? 'pg' : dbType),
     connection: DATABASE_URL,
-    pool: { min, max, idleTimeoutMillis, reapIntervalMillis },
+    pool: { min, max, idleTimeoutMillis, reapIntervalMillis, afterCreate },
     ssl: useSSL
   }
 } else {
