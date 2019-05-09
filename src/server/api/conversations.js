@@ -359,13 +359,8 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
             campaign_id: campaignId,
             user_id: newTexterId
           })
-          .returning('*')
-        // MySQL does not support `RETURNING` so we do some acrobatics to get the new assignment ID
+          .returning('id')
         assignmentId = inserted[0]
-          ? inserted[0].id
-            ? inserted[0].id
-            : inserted[0]
-          : inserted.id
       }
 
       // Update the contact's assignment
@@ -380,6 +375,7 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
 
       // Update the conversations messages
       await r.knex('message')
+        .transacting(trx)
         .update({ assignment_id: assignmentId })
         .whereIn('campaign_contact_id', contactIds)
     }))
@@ -409,16 +405,14 @@ export async function reassignConversations(campaignIdContactIdsMap, campaignIdM
     campaignIdAssignmentIdMap.set(campaignId, assignment.id)
   }
 
-  // do the reassignment
-  const returnCampaignIdAssignmentIds = []
+  const returnCampaignIdAssignmentIds = await r.knex.transaction(async trx => {
+    const result = []
 
-  // TODO(larry) do this in a transaction!
-  try {
     for (const [campaignId, campaignContactIds] of campaignIdContactIdsMap) {
       const assignmentId = campaignIdAssignmentIdMap.get(campaignId)
-
       await r
         .knex('campaign_contact')
+        .transacting(trx)
         .where('campaign_id', campaignId)
         .whereIn('id', campaignContactIds)
         .update({
@@ -426,24 +420,25 @@ export async function reassignConversations(campaignIdContactIdsMap, campaignIdM
           updated_at: r.knex.fn.now()
         })
 
-      returnCampaignIdAssignmentIds.push({
+      result.push({
         campaignId,
         assignmentId: assignmentId.toString()
       })
     }
+
     for (const [campaignId, messageIds] of campaignIdMessagesIdsMap) {
       const assignmentId = campaignIdAssignmentIdMap.get(campaignId)
-
       await r
         .knex('message')
+        .transacting(trx)
         .whereIn('id', messageIds)
         .update({
           assignment_id: assignmentId
         })
     }
-  } catch (error) {
-    log.error(error)
-  }
+
+    return result
+  })
 
   return returnCampaignIdAssignmentIds
 }

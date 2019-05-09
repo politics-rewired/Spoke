@@ -141,7 +141,7 @@ export async function currentAssignmentTarget() {
     is_archived: false,
     is_autoassign_enabled: true
   }).andWhere(
-    r.knex.raw(`texting_hours_end > hour(CONVERT_TZ(UTC_TIMESTAMP(), 'UTC', campaign.timezone))`)
+    r.knex.raw(`texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone campaign.timezone))`)
   )
 
   const hasContactsOfTypeToAssign = await Promise.all(eligibleCampaigns.map(async campaign => {
@@ -219,10 +219,12 @@ export async function giveUserMoreTexts(auth0Id, count) {
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
   const updated_result = await r.knex.transaction(async trx => {
     let assignmentId;
-    const existingAssignment = (await r.knex("assignment").where({
-      user_id: user.id,
-      campaign_id: campaignIdToAssignTo
-    }))[0];
+    const existingAssignment = await r.knex("assignment")
+      .where({
+        user_id: user.id,
+        campaign_id: campaignIdToAssignTo
+      })
+      .first();
 
     if (!existingAssignment) {
       const inserted = await r
@@ -232,13 +234,8 @@ export async function giveUserMoreTexts(auth0Id, count) {
           campaign_id: campaignIdToAssignTo,
           max_contacts: countToAssign
         })
-        .returning("*");
-      console.log(inserted);
+        .returning('id');
       assignmentId = inserted[0]
-        ? inserted[0].id
-          ? inserted[0].id
-          : inserted[0]
-        : inserted.id;
     } else {
       assignmentId = existingAssignment.id;
     }
@@ -258,6 +255,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
       UNSENT: 'needsMessage'
     }[assignmentInfo.type]
 
+    // TODO - MySQL specific
     const ids = await r
       .knex("campaign_contact")
       .select("id")

@@ -29,6 +29,7 @@ export function timestamp() {
     .date()
     .required()
     .allowNull(false)
+    // TODO - this may not be UTC (hopefully thinky gets this right though...)
     .default(r.now())
 }
 

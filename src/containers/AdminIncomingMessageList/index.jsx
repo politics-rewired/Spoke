@@ -79,6 +79,7 @@ export class AdminIncomingMessageList extends Component {
       assignmentsFilter,
       contactNameFilter: undefined,
       needsRender: false,
+      // TODO - this is local timezone, not UTC
       utc: Date.now().toString(),
       campaigns: [],
       reassignmentTexters: [],
@@ -180,6 +181,7 @@ export class AdminIncomingMessageList extends Component {
       }
     }
 
+    // TODO - this is local timezone, not UTC
     newState.utc = Date.now().toString()
     this.setState(newState)
   }
@@ -235,6 +237,7 @@ export class AdminIncomingMessageList extends Component {
     )
 
     this.setState({
+      // TODO - this is local timezone, not UTC
       utc: Date.now().toString(),
       needsRender: true
     })

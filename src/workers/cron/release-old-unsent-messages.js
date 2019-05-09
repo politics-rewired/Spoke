@@ -36,10 +36,12 @@ async function main() {
   const campaignContactIdsToRelease = selectResult[0].map(rdp => rdp.id);
 
   const updateResult = await db("campaign_contact")
+    // TODO - MySQL Specific. use knex.fn.now()
     .update({
       assignment_id: null,
       updated_at: db.raw("now()")
     })
+    // TODO - MySQL Specific. Getting contactIds can be done in subquery
     .whereIn("id", campaignContactIdsToRelease);
 
   return `Released ${updateResult} unsent initials that had stayed untouched for the last hour`;

@@ -64,3 +64,24 @@ Suggested steps for testing Spoke. These steps allow us to see if Spoke's 'basic
 4. As an Admin, disable Enforce texting hours
 5. As a texter, verify that you can text any contact
 
+### Reassigning Selected Conversations
+1. As an Admin, create a campaign with ~20 contacts. Assign these contacts.
+2. Visit **Message Review** and filter by the above campaign.
+3. Reassign these contacts to another user.
+
+### Escalating a Conversation
+1. Set a dedicated escalation user
+2. In a conversation, complete the escalate button confirmation workflow.
+3. Ensure conversation appears in Escalated Convos
+
+### Check Opt-Out/In from Conversation Review
+1. Open conversation in **Message Review**
+2. Opt the contact out
+3. Confirm this change has taken effect
+4. Opt the contact in
+5. Confirm this change has taken effect
+
+### Check Editing Question Responses from Conversation Review
+1. Open conversation in **Message Review**
+2. Edit a question response value
+3. Confirm this change has taken effect

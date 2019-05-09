@@ -415,6 +415,7 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
 
   const sendBeforeDate = sendBefore ? sendBefore.toDate() : null;
 
+  // TODO - this is local timezone, not UTC
   if (sendBeforeDate && sendBeforeDate <= Date.now()) {
     throw new GraphQLError(
       "Outside permitted texting time for this recipient"
@@ -1011,6 +1012,7 @@ const rootMutations = {
             }
           })
         }
+        // TODO - MySQL Specific. This should be an inline subquery
         const campaignIds = await campaignIdQuery
 
         const interactionStepsToChange = await r.knex('interaction_step')
@@ -1304,6 +1306,7 @@ const rootMutations = {
           .del();
 
         // Update all "cached" values for campaign contacts
+        // TODO - MySQL Specific. Fetching contactIds can be done in a subquery
         const contactUpdates = r.knex('campaign_contact')
           .transacting(trx)
           .leftJoin("campaign", "campaign_contact.campaign_id", "campaign.id")
