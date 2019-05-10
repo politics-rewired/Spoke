@@ -152,8 +152,6 @@ export async function uploadContacts(job) {
   const organization = await Organization.get(campaign.organization_id)
   const orgFeatures = JSON.parse(organization.features || '{}')
 
-  const jobMessages = []
-
   await r.table('campaign_contact')
     .getAll(campaignId, { index: 'campaign_id' })
     .delete()
@@ -178,36 +176,55 @@ export async function uploadContacts(job) {
     }
   }
 
-  const contactChunks = _.chunk(contacts, CHUNK_SIZE)
-  let chunksCompleted = 0
-  await Promise.all(contactChunks.map(async chunk => {
-    chunksCompleted = chunksCompleted + 1
-    const percentComplete = Math.round(chunksCompleted / contactChunks.length * 100)
-    await updateJob(job, percentComplete)
-    await CampaignContact.save(chunk)
-  }))
+  const jobMessages = await r.knex.transaction(async trx => {
+    const resultMessages = []
 
-  const deleteOptOutCells = await r.knex('campaign_contact')
-    .whereIn('cell', getOptOutSubQuery(campaign.organization_id))
-    .where('campaign_id', campaignId)
-    .delete()
+    const contactChunks = _.chunk(contacts, CHUNK_SIZE)
+    let chunksCompleted = 0
+    await Promise.all(contactChunks.map(async chunk => {
+      chunksCompleted = chunksCompleted + 1
+      const percentComplete = Math.round(chunksCompleted / contactChunks.length * 100)
+      await updateJob(job, percentComplete)
+      try {
+        await trx('campaign_contact').insert(chunk)
+      } catch (exc) {
+        console.error('Error inserting contacts:', exc)
+        throw exc
+      }
+    }))
 
-  if (deleteOptOutCells) {
-    jobMessages.push(`Number of contacts excluded due to their opt-out status: ${deleteOptOutCells}`)
-  }
+    try {
+      const deleteOptOutCells = await trx('campaign_contact')
+        .whereIn('cell', getOptOutSubQuery(campaign.organization_id))
+        .where('campaign_id', campaignId)
+        .delete()
 
-  const cellsToExclude = await r.knex('campaign_contact')
-    .whereIn('campaign_id', excludeCampaignIds)
-    .pluck('cell')
-  const exclusionCellCount = await r.knex('campaign_contact')
-    // TODO - MySQL Specific. cellsToExclude should be
-    .whereIn('cell', cellsToExclude)
-    .where('campaign_id', campaignId)
-    .del()
+        if (deleteOptOutCells) {
+          resultMessages.push(`Number of contacts excluded due to their opt-out status: ${deleteOptOutCells}`)
+        }
+    } catch (exc) {
+      console.error('Error deleting opt-outs:', exc)
+      throw exc
+    }
 
-  if (exclusionCellCount) {
-    jobMessages.push(`Number of contacts excluded due to campaign exclusion list: ${exclusionCellCount}`)
-  }
+    try {
+      const exclusionCellCount = await trx('campaign_contact')
+        .whereIn('cell', function() {
+          this.select('cell').from('campaign_contact').whereIn('campaign_id', excludeCampaignIds)
+        })
+        .where('campaign_id', campaignId)
+        .del()
+
+      if (exclusionCellCount) {
+        resultMessages.push(`Number of contacts excluded due to campaign exclusion list: ${exclusionCellCount}`)
+      }
+    } catch (exc) {
+      console.error('Error deleting excluded contacts:', exc)
+      throw exc
+    }
+
+    return resultMessages
+  })
 
   if (job.id) {
     if (jobMessages.length) {
