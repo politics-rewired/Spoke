@@ -34,7 +34,8 @@ class AdminCampaignList extends React.Component {
   }
 
   handleClickNewButton = async () => {
-    const { organizationId, router } = this.props.params
+    const { router, params } = this.props
+    const { organizationId } = params
     this.setState({ isCreating: true })
     const newCampaign = await this.props.mutations.createCampaign({
       title: 'New Campaign',
