@@ -32,7 +32,7 @@ async function main() {
     limit 1
   `);
 
-  const lastReport = results[0][0];
+  const lastReport = results.fields[0];
 
   let period_starts_at, period_ends_at;
 
