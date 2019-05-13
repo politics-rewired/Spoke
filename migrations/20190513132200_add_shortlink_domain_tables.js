@@ -18,6 +18,7 @@ exports.up = function(knex, Promise) {
     table.increments('id').primary()
     table.text('domain').notNullable()
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
+    table.timestamp('healthy_again_at')
 
     table.index(['domain', 'created_at'])
   })
