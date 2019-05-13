@@ -12,6 +12,7 @@ import QuestionResponse from './question-response'
 import OptOut from './opt-out'
 import JobRequest from './job-request'
 import Invite from './invite'
+import { LinkDomain, UnhealthyLinkDomain } from './link-domain'
 import CannedResponse from './canned-response'
 import UserOrganization from './user-organization'
 import UserCell from './user-cell'
@@ -57,7 +58,9 @@ const tableList = [
   'question_response',
   'user_cell',
   'user_organization',
-  'zip_code' // good candidate (or by contact)?
+  'zip_code', // good candidate (or by contact)?
+  'link_domain',
+  'unhealthy_link_domain'
 ]
 
 function createTablesIfNecessary() {
@@ -97,7 +100,9 @@ const createLoaders = () => ({
   pendingMessagePart: createLoader(PendingMessagePart),
   questionResponse: createLoader(QuestionResponse),
   userCell: createLoader(UserCell),
-  userOrganization: createLoader(UserOrganization)
+  userOrganization: createLoader(UserOrganization),
+  linkDomain: createLoader(LinkDomain),
+  unhealthyLinkDomain: createLoader(UnhealthyLinkDomain)
 })
 
 const r = thinky.r
@@ -126,5 +131,7 @@ export {
   UserOrganization,
   User,
   ZipCode,
-  Log
+  Log,
+  LinkDomain,
+  UnhealthyLinkDomain
 }

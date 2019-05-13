@@ -57,6 +57,7 @@ import {
 } from "./errors";
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
+import { resolvers as linkDomainResolvers } from "./link-domain"
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import serviceMap from "./lib/services";
 import { resolvers as messageResolvers } from "./message";
@@ -1982,6 +1983,7 @@ export const resolvers = {
   ...cannedResponseResolvers,
   ...questionResponseResolvers,
   ...inviteResolvers,
+  ...linkDomainResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },

@@ -30,6 +30,7 @@ import {
   resolvers as cannedResponseResolvers
 } from './canned-response'
 import { schema as inviteSchema, resolvers as inviteResolvers } from './invite'
+import { schema as linkDomainSchema } from './link-domain'
 
 
 const rootSchema = `
@@ -268,5 +269,6 @@ export const schema = [
   questionResponseSchema,
   questionSchema,
   inviteSchema,
+  linkDomainSchema,
   conversationSchema
 ]
