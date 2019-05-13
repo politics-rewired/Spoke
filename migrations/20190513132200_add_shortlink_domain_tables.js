@@ -2,12 +2,16 @@
 exports.up = function(knex, Promise) {
   const linkDomainPromise = knex.schema.createTable('link_domain', table => {
     table.increments('id').primary()
+    table.integer('organization_id').notNullable()
     table.text('domain').notNullable().unique().index()
     table.integer('max_usage_count').notNullable()
     table.integer('current_usage_count').notNullable().default(0)
     table.boolean('is_manually_disabled').notNullable().default(false)
     table.timestamp('cycled_out_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
+
+    table.index('organization_id')
+    table.foreign('organization_id').references('organization.id')
   })
 
   const unhealthyDomainPromise = knex.schema.createTable('unhealthy_link_domain', table => {
