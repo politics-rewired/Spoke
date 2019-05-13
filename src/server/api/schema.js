@@ -1758,7 +1758,7 @@ const rootMutations = {
             `
 
             const result = await r.knex.raw(ccsAvailableQuery)
-            return result[0].length > 0;
+            return result.fields.length > 0;
           })()
 
           if (textsAvailable) {
