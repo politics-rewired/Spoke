@@ -1500,31 +1500,29 @@ const rootMutations = {
         "Mark Campaign for Second Pass", will only mark contacts for a second
         pass that do not have a more recently created membership in another campaign.
       */
-      const skippingCells = await r.knex('campaign_contact')
-        .select('cell')
-        .where({
-          campaign_id: parseInt(campaignId),
-          message_status: 'messaged'
-        })
-        .whereRaw(`
-          campaign_contact.cell in (
-            select cell
-            from campaign_contact as other_campaign_contact
-            where other_campaign_contact.created_at > campaign_contact.created_at
+      const updateResultRaw = await r.knex.raw(`
+        update
+          campaign_contact as current_contact
+        set
+          message_status = 'needsMessage'
+        where
+          current_contact.message_status = 'messaged'
+          and current_contact.campaign_id = ?
+          and not exists (
+            select
+              cell
+            from
+              campaign_contact as newer_contact
+            where
+              newer_contact.cell = current_contact.cell
+              and newer_contact.created_at > current_contact.created_at
+            limit 1
           )
-        `)
+        ;
+      `, [parseInt(campaignId)])
+      const updateResult = updateResultRaw.rowCount
 
-      const updateResult = await r.knex('campaign_contact')
-          .update({ message_status: 'needsMessage' })
-          .where({
-            campaign_id: parseInt(campaignId),
-            message_status: 'messaged'
-          })
-          .whereNotIn('cell', skippingCells.map(cc => cc.cell))
-
-      return `Marked ${updateResult} campaign contacts for a second pass.\
-        Did not mark ${skippingCells.length} contacts because they were\
-        present in another, more recent campaign.`
+      return `Marked ${updateResult} campaign contacts for a second pass.`
     },
 
     megaReassignCampaignContacts: async (
