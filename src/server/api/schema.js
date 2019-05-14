@@ -1516,7 +1516,6 @@ const rootMutations = {
             where
               newer_contact.cell = current_contact.cell
               and newer_contact.created_at > current_contact.created_at
-            limit 1
           )
         ;
       `, [parseInt(campaignId)])
