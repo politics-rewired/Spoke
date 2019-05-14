@@ -57,6 +57,23 @@ class AdminShortLinkDomains extends Component {
     }
   }
 
+  handleDeleteDomain = async domainId => {
+    this.setState({
+      disabledDomainIds: this.state.disabledDomainIds.concat([domainId])
+    })
+    try {
+      const response = await this.props.mutations.deleteLinkDomain(domainId)
+      if (response.errors) throw new Error(response.errors)
+      await this.props.shortLinkDomains.refetch()
+    } catch (exc) {
+      this.setState({ webRequestError: exc })
+    } finally {
+      this.setState({
+        disabledDomainIds: this.state.disabledDomainIds.filter(disabledId => disabledId !== domainId)
+      })
+    }
+  }
+
   render() {
     const { shortLinkDomains } = this.props
     const { disabledDomainIds, webRequestError, showAddDomainDialog, addDomainIsWorking } = this.state
@@ -85,6 +102,7 @@ class AdminShortLinkDomains extends Component {
           domains={linkDomains}
           disabledDomainIds={disabledDomainIds}
           onManualDisableToggle={this.handleManualDisableToggle}
+          onDeleteDomain={this.handleDeleteDomain}
         />
         <FloatingActionButton
           style={theme.components.floatingButton}
@@ -181,6 +199,17 @@ const mapMutationsToProps = ({ ownProps }) => ({
       payload: {
         isManuallyDisabled
       }
+    }
+  }),
+  deleteLinkDomain: (domainId) => ({
+    mutation: gql`
+      mutation deleteLinkDomain($organizationId: String!, $domainId: String!) {
+        deleteLinkDomain(organizationId: $organizationId, domainId: $domainId)
+      }
+    `,
+    variables: {
+      organizationId: ownProps.params.organizationId,
+      domainId
     }
   })
 })

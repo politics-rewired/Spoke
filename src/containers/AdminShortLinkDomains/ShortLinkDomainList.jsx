@@ -4,10 +4,12 @@ import moment from 'moment'
 
 import DataTables from 'material-ui-datatables'
 import Toggle from 'material-ui/Toggle'
+import IconButton from 'material-ui/IconButton'
 import CheckCircleIcon from 'material-ui/svg-icons/action/check-circle'
 import BlockIcon from 'material-ui/svg-icons/content/block'
 import ThumbUpIcon from 'material-ui/svg-icons/action/thumb-up'
 import ThumbDownIcon from 'material-ui/svg-icons/action/thumb-down'
+import DeleteForeverIcon from 'material-ui/svg-icons/action/delete-forever'
 import { red500, green500 } from 'material-ui/styles/colors'
 
 class ShortLinkDomainList extends Component {
@@ -41,7 +43,7 @@ class ShortLinkDomainList extends Component {
         return (
           <Toggle
             toggled={value}
-            disabled={row.isToggleDisabled}
+            disabled={row.isRowDisabled}
             onToggle={this.createHandleDisableToggle(row.id)}
           />
         )
@@ -64,6 +66,19 @@ class ShortLinkDomainList extends Component {
       key: 'createdAt',
       label: 'Created',
       render: (value, row) => new Date(value).toLocaleString()
+    }, {
+      label: '',
+      style: { width: '50px' },
+      render: (value, row) => {
+        return (
+          <IconButton
+            disabled={row.isRowDisabled}
+            onClick={this.createHandleDeleteClick(row.id)}
+          >
+            <DeleteForeverIcon color={red500} />
+          </IconButton>
+        )
+      }
     }
   ])
 
@@ -74,6 +89,15 @@ class ShortLinkDomainList extends Component {
     event.preventDefault()
 
     this.props.onManualDisableToggle(domainId, value)
+  }
+
+  createHandleDeleteClick = domainId => event => {
+    // These don't appear to be doing anything to stop handleCellClick being called...
+    event.stopPropagation()
+    event.nativeEvent.stopImmediatePropagation()
+    event.preventDefault()
+
+    this.props.onDeleteDomain(domainId)
   }
 
   handleCellClick = (rowIndex, columnIndex, row, cellValue, args) => {
@@ -95,8 +119,8 @@ class ShortLinkDomainList extends Component {
   render() {
     let { domains, disabledDomainIds } = this.props
     domains = domains.map(domain => {
-      const isToggleDisabled = disabledDomainIds.indexOf(domain.id) > -1
-      return Object.assign({}, domain, { isToggleDisabled })
+      const isRowDisabled = disabledDomainIds.indexOf(domain.id) > -1
+      return Object.assign({}, domain, { isRowDisabled })
     })
 
     return (
@@ -125,7 +149,8 @@ ShortLinkDomainList.defaultProps = {
 ShortLinkDomainList.propTypes = {
   domains: PropTypes.arrayOf(PropTypes.object).isRequired,
   disabledDomainIds: PropTypes.arrayOf(PropTypes.string),
-  onManualDisableToggle: PropTypes.func.isRequired
+  onManualDisableToggle: PropTypes.func.isRequired,
+  onDeleteDomain: PropTypes.func.isRequired
 }
 
 export default ShortLinkDomainList

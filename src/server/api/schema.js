@@ -1559,13 +1559,34 @@ const rootMutations = {
       if (maxUsageCount === undefined && isManuallyDisabled === undefined) throw new Error('Must supply at least one field to update.')
 
       let query = r.knex('link_domain')
-        .where({ id: domainId })
+        .where({
+          id: domainId,
+          organization_id: organizationId
+        })
         .returning("*")
       if (maxUsageCount !== undefined) query = query.update({ max_usage_count: maxUsageCount })
       if (isManuallyDisabled !== undefined) query = query.update({ is_manually_disabled: isManuallyDisabled })
 
       const linkDomainResult = await query
       return linkDomainResult[0]
+    },
+
+    deleteLinkDomain: async (
+      _ignore,
+      { organizationId, domainId },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true)
+
+      await r.knex('link_domain')
+        .where({
+          id: domainId,
+          organization_id: organizationId
+        })
+        .del()
+
+      return true
     },
 
     megaReassignCampaignContacts: async (

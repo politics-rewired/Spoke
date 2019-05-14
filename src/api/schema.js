@@ -251,6 +251,7 @@ const rootSchema = `
     markForSecondPass(campaignId: String!): String!
     insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!
     updateLinkDomain(organizationId: String!, domainId: String!, payload: UpdateLinkDomain!): LinkDomain!
+    deleteLinkDomain(organizationId: String!, domainId: String!): Boolean!
   }
 
   schema {
