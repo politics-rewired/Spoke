@@ -76,6 +76,64 @@ const JOBS_SAME_PROCESS = !!(
 );
 const JOBS_SYNC = !!(process.env.JOBS_SYNC || global.JOBS_SYNC);
 
+const replaceCurlyApostrophes = rawText => rawText.replace(/[\u2018\u2019]/g, "'")
+
+// From: https://stackoverflow.com/a/1144788
+const escapeRegExp = str => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")
+const replaceAll = (str, find, replace) => str.replace(new RegExp(escapeRegExp(find), 'g'), replace)
+
+const replaceShortLinkDomains = async (organizationId, messageText) => {
+  const domains = await r.knex('link_domain')
+    .where({ organization_id: organizationId })
+    .pluck('domain')
+
+  const checkerReducer = (doesContainShortlink, linkDomain) => {
+    const containsLinkDomain = messageText.indexOf(linkDomain) > -1
+    return doesContainShortlink || containsLinkDomain
+  }
+  const doesContainShortLink = domains.reduce(checkerReducer, false)
+
+  if (!doesContainShortLink) {
+    return messageText
+  }
+
+  // Get next domain
+  const domainRaw = await r.knex.raw(`
+    update
+      link_domain
+    set
+      current_usage_count = (current_usage_count + 1) % max_usage_count,
+      cycled_out_at = case when (current_usage_count + 1) % max_usage_count = 0 then now() else cycled_out_at end
+    where
+      id = (
+        select
+          id
+        from
+          link_domain
+        where
+          is_manually_disabled = false
+        and not exists (
+          select 1
+          from unhealthy_link_domain
+          where unhealthy_link_domain.domain = link_domain.domain
+        )
+        order by
+          cycled_out_at asc,
+          current_usage_count asc
+        limit 1
+        for update
+      )
+    returning link_domain.domain;
+  `)
+  const targetDomain = domainRaw.rows[0].domain
+
+  const replacerReducer = (text, domain) => {
+    return replaceAll(text, domain, targetDomain)
+  }
+  const finalMessageText = domains.reduce(replacerReducer, messageText)
+  return finalMessageText
+}
+
 async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   const {
     title,
@@ -380,8 +438,8 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
     throw new GraphQLError("Message was longer than the limit");
   }
 
-  const replaceCurlyApostrophes = rawText =>
-    rawText.replace(/[\u2018\u2019]/g, "'");
+  const escapedApostrophes = replaceCurlyApostrophes(text)
+  const replacedDomainsText =  await replaceShortLinkDomains(record.organization_id, escapedApostrophes)
 
   let contactTimezone = {};
   if (record.contact_timezone_offset) {
@@ -426,7 +484,7 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
   const toInsert = {
     user_id: user.id,
     campaign_contact_id: campaignContactId,
-    text: replaceCurlyApostrophes(text),
+    text: replacedDomainsText,
     contact_number: contactNumber,
     user_number: "",
     assignment_id: message.assignmentId,
