@@ -100,22 +100,6 @@ class ShortLinkDomainList extends Component {
     this.props.onDeleteDomain(domainId)
   }
 
-  handleCellClick = (rowIndex, columnIndex, row, cellValue, args) => {
-    console.log(rowIndex, columnIndex, row, cellValue, args)
-  }
-
-  handleCellDoubleClick = args => {
-
-  }
-
-  handleFilterValueChange = value => {
-
-  }
-
-  handleSortOrderChange = (key, order) => {
-
-  }
-
   render() {
     let { domains, disabledDomainIds } = this.props
     domains = domains.map(domain => {
@@ -133,10 +117,6 @@ class ShortLinkDomainList extends Component {
         showHeaderToolbar={false}
         showFooterToolbar={false}
         showCheckboxes={false}
-        onCellClick={this.handleCellClick}
-        onCellDoubleClick={this.handleCellDoubleClick}
-        onFilterValueChange={this.handleFilterValueChange}
-        onSortOrderChange={this.handleSortOrderChange}
       />
     )
   }
