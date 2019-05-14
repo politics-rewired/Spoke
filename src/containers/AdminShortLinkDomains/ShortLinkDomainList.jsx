@@ -4,8 +4,10 @@ import moment from 'moment'
 
 import DataTables from 'material-ui-datatables'
 import Toggle from 'material-ui/Toggle'
-import CheckCircle from 'material-ui/svg-icons/action/check-circle'
-import Warning from 'material-ui/svg-icons/alert/warning'
+import CheckCircleIcon from 'material-ui/svg-icons/action/check-circle'
+import WarningIcon from 'material-ui/svg-icons/alert/warning'
+import ThumbUpIcon from 'material-ui/svg-icons/action/thumb-up'
+import ThumbDownIcon from 'material-ui/svg-icons/action/thumb-down'
 import { red500, green500 } from 'material-ui/styles/colors'
 
 class ShortLinkDomainList extends Component {
@@ -17,8 +19,8 @@ class ShortLinkDomainList extends Component {
       render: (value, row) => {
         const isEligible = row.isHealthy && !row.isManuallyDisabled
         return isEligible
-          ? <CheckCircle color={green500} />
-          : <Warning color={red500} />
+          ? <CheckCircleIcon color={green500} />
+          : <WarningIcon color={red500} />
       }
     }, {
       key: 'domain',
@@ -49,13 +51,9 @@ class ShortLinkDomainList extends Component {
       label: 'Health',
       tooltip: 'Health of the domain based on text delivery report summaries.',
       render: (value, row) => {
-        return (
-          <div style={{
-            height: '20px',
-            width: '33px',
-            backgroundColor: value ? 'green' : 'red'
-          }} />
-        )
+        return value
+          ? <ThumbUpIcon color={green500} />
+          : <ThumbDownIcon color={red500} />
       }
     }, {
       key: 'cycledOutAt',
