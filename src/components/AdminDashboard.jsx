@@ -92,6 +92,10 @@ class AdminDashboard extends React.Component {
       path: 'bulk-script-editor',
       role: 'ADMIN'
     }, {
+      name: 'Short Link Domains',
+      path: 'short-link-domains',
+      role: 'ADMIN'
+    }, {
       name: 'Settings',
       path: 'settings',
       role: 'SUPERVOLUNTEER'
