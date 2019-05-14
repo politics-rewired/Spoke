@@ -5,7 +5,7 @@ import moment from 'moment'
 import DataTables from 'material-ui-datatables'
 import Toggle from 'material-ui/Toggle'
 import CheckCircleIcon from 'material-ui/svg-icons/action/check-circle'
-import WarningIcon from 'material-ui/svg-icons/alert/warning'
+import BlockIcon from 'material-ui/svg-icons/content/block'
 import ThumbUpIcon from 'material-ui/svg-icons/action/thumb-up'
 import ThumbDownIcon from 'material-ui/svg-icons/action/thumb-down'
 import { red500, green500 } from 'material-ui/styles/colors'
@@ -20,7 +20,7 @@ class ShortLinkDomainList extends Component {
         const isEligible = row.isHealthy && !row.isManuallyDisabled
         return isEligible
           ? <CheckCircleIcon color={green500} />
-          : <WarningIcon color={red500} />
+          : <BlockIcon color={red500} />
       }
     }, {
       key: 'domain',
