@@ -150,6 +150,11 @@ const rootSchema = `
     messageIds: [Int]!
   }
 
+  input UpdateLinkDomain {
+    maxUsageCount: Int
+    isManuallyDisabled: Boolean
+  }
+
   enum ReleaseActionTarget {
     UNSENT
     UNREPLIED
@@ -244,6 +249,7 @@ const rootSchema = `
     requestTexts(count: Int!, email: String!, organizationId: String!): String!
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Int): String!
     markForSecondPass(campaignId: String!): String!
+    updateLinkDomain(organizationId: String!, domainId: String!, payload: UpdateLinkDomain!): LinkDomain!
   }
 
   schema {

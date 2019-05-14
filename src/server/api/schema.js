@@ -1528,6 +1528,27 @@ const rootMutations = {
         present in another, more recent campaign.`
     },
 
+    updateLinkDomain: async (
+      _ignore,
+      { organizationId, domainId, payload },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      const { maxUsageCount, isManuallyDisabled } = payload
+      if (maxUsageCount === undefined && isManuallyDisabled === undefined) throw new Error('Must supply at least one field to update.')
+
+      let query = r.knex('link_domain')
+        .where({ id: domainId })
+        .returning("*")
+      if (maxUsageCount !== undefined) query = query.update({ max_usage_count: maxUsageCount })
+      if (isManuallyDisabled !== undefined) query = query.update({ is_manually_disabled: isManuallyDisabled })
+
+      const linkDomainResult = await query
+      return linkDomainResult[0]
+    },
+
     megaReassignCampaignContacts: async (
       _ignore,
       { organizationId, campaignIdsContactIds, newTexterUserIds },

@@ -4,6 +4,9 @@ import gql from 'graphql-tag'
 import { connect } from 'react-apollo'
 
 import FloatingActionButton from 'material-ui/FloatingActionButton'
+import Dialog from 'material-ui/Dialog'
+import FlatButton from 'material-ui/FlatButton'
+import RaisedButton from 'material-ui/RaisedButton'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 
 import theme from '../../styles/theme'
@@ -13,25 +16,31 @@ import ShortLinkDomainList from './ShortLinkDomainList'
 
 class AdminShortLinkDomains extends Component {
   state = {
-    disabledDomainIds: []
+    disabledDomainIds: [],
+    webRequestError: undefined
   }
 
-  handleManualDisableToggle = (domainId, value) => {
+  handleManualDisableToggle = async (domainId, isManuallyDisabled) => {
     this.setState({
       disabledDomainIds: this.state.disabledDomainIds.concat([domainId])
     })
-    // simulate mutation
-    console.log(`sending request... ${domainId}, ${value}`)
-    setTimeout(() => {
+    try {
+      const response = await this.props.mutations.setDomainManuallyDisabled(domainId, isManuallyDisabled)
+      if (response.errors) throw new Error(response.errors)
+    } catch (exc) {
+      this.setState({ webRequestError: exc })
+    } finally {
       this.setState({
         disabledDomainIds: this.state.disabledDomainIds.filter(disabledId => disabledId !== domainId)
       })
-    }, 2000)
+    }
   }
+
+  handleErrorDialogClose = () => this.setState({ webRequestError: undefined })
 
   render() {
     const { shortLinkDomains } = this.props
-    const { disabledDomainIds } = this.state
+    const { disabledDomainIds, webRequestError } = this.state
 
     if (shortLinkDomains.loading) {
       return <LoadingIndicator />
@@ -42,6 +51,14 @@ class AdminShortLinkDomains extends Component {
     }
 
     const { linkDomains } = shortLinkDomains.organization
+
+    const errorActions = [
+      <FlatButton
+        label="Close"
+        primary={true}
+        onClick={this.handleErrorDialogClose}
+      />
+    ]
 
     return (
       <div>
@@ -56,6 +73,17 @@ class AdminShortLinkDomains extends Component {
         >
           <ContentAdd />
         </FloatingActionButton>
+        {webRequestError && (
+          <Dialog
+            title="Error Completing Request"
+            actions={errorActions}
+            modal={false}
+            open={true}
+            onRequestClose={this.handleErrorDialogClose}
+          >
+            {webRequestError.message}
+          </Dialog>
+        )}
       </div>
     )
   }
@@ -90,19 +118,21 @@ const mapQueriesToProps = ({ ownProps }) => ({
 })
 
 const mapMutationsToProps = ({ ownProps }) => ({
-  bulkUpdateScript: (findAndReplace) => ({
+  setDomainManuallyDisabled: (domainId, isManuallyDisabled) => ({
     mutation: gql`
-      mutation bulkUpdateScript($organizationId: String!, $findAndReplace: BulkUpdateScriptInput!) {
-        bulkUpdateScript(organizationId: $organizationId, findAndReplace: $findAndReplace) {
-          campaignId
-          found
-          replaced
+      mutation setDomainManuallyDisabled($organizationId: String!, $domainId: String!, $payload: UpdateLinkDomain!) {
+        updateLinkDomain(organizationId: $organizationId, domainId: $domainId, payload: $payload) {
+          id,
+          isManuallyDisabled
         }
       }
     `,
     variables: {
       organizationId: ownProps.params.organizationId,
-      findAndReplace
+      domainId,
+      payload: {
+        isManuallyDisabled
+      }
     }
   })
 })
