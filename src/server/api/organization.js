@@ -154,7 +154,6 @@ export const resolvers = {
           link_domain.organization_id = ?
         ;
       `, [organization.id])
-      console.log(rawResult.rows)
       return rawResult.rows
     },
     unhealthyLinkDomains: async _ => {
