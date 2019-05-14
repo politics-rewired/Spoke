@@ -6,18 +6,21 @@ import { connect } from 'react-apollo'
 import FloatingActionButton from 'material-ui/FloatingActionButton'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
-import RaisedButton from 'material-ui/RaisedButton'
-import ContentAdd from 'material-ui/svg-icons/content/add'
+import ContentAddIcon from 'material-ui/svg-icons/content/add'
+import CloudUploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 
 import theme from '../../styles/theme'
 import LoadingIndicator from '../../components/LoadingIndicator'
 
 import ShortLinkDomainList from './ShortLinkDomainList'
+import AddDomainDialog from './AddDomainDialog'
 
 class AdminShortLinkDomains extends Component {
   state = {
     disabledDomainIds: [],
-    webRequestError: undefined
+    webRequestError: undefined,
+    showAddDomainDialog: false,
+    addDomainIsWorking: false
   }
 
   handleManualDisableToggle = async (domainId, isManuallyDisabled) => {
@@ -38,9 +41,25 @@ class AdminShortLinkDomains extends Component {
 
   handleErrorDialogClose = () => this.setState({ webRequestError: undefined })
 
+  handleAddDomainClick = () => this.setState({ showAddDomainDialog: true })
+  handleAddDomainDialogClose = () => this.setState({ showAddDomainDialog: false })
+
+  handleAddDomain = async (domain, maxUsageCount) => {
+    this.setState({ showAddDomainDialog: false, addDomainIsWorking: true })
+    try {
+      const response = await this.props.mutations.insertLinkDomain(domain, maxUsageCount)
+      if (response.errors) throw new Error(response.errors)
+      await this.props.shortLinkDomains.refetch()
+    } catch (exc) {
+      this.setState({ webRequestError: exc })
+    } finally {
+      this.setState({ addDomainIsWorking: false })
+    }
+  }
+
   render() {
     const { shortLinkDomains } = this.props
-    const { disabledDomainIds, webRequestError } = this.state
+    const { disabledDomainIds, webRequestError, showAddDomainDialog, addDomainIsWorking } = this.state
 
     if (shortLinkDomains.loading) {
       return <LoadingIndicator />
@@ -69,10 +88,18 @@ class AdminShortLinkDomains extends Component {
         />
         <FloatingActionButton
           style={theme.components.floatingButton}
-          onClick={console.log}
+          disabled={addDomainIsWorking}
+          onClick={this.handleAddDomainClick}
         >
-          <ContentAdd />
+          {addDomainIsWorking
+            ? <CloudUploadIcon />
+            : <ContentAddIcon />}
         </FloatingActionButton>
+        <AddDomainDialog
+          open={showAddDomainDialog}
+          onRequestClose={this.handleAddDomainDialogClose}
+          onAddNewDomain={this.handleAddDomain}
+        />
         {webRequestError && (
           <Dialog
             title="Error Completing Request"
@@ -118,6 +145,27 @@ const mapQueriesToProps = ({ ownProps }) => ({
 })
 
 const mapMutationsToProps = ({ ownProps }) => ({
+  insertLinkDomain: (domain, maxUsageCount) => ({
+    mutation: gql`
+      mutation insertLinkDomain($organizationId: String!, $domain: String!, $maxUsageCount: Int!) {
+        insertLinkDomain(organizationId: $organizationId, domain: $domain, maxUsageCount: $maxUsageCount) {
+          id
+          domain
+          maxUsageCount
+          currentUsageCount
+          isManuallyDisabled
+          isHealthy
+          cycledOutAt
+          createdAt
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.params.organizationId,
+      domain,
+      maxUsageCount,
+    }
+  }),
   setDomainManuallyDisabled: (domainId, isManuallyDisabled) => ({
     mutation: gql`
       mutation setDomainManuallyDisabled($organizationId: String!, $domainId: String!, $payload: UpdateLinkDomain!) {

@@ -1528,6 +1528,25 @@ const rootMutations = {
         present in another, more recent campaign.`
     },
 
+    insertLinkDomain: async (
+      _ignore,
+      { organizationId, domain, maxUsageCount },
+      { user }
+    ) => {
+      // verify permissions
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true)
+
+      const insertResult = await r.knex('link_domain')
+        .insert({
+          organization_id: organizationId,
+          max_usage_count: maxUsageCount,
+          domain
+        })
+        .returning('*')
+
+      return insertResult[0]
+    },
+
     updateLinkDomain: async (
       _ignore,
       { organizationId, domainId, payload },
