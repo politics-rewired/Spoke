@@ -4,9 +4,11 @@ try {
   // do nothing
 }
 
+const { DATABASE_URL } = process.env
+const dbType = DATABASE_URL.match(/^\w+/)[0]
 const config = {
-  client: "mysql",
-  connection: process.env.DATABASE_URL,
+  client: (/postgres/.test(dbType) ? 'pg' : dbType),
+  connection: DATABASE_URL,
   pool: {
     min: 2,
     max: 10
