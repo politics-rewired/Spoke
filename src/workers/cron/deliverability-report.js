@@ -4,6 +4,8 @@ try {
   // do nothing
 }
 
+const groupBy = require('lodash/groupby');
+
 const { DATABASE_URL } = process.env
 const dbType = DATABASE_URL.match(/^\w+/)[0]
 const config = {
@@ -18,6 +20,10 @@ const config = {
 const moment = require("moment");
 const MINUTES_LATER = 10;
 const COMPUTATION_DELAY = 1;
+
+const SENSOR_DOMAIN_MAX_THRESHOLD = 10;
+const SLIDING_WINDOW_SECONDS = 4 * 60 * 60; // 4 hours
+const COOL_DOWN_PERIOD_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 const DOMAIN_ENDINGS = [".com", ".us", ".net", ".io", ".org", ".info", ".news"];
 const DOMAIN_REGEX = new RegExp(
@@ -126,6 +132,89 @@ async function chunkedMain() {
   return chunkedMain();
 }
 
+const deliverabilityReducer = (accumulator, messageGroup) => {
+  let [sent, delivered] = accumulator;
+  sent = sent + messageGroup.message_count;
+  if (messageGroup.send_status.toLowerCase === 'delivered') delivered = delivered + messageGroup.message_count;
+  return [sent, delivered];
+}
+
+async function slidingWindowMain() {
+  const { rows: messages } = await db.raw(`
+    select
+      count(*)::integer as message_count,
+      matched_message.send_status,
+      matched_message.domain,
+      (link_domain.max_usage_count <= ?) as is_sensor_domain
+    from
+      link_domain
+      join
+        (
+          select
+            send_status,
+            lower(substring(text from '.*://([^/]*)')) as domain
+          from
+            message
+          where
+            created_at >= CURRENT_TIMESTAMP - INTERVAL '?? second'
+            and text like '%http%'
+        ) as matched_message
+        on matched_message.domain = link_domain.domain
+    group by
+      matched_message.send_status,
+      matched_message.domain,
+      is_sensor_domain
+  `, [SENSOR_DOMAIN_MAX_THRESHOLD, SLIDING_WINDOW_SECONDS]);
+
+  const sensorDomainMessages = messages.filter(message => message.is_sensor_domain);
+  const [sensorSent, sensorDelivered] = sensorDomainMessages.reduce(deliverabilityReducer, [0, 0]);
+  const sensorDeliverability = sensorDelivered / Math.max(1, sensorSent);
+
+  const workHorseDomains = messages.filter(message => !message.is_sensor_domain);
+  const messageGroupsByDomain = groupBy(workHorseDomains, message => message.domain);
+  const domainDeliverability = Object.keys(messageGroupsByDomain).reduce((accumulator, domain) => {
+    const messageGroups = messageGroupsByDomain[domain];
+    const [sent, delivered] = messageGroups.reduce(deliverabilityReducer, [0, 0]);
+    accumulator[domain] = delivered / Math.max(1, sent);
+    return accumulator;
+  }, {});
+
+  await Promise.all(Object.keys(domainDeliverability).map(async domain => {
+    const deliverability = domainDeliverability[domain];
+    if (deliverability < sensorDeliverability - 0.30) {
+      console.log(`Domain '${domain}' deemed unhealthy with deliverability ${deliverability} over the last ${SLIDING_WINDOW_SECONDS / 60 / 60} hours`);
+      await markDomainUnhealthy(domain);
+    }
+  }));
+
+  // TODO - re-introduce unhealthy domains after a cool down period
+  // await db('unhealthy_link_domain')
+  //   .update({ healthy_again_at: db.fn.now() })
+  //   .whereNull('healthy_again_at')
+  //   .whereRaw(`created_at < CURRENT_TIMESTAMP - INTERVAL '?? second'`, [COOL_DOWN_PERIOD_SECONDS])
+
+  return 'Done';
+}
+
+async function markDomainUnhealthy(domain) {
+  // Check if domain is already marked unhealthy
+  const existingDomain = await db('unhealthy_link_domain')
+    .select('id')
+    .where({ domain })
+    .where('healthy_again_at', '>', db.fn.now())
+    .orWhereNull('healthy_again_at')
+    .first();
+
+  if (existingDomain) {
+    console.log('found one!');
+    return;
+  }
+
+  console.log(`Marking ${domain} as unhealthy.`);
+  await db('unhealthy_link_domain')
+    .insert({ domain });
+}
+
 async function firstMessageSentAt() {
   const firstMessage = await db("message")
     .select("created_at")
@@ -160,7 +249,7 @@ function extractPath(text, domain) {
 }
 
 async function main() {
-  return Promise.all([chunkedMain()])
+  return Promise.all([chunkedMain(), slidingWindowMain()]);
 }
 
 main()
