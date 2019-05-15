@@ -162,9 +162,9 @@ function extractPath(text, domain) {
 main()
   .then(result => {
     console.log(result);
-    process.exit();
+    process.exit(0);
   })
   .catch(error => {
     console.error(error);
-    process.exit();
+    process.exit(1);
   });
