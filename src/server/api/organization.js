@@ -152,6 +152,7 @@ export const resolvers = {
             unhealthy_domains.domain = link_domain.domain
         where
           link_domain.organization_id = ?
+        order by created_at asc
         ;
       `, [organization.id])
       return rawResult.rows
