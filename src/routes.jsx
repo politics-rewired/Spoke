@@ -6,6 +6,7 @@ import AdminCampaignStats from './containers/AdminCampaignStats'
 import AdminPersonList from './containers/AdminPersonList'
 import AdminOptOutList from './containers/AdminOptOutList'
 import AdminBulkScriptEditor from './containers/AdminBulkScriptEditor'
+import AdminShortLinkDomains from './containers/AdminShortLinkDomains'
 import AdminIncomingMessageList from './containers/AdminIncomingMessageList'
 import EscalatedConversationList from './containers/AdminIncomingMessageList/EscalatedConversationList'
 import AdminCampaignEdit from './containers/AdminCampaignEdit'
@@ -46,6 +47,7 @@ export default function makeRoutes(requireAuth = () => {}) {
           <Route path='incoming' component={AdminIncomingMessageList} />
           <Route path='escalated' component={EscalatedConversationList} />
           <Route path='bulk-script-editor' component={AdminBulkScriptEditor} />
+          <Route path='short-link-domains' component={AdminShortLinkDomains} />
           <Route path='settings' component={Settings} />
         </Route>
       </Route>

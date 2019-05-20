@@ -32,5 +32,7 @@ export const schema = `
     currentAssignmentTarget: AssignmentTarget
     escalationUserId: Int
     escalatedConversationCount: Int!
+    linkDomains: [LinkDomain]!
+    unhealthyLinkDomains: [UnhealthyLinkDomain]!
   }
 `

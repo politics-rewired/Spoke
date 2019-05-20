@@ -129,6 +129,46 @@ export const resolvers = {
         return escalatedCount
       }
       return 0
+    },
+    linkDomains: async organization => {
+      const rawResult = await r.knex.raw(`
+        select
+          link_domain.*,
+          (is_unhealthy is null or not is_unhealthy) as is_healthy
+        from
+          link_domain
+        left join
+          (
+            select
+              domain,
+              (healthy_again_at is null or healthy_again_at > now()) as is_unhealthy
+            from
+              unhealthy_link_domain
+            order by
+              created_at desc
+            limit 1
+          ) unhealthy_domains
+          on
+            unhealthy_domains.domain = link_domain.domain
+        where
+          link_domain.organization_id = ?
+        order by created_at asc
+        ;
+      `, [organization.id])
+      return rawResult.rows
+    },
+    unhealthyLinkDomains: async _ => {
+      const rawResult = await r.knex.raw(`
+        select
+          distinct on (domain) *
+        from
+          unhealthy_link_domain
+        order by
+          domain,
+          created_at desc
+        ;
+      `)
+      return rawResult.rows
     }
   }
 }
