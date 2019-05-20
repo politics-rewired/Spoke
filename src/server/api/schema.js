@@ -126,7 +126,12 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
       )
     returning link_domain.domain;
   `, [organizationId])
-  const targetDomain = domainRaw.rows[0].domain
+  const targetDomain = domainRaw.rows[0] && domainRaw.rows[0].domain
+
+  // Skip updating the message text if no healthy target domain was found
+  if (!targetDomain) {
+    return messageText
+  }
 
   const replacerReducer = (text, domain) => {
     return replaceAll(text, domain, targetDomain)
