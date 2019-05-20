@@ -112,6 +112,7 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
           link_domain
         where
           is_manually_disabled = false
+          and organization_id = ?
         and not exists (
           select 1
           from unhealthy_link_domain
@@ -124,7 +125,7 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
         for update
       )
     returning link_domain.domain;
-  `)
+  `, [organizationId])
   const targetDomain = domainRaw.rows[0].domain
 
   const replacerReducer = (text, domain) => {
