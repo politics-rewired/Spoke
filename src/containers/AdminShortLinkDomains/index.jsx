@@ -6,6 +6,7 @@ import { connect } from 'react-apollo'
 import FloatingActionButton from 'material-ui/FloatingActionButton'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
+import RaisedButton from 'material-ui/RaisedButton'
 import ContentAddIcon from 'material-ui/svg-icons/content/add'
 import CloudUploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 
@@ -20,7 +21,8 @@ class AdminShortLinkDomains extends Component {
     disabledDomainIds: [],
     webRequestError: undefined,
     showAddDomainDialog: false,
-    addDomainIsWorking: false
+    addDomainIsWorking: false,
+    warnDeleteDomainId: undefined
   }
 
   handleManualDisableToggle = async (domainId, isManuallyDisabled) => {
@@ -57,9 +59,14 @@ class AdminShortLinkDomains extends Component {
     }
   }
 
-  handleDeleteDomain = async domainId => {
+  handleConfirmDeleteDomain = warnDeleteDomainId => this.setState({ warnDeleteDomainId })
+  handleCancelDeleteDomain = () => this.setState({ warnDeleteDomainId: undefined })
+
+  handleDeleteDomain = async () => {
+    const { warnDeleteDomainId: domainId } = this.state
     this.setState({
-      disabledDomainIds: this.state.disabledDomainIds.concat([domainId])
+      disabledDomainIds: this.state.disabledDomainIds.concat([domainId]),
+      warnDeleteDomainId: undefined
     })
     try {
       const response = await this.props.mutations.deleteLinkDomain(domainId)
@@ -76,7 +83,7 @@ class AdminShortLinkDomains extends Component {
 
   render() {
     const { shortLinkDomains } = this.props
-    const { disabledDomainIds, webRequestError, showAddDomainDialog, addDomainIsWorking } = this.state
+    const { disabledDomainIds, webRequestError, showAddDomainDialog, addDomainIsWorking, warnDeleteDomainId } = this.state
 
     if (shortLinkDomains.loading) {
       return <LoadingIndicator />
@@ -87,6 +94,20 @@ class AdminShortLinkDomains extends Component {
     }
 
     const { linkDomains } = shortLinkDomains.organization
+    const warnDomainName = warnDeleteDomainId && linkDomains.filter(domain => domain.id === warnDeleteDomainId)[0].domain
+
+    const deleteDomainActions = [
+      <FlatButton
+        label="Cancel"
+        primary={false}
+        onClick={this.handleCancelDeleteDomain}
+      />,
+      <RaisedButton
+        label="Delete"
+        primary={true}
+        onClick={this.handleDeleteDomain}
+      />
+    ]
 
     const errorActions = [
       <FlatButton
@@ -102,7 +123,7 @@ class AdminShortLinkDomains extends Component {
           domains={linkDomains}
           disabledDomainIds={disabledDomainIds}
           onManualDisableToggle={this.handleManualDisableToggle}
-          onDeleteDomain={this.handleDeleteDomain}
+          onDeleteDomain={this.handleConfirmDeleteDomain}
         />
         <FloatingActionButton
           style={theme.components.floatingButton}
@@ -118,6 +139,17 @@ class AdminShortLinkDomains extends Component {
           onRequestClose={this.handleAddDomainDialogClose}
           onAddNewDomain={this.handleAddDomain}
         />
+        {warnDomainName && (
+          <Dialog
+            title="Confirm Delete Domain"
+            actions={deleteDomainActions}
+            modal={false}
+            open={true}
+            onRequestClose={this.handleCancelDeleteDomain}
+          >
+            Are you sure you want to delete the short link domain <span style={{ color: '#000000' }}>{warnDomainName}</span>?
+          </Dialog>
+        )}
         {webRequestError && (
           <Dialog
             title="Error Completing Request"
