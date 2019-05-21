@@ -1059,7 +1059,7 @@ const rootMutations = {
     },
 
     bulkUpdateScript: async (_, { organizationId, findAndReplace }, { user, loaders }) => {
-      await accessRequired(user, organizationId, "ADMIN")
+      await accessRequired(user, organizationId, "OWNER")
 
       const scriptUpdatesResult = await r.knex.transaction(async trx => {
         const { searchString, replaceString, includeArchived, campaignTitlePrefixes } = findAndReplace
@@ -1595,7 +1595,7 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true)
+      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true)
 
       const insertResult = await r.knex('link_domain')
         .insert({
@@ -1614,7 +1614,7 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true);
 
       const { maxUsageCount, isManuallyDisabled } = payload
       if (maxUsageCount === undefined && isManuallyDisabled === undefined) throw new Error('Must supply at least one field to update.')
@@ -1638,7 +1638,7 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true)
+      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true)
 
       await r.knex('link_domain')
         .where({

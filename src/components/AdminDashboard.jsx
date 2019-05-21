@@ -83,18 +83,18 @@ class AdminDashboard extends React.Component {
     }, {
       name: 'Escalated Convos',
       path: 'escalated',
-      role: 'SUPERVOLUNTEER',
+      role: 'OWNER',
       badge: {
         count: escalatedConversationCount
       }
     }, {
       name: 'Bulk Script Editor',
       path: 'bulk-script-editor',
-      role: 'ADMIN'
+      role: 'OWNER'
     }, {
       name: 'Short Link Domains',
       path: 'short-link-domains',
-      role: 'ADMIN'
+      role: 'OWNER'
     }, {
       name: 'Settings',
       path: 'settings',
