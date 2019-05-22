@@ -60,7 +60,7 @@ export const applyScript = ({ script, contact, customFields, texter }) => {
   let appliedScript = script;
 
   for (const field of scriptFields) {
-    const re = new RegExp(`${delimit(field)}`, "g");
+    const re = new RegExp(escapeRegExp(`${delimit(field)}`), "g");
     appliedScript = appliedScript.replace(
       re,
       getScriptFieldValue(contact, texter, field)
@@ -68,3 +68,7 @@ export const applyScript = ({ script, contact, customFields, texter }) => {
   }
   return appliedScript;
 };
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
