@@ -205,7 +205,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
   if (!user) {
     throw new Error(`No user found with id ${auth0Id}`);
   }
- 
+
   const assignmentInfo = await currentAssignmentTarget()
   if (!assignmentInfo) {
     throw new Error('Could not find a suitable campaign to assign to.')
@@ -219,7 +219,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
   const updated_result = await r.knex.transaction(async trx => {
     let assignmentId;
-    const existingAssignment = await r.knex("assignment")
+    const existingAssignment = await trx("assignment")
       .where({
         user_id: user.id,
         campaign_id: campaignIdToAssignTo
@@ -227,8 +227,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
       .first();
 
     if (!existingAssignment) {
-      const inserted = await r
-        .knex("assignment")
+      const inserted = await trx("assignment")
         .insert({
           user_id: user.id,
           campaign_id: campaignIdToAssignTo,
@@ -247,60 +246,54 @@ export async function giveUserMoreTexts(auth0Id, count) {
       UNSENT: 'needsMessage'
     }[assignmentInfo.type]
 
-    const { ccUpdateCount, messageUpdateCount } = await r.knex.transaction(async trx => {
-      const ccUpdateRaw = await trx.raw(`
-        update
-          campaign_contact as target_contact
-        set
-          assignment_id = ?,
-          updated_at = now()
-        from
-          (
-            select
-              id
-            from
-              campaign_contact
-            where
-              assignment_id is null
-              and campaign_id = ?
-              and message_status = ?
-              and is_opted_out = false
-            limit ?
-            for update skip locked
-          ) matching_contact
-        where
-          target_contact.id = matching_contact.id
-        ;
-      `, [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign])
-      const ccUpdateCount = ccUpdateRaw.rowCount
+    const { rowCount: ccUpdateCount } = await trx.raw(`
+      update
+        campaign_contact as target_contact
+      set
+        assignment_id = ?,
+        updated_at = now()
+      from
+        (
+          select
+            id
+          from
+            campaign_contact
+          where
+            assignment_id is null
+            and campaign_id = ?
+            and message_status = ?
+            and is_opted_out = false
+          limit ?
+          for update skip locked
+        ) matching_contact
+      where
+        target_contact.id = matching_contact.id
+      ;
+    `, [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign])
 
-      const messageUpdateRaw = await trx.raw(`
-        update
-          message
-        set
-          assignment_id = ?
-        from
-          (
-            select
-              id
-            from
-              campaign_contact
-            where
-              assignment_id is null
-              and campaign_id = ?
-              and message_status = ?
-              and is_opted_out = false
-            limit ?
-            for update skip locked
-          ) matching_contact
-        where
-          message.campaign_contact_id = matching_contact.id
-        ;
-      `, [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign])
-      const messageUpdateCount = messageUpdateRaw.rowCount
-
-      return { ccUpdateCount, messageUpdateCount }
-    })
+    const { rowCount: messageUpdateCount } = await trx.raw(`
+      update
+        message
+      set
+        assignment_id = ?
+      from
+        (
+          select
+            id
+          from
+            campaign_contact
+          where
+            assignment_id is null
+            and campaign_id = ?
+            and message_status = ?
+            and is_opted_out = false
+          limit ?
+          for update skip locked
+        ) matching_contact
+      where
+        message.campaign_contact_id = matching_contact.id
+      ;
+    `, [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign])
 
     console.log(`Updated ${ccUpdateCount} campaign contacts and ${messageUpdateCount} messages.`)
     return ccUpdateCount
