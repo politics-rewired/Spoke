@@ -65,7 +65,7 @@ async function convertMessagePartsToMessage(messageParts) {
     service: 'twilio',
     contactNumber
   })
-  return {
+  return lastMessage && {
     campaign_contact_id: lastMessage && lastMessage.campaign_contact_id,
     contact_number: contactNumber,
     user_number: userNumber,
@@ -315,7 +315,9 @@ async function handleIncomingMessage(message) {
 
   if (process.env.JOBS_SAME_PROCESS) {
     const finalMessage = await convertMessagePartsToMessage([pendingMessagePart])
-    await saveNewIncomingMessage(finalMessage)
+    if (finalMessage) {
+      await saveNewIncomingMessage(finalMessage)
+    }
     await r.knex('pending_message_part').where('id', pendingMessagePart.id).delete()
   }
   return pendingMessagePart.id
