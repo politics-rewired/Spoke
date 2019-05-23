@@ -1044,7 +1044,7 @@ export async function sendMessages(queryFunc, defaultStatus) {
 }
 
 export async function handleIncomingMessageParts() {
-  const messageParts = await r.table('pending_message_part').limit(100)
+  const messageParts = await r.knex('pending_message_part').select('*').limit(100)
   const messagePartsByService = {}
   messageParts.forEach((m) => {
     if (m.service in serviceMap) {
@@ -1074,9 +1074,9 @@ export async function handleIncomingMessageParts() {
     for (let i = 0; i < allPartsCount; i++) {
       const part = allParts[i]
       const serviceMessageId = part.service_id
-      const savedCount = await r.table('message')
-        .getAll(serviceMessageId, { index: 'service_id' })
-        .count()
+      const savedCount = await r.parseCount(r.knex('message')
+        .where({ service_id: serviceMessageId })
+        .count())
       const lastMessage = await getLastMessage({
         contactNumber: part.contact_number,
         service: serviceKey

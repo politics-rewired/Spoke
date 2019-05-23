@@ -60,11 +60,12 @@ async function convertMessagePartsToMessage(messageParts) {
     .map((serviceMessage) => serviceMessage.Body)
     .join('')
 
+  // TODO: this could be a slow query
   const lastMessage = await getLastMessage({
     service: 'twilio',
     contactNumber
   })
-  return new Message({
+  return lastMessage && {
     campaign_contact_id: lastMessage && lastMessage.campaign_contact_id,
     contact_number: contactNumber,
     user_number: userNumber,
@@ -75,7 +76,7 @@ async function convertMessagePartsToMessage(messageParts) {
     assignment_id: lastMessage && lastMessage.assignment_id,
     service: 'twilio',
     send_status: 'DELIVERED'
-  })
+  }
 }
 
 async function findNewCell() {
@@ -301,23 +302,25 @@ async function handleIncomingMessage(message) {
   const contactNumber = getFormattedPhoneNumber(From)
   const userNumber = (To ? getFormattedPhoneNumber(To) : '')
 
-  const pendingMessagePart = new PendingMessagePart({
-    service: 'twilio',
-    service_id: MessageSid,
-    parent_id: null,
-    service_message: JSON.stringify(message),
-    user_number: userNumber,
-    contact_number: contactNumber
-  })
+  const pendingMessagePart = (await r.knex('pending_message_part')
+    .insert({
+      service: 'twilio',
+      service_id: MessageSid,
+      parent_id: null,
+      service_message: JSON.stringify(message),
+      user_number: userNumber,
+      contact_number: contactNumber
+    })
+    .returning('*'))[0]
 
-  const part = await pendingMessagePart.save()
-  const partId = part.id
   if (process.env.JOBS_SAME_PROCESS) {
-    const finalMessage = await convertMessagePartsToMessage([part])
-    await saveNewIncomingMessage(finalMessage)
-    await r.knex('pending_message_part').where('id', partId).delete()
+    const finalMessage = await convertMessagePartsToMessage([pendingMessagePart])
+    if (finalMessage) {
+      await saveNewIncomingMessage(finalMessage)
+    }
+    await r.knex('pending_message_part').where('id', pendingMessagePart.id).delete()
   }
-  return partId
+  return pendingMessagePart.id
 }
 
 function deterministicIntWithinRange(string, maxSize) {

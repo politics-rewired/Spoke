@@ -577,12 +577,12 @@ const rootMutations = {
 
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
-      const lastMessage = await r
-        .table("message")
-        .getAll(contact.assignment_id, { index: "assignment_id" })
-        .filter({ contact_number: contact.cell })
-        .limit(1)(0)
-        .default(null);
+      const lastMessage = await r.knex('message')
+        .where({
+          assignment_id: contact.assignment_id,
+          contact_number: contact.cell
+        })
+        .first()
 
       if (!lastMessage) {
         throw new GraphQLError({
@@ -597,24 +597,22 @@ const rootMutations = {
       const mockId = `mocked_${Math.random()
         .toString(36)
         .replace(/[^a-zA-Z1-9]+/g, "")}`;
-      await saveNewIncomingMessage(
-        new Message({
-          campaign_contact_id: contact.id,
-          contact_number: contactNumber,
-          user_number: userNumber,
-          is_from_contact: true,
-          text: message,
-          service_response: JSON.stringify({
-            fakeMessage: true,
-            userId: user.id,
-            userFirstName: user.first_name
-          }),
-          service_id: mockId,
-          assignment_id: lastMessage.assignment_id,
-          service: lastMessage.service,
-          send_status: "DELIVERED"
-        })
-      );
+      await saveNewIncomingMessage({
+        campaign_contact_id: contact.id,
+        contact_number: contactNumber,
+        user_number: userNumber,
+        is_from_contact: true,
+        text: message,
+        service_response: JSON.stringify({
+          fakeMessage: true,
+          userId: user.id,
+          userFirstName: user.first_name
+        }),
+        service_id: mockId,
+        assignment_id: lastMessage.assignment_id,
+        service: lastMessage.service,
+        send_status: "DELIVERED"
+      });
       return loaders.campaignContact.load(id);
     },
 
