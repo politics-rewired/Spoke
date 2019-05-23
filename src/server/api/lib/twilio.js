@@ -301,7 +301,6 @@ async function handleIncomingMessage(message) {
   const contactNumber = getFormattedPhoneNumber(From)
   const userNumber = (To ? getFormattedPhoneNumber(To) : '')
 
-
   let pendingMessagePart = {
     service: 'twilio',
     service_id: MessageSid,
