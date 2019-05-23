@@ -136,29 +136,28 @@ export async function currentAssignmentTarget() {
 
   if (!campaignContactStatus) { return null }
 
-  const eligibleCampaigns = await r.knex('campaign').where({
-    is_started: true,
-    is_archived: false,
-    is_autoassign_enabled: true
-  }).andWhere(
-    r.knex.raw(`texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone campaign.timezone))`)
-  )
+  const { rows: assignableCampaigns } = await r.knex.raw(`
+    select
+      *
+    from
+      campaign
+    where
+      is_started = true
+      and is_archived = false
+      and is_autoassign_enabled = true
+      and texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone campaign.timezone))
+      and exists (
+        select 1
+        from campaign_contact
+        where
+          campaign_contact.campaign_id = campaign.id
+          and assignment_id is null
+          and message_status = ?
+          and is_opted_out = false
+      )
+    ;
+  `, [campaignContactStatus])
 
-  const hasContactsOfTypeToAssign = await Promise.all(eligibleCampaigns.map(async campaign => {
-    const contacts = await r.knex('campaign_contact')
-      .select('id')
-      .where({
-        assignment_id: null,
-        message_status: campaignContactStatus,
-        is_opted_out: false,
-        campaign_id: campaign.id
-      })
-      .limit(1)
-
-    return contacts.length > 0
-  }))
-
-  const assignableCampaigns = eligibleCampaigns.filter((_campaign, idx) => hasContactsOfTypeToAssign[idx])
   const campaign = assignableCampaigns[0]
 
   if (!campaign) return null
