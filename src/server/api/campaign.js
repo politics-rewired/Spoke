@@ -177,8 +177,9 @@ export const resolvers = {
     datawarehouseAvailable: (campaign, _, { user }) => (
       user.is_superadmin && !!process.env.WAREHOUSE_DB_HOST
     ),
-    pendingJobs: async (campaign) => r.table('job_request')
-      .filter({ campaign_id: campaign.id }).orderBy('updated_at', 'desc'),
+    pendingJobs: async (campaign) => r.knex('job_request')
+        .where({ campaign_id: campaign.id })
+        .orderBy('updated_at', 'desc'),
     texters: async (campaign) =>
       getUsers(campaign.organization_id, null, {campaignId: campaign.id }) ,
     assignments: async (campaign, {assignmentsFilter} ) => {
