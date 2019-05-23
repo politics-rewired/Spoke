@@ -159,8 +159,8 @@ async function copyBetween(source, target, table, greatestTargetId, offset, limi
   try {
     return await copyBatch()
   } catch (ex) {
-    console.log(`[${table}]: caught 08P01, retrying`)
     if (ex.code == '08P01') {
+      console.log(`[${table}]: caught 08P01, retrying`)
       return await copyBatch()
     }
     throw ex;
