@@ -1123,9 +1123,9 @@ export async function handleIncomingMessageParts() {
 
     const messageIdsToDelete = messagePartsToDelete.map((m) => m.id)
     log.info('Deleting message parts', messageIdsToDelete)
-    await r.table('pending_message_part')
-      .getAll(...messageIdsToDelete)
-      .delete()
+    await r.knex('pending_message_part')
+      .whereIn('id', messageIdsToDelete)
+      .del()
   }
 }
 
