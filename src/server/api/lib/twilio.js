@@ -301,23 +301,27 @@ async function handleIncomingMessage(message) {
   const contactNumber = getFormattedPhoneNumber(From)
   const userNumber = (To ? getFormattedPhoneNumber(To) : '')
 
-  const pendingMessagePart = new PendingMessagePart({
+
+  let pendingMessagePart = {
     service: 'twilio',
     service_id: MessageSid,
     parent_id: null,
     service_message: JSON.stringify(message),
     user_number: userNumber,
     contact_number: contactNumber
-  })
-
-  const part = await pendingMessagePart.save()
-  const partId = part.id
-  if (process.env.JOBS_SAME_PROCESS) {
-    const finalMessage = await convertMessagePartsToMessage([part])
-    await saveNewIncomingMessage(finalMessage)
-    await r.knex('pending_message_part').where('id', partId).delete()
   }
-  return partId
+
+  if (!process.env.JOBS_SAME_PROCESS) {
+    // If multiple processes, just insert the message part and let another job handle it
+    await r.knex('pending_message_part')
+      .insert(pendingMessagePart)
+  } else {
+    // Handle the message directly and skip saving an intermediate part
+    const finalMessage = await convertMessagePartsToMessage([pendingMessagePart])
+    if (finalMessage) {
+      await saveNewIncomingMessage(finalMessage)
+    }
+  }
 }
 
 function deterministicIntWithinRange(string, maxSize) {
