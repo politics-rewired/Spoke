@@ -207,13 +207,28 @@ export async function uploadContacts(job) {
       throw exc
     }
 
+    const whereInParams = excludeCampaignIds.map(_ => '?').join(', ')
     try {
-      const exclusionCellCount = await trx('campaign_contact')
-        .whereIn('cell', function() {
-          this.select('cell').from('campaign_contact').whereIn('campaign_id', excludeCampaignIds)
-        })
-        .where('campaign_id', campaignId)
-        .del()
+      const { rowCount: exclusionCellCount } = await trx.raw(`
+        with exclude_cell as (
+          select distinct on (campaign_contact.cell)
+            campaign_contact.cell
+          from
+            campaign_contact
+          where
+            campaign_contact.campaign_id in (${whereInParams})
+        )
+        delete from
+          campaign_contact
+        where
+          campaign_contact.campaign_id = ?
+          and exists (
+            select 1
+            from exclude_cell
+            where exclude_cell.cell = campaign_contact.cell
+          )
+        ;
+      `, excludeCampaignIds.concat([campaignId]))
 
       if (exclusionCellCount) {
         resultMessages.push(`Number of contacts excluded due to campaign exclusion list: ${exclusionCellCount}`)
