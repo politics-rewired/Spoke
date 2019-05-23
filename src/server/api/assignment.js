@@ -138,27 +138,24 @@ export async function currentAssignmentTarget() {
 
   const { rows: assignableCampaigns } = await r.knex.raw(`
     select
-      campaign.*
+      *
     from
       campaign
-    left join
-      campaign_contact
-      on campaign_contact.id = (
-        select id
+    where
+      is_started = true
+      and is_archived = false
+      and is_autoassign_enabled = true
+      and texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone campaign.timezone))
+      and exists (
+        select 1
         from campaign_contact
         where
           campaign_contact.campaign_id = campaign.id
           and assignment_id is null
           and message_status = ?
           and is_opted_out = false
-        limit 1
       )
-    where
-      is_started = true
-      and is_archived = false
-      and is_autoassign_enabled = true
-      and texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone campaign.timezone))
-      and campaign_contact.id is not null
+    ;
   `, [campaignContactStatus])
 
   const campaign = assignableCampaigns[0]
