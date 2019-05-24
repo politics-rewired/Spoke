@@ -15,7 +15,7 @@ import { sendEmail } from '../server/mail'
 import { Notifications, sendUserNotification } from '../server/notifications'
 
 const CHUNK_SIZE = 1000
-const BATCH_SIZE = 5
+const BATCH_SIZE = parseInt(process.env.DB_MAX_POOL || 5, 10)
 
 const zipMemoization = {}
 let warehouseConnection = null
