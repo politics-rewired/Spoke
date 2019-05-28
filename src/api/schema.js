@@ -175,6 +175,16 @@ const rootSchema = `
     found: Boolean
   }
 
+  type FetchCampaignOverlapResult {
+    campaign: Campaign!,
+    overlapCount: Int!
+  }
+
+  type DeleteCampaignOverlapResult {
+    campaign: Campaign,
+    deletedRowCount: Int!
+  }
+
   type PageInfo {
     limit: Int!
     offset: Int!
@@ -206,6 +216,7 @@ const rootSchema = `
     campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
     people(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
     peopleByUserIds(userIds:[String], organizationId:String!): UsersList
+    fetchCampaignOverlaps(organizationId: String!, campaignId: String!): [FetchCampaignOverlapResult]!
   }
 
   type RootMutation {
@@ -252,6 +263,7 @@ const rootSchema = `
     insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!
     updateLinkDomain(organizationId: String!, domainId: String!, payload: UpdateLinkDomain!): LinkDomain!
     deleteLinkDomain(organizationId: String!, domainId: String!): Boolean!
+    deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
   }
 
   schema {

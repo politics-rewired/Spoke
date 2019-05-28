@@ -209,6 +209,7 @@ export async function uploadContacts(job) {
 
     const whereInParams = excludeCampaignIds.map(_ => '?').join(', ')
     try {
+      // TODO - filter on same organization ids
       const { rowCount: exclusionCellCount } = await trx.raw(`
         with exclude_cell as (
           select distinct on (campaign_contact.cell)

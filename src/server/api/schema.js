@@ -1948,6 +1948,34 @@ const rootMutations = {
       })
 
       return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;
+    },
+    deleteCampaignOverlap: async (_, { organizationId, campaignId, overlappingCampaignId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      const result =  await r.knex.raw(`
+        with exclude_cell as (
+          select distinct on (campaign_contact.cell)
+            campaign_contact.cell
+          from
+            campaign_contact
+          where
+            campaign_contact.campaign_id = ?
+        )
+        delete from
+          campaign_contact
+        where
+          campaign_contact.campaign_id = ?
+          and campaign_contact.message_status = 'needsMessage'
+          and exists (
+            select 1
+            from exclude_cell
+            where exclude_cell.cell = campaign_contact.cell
+          );
+      `, [overlappingCampaignId, campaignId])
+
+      const deletedRowCount = result.rowCount
+
+      return { campaign: { id: campaignId, title: 'title' }, deletedRowCount }
     }
   }
 };
@@ -2089,6 +2117,39 @@ const rootResolvers = {
     ) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER")
       return getUsersById(userIds)
+    },
+    fetchCampaignOverlaps: async( _, { organizationId, campaignId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const result = await r.knex.raw(`
+        with campaign_ids_in_organization as (
+          select id
+          from campaign
+          where organization_id = ?
+        )
+        select overlapping_cc.campaign_id, count(overlapping_cc.id)
+        from campaign_contact
+        join campaign_contact as overlapping_cc
+          on campaign_contact.cell = overlapping_cc.cell
+        where
+          campaign_contact.campaign_id = ?
+          and campaign_contact.message_status = 'needsMessage'
+          and exists (
+            select 1
+            from campaign_ids_in_organization
+            where overlapping_cc.campaign_id = campaign_ids_in_organization.id
+          )
+          and overlapping_cc.campaign_id != ?
+        group by overlapping_cc.campaign_id
+        order by overlapping_cc.campaign_id desc;
+      `, [organizationId, campaignId, campaignId])
+
+      const toReturn = result.rows.map(({campaign_id, count}) => ({
+        campaign: { id: campaign_id, title: 'title' },
+        overlapCount: count
+      }))
+
+      return toReturn;
     }
   }
 };
