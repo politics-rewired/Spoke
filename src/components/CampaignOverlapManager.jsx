@@ -44,7 +44,7 @@ class CampaignOverlapManager extends React.Component {
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
           {this.props.fetchCampaignOverlaps.fetchCampaignOverlaps.map(fco =>
-            <TableRow>
+            <TableRow key={fco.id}>
               <TableRowColumn>{fco.campaign.id + ' ' + fco.campaign.title} </TableRowColumn>
               <TableRowColumn>{fco.overlapCount}</TableRowColumn>
               <TableRowColumn>
