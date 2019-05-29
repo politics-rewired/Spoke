@@ -2127,10 +2127,11 @@ const rootResolvers = {
           from campaign
           where organization_id = ?
         )
-        select overlapping_cc.campaign_id, count(overlapping_cc.id)
+        select overlapping_cc.campaign_id, count(overlapping_cc.id), campaign.title as campaign_title
         from campaign_contact
         join campaign_contact as overlapping_cc
           on campaign_contact.cell = overlapping_cc.cell
+        join campaign on campaign_contact.campaign_id = campaign.id
         where
           campaign_contact.campaign_id = ?
           and campaign_contact.message_status = 'needsMessage'
@@ -2140,12 +2141,12 @@ const rootResolvers = {
             where overlapping_cc.campaign_id = campaign_ids_in_organization.id
           )
           and overlapping_cc.campaign_id != ?
-        group by overlapping_cc.campaign_id
+        group by overlapping_cc.campaign_id, campaign_title
         order by overlapping_cc.campaign_id desc;
       `, [organizationId, campaignId, campaignId])
 
-      const toReturn = result.rows.map(({campaign_id, count}) => ({
-        campaign: { id: campaign_id, title: 'title' },
+      const toReturn = result.rows.map(({campaign_id, count, campaign_title}) => ({
+        campaign: { id: campaign_id, title: campaign_title },
         overlapCount: count
       }))
 
