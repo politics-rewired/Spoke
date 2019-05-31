@@ -16,10 +16,26 @@ import FlatButton from 'material-ui/FlatButton'
 import DeleteIcon from 'material-ui/svg-icons/action/delete-forever'
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
+const hoverBoxStyle = {
+  position: 'fixed',
+  top: '120px',
+  left: '50%',
+  width: '400px',
+  marginLeft: '-200px',
+  backgroundColor: '#D0D0D0',
+  padding: '20px'
+}
+
+const hoveredCampaignStyle = {
+  padding: '10px',
+  backgroundColor: '#F0F0F0'
+}
+
 class CampaignOverlapManager extends React.Component {
   state = {
     deleting: new Set(),
-    errored: new Set()
+    errored: new Set(),
+    hoveredRowId: undefined
   }
 
   delete = id => async ev => {
@@ -41,26 +57,45 @@ class CampaignOverlapManager extends React.Component {
     }
   }
 
+  setHoverId = hoveredRowId => () => this.setState({ hoveredRowId })
+
+  clearHover = () => this.setState({ hoveredRowId: undefined })
+
   render() {
     const { fetchCampaignOverlaps: overlaps } = this.props
-    const { deleting, errored } = this.state
+    const { deleting, errored, hoveredRowId } = this.state
 
     if (overlaps.loading && !overlaps.fetchCampaignOverlaps) return <CircularProgress/>
 
+    const { fetchCampaignOverlaps: overlapList } = overlaps
+    const hoveredTitle = hoveredRowId && overlapList.find(fco => fco.campaign.id === hoveredRowId).campaign.title
+
     return (
       <div>
-        Warning: clicking the trashcan will trigger an irreversible delete.
+        <p>Warning: clicking the trashcan will trigger an irreversible delete.</p>
+        {hoveredTitle && (
+          <div style={hoverBoxStyle}>
+            <h3>Hovered on campaign:</h3>
+            <p style={hoveredCampaignStyle}>
+              {hoveredTitle}
+            </p>
+          </div>
+        )}
       <Table selectable={false}>
-        <TableHeader>
+        <TableHeader enableSelectAll={false} displaySelectAll={false}>
           <TableHeaderColumn>Campaign</TableHeaderColumn>
           <TableHeaderColumn>Overlap Count</TableHeaderColumn>
           <TableHeaderColumn>Last Messaged</TableHeaderColumn>
           <TableHeaderColumn>Delete</TableHeaderColumn>
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
-          {overlaps.fetchCampaignOverlaps.map(fco =>
-            <TableRow key={fco.id}>
-              <TableRowColumn>{fco.campaign.id + ' ' + fco.campaign.title}</TableRowColumn>
+          {overlapList.map(fco =>
+            <TableRow key={fco.campaign.id}>
+              <TableRowColumn>
+                <span onMouseOver={this.setHoverId(fco.campaign.id)} onMouseOut={this.clearHover}>
+                  {fco.campaign.id + ' ' + fco.campaign.title}
+                </span>
+              </TableRowColumn>
               <TableRowColumn>{fco.overlapCount}</TableRowColumn>
               <TableRowColumn>{(new Date(fco.lastActivity)).toLocaleString()}</TableRowColumn>
               <TableRowColumn>
