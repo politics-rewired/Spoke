@@ -45,18 +45,22 @@ if (isClient()) {
 
   logInstance = minilog('backend')
   const existingErrorLogger = logInstance.error
-  logInstance.error = (err) => {
+  logInstance.error = (...err) => {
     if (enableRollbar) {
       if (typeof err === 'object') {
-        rollbar.error(err)
+        rollbar.error(...err)
       } else if (typeof err === 'string') {
-        rollbar.critical(err)
+        rollbar.critical(...err)
       } else {
         rollbar.error('Got backend error with no error message')
       }
     }
 
-    existingErrorLogger(err && err.stack ? err.stack : err)
+    if (err[0] && err[0].stack) {
+      existingErrorLogger(err[0].stack)
+    } else {
+      existingErrorLogger(...err)
+    }
   }
 }
 
