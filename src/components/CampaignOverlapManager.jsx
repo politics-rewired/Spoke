@@ -54,13 +54,15 @@ class CampaignOverlapManager extends React.Component {
         <TableHeader>
           <TableHeaderColumn>Campaign</TableHeaderColumn>
           <TableHeaderColumn>Overlap Count</TableHeaderColumn>
+          <TableHeaderColumn>Last Messaged</TableHeaderColumn>
           <TableHeaderColumn>Delete</TableHeaderColumn>
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
           {overlaps.fetchCampaignOverlaps.map(fco =>
             <TableRow key={fco.id}>
-              <TableRowColumn>{fco.campaign.id + ' ' + fco.campaign.title} </TableRowColumn>
+              <TableRowColumn>{fco.campaign.id + ' ' + fco.campaign.title}</TableRowColumn>
               <TableRowColumn>{fco.overlapCount}</TableRowColumn>
+              <TableRowColumn>{(new Date(fco.lastActivity)).toLocaleString()}</TableRowColumn>
               <TableRowColumn>
                 <IconButton onClick={this.delete(fco.campaign.id)}>
                   {deleting.has(fco.campaign.id)
@@ -92,6 +94,7 @@ const mapQueriesToProps = ({ownProps}) => ({
         fetchCampaignOverlaps(organizationId: $organizationId, campaignId: $campaignId) {
           campaign { id title }
           overlapCount
+          lastActivity
         }
       }
     `,

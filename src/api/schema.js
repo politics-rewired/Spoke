@@ -178,6 +178,7 @@ const rootSchema = `
   type FetchCampaignOverlapResult {
     campaign: Campaign!,
     overlapCount: Int!
+    lastActivity: Date!
   }
 
   type DeleteCampaignOverlapResult {
