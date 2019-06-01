@@ -213,11 +213,16 @@ export const resolvers = {
       )
     ),
     hasUnassignedContacts: async (campaign) => {
-      const contacts = await r.knex('campaign_contact')
-        .select('id')
-        .where({ campaign_id: campaign.id, assignment_id: null })
-        .limit(1)
-      return contacts.length > 0
+      try {
+        const contacts = await r.knex('campaign_contact')
+          .select('id')
+          .where({ campaign_id: campaign.id, assignment_id: null })
+          .limit(1)
+          .timeout(5000)
+        return contacts.length > 0
+      } catch (exc) {
+        return false
+      }
     },
     hasUnsentInitialMessages: async (campaign) => {
       const contacts = await r.knex('campaign_contact')
