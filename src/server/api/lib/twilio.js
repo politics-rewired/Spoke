@@ -59,6 +59,7 @@ async function convertMessagePartsToMessage(messageParts) {
   const text = serviceMessages
     .map((serviceMessage) => serviceMessage.Body)
     .join('')
+    .replace(/\0/g, '') // strip all UTF-8 null characters (0x00)
 
   // TODO: this could be a slow query
   const lastMessage = await getLastMessage({
