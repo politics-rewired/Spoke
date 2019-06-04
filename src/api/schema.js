@@ -184,6 +184,7 @@ const rootSchema = `
   type DeleteCampaignOverlapResult {
     campaign: Campaign,
     deletedRowCount: Int!
+    remainingCount: Int!
   }
 
   type PageInfo {

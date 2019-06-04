@@ -67,6 +67,7 @@ import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
+import { queryCampaignOverlaps, queryCampaignOverlapCount } from './campaign-overlap'
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
@@ -1952,30 +1953,42 @@ const rootMutations = {
     deleteCampaignOverlap: async (_, { organizationId, campaignId, overlappingCampaignId }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-      const result =  await r.knex.raw(`
-        with exclude_cell as (
-          select distinct on (campaign_contact.cell)
-            campaign_contact.cell
-          from
+      const { deletedRowCount, remainingCount } = await r.knex.transaction(async trx => {
+        // Get total count, including second pass contacts, locking for subsequent delete
+        let remainingCount = await queryCampaignOverlapCount(campaignId, overlappingCampaignId, trx)
+
+        // Delete, excluding second pass contacts that have already been messaged
+        const { rowCount: deletedRowCount } =  await trx.raw(`
+          with exclude_cell as (
+            select distinct on (campaign_contact.cell)
+              campaign_contact.cell
+            from
+              campaign_contact
+            where
+              campaign_contact.campaign_id = ?
+          )
+          delete from
             campaign_contact
           where
             campaign_contact.campaign_id = ?
-        )
-        delete from
-          campaign_contact
-        where
-          campaign_contact.campaign_id = ?
-          and campaign_contact.message_status = 'needsMessage'
-          and exists (
-            select 1
-            from exclude_cell
-            where exclude_cell.cell = campaign_contact.cell
-          );
-      `, [overlappingCampaignId, campaignId])
+            and not exists (
+              select 1
+              from message
+              where campaign_contact_id = campaign_contact.id
+            )
+            and exists (
+              select 1
+              from exclude_cell
+              where exclude_cell.cell = campaign_contact.cell
+            );
+        `, [overlappingCampaignId, campaignId])
 
-      const deletedRowCount = result.rowCount
+        remainingCount = remainingCount - deletedRowCount
 
-      return { campaign: { id: campaignId, title: 'title' }, deletedRowCount }
+        return { deletedRowCount, remainingCount }
+      })
+
+      return { campaign: { id: campaignId, title: 'title' }, deletedRowCount, remainingCount }
     }
   }
 };
@@ -2121,35 +2134,9 @@ const rootResolvers = {
     fetchCampaignOverlaps: async( _, { organizationId, campaignId }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      const result = await r.knex.raw(`
-        with campaign_ids_in_organization as (
-          select id
-          from campaign
-          where organization_id = ?
-        )
-        select
-          overlapping_cc.campaign_id,
-          count(overlapping_cc.id),
-          campaign.title as campaign_title,
-          max(overlapping_cc.updated_at) as last_activity
-        from campaign_contact
-        join campaign_contact as overlapping_cc
-          on campaign_contact.cell = overlapping_cc.cell
-        join campaign on campaign_contact.campaign_id = campaign.id
-        where
-          campaign_contact.campaign_id = ?
-          and campaign_contact.message_status = 'needsMessage'
-          and exists (
-            select 1
-            from campaign_ids_in_organization
-            where overlapping_cc.campaign_id = campaign_ids_in_organization.id
-          )
-          and overlapping_cc.campaign_id != ?
-        group by overlapping_cc.campaign_id, campaign_title
-        order by overlapping_cc.campaign_id desc;
-      `, [organizationId, campaignId, campaignId])
+      const { rows } = await queryCampaignOverlaps(campaignId, organizationId)
 
-      const toReturn = result.rows.map(({campaign_id, count, campaign_title, last_activity}) => ({
+      const toReturn = rows.map(({campaign_id, count, campaign_title, last_activity}) => ({
         campaign: { id: campaign_id, title: campaign_title },
         overlapCount: count,
         lastActivity: last_activity
