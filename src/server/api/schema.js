@@ -67,6 +67,7 @@ import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
+import { queryCampaignOverlaps, queryCampaignOverlapCount } from './campaign-overlap'
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
@@ -1948,6 +1949,46 @@ const rootMutations = {
       })
 
       return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;
+    },
+    deleteCampaignOverlap: async (_, { organizationId, campaignId, overlappingCampaignId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      const { deletedRowCount, remainingCount } = await r.knex.transaction(async trx => {
+        // Get total count, including second pass contacts, locking for subsequent delete
+        let remainingCount = await queryCampaignOverlapCount(campaignId, overlappingCampaignId, trx)
+
+        // Delete, excluding second pass contacts that have already been messaged
+        const { rowCount: deletedRowCount } =  await trx.raw(`
+          with exclude_cell as (
+            select distinct on (campaign_contact.cell)
+              campaign_contact.cell
+            from
+              campaign_contact
+            where
+              campaign_contact.campaign_id = ?
+          )
+          delete from
+            campaign_contact
+          where
+            campaign_contact.campaign_id = ?
+            and not exists (
+              select 1
+              from message
+              where campaign_contact_id = campaign_contact.id
+            )
+            and exists (
+              select 1
+              from exclude_cell
+              where exclude_cell.cell = campaign_contact.cell
+            );
+        `, [overlappingCampaignId, campaignId])
+
+        remainingCount = remainingCount - deletedRowCount
+
+        return { deletedRowCount, remainingCount }
+      })
+
+      return { campaign: { id: overlappingCampaignId }, deletedRowCount, remainingCount }
     }
   }
 };
@@ -2089,6 +2130,19 @@ const rootResolvers = {
     ) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER")
       return getUsersById(userIds)
+    },
+    fetchCampaignOverlaps: async( _, { organizationId, campaignId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const { rows } = await queryCampaignOverlaps(campaignId, organizationId)
+
+      const toReturn = rows.map(({campaign_id, count, campaign_title, last_activity}) => ({
+        campaign: { id: campaign_id, title: campaign_title },
+        overlapCount: count,
+        lastActivity: last_activity
+      }))
+
+      return toReturn;
     }
   }
 };

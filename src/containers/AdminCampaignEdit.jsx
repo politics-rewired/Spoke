@@ -16,6 +16,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import CampaignBasicsForm from '../components/CampaignBasicsForm'
 import CampaignContactsForm from '../components/CampaignContactsForm'
 import CampaignTextersForm from '../components/CampaignTextersForm'
+import CampaignOverlapManager from '../components/CampaignOverlapManager'
 import CampaignInteractionStepsForm from '../components/CampaignInteractionStepsForm'
 import CampaignCannedResponsesForm from '../components/CampaignCannedResponsesForm'
 import { dataTest, camelCase } from '../lib/attributes'
@@ -325,6 +326,14 @@ class AdminCampaignEdit extends React.Component {
         otherCampaigns: this.props.organizationData.organization.campaigns.campaigns.filter(campaign => campaign.id != this.props.params.campaignId)
       }
     }, {
+      title: 'Contact Overlap Management',
+      content: CampaignOverlapManager,
+      keys: [],
+      blockStarting: false,
+      expandAfterCampaignStarts: true,
+      expandableBySuperVolunteers: false,
+      checkCompleted: () => true
+    }, {
       title: 'Texters',
       content: CampaignTextersForm,
       keys: ['texters', 'contactsCount', 'useDynamicAssignment'],
@@ -430,6 +439,8 @@ class AdminCampaignEdit extends React.Component {
         saveDisabled={shouldDisable}
         ensureComplete={this.props.campaignData.campaign.isStarted}
         onSubmit={this.handleSubmit}
+        campaignId={this.props.params.campaignId}
+        organizationId={this.props.params.organizationId}
         {...section.extraProps}
       />
     )
