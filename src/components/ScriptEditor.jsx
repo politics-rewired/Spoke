@@ -7,7 +7,7 @@ import {
   Editor,
   Modifier
 } from 'draft-js'
-import { delimit } from '../lib/scripts'
+import { delimit, escapeRegExp } from '../lib/scripts'
 import Chip from './Chip'
 import { red400, green500, green600, grey100 } from 'material-ui/styles/colors'
 
@@ -124,7 +124,7 @@ class ScriptEditor extends React.Component {
 
   getCompositeDecorator(scriptFields) {
     const recognizedFieldStrategy = (contentBlock, callback) => {
-      const regex = new RegExp(`\{(${scriptFields.join('|')})\}`, 'g')
+      const regex = new RegExp(`\{(${scriptFields.map(escapeRegExp).join('|')})\}`, 'g')
       return findWithRegex(regex, contentBlock, callback)
     }
 

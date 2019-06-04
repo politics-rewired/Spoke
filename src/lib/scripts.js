@@ -69,6 +69,6 @@ export const applyScript = ({ script, contact, customFields, texter }) => {
   return appliedScript;
 };
 
-function escapeRegExp(string) {
+export const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
