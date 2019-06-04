@@ -1988,7 +1988,7 @@ const rootMutations = {
         return { deletedRowCount, remainingCount }
       })
 
-      return { campaign: { id: campaignId, title: 'title' }, deletedRowCount, remainingCount }
+      return { campaign: { id: overlappingCampaignId }, deletedRowCount, remainingCount }
     }
   }
 };

@@ -3,6 +3,7 @@ import loadData from '../containers/hoc/load-data'
 import wrapMutations from '../containers/hoc/wrap-mutations'
 import CircularProgress from 'material-ui/CircularProgress'
 import gql from 'graphql-tag'
+import sortBy from 'lodash/sortBy'
 import {
   Table,
   TableBody,
@@ -11,6 +12,7 @@ import {
   TableRow,
   TableRowColumn,
 } from 'material-ui/Table';
+import Snackbar from 'material-ui/Snackbar'
 import IconButton from 'material-ui/IconButton'
 import FlatButton from 'material-ui/FlatButton'
 import DeleteIcon from 'material-ui/svg-icons/action/delete-forever'
@@ -35,11 +37,12 @@ class CampaignOverlapManager extends React.Component {
   state = {
     deleting: new Set(),
     errored: new Set(),
+    deleteResults: {},
     hoveredRowId: undefined
   }
 
   delete = id => async ev => {
-    const { deleting, errored } = this.state
+    const { deleting, errored, deleteResults } = this.state
 
     errored.delete(id)
     deleting.add(id)
@@ -49,6 +52,11 @@ class CampaignOverlapManager extends React.Component {
     try {
       const response = await this.props.mutations.deleteCampaignOverlap(id)
       if (response.errors) throw new Error(response.errors)
+
+      const { deletedRowCount, remainingCount } = response.data.deleteCampaignOverlap
+      const timestamp = (new Date).getTime()
+      deleteResults[id] = { id, deletedRowCount, remainingCount, timestamp }
+      this.setState({ deleteResults })
     } catch (exc) {
       errored.add(id)
     } finally {
@@ -61,14 +69,22 @@ class CampaignOverlapManager extends React.Component {
 
   clearHover = () => this.setState({ hoveredRowId: undefined })
 
+  clearDeleteResult = id => () => {
+    const { deleteResults } = this.state
+    delete deleteResults[id]
+    this.setState({ deleteResults })
+  }
+
   render() {
     const { fetchCampaignOverlaps: overlaps } = this.props
-    const { deleting, errored, hoveredRowId } = this.state
+    const { deleting, errored, hoveredRowId, deleteResults } = this.state
 
     if (overlaps.loading && !overlaps.fetchCampaignOverlaps) return <CircularProgress/>
 
     const { fetchCampaignOverlaps: overlapList } = overlaps
     const hoveredTitle = hoveredRowId && overlapList.find(fco => fco.campaign.id === hoveredRowId).campaign.title
+
+    const sortedDeleteResults = sortBy(Object.values(deleteResults), 'timestamp')
 
     return (
       <div>
@@ -117,6 +133,18 @@ class CampaignOverlapManager extends React.Component {
           )}
         </TableBody>
       </Table>
+      {sortedDeleteResults.map(({ id, deletedRowCount, remainingCount }) => {
+        const remainingText = remainingCount > 0 ? `Skipped ${remainingCount} already messaged.` : ''
+        return (
+          <Snackbar
+            key={id}
+            open={true}
+            message={`Campaign ${id}: Deleted ${deletedRowCount}. ${remainingText}`}
+            autoHideDuration={4000}
+            onRequestClose={this.clearDeleteResult(id)}
+          />
+        )
+      })}
       </div>
     )
   }
@@ -145,8 +173,9 @@ const mapMutationsToProps = ({ownProps}) => ({
     mutation: gql`
       mutation deleteCampaignOverlap($organizationId: String!, $campaignId: String!, $overlappingCampaignId: String!) {
         deleteCampaignOverlap(organizationId: $organizationId, campaignId: $campaignId, overlappingCampaignId: $overlappingCampaignId) {
-          campaign { id title }
+          campaign { id }
           deletedRowCount
+          remainingCount
         }
       }
     `,
