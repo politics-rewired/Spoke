@@ -134,12 +134,12 @@ class CampaignOverlapManager extends React.Component {
         </TableBody>
       </Table>
       {sortedDeleteResults.map(({ id, deletedRowCount, remainingCount }) => {
-        const remainingText = remainingCount > 0 ? `Skipped ${remainingCount} already messaged.` : ''
+        const remainingText = remainingCount > 0 ? `; skipped ${remainingCount} contacts that had already been messaged` : ''
         return (
           <Snackbar
             key={id}
             open={true}
-            message={`Campaign ${id}: Deleted ${deletedRowCount}. ${remainingText}`}
+            message={`From campaign [${id}]: deleted ${deletedRowCount}${remainingText}.`}
             autoHideDuration={4000}
             onRequestClose={this.clearDeleteResult(id)}
           />
