@@ -1,16 +1,18 @@
-require('dotenv').config()
+require("dotenv").config();
 const config = {
-  client: 'mysql',
+  client: "mysql",
   connection: process.env.DATABASE_URL,
   pool: {
     min: 2,
     max: 30
-  },
+  }
 };
 
-const db = require('knex')(config)
+const db = require("knex")(config);
 
-main().then(console.log).catch(console.error)
+main()
+  .then(console.log)
+  .catch(console.error);
 
 async function main() {
   const [results, _junk] = await db.raw(`
@@ -22,23 +24,29 @@ async function main() {
     and campaign_contact.message_status = 'needsMessage'
     group by campaign_contact_id
     order by count(message.id) desc;
-  `)
+  `);
 
-  console.log(results)
-  console.log(results.length)
+  console.log(results);
+  console.log(results.length);
 
-  for (let {campaign_contact_id, message_count} of results) {
-    await repairContactState(campaign_contact_id)
+  for (let { campaign_contact_id, message_count } of results) {
+    await repairContactState(campaign_contact_id);
   }
 }
 
 async function repairContactState(campaign_contact_id) {
-  let properMessageStatus
-  const messages = await db('message').where({ campaign_contact_id }).orderBy('created_at', 'asc')
+  let properMessageStatus;
+  const messages = await db("message")
+    .where({ campaign_contact_id })
+    .orderBy("created_at", "asc");
   if (messages[messages.length - 1].is_from_contact) {
-    properMessageStatus = 'needsResponse'
+    properMessageStatus = "needsResponse";
   } else {
-    properMessageStatus = 'convo'
+    properMessageStatus = "convo";
   }
-  console.log(await db('campaign_contact').where({ id: campaign_contact_id }).update({ message_status: properMessageStatus }))
+  console.log(
+    await db("campaign_contact")
+      .where({ id: campaign_contact_id })
+      .update({ message_status: properMessageStatus })
+  );
 }

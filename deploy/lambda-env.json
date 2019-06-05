@@ -3,7 +3,7 @@
   "JOBS_SAME_PROCESS": "1",
   "SUPPRESS_SEED_CALLS": "1",
   "AWS_ACCESS_AVAILABLE": "1",
-  "AWS_S3_BUCKET_NAME":  "spoke.example.com",
+  "AWS_S3_BUCKET_NAME": "spoke.example.com",
   "APOLLO_OPTICS_KEY": "",
   "DEFAULT_SERVICE": "twilio",
   "OUTPUT_DIR": "./build",
@@ -32,7 +32,8 @@
   "TWILIO_APPLICATION_SID": "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "TWILIO_ACCOUNT_SID": "XXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "TWILIO_AUTH_TOKEN": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx",
-  "TWILIO_STATUS_CALLBACK_URL": "https://spoke.example.com/twilio-message-report",
+  "TWILIO_STATUS_CALLBACK_URL":
+    "https://spoke.example.com/twilio-message-report",
   "EMAIL_HOST": "",
   "EMAIL_HOST_PASSWORD": "",
   "EMAIL_HOST_USER": "",

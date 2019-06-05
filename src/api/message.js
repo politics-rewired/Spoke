@@ -11,5 +11,4 @@ export const schema = `
     userId: ID
     sendStatus: String
   }
-`
-
+`;

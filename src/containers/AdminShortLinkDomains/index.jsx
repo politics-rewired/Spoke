@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import gql from 'graphql-tag'
-import { connect } from 'react-apollo'
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import gql from "graphql-tag";
+import { connect } from "react-apollo";
 
-import FloatingActionButton from 'material-ui/FloatingActionButton'
-import Dialog from 'material-ui/Dialog'
-import FlatButton from 'material-ui/FlatButton'
-import RaisedButton from 'material-ui/RaisedButton'
-import ContentAddIcon from 'material-ui/svg-icons/content/add'
-import CloudUploadIcon from 'material-ui/svg-icons/file/cloud-upload'
+import FloatingActionButton from "material-ui/FloatingActionButton";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import ContentAddIcon from "material-ui/svg-icons/content/add";
+import CloudUploadIcon from "material-ui/svg-icons/file/cloud-upload";
 
-import theme from '../../styles/theme'
-import LoadingIndicator from '../../components/LoadingIndicator'
+import theme from "../../styles/theme";
+import LoadingIndicator from "../../components/LoadingIndicator";
 
-import ShortLinkDomainList from './ShortLinkDomainList'
-import AddDomainDialog from './AddDomainDialog'
+import ShortLinkDomainList from "./ShortLinkDomainList";
+import AddDomainDialog from "./AddDomainDialog";
 
 class AdminShortLinkDomains extends Component {
   state = {
@@ -23,78 +23,99 @@ class AdminShortLinkDomains extends Component {
     showAddDomainDialog: false,
     addDomainIsWorking: false,
     warnDeleteDomainId: undefined
-  }
+  };
 
   handleManualDisableToggle = async (domainId, isManuallyDisabled) => {
     this.setState({
       disabledDomainIds: this.state.disabledDomainIds.concat([domainId])
-    })
+    });
     try {
-      const response = await this.props.mutations.setDomainManuallyDisabled(domainId, isManuallyDisabled)
-      if (response.errors) throw new Error(response.errors)
+      const response = await this.props.mutations.setDomainManuallyDisabled(
+        domainId,
+        isManuallyDisabled
+      );
+      if (response.errors) throw new Error(response.errors);
     } catch (exc) {
-      this.setState({ webRequestError: exc })
+      this.setState({ webRequestError: exc });
     } finally {
       this.setState({
-        disabledDomainIds: this.state.disabledDomainIds.filter(disabledId => disabledId !== domainId)
-      })
+        disabledDomainIds: this.state.disabledDomainIds.filter(
+          disabledId => disabledId !== domainId
+        )
+      });
     }
-  }
+  };
 
-  handleErrorDialogClose = () => this.setState({ webRequestError: undefined })
+  handleErrorDialogClose = () => this.setState({ webRequestError: undefined });
 
-  handleAddDomainClick = () => this.setState({ showAddDomainDialog: true })
-  handleAddDomainDialogClose = () => this.setState({ showAddDomainDialog: false })
+  handleAddDomainClick = () => this.setState({ showAddDomainDialog: true });
+  handleAddDomainDialogClose = () =>
+    this.setState({ showAddDomainDialog: false });
 
   handleAddDomain = async (domain, maxUsageCount) => {
-    this.setState({ showAddDomainDialog: false, addDomainIsWorking: true })
+    this.setState({ showAddDomainDialog: false, addDomainIsWorking: true });
     try {
-      const response = await this.props.mutations.insertLinkDomain(domain, maxUsageCount)
-      if (response.errors) throw new Error(response.errors)
-      await this.props.shortLinkDomains.refetch()
+      const response = await this.props.mutations.insertLinkDomain(
+        domain,
+        maxUsageCount
+      );
+      if (response.errors) throw new Error(response.errors);
+      await this.props.shortLinkDomains.refetch();
     } catch (exc) {
-      this.setState({ webRequestError: exc })
+      this.setState({ webRequestError: exc });
     } finally {
-      this.setState({ addDomainIsWorking: false })
+      this.setState({ addDomainIsWorking: false });
     }
-  }
+  };
 
-  handleConfirmDeleteDomain = warnDeleteDomainId => this.setState({ warnDeleteDomainId })
-  handleCancelDeleteDomain = () => this.setState({ warnDeleteDomainId: undefined })
+  handleConfirmDeleteDomain = warnDeleteDomainId =>
+    this.setState({ warnDeleteDomainId });
+  handleCancelDeleteDomain = () =>
+    this.setState({ warnDeleteDomainId: undefined });
 
   handleDeleteDomain = async () => {
-    const { warnDeleteDomainId: domainId } = this.state
+    const { warnDeleteDomainId: domainId } = this.state;
     this.setState({
       disabledDomainIds: this.state.disabledDomainIds.concat([domainId]),
       warnDeleteDomainId: undefined
-    })
+    });
     try {
-      const response = await this.props.mutations.deleteLinkDomain(domainId)
-      if (response.errors) throw new Error(response.errors)
-      await this.props.shortLinkDomains.refetch()
+      const response = await this.props.mutations.deleteLinkDomain(domainId);
+      if (response.errors) throw new Error(response.errors);
+      await this.props.shortLinkDomains.refetch();
     } catch (exc) {
-      this.setState({ webRequestError: exc })
+      this.setState({ webRequestError: exc });
     } finally {
       this.setState({
-        disabledDomainIds: this.state.disabledDomainIds.filter(disabledId => disabledId !== domainId)
-      })
+        disabledDomainIds: this.state.disabledDomainIds.filter(
+          disabledId => disabledId !== domainId
+        )
+      });
     }
-  }
+  };
 
   render() {
-    const { shortLinkDomains } = this.props
-    const { disabledDomainIds, webRequestError, showAddDomainDialog, addDomainIsWorking, warnDeleteDomainId } = this.state
+    const { shortLinkDomains } = this.props;
+    const {
+      disabledDomainIds,
+      webRequestError,
+      showAddDomainDialog,
+      addDomainIsWorking,
+      warnDeleteDomainId
+    } = this.state;
 
     if (shortLinkDomains.loading) {
-      return <LoadingIndicator />
+      return <LoadingIndicator />;
     }
 
     if (shortLinkDomains.errors) {
-      return <p>{shortLinkDomains.errors}</p>
+      return <p>{shortLinkDomains.errors}</p>;
     }
 
-    const { linkDomains } = shortLinkDomains.organization
-    const warnDomainName = warnDeleteDomainId && linkDomains.filter(domain => domain.id === warnDeleteDomainId)[0].domain
+    const { linkDomains } = shortLinkDomains.organization;
+    const warnDomainName =
+      warnDeleteDomainId &&
+      linkDomains.filter(domain => domain.id === warnDeleteDomainId)[0].domain;
 
     const deleteDomainActions = [
       <FlatButton
@@ -107,7 +128,7 @@ class AdminShortLinkDomains extends Component {
         primary={true}
         onClick={this.handleDeleteDomain}
       />
-    ]
+    ];
 
     const errorActions = [
       <FlatButton
@@ -115,7 +136,7 @@ class AdminShortLinkDomains extends Component {
         primary={true}
         onClick={this.handleErrorDialogClose}
       />
-    ]
+    ];
 
     return (
       <div>
@@ -130,9 +151,7 @@ class AdminShortLinkDomains extends Component {
           disabled={addDomainIsWorking}
           onClick={this.handleAddDomainClick}
         >
-          {addDomainIsWorking
-            ? <CloudUploadIcon />
-            : <ContentAddIcon />}
+          {addDomainIsWorking ? <CloudUploadIcon /> : <ContentAddIcon />}
         </FloatingActionButton>
         <AddDomainDialog
           open={showAddDomainDialog}
@@ -147,7 +166,8 @@ class AdminShortLinkDomains extends Component {
             open={true}
             onRequestClose={this.handleCancelDeleteDomain}
           >
-            Are you sure you want to delete the short link domain <span style={{ color: '#000000' }}>{warnDomainName}</span>?
+            Are you sure you want to delete the short link domain{" "}
+            <span style={{ color: "#000000" }}>{warnDomainName}</span>?
           </Dialog>
         )}
         {webRequestError && (
@@ -162,43 +182,53 @@ class AdminShortLinkDomains extends Component {
           </Dialog>
         )}
       </div>
-    )
+    );
   }
 }
 
 AdminShortLinkDomains.propTypes = {
   params: PropTypes.object,
   shortLinkDomains: PropTypes.object
-}
+};
 
 const mapQueriesToProps = ({ ownProps }) => ({
   shortLinkDomains: {
-    query: gql`query getShortLinkDomains($organizationId: String!) {
-      organization(id: $organizationId) {
-        id
-        linkDomains {
+    query: gql`
+      query getShortLinkDomains($organizationId: String!) {
+        organization(id: $organizationId) {
           id
-          domain
-          maxUsageCount
-          currentUsageCount
-          isManuallyDisabled
-          isHealthy
-          cycledOutAt
-          createdAt
+          linkDomains {
+            id
+            domain
+            maxUsageCount
+            currentUsageCount
+            isManuallyDisabled
+            isHealthy
+            cycledOutAt
+            createdAt
+          }
         }
       }
-    }`,
+    `,
     variables: {
       organizationId: ownProps.params.organizationId
     }
-  },
-})
+  }
+});
 
 const mapMutationsToProps = ({ ownProps }) => ({
   insertLinkDomain: (domain, maxUsageCount) => ({
     mutation: gql`
-      mutation insertLinkDomain($organizationId: String!, $domain: String!, $maxUsageCount: Int!) {
-        insertLinkDomain(organizationId: $organizationId, domain: $domain, maxUsageCount: $maxUsageCount) {
+      mutation insertLinkDomain(
+        $organizationId: String!
+        $domain: String!
+        $maxUsageCount: Int!
+      ) {
+        insertLinkDomain(
+          organizationId: $organizationId
+          domain: $domain
+          maxUsageCount: $maxUsageCount
+        ) {
           id
           domain
           maxUsageCount
@@ -213,14 +243,22 @@ const mapMutationsToProps = ({ ownProps }) => ({
     variables: {
       organizationId: ownProps.params.organizationId,
       domain,
-      maxUsageCount,
+      maxUsageCount
     }
   }),
   setDomainManuallyDisabled: (domainId, isManuallyDisabled) => ({
     mutation: gql`
-      mutation setDomainManuallyDisabled($organizationId: String!, $domainId: String!, $payload: UpdateLinkDomain!) {
-        updateLinkDomain(organizationId: $organizationId, domainId: $domainId, payload: $payload) {
-          id,
+      mutation setDomainManuallyDisabled(
+        $organizationId: String!
+        $domainId: String!
+        $payload: UpdateLinkDomain!
+      ) {
+        updateLinkDomain(
+          organizationId: $organizationId
+          domainId: $domainId
+          payload: $payload
+        ) {
+          id
           isManuallyDisabled
         }
       }
@@ -233,7 +271,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     }
   }),
-  deleteLinkDomain: (domainId) => ({
+  deleteLinkDomain: domainId => ({
     mutation: gql`
       mutation deleteLinkDomain($organizationId: String!, $domainId: String!) {
         deleteLinkDomain(organizationId: $organizationId, domainId: $domainId)
@@ -244,9 +282,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
       domainId
     }
   })
-})
+});
 
 export default connect({
   mapQueriesToProps,
   mapMutationsToProps
-})(AdminShortLinkDomains)
+})(AdminShortLinkDomains);

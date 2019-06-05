@@ -42,7 +42,8 @@
     "jest-test": "jest __test__/backend.test.js",
     "dev": "nf start -w --procfile ./dev-tools/Procfile.dev",
     "dev-nowrap": "nf start --trim 500 --procfile ./dev-tools/Procfile.dev",
-    "debug-server": "nf start -w --procfile ./dev-tools/Procfile-debug-server.dev"
+    "debug-server": "nf start -w --procfile ./dev-tools/Procfile-debug-server.dev",
+    "prettier-all": "prettier --write \"src/**/*.js*\" && prettier --write \"dev-tools/**/*.js\" && prettier --write \"deploy/**/*.js?(on)\" && prettier --write \"migrations/**/*.js\""
   },
   "repository": {
     "type": "git",

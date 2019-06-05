@@ -1,198 +1,208 @@
-import PropTypes from 'prop-types'
-import React from 'react'
-import { StyleSheet, css } from 'aphrodite'
-import MessageList from '../../components/MessageList'
-import CannedResponseMenu from '../../components/CannedResponseMenu'
-import AssignmentTexterSurveys from '../../components/AssignmentTexterSurveys'
-import RaisedButton from 'material-ui/RaisedButton'
-import FlatButton from 'material-ui/FlatButton'
-import { grey100 } from 'material-ui/styles/colors'
-import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar'
-import { Card, CardActions, CardTitle } from 'material-ui/Card'
-import Divider from 'material-ui/Divider'
-import { applyScript } from '../../lib/scripts'
-import yup from 'yup'
-import GSForm from '../../components/forms/GSForm'
-import Form from 'react-formal'
-import GSSubmitButton from '../../components/forms/GSSubmitButton'
-import SendButton from '../../components/SendButton'
-import BulkSendButton from '../../components/BulkSendButton'
-import SendButtonArrow from '../../components/SendButtonArrow'
-import CircularProgress from 'material-ui/CircularProgress'
-import Snackbar from 'material-ui/Snackbar'
-import { getChildren, getTopMostParent, interactionStepForId, log } from '../../lib'
-import { withRouter } from 'react-router'
-import Empty from '../../components/Empty'
-import CreateIcon from 'material-ui/svg-icons/content/create'
-import { dataTest } from '../../lib/attributes'
-import ContactActionDialog from './ContactActionDialog'
-import MessageTextField from './MessageTextField'
-import EscalateButton from './EscalateButton'
+import PropTypes from "prop-types";
+import React from "react";
+import { StyleSheet, css } from "aphrodite";
+import MessageList from "../../components/MessageList";
+import CannedResponseMenu from "../../components/CannedResponseMenu";
+import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
+import RaisedButton from "material-ui/RaisedButton";
+import FlatButton from "material-ui/FlatButton";
+import { grey100 } from "material-ui/styles/colors";
+import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
+import { Card, CardActions, CardTitle } from "material-ui/Card";
+import Divider from "material-ui/Divider";
+import { applyScript } from "../../lib/scripts";
+import yup from "yup";
+import GSForm from "../../components/forms/GSForm";
+import Form from "react-formal";
+import GSSubmitButton from "../../components/forms/GSSubmitButton";
+import SendButton from "../../components/SendButton";
+import BulkSendButton from "../../components/BulkSendButton";
+import SendButtonArrow from "../../components/SendButtonArrow";
+import CircularProgress from "material-ui/CircularProgress";
+import Snackbar from "material-ui/Snackbar";
+import {
+  getChildren,
+  getTopMostParent,
+  interactionStepForId,
+  log
+} from "../../lib";
+import { withRouter } from "react-router";
+import Empty from "../../components/Empty";
+import CreateIcon from "material-ui/svg-icons/content/create";
+import { dataTest } from "../../lib/attributes";
+import ContactActionDialog from "./ContactActionDialog";
+import MessageTextField from "./MessageTextField";
+import EscalateButton from "./EscalateButton";
 
-import { isContactBetweenTextingHours } from './utils'
-import TopFixedSection from './TopFixedSection'
+import { isContactBetweenTextingHours } from "./utils";
+import TopFixedSection from "./TopFixedSection";
 
-const TexterDialogType = Object.freeze({ None: 'None', OptOut: 'OptOut', Escalate: 'Escalate' })
+const TexterDialogType = Object.freeze({
+  None: "None",
+  OptOut: "OptOut",
+  Escalate: "Escalate"
+});
 
-const DEFAULT_ESCALATE_TEXT = 'Great question! I\'m going to pass this on to someone more familiar with that specific topic area'
+const DEFAULT_ESCALATE_TEXT =
+  "Great question! I'm going to pass this on to someone more familiar with that specific topic area";
 
 const styles = StyleSheet.create({
   mobile: {
-    '@media(min-width: 425px)': {
-      display: 'none !important'
+    "@media(min-width: 425px)": {
+      display: "none !important"
     }
   },
   desktop: {
-    '@media(max-width: 450px)': {
-      display: 'none !important'
+    "@media(max-width: 450px)": {
+      display: "none !important"
     }
   },
   container: {
     margin: 0,
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     bottom: 0,
     left: 0,
     right: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%'
+    display: "flex",
+    flexDirection: "column",
+    height: "100%"
   },
   overlay: {
     margin: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
     top: 0,
     bottom: 0,
     left: 0,
     right: 0,
     opacity: 0.2,
-    backgroundColor: 'black',
-    color: 'white',
+    backgroundColor: "black",
+    color: "white",
     zIndex: 1000000
   },
   optOutCard: {
-    '@media(max-width: 320px)': {
-      padding: '2px 10px !important'
+    "@media(max-width: 320px)": {
+      padding: "2px 10px !important"
     },
     zIndex: 2000,
-    backgroundColor: 'white'
+    backgroundColor: "white"
   },
   messageForm: {
-    backgroundColor: 'red'
+    backgroundColor: "red"
   },
   loadingIndicator: {
-    maxWidth: '50%'
+    maxWidth: "50%"
   },
   navigationToolbarTitle: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    position: 'relative',
+    fontSize: "14px",
+    fontWeight: "bold",
+    position: "relative",
     top: 5
-
   },
   topFixedSection: {
-    flex: '0 0 auto'
+    flex: "0 0 auto"
   },
   middleScrollingSection: {
-    flex: '1 1 auto',
-    overflowY: 'scroll',
-    overflow: '-moz-scrollbars-vertical'
+    flex: "1 1 auto",
+    overflowY: "scroll",
+    overflow: "-moz-scrollbars-vertical"
   },
   bottomFixedSection: {
     borderTop: `1px solid ${grey100}`,
-    flex: '0 0 auto',
-    marginBottom: 'none'
+    flex: "0 0 auto",
+    marginBottom: "none"
   },
   messageField: {
-    padding: '0px 8px',
-    '@media(maxWidth: 450px)': {
-      marginBottom: '8%'
+    padding: "0px 8px",
+    "@media(maxWidth: 450px)": {
+      marginBottom: "8%"
     }
   },
   textField: {
-    '@media(max-width: 350px)': {
-      overflowY: 'scroll !important'
+    "@media(max-width: 350px)": {
+      overflowY: "scroll !important"
     }
   },
   dialogActions: {
     marginTop: 20,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'flex-end'
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-end"
   },
   lgMobileToolBar: {
-    '@media(max-width: 449px) and (min-width: 300px)': {
-      display: 'inline-block'
+    "@media(max-width: 449px) and (min-width: 300px)": {
+      display: "inline-block"
     },
-    '@media(max-width: 320px) and (min-width: 300px)': {
-      marginLeft: '-30px !important'
+    "@media(max-width: 320px) and (min-width: 300px)": {
+      marginLeft: "-30px !important"
     }
   }
-})
+});
 
 const inlineStyles = {
   mobileToolBar: {
-    position: 'absolute',
-    bottom: '-5'
+    position: "absolute",
+    bottom: "-5"
   },
   mobileCannedReplies: {
-    '@media(max-width: 450px)': {
-      marginBottom: '1'
+    "@media(max-width: 450px)": {
+      marginBottom: "1"
     }
   },
   dialogButton: {
-    display: 'inline-block'
+    display: "inline-block"
   },
   actionToolbar: {
     height: 118,
-    backgroundColor: 'white',
-    '@media(min-width: 450px)': {
+    backgroundColor: "white",
+    "@media(min-width: 450px)": {
       marginBottom: 5
     },
-    '@media(max-width: 450px)': {
-      marginBottom: 50,
-    },
+    "@media(max-width: 450px)": {
+      marginBottom: 50
+    }
   },
 
   actionToolbarFirst: {
-    backgroundColor: 'white'
+    backgroundColor: "white"
   },
 
   snackbar: {
     zIndex: 1000001
   }
-}
+};
 
 export class AssignmentTexterContact extends React.Component {
-
   constructor(props) {
-    super(props)
+    super(props);
 
-    const { assignment, campaign, contact } = this.props
-    const questionResponses = this.getInitialQuestionResponses(contact.questionResponseValues)
-    const availableSteps = this.getAvailableInteractionSteps(questionResponses)
+    const { assignment, campaign, contact } = this.props;
+    const questionResponses = this.getInitialQuestionResponses(
+      contact.questionResponseValues
+    );
+    const availableSteps = this.getAvailableInteractionSteps(questionResponses);
 
-    let disabled = false
-    let disabledText = 'Sending...'
-    let snackbarOnTouchTap = null
-    let snackbarActionTitle = null
-    let snackbarError = null
+    let disabled = false;
+    let disabledText = "Sending...";
+    let snackbarOnTouchTap = null;
+    let snackbarActionTitle = null;
+    let snackbarError = null;
 
     if (assignment.id !== contact.assignmentId || campaign.isArchived) {
-      disabledText = ''
-      disabled = true
-      snackbarError = 'Your assignment has changed'
-      snackbarOnTouchTap = this.goBackToTodos
-      snackbarActionTitle = 'Back to Todos'
+      disabledText = "";
+      disabled = true;
+      snackbarError = "Your assignment has changed";
+      snackbarOnTouchTap = this.goBackToTodos;
+      snackbarActionTitle = "Back to Todos";
     } else if (contact.optOut) {
-      disabledText = 'Skipping opt-out...'
-      disabled = true
+      disabledText = "Skipping opt-out...";
+      disabled = true;
     } else if (!isContactBetweenTextingHours(contact, campaign)) {
-      disabledText = "Refreshing ..."
-      disabled = true
+      disabledText = "Refreshing ...";
+      disabled = true;
     }
 
     this.state = {
@@ -209,334 +219,369 @@ export class AssignmentTexterContact extends React.Component {
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
       dialogType: TexterDialogType.None,
-      currentInteractionStep: availableSteps.length > 0 ? availableSteps[availableSteps.length - 1] : null
-    }
+      currentInteractionStep:
+        availableSteps.length > 0
+          ? availableSteps[availableSteps.length - 1]
+          : null
+    };
   }
 
   componentDidMount() {
-    const { contact, campaign } = this.props
+    const { contact, campaign } = this.props;
     if (contact.optOut) {
-      this.skipContact()
+      this.skipContact();
     } else if (!isContactBetweenTextingHours(contact, campaign)) {
       setTimeout(() => {
-        this.props.refreshData()
-        this.setState({ disabled: false })
-      }, 1500)
+        this.props.refreshData();
+        this.setState({ disabled: false });
+      }, 1500);
     }
 
-    this.refs.messageScrollContainer.scrollTo(0, this.refs.messageScrollContainer.scrollHeight)
+    this.refs.messageScrollContainer.scrollTo(
+      0,
+      this.refs.messageScrollContainer.scrollHeight
+    );
 
-    document.body.addEventListener('keyup', this.onEnterUp)
+    document.body.addEventListener("keyup", this.onEnterUp);
   }
 
   componentWillUnmount() {
-    document.body.removeEventListener('keyup', this.onEnterUp)
+    document.body.removeEventListener("keyup", this.onEnterUp);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.errors.length !== nextProps.length) {
-      this.state.disabled = false
+      this.state.disabled = false;
     }
   }
 
   // Handle submission on <enter> *up* to prevent holding enter
-  onEnterUp = (event) => {
-    const keyCode = event.keyCode || event.which
-    if (keyCode === 13  && !event.shiftKey) {
-      event.preventDefault()
-      const { dialogType } = this.state
+  onEnterUp = event => {
+    const keyCode = event.keyCode || event.which;
+    if (keyCode === 13 && !event.shiftKey) {
+      event.preventDefault();
+      const { dialogType } = this.state;
       if (dialogType === TexterDialogType.OptOut) {
-        this.handleOptOut()
+        this.handleOptOut();
       } else if (dialogType === TexterDialogType.Escalate) {
-        this.handleEscalate()
+        this.handleEscalate();
       } else {
-        this.handleClickSendMessageButton()
+        this.handleClickSendMessageButton();
       }
     }
-  }
+  };
 
   setDisabled = (disabled = true) => {
-    this.setState({ disabled })
-  }
+    this.setState({ disabled });
+  };
 
-  getAvailableInteractionSteps = (questionResponses) => {
-    const allInteractionSteps = this.props.campaign.interactionSteps
-    const availableSteps = []
+  getAvailableInteractionSteps = questionResponses => {
+    const allInteractionSteps = this.props.campaign.interactionSteps;
+    const availableSteps = [];
 
-    let step = getTopMostParent(allInteractionSteps)
+    let step = getTopMostParent(allInteractionSteps);
 
     while (step) {
-      availableSteps.push(step)
-      const questionResponseValue = questionResponses[step.id]
+      availableSteps.push(step);
+      const questionResponseValue = questionResponses[step.id];
       if (questionResponseValue) {
-        const matchingAnswerOption = step.question.answerOptions.find((answerOption) => answerOption.value === questionResponseValue)
+        const matchingAnswerOption = step.question.answerOptions.find(
+          answerOption => answerOption.value === questionResponseValue
+        );
         if (matchingAnswerOption && matchingAnswerOption.nextInteractionStep) {
-          step = interactionStepForId(matchingAnswerOption.nextInteractionStep.id, allInteractionSteps)
+          step = interactionStepForId(
+            matchingAnswerOption.nextInteractionStep.id,
+            allInteractionSteps
+          );
         } else {
-          step = null
+          step = null;
         }
       } else {
-        step = null
+        step = null;
       }
     }
 
-    return availableSteps
-  }
+    return availableSteps;
+  };
 
-  getInitialQuestionResponses = (questionResponseValues) => {
-    const questionResponses = {}
-    questionResponseValues.forEach((questionResponse) => {
-      questionResponses[questionResponse.interactionStepId] = questionResponse.value
-    })
+  getInitialQuestionResponses = questionResponseValues => {
+    const questionResponses = {};
+    questionResponseValues.forEach(questionResponse => {
+      questionResponses[questionResponse.interactionStepId] =
+        questionResponse.value;
+    });
 
-    return questionResponses
-  }
-  getMessageTextFromScript = (script) => {
-    const { campaign, contact, texter } = this.props
+    return questionResponses;
+  };
+  getMessageTextFromScript = script => {
+    const { campaign, contact, texter } = this.props;
 
-    return script ? applyScript({
-      contact,
-      texter,
-      script,
-      customFields: campaign.customFields
-    }) : null
-  }
+    return script
+      ? applyScript({
+          contact,
+          texter,
+          script,
+          customFields: campaign.customFields
+        })
+      : null;
+  };
 
   getStartingMessageText = () => {
-    const { contact, campaign } = this.props
-    return contact.messageStatus == 'needsMessage'
-      ? this.getMessageTextFromScript(getTopMostParent(campaign.interactionSteps).script)
-      : ''
-  }
+    const { contact, campaign } = this.props;
+    return contact.messageStatus == "needsMessage"
+      ? this.getMessageTextFromScript(
+          getTopMostParent(campaign.interactionSteps).script
+        )
+      : "";
+  };
 
-  handleOpenPopover = (event) => {
-    event.preventDefault()
-    const { assignment } = this.props
-    const { userCannedResponses, campaignCannedResponses } = assignment
-    const isCannedResponseEnabled = userCannedResponses.length + campaignCannedResponses.length > 0
+  handleOpenPopover = event => {
+    event.preventDefault();
+    const { assignment } = this.props;
+    const { userCannedResponses, campaignCannedResponses } = assignment;
+    const isCannedResponseEnabled =
+      userCannedResponses.length + campaignCannedResponses.length > 0;
     if (isCannedResponseEnabled) {
       this.setState({
         responsePopoverAnchorEl: event.currentTarget,
         responsePopoverOpen: true
-      })
+      });
     }
-  }
+  };
 
   handleClosePopover = () => {
     this.setState({
       responsePopoverOpen: false
-    })
-  }
+    });
+  };
 
-  handleCannedResponseChange = (cannedResponseScript) => {
-    this.handleChangeScript(cannedResponseScript)
-  }
+  handleCannedResponseChange = cannedResponseScript => {
+    this.handleChangeScript(cannedResponseScript);
+  };
 
-  createMessageToContact = (text) => {
-    const { texter, assignment } = this.props
-    const { contact } = this.props
+  createMessageToContact = text => {
+    const { texter, assignment } = this.props;
+    const { contact } = this.props;
 
     return {
       contactNumber: contact.cell,
       userId: texter.id,
       text,
       assignmentId: assignment.id
-    }
-  }
+    };
+  };
 
   goBackToTodos = () => {
-    const { campaign } = this.props
-    this.props.router.push(`/app/${campaign.organization.id}/todos`)
-  }
+    const { campaign } = this.props;
+    this.props.router.push(`/app/${campaign.organization.id}/todos`);
+  };
 
   handleMessageFormSubmit = ({ messageText }) => {
     // Process the submit synchronously
     if (this.state.alreadySent || this.state.disabled) {
-      return // stops from multi-send
+      return; // stops from multi-send
     }
     this.setState({ disabled: true, alreadySent: true }, () => {
       // Actually deliver the payload asyncronously
-      this.submitAction(messageText)
-    })
-  }
+      this.submitAction(messageText);
+    });
+  };
 
-  submitAction = async (messageText) => {
-    const { contact } = this.props
-    const message = this.createMessageToContact(messageText)
-    const changes = this.gatherSurveyChanges()
-    const payload = Object.assign({ message }, changes)
-    this.props.sendMessage(contact.id, payload)
-  }
+  submitAction = async messageText => {
+    const { contact } = this.props;
+    const message = this.createMessageToContact(messageText);
+    const changes = this.gatherSurveyChanges();
+    const payload = Object.assign({ message }, changes);
+    this.props.sendMessage(contact.id, payload);
+  };
 
   gatherSurveyChanges = () => {
-    const { contact } = this.props
+    const { contact } = this.props;
 
-    const deletionIds = []
-    const questionResponseObjects = []
+    const deletionIds = [];
+    const questionResponseObjects = [];
 
-    const interactionStepIds = Object.keys(this.state.questionResponses)
+    const interactionStepIds = Object.keys(this.state.questionResponses);
 
-    const count = interactionStepIds.length
+    const count = interactionStepIds.length;
 
     for (let i = 0; i < count; i++) {
-      const interactionStepId = interactionStepIds[i]
-      const value = this.state.questionResponses[interactionStepId]
+      const interactionStepId = interactionStepIds[i];
+      const value = this.state.questionResponses[interactionStepId];
       if (value) {
         questionResponseObjects.push({
           interactionStepId,
           campaignContactId: contact.id,
           value
-        })
+        });
       } else {
-        deletionIds.push(interactionStepId)
+        deletionIds.push(interactionStepId);
       }
     }
 
-
-    const changes = {}
-    if (questionResponseObjects.length) changes.questionResponseObjects = questionResponseObjects
-    if (deletionIds.length) changes.deletionIds = deletionIds
-    return changes
-  }
+    const changes = {};
+    if (questionResponseObjects.length)
+      changes.questionResponseObjects = questionResponseObjects;
+    if (deletionIds.length) changes.deletionIds = deletionIds;
+    return changes;
+  };
 
   handleClickCloseContactButton = async () => {
-    await this.handleEditMessageStatus('closed')
-    this.props.onFinishContact()
-  }
+    await this.handleEditMessageStatus("closed");
+    this.props.onFinishContact();
+  };
 
-  handleEditMessageStatus = async (messageStatus) => {
-    const { contact } = this.props
-    await this.props.mutations.editCampaignContactMessageStatus(messageStatus, contact.id)
-  }
+  handleEditMessageStatus = async messageStatus => {
+    const { contact } = this.props;
+    await this.props.mutations.editCampaignContactMessageStatus(
+      messageStatus,
+      contact.id
+    );
+  };
 
   handleOptOut = () => {
-    const { disabled, optOutMessageText } = this.state
-    const { assignment, contact } = this.props
+    const { disabled, optOutMessageText } = this.state;
+    const { assignment, contact } = this.props;
     if (disabled) {
-      return // stops from multi-send
+      return; // stops from multi-send
     }
-    this.setState({ disabled: true })
+    this.setState({ disabled: true });
 
     const optOut = {
       cell: contact.cell,
       assignmentId: assignment.id
-    }
+    };
 
     if (optOutMessageText.length) {
-      const message = this.createMessageToContact(optOutMessageText)
-      optOut.message = message
+      const message = this.createMessageToContact(optOutMessageText);
+      optOut.message = message;
     }
 
-    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges())
-    this.props.sendMessage(contact.id, payload)
-  }
+    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges());
+    this.props.sendMessage(contact.id, payload);
+  };
 
   handleEscalate = () => {
-    const { disabled, escalateMessageText } = this.state
-    const { assignment, contact } = this.props
+    const { disabled, escalateMessageText } = this.state;
+    const { assignment, contact } = this.props;
     if (disabled) {
-      return // stops from multi-send
+      return; // stops from multi-send
     }
-    this.setState({ disabled: true })
+    this.setState({ disabled: true });
 
     const escalate = {
       cell: contact.cell,
       assignmentId: assignment.id
-    }
+    };
 
     if (escalateMessageText && escalateMessageText.length) {
-      const message = this.createMessageToContact(escalateMessageText)
-      escalate.message = message
+      const message = this.createMessageToContact(escalateMessageText);
+      escalate.message = message;
     }
 
-    const payload = Object.assign({}, { escalate })
-    this.props.sendMessage(contact.id, payload)
-  }
+    const payload = Object.assign({}, { escalate });
+    this.props.sendMessage(contact.id, payload);
+  };
 
   handleOpenOptOutDialog = () => {
-    this.setState({ dialogType: TexterDialogType.OptOut })
-  }
+    this.setState({ dialogType: TexterDialogType.OptOut });
+  };
 
   handleOpenEscalateDialog = () => {
-    this.setState({ dialogType: TexterDialogType.Escalate })
-  }
+    this.setState({ dialogType: TexterDialogType.Escalate });
+  };
 
   handleCloseDialog = () => {
-    this.setState({ dialogType: TexterDialogType.None })
-  }
+    this.setState({ dialogType: TexterDialogType.None });
+  };
 
-  handleChangeScript = (newScript) => {
-    const messageText = this.getMessageTextFromScript(newScript)
+  handleChangeScript = newScript => {
+    const messageText = this.getMessageTextFromScript(newScript);
 
     this.setState({
       messageText
-    })
-  }
+    });
+  };
 
-  handleQuestionResponseChange = ({ interactionStep, questionResponseValue, nextScript }) => {
-    const { questionResponses } = this.state
-    const { interactionSteps } = this.props.campaign
-    questionResponses[interactionStep.id] = questionResponseValue
+  handleQuestionResponseChange = ({
+    interactionStep,
+    questionResponseValue,
+    nextScript
+  }) => {
+    const { questionResponses } = this.state;
+    const { interactionSteps } = this.props.campaign;
+    questionResponses[interactionStep.id] = questionResponseValue;
 
-    const children = getChildren(interactionStep, interactionSteps)
+    const children = getChildren(interactionStep, interactionSteps);
     for (const childStep of children) {
       if (childStep.id in questionResponses) {
-        questionResponses[childStep.id] = null
+        questionResponses[childStep.id] = null;
       }
     }
 
-    this.setState({
-      questionResponses
-    }, () => {
-      this.handleChangeScript(nextScript)
-    })
-  }
+    this.setState(
+      {
+        questionResponses
+      },
+      () => {
+        this.handleChangeScript(nextScript);
+      }
+    );
+  };
 
   handleClickSendMessageButton = () => {
-    this.refs.form.submit()
-    if (this.props.contact.messageStatus === 'needsMessage') {
-      this.setState({ justSentNew: true })
+    this.refs.form.submit();
+    if (this.props.contact.messageStatus === "needsMessage") {
+      this.setState({ justSentNew: true });
     }
-  }
+  };
 
   optOutSchema = yup.object({
     optOutMessageText: yup.string()
-  })
+  });
 
   skipContact = () => {
-    this.props.onFinishContact()
-  }
+    this.props.onFinishContact();
+  };
 
-  bulkSendMessages = async (assignmentId) => {
-    await this.props.mutations.bulkSendMessages(assignmentId)
-    this.props.refreshData()
-  }
+  bulkSendMessages = async assignmentId => {
+    await this.props.mutations.bulkSendMessages(assignmentId);
+    this.props.refreshData();
+  };
 
   messageSchema = yup.object({
-    messageText: yup.string().trim().required("Can't send empty message").max(window.MAX_MESSAGE_LENGTH)
-  })
+    messageText: yup
+      .string()
+      .trim()
+      .required("Can't send empty message")
+      .max(window.MAX_MESSAGE_LENGTH)
+  });
 
   handleMessageFormChange = ({ messageText }) => {
-    const { messageStatus } = this.props.contact
+    const { messageStatus } = this.props.contact;
     // Do not allow deviating from the script for the first message of a campaign
-    if (messageStatus !== 'needsMessage') {
-      this.setState({ messageText })
+    if (messageStatus !== "needsMessage") {
+      this.setState({ messageText });
     }
-  }
+  };
 
   renderSurveySection() {
-    const { contact } = this.props
-    const { messages } = contact
+    const { contact } = this.props;
+    const { messages } = contact;
 
-    const { questionResponses } = this.state
+    const { questionResponses } = this.state;
 
-    const availableInteractionSteps = this.getAvailableInteractionSteps(questionResponses)
+    const availableInteractionSteps = this.getAvailableInteractionSteps(
+      questionResponses
+    );
 
-    return messages.length === 0 ? (<Empty
-      title={'This is your first message to ' + contact.firstName}
-      icon={<CreateIcon color='rgb(83, 180, 119)' />}
-      hideMobile
-    />) : (
+    return messages.length === 0 ? (
+      <Empty
+        title={"This is your first message to " + contact.firstName}
+        icon={<CreateIcon color="rgb(83, 180, 119)" />}
+        hideMobile
+      />
+    ) : (
       <div>
         <AssignmentTexterSurveys
           contact={contact}
@@ -546,63 +591,79 @@ export class AssignmentTexterContact extends React.Component {
           questionResponses={questionResponses}
         />
       </div>
-    )
+    );
   }
 
   renderNeedsResponseToggleButton(contact) {
-    const { messageStatus } = contact
-    let button = null
-    if (messageStatus === 'closed') {
-      button = (<RaisedButton
-        onTouchTap={() => this.handleEditMessageStatus('needsResponse')}
-        label='Reopen'
-      />)
-    } else if (messageStatus === 'needsResponse') {
-      button = (<RaisedButton
-        onTouchTap={this.handleClickCloseContactButton}
-        label='Skip Reply'
-      />)
+    const { messageStatus } = contact;
+    let button = null;
+    if (messageStatus === "closed") {
+      button = (
+        <RaisedButton
+          onTouchTap={() => this.handleEditMessageStatus("needsResponse")}
+          label="Reopen"
+        />
+      );
+    } else if (messageStatus === "needsResponse") {
+      button = (
+        <RaisedButton
+          onTouchTap={this.handleClickCloseContactButton}
+          label="Skip Reply"
+        />
+      );
     }
 
-    return button
+    return button;
   }
 
   renderActionToolbar() {
-    const { contact, campaign, assignment, navigationToolbarChildren, onFinishContact } = this.props
-    const { userCannedResponses, campaignCannedResponses } = assignment
-    const isCannedResponseEnabled = userCannedResponses.length + campaignCannedResponses.length > 0
-    const { justSentNew, alreadySent } = this.state
-    const { messageStatus } = contact
-    const size = document.documentElement.clientWidth
+    const {
+      contact,
+      campaign,
+      assignment,
+      navigationToolbarChildren,
+      onFinishContact
+    } = this.props;
+    const { userCannedResponses, campaignCannedResponses } = assignment;
+    const isCannedResponseEnabled =
+      userCannedResponses.length + campaignCannedResponses.length > 0;
+    const { justSentNew, alreadySent } = this.state;
+    const { messageStatus } = contact;
+    const size = document.documentElement.clientWidth;
 
-    if (messageStatus === 'needsMessage' || justSentNew) {
+    if (messageStatus === "needsMessage" || justSentNew) {
       return (
         <div>
           <Toolbar style={inlineStyles.actionToolbarFirst}>
-            <ToolbarGroup
-              firstChild
-            >
+            <ToolbarGroup firstChild>
               <SendButton
                 threeClickEnabled={campaign.organization.threeClickEnabled}
-                onFinalTouchTap={alreadySent ? undefined : this.handleClickSendMessageButton}
+                onFinalTouchTap={
+                  alreadySent ? undefined : this.handleClickSendMessageButton
+                }
                 disabled={this.state.disabled}
               />
-              {window.NOT_IN_USA && window.ALLOW_SEND_ALL && window.BULK_SEND_CHUNK_SIZE ? <BulkSendButton
-                assignment={assignment}
-                onFinishContact={onFinishContact}
-                bulkSendMessages={this.bulkSendMessages}
-                setDisabled={this.setDisabled}
-              /> : ''}
-              <div
-                style={{ float: 'right', marginLeft: 20 }}
-              >
+              {window.NOT_IN_USA &&
+              window.ALLOW_SEND_ALL &&
+              window.BULK_SEND_CHUNK_SIZE ? (
+                <BulkSendButton
+                  assignment={assignment}
+                  onFinishContact={onFinishContact}
+                  bulkSendMessages={this.bulkSendMessages}
+                  setDisabled={this.setDisabled}
+                />
+              ) : (
+                ""
+              )}
+              <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
               </div>
             </ToolbarGroup>
           </Toolbar>
         </div>
-      )
-    } else if (size < 450) { // for needsResponse or messaged or convo
+      );
+    } else if (size < 450) {
+      // for needsResponse or messaged or convo
       return (
         <div>
           <Toolbar
@@ -615,35 +676,32 @@ export class AssignmentTexterContact extends React.Component {
               firstChild
             >
               <RaisedButton
-                {...dataTest('optOut')}
+                {...dataTest("optOut")}
                 secondary
-                label='Opt out'
+                label="Opt out"
                 onTouchTap={this.handleOpenOptOutDialog}
-                tooltip='Opt out this contact'
+                tooltip="Opt out this contact"
               />
               <RaisedButton
                 style={inlineStyles.mobileCannedReplies}
-                label='Canned replies'
+                label="Canned replies"
                 onTouchTap={this.handleOpenPopover}
                 disabled={!isCannedResponseEnabled}
               />
               {this.renderNeedsResponseToggleButton(contact)}
-              <div
-                style={{ float: 'right', marginLeft: '-30px' }}
-              >
+              <div style={{ float: "right", marginLeft: "-30px" }}>
                 {navigationToolbarChildren}
               </div>
             </ToolbarGroup>
           </Toolbar>
         </div>
-      )
-    } else if (size >= 768) { // for needsResponse or messaged
+      );
+    } else if (size >= 768) {
+      // for needsResponse or messaged
       return (
         <div>
           <Toolbar style={inlineStyles.actionToolbarFirst}>
-            <ToolbarGroup
-              firstChild
-            >
+            <ToolbarGroup firstChild>
               <SendButton
                 threeClickEnabled={campaign.organization.threeClickEnabled}
                 onFinalTouchTap={this.handleClickSendMessageButton}
@@ -651,52 +709,50 @@ export class AssignmentTexterContact extends React.Component {
               />
               {this.renderNeedsResponseToggleButton(contact)}
               <RaisedButton
-                label='Canned responses'
+                label="Canned responses"
                 onTouchTap={this.handleOpenPopover}
                 disabled={!isCannedResponseEnabled}
               />
               <RaisedButton
-                {...dataTest('optOut')}
+                {...dataTest("optOut")}
                 secondary
-                label='Opt out'
+                label="Opt out"
                 onTouchTap={this.handleOpenOptOutDialog}
               />
-              <EscalateButton
-                onEscalate={this.handleOpenEscalateDialog}
-              />
-              <div
-                style={{ float: 'right', marginLeft: 20 }}
-              >
+              <EscalateButton onEscalate={this.handleOpenEscalateDialog} />
+              <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
               </div>
             </ToolbarGroup>
           </Toolbar>
         </div>
-      )
+      );
     }
-    return ''
+    return "";
   }
 
   renderCannedResponsePopover() {
-    const { campaign, assignment, texter } = this.props
-    const { userCannedResponses, campaignCannedResponses } = assignment
+    const { campaign, assignment, texter } = this.props;
+    const { userCannedResponses, campaignCannedResponses } = assignment;
 
-    return (<CannedResponseMenu
-      onRequestClose={this.handleClosePopover}
-      open={this.state.responsePopoverOpen}
-      anchorEl={this.state.responsePopoverAnchorEl}
-      campaignCannedResponses={campaignCannedResponses}
-      userCannedResponses={userCannedResponses}
-      customFields={campaign.customFields}
-      campaignId={campaign.id}
-      texterId={texter.id}
-      onSelectCannedResponse={this.handleCannedResponseChange}
-    />)
+    return (
+      <CannedResponseMenu
+        onRequestClose={this.handleClosePopover}
+        open={this.state.responsePopoverOpen}
+        anchorEl={this.state.responsePopoverAnchorEl}
+        campaignCannedResponses={campaignCannedResponses}
+        userCannedResponses={userCannedResponses}
+        customFields={campaign.customFields}
+        campaignId={campaign.id}
+        texterId={texter.id}
+        onSelectCannedResponse={this.handleCannedResponseChange}
+      />
+    );
   }
 
   renderCorrectSendButton() {
-    const { messageStatus } = this.props.contact
-    const validStates = ['messaged', 'convo', 'needsResponse']
+    const { messageStatus } = this.props.contact;
+    const validStates = ["messaged", "convo", "needsResponse"];
     if (validStates.indexOf(messageStatus) > -1) {
       return (
         <SendButtonArrow
@@ -704,13 +760,13 @@ export class AssignmentTexterContact extends React.Component {
           onFinalTouchTap={this.handleClickSendMessageButton}
           disabled={this.state.disabled}
         />
-      )
+      );
     }
-    return null
+    return null;
   }
 
   renderBottomFixedSection() {
-    const { dialogType, messageText, alreadySent } = this.state
+    const { dialogType, messageText, alreadySent } = this.state;
 
     return (
       <div>
@@ -719,10 +775,12 @@ export class AssignmentTexterContact extends React.Component {
           <div>
             <div className={css(styles.messageField)}>
               <GSForm
-                ref='form'
+                ref="form"
                 schema={this.messageSchema}
                 value={{ messageText }}
-                onSubmit={alreadySent ? undefined : this.handleMessageFormSubmit}
+                onSubmit={
+                  alreadySent ? undefined : this.handleMessageFormSubmit
+                }
                 onChange={this.handleMessageFormChange}
               >
                 <MessageTextField />
@@ -734,36 +792,45 @@ export class AssignmentTexterContact extends React.Component {
         )}
         {dialogType === TexterDialogType.OptOut && (
           <ContactActionDialog
-            title='Opt out user'
+            title="Opt out user"
             messageText={this.state.optOutMessageText}
-            submitTitle={this.state.optOutMessageText ? 'Send' : 'Opt Out without Text'}
-            onChange={({ messageText }) => this.setState({ optOutMessageText: messageText })}
+            submitTitle={
+              this.state.optOutMessageText ? "Send" : "Opt Out without Text"
+            }
+            onChange={({ messageText }) =>
+              this.setState({ optOutMessageText: messageText })
+            }
             onSubmit={this.handleOptOut}
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
         {dialogType === TexterDialogType.Escalate && (
           <ContactActionDialog
-            title='Escalate conversation'
+            title="Escalate conversation"
             messageText={this.state.escalateMessageText}
-            submitTitle={this.state.escalateMessageText ? 'Send' : 'Escalate without Text'}
-            onChange={({ messageText }) => this.setState({ escalateMessageText: messageText })}
+            submitTitle={
+              this.state.escalateMessageText ? "Send" : "Escalate without Text"
+            }
+            onChange={({ messageText }) =>
+              this.setState({ escalateMessageText: messageText })
+            }
             onSubmit={this.handleEscalate}
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
         {this.renderCannedResponsePopover()}
       </div>
-    )
+    );
   }
 
   render() {
-    const { disabled } = this.state
-    const { campaign, contact, onExitTexter } = this.props
+    const { disabled } = this.state;
+    const { campaign, contact, onExitTexter } = this.props;
 
-    const backgroundColor = contact.messageStatus === 'needsResponse'
-      ? 'rgba(83, 180, 119, 0.25)'
-      : ''
+    const backgroundColor =
+      contact.messageStatus === "needsResponse"
+        ? "rgba(83, 180, 119, 0.25)"
+        : "";
 
     return (
       <div>
@@ -773,10 +840,7 @@ export class AssignmentTexterContact extends React.Component {
             {this.state.disabledText}
           </div>
         )}
-        <div
-          className={css(styles.container)}
-          style={{ backgroundColor }}
-        >
+        <div className={css(styles.container)} style={{ backgroundColor }}>
           <div className={css(styles.topFixedSection)}>
             <TopFixedSection
               campaign={campaign}
@@ -785,14 +849,11 @@ export class AssignmentTexterContact extends React.Component {
             />
           </div>
           <div
-            {...dataTest('messageList')}
-            ref='messageScrollContainer'
+            {...dataTest("messageList")}
+            ref="messageScrollContainer"
             className={css(styles.middleScrollingSection)}
           >
-            <MessageList
-              contact={contact}
-              messages={contact.messages}
-            />
+            <MessageList contact={contact} messages={contact.messages} />
           </div>
           <div className={css(styles.bottomFixedSection)}>
             {this.renderBottomFixedSection()}
@@ -801,23 +862,26 @@ export class AssignmentTexterContact extends React.Component {
         <Snackbar
           style={inlineStyles.snackbar}
           open={!!this.state.snackbarError}
-          message={this.state.snackbarError || ''}
+          message={this.state.snackbarError || ""}
           action={this.state.snackbarActionTitle}
           onActionClick={this.state.snackbarOnTouchTap}
         />
-        {this.props.errors.map((err, idx) =>
-          <Snackbar 
+        {this.props.errors.map((err, idx) => (
+          <Snackbar
             key={err.id}
-            style={Object.assign({}, inlineStyles.snackbar, {bottom: idx * 50, width: 700})}
+            style={Object.assign({}, inlineStyles.snackbar, {
+              bottom: idx * 50,
+              width: 700
+            })}
             open={true}
-            message={err.snackbarError || ''}
+            message={err.snackbarError || ""}
             action={err.snackbarActionTitle}
             onActionClick={err.snackbarOnTouchTap}
             transitionDuration={0}
           />
-        )}
+        ))}
       </div>
-    )
+    );
   }
 }
 
@@ -834,6 +898,6 @@ AssignmentTexterContact.propTypes = {
   refreshData: PropTypes.func,
   onExitTexter: PropTypes.func,
   onRefreshAssignmentContacts: PropTypes.func
-}
+};
 
-export default withRouter(AssignmentTexterContact)
+export default withRouter(AssignmentTexterContact);

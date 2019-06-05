@@ -57,17 +57,23 @@ import {
 } from "./errors";
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
-import { resolvers as linkDomainResolvers } from "./link-domain"
+import { resolvers as linkDomainResolvers } from "./link-domain";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import serviceMap from "./lib/services";
 import { resolvers as messageResolvers } from "./message";
 import { resolvers as optOutResolvers } from "./opt-out";
-import { resolvers as organizationResolvers, getEscalationUserId } from "./organization";
+import {
+  resolvers as organizationResolvers,
+  getEscalationUserId
+} from "./organization";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
-import { queryCampaignOverlaps, queryCampaignOverlapCount } from './campaign-overlap'
+import {
+  queryCampaignOverlaps,
+  queryCampaignOverlapCount
+} from "./campaign-overlap";
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
@@ -77,29 +83,33 @@ const JOBS_SAME_PROCESS = !!(
 );
 const JOBS_SYNC = !!(process.env.JOBS_SYNC || global.JOBS_SYNC);
 
-const replaceCurlyApostrophes = rawText => rawText.replace(/[\u2018\u2019]/g, "'")
+const replaceCurlyApostrophes = rawText =>
+  rawText.replace(/[\u2018\u2019]/g, "'");
 
 // From: https://stackoverflow.com/a/1144788
-const escapeRegExp = str => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")
-const replaceAll = (str, find, replace) => str.replace(new RegExp(escapeRegExp(find), 'g'), replace)
+const escapeRegExp = str => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+const replaceAll = (str, find, replace) =>
+  str.replace(new RegExp(escapeRegExp(find), "g"), replace);
 
 const replaceShortLinkDomains = async (organizationId, messageText) => {
-  const domains = await r.knex('link_domain')
+  const domains = await r
+    .knex("link_domain")
     .where({ organization_id: organizationId })
-    .pluck('domain')
+    .pluck("domain");
 
   const checkerReducer = (doesContainShortlink, linkDomain) => {
-    const containsLinkDomain = messageText.indexOf(linkDomain) > -1
-    return doesContainShortlink || containsLinkDomain
-  }
-  const doesContainShortLink = domains.reduce(checkerReducer, false)
+    const containsLinkDomain = messageText.indexOf(linkDomain) > -1;
+    return doesContainShortlink || containsLinkDomain;
+  };
+  const doesContainShortLink = domains.reduce(checkerReducer, false);
 
   if (!doesContainShortLink) {
-    return messageText
+    return messageText;
   }
 
   // Get next domain
-  const domainRaw = await r.knex.raw(`
+  const domainRaw = await r.knex.raw(
+    `
     update
       link_domain
     set
@@ -126,20 +136,22 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
         for update
       )
     returning link_domain.domain;
-  `, [organizationId])
-  const targetDomain = domainRaw.rows[0] && domainRaw.rows[0].domain
+  `,
+    [organizationId]
+  );
+  const targetDomain = domainRaw.rows[0] && domainRaw.rows[0].domain;
 
   // Skip updating the message text if no healthy target domain was found
   if (!targetDomain) {
-    return messageText
+    return messageText;
   }
 
   const replacerReducer = (text, domain) => {
-    return replaceAll(text, domain, targetDomain)
-  }
-  const finalMessageText = domains.reduce(replacerReducer, messageText)
-  return finalMessageText
-}
+    return replaceAll(text, domain, targetDomain);
+  };
+  const finalMessageText = domains.reduce(replacerReducer, messageText);
+  return finalMessageText;
+};
 
 async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   const {
@@ -210,7 +222,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     const jobPayload = {
       excludeCampaignIds: campaign.excludeCampaignIds || [],
       contacts: contactsToSave
-    }
+    };
     const compressedString = await gzip(JSON.stringify(jobPayload));
     let job = await JobRequest.save({
       queue_name: `${id}:edit_campaign`,
@@ -366,8 +378,15 @@ async function updateInteractionSteps(
 // and enforce_texting_hours is always true
 // as a result, we're forcing admins to think about the time zone of each campaign
 // and saving a join on this query.
-async function sendMessage (user, campaignContactId, message, checkOptOut = true, checkAssignment = true) {
-  const record = await r.knex("campaign_contact")
+async function sendMessage(
+  user,
+  campaignContactId,
+  message,
+  checkOptOut = true,
+  checkAssignment = true
+) {
+  const record = await r
+    .knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId) })
     .where({ "campaign.is_archived": false })
@@ -389,9 +408,12 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
       "assignment.user_id as a_assignment_user_id",
       "opt_out.id as is_opted_out",
       "campaign_contact.timezone_offset as contact_timezone_offset"
-    )
+    );
 
-  if (checkAssignment && (record.assignment_id != parseInt(message.assignmentId))) {
+  if (
+    checkAssignment &&
+    record.assignment_id != parseInt(message.assignmentId)
+  ) {
     throw new GraphQLError("Your assignment has changed");
   }
 
@@ -445,8 +467,11 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
     throw new GraphQLError("Message was longer than the limit");
   }
 
-  const escapedApostrophes = replaceCurlyApostrophes(text)
-  const replacedDomainsText =  await replaceShortLinkDomains(record.organization_id, escapedApostrophes)
+  const escapedApostrophes = replaceCurlyApostrophes(text);
+  const replacedDomainsText = await replaceShortLinkDomains(
+    record.organization_id,
+    escapedApostrophes
+  );
 
   let contactTimezone = {};
   if (record.contact_timezone_offset) {
@@ -483,9 +508,7 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
 
   // TODO - this is local timezone, not UTC
   if (sendBeforeDate && sendBeforeDate <= Date.now()) {
-    throw new GraphQLError(
-      "Outside permitted texting time for this recipient"
-    );
+    throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
   const toInsert = {
@@ -514,8 +537,7 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
       .update({
         updated_at: r.knex.fn.now(),
         message_status:
-          cc_message_status === "needsResponse" ||
-          cc_message_status === "convo"
+          cc_message_status === "needsResponse" || cc_message_status === "convo"
             ? "convo"
             : "messaged"
       })
@@ -544,7 +566,7 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
   service.sendMessage(toInsert);
 
   // Send message to BernieSMS to be checked for bad words
-  const badWordUrl = process.env.TFB_BAD_WORD_URL
+  const badWordUrl = process.env.TFB_BAD_WORD_URL;
   if (badWordUrl) {
     request
       .post(badWordUrl)
@@ -552,9 +574,9 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
         if (err) {
-          log.error(err)
+          log.error(err);
         }
-      })
+      });
   }
 
   return contactUpdateResult;
@@ -578,12 +600,13 @@ const rootMutations = {
 
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
-      const lastMessage = await r.knex('message')
+      const lastMessage = await r
+        .knex("message")
         .where({
           assignment_id: contact.assignment_id,
           contact_number: contact.cell
         })
-        .first()
+        .first();
 
       if (!lastMessage) {
         throw new GraphQLError({
@@ -832,24 +855,33 @@ const rootMutations = {
     },
 
     updateTextRequestFormSettings: async (_, args, { user, loaders }) => {
-      const { organizationId, textRequestFormEnabled, textRequestType, textRequestMaxCount } = args
-      await accessRequired(user, organizationId, 'ADMIN')
+      const {
+        organizationId,
+        textRequestFormEnabled,
+        textRequestType,
+        textRequestMaxCount
+      } = args;
+      await accessRequired(user, organizationId, "ADMIN");
 
-      const currentOrganization = await Organization.get(organizationId)
-      let currentFeatures = {}
+      const currentOrganization = await Organization.get(organizationId);
+      let currentFeatures = {};
       try {
         currentFeatures = JSON.parse(currentOrganization.features);
       } catch (ex) {
         // do nothing
       }
 
-      let nextFeatures = { textRequestFormEnabled, textRequestType, textRequestMaxCount }
-      nextFeatures = Object.assign({}, currentFeatures, nextFeatures)
+      let nextFeatures = {
+        textRequestFormEnabled,
+        textRequestType,
+        textRequestMaxCount
+      };
+      nextFeatures = Object.assign({}, currentFeatures, nextFeatures);
       await Organization.get(organizationId).update({
         features: JSON.stringify(nextFeatures)
-      })
+      });
 
-      return await loaders.organization.load(organizationId)
+      return await loaders.organization.load(organizationId);
     },
 
     updateOptOutMessage: async (
@@ -870,11 +902,15 @@ const rootMutations = {
       return await Organization.get(organizationId);
     },
 
-    updateEscalationUserId: async (_, { organizationId, escalationUserId }, { user, loaders }) => {
-      await accessRequired(user, organizationId, 'ADMIN')
+    updateEscalationUserId: async (
+      _,
+      { organizationId, escalationUserId },
+      { user, loaders }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
 
-      const currentOrganization = await Organization.get(organizationId)
-      let currentFeatures = {}
+      const currentOrganization = await Organization.get(organizationId);
+      let currentFeatures = {};
       try {
         currentFeatures = JSON.parse(currentOrganization.features);
       } catch (ex) {
@@ -882,15 +918,21 @@ const rootMutations = {
       }
 
       // Ensure the user actually exists
-      const escalationUser = await r.knex('user').where({ id: escalationUserId }).first('id')
-      if (!escalationUser) throw new GraphQLError('User with that ID does not exist!')
+      const escalationUser = await r
+        .knex("user")
+        .where({ id: escalationUserId })
+        .first("id");
+      if (!escalationUser)
+        throw new GraphQLError("User with that ID does not exist!");
 
-      const nextFeatures = Object.assign({}, currentFeatures, { escalationUserId })
+      const nextFeatures = Object.assign({}, currentFeatures, {
+        escalationUserId
+      });
       await Organization.get(organizationId).update({
         features: JSON.stringify(nextFeatures)
-      })
+      });
 
-      return await loaders.organization.load(organizationId)
+      return await loaders.organization.load(organizationId);
     },
 
     createInvite: async (_, { user }) => {
@@ -1057,55 +1099,70 @@ const rootMutations = {
       return editCampaign(id, campaign, loaders, user, origCampaign);
     },
 
-    bulkUpdateScript: async (_, { organizationId, findAndReplace }, { user, loaders }) => {
-      await accessRequired(user, organizationId, "OWNER")
+    bulkUpdateScript: async (
+      _,
+      { organizationId, findAndReplace },
+      { user, loaders }
+    ) => {
+      await accessRequired(user, organizationId, "OWNER");
 
       const scriptUpdatesResult = await r.knex.transaction(async trx => {
-        const { searchString, replaceString, includeArchived, campaignTitlePrefixes } = findAndReplace
+        const {
+          searchString,
+          replaceString,
+          includeArchived,
+          campaignTitlePrefixes
+        } = findAndReplace;
 
-        let campaignIdQuery = r.knex('campaign')
+        let campaignIdQuery = r
+          .knex("campaign")
           .transacting(trx)
-          .pluck('id')
+          .pluck("id");
         if (!includeArchived) {
-          campaignIdQuery = campaignIdQuery.where({ is_archived: false })
+          campaignIdQuery = campaignIdQuery.where({ is_archived: false });
         }
         if (campaignTitlePrefixes.length > 0) {
-          campaignIdQuery = campaignIdQuery.where(function () {
+          campaignIdQuery = campaignIdQuery.where(function() {
             for (const prefix of campaignTitlePrefixes) {
-              this.orWhere('title', 'like', `${prefix}%`)
+              this.orWhere("title", "like", `${prefix}%`);
             }
-          })
+          });
         }
         // TODO - MySQL Specific. This should be an inline subquery
-        const campaignIds = await campaignIdQuery
+        const campaignIds = await campaignIdQuery;
 
-        const interactionStepsToChange = await r.knex('interaction_step')
+        const interactionStepsToChange = await r
+          .knex("interaction_step")
           .transacting(trx)
-          .where('script', 'like', `%${searchString}%`)
-          .whereIn('campaign_id', campaignIds)
+          .where("script", "like", `%${searchString}%`)
+          .whereIn("campaign_id", campaignIds);
 
-        const scriptUpdates = []
+        const scriptUpdates = [];
         for (let step of interactionStepsToChange) {
-          const newText = step.script.replace(new RegExp(searchString, 'g'), replaceString)
+          const newText = step.script.replace(
+            new RegExp(searchString, "g"),
+            replaceString
+          );
 
           const scriptUpdate = {
             campaignId: step.campaign_id,
             found: step.script,
             replaced: newText
-          }
+          };
 
-          await r.knex('interaction_step')
+          await r
+            .knex("interaction_step")
             .transacting(trx)
             .update({ script: newText })
-            .where({ id: step.id })
+            .where({ id: step.id });
 
-          scriptUpdates.push(scriptUpdate)
+          scriptUpdates.push(scriptUpdate);
         }
 
-        return scriptUpdates
-      })
+        return scriptUpdates;
+      });
 
-      return scriptUpdatesResult
+      return scriptUpdatesResult;
     },
 
     deleteJob: async (_, { campaignId, id }, { user, loaders }) => {
@@ -1275,33 +1332,54 @@ const rootMutations = {
         return { found: false };
       }
     },
-    escalateConversation: async (_, { campaignContactId, escalate }, { user, loaders }) => {
-      let campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
-      await assignmentRequired(user, campaignContact.assignment_id)
+    escalateConversation: async (
+      _,
+      { campaignContactId, escalate },
+      { user, loaders }
+    ) => {
+      let campaignContact = await r
+        .knex("campaign_contact")
+        .where({ id: campaignContactId })
+        .first();
+      await assignmentRequired(user, campaignContact.assignment_id);
 
-      const campaign = await r.knex('campaign')
+      const campaign = await r
+        .knex("campaign")
         .where({ id: campaignContact.campaign_id })
-        .first('organization_id')
-      const escalationUserId = await getEscalationUserId(campaign.organization_id)
+        .first("organization_id");
+      const escalationUserId = await getEscalationUserId(
+        campaign.organization_id
+      );
       if (!escalationUserId) {
-        throw new GraphQLError(`No escalation user set for organization ${campaign.organization_id}!`)
+        throw new GraphQLError(
+          `No escalation user set for organization ${campaign.organization_id}!`
+        );
       }
 
-      await reassignContacts([campaignContactId], escalationUserId)
-      campaignContact = await r.knex('campaign_contact').where({ id: campaignContactId }).first()
+      await reassignContacts([campaignContactId], escalationUserId);
+      campaignContact = await r
+        .knex("campaign_contact")
+        .where({ id: campaignContactId })
+        .first();
 
       if (escalate.message) {
         try {
-          const checkOptOut = true
-          const checkAssignment = false
-          await sendMessage(user, campaignContactId, escalate.message, checkOptOut, checkAssignment)
+          const checkOptOut = true;
+          const checkAssignment = false;
+          await sendMessage(
+            user,
+            campaignContactId,
+            escalate.message,
+            checkOptOut,
+            checkAssignment
+          );
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
-          log.error(error)
+          log.error(error);
         }
       }
 
-      return campaignContact
+      return campaignContact;
     },
     createOptOut: async (
       _,
@@ -1320,7 +1398,7 @@ const rootMutations = {
         await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       }
 
-      const { assignmentId, cell, message, reason } = optOut
+      const { assignmentId, cell, message, reason } = optOut;
       await cacheableData.optOut.save({
         cell,
         reason,
@@ -1329,17 +1407,17 @@ const rootMutations = {
       });
 
       if (message) {
-        const checkOptOut = false
+        const checkOptOut = false;
         try {
-          await sendMessage(user, campaignContactId, message, checkOptOut)
+          await sendMessage(user, campaignContactId, message, checkOptOut);
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
-          log.error(error)
+          log.error(error);
         }
       }
 
       // Force reload with updated `is_opted_out` status
-      loaders.campaignContact.clear(campaignContactId)
+      loaders.campaignContact.clear(campaignContactId);
       return loaders.campaignContact.load(campaignContactId);
     },
 
@@ -1371,7 +1449,8 @@ const rootMutations = {
 
         // Update all "cached" values for campaign contacts
         // TODO - MySQL Specific. Fetching contactIds can be done in a subquery
-        const contactUpdates = r.knex('campaign_contact')
+        const contactUpdates = r
+          .knex("campaign_contact")
           .transacting(trx)
           .leftJoin("campaign", "campaign_contact.campaign_id", "campaign.id")
           .where({
@@ -1380,17 +1459,23 @@ const rootMutations = {
           })
           .pluck("campaign_contact.id")
           .then(contactIds => {
-            return r.knex('campaign_contact')
-              .transacting(trx)
-              .whereIn("id", contactIds)
-              .update({ is_opted_out: false })
-              // Return updated contactIds from Promise chain
-              .then(_ => contactIds)
-          })
+            return (
+              r
+                .knex("campaign_contact")
+                .transacting(trx)
+                .whereIn("id", contactIds)
+                .update({ is_opted_out: false })
+                // Return updated contactIds from Promise chain
+                .then(_ => contactIds)
+            );
+          });
 
-        const [_optOutRes, contactIds] = await Promise.all([optOuts, contactUpdates])
-        return contactIds
-      })
+        const [_optOutRes, contactIds] = await Promise.all([
+          optOuts,
+          contactUpdates
+        ]);
+        return contactIds;
+      });
 
       // We don't care about Redis
       // await cacheableData.optOut.clearCache(...)
@@ -1464,7 +1549,7 @@ const rootMutations = {
       { message, campaignContactId },
       { user, loaders }
     ) => {
-      return await sendMessage(user, campaignContactId, message)
+      return await sendMessage(user, campaignContactId, message);
     },
 
     deleteQuestionResponses: async (
@@ -1476,9 +1561,12 @@ const rootMutations = {
       try {
         await assignmentRequired(user, contact.assignment_id);
       } catch (error) {
-        const campaign = await r.knex('campaign').where({ id: contact.campaign_id }).first()
-        const organizationId = campaign.organization_id
-        await accessRequired(user, organizationId, 'SUPERVOLUNTEER')
+        const campaign = await r
+          .knex("campaign")
+          .where({ id: contact.campaign_id })
+          .first();
+        const organizationId = campaign.organization_id;
+        await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       }
       // TODO: maybe undo action_handler
       await r
@@ -1549,14 +1637,11 @@ const rootMutations = {
       return contact;
     },
 
-    markForSecondPass: async (
-      _ignore,
-      { campaignId },
-      { user }
-    ) => {
+    markForSecondPass: async (_ignore, { campaignId }, { user }) => {
       // verify permissions
-      const organizationId = (await r.knex('campaign')
-        .where({ id: parseInt(campaignId) }))[0].organization_id
+      const organizationId = (await r
+        .knex("campaign")
+        .where({ id: parseInt(campaignId) }))[0].organization_id;
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
@@ -1564,7 +1649,8 @@ const rootMutations = {
         "Mark Campaign for Second Pass", will only mark contacts for a second
         pass that do not have a more recently created membership in another campaign.
       */
-      const updateResultRaw = await r.knex.raw(`
+      const updateResultRaw = await r.knex.raw(
+        `
         update
           campaign_contact as current_contact
         set
@@ -1582,10 +1668,12 @@ const rootMutations = {
               and newer_contact.created_at > current_contact.created_at
           )
         ;
-      `, [parseInt(campaignId)])
-      const updateResult = updateResultRaw.rowCount
+      `,
+        [parseInt(campaignId)]
+      );
+      const updateResult = updateResultRaw.rowCount;
 
-      return `Marked ${updateResult} campaign contacts for a second pass.`
+      return `Marked ${updateResult} campaign contacts for a second pass.`;
     },
 
     insertLinkDomain: async (
@@ -1594,17 +1682,18 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true)
+      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true);
 
-      const insertResult = await r.knex('link_domain')
+      const insertResult = await r
+        .knex("link_domain")
         .insert({
           organization_id: organizationId,
           max_usage_count: maxUsageCount,
           domain
         })
-        .returning('*')
+        .returning("*");
 
-      return insertResult[0]
+      return insertResult[0];
     },
 
     updateLinkDomain: async (
@@ -1615,20 +1704,24 @@ const rootMutations = {
       // verify permissions
       await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true);
 
-      const { maxUsageCount, isManuallyDisabled } = payload
-      if (maxUsageCount === undefined && isManuallyDisabled === undefined) throw new Error('Must supply at least one field to update.')
+      const { maxUsageCount, isManuallyDisabled } = payload;
+      if (maxUsageCount === undefined && isManuallyDisabled === undefined)
+        throw new Error("Must supply at least one field to update.");
 
-      let query = r.knex('link_domain')
+      let query = r
+        .knex("link_domain")
         .where({
           id: domainId,
           organization_id: organizationId
         })
-        .returning("*")
-      if (maxUsageCount !== undefined) query = query.update({ max_usage_count: maxUsageCount })
-      if (isManuallyDisabled !== undefined) query = query.update({ is_manually_disabled: isManuallyDisabled })
+        .returning("*");
+      if (maxUsageCount !== undefined)
+        query = query.update({ max_usage_count: maxUsageCount });
+      if (isManuallyDisabled !== undefined)
+        query = query.update({ is_manually_disabled: isManuallyDisabled });
 
-      const linkDomainResult = await query
-      return linkDomainResult[0]
+      const linkDomainResult = await query;
+      return linkDomainResult[0];
     },
 
     deleteLinkDomain: async (
@@ -1637,16 +1730,17 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true)
+      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true);
 
-      await r.knex('link_domain')
+      await r
+        .knex("link_domain")
         .where({
           id: domainId,
           organization_id: organizationId
         })
-        .del()
+        .del();
 
-      return true
+      return true;
     },
 
     megaReassignCampaignContacts: async (
@@ -1658,50 +1752,56 @@ const rootMutations = {
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
       if (newTexterUserIds == null) {
-        const campaignContactIdsToUnassign = campaignIdsContactIds.map(cc => cc.campaignContactId)
+        const campaignContactIdsToUnassign = campaignIdsContactIds.map(
+          cc => cc.campaignContactId
+        );
 
-        const updated_result = await r.knex('campaign_contact')
+        const updated_result = await r
+          .knex("campaign_contact")
           .update({ assignment_id: null })
-          .whereIn('id', campaignContactIdsToUnassign)
+          .whereIn("id", campaignContactIdsToUnassign);
 
         return campaignContactIdsToUnassign.map(cc => ({
           campaignId: cc.campaignId,
           assignmentId: null
-        }))
+        }));
       }
 
       // group contactIds by campaign
       // group messages by campaign
-      const aggregated = {}
+      const aggregated = {};
       campaignIdsContactIds.forEach(campaignIdContactId => {
         aggregated[campaignIdContactId.campaignContactId] = {
           campaign_id: campaignIdContactId.campaignId,
           messages: campaignIdContactId.messageIds
-        }
-      })
+        };
+      });
 
-      const result = Object.entries(aggregated)
-      const numberOfCampaignContactsToReassign = result.length
-      const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
-      const response = []
-      const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter)
+      const result = Object.entries(aggregated);
+      const numberOfCampaignContactsToReassign = result.length;
+      const numberOfCampaignContactsPerNextTexter = Math.ceil(
+        numberOfCampaignContactsToReassign / newTexterUserIds.length
+      );
+      const response = [];
+      const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter);
 
       for (let [idx, chunk] of chunks.entries()) {
-        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
-        const campaignIdContactIdsMap = new Map()
-        const campaignIdMessageIdsMap = new Map()
-
+        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id);
+        const campaignIdContactIdsMap = new Map();
+        const campaignIdMessageIdsMap = new Map();
 
         Object.keys(byCampaignId).forEach(campaign_id => {
           chunk.filter(x => x[1].campaign_id === campaign_id).forEach(x => {
-            if (!campaignIdContactIdsMap.has(campaign_id)) campaignIdContactIdsMap.set(campaign_id, [])
-            if (!campaignIdMessageIdsMap.has(campaign_id)) campaignIdMessageIdsMap.set(campaign_id, [])
-            campaignIdContactIdsMap.get(campaign_id).push(x[0])
+            if (!campaignIdContactIdsMap.has(campaign_id))
+              campaignIdContactIdsMap.set(campaign_id, []);
+            if (!campaignIdMessageIdsMap.has(campaign_id))
+              campaignIdMessageIdsMap.set(campaign_id, []);
+            campaignIdContactIdsMap.get(campaign_id).push(x[0]);
             x[1].messages.forEach(message_id => {
-              campaignIdMessageIdsMap.get(campaign_id).push(message_id)
-            })
-          })
-        })
+              campaignIdMessageIdsMap.get(campaign_id).push(message_id);
+            });
+          });
+        });
 
         const responses = await reassignConversations(
           campaignIdContactIdsMap,
@@ -1709,7 +1809,7 @@ const rootMutations = {
           newTexterUserIds[idx]
         );
         for (let r of responses) {
-          response.push(r)
+          response.push(r);
         }
       }
 
@@ -1730,46 +1830,58 @@ const rootMutations = {
       // verify permissions
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-
       const campaignContactIdsToMessageIds = await getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
         organizationId,
         campaignsFilter,
         assignmentsFilter,
         contactsFilter
-      )
+      );
 
       if (newTexterUserIds == null) {
-        const campaignContactIdsToUnassign = campaignContactIdsToMessageIds.map(([ccId, _]) => ccId);
+        const campaignContactIdsToUnassign = campaignContactIdsToMessageIds.map(
+          ([ccId, _]) => ccId
+        );
 
-        const updated_result = await r.knex('campaign_contact')
+        const updated_result = await r
+          .knex("campaign_contact")
           .update({ assignment_id: null })
-          .whereIn('id', campaignContactIdsToUnassign)
+          .whereIn("id", campaignContactIdsToUnassign);
 
         return campaignContactIdsToUnassign.map(cc => ({
           campaignId: cc.campaignId,
           assignmentId: null
-        }))
+        }));
       }
 
-      const numberOfCampaignContactsToReassign = campaignContactIdsToMessageIds.length
-      const numberOfCampaignContactsPerNextTexter = Math.ceil(numberOfCampaignContactsToReassign / newTexterUserIds.length)
-      const response = []
-      const chunks = _.chunk(campaignContactIdsToMessageIds, numberOfCampaignContactsPerNextTexter)
+      const numberOfCampaignContactsToReassign =
+        campaignContactIdsToMessageIds.length;
+      const numberOfCampaignContactsPerNextTexter = Math.ceil(
+        numberOfCampaignContactsToReassign / newTexterUserIds.length
+      );
+      const response = [];
+      const chunks = _.chunk(
+        campaignContactIdsToMessageIds,
+        numberOfCampaignContactsPerNextTexter
+      );
       for (let [idx, chunk] of chunks.entries()) {
-        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id)
-        const campaignIdContactIdsMap = new Map()
-        const campaignIdMessageIdsMap = new Map()
+        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id);
+        const campaignIdContactIdsMap = new Map();
+        const campaignIdMessageIdsMap = new Map();
 
         Object.keys(byCampaignId).forEach(campaign_id => {
-          chunk.filter(x => x[1].campaign_id === parseInt(campaign_id)).forEach(x => {
-            if (!campaignIdContactIdsMap.has(campaign_id)) campaignIdContactIdsMap.set(campaign_id, [])
-            if (!campaignIdMessageIdsMap.has(campaign_id)) campaignIdMessageIdsMap.set(campaign_id, [])
-            campaignIdContactIdsMap.get(campaign_id).push(x[0])
-            x[1].messages.forEach(message_id => {
-              campaignIdMessageIdsMap.get(campaign_id).push(message_id)
-            })
-          })
-        })
+          chunk
+            .filter(x => x[1].campaign_id === parseInt(campaign_id))
+            .forEach(x => {
+              if (!campaignIdContactIdsMap.has(campaign_id))
+                campaignIdContactIdsMap.set(campaign_id, []);
+              if (!campaignIdMessageIdsMap.has(campaign_id))
+                campaignIdMessageIdsMap.set(campaign_id, []);
+              campaignIdContactIdsMap.get(campaign_id).push(x[0]);
+              x[1].messages.forEach(message_id => {
+                campaignIdMessageIdsMap.get(campaign_id).push(message_id);
+              });
+            });
+        });
 
         const responses = await reassignConversations(
           campaignIdContactIdsMap,
@@ -1777,7 +1889,7 @@ const rootMutations = {
           newTexterUserIds[idx]
         );
         for (let r of responses) {
-          response.push(r)
+          response.push(r);
         }
       }
 
@@ -1854,18 +1966,26 @@ const rootMutations = {
       );
     },
 
-    requestTexts: async (_, { count, email, organizationId }, { user, loaders }) => {
+    requestTexts: async (
+      _,
+      { count, email, organizationId },
+      { user, loaders }
+    ) => {
       try {
         const formEnabled = await (async () => {
-          const organization = await r.knex('organization').select('features').where({ id: organizationId }).first()
+          const organization = await r
+            .knex("organization")
+            .select("features")
+            .where({ id: organizationId })
+            .first();
 
           try {
-            const features = JSON.parse(organization.features)
+            const features = JSON.parse(organization.features);
             return features.textRequestFormEnabled || false;
           } catch (ex) {
-            return false
+            return false;
           }
-        })()
+        })();
 
         if (formEnabled) {
           const textsAvailable = await (async () => {
@@ -1877,11 +1997,11 @@ const rootMutations = {
                 and campaign.is_started = true 
                 and campaign.is_archived = false
               limit 1;
-            `
+            `;
 
-            const result = await r.knex.raw(ccsAvailableQuery)
+            const result = await r.knex.raw(ccsAvailableQuery);
             return result.fields.length > 0;
-          })()
+          })();
 
           if (textsAvailable) {
             const response = await request
@@ -1893,44 +2013,50 @@ const rootMutations = {
           }
         }
 
-
-        return 'No texts available at the moment'
+        return "No texts available at the moment";
       } catch (e) {
         return e.response.body.message;
       }
     },
-    releaseMessages: async (_, { campaignId, target, ageInHours }, { user }) => {
-      let messageStatus
+    releaseMessages: async (
+      _,
+      { campaignId, target, ageInHours },
+      { user }
+    ) => {
+      let messageStatus;
       switch (target) {
-        case 'UNSENT':
-          messageStatus = 'needsMessage'
-          break
-        case 'UNREPLIED':
-          messageStatus = 'needsResponse'
-          break
+        case "UNSENT":
+          messageStatus = "needsMessage";
+          break;
+        case "UNREPLIED":
+          messageStatus = "needsResponse";
+          break;
 
         default:
-          throw new Error(`Unknown ReleaseActionTarget '${target}'`)
+          throw new Error(`Unknown ReleaseActionTarget '${target}'`);
       }
 
-      let ageInHoursAgo
+      let ageInHoursAgo;
       if (!!ageInHours) {
-        ageInHoursAgo = new Date()
-        ageInHoursAgo.setHours(new Date().getHours() - ageInHours)
-        ageInHoursAgo = ageInHoursAgo.toISOString()
+        ageInHoursAgo = new Date();
+        ageInHoursAgo.setHours(new Date().getHours() - ageInHours);
+        ageInHoursAgo = ageInHoursAgo.toISOString();
       }
 
-      const campaign = await r.knex('campaign')
+      const campaign = await r
+        .knex("campaign")
         .where({ id: campaignId })
-        .first('organization_id')
-      const escalationUserId = (await getEscalationUserId(campaign.organization_id)) || null
+        .first("organization_id");
+      const escalationUserId =
+        (await getEscalationUserId(campaign.organization_id)) || null;
 
       const updatedCount = await r.knex.transaction(async trx => {
-        const queryArgs = [parseInt(campaignId), messageStatus]
-        if (ageInHours) queryArgs.push(ageInHoursAgo)
-        if (escalationUserId) queryArgs.push(escalationUserId)
+        const queryArgs = [parseInt(campaignId), messageStatus];
+        if (ageInHours) queryArgs.push(ageInHoursAgo);
+        if (escalationUserId) queryArgs.push(escalationUserId);
 
-        const rawResult = await trx.raw(`
+        const rawResult = await trx.raw(
+          `
           update
             campaign_contact
           set
@@ -1942,23 +2068,39 @@ const rootMutations = {
             and assignment.id = campaign_contact.assignment_id
             and is_opted_out = false
             and message_status = ?
-            ${ageInHours ? 'and campaign_contact.updated_at < ?' : ''}
-            ${escalationUserId ? 'and (assignment.user_id is null or assignment.user_id <> ?)' : ''}
-        `, queryArgs)
-        return rawResult.rowCount
-      })
+            ${ageInHours ? "and campaign_contact.updated_at < ?" : ""}
+            ${
+              escalationUserId
+                ? "and (assignment.user_id is null or assignment.user_id <> ?)"
+                : ""
+            }
+        `,
+          queryArgs
+        );
+        return rawResult.rowCount;
+      });
 
       return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;
     },
-    deleteCampaignOverlap: async (_, { organizationId, campaignId, overlappingCampaignId }, { user }) => {
+    deleteCampaignOverlap: async (
+      _,
+      { organizationId, campaignId, overlappingCampaignId },
+      { user }
+    ) => {
       await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
 
-      const { deletedRowCount, remainingCount } = await r.knex.transaction(async trx => {
-        // Get total count, including second pass contacts, locking for subsequent delete
-        let remainingCount = await queryCampaignOverlapCount(campaignId, overlappingCampaignId, trx)
+      const { deletedRowCount, remainingCount } = await r.knex.transaction(
+        async trx => {
+          // Get total count, including second pass contacts, locking for subsequent delete
+          let remainingCount = await queryCampaignOverlapCount(
+            campaignId,
+            overlappingCampaignId,
+            trx
+          );
 
-        // Delete, excluding second pass contacts that have already been messaged
-        const { rowCount: deletedRowCount } =  await trx.raw(`
+          // Delete, excluding second pass contacts that have already been messaged
+          const { rowCount: deletedRowCount } = await trx.raw(
+            `
           with exclude_cell as (
             select distinct on (campaign_contact.cell)
               campaign_contact.cell
@@ -1981,14 +2123,21 @@ const rootMutations = {
               from exclude_cell
               where exclude_cell.cell = campaign_contact.cell
             );
-        `, [overlappingCampaignId, campaignId])
+        `,
+            [overlappingCampaignId, campaignId]
+          );
 
-        remainingCount = remainingCount - deletedRowCount
+          remainingCount = remainingCount - deletedRowCount;
 
-        return { deletedRowCount, remainingCount }
-      })
+          return { deletedRowCount, remainingCount };
+        }
+      );
 
-      return { campaign: { id: overlappingCampaignId }, deletedRowCount, remainingCount }
+      return {
+        campaign: { id: overlappingCampaignId },
+        deletedRowCount,
+        remainingCount
+      };
     }
   }
 };
@@ -2117,30 +2266,32 @@ const rootResolvers = {
     },
     people: async (
       _,
-      { organizationId, cursor, campaignsFilter, role},
+      { organizationId, cursor, campaignsFilter, role },
       { user }
     ) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       return getUsers(organizationId, cursor, campaignsFilter, role);
     },
-    peopleByUserIds: async(
+    peopleByUserIds: async (_, { organizationId, userIds }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      return getUsersById(userIds);
+    },
+    fetchCampaignOverlaps: async (
       _,
-      { organizationId, userIds },
+      { organizationId, campaignId },
       { user }
     ) => {
-      await accessRequired(user, organizationId, "SUPERVOLUNTEER")
-      return getUsersById(userIds)
-    },
-    fetchCampaignOverlaps: async( _, { organizationId, campaignId }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      const { rows } = await queryCampaignOverlaps(campaignId, organizationId)
+      const { rows } = await queryCampaignOverlaps(campaignId, organizationId);
 
-      const toReturn = rows.map(({campaign_id, count, campaign_title, last_activity}) => ({
-        campaign: { id: campaign_id, title: campaign_title },
-        overlapCount: count,
-        lastActivity: last_activity
-      }))
+      const toReturn = rows.map(
+        ({ campaign_id, count, campaign_title, last_activity }) => ({
+          campaign: { id: campaign_id, title: campaign_title },
+          overlapCount: count,
+          lastActivity: last_activity
+        })
+      );
 
       return toReturn;
     }

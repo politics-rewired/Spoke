@@ -1,52 +1,52 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import uniqBy from 'lodash/uniqBy'
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import uniqBy from "lodash/uniqBy";
 
-import CreatableSelect from 'react-select/lib/Creatable'
+import CreatableSelect from "react-select/lib/Creatable";
 
 const components = {
   DropdownIndicator: null
-}
+};
 
-const createOption = (label) => ({
+const createOption = label => ({
   value: label,
   label
-})
+});
 
 class CampaignPrefixSelector extends Component {
   state = {
-    inputValue: '',
-    value: [],
-  }
+    inputValue: "",
+    value: []
+  };
 
   handleChange = (value, _actionMeta) => {
-    this.props.onChange(value)
-  }
+    this.props.onChange(value);
+  };
 
-  handleInputChange = (inputValue) => {
-    this.setState({ inputValue })
-  }
+  handleInputChange = inputValue => {
+    this.setState({ inputValue });
+  };
 
-  handleKeyDown = (event) => {
-    const { inputValue } = this.state
-    const { value } = this.props
-    if (!inputValue) return
+  handleKeyDown = event => {
+    const { inputValue } = this.state;
+    const { value } = this.props;
+    if (!inputValue) return;
     switch (event.key) {
-      case 'Enter':
-      case 'Tab':
-        let newValue = [...value, createOption(inputValue)]
-        newValue = uniqBy(newValue, 'value')
+      case "Enter":
+      case "Tab":
+        let newValue = [...value, createOption(inputValue)];
+        newValue = uniqBy(newValue, "value");
         this.setState({
-          inputValue: ''
-        })
-        this.props.onChange(newValue)
-        event.preventDefault()
+          inputValue: ""
+        });
+        this.props.onChange(newValue);
+        event.preventDefault();
     }
-  }
+  };
 
   render() {
-    const { inputValue } = this.state
-    const { value, isDisabled } = this.props
+    const { inputValue } = this.state;
+    const { value, isDisabled } = this.props;
     return (
       <CreatableSelect
         components={components}
@@ -61,7 +61,7 @@ class CampaignPrefixSelector extends Component {
         value={value}
         isDisabled={isDisabled}
       />
-    )
+    );
   }
 }
 
@@ -69,6 +69,6 @@ CampaignPrefixSelector.propTypes = {
   value: PropTypes.arrayOf(PropTypes.object).isRequired,
   isDisabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired
-}
+};
 
-export default CampaignPrefixSelector
+export default CampaignPrefixSelector;

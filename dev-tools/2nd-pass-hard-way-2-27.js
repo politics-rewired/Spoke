@@ -1,14 +1,14 @@
-require('dotenv').config()
+require("dotenv").config();
 const config = {
-  client: 'mysql',
+  client: "mysql",
   connection: process.env.DATABASE_URL,
   pool: {
     min: 2,
     max: 30
-  },
+  }
 };
 
-const db = require('knex')(config)
+const db = require("knex")(config);
 
 /*
 0 = ensure that all texts in the ben assignment pool are the ones to move over (piece of paper)
@@ -32,7 +32,8 @@ const db = require('knex')(config)
 
 // resetCCMessageStatus({ campaignId: 66, assignmentId: 6145 })
 resetCCMessageStatus({ campaignId: 69, assignmentId: 5656 })
-.then(console.log).catch(console.error)
+  .then(console.log)
+  .catch(console.error);
 
 async function resetCCMessageStatus({ campaignId, assignmentId }) {
   const [ccs_assigned_to_ben_with_a_reply, _junk] = await db.raw(`
@@ -44,25 +45,31 @@ async function resetCCMessageStatus({ campaignId, assignmentId }) {
       select campaign_contact_id from message
       where message.is_from_contact = true
     )
-  `)
+  `);
 
   for (let cc of ccs_assigned_to_ben_with_a_reply) {
-    await properlyMarkCampaignContact(cc)
+    await properlyMarkCampaignContact(cc);
   }
 
-  return ccs_assigned_to_ben_with_a_reply
+  return ccs_assigned_to_ben_with_a_reply;
 }
 
 async function properlyMarkCampaignContact(cc) {
-  let properMessageStatus
-  const messages = await db('message').where({ campaign_contact_id: cc.id}).orderBy('created_at', 'asc')
+  let properMessageStatus;
+  const messages = await db("message")
+    .where({ campaign_contact_id: cc.id })
+    .orderBy("created_at", "asc");
   if (messages[messages.length - 1].is_from_contact) {
-    properMessageStatus = 'needsResponse'
+    properMessageStatus = "needsResponse";
   } else {
-    properMessageStatus = 'convo'
+    properMessageStatus = "convo";
   }
 
   // console.log(messages)
   // console.log(properMessageStatus)
-  console.log(await db('campaign_contact').where({ id: cc.id }).update({ message_status: properMessageStatus }))
+  console.log(
+    await db("campaign_contact")
+      .where({ id: cc.id })
+      .update({ message_status: properMessageStatus })
+  );
 }

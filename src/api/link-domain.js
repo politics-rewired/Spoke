@@ -16,4 +16,4 @@ export const schema = `
     createdAt: Date!
     healthyAgainAt: Date
   }
-`
+`;

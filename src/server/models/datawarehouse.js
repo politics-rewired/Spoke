@@ -1,6 +1,6 @@
-import r from './index.js'
+import r from "./index.js";
 
-let config
+let config;
 
 if (process.env.WAREHOUSE_DB_TYPE) {
   config = {
@@ -12,9 +12,7 @@ if (process.env.WAREHOUSE_DB_TYPE) {
       password: process.env.WAREHOUSE_DB_PASSWORD,
       user: process.env.WAREHOUSE_DB_USER
     }
-  }
+  };
 }
 
-export default (process.env.WAREHOUSE_DB_TYPE
-                ? () => r(config)
-                : null)
+export default (process.env.WAREHOUSE_DB_TYPE ? () => r(config) : null);
