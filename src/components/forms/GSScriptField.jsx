@@ -1,68 +1,71 @@
-import React from 'react'
-import GSFormField from './GSFormField'
-import { allScriptFields } from '../../lib/scripts'
-import ScriptEditor from '../ScriptEditor'
-import Dialog from 'material-ui/Dialog'
-import FlatButton from 'material-ui/FlatButton'
-import RaisedButton from 'material-ui/RaisedButton'
-import TextField from 'material-ui/TextField'
-import { dataTest } from '../../lib/attributes'
+import React from "react";
+import GSFormField from "./GSFormField";
+import { allScriptFields } from "../../lib/scripts";
+import ScriptEditor from "../ScriptEditor";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import TextField from "material-ui/TextField";
+import { dataTest } from "../../lib/attributes";
 
 const styles = {
   dialog: {
     zIndex: 10001
   }
-}
+};
 
 export default class GSScriptField extends GSFormField {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       open: false,
       script: props.value
-    }
+    };
   }
 
-  handleOpenDialog = (event) => {
-    event.stopPropagation()
-    event.preventDefault()
-    this.setState({
-      open: true
-    }, () => this.refs.dialogScriptInput.focus())
-  }
+  handleOpenDialog = event => {
+    event.stopPropagation();
+    event.preventDefault();
+    this.setState(
+      {
+        open: true
+      },
+      () => this.refs.dialogScriptInput.focus()
+    );
+  };
 
   handleCancelDialog = () => {
     // Reset any changes the user has made in the Editor
-    const script = this.props.value
+    const script = this.props.value;
     this.setState({
       open: false,
       script
-    })
-  }
+    });
+  };
 
   handleSaveScript = () => {
-    const value = this.state.script
-    this.props.onChange(value)
-    this.setState({ open: false })
-  }
+    const value = this.state.script;
+    this.props.onChange(value);
+    this.setState({ open: false });
+  };
 
   renderDialog() {
-    const { open } = this.state
-    const { customFields, sampleContact } = this.props
-    const scriptFields = allScriptFields(customFields)
+    const { open } = this.state;
+    const { customFields, sampleContact } = this.props;
+    const scriptFields = allScriptFields(customFields);
 
     return (
       <Dialog
         style={styles.dialog}
         actions={[
           <FlatButton
-            {...dataTest('scriptCancel')}
-            label='Cancel'
+            {...dataTest("scriptCancel")}
+            label="Cancel"
             onTouchTap={this.handleCancelDialog}
           />,
           <RaisedButton
-            {...dataTest('scriptDone')}
-            label='Done'
+            {...dataTest("scriptDone")}
+            label="Done"
             onTouchTap={this.handleSaveScript}
             primary
           />
@@ -73,14 +76,14 @@ export default class GSScriptField extends GSFormField {
       >
         <ScriptEditor
           expandable
-          ref='dialogScriptInput'
+          ref="dialogScriptInput"
           scriptText={this.state.script}
           sampleContact={sampleContact}
           scriptFields={scriptFields}
-          onChange={(val) => this.setState({ script: val })}
+          onChange={val => this.setState({ script: val })}
         />
       </Dialog>
-    )
+    );
   }
 
   render() {
@@ -97,6 +100,6 @@ export default class GSScriptField extends GSFormField {
         />
         {this.renderDialog()}
       </div>
-    )
+    );
   }
 }

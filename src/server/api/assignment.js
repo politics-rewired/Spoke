@@ -3,7 +3,7 @@ import { Assignment, r, cacheableData } from "../models";
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from "../../lib";
 import { Notifications, sendUserNotification } from "../notifications";
 import _ from "lodash";
-import request from 'superagent'
+import request from "superagent";
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -115,28 +115,35 @@ export function getContacts(
 
 // Returns either "replies", "initials", or null
 export async function getCurrentAssignmentType() {
-  const organization = await r.knex('organization').select('features').where({ id: 1 }).first()
-  const features = {}
+  const organization = await r
+    .knex("organization")
+    .select("features")
+    .where({ id: 1 })
+    .first();
+  const features = {};
   try {
-    const parsed = JSON.parse(organization.features)
-    Object.assign(features, parsed)
+    const parsed = JSON.parse(organization.features);
+    Object.assign(features, parsed);
   } catch (ex) {
     // do nothing
   }
-  return features.textRequestType
+  return features.textRequestType;
 }
 
 export async function currentAssignmentTarget() {
-  const assignmentType = await getCurrentAssignmentType()
+  const assignmentType = await getCurrentAssignmentType();
 
   const campaignContactStatus = {
-    UNREPLIED: 'needsResponse',
-    UNSENT: 'needsMessage'
-  }[assignmentType]
+    UNREPLIED: "needsResponse",
+    UNSENT: "needsMessage"
+  }[assignmentType];
 
-  if (!campaignContactStatus) { return null }
+  if (!campaignContactStatus) {
+    return null;
+  }
 
-  const { rows: assignableCampaigns } = await r.knex.raw(`
+  const { rows: assignableCampaigns } = await r.knex.raw(
+    `
     select
       *
     from
@@ -156,64 +163,76 @@ export async function currentAssignmentTarget() {
           and is_opted_out = false
       )
     ;
-  `, [campaignContactStatus])
+  `,
+    [campaignContactStatus]
+  );
 
-  const campaign = assignableCampaigns[0]
+  const campaign = assignableCampaigns[0];
 
-  if (!campaign) return null
+  if (!campaign) return null;
 
-  return { type: assignmentType, campaign }
+  return { type: assignmentType, campaign };
 }
 
-const ASSIGNMENT_COMPLETE_NOTIFICATION_URL = process.env.ASSIGNMENT_COMPLETE_NOTIFICATION_URL
+const ASSIGNMENT_COMPLETE_NOTIFICATION_URL =
+  process.env.ASSIGNMENT_COMPLETE_NOTIFICATION_URL;
 async function notifyIfAllAssigned(type, user, count) {
   if (ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
-    const assignmentTarget = await currentAssignmentTarget()
+    const assignmentTarget = await currentAssignmentTarget();
     if (assignmentTarget == null) {
-      await request.post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL).send({ type, user, count })
-      console.log(`Notified about out of ${type} to assign`)
-    } 
+      await request
+        .post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
+        .send({ type, user, count });
+      console.log(`Notified about out of ${type} to assign`);
+    }
   } else {
-    console.log('Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset')
+    console.log(
+      "Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset"
+    );
   }
 }
 
 export async function countLeft(assignmentType, campaign) {
   const campaignContactStatus = {
-    UNREPLIED: 'needsResponse',
-    UNSENT: 'needsMessage'
-  }[assignmentType]
- 
+    UNREPLIED: "needsResponse",
+    UNSENT: "needsMessage"
+  }[assignmentType];
+
   const result = await r.parseCount(
-    r.knex('campaign_contact')
+    r
+      .knex("campaign_contact")
       .count()
       .where({
         assignment_id: null,
         message_status: campaignContactStatus,
         campaign_id: campaign
       })
-    )
+  );
   return result;
 }
 
 export async function giveUserMoreTexts(auth0Id, count) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
   // Fetch DB info
-  const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id })
+  const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
   const user = matchingUsers[0];
   if (!user) {
     throw new Error(`No user found with id ${auth0Id}`);
   }
 
-  const assignmentInfo = await currentAssignmentTarget()
+  const assignmentInfo = await currentAssignmentTarget();
   if (!assignmentInfo) {
-    throw new Error('Could not find a suitable campaign to assign to.')
+    throw new Error("Could not find a suitable campaign to assign to.");
   }
-  
+
   // Determine which campaign to assign to – optimize to pick winners
-  let campaignIdToAssignTo = assignmentInfo.campaign.id
+  let campaignIdToAssignTo = assignmentInfo.campaign.id;
   let countToAssign = count;
-  console.log(`Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${assignmentInfo.type}`)
+  console.log(
+    `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${
+      assignmentInfo.type
+    }`
+  );
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
   const updated_result = await r.knex.transaction(async trx => {
@@ -232,20 +251,21 @@ export async function giveUserMoreTexts(auth0Id, count) {
           campaign_id: campaignIdToAssignTo,
           max_contacts: countToAssign
         })
-        .returning('id');
-      assignmentId = inserted[0]
+        .returning("id");
+      assignmentId = inserted[0];
     } else {
       assignmentId = existingAssignment.id;
     }
 
-    console.log(`Assigning to assignment id ${assignmentId}`)
+    console.log(`Assigning to assignment id ${assignmentId}`);
 
     const campaignContactStatus = {
-      UNREPLIED: 'needsResponse',
-      UNSENT: 'needsMessage'
-    }[assignmentInfo.type]
+      UNREPLIED: "needsResponse",
+      UNSENT: "needsMessage"
+    }[assignmentInfo.type];
 
-    const { rowCount: ccUpdateCount } = await trx.raw(`
+    const { rowCount: ccUpdateCount } = await trx.raw(
+      `
       update
         campaign_contact as target_contact
       set
@@ -268,9 +288,12 @@ export async function giveUserMoreTexts(auth0Id, count) {
       where
         target_contact.id = matching_contact.id
       ;
-    `, [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign])
+    `,
+      [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
+    );
 
-    const { rowCount: messageUpdateCount } = await trx.raw(`
+    const { rowCount: messageUpdateCount } = await trx.raw(
+      `
       update
         message
       set
@@ -292,16 +315,20 @@ export async function giveUserMoreTexts(auth0Id, count) {
       where
         message.campaign_contact_id = matching_contact.id
       ;
-    `, [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign])
+    `,
+      [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
+    );
 
-    console.log(`Updated ${ccUpdateCount} campaign contacts and ${messageUpdateCount} messages.`)
-    return ccUpdateCount
+    console.log(
+      `Updated ${ccUpdateCount} campaign contacts and ${messageUpdateCount} messages.`
+    );
+    return ccUpdateCount;
   });
 
   // Async function, not awaiting because response to TFB does not depend on it
-  notifyIfAllAssigned(assignmentInfo.type, auth0Id, countToAssign)
+  notifyIfAllAssigned(assignmentInfo.type, auth0Id, countToAssign);
 
-  return updated_result
+  return updated_result;
 }
 
 export const resolvers = {

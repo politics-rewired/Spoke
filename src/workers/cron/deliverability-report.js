@@ -4,12 +4,12 @@ try {
   // do nothing
 }
 
-const groupBy = require('lodash/groupby');
+const groupBy = require("lodash/groupby");
 
-const { DATABASE_URL } = process.env
-const dbType = DATABASE_URL.match(/^\w+/)[0]
+const { DATABASE_URL } = process.env;
+const dbType = DATABASE_URL.match(/^\w+/)[0];
 const config = {
-  client: (/postgres/.test(dbType) ? 'pg' : dbType),
+  client: /postgres/.test(dbType) ? "pg" : dbType,
   connection: DATABASE_URL,
   pool: {
     min: 2,
@@ -135,12 +135,14 @@ async function chunkedMain() {
 const deliverabilityReducer = (accumulator, messageGroup) => {
   let [sent, delivered] = accumulator;
   sent = sent + messageGroup.message_count;
-  if (messageGroup.send_status.toLowerCase === 'delivered') delivered = delivered + messageGroup.message_count;
+  if (messageGroup.send_status.toLowerCase === "delivered")
+    delivered = delivered + messageGroup.message_count;
   return [sent, delivered];
-}
+};
 
 async function slidingWindowMain() {
-  const { rows: messages } = await db.raw(`
+  const { rows: messages } = await db.raw(
+    `
     select
       count(*)::integer as message_count,
       matched_message.send_status,
@@ -164,28 +166,52 @@ async function slidingWindowMain() {
       matched_message.send_status,
       matched_message.domain,
       is_sensor_domain
-  `, [SENSOR_DOMAIN_MAX_THRESHOLD, SLIDING_WINDOW_SECONDS]);
+  `,
+    [SENSOR_DOMAIN_MAX_THRESHOLD, SLIDING_WINDOW_SECONDS]
+  );
 
-  const sensorDomainMessages = messages.filter(message => message.is_sensor_domain);
-  const [sensorSent, sensorDelivered] = sensorDomainMessages.reduce(deliverabilityReducer, [0, 0]);
+  const sensorDomainMessages = messages.filter(
+    message => message.is_sensor_domain
+  );
+  const [sensorSent, sensorDelivered] = sensorDomainMessages.reduce(
+    deliverabilityReducer,
+    [0, 0]
+  );
   const sensorDeliverability = sensorDelivered / Math.max(1, sensorSent);
 
-  const workHorseDomains = messages.filter(message => !message.is_sensor_domain);
-  const messageGroupsByDomain = groupBy(workHorseDomains, message => message.domain);
-  const domainDeliverability = Object.keys(messageGroupsByDomain).reduce((accumulator, domain) => {
-    const messageGroups = messageGroupsByDomain[domain];
-    const [sent, delivered] = messageGroups.reduce(deliverabilityReducer, [0, 0]);
-    accumulator[domain] = delivered / Math.max(1, sent);
-    return accumulator;
-  }, {});
+  const workHorseDomains = messages.filter(
+    message => !message.is_sensor_domain
+  );
+  const messageGroupsByDomain = groupBy(
+    workHorseDomains,
+    message => message.domain
+  );
+  const domainDeliverability = Object.keys(messageGroupsByDomain).reduce(
+    (accumulator, domain) => {
+      const messageGroups = messageGroupsByDomain[domain];
+      const [sent, delivered] = messageGroups.reduce(deliverabilityReducer, [
+        0,
+        0
+      ]);
+      accumulator[domain] = delivered / Math.max(1, sent);
+      return accumulator;
+    },
+    {}
+  );
 
-  await Promise.all(Object.keys(domainDeliverability).map(async domain => {
-    const deliverability = domainDeliverability[domain];
-    if (deliverability < sensorDeliverability - 0.30) {
-      console.log(`Domain '${domain}' deemed unhealthy with deliverability ${deliverability} over the last ${SLIDING_WINDOW_SECONDS / 60 / 60} hours`);
-      await markDomainUnhealthy(domain);
-    }
-  }));
+  await Promise.all(
+    Object.keys(domainDeliverability).map(async domain => {
+      const deliverability = domainDeliverability[domain];
+      if (deliverability < sensorDeliverability - 0.3) {
+        console.log(
+          `Domain '${domain}' deemed unhealthy with deliverability ${deliverability} over the last ${SLIDING_WINDOW_SECONDS /
+            60 /
+            60} hours`
+        );
+        await markDomainUnhealthy(domain);
+      }
+    })
+  );
 
   // TODO - re-introduce unhealthy domains after a cool down period
   // await db('unhealthy_link_domain')
@@ -193,26 +219,25 @@ async function slidingWindowMain() {
   //   .whereNull('healthy_again_at')
   //   .whereRaw(`created_at < CURRENT_TIMESTAMP - INTERVAL '?? second'`, [COOL_DOWN_PERIOD_SECONDS])
 
-  return 'Done';
+  return "Done";
 }
 
 async function markDomainUnhealthy(domain) {
   // Check if domain is already marked unhealthy
-  const existingDomain = await db('unhealthy_link_domain')
-    .select('id')
+  const existingDomain = await db("unhealthy_link_domain")
+    .select("id")
     .where({ domain })
-    .where('healthy_again_at', '>', db.fn.now())
-    .orWhereNull('healthy_again_at')
+    .where("healthy_again_at", ">", db.fn.now())
+    .orWhereNull("healthy_again_at")
     .first();
 
   if (existingDomain) {
-    console.log('found one!');
+    console.log("found one!");
     return;
   }
 
   console.log(`Marking ${domain} as unhealthy.`);
-  await db('unhealthy_link_domain')
-    .insert({ domain });
+  await db("unhealthy_link_domain").insert({ domain });
 }
 
 async function firstMessageSentAt() {

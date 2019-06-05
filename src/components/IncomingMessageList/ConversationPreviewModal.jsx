@@ -1,69 +1,69 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { StyleSheet, css } from 'aphrodite'
-import Dialog from 'material-ui/Dialog'
-import FlatButton from 'material-ui/FlatButton'
+import React from "react";
+import PropTypes from "prop-types";
+import { StyleSheet, css } from "aphrodite";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
 
-import MessageColumn from './MessageColumn'
-import SurveyColumn from './SurveyColumn'
+import MessageColumn from "./MessageColumn";
+import SurveyColumn from "./SurveyColumn";
 
 const styles = StyleSheet.create({
   container: {
-    display: 'flex',
+    display: "flex"
   },
   column: {
     flex: 1,
-    padding: '0 10px 0 10px'
+    padding: "0 10px 0 10px"
   },
   conversationRow: {
-    color: 'white',
-    padding: '10px',
-    borderRadius: '5px',
-    fontWeight: 'normal',
+    color: "white",
+    padding: "10px",
+    borderRadius: "5px",
+    fontWeight: "normal"
   }
-})
+});
 
-const ConversationPreviewBody = (props) => {
+const ConversationPreviewBody = props => {
   const { conversation } = props,
-        { contact, campaign } = conversation
+    { contact, campaign } = conversation;
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.column)}>
-        <MessageColumn conversation={conversation} organizationId={props.organizationId} />
+        <MessageColumn
+          conversation={conversation}
+          organizationId={props.organizationId}
+        />
       </div>
       <div className={css(styles.column)}>
         <SurveyColumn contact={contact} campaign={campaign} />
       </div>
     </div>
-  )
-}
+  );
+};
 
 ConversationPreviewBody.propTypes = {
-  conversation: PropTypes.object,
-}
+  conversation: PropTypes.object
+};
 
-const ConversationPreviewModal = (props) => {
+const ConversationPreviewModal = props => {
   const { conversation, onRequestClose } = props,
-        isOpen = conversation !== undefined
+    isOpen = conversation !== undefined;
 
   const primaryActions = [
-    <FlatButton
-      label="Close"
-      primary={true}
-      onClick={onRequestClose}
-    />
-  ]
+    <FlatButton label="Close" primary={true} onClick={onRequestClose} />
+  ];
 
   const customContentStyle = {
-    width: '100%',
-    maxWidth: 'none',
-  }
+    width: "100%",
+    maxWidth: "none"
+  };
 
   return (
     <Dialog
-      title={conversation
-        ? `Conversation Review: ${conversation.campaign.title}`
-        : 'Conversation Review'
+      title={
+        conversation
+          ? `Conversation Review: ${conversation.campaign.title}`
+          : "Conversation Review"
       }
       open={isOpen}
       actions={primaryActions}
@@ -79,12 +79,12 @@ const ConversationPreviewModal = (props) => {
         />
       )}
     </Dialog>
-  )
-}
+  );
+};
 
 ConversationPreviewModal.propTypes = {
   conversation: PropTypes.object,
   onRequestClose: PropTypes.func
-}
+};
 
-export default ConversationPreviewModal
+export default ConversationPreviewModal;

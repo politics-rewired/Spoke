@@ -1,6 +1,6 @@
-import thinky from './thinky'
-const type = thinky.type
-const r = thinky.r
+import thinky from "./thinky";
+const type = thinky.type;
+const r = thinky.r;
 
 // In order to not end up with optional
 // strings that are half null and half
@@ -13,7 +13,7 @@ export function requiredString() {
     .string()
     .required()
     .allowNull(false)
-    .min(1)
+    .min(1);
 }
 
 export function optionalString() {
@@ -21,19 +21,20 @@ export function optionalString() {
     .string()
     .required()
     .allowNull(false)
-    .default('')
+    .default("");
 }
 
 export function timestamp() {
-  return type
-    .date()
-    .required()
-    .allowNull(false)
-    // TODO - this may not be UTC (hopefully thinky gets this right though...)
-    .default(r.now())
+  return (
+    type
+      .date()
+      .required()
+      .allowNull(false)
+      // TODO - this may not be UTC (hopefully thinky gets this right though...)
+      .default(r.now())
+  );
 }
 
 export function optionalTimestamp() {
-  return type
-    .date()
+  return type.date();
 }

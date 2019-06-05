@@ -1,68 +1,73 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import yup from 'yup'
-import Form from 'react-formal'
-import { StyleSheet, css } from 'aphrodite'
-import { Card, CardActions, CardTitle } from 'material-ui/Card'
-import Divider from 'material-ui/Divider'
-import FlatButton from 'material-ui/FlatButton'
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import yup from "yup";
+import Form from "react-formal";
+import { StyleSheet, css } from "aphrodite";
+import { Card, CardActions, CardTitle } from "material-ui/Card";
+import Divider from "material-ui/Divider";
+import FlatButton from "material-ui/FlatButton";
 
-import GSForm from '../../components/forms/GSForm'
-import GSSubmitButton from '../../components/forms/GSSubmitButton'
+import GSForm from "../../components/forms/GSForm";
+import GSSubmitButton from "../../components/forms/GSSubmitButton";
 
 const styles = StyleSheet.create({
   contactActionCard: {
-    '@media(max-width: 320px)': {
-      padding: '2px 10px !important'
+    "@media(max-width: 320px)": {
+      padding: "2px 10px !important"
     },
     zIndex: 2000,
-    backgroundColor: 'white'
+    backgroundColor: "white"
   }
-})
+});
 
 const inlineStyles = {
   dialogButton: {
-    display: 'inline-block'
+    display: "inline-block"
   }
-}
+};
 
 const contactActionSchema = yup.object({
   messageText: yup.string()
-})
+});
 
 class ContactActionDialog extends Component {
   componentDidMount() {
-    const contactActionTextField = this.getContactActionTextFieldRef()
-    contactActionTextField.addEventListener('keydown', this.onEnterDown)
+    const contactActionTextField = this.getContactActionTextFieldRef();
+    contactActionTextField.addEventListener("keydown", this.onEnterDown);
   }
 
   componentWillUnmount() {
-    const contactActionTextField = this.getContactActionTextFieldRef()
-    contactActionTextField.removeEventListener('keydown', this.onEnterDown)
+    const contactActionTextField = this.getContactActionTextFieldRef();
+    contactActionTextField.removeEventListener("keydown", this.onEnterDown);
   }
 
   getContactActionTextFieldRef = () => {
     // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.contactActionText.refs.input.refs.textField.input.refs.input
-  }
+    return this.refs.contactActionText.refs.input.refs.textField.input.refs
+      .input;
+  };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
-  onEnterDown = (event) => {
-    const keyCode = event.keyCode || event.which
+  onEnterDown = event => {
+    const keyCode = event.keyCode || event.which;
     if (keyCode === 13 && !event.shiftKey) {
-      event.preventDefault()
-      return false
+      event.preventDefault();
+      return false;
     }
-  }
+  };
 
   render() {
-    const { title, messageText, submitTitle, onChange, onSubmit, handleCloseDialog } = this.props
+    const {
+      title,
+      messageText,
+      submitTitle,
+      onChange,
+      onSubmit,
+      handleCloseDialog
+    } = this.props;
     return (
       <Card>
-        <CardTitle
-          className={css(styles.contactActionCard)}
-          title={title}
-        />
+        <CardTitle className={css(styles.contactActionCard)} title={title} />
         <Divider />
         <CardActions className={css(styles.contactActionCard)}>
           <GSForm
@@ -73,8 +78,8 @@ class ContactActionDialog extends Component {
             onSubmit={onSubmit}
           >
             <Form.Field
-              ref='contactActionText'
-              name='messageText'
+              ref="contactActionText"
+              name="messageText"
               fullWidth
               autoFocus
               multiLine
@@ -82,11 +87,11 @@ class ContactActionDialog extends Component {
             <div className={css(styles.dialogActions)}>
               <FlatButton
                 style={inlineStyles.dialogButton}
-                label='Cancel'
+                label="Cancel"
                 onTouchTap={handleCloseDialog}
               />
               <Form.Button
-                type='submit'
+                type="submit"
                 style={inlineStyles.dialogButton}
                 component={GSSubmitButton}
                 label={submitTitle}
@@ -95,7 +100,7 @@ class ContactActionDialog extends Component {
           </GSForm>
         </CardActions>
       </Card>
-    )
+    );
   }
 }
 
@@ -106,6 +111,6 @@ ContactActionDialog.propTypes = {
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   handleCloseDialog: PropTypes.func.isRequired
-}
+};
 
-export default ContactActionDialog
+export default ContactActionDialog;

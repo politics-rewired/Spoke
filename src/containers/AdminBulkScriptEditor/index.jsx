@@ -1,103 +1,114 @@
-import React, { Component } from 'react'
-import gql from 'graphql-tag'
-import { connect } from 'react-apollo'
-import Paper from 'material-ui/Paper'
-import TextField from 'material-ui/TextField'
-import Toggle from 'material-ui/Toggle'
-import Dialog from 'material-ui/Dialog'
-import FlatButton from 'material-ui/FlatButton'
-import RaisedButton from 'material-ui/RaisedButton'
-import pick from 'lodash/pick'
+import React, { Component } from "react";
+import gql from "graphql-tag";
+import { connect } from "react-apollo";
+import Paper from "material-ui/Paper";
+import TextField from "material-ui/TextField";
+import Toggle from "material-ui/Toggle";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import pick from "lodash/pick";
 
-import CampaignPrefixSelector from './CampaignPrefixSelector'
+import CampaignPrefixSelector from "./CampaignPrefixSelector";
 
-const PROTECTED_CHARACTERS = ['/']
+const PROTECTED_CHARACTERS = ["/"];
 
 const styles = {
   bold: {
-    fontWeight: 'bold'
+    fontWeight: "bold"
   },
   paddedPaper: {
-    padding: '10px',
-    marginBottom: '15px'
+    padding: "10px",
+    marginBottom: "15px"
   },
   code: {
-    color: '#000000',
-    backgroundColor: '#DDDDDD',
-    fontFamily: 'monospace',
-    fontSize: '1.2em',
-    fontStyle: 'normal',
-    padding: '2px 5px',
-    borderRadius: '3px'
+    color: "#000000",
+    backgroundColor: "#DDDDDD",
+    fontFamily: "monospace",
+    fontSize: "1.2em",
+    fontStyle: "normal",
+    padding: "2px 5px",
+    borderRadius: "3px"
   }
-}
+};
 
 class AdminBulkScriptEditor extends Component {
   state = {
     isSubmitting: false,
-    error: '',
+    error: "",
     result: null,
     flaggedCharacters: [],
     confirmFlaggedCharacters: false,
-    searchString: '',
-    replaceString: '',
+    searchString: "",
+    replaceString: "",
     includeArchived: true,
     campaignTitlePrefixes: []
-  }
+  };
 
   handleChangeSearchString = (_event, searchString) => {
-    const flaggedCharacters = PROTECTED_CHARACTERS.filter(character => searchString.indexOf(character) > -1)
-    this.setState({ searchString, flaggedCharacters })
-  }
+    const flaggedCharacters = PROTECTED_CHARACTERS.filter(
+      character => searchString.indexOf(character) > -1
+    );
+    this.setState({ searchString, flaggedCharacters });
+  };
 
   handleChangeReplaceString = (_event, replaceString) => {
-    this.setState({ replaceString })
-  }
+    this.setState({ replaceString });
+  };
 
   handleToggleIncludeArchived = (_event, includeArchived) => {
-    this.setState({ includeArchived })
-  }
+    this.setState({ includeArchived });
+  };
 
-  handleCampaignPrefixChange = (campaignTitlePrefixes) => {
-    this.setState({ campaignTitlePrefixes })
-  }
+  handleCampaignPrefixChange = campaignTitlePrefixes => {
+    this.setState({ campaignTitlePrefixes });
+  };
 
   handleSubmitJob = async () => {
-    const { flaggedCharacters } = this.state
+    const { flaggedCharacters } = this.state;
     if (flaggedCharacters.length > 0) {
-      this.setState({ confirmFlaggedCharacters: true })
+      this.setState({ confirmFlaggedCharacters: true });
     } else {
-      this.submitJob()
+      this.submitJob();
     }
-  }
+  };
 
   handleConfirmSubmit = () => {
-    this.setState({ confirmFlaggedCharacters: false })
-    this.submitJob()
-  }
+    this.setState({ confirmFlaggedCharacters: false });
+    this.submitJob();
+  };
 
   submitJob = async () => {
-    this.setState({ isSubmitting: true })
-    const findAndReplace = pick(this.state, ['searchString', 'replaceString', 'includeArchived', 'campaignTitlePrefixes'])
-    findAndReplace.campaignTitlePrefixes = findAndReplace.campaignTitlePrefixes.map(prefix => prefix.value)
+    this.setState({ isSubmitting: true });
+    const findAndReplace = pick(this.state, [
+      "searchString",
+      "replaceString",
+      "includeArchived",
+      "campaignTitlePrefixes"
+    ]);
+    findAndReplace.campaignTitlePrefixes = findAndReplace.campaignTitlePrefixes.map(
+      prefix => prefix.value
+    );
     try {
-      const response = await this.props.mutations.bulkUpdateScript(findAndReplace)
-      if (response.errors) throw response.errors
-      this.setState({ result: response.data.bulkUpdateScript })
+      const response = await this.props.mutations.bulkUpdateScript(
+        findAndReplace
+      );
+      if (response.errors) throw response.errors;
+      this.setState({ result: response.data.bulkUpdateScript });
     } catch (error) {
-      this.setState({ error: error.message })
+      this.setState({ error: error.message });
     } finally {
-      this.setState({ isSubmitting: false })
+      this.setState({ isSubmitting: false });
     }
-  }
+  };
 
   handleClose = () => {
     this.setState({
       confirmFlaggedCharacters: false,
-      error: '',
+      error: "",
       result: null
-    })
-  }
+    });
+  };
 
   render() {
     const {
@@ -108,28 +119,21 @@ class AdminBulkScriptEditor extends Component {
       replaceString,
       includeArchived,
       campaignTitlePrefixes
-    } = this.state
-    const isSubmitDisabled = isSubmitting || !searchString
+    } = this.state;
+    const isSubmitDisabled = isSubmitting || !searchString;
 
     const flaggedCharacterActions = [
-      <FlatButton
-        label="Cancel"
-        onClick={this.handleClose}
-      />,
+      <FlatButton label="Cancel" onClick={this.handleClose} />,
       <FlatButton
         label="Confirm"
         primary={true}
         onClick={this.handleConfirmSubmit}
       />
-    ]
+    ];
 
     const dialogActions = [
-      <FlatButton
-        label="OK"
-        primary={true}
-        onClick={this.handleClose}
-      />
-    ]
+      <FlatButton label="OK" primary={true} onClick={this.handleClose} />
+    ];
 
     return (
       <div>
@@ -144,10 +148,15 @@ class AdminBulkScriptEditor extends Component {
             onChange={this.handleChangeSearchString}
           />
           {flaggedCharacters.length > 0 && (
-            <p style={{ color: '#FFAA00' }}>
-              Warning: Your search text contains the following special characters: {' '}
-              {flaggedCharacters.map(char => <span key={char} style={styles.code}>{char}</span>)}
-              {' '} Be careful with this!
+            <p style={{ color: "#FFAA00" }}>
+              Warning: Your search text contains the following special
+              characters:{" "}
+              {flaggedCharacters.map(char => (
+                <span key={char} style={styles.code}>
+                  {char}
+                </span>
+              ))}{" "}
+              Be careful with this!
             </p>
           )}
           <TextField
@@ -157,15 +166,17 @@ class AdminBulkScriptEditor extends Component {
             disabled={isSubmitting}
             onChange={this.handleChangeReplaceString}
           />
-          <p style={{fontStyle: 'italic'}}>Note: the text must be an exact match! For example, there a couple apostraphe characters: {' '}
-            <span style={styles.code}>'</span> vs <span style={styles.code}>’</span> )
+          <p style={{ fontStyle: "italic" }}>
+            Note: the text must be an exact match! For example, there a couple
+            apostraphe characters: <span style={styles.code}>'</span> vs{" "}
+            <span style={styles.code}>’</span> )
           </p>
         </Paper>
         <Paper style={styles.paddedPaper}>
           <p style={styles.bold}>Filter campaigns</p>
           <Toggle
             label="Include archived campaigns"
-            style={{marginBottom: '25px'}}
+            style={{ marginBottom: "25px" }}
             toggled={includeArchived}
             disabled={isSubmitting}
             onToggle={this.handleToggleIncludeArchived}
@@ -178,7 +189,7 @@ class AdminBulkScriptEditor extends Component {
           />
         </Paper>
         <RaisedButton
-          label={isSubmitting ? 'Working...' : 'Find & replace'}
+          label={isSubmitting ? "Working..." : "Find & replace"}
           primary={true}
           disabled={isSubmitDisabled}
           onClick={this.handleSubmitJob}
@@ -190,8 +201,14 @@ class AdminBulkScriptEditor extends Component {
             open
             onRequestClose={this.handleClose}
           >
-            <p>Are you sure you want to run run a bulk script update with special characters?</p>
-            <p>If you don't know what this means, you should cancel and ask an admin!</p>
+            <p>
+              Are you sure you want to run run a bulk script update with special
+              characters?
+            </p>
+            <p>
+              If you don't know what this means, you should cancel and ask an
+              admin!
+            </p>
           </Dialog>
         )}
         {this.state.error && (
@@ -201,8 +218,10 @@ class AdminBulkScriptEditor extends Component {
             open
             onRequestClose={this.handleClose}
           >
-            <p>Spoke ran into the following error when trying to update scripts:</p>
-            <p style={{ fontFamily: 'monospace' }}>{this.state.error}</p>
+            <p>
+              Spoke ran into the following error when trying to update scripts:
+            </p>
+            <p style={{ fontFamily: "monospace" }}>{this.state.error}</p>
           </Dialog>
         )}
         {this.state.result !== null && (
@@ -213,35 +232,47 @@ class AdminBulkScriptEditor extends Component {
             open
             autoScrollBodyContent
             contentStyle={{
-              width: '100%',
-              maxWidth: 'none'
+              width: "100%",
+              maxWidth: "none"
             }}
             onRequestClose={this.handleClose}
           >
             <ul>
               {this.state.result.map((replacedText, index) => (
                 <li key={index}>
-                  Campaign ID: {replacedText.campaignId}<br />
-                  Found: <span  style={styles.code}>{replacedText.found}</span><br />
-                  Replaced with: <span style={styles.code}>{replacedText.replaced}</span>
+                  Campaign ID: {replacedText.campaignId}
+                  <br />
+                  Found: <span style={styles.code}>{replacedText.found}</span>
+                  <br />
+                  Replaced with:{" "}
+                  <span style={styles.code}>{replacedText.replaced}</span>
                 </li>
               ))}
             </ul>
             {this.state.result.length === 0 && (
-              <p>No occurences were found. Check your search parameters and try again.</p>
+              <p>
+                No occurences were found. Check your search parameters and try
+                again.
+              </p>
             )}
           </Dialog>
         )}
       </div>
-    )
+    );
   }
 }
 
 const mapMutationsToProps = ({ ownProps }) => ({
-  bulkUpdateScript: (findAndReplace) => ({
+  bulkUpdateScript: findAndReplace => ({
     mutation: gql`
-      mutation bulkUpdateScript($organizationId: String!, $findAndReplace: BulkUpdateScriptInput!) {
-        bulkUpdateScript(organizationId: $organizationId, findAndReplace: $findAndReplace) {
+      mutation bulkUpdateScript(
+        $organizationId: String!
+        $findAndReplace: BulkUpdateScriptInput!
+      ) {
+        bulkUpdateScript(
+          organizationId: $organizationId
+          findAndReplace: $findAndReplace
+        ) {
           campaignId
           found
           replaced
@@ -253,8 +284,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
       findAndReplace
     }
   })
-})
+});
 
 export default connect({
   mapMutationsToProps
-})(AdminBulkScriptEditor)
+})(AdminBulkScriptEditor);
