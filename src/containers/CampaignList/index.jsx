@@ -4,12 +4,6 @@ import gql from "graphql-tag";
 import { withRouter } from "react-router";
 
 import Paper from "material-ui/Paper";
-import IconMenu from "material-ui/IconMenu";
-import MenuItem from "material-ui/MenuItem";
-import IconButton from "material-ui/IconButton";
-import ArchiveIcon from "material-ui/svg-icons/content/archive";
-import UnarchiveIcon from "material-ui/svg-icons/content/unarchive";
-import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 
 import loadData from "../hoc/load-data";
 import wrapMutations from "../hoc/wrap-mutations";
@@ -100,47 +94,6 @@ export class CampaignList extends React.Component {
           unarchiveCampaign={unarchiveCampaign}
         />
       </div>
-    );
-  }
-
-  renderMenu(campaign) {
-    return (
-      <IconMenu
-        iconButtonElement={
-          <IconButton>
-            <MoreVertIcon />
-          </IconButton>
-        }
-      >
-        <MenuItem
-          primaryText="Release Unsent Messages"
-          onClick={this.start("releaseUnsentMessages", campaign)}
-        />
-        <MenuItem
-          primaryText="Mark for a Second Pass"
-          onClick={this.start("markForSecondPass", campaign)}
-        />
-        <MenuItem
-          primaryText="Release Unreplied Conversations"
-          onClick={this.start("releaseUnrepliedMessages", campaign, {
-            ageInHours: 1
-          })}
-        />
-        {!campaign.isArchived && (
-          <MenuItem
-            primaryText="Archive Campaign"
-            leftIcon={<ArchiveIcon />}
-            onClick={() => this.props.mutations.archiveCampaign(campaign.id)}
-          />
-        )}
-        {campaign.isArchived && (
-          <MenuItem
-            primaryText="Unarchive Campaign"
-            leftIcon={<UnarchiveIcon />}
-            onClick={() => this.props.mutations.unarchiveCampaign(campaign.id)}
-          />
-        )}
-      </IconMenu>
     );
   }
 }
