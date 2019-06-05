@@ -146,7 +146,7 @@ const mapMutationsToProps = () => ({
       }`,
     variables: { campaignId }
   }),
-  releaseUnsentMessages: campaignId => ({
+  releaseUnsentMessages: (campaignId, { days, hours }) => ({
     mutation: gql`
       mutation releaseUnsentMessages(
         $campaignId: String!

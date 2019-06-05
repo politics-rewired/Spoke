@@ -3,6 +3,7 @@ import React from "react";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import TextField from "material-ui/TextField";
+import Toggle from "material-ui/Toggle";
 import LoadingIndicator from "../../components/LoadingIndicator";
 
 export const operations = {
@@ -71,6 +72,66 @@ export const OperationDialogBody = props => {
             }
           />
         </p>
+      </div>
+    );
+  }
+
+  if (operationName === "markForSecondPass") {
+    const { excludeRecentlyTexted, days, hours } = operationArs;
+    return (
+      <div>
+        <p>{operationDefinition.body(campaign)}</p>
+        <br />
+        <Toggle
+          label="Exclude recently texted contacts?"
+          toggled={excludeRecentlyTexted}
+          onToggle={(ev, val) =>
+            setState(prevState => {
+              const nextInProgress = prevState.inProgress.slice();
+              nextInProgress[2].excludeRecentlyTexted = val;
+              return {
+                inProgress: nextInProgress
+              };
+            })
+          }
+        />
+        {excludeRecentlyTexted && (
+          <p>Exlcude contacts messaged within the last:</p>
+        )}
+        {excludeRecentlyTexted && (
+          <div style={{ display: "flex" }}>
+            <TextField
+              style={{ flexGrow: 1, margin: "10px" }}
+              type="number"
+              floatingLabelText="Number of Days"
+              value={days}
+              onChange={(ev, val) =>
+                setState(prevState => {
+                  const nextInProgress = prevState.inProgress.slice();
+                  nextInProgress[2].days = parseInt(val);
+                  return {
+                    inProgress: nextInProgress
+                  };
+                })
+              }
+            />
+            <TextField
+              style={{ flexGrow: 1, margin: "10px" }}
+              type="number"
+              floatingLabelText="Number of Hours"
+              value={hours}
+              onChange={(ev, val) =>
+                setState(prevState => {
+                  const nextInProgress = prevState.inProgress.slice();
+                  nextInProgress[2].hours = parseInt(val);
+                  return {
+                    inProgress: nextInProgress
+                  };
+                })
+              }
+            />
+          </div>
+        )}
       </div>
     );
   }
