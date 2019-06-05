@@ -1,6 +1,48 @@
 import { r } from '../../models'
 
-export async function getLastMessage({ contactNumber, service }) {
+/*
+  This needs to change to accomodate multiple organizationIds
+  - option one: with campaign_id_options as select campaigns from organizationId, where campaign_id = campaign.id
+    -----------------------------------
+    with campaign_contact_option as (
+      select id
+      from campaign_contact
+      join campaign
+        on campaign_contact.campaign_id = campaign.id
+      where
+        campaign.organization_id = ?
+        and campaign_contact.cell = ?
+    )
+    select campaign_contact_id, assignment_id
+    from message
+    join campaign_contact_option
+      on message.campaign_contact_id = campaign_contact_option.id
+    where
+      message.is_from_contact = false
+    order by created_at desc
+    limit 1
+    -----------------------------------
+
+  - option two: join campaign_contact, join campaign, where campaign.org_id = org_id
+    -----------------------------------
+    select campaign_contact_id, assignment_id
+    from message
+    join campaign_contact
+      on message.campaign_contact_id = campaign_contact.id
+    join campaign
+      on campaign.id = campaign_contact.campaign_id
+    where
+      campaign.organization_id = ?
+      and campaign_contact.cell = ?
+      and message.is_from_contact = false
+    order by created_at desc
+    limit 1
+    -----------------------------------
+
+  - must do explain analyze
+ */
+
+export async function getLastMessage({ contactNumber, service, organizationId }) {
   const lastMessage = await r.knex('message')
     .where({
       contact_number: contactNumber,

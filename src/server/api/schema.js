@@ -541,7 +541,7 @@ async function sendMessage (user, campaignContactId, message, checkOptOut = true
   // Send message after we are sure messageInstance has been persisted
   const service =
     serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
-  service.sendMessage(toInsert);
+  service.sendMessage(toInsert, record.organization_id);
 
   // Send message to BernieSMS to be checked for bad words
   const badWordUrl = process.env.TFB_BAD_WORD_URL

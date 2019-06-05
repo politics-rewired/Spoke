@@ -152,21 +152,49 @@ const getMessagingServiceSIDs = () => {
 
 const MESSAGING_SERVICE_SIDS = getMessagingServiceSIDs()
 
-const getMessageServiceSID = cell => {
-  // Check for single message service
-  if (!!process.env.TWILIO_MESSAGE_SERVICE_SID) {
-    return process.env.TWILIO_MESSAGE_SERVICE_SID
-  }
+const assignMessagingServiceSID = async (cell, organizationId) => {
+  const assignedMessagingServiceSidWithFewestCells = r.knex.raw(`
+      with chosen_messaging_service_sid as (
+        select
+          messaging_service_sid,
+          count(
+            select 1
+            from messaging_service_stick
+            where organization_id = ?
+          ) as usage_count
+        from messaging_service
+        where organization_id = ?
+        order by usage_count asc
+        limit 1
+      )
+      insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
+      values (?, ?, chosen_messaging_service_sid.messaging_service_sid)
+      returning messaging_service_sid;
+    `, [organizationId, organizationId])
 
-  const messagingServiceIndex = deterministicIntWithinRange(cell, MESSAGING_SERVICE_SIDS.length)
-  const messagingServiceId = MESSAGING_SERVICE_SIDS[messagingServiceIndex]
-
-  if (!messagingServiceId) throw new Error(`Could not find Twilio message service SID for ${cell}!`)
-
-  return messagingServiceId
+  const chosen = assignedMessagingServiceSidWithFewestCells[0].messaging_service_id;
+  return chosen
 }
 
-async function sendMessage(message, trx) {
+const getMessageServiceSID = async (cell, organizationId, trx) => {
+  const existingStick = await trx.raw(`
+    select messaging_service_sid
+    from messaging_service_stick
+    where
+      cell = ?
+      and organization_id = ?
+  `, [cell, organizationId])
+
+  const existingMessageServiceSid = existingStick[0] && existingStick[0].messaging_service_sid
+
+  if (existingMessageServiceSid) {
+    return existingMessageServiceSid
+  }
+
+  return await assignMessagingServiceSID(cell, organizationId)
+}
+
+async function sendMessage(message, organizationId, trx) {
   if (!twilio) {
     log.warn('cannot actually send SMS message -- twilio is not fully configured:', message.id)
     if (message.id) {
@@ -182,7 +210,7 @@ async function sendMessage(message, trx) {
       log.warn('Message not marked as a twilio message', message.id)
     }
 
-    const messagingServiceSid = getMessageServiceSID(message.contact_number)
+    const messagingServiceSid = await getMessageServiceSID(message.contact_number, organizationId, trx)
 
     const messageParams = Object.assign({
       to: message.contact_number,
