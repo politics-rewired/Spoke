@@ -35,7 +35,7 @@ export const operations = {
 export const OperationDialogBody = props => {
   const { inProgress, finished, executing, error, setState } = props;
 
-  const [operationName, campaign] = inProgress;
+  const [operationName, campaign, operationArs] = inProgress;
   const operationDefinition = operations[operationName];
 
   if (executing) return <LoadingIndicator />;
@@ -44,6 +44,7 @@ export const OperationDialogBody = props => {
   if (finished) return <div>{finished}</div>;
 
   if (operationName === "releaseUnrepliedMessages") {
+    const { ageInHours } = operationArs;
     return (
       <div>
         {operationDefinition.body(campaign)}
@@ -58,6 +59,7 @@ export const OperationDialogBody = props => {
             type="number"
             floatingLabelText="Number of Hours"
             defaultValue={1}
+            value={ageInHours}
             onChange={(ev, val) =>
               setState(prevState => {
                 const nextInProgress = prevState.inProgress.slice();

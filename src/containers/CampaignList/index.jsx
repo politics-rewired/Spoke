@@ -66,7 +66,7 @@ export class CampaignList extends React.Component {
             error={error}
             finished={finished}
             executing={executing}
-            setState={this.setState}
+            setState={this.setState.bind(this)}
             clearInProgress={this.clearInProgress}
             executeOperation={this.executeOperation}
           />
