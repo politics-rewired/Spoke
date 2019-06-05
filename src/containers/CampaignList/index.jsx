@@ -4,47 +4,17 @@ import gql from "graphql-tag";
 import { withRouter } from "react-router";
 
 import Paper from "material-ui/Paper";
-import Dialog from "material-ui/Dialog";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
-import FlatButton from "material-ui/FlatButton";
 import IconButton from "material-ui/IconButton";
-import TextField from "material-ui/TextField";
 import ArchiveIcon from "material-ui/svg-icons/content/archive";
 import UnarchiveIcon from "material-ui/svg-icons/content/unarchive";
 import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 
 import loadData from "../hoc/load-data";
 import wrapMutations from "../hoc/wrap-mutations";
-import LoadingIndicator from "../../components/LoadingIndicator";
 import CampaignListLoader from "./CampaignListLoader";
-
-const operations = {
-  releaseUnsentMessages: {
-    title: campaign => `Release Unsent Messages for ${campaign.title}`,
-    body: () => `Releasing unsent messages for this campaign will cause unsent messages in this campaign\
-      to be removed from texter's assignments. This means that these texters will no longer be able to send\
-      these messages, but these messages will become available to assign via the autoassignment\
-      functionality.`,
-    mutationName: "releaseMessages"
-  },
-  markForSecondPass: {
-    title: campaign =>
-      `Mark Unresponded to Messages in ${campaign.title} for a Second Pass`,
-    body: () => `Marking unresponded to messages for this campaign will reset the state of messages that have\
-      not been responded to by the contact, causing them to show up as needing a first text, as long as the campaign\
-      is not past due. After running this operation, the texts will still be assigned to the same texter, so please\
-      run 'Release Unsent Messages' after if you'd like these second pass messages to be available for auto-assignment.`
-  },
-  releaseUnrepliedMessages: {
-    title: campaign => `Release Unreplied Conversations for ${campaign.title}`,
-    body: () => `Releasing unreplied messages for this campaign will cause unreplied messages in this campaign\
-      to be removed from texter's assignments. This means that these texters will no longer be able to respond\
-      to these conversations, but these conversations will become available to assign via the autoassignment\
-      functionality.`,
-    mutationName: "releaseMessages"
-  }
-};
+import { OperationDialog, operations } from "./OperationDialog";
 
 export class CampaignList extends React.Component {
   state = {
@@ -96,70 +66,16 @@ export class CampaignList extends React.Component {
     return (
       <div>
         {inProgress && (
-          <Dialog
-            title={operations[inProgress[0]].title(inProgress[1])}
-            onRequestClose={this.clearInProgress}
-            open={true}
-            actions={
-              finished
-                ? [
-                    <FlatButton
-                      label="Done"
-                      primary={true}
-                      onClick={this.clearInProgress}
-                    />
-                  ]
-                : [
-                    <FlatButton
-                      label="Cancel"
-                      primary={true}
-                      disabled={executing}
-                      onClick={this.clearInProgress}
-                    />,
-                    <FlatButton
-                      label="Execute Operation"
-                      primary={true}
-                      onClick={this.executeOperation}
-                    />
-                  ]
-            }
-          >
-            {executing ? (
-              <LoadingIndicator />
-            ) : error ? (
-              <span style={{ color: "red" }}> {JSON.stringify(error)} </span>
-            ) : finished ? (
-              finished
-            ) : inProgress[0] === "releaseUnrepliedMessages" ? (
-              <div>
-                {operations[inProgress[0]].body(inProgress[1])}
-                <br />
-                <p>
-                  <label>
-                    {" "}
-                    How many hours ago should a conversation have been idle for
-                    it to be unassigned?{" "}
-                  </label>
-                  <TextField
-                    type="number"
-                    floatingLabelText="Number of Hours"
-                    defaultValue={1}
-                    onChange={(ev, val) =>
-                      this.setState(prevState => {
-                        const nextInProgress = prevState.inProgress.slice();
-                        nextInProgress[2] = { ageInHours: parseInt(val) };
-                        return {
-                          inProgress: nextInProgress
-                        };
-                      })
-                    }
-                  />
-                </p>
-              </div>
-            ) : (
-              operations[inProgress[0]].body(inProgress[1])
-            )}
-          </Dialog>
+          <OperationDialog
+            operations={operations}
+            inProgress={inProgress}
+            error={error}
+            finished={finished}
+            executing={executing}
+            setState={this.setState}
+            clearInProgress={this.clearInProgress}
+            executeOperation={this.executeOperation}
+          />
         )}
         {currentAssignmentTarget && (
           <Paper style={{ padding: 10 }}>
