@@ -138,12 +138,7 @@ export async function handleIncomingMessages() {
       if (process.env.DEBUG_SCALING) {
         log.info('entering handleIncomingMessages. round: ', ++i)
       }
-      const countPendingMessagePart = await r.knex('pending_message_part')
-      .count('id AS total').then(total => {
-        let totalCount = 0
-        totalCount = total[0].total
-        return totalCount
-      })
+      const countPendingMessagePart = await r.parseCount(r.knex('pending_message_part').count())
       if (process.env.DEBUG_SCALING) {
         log.info('counting handleIncomingMessages. count: ', countPendingMessagePart)
       }
