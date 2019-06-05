@@ -1791,18 +1791,16 @@ const rootMutations = {
         const campaignIdMessageIdsMap = new Map();
 
         Object.keys(byCampaignId).forEach(campaign_id => {
-          chunk
-            .filter(x => x[1].campaign_id === campaign_id)
-            .forEach(x => {
-              if (!campaignIdContactIdsMap.has(campaign_id))
-                campaignIdContactIdsMap.set(campaign_id, []);
-              if (!campaignIdMessageIdsMap.has(campaign_id))
-                campaignIdMessageIdsMap.set(campaign_id, []);
-              campaignIdContactIdsMap.get(campaign_id).push(x[0]);
-              x[1].messages.forEach(message_id => {
-                campaignIdMessageIdsMap.get(campaign_id).push(message_id);
-              });
+          chunk.filter(x => x[1].campaign_id === campaign_id).forEach(x => {
+            if (!campaignIdContactIdsMap.has(campaign_id))
+              campaignIdContactIdsMap.set(campaign_id, []);
+            if (!campaignIdMessageIdsMap.has(campaign_id))
+              campaignIdMessageIdsMap.set(campaign_id, []);
+            campaignIdContactIdsMap.get(campaign_id).push(x[0]);
+            x[1].messages.forEach(message_id => {
+              campaignIdMessageIdsMap.get(campaign_id).push(message_id);
             });
+          });
         });
 
         const responses = await reassignConversations(

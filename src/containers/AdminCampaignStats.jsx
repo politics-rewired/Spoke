@@ -291,7 +291,7 @@ class AdminCampaignStats extends React.Component {
         />
         <Snackbar
           open={this.state.campaignJustCopied}
-          message='Campaign successfully copied. Click "Campaigns" to see it'
+          message="Campaign successfully copied. Click &quot;Campaigns&quot; to see it"
           autoHideDuration={5000}
           onRequestClose={() => {
             this.setState({ campaignJustCopied: false });

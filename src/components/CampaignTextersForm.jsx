@@ -134,8 +134,8 @@ export default class CampaignTextersForm extends React.Component {
 
     // 1. map form texters to existing texters. with needsMessageCount tweaked to minimums when invalid or useless
     newFormValues.texters = newFormValues.texters.map(newTexter => {
-      const existingTexter = existingFormValues.texters.filter(texter =>
-        texter.id === newTexter.id ? texter : null
+      const existingTexter = existingFormValues.texters.filter(
+        texter => (texter.id === newTexter.id ? texter : null)
       )[0];
       let messagedCount = 0;
       if (existingTexter) {

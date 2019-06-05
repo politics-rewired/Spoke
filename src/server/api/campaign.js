@@ -97,17 +97,17 @@ export const resolvers = {
         .eqJoin("id", r.table("message"), { index: "assignment_id" })
         .filter({ is_from_contact: false })
         .count(),
-      // TODO: NEEDS TESTING
-      // this is a change to avoid very weird map(...).sum() pattern
-      // that will work better with RDBMs
-      // main question is will/should filter work, or do we need to specify,
-      // e.g. 'right_is_from_contact': false, or something
-      // .map((assignment) => (
-      //   r.table('message')
-      //     .getAll(assignment('id'), { index: 'assignment_id' })
-      //     .filter({ is_from_contact: false })
-      //     .count()
-      // )).sum()
+    // TODO: NEEDS TESTING
+    // this is a change to avoid very weird map(...).sum() pattern
+    // that will work better with RDBMs
+    // main question is will/should filter work, or do we need to specify,
+    // e.g. 'right_is_from_contact': false, or something
+    // .map((assignment) => (
+    //   r.table('message')
+    //     .getAll(assignment('id'), { index: 'assignment_id' })
+    //     .filter({ is_from_contact: false })
+    //     .count()
+    // )).sum()
     receivedMessagesCount: async campaign =>
       r
         .table("assignment")

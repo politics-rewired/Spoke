@@ -92,8 +92,8 @@ export function getTopMostParent(interactionSteps, isModel) {
 }
 
 export function makeTree(interactionSteps, id = null) {
-  const root = interactionSteps.filter(is =>
-    id ? is.id === id : is.parentInteractionId === null
+  const root = interactionSteps.filter(
+    is => (id ? is.id === id : is.parentInteractionId === null)
   )[0];
   const children = interactionSteps.filter(
     is => is.parentInteractionId === root.id

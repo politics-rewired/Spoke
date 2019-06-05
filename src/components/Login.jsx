@@ -9,8 +9,8 @@ const Login = ({ location }) => (
         // Force reload will hit the server redirect (as opposed to client routing)
         (window.location.href = "https://www.bernietext.com/auth/login/slack/")
       : isClient()
-      ? window.AuthService.login(location.query.nextUrl)
-      : ""}
+        ? window.AuthService.login(location.query.nextUrl)
+        : ""}
   </div>
 );
 

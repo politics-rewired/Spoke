@@ -22,7 +22,7 @@ export default class Store {
           ReduxThunk.withExtraArgument(ApolloClientSingleton)
         ),
         typeof window === "object" &&
-          typeof window.devToolsExtension !== "undefined"
+        typeof window.devToolsExtension !== "undefined"
           ? window.devToolsExtension()
           : f => f
       )
