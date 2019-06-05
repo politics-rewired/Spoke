@@ -146,7 +146,7 @@ const mapMutationsToProps = () => ({
       }`,
     variables: { campaignId }
   }),
-  releaseUnsentMessages: (campaignId, { days, hours }) => ({
+  releaseUnsentMessages: campaignId => ({
     mutation: gql`
       mutation releaseUnsentMessages(
         $campaignId: String!
@@ -160,13 +160,22 @@ const mapMutationsToProps = () => ({
       campaignId
     }
   }),
-  markForSecondPass: campaignId => ({
+  markForSecondPass: (campaignId, { excludeRecentlyTexted, days, hours }) => ({
     mutation: gql`
-      mutation markForSecondPass($campaignId: String!) {
-        markForSecondPass(campaignId: $campaignId)
+      mutation markForSecondPass(
+        $campaignId: String!
+        $excludeAgeInHours: Int
+      ) {
+        markForSecondPass(
+          campaignId: $campaignId
+          excludeAgeInHours: $excludeAgeInHours
+        )
       }
     `,
-    variables: { campaignId }
+    variables: {
+      excludeAgeInHours: excludeRecentlyTexted ? days * 24 + hours : undefined,
+      campaignId
+    }
   }),
   releaseUnrepliedMessages: (campaignId, { ageInHours }) => ({
     mutation: gql`
