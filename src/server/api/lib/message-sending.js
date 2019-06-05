@@ -15,7 +15,9 @@ export async function getLastMessage({ contactNumber, service }) {
 }
 
 export async function saveNewIncomingMessage(messageInstance) {
-  await messageInstance.save()
+  await r.knex('message')
+    .insert(messageInstance)
+    .returning('*')
 
   // Separate update fields according to: https://stackoverflow.com/a/42307979
   let updateQuery = r.knex('campaign_contact')

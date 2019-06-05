@@ -153,22 +153,24 @@ export const resolvers = {
       return await loaders.zipCode.load(mainZip)
     },
     messages: async (campaignContact) => {
-      // Uncommenting this out for the second pass scenario
-      // if (campaignContact.message_status === 'needsMessage') {
-      //   return [] // it's the beginning, so there won't be any
-      // }
-
       if ('messages' in campaignContact) {
         return campaignContact.messages
       }
 
-      const messages = await r.table('message')
-        .getAll(campaignContact.assignment_id, { index: 'assignment_id' })
-        .filter({
-          contact_number: campaignContact.cell
-        })
+      let messages = await r.knex('message')
+        .where({ campaign_contact_id: campaignContact.id })
         .orderBy('created_at')
-      
+
+      // This covers edge case campaign contacts from mid-February 2019
+      if (messages.length === 0 && campaignContact.message_status !== 'needsMessage') {
+        messages = await r.knex('message')
+          .where({
+            assignment_id: campaignContact.assignment_id,
+            contact_number: campaignContact.cell
+          })
+          .orderBy('created_at')
+      }
+
       return messages
     },
     optOut: async (campaignContact, _, { loaders }) => {

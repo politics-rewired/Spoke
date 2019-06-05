@@ -15,6 +15,7 @@ import { sendEmail } from '../server/mail'
 import { Notifications, sendUserNotification } from '../server/notifications'
 
 const CHUNK_SIZE = 1000
+const BATCH_SIZE = parseInt(process.env.DB_MAX_POOL || 5, 10)
 
 const zipMemoization = {}
 let warehouseConnection = null
@@ -180,18 +181,24 @@ export async function uploadContacts(job) {
     const resultMessages = []
 
     const contactChunks = _.chunk(contacts, CHUNK_SIZE)
+    const chunkChunks = _.chunk(contactChunks, BATCH_SIZE)
     let chunksCompleted = 0
-    await Promise.all(contactChunks.map(async chunk => {
-      chunksCompleted = chunksCompleted + 1
-      const percentComplete = Math.round(chunksCompleted / contactChunks.length * 100)
-      await updateJob(job, percentComplete)
-      try {
-        await trx('campaign_contact').insert(chunk)
-      } catch (exc) {
-        console.error('Error inserting contacts:', exc)
-        throw exc
-      }
-    }))
+
+    for (let chunkChunk of chunkChunks) {
+      await Promise.all(chunkChunk.map(async chunk => {
+        const percentComplete = Math.round(chunksCompleted / contactChunks.length * 100)
+
+        try {
+          await trx('campaign_contact').insert(chunk)
+        } catch (exc) {
+          console.error('Error inserting contacts:', exc)
+          throw exc
+        }
+
+        chunksCompleted = chunksCompleted + 1
+        await updateJob(job, percentComplete)
+      }))
+    }
 
     try {
       const deleteOptOutCells = await trx('campaign_contact')
@@ -207,13 +214,30 @@ export async function uploadContacts(job) {
       throw exc
     }
 
+    const whereInParams = excludeCampaignIds.map(_ => '?').join(', ')
     try {
-      const exclusionCellCount = await trx('campaign_contact')
-        .whereIn('cell', function() {
-          this.select('cell').from('campaign_contact').whereIn('campaign_id', excludeCampaignIds)
-        })
-        .where('campaign_id', campaignId)
-        .del()
+      const { rowCount: exclusionCellCount } = excludeCampaignIds.length === 0
+        ? { rowCount: 0 }
+        : await trx.raw(`
+          with exclude_cell as (
+            select distinct on (campaign_contact.cell)
+              campaign_contact.cell
+            from
+              campaign_contact
+            where
+              campaign_contact.campaign_id in (${whereInParams})
+          )
+          delete from
+            campaign_contact
+          where
+            campaign_contact.campaign_id = ?
+            and exists (
+              select 1
+              from exclude_cell
+              where exclude_cell.cell = campaign_contact.cell
+            )
+          ;
+        `, excludeCampaignIds.concat([campaignId]))
 
       if (exclusionCellCount) {
         resultMessages.push(`Number of contacts excluded due to campaign exclusion list: ${exclusionCellCount}`)
@@ -1029,7 +1053,7 @@ export async function sendMessages(queryFunc, defaultStatus) {
 }
 
 export async function handleIncomingMessageParts() {
-  const messageParts = await r.table('pending_message_part').limit(100)
+  const messageParts = await r.knex('pending_message_part').select('*').limit(100)
   const messagePartsByService = {}
   messageParts.forEach((m) => {
     if (m.service in serviceMap) {
@@ -1059,9 +1083,9 @@ export async function handleIncomingMessageParts() {
     for (let i = 0; i < allPartsCount; i++) {
       const part = allParts[i]
       const serviceMessageId = part.service_id
-      const savedCount = await r.table('message')
-        .getAll(serviceMessageId, { index: 'service_id' })
-        .count()
+      const savedCount = await r.parseCount(r.knex('message')
+        .where({ service_id: serviceMessageId })
+        .count())
       const lastMessage = await getLastMessage({
         contactNumber: part.contact_number,
         service: serviceKey

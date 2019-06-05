@@ -59,12 +59,14 @@ async function convertMessagePartsToMessage(messageParts) {
   const text = serviceMessages
     .map((serviceMessage) => serviceMessage.Body)
     .join('')
+    .replace(/\0/g, '') // strip all UTF-8 null characters (0x00)
 
+  // TODO: this could be a slow query
   const lastMessage = await getLastMessage({
     service: 'twilio',
     contactNumber
   })
-  return new Message({
+  return lastMessage && {
     campaign_contact_id: lastMessage && lastMessage.campaign_contact_id,
     contact_number: contactNumber,
     user_number: userNumber,
@@ -75,7 +77,7 @@ async function convertMessagePartsToMessage(messageParts) {
     assignment_id: lastMessage && lastMessage.assignment_id,
     service: 'twilio',
     send_status: 'DELIVERED'
-  })
+  }
 }
 
 async function findNewCell() {
