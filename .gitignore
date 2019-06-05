@@ -1,20 +1,30 @@
 # Spoke Additions
 
-/build
+*#
+
+### Editor ###
+.idea/
+*.vscode
+
+### Development Databases ###
+*sqlite
+*.rdb
 rethinkdb_data
+
+### Testing Artifacts ###
 __test__/test_data/*
-production-env.json
+test.sqlite
+
+### Build Artifacts ###
+/build
+
+### Claudia Deploy ###
 claudia.json
+production-env.json
 stage.json
 beta.json
 stage-env.json
 beta-env.json
-test.sqlite
-*#
-.idea/
-*sqlite
-*.vscode
-*.rdb
 
 # Created by https://www.gitignore.io/api/node,linux,macos,windows
 # Edit at https://www.gitignore.io/?templates=node,linux,macos,windows
