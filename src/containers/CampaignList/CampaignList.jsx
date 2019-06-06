@@ -50,7 +50,11 @@ export class CampaignList extends React.Component {
         />
         <MenuItem
           primaryText="Mark for a Second Pass"
-          onClick={startOperation("markForSecondPass", campaign)}
+          onClick={startOperation("markForSecondPass", campaign, {
+            excludeRecentlyTexted: false,
+            days: 3,
+            hours: 0
+          })}
         />
         <MenuItem
           primaryText="Release Unreplied Conversations"

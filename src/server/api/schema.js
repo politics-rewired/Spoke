@@ -1637,13 +1637,22 @@ const rootMutations = {
       return contact;
     },
 
-    markForSecondPass: async (_ignore, { campaignId }, { user }) => {
+    markForSecondPass: async (
+      _ignore,
+      { campaignId, excludeAgeInHours },
+      { user }
+    ) => {
       // verify permissions
       const organizationId = (await r
         .knex("campaign")
         .where({ id: parseInt(campaignId) }))[0].organization_id;
 
       await accessRequired(user, organizationId, "ADMIN", true);
+
+      const queryArgs = [parseInt(campaignId)];
+      if (excludeAgeInHours) {
+        queryArgs.push(parseInt(excludeAgeInHours));
+      }
 
       /*
         "Mark Campaign for Second Pass", will only mark contacts for a second
@@ -1667,9 +1676,14 @@ const rootMutations = {
               newer_contact.cell = current_contact.cell
               and newer_contact.created_at > current_contact.created_at
           )
+          ${
+            excludeAgeInHours
+              ? "and current_contact.updated_at < now() - interval '?? hour'"
+              : ""
+          }
         ;
       `,
-        [parseInt(campaignId)]
+        queryArgs
       );
       const updateResult = updateResultRaw.rowCount;
 

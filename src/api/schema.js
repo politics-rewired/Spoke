@@ -279,7 +279,7 @@ const rootSchema = `
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!, organizationId: String!): String!
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Int): String!
-    markForSecondPass(campaignId: String!): String!
+    markForSecondPass(campaignId: String!, excludeAgeInHours: Int): String!
     insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!
     updateLinkDomain(organizationId: String!, domainId: String!, payload: UpdateLinkDomain!): LinkDomain!
     deleteLinkDomain(organizationId: String!, domainId: String!): Boolean!
