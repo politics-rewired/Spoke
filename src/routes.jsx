@@ -7,6 +7,7 @@ import AdminPersonList from "./containers/AdminPersonList";
 import AdminOptOutList from "./containers/AdminOptOutList";
 import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
 import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
+import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
 import AdminIncomingMessageList from "./containers/AdminIncomingMessageList";
 import EscalatedConversationList from "./containers/AdminIncomingMessageList/EscalatedConversationList";
 import AdminCampaignEdit from "./containers/AdminCampaignEdit";
@@ -48,6 +49,10 @@ export default function makeRoutes(requireAuth = () => {}) {
           <Route path="escalated" component={EscalatedConversationList} />
           <Route path="bulk-script-editor" component={AdminBulkScriptEditor} />
           <Route path="short-link-domains" component={AdminShortLinkDomains} />
+          <Route
+            path="assignment-requests"
+            component={AdminAssignmentRequest}
+          />
           <Route path="settings" component={Settings} />
         </Route>
       </Route>

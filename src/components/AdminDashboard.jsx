@@ -105,6 +105,11 @@ class AdminDashboard extends React.Component {
         role: "OWNER"
       },
       {
+        name: "Assignment Requests",
+        path: "assignment-requests",
+        role: "ADMIN"
+      },
+      {
         name: "Settings",
         path: "settings",
         role: "SUPERVOLUNTEER"
