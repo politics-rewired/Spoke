@@ -15,7 +15,6 @@ import FlatButton from "material-ui/FlatButton";
 import CircularProgress from "material-ui/CircularProgress";
 
 import theme from "../../styles/theme";
-import LoadingIndicator from "../../components/LoadingIndicator";
 
 export const RowWorkState = Object.freeze({
   Inactive: 0,
@@ -26,25 +25,24 @@ export const RowWorkState = Object.freeze({
 });
 
 const rowStyleForState = rowState => {
-  switch (rowState) {
-    case RowWorkState.Error:
-      return { backgroundColor: theme.colors.lightGray, ...fadeOutStyle };
-    case RowWorkState.Approved:
-      return { backgroundColor: theme.colors.green, ...fadeOutStyle };
-    case RowWorkState.Denied:
-      return { backgroundColor: theme.colors.lightRed };
-    default:
-      return undefined;
-  }
-};
+  const baseStyle = {
+    "-webkit-transition": "opacity 2s ease-in-out",
+    "-moz-transition": "opacity 2s ease-in-out",
+    "-ms-transition": "opacity 2s ease-in-out",
+    "-o-transition": "opacity 2s ease-in-out",
+    transition: "opacity 2s ease-in-out",
+    opacity: 1
+  };
 
-const fadeOutStyle = {
-  "-webkit-transition": "opacity 3s ease-in-out",
-  "-moz-transition": "opacity 3s ease-in-out",
-  "-ms-transition": "opacity 3s ease-in-out",
-  "-o-transition": "opacity 3s ease-in-out",
-  transition: "opacity 3s ease-in-out",
-  opacity: 1
+  let overrideStyle = {};
+  if (rowState === RowWorkState.Error) {
+    overrideStyle = { backgroundColor: theme.colors.lightGray };
+  } else if (rowState === RowWorkState.Approved) {
+    overrideStyle = { opacity: 0, backgroundColor: theme.colors.green };
+  } else if (rowState === RowWorkState.Denied) {
+    overrideStyle = { opacity: 0, backgroundColor: theme.colors.lightRed };
+  }
+  return Object.assign({}, baseStyle, overrideStyle);
 };
 
 const styles = {
@@ -110,7 +108,6 @@ const AssignmentRequestTable = props => {
           })}
         </TableBody>
       </Table>
-      {assignmentRequests.length === 0 && <LoadingIndicator />}
     </div>
   );
 };

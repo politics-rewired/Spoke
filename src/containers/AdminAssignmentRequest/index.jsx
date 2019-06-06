@@ -72,7 +72,7 @@ class AdminAssignmentRequest extends Component {
       await sleep(1000);
       console.log("Approved request");
       this.setRequestState(requestId, RowWorkState.Approved);
-      await sleep(4000);
+      await sleep(2000);
       this.deleteRequest(requestId);
     } catch (exc) {
       console.log("Request approval failed", exc);
