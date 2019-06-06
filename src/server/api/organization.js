@@ -144,6 +144,10 @@ export const resolvers = {
       }
       return 0;
     },
+    assignmentRequestCount: async organization => {
+      // TODO - Fill in this stub
+      return 2;
+    },
     linkDomains: async organization => {
       const rawResult = await r.knex.raw(
         `
