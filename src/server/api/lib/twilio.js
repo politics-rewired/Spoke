@@ -2,7 +2,7 @@ import Twilio from 'twilio'
 import { getFormattedPhoneNumber } from '../../../lib/phone-format'
 import { Log, Message, PendingMessagePart, r } from '../../models'
 import { log } from '../../../lib'
-import { getLastMessage, saveNewIncomingMessage } from './message-sending'
+import { getCampaignContactAndAssignmentForIncomingMessage, saveNewIncomingMessage } from './message-sending'
 import faker from 'faker'
 
 let twilio = null
@@ -61,20 +61,21 @@ async function convertMessagePartsToMessage(messageParts) {
     .join('')
     .replace(/\0/g, '') // strip all UTF-8 null characters (0x00)
 
-  // TODO: this could be a slow query
-  const lastMessage = await getLastMessage({
+  const ccInfo = await getCampaignContactAndAssignmentForIncomingMessage({
     service: 'twilio',
-    contactNumber
+    contactNumber,
+    messaging_service_sid: serviceMessages[0].MessagingServiceSid
   })
-  return lastMessage && {
-    campaign_contact_id: lastMessage && lastMessage.campaign_contact_id,
+
+  return ccInfo && {
+    campaign_contact_id: ccInfo && ccInfo.campaign_contact_id,
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,
     text: textIncludingMms(text, serviceMessages),
     service_response: JSON.stringify(serviceMessages),
     service_id: serviceMessages[0].MessagingServiceSid,
-    assignment_id: lastMessage && lastMessage.assignment_id,
+    assignment_id: ccInfo && ccInfo.assignment_id,
     service: 'twilio',
     send_status: 'DELIVERED'
   }
@@ -135,23 +136,6 @@ function parseMessageText(message) {
   return params
 }
 
-const getMessagingServiceSIDs = () => {
-  // Gather multiple messaging service SIDs (may be split across multiple env vars)
-  const envVarKeys = Object.keys(process.env).filter(key => key.startsWith(`TWILIO_MESSAGE_SERVICE_SIDS`))
-  envVarKeys.sort()
-
-  let messagingServiceIds = []
-  for (const envVarKey of envVarKeys) {
-    const envVarValue = process.env[envVarKey]
-    const newServiceIds = envVarValue.split(',').map(serviceSid => serviceSid.trim())
-    messagingServiceIds = messagingServiceIds.concat(newServiceIds)
-  }
-
-  return messagingServiceIds
-}
-
-const MESSAGING_SERVICE_SIDS = getMessagingServiceSIDs()
-
 const assignMessagingServiceSID = async (cell, organizationId) => {
   const assignedMessagingServiceSidWithFewestCells = r.knex.raw(`
       with chosen_messaging_service_sid as (
@@ -170,9 +154,9 @@ const assignMessagingServiceSID = async (cell, organizationId) => {
       insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
       values (?, ?, chosen_messaging_service_sid.messaging_service_sid)
       returning messaging_service_sid;
-    `, [organizationId, organizationId])
+    `, [organizationId, organizationId, cell, organizationId])
 
-  const chosen = assignedMessagingServiceSidWithFewestCells[0].messaging_service_id;
+  const chosen = assignedMessagingServiceSidWithFewestCells[0].messaging_service_sid;
   return chosen
 }
 
@@ -205,7 +189,7 @@ async function sendMessage(message, organizationId, trx) {
     return 'test_message_uuid'
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (message.service !== 'twilio') {
       log.warn('Message not marked as a twilio message', message.id)
     }

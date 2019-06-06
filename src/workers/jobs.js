@@ -190,6 +190,7 @@ export async function uploadContacts(job) {
 
         try {
           await trx('campaign_contact').insert(chunk)
+          await ensureAllNumbersHaveMessagingServiceSIDs(trx, campaignId, campaign.organization_id)
         } catch (exc) {
           console.error('Error inserting contacts:', exc)
           throw exc
@@ -259,6 +260,67 @@ export async function uploadContacts(job) {
     }
   }
   await cacheableData.campaign.reload(campaignId)
+}
+
+const ensureAllNumbersHaveMessagingServiceSIDs = async (trx, campaignId, organizationId) => {
+  const { rows } = await r.knex.raw(`
+    select contact_number
+    from campaign_contact
+    left join messaging_service
+      on messaging_service.cell = campaign_contact.contact_number
+    where campaign_id = ?
+      and messaging_service.messaging_service_sid is null
+  `, [campaignId])
+
+  const cells = rows.map(r => r.contact_number)
+
+  const messagingServiceCandidates = await r.knex.raw(`
+    select messaging_service_sid, count(*) as count
+    from messaging_service
+    where organization_id = ?
+    order by count desc
+  `, [organizationId])
+
+  const mostAssignedNumbers = messagingServiceCandidates[0].count
+
+  const gapToMakeUp = messagingServiceCandidates.slice(1).reduce((acc, ms) => {
+    return acc + (mostAssignedNumbers - ms.count)
+  }, 0)
+
+  let cellsUsedForMakingUpGap = cells.slice(0, gapToMakeUp)
+  const additionalCells = cells.slice(gapToMakeUp)
+
+  const reversedMessagingServicesToAddMakeUpCellsTo = messagingServiceCandidates.slice(0)
+  reversedMessagingServicesToAddMakeUpCellsTo.reverse()
+
+  let rowsToInsert = []
+
+  for (let ms of reversedMessagingServicesToAddMakeUpCellsTo) {
+    const gap = mostAssignedNumbers - ms.count
+
+    rowsToInsert = rowsToInsert.concat(cellsUsedForMakingUpGap.slice(0, gap).map(cell => ({
+      cell,
+      organization_id: organizationId,
+      messaging_service_sid: ms.messaging_service_sid
+    })))
+
+    cellsUsedForMakingUpGap = cellsUsedForMakingUpGap.concat(gap)
+  }
+
+  const chunkSize = Math.ceil(additionalCells.length / messagingServiceCandidates.length)
+  const chunks = _.chunk(additionalCells, chunkSize)
+
+  messagingServiceCandidates.forEach((ms, idx) => {
+    const chunk = chunks[idx]
+
+    rowsToInsert = rowsToInsert.concat(chunk.map(cell => ({
+      cell,
+      organization_id: organizationId,
+      messaging_service_sid: ms.messaging_service_sid
+    })))
+  })
+
+  return await r.knex('messaging_service').insert(rowsToInsert);
 }
 
 export async function loadContactsFromDataWarehouseFragment(jobEvent) {
