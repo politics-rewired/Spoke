@@ -327,29 +327,47 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   campaignId,
   organizationId
 ) => {
-  const { rows } = await r.knex.raw(
+  const { rows } = await trx.raw(
     `
-    select contact_number
+    select campaign_contact.cell
     from campaign_contact
-    left join messaging_service
-      on messaging_service.cell = campaign_contact.contact_number
+    left join messaging_service_stick
+      on messaging_service_stick.cell = campaign_contact.cell
+        and messaging_service_stick.organization_id = ?
     where campaign_id = ?
-      and messaging_service.messaging_service_sid is null
+      and messaging_service_stick.messaging_service_sid is null
   `,
-    [campaignId]
+    [organizationId, campaignId]
   );
 
-  const cells = rows.map(r => r.contact_number);
+  const cells = rows.map(r => r.cell);
 
-  const messagingServiceCandidates = await r.knex.raw(
+  if (cells.length == 0) {
+    return;
+  }
+
+  const { rows: messagingServiceCandidates } = await r.knex.raw(
     `
     select messaging_service_sid, count(*) as count
+    from messaging_service_stick
+    where organization_id = ?
+    group by messaging_service_sid
+    union
+    select messaging_service_sid, 0
     from messaging_service
     where organization_id = ?
+      and not exists (
+        select 1
+        from messaging_service_stick
+        where 
+          messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+      )
     order by count desc
   `,
-    [organizationId]
+    [organizationId, organizationId]
   );
+
+  console.log(messagingServiceCandidates);
 
   const mostAssignedNumbers = messagingServiceCandidates[0].count;
 
@@ -359,6 +377,8 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 
   let cellsUsedForMakingUpGap = cells.slice(0, gapToMakeUp);
   const additionalCells = cells.slice(gapToMakeUp);
+
+  console.log({ gapToMakeUp, cellsUsedForMakingUpGap, additionalCells });
 
   const reversedMessagingServicesToAddMakeUpCellsTo = messagingServiceCandidates.slice(
     0
@@ -386,6 +406,9 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   );
   const chunks = _.chunk(additionalCells, chunkSize);
 
+  console.log(chunkSize);
+  console.log(chunks);
+
   messagingServiceCandidates.forEach((ms, idx) => {
     const chunk = chunks[idx];
 
@@ -398,7 +421,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
     );
   });
 
-  return await r.knex("messaging_service").insert(rowsToInsert);
+  return await r.knex("messaging_service_stick").insert(rowsToInsert);
 };
 
 export async function loadContactsFromDataWarehouseFragment(jobEvent) {

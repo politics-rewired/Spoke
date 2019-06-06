@@ -158,35 +158,39 @@ function parseMessageText(message) {
 }
 
 const assignMessagingServiceSID = async (cell, organizationId) => {
-  const assignedMessagingServiceSidWithFewestCells = r.knex.raw(
+  const result = await r.knex.raw(
     `
       with chosen_messaging_service_sid as (
-        select
-          messaging_service_sid,
-          count(
-            select 1
-            from messaging_service_stick
-            where organization_id = ?
-          ) as usage_count
+        select messaging_service_sid, count(*) as count
+        from messaging_service_stick
+        where organization_id = ?
+        group by messaging_service_sid
+        union
+        select messaging_service_sid, 0
         from messaging_service
         where organization_id = ?
-        order by usage_count asc
+          and not exists (
+            select 1
+            from messaging_service_stick
+            where 
+              messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+          )
+        order by count asc
         limit 1
-      )
-      insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
-      values (?, ?, chosen_messaging_service_sid.messaging_service_sid)
-      returning messaging_service_sid;
+    )
+    insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
+    values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
+    returning messaging_service_sid;
     `,
     [organizationId, organizationId, cell, organizationId]
   );
 
-  const chosen =
-    assignedMessagingServiceSidWithFewestCells[0].messaging_service_sid;
+  const chosen = result.rows[0].messaging_service_sid;
   return chosen;
 };
 
 const getMessageServiceSID = async (cell, organizationId, trx) => {
-  const existingStick = await trx.raw(
+  const { rows: existingStick } = await r.knex.raw(
     `
     select messaging_service_sid
     from messaging_service_stick
@@ -230,8 +234,7 @@ async function sendMessage(message, organizationId, trx) {
 
     const messagingServiceSid = await getMessageServiceSID(
       message.contact_number,
-      organizationId,
-      trx
+      organizationId
     );
 
     const messageParams = Object.assign(

@@ -64,15 +64,15 @@ export async function getCampaignContactAndAssignmentForIncomingMessage({
       select organization_id
       from messaging_service
       where messaging_service_sid = ?
-    )
-    with campaign_contact_option as (
-      select id
+    ),
+    campaign_contact_option as (
+      select campaign_contact.id
       from campaign_contact
       join campaign
         on campaign_contact.campaign_id = campaign.id
       where
         campaign.organization_id in (
-          select id from chosen_organization
+          select organization_id from chosen_organization
         )
         and campaign_contact.cell = ?
     )
