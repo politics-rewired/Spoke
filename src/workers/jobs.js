@@ -367,8 +367,6 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
     [organizationId, organizationId]
   );
 
-  console.log(messagingServiceCandidates);
-
   const mostAssignedNumbers = messagingServiceCandidates[0].count;
 
   const gapToMakeUp = messagingServiceCandidates.slice(1).reduce((acc, ms) => {
@@ -377,8 +375,6 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 
   let cellsUsedForMakingUpGap = cells.slice(0, gapToMakeUp);
   const additionalCells = cells.slice(gapToMakeUp);
-
-  console.log({ gapToMakeUp, cellsUsedForMakingUpGap, additionalCells });
 
   const reversedMessagingServicesToAddMakeUpCellsTo = messagingServiceCandidates.slice(
     0
@@ -405,9 +401,6 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
     additionalCells.length / messagingServiceCandidates.length
   );
   const chunks = _.chunk(additionalCells, chunkSize);
-
-  console.log(chunkSize);
-  console.log(chunks);
 
   messagingServiceCandidates.forEach((ms, idx) => {
     const chunk = chunks[idx];
