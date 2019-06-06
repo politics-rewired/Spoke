@@ -1,10 +1,11 @@
 const config = {
-  client: 'mysql',
-  connection: 'mysql://spoke:tHXtEb6YZ4P3SZfT9kzJyKykCg4mTbGgYsSTXUph4@bernie-pgbouncer.politicsrewired.com:4006/spoke_prod',
+  client: "mysql",
+  connection:
+    "mysql://spoke:tHXtEb6YZ4P3SZfT9kzJyKykCg4mTbGgYsSTXUph4@bernie-pgbouncer.politicsrewired.com:4006/spoke_prod",
   pool: {
     min: 2,
     max: 10
-  },
+  }
 };
 
 const campaign_contacts_without_question_responses = `
@@ -16,7 +17,7 @@ create view campaign_contacts_without_question_responses as
     from question_response
     where question_response.campaign_contact_id = campaign_contact.id
   );
-`
+`;
 
 const question_response_messages = `
 create or replace view question_response_message_contact_numbers as 
@@ -26,17 +27,17 @@ create or replace view question_response_message_contact_numbers as
       select script
       from interaction_step;
     );
-`
+`;
 
 const drop_tables = `
 drop table question_response_message_contact_numbers_cached;
 drop table campaign_contacts_without_question_responses_cached;
-`
+`;
 
 const create_tables = `
 create table question_response_message_contact_numbers_cached select * from question_response_message_contact_numbers;
 create table campaign_contacts_without_question_responses_cached select * from campaign_contacts_without_question_responses;
-`
+`;
 
 const query = `
 select campaign_contact.id, campaign_contact.campaign_id, question_response_message_contact_numbers_cached.text
@@ -46,54 +47,58 @@ where campaign_contact.id in (
   select id
   from campaign_contacts_without_question_responses_cached
 );
-`
+`;
 
-const db = require('knex')(config);
+const db = require("knex")(config);
 
-let result
-let operatedOn = 0
+let result;
+let operatedOn = 0;
 async function main() {
   try {
-    await db.raw(create_tables)
-    console.log('Created tables')
+    await db.raw(create_tables);
+    console.log("Created tables");
   } catch (ex) {
-    await db.raw(drop_tables)
-    console.log('Droppped tables')
-    await db.raw(create_tables)
-    console.log('Created tables')
+    await db.raw(drop_tables);
+    console.log("Droppped tables");
+    await db.raw(create_tables);
+    console.log("Created tables");
   }
-  result = await db.raw(query)
-  rows = result[0]
-  console.log(rows)
+  result = await db.raw(query);
+  rows = result[0];
+  console.log(rows);
   while (rows.length > 0) {
-    operatedOn = operatedOn + rows.length
+    operatedOn = operatedOn + rows.length;
     for (let row of rows) {
-      await updateRow(row)
+      await updateRow(row);
     }
-    console.log(`Operating on ${operatedOn} rows`)
-    await db.raw(drop_tables)
-    console.log('Dropped tables')
-    await db.raw(create_tables)
-    console.log('Recreated tables')
-    result = await db.raw(query)
-    rows = result[0]
-    console.log(rows)
+    console.log(`Operating on ${operatedOn} rows`);
+    await db.raw(drop_tables);
+    console.log("Dropped tables");
+    await db.raw(create_tables);
+    console.log("Recreated tables");
+    result = await db.raw(query);
+    rows = result[0];
+    console.log(rows);
   }
-  return operatedOn
+  return operatedOn;
 }
 
 async function updateRow({ id, campaign_id, text }) {
-  const matchingInteractionStep = await db('interaction_step').where({ script: text, campaign_id }).first()
+  const matchingInteractionStep = await db("interaction_step")
+    .where({ script: text, campaign_id })
+    .first();
   if (matchingInteractionStep) {
     const toInsert = {
       interaction_step_id: matchingInteractionStep.id,
       campaign_contact_id: id,
       value: matchingInteractionStep.answer_option
-    }
+    };
 
-    const insert_result = await db('question_response').insert(toInsert)
-    console.log(95)
+    const insert_result = await db("question_response").insert(toInsert);
+    console.log(95);
   }
 }
 
-main().then(console.log).catch(console.error)
+main()
+  .then(console.log)
+  .catch(console.error);

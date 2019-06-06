@@ -41,5 +41,4 @@ export const schema = `
     assignmentId: String
     updatedAt: Date
   }
-`
-
+`;

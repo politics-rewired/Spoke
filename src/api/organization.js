@@ -1,4 +1,7 @@
-export const TextRequestType = Object.freeze({ UNSENT: 'UNSENT', UNREPLIED: 'UNREPLIED' })
+export const TextRequestType = Object.freeze({
+  UNSENT: "UNSENT",
+  UNREPLIED: "UNREPLIED"
+});
 
 export const schema = `
   enum TextRequestType {
@@ -35,4 +38,4 @@ export const schema = `
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
   }
-`
+`;

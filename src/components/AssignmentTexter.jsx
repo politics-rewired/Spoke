@@ -1,42 +1,42 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { withRouter } from 'react-router'
-import gql from 'graphql-tag'
+import React from "react";
+import PropTypes from "prop-types";
+import { withRouter } from "react-router";
+import gql from "graphql-tag";
 
-import { StyleSheet, css } from 'aphrodite'
-import IconButton from 'material-ui/IconButton/IconButton'
-import RaisedButton from 'material-ui/RaisedButton'
-import { ToolbarTitle } from 'material-ui/Toolbar'
-import NavigateBeforeIcon from 'material-ui/svg-icons/image/navigate-before'
-import NavigateNextIcon from 'material-ui/svg-icons/image/navigate-next'
-import Check from 'material-ui/svg-icons/action/check-circle'
+import { StyleSheet, css } from "aphrodite";
+import IconButton from "material-ui/IconButton/IconButton";
+import RaisedButton from "material-ui/RaisedButton";
+import { ToolbarTitle } from "material-ui/Toolbar";
+import NavigateBeforeIcon from "material-ui/svg-icons/image/navigate-before";
+import NavigateNextIcon from "material-ui/svg-icons/image/navigate-next";
+import Check from "material-ui/svg-icons/action/check-circle";
 
-import { log } from '../lib/log'
-import loadData from '../containers/hoc/load-data'
-import wrapMutations from '../containers/hoc/wrap-mutations'
-import AssignmentTexterContact from '../containers/AssignmentTexterContact'
-import Empty from '../components/Empty'
-import LoadingIndicator from '../components/LoadingIndicator'
+import { log } from "../lib/log";
+import loadData from "../containers/hoc/load-data";
+import wrapMutations from "../containers/hoc/wrap-mutations";
+import AssignmentTexterContact from "../containers/AssignmentTexterContact";
+import Empty from "../components/Empty";
+import LoadingIndicator from "../components/LoadingIndicator";
 
-const SEND_DELAY = 100
+const SEND_DELAY = 100;
 
 const styles = StyleSheet.create({
   container: {
-    position: 'fixed',
+    position: "fixed",
     top: 0,
     left: 0,
     // right: 0,
     // bottom: 0
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     zIndex: 1002,
-    backgroundColor: 'white',
-    overflow: 'hidden'
+    backgroundColor: "white",
+    overflow: "hidden"
   },
   navigationToolbarTitle: {
-    fontSize: '12px'
+    fontSize: "12px"
   }
-})
+});
 
 class AssignmentTexter extends React.Component {
   state = {
@@ -44,10 +44,10 @@ class AssignmentTexter extends React.Component {
     contactCache: {},
     loading: false,
     errors: []
-  }
+  };
 
   componentWillMount() {
-    this.updateCurrentContactIndex(0)
+    this.updateCurrentContactIndex(0);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -58,15 +58,17 @@ class AssignmentTexter extends React.Component {
     // In fact, without the code below, we will 'double-jump' each message
     // we send or change the status in some way.
     // Below, we update our index with the contact that matches our current index.
-    if (typeof nextState.currentContactIndex !== 'undefined'
-        && nextState.currentContactIndex === this.state.currentContactIndex
-        && nextProps.contactIds.length !== this.props.contactIds.length
-        && this.props.contactIds[this.state.currentContactIndex]) {
-      const curId = this.props.contactIds[this.state.currentContactIndex]
-      const nextIndex = nextProps.contactIds.indexOf(curId)
+    if (
+      typeof nextState.currentContactIndex !== "undefined" &&
+      nextState.currentContactIndex === this.state.currentContactIndex &&
+      nextProps.contactIds.length !== this.props.contactIds.length &&
+      this.props.contactIds[this.state.currentContactIndex]
+    ) {
+      const curId = this.props.contactIds[this.state.currentContactIndex];
+      const nextIndex = nextProps.contactIds.indexOf(curId);
       if (nextIndex !== nextState.currentContactIndex) {
         // eslint-disable-next-line no-param-reassign
-        nextState.currentContactIndex = nextIndex
+        nextState.currentContactIndex = nextIndex;
       }
     }
   }
@@ -111,253 +113,282 @@ class AssignmentTexter extends React.Component {
 
   */
   getContactData = async (newIndex, force = false) => {
-    const { contactIds } = this.props
-    const BATCH_GET = 10 // how many to get at once
-    const BATCH_FORWARD = 5 // when to reach out and get more
-    let getIds = []
+    const { contactIds } = this.props;
+    const BATCH_GET = 10; // how many to get at once
+    const BATCH_FORWARD = 5; // when to reach out and get more
+    let getIds = [];
     // if we don't have current data, get that
-    if (contactIds[newIndex]
-        && !this.state.contactCache[contactIds[newIndex]]) {
+    if (
+      contactIds[newIndex] &&
+      !this.state.contactCache[contactIds[newIndex]]
+    ) {
       getIds = contactIds
         .slice(newIndex, newIndex + BATCH_GET)
-        .filter((cId) => !force || !this.state.contactCache[cId])
+        .filter(cId => !force || !this.state.contactCache[cId]);
     }
     // if we DO have current data, but don't have data base BATCH_FORWARD...
-    if (!getIds.length
-        && contactIds[newIndex + BATCH_FORWARD]
-        && !this.state.contactCache[contactIds[newIndex + BATCH_FORWARD]]) {
+    if (
+      !getIds.length &&
+      contactIds[newIndex + BATCH_FORWARD] &&
+      !this.state.contactCache[contactIds[newIndex + BATCH_FORWARD]]
+    ) {
       getIds = contactIds
         .slice(newIndex + BATCH_FORWARD, newIndex + BATCH_FORWARD + BATCH_GET)
-        .filter((cId) => !force || !this.state.contactCache[cId])
+        .filter(cId => !force || !this.state.contactCache[cId]);
     }
 
     if (getIds.length) {
-      this.setState({ loading: true })
+      this.setState({ loading: true });
 
-      await this.props.loadContacts(getIds)
+      await this.props
+        .loadContacts(getIds)
         .then(response => {
-          if (response.errors) throw new Error(response.errors)
-          const { getAssignmentContacts } = response.data
-          if (!getAssignmentContacts) throw new Error('No assignment contacts returned!')
-          return getAssignmentContacts
+          if (response.errors) throw new Error(response.errors);
+          const { getAssignmentContacts } = response.data;
+          if (!getAssignmentContacts)
+            throw new Error("No assignment contacts returned!");
+          return getAssignmentContacts;
         })
         .then(getAssignmentContacts => {
           const foldIn = (contactCache, newContact) => {
-            contactCache[newContact.id] = newContact
-            return contactCache
-          }
-          const oldCache = Object.assign({}, this.state.contactCache)
-          const contactCache = getAssignmentContacts.reduce(foldIn, oldCache)
+            contactCache[newContact.id] = newContact;
+            return contactCache;
+          };
+          const oldCache = Object.assign({}, this.state.contactCache);
+          const contactCache = getAssignmentContacts.reduce(foldIn, oldCache);
 
           this.setState({
             loading: false,
             contactCache
-          })
+          });
         })
-        .catch(log.error)
+        .catch(log.error);
     }
-  }
+  };
 
-  incrementCurrentContactIndex = (increment) => {
-    let newIndex = this.state.currentContactIndex
-    newIndex = newIndex + increment
-    this.updateCurrentContactIndex(newIndex)
-  }
+  incrementCurrentContactIndex = increment => {
+    let newIndex = this.state.currentContactIndex;
+    newIndex = newIndex + increment;
+    this.updateCurrentContactIndex(newIndex);
+  };
 
-  updateCurrentContactIndex = (newIndex) => {
+  updateCurrentContactIndex = newIndex => {
     this.setState({
       currentContactIndex: newIndex
-    })
-    this.getContactData(newIndex)
-  }
+    });
+    this.getContactData(newIndex);
+  };
 
   hasPrevious = () => {
-    return this.state.currentContactIndex > 0
-  }
+    return this.state.currentContactIndex > 0;
+  };
 
   hasNext = () => {
-    return this.state.currentContactIndex < this.contactCount() - 1
-  }
+    return this.state.currentContactIndex < this.contactCount() - 1;
+  };
 
   handleFinishContact = () => {
     if (this.hasNext()) {
-      this.handleNavigateNext()
+      this.handleNavigateNext();
     } else {
       // Will look async and then redirect to todo page if not
-      this.props.assignContactsIfNeeded(/* checkServer*/true)
+      this.props.assignContactsIfNeeded(/* checkServer*/ true);
     }
-  }
+  };
 
   handleNavigateNext = () => {
     if (!this.hasNext()) {
-      return
+      return;
     }
 
-    this.incrementCurrentContactIndex(1)
-  }
+    this.incrementCurrentContactIndex(1);
+  };
 
   handleNavigatePrevious = () => {
     if (!this.hasPrevious()) {
-      return
+      return;
     }
-    this.incrementCurrentContactIndex(-1)
-  }
+    this.incrementCurrentContactIndex(-1);
+  };
 
-  handleCannedResponseChange = (script) => {
-    this.handleScriptChange(script)
-    this.handleClosePopover()
-  }
+  handleCannedResponseChange = script => {
+    this.handleScriptChange(script);
+    this.handleClosePopover();
+  };
 
-  handleScriptChange = (script) => {
-    this.setState({ script })
-  }
+  handleScriptChange = script => {
+    this.setState({ script });
+  };
 
   handleExitTexter = () => {
-    this.props.router.push('/app/' + (this.props.organizationId || ''))
-  }
+    this.props.router.push("/app/" + (this.props.organizationId || ""));
+  };
 
   contactCount = () => {
-    const { contactIds } = this.props
-    return contactIds.length
-  }
+    const { contactIds } = this.props;
+    return contactIds.length;
+  };
 
   currentContact = () => {
-    const { contactIds } = this.props
-    const { currentContactIndex, contactCache } = this.state
-    const contactId = contactIds[currentContactIndex]
-    const contact = contactCache[contactId]
-    return contact
-  }
+    const { contactIds } = this.props;
+    const { currentContactIndex, contactCache } = this.state;
+    const contactId = contactIds[currentContactIndex];
+    const contact = contactCache[contactId];
+    return contact;
+  };
 
   renderNavigationToolbarChildren = () => {
-    const { allContactsCount } = this.props
-    const remainingContacts = this.contactCount()
-    const messagedContacts = allContactsCount - remainingContacts
+    const { allContactsCount } = this.props;
+    const remainingContacts = this.contactCount();
+    const messagedContacts = allContactsCount - remainingContacts;
 
-    const currentIndex = this.state.currentContactIndex + 1 + messagedContacts
-    let ofHowMany = allContactsCount
-    if (ofHowMany === currentIndex
-        && this.props.assignment.campaign.useDynamicAssignment) {
-      ofHowMany = '?'
+    const currentIndex = this.state.currentContactIndex + 1 + messagedContacts;
+    let ofHowMany = allContactsCount;
+    if (
+      ofHowMany === currentIndex &&
+      this.props.assignment.campaign.useDynamicAssignment
+    ) {
+      ofHowMany = "?";
     }
-    const title = `${currentIndex} of ${ofHowMany}`
+    const title = `${currentIndex} of ${ofHowMany}`;
     return [
       <ToolbarTitle
-        key='title'
+        key="title"
         className={css(styles.navigationToolbarTitle)}
         text={title}
       />,
       <IconButton
-        key='previous'
+        key="previous"
         onTouchTap={this.handleNavigatePrevious}
         disabled={!this.hasPrevious()}
       >
         <NavigateBeforeIcon />
       </IconButton>,
       <IconButton
-        key='next'
+        key="next"
         onTouchTap={this.handleNavigateNext}
         disabled={!this.hasNext()}
       >
         <NavigateNextIcon />
       </IconButton>
-    ]
-  }
+    ];
+  };
 
   sendMessage = (contact_id, payload) => {
-    const isLastOne = !this.hasNext()
+    const isLastOne = !this.hasNext();
 
-    const promises = []
+    const promises = [];
 
     const catchError = response => {
       if (response.errors) {
-        throw new Error(response.errors)
+        throw new Error(response.errors);
       }
-      return response
-    }
+      return response;
+    };
 
-    if (payload.message) 
+    if (payload.message)
       promises.push(
-        this.props.mutations.sendMessage(payload.message, contact_id)
+        this.props.mutations
+          .sendMessage(payload.message, contact_id)
           .then(catchError)
           .catch(this.handleSendMessageError(contact_id))
-      )
+      );
 
     if (payload.questionResponseObjects)
-      promises.push(this.props.mutations.updateQuestionResponses(payload.questionResponseObjects, contact_id)
-        .then(catchError))
+      promises.push(
+        this.props.mutations
+          .updateQuestionResponses(payload.questionResponseObjects, contact_id)
+          .then(catchError)
+      );
 
     if (payload.deletionIds)
-      promises.push(this.props.mutations.deleteQuestionResponses(payload.deletionIds, contact_id)
-        .then(catchError))
+      promises.push(
+        this.props.mutations
+          .deleteQuestionResponses(payload.deletionIds, contact_id)
+          .then(catchError)
+      );
 
     if (payload.optOut) {
-      promises.push(this.props.mutations.createOptOut(payload.optOut, contact_id)
-        .then(catchError))
+      promises.push(
+        this.props.mutations
+          .createOptOut(payload.optOut, contact_id)
+          .then(catchError)
+      );
     }
 
     if (payload.escalate) {
-      promises.push(this.props.mutations.escalateContact(contact_id, payload.escalate)
-        .then(catchError))
+      promises.push(
+        this.props.mutations
+          .escalateContact(contact_id, payload.escalate)
+          .then(catchError)
+      );
     }
 
-    Promise.all(promises)
-      .then(_ => {
-        if (isLastOne) this.handleFinishContact()
-      })
+    Promise.all(promises).then(_ => {
+      if (isLastOne) this.handleFinishContact();
+    });
 
     if (!isLastOne) {
-      setTimeout(() => this.handleFinishContact(), SEND_DELAY)
+      setTimeout(() => this.handleFinishContact(), SEND_DELAY);
     }
-  }
+  };
 
   goBackToTodos = () => {
-    const { campaign } = this.props.assignment
-    this.props.router.push(`/app/${campaign.organization.id}/todos`)
-  }
+    const { campaign } = this.props.assignment;
+    this.props.router.push(`/app/${campaign.organization.id}/todos`);
+  };
 
-  handleSendMessageError = (contact_id) => (e) => {
-    let error = {id: contact_id}
+  handleSendMessageError = contact_id => e => {
+    let error = { id: contact_id };
 
     if (e.status === 402) {
-      this.goBackToTodos()
+      this.goBackToTodos();
     } else {
-      error.snackbarError = e.message
+      error.snackbarError = e.message;
 
-      if (e.message.includes('Your assignment has changed')) {
-        error.snackbarActionTitle = 'Back to todos'
-        error.snackbarOnTouchTap = this.goBackToTodos
-      } else if (e.message.includes('Skipped sending because this contact was already opted out')) {
+      if (e.message.includes("Your assignment has changed")) {
+        error.snackbarActionTitle = "Back to todos";
+        error.snackbarOnTouchTap = this.goBackToTodos;
+      } else if (
+        e.message.includes(
+          "Skipped sending because this contact was already opted out"
+        )
+      ) {
         // opt out or send message Error
-        error.snackbarActionTitle = 'A previous contact had been opted out'
+        error.snackbarActionTitle = "A previous contact had been opted out";
       } else {
-        error.snackbarError = 'Error: Please wait a few seconds and try again.'
+        error.snackbarError = "Error: Please wait a few seconds and try again.";
       }
 
-      error.snackbarError = `Error for contact ${contact_id}: ${error.snackbarError.replace('Error: GraphQL error:', '')}`
+      error.snackbarError = `Error for contact ${contact_id}: ${error.snackbarError.replace(
+        "Error: GraphQL error:",
+        ""
+      )}`;
 
-      this.setState({ errors: this.state.errors.concat([error]) })
+      this.setState({ errors: this.state.errors.concat([error]) });
 
       setTimeout(() => {
-        this.setState({ errors: this.state.errors.filter(e => e.id !== contact_id) })
-      }, 2000)
-      
+        this.setState({
+          errors: this.state.errors.filter(e => e.id !== contact_id)
+        });
+      }, 2000);
+
       throw e;
     }
-  }
+  };
 
   renderTexter = () => {
-    const { errors } = this.state
-    const { assignment } = this.props
-    const { campaign, texter } = assignment
-    const contact = this.currentContact()
+    const { errors } = this.state;
+    const { assignment } = this.props;
+    const { campaign, texter } = assignment;
+    const contact = this.currentContact();
 
     // render() will automatically be called again once contentCache is updated, just wait for now
     if (!contact) {
-      return <LoadingIndicator />
+      return <LoadingIndicator />;
     }
 
-    const navigationToolbarChildren = this.renderNavigationToolbarChildren()
+    const navigationToolbarChildren = this.renderNavigationToolbarChildren();
     return (
       <AssignmentTexterContact
         key={contact.id}
@@ -371,54 +402,60 @@ class AssignmentTexter extends React.Component {
         onExitTexter={this.handleExitTexter}
         errors={errors}
         mutations={{
-          editCampaignContactMessageStatus: this.props.mutations.editCampaignContactMessageStatus,
-          bulkSendMessages: this.props.mutations.bulkSendMessages,
+          editCampaignContactMessageStatus: this.props.mutations
+            .editCampaignContactMessageStatus,
+          bulkSendMessages: this.props.mutations.bulkSendMessages
         }}
         sendMessage={this.sendMessage}
       />
-    )
-  }
+    );
+  };
   renderEmpty = () => {
     return (
       <div>
         <Empty
           title="You've already messaged or replied to all your assigned contacts for now."
           icon={<Check />}
-          content={(<RaisedButton
-            label='Back To Todos'
-            onClick={this.handleExitTexter}
-          />)}
+          content={
+            <RaisedButton
+              label="Back To Todos"
+              onClick={this.handleExitTexter}
+            />
+          }
         />
       </div>
-    )
-  }
+    );
+  };
 
   render() {
-    const { contactIds } = this.props
+    const { contactIds } = this.props;
     return (
       <div className={css(styles.container)}>
         {contactIds.length === 0 ? this.renderEmpty() : this.renderTexter()}
       </div>
-    )
+    );
   }
 }
 
 AssignmentTexter.propTypes = {
   currentUser: PropTypes.object,
-  assignment: PropTypes.object,      // current assignment
-  contactIds: PropTypes.arrayOf(PropTypes.string),   // contacts for current assignment
+  assignment: PropTypes.object, // current assignment
+  contactIds: PropTypes.arrayOf(PropTypes.string), // contacts for current assignment
   allContactsCount: PropTypes.number,
   router: PropTypes.object,
   refreshData: PropTypes.func,
   loadContacts: PropTypes.func,
   assignContactsIfNeeded: PropTypes.func,
   organizationId: PropTypes.string
-}
+};
 
 const mapMutationsToProps = () => ({
   createOptOut: (optOut, campaignContactId) => ({
     mutation: gql`
-      mutation createOptOut($optOut: ContactActionInput!, $campaignContactId: String!) {
+      mutation createOptOut(
+        $optOut: ContactActionInput!
+        $campaignContactId: String!
+      ) {
         createOptOut(optOut: $optOut, campaignContactId: $campaignContactId) {
           id
           optOut {
@@ -435,8 +472,14 @@ const mapMutationsToProps = () => ({
   }),
   escalateContact: (campaignContactId, escalate) => ({
     mutation: gql`
-      mutation escalateConversation($campaignContactId: String!, $escalate: ContactActionInput!) {
-        escalateConversation(campaignContactId: $campaignContactId, escalate: $escalate) {
+      mutation escalateConversation(
+        $campaignContactId: String!
+        $escalate: ContactActionInput!
+      ) {
+        escalateConversation(
+          campaignContactId: $campaignContactId
+          escalate: $escalate
+        ) {
           id
           assignmentId
         }
@@ -449,8 +492,14 @@ const mapMutationsToProps = () => ({
   }),
   editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({
     mutation: gql`
-      mutation editCampaignContactMessageStatus($messageStatus: String!, $campaignContactId: String!) {
-        editCampaignContactMessageStatus(messageStatus:$messageStatus, campaignContactId: $campaignContactId) {
+      mutation editCampaignContactMessageStatus(
+        $messageStatus: String!
+        $campaignContactId: String!
+      ) {
+        editCampaignContactMessageStatus(
+          messageStatus: $messageStatus
+          campaignContactId: $campaignContactId
+        ) {
           id
           messageStatus
         }
@@ -463,8 +512,14 @@ const mapMutationsToProps = () => ({
   }),
   deleteQuestionResponses: (interactionStepIds, campaignContactId) => ({
     mutation: gql`
-      mutation deleteQuestionResponses($interactionStepIds:[String], $campaignContactId: String!) {
-        deleteQuestionResponses(interactionStepIds: $interactionStepIds, campaignContactId: $campaignContactId) {
+      mutation deleteQuestionResponses(
+        $interactionStepIds: [String]
+        $campaignContactId: String!
+      ) {
+        deleteQuestionResponses(
+          interactionStepIds: $interactionStepIds
+          campaignContactId: $campaignContactId
+        ) {
           id
         }
       }
@@ -476,8 +531,14 @@ const mapMutationsToProps = () => ({
   }),
   updateQuestionResponses: (questionResponses, campaignContactId) => ({
     mutation: gql`
-      mutation updateQuestionResponses($questionResponses:[QuestionResponseInput], $campaignContactId: String!) {
-        updateQuestionResponses(questionResponses: $questionResponses, campaignContactId: $campaignContactId) {
+      mutation updateQuestionResponses(
+        $questionResponses: [QuestionResponseInput]
+        $campaignContactId: String!
+      ) {
+        updateQuestionResponses(
+          questionResponses: $questionResponses
+          campaignContactId: $campaignContactId
+        ) {
           id
         }
       }
@@ -489,7 +550,10 @@ const mapMutationsToProps = () => ({
   }),
   sendMessage: (message, campaignContactId) => ({
     mutation: gql`
-      mutation sendMessage($message: MessageInput!, $campaignContactId: String!) {
+      mutation sendMessage(
+        $message: MessageInput!
+        $campaignContactId: String!
+      ) {
         sendMessage(message: $message, campaignContactId: $campaignContactId) {
           id
           messageStatus
@@ -507,7 +571,7 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  bulkSendMessages: (assignmentId) => ({
+  bulkSendMessages: assignmentId => ({
     mutation: gql`
       mutation bulkSendMessages($assignmentId: Int!) {
         bulkSendMessages(assignmentId: $assignmentId) {
@@ -519,10 +583,8 @@ const mapMutationsToProps = () => ({
       assignmentId
     }
   })
-})
+});
 
-export default loadData(wrapMutations(
-  withRouter(AssignmentTexter)), {
-    mapMutationsToProps
-  })
-
+export default loadData(wrapMutations(withRouter(AssignmentTexter)), {
+  mapMutationsToProps
+});

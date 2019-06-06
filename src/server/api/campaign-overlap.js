@@ -1,15 +1,20 @@
-import { r } from '../models'
+import { r } from "../models";
 
 /**
- * Fetch overlaping campaign contacts 
+ * Fetch overlaping campaign contacts
  * @param {number} campaignId - ID of the source campaign to find overlaps for.
  * @param {number} organizationId - ID of the organization to to check other campaigns within.
  * @param {Knex=} knexObject - Optional Knex instance to execute query with (for use within transaction).
  */
-export const queryCampaignOverlaps = async (campaignId, organizationId, knexObject = undefined) => {
-  if (knexObject === undefined) knexObject = r.knex
+export const queryCampaignOverlaps = async (
+  campaignId,
+  organizationId,
+  knexObject = undefined
+) => {
+  if (knexObject === undefined) knexObject = r.knex;
 
-  const result = await knexObject.raw(`
+  const result = await knexObject.raw(
+    `
     with campaign_ids_in_organization as (
       select id
       from campaign
@@ -35,21 +40,28 @@ export const queryCampaignOverlaps = async (campaignId, organizationId, knexObje
       and overlapping_cc.campaign_id != ?
     group by overlapping_cc.campaign_id, campaign_title
     order by overlapping_cc.campaign_id desc;
-  `, [organizationId, campaignId, campaignId])
+  `,
+    [organizationId, campaignId, campaignId]
+  );
 
-  return result
-}
+  return result;
+};
 
 /**
  * Fetch overlap count for
  * @param {number} campaignId - ID of the source campaign to find overlaps for.
- * @param {number} overlapCampaignId - 
+ * @param {number} overlapCampaignId -
  * @param {Knex=} knexObject - Optional Knex instance to execute query with (for use within transaction).
  */
-export const queryCampaignOverlapCount = async (campaignId, overlapCampaignId, knexObject) => {
-  if (knexObject === undefined) knexObject = r.knex
+export const queryCampaignOverlapCount = async (
+  campaignId,
+  overlapCampaignId,
+  knexObject
+) => {
+  if (knexObject === undefined) knexObject = r.knex;
 
-  const { rows } = await knexObject.raw(`
+  const { rows } = await knexObject.raw(
+    `
     select
       count(overlapping_cc.id) as overlap_count
     from campaign_contact
@@ -60,8 +72,10 @@ export const queryCampaignOverlapCount = async (campaignId, overlapCampaignId, k
       and campaign_contact.message_status = 'needsMessage'
       and overlapping_cc.campaign_id = ?
     ;
-  `, [campaignId, overlapCampaignId])
+  `,
+    [campaignId, overlapCampaignId]
+  );
 
-  const { overlap_count: overlapCount } = rows[0]
-  return overlapCount
-}
+  const { overlap_count: overlapCount } = rows[0];
+  return overlapCount;
+};

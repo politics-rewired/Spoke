@@ -1,8 +1,8 @@
-import _ from 'lodash'
-import { Assignment, r } from '../models'
-import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from './assignment'
-import { buildCampaignQuery } from './campaign'
-import { log } from '../../lib'
+import _ from "lodash";
+import { Assignment, r } from "../models";
+import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
+import { buildCampaignQuery } from "./campaign";
+import { log } from "../../lib";
 
 async function getConversationsJoinsAndWhereClause(
   queryParam,
@@ -13,52 +13,68 @@ async function getConversationsJoinsAndWhereClause(
   contactNameFilter
 ) {
   let query = queryParam
-    .leftJoin('campaign_contact', 'campaign.id', 'campaign_contact.campaign_id')
-    .leftJoin('assignment', 'campaign_contact.assignment_id', 'assignment.id')
-    .leftJoin('user', 'assignment.user_id', 'user.id')
-    .where({ 'campaign.organization_id': organizationId })
+    .leftJoin("campaign_contact", "campaign.id", "campaign_contact.campaign_id")
+    .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
+    .leftJoin("user", "assignment.user_id", "user.id")
+    .where({ "campaign.organization_id": organizationId });
 
-  query = buildCampaignQuery(query, organizationId, campaignsFilter)
+  query = buildCampaignQuery(query, organizationId, campaignsFilter);
 
   if (assignmentsFilter) {
-    if ('texterId' in assignmentsFilter && assignmentsFilter.texterId !== null)
-      query = query.where({ 'assignment.user_id': assignmentsFilter.texterId })
+    if ("texterId" in assignmentsFilter && assignmentsFilter.texterId !== null)
+      query = query.where({ "assignment.user_id": assignmentsFilter.texterId });
   }
 
-  const includeEscalated = assignmentsFilter && !!assignmentsFilter.includeEscalated
+  const includeEscalated =
+    assignmentsFilter && !!assignmentsFilter.includeEscalated;
   if (!includeEscalated) {
-    const { features } = await r.knex('organization').where({ id: organizationId }).first('features')
-    const { escalationUserId } = JSON.parse(features)
+    const { features } = await r
+      .knex("organization")
+      .where({ id: organizationId })
+      .first("features");
+    const { escalationUserId } = JSON.parse(features);
     if (escalationUserId) {
       query = query.where(function() {
-        this.whereNot({ 'assignment.user_id': escalationUserId }).orWhereNull('assignment.user_id')
-      })
+        this.whereNot({ "assignment.user_id": escalationUserId }).orWhereNull(
+          "assignment.user_id"
+        );
+      });
     }
   }
 
   if (contactNameFilter) {
-    if (contactNameFilter.firstName) 
-      query = query.where('campaign_contact.first_name', 'like', `${contactNameFilter.firstName}%`)
-    if (contactNameFilter.lastName) 
-      query = query.where('campaign_contact.last_name', 'like', `${contactNameFilter.lastName}%`)
+    if (contactNameFilter.firstName)
+      query = query.where(
+        "campaign_contact.first_name",
+        "like",
+        `${contactNameFilter.firstName}%`
+      );
+    if (contactNameFilter.lastName)
+      query = query.where(
+        "campaign_contact.last_name",
+        "like",
+        `${contactNameFilter.lastName}%`
+      );
   }
 
   query = addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
     query,
-    contactsFilter && contactsFilter.messageStatus)
+    contactsFilter && contactsFilter.messageStatus
+  );
 
-  if (contactsFilter && 'isOptedOut' in contactsFilter) {
-    const subQuery = (r.knex.select('cell')
-      .from('opt_out')
-      .whereRaw('opt_out.cell=campaign_contact.cell'))
+  if (contactsFilter && "isOptedOut" in contactsFilter) {
+    const subQuery = r.knex
+      .select("cell")
+      .from("opt_out")
+      .whereRaw("opt_out.cell=campaign_contact.cell");
     if (contactsFilter.isOptedOut) {
-      query = query.whereExists(subQuery)
+      query = query.whereExists(subQuery);
     } else {
-      query = query.whereNotExists(subQuery)
+      query = query.whereNotExists(subQuery);
     }
   }
 
-  return { query }
+  return { query };
 }
 
 /*
@@ -70,12 +86,12 @@ results can be consumed by downstream resolvers.
  */
 function mapQueryFieldsToResolverFields(queryResult, fieldsMap) {
   return _.mapKeys(queryResult, (value, key) => {
-    const newKey = fieldsMap[key]
+    const newKey = fieldsMap[key];
     if (newKey) {
-      return newKey
+      return newKey;
     }
-    return key
-  })
+    return key;
+  });
 }
 
 export async function getConversations(
@@ -88,8 +104,8 @@ export async function getConversations(
   utc
 ) {
   /* Query #1 == get campaign_contact.id for all the conversations matching
-  * the criteria with offset and limit. */
-  let offsetLimitQuery = r.knex.select('campaign_contact.id as cc_id')
+   * the criteria with offset and limit. */
+  let offsetLimitQuery = r.knex.select("campaign_contact.id as cc_id");
 
   offsetLimitQuery = (await getConversationsJoinsAndWhereClause(
     offsetLimitQuery,
@@ -98,47 +114,47 @@ export async function getConversations(
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )).query
+  )).query;
 
   offsetLimitQuery = offsetLimitQuery
-    .orderBy('campaign_contact.updated_at', 'DESC')
-    .orderBy('cc_id')
-  offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset)
+    .orderBy("campaign_contact.updated_at", "DESC")
+    .orderBy("cc_id");
+  offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset);
 
-  const ccIdRows = await offsetLimitQuery
-  const ccIds = ccIdRows.map((ccIdRow) => {
-    return ccIdRow.cc_id
-  })
+  const ccIdRows = await offsetLimitQuery;
+  const ccIds = ccIdRows.map(ccIdRow => {
+    return ccIdRow.cc_id;
+  });
 
   /* Query #2 -- get all the columns we need, including messages, using the
-  * cc_ids from Query #1 to scope the results to limit, offset */
+   * cc_ids from Query #1 to scope the results to limit, offset */
   let query = r.knex.select(
-    'campaign_contact.id as cc_id',
-    'campaign_contact.first_name as cc_first_name',
-    'campaign_contact.last_name as cc_last_name',
-    'campaign_contact.cell',
-    'campaign_contact.message_status',
-    'campaign_contact.is_opted_out',
-    'campaign_contact.updated_at',
-    'campaign_contact.assignment_id',
-    'opt_out.cell as opt_out_cell',
-    'user.id as u_id',
-    'user.first_name as u_first_name',
-    'user.last_name as u_last_name',
-    'campaign.id as cmp_id',
-    'campaign.title',
-    'campaign.due_by',
-    'assignment.id as ass_id',
-    'message.id as mess_id',
-    'message.text',
-    'message.user_number',
-    'message.contact_number',
-    'message.created_at',
-    'message.is_from_contact',
-    'message.created_at',
-    'message.send_status',
-    'message.user_id'
-  )
+    "campaign_contact.id as cc_id",
+    "campaign_contact.first_name as cc_first_name",
+    "campaign_contact.last_name as cc_last_name",
+    "campaign_contact.cell",
+    "campaign_contact.message_status",
+    "campaign_contact.is_opted_out",
+    "campaign_contact.updated_at",
+    "campaign_contact.assignment_id",
+    "opt_out.cell as opt_out_cell",
+    "user.id as u_id",
+    "user.first_name as u_first_name",
+    "user.last_name as u_last_name",
+    "campaign.id as cmp_id",
+    "campaign.title",
+    "campaign.due_by",
+    "assignment.id as ass_id",
+    "message.id as mess_id",
+    "message.text",
+    "message.user_number",
+    "message.contact_number",
+    "message.created_at",
+    "message.is_from_contact",
+    "message.created_at",
+    "message.send_status",
+    "message.user_id"
+  );
 
   query = (await getConversationsJoinsAndWhereClause(
     query,
@@ -147,88 +163,97 @@ export async function getConversations(
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )).query
+  )).query;
 
-  query = query.whereIn('campaign_contact.id', ccIds)
+  query = query.whereIn("campaign_contact.id", ccIds);
 
-  query = query.leftJoin('message', 'message.campaign_contact_id', '=', 'campaign_contact.id')
+  query = query.leftJoin(
+    "message",
+    "message.campaign_contact_id",
+    "=",
+    "campaign_contact.id"
+  );
 
   // Sorting has already happened in Query 1 and will happen in the JS grouping below
-  query = query
-    .leftJoin('opt_out', table => {
-      table
-        .on('opt_out.organization_id', '=',  'campaign.organization_id')
-        .andOn('campaign_contact.cell', 'opt_out.cell')
-    })
+  query = query.leftJoin("opt_out", table => {
+    table
+      .on("opt_out.organization_id", "=", "campaign.organization_id")
+      .andOn("campaign_contact.cell", "opt_out.cell");
+  });
 
-  const conversationRows = await query
+  const conversationRows = await query;
 
   /* collapse the rows to produce an array of objects, with each object
-  * containing the fields for one conversation, each having an array of
-  * message objects */
+   * containing the fields for one conversation, each having an array of
+   * message objects */
   const messageFields = [
-    'mess_id',
-    'text',
-    'user_number',
-    'contact_number',
-    'created_at',
-    'is_from_contact',
-    'user_id',
-    'send_status'
-  ]
+    "mess_id",
+    "text",
+    "user_number",
+    "contact_number",
+    "created_at",
+    "is_from_contact",
+    "user_id",
+    "send_status"
+  ];
 
-  const groupedContacts = _.groupBy(conversationRows, 'cc_id')
+  const groupedContacts = _.groupBy(conversationRows, "cc_id");
   const conversations = Object.keys(groupedContacts)
     .map(contactId => {
-      const contactMessages = groupedContacts[contactId]
-      const firstRow = contactMessages[0]
-      const conversation = _.omit(firstRow, messageFields)
+      const contactMessages = groupedContacts[contactId];
+      const firstRow = contactMessages[0];
+      const conversation = _.omit(firstRow, messageFields);
       conversation.messages = contactMessages
         // Sort ASC to display most recent _messages_ last
         .sort((messageA, messageB) => messageA.created_at - messageB.created_at)
         .map(message => {
-          return mapQueryFieldsToResolverFields(_.pick(message, messageFields), { mess_id: 'id' })
-        })
-      return conversation
+          return mapQueryFieldsToResolverFields(
+            _.pick(message, messageFields),
+            { mess_id: "id" }
+          );
+        });
+      return conversation;
     })
     // Sort DESC to display most recent _conversations_ first
-    .sort((convA, convB) => convB.updated_at - convA.updated_at)
+    .sort((convA, convB) => convB.updated_at - convA.updated_at);
 
   /* Query #3 -- get the count of all conversations matching the criteria.
-  * We need this to show total number of conversations to support paging */
-  const conversationsCount = await r.parseCount((await getConversationsJoinsAndWhereClause(
-    // Only grab one field in order to minimize bandwidth
-    r.knex.count('*'),
-    organizationId,
-    campaignsFilter,
-    assignmentsFilter,
-    contactsFilter,
-    contactNameFilter
-  )).query)
+   * We need this to show total number of conversations to support paging */
+  const conversationsCount = await r.parseCount(
+    (await getConversationsJoinsAndWhereClause(
+      // Only grab one field in order to minimize bandwidth
+      r.knex.count("*"),
+      organizationId,
+      campaignsFilter,
+      assignmentsFilter,
+      contactsFilter,
+      contactNameFilter
+    )).query
+  );
 
   const pageInfo = {
     limit: cursor.limit,
     offset: cursor.offset,
     total: conversationsCount
-  }
+  };
 
   return {
     conversations,
     pageInfo
-  }
+  };
 }
 
 export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
   organizationId,
   campaignsFilter,
   assignmentsFilter,
-  contactsFilter,
+  contactsFilter
 ) {
   let query = r.knex.select(
-    'campaign_contact.id as cc_id',
-    'campaign.id as cmp_id',
-    'message.id as mess_id',
-  )
+    "campaign_contact.id as cc_id",
+    "campaign.id as cmp_id",
+    "message.id as mess_id"
+  );
 
   query = (await getConversationsJoinsAndWhereClause(
     query,
@@ -237,48 +262,49 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )).query
+  )).query;
 
-  query = query.leftJoin('message', table => {
+  query = query.leftJoin("message", table => {
     table
-      .on('message.assignment_id', '=', 'assignment.id')
-      .andOn('message.contact_number', '=', 'campaign_contact.cell')
-  })
+      .on("message.assignment_id", "=", "assignment.id")
+      .andOn("message.contact_number", "=", "campaign_contact.cell");
+  });
 
-  query = query
-    .orderBy('cc_id')
+  query = query.orderBy("cc_id");
 
-  const conversationRows = await query
+  const conversationRows = await query;
 
-  const campaignIdContactIdsMap = new Map()
-  const campaignIdMessagesIdsMap = new Map()
+  const campaignIdContactIdsMap = new Map();
+  const campaignIdMessagesIdsMap = new Map();
 
-  let ccId = undefined
+  let ccId = undefined;
   for (const conversationRow of conversationRows) {
     if (ccId !== conversationRow.cc_id) {
-      const ccId = conversationRow.cc_id
-      campaignIdContactIdsMap[conversationRow.cmp_id] = ccId
+      const ccId = conversationRow.cc_id;
+      campaignIdContactIdsMap[conversationRow.cmp_id] = ccId;
 
       if (!campaignIdContactIdsMap.has(conversationRow.cmp_id)) {
-        campaignIdContactIdsMap.set(conversationRow.cmp_id, [])
+        campaignIdContactIdsMap.set(conversationRow.cmp_id, []);
       }
 
-      campaignIdContactIdsMap.get(conversationRow.cmp_id).push(ccId)
+      campaignIdContactIdsMap.get(conversationRow.cmp_id).push(ccId);
 
       if (!campaignIdMessagesIdsMap.has(conversationRow.cmp_id)) {
-        campaignIdMessagesIdsMap.set(conversationRow.cmp_id, [])
+        campaignIdMessagesIdsMap.set(conversationRow.cmp_id, []);
       }
     }
 
     if (conversationRow.mess_id) {
-      campaignIdMessagesIdsMap.get(conversationRow.cmp_id).push(conversationRow.mess_id)
+      campaignIdMessagesIdsMap
+        .get(conversationRow.cmp_id)
+        .push(conversationRow.mess_id);
     }
   }
 
   return {
     campaignIdContactIdsMap,
     campaignIdMessagesIdsMap
-  }
+  };
 }
 
 export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
@@ -289,10 +315,10 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
   contactNameFilter
 ) {
   let query = r.knex.select(
-    'campaign_contact.id as cc_id',
-    'campaign.id as cmp_id',
-    'message.id as mess_id',
-  )
+    "campaign_contact.id as cc_id",
+    "campaign.id as cmp_id",
+    "message.id as mess_id"
+  );
 
   query = (await getConversationsJoinsAndWhereClause(
     query,
@@ -301,179 +327,190 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
     assignmentsFilter,
     contactsFilter,
     contactNameFilter
-  )).query
+  )).query;
 
-  query = query.leftJoin('message', table => {
+  query = query.leftJoin("message", table => {
     table
-      .on('message.assignment_id', '=', 'assignment.id')
-      .andOn('message.contact_number', '=', 'campaign_contact.cell')
-  })
+      .on("message.assignment_id", "=", "assignment.id")
+      .andOn("message.contact_number", "=", "campaign_contact.cell");
+  });
 
-  query = query
-    .orderBy('cc_id')
+  query = query.orderBy("cc_id");
 
-  const conversationRows = await query
-  const result = {}
+  const conversationRows = await query;
+  const result = {};
   conversationRows.forEach(row => {
     result[row.cc_id] = {
       campaign_id: row.cmp_id,
       messages: []
-    }
-  })
+    };
+  });
 
   conversationRows.forEach(row => {
     if (row.mess_id) {
-      result[row.cc_id].messages.push(row.mess_id)
+      result[row.cc_id].messages.push(row.mess_id);
     }
-  })
-  return Object.entries(result)
+  });
+  return Object.entries(result);
 }
-
 
 export const reassignContacts = async (campaignContactIds, newTexterId) => {
   const result = await r.knex.transaction(async trx => {
     // Fetch more complete information for campaign contacts
-    const campaignContacts = await r.knex('campaign_contact')
+    const campaignContacts = await r
+      .knex("campaign_contact")
       .transacting(trx)
-      .select(['id', 'campaign_id'])
-      .whereIn('id', campaignContactIds)
+      .select(["id", "campaign_id"])
+      .whereIn("id", campaignContactIds);
 
     // Batch update by campaign
-    const contactsByCampaignId = _.groupBy(campaignContacts, 'campaign_id')
-    const campaignIds = Object.keys(contactsByCampaignId)
-    await Promise.all(campaignIds.map(async campaignId => {
-      // See if newTexter already has an assignment for this campaign
-      const existingAssignment = await r.knex('assignment')
-        .transacting(trx)
-        .where({
-          campaign_id: campaignId,
-          user_id: newTexterId
-        })
-        .first('id')
-      let assignmentId = existingAssignment && existingAssignment.id
-      if (!assignmentId) {
-        // Create a new assignment if none exists
-        const inserted = await r.knex('assignment')
+    const contactsByCampaignId = _.groupBy(campaignContacts, "campaign_id");
+    const campaignIds = Object.keys(contactsByCampaignId);
+    await Promise.all(
+      campaignIds.map(async campaignId => {
+        // See if newTexter already has an assignment for this campaign
+        const existingAssignment = await r
+          .knex("assignment")
           .transacting(trx)
-          .insert({
+          .where({
             campaign_id: campaignId,
             user_id: newTexterId
           })
-          .returning('id')
-        assignmentId = inserted[0]
-      }
+          .first("id");
+        let assignmentId = existingAssignment && existingAssignment.id;
+        if (!assignmentId) {
+          // Create a new assignment if none exists
+          const inserted = await r
+            .knex("assignment")
+            .transacting(trx)
+            .insert({
+              campaign_id: campaignId,
+              user_id: newTexterId
+            })
+            .returning("id");
+          assignmentId = inserted[0];
+        }
 
-      // Update the contact's assignment
-      const contactIds = contactsByCampaignId[campaignId].map(contact => contact.id)
-      await r.knex('campaign_contact')
-        .transacting(trx)
-        .update({
-          assignment_id: assignmentId,
-          updated_at: r.knex.fn.now()
-        })
-        .whereIn('id', contactIds)
+        // Update the contact's assignment
+        const contactIds = contactsByCampaignId[campaignId].map(
+          contact => contact.id
+        );
+        await r
+          .knex("campaign_contact")
+          .transacting(trx)
+          .update({
+            assignment_id: assignmentId,
+            updated_at: r.knex.fn.now()
+          })
+          .whereIn("id", contactIds);
 
-      // Update the conversations messages
-      await r.knex('message')
-        .transacting(trx)
-        .update({ assignment_id: assignmentId })
-        .whereIn('campaign_contact_id', contactIds)
-    }))
-    return campaignContactIds
-  })
+        // Update the conversations messages
+        await r
+          .knex("message")
+          .transacting(trx)
+          .update({ assignment_id: assignmentId })
+          .whereIn("campaign_contact_id", contactIds);
+      })
+    );
+    return campaignContactIds;
+  });
 
-  return result
-}
+  return result;
+};
 
-export async function reassignConversations(campaignIdContactIdsMap, campaignIdMessagesIdsMap, newTexterUserId) {
+export async function reassignConversations(
+  campaignIdContactIdsMap,
+  campaignIdMessagesIdsMap,
+  newTexterUserId
+) {
   // ensure existence of assignments
-  const campaignIdAssignmentIdMap = new Map()
+  const campaignIdAssignmentIdMap = new Map();
   for (const [campaignId, _] of campaignIdContactIdsMap) {
     let assignment = await r
-      .table('assignment')
-      .getAll(newTexterUserId, { index: 'user_id' })
+      .table("assignment")
+      .getAll(newTexterUserId, { index: "user_id" })
       .filter({ campaign_id: campaignId })
       .limit(1)(0)
-      .default(null)
+      .default(null);
     if (!assignment) {
       assignment = await Assignment.save({
         user_id: newTexterUserId,
         campaign_id: campaignId,
         max_contacts: parseInt(process.env.MAX_CONTACTS_PER_TEXTER || 0, 10)
-      })
+      });
     }
-    campaignIdAssignmentIdMap.set(campaignId, assignment.id)
+    campaignIdAssignmentIdMap.set(campaignId, assignment.id);
   }
 
   const returnCampaignIdAssignmentIds = await r.knex.transaction(async trx => {
-    const result = []
+    const result = [];
 
     for (const [campaignId, campaignContactIds] of campaignIdContactIdsMap) {
-      const assignmentId = campaignIdAssignmentIdMap.get(campaignId)
+      const assignmentId = campaignIdAssignmentIdMap.get(campaignId);
       await r
-        .knex('campaign_contact')
+        .knex("campaign_contact")
         .transacting(trx)
-        .where('campaign_id', campaignId)
-        .whereIn('id', campaignContactIds)
+        .where("campaign_id", campaignId)
+        .whereIn("id", campaignContactIds)
         .update({
           assignment_id: assignmentId,
           updated_at: r.knex.fn.now()
-        })
+        });
 
       result.push({
         campaignId,
         assignmentId: assignmentId.toString()
-      })
+      });
     }
 
     for (const [campaignId, messageIds] of campaignIdMessagesIdsMap) {
-      const assignmentId = campaignIdAssignmentIdMap.get(campaignId)
+      const assignmentId = campaignIdAssignmentIdMap.get(campaignId);
       await r
-        .knex('message')
+        .knex("message")
         .transacting(trx)
-        .whereIn('id', messageIds)
+        .whereIn("id", messageIds)
         .update({
           assignment_id: assignmentId
-        })
+        });
     }
 
-    return result
-  })
+    return result;
+  });
 
-  return returnCampaignIdAssignmentIds
+  return returnCampaignIdAssignmentIds;
 }
 
 export const resolvers = {
   PaginatedConversations: {
     conversations: queryResult => {
-      return queryResult.conversations
+      return queryResult.conversations;
     },
     pageInfo: queryResult => {
-      if ('pageInfo' in queryResult) {
-        return queryResult.pageInfo
+      if ("pageInfo" in queryResult) {
+        return queryResult.pageInfo;
       } else {
-        return null
+        return null;
       }
     }
   },
   Conversation: {
     texter: queryResult => {
       return mapQueryFieldsToResolverFields(queryResult, {
-        u_id: 'id',
-        u_first_name: 'first_name',
-        u_last_name: 'last_name'
-      })
+        u_id: "id",
+        u_first_name: "first_name",
+        u_last_name: "last_name"
+      });
     },
     contact: queryResult => {
       return mapQueryFieldsToResolverFields(queryResult, {
-        cc_id: 'id',
-        cc_first_name: 'first_name',
-        cc_last_name: 'last_name',
-        opt_out_cell: 'opt_out_cell'
-      })
+        cc_id: "id",
+        cc_first_name: "first_name",
+        cc_last_name: "last_name",
+        opt_out_cell: "opt_out_cell"
+      });
     },
     campaign: queryResult => {
-      return mapQueryFieldsToResolverFields(queryResult, { cmp_id: 'id' })
+      return mapQueryFieldsToResolverFields(queryResult, { cmp_id: "id" });
     }
   }
-}
+};

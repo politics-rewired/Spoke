@@ -1,51 +1,51 @@
-import PropTypes from 'prop-types'
-import React from 'react'
-import { StyleSheet, css } from 'aphrodite'
-import theme from '../styles/theme'
-import { hasRole } from '../lib'
-import TopNav from './TopNav'
-import gql from 'graphql-tag'
-import { withRouter } from 'react-router'
-import loadData from '../containers/hoc/load-data'
-import AdminNavigation from '../containers/AdminNavigation'
+import PropTypes from "prop-types";
+import React from "react";
+import { StyleSheet, css } from "aphrodite";
+import theme from "../styles/theme";
+import { hasRole } from "../lib";
+import TopNav from "./TopNav";
+import gql from "graphql-tag";
+import { withRouter } from "react-router";
+import loadData from "../containers/hoc/load-data";
+import AdminNavigation from "../containers/AdminNavigation";
 const styles = StyleSheet.create({
   container: {
     ...theme.layouts.multiColumn.container
   },
   sidebar: {
-    minHeight: 'calc(100vh - 56px)'
+    minHeight: "calc(100vh - 56px)"
   },
   content: {
     ...theme.layouts.multiColumn.flexColumn,
-    paddingLeft: '2rem',
-    paddingRight: '2rem',
-    margin: '24px auto'
+    paddingLeft: "2rem",
+    paddingRight: "2rem",
+    margin: "24px auto"
   }
-})
+});
 
 class AdminDashboard extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       showMenu: true
-    }
+    };
 
-    this.handleToggleMenu = this.handleToggleMenu.bind(this)
+    this.handleToggleMenu = this.handleToggleMenu.bind(this);
   }
   urlFromPath(path) {
-    const organizationId = this.props.params.organizationId
-    return `/admin/${organizationId}/${path}`
+    const organizationId = this.props.params.organizationId;
+    return `/admin/${organizationId}/${path}`;
   }
 
   async handleToggleMenu() {
-    await this.setState({showMenu: !this.state.showMenu})
+    await this.setState({ showMenu: !this.state.showMenu });
   }
 
   renderNavigation(sections) {
-    const organizationId = this.props.params.organizationId
+    const organizationId = this.props.params.organizationId;
 
     if (!organizationId) {
-      return ''
+      return "";
     }
 
     return (
@@ -57,72 +57,85 @@ class AdminDashboard extends React.Component {
           sections={sections}
         />
       </div>
-    )
+    );
   }
 
   render() {
-    const { location, children, params } = this.props
-    const { roles } = this.props.data.currentUser
-    const { escalatedConversationCount } = this.props.escalatedConversationCount.organization
+    const { location, children, params } = this.props;
+    const { roles } = this.props.data.currentUser;
+    const {
+      escalatedConversationCount
+    } = this.props.escalatedConversationCount.organization;
 
     // HACK: Setting params.adminPerms helps us hide non-supervolunteer functionality
-    params.adminPerms = hasRole('ADMIN', roles || [])
+    params.adminPerms = hasRole("ADMIN", roles || []);
 
-    const sections = [{
-      name: 'Campaigns',
-      path: 'campaigns',
-      role: 'SUPERVOLUNTEER'
-    }, {
-      name: 'People',
-      path: 'people',
-      role: 'ADMIN'
-    }, {
-      name: 'Message Review',
-      path: 'incoming',
-      role: 'SUPERVOLUNTEER'
-    }, {
-      name: 'Escalated Convos',
-      path: 'escalated',
-      role: 'OWNER',
-      badge: {
-        count: escalatedConversationCount
+    const sections = [
+      {
+        name: "Campaigns",
+        path: "campaigns",
+        role: "SUPERVOLUNTEER"
+      },
+      {
+        name: "People",
+        path: "people",
+        role: "ADMIN"
+      },
+      {
+        name: "Message Review",
+        path: "incoming",
+        role: "SUPERVOLUNTEER"
+      },
+      {
+        name: "Escalated Convos",
+        path: "escalated",
+        role: "OWNER",
+        badge: {
+          count: escalatedConversationCount
+        }
+      },
+      {
+        name: "Bulk Script Editor",
+        path: "bulk-script-editor",
+        role: "OWNER"
+      },
+      {
+        name: "Short Link Domains",
+        path: "short-link-domains",
+        role: "OWNER"
+      },
+      {
+        name: "Settings",
+        path: "settings",
+        role: "SUPERVOLUNTEER"
       }
-    }, {
-      name: 'Bulk Script Editor',
-      path: 'bulk-script-editor',
-      role: 'OWNER'
-    }, {
-      name: 'Short Link Domains',
-      path: 'short-link-domains',
-      role: 'OWNER'
-    }, {
-      name: 'Settings',
-      path: 'settings',
-      role: 'SUPERVOLUNTEER'
-    }]
+    ];
 
-    let currentSection = sections.filter(
-      (section) => location.pathname.match(`/${section.path}`)
-    )
+    let currentSection = sections.filter(section =>
+      location.pathname.match(`/${section.path}`)
+    );
 
-    currentSection = currentSection.length > 0 ? currentSection.shift() : null
-    const title = currentSection ? currentSection.name : 'Admin'
-    const backToURL = currentSection &&
-      location.pathname.split('/').pop() !== currentSection.path ?
-      this.urlFromPath(currentSection.path) :
-      null
+    currentSection = currentSection.length > 0 ? currentSection.shift() : null;
+    const title = currentSection ? currentSection.name : "Admin";
+    const backToURL =
+      currentSection &&
+      location.pathname.split("/").pop() !== currentSection.path
+        ? this.urlFromPath(currentSection.path)
+        : null;
 
     return (
       <div>
-        <TopNav title={title} backToURL={backToURL} orgId={params.organizationId} />
+        <TopNav
+          title={title}
+          backToURL={backToURL}
+          orgId={params.organizationId}
+        />
         <div className={css(styles.container)}>
-          {this.renderNavigation(sections.filter((s) => hasRole(s.role, roles)))}
-          <div className={css(styles.content)}>
-            {children}
-          </div>
+          {this.renderNavigation(sections.filter(s => hasRole(s.role, roles)))}
+          <div className={css(styles.content)}>{children}</div>
         </div>
       </div>
-    )
+    );
   }
 }
 
@@ -131,32 +144,36 @@ AdminDashboard.propTypes = {
   params: PropTypes.object,
   children: PropTypes.object,
   location: PropTypes.object
-}
+};
 
 const mapQueriesToProps = ({ ownProps }) => ({
   data: {
-    query: gql`query getCurrentUserRoles($organizationId: String!) {
-      currentUser {
-        id
-        roles(organizationId: $organizationId)
+    query: gql`
+      query getCurrentUserRoles($organizationId: String!) {
+        currentUser {
+          id
+          roles(organizationId: $organizationId)
+        }
       }
-    }`,
+    `,
     variables: {
       organizationId: ownProps.params.organizationId
     }
   },
   escalatedConversationCount: {
-    query: gql`query getEscalatedConversationCount($organizationId: String!) {
-      organization(id: $organizationId) {
-        id
-        escalatedConversationCount
+    query: gql`
+      query getEscalatedConversationCount($organizationId: String!) {
+        organization(id: $organizationId) {
+          id
+          escalatedConversationCount
+        }
       }
-    }`,
+    `,
     variables: {
       organizationId: ownProps.params.organizationId
     },
     pollInterval: 20000
   }
-})
+});
 
-export default loadData(withRouter(AdminDashboard), { mapQueriesToProps })
+export default loadData(withRouter(AdminDashboard), { mapQueriesToProps });

@@ -1,4 +1,6 @@
-import { messageSender01 } from './job-processes'
-import { log } from '../lib/log'
+import { messageSender01 } from "./job-processes";
+import { log } from "../lib/log";
 
-messageSender01().catch((err) => { log.error(err) })
+messageSender01().catch(err => {
+  log.error(err);
+});
