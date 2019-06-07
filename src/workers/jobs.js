@@ -322,6 +322,8 @@ export async function uploadContacts(job) {
   await cacheableData.campaign.reload(campaignId);
 }
 
+// NOTE: This does not chunk inserts so make sure this is run only when you are sure the specified campaign
+// has a reasonable size (< 1000) of cells without sticky messaging services.
 const ensureAllNumbersHaveMessagingServiceSIDs = async (
   trx,
   campaignId,
