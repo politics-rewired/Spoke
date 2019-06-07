@@ -1,4 +1,5 @@
 import Twilio from "twilio";
+import _ from "lodash";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Log, Message, PendingMessagePart, r } from "../../models";
 import { log } from "../../../lib";
@@ -424,6 +425,103 @@ function hashStr(str) {
   return hash;
 }
 
+// NOTE: This does not chunk inserts so make sure this is run only when you are sure the specified campaign
+// has a reasonable size (< 1000) of cells without sticky messaging services.
+const ensureAllNumbersHaveMessagingServiceSIDs = async (
+  trx,
+  campaignId,
+  organizationId
+) => {
+  const { rows } = await trx.raw(
+    `
+    select campaign_contact.cell
+    from campaign_contact
+    left join messaging_service_stick
+      on messaging_service_stick.cell = campaign_contact.cell
+        and messaging_service_stick.organization_id = ?
+    where campaign_id = ?
+      and messaging_service_stick.messaging_service_sid is null
+  `,
+    [organizationId, campaignId]
+  );
+
+  const cells = rows.map(r => r.cell);
+
+  if (cells.length == 0) {
+    return;
+  }
+
+  const { rows: messagingServiceCandidates } = await r.knex.raw(
+    `
+    select messaging_service_sid, count(*) as count
+    from messaging_service_stick
+    where organization_id = ?
+    group by messaging_service_sid
+    union
+    select messaging_service_sid, 0
+    from messaging_service
+    where organization_id = ?
+      and not exists (
+        select 1
+        from messaging_service_stick
+        where 
+          messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+      )
+    order by count desc
+  `,
+    [organizationId, organizationId]
+  );
+
+  const mostAssignedNumbers = messagingServiceCandidates[0].count;
+
+  const gapToMakeUp = messagingServiceCandidates.slice(1).reduce((acc, ms) => {
+    return acc + (mostAssignedNumbers - ms.count);
+  }, 0);
+
+  let cellsUsedForMakingUpGap = cells.slice(0, gapToMakeUp);
+  const additionalCells = cells.slice(gapToMakeUp);
+
+  const reversedMessagingServicesToAddMakeUpCellsTo = messagingServiceCandidates.slice(
+    0
+  );
+  reversedMessagingServicesToAddMakeUpCellsTo.reverse();
+
+  let rowsToInsert = [];
+
+  for (let ms of reversedMessagingServicesToAddMakeUpCellsTo) {
+    const gap = mostAssignedNumbers - ms.count;
+
+    rowsToInsert = rowsToInsert.concat(
+      cellsUsedForMakingUpGap.slice(0, gap).map(cell => ({
+        cell,
+        organization_id: organizationId,
+        messaging_service_sid: ms.messaging_service_sid
+      }))
+    );
+
+    cellsUsedForMakingUpGap = cellsUsedForMakingUpGap.slice(gap);
+  }
+
+  const chunkSize = Math.ceil(
+    additionalCells.length / messagingServiceCandidates.length
+  );
+  const chunks = _.chunk(additionalCells, chunkSize);
+
+  messagingServiceCandidates.forEach((ms, idx) => {
+    const chunk = chunks[idx];
+
+    rowsToInsert = rowsToInsert.concat(
+      chunk.map(cell => ({
+        cell,
+        organization_id: organizationId,
+        messaging_service_sid: ms.messaging_service_sid
+      }))
+    );
+  });
+
+  return await r.knex("messaging_service_stick").insert(rowsToInsert);
+};
+
 export default {
   syncMessagePartProcessing: !!process.env.JOBS_SAME_PROCESS,
   webhook,
@@ -434,5 +532,6 @@ export default {
   saveNewIncomingMessage,
   handleDeliveryReport,
   handleIncomingMessage,
-  parseMessageText
+  parseMessageText,
+  ensureAllNumbersHaveMessagingServiceSIDs
 };
