@@ -56,7 +56,7 @@ const getMessageServiceSID = cell => {
 const doBatch = async () => {
   const { rows } = await knex.raw(
     `
-    select campaign_contact.cell
+    select distinct campaign_contact.cell
     from campaign_contact
     left join messaging_service_stick
       on messaging_service_stick.cell = campaign_contact.cell
