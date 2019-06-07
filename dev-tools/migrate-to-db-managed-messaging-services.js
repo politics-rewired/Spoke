@@ -90,7 +90,7 @@ const doBatch = async () => {
 async function main() {
   let done = 0;
   let did = 0;
-  while ((did = await doBatch())) {
+  while ((did = await doBatch()) > 0) {
     console.log("Did ", did);
     done = done + did;
     connsole.log("Done ", done);
