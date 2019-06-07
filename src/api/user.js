@@ -11,6 +11,7 @@ export const schema = `
     roles(organizationId: String!): [String]
     assignedCell: Phone
     assignment(campaignId: String): Assignment,
+    pendingAssignmentRequest: AssignmentRequest
     terms: Boolean
   }
   

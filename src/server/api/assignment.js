@@ -130,7 +130,7 @@ export async function getCurrentAssignmentType() {
   return features.textRequestType;
 }
 
-export async function currentAssignmentTarget() {
+export async function currentAssignmentTarget(organizationId) {
   const assignmentType = await getCurrentAssignmentType();
 
   const campaignContactStatus = {
@@ -162,6 +162,11 @@ export async function currentAssignmentTarget() {
           and message_status = ?
           and is_opted_out = false
       )
+      ${
+        organizationId !== undefined
+          ? `and campaign.organization_id = ${organizationId}`
+          : ""
+      }
     ;
   `,
     [campaignContactStatus]
@@ -178,7 +183,7 @@ const ASSIGNMENT_COMPLETE_NOTIFICATION_URL =
   process.env.ASSIGNMENT_COMPLETE_NOTIFICATION_URL;
 async function notifyIfAllAssigned(type, user, count) {
   if (ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
-    const assignmentTarget = await currentAssignmentTarget();
+    const assignmentTarget = await currentAssignmentTarget(organizationid);
     if (assignmentTarget == null) {
       await request
         .post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
@@ -211,7 +216,7 @@ export async function countLeft(assignmentType, campaign) {
   return result;
 }
 
-export async function giveUserMoreTexts(auth0Id, count) {
+export async function giveUserMoreTexts(auth0Id, count, organizationId) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
   // Fetch DB info
   const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
@@ -220,7 +225,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
     throw new Error(`No user found with id ${auth0Id}`);
   }
 
-  const assignmentInfo = await currentAssignmentTarget();
+  const assignmentInfo = await currentAssignmentTarget(organizationId);
   if (!assignmentInfo) {
     throw new Error("Could not find a suitable campaign to assign to.");
   }
@@ -325,7 +330,7 @@ export async function giveUserMoreTexts(auth0Id, count) {
     return ccUpdateCount;
   });
 
-  // Async function, not awaiting because response to TFB does not depend on it
+  // Async function, not awaiting because response to external assignment tool does not depend on it
   notifyIfAllAssigned(assignmentInfo.type, auth0Id, countToAssign);
 
   return updated_result;

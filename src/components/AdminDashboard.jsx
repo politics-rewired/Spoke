@@ -65,7 +65,7 @@ class AdminDashboard extends React.Component {
     const { roles } = this.props.data.currentUser;
     const {
       escalatedConversationCount,
-      assignmentRequestCount
+      pendingAssignmentRequestCount
     } = this.props.badgeCounts.organization;
 
     // HACK: Setting params.adminPerms helps us hide non-supervolunteer functionality
@@ -110,7 +110,7 @@ class AdminDashboard extends React.Component {
         path: "assignment-requests",
         role: "ADMIN",
         badge: {
-          count: assignmentRequestCount
+          count: pendingAssignmentRequestCount
         }
       },
       {
@@ -175,7 +175,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         organization(id: $organizationId) {
           id
           escalatedConversationCount
-          assignmentRequestCount
+          pendingAssignmentRequestCount
         }
       }
     `,

@@ -50,6 +50,7 @@ import {
 } from "./canned-response";
 import { schema as inviteSchema, resolvers as inviteResolvers } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
+import { schema as assignmentRequestSchema } from "./assignment-request";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -223,6 +224,7 @@ const rootSchema = `
     replaced: String!
   }
 
+
   type RootQuery {
     currentUser: User
     organization(id:String!, utc:String): Organization
@@ -237,6 +239,7 @@ const rootSchema = `
     people(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
     peopleByUserIds(userIds:[String], organizationId:String!): UsersList
     fetchCampaignOverlaps(organizationId: String!, campaignId: String!): [FetchCampaignOverlapResult]!
+    assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
   }
 
   type RootMutation {
@@ -284,6 +287,8 @@ const rootSchema = `
     updateLinkDomain(organizationId: String!, domainId: String!, payload: UpdateLinkDomain!): LinkDomain!
     deleteLinkDomain(organizationId: String!, domainId: String!): Boolean!
     deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
+    approveAssignmentRequest(assignmentRequestId: String!): Int!
+    rejectAssignmentRequest(assignmentRequestId: String!): Boolean!
   }
 
   schema {
@@ -310,5 +315,6 @@ export const schema = [
   questionSchema,
   inviteSchema,
   linkDomainSchema,
+  assignmentRequestSchema,
   conversationSchema
 ];

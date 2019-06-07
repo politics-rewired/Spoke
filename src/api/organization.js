@@ -32,10 +32,10 @@ export const schema = `
     textRequestType: TextRequestType
     textRequestMaxCount: Int
     textsAvailable: Boolean
+    pendingAssignmentRequestCount: Int!
     currentAssignmentTarget: AssignmentTarget
     escalationUserId: Int
     escalatedConversationCount: Int!
-    assignmentRequestCount: Int!
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
   }

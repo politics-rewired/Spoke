@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-
+import gql from "graphql-tag";
 import AssignmentRequestTable, { RowWorkState } from "./AssignmentRequestTable";
+import loadData from "../hoc/load-data";
+import wrapMutations from "../hoc/wrap-mutations";
+import CircularProgress from "material-ui/CircularProgress";
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -97,7 +100,13 @@ class AdminAssignmentRequest extends Component {
   };
 
   render() {
-    const { assignmentRequests } = this.state;
+    const { pendingAssignmentRequests } = this.props;
+
+    if (pendingAssignmentRequests.loading) {
+      return <CircularProgress />;
+    }
+
+    const { assignmentRequests } = pendingAssignmentRequests;
 
     return (
       <AssignmentRequestTable
@@ -113,4 +122,49 @@ AdminAssignmentRequest.propTypes = {
   params: PropTypes.object.isRequired
 };
 
-export default AdminAssignmentRequest;
+const mapQueriesToProps = ({ ownProps }) => ({
+  pendingAssignmentRequests: {
+    query: gql`
+      query assignmentRequests($organizationId: String!, $status: String) {
+        assignmentRequests(organizationId: $organizationId, status: $status) {
+          id
+          createdAt
+          user {
+            id
+            firstName
+            lastName
+          }
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.params.organizationId,
+      status: "pending"
+    },
+    forceFetch: true
+  }
+});
+
+const mapMutationsToProps = ({ ownProps }) => ({
+  approveAssignmentRequest: assignmentRequestId => ({
+    mutation: gql`
+      mutation approveAssignmentRequest($assignmentRequestId: String!) {
+        approveAssignmentRequest(assignmentRequestId: $assignmentRequestId)
+      }
+    `,
+    variables: { assignmentRequestId }
+  }),
+  rejectAssignmentRequest: assignmentRequestId => ({
+    mutation: gql`
+      mutation rejectAssignmentRequest($assignmentRequestId: String!) {
+        rejectAssignmentRequest(assignmentRequestId: $assignmentRequestId)
+      }
+    `,
+    variables: { assignmentRequestId }
+  })
+});
+
+export default loadData(wrapMutations(AdminAssignmentRequest), {
+  mapQueriesToProps,
+  mapMutationsToProps
+});
