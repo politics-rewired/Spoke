@@ -190,7 +190,7 @@ const assignMessagingServiceSID = async (cell, organizationId) => {
   return chosen;
 };
 
-const getMessageServiceSID = async (cell, organizationId, trx) => {
+const getMessageServiceSID = async (cell, organizationId) => {
   const { rows: existingStick } = await r.knex.raw(
     `
     select messaging_service_sid
@@ -434,7 +434,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 ) => {
   const { rows } = await trx.raw(
     `
-    select campaign_contact.cell
+    select distinct campaign_contact.cell
     from campaign_contact
     left join messaging_service_stick
       on messaging_service_stick.cell = campaign_contact.cell
