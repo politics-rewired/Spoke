@@ -71,7 +71,7 @@ const doBatch = async () => {
   console.log("Doing ", cells.length);
 
   if (cells.length === 0) {
-    return false;
+    return 0;
   }
 
   const toInsert = cells.map(c => ({
