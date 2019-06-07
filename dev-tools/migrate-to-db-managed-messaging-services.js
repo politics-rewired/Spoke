@@ -7,7 +7,7 @@ const config = {
   connection: process.env.DATABASE_URL,
   pool: {
     min: process.env.ROW_CONCURRENCY,
-    max: ROW_CONCURRENCY
+    min: process.env.ROW_CONCURRENCY,
   }
 };
 
