@@ -2,7 +2,7 @@
 exports.up = function(knex, Promise) {
   return knex.schema.alterTable("campaign_contact", table => {
     table.index(
-      ["campaign_id, assignment_id, message_status, is_opted_out"],
+      ["campaign_id", "assignment_id", "message_status", "is_opted_out"],
       "campaign_contact_get_current_assignment_index"
     );
   });

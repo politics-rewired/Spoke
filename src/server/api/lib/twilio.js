@@ -1,8 +1,12 @@
 import Twilio from "twilio";
+import _ from "lodash";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Log, Message, PendingMessagePart, r } from "../../models";
 import { log } from "../../../lib";
-import { getLastMessage, saveNewIncomingMessage } from "./message-sending";
+import {
+  getCampaignContactAndAssignmentForIncomingMessage,
+  saveNewIncomingMessage
+} from "./message-sending";
 import faker from "faker";
 
 let twilio = null;
@@ -70,21 +74,22 @@ async function convertMessagePartsToMessage(messageParts) {
     .join("")
     .replace(/\0/g, ""); // strip all UTF-8 null characters (0x00)
 
-  // TODO: this could be a slow query
-  const lastMessage = await getLastMessage({
+  const ccInfo = await getCampaignContactAndAssignmentForIncomingMessage({
     service: "twilio",
-    contactNumber
+    contactNumber,
+    messaging_service_sid: serviceMessages[0].MessagingServiceSid
   });
+
   return (
-    lastMessage && {
-      campaign_contact_id: lastMessage && lastMessage.campaign_contact_id,
+    ccInfo && {
+      campaign_contact_id: ccInfo && ccInfo.campaign_contact_id,
       contact_number: contactNumber,
       user_number: userNumber,
       is_from_contact: true,
       text: textIncludingMms(text, serviceMessages),
       service_response: JSON.stringify(serviceMessages),
       service_id: serviceMessages[0].MessagingServiceSid,
-      assignment_id: lastMessage && lastMessage.assignment_id,
+      assignment_id: ccInfo && ccInfo.assignment_id,
       service: "twilio",
       send_status: "DELIVERED"
     }
@@ -153,46 +158,61 @@ function parseMessageText(message) {
   return params;
 }
 
-const getMessagingServiceSIDs = () => {
-  // Gather multiple messaging service SIDs (may be split across multiple env vars)
-  const envVarKeys = Object.keys(process.env).filter(key =>
-    key.startsWith(`TWILIO_MESSAGE_SERVICE_SIDS`)
+const assignMessagingServiceSID = async (cell, organizationId) => {
+  const result = await r.knex.raw(
+    `
+      with chosen_messaging_service_sid as (
+        select messaging_service_sid, count(*) as count
+        from messaging_service_stick
+        where organization_id = ?
+        group by messaging_service_sid
+        union
+        select messaging_service_sid, 0
+        from messaging_service
+        where organization_id = ?
+          and not exists (
+            select 1
+            from messaging_service_stick
+            where 
+              messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+          )
+        order by count asc
+        limit 1
+    )
+    insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
+    values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
+    returning messaging_service_sid;
+    `,
+    [organizationId, organizationId, cell, organizationId]
   );
-  envVarKeys.sort();
 
-  let messagingServiceIds = [];
-  for (const envVarKey of envVarKeys) {
-    const envVarValue = process.env[envVarKey];
-    const newServiceIds = envVarValue
-      .split(",")
-      .map(serviceSid => serviceSid.trim());
-    messagingServiceIds = messagingServiceIds.concat(newServiceIds);
-  }
-
-  return messagingServiceIds;
+  const chosen = result.rows[0].messaging_service_sid;
+  return chosen;
 };
 
-const MESSAGING_SERVICE_SIDS = getMessagingServiceSIDs();
+const getMessageServiceSID = async (cell, organizationId) => {
+  const { rows: existingStick } = await r.knex.raw(
+    `
+    select messaging_service_sid
+    from messaging_service_stick
+    where
+      cell = ?
+      and organization_id = ?
+  `,
+    [cell, organizationId]
+  );
 
-const getMessageServiceSID = cell => {
-  // Check for single message service
-  if (!!process.env.TWILIO_MESSAGE_SERVICE_SID) {
-    return process.env.TWILIO_MESSAGE_SERVICE_SID;
+  const existingMessageServiceSid =
+    existingStick[0] && existingStick[0].messaging_service_sid;
+
+  if (existingMessageServiceSid) {
+    return existingMessageServiceSid;
   }
 
-  const messagingServiceIndex = deterministicIntWithinRange(
-    cell,
-    MESSAGING_SERVICE_SIDS.length
-  );
-  const messagingServiceId = MESSAGING_SERVICE_SIDS[messagingServiceIndex];
-
-  if (!messagingServiceId)
-    throw new Error(`Could not find Twilio message service SID for ${cell}!`);
-
-  return messagingServiceId;
+  return await assignMessagingServiceSID(cell, organizationId);
 };
 
-async function sendMessage(message, trx) {
+async function sendMessage(message, organizationId, trx) {
   if (!twilio) {
     log.warn(
       "cannot actually send SMS message -- twilio is not fully configured:",
@@ -208,12 +228,15 @@ async function sendMessage(message, trx) {
     return "test_message_uuid";
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (message.service !== "twilio") {
       log.warn("Message not marked as a twilio message", message.id);
     }
 
-    const messagingServiceSid = getMessageServiceSID(message.contact_number);
+    const messagingServiceSid = await getMessageServiceSID(
+      message.contact_number,
+      organizationId
+    );
 
     const messageParams = Object.assign(
       {
@@ -402,6 +425,103 @@ function hashStr(str) {
   return hash;
 }
 
+// NOTE: This does not chunk inserts so make sure this is run only when you are sure the specified campaign
+// has a reasonable size (< 1000) of cells without sticky messaging services.
+const ensureAllNumbersHaveMessagingServiceSIDs = async (
+  trx,
+  campaignId,
+  organizationId
+) => {
+  const { rows } = await trx.raw(
+    `
+    select distinct campaign_contact.cell
+    from campaign_contact
+    left join messaging_service_stick
+      on messaging_service_stick.cell = campaign_contact.cell
+        and messaging_service_stick.organization_id = ?
+    where campaign_id = ?
+      and messaging_service_stick.messaging_service_sid is null
+  `,
+    [organizationId, campaignId]
+  );
+
+  const cells = rows.map(r => r.cell);
+
+  if (cells.length == 0) {
+    return;
+  }
+
+  const { rows: messagingServiceCandidates } = await r.knex.raw(
+    `
+    select messaging_service_sid, count(*) as count
+    from messaging_service_stick
+    where organization_id = ?
+    group by messaging_service_sid
+    union
+    select messaging_service_sid, 0
+    from messaging_service
+    where organization_id = ?
+      and not exists (
+        select 1
+        from messaging_service_stick
+        where 
+          messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+      )
+    order by count desc
+  `,
+    [organizationId, organizationId]
+  );
+
+  const mostAssignedNumbers = messagingServiceCandidates[0].count;
+
+  const gapToMakeUp = messagingServiceCandidates.slice(1).reduce((acc, ms) => {
+    return acc + (mostAssignedNumbers - ms.count);
+  }, 0);
+
+  let cellsUsedForMakingUpGap = cells.slice(0, gapToMakeUp);
+  const additionalCells = cells.slice(gapToMakeUp);
+
+  const reversedMessagingServicesToAddMakeUpCellsTo = messagingServiceCandidates.slice(
+    0
+  );
+  reversedMessagingServicesToAddMakeUpCellsTo.reverse();
+
+  let rowsToInsert = [];
+
+  for (let ms of reversedMessagingServicesToAddMakeUpCellsTo) {
+    const gap = mostAssignedNumbers - ms.count;
+
+    rowsToInsert = rowsToInsert.concat(
+      cellsUsedForMakingUpGap.slice(0, gap).map(cell => ({
+        cell,
+        organization_id: organizationId,
+        messaging_service_sid: ms.messaging_service_sid
+      }))
+    );
+
+    cellsUsedForMakingUpGap = cellsUsedForMakingUpGap.slice(gap);
+  }
+
+  const chunkSize = Math.ceil(
+    additionalCells.length / messagingServiceCandidates.length
+  );
+  const chunks = _.chunk(additionalCells, chunkSize);
+
+  messagingServiceCandidates.forEach((ms, idx) => {
+    const chunk = chunks[idx];
+
+    rowsToInsert = rowsToInsert.concat(
+      chunk.map(cell => ({
+        cell,
+        organization_id: organizationId,
+        messaging_service_sid: ms.messaging_service_sid
+      }))
+    );
+  });
+
+  return await r.knex("messaging_service_stick").insert(rowsToInsert);
+};
+
 export default {
   syncMessagePartProcessing: !!process.env.JOBS_SAME_PROCESS,
   webhook,
@@ -412,5 +532,6 @@ export default {
   saveNewIncomingMessage,
   handleDeliveryReport,
   handleIncomingMessage,
-  parseMessageText
+  parseMessageText,
+  ensureAllNumbersHaveMessagingServiceSIDs
 };
