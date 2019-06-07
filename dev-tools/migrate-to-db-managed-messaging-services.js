@@ -6,7 +6,7 @@ const config = {
   client: "postgresql",
   connection: process.env.DATABASE_URL,
   pool: {
-    min: ROW_CONCURRENCY,
+    min: process.env.ROW_CONCURRENCY,
     max: ROW_CONCURRENCY
   }
 };
