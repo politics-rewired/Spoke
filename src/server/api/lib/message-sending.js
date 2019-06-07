@@ -1,7 +1,7 @@
 import { r } from "../../models";
 
 /*
-  This needs to change to accomodate multiple organizationIds
+  This was changed to accommodate multiple organizationIds. There were two potential approaches:
   - option one: with campaign_id_options as select campaigns from organizationId, where campaign_id = campaign.id
     -----------------------------------
     with chosen_organization as (
