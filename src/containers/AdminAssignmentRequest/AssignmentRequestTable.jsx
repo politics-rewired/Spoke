@@ -16,15 +16,15 @@ import CircularProgress from "material-ui/CircularProgress";
 
 import theme from "../../styles/theme";
 
-export const RowWorkState = Object.freeze({
-  Inactive: 0,
-  Error: 1,
-  Working: 2,
-  Approved: 3,
-  Denied: 4
+export const RowWorkStatus = Object.freeze({
+  Inactive: "pending",
+  Error: "error",
+  Working: "working",
+  Approved: "approved",
+  Denied: "rejected"
 });
 
-const rowStyleForState = rowState => {
+const rowStyleForStatus = rowStatus => {
   const baseStyle = {
     "-webkit-transition": "opacity 2s ease-in-out",
     "-moz-transition": "opacity 2s ease-in-out",
@@ -35,11 +35,11 @@ const rowStyleForState = rowState => {
   };
 
   let overrideStyle = {};
-  if (rowState === RowWorkState.Error) {
+  if (rowStatus === RowWorkStatus.Error) {
     overrideStyle = { backgroundColor: theme.colors.lightGray };
-  } else if (rowState === RowWorkState.Approved) {
+  } else if (rowStatus === RowWorkStatus.Approved) {
     overrideStyle = { opacity: 0, backgroundColor: theme.colors.green };
-  } else if (rowState === RowWorkState.Denied) {
+  } else if (rowStatus === RowWorkStatus.Denied) {
     overrideStyle = { opacity: 0, backgroundColor: theme.colors.lightRed };
   }
   return Object.assign({}, baseStyle, overrideStyle);
@@ -69,18 +69,19 @@ const AssignmentRequestTable = props => {
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
           {assignmentRequests.map(request => {
-            const { user, createdAt, id: requestId, state } = request;
+            const { user, createdAt, id: requestId, status } = request;
             const showActions =
-              state === RowWorkState.Inactive || state === RowWorkState.Error;
+              status === RowWorkStatus.Inactive ||
+              status === RowWorkStatus.Error;
             return (
-              <TableRow key={requestId} style={rowStyleForState(state)}>
+              <TableRow key={requestId} style={rowStyleForStatus(status)}>
                 <TableRowColumn>
                   {user.firstName} {user.lastName}
                 </TableRowColumn>
                 <TableRowColumn>{request.amount}</TableRowColumn>
                 <TableRowColumn>{moment(createdAt).fromNow()}</TableRowColumn>
                 <TableRowColumn>
-                  {state === RowWorkState.Error && (
+                  {status === RowWorkStatus.Error && (
                     <span style={styles.errorText}>Error. Try again.</span>
                   )}
                   {showActions && (
@@ -99,7 +100,7 @@ const AssignmentRequestTable = props => {
                       onClick={handleApproveRow(requestId)}
                     />
                   )}
-                  {state === RowWorkState.Working && (
+                  {status === RowWorkStatus.Working && (
                     <CircularProgress size={25} />
                   )}
                 </TableRowColumn>
@@ -123,7 +124,7 @@ AssignmentRequestTable.propTypes = {
       }).isRequired,
       amount: PropTypes.number.isRequired,
       createdAt: PropTypes.instanceOf(Date),
-      state: PropTypes.number.isRequired
+      status: PropTypes.string.isRequired
     })
   ),
   onApproveRequest: PropTypes.func.isRequired,

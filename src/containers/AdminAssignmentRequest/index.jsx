@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
-import AssignmentRequestTable, { RowWorkState } from "./AssignmentRequestTable";
+import AssignmentRequestTable, {
+  RowWorkStatus
+} from "./AssignmentRequestTable";
 import loadData from "../hoc/load-data";
 import wrapMutations from "../hoc/wrap-mutations";
 import CircularProgress from "material-ui/CircularProgress";
@@ -10,29 +12,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const dummyData = [
-  {
-    id: "1",
-    user: {
-      id: "1",
-      firstName: "Ben",
-      lastName: "Chrobot"
-    },
-    amount: 100,
-    state: RowWorkState.Inactive
-  },
-  {
-    id: "2",
-    user: {
-      id: "2",
-      firstName: "Ben",
-      lastName: "Packer"
-    },
-    amount: 100,
-    state: RowWorkState.Inactive
-  }
-];
-
 class AdminAssignmentRequest extends Component {
   timers = [];
 
@@ -40,22 +19,38 @@ class AdminAssignmentRequest extends Component {
     assignmentRequests: []
   };
 
-  componentDidMount() {
-    this.setState({ assignmentRequests: dummyData });
+  componentWillUpdate(nextProps) {
+    this.updateAssignmentRequestStateWithNewProps(nextProps);
+  }
+
+  componentWillMount() {
+    this.updateAssignmentRequestStateWithNewProps(this.props);
+  }
+
+  updateAssignmentRequestStateWithNewProps(nextProps) {
+    if (
+      nextProps.pendingAssignmentRequests.assignmentRequests &&
+      nextProps.pendingAssignmentRequests.assignmentRequests.length !==
+        this.state.assignmentRequests
+    ) {
+      this.state.assignmentRequests =
+        nextProps.pendingAssignmentRequests.assignmentRequests;
+    }
   }
 
   componentWillUnmount() {
     this.timers.forEach(timer => clearTimeout(timer));
   }
 
-  setRequestState = (requestId, state) => {
+  setRequestStatus = (requestId, status) => {
     const { assignmentRequests } = this.state;
     const requestIndex = assignmentRequests.findIndex(
       request => request.id === requestId
     );
     if (requestIndex < 0)
       throw new Error(`Could not find request with ID ${requestId}`);
-    assignmentRequests[requestIndex].state = state;
+    assignmentRequests[requestIndex].status = status;
+    console.log(assignmentRequests);
     this.setState({ assignmentRequests });
   };
 
@@ -69,33 +64,40 @@ class AdminAssignmentRequest extends Component {
 
   handleApproveRequest = async requestId => {
     console.log("Approve", requestId);
-    this.setRequestState(requestId, RowWorkState.Working);
+    this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
       // simulate network request
-      await sleep(1000);
+      const response = await this.props.mutations.approveAssignmentRequest(
+        requestId
+      );
+
+      if (response.errors) {
+        throw response.errors[0];
+      }
+
       console.log("Approved request");
-      this.setRequestState(requestId, RowWorkState.Approved);
+      this.setRequestStatus(requestId, RowWorkStatus.Approved);
       await sleep(2000);
       this.deleteRequest(requestId);
     } catch (exc) {
       console.log("Request approval failed", exc);
-      this.setRequestState(requestId, RowWorkState.Error);
+      this.setRequestStatus(requestId, RowWorkStatus.Error);
     }
   };
 
   handleDenyRequest = async requestId => {
     console.log("Deny", requestId);
-    this.setRequestState(requestId, RowWorkState.Working);
+    this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
       // simulate network request
-      await sleep(1000);
+      await this.props.mutations.rejectAssignmentRequest(requestId);
       console.log("Denied request");
-      this.setRequestState(requestId, RowWorkState.Denied);
+      this.setRequestStatus(requestId, RowWorkStatus.Denied);
       await sleep(4000);
       this.deleteRequest(requestId);
     } catch (exc) {
       console.log("Request deny failed", exc);
-      this.setRequestState(requestId, RowWorkState.Error);
+      this.setRequestStatus(requestId, RowWorkStatus.Error);
     }
   };
 
@@ -106,7 +108,7 @@ class AdminAssignmentRequest extends Component {
       return <CircularProgress />;
     }
 
-    const { assignmentRequests } = pendingAssignmentRequests;
+    const { assignmentRequests } = this.state;
 
     return (
       <AssignmentRequestTable
@@ -129,6 +131,8 @@ const mapQueriesToProps = ({ ownProps }) => ({
         assignmentRequests(organizationId: $organizationId, status: $status) {
           id
           createdAt
+          amount
+          status
           user {
             id
             firstName

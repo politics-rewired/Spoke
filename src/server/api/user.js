@@ -126,6 +126,18 @@ export const resolvers = {
       User
     ),
     displayName: user => `${user.first_name} ${user.last_name}`,
+    currentRequest: async (user, { organizationId }) => {
+      const currentRequest = await r
+        .knex("assignment_request")
+        .where({
+          user_id: user.id,
+          organization_id: organizationId,
+          status: "pending"
+        })
+        .first("id", "amount", "status");
+
+      return currentRequest;
+    },
     assignment: async (user, { campaignId }) =>
       r
         .table("assignment")

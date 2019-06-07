@@ -70,6 +70,7 @@ import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
+import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -2166,7 +2167,7 @@ const rootMutations = {
       };
     },
     approveAssignmentRequest: async (_, { assignmentRequestId }, { user }) => {
-      const assignmentRequest = r
+      const assignmentRequest = await r
         .knex("assignment_request")
         .first("*")
         .where({ id: parseInt(assignmentRequestId) });
@@ -2181,6 +2182,12 @@ const rootMutations = {
         "SUPERVOLUNTEER"
       );
 
+      const numberAssigned = await giveUserMoreTexts(
+        user.auth0_id,
+        assignmentRequest.amount,
+        assignmentRequest.organizationId
+      );
+
       await r
         .knex("assignment_request")
         .update({
@@ -2190,16 +2197,10 @@ const rootMutations = {
         })
         .where({ id: parseInt(assignmentRequestId) });
 
-      const numberAssigned = await giveUserMoreTexts(
-        user.auth0_id,
-        assignmentRequest.amount,
-        assignmentRequest.organizationId
-      );
-
       return numberAssigned;
     },
     rejectAssignmentRequest: async (_, { assignmentRequestId }, { user }) => {
-      const assignmentRequest = r
+      const assignmentRequest = await r
         .knex("assignment_request")
         .first("*")
         .where({ id: parseInt(assignmentRequestId) });
@@ -2384,21 +2385,33 @@ const rootResolvers = {
     assignmentRequests: async (_, { organizationId, status }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      const query = r.knex("assignment_request").select("*");
+      const query = r
+        .knex("assignment_request")
+        .select("*")
+        .join("user", "user_id", "=", "user.id")
+        .join("organization", "organization_id", "=", "organization.id");
+
       if (status) {
         query.where({ status });
       }
 
       const assignmentRequests = await query;
-      return assignmentRequests.map(ar => {
-        ar.user = { id: ar.user_id };
+      const result = assignmentRequests.map(ar => {
+        ar.user = {
+          id: ar.user_id,
+          first_name: ar.first_name,
+          last_name: ar.last_name
+        };
         ar.organization = { id: ar.organization_id };
+        return ar;
       });
+      return result;
     }
   }
 };
 
 export const resolvers = {
+  ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,
   ...organizationResolvers,
