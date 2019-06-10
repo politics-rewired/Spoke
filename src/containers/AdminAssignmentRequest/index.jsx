@@ -96,7 +96,6 @@ class AdminAssignmentRequest extends Component {
       await sleep(2000);
       this.deleteRequest(requestId);
     } catch (exc) {
-      console.log("Request deny failed", exc);
       this.setRequestStatus(requestId, RowWorkStatus.Error);
     }
   };
