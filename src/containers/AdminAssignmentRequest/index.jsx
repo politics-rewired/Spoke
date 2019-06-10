@@ -26,13 +26,44 @@ class AdminAssignmentRequest extends Component {
   }
 
   updateAssignmentRequestStateWithNewProps(nextProps) {
-    if (
-      nextProps.pendingAssignmentRequests.assignmentRequests &&
-      nextProps.pendingAssignmentRequests.assignmentRequests.length !==
-        this.state.assignmentRequests
-    ) {
-      this.state.assignmentRequests =
-        nextProps.pendingAssignmentRequests.assignmentRequests;
+    if (!nextProps.pendingAssignmentRequests) {
+      return;
+    }
+
+    const newRequestIds = nextProps.pendingAssignmentRequests.assignmentRequests.map(
+      r => r.id
+    );
+
+    const deletableOldRequestIds = this.state.assignmentRequests
+      .filter(r => r.status === "pending")
+      .map(r => r.id);
+
+    const toAdd = newRequestIds.filter(
+      rId => !deletableOldRequestIds.includes(rId)
+    );
+
+    const toDelete = deletableOldRequestIds.filter(
+      rId => !newRequestIds.includes(rId)
+    );
+
+    if (toAdd.length > 0) {
+      for (let rId of toAdd) {
+        const r = nextProps.pendingAssignmentRequests.assignmentRequests.find(
+          r => r.id === rId
+        );
+        this.state.assignmentRequests.push(r);
+      }
+    }
+
+    if (toDelete.length > 0) {
+      this.state.pendingAssignmentRequests = this.state.assignmentRequests.filter(
+        r => !toDelete.includes(r.id)
+      );
+    }
+
+    if (toAdd.length > 0 || toDelete.length > 0) {
+      console.log({ toAdd, toDelete });
+      // this.forceUpdate();
     }
   }
 
@@ -140,7 +171,8 @@ const mapQueriesToProps = ({ ownProps }) => ({
       organizationId: ownProps.params.organizationId,
       status: "pending"
     },
-    forceFetch: true
+    forceFetch: true,
+    pollInterval: 10000
   }
 });
 

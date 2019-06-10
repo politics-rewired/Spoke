@@ -2387,7 +2387,13 @@ const rootResolvers = {
 
       const query = r
         .knex("assignment_request")
-        .select("*")
+        .select(
+          "assignment_request.*",
+          "user.id as user_id",
+          "user.first_name",
+          "user.last_name",
+          "organization.id as organization_id"
+        )
         .join("user", "user_id", "=", "user.id")
         .join("organization", "organization_id", "=", "organization.id");
 
