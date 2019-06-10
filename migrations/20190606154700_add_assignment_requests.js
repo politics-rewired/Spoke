@@ -14,8 +14,8 @@ exports.up = function(knex, Promise) {
     t.index("status"); // this is what we'll be searching by
 
     t.integer("user_id")
-      .references("user(id)")
-      .notNullable();
+      .notNullable()
+      .references("user(id)");
 
     t.integer("amount").notNullable();
     t.integer("approved_by_user_id").references("user(id)");
