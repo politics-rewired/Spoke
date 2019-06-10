@@ -130,7 +130,7 @@ export async function getCurrentAssignmentType() {
   return features.textRequestType;
 }
 
-export async function currentAssignmentTarget(organizationId) {
+export async function currentAssignmentTarget(organizationId, trx = r.knex) {
   const assignmentType = await getCurrentAssignmentType();
 
   const campaignContactStatus = {
@@ -142,7 +142,7 @@ export async function currentAssignmentTarget(organizationId) {
     return null;
   }
 
-  const { rows: assignableCampaigns } = await r.knex.raw(
+  const { rows: assignableCampaigns } = await trx.raw(
     `
     select
       *
@@ -181,13 +181,14 @@ export async function currentAssignmentTarget(organizationId) {
 
 const ASSIGNMENT_COMPLETE_NOTIFICATION_URL =
   process.env.ASSIGNMENT_COMPLETE_NOTIFICATION_URL;
-async function notifyIfAllAssigned(type, user, count) {
+
+async function notifyIfAllAssigned(type, user, organizationId) {
   if (ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
-    const assignmentTarget = await currentAssignmentTarget(organizationid);
+    const assignmentTarget = await currentAssignmentTarget(organizationId);
     if (assignmentTarget == null) {
       await request
         .post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
-        .send({ type, user, count });
+        .send({ type, user });
       console.log(`Notified about out of ${type} to assign`);
     }
   } else {
@@ -218,7 +219,7 @@ export async function countLeft(assignmentType, campaign) {
 
 export async function giveUserMoreTexts(auth0Id, count, organizationId) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
-  // Fetch DB info
+
   const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
   const user = matchingUsers[0];
   if (!user) {
@@ -230,9 +231,51 @@ export async function giveUserMoreTexts(auth0Id, count, organizationId) {
     throw new Error("Could not find a suitable campaign to assign to.");
   }
 
+  let countUpdated = 0;
+  let countLeftToUpdate = count;
+
+  const updated_result = await r.knex.transaction(async trx => {
+    while (countLeftToUpdate > 0) {
+      const countUpdatedInLoop = await assignLoop(
+        user,
+        organizationId,
+        countLeftToUpdate,
+        trx
+      );
+
+      countLeftToUpdate = countLeftToUpdate - countUpdatedInLoop;
+      countUpdated = countUpdated + countUpdatedInLoop;
+
+      if (countUpdatedInLoop === 0) {
+        if (countUpdated === 0) {
+          throw new Error("Could not find a suitable campaign to assign to.");
+        } else {
+          return countUpdated;
+        }
+      }
+    }
+
+    console.log(countUpdated);
+    return countUpdated;
+  });
+
+  // Async function, not awaiting because response to external assignment tool does not depend on it
+  notifyIfAllAssigned(assignmentInfo.type, auth0Id, organizationId);
+
+  console.log(updated_result);
+  return updated_result;
+}
+
+export async function assignLoop(user, organizationId, countLeft, trx) {
+  console.log({ user, organizationId, countLeft });
+  const assignmentInfo = await currentAssignmentTarget(organizationId, trx);
+  if (!assignmentInfo) {
+    return 0;
+  }
+
   // Determine which campaign to assign to – optimize to pick winners
   let campaignIdToAssignTo = assignmentInfo.campaign.id;
-  let countToAssign = count;
+  let countToAssign = countLeft;
   console.log(
     `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${
       assignmentInfo.type
@@ -240,37 +283,36 @@ export async function giveUserMoreTexts(auth0Id, count, organizationId) {
   );
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
-  const updated_result = await r.knex.transaction(async trx => {
-    let assignmentId;
-    const existingAssignment = await trx("assignment")
-      .where({
+  let assignmentId;
+  const existingAssignment = await trx("assignment")
+    .where({
+      user_id: user.id,
+      campaign_id: campaignIdToAssignTo
+    })
+    .first();
+
+  if (!existingAssignment) {
+    const inserted = await trx("assignment")
+      .insert({
         user_id: user.id,
-        campaign_id: campaignIdToAssignTo
+        campaign_id: campaignIdToAssignTo,
+        max_contacts: countToAssign
       })
-      .first();
+      .returning("id");
+    assignmentId = inserted[0];
+  } else {
+    assignmentId = existingAssignment.id;
+  }
 
-    if (!existingAssignment) {
-      const inserted = await trx("assignment")
-        .insert({
-          user_id: user.id,
-          campaign_id: campaignIdToAssignTo,
-          max_contacts: countToAssign
-        })
-        .returning("id");
-      assignmentId = inserted[0];
-    } else {
-      assignmentId = existingAssignment.id;
-    }
+  console.log(`Assigning to assignment id ${assignmentId}`);
 
-    console.log(`Assigning to assignment id ${assignmentId}`);
+  const campaignContactStatus = {
+    UNREPLIED: "needsResponse",
+    UNSENT: "needsMessage"
+  }[assignmentInfo.type];
 
-    const campaignContactStatus = {
-      UNREPLIED: "needsResponse",
-      UNSENT: "needsMessage"
-    }[assignmentInfo.type];
-
-    const { rowCount: ccUpdateCount } = await trx.raw(
-      `
+  const { rowCount: ccUpdateCount } = await trx.raw(
+    `
       update
         campaign_contact as target_contact
       set
@@ -294,11 +336,11 @@ export async function giveUserMoreTexts(auth0Id, count, organizationId) {
         target_contact.id = matching_contact.id
       ;
     `,
-      [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
-    );
+    [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
+  );
 
-    const { rowCount: messageUpdateCount } = await trx.raw(
-      `
+  const { rowCount: messageUpdateCount } = await trx.raw(
+    `
       update
         message
       set
@@ -321,19 +363,13 @@ export async function giveUserMoreTexts(auth0Id, count, organizationId) {
         message.campaign_contact_id = matching_contact.id
       ;
     `,
-      [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
-    );
+    [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
+  );
 
-    console.log(
-      `Updated ${ccUpdateCount} campaign contacts and ${messageUpdateCount} messages.`
-    );
-    return ccUpdateCount;
-  });
-
-  // Async function, not awaiting because response to external assignment tool does not depend on it
-  notifyIfAllAssigned(assignmentInfo.type, auth0Id, countToAssign);
-
-  return updated_result;
+  console.log(
+    `Updated ${ccUpdateCount} campaign contacts and ${messageUpdateCount} messages.`
+  );
+  return ccUpdateCount;
 }
 
 export const resolvers = {

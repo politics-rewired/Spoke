@@ -2182,7 +2182,7 @@ const rootMutations = {
       const numberAssigned = await giveUserMoreTexts(
         user.auth0_id,
         assignmentRequest.amount,
-        assignmentRequest.organizationId
+        assignmentRequest.organization_id
       );
 
       await r
