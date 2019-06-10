@@ -20,7 +20,7 @@ const styles = {
   }
 };
 
-const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE = 50;
 
 class AdminCampaignList extends React.Component {
   state = {
