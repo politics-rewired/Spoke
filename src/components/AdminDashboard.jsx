@@ -120,6 +120,11 @@ class AdminDashboard extends React.Component {
       }
     ];
 
+    if (window.DISABLE_ASSIGNMENT_PAGE) {
+      const index = sections.findIndex(s => s.name === "Assignment Requests");
+      sections.splice(index, 1);
+    }
+
     let currentSection = sections.filter(section =>
       location.pathname.match(`/${section.path}`)
     );
