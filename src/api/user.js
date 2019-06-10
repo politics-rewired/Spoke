@@ -12,7 +12,6 @@ export const schema = `
     currentRequest(organizationId: String!): AssignmentRequest
     assignedCell: Phone
     assignment(campaignId: String): Assignment,
-    pendingAssignmentRequest: AssignmentRequest
     terms: Boolean
   }
   
