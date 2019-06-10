@@ -1140,10 +1140,7 @@ const rootMutations = {
 
         const scriptUpdates = [];
         for (let step of interactionStepsToChange) {
-          const newText = step.script.replace(
-            new RegExp(searchString, "g"),
-            replaceString
-          );
+          const newText = replaceAll(step.script, searchString, replaceString);
 
           const scriptUpdate = {
             campaignId: step.campaign_id,
