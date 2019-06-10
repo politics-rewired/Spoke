@@ -89,7 +89,8 @@ class AdminAssignmentRequest extends Component {
     this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
       // simulate network request
-      await this.props.mutations.rejectAssignmentRequest(requestId);
+      const response = await this.props.mutations.rejectAssignmentRequest(requestId);
+      if (response.errors) throw new Error(response.errors);
       console.log("Denied request");
       this.setRequestStatus(requestId, RowWorkStatus.Denied);
       await sleep(4000);
