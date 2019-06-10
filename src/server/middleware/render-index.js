@@ -56,6 +56,7 @@ export default function renderIndex(html, css, assetMap, store) {
       window.DST_REFERENCE_TIMEZONE="${process.env.DST_REFERENCE_TIMEZONE ||
         "America/New_York"}"
       window.ROLLBAR_CLIENT_TOKEN="${process.env.ROLLBAR_CLIENT_TOKEN}"
+      window.DISABLE_ASSIGNMENT_PAGE=${!!process.env.ASSIGNMENT_REQUESTED_URL}
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>
