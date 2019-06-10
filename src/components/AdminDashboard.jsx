@@ -64,8 +64,9 @@ class AdminDashboard extends React.Component {
     const { location, children, params } = this.props;
     const { roles } = this.props.data.currentUser;
     const {
-      escalatedConversationCount
-    } = this.props.escalatedConversationCount.organization;
+      escalatedConversationCount,
+      pendingAssignmentRequestCount
+    } = this.props.badgeCounts.organization;
 
     // HACK: Setting params.adminPerms helps us hide non-supervolunteer functionality
     params.adminPerms = hasRole("ADMIN", roles || []);
@@ -103,6 +104,14 @@ class AdminDashboard extends React.Component {
         name: "Short Link Domains",
         path: "short-link-domains",
         role: "OWNER"
+      },
+      {
+        name: "Assignment Requests",
+        path: "assignment-requests",
+        role: "ADMIN",
+        badge: {
+          count: pendingAssignmentRequestCount
+        }
       },
       {
         name: "Settings",
@@ -160,12 +169,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
       organizationId: ownProps.params.organizationId
     }
   },
-  escalatedConversationCount: {
+  badgeCounts: {
     query: gql`
-      query getEscalatedConversationCount($organizationId: String!) {
+      query getBadgeCounts($organizationId: String!) {
         organization(id: $organizationId) {
           id
           escalatedConversationCount
+          pendingAssignmentRequestCount
         }
       }
     `,

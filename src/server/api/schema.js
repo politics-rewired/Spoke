@@ -70,6 +70,7 @@ import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
+import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -566,11 +567,11 @@ async function sendMessage(
   service.sendMessage(toInsert, record.organization_id);
 
   // Send message to BernieSMS to be checked for bad words
-  const badWordUrl = process.env.TFB_BAD_WORD_URL;
+  const badWordUrl = process.env.BAD_WORD_URL;
   if (badWordUrl) {
     request
       .post(badWordUrl)
-      .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
+      .set("Authorization", `Token ${process.env.BAD_WORD_TOKEN}`)
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
         if (err) {
@@ -2018,12 +2019,24 @@ const rootMutations = {
           })();
 
           if (textsAvailable) {
-            const response = await request
-              .post(process.env.TFB_URL)
-              .set("Authorization", `Token ${process.env.TFB_TOKEN}`)
-              .send({ count, email });
+            if (process.env.ASSIGNMENT_REQUESTED_URL) {
+              const response = await request
+                .post(process.env.ASSIGNMENT_REQUESTED_URL)
+                .set(
+                  "Authorization",
+                  `Token ${process.env.ASSIGNMENT_REQUESTED_TOKEN}`
+                )
+                .send({ count, email });
 
-            return response.body.message;
+              return response.body.message;
+            } else {
+              await r.knex("assignment_request").insert({
+                user_id: user.id,
+                organization_id: organization.id
+              });
+
+              return "Created";
+            }
           }
         }
 
@@ -2152,6 +2165,66 @@ const rootMutations = {
         deletedRowCount,
         remainingCount
       };
+    },
+    approveAssignmentRequest: async (_, { assignmentRequestId }, { user }) => {
+      const assignmentRequest = await r
+        .knex("assignment_request")
+        .first("*")
+        .where({ id: parseInt(assignmentRequestId) });
+
+      if (!assignmentRequest) {
+        throw new Error("Assignment request not found");
+      }
+
+      await accessRequired(
+        user,
+        assignmentRequest.organization_id,
+        "SUPERVOLUNTEER"
+      );
+
+      const numberAssigned = await giveUserMoreTexts(
+        user.auth0_id,
+        assignmentRequest.amount,
+        assignmentRequest.organizationId
+      );
+
+      await r
+        .knex("assignment_request")
+        .update({
+          status: "approved",
+          updated_at: r.knex.fn.now(),
+          approved_by_user_id: user.id
+        })
+        .where({ id: parseInt(assignmentRequestId) });
+
+      return numberAssigned;
+    },
+    rejectAssignmentRequest: async (_, { assignmentRequestId }, { user }) => {
+      const assignmentRequest = await r
+        .knex("assignment_request")
+        .first("*")
+        .where({ id: parseInt(assignmentRequestId) });
+
+      if (!assignmentRequest) {
+        throw new Error("Assignment request not found");
+      }
+
+      await accessRequired(
+        user,
+        assignmentRequest.organization_id,
+        "SUPERVOLUNTEER"
+      );
+
+      await r
+        .knex("assignment_request")
+        .update({
+          status: "rejected",
+          updated_at: r.knex.fn.now(),
+          approved_by_user_id: user.id
+        })
+        .where({ id: parseInt(assignmentRequestId) });
+
+      return true;
     }
   }
 };
@@ -2308,11 +2381,43 @@ const rootResolvers = {
       );
 
       return toReturn;
+    },
+    assignmentRequests: async (_, { organizationId, status }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const query = r
+        .knex("assignment_request")
+        .select(
+          "assignment_request.*",
+          "user.id as user_id",
+          "user.first_name",
+          "user.last_name",
+          "organization.id as organization_id"
+        )
+        .join("user", "user_id", "=", "user.id")
+        .join("organization", "organization_id", "=", "organization.id");
+
+      if (status) {
+        query.where({ status });
+      }
+
+      const assignmentRequests = await query;
+      const result = assignmentRequests.map(ar => {
+        ar.user = {
+          id: ar.user_id,
+          first_name: ar.first_name,
+          last_name: ar.last_name
+        };
+        ar.organization = { id: ar.organization_id };
+        return ar;
+      });
+      return result;
     }
   }
 };
 
 export const resolvers = {
+  ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,
   ...organizationResolvers,

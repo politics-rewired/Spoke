@@ -86,6 +86,23 @@ class TexterRequest extends React.Component {
       textRequestFormEnabled,
       textRequestMaxCount
     } = this.props.data.organization;
+
+    if (this.props.data.currentUser.currentRequest) {
+      const { amount, status } = this.props.data.currentUser.currentRequest;
+
+      return (
+        <Paper>
+          <div style={{ padding: "20px" }}>
+            <h3> You currently have an pending request</h3>
+            <p>
+              You requested {amount} texts. Hold on, someone will approve them
+              soon!
+            </p>
+          </div>
+        </Paper>
+      );
+    }
+
     if (!(textsAvailable && textRequestFormEnabled)) {
       return (
         <Paper>
@@ -175,7 +192,15 @@ class TexterRequest extends React.Component {
 const mapQueriesToProps = ({ ownProps }) => ({
   data: {
     query: gql`
-      query currentUser($organizationId: String!) {
+      query currentUserFormInfo($organizationId: String!) {
+        currentUser {
+          id
+          currentRequest(organizationId: $organizationId) {
+            id
+            status
+            amount
+          }
+        }
         organization(id: $organizationId) {
           id
           textRequestFormEnabled
