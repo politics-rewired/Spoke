@@ -24,6 +24,7 @@ const min = parseInt(DB_MIN_POOL, 10);
 const max = parseInt(DB_MAX_POOL, 10);
 const idleTimeoutMillis = parseInt(DB_IDLE_TIMEOUT_MS);
 const reapIntervalMillis = parseInt(DB_REAP_INTERVAL_MS);
+const IDLE_TRANSACTION_TIMEOUT = 30 * 1000;
 
 const pg = require("pg");
 
@@ -32,6 +33,20 @@ if (useSSL) pg.defaults.ssl = true;
 // see https://github.com/tgriesser/knex/issues/852
 
 let config;
+
+https://dba.stackexchange.com/questions/164419/is-it-possible-to-limit-timeout-on-postgres-server
+const pgAfterCreate = (conn, done) =>
+  conn.query(
+    `SET idle_in_transaction_session_timeout = ${IDLE_TRANSACTION_TIMEOUT};`,
+    (error, _results, _fields) => done(error, conn)
+  );
+
+// Set connection to utf8mb4 collation
+const mySqlAfterCreate = (conn, done) =>
+  conn.query(
+    "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;",
+    (error, _results, _fields) => done(error, conn)
+  );
 
 if (NODE_ENV === "test") {
   config = {
@@ -58,18 +73,11 @@ if (NODE_ENV === "test") {
       user: DB_USER,
       ssl: useSSL
     },
-    pool: { min, max, idleTimeoutMillis, reapIntervalMillis }
+    pool: { min, max, idleTimeoutMillis, reapIntervalMillis, afterCreate: pgAfterCreate}
   };
 } else if (DATABASE_URL) {
   const dbType = DATABASE_URL.match(/^\w+/)[0];
-  const mySqlAfterCreate = function(conn, done) {
-    // Set connection to utf8mb4 collation
-    const setCollation = "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;";
-    conn.query(setCollation, function(error, _results, _fields) {
-      done(error, conn);
-    });
-  };
-  const afterCreate = /mysql/.test(dbType) ? mySqlAfterCreate : undefined;
+  const afterCreate = /mysql/.test(dbType) ? mySqlAfterCreate : pgAfterCreate;
   config = {
     client: /postgres/.test(dbType) ? "pg" : dbType,
     connection: DATABASE_URL,
