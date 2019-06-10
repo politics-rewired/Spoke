@@ -93,7 +93,7 @@ class AdminAssignmentRequest extends Component {
       if (response.errors) throw new Error(response.errors);
       console.log("Denied request");
       this.setRequestStatus(requestId, RowWorkStatus.Denied);
-      await sleep(4000);
+      await sleep(2000);
       this.deleteRequest(requestId);
     } catch (exc) {
       console.log("Request deny failed", exc);
