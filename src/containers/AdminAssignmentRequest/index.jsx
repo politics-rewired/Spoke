@@ -50,7 +50,6 @@ class AdminAssignmentRequest extends Component {
     if (requestIndex < 0)
       throw new Error(`Could not find request with ID ${requestId}`);
     assignmentRequests[requestIndex].status = status;
-    console.log(assignmentRequests);
     this.setState({ assignmentRequests });
   };
 
