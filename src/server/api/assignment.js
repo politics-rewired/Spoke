@@ -130,7 +130,7 @@ export async function getCurrentAssignmentType() {
   return features.textRequestType;
 }
 
-export async function currentAssignmentTarget(organizationId, trx) {
+export async function currentAssignmentTarget(organizationId, trx = r.knex) {
   const assignmentType = await getCurrentAssignmentType();
 
   const campaignContactStatus = {
@@ -142,7 +142,7 @@ export async function currentAssignmentTarget(organizationId, trx) {
     return null;
   }
 
-  const { rows: assignableCampaigns } = await (trx || r.knex).raw(
+  const { rows: assignableCampaigns } = await trx.raw(
     `
     select
       *
