@@ -13,8 +13,6 @@ function sleep(ms) {
 }
 
 class AdminAssignmentRequest extends Component {
-  timers = [];
-
   state = {
     assignmentRequests: []
   };
@@ -36,10 +34,6 @@ class AdminAssignmentRequest extends Component {
       this.state.assignmentRequests =
         nextProps.pendingAssignmentRequests.assignmentRequests;
     }
-  }
-
-  componentWillUnmount() {
-    this.timers.forEach(timer => clearTimeout(timer));
   }
 
   setRequestStatus = (requestId, status) => {
@@ -89,7 +83,9 @@ class AdminAssignmentRequest extends Component {
     this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
       // simulate network request
-      const response = await this.props.mutations.rejectAssignmentRequest(requestId);
+      const response = await this.props.mutations.rejectAssignmentRequest(
+        requestId
+      );
       if (response.errors) throw new Error(response.errors);
       console.log("Denied request");
       this.setRequestStatus(requestId, RowWorkStatus.Denied);
