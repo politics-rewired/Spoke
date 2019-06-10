@@ -136,7 +136,7 @@ export const resolvers = {
         })
         .first("id", "amount", "status");
 
-      return currentRequest;
+      return currentRequest || null;
     },
     assignment: async (user, { campaignId }) =>
       r
