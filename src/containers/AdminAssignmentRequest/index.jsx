@@ -50,7 +50,6 @@ class AdminAssignmentRequest extends Component {
     if (requestIndex < 0)
       throw new Error(`Could not find request with ID ${requestId}`);
     assignmentRequests[requestIndex].status = status;
-    console.log(assignmentRequests);
     this.setState({ assignmentRequests });
   };
 
@@ -90,13 +89,13 @@ class AdminAssignmentRequest extends Component {
     this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
       // simulate network request
-      await this.props.mutations.rejectAssignmentRequest(requestId);
+      const response = await this.props.mutations.rejectAssignmentRequest(requestId);
+      if (response.errors) throw new Error(response.errors);
       console.log("Denied request");
       this.setRequestStatus(requestId, RowWorkStatus.Denied);
-      await sleep(4000);
+      await sleep(2000);
       this.deleteRequest(requestId);
     } catch (exc) {
-      console.log("Request deny failed", exc);
       this.setRequestStatus(requestId, RowWorkStatus.Error);
     }
   };

@@ -10,7 +10,7 @@ exports.up = function(knex, Promise) {
 
     t.integer("organization_id").references("organization(id)");
 
-    t.string("status").default("pending"); // one of pending, approved, rejected
+    t.enu("status", ["pending", "approved", "rejected"]).default("pending");
     t.index("status"); // this is what we'll be searching by
 
     t.integer("user_id")
