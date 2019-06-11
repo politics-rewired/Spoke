@@ -8,6 +8,11 @@ import { User, Organization, r } from "./models";
 import wrap from "./wrap";
 import { split } from "apollo-link";
 
+const SHOULD_AUTOJOIN_NEW_USER = !!process.env.AUTOJOIN_ORG_UUID;
+const AUTOJOIN_URL = SHOULD_AUTOJOIN_NEW_USER
+  ? `${process.env.BASE_URL}/${process.env.AUTOJOIN_ORG_UUID}/join`
+  : "";
+
 export function setupSlackPassport() {
   const options = {
     clientID: process.env.SLACK_CLIENT_ID,
@@ -90,14 +95,10 @@ export function setupSlackPassport() {
 
         await User.save(userData);
 
-        return res.redirect(
-          "https://text.berniesanders.com/f5a2a334-8e02-4de5-b99e-766a7e312cbb/join"
-        );
+        return redirectPostSignIn(req, res);
       }
 
-      return res.redirect(
-        "https://text.berniesanders.com/f5a2a334-8e02-4de5-b99e-766a7e312cbb/join"
-      );
+      return redirectPostSignIn(req, res);
     }
   };
 }
@@ -159,19 +160,23 @@ export function setupAuth0Passport() {
           email: req.user._json.email,
           is_superadmin: false
         };
-        await User.save(userData);
 
-        const organizations = await Organization.filter({});
-        const uuid = organizations[0].uuid;
-        const joinUrl = `${process.env.BASE_URL}/${uuid}/join`;
-
-        res.redirect(req.query.state == "/" ? joinUrl : req.query.state);
-        return;
+        return redirectPostSignIn(req, res);
       }
-      res.redirect(req.query.state || "/");
-      return;
+
+      return redirectPostSignIn(req, res);
     })
   ];
+}
+
+function redirectPostSignIn(req, re) {
+  res.redirect(
+    req.query.state == "/"
+      ? SHOULD_AUTOJOIN_NEW_USER
+        ? AUTOJOIN_URL
+        : "/"
+      : req.query.state
+  );
 }
 
 export function setupLocalAuthPassport() {
