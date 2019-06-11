@@ -161,6 +161,8 @@ export function setupAuth0Passport() {
           is_superadmin: false
         };
 
+        await User.save(userData);
+
         return redirectPostSignIn(req, res);
       }
 
