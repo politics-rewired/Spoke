@@ -510,16 +510,26 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   messagingServiceCandidates.forEach((ms, idx) => {
     const chunk = chunks[idx];
 
-    rowsToInsert = rowsToInsert.concat(
-      chunk.map(cell => ({
-        cell,
-        organization_id: organizationId,
-        messaging_service_sid: ms.messaging_service_sid
-      }))
-    );
+    if (chunk) {
+      rowsToInsert = rowsToInsert.concat(
+        chunk.map(cell => ({
+          cell,
+          organization_id: organizationId,
+          messaging_service_sid: ms.messaging_service_sid
+        }))
+      );
+    }
   });
 
-  return await r.knex("messaging_service_stick").insert(rowsToInsert);
+  const foundCells = await r
+    .knex("messaging_service_stick")
+    .pluck("cell")
+    .where({ organization_id: organizationId })
+    .whereIn("cell", rowsToInsert.map(r => r.cell));
+
+  const toInsert = rowsToInsert.filter(r => !foundCells.includes(r.cell));
+
+  return await r.knex("messaging_service_stick").insert(toInsert);
 };
 
 export default {
