@@ -489,6 +489,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   let rowsToInsert = [];
 
   for (let ms of reversedMessagingServicesToAddMakeUpCellsTo) {
+    console.log(cellsUsedForMakingUpGap);
     const gap = mostAssignedNumbers - ms.count;
 
     rowsToInsert = rowsToInsert.concat(
@@ -510,16 +511,26 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   messagingServiceCandidates.forEach((ms, idx) => {
     const chunk = chunks[idx];
 
-    rowsToInsert = rowsToInsert.concat(
-      chunk.map(cell => ({
-        cell,
-        organization_id: organizationId,
-        messaging_service_sid: ms.messaging_service_sid
-      }))
-    );
+    if (chunk) {
+      rowsToInsert = rowsToInsert.concat(
+        chunk.map(cell => ({
+          cell,
+          organization_id: organizationId,
+          messaging_service_sid: ms.messaging_service_sid
+        }))
+      );
+    }
   });
 
-  return await r.knex("messaging_service_stick").insert(rowsToInsert);
+  const foundRows = await r
+    .knex("messaging_service_stick")
+    .select("cell")
+    .whereIn(rowsToInsert.map(r => r.cell));
+
+  const foundCells = foundRows.map(r => r.cell);
+  const toInsert = rowsToInsert.filter(r => !foundCells.includes(r.cell));
+
+  return await r.knex("messaging_service_stick").insert(toInsert);
 };
 
 export default {
