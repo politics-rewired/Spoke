@@ -525,6 +525,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   const foundRows = await r
     .knex("messaging_service_stick")
     .select("cell")
+    .where({ organization_id: organizationId })
     .whereIn(rowsToInsert.map(r => r.cell));
 
   const foundCells = foundRows.map(r => r.cell);
