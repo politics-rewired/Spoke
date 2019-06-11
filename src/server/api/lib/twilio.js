@@ -521,13 +521,12 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
     }
   });
 
-  const foundRows = await r
+  const foundCells = await r
     .knex("messaging_service_stick")
-    .select("cell")
+    .pluck("cell")
     .where({ organization_id: organizationId })
     .whereIn("cell", rowsToInsert.map(r => r.cell));
 
-  const foundCells = foundRows.map(r => r.cell);
   const toInsert = rowsToInsert.filter(r => !foundCells.includes(r.cell));
 
   return await r.knex("messaging_service_stick").insert(toInsert);
