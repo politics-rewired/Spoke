@@ -40,19 +40,17 @@ process.on("uncaughtException", ex => {
 const DEBUG = process.env.NODE_ENV === "development";
 
 let loginCallbacks;
-if (!process.env.PASSPORT_STRATEGY && !global.PASSPORT_STRATEGY) {
+
+const loginStrategy =
+  process.env.PASSPORT_STRATEGY || global.PASSPORT_STRATEGY || "auth0";
+
+if (loginStrategy == "auth0") {
   // default to legacy Auth0 choice
   loginCallbacks = setupAuth0Passport();
-} else {
-  const loginStrategy =
-    process.env.PASSPORT_STRATEGY || global.PASSPORT_STRATEGY;
-  if (loginStrategy === "localauthexperimental") {
-    loginCallbacks = setupLocalAuthPassport();
-  }
-
-  if (loginStrategy === "slack") {
-    loginCallbacks = setupSlackPassport();
-  }
+} else if (loginStrategy === "localauthexperimental") {
+  loginCallbacks = setupLocalAuthPassport();
+} else if (loginStrategy === "slack") {
+  loginCallbacks = setupSlackPassport();
 }
 
 if (!process.env.SUPPRESS_SEED_CALLS) {
