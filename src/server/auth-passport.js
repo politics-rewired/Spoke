@@ -169,7 +169,7 @@ export function setupAuth0Passport() {
   ];
 }
 
-function redirectPostSignIn(req, re) {
+function redirectPostSignIn(req, res) {
   res.redirect(
     req.query.state == "/"
       ? SHOULD_AUTOJOIN_NEW_USER
