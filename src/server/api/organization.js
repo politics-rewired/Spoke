@@ -145,11 +145,16 @@ export const resolvers = {
       return 0;
     },
     pendingAssignmentRequestCount: async organization => {
-      const result = await r
-        .knex("assignment_request")
-        .count("*")
-        .where({ status: "pending" });
-      return result.count;
+      const count = await r.parseCount(
+        r
+          .knex("assignment_request")
+          .count("*")
+          .where({
+            status: "pending",
+            organization_id: organization.id
+          })
+      );
+      return count;
     },
     linkDomains: async organization => {
       const rawResult = await r.knex.raw(
