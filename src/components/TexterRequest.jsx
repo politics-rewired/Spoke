@@ -93,7 +93,7 @@ class TexterRequest extends React.Component {
       return (
         <Paper>
           <div style={{ padding: "20px" }}>
-            <h3> You currently have an pending request</h3>
+            <h3> You currently have a pending request</h3>
             <p>
               You requested {amount} texts. Hold on, someone will approve them
               soon!
