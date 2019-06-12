@@ -118,9 +118,16 @@ app.post(
   })
 );
 
-app.post(
-  "/twilio",
-  twilio.webhook(),
+const REQUIRE_REPLY_VALIDATION =
+  process.env.REQUIRE_REPLY_VALIDATION === "true" ||
+  process.env.REQUIRE_REPLY_VALIDATION === true;
+
+const replyHandlers = [];
+if (REQUIRE_REPLY_VALIDATION) {
+  replyHandlers.push(twilio.webhook());
+}
+
+replyHandlers.push(
   wrap(async (req, res) => {
     try {
       await twilio.handleIncomingMessage(req.body);
@@ -133,6 +140,8 @@ app.post(
     res.end(resp.toString());
   })
 );
+
+app.post("/twilio", ...replyHandlers);
 
 app.post(
   "/nexmo-message-report",
