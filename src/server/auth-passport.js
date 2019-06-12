@@ -172,12 +172,14 @@ export function setupAuth0Passport() {
 }
 
 function redirectPostSignIn(req, res) {
-  res.redirect(
+  return res.redirect(
     req.query.state == "/"
       ? SHOULD_AUTOJOIN_NEW_USER
         ? AUTOJOIN_URL
         : "/"
       : req.query.state
+        ? req.query.state
+        : "/"
   );
 }
 
