@@ -163,7 +163,7 @@ export function setupAuth0Passport() {
 
         await User.save(userData);
 
-        return redirectPostSignIn(req, res);
+        return redirectPostSignIn(req, res, true);
       }
 
       return redirectPostSignIn(req, res);
@@ -171,16 +171,16 @@ export function setupAuth0Passport() {
   ];
 }
 
-function redirectPostSignIn(req, res) {
-  return res.redirect(
-    req.query.state == "/"
-      ? SHOULD_AUTOJOIN_NEW_USER
-        ? AUTOJOIN_URL
-        : "/"
-      : req.query.state
-        ? req.query.state
-        : "/"
-  );
+function redirectPostSignIn(req, res, isNewUser) {
+  const redirectDestionation = !req.query.state
+    ? SHOULD_AUTOJOIN_NEW_USER && isNewUser
+      ? AUTOJOIN_URL
+      : "/"
+    : req.query.state
+      ? req.query.state
+      : "/";
+
+  return res.redirect(redirectDestionation);
 }
 
 export function setupLocalAuthPassport() {
