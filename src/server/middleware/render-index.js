@@ -57,7 +57,11 @@ export default function renderIndex(html, css, assetMap, store) {
         "America/New_York"}"
       window.ROLLBAR_CLIENT_TOKEN="${process.env.ROLLBAR_CLIENT_TOKEN}"
       window.DISABLE_ASSIGNMENT_PAGE=${!!process.env.ASSIGNMENT_REQUESTED_URL}
-      window.EXTERNAL_FAQ_URL="${process.env.EXTERNAL_FAQ_URL || ""}";
+      window.EXTERNAL_FAQ_URL=${
+        process.env.EXTERNAL_FAQ_URL
+          ? `"${process.env.EXTERNAL_FAQ_URL}"`
+          : "undefined"
+      };
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>
