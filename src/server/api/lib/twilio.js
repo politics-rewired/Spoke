@@ -446,6 +446,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   );
 
   const cells = rows.map(r => r.cell);
+  // console.log(449, cells.length);
 
   if (cells.length == 0) {
     return;
@@ -472,7 +473,10 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
     [organizationId, organizationId]
   );
 
+  // console.log(476, messagingServiceCandidates);
   const mostAssignedNumbers = messagingServiceCandidates[0].count;
+
+  // console.log(479, mostAssignedNumbers);
 
   const gapToMakeUp = messagingServiceCandidates.slice(1).reduce((acc, ms) => {
     return acc + (mostAssignedNumbers - ms.count);
@@ -480,6 +484,9 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 
   let cellsUsedForMakingUpGap = cells.slice(0, gapToMakeUp);
   const additionalCells = cells.slice(gapToMakeUp);
+
+  // console.log(gapToMakeUp);
+  // console.log(486, cellsUsedForMakingUpGap.length);
 
   const reversedMessagingServicesToAddMakeUpCellsTo = messagingServiceCandidates.slice(
     0
@@ -491,6 +498,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   for (let ms of reversedMessagingServicesToAddMakeUpCellsTo) {
     const gap = mostAssignedNumbers - ms.count;
 
+    // console.log(498, gap);
     rowsToInsert = rowsToInsert.concat(
       cellsUsedForMakingUpGap.slice(0, gap).map(cell => ({
         cell,
@@ -500,6 +508,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
     );
 
     cellsUsedForMakingUpGap = cellsUsedForMakingUpGap.slice(gap);
+    // console.log(510, cellsUsedForMakingUpGap.length)
   }
 
   const chunkSize = Math.ceil(
@@ -521,15 +530,16 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
     }
   });
 
-  const foundCells = await r
-    .knex("messaging_service_stick")
+  // console.log(529, rowsToInsert.map(r => r.cell));
+
+  const foundCells = await trx("messaging_service_stick")
     .pluck("cell")
     .where({ organization_id: organizationId })
     .whereIn("cell", rowsToInsert.map(r => r.cell));
 
   const toInsert = rowsToInsert.filter(r => !foundCells.includes(r.cell));
 
-  return await r.knex("messaging_service_stick").insert(toInsert);
+  return await trx("messaging_service_stick").insert(toInsert);
 };
 
 export default {
