@@ -218,7 +218,6 @@ export async function countLeft(assignmentType, campaign) {
 }
 
 export async function fulfillPendingRequestFor(auth0Id) {
-  console.log(auth0Id);
   const user = await r
     .knex("user")
     .first("id")
@@ -228,6 +227,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
     throw new Error(`No user found with id ${auth0Id}`);
   }
 
+  // External assignment service may not be organization-aware so we default to the highest organization ID
   const pendingAssignmentRequest = await r
     .knex("assignment_request")
     .where({ status: "pending", user_id: user.id })
