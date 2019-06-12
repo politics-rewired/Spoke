@@ -15,48 +15,28 @@ import { hasRole } from "../lib/permissions";
 
 const avatarSize = 28;
 
-class OrganizationItemInner extends Component {
-  componentDidMount() {
-    this.updateHasTeam();
-  }
+const OrganizationItemInner = props => {
+  const { organization, data, router } = props;
+  const { loading, currentUser } = data;
+  const path =
+    data.currentUser && hasRole("SUPERVOLUNTEER", currentUser.roles)
+      ? `/admin/${organization.id}`
+      : `/app/${organization.id}`;
 
-  componentDidUpdate() {
-    this.updateHasTeam();
-  }
-
-  isAdminOfOrg = () => {
-    if (this.props.data.loading) {
-      return false;
-    }
-    const roles = this.props.data.currentUser.roles || [];
-    return hasRole("SUPERVOLUNTEER", roles);
-  };
-
-  updateHasTeam = () => {
-    this.props.handleHasTeam(this.isAdminOfOrg());
-  };
-
-  handleClick = event => {
+  const handleClick = event => {
     event.preventDefault();
-    this.props.router.push(`/admin/${this.props.organization.id}`);
+    router.push(path);
   };
 
-  render() {
-    const { organization } = this.props;
-
-    if (!this.isAdminOfOrg()) {
-      return <div />;
-    }
-
-    return (
-      <MenuItem
-        primaryText={organization.name}
-        value={organization.id}
-        onClick={this.handleClick}
-      />
-    );
-  }
-}
+  return (
+    <MenuItem
+      primaryText={organization.name}
+      value={path}
+      disabled={loading}
+      onClick={handleClick}
+    />
+  );
+};
 
 const orgRoleProps = ({ ownProps }) => ({
   data: {
@@ -78,52 +58,11 @@ const OrganizationItem = connect({
   mapQueriesToProps: orgRoleProps
 })(withRouter(OrganizationItemInner));
 
-class TeamMenu extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      hasTeams: false
-    };
-  }
-
-  handleHasTeam = hasTeam => {
-    this.setState((currentState, currentProps) => ({
-      hasTeams: currentState.hasTeams || hasTeam
-    }));
-  };
-
-  render() {
-    return (
-      <div>
-        {this.state.hasTeams && (
-          <div>
-            <Divider />
-            <Subheader>Teams</Subheader>
-          </div>
-        )}
-        {this.props.organizations.map(organization => (
-          <OrganizationItem
-            key={organization.id}
-            organization={organization}
-            handleHasTeam={this.handleHasTeam}
-          />
-        ))}
-      </div>
-    );
-  }
-}
-
 class UserMenu extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false,
-      anchorEl: null
-    };
-    this.handleReturn = this.handleReturn.bind(this);
-    this.handleRequestFaqs = this.handleRequestFaqs.bind(this);
-  }
+  state = {
+    open: false,
+    anchorEl: null
+  };
 
   handleTouchTap = event => {
     // This prevents ghost click.
@@ -135,37 +74,27 @@ class UserMenu extends Component {
     });
   };
 
-  handleRequestClose = () => {
-    this.setState({
-      open: false
-    });
-  };
+  handleRequestClose = () => this.setState({ open: false });
 
-  handleMenuChange = (event, value) => {
+  handleMenuChange = (_, value) => {
+    const { orgId, data, router } = this.props;
+    const { currentUser } = data;
+
     this.handleRequestClose();
+
+    // Handle only named routes (org navigation is done in OrganizationItem
+    // becase MenuItem change is only handled if it's a direct descendent of Menu)
     if (value === "logout") {
       window.AuthService.logout();
     } else if (value === "account") {
-      const { orgId } = this.props;
-      const { currentUser } = this.props.data;
       if (orgId) {
-        this.props.router.push(`/app/${orgId}/account/${currentUser.id}`);
+        router.push(`/app/${orgId}/account/${currentUser.id}`);
       }
-    } else {
-      this.props.router.push(`/admin/${value}`);
+    } else if (value === "home") {
+      router.push(`/app/${orgId}/todos`);
+    } else if (value === "faqs") {
+      router.push(`/app/${orgId}/faqs`);
     }
-  };
-
-  handleReturn = e => {
-    e.preventDefault();
-    const { orgId } = this.props;
-    this.props.router.push(`/app/${orgId}/todos`);
-  };
-
-  handleRequestFaqs = e => {
-    e.preventDefault();
-    const { orgId } = this.props;
-    this.props.router.push(`/app/${orgId}/faqs`);
   };
 
   renderAvatar(user, size) {
@@ -184,10 +113,14 @@ class UserMenu extends Component {
   }
 
   render() {
-    const { currentUser } = this.props.data;
+    const { orgId, data } = this.props;
+    const { currentUser } = data;
+
     if (!currentUser) {
       return <div />;
     }
+
+    const { open, anchorEl } = this.state;
 
     return (
       <div>
@@ -199,8 +132,8 @@ class UserMenu extends Component {
           {this.renderAvatar(currentUser, avatarSize)}
         </IconButton>
         <Popover
-          open={this.state.open}
-          anchorEl={this.state.anchorEl}
+          open={open}
+          anchorEl={anchorEl}
           anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
           targetOrigin={{ horizontal: "left", vertical: "top" }}
           onRequestClose={this.handleRequestClose}
@@ -210,19 +143,22 @@ class UserMenu extends Component {
               {...dataTest("userMenuDisplayName")}
               primaryText={currentUser.displayName}
               leftIcon={this.renderAvatar(currentUser, 40)}
-              disabled={!this.props.orgId}
+              disabled={!orgId}
               value={"account"}
             >
               {currentUser.email}
             </MenuItem>
-            <TeamMenu organizations={currentUser.organizations} />
             <Divider />
-            <MenuItem
-              {...dataTest("home")}
-              primaryText="Home"
-              onClick={this.handleReturn}
-            />
-            <MenuItem primaryText="FAQs" onClick={this.handleRequestFaqs} />
+            <Subheader>Teams</Subheader>
+            {currentUser.organizations.map(organization => (
+              <OrganizationItem
+                key={organization.id}
+                organization={organization}
+              />
+            ))}
+            <Divider />
+            <MenuItem {...dataTest("home")} primaryText="Home" value="home" />
+            <MenuItem {...dataTest("faqs")} primaryText="FAQs" value="faqs" />
             <Divider />
             <MenuItem
               {...dataTest("userMenuLogOut")}
