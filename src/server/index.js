@@ -118,12 +118,12 @@ app.post(
   })
 );
 
-const REQUIRE_REPLY_VALIDATION =
-  process.env.REQUIRE_REPLY_VALIDATION === "true" ||
-  process.env.REQUIRE_REPLY_VALIDATION === true;
+const SKIP_TWILIO_VALIDATION =
+  process.env.SKIP_TWILIO_VALIDATION === "true" ||
+  process.env.SKIP_TWILIO_VALIDATION === true;
 
 const replyHandlers = [];
-if (REQUIRE_REPLY_VALIDATION) {
+if (!SKIP_TWILIO_VALIDATION) {
   replyHandlers.push(twilio.webhook());
 }
 
