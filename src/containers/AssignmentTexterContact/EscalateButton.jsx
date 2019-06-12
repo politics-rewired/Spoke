@@ -9,12 +9,17 @@ const EscalateStep = Object.freeze({ None: 0, FAQ: 1, Slack: 2, Escalate: 3 });
 const dialogBodyForStep = step => {
   switch (step) {
     case EscalateStep.FAQ:
+      const { EXTERNAL_FAQ_URL } = window;
       return (
         <p>
           Have you checked the{" "}
-          <a href="https://brnsndrs.com/textfaq" target="_blank">
-            FAQ
-          </a>
+          {EXTERNAL_FAQ_URL ? (
+            <a href={EXTERNAL_FAQ_URL} target="_blank">
+              FAQ
+            </a>
+          ) : (
+            "FAQ"
+          )}
           ?
         </p>
       );
