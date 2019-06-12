@@ -24,7 +24,7 @@ import { seedZipCodes } from "./seeds/seed-zip-codes";
 import { setupUserNotificationObservers } from "./notifications";
 import { TwimlResponse } from "twilio";
 import basicAuth from "express-basic-auth";
-import { giveUserMoreTexts } from "./api/assignment";
+import { fulfillPendingRequestFor } from "./api/assignment";
 import googleLibPhoneNumber from "google-libphonenumber";
 import requestLogging from "../lib/request-logging";
 
@@ -228,10 +228,7 @@ app.post(
         .json({ error: "Missing parameter `count` in POST body." });
 
     try {
-      const numberAssigned = await giveUserMoreTexts(
-        req.body.slack_id,
-        req.body.count
-      );
+      const numberAssigned = await fulfillPendingRequestFor(req.body.slack_id);
       return res.json({ numberAssigned });
     } catch (ex) {
       log.error(ex);

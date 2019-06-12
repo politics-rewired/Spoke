@@ -217,6 +217,44 @@ export async function countLeft(assignmentType, campaign) {
   return result;
 }
 
+export async function fulfillPendingRequestFor(auth0Id) {
+  const user = await r
+    .knex("user")
+    .first("id")
+    .where({ auth0_id: auth0Id });
+
+  if (!user) {
+    throw new Error(`No user found with id ${auth0Id}`);
+  }
+
+  // External assignment service may not be organization-aware so we default to the highest organization ID
+  const pendingAssignmentRequest = await r
+    .knex("assignment_request")
+    .where({ status: "pending", user_id: user.id })
+    .orderBy("organization_id", "desc")
+    .first("*");
+
+  if (!pendingAssignmentRequest) {
+    throw new Error(`No pending request exists for ${auth0Id}`);
+  }
+
+  const numberAssigned = await giveUserMoreTexts(
+    auth0Id,
+    pendingAssignmentRequest.amount,
+    pendingAssignmentRequest.organization_id
+  );
+
+  await r
+    .knex("assignment_request")
+    .update({
+      status: "approved",
+      updated_at: r.knex.fn.now()
+    })
+    .where({ id: pendingAssignmentRequest.id });
+
+  return numberAssigned;
+}
+
 export async function giveUserMoreTexts(auth0Id, count, organizationId) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
 
@@ -262,12 +300,10 @@ export async function giveUserMoreTexts(auth0Id, count, organizationId) {
   // Async function, not awaiting because response to external assignment tool does not depend on it
   notifyIfAllAssigned(assignmentInfo.type, auth0Id, organizationId);
 
-  console.log(updated_result);
   return updated_result;
 }
 
 export async function assignLoop(user, organizationId, countLeft, trx) {
-  console.log({ user, organizationId, countLeft });
   const assignmentInfo = await currentAssignmentTarget(organizationId, trx);
   if (!assignmentInfo) {
     return 0;

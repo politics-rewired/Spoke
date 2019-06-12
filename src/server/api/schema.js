@@ -2008,38 +2008,53 @@ const rootMutations = {
               where assignment_id is null
                 and campaign.is_started = true 
                 and campaign.is_archived = false
+                and campaign.organization_id = ?
               limit 1;
             `;
 
-            const result = await r.knex.raw(ccsAvailableQuery);
+            const result = await r.knex.raw(ccsAvailableQuery, [
+              organizationId
+            ]);
             return result.fields.length > 0;
           })();
 
           if (textsAvailable) {
-            if (process.env.ASSIGNMENT_REQUESTED_URL) {
-              const response = await request
-                .post(process.env.ASSIGNMENT_REQUESTED_URL)
-                .set(
-                  "Authorization",
-                  `Token ${process.env.ASSIGNMENT_REQUESTED_TOKEN}`
-                )
-                .send({ count, email });
-
-              return response.body.message;
-            } else {
-              await r.knex("assignment_request").insert({
+            /*
+              We create the assignment_request in a transaction
+              If ASSIGNMENT_REQUESTED_URL is present,
+                - we send to it
+                - if it returns as error
+                  - we roll back the insert and return the error
+                - if it succeeds, return 'Created'!
+            */
+            await r.knex.transaction(async trx => {
+              await trx("assignment_request").insert({
                 user_id: user.id,
-                organization_id: organization.id
+                organization_id: organizationId,
+                amount: count
               });
 
-              return "Created";
-            }
+              /* This will just throw if it errors */
+              if (process.env.ASSIGNMENT_REQUESTED_URL) {
+                const response = await request
+                  .post(process.env.ASSIGNMENT_REQUESTED_URL)
+                  .set(
+                    "Authorization",
+                    `Token ${process.env.ASSIGNMENT_REQUESTED_TOKEN}`
+                  )
+                  .send({ count, email });
+
+                return true;
+              }
+            });
+
+            return "Created";
           }
         }
 
         return "No texts available at the moment";
       } catch (e) {
-        return e.response.body.message;
+        return e.response ? e.response.body.message : e;
       }
     },
     releaseMessages: async (
