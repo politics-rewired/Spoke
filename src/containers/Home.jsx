@@ -105,7 +105,11 @@ class Home extends React.Component {
           <a
             id="login"
             className={css(styles.link_dark_bg)}
-            href="/login"
+            href={
+              window.PASSPORT_STRATEGY == "slack"
+                ? "https://www.bernietext.com/auth/login/slack/"
+                : "/login"
+            }
             onClick={this.handleOrgInviteClick}
           >
             Login and get started
