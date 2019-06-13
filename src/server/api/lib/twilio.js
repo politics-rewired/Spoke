@@ -446,7 +446,6 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
   );
 
   const cells = rows.map(r => r.cell);
-  console.log(449, cells.length);
 
   const { rows: messagingServiceCandidates } = await trx.raw(
     `
@@ -478,8 +477,6 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
           .messaging_service_sid
     };
   });
-
-  console.log(482, toInsert);
 
   // const foundCells = await trx("messaging_service_stick")
   //   .pluck("cell")

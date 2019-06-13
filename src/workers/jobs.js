@@ -232,15 +232,7 @@ export async function uploadContacts(job) {
 
           try {
             await trx("campaign_contact").insert(chunk);
-            const service = serviceMap[process.env.DEFAULT_SERVICE];
             console.log(236, service);
-            if (service.ensureAllNumbersHaveMessagingServiceSIDs) {
-              await service.ensureAllNumbersHaveMessagingServiceSIDs(
-                trx,
-                campaignId,
-                campaign.organization_id
-              );
-            }
           } catch (exc) {
             console.error("Error inserting contacts:", exc);
             throw exc;
@@ -250,6 +242,15 @@ export async function uploadContacts(job) {
           await updateJob(job, percentComplete);
         })
       );
+
+      const service = serviceMap[process.env.DEFAULT_SERVICE];
+      if (service.ensureAllNumbersHaveMessagingServiceSIDs) {
+        await service.ensureAllNumbersHaveMessagingServiceSIDs(
+          trx,
+          campaignId,
+          campaign.organization_id
+        );
+      }
     }
 
     try {
