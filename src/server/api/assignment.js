@@ -114,11 +114,11 @@ export function getContacts(
 }
 
 // Returns either "replies", "initials", or null
-export async function getCurrentAssignmentType() {
+export async function getCurrentAssignmentType(organizationId) {
   const organization = await r
     .knex("organization")
     .select("features")
-    .where({ id: 1 })
+    .where({ id: parseInt(organizationId) })
     .first();
   const features = {};
   try {
@@ -131,7 +131,7 @@ export async function getCurrentAssignmentType() {
 }
 
 export async function currentAssignmentTarget(organizationId, trx = r.knex) {
-  const assignmentType = await getCurrentAssignmentType();
+  const assignmentType = await getCurrentAssignmentType(organizationId);
 
   const campaignContactStatus = {
     UNREPLIED: "needsResponse",
@@ -293,7 +293,6 @@ export async function giveUserMoreTexts(auth0Id, count, organizationId) {
       }
     }
 
-    console.log(countUpdated);
     return countUpdated;
   });
 
