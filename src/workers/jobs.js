@@ -233,6 +233,7 @@ export async function uploadContacts(job) {
           try {
             await trx("campaign_contact").insert(chunk);
             const service = serviceMap[process.env.DEFAULT_SERVICE];
+            console.log(236, service);
             if (service.ensureAllNumbersHaveMessagingServiceSIDs) {
               await service.ensureAllNumbersHaveMessagingServiceSIDs(
                 trx,
