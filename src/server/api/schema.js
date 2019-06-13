@@ -2194,8 +2194,13 @@ const rootMutations = {
         "SUPERVOLUNTEER"
       );
 
+      const { auth0_id } = await r
+        .knex("user")
+        .where({ id: assignmentRequest.user_id })
+        .first("auth0_id");
+
       const numberAssigned = await giveUserMoreTexts(
-        user.auth0_id,
+        auth0_id,
         assignmentRequest.amount,
         assignmentRequest.organization_id
       );
