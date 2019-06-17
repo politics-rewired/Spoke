@@ -95,7 +95,7 @@ export function setupSlackPassport() {
 
         await User.save(userData);
 
-        return redirectPostSignIn(req, res);
+        return redirectPostSignIn(req, res, true);
       }
 
       return redirectPostSignIn(req, res);
@@ -140,6 +140,7 @@ export function setupAuth0Passport() {
       if (!auth0Id) {
         throw new Error("Null user in login callback");
       }
+
       const existingUser = await User.filter({ auth0_id: auth0Id });
 
       if (existingUser.length === 0) {
