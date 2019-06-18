@@ -11,10 +11,12 @@ a useful source of ideas, it may more work than is worth it to merge it back int
 that goal.
 
 The main difficulties and source of differences that I can think of at this moment in time are:
-• Instead of associating messages to campaign_contacts via `cell = contact_number` and `assignment_id = assignment_id`, we have a foreign 
+
+* Instead of associating messages to campaign_contacts via `cell = contact_number` and `assignment_id = assignment_id`, we have a foreign 
 key on `message` that points to `campaign_contact`. This was necessary for some of the more flexible reassignment flows we built. We have 
 a script that should migrate from one to the other, but it is a potentially dangerous process that may require downtime.
-• In order to support multiple different Twilio subaccount / messaging service relationships (and multiple messaging services to get 
+
+* In order to support multiple different Twilio subaccount / messaging service relationships (and multiple messaging services to get 
 around Twilio's limit of 400 numbers per service), we've moved those controls from `.env` variables to new database schemas. Those 
 database rows will need to be inserted carefully in order to avoid disrupting existing conversations.
 
