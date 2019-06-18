@@ -62,6 +62,11 @@ export default function renderIndex(html, css, assetMap, store) {
           ? `"${process.env.EXTERNAL_FAQ_URL}"`
           : "undefined"
       };
+      window.ALTERNATE_LOGIN_URL=${
+        process.env.ALTERNATE_LOGIN_URL
+          ? `"${process.env.ALTERNATE_LOGIN_URL}"`
+          : "undefined"
+      };
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>
