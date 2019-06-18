@@ -1,32 +1,29 @@
-[![Build Status](https://travis-ci.org/MoveOnOrg/Spoke.svg?branch=main)](https://travis-ci.org/MoveOnOrg/Spoke)
-
-[![Sauce Test Status](https://saucelabs.com/buildstatus/opensourcemoveon)](https://saucelabs.com/u/opensourcemoveon)
-
 # Spoke
 
 Spoke is an open source text-distribution tool for organizations to mobilize supporters and members into action. Spoke allows you to upload phone numbers, customize scripts and assign volunteers to communicate with supporters while allowing organizations to manage the process.
 
-Spoke was created by Saikat Chakrabarti and Sheena Pakanati, and is now maintained by MoveOn.org.
+Spoke was created by Saikat Chakrabarti and Sheena Pakanati, and is now maintained by MoveOn.org at https://github.com/MoveOnOrg/Spoke.
 
-The latest version is [1.4.1](https://github.com/MoveOnOrg/Spoke/tree/v1.4.1) (see [release notes](https://github.com/MoveOnOrg/Spoke/blob/main/docs/RELEASE_NOTES.md#v141)) which we recommend for production use, while our `main` branch is where features still in development and testing will be available.
+This repository is a branch of MoveOn/Spoke created by Politics Rewired, a small campaign tech consultancy created in 2019. 
 
-## Note
+Due to a desire to develop more quickly, we did not maintain compatibility with MoveOn/Spoke, which means although this repository will be 
+a useful source of ideas, it may more work than is worth it to merge it back into MoveOn/Spoke, although we welcome any efforts towards 
+that goal.
 
-This is generated from [react-apollo-starter-kit](https://github.com/saikat/react-apollo-starter-kit). Look at that project's README for info on some of the libraries used.
+The main difficulties and source of differences that I can think of at this moment in time are:
+• Instead of associating messages to campaign_contacts via `cell = contact_number` and `assignment_id = assignment_id`, we have a foreign 
+key on `message` that points to `campaign_contact`. This was necessary for some of the more flexible reassignment flows we built. We have 
+a script that should migrate from one to the other, but it is a potentially dangerous process that may require downtime.
+• In order to support multiple different Twilio subaccount / messaging service relationships (and multiple messaging services to get 
+around Twilio's limit of 400 numbers per service), we've moved those controls from `.env` variables to new database schemas. Those 
+database rows will need to be inserted carefully in order to avoid disrupting existing conversations.
 
-## Deploy to Heroku
+We will continue to add to this as we notice differences, and add a list of the things we've done likely under a wiki to come.
 
-<a href="https://heroku.com/deploy?template=https://github.com/MoveOnOrg/Spoke/tree/v1.4.1">
-  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
-</a>
-
-Follow up instructions located [here](https://github.com/MoveOnOrg/Spoke/blob/main/docs/HOWTO_HEROKU_DEPLOY.md)
-
-Please let us know if you deployed by filling out this form [here](https://act.moveon.org/survey/tech/)
 
 ## Getting started
 
-1. Install either sqlite (or another [knex](http://knexjs.org/#Installation-client)-supported database)
+1. Install Postgres.
 2. Install the Node version listed under `engines` in `package.json`. [NVM](https://github.com/creationix/nvm) is one way to do this.
 3. `npm install`
 4. `npm install -g foreman`
@@ -50,11 +47,10 @@ callback(null, user, context);
 11. If the application is still running from step 8, kill the process and re-run `npm run dev` to restart the app. Wait until you see both "Node app is running ..." and "webpack: Compiled successfully." before attempting to connect. (make sure environment variable `JOBS_SAME_PROCESS=1`)
 12. Go to `http://localhost:3000` to load the app.
 13. As long as you leave `SUPPRESS_SELF_INVITE=` blank and unset in your `.env` you should be able to invite yourself from the homepage.
-    - If you DO set that variable, then spoke will be invite-only and you'll need to generate an invite. Run:
+    - If you DO set that variable, then spoke will be invite-only and you'll need to generate an invite. Run, inside of a `psql` shell:
 
 ```
-echo "INSERT INTO invite (hash,is_valid) VALUES ('abc', 1);" |sqlite3 mydb.sqlite
-# Note: When doing this with PostgreSQL, you would replace the `1` with `true`
+echo "INSERT INTO invite (hash,is_valid) VALUES ('abc', true);"
 ```
 
 - Then use the generated key to visit an invite link, e.g.: http://localhost:3000/invite/abc. This should redirect you to the login screen. Use the "Sign Up" option to create your account.
@@ -62,42 +58,6 @@ echo "INSERT INTO invite (hash,is_valid) VALUES ('abc', 1);" |sqlite3 mydb.sqlit
 14. You should then be prompted to create an organization. Create it.
 
 If you want to create an invite via the home page "Login and get started" link, make sure your `SUPPRESS_SELF_INVITE` variable is not set.
-
-## Getting started with Docker
-
-1. `cp .env.example .env`
-2. Follow Steps 7, 9, & 10 above to set up your [Auth0](https://auth0.com) account.
-3. Build a Spoke Docker image with `docker-compose build app`
-4. Start the PostgreSQL & Redis containers in the background with `docker-compose up -d postgres redis`.
-5. Start the Spoke application in the foreground with `docker-compose up app`.
-6. Go to `http://localhost:3000` to load the app.
-7. Follow Step 13 above.
-
-- But if you need to generate an invite, run:
-
-```bash
-docker-compose exec postgres psql -U spoke -d spokedev -c "INSERT INTO invite (hash,is_valid) VALUES ('<your-hash>', true);"
-```
-
-- Then use the generated key to visit an invite link, e.g.: `http://localhost:3000/invite/<your-hash>`. This should redirect you to the login screen. Use the "Sign Up" option to create your account.
-
-8. You should then be prompted to create an organization. Create it.
-9. Bring down your application with `docker-compose down`, or `docker-compose down -v` to bring it down and _completely destroy_ your Postgres database & Redis datastore along with it.
-
-## Running Tests
-
-See https://github.com/MoveOnOrg/Spoke/blob/main/docs/HOWTO-run_tests.md
-
-## Big Thanks
-
-Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs](https://saucelabs.com).
-
-## Helpful Dev Tips
-
-- Run `sqlite3 mydb.sqlite` to connect to a SQL shell for the dev database
-- [Set up an ESLint plugin in your code editor so that you catch coding errors and follow code style guidelines more easily!](https://medium.com/planet-arkency/catch-mistakes-before-you-run-you-javascript-code-6e524c36f0c8#.oboqsse48)
-- [Install the redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension) in Chrome to get advanced Redux debugging features.
-- Right now there is a bug in Apollo (https://github.com/apollostack/react-apollo/issues/57) that means in one particular case, errors get swallowed. If you end up with an app that is silently breaking, console.log(this.props.data) and check the errors property.
 
 ### SMS
 
@@ -111,12 +71,11 @@ Twilio provides test credentials that will not charge your account as described 
 
 ## Deploying
 
-1. Run `OUTPUT_DIR=./build npm run prod-build-server`
-   This will generate something you can deploy to production in ./build and run nodejs server/server/index.js
-2. Run `npm run prod-build-client`
-3. Make a copy of `deploy/spoke-pm2.config.js.template`, e.g. `spoke-pm2.config.js`, add missing environment variables, and run it with [pm2](https://www.npmjs.com/package/pm2), e.g. `pm2 start spoke-pm2.config.js --env production`
-4. [Install PostgreSQL](https://wiki.postgresql.org/wiki/Detailed_installation_guides)
-5. Start PostgreSQL (e.g. `sudo /etc/init.d/postgresql start`), connect (e.g. `sudo -u postgres psql`), create a user and database (e.g. `create user spoke password 'spoke'; create database spoke owner spoke;`), disconnect (e.g. `\q`) and add credentials to `DB_` variables in spoke-pm2.config.js
+We deploy via https://github.com/assemble-main/spoke-terraform, which deploys one Elastic Beanstalk cluster and one Lambda function side-
+by-side, interacting with the same Aurora Postgresql Serverless database. We use a small proxy app (https://github.com/assemble-main/spoke-fly) 
+built to run on https://fly.io to route traffic from the /admin UI to Elastic Beanstalk, and all other requests to Lambda. This let's 
+Lambda deal with high throughput traffic (sending and receiving texts) and the long running servers on EBs can handle actions (such as 
+uploading or exporting) that may exceed Lambda's limits.
 
 # License
 
