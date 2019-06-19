@@ -23,7 +23,7 @@ database rows will need to be inserted carefully in order to avoid disrupting ex
 * We did not maintain compatibility with MoveOn's caching layer, so certain features we built should interact with cache invalidation, but 
 don't
 
-* We did not maintain compatibility (or write our own) tests 😬
+* We did not maintain compatibility with MoveOn's (or write our own) tests 😬
 
 We will continue to add to this as we notice differences, and add a list of the things we've done likely under a wiki to come.
 
