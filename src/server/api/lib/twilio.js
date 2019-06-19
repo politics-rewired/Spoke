@@ -7,37 +7,40 @@ import {
   getCampaignContactAndAssignmentForIncomingMessage,
   saveNewIncomingMessage
 } from "./message-sending";
-import faker from "faker";
+import { symmetricDecrypt } from "./crypto";
 
-let twilio = null;
 const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
 const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
-if (process.env.TWILIO_API_KEY && process.env.TWILIO_AUTH_TOKEN) {
-  // eslint-disable-next-line new-cap
-  twilio = Twilio(process.env.TWILIO_API_KEY, process.env.TWILIO_AUTH_TOKEN);
-} else {
-  log.warn("NO TWILIO CONNECTION");
-}
+const headerValidator = () => {
+  const {
+    SKIP_TWILIO_VALIDATION,
+    TWILIO_VALIDATION_HOST,
+    BASE_URL
+  } = process.env;
+  if (!!SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
 
-if (!process.env.TWILIO_MESSAGE_SERVICE_SID) {
-  log.warn(
-    "Twilio will not be able to send without TWILIO_MESSAGE_SERVICE_SID set"
-  );
-}
+  return async (req, res, next) => {
+    const { MessagingServiceSid } = req.body;
+    const { authToken } = await getTwilioCredentials(MessagingServiceSid);
 
-function webhook() {
-  log.warn("twilio webhook call"); // sky: doesn't run this
-  if (twilio) {
-    return Twilio.webhook();
-  } else {
-    log.warn("NO TWILIO WEB VALIDATION");
-    return function(req, res, next) {
-      next();
+    // Allow setting
+    const host = TWILIO_VALIDATION_HOST
+      ? TWILIO_VALIDATION_HOST !== ""
+        ? TWILIO_VALIDATION_HOST
+        : undefined
+      : BASE_URL;
+
+    const options = {
+      validate: true,
+      protocol: "https",
+      host
     };
-  }
-}
+
+    return Twilio.webhook(authToken, options)(req, res, next);
+  };
+};
 
 const textIncludingMms = (text, serviceMessages) => {
   const mediaUrls = [];
@@ -96,10 +99,8 @@ async function convertMessagePartsToMessage(messageParts) {
   );
 }
 
-async function findNewCell() {
-  if (!twilio) {
-    return { availablePhoneNumbers: [{ phone_number: "+15005550006" }] };
-  }
+async function findNewCell(messagingSericeSid) {
+  const twilio = await twilioClient(messagingSericeSid);
   return new Promise((resolve, reject) => {
     twilio.availablePhoneNumbers("US").local.list({}, (err, data) => {
       if (err) {
@@ -111,10 +112,8 @@ async function findNewCell() {
   });
 }
 
-async function rentNewCell() {
-  if (!twilio) {
-    return getFormattedPhoneNumber(faker.phone.phoneNumber());
-  }
+async function rentNewCell(messagingSericeSid) {
+  const twilio = await twilioClient(messagingSericeSid);
   const newCell = await findNewCell();
 
   if (
@@ -127,7 +126,7 @@ async function rentNewCell() {
       twilio.incomingPhoneNumbers.create(
         {
           phoneNumber: newCell.availablePhoneNumbers[0].phone_number,
-          smsApplicationSid: process.env.TWILIO_APPLICATION_SID
+          smsApplicationSid: messagingSericeSid
         },
         (err, purchasedNumber) => {
           if (err) {
@@ -212,7 +211,30 @@ const getMessageServiceSID = async (cell, organizationId) => {
   return await assignMessagingServiceSID(cell, organizationId);
 };
 
+const getTwilioCredentials = async messagingServiceSid => {
+  const { account_sid: accountSid, encrypted_auth_token } = await r
+    .knex("messaging_service")
+    .first(["account_sid", "encrypted_auth_token"])
+    .where({ messaging_service_sid: messagingServiceSid });
+  const authToken = symmetricDecrypt(encrypted_auth_token);
+  return { accountSid, authToken };
+};
+
+const twilioClient = async messagingServiceSid => {
+  const { accountSid, authToken } = await getTwilioCredentials(
+    messagingServiceSid
+  );
+  return Twilio(accountSid, authToken);
+};
+
 async function sendMessage(message, organizationId, trx) {
+  // Get (or assign) messaging service for contact's number
+  const messagingServiceSid = await getMessageServiceSID(
+    message.contact_number,
+    organizationId
+  );
+  const twilio = await twilioClient(messagingServiceSid);
+
   if (!twilio) {
     log.warn(
       "cannot actually send SMS message -- twilio is not fully configured:",
@@ -232,11 +254,6 @@ async function sendMessage(message, organizationId, trx) {
     if (message.service !== "twilio") {
       log.warn("Message not marked as a twilio message", message.id);
     }
-
-    const messagingServiceSid = await getMessageServiceSID(
-      message.contact_number,
-      organizationId
-    );
 
     const messageParams = Object.assign(
       {
@@ -488,7 +505,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 
 export default {
   syncMessagePartProcessing: !!process.env.JOBS_SAME_PROCESS,
-  webhook,
+  headerValidator,
   convertMessagePartsToMessage,
   findNewCell,
   rentNewCell,
