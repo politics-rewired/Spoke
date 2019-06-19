@@ -120,7 +120,7 @@ app.post(
 
 app.post(
   "/twilio",
-  twilio.incomingMessageWebhook(),
+  twilio.headerValidator(),
   wrap(async (req, res) => {
     try {
       await twilio.handleIncomingMessage(req.body);
@@ -149,7 +149,7 @@ app.post(
 
 app.post(
   "/twilio-message-report",
-  twilio.incomingMessageWebhook(),
+  twilio.headerValidator(),
   wrap(async (req, res) => {
     try {
       const body = req.body;

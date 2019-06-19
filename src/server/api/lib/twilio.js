@@ -13,7 +13,7 @@ const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
 const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
-const incomingMessageWebhook = () => {
+const headerValidator = () => {
   const {
     SKIP_TWILIO_VALIDATION,
     TWILIO_VALIDATION_HOST,
@@ -505,7 +505,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 
 export default {
   syncMessagePartProcessing: !!process.env.JOBS_SAME_PROCESS,
-  incomingMessageWebhook,
+  headerValidator,
   convertMessagePartsToMessage,
   findNewCell,
   rentNewCell,
