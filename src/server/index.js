@@ -118,11 +118,9 @@ app.post(
   })
 );
 
-const replyHandlers = [];
-
-replyHandlers.push(twilio.incomingMessageWebhook());
-
-replyHandlers.push(
+app.post(
+  "/twilio",
+  twilio.incomingMessageWebhook(),
   wrap(async (req, res) => {
     try {
       await twilio.handleIncomingMessage(req.body);
@@ -135,8 +133,6 @@ replyHandlers.push(
     res.end(resp.toString());
   })
 );
-
-app.post("/twilio", ...replyHandlers);
 
 app.post(
   "/nexmo-message-report",
@@ -153,6 +149,7 @@ app.post(
 
 app.post(
   "/twilio-message-report",
+  twilio.incomingMessageWebhook(),
   wrap(async (req, res) => {
     try {
       const body = req.body;
