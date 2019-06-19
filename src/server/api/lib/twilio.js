@@ -14,17 +14,28 @@ const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
 const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
 const incomingMessageWebhook = () => {
-  const { SKIP_TWILIO_VALIDATION, BASE_URL } = process.env;
+  const {
+    SKIP_TWILIO_VALIDATION,
+    TWILIO_VALIDATION_HOST,
+    BASE_URL
+  } = process.env;
   if (!!SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
 
   return async (req, res, next) => {
     const { MessagingServiceSid } = req.body;
     const { authToken } = await getTwilioCredentials(MessagingServiceSid);
 
+    // Allow setting
+    const host = TWILIO_VALIDATION_HOST
+      ? TWILIO_VALIDATION_HOST !== ""
+        ? TWILIO_VALIDATION_HOST
+        : undefined
+      : BASE_URL;
+
     const options = {
       validate: true,
-      // host: BASE_URL,
-      protocol: "https"
+      protocol: "https",
+      host
     };
 
     return Twilio.webhook(authToken, options)(req, res, next);
