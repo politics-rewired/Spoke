@@ -25,6 +25,8 @@ don't
 
 * We did not maintain compatibility with MoveOn's (or write our own) tests 😬
 
+* We `prettier`'ed everything
+
 We will continue to add to this as we notice differences, and add a list of the things we've done likely under a wiki to come.
 
 
