@@ -243,11 +243,11 @@ export async function fulfillPendingRequestFor(auth0Id) {
       const numberAssigned = await giveUserMoreTexts(
         auth0Id,
         pendingAssignmentRequest.amount,
-        pendingAssignmentRequest.organization_id
+        pendingAssignmentRequest.organization_id,
+        trx,
       );
 
-      await r
-        .knex("assignment_request")
+      await trx("assignment_request")
         .update({
           status: "approved",
           updated_at: r.knex.fn.now()
@@ -260,6 +260,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
         `Failed to give user ${auth0Id} more texts. Marking their request as rejected.`
       );
 
+      // Mark as rejected outside the transaction so it is unaffected by the rollback
       await r
         .knex("assignment_request")
         .update({
