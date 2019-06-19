@@ -13,18 +13,23 @@ const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
 const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
-function webhook() {
-  const twilio = undefined;
-  log.warn("twilio webhook call"); // sky: doesn't run this
-  if (twilio) {
-    return Twilio.webhook();
-  } else {
-    log.warn("NO TWILIO WEB VALIDATION");
-    return function(req, res, next) {
-      next();
+const incomingMessageWebhook = () => {
+  const { SKIP_TWILIO_VALIDATION, BASE_URL } = process.env;
+  if (!!SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
+
+  return async (req, res, next) => {
+    const { MessagingServiceSid } = req.body;
+    const { authToken } = await getTwilioCredentials(MessagingServiceSid);
+
+    const options = {
+      validate: true,
+      // host: BASE_URL,
+      protocol: "https"
     };
-  }
-}
+
+    return Twilio.webhook(authToken, options)(req, res, next);
+  };
+};
 
 const textIncludingMms = (text, serviceMessages) => {
   const mediaUrls = [];
@@ -195,12 +200,19 @@ const getMessageServiceSID = async (cell, organizationId) => {
   return await assignMessagingServiceSID(cell, organizationId);
 };
 
-const twilioClient = async messagingServiceSid => {
+const getTwilioCredentials = async messagingServiceSid => {
   const { account_sid: accountSid, encrypted_auth_token } = await r
     .knex("messaging_service")
     .first(["account_sid", "encrypted_auth_token"])
     .where({ messaging_service_sid: messagingServiceSid });
   const authToken = symmetricDecrypt(encrypted_auth_token);
+  return { accountSid, authToken };
+};
+
+const twilioClient = async messagingServiceSid => {
+  const { accountSid, authToken } = await getTwilioCredentials(
+    messagingServiceSid
+  );
   return Twilio(accountSid, authToken);
 };
 
@@ -482,7 +494,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 
 export default {
   syncMessagePartProcessing: !!process.env.JOBS_SAME_PROCESS,
-  webhook,
+  incomingMessageWebhook,
   convertMessagePartsToMessage,
   findNewCell,
   rentNewCell,

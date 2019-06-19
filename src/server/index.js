@@ -118,14 +118,9 @@ app.post(
   })
 );
 
-const SKIP_TWILIO_VALIDATION =
-  process.env.SKIP_TWILIO_VALIDATION === "true" ||
-  process.env.SKIP_TWILIO_VALIDATION === true;
-
 const replyHandlers = [];
-if (!SKIP_TWILIO_VALIDATION) {
-  replyHandlers.push(twilio.webhook());
-}
+
+replyHandlers.push(twilio.incomingMessageWebhook());
 
 replyHandlers.push(
   wrap(async (req, res) => {
