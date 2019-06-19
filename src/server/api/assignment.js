@@ -238,24 +238,50 @@ export async function fulfillPendingRequestFor(auth0Id) {
     throw new Error(`No pending request exists for ${auth0Id}`);
   }
 
-  const numberAssigned = await giveUserMoreTexts(
-    auth0Id,
-    pendingAssignmentRequest.amount,
-    pendingAssignmentRequest.organization_id
-  );
+  const numberAssigned = await r.knex.transaction(async trx => {
+    try {
+      const numberAssigned = await giveUserMoreTexts(
+        auth0Id,
+        pendingAssignmentRequest.amount,
+        pendingAssignmentRequest.organization_id,
+        trx,
+      );
 
-  await r
-    .knex("assignment_request")
-    .update({
-      status: "approved",
-      updated_at: r.knex.fn.now()
-    })
-    .where({ id: pendingAssignmentRequest.id });
+      await trx("assignment_request")
+        .update({
+          status: "approved",
+          updated_at: r.knex.fn.now()
+        })
+        .where({ id: pendingAssignmentRequest.id });
+
+      return numberAssigned;
+    } catch (ex) {
+      console.log(
+        `Failed to give user ${auth0Id} more texts. Marking their request as rejected.`
+      );
+
+      // Mark as rejected outside the transaction so it is unaffected by the rollback
+      await r
+        .knex("assignment_request")
+        .update({
+          status: "rejected",
+          updated_at: r.knex.fn.now()
+        })
+        .where({ id: pendingAssignmentRequest.id });
+
+      throw new Error(ex.message);
+    }
+  });
 
   return numberAssigned;
 }
 
-export async function giveUserMoreTexts(auth0Id, count, organizationId) {
+export async function giveUserMoreTexts(
+  auth0Id,
+  count,
+  organizationId,
+  parentTrx = r.knex
+) {
   console.log(`Starting to give ${auth0Id} ${count} texts`);
 
   const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
@@ -272,7 +298,7 @@ export async function giveUserMoreTexts(auth0Id, count, organizationId) {
   let countUpdated = 0;
   let countLeftToUpdate = count;
 
-  const updated_result = await r.knex.transaction(async trx => {
+  const updated_result = await parentTrx.transaction(async trx => {
     while (countLeftToUpdate > 0) {
       const countUpdatedInLoop = await assignLoop(
         user,

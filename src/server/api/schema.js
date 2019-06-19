@@ -2199,20 +2199,24 @@ const rootMutations = {
         .where({ id: assignmentRequest.user_id })
         .first("auth0_id");
 
-      const numberAssigned = await giveUserMoreTexts(
-        auth0_id,
-        assignmentRequest.amount,
-        assignmentRequest.organization_id
-      );
+      const numberAssigned = await r.knex.transaction(async trx => {
+        await giveUserMoreTexts(
+          auth0_id,
+          assignmentRequest.amount,
+          assignmentRequest.organization_id,
+          trx
+        );
 
-      await r
-        .knex("assignment_request")
-        .update({
-          status: "approved",
-          updated_at: r.knex.fn.now(),
-          approved_by_user_id: user.id
-        })
-        .where({ id: parseInt(assignmentRequestId) });
+        await trx("assignment_request")
+          .update({
+            status: "approved",
+            updated_at: r.knex.fn.now(),
+            approved_by_user_id: user.id
+          })
+          .where({ id: parseInt(assignmentRequestId) });
+
+        return numberAssigned;
+      });
 
       return numberAssigned;
     },
