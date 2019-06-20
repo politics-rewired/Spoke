@@ -151,10 +151,14 @@ app.post(
   "/twilio-message-report",
   twilio.headerValidator(),
   wrap(async (req, res) => {
-    await twilio.handleDeliveryReport(req.body);
-    const resp = new TwimlResponse();
-    res.writeHead(200, { "Content-Type": "text/xml" });
-    res.end(resp.toString());
+    try {
+      await twilio.handleDeliveryReport(req.body);
+      const resp = new TwimlResponse();
+      res.writeHead(200, { "Content-Type": "text/xml" });
+      return res.end(resp.toString());
+    } catch (exc) {
+      res.status(500).send(exc.message);
+    }
   })
 );
 
