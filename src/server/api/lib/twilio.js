@@ -362,31 +362,41 @@ async function sendMessage(message, organizationId, trx) {
   });
 }
 
+// Get appropriate Spoke message status from Twilio status
+const getMessageStatus = twilioStatus => {
+  if (twilioStatus === "delivered") {
+    return "DELIVERED";
+  } else if (twilioStatus === "failed" || twilioStatus === "undelivered") {
+    return "ERROR";
+  }
+
+  // Other Twilio statuses do not map to Spoke statuses and thus are ignored
+};
+
 async function handleDeliveryReport(report) {
-  const messageSid = report.MessageSid;
-  if (messageSid) {
-    await Log.save({
-      message_sid: report.MessageSid,
+  const { MessageSid: service_id, MessageStatus } = report;
+
+  // Insert log line (we don't care about waiting for this to complete)
+  r.knex("log")
+    .insert({
+      message_sid: service_id,
       body: JSON.stringify(report)
-    });
-    const messageStatus = report.MessageStatus;
-    const message = await r
-      .table("message")
-      .getAll(messageSid, { index: "service_id" })
-      .limit(1)(0)
-      .default(null);
-    if (message) {
-      message.service_response_at = new Date();
-      if (messageStatus === "delivered") {
-        message.send_status = "DELIVERED";
-      } else if (
-        messageStatus === "failed" ||
-        messageStatus === "undelivered"
-      ) {
-        message.send_status = "ERROR";
-      }
-      Message.save(message, { conflict: "update" });
-    }
+    })
+    .catch(console.error);
+
+  // Update matching message.
+  const rowCount = await r
+    .knex("message")
+    .update({
+      service_response_at: r.knex.fn.now(),
+      send_status: getMessageStatus(MessageStatus)
+    })
+    .where({ service_id });
+
+  if (rowCount !== 1) {
+    throw new Error(
+      `Received message report for Message SID '${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
+    );
   }
 }
 
