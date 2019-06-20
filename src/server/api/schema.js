@@ -512,59 +512,53 @@ async function sendMessage(
     throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
-  const toInsert = {
-    user_id: user.id,
-    campaign_contact_id: campaignContactId,
-    text: replacedDomainsText,
-    contact_number: contactNumber,
-    user_number: "",
-    assignment_id: message.assignmentId,
-    send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
-    service: process.env.DEFAULT_SERVICE || "",
-    is_from_contact: false,
-    queued_at: new Date(),
-    send_before: sendBeforeDate
-  };
+  const { messageInsertResult, contactUpdateResult } = await r.knex.transaction(
+    async trx => {
+      const toInsert = {
+        user_id: user.id,
+        campaign_contact_id: campaignContactId,
+        text: replacedDomainsText,
+        contact_number: contactNumber,
+        user_number: "",
+        assignment_id: message.assignmentId,
+        send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
+        service: process.env.DEFAULT_SERVICE || "",
+        is_from_contact: false,
+        queued_at: trx.fn.now(),
+        send_before: sendBeforeDate
+      };
 
-  const messageSavePromise = r
-    .knex("message")
-    .insert(toInsert)
-    .returning(Object.keys(toInsert).concat(["id"]));
+      const messageSavePromise = trx("message")
+        .insert(toInsert)
+        .returning(Object.keys(toInsert).concat(["id"]))
+        .then(rows => rows[0]);
 
-  const { cc_message_status } = record;
-  const contactSavePromise = (async () => {
-    await r
-      .knex("campaign_contact")
-      .update({
-        updated_at: r.knex.fn.now(),
-        message_status:
-          cc_message_status === "needsResponse" || cc_message_status === "convo"
-            ? "convo"
-            : "messaged"
-      })
-      .where({ id: record.cc_id });
+      const { cc_message_status: messageStatus } = record;
+      const contactSavePromise = trx("campaign_contact")
+        .update({
+          updated_at: r.knex.fn.now(),
+          message_status:
+            messageStatus === "needsResponse" || messageStatus === "convo"
+              ? "convo"
+              : "messaged"
+        })
+        .where({ id: record.cc_id })
+        .returning("*")
+        .then(rows => rows[0]);
 
-    const contact = await r
-      .knex("campaign_contact")
-      .select("*")
-      .where({ id: record.cc_id })
-      .first();
-    return contact;
-  })();
+      const [messageInsertResult, contactUpdateResult] = await Promise.all([
+        messageSavePromise,
+        contactSavePromise
+      ]);
 
-  const [messageInsertResult, contactUpdateResult] = await Promise.all([
-    messageSavePromise,
-    contactSavePromise
-  ]);
-  const messageInstance = Array.isArray(messageInsertResult)
-    ? messageInsertResult[0]
-    : messageInsertResult;
-  toInsert.id = messageInstance.id || messageInstance;
+      return { messageInsertResult, contactUpdateResult };
+    }
+  );
 
   // Send message after we are sure messageInstance has been persisted
-  const service =
-    serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
-  service.sendMessage(toInsert, record.organization_id);
+  const serviceName = messageInstance.service || process.env.DEFAULT_SERVICE;
+  const service = serviceMap[serviceName];
+  service.sendMessage(messageInsertResult, record.organization_id);
 
   // Send message to BernieSMS to be checked for bad words
   const badWordUrl = process.env.BAD_WORD_URL;
@@ -572,7 +566,7 @@ async function sendMessage(
     request
       .post(badWordUrl)
       .set("Authorization", `Token ${process.env.BAD_WORD_TOKEN}`)
-      .send({ user_id: user.auth0_id, message: toInsert.text })
+      .send({ user_id: user.auth0_id, message: messageInsertResult.text })
       .end((err, res) => {
         if (err) {
           log.error(err);
