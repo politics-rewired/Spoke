@@ -394,8 +394,11 @@ async function handleDeliveryReport(report) {
     .where({ service_id });
 
   if (rowCount !== 1) {
-    throw new Error(
-      `Received message report for Message SID '${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
+    // This could happen because the 'queued' report arrived before we finished updating the
+    // message's SID with the created Twilio Message response
+    console.warn(
+      `Received message report '${MessageStatus}' for Message SID '${service_id}' ` +
+        `that matched ${rowCount} messages. Expected only 1 match.`
     );
   }
 }
