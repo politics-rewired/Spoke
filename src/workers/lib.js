@@ -1,7 +1,5 @@
 import { r, JobRequest } from "../server/models";
 
-export const sleep = (ms = 0) => new Promise(fn => setTimeout(fn, ms));
-
 export async function updateJob(job, percentComplete) {
   if (job.id) {
     await JobRequest.get(job.id).update({

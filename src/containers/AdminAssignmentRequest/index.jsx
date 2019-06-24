@@ -6,11 +6,8 @@ import AssignmentRequestTable, {
 } from "./AssignmentRequestTable";
 import loadData from "../hoc/load-data";
 import wrapMutations from "../hoc/wrap-mutations";
+import { sleep } from "../../lib/utils";
 import CircularProgress from "material-ui/CircularProgress";
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 class AdminAssignmentRequest extends Component {
   state = {

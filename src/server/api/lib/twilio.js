@@ -3,6 +3,7 @@ import _ from "lodash";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Log, Message, PendingMessagePart, r } from "../../models";
 import { log } from "../../../lib";
+import { sleep } from "../../../lib/utils";
 import {
   getCampaignContactAndAssignmentForIncomingMessage,
   saveNewIncomingMessage
@@ -373,34 +374,43 @@ const getMessageStatus = twilioStatus => {
   // Other Twilio statuses do not map to Spoke statuses and thus are ignored
 };
 
+// Delivery reports can arrive before sendMessage() has finished. In these cases,
+// the message record in the database will not have a Twilio SID saved and the
+// delivery report lookup will fail. To deal with this we prioritize recording
+// the delivery report itself rather than updating the message. We can then "replay"
+// the delivery reports back on the message table at a later date. We still attempt
+// to update the message record status (after a slight delay).
 async function handleDeliveryReport(report) {
   const { MessageSid: service_id, MessageStatus } = report;
 
-  // Insert log line (we don't care about waiting for this to complete)
-  r.knex("log")
-    .insert({
-      message_sid: service_id,
-      body: JSON.stringify(report)
+  // Record the delivery report
+  const insertResult = await r.knex("log").insert({
+    message_sid: service_id,
+    body: JSON.stringify(report)
+  });
+
+  // Kick off message update after delay, but don't wait around for result
+  sleep(5000)
+    .then(() =>
+      r
+        .knex("message")
+        .update({
+          service_response_at: r.knex.fn.now(),
+          send_status: getMessageStatus(MessageStatus)
+        })
+        .where({ service_id })
+    )
+    .then(rowCount => {
+      if (rowCount !== 1) {
+        console.warn(
+          `Received message report '${MessageStatus}' for Message SID ` +
+            `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
+        );
+      }
     })
     .catch(console.error);
 
-  // Update matching message.
-  const rowCount = await r
-    .knex("message")
-    .update({
-      service_response_at: r.knex.fn.now(),
-      send_status: getMessageStatus(MessageStatus)
-    })
-    .where({ service_id });
-
-  if (rowCount !== 1) {
-    // This could happen because the 'queued' report arrived before we finished updating the
-    // message's SID with the created Twilio Message response
-    console.warn(
-      `Received message report '${MessageStatus}' for Message SID '${service_id}' ` +
-        `that matched ${rowCount} messages. Expected only 1 match.`
-    );
-  }
+  return insertResult;
 }
 
 async function handleIncomingMessage(message) {
