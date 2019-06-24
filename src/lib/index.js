@@ -22,6 +22,8 @@ export { DstHelper } from "./dst-helper";
 export { isClient } from "./is-client";
 import { log } from "./log";
 export { log };
+import { sleep } from "./utils";
+export { sleep };
 import Papa from "papaparse";
 import _ from "lodash";
 import { getFormattedPhoneNumber, getFormattedZip } from "../lib";
