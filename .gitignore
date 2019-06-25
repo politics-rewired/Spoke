@@ -1,6 +1,7 @@
 # Spoke Additions
 
 *#
+.env.*
 
 ### Editor ###
 .idea/
