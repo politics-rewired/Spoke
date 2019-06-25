@@ -1029,8 +1029,9 @@ export async function exportCampaign(job) {
   const allQuestions = {};
   const questionCount = {};
   const interactionSteps = await r
-    .table("interaction_step")
-    .getAll(id, { index: "campaign_id" });
+    .knex("interaction_step")
+    .select("*")
+    .where({ campaign_id: id });
 
   interactionSteps.forEach(step => {
     if (!step.question || step.question.trim() === "") {

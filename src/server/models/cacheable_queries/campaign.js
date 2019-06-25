@@ -33,9 +33,12 @@ const dbCustomFields = async id => {
 
 const dbInteractionSteps = async id => {
   return r
-    .table("interaction_step")
-    .getAll(id, { index: "campaign_id" })
-    .filter({ is_deleted: false });
+    .knex("interaction_step")
+    .select("*")
+    .where({
+      campaign_id: id,
+      is_deleted: false
+    });
 };
 
 const clear = async id => {
