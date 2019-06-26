@@ -9,6 +9,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import IconButton from "material-ui/IconButton";
 import InfoIcon from "material-ui/svg-icons/action/info";
 import CreateIcon from "material-ui/svg-icons/content/create";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
 
 import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
@@ -35,6 +36,13 @@ class GSScriptOptionsField extends GSFormField {
       { scriptTarget: scriptVersion, scriptDraft: scriptVersion }
       // () => this.refs.dialogScriptInput.focus()
     );
+  };
+
+  createDeleteHandler = scriptVersion => () => {
+    const { value: scriptVersions } = this.props;
+    const targetIndex = scriptVersions.indexOf(scriptVersion);
+    scriptVersions.splice(targetIndex, 1);
+    this.props.onChange(scriptVersions);
   };
 
   handleCancelDialog = () =>
@@ -124,6 +132,7 @@ class GSScriptOptionsField extends GSFormField {
       "onChange"
     ]);
 
+    const canDelete = scriptVersions.length > 1;
     const emptyVersionExists =
       scriptVersions.filter(version => version.trim() === "").length > 0;
 
@@ -140,20 +149,33 @@ class GSScriptOptionsField extends GSFormField {
           <InfoIcon />
         </IconButton>
         {scriptVersions.map((scriptVersion, index) => (
-          <TextField
-            key={scriptVersion}
-            value={scriptVersion}
-            floatingLabelText={`Script Version ${index + 1}`}
-            floatingLabelStyle={{ zIndex: 0 }}
-            errorText={
-              scriptVersion.trim().length === 0
-                ? "Script cannot be empty"
-                : undefined
-            }
-            multiLine={true}
-            onClick={this.createDialogHandler(scriptVersion)}
-            {...passThroughProps}
-          />
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <TextField
+              key={scriptVersion}
+              value={scriptVersion}
+              floatingLabelText={`Script Version ${index + 1}`}
+              floatingLabelStyle={{ zIndex: 0 }}
+              errorText={
+                scriptVersion.trim().length === 0
+                  ? "Script cannot be empty"
+                  : undefined
+              }
+              multiLine={true}
+              onClick={this.createDialogHandler(scriptVersion)}
+              {...passThroughProps}
+            />
+            {canDelete && (
+              <IconButton
+                tooltip="Deleting will not take effect until you save!"
+                tooltipPosition="top-left"
+                iconStyle={{ width: 20, height: 20, color: "red" }}
+                style={{ width: 40, height: 40, padding: 10 }}
+                onClick={this.createDeleteHandler(scriptVersion)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </div>
         ))}
         <FlatButton
           label="Add script version"
