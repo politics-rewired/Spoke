@@ -15,7 +15,7 @@ import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
 import theme from "../styles/theme";
 import { StyleSheet, css } from "aphrodite";
-import yup from "yup";
+import * as yup from "yup";
 import { dataTest } from "../lib/attributes";
 
 const checkIcon = <CheckIcon color={theme.colors.green} />;

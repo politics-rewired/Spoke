@@ -9,7 +9,7 @@ import Divider from "material-ui/Divider";
 import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 import IconButton from "material-ui/IconButton";
-import yup from "yup";
+import * as yup from "yup";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import theme from "../styles/theme";
 import { StyleSheet, css } from "aphrodite";

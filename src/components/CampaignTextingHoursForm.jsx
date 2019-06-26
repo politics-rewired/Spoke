@@ -4,7 +4,7 @@ import React from "react";
 import Form from "react-formal";
 import GSForm from "./forms/GSForm";
 import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
-import yup from "yup";
+import * as yup from "yup";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import moment from "moment";

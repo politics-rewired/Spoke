@@ -1,6 +1,6 @@
 import React from "react";
 import type from "prop-types";
-import yup from "yup";
+import * as yup from 'yup';
 import Form from "react-formal";
 
 import RaisedButton from "material-ui/RaisedButton";

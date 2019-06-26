@@ -11,7 +11,7 @@ import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
 import { applyScript } from "../../lib/scripts";
-import yup from "yup";
+import * as yup from 'yup';
 import GSForm from "../../components/forms/GSForm";
 import Form from "react-formal";
 import GSSubmitButton from "../../components/forms/GSSubmitButton";

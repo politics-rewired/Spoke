@@ -7,7 +7,7 @@ import IconButton from "material-ui/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import GSForm from "../components/forms/GSForm";
-import yup from "yup";
+import * as yup from "yup";
 import Form from "react-formal";
 import OrganizationJoinLink from "./OrganizationJoinLink";
 import CampaignFormSectionHeading from "./CampaignFormSectionHeading";

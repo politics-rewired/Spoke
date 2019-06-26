@@ -7,7 +7,7 @@ import theme from "../styles/theme";
 import GSForm from "../components/forms/GSForm";
 import wrapMutations from "./hoc/wrap-mutations";
 import Form from "react-formal";
-import yup from "yup";
+import * as yup from 'yup';
 import { dataTest } from "../lib/attributes";
 
 const styles = StyleSheet.create({
