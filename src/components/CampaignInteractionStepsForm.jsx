@@ -33,8 +33,9 @@ const styles = {
   },
 
   answerContainer: {
-    marginLeft: "35px",
+    marginLeft: "25px",
     marginTop: "10px",
+    paddingLeft: "15px",
     borderLeft: `3px dashed ${theme.colors.veryLightGray}`
   }
 };
@@ -172,19 +173,22 @@ class CampaignInteractionStepsForm extends React.Component {
               onChange={this.handleFormChange}
             >
               {parentInteractionId && (
-                <Form.Field
-                  {...dataTest("answerOption")}
-                  name="answerOption"
-                  label="Answer"
-                  fullWidth
-                  hintText="Answer to the previous question"
-                />
-              )}
-              {parentInteractionId && (
-                <DeleteIcon
-                  style={styles.pullRight}
-                  onTouchTap={this.createDeleteStepHandler(interactionStep.id)}
-                />
+                <div style={{ display: "flex", alignItems: "baseline" }}>
+                  <Form.Field
+                    {...dataTest("answerOption")}
+                    name="answerOption"
+                    label="Answer"
+                    fullWidth
+                    hintText="Answer to the previous question"
+                  />
+                  <IconButton
+                    onTouchTap={this.createDeleteStepHandler(
+                      interactionStep.id
+                    )}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
               )}
               {displayActions && (
                 <div key={`answeractions-${interactionStep.id}`}>
