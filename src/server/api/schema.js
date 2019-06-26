@@ -280,16 +280,16 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("interactionSteps")) {
     // TODO: debug why { script: '' } is even being sent from the client in the first place
-    if (!_.isEqual(campaign.interactionSteps, { script: "" })) {
+    if (!_.isEqual(campaign.interactionSteps, { scriptOptions: [""] })) {
       await accessRequired(
         user,
         organizationId,
         "SUPERVOLUNTEER",
         /* superadmin*/ true
       );
-      await updateInteractionSteps(
+      await persistInteractionStepTree(
         id,
-        [campaign.interactionSteps],
+        campaign.interactionSteps,
         origCampaignRecord
       );
     }
@@ -325,55 +325,80 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   return newCampaign || loaders.campaign.load(id);
 }
 
-async function updateInteractionSteps(
+const persistInteractionStepTree = async (
   campaignId,
-  interactionSteps,
+  rootInteractionStep,
   origCampaignRecord,
-  idMap = {}
-) {
-  await interactionSteps.forEach(async is => {
-    // map the interaction step ids for new ones
-    if (idMap[is.parentInteractionId]) {
-      is.parentInteractionId = idMap[is.parentInteractionId];
-    }
-    if (is.id.indexOf("new") !== -1) {
-      const newIstep = await InteractionStep.save({
-        parent_interaction_id: is.parentInteractionId || null,
-        question: is.questionText,
-        script: is.script,
-        answer_option: is.answerOption,
-        answer_actions: is.answerActions,
+  knexTrx,
+  temporaryIdMap = {}
+) => {
+  // Perform updates in a transaction if one is not present
+  if (!knexTrx) {
+    return await r.knex.transaction(async trx => {
+      await persistInteractionStepTree(
+        campaignId,
+        rootInteractionStep,
+        origCampaignRecord,
+        trx,
+        temporaryIdMap
+      );
+    });
+  }
+
+  // Update the parent interaction step ID if this step has a reference to a temporary ID
+  // and the parent has since been inserted
+  if (temporaryIdMap[rootInteractionStep.parentInteractionId]) {
+    rootInteractionStep.parentInteractionId =
+      temporaryIdMap[rootInteractionStep.parentInteractionId];
+  }
+
+  if (rootInteractionStep.id.indexOf("new") !== -1) {
+    // Insert new interaction steps
+    const [newId] = await knexTrx("interaction_step")
+      .insert({
+        parent_interaction_id: rootInteractionStep.parentInteractionId || null,
+        question: rootInteractionStep.questionText,
+        script_options: rootInteractionStep.scriptOptions,
+        answer_option: rootInteractionStep.answerOption,
+        answer_actions: rootInteractionStep.answerActions,
         campaign_id: campaignId,
         is_deleted: false
+      })
+      .returning("id");
+
+    // Update the mapping of temporary IDs
+    temporaryIdMap[rootInteractionStep.id] = newId;
+  } else if (!origCampaignRecord.is_started && rootInteractionStep.isDeleted) {
+    // Hard delete interaction steps if the campaign hasn't started
+    await knexTrx("interaction_step")
+      .where({ id: rootInteractionStep.id })
+      .delete();
+  } else {
+    // Update the interaction step record
+    await knexTrx("interaction_step")
+      .where({ id: rootInteractionStep.id })
+      .update({
+        question: rootInteractionStep.questionText,
+        script_options: rootInteractionStep.scriptOptions,
+        answer_option: rootInteractionStep.answerOption,
+        answer_actions: rootInteractionStep.answerActions,
+        is_deleted: rootInteractionStep.isDeleted
       });
-      idMap[is.id] = newIstep.id;
-    } else {
-      if (!origCampaignRecord.is_started && is.isDeleted) {
-        await r
-          .knex("interaction_step")
-          .where({ id: is.id })
-          .delete();
-      } else {
-        await r
-          .knex("interaction_step")
-          .where({ id: is.id })
-          .update({
-            question: is.questionText,
-            script: is.script,
-            answer_option: is.answerOption,
-            answer_actions: is.answerActions,
-            is_deleted: is.isDeleted
-          });
-      }
-    }
-    await updateInteractionSteps(
-      campaignId,
-      is.interactionSteps,
-      origCampaignRecord,
-      idMap
-    );
-  });
-}
+  }
+
+  // Persist child interaction steps
+  await Promise.all(
+    rootInteractionStep.interactionSteps.map(async childStep => {
+      await persistInteractionStepTree(
+        campaignId,
+        childStep,
+        origCampaignRecord,
+        knexTrx,
+        temporaryIdMap
+      );
+    })
+  );
+};
 
 // We've modified campaign creation on the client so that overrideOrganizationHours is always true
 // and enforce_texting_hours is always true
@@ -994,7 +1019,7 @@ const rootMutations = {
           let is = {
             id: "new" + interaction.id,
             questionText: interaction.question,
-            script: interaction.script,
+            scriptOptions: interaction.script_options,
             answerOption: interaction.answer_option,
             answerActions: interaction.answer_actions,
             isDeleted: interaction.is_deleted,
@@ -1006,7 +1031,7 @@ const rootMutations = {
           let is = {
             id: "new" + interaction.id,
             questionText: interaction.question,
-            script: interaction.script,
+            scriptOptions: interaction.script_options,
             answerOption: interaction.answer_option,
             answerActions: interaction.answer_actions,
             isDeleted: interaction.is_deleted,
@@ -1017,29 +1042,28 @@ const rootMutations = {
         }
       });
 
-      let createSteps = updateInteractionSteps(
+      const interactionStepTree = makeTree(interactionsArr, (id = null));
+      await persistInteractionStepTree(
         newCampaignId,
-        [makeTree(interactionsArr, (id = null))],
-        campaign,
-        {}
+        interactionStepTree,
+        campaign
       );
 
-      await createSteps;
-
-      let createCannedResponses = r
+      const newCannedResponseIds = await r
         .knex("canned_response")
         .where({ campaign_id: oldCampaignId })
-        .then(function(res) {
-          res.forEach((response, index) => {
-            const copiedCannedResponse = new CannedResponse({
-              campaign_id: newCampaignId,
-              title: response.title,
-              text: response.text
-            }).save();
-          });
-        });
-
-      await createCannedResponses;
+        .then(responses =>
+          Promise.all(
+            responses.map(async result => {
+              const [newId] = await r.knex("canned_response").insert({
+                campaign_id: newCampaignId,
+                title: response.title,
+                text: response.text
+              });
+              return newId;
+            })
+          )
+        );
 
       return newCampaign;
     },
@@ -1132,29 +1156,39 @@ const rootMutations = {
         // TODO - MySQL Specific. This should be an inline subquery
         const campaignIds = await campaignIdQuery;
 
+        // Using array_to_string is easier and faster than using unnest(script_options) (https://stackoverflow.com/a/7222285)
         const interactionStepsToChange = await r
           .knex("interaction_step")
           .transacting(trx)
-          .where("script", "like", `%${searchString}%`)
+          .select(["id", "campaign_id", "script_options"])
+          .whereRaw("array_to_string(script_options, '||') like ?", [
+            `%${searchString}%`
+          ])
           .whereIn("campaign_id", campaignIds);
 
         const scriptUpdates = [];
         for (let step of interactionStepsToChange) {
-          const newText = replaceAll(step.script, searchString, replaceString);
-
-          const scriptUpdate = {
-            campaignId: step.campaign_id,
-            found: step.script,
-            replaced: newText
-          };
+          const script_options = step.script_options.map(scriptOption => {
+            const newValue = replaceAll(
+              scriptOption,
+              searchString,
+              replaceString
+            );
+            if (newValue !== scriptOption) {
+              scriptUpdates.push({
+                campaignId: step.campaign_id,
+                found: scriptOption,
+                replaced: newValue
+              });
+            }
+            return newValue;
+          });
 
           await r
             .knex("interaction_step")
             .transacting(trx)
-            .update({ script: newText })
+            .update({ script_options })
             .where({ id: step.id });
-
-          scriptUpdates.push(scriptUpdate);
         }
 
         return scriptUpdates;

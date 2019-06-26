@@ -6,7 +6,6 @@ export const resolvers = {
     ...mapFieldsToModel(
       [
         "id",
-        "script",
         "answerOption",
         "answerActions",
         "parentInteractionId",
@@ -14,6 +13,10 @@ export const resolvers = {
       ],
       InteractionStep
     ),
+    scriptOptions: async interactionStep => {
+      const { script, script_options } = interactionStep;
+      return script_options || [script];
+    },
     questionText: async interactionStep => {
       return interactionStep.question;
     },

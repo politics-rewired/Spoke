@@ -176,6 +176,7 @@ class ScriptEditor extends React.Component {
       <div style={styles.scriptFieldButtonSection}>
         {scriptFields.map(field => (
           <Chip
+            key={field}
             style={styles.scriptFieldButton}
             text={delimit(field)}
             onTouchTap={() => this.addCustomField(field)}
@@ -206,10 +207,10 @@ class ScriptEditor extends React.Component {
 }
 
 ScriptEditor.propTypes = {
-  scriptFields: PropTypes.array,
-  scriptText: PropTypes.string,
-  onChange: PropTypes.func,
-  name: PropTypes.string
+  name: PropTypes.string.isRequired,
+  scriptText: PropTypes.string.isRequired,
+  scriptFields: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired
 };
 
 export default ScriptEditor;

@@ -103,7 +103,7 @@ export const resolvers = {
           "interaction_step.interaction_step_id",
           "interaction_step.campaign_id",
           "interaction_step.question",
-          "interaction_step.script",
+          "interaction_step.script_options",
           "qres.id",
           "qres.value",
           "qres.created_at",
@@ -146,7 +146,7 @@ export const resolvers = {
               parent_interaction_id:
                 res["interaction_step.parent_interaction_id"],
               question: res["interaction_step.question"],
-              script: res["interaction_step.script"]
+              scriptOptions: res["interaction_step.script_options"]
             },
             value: responseValue
           };

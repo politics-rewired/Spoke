@@ -14,6 +14,7 @@ const InteractionStep = thinky.createModel(
       // PROMPTS:
       question: optionalString(),
       script: optionalString(),
+      // script_options: [type.string()], // thinky does not support rethink-style list properties
       created_at: timestamp(),
 
       // Previously there were answer options, and no such thing as

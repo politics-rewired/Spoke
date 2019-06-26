@@ -8,7 +8,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import Paper from "material-ui/Paper";
 import Form from "react-formal";
-import yup from "yup";
+import * as yup from "yup";
 import gql from "graphql-tag";
 import LoadingIndicator from "./LoadingIndicator";
 

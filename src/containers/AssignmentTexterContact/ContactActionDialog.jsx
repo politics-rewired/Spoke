@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import yup from "yup";
+import * as yup from 'yup';
 import Form from "react-formal";
 import { StyleSheet, css } from "aphrodite";
 import { Card, CardActions, CardTitle } from "material-ui/Card";

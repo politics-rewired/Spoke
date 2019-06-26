@@ -1,4 +1,6 @@
 import React from "react";
+import PropTypes from "prop-types";
+import pick from "lodash/pick";
 import GSFormField from "./GSFormField";
 import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
@@ -14,7 +16,7 @@ const styles = {
   }
 };
 
-export default class GSScriptField extends GSFormField {
+class GSScriptField extends GSFormField {
   constructor(props) {
     super(props);
     this.state = {
@@ -50,8 +52,8 @@ export default class GSScriptField extends GSFormField {
   };
 
   renderDialog() {
+    const { name, customFields } = this.props;
     const { open } = this.state;
-    const { customFields, sampleContact } = this.props;
     const scriptFields = allScriptFields(customFields);
 
     return (
@@ -75,11 +77,11 @@ export default class GSScriptField extends GSFormField {
         onRequestClose={this.handleCancelDialog}
       >
         <ScriptEditor
-          expandable
           ref="dialogScriptInput"
+          name={name}
           scriptText={this.state.script}
-          sampleContact={sampleContact}
           scriptFields={scriptFields}
+          expandable={true}
           onChange={val => this.setState({ script: val })}
         />
       </Dialog>
@@ -87,6 +89,20 @@ export default class GSScriptField extends GSFormField {
   }
 
   render() {
+    // The "errors" prop is an empty object and is not mentioned in yum or react-formal documentation
+    const passThroughProps = pick(this.props, [
+      "className",
+      "fullWidth",
+      "hintText",
+      "label",
+      "multiLine",
+      "name",
+      "value",
+      "data-test",
+      "onBlur",
+      "onChange"
+    ]);
+
     return (
       <div>
         <TextField
@@ -96,10 +112,25 @@ export default class GSScriptField extends GSFormField {
           floatingLabelStyle={{
             zIndex: 0
           }}
-          {...this.props}
+          {...passThroughProps}
         />
         {this.renderDialog()}
       </div>
     );
   }
 }
+
+GSScriptField.propTypes = {
+  value: PropTypes.string.isRequired,
+  customFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  name: PropTypes.string,
+  className: PropTypes.string,
+  hintText: PropTypes.string,
+  label: PropTypes.string,
+  multiLine: PropTypes.bool,
+  fullWidth: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  onBlur: PropTypes.func
+};
+
+export default GSScriptField;

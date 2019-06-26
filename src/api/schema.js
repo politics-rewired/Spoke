@@ -91,7 +91,7 @@ const rootSchema = `
   input InteractionStepInput {
     id: String
     questionText: String
-    script: String
+    scriptOptions: [String]!
     answerOption: String
     answerActions: String
     parentInteractionId: String
