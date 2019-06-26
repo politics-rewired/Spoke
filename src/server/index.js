@@ -22,8 +22,7 @@ import nexmo from "./api/lib/nexmo";
 import twilio from "./api/lib/twilio";
 import { seedZipCodes } from "./seeds/seed-zip-codes";
 import { setupUserNotificationObservers } from "./notifications";
-import { twiml } from "twilio";
-const { MessagingResponse } = twiml;
+import { TwimlResponse } from "twilio";
 import basicAuth from "express-basic-auth";
 import { fulfillPendingRequestFor } from "./api/assignment";
 import googleLibPhoneNumber from "google-libphonenumber";
@@ -129,7 +128,7 @@ app.post(
       log.error(ex);
     }
 
-    const resp = new MessagingResponse();
+    const resp = new TwimlResponse();
     res.writeHead(200, { "Content-Type": "text/xml" });
     res.end(resp.toString());
   })
@@ -154,7 +153,7 @@ app.post(
   wrap(async (req, res) => {
     try {
       await twilio.handleDeliveryReport(req.body);
-      const resp = new MessagingResponse();
+      const resp = new TwimlResponse();
       res.writeHead(200, { "Content-Type": "text/xml" });
       return res.end(resp.toString());
     } catch (exc) {
