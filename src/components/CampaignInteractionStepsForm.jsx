@@ -1,30 +1,19 @@
-import type from "prop-types";
 import React from "react";
-import ReactDOM from "react-dom";
-import Divider from "material-ui/Divider";
-import ContentClear from "material-ui/svg-icons/content/clear";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
-import RadioButtonUnchecked from "material-ui/svg-icons/toggle/radio-button-unchecked";
-import IconButton from "material-ui/IconButton";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
-import theme from "../styles/theme";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
-import ForwardIcon from "material-ui/svg-icons/navigation/arrow-forward";
-import HelpIcon from "material-ui/svg-icons/action/help";
-import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
-import Form from "react-formal";
-import GSForm from "./forms/GSForm";
+import type from "prop-types";
 import yup from "yup";
-import {
-  sortInteractionSteps,
-  getInteractionPath,
-  getChildren,
-  findParent,
-  makeTree
-} from "../lib";
+import Form from "react-formal";
+
+import RaisedButton from "material-ui/RaisedButton";
+import { Card, CardHeader, CardText } from "material-ui/Card";
+import IconButton from "material-ui/IconButton";
+import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
+
+import { makeTree } from "../lib";
 import { dataTest } from "../lib/attributes";
+import theme from "../styles/theme";
+import GSForm from "./forms/GSForm";
+import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
 
 const styles = {
   pullRight: {
@@ -50,7 +39,6 @@ const styles = {
   }
 };
 
-export default class CampaignInteractionStepsForm extends React.Component {
   state = {
     focusedField: null,
     interactionSteps: this.props.formValues.interactionSteps[0]
