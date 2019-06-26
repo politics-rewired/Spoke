@@ -207,10 +207,10 @@ class ScriptEditor extends React.Component {
 }
 
 ScriptEditor.propTypes = {
-  scriptFields: PropTypes.array,
-  scriptText: PropTypes.string,
-  onChange: PropTypes.func,
-  name: PropTypes.string
+  name: PropTypes.string.isRequired,
+  scriptText: PropTypes.string.isRequired,
+  scriptFields: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired
 };
 
 export default ScriptEditor;

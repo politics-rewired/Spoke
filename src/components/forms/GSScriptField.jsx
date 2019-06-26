@@ -52,8 +52,8 @@ class GSScriptField extends GSFormField {
   };
 
   renderDialog() {
+    const { name, customFields } = this.props;
     const { open } = this.state;
-    const { customFields, sampleContact } = this.props;
     const scriptFields = allScriptFields(customFields);
 
     return (
@@ -77,11 +77,11 @@ class GSScriptField extends GSFormField {
         onRequestClose={this.handleCancelDialog}
       >
         <ScriptEditor
-          expandable
           ref="dialogScriptInput"
+          name={name}
           scriptText={this.state.script}
-          sampleContact={sampleContact}
           scriptFields={scriptFields}
+          expandable={true}
           onChange={val => this.setState({ script: val })}
         />
       </Dialog>
@@ -98,6 +98,7 @@ class GSScriptField extends GSFormField {
       "multiLine",
       "name",
       "value",
+      "data-test",
       "onBlur",
       "onChange"
     ]);
@@ -121,7 +122,15 @@ class GSScriptField extends GSFormField {
 
 GSScriptField.propTypes = {
   value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired
+  customFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  name: PropTypes.string,
+  className: PropTypes.string,
+  hintText: PropTypes.string,
+  label: PropTypes.string,
+  multiLine: PropTypes.bool,
+  fullWidth: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  onBlur: PropTypes.func
 };
 
 export default GSScriptField;
