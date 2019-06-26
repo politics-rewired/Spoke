@@ -217,12 +217,12 @@ class CampaignInteractionStepsForm extends React.Component {
               <Form.Field
                 {...dataTest("editorInteraction")}
                 name="scriptOptions"
-                type="script"
-                fullWidth
-                customFields={customFields}
+                type="scriptOptions"
                 label="Script"
-                multiLine
                 hintText="This is what your texters will send to your contacts. E.g. Hi, {firstName}. It's {texterFirstName} here."
+                customFields={customFields}
+                fullWidth
+                multiLine
               />
               <Form.Field
                 {...dataTest("questionText")}

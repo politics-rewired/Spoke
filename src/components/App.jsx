@@ -9,6 +9,7 @@ import Form from "react-formal";
 import GSTextField from "./forms/GSTextField";
 import GSDateField from "./forms/GSDateField";
 import GSScriptField from "./forms/GSScriptField";
+import GSScriptOptionsField from "./forms/GSScriptOptionsField";
 import GSSelectField from "./forms/GSSelectField";
 
 // Needed for MaterialUI
@@ -20,6 +21,7 @@ Form.addInputTypes({
   date: GSDateField,
   email: GSTextField,
   script: GSScriptField,
+  scriptOptions: GSScriptOptionsField,
   select: GSSelectField
 });
 
