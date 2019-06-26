@@ -1,4 +1,6 @@
 import React from "react";
+import PropTypes from "prop-types";
+import pick from "lodash/pick";
 import GSFormField from "./GSFormField";
 import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
@@ -14,7 +16,7 @@ const styles = {
   }
 };
 
-export default class GSScriptField extends GSFormField {
+class GSScriptField extends GSFormField {
   constructor(props) {
     super(props);
     this.state = {
@@ -87,6 +89,19 @@ export default class GSScriptField extends GSFormField {
   }
 
   render() {
+    // The "errors" prop is an empty object and is not mentioned in yum or react-formal documentation
+    const passThroughProps = pick(this.props, [
+      "className",
+      "fullWidth",
+      "hintText",
+      "label",
+      "multiLine",
+      "name",
+      "value",
+      "onBlur",
+      "onChange"
+    ]);
+
     return (
       <div>
         <TextField
@@ -96,10 +111,17 @@ export default class GSScriptField extends GSFormField {
           floatingLabelStyle={{
             zIndex: 0
           }}
-          {...this.props}
+          {...passThroughProps}
         />
         {this.renderDialog()}
       </div>
     );
   }
 }
+
+GSScriptField.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired
+};
+
+export default GSScriptField;
