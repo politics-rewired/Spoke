@@ -1,6 +1,6 @@
 import React from "react";
 import type from "prop-types";
-import * as yup from 'yup';
+import * as yup from "yup";
 import Form from "react-formal";
 
 import RaisedButton from "material-ui/RaisedButton";
@@ -39,6 +39,13 @@ const styles = {
     borderLeft: `3px dashed ${theme.colors.veryLightGray}`
   }
 };
+
+const interactionStepSchema = yup.object({
+  scriptOptions: yup.array(yup.string()),
+  questionText: yup.string(),
+  answerOption: yup.string(),
+  answerActions: yup.string()
+});
 
 /**
  * Returns `interactionSteps` with `stepId` and all its children marked as `isDeleted`.
@@ -123,13 +130,6 @@ class CampaignInteractionStepsForm extends React.Component {
     this.setState({ interactionSteps });
   };
 
-  formSchema = yup.object({
-    scriptOptions: yup.array(yup.string()),
-    questionText: yup.string(),
-    answerOption: yup.string(),
-    answerActions: yup.string()
-  });
-
   renderInteractionStep(interactionStep, title = "Start") {
     const { availableActions, customFields } = this.props;
     const displayActions =
@@ -168,7 +168,7 @@ class CampaignInteractionStepsForm extends React.Component {
           <CardText>
             <GSForm
               {...dataTest("childInteraction", !parentInteractionId)}
-              schema={this.formSchema}
+              schema={interactionStepSchema}
               value={interactionStep}
               onChange={this.handleFormChange}
             >
