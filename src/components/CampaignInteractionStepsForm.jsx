@@ -39,6 +39,29 @@ const styles = {
   }
 };
 
+/**
+ * Returns `interactionSteps` with `stepId` and all its children marked as `isDeleted`.
+ * @param {string} stepId The ID of the interaction step to mark as deleted.
+ * @param {string[]} interactionSteps The list of interaction steps to work on.
+ */
+const markDeleted = (stepId, interactionSteps) => {
+  interactionSteps = interactionSteps.map(step => {
+    const updates = {};
+    if (step.id === stepId) updates.isDeleted = true;
+    return Object.assign(step, updates);
+  });
+
+  const childSteps = interactionSteps.filter(
+    step => step.parentInteractionId === stepId
+  );
+  for (const childStep of childSteps) {
+    interactionSteps = markDeleted(childStep.id, interactionSteps);
+  }
+
+  return interactionSteps;
+};
+
+class CampaignInteractionStepsForm extends React.Component {
   state = {
     focusedField: null,
     interactionSteps: this.props.formValues.interactionSteps[0]
@@ -63,60 +86,40 @@ const styles = {
     this.props.onSubmit();
   };
 
-  addStep(parentInteractionId) {
-    return () => {
-      const newId =
-        "new" +
-        Math.random()
-          .toString(36)
-          .replace(/[^a-zA-Z1-9]+/g, "");
-      this.setState({
-        interactionSteps: [
-          ...this.state.interactionSteps,
-          {
-            id: newId,
-            parentInteractionId,
-            questionText: "",
-            scriptOptions: [""],
-            answerOption: "",
-            answerActions: "",
-            isDeleted: false
-          }
-        ]
-      });
-    };
-  }
+  createAddStepHandler = parentInteractionId => () => {
+    const randSuffix = Math.random()
+      .toString(36)
+      .replace(/[^a-zA-Z1-9]+/g, "");
 
-  deleteStep(id) {
-    return () => {
-      this.setState({
-        interactionSteps: this.state.interactionSteps.map(is => {
-          if (is.id == id) {
-            is.isDeleted = true;
-            this.state.interactionSteps
-              .filter(isp => isp.parentInteractionId === is.id)
-              .map(isp => {
-                this.deleteStep(isp.id);
-              });
-          }
-          return is;
-        })
-      });
-    };
-  }
+    this.setState({
+      interactionSteps: [
+        ...this.state.interactionSteps,
+        {
+          id: `new${randSuffix}`,
+          parentInteractionId,
+          questionText: "",
+          scriptOptions: [""],
+          answerOption: "",
+          answerActions: "",
+          isDeleted: false
+        }
+      ]
+    });
+  };
+
+  createDeleteStepHandler = id => () => {
+    const interactionSteps = markDeleted(id, this.state.interactionSteps);
+    this.setState({ interactionSteps });
+  };
 
   handleFormChange = event => {
-    this.setState({
-      interactionSteps: this.state.interactionSteps.map(is => {
-        if (is.id == event.id) {
-          delete event.interactionSteps;
-          return event;
-        } else {
-          delete event.interactionSteps;
-          return is;
-        }
-      })
+    const updatedEvent = Object.assign({}, event, {
+      interactionSteps: undefined
     });
+    const interactionSteps = this.state.interactionSteps.map(
+      step => (step.id === updatedEvent.id ? updatedEvent : step)
+    );
+    this.setState({ interactionSteps });
   };
 
   formSchema = yup.object({
@@ -127,8 +130,26 @@ const styles = {
   });
 
   renderInteractionStep(interactionStep, title = "Start") {
+    const { availableActions, customFields } = this.props;
+    const displayActions =
+      parentInteractionId && availableActions && availableActions.length;
+
+    const {
+      scriptOptions,
+      questionText,
+      parentInteractionId,
+      answerOption,
+      answerActions,
+      interactionSteps: childSteps
+    } = interactionStep;
+    const stepHasScript = scriptOptions[0];
+    const stepHasQuestion = questionText;
+    const stepCanHaveChildren = !parentInteractionId || answerOption;
+    const isAbleToAddResponse =
+      stepHasQuestion && stepHasScript && stepCanHaveChildren;
+
     return (
-      <div>
+      <div key={interactionStep.id}>
         <Card
           style={styles.interactionStep}
           ref={interactionStep.id}
@@ -138,22 +159,19 @@ const styles = {
             style={styles.cardHeader}
             title={title}
             subtitle={
-              interactionStep.parentInteractionId
+              parentInteractionId
                 ? ""
                 : "Enter a script for your texter along with the question you want the texter be able to answer on behalf of the contact."
             }
           />
           <CardText>
             <GSForm
-              {...dataTest(
-                "childInteraction",
-                !interactionStep.parentInteractionId
-              )}
+              {...dataTest("childInteraction", !parentInteractionId)}
               schema={this.formSchema}
               value={interactionStep}
               onChange={this.handleFormChange}
             >
-              {interactionStep.parentInteractionId ? (
+              {parentInteractionId && (
                 <Form.Field
                   {...dataTest("answerOption")}
                   name="answerOption"
@@ -161,20 +179,14 @@ const styles = {
                   fullWidth
                   hintText="Answer to the previous question"
                 />
-              ) : (
-                ""
               )}
-              {interactionStep.parentInteractionId ? (
+              {parentInteractionId && (
                 <DeleteIcon
                   style={styles.pullRight}
-                  onTouchTap={this.deleteStep(interactionStep.id).bind(this)}
+                  onTouchTap={this.createDeleteStepHandler(interactionStep.id)}
                 />
-              ) : (
-                ""
               )}
-              {interactionStep.parentInteractionId &&
-              this.props.availableActions &&
-              this.props.availableActions.length ? (
+              {displayActions && (
                 <div key={`answeractions-${interactionStep.id}`}>
                   <Form.Field
                     name="answerActions"
@@ -182,7 +194,7 @@ const styles = {
                     default=""
                     choices={[
                       { value: "", label: "Action..." },
-                      ...this.props.availableActions.map(action => ({
+                      ...availableActions.map(action => ({
                         value: action.name,
                         label: action.display_name
                       }))
@@ -192,22 +204,18 @@ const styles = {
                     <HelpIconOutline />
                   </IconButton>
                   <div>
-                    {interactionStep.answerActions
-                      ? this.props.availableActions.filter(
-                          a => a.name === interactionStep.answerActions
-                        )[0].instructions
-                      : ""}
+                    {answerActions &&
+                      availableActions.filter(a => a.name === answerActions)[0]
+                        .instructions}
                   </div>
                 </div>
-              ) : (
-                ""
               )}
               <Form.Field
                 {...dataTest("editorInteraction")}
                 name="scriptOptions"
                 type="script"
                 fullWidth
-                customFields={this.props.customFields}
+                customFields={customFields}
                 label="Script"
                 multiLine
                 hintText="This is what your texters will send to your contacts. E.g. Hi, {firstName}. It's {texterFirstName} here."
@@ -223,33 +231,19 @@ const styles = {
           </CardText>
         </Card>
         <div style={styles.answerContainer}>
-          {interactionStep.questionText &&
-          interactionStep.scriptOptions &&
-          (!interactionStep.parentInteractionId ||
-            interactionStep.answerOption) ? (
-            <div>
-              <RaisedButton
-                {...dataTest("addResponse")}
-                label="+ Add a response"
-                onTouchTap={this.addStep(interactionStep.id).bind(this)}
-                style={{ marginBottom: "10px" }}
-              />
-            </div>
-          ) : (
-            ""
+          {isAbleToAddResponse && (
+            <RaisedButton
+              {...dataTest("addResponse")}
+              label="+ Add a response"
+              onTouchTap={this.createAddStepHandler(interactionStep.id)}
+              style={{ marginBottom: "10px" }}
+            />
           )}
-          {interactionStep.interactionSteps
+          {childSteps
             .filter(is => !is.isDeleted)
-            .map(is => {
-              return (
-                <div>
-                  {this.renderInteractionStep(
-                    is,
-                    `Question: ${interactionStep.questionText}`
-                  )}
-                </div>
-              );
-            })}
+            .map(childStep =>
+              this.renderInteractionStep(childStep, `Question: ${questionText}`)
+            )}
         </div>
       </div>
     );
@@ -277,12 +271,13 @@ const styles = {
 }
 
 CampaignInteractionStepsForm.propTypes = {
-  formValues: type.object,
-  onChange: type.func,
-  ensureComplete: type.bool,
-  onSubmit: type.func,
-  customFields: type.array,
-  saveLabel: type.string,
-  errors: type.array,
-  availableActions: type.array
+  formValues: type.object.isRequired,
+  customFields: type.array.isRequired,
+  availableActions: type.array.isRequired,
+  ensureComplete: type.bool.isRequired,
+  saveLabel: type.string.isRequired,
+  onChange: type.func.isRequired,
+  onSubmit: type.func.isRequired
 };
+
+export default CampaignInteractionStepsForm;
