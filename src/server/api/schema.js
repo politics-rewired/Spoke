@@ -1156,6 +1156,7 @@ const rootMutations = {
         // TODO - MySQL Specific. This should be an inline subquery
         const campaignIds = await campaignIdQuery;
 
+        // Using array_to_string is easier and faster than using unnest(script_options) (https://stackoverflow.com/a/7222285)
         const interactionStepsToChange = await r
           .knex("interaction_step")
           .transacting(trx)
