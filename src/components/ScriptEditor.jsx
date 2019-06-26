@@ -176,6 +176,7 @@ class ScriptEditor extends React.Component {
       <div style={styles.scriptFieldButtonSection}>
         {scriptFields.map(field => (
           <Chip
+            key={field}
             style={styles.scriptFieldButton}
             text={delimit(field)}
             onTouchTap={() => this.addCustomField(field)}
