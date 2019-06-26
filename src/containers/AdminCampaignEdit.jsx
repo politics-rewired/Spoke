@@ -56,7 +56,7 @@ const campaignInfoFragment = `
   interactionSteps {
     id
     questionText
-    script
+    scriptOptions
     answerOption
     answerActions
     parentInteractionId

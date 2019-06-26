@@ -13,9 +13,9 @@ export const resolvers = {
       ],
       InteractionStep
     ),
-    script: async interactionStep => {
+    scriptOptions: async interactionStep => {
       const { script, script_options } = interactionStep;
-      return (script_options && script_options[0]) || script;
+      return script_options || [script];
     },
     questionText: async interactionStep => {
       return interactionStep.question;

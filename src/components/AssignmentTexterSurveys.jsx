@@ -34,7 +34,7 @@ class AssignmentTexterSurveys extends Component {
     const answerOption = interactionStep.question.answerOptions[answerIndex];
 
     const { nextInteractionStep } = answerOption;
-    return nextInteractionStep ? nextInteractionStep.script : null;
+    return nextInteractionStep ? nextInteractionStep.scriptOptions[0] : null;
   }
 
   handleExpandChange = newExpandedState => {

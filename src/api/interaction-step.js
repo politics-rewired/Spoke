@@ -3,7 +3,7 @@ export const schema = `
     id: ID!
     question: Question
     questionText: String
-    script: String
+    scriptOptions: [String]!
     answerOption: String
     parentInteractionId: String
     isDeleted: Boolean

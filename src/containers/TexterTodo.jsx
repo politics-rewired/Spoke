@@ -140,14 +140,14 @@ const mapQueriesToProps = ({ ownProps }) => ({
             customFields
             interactionSteps {
               id
-              script
+              scriptOptions
               question {
                 text
                 answerOptions {
                   value
                   nextInteractionStep {
                     id
-                    script
+                    scriptOptions
                   }
                 }
               }

@@ -330,7 +330,7 @@ export class AssignmentTexterContact extends React.Component {
     const { contact, campaign } = this.props;
     return contact.messageStatus == "needsMessage"
       ? this.getMessageTextFromScript(
-          getTopMostParent(campaign.interactionSteps).script
+          getTopMostParent(campaign.interactionSteps).scriptOptions[0]
         )
       : "";
   };

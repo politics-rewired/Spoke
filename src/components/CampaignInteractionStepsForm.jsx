@@ -49,7 +49,7 @@ const styles = {
             parentInteractionId: null,
             questionText: "",
             answerOption: "",
-            script: "",
+            scriptOptions: [""],
             answerActions: "",
             isDeleted: false
           }
@@ -77,7 +77,7 @@ const styles = {
             id: newId,
             parentInteractionId,
             questionText: "",
-            script: "",
+            scriptOptions: [""],
             answerOption: "",
             answerActions: "",
             isDeleted: false
@@ -120,7 +120,7 @@ const styles = {
   };
 
   formSchema = yup.object({
-    script: yup.string(),
+    scriptOptions: yup.array(yup.string()),
     questionText: yup.string(),
     answerOption: yup.string(),
     answerActions: yup.string()
@@ -204,7 +204,7 @@ const styles = {
               )}
               <Form.Field
                 {...dataTest("editorInteraction")}
-                name="script"
+                name="scriptOptions"
                 type="script"
                 fullWidth
                 customFields={this.props.customFields}
@@ -224,7 +224,7 @@ const styles = {
         </Card>
         <div style={styles.answerContainer}>
           {interactionStep.questionText &&
-          interactionStep.script &&
+          interactionStep.scriptOptions &&
           (!interactionStep.parentInteractionId ||
             interactionStep.answerOption) ? (
             <div>

@@ -280,7 +280,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("interactionSteps")) {
     // TODO: debug why { script: '' } is even being sent from the client in the first place
-    if (!_.isEqual(campaign.interactionSteps, { script: "" })) {
+    if (!_.isEqual(campaign.interactionSteps, { scriptOptions: [""] })) {
       await accessRequired(
         user,
         organizationId,
@@ -340,7 +340,7 @@ async function updateInteractionSteps(
       const newIstep = await InteractionStep.save({
         parent_interaction_id: is.parentInteractionId || null,
         question: is.questionText,
-        script: is.script,
+        script_options: is.scriptOptions,
         answer_option: is.answerOption,
         answer_actions: is.answerActions,
         campaign_id: campaignId,
@@ -359,7 +359,7 @@ async function updateInteractionSteps(
           .where({ id: is.id })
           .update({
             question: is.questionText,
-            script: is.script,
+            script_options: is.scriptOptions,
             answer_option: is.answerOption,
             answer_actions: is.answerActions,
             is_deleted: is.isDeleted
@@ -994,7 +994,7 @@ const rootMutations = {
           let is = {
             id: "new" + interaction.id,
             questionText: interaction.question,
-            script: interaction.script,
+            scriptOptions: interaction.script_options,
             answerOption: interaction.answer_option,
             answerActions: interaction.answer_actions,
             isDeleted: interaction.is_deleted,
@@ -1006,7 +1006,7 @@ const rootMutations = {
           let is = {
             id: "new" + interaction.id,
             questionText: interaction.question,
-            script: interaction.script,
+            scriptOptions: interaction.script_options,
             answerOption: interaction.answer_option,
             answerActions: interaction.answer_actions,
             isDeleted: interaction.is_deleted,
@@ -1135,23 +1135,27 @@ const rootMutations = {
         const interactionStepsToChange = await r
           .knex("interaction_step")
           .transacting(trx)
-          .where("script", "like", `%${searchString}%`)
+          .where("scriptOptions[0]", "like", `%${searchString}%`)
           .whereIn("campaign_id", campaignIds);
 
         const scriptUpdates = [];
         for (let step of interactionStepsToChange) {
-          const newText = replaceAll(step.script, searchString, replaceString);
+          const newText = replaceAll(
+            step.scriptOptions[0],
+            searchString,
+            replaceString
+          );
 
           const scriptUpdate = {
             campaignId: step.campaign_id,
-            found: step.script,
+            found: step.scriptOptions[0],
             replaced: newText
           };
 
           await r
             .knex("interaction_step")
             .transacting(trx)
-            .update({ script: newText })
+            .update({ "scriptOptions[0]": newText })
             .where({ id: step.id });
 
           scriptUpdates.push(scriptUpdate);
