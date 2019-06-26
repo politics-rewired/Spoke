@@ -1159,30 +1159,35 @@ const rootMutations = {
         const interactionStepsToChange = await r
           .knex("interaction_step")
           .transacting(trx)
-          .where("scriptOptions[0]", "like", `%${searchString}%`)
+          .select(["id", "campaign_id", "script_options"])
+          .whereRaw("array_to_string(script_options, '||') like ?", [
+            `%${searchString}%`
+          ])
           .whereIn("campaign_id", campaignIds);
 
         const scriptUpdates = [];
         for (let step of interactionStepsToChange) {
-          const newText = replaceAll(
-            step.scriptOptions[0],
-            searchString,
-            replaceString
-          );
-
-          const scriptUpdate = {
-            campaignId: step.campaign_id,
-            found: step.scriptOptions[0],
-            replaced: newText
-          };
+          const script_options = step.script_options.map(scriptOption => {
+            const newValue = replaceAll(
+              scriptOption,
+              searchString,
+              replaceString
+            );
+            if (newValue !== scriptOption) {
+              scriptUpdates.push({
+                campaignId: step.campaign_id,
+                found: scriptOption,
+                replaced: newValue
+              });
+            }
+            return newValue;
+          });
 
           await r
             .knex("interaction_step")
             .transacting(trx)
-            .update({ "scriptOptions[0]": newText })
+            .update({ script_options })
             .where({ id: step.id });
-
-          scriptUpdates.push(scriptUpdate);
         }
 
         return scriptUpdates;
