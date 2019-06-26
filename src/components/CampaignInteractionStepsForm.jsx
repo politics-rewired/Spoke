@@ -151,7 +151,7 @@ class CampaignInteractionStepsForm extends React.Component {
       answerActions,
       interactionSteps: childSteps
     } = interactionStep;
-    const stepHasScript = scriptOptions[0];
+    const stepHasScript = scriptOptions.length > 0;
     const stepHasQuestion = questionText;
     const stepCanHaveChildren = !parentInteractionId || answerOption;
     const isAbleToAddResponse =

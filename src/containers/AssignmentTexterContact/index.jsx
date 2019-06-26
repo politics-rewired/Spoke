@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+import sample from "lodash/sample";
 import { StyleSheet, css } from "aphrodite";
 import MessageList from "../../components/MessageList";
 import CannedResponseMenu from "../../components/CannedResponseMenu";
@@ -11,7 +12,7 @@ import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
 import { applyScript } from "../../lib/scripts";
-import * as yup from 'yup';
+import * as yup from "yup";
 import GSForm from "../../components/forms/GSForm";
 import Form from "react-formal";
 import GSSubmitButton from "../../components/forms/GSSubmitButton";
@@ -328,11 +329,12 @@ export class AssignmentTexterContact extends React.Component {
 
   getStartingMessageText = () => {
     const { contact, campaign } = this.props;
-    return contact.messageStatus == "needsMessage"
-      ? this.getMessageTextFromScript(
-          getTopMostParent(campaign.interactionSteps).scriptOptions[0]
-        )
-      : "";
+    if (contact.messageStatus === "needsMessage") {
+      const { scriptOptions } = getTopMostParent(campaign.interactionSteps);
+      const randomScript = sample(scriptOptions);
+      return this.getMessageTextFromScript(randomScript);
+    }
+    return "";
   };
 
   handleOpenPopover = event => {

@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+import sample from "lodash/sample";
+
 import { grey50 } from "material-ui/styles/colors";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import MenuItem from "material-ui/MenuItem";
@@ -34,7 +36,11 @@ class AssignmentTexterSurveys extends Component {
     const answerOption = interactionStep.question.answerOptions[answerIndex];
 
     const { nextInteractionStep } = answerOption;
-    return nextInteractionStep ? nextInteractionStep.scriptOptions[0] : null;
+    if (nextInteractionStep) {
+      const { scriptOptions } = nextInteractionStep;
+      return sample(scriptOptions);
+    }
+    return null;
   }
 
   handleExpandChange = newExpandedState => {
