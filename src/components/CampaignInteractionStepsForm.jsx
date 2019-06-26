@@ -88,8 +88,16 @@ class CampaignInteractionStepsForm extends React.Component {
   };
 
   onSave = async () => {
+    // Strip all empty script versions. "Save" should be disabled in this case, but just in case...
+    const interactionSteps = this.state.interactionSteps.map(step => {
+      const scriptOptions = step.scriptOptions.filter(
+        scriptOption => scriptOption.trim() !== ""
+      );
+      return Object.assign(step, { scriptOptions });
+    });
+
     await this.props.onChange({
-      interactionSteps: makeTree(this.state.interactionSteps)
+      interactionSteps: makeTree(interactionSteps)
     });
     this.props.onSubmit();
   };
@@ -256,6 +264,14 @@ class CampaignInteractionStepsForm extends React.Component {
   render() {
     const tree = makeTree(this.state.interactionSteps);
 
+    const emptyScriptSteps = this.state.interactionSteps.filter(step => {
+      const hasNoOptions = step.scriptOptions.length === 0;
+      const hasEmptyScripts =
+        step.scriptOptions.filter(version => version.trim() === "").length > 0;
+      return hasNoOptions || hasEmptyScripts;
+    });
+    const hasEmptyScripts = emptyScriptSteps.length > 0;
+
     return (
       <div>
         <CampaignFormSectionHeading
@@ -267,8 +283,14 @@ class CampaignInteractionStepsForm extends React.Component {
           {...dataTest("interactionSubmit")}
           primary
           label={this.props.saveLabel}
-          onTouchTap={this.onSave.bind(this)}
+          disabled={hasEmptyScripts}
+          onTouchTap={this.onSave}
         />
+        {hasEmptyScripts && (
+          <p style={{ color: "#DD0000" }}>
+            You have one or more empty scripts!
+          </p>
+        )}
       </div>
     );
   }
