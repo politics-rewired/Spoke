@@ -33,8 +33,8 @@ class GSScriptOptionsField extends GSFormField {
     event.preventDefault();
 
     this.setState(
-      { scriptTarget: scriptVersion, scriptDraft: scriptVersion }
-      // () => this.refs.dialogScriptInput.focus()
+      { scriptTarget: scriptVersion, scriptDraft: scriptVersion },
+      () => this.refs.dialogScriptInput.focus()
     );
   };
 
