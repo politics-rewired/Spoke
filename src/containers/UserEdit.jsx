@@ -7,7 +7,7 @@ import gql from "graphql-tag";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
 import Form from "react-formal";
-import * as yup from 'yup';
+import * as yup from "yup";
 
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";

@@ -34,7 +34,7 @@ if (useSSL) pg.defaults.ssl = true;
 
 let config;
 
-https://dba.stackexchange.com/questions/164419/is-it-possible-to-limit-timeout-on-postgres-server
+// https://dba.stackexchange.com/questions/164419/is-it-possible-to-limit-timeout-on-postgres-server
 const pgAfterCreate = (conn, done) =>
   conn.query(
     `SET idle_in_transaction_session_timeout = ${IDLE_TRANSACTION_TIMEOUT};`,
@@ -73,7 +73,13 @@ if (NODE_ENV === "test") {
       user: DB_USER,
       ssl: useSSL
     },
-    pool: { min, max, idleTimeoutMillis, reapIntervalMillis, afterCreate: pgAfterCreate}
+    pool: {
+      min,
+      max,
+      idleTimeoutMillis,
+      reapIntervalMillis,
+      afterCreate: pgAfterCreate
+    }
   };
 } else if (DATABASE_URL) {
   const dbType = DATABASE_URL.match(/^\w+/)[0];

@@ -244,7 +244,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
         auth0Id,
         pendingAssignmentRequest.amount,
         pendingAssignmentRequest.organization_id,
-        trx,
+        trx
       );
 
       await trx("assignment_request")

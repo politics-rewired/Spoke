@@ -3,7 +3,7 @@ import React from "react";
 import loadData from "./hoc/load-data";
 import gql from "graphql-tag";
 import Form from "react-formal";
-import * as yup from 'yup';
+import * as yup from "yup";
 import { StyleSheet, css } from "aphrodite";
 import wrapMutations from "./hoc/wrap-mutations";
 import theme from "../styles/theme";
