@@ -43,7 +43,8 @@ class ContactActionDialog extends Component {
 
   getContactActionTextFieldRef = () => {
     // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.contactActionText.input.refs.textField.input.refs.input;
+    return this.refs.contactActionText.refs.input.refs.textField.input.refs
+      .input;
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting

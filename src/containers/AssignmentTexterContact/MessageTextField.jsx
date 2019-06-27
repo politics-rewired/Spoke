@@ -23,7 +23,7 @@ class MessageTextField extends Component {
 
   getMessageFieldRef = () => {
     // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.messageText.input.refs.textField.input.refs.input;
+    return this.refs.messageText.refs.input.refs.textField.input.refs.input;
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
