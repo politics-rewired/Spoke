@@ -37,7 +37,7 @@ exports.down = function(knex, Promise) {
     })
     .then(() =>
       knex("interaction_step").update({
-        script: knex.raw("script_options[0]")
+        script: knex.raw("script_options[1]") // Postgres is indexed from 1 https://stackoverflow.com/a/47384220
       })
     )
     .then(() =>
