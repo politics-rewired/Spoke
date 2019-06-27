@@ -21,7 +21,7 @@ Form.addInputTypes({
   date: GSDateField,
   email: GSTextField,
   script: GSScriptField,
-  scriptOptions: GSScriptOptionsField,
+  scriptoptions: GSScriptOptionsField,
   select: GSSelectField
 });
 
