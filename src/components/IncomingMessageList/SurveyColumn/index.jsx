@@ -176,7 +176,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
           id
           interactionSteps {
             id
-            script
             questionText
             answerOption
             parentInteractionId
