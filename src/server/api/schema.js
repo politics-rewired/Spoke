@@ -1054,12 +1054,15 @@ const rootMutations = {
         .where({ campaign_id: oldCampaignId })
         .then(responses =>
           Promise.all(
-            responses.map(async result => {
-              const [newId] = await r.knex("canned_response").insert({
-                campaign_id: newCampaignId,
-                title: response.title,
-                text: response.text
-              });
+            responses.map(async response => {
+              const [newId] = await r
+                .knex("canned_response")
+                .insert({
+                  campaign_id: newCampaignId,
+                  title: response.title,
+                  text: response.text
+                })
+                .returning("id");
               return newId;
             })
           )
