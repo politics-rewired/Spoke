@@ -230,7 +230,7 @@ class AdminCampaignEdit extends React.Component {
           };
           Object.keys(contact).forEach(key => {
             if (!contactInput.hasOwnProperty(key)) {
-              customFields[key] = contact[key];
+              customFields[key] = contact[key].trim();
             }
           });
           contactInput.customFields = JSON.stringify(customFields);
