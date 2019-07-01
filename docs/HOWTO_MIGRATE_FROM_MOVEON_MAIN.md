@@ -125,6 +125,8 @@ Running Spoke with `SUPPRESS_MIGRATIONS` _unset_ will execute the remining migra
 
 **Special Notes**
 
+- `20190225000000_add_message_campaign_contact_id.js` -- You will want to backfill `message.campaign_contact_id` using [`associate-messages.js`](../dev-tools/associate-messages.js).
+  - _NOTE:_ This requires changing database engine `mysql` --> `pg`.
 - [`20190426113700_add_unique_cc_campaign_call.js`](../migrations/20190426113700_add_unique_cc_campaign_call.js) -- See inline notes.
 - [`20190604154700_add_messaging_service_tables.js`](../migrations/20190604154700_add_messaging_service_tables.js) and [`20190618151200_messaging_service_account_keys.js`](../migrations/20190618151200_messaging_service_account_keys.js) -- You will need to manually insert at least one record (messaging service SID, account SID, and encrypted auth token) for each organization.
   - The [`symmetric-encrypt.js`](../dev-tools/symmetric-encrypt.js) script can be used to encrypt the auth token. See inline notes.
