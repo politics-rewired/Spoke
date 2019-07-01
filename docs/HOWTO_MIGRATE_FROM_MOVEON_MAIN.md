@@ -6,6 +6,21 @@ The Politics Rewired fork of Spoke has many differences from [MoveOnOrg/Spoke](h
 
 Below are some of the more important changes from `MoveOnOrg/Spoke` up to July 1, 2019. The PR's linked are the initial PRs and do not include follow up work. We were working very quickly and sloppily in the beginning so the earlier PRs have lots of follow up work.
 
+An overview of the main difficulties and sources of difference:
+
+- Instead of associating messages to campaign_contacts via `cell = contact_number` and `assignment_id = assignment_id`, we have a foreign
+  key on `message` that points to `campaign_contact`. This was necessary for some of the more flexible reassignment flows we built. We have
+  a script that should migrate from one to the other, but it is a potentially dangerous process that may require downtime
+- In order to support multiple different Twilio subaccount / messaging service relationships (and multiple messaging services to get
+  around Twilio's limit of 400 numbers per service), we've moved those controls from `.env` variables to new database schemas. Those
+  database rows will need to be inserted carefully in order to avoid disrupting existing conversations
+- We did not maintain compatibility with MoveOn's caching layer, so certain features we built should interact with cache invalidation, but
+  don't
+- We did not maintain compatibility with MoveOn's (or write our own) tests 😬
+- We `prettier`'ed everything
+
+We will continue to add to this as we notice differences, and add a list of the things we've done likely under a wiki to come.
+
 ### Breaking
 
 - Support multiple script variations for each interaction step to improve deliverability ([#197](https://github.com/politics-rewired/Spoke/pull/197))

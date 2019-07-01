@@ -4,31 +4,11 @@ Spoke is an open source text-distribution tool for organizations to mobilize sup
 
 Spoke was created by Saikat Chakrabarti and Sheena Pakanati, and is now maintained by MoveOn.org at https://github.com/MoveOnOrg/Spoke.
 
-This repository is a branch of MoveOn/Spoke created by Politics Rewired, a small campaign tech consultancy created in 2019. 
+This repository is a branch of MoveOn/Spoke created by Politics Rewired, a small campaign tech consultancy created in 2019.
 
-Due to a desire to develop more quickly, we did not maintain compatibility with MoveOn/Spoke, which means although this repository will be 
-a useful source of ideas, it may more work than is worth it to merge it back into MoveOn/Spoke, although we welcome any efforts towards 
-that goal.
-
-The main difficulties and source of differences that I can think of at this moment in time are:
-
-* Instead of associating messages to campaign_contacts via `cell = contact_number` and `assignment_id = assignment_id`, we have a foreign 
-key on `message` that points to `campaign_contact`. This was necessary for some of the more flexible reassignment flows we built. We have 
-a script that should migrate from one to the other, but it is a potentially dangerous process that may require downtime
-
-* In order to support multiple different Twilio subaccount / messaging service relationships (and multiple messaging services to get 
-around Twilio's limit of 400 numbers per service), we've moved those controls from `.env` variables to new database schemas. Those 
-database rows will need to be inserted carefully in order to avoid disrupting existing conversations
-
-* We did not maintain compatibility with MoveOn's caching layer, so certain features we built should interact with cache invalidation, but 
-don't
-
-* We did not maintain compatibility with MoveOn's (or write our own) tests 😬
-
-* We `prettier`'ed everything
-
-We will continue to add to this as we notice differences, and add a list of the things we've done likely under a wiki to come.
-
+Due to a desire to develop more quickly, we did not maintain compatibility with MoveOn/Spoke, which means although this repository will be
+a useful source of ideas, it may more work than is worth it to merge it back into MoveOn/Spoke, although we welcome any efforts towards
+that goal. See [`HOWTO_MIGRATE_FROM_MOVEON_MAIN.md`](./docs/HOWTO_MIGRATE_FROM_MOVEON_MAIN.md)
 
 ## Getting started
 
