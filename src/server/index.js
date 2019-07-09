@@ -27,6 +27,11 @@ import basicAuth from "express-basic-auth";
 import { fulfillPendingRequestFor } from "./api/assignment";
 import googleLibPhoneNumber from "google-libphonenumber";
 import requestLogging from "../lib/request-logging";
+import { checkForBadDeliverability } from "./api/lib/alerts";
+import cron from "node-cron";
+
+cron.schedule("0 */1 * * *", checkForBadDeliverability);
+checkForBadDeliverability();
 
 const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
 const PNF = googleLibPhoneNumber.PhoneNumberFormat;
