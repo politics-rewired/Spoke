@@ -62,13 +62,15 @@ class MessageList extends Component {
               </p>
               <p style={senderInfoStyle}>
                 {message.isFromContact
-                  ? `Received at ${moment(message.createdAt).fromNow()}`
+                  ? `Received at ${moment(
+                      message.createdAt.replace("Z", "-04:00")
+                    ).fromNow()}`
                   : message.sendStatus == "ERROR"
                     ? `Carrier rejected this message sent by ${senderName} at ${moment(
-                        message.createdAt
+                        message.createdAt.replace("Z", "-04:00")
                       ).fromNow()}`
                     : `Sent by ${senderName} ${moment(
-                        message.createdAt
+                        message.createdAt.replace("Z", "-04:00")
                       ).fromNow()}`}
               </p>
             </div>
