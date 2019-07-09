@@ -75,6 +75,7 @@ import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
 } from "./campaign-overlap";
+import { notifyOnEscalateMessage } from "./lib/alerts";
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
@@ -1413,6 +1414,8 @@ const rootMutations = {
           log.error(error);
         }
       }
+
+      await notifyOnEscalateMessage(campaignContactId, user.id);
 
       return campaignContact;
     },
