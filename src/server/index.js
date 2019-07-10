@@ -31,7 +31,6 @@ import { checkForBadDeliverability } from "./api/lib/alerts";
 import cron from "node-cron";
 
 cron.schedule("0 */1 * * *", checkForBadDeliverability);
-checkForBadDeliverability();
 
 const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
 const PNF = googleLibPhoneNumber.PhoneNumberFormat;
