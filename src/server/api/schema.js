@@ -149,7 +149,12 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
   }
 
   const replacerReducer = (text, domain) => {
-    return replaceAll(text, domain, targetDomain);
+    const domainRegex = RegExp(
+      "/(https?:\/\/)"
+      + escapeRegExp(domain)
+      + "(:*)/g"
+    );
+    return text.replace(domainRegex, "$1" + targetDomain + "$3");
   };
   const finalMessageText = domains.reduce(replacerReducer, messageText);
   return finalMessageText;
