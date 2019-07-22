@@ -98,4 +98,4 @@ if (NODE_ENV === "test") {
   };
 }
 
-export default config;
+module.exports = config;
