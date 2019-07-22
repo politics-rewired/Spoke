@@ -8,7 +8,7 @@ import { resolvers } from "./api/schema";
 import { schema } from "../api/schema";
 import { accessRequired } from "./api/errors";
 import mocks from "./api/mocks";
-import { createLoaders, createTablesIfNecessary, r } from "./models";
+import { createLoaders, r } from "./models";
 import passport from "passport";
 import cookieSession from "cookie-session";
 import {
@@ -59,20 +59,6 @@ if (loginStrategy == "auth0") {
 
 if (!process.env.SUPPRESS_SEED_CALLS) {
   seedZipCodes();
-}
-
-if (!process.env.SUPPRESS_DATABASE_AUTOCREATE) {
-  createTablesIfNecessary().then(didCreate => {
-    // seed above won't have succeeded if we needed to create first
-    if (didCreate && !process.env.SUPPRESS_SEED_CALLS) {
-      seedZipCodes();
-    }
-    if (!didCreate && !process.env.SUPPRESS_MIGRATIONS) {
-      r.k.migrate.latest();
-    }
-  });
-} else if (!process.env.SUPPRESS_MIGRATIONS) {
-  r.k.migrate.latest();
 }
 
 setupUserNotificationObservers();
