@@ -1,14 +1,8 @@
-import {
-  createLoaders,
-  createTables,
-  dropTables,
-  r
-} from "../src/server/models/";
+import { createLoaders, dropTables, r } from "../src/server/models/";
 import { sleep } from "../src/workers/lib";
 
 export async function setupTest() {
-  await createTables();
-  return;
+  return r.k.migrate.latest();
 }
 
 export async function cleanupTest() {

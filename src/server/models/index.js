@@ -63,21 +63,6 @@ const tableList = [
   "unhealthy_link_domain"
 ];
 
-function createTablesIfNecessary() {
-  // builds the database if we don't see the organization table
-  return thinky.k.schema.hasTable("organization").then(tableExists => {
-    if (!tableExists) {
-      log.info("CREATING DATABASE SCHEMA");
-      createTables();
-      return true;
-    }
-  });
-}
-
-function createTables() {
-  return thinky.createTables(tableList);
-}
-
 function dropTables() {
   return thinky.dropTables(tableList);
 }
@@ -112,8 +97,6 @@ export {
   createLoaders,
   r,
   cacheableData,
-  createTables,
-  createTablesIfNecessary,
   dropTables,
   datawarehouse,
   Assignment,
