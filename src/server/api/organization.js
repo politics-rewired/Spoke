@@ -144,6 +144,16 @@ export const resolvers = {
       }
       return 0;
     },
+    numbersApiKey: async organization => {
+      let numbersApiKey;
+      try {
+        const features = JSON.parse(organization.features);
+        numbersApiKey = features.numbersApiKey.slice(0, 4) + "****************";
+      } catch (ex) {
+        // no-op
+      }
+      return numbersApiKey;
+    },
     pendingAssignmentRequestCount: async organization => {
       const count = await r.parseCount(
         r

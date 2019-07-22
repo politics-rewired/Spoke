@@ -38,5 +38,6 @@ export const schema = `
     escalatedConversationCount: Int!
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
+    numbersApiKey: String
   }
 `;

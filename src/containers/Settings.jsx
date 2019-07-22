@@ -278,13 +278,17 @@ class Settings extends React.Component {
 
   render() {
     const { organization } = this.props.data;
-    const { optOutMessage, escalationUserId } = organization;
+    const { optOutMessage, escalationUserId, numbersApiKey } = organization;
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
     });
     const escalateUserSchema = yup.object({
       escalationUserId: yup.number()
+    });
+
+    const numbersApiKeySchema = yup.object({
+      numbersApiKey: yup.string()
     });
 
     return (
@@ -365,6 +369,28 @@ class Settings extends React.Component {
               <Form.Field
                 label="User ID for escalation handler"
                 name="escalationUserId"
+                fullWidth
+              />
+            </CardText>
+            <CardActions>
+              <Form.Button type="submit" label={"Save"} />
+            </CardActions>
+          </GSForm>
+        </Card>
+
+        <Card className={css(styles.sectionCard)}>
+          <GSForm
+            schema={numbersApiKeySchema}
+            onSubmit={this.props.mutations.setNumbersApiKey}
+            defaultValue={{ numbersApiKey }}
+          >
+            <CardHeader title="Assemble Numbers API Key" />
+            <CardText>
+              To enable automatic filtering of landline phone numbers, you will
+              need to put in your Assemble Numbers API Key here.
+              <Form.Field
+                label="Assemble Numbers API Key"
+                name="numbersApiKey"
                 fullWidth
               />
             </CardText>
@@ -503,6 +529,26 @@ const mapMutationsToProps = ({ ownProps }) => ({
       organizationId: ownProps.params.organizationId,
       escalationUserId
     }
+  }),
+  setNumbersApiKey: ({ numbersApiKey }) => ({
+    mutation: gql`
+      mutation setNumbersApiKey(
+        $numbersApiKey: String!
+        $organizationId: String!
+      ) {
+        setNumbersApiKey(
+          organizationId: $organizationId
+          numbersApiKey: $numbersApiKey
+        ) {
+          id
+          numbersApiKey
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.params.organizationId,
+      numbersApiKey
+    }
   })
 });
 
@@ -521,6 +567,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
           textRequestType
           textRequestMaxCount
           escalationUserId
+          numbersApiKey
         }
       }
     `,
