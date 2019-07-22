@@ -1,14 +1,15 @@
 {
   "name": "spoke",
   "description": "Mass peer to peer texting tool",
-  "repository":"https://github.com/moveonorg/spoke",
-  "success_url":"/",
+  "repository": "https://github.com/moveonorg/spoke",
+  "success_url": "/",
   "buildpacks": [
-      { "url": "https://github.com/heroku/heroku-buildpack-nodejs"}
+    { "url": "https://github.com/heroku/heroku-buildpack-nodejs" }
   ],
   "env": {
     "SUPPRESS_SELF_INVITE": {
-      "description": "Should anonymous visitors be able to create new organizations from the home page? You will probably want to start the app with this off, and then after creating your own organization, come back here and set it to 1",
+      "description":
+        "Should anonymous visitors be able to create new organizations from the home page? You will probably want to start the app with this off, and then after creating your own organization, come back here and set it to 1",
       "required": false,
       "value": ""
     },
@@ -104,7 +105,8 @@
     },
 
     "EMAIL_FROM": {
-      "description": "for email notification integration, the from email address",
+      "description":
+        "for email notification integration, the from email address",
       "required": false,
       "value": ""
     },
@@ -140,13 +142,15 @@
     },
 
     "NODE_ENV": {
-      "description": "node environment determines the application build/start process",
+      "description":
+        "node environment determines the application build/start process",
       "required": true,
       "value": "production"
     },
 
     "JOBS_SAME_PROCESS": {
-      "description": "recommended setting which means that the same node process that runs the web app processes applications.",
+      "description":
+        "recommended setting which means that the same node process that runs the web app processes applications.",
       "required": true,
       "value": "1"
     },
@@ -176,21 +180,19 @@
     },
 
     "SUPPRESS_MIGRATIONS": {
-      "description": "When updating code, do you want to disable auto-database migrations?",
+      "description":
+        "When updating code, do you want to disable auto-database migrations?",
       "required": false,
       "value": ""
     },
 
     "DST_REFERENCE_TIMEZONE": {
-      "description": "Timezone to use to determine whether DST is in effect for a date",
+      "description":
+        "Timezone to use to determine whether DST is in effect for a date",
       "required": true,
       "value": "America/New_York"
     }
-
   },
 
-  "addons": [
-    "heroku-postgresql:hobby-dev",
-    "mailgun:starter"
-  ]
+  "addons": ["heroku-postgresql:hobby-dev", "mailgun:starter"]
 }
