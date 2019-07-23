@@ -17,6 +17,7 @@ import {
   getLastMessage,
   saveNewIncomingMessage
 } from "../server/api/lib/message-sending";
+import NumbersClient from "assemble-numbers-client";
 
 import AWS from "aws-sdk";
 import Papa from "papaparse";
@@ -188,10 +189,19 @@ export async function uploadContacts(job) {
   const organization = await Organization.get(campaign.organization_id);
   const orgFeatures = JSON.parse(organization.features || "{}");
 
+  const numbersApiKey = orgFeatures.numbersApiKey;
+  let numbersClient, numbersRequest, landlinesFilteredOut;
+
+  if (numbersApiKey) {
+    numbersClient = new NumbersClient({ apiKey: numbersApiKey });
+    numbersRequest = await numbersClient.createRequest();
+  }
+
   await r
     .table("campaign_contact")
     .getAll(campaignId, { index: "campaign_id" })
     .delete();
+
   let jobPayload = await gunzip(new Buffer(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
   let { contacts, excludeCampaignIds = [] } = jobPayload;
@@ -232,7 +242,7 @@ export async function uploadContacts(job) {
 
           try {
             await trx("campaign_contact").insert(chunk);
-            console.log(236, service);
+            await numbersRequest.addPhoneNumbers(chunk.map(c => c.cell));
           } catch (exc) {
             console.error("Error inserting contacts:", exc);
             throw exc;
@@ -251,6 +261,30 @@ export async function uploadContacts(job) {
           campaign.organization_id
         );
       }
+    }
+
+    if (numbersApiKey) {
+      await numbersRequest.close();
+      await numbersRequest.waitUntilDone({
+        onProgressUpdate: async percentComplete => {
+          await updateJob(job, 100 + Math.round(percentComplete * 100));
+        }
+      });
+
+      landlinesFilteredOut = 0;
+      await numbersRequest.landlines.eachPage({
+        onPage: async numbers => {
+          landlinesFilteredOut += numbers.length;
+          await trx("campaign_contact")
+            .where("campaign_id", campaignId)
+            .whereIn("cell", numbers.map(n => n.phoneNumber))
+            .delete();
+        }
+      });
+
+      resultMessages.push(
+        `Number of contacts excluded because they were landlines: ${landlinesFilteredOut}`
+      );
     }
 
     try {

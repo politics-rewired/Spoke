@@ -150,9 +150,7 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
 
   const replacerReducer = (text, domain) => {
     const domainRegex = RegExp(
-      "/(https?:\/\/)"
-      + escapeRegExp(domain)
-      + "(:*)/g"
+      "/(https?://)" + escapeRegExp(domain) + "(:*)/g"
     );
     return text.replace(domainRegex, "$1" + targetDomain + "$3");
   };
@@ -2291,6 +2289,28 @@ const rootMutations = {
         .where({ id: parseInt(assignmentRequestId) });
 
       return true;
+    },
+    setNumbersApiKey: async (
+      _,
+      { organizationId, numbersApiKey },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "OWNER");
+
+      // User probably made a mistake - no API key will have a *
+      if (numbersApiKey.includes("*")) {
+        throw new Error("Numbers API Key cannot have character: *");
+      }
+
+      const organization = await Organization.get(organizationId);
+      const featuresJSON = JSON.parse(organization.features || "{}");
+      featuresJSON.numbersApiKey = numbersApiKey;
+      organization.features = JSON.stringify(featuresJSON);
+
+      await organization.save();
+      await organizationCache.clear(organizationId);
+
+      return await Organization.get(organizationId);
     }
   }
 };

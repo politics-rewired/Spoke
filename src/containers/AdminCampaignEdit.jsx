@@ -671,7 +671,9 @@ class AdminCampaignEdit extends React.Component {
           if (sectionIsSaving) {
             avatar = <CircularProgress style={avatarStyle} size={25} />;
             cardHeaderStyle.background = theme.colors.lightGray;
-            cardHeaderStyle.width = `${savePercent}%`;
+            cardHeaderStyle.width = `${
+              savePercent > 100 ? savePercent - 100 : savePercent
+            }%`;
           } else if (sectionIsExpanded && sectionCanExpandOrCollapse) {
             cardHeaderStyle.backgroundColor = theme.colors.lightYellow;
           } else if (!sectionCanExpandOrCollapse) {
@@ -725,7 +727,9 @@ class AdminCampaignEdit extends React.Component {
               </CardText>
               {sectionIsSaving && adminPerms ? (
                 <CardActions>
-                  <div>Current Status: {savePercent}% complete</div>
+                  <div>
+                    Current Status: {extractStageAndStatus(savePercent)}
+                  </div>
                   {jobMessage ? <div>Message: {jobMessage}</div> : null}
                   <RaisedButton
                     label="Discard Job"
@@ -739,6 +743,14 @@ class AdminCampaignEdit extends React.Component {
         })}
       </div>
     );
+  }
+}
+
+function extractStageAndStatus(percentComplete) {
+  if (percentComplete > 100) {
+    return `Filtering out landlines. ${percentComplete - 100}% complete`;
+  } else {
+    return `Uploading. ${percentComplete}% complete`;
   }
 }
 

@@ -289,6 +289,7 @@ const rootSchema = `
     deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
     approveAssignmentRequest(assignmentRequestId: String!): Int!
     rejectAssignmentRequest(assignmentRequestId: String!): Boolean!
+    setNumbersApiKey(organizationId: String!, numbersApiKey: String!): Organization!
   }
 
   schema {
