@@ -20,7 +20,6 @@ import wrap from "./wrap";
 import { log } from "../lib";
 import nexmo from "./api/lib/nexmo";
 import twilio from "./api/lib/twilio";
-import { seedZipCodes } from "./seeds/seed-zip-codes";
 import { setupUserNotificationObservers } from "./notifications";
 import { TwimlResponse } from "twilio";
 import basicAuth from "express-basic-auth";
@@ -55,10 +54,6 @@ if (loginStrategy == "auth0") {
   loginCallbacks = setupLocalAuthPassport();
 } else if (loginStrategy === "slack") {
   loginCallbacks = setupSlackPassport();
-}
-
-if (!process.env.SUPPRESS_SEED_CALLS) {
-  seedZipCodes();
 }
 
 setupUserNotificationObservers();

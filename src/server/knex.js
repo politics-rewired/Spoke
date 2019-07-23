@@ -98,4 +98,12 @@ if (NODE_ENV === "test") {
   };
 }
 
+const seedSettings = {
+  seeds: {
+    directory: "./seeds"
+  }
+};
+
+config = Object.assign(config, seedSettings);
+
 module.exports = config;

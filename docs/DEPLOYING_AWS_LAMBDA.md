@@ -194,7 +194,7 @@ After Claudia.js does an 'npm install' essentially of your directory (which will
 
 ### Seed Database
 
-Because seed calls are supressed, you will need to seed the database manually. The current best way to do this is to run Spoke locally using the RDS database credentials. In your `.env` file the relevant lines will look like:
+Because seed calls are supressed, you will need to seed the database manually. The current best way to do this is to run `yarn knex seed:run` locally using the RDS database credentials. In your `.env` file the relevant lines will look like:
 
 ```
 DB_HOST=spokeprod.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com
