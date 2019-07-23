@@ -16,8 +16,6 @@ import {
 } from "./jobs";
 import { setupUserNotificationObservers } from "../server/notifications";
 
-export { seedZipCodes } from "../server/seeds/seed-zip-codes";
-
 /* Two process models are supported in this file.
    The main in both cases is to process jobs and send/receive messages
    on separate loop(s) from the web server.
@@ -176,7 +174,7 @@ export async function handleIncomingMessages() {
 }
 
 export async function runDatabaseMigrations(event, dispatcher, eventCallback) {
-  knex.migrate.latest();
+  r.knex.migrate.latest();
   if (eventCallback) {
     eventCallback(null, "completed migrations");
   }

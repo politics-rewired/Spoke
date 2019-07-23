@@ -122,7 +122,7 @@ VALUES
 
 ### Remaining Migrations
 
-Running Spoke with `SUPPRESS_MIGRATIONS` _unset_ will execute the remining migrations. Most of these do not need special attention. There are, however, a few exceptions:
+Running `yarn knex migrate:latest` will execute the remining migrations. Most of these do not need special attention. There are, however, a few exceptions:
 
 **Special Notes**
 

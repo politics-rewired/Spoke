@@ -1,20 +1,20 @@
 # Table Contents
 
-1. [AWS Resource Configuration](#aws-resource-configuration)
-   1. [Certificate](#certificate)
-   2. [S3](#s3)
-   3. [VPC](#vpc)
-   4. [RDS](#rds)
-2. [Deploy with Claudia.js](#deploy-with-claudiajs)
-   1. [Preparation](#preparation)
-      1. [Configure Deploy Environment](#configure-deploy-environment)
-      2. [Create Production Environment File](#create-production-environment-file)
-   2. [Deploy](#deploy)
-      1. [Seed Database](#seed-database)
-      2. [Setting Up Scheduled Jobs](#setting-up-scheduled-jobs)
-      3. [Migrating the Database](#migrating-the-database)
-      4. [Add a Custom Domain](#add-a-custom-domain)
-   3. [Updating Code or Environment Variables](#updating-code-or-environment-variables)
+1.  [AWS Resource Configuration](#aws-resource-configuration)
+    1.  [Certificate](#certificate)
+    2.  [S3](#s3)
+    3.  [VPC](#vpc)
+    4.  [RDS](#rds)
+2.  [Deploy with Claudia.js](#deploy-with-claudiajs)
+    1.  [Preparation](#preparation)
+        1.  [Configure Deploy Environment](#configure-deploy-environment)
+        2.  [Create Production Environment File](#create-production-environment-file)
+    2.  [Deploy](#deploy)
+        1.  [Seed Database](#seed-database)
+        2.  [Setting Up Scheduled Jobs](#setting-up-scheduled-jobs)
+        3.  [Migrating the Database](#migrating-the-database)
+        4.  [Add a Custom Domain](#add-a-custom-domain)
+    3.  [Updating Code or Environment Variables](#updating-code-or-environment-variables)
 
 # AWS Resource Configuration
 
@@ -119,24 +119,24 @@ Create an RDS instance running Postgres 10.4 with the following settings:
 
 ### Configure Deploy Environment
 
-1. First make sure you are running node 6.10 (compatible with AWS Lambda) `nvm install 6.10; nvm use 6.10`
-2. Install Claudia js: `npm install -g claudia`
-3. Create an admin user on AWS selecting programmatic access. Add that profile to `~/.aws/credentials` giving it a nickname to use later in shell commands:
-   ```
-   [your_profile_nickname]
-   aws_access_key_id = XXXXXXXXXXXXXXXXXXX
-   aws_secret_access_key = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-   ```
-4. Configure [s3cmd](https://github.com/s3tools/s3cmd)
-   1. Create an AWS user called `spoke_upload`. Create a new group for it with the `AmazonS3FullAccess` policy
-   2. Copy the credentials of the `spoke_upload` user to `~/.s3cfg`:
-      ```
-      [default]
-      access_key = XXXXXXXXXXXXXXXXXX
-      secret_key = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-      ```
-      > _TODO_: figure out how to switch away from default profile in `package.json`'s `prod-static-upload` script using ENV vars
-   3. [Install s3cmd](https://s3tools.org/download)
+1.  First make sure you are running node 6.10 (compatible with AWS Lambda) `nvm install 6.10; nvm use 6.10`
+2.  Install Claudia js: `npm install -g claudia`
+3.  Create an admin user on AWS selecting programmatic access. Add that profile to `~/.aws/credentials` giving it a nickname to use later in shell commands:
+    ```
+    [your_profile_nickname]
+    aws_access_key_id = XXXXXXXXXXXXXXXXXXX
+    aws_secret_access_key = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    ```
+4.  Configure [s3cmd](https://github.com/s3tools/s3cmd)
+    1.  Create an AWS user called `spoke_upload`. Create a new group for it with the `AmazonS3FullAccess` policy
+    2.  Copy the credentials of the `spoke_upload` user to `~/.s3cfg`:
+        ```
+        [default]
+        access_key = XXXXXXXXXXXXXXXXXX
+        secret_key = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        ```
+        > _TODO_: figure out how to switch away from default profile in `package.json`'s `prod-static-upload` script using ENV vars
+    3.  [Install s3cmd](https://s3tools.org/download)
 
 ### Create Production Environment File
 
@@ -194,7 +194,7 @@ After Claudia.js does an 'npm install' essentially of your directory (which will
 
 ### Seed Database
 
-Because seed calls are supressed, you will need to seed the database manually. The current best way to do this is to run Spoke locally using the RDS database credentials. In your `.env` file the relevant lines will look like:
+Because seed calls are supressed, you will need to seed the database manually. The current best way to do this is to run `yarn knex seed:run` locally using the RDS database credentials. In your `.env` file the relevant lines will look like:
 
 ```
 DB_HOST=spokeprod.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com

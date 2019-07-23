@@ -102,8 +102,6 @@ Create a new migration using the [knex CLI](https://knexjs.org/#Migrations). If 
 In order to support PostgreSQL and Sqlite, you can define a field as `.json()` when defining it in the
 migration, but it should be `type.string()` in its `src/server/models/` definition.
 
-Production instances can disable automatic migrations on startup with environment variable `SUPPRESS_MIGRATIONS`.
-
 ## Apollo/GraphQL structure and gotchas
 
 See [EXPLANATION-request-example.md](./EXPLANATION-request-example.md) for a great run-down all the
