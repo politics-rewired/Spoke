@@ -1,5 +1,5 @@
 # Use latest LTS
-FROM node:10.16.0-alpine
+FROM node:8.10.0-alpine
 
 WORKDIR /usr/Spoke
 
