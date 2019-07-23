@@ -1,19 +1,24 @@
-FROM node:6.10
+# Use latest LTS
+FROM node:10.16.0-alpine
 
-# Install Spoke
-ARG SPOKE_VERSION=1.4.1
-ENV OUTPUT_DIR=/Spoke/build \
-    SPOKE_VERSION=$SPOKE_VERSION \
-    SUDO_USER=root
-RUN wget https://github.com/MoveOnOrg/Spoke/archive/v$SPOKE_VERSION.tar.gz && \
-    tar zxf v$SPOKE_VERSION.tar.gz && \
-    rm v$SPOKE_VERSION.tar.gz && \
-    mv /Spoke-$SPOKE_VERSION /Spoke && \
-    cd /Spoke && \
-    npm install && \
-    npm install -g foreman
+WORKDIR /usr/Spoke
 
-# Spoke Runtime
-WORKDIR /Spoke
+# Cache dependencies
+COPY package.json .
+RUN npm install
+
+# Configure build environment
+ARG PHONE_NUMBER_COUNTRY=US
+ENV NODE_ENV="production" \
+  OUTPUT_DIR="./build" \
+  ASSETS_DIR="./build/client" \
+  ASSETS_MAP_FILE="./build/client/assets" \
+  PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY
+
+# Copy application codebase
+COPY . .
+RUN npm run prod-build
+
+# Run the production compiled code
 EXPOSE 3000
-CMD ["nf", "start", "--procfile", "./dev-tools/Procfile.dev"]
+CMD [ "npm", "run", "start" ]

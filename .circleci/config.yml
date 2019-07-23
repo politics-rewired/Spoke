@@ -1,0 +1,41 @@
+version: 2
+
+jobs:
+  build_image:
+    docker:
+      - image: circleci/node:8.10.0
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - run:
+          name: Configure GCR access
+          command: |
+            echo "deb http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+            sudo apt-get update && sudo apt-get install google-cloud-sdk
+            echo ${GOOGLE_AUTH} | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GCP_PROJECT}
+
+      - run:
+          name: Publish Docker image
+          command: |
+            docker build --rm=false -t gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 .
+            docker tag gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 gcr.io/spoke-rewired/spoke:latest
+            gcloud docker -- push gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1
+            gcloud docker -- push gcr.io/spoke-rewired/spoke:latest
+
+workflows:
+  version: 2
+
+  build_and_push:
+    jobs:
+      - build_image:
+          context: gcp-spoke
+          filters:
+            branches:
+              only: politics-rewired/deploy
