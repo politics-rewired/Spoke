@@ -5,6 +5,8 @@ jobs:
     docker:
       - image: circleci/node:10.16.0
 
+    working_directory: ~/repo
+
     steps:
       - checkout
 
@@ -13,17 +15,32 @@ jobs:
       - run:
           name: Configure GCR access
           command: |
-            echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
-            sudo /opt/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
-            sudo /opt/google-cloud-sdk/bin/gcloud --quiet config set project ${GCP_PROJECT}
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && sudo apt-get install google-cloud-sdk
+            echo ${GOOGLE_AUTH} | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GCP_PROJECT}
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
 
       - run:
           name: Publish Docker image
           command: |
             docker build --rm=false -t gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 .
             docker tag gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 gcr.io/spoke-rewired/spoke:latest
-            sudo /opt/google-cloud-sdk/bin/gcloud docker -- gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1
-            sudo /opt/google-cloud-sdk/bin/gcloud docker -- gcr.io/spoke-rewired/spoke:latest
+            gcloud docker -- gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1
+            gcloud docker -- gcr.io/spoke-rewired/spoke:latest
 
 workflows:
   version: 2
