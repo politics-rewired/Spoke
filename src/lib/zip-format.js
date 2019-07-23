@@ -1,4 +1,4 @@
-export const getFormattedZip = (zip, country = "US") => {
+const getFormattedZip = (zip, country = "US") => {
   if (country === "US") {
     const regex = /(\d{5})([ \-]\d{4})?/;
     const [, first5] = zip.match(regex) || [];
@@ -57,11 +57,11 @@ var commonZipRanges = [
 
 commonZipRanges.sort((a, b) => a[0] - b[0]);
 
-export function getCommonZipRanges() {
+function getCommonZipRanges() {
   return commonZipRanges;
 }
 
-export const zipToTimeZone = function(zip) {
+const zipToTimeZone = function(zip) {
   // will search common zip ranges -- won't necessarily find something
   // so fallback on looking it up in db
   if (typeof zip == "number" || zip.length >= 5) {
@@ -71,7 +71,7 @@ export const zipToTimeZone = function(zip) {
 };
 
 // lperson 2018.02.10 this is dead code
-export const findZipRanges = function(r) {
+const findZipRanges = function(r) {
   var zipchanges = [];
   return r
     .knex("zip_code")
@@ -101,4 +101,11 @@ export const findZipRanges = function(r) {
       console.log(zipchanges);
     });
   return zipchanges;
+};
+
+module.exports = {
+  getFormattedZip,
+  getCommonZipRanges,
+  zipToTimeZone,
+  findZipRanges
 };
