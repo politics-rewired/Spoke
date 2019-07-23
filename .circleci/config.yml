@@ -34,4 +34,4 @@ workflows:
           context: gcp-spoke
           filters:
             branches:
-              only: politics-rewired/deploy
+              only: ci/publish-docker-image
