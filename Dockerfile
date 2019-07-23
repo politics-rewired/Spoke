@@ -9,8 +9,10 @@ RUN npm install
 
 # Configure build environment
 ARG PHONE_NUMBER_COUNTRY=US
-ENV NODE_ENV=production \
-  OUTPUT_DIR=./build \
+ENV NODE_ENV="production" \
+  OUTPUT_DIR="./build" \
+  ASSETS_DIR="./build/client" \
+  ASSETS_MAP_FILE="./build/client/assets" \
   PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY
 
 # Copy application codebase
