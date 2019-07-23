@@ -381,6 +381,7 @@ class Settings extends React.Component {
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={numbersApiKeySchema}
+            onChange={({ numbersApiKey: newValue }) => this.setState({ hasNumbersApiKeyChanged: newValue !== numbersApiKey })}
             onSubmit={this.props.mutations.setNumbersApiKey}
             defaultValue={{ numbersApiKey }}
           >
@@ -395,7 +396,11 @@ class Settings extends React.Component {
               />
             </CardText>
             <CardActions>
-              <Form.Button type="submit" label={"Save"} />
+              <Form.Button
+                type="submit"
+                label={"Save"}
+                disabled={!this.state.hasNumbersApiKeyChanged}
+              />
             </CardActions>
           </GSForm>
         </Card>
