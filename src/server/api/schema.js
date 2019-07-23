@@ -2297,6 +2297,11 @@ const rootMutations = {
     ) => {
       await accessRequired(user, organizationId, "OWNER");
 
+      // User probably made a mistake - no API key will have a *
+      if (numbersApiKey.includes("*")) {
+        throw new Error("Numbers API Key cannot have character: *");
+      }
+
       const organization = await Organization.get(organizationId);
       const featuresJSON = JSON.parse(organization.features || "{}");
       featuresJSON.numbersApiKey = numbersApiKey;
