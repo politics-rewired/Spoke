@@ -1,3 +1,4 @@
+release: npm run knex migrate:latest && npm run knex seed:run
 web: npm start
 jobhandler: npm run prod-job-handler
 messagesender01: npm run prod-message-sender-01
