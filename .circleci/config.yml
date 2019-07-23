@@ -26,8 +26,8 @@ jobs:
           command: |
             docker build --rm=false -t gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 .
             docker tag gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 gcr.io/spoke-rewired/spoke:latest
-            gcloud docker -- gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1
-            gcloud docker -- gcr.io/spoke-rewired/spoke:latest
+            gcloud docker -- push gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1
+            gcloud docker -- push gcr.io/spoke-rewired/spoke:latest
 
 workflows:
   version: 2
