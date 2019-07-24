@@ -2,11 +2,12 @@ import express from "express";
 import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import passportSlack from "@aoberoi/passport-slack";
-import AuthHasher from "passport-local-authenticate";
 import { Strategy as LocalStrategy } from "passport-local";
 
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
+import localAuthHelpers from "./local-auth-helpers";
+import { capitalizeWord } from "./api/lib/utils";
 
 const {
   BASE_URL,
@@ -145,6 +146,7 @@ function setupAuth0Passport() {
 
   passport.serializeUser((auth0User, done) => {
     // This is the Auth0 user object, not the db one
+    // eslint-disable-next-line no-underscore-dangle
     const auth0Id = auth0User.id || auth0User._json.sub;
     done(null, auth0Id);
   });
@@ -173,8 +175,8 @@ function setupAuth0Passport() {
         userJson["https://spoke/user_metadata"] || userJson.user_metadata || {};
       const userData = {
         auth0_id: auth0Id,
-        first_name: userMetadata.given_name || "",
-        last_name: userMetadata.family_name || "",
+        first_name: capitalizeWord(userMetadata.given_name) || "",
+        last_name: capitalizeWord(userMetadata.family_name) || "",
         cell: userMetadata.cell || "",
         email: userJson.email,
         is_superadmin: false
@@ -200,49 +202,36 @@ function setupAuth0Passport() {
 function setupLocalAuthPassport() {
   const strategy = new LocalStrategy(
     {
-      usernameField: "email"
+      usernameField: "email",
+      passReqToCallback: true
     },
-    (username, password, done) =>
-      r
-        .knex("public.user")
-        .where({ email: username })
-        .first()
-        .then(user => {
-          if (user) {
-            // Log in the user
-            const pwFieldSplit = user.auth0_id.split("|");
-            const hashed = {
-              salt: pwFieldSplit[0],
-              hash: pwFieldSplit[1]
-            };
-            AuthHasher.verify(password, hashed, (error, verified) => {
-              if (error) done(error);
-              if (!verified) done("Validation failed");
-              done(null, user);
-            });
-          } else {
-            // Create the user
-            AuthHasher.hash(password, (error, hashed) => {
-              if (error) done(error);
+    async (req, username, password, done) => {
+      const { nextUrl = "", authType } = req.body;
+      const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
+      const lowerCaseEmail = username.toLowerCase();
+      const existingUser = await r
+        .knex("user")
+        .where({ email: lowerCaseEmail })
+        .first();
 
-              const passwordToSave = `${hashed.salt}|${hashed.hash}`;
-              return r
-                .knex("public.user")
-                .insert({
-                  email: username,
-                  auth0_id: passwordToSave,
-                  first_name: "",
-                  last_name: "",
-                  cell: "",
-                  is_superadmin: false
-                })
-                .returning("*")
-                .then(([user]) => done(null, user))
-                .catch(error => done(error));
-            });
-          }
-        })
-        .catch(error => done(error))
+      // Run login, signup, or reset functions based on request data
+      if (authType && !localAuthHelpers[authType]) return done(null, false);
+
+      try {
+        const user = await localAuthHelpers[authType]({
+          lowerCaseEmail,
+          password,
+          existingUser,
+          nextUrl,
+          uuidMatch,
+          reqBody: req.body
+        });
+        return done(null, user);
+      } catch (error) {
+        // TODO - this should differentiate between invalid login and actual server error
+        return done(null, false);
+      }
+    }
   );
   passport.use(strategy);
 
@@ -254,10 +243,8 @@ function setupLocalAuthPassport() {
   );
 
   const app = express();
-  app.post(
-    "/login-callback",
-    passport.authenticate("local", { failureRedirect: "/login" }),
-    (req, res) => res.redirect(req.body.nextUrl || "/")
+  app.post("/login-callback", passport.authenticate("local"), (req, res) =>
+    res.redirect(req.body.nextUrl || "/")
   );
 
   return app;

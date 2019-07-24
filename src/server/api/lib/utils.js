@@ -18,6 +18,13 @@ export function mapFieldsToModel(fields, model) {
   return resolvers;
 }
 
+export const capitalizeWord = word => {
+  if (word) {
+    return word[0].toUpperCase() + word.slice(1);
+  }
+  return "";
+};
+
 export const normalizeTimezone = serverDate => {
   const now = new Date();
   const currentTzOffset = now.getTimezoneOffset() / 60;
