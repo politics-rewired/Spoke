@@ -1,0 +1,12 @@
+# Ignore everything
+**
+
+# Allow source files
+!/package.json
+!/yarn.lock
+!/webpack
+!/.babelrc
+!/knexfile.env.js
+!/src/*
+!/migrations
+!/seeds
