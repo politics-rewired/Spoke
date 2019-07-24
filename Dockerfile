@@ -11,8 +11,8 @@ RUN npm install
 ARG PHONE_NUMBER_COUNTRY=US
 ENV NODE_ENV="production" \
   OUTPUT_DIR="./build" \
-  ASSETS_DIR="./build/client" \
-  ASSETS_MAP_FILE="./build/client/assets" \
+  ASSETS_DIR="./build/client/assets" \
+  ASSETS_MAP_FILE="assets.json" \
   PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY
 
 # Copy application codebase
