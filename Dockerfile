@@ -10,6 +10,7 @@ RUN npm install
 # Configure build environment
 ARG PHONE_NUMBER_COUNTRY=US
 ENV NODE_ENV="production" \
+  PORT=3000 \
   OUTPUT_DIR="./build" \
   ASSETS_DIR="./build/client/assets" \
   ASSETS_MAP_FILE="assets.json" \
