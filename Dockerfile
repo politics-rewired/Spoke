@@ -5,7 +5,7 @@ WORKDIR /usr/Spoke
 
 # Cache dependencies
 COPY package.json .
-RUN npm install
+RUN yarn install
 
 # Configure build environment
 ARG PHONE_NUMBER_COUNTRY=US
@@ -19,8 +19,8 @@ ENV NODE_ENV="production" \
 
 # Copy application codebase
 COPY . .
-RUN npm run prod-build
+RUN yarn run prod-build
 
 # Run the production compiled code
 EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+CMD [ "yarn", "run", "start" ]
