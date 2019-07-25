@@ -1342,14 +1342,10 @@ export async function exportCampaign(job) {
     const campaignContactsKey = `${objectKeyPrefix}${safeTitle}-${timestamp}.csv`;
     const messagesKey = `${campaignContactsKey}-messages.csv`;
     try {
-      const campaignExportUrl = await uploadToS3(
-        campaignContactsKey,
-        campaignsCsv
-      );
-      const campaignMessagesExportUrl = await uploadToS3(
-        messagesKey,
-        messagesCsv
-      );
+      const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
+        uploadToS3(campaignContactsKey, campaignsCsv),
+        uploadToS3(messagesKey, messagesCsv)
+      ]);
       await sendEmail({
         to: notificationEmail,
         subject: `Export ready for ${campaignTitle}`,
