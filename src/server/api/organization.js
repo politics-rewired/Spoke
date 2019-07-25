@@ -208,6 +208,14 @@ export const resolvers = {
         ;
       `);
       return rawResult.rows;
-    }
+    },
+    tags: async organization =>
+      r
+        .knex("tag")
+        .where({ organization_id: organization.id })
+        .orderBy([
+          { column: "is_system", order: "asc" },
+          { column: "title", order: "asc" }
+        ])
   }
 };

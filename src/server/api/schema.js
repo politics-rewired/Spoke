@@ -72,6 +72,7 @@ import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
+import { resolvers as tagResolvers } from "./tag";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -2347,6 +2348,56 @@ const rootMutations = {
       await organizationCache.clear(organizationId);
 
       return await Organization.get(organizationId);
+    },
+    saveTag: async (_, { organizationId, tag }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      // Update existing tag
+      if (tag.id) {
+        const [updatedTag] = await r
+          .knex("tag")
+          .update({
+            title: tag.title,
+            description: tag.description,
+            is_assignable: tag.isAssignable
+          })
+          .where({
+            id: tag.id,
+            organization_id: organizationId,
+            is_system: false
+          })
+          .returning("*");
+        if (!updatedTag) throw new Error("No matching tag to update!");
+        return updatedTag;
+      }
+
+      // Create new tag
+      const [newTag] = await r
+        .knex("tag")
+        .insert({
+          organization_id: organizationId,
+          author_id: user.id,
+          title: tag.title,
+          description: tag.description,
+          is_assignable: tag.isAssignable
+        })
+        .returning("*");
+      return newTag;
+    },
+    deleteTag: async (_, { organizationId, tagId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const deleteCount = await r
+        .knex("tag")
+        .where({
+          id: tagId,
+          organization_id: organizationId,
+          is_system: false
+        })
+        .del();
+      if (deleteCount !== 1) throw new Error("Could not delete the tag.");
+
+      return true;
     }
   }
 };
@@ -2537,6 +2588,7 @@ const rootResolvers = {
 };
 
 export const resolvers = {
+  ...tagResolvers,
   ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,

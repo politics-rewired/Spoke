@@ -39,5 +39,7 @@ export const schema = `
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
     numbersApiKey: String
+
+    tags: [Tag]
   }
 `;

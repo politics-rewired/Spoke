@@ -51,6 +51,7 @@ import {
 import { schema as inviteSchema, resolvers as inviteResolvers } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
 import { schema as assignmentRequestSchema } from "./assignment-request";
+import { schema as tagSchema } from "./tag";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -299,6 +300,8 @@ const rootSchema = `
     approveAssignmentRequest(assignmentRequestId: String!): Int!
     rejectAssignmentRequest(assignmentRequestId: String!): Boolean!
     setNumbersApiKey(organizationId: String!, numbersApiKey: String!): Organization!
+    saveTag(organizationId: String!, tag: TagInput!): Tag!
+    deleteTag(organizationId: String!, tagId: String!): Boolean!
   }
 
   schema {
@@ -326,5 +329,6 @@ export const schema = [
   inviteSchema,
   linkDomainSchema,
   assignmentRequestSchema,
-  conversationSchema
+  conversationSchema,
+  tagSchema
 ];

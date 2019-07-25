@@ -1,6 +1,7 @@
 import { CampaignContact, r, cacheableData } from "../models";
 import { mapFieldsToModel } from "./lib/utils";
 import { log, getTopMostParent, zipToTimeZone } from "../../lib";
+import { accessRequired } from "./errors";
 
 export const resolvers = {
   Location: {
@@ -240,6 +241,33 @@ export const resolvers = {
         }
         return null;
       }
+    },
+    tags: async (campaignContact, _, { user }) => {
+      const { campaign_id } = campaignContact;
+      const { organization_id } = await r
+        .knex("campaign")
+        .where({ id: campaign_id })
+        .first("organization_id");
+      await accessRequired(user, organization_id, "SUPERVOLUNTEER");
+
+      return r
+        .knex("tag")
+        .select("tag.*")
+        .join(
+          "campaign_contact_tag",
+          "campaign_contact_tag.tag_id",
+          "=",
+          "tag.id"
+        )
+        .where(
+          "campaign_contact_tag.campaign_contact_id",
+          "=",
+          campaignContact.id
+        )
+        .orderBy([
+          { column: "is_system", order: "asc" },
+          { column: "title", order: "asc" }
+        ]);
     }
   }
 };
