@@ -271,8 +271,7 @@ IncomingMessageList.propTypes = {
   onPageChanged: type.func,
   onPageSizeChanged: type.func,
   onConversationSelected: type.func,
-  onConversationCountChanged: type.func,
-  utc: type.string
+  onConversationCountChanged: type.func
 };
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -285,7 +284,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
         $contactNameFilter: ContactNameFilter
-        $utc: String
       ) {
         conversations(
           cursor: $cursor
@@ -294,7 +292,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
           contactsFilter: $contactsFilter
           assignmentsFilter: $assignmentsFilter
           contactNameFilter: $contactNameFilter
-          utc: $utc
         ) {
           pageInfo {
             limit
@@ -340,8 +337,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       contactsFilter: ownProps.contactsFilter,
       campaignsFilter: ownProps.campaignsFilter,
       assignmentsFilter: ownProps.assignmentsFilter,
-      contactNameFilter: ownProps.contactNameFilter,
-      utc: ownProps.utc
+      contactNameFilter: ownProps.contactNameFilter
     },
     forceFetch: true
   }

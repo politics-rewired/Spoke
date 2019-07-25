@@ -51,9 +51,7 @@ const MessageList = function MessageList(props) {
         leftIcon={<ProhibitedIcon style={{ fill: red300 }} />}
         disabled
         primaryText={`${contact.firstName} opted out of texts`}
-        secondaryText={moment(
-          optOut.createdAt.replace("Z", "-04:00")
-        ).fromNow()}
+        secondaryText={moment(optOut.createdAt).fromNow()}
       />
     </div>
   ) : (
@@ -75,9 +73,7 @@ const MessageList = function MessageList(props) {
             primaryText={
               <span style={{ whiteSpace: "pre-wrap" }}>{message.text}</span>
             }
-            secondaryText={`${moment(
-              message.createdAt.replace("Z", "-04:00")
-            ).fromNow()}`}
+            secondaryText={`${moment(message.createdAt).fromNow()}`}
           />
         );
       })}

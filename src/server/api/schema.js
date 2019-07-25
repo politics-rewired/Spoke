@@ -5,6 +5,7 @@ import { GraphQLError } from "graphql/error";
 import isUrl from "is-url";
 import request from "superagent";
 import _ from "lodash";
+import moment from "moment-timezone";
 import { organizationCache } from "../models/cacheable_queries/organization";
 
 import { gzip, log, makeTree } from "../../lib";
@@ -536,8 +537,7 @@ async function sendMessage(
 
   const sendBeforeDate = sendBefore ? sendBefore.toDate() : null;
 
-  // TODO - this is local timezone, not UTC
-  if (sendBeforeDate && sendBeforeDate <= Date.now()) {
+  if (sendBeforeDate && moment(sendBeforeDate).isSameOrBefore(moment())) {
     throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
@@ -2448,8 +2448,7 @@ const rootResolvers = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
-        contactNameFilter,
-        utc
+        contactNameFilter
       },
       { user }
     ) => {
@@ -2461,8 +2460,7 @@ const rootResolvers = {
         campaignsFilter,
         assignmentsFilter,
         contactsFilter,
-        contactNameFilter,
-        utc
+        contactNameFilter
       );
     },
     campaigns: async (

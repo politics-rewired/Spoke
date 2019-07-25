@@ -100,8 +100,7 @@ export async function getConversations(
   campaignsFilter,
   assignmentsFilter,
   contactsFilter,
-  contactNameFilter,
-  utc
+  contactNameFilter
 ) {
   /* Query #1 == get campaign_contact.id for all the conversations matching
    * the criteria with offset and limit. */

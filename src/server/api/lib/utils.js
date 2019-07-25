@@ -24,11 +24,3 @@ export const capitalizeWord = word => {
   }
   return "";
 };
-
-export const normalizeTimezone = serverDate => {
-  const now = new Date();
-  const currentTzOffset = now.getTimezoneOffset() / 60;
-  serverDate = new Date(serverDate);
-  serverDate.setHours(serverDate.getHours() - currentTzOffset);
-  return serverDate;
-};
