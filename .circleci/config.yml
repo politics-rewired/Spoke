@@ -38,4 +38,4 @@ workflows:
           context: gcp-spoke
           filters:
             branches:
-              only: politics-rewired/deploy
+              only: master
