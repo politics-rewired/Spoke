@@ -1054,211 +1054,370 @@ export async function assignTexters(job) {
   });
 }
 
-export async function exportCampaign(job) {
-  const payload = JSON.parse(job.payload);
-  const id = job.campaign_id;
-  const campaign = await Campaign.get(id);
-  const requester = payload.requester;
-  const user = await User.get(requester);
-  const allQuestions = {};
-  const questionCount = {};
+/**
+ * Fetch necessary job data from database.
+ * @param {object} job The export job object to fetch data for. Must have payload, campaign_id, and requester properties.
+ */
+const fetchExportData = async job => {
+  const { campaign_id: campaignId, payload: rawPayload } = job;
+  const { requester: requesterId } = JSON.parse(rawPayload);
+  const { title: campaignTitle } = await r
+    .knex("campaign")
+    .first("title")
+    .where({ id: campaignId });
+  const { email: notificationEmail } = await r
+    .knex("user")
+    .first("email")
+    .where({ id: requesterId });
   const interactionSteps = await r
     .knex("interaction_step")
     .select("*")
-    .where({ campaign_id: id });
-
-  interactionSteps.forEach(step => {
-    if (!step.question || step.question.trim() === "") {
-      return;
-    }
-
-    if (questionCount.hasOwnProperty(step.question)) {
-      questionCount[step.question] += 1;
-    } else {
-      questionCount[step.question] = 0;
-    }
-    const currentCount = questionCount[step.question];
-    if (currentCount > 0) {
-      allQuestions[step.id] = `${step.question}_${currentCount}`;
-    } else {
-      allQuestions[step.id] = step.question;
-    }
-  });
-
-  let finalCampaignResults = [];
-  let finalCampaignMessages = [];
+    .where({ campaign_id: campaignId });
   const assignments = await r
     .knex("assignment")
-    .where("campaign_id", id)
+    .where("campaign_id", campaignId)
     .join("user", "user_id", "user.id")
     .select(
       "assignment.id as id",
-      // user fields
-      "first_name",
-      "last_name",
-      "email",
-      "cell",
-      "assigned_cell"
+      "user.first_name",
+      "user.last_name",
+      "user.email",
+      "user.cell",
+      "user.assigned_cell"
     );
-  const assignmentCount = assignments.length;
 
-  for (let index = 0; index < assignmentCount; index++) {
-    const assignment = assignments[index];
-    const optOuts = await r
-      .table("opt_out")
-      .getAll(assignment.id, { index: "assignment_id" });
+  return {
+    campaignId,
+    campaignTitle,
+    notificationEmail,
+    interactionSteps,
+    assignments
+  };
+};
 
-    const contacts = await r
-      .knex("campaign_contact")
-      .leftJoin("zip_code", "zip_code.zip", "campaign_contact.zip")
-      .select()
-      .where("assignment_id", assignment.id);
-    const messages = await r
-      .table("message")
-      .getAll(assignment.id, { index: "assignment_id" });
-    let convertedMessages = messages.map(message => {
-      const messageRow = {
-        assignmentId: message.assignment_id,
-        campaignId: campaign.id,
-        userNumber: message.user_number,
-        contactNumber: message.contact_number,
-        isFromContact: message.is_from_contact,
-        sendStatus: message.send_status,
-        attemptedAt: moment(message.created_at).toISOString(),
-        text: message.text
-      };
-      return messageRow;
+const stepHasQuestion = step => step.question && step.question.trim() !== "";
+
+/**
+ * Returns map from interaction step ID --> question text (deduped where appropriate).
+ * @param {object[]} interactionSteps Array of interaction steps to work on.
+ */
+const getUniqueQuestionsByStepId = interactionSteps => {
+  const questionSteps = interactionSteps.filter(stepHasQuestion);
+  const duplicateQuestions = _.groupBy(questionSteps, step => step.question);
+
+  return Object.keys(duplicateQuestions).reduce(
+    (allQuestions, questionText) => {
+      const steps = duplicateQuestions[questionText];
+      const newUniqueQuestions =
+        steps.length > 1
+          ? steps.reduce(
+              (collector, step, index) =>
+                Object.assign(collector, {
+                  [step.id]: `${questionText}_${index + 1}`
+                }),
+              {}
+            )
+          : { [steps[0].id]: questionText };
+
+      return Object.assign(allQuestions, newUniqueQuestions);
+    },
+    {}
+  );
+};
+
+const processContactsChunk = async (
+  campaignId,
+  campaignTitle,
+  questionsById,
+  lastContactId = 0
+) => {
+  const { rows } = await r.knex.raw(
+    `
+      with campaign_contacts as (
+        select *
+        from campaign_contact
+        where
+          campaign_id = ?
+          and id > ?
+        limit ?
+      )
+      select
+        campaign_contacts.*,
+        zip_code.city,
+        zip_code.state,
+        question_response.interaction_step_id,
+        question_response.value
+      from campaign_contacts
+      left join question_response
+        on question_response.campaign_contact_id = campaign_contacts.id
+      left join zip_code
+        on zip_code.zip = campaign_contacts.zip
+      order by
+        campaign_contacts.id asc
+      ;
+    `,
+    [campaignId, lastContactId, CHUNK_SIZE]
+  );
+
+  if (rows.length === 0) return false;
+
+  lastContactId = rows[rows.length - 1].id;
+
+  const rowsByContactId = _.groupBy(rows, row => row.id);
+  const contacts = Object.keys(rowsByContactId).map(contactId => {
+    // Use the first row for all the common campaign contact fields
+    const contact = rowsByContactId[contactId][0];
+    const contactRow = {
+      campaignId,
+      campaign: campaignTitle,
+      // TODO - Move this to messages table
+      // assignmentId: contact.assignment_id,
+      // "texter[firstName]": assignment.first_name,
+      // "texter[lastName]": assignment.last_name,
+      // "texter[email]": assignment.email,
+      // "texter[cell]": assignment.cell,
+      // "texter[assignedCell]": assignment.assigned_cell,
+      "contact[firstName]": contact.first_name,
+      "contact[lastName]": contact.last_name,
+      "contact[cell]": contact.cell,
+      "contact[zip]": contact.zip,
+      "contact[city]": contact.city || null,
+      "contact[state]": contact.state || null,
+      "contact[optOut]": contact.is_opted_out,
+      "contact[messageStatus]": contact.message_status,
+      "contact[external_id]": contact.external_id
+    };
+
+    // Append columns for custom fields
+    const customFields = JSON.parse(contact.custom_fields);
+    Object.keys(customFields).forEach(fieldName => {
+      contactRow[`contact[${fieldName}]`] = customFields[fieldName];
     });
 
-    convertedMessages = await Promise.all(convertedMessages);
-    finalCampaignMessages = finalCampaignMessages.concat(convertedMessages);
-    let convertedContacts = contacts.map(async contact => {
-      const contactRow = {
-        campaignId: campaign.id,
-        campaign: campaign.title,
-        assignmentId: assignment.id,
-        "texter[firstName]": assignment.first_name,
-        "texter[lastName]": assignment.last_name,
-        "texter[email]": assignment.email,
-        "texter[cell]": assignment.cell,
-        "texter[assignedCell]": assignment.assigned_cell,
-        "contact[firstName]": contact.first_name,
-        "contact[lastName]": contact.last_name,
-        "contact[cell]": contact.cell,
-        "contact[zip]": contact.zip,
-        "contact[city]": contact.city ? contact.city : null,
-        "contact[state]": contact.state ? contact.state : null,
-        "contact[optOut]": optOuts.find(ele => ele.cell === contact.cell)
-          ? "true"
-          : "false",
-        "contact[messageStatus]": contact.message_status,
-        "contact[external_id]": contact.external_id
-      };
-      const customFields = JSON.parse(contact.custom_fields);
-      Object.keys(customFields).forEach(fieldName => {
-        contactRow[`contact[${fieldName}]`] = customFields[fieldName];
-      });
-
-      const questionResponses = await r
-        .table("question_response")
-        .getAll(contact.id, { index: "campaign_contact_id" });
-
-      Object.keys(allQuestions).forEach(stepId => {
-        let value = "";
-        questionResponses.forEach(response => {
-          if (response.interaction_step_id === parseInt(stepId, 10)) {
-            value = response.value;
-          }
-        });
-
-        contactRow[`question[${allQuestions[stepId]}]`] = value;
-      });
-
-      return contactRow;
+    // Append columns for question responses
+    Object.keys(questionsById).forEach(stepId => {
+      const questionText = questionsById[stepId];
+      const response = rowsByContactId[contactId].find(
+        response => response.interaction_step_id === stepId
+      );
+      const responseValue = response ? response.value : "";
+      contactRow[`question[${questionText}]`] = responseValue;
     });
-    convertedContacts = await Promise.all(convertedContacts);
-    finalCampaignResults = finalCampaignResults.concat(convertedContacts);
-    await updateJob(job, Math.round((index / assignmentCount) * 100));
+
+    return contactRow;
+  });
+
+  return { lastContactId, contacts };
+};
+
+const processMessagesChunk = async (campaignId, lastContactId = 0) => {
+  const { rows } = await r.knex.raw(
+    `
+      with campaign_contact_ids as (
+        select id
+        from campaign_contact
+        where
+          campaign_id = ?
+          and id > ?
+        limit ?
+      )
+      select
+        message.campaign_contact_id,
+        message.assignment_id,
+        message.user_number,
+        message.contact_number,
+        message.is_from_contact,
+        message.text,
+        message.send_status,
+        message.created_at
+      from message
+      join campaign_contact_ids
+        on campaign_contact_ids.id = message.campaign_contact_id
+      order by
+        campaign_contact_id asc,
+        message.created_at asc
+      ;
+    `,
+    [campaignId, lastContactId, CHUNK_SIZE]
+  );
+
+  if (rows.length === 0) return false;
+
+  lastContactId = rows[rows.length - 1].campaign_contact_id;
+
+  const messages = rows.map(message => ({
+    assignmentId: message.assignment_id,
+    userNumber: message.user_number,
+    contactNumber: message.contact_number,
+    isFromContact: message.is_from_contact,
+    sendStatus: message.send_status,
+    attemptedAt: moment(message.created_at).toISOString(),
+    text: message.text,
+    campaignId
+  }));
+
+  return { lastContactId, messages };
+};
+
+const uploadToS3 = async (key, payload) => {
+  const s3bucket = new AWS.S3({
+    signatureVersion: "v4",
+    params: { Bucket: process.env.AWS_S3_BUCKET_NAME }
+  });
+
+  const uploadPparams = { Key: key, Body: payload };
+  await s3bucket.putObject(uploadPparams).promise();
+
+  const exportUrlParams = { Key: key, Expires: 86400 };
+  const campaignExportUrl = await s3bucket.getSignedUrl(
+    "getObject",
+    exportUrlParams
+  );
+
+  return campaignExportUrl;
+};
+
+const deleteJob = async (jobId, retries = 0) => {
+  try {
+    await r
+      .knex("job_request")
+      .where({ id: jobId })
+      .del();
+  } catch (err) {
+    if (retries < 5) {
+      await deleteJob(jobId, retries + 1);
+    } else {
+      console.error(`Could not delete job. Err: ${err.message}`);
+    }
   }
-  const campaignCsv = Papa.unparse(finalCampaignResults);
-  const messageCsv = Papa.unparse(finalCampaignMessages);
+};
+
+export async function exportCampaign(job) {
+  let campaignId = undefined,
+    campaignTitle = undefined,
+    notificationEmail = undefined,
+    interactionSteps = undefined,
+    assignments = undefined;
+  try {
+    ({
+      campaignId,
+      campaignTitle,
+      notificationEmail,
+      interactionSteps,
+      assignments
+    } = await fetchExportData(job));
+  } catch (exc) {
+    console.error("Error fetching export data:");
+    console.error(exc);
+    return;
+  }
+
+  const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
+
+  // Message rows
+  let messageRows = [];
+  try {
+    let chunkMessageResult = undefined;
+    let lastContactId = 0;
+    while (
+      (chunkMessageResult = await processMessagesChunk(
+        campaignId,
+        lastContactId
+      ))
+    ) {
+      lastContactId = chunkMessageResult.lastContactId;
+      messageRows = messageRows.concat(chunkMessageResult.messages);
+    }
+  } catch (exc) {
+    console.error("Error building message rows:");
+    console.error(exc);
+  }
+
+  // Contact rows
+  let contactRows = [];
+  try {
+    let chunkContactResult = undefined;
+    lastContactId = 0;
+    while (
+      (chunkContactResult = await processContactsChunk(
+        campaignId,
+        campaignTitle,
+        uniqueQuestionsByStepId,
+        lastContactId
+      ))
+    ) {
+      lastContactId = chunkContactResult.lastContactId;
+      contactRows = contactRows.concat(chunkContactResult.contacts);
+    }
+  } catch (exc) {
+    console.error("Error building campaign contact rows:");
+    console.error(exc);
+  }
+
+  // Create the CSV paylaods
+  let campaignsCsv = undefined,
+    messagesCsv = undefined;
+  try {
+    campaignsCsv = Papa.unparse(contactRows);
+    messagesCsv = Papa.unparse(messageRows);
+  } catch (exc) {
+    console.error("Error building CSVs:");
+    console.error(exc);
+  }
 
   if (
     process.env.AWS_ACCESS_AVAILABLE ||
     (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)
   ) {
+    // Attempt upload to AWS S3
     const objectKeyPrefix = process.env.AWS_S3_KEY_PREFIX || "";
+    const safeTitle = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
+    const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
+    const campaignContactsKey = `${objectKeyPrefix}${safeTitle}-${timestamp}.csv`;
+    const messagesKey = `${campaignContactsKey}-messages.csv`;
     try {
-      const s3bucket = new AWS.S3({
-        signatureVersion: "v4",
-        params: { Bucket: process.env.AWS_S3_BUCKET_NAME }
-      });
-      const campaignTitle = campaign.title
-        .replace(/ /g, "_")
-        .replace(/\//g, "_");
-      const key = `${objectKeyPrefix}${campaignTitle}-${moment().format(
-        "YYYY-MM-DD-HH-mm-ss"
-      )}.csv`;
-      const messageKey = `${key}-messages.csv`;
-      let params = { Key: key, Body: campaignCsv };
-      await s3bucket.putObject(params).promise();
-      params = { Key: key, Expires: 86400 };
-      const campaignExportUrl = await s3bucket.getSignedUrl(
-        "getObject",
-        params
-      );
-      params = { Key: messageKey, Body: messageCsv };
-      await s3bucket.putObject(params).promise();
-      params = { Key: messageKey, Expires: 86400 };
-      const campaignMessagesExportUrl = await s3bucket.getSignedUrl(
-        "getObject",
-        params
-      );
+      const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
+        uploadToS3(campaignContactsKey, campaignsCsv),
+        uploadToS3(messagesKey, messagesCsv)
+      ]);
       await sendEmail({
-        to: user.email,
-        subject: `Export ready for ${campaign.title}`,
-        text: `Your Spoke exports are ready! These URLs will be valid for 24 hours.
-        Campaign export: ${campaignExportUrl}
-        Message export: ${campaignMessagesExportUrl}`
+        to: notificationEmail,
+        subject: `Export ready for ${campaignTitle}`,
+        text:
+          `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
+          `    Campaign export: ${campaignExportUrl}` +
+          `    Message export: ${campaignMessagesExportUrl}`
       }).catch(err => {
-        log.error(err);
-        log.info(`Campaign Export URL - ${campaignExportUrl}`);
-        log.info(`Campaign Messages Export URL - ${campaignMessagesExportUrl}`);
+        console.error(err);
+        console.info(`Campaign Export URL - ${campaignExportUrl}`);
+        console.info(
+          `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
+        );
       });
-      log.info(`Successfully exported ${id}`);
+      console.info(`Successfully exported ${campaignId}`);
     } catch (err) {
-      log.error(err);
+      console.error("Error uploading to S3:");
+      console.error(err);
+
       await sendEmail({
-        to: user.email,
-        subject: `Export failed for ${campaign.title}`,
+        to: notificationEmail,
+        subject: `Export failed for ${campaignTitle}`,
         text: `Your Spoke exports failed... please try again later.
         Error: ${err.message}`
       });
     }
   } else {
-    log.debug("Would have saved the following to S3:");
-    log.debug(campaignCsv);
-    log.debug(messageCsv);
+    console.debug("Would have saved the following to S3:");
+    console.debug(campaignCsv);
+    console.debug(messageCsv);
   }
 
+  // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
   if (job.id) {
-    let retries = 0;
-    const deleteJob = async () => {
-      try {
-        await r
-          .table("job_request")
-          .get(job.id)
-          .delete();
-      } catch (err) {
-        if (retries < 5) {
-          retries += 1;
-          await deleteJob();
-        } else log.error(`Could not delete job. Err: ${err.message}`);
-      }
-    };
-
-    await deleteJob();
-  } else log.debug(job);
+    await deleteJob(job.id);
+  } else {
+    console.debug(job);
+  }
 }
 
 // add an in-memory guard that the same messages are being sent again and again
