@@ -19,6 +19,7 @@ import theme from "../styles/theme";
 import UserEdit from "./UserEdit";
 import Empty from "../components/Empty";
 import OrganizationJoinLink from "../components/OrganizationJoinLink";
+import PasswordResetLink from "../components/PasswordResetLink";
 import LoadingIndicator from "../components/LoadingIndicator";
 
 class AdminPersonList extends React.Component {
