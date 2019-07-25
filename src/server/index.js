@@ -11,11 +11,7 @@ import mocks from "./api/mocks";
 import { createLoaders, r } from "./models";
 import passport from "passport";
 import cookieSession from "cookie-session";
-import {
-  setupAuth0Passport,
-  setupLocalAuthPassport,
-  setupSlackPassport
-} from "./auth-passport";
+import authStrategies from "./auth-passport";
 import wrap from "./wrap";
 import { log } from "../lib";
 import nexmo from "./api/lib/nexmo";
@@ -41,35 +37,35 @@ process.on("uncaughtException", ex => {
   log.error(ex);
   process.exit(1);
 });
-const DEBUG = process.env.NODE_ENV === "development";
 
-let loginCallbacks;
+const {
+  NODE_ENV,
+  PASSPORT_STRATEGY,
+  DEV_APP_PORT,
+  PORT,
+  PUBLIC_DIR,
+  SESSION_SECRET,
+  ASSIGNMENT_USERNAME,
+  ASSIGNMENT_PASSWORD,
+  CONTACT_REMOVAL_SECRET
+} = process.env;
 
-const loginStrategy =
-  process.env.PASSPORT_STRATEGY || global.PASSPORT_STRATEGY || "auth0";
-
-if (loginStrategy == "auth0") {
-  // default to legacy Auth0 choice
-  loginCallbacks = setupAuth0Passport();
-} else if (loginStrategy === "localauthexperimental") {
-  loginCallbacks = setupLocalAuthPassport();
-} else if (loginStrategy === "slack") {
-  loginCallbacks = setupSlackPassport();
-}
+const DEBUG = NODE_ENV === "development";
+// Heroku requires you to use process.env.PORT
+const port = DEV_APP_PORT || PORT;
+const loginStrategy = PASSPORT_STRATEGY || global.PASSPORT_STRATEGY || "auth0";
 
 setupUserNotificationObservers();
+
 const app = express();
-// Heroku requires you to use process.env.PORT
-const port = process.env.DEV_APP_PORT || process.env.PORT;
+
+// app.use(requestLogging);
 
 // Don't rate limit heroku
 app.enable("trust proxy");
-if (!DEBUG && process.env.PUBLIC_DIR) {
-  app.use(
-    express.static(process.env.PUBLIC_DIR, {
-      maxAge: "180 days"
-    })
-  );
+
+if (!DEBUG && PUBLIC_DIR) {
+  app.use(express.static(PUBLIC_DIR, { maxAge: "180 days" }));
 }
 
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -97,14 +93,13 @@ app.use(
       secure: !DEBUG,
       maxAge: null
     },
-    secret: process.env.SESSION_SECRET || global.SESSION_SECRET
+    secret: SESSION_SECRET || global.SESSION_SECRET
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-// app.use(requestLogging)
+app.use(authStrategies[loginStrategy]());
 
 app.post(
   "/nexmo",
@@ -163,23 +158,10 @@ app.post(
   })
 );
 
-// const accountSid = process.env.TWILIO_API_KEY
-// const authToken = process.env.TWILIO_AUTH_TOKEN
-// const client = require('twilio')(accountSid, authToken)
-
 app.get("/logout-callback", (req, res) => {
   req.logOut();
   res.redirect("/");
 });
-
-if (loginCallbacks) {
-  if ((process.env.PASSPORT_STRATEGY || global.PASSPORT_STRATEGY) == "slack") {
-    app.get("/login", loginCallbacks.first);
-    app.get("/login-callback", loginCallbacks.callback, loginCallbacks.after);
-  } else {
-    app.get("/login-callback", ...loginCallbacks);
-  }
-}
 
 const executableSchema = makeExecutableSchema({
   typeDefs: schema,
@@ -215,7 +197,7 @@ app.post(
   "/autoassign",
   basicAuth({
     users: {
-      [process.env.ASSIGNMENT_USERNAME]: process.env.ASSIGNMENT_PASSWORD
+      [ASSIGNMENT_USERNAME]: ASSIGNMENT_PASSWORD
     }
   }),
   async (req, res) => {
@@ -244,10 +226,7 @@ function normalize(rawNumber) {
 }
 
 app.post("/remove-number-from-campaign", async (req, res) => {
-  if (
-    !req.query.secret ||
-    req.query.secret !== process.env.CONTACT_REMOVAL_SECRET
-  )
+  if (!req.query.secret || req.query.secret !== CONTACT_REMOVAL_SECRET)
     return res.sendStatus(403);
 
   log.info(`Removing user matching ${JSON.stringify(req.body)}`);

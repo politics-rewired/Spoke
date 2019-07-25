@@ -1,22 +1,25 @@
-import PropTypes from "prop-types";
 import React from "react";
+import PropTypes from "prop-types";
 import { withRouter } from "react-router";
-import Empty from "../components/Empty";
-import OrganizationJoinLink from "../components/OrganizationJoinLink";
-import UserEdit from "./UserEdit";
+import gql from "graphql-tag";
+
+import { Table, TableBody, TableRow, TableRowColumn } from "material-ui/Table";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
-import ContentAdd from "material-ui/svg-icons/content/add";
-import { Table, TableBody, TableRow, TableRowColumn } from "material-ui/Table";
 import Dialog from "material-ui/Dialog";
 import PeopleIcon from "material-ui/svg-icons/social/people";
+import ContentAdd from "material-ui/svg-icons/content/add";
+
 import { getHighestRole, ROLE_HIERARCHY } from "../lib";
-import theme from "../styles/theme";
-import loadData from "./hoc/load-data";
-import gql from "graphql-tag";
 import { dataTest } from "../lib/attributes";
+import loadData from "./hoc/load-data";
+import theme from "../styles/theme";
+import UserEdit from "./UserEdit";
+import Empty from "../components/Empty";
+import OrganizationJoinLink from "../components/OrganizationJoinLink";
+import PasswordResetLink from "../components/PasswordResetLink";
 import LoadingIndicator from "../components/LoadingIndicator";
 
 class AdminPersonList extends React.Component {
@@ -30,7 +33,8 @@ class AdminPersonList extends React.Component {
 
   state = {
     open: false,
-    userEdit: false
+    userEdit: false,
+    passwordResetHash: ""
   };
 
   handleFilterChange = (campaignId, offset) => {
@@ -55,7 +59,7 @@ class AdminPersonList extends React.Component {
   }
 
   handleClose() {
-    this.setState({ open: false });
+    this.setState({ open: false, passwordResetHash: "" });
   }
 
   handleChange = async (userId, value) => {
@@ -102,6 +106,19 @@ class AdminPersonList extends React.Component {
       );
     }
     return null;
+  }
+
+  async resetPassword(userId) {
+    const { organizationId } = this.props.params;
+    const { currentUser } = this.props.userData;
+    if (currentUser.id !== userId) {
+      const res = await this.props.mutations.resetUserPassword(
+        organizationId,
+        userId
+      );
+      const { resetUserPassword } = res.data;
+      this.setState({ passwordResetHash: resetUserPassword });
+    }
   }
 
   renderCampaignList() {
@@ -179,6 +196,13 @@ class AdminPersonList extends React.Component {
                     this.editUser(person.id);
                   }}
                 />
+                <FlatButton
+                  label="Reset Password"
+                  disabled={currentUser.id === person.id}
+                  onTouchTap={() => {
+                    this.resetPassword(person.id);
+                  }}
+                />
               </TableRowColumn>
             </TableRow>
           ))}
@@ -240,6 +264,24 @@ class AdminPersonList extends React.Component {
                 organizationUuid={organizationData.organization.uuid}
               />
             </Dialog>
+            <Dialog
+              title="Reset user password"
+              actions={[
+                <FlatButton
+                  {...dataTest("passResetOK")}
+                  label="OK"
+                  primary
+                  onTouchTap={this.handleClose}
+                />
+              ]}
+              modal={false}
+              open={Boolean(this.state.passwordResetHash)}
+              onRequestClose={this.handleClose}
+            >
+              <PasswordResetLink
+                passwordResetHash={this.state.passwordResetHash}
+              />
+            </Dialog>
           </div>
         )}
       </div>
@@ -282,6 +324,17 @@ const mapMutationsToProps = ({ ownProps }) => ({
       roles,
       campaignId: ownProps.location.query.campaignId,
       offset: ownProps.location.query.offset || 0
+    }
+  }),
+  resetUserPassword: (organizationId, userId) => ({
+    mutation: gql`
+      mutation resetUserPassword($organizationId: String!, $userId: Int!) {
+        resetUserPassword(organizationId: $organizationId, userId: $userId)
+      }
+    `,
+    variables: {
+      organizationId,
+      userId
     }
   })
 });

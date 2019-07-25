@@ -75,6 +75,7 @@ import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
 } from "./campaign-overlap";
+import { change } from "../local-auth-helpers";
 import { notifyOnEscalateMessage } from "./lib/alerts";
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
@@ -740,7 +741,7 @@ const rootMutations = {
       }
       const userRes = await r
         .knex("user")
-        .rightJoin("user_organization", "user.id", "user_organization.user_id")
+        .join("user_organization", "user.id", "user_organization.user_id")
         .where({
           "user_organization.organization_id": organizationId,
           "user.id": userId
@@ -772,6 +773,42 @@ const rootMutations = {
         }
         return userData;
       }
+    },
+
+    resetUserPassword: async (_, { organizationId, userId }, { user }) => {
+      if (user.id === userId) {
+        throw new Error("You can't reset your own password.");
+      }
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      // Add date at the end in case user record is modified after password is reset
+      const passwordResetHash = uuidv4();
+      const auth0_id = `reset|${passwordResetHash}|${Date.now()}`;
+
+      const userRes = await r
+        .knex("user")
+        .where("id", userId)
+        .update({
+          auth0_id
+        });
+      return passwordResetHash;
+    },
+
+    changeUserPassword: async (_, { userId, formData }, { user }) => {
+      if (user.id !== userId) {
+        throw new Error("You can only change your own password.");
+      }
+
+      const { password, newPassword, passwordConfirm } = formData;
+
+      const updatedUser = await change({
+        user,
+        password,
+        newPassword,
+        passwordConfirm
+      });
+
+      return updatedUser;
     },
 
     joinOrganization: async (_, { organizationUuid }, { user, loaders }) => {

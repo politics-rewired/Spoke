@@ -1,176 +1,29 @@
+import express from "express";
 import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import passportSlack from "@aoberoi/passport-slack";
-import AuthHasher from "passport-local-authenticate";
 import { Strategy as LocalStrategy } from "passport-local";
+
+import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
-import { User, Organization, r } from "./models";
-import wrap from "./wrap";
-import { split } from "apollo-link";
+import localAuthHelpers from "./local-auth-helpers";
+import { capitalizeWord } from "./api/lib/utils";
 
-const SHOULD_AUTOJOIN_NEW_USER = !!process.env.AUTOJOIN_ORG_UUID;
+const {
+  BASE_URL,
+  AUTOJOIN_ORG_UUID,
+  SLACK_TEAM_NAME,
+  SLACK_CLIENT_ID,
+  SLACK_CLIENT_SECRET,
+  AUTH0_DOMAIN,
+  AUTH0_CLIENT_ID,
+  AUTH0_CLIENT_SECRET
+} = process.env;
+
+const SHOULD_AUTOJOIN_NEW_USER = !!AUTOJOIN_ORG_UUID;
 const AUTOJOIN_URL = SHOULD_AUTOJOIN_NEW_USER
-  ? `${process.env.BASE_URL}/${process.env.AUTOJOIN_ORG_UUID}/join`
+  ? `${BASE_URL}/${AUTOJOIN_ORG_UUID}/join`
   : "";
-
-export function setupSlackPassport() {
-  const options = {
-    clientID: process.env.SLACK_CLIENT_ID,
-    clientSecret: process.env.SLACK_CLIENT_SECRET,
-    callbackURL: `${process.env.BASE_URL}/login-callback`
-  };
-
-  if (process.env.SLACK_TEAM_NAME) {
-    options.authorizationURL = `https://${
-      process.env.SLACK_TEAM_NAME
-    }.slack.com/oauth/authorize`;
-  }
-
-  const strategy = new passportSlack.Strategy(options, function(
-    accessToken,
-    scopes,
-    team,
-    { bot, incomingWebhook },
-    { user: userProfile, team: teamProfile },
-    done
-  ) {
-    done(null, userProfile);
-  });
-
-  passport.use(strategy);
-
-  passport.serializeUser((user, done) => {
-    const auth0Id = user.id;
-    return done(null, auth0Id);
-  });
-
-  passport.deserializeUser(
-    wrap(async (id, done) => {
-      const user = await userLoggedIn(id);
-      return done(null, user || false);
-    })
-  );
-
-  return {
-    first: passport.authenticate("slack", {
-      scope: ["identity.basic", "identity.email", "identity.team"]
-    }),
-    callback: passport.authenticate("slack", {
-      failureRedirect: "/login"
-    }),
-    after: async (req, res) => {
-      const user = req.user;
-      // set slack_id to auth0Id to avoid changing the schema
-      const auth0Id = user && user.id;
-      if (!auth0Id) {
-        throw new Error("Null user in login callback");
-      }
-      const existingUser = await User.filter({ auth0_id: auth0Id });
-
-      if (existingUser.length === 0) {
-        let first_name, last_name;
-        const splitName = user.name ? user.name.split(" ") : ["First", "Last"];
-        if (splitName.length == 1) {
-          first_name = splitName[0];
-          last_name = "";
-        } else if (splitName.length == 2) {
-          first_name = splitName[0];
-          last_name = splitName[1];
-        } else {
-          first_name = splitName[0];
-          last_name = splitName.slice(1, splitName.length + 1).join(" ");
-        }
-
-        const userData = {
-          auth0_id: auth0Id,
-          // eslint-disable-next-line no-underscore-dangle
-          first_name,
-          // eslint-disable-next-line no-underscore-dangle
-          last_name,
-          cell: "unknown",
-          // eslint-disable-next-line no-underscore-dangle
-          email: user.email,
-          is_superadmin: false
-        };
-
-        await User.save(userData);
-
-        return redirectPostSignIn(req, res, true);
-      }
-
-      return redirectPostSignIn(req, res);
-    }
-  };
-}
-
-export function setupAuth0Passport() {
-  const strategy = new Auth0Strategy(
-    {
-      domain: process.env.AUTH0_DOMAIN,
-      clientID: process.env.AUTH0_CLIENT_ID,
-      clientSecret: process.env.AUTH0_CLIENT_SECRET,
-      callbackURL: `${process.env.BASE_URL}/login-callback`
-    },
-    (accessToken, refreshToken, extraParams, profile, done) =>
-      done(null, profile)
-  );
-
-  passport.use(strategy);
-
-  passport.serializeUser((user, done) => {
-    // This is the Auth0 user object, not the db one
-    const auth0Id = user.id || user._json.sub;
-    done(null, auth0Id);
-  });
-
-  passport.deserializeUser(
-    wrap(async (id, done) => {
-      // add new cacheable query
-      const user = await userLoggedIn(id);
-      done(null, user || false);
-    })
-  );
-
-  return [
-    passport.authenticate("auth0", {
-      failureRedirect: "/login"
-    }),
-    wrap(async (req, res) => {
-      const auth0Id = req.user && (req.user.id || req.user._json.sub);
-      if (!auth0Id) {
-        throw new Error("Null user in login callback");
-      }
-
-      const existingUser = await User.filter({ auth0_id: auth0Id });
-
-      if (existingUser.length === 0) {
-        const userMetadata =
-          // eslint-disable-next-line no-underscore-dangle
-          req.user._json["https://spoke/user_metadata"] ||
-          // eslint-disable-next-line no-underscore-dangle
-          req.user._json.user_metadata ||
-          {};
-        const userData = {
-          auth0_id: auth0Id,
-          // eslint-disable-next-line no-underscore-dangle
-          first_name: userMetadata.given_name || "",
-          // eslint-disable-next-line no-underscore-dangle
-          last_name: userMetadata.family_name || "",
-          cell: userMetadata.cell || "",
-          // eslint-disable-next-line no-underscore-dangle
-          email: req.user._json.email,
-          is_superadmin: false
-        };
-
-        await User.save(userData);
-
-        return redirectPostSignIn(req, res, true);
-      }
-
-      return redirectPostSignIn(req, res);
-    })
-  ];
-}
 
 function redirectPostSignIn(req, res, isNewUser) {
   const redirectDestionation = !req.query.state
@@ -184,51 +37,221 @@ function redirectPostSignIn(req, res, isNewUser) {
   return res.redirect(redirectDestionation);
 }
 
-export function setupLocalAuthPassport() {
+function setupSlackPassport() {
+  const options = {
+    clientID: SLACK_CLIENT_ID,
+    clientSecret: SLACK_CLIENT_SECRET,
+    callbackURL: `${BASE_URL}/login-callback`,
+    authorizationURL: SLACK_TEAM_NAME
+      ? `https://${SLACK_TEAM_NAME}.slack.com/oauth/authorize`
+      : undefined
+  };
+
+  const strategy = new passportSlack.Strategy(
+    options,
+    (
+      accessToken,
+      scopes,
+      team,
+      { bot, incomingWebhook },
+      { user: userProfile, team: teamProfile },
+      done
+    ) => done(null, userProfile)
+  );
+
+  passport.use(strategy);
+
+  passport.serializeUser(({ id: slackUserId }, done) =>
+    done(null, slackUserId)
+  );
+
+  passport.deserializeUser((slackUserId, done) =>
+    userLoggedIn(slackUserId, "auth0_id")
+      .then(user => done(null, user || false))
+      .catch(error => done(error))
+  );
+
+  const handleLogin = async (req, res) => {
+    const user = req.user;
+    // set slack_id to auth0Id to avoid changing the schema
+    const auth0Id = user && user.id;
+    if (!auth0Id) {
+      throw new Error("Null user in login callback");
+    }
+    const existingUser = await r
+      .knex("user")
+      .where({ auth0_id: auth0Id })
+      .first();
+
+    if (!existingUser) {
+      let first_name, last_name;
+      const splitName = user.name ? user.name.split(" ") : ["First", "Last"];
+      if (splitName.length == 1) {
+        first_name = splitName[0];
+        last_name = "";
+      } else if (splitName.length == 2) {
+        first_name = splitName[0];
+        last_name = splitName[1];
+      } else {
+        first_name = splitName[0];
+        last_name = splitName.slice(1, splitName.length + 1).join(" ");
+      }
+
+      const userData = {
+        auth0_id: auth0Id,
+        first_name,
+        last_name,
+        cell: "unknown",
+        email: user.email,
+        is_superadmin: false
+      };
+
+      await r.knex("user").insert(userData);
+
+      return redirectPostSignIn(req, res, true);
+    }
+
+    return redirectPostSignIn(req, res);
+  };
+
+  const app = express();
+  app.get(
+    "/login",
+    passport.authenticate("slack", {
+      scope: ["identity.basic", "identity.email", "identity.team"]
+    })
+  );
+
+  app.get(
+    "/login-callback",
+    passport.authenticate("slack", { failureRedirect: "/login" }),
+    handleLogin
+  );
+  return app;
+}
+
+function setupAuth0Passport() {
+  const strategy = new Auth0Strategy(
+    {
+      domain: AUTH0_DOMAIN,
+      clientID: AUTH0_CLIENT_ID,
+      clientSecret: AUTH0_CLIENT_SECRET,
+      callbackURL: `${BASE_URL}/login-callback`
+    },
+    (accessToken, refreshToken, extraParams, profile, done) =>
+      done(null, profile)
+  );
+
+  passport.use(strategy);
+
+  passport.serializeUser((auth0User, done) => {
+    // This is the Auth0 user object, not the db one
+    // eslint-disable-next-line no-underscore-dangle
+    const auth0Id = auth0User.id || auth0User._json.sub;
+    done(null, auth0Id);
+  });
+
+  passport.deserializeUser((auth0Id, done) =>
+    userLoggedIn(auth0Id, "auth0_id")
+      .then(user => done(null, user || false))
+      .catch(error => done(error))
+  );
+
+  const handleLogin = async (req, res) => {
+    const auth0Id = req.user && (req.user.id || req.user._json.sub);
+    if (!auth0Id) {
+      throw new Error("Null user in login callback");
+    }
+
+    const existingUser = await r
+      .knex("user")
+      .where({ auth0_id: auth0Id })
+      .first();
+
+    if (!existingUser) {
+      // eslint-disable-next-line no-underscore-dangle
+      const userJson = req.user._json;
+      const userMetadata =
+        userJson["https://spoke/user_metadata"] || userJson.user_metadata || {};
+      const userData = {
+        auth0_id: auth0Id,
+        first_name: capitalizeWord(userMetadata.given_name) || "",
+        last_name: capitalizeWord(userMetadata.family_name) || "",
+        cell: userMetadata.cell || "",
+        email: userJson.email,
+        is_superadmin: false
+      };
+
+      await r.knex("user").insert(userData);
+
+      return redirectPostSignIn(req, res, true);
+    }
+
+    return redirectPostSignIn(req, res);
+  };
+
+  const app = express();
+  app.get(
+    "/login-callback",
+    passport.authenticate("auth0", { failureRedirect: "/login" }),
+    handleLogin
+  );
+  return app;
+}
+
+function setupLocalAuthPassport() {
   const strategy = new LocalStrategy(
     {
       usernameField: "email",
-      passwordField: "auth0_id" // using the legacy fieldname for password
+      passReqToCallback: true
     },
-    function(username, password, done) {
-      User.filter({ email: username }, function(err, user) {
-        if (err) {
-          return done(err);
-        }
-        if (!user) {
-          return done(null, false);
-        }
+    async (req, username, password, done) => {
+      const { nextUrl = "", authType } = req.body;
+      const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
+      const lowerCaseEmail = username.toLowerCase();
+      const existingUser = await r
+        .knex("user")
+        .where({ email: lowerCaseEmail })
+        .first();
 
-        // AuthHasher.hash(password, function(err, hashed) {
-        // const passwordToSave = `${hashed.salt}|${hashed.hash}`
-        // .salt and .hash
-        // });
-        const pwFieldSplit = user.auth0_id.split("|");
-        const hashed = {
-          salt: pwFieldSplit[0],
-          hash: pwFieldSplit[1]
-        };
-        AuthHasher.verify(password, hashed, function(err, verified) {
-          if (verified) {
-            return done(null, false);
-          } else {
-            done(null, user);
-          }
+      // Run login, signup, or reset functions based on request data
+      if (authType && !localAuthHelpers[authType]) return done(null, false);
+
+      try {
+        const user = await localAuthHelpers[authType]({
+          lowerCaseEmail,
+          password,
+          existingUser,
+          nextUrl,
+          uuidMatch,
+          reqBody: req.body
         });
-      });
+        return done(null, user);
+      } catch (error) {
+        // TODO - this should differentiate between invalid login and actual server error
+        return done(null, false);
+      }
     }
   );
   passport.use(strategy);
 
-  passport.serializeUser((user, done) => {
-    done(null, user.id);
-  });
-  passport.deserializeUser(
-    wrap(async (id, done) => {
-      const user = await User.filter({ id });
-      done(null, user[0] || false);
-    })
+  passport.serializeUser((user, done) => done(null, user.id));
+  passport.deserializeUser((id, done) =>
+    userLoggedIn(parseInt(id, 10))
+      .then(user => done(null, user || false))
+      .catch(error => done(error))
   );
 
-  return null; // no loginCallback
+  const app = express();
+  app.post("/login-callback", passport.authenticate("local"), (req, res) =>
+    res.redirect(req.body.nextUrl || "/")
+  );
+
+  return app;
 }
+
+export default {
+  local: setupLocalAuthPassport,
+  auth0: setupAuth0Passport,
+  slack: setupSlackPassport
+};
