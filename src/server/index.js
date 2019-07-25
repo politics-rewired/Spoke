@@ -75,18 +75,20 @@ if (!DEBUG && process.env.PUBLIC_DIR) {
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const datadogOptions = {
-  path: true,
-  method: false,
-  response_code: true,
-  graphql_paths: "/graphql"
-};
+if (process.env.DD_AGENT_HOST && process.env.DD_DOGSTATSD_PORT) {
+  const datadogOptions = {
+    path: true,
+    method: false,
+    response_code: true,
+    graphql_paths: "/graphql"
+  };
 
-if (process.env.CLIENT_NAME) {
-  datadogOptions.tags = [`client:${process.env.CLIENT_NAME}`];
+  if (process.env.CLIENT_NAME) {
+    datadogOptions.tags = [`client:${process.env.CLIENT_NAME}`];
+  }
+
+  app.use(connectDatadog(datadogOptions));
 }
-
-app.use(connectDatadog(datadogOptions));
 
 app.use(
   cookieSession({
