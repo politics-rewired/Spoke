@@ -28,6 +28,7 @@ import googleLibPhoneNumber from "google-libphonenumber";
 import requestLogging from "../lib/request-logging";
 import { checkForBadDeliverability } from "./api/lib/alerts";
 import cron from "node-cron";
+import connectDatadog from "connect-datadog-graphql";
 
 cron.schedule("0 */1 * * *", checkForBadDeliverability);
 
@@ -73,6 +74,21 @@ if (!DEBUG && process.env.PUBLIC_DIR) {
 
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+if (process.env.DD_AGENT_HOST && process.env.DD_DOGSTATSD_PORT) {
+  const datadogOptions = {
+    path: true,
+    method: false,
+    response_code: true,
+    graphql_paths: "/graphql"
+  };
+
+  if (process.env.CLIENT_NAME) {
+    datadogOptions.tags = [`client:${process.env.CLIENT_NAME}`];
+  }
+
+  app.use(connectDatadog(datadogOptions));
+}
 
 app.use(
   cookieSession({
