@@ -1,22 +1,24 @@
-import PropTypes from "prop-types";
 import React from "react";
+import PropTypes from "prop-types";
 import { withRouter } from "react-router";
-import Empty from "../components/Empty";
-import OrganizationJoinLink from "../components/OrganizationJoinLink";
-import UserEdit from "./UserEdit";
+import gql from "graphql-tag";
+
+import { Table, TableBody, TableRow, TableRowColumn } from "material-ui/Table";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
-import ContentAdd from "material-ui/svg-icons/content/add";
-import { Table, TableBody, TableRow, TableRowColumn } from "material-ui/Table";
 import Dialog from "material-ui/Dialog";
 import PeopleIcon from "material-ui/svg-icons/social/people";
+import ContentAdd from "material-ui/svg-icons/content/add";
+
 import { getHighestRole, ROLE_HIERARCHY } from "../lib";
-import theme from "../styles/theme";
-import loadData from "./hoc/load-data";
-import gql from "graphql-tag";
 import { dataTest } from "../lib/attributes";
+import loadData from "./hoc/load-data";
+import theme from "../styles/theme";
+import UserEdit from "./UserEdit";
+import Empty from "../components/Empty";
+import OrganizationJoinLink from "../components/OrganizationJoinLink";
 import LoadingIndicator from "../components/LoadingIndicator";
 
 class AdminPersonList extends React.Component {
