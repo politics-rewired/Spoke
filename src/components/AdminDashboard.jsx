@@ -83,6 +83,11 @@ class AdminDashboard extends React.Component {
         role: "ADMIN"
       },
       {
+        name: "Tags",
+        path: "tag-editor",
+        role: "ADMIN"
+      },
+      {
         name: "Message Review",
         path: "incoming",
         role: "SUPERVOLUNTEER"
