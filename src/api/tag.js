@@ -27,4 +27,9 @@ export const schema = `
     webhookUrl: String!
     isAssignable: Boolean!
   }
+
+  input TagsFilter {
+    excludeEscalated: Boolean
+    escalatedConvosOnly: Boolean
+  }
 `;

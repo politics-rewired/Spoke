@@ -9,6 +9,7 @@ async function getConversationsJoinsAndWhereClause(
   organizationId,
   campaignsFilter,
   assignmentsFilter,
+  tagsFilter,
   contactsFilter,
   contactNameFilter
 ) {
@@ -23,23 +24,6 @@ async function getConversationsJoinsAndWhereClause(
   if (assignmentsFilter) {
     if ("texterId" in assignmentsFilter && assignmentsFilter.texterId !== null)
       query = query.where({ "assignment.user_id": assignmentsFilter.texterId });
-  }
-
-  const includeEscalated =
-    assignmentsFilter && !!assignmentsFilter.includeEscalated;
-  if (!includeEscalated) {
-    const { features } = await r
-      .knex("organization")
-      .where({ id: organizationId })
-      .first("features");
-    const { escalationUserId } = JSON.parse(features);
-    if (escalationUserId) {
-      query = query.where(function() {
-        this.whereNot({ "assignment.user_id": escalationUserId }).orWhereNull(
-          "assignment.user_id"
-        );
-      });
-    }
   }
 
   if (contactNameFilter) {
@@ -74,6 +58,26 @@ async function getConversationsJoinsAndWhereClause(
     }
   }
 
+  if (tagsFilter) {
+    const subQuery = r.knex
+      .select("campaign_contact_tag.campaign_contact_id")
+      .from("campaign_contact_tag")
+      .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+      .where({
+        "tag.title": "Escalated",
+        "tag.organization_id": organizationId
+      })
+      .whereRaw(
+        "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+      );
+
+    if (tagsFilter.escalatedConvosOnly) {
+      query = query.whereExists(subQuery);
+    } else if (tagsFilter.excludeEscalated) {
+      query = query.whereNotExists(subQuery);
+    }
+  }
+
   return { query };
 }
 
@@ -99,6 +103,7 @@ export async function getConversations(
   organizationId,
   campaignsFilter,
   assignmentsFilter,
+  tagsFilter,
   contactsFilter,
   contactNameFilter
 ) {
@@ -111,6 +116,7 @@ export async function getConversations(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
+    tagsFilter,
     contactsFilter,
     contactNameFilter
   )).query;
@@ -160,6 +166,7 @@ export async function getConversations(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
+    tagsFilter,
     contactsFilter,
     contactNameFilter
   )).query;
@@ -225,6 +232,7 @@ export async function getConversations(
       organizationId,
       campaignsFilter,
       assignmentsFilter,
+      tagsFilter,
       contactsFilter,
       contactNameFilter
     )).query
@@ -246,6 +254,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
   organizationId,
   campaignsFilter,
   assignmentsFilter,
+  tagsFilter,
   contactsFilter
 ) {
   let query = r.knex.select(
@@ -259,6 +268,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
+    tagsFilter,
     contactsFilter,
     contactNameFilter
   )).query;
@@ -310,6 +320,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
   organizationId,
   campaignsFilter,
   assignmentsFilter,
+  tagsFilter,
   contactsFilter,
   contactNameFilter
 ) {
@@ -324,6 +335,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
     organizationId,
     campaignsFilter,
     assignmentsFilter,
+    tagsFilter,
     contactsFilter,
     contactNameFilter
   )).query;

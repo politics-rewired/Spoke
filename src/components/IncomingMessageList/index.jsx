@@ -267,6 +267,7 @@ IncomingMessageList.propTypes = {
   contactsFilter: type.object,
   campaignsFilter: type.object,
   assignmentsFilter: type.object,
+  tagsFilter: type.object,
   selectedRows: type.arrayOf(type.object),
   onPageChanged: type.func,
   onPageSizeChanged: type.func,
@@ -283,6 +284,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         $contactsFilter: ContactsFilter
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
+        $tagsFilter: TagsFilter
         $contactNameFilter: ContactNameFilter
       ) {
         conversations(
@@ -291,6 +293,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
           campaignsFilter: $campaignsFilter
           contactsFilter: $contactsFilter
           assignmentsFilter: $assignmentsFilter
+          tagsFilter: $tagsFilter
           contactNameFilter: $contactNameFilter
         ) {
           pageInfo {
@@ -337,6 +340,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       contactsFilter: ownProps.contactsFilter,
       campaignsFilter: ownProps.campaignsFilter,
       assignmentsFilter: ownProps.assignmentsFilter,
+      tagsFilter: ownProps.tagsFilter,
       contactNameFilter: ownProps.contactNameFilter
     },
     forceFetch: true

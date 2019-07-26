@@ -1920,6 +1920,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         newTexterUserIds
       },
@@ -1932,6 +1933,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter
       );
 
@@ -2039,6 +2041,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         newTexterUserId
       },
@@ -2054,6 +2057,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter
       );
 
@@ -2504,6 +2508,7 @@ const rootResolvers = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         contactNameFilter
       },
@@ -2516,6 +2521,7 @@ const rootResolvers = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         contactNameFilter
       );

@@ -6,10 +6,7 @@ exports.up = function(knex, Promise) {
         .integer("organization_id")
         .unsigned()
         .notNullable();
-      table
-        .text("title")
-        .notNullable()
-        .unique();
+      table.text("title").notNullable();
       table
         .text("description")
         .notNullable()
@@ -50,7 +47,9 @@ exports.up = function(knex, Promise) {
 
       table.foreign("organization_id").references("organization.id");
       table.foreign("author_id").references("user.id");
-      table.index("is_assignable", "is_assignable_idx");
+      table.unique(["title", "organization_id"]);
+      table.index("is_assignable");
+      table.index("lower(title)");
     })
     .then(() =>
       knex.schema.createTable("campaign_contact_tag", table => {
