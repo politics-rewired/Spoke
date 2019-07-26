@@ -50,6 +50,7 @@ exports.up = function(knex, Promise) {
 
       table.foreign("organization_id").references("organization.id");
       table.foreign("author_id").references("user.id");
+      table.index("is_assignable", "is_assignable_idx");
     })
     .then(() =>
       knex.schema.createTable("campaign_contact_tag", table => {
