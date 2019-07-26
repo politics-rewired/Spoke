@@ -41,6 +41,6 @@ export const schema = `
     assignmentId: String
     updatedAt: Date
 
-    tags: [Tag]
+    contactTags: [Tag]
   }
 `;

@@ -94,7 +94,7 @@ class AdminTagEditor extends Component {
     if (organizationTags.loading) return <LoadingIndicator />;
     if (organizationTags.errors) return <p>{organizationTags.errors}</p>;
 
-    const { tags } = organizationTags.organization;
+    const { tagList } = organizationTags.organization;
 
     const isNewTag = (editingTag || {}).id === undefined;
     const tagVerb = isNewTag ? "Create" : "Edit";
@@ -106,7 +106,7 @@ class AdminTagEditor extends Component {
     return (
       <div>
         <TagEditorList
-          tags={tags}
+          tags={tagList}
           oEditTag={this.handleEditTag}
           onDeleteTag={this.handleDeleteTag}
         />
@@ -166,7 +166,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       query getOrganizationTags($organizationId: String!) {
         organization(id: $organizationId) {
           id
-          tags {
+          tagList {
             id
             title
             description

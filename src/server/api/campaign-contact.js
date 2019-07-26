@@ -242,7 +242,7 @@ export const resolvers = {
         return null;
       }
     },
-    tags: async (campaignContact, _, { user }) => {
+    contactTags: async (campaignContact, _, { user }) => {
       const { campaign_id } = campaignContact;
       const { organization_id } = await r
         .knex("campaign")

@@ -40,6 +40,6 @@ export const schema = `
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
     numbersApiKey: String
 
-    tags: [Tag]
+    tagList: [Tag]
   }
 `;

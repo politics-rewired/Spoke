@@ -209,7 +209,7 @@ export const resolvers = {
       `);
       return rawResult.rows;
     },
-    tags: async organization =>
+    tagList: async organization =>
       r
         .knex("tag")
         .where({ organization_id: organization.id })
