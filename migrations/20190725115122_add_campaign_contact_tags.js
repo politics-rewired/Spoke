@@ -22,10 +22,19 @@ exports.up = function(knex, Promise) {
         .text("background_color")
         .notNullable()
         .default("#DDEEEE");
+      table.integer("author_id").unsigned();
       table
-        .integer("author_id")
-        .unsigned()
-        .notNullable();
+        .specificType("confirmation_steps", "text[][]")
+        .notNullable()
+        .default("{}");
+      table
+        .text("on_apply_script")
+        .notNullable()
+        .default("");
+      table
+        .text("webhook_url")
+        .notNullable()
+        .default("");
       table
         .boolean("is_assignable")
         .notNullable()
