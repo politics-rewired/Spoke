@@ -275,7 +275,7 @@ async function sendMessage(message, organizationId, trx) {
       // we subtract the MESSAGE_VALIDITY_PADDING_SECONDS seconds to allow time for the message to be sent by
       // a downstream service
       const messageValidityPeriod =
-        moment().diff(moment(message.send_before), "seconds") -
+        moment(message.send_before).diff(moment(), "seconds") -
         MESSAGE_VALIDITY_PADDING_SECONDS;
       if (messageValidityPeriod < 0) {
         // this is an edge case
