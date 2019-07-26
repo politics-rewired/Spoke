@@ -27,7 +27,18 @@ class AdminTagEditor extends Component {
   };
 
   handleClickAddTag = () =>
-    this.setState({ editingTag: { isAssignable: true } });
+    this.setState({
+      editingTag: {
+        title: "",
+        description: "",
+        textColor: "",
+        backgroundColor: "",
+        confirmationSteps: [[]],
+        onApplyScript: "",
+        webhookUrl: "",
+        isAssignable: true
+      }
+    });
 
   handleEditTag = tagId => this.setState({ editingTag: this.getTag(tagId) });
 
@@ -39,13 +50,17 @@ class AdminTagEditor extends Component {
       "id",
       "title",
       "description",
+      "textColor",
+      "backgroundColor",
+      "confirmationSteps",
+      "onApplyScript",
+      "webhookUrl",
       "isAssignable"
     ]);
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.saveTag(tag);
       if (result.errors) throw new Error(result.errors);
-      this.props.organizationTags.refetch();
     } catch (error) {
       console.error(error);
     } finally {
@@ -59,7 +74,6 @@ class AdminTagEditor extends Component {
     try {
       const result = await this.props.mutations.deleteTag(tagId);
       if (result.errors) throw new Error(result.errors);
-      this.props.organizationTags.refetch();
     } catch (error) {
       console.error(error);
     } finally {
@@ -181,7 +195,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
     variables: {
       organizationId: ownProps.params.organizationId,
       tag
-    }
+    },
+    refetchQueries: ["getOrganizationTags"]
   }),
   deleteTag: tagId => ({
     mutation: gql`
@@ -192,7 +207,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
     variables: {
       organizationId: ownProps.params.organizationId,
       tagId
-    }
+    },
+    refetchQueries: ["getOrganizationTags"]
   })
 });
 

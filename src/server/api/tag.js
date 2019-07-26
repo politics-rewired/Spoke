@@ -6,11 +6,16 @@ export const resolvers = {
     id: async tag => tag.id,
     title: async tag => tag.title,
     description: async tag => tag.description,
+    textColor: async tag => tag.text_color,
+    backgroundColor: async tag => tag.background_color,
     author: async tag =>
       r
         .knex("user")
         .where({ id: tag.author_id })
         .first("*"),
+    confirmationSteps: async tag => tag.confirmation_steps,
+    onApplyScript: async tag => tag.on_apply_script,
+    webhookUrl: async tag => tag.webhook_url,
     isAssignable: async tag => tag.is_assignable,
     isSystem: async tag => tag.is_system,
     createdAt: async tag => tag.created_at,
