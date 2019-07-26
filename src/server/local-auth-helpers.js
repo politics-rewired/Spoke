@@ -14,14 +14,17 @@ const errorMessages = {
 };
 
 const validUuid = async (nextUrl, uuidMatch) => {
-  if (!uuidMatch || !nextUrl) throw new Error(errorMessages.invalidInvite);
+  if (!nextUrl) throw new Error(errorMessages.invalidInvite);
 
   let foundUUID;
   if (nextUrl.includes("join")) {
     foundUUID = await Organization.filter({ uuid: uuidMatch[0] });
   } else if (nextUrl.includes("invite")) {
-    foundUUID = await Invite.filter({ hash: uuidMatch[0] });
+    const splitUrl = nextUrl.split("/");
+    const inviteHash = splitUrl[splitUrl.length - 1];
+    foundUUID = await Invite.filter({ hash: inviteHash });
   }
+
   if (foundUUID.length === 0) throw new Error(errorMessages.invalidInvite);
 };
 
@@ -58,7 +61,7 @@ const signup = async ({
   await validUuid(nextUrl, uuidMatch);
 
   // Verify user doesn't already exist
-  if (existingUser.length > 0 && existingUser[0].email === lowerCaseEmail) {
+  if (existingUser && existingUser.email === lowerCaseEmail) {
     throw new Error(errorMessages.emailTaken);
   }
 
