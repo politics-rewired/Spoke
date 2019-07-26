@@ -16,7 +16,8 @@ const styles = StyleSheet.create({
   loginPage: {
     display: "flex",
     "justify-content": "center",
-    "align-items": "flex-start",
+    "align-items": "center",
+    flexDirection: "column",
     height: "100vh",
     "padding-top": "10vh",
     background: theme.colors.veryLightGray
@@ -25,6 +26,7 @@ const styles = StyleSheet.create({
     border: "none",
     background: theme.colors.lightGray,
     color: theme.colors.darkGreen,
+    height: "100%",
     padding: "16px 16px",
     "font-size": "14px",
     "text-transform": "uppercase",
@@ -52,9 +54,7 @@ class LocalLogin extends React.Component {
 
   componentDidMount = () => {
     const { nextUrl } = this.props.location.query;
-    if (!this.naiveVerifyInviteValid(nextUrl)) {
-      this.props.router.replace("/login");
-    }
+
     if (nextUrl && nextUrl.includes("reset")) {
       this.setState({ active: "reset" });
     }
@@ -65,7 +65,8 @@ class LocalLogin extends React.Component {
   };
 
   naiveVerifyInviteValid = nextUrl =>
-    /\/\w{8}-(\w{4}\-){3}\w{12}(\/|$)/.test(nextUrl);
+    /\/\w{8}-(\w{4}\-){3}\w{12}(\/|$)/.test(nextUrl) ||
+    nextUrl.includes("invite");
 
   render() {
     const { location, router } = this.props;
@@ -88,7 +89,7 @@ class LocalLogin extends React.Component {
       <div className={css(styles.loginPage)}>
         {/* Only display sign up option if there is a nextUrl */}
         {displaySignUp && (
-          <section>
+          <section style={{ width: 256 }}>
             <button
               className={css(styles.button)}
               type="button"
