@@ -1,4 +1,4 @@
-import { mapFieldsToModel, normalizeTimezone } from "./lib/utils";
+import { mapFieldsToModel } from "./lib/utils";
 import { Message } from "../models";
 
 export const resolvers = {
@@ -10,14 +10,12 @@ export const resolvers = {
         "userNumber",
         "contactNumber",
         "isFromContact",
-        "sendStatus"
+        "sendStatus",
+        "createdAt"
       ],
       Message
     ),
     campaignId: instance => instance["campaign_id"],
-    createdAt: instance => {
-      return normalizeTimezone(instance.created_at);
-    },
     userId: instance => instance["user_id"]
   }
 };

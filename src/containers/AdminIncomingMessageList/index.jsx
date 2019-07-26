@@ -79,8 +79,6 @@ export class AdminIncomingMessageList extends Component {
       assignmentsFilter,
       contactNameFilter: undefined,
       needsRender: false,
-      // TODO - this is local timezone, not UTC
-      utc: Date.now().toString(),
       campaigns: [],
       reassignmentTexters: [],
       campaignTexters: [],
@@ -184,8 +182,6 @@ export class AdminIncomingMessageList extends Component {
       };
     }
 
-    // TODO - this is local timezone, not UTC
-    newState.utc = Date.now().toString();
     this.setState(newState);
   };
 
@@ -240,8 +236,6 @@ export class AdminIncomingMessageList extends Component {
     );
 
     this.setState({
-      // TODO - this is local timezone, not UTC
-      utc: Date.now().toString(),
       needsRender: true
     });
   };
@@ -477,7 +471,6 @@ export class AdminIncomingMessageList extends Component {
             includeEscalated={includeEscalated}
             contactNameFilter={this.state.contactNameFilter}
             selectedRows={this.state.selectedRows}
-            utc={this.state.utc}
             onPageChanged={this.handlePageChange}
             onPageSizeChanged={this.handlePageSizeChange}
             onConversationSelected={this.handleRowSelection}
