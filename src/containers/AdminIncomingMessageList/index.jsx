@@ -452,7 +452,7 @@ export class AdminIncomingMessageList extends Component {
             this.state.includeNotOptedOutConversations
           }
           includeOptedOutConversations={this.state.includeOptedOutConversations}
-          isTexterFilterable={this.props.escalationUserId === undefined}
+          isTexterFilterable={!this.props.escalatedConvosOnly}
           isIncludeEscalatedFilterable={!this.props.escalatedConvosOnly}
         />
         <br />

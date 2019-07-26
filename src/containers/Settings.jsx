@@ -278,13 +278,10 @@ class Settings extends React.Component {
 
   render() {
     const { organization } = this.props.data;
-    const { optOutMessage, escalationUserId, numbersApiKey } = organization;
+    const { optOutMessage, numbersApiKey } = organization;
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
-    });
-    const escalateUserSchema = yup.object({
-      escalationUserId: yup.number()
     });
 
     const numbersApiKeySchema = yup.object({
@@ -358,30 +355,12 @@ class Settings extends React.Component {
 
         <Card className={css(styles.sectionCard)}>
           <GSForm
-            schema={escalateUserSchema}
-            onSubmit={this.props.mutations.updateEscaltedUserId}
-            defaultValue={{ escalationUserId }}
-          >
-            <CardHeader title="Conversation Escalation" />
-            <CardText>
-              To enable conversation escalation you must specify a user to which
-              these conversations will be assigned.
-              <Form.Field
-                label="User ID for escalation handler"
-                name="escalationUserId"
-                fullWidth
-              />
-            </CardText>
-            <CardActions>
-              <Form.Button type="submit" label={"Save"} />
-            </CardActions>
-          </GSForm>
-        </Card>
-
-        <Card className={css(styles.sectionCard)}>
-          <GSForm
             schema={numbersApiKeySchema}
-            onChange={({ numbersApiKey: newValue }) => this.setState({ hasNumbersApiKeyChanged: newValue !== numbersApiKey })}
+            onChange={({ numbersApiKey: newValue }) =>
+              this.setState({
+                hasNumbersApiKeyChanged: newValue !== numbersApiKey
+              })
+            }
             onSubmit={this.props.mutations.setNumbersApiKey}
             defaultValue={{ numbersApiKey }}
           >
@@ -515,26 +494,6 @@ const mapMutationsToProps = ({ ownProps }) => ({
       textRequestMaxCount
     }
   }),
-  updateEscaltedUserId: ({ escalationUserId }) => ({
-    mutation: gql`
-      mutation updateEscaltedUserId(
-        $organizationId: String!
-        $escalationUserId: Int
-      ) {
-        updateEscalationUserId(
-          organizationId: $organizationId
-          escalationUserId: $escalationUserId
-        ) {
-          id
-          escalationUserId
-        }
-      }
-    `,
-    variables: {
-      organizationId: ownProps.params.organizationId,
-      escalationUserId
-    }
-  }),
   setNumbersApiKey: ({ numbersApiKey }) => ({
     mutation: gql`
       mutation setNumbersApiKey(
@@ -571,7 +530,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
           textRequestFormEnabled
           textRequestType
           textRequestMaxCount
-          escalationUserId
           numbersApiKey
         }
       }

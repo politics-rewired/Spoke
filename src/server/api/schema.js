@@ -969,39 +969,6 @@ const rootMutations = {
       return await Organization.get(organizationId);
     },
 
-    updateEscalationUserId: async (
-      _,
-      { organizationId, escalationUserId },
-      { user, loaders }
-    ) => {
-      await accessRequired(user, organizationId, "ADMIN");
-
-      const currentOrganization = await Organization.get(organizationId);
-      let currentFeatures = {};
-      try {
-        currentFeatures = JSON.parse(currentOrganization.features);
-      } catch (ex) {
-        // do nothing
-      }
-
-      // Ensure the user actually exists
-      const escalationUser = await r
-        .knex("user")
-        .where({ id: escalationUserId })
-        .first("id");
-      if (!escalationUser)
-        throw new GraphQLError("User with that ID does not exist!");
-
-      const nextFeatures = Object.assign({}, currentFeatures, {
-        escalationUserId
-      });
-      await Organization.get(organizationId).update({
-        features: JSON.stringify(nextFeatures)
-      });
-
-      return await loaders.organization.load(organizationId);
-    },
-
     createInvite: async (_, { user }) => {
       if ((user && user.is_superadmin) || !process.env.SUPPRESS_SELF_INVITE) {
         const inviteInstance = new Invite({
@@ -2176,13 +2143,10 @@ const rootMutations = {
         .knex("campaign")
         .where({ id: campaignId })
         .first("organization_id");
-      const escalationUserId =
-        (await getEscalationUserId(campaign.organization_id)) || null;
 
       const updatedCount = await r.knex.transaction(async trx => {
         const queryArgs = [parseInt(campaignId), messageStatus];
         if (ageInHours) queryArgs.push(ageInHoursAgo);
-        if (escalationUserId) queryArgs.push(escalationUserId);
 
         const rawResult = await trx.raw(
           `
@@ -2197,15 +2161,18 @@ const rootMutations = {
             and assignment.id = campaign_contact.assignment_id
             and is_opted_out = false
             and message_status = ?
+            and not exists (
+              select 1 
+              from campaign_contact_tag
+              join tag on tag.id = campaign_contact_tag.tag_id
+              where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+            )
             ${ageInHours ? "and campaign_contact.updated_at < ?" : ""}
-            ${
-              escalationUserId
-                ? "and (assignment.user_id is null or assignment.user_id <> ?)"
-                : ""
-            }
         `,
           queryArgs
         );
+
         return rawResult.rowCount;
       });
 

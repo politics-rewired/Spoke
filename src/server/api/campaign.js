@@ -2,7 +2,6 @@ import { mapFieldsToModel } from "./lib/utils";
 import { Campaign, JobRequest, r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
-import { getEscalationUserId } from "./organization";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -245,9 +244,6 @@ export const resolvers = {
     },
     hasUnhandledMessages: async campaign => {
       // TODO: restrict to sufficiently old values for updated_at
-      const escalationUserId = await getEscalationUserId(
-        campaign.organization_id
-      );
 
       let contactsQuery = r
         .knex("campaign_contact")
@@ -259,15 +255,19 @@ export const resolvers = {
         })
         .limit(1);
 
-      if (escalationUserId) {
-        contactsQuery = contactsQuery
-          .join("assignment", "assignment.id", "campaign_contact.assignment_id")
-          .where(function() {
-            this.whereNot({
-              "assignment.user_id": escalationUserId
-            }).orWhereNull("assignment.user_id");
-          });
-      }
+      const notAssignableTagSubQuery = r.knex
+        .select("campaign_contact_tag.campaign_contact_id")
+        .from("campaign_contact_tag")
+        .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+        .where({
+          "tag.title": "Escalated",
+          "tag.organization_id": campaign.organization_id
+        })
+        .whereRaw(
+          "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+        );
+
+      contactsQuery = contactsQuery.whereNotExists(notAssignableTagSubQuery);
 
       const contacts = await contactsQuery;
       return contacts.length > 0;

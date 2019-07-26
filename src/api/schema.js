@@ -269,7 +269,6 @@ const rootSchema = `
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
     updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
     updateOptOutMessage( organizationId: String!, optOutMessage: String!): Organization
-    updateEscalationUserId(organizationId: String!, escalationUserId: Int): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
     escalateConversation(campaignContactId: String!, escalate: ContactActionInput!): CampaignContact
