@@ -15,6 +15,14 @@ exports.up = function(knex, Promise) {
         .notNullable()
         .default("");
       table
+        .text("text_color")
+        .notNullable()
+        .default("#000000");
+      table
+        .text("background_color")
+        .notNullable()
+        .default("#DDEEEE");
+      table
         .integer("author_id")
         .unsigned()
         .notNullable();
