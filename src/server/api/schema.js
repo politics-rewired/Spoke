@@ -1300,22 +1300,28 @@ const rootMutations = {
         });
       }
 
-      const newOrganization = await Organization.save({
+      const [newOrganization] = await r.knex("organization").insert({
         name,
         uuid: uuidv4()
       });
-      await UserOrganization.save({
+      await r.knex("user_organization").insert({
         role: "OWNER",
         user_id: userId,
         organization_id: newOrganization.id
       });
-      await Invite.save(
-        {
-          id: inviteId,
-          is_valid: false
-        },
-        { conflict: "update" }
-      );
+      await r.knex("invite").update({
+        id: inviteId,
+        is_valid: false
+      });
+      await r.knex("tag").insert({
+        organization_id: newOrganization.id,
+        title: "Escalated",
+        description:
+          "Escalation is meant for situations where you have exhausted all available help resources and still do not know how to respond.",
+        confirmation_steps: [],
+        is_assignable: false,
+        is_system: true
+      });
 
       return newOrganization;
     },
