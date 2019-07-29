@@ -316,10 +316,10 @@ class AssignmentTexter extends React.Component {
       );
     }
 
-    if (payload.escalate) {
+    if (payload.tag) {
       promises.push(
         this.props.mutations
-          .escalateContact(contact_id, payload.escalate)
+          .tagContact(contact_id, payload.tag)
           .then(catchError)
       );
     }
@@ -497,16 +497,13 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  escalateContact: (campaignContactId, escalate) => ({
+  tagContact: (campaignContactId, tag) => ({
     mutation: gql`
-      mutation escalateConversation(
+      mutation tagConversation(
         $campaignContactId: String!
-        $escalate: ContactActionInput!
+        $tag: ContactTagActionInput!
       ) {
-        escalateConversation(
-          campaignContactId: $campaignContactId
-          escalate: $escalate
-        ) {
+        tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
           id
           assignmentId
         }
@@ -514,7 +511,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: {
       campaignContactId,
-      escalate
+      tag
     }
   }),
   editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({

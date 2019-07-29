@@ -7,8 +7,6 @@ const THRESHOLD = 0.2;
 
 const ALERTS_ON = !!process.env.DELIVERABILITY_ALERT_ENDPOINT;
 const DELIVERABILITY_ALERT_ENDPOINT = process.env.DELIVERABILITY_ALERT_ENDPOINT;
-const SHOULD_SEND_ESCALATION_HOOK = !!process.env.ESCALATE_ALERT_ENDPOINT;
-const ESCALATE_ALERT_ENDPOINT = process.env.ESCALATE_ALERT_ENDPOINT;
 
 async function checkForBadDeliverability() {
   if (!ALERTS_ON) return null;
@@ -63,9 +61,7 @@ async function checkForBadDeliverability() {
   }
 }
 
-async function notifyOnEscalateMessage(campaignContactId, userId) {
-  if (!SHOULD_SEND_ESCALATION_HOOK) return null;
-
+async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
   const promises = {
     mostRecentlyReceivedMessage: (async () => {
       const message = await r
@@ -79,7 +75,7 @@ async function notifyOnEscalateMessage(campaignContactId, userId) {
 
       return message;
     })(),
-    escalatingUser: (async () => {
+    taggingUser: (async () => {
       const user = await r
         .knex("user")
         .where({ id: parseInt(userId) })
@@ -87,27 +83,33 @@ async function notifyOnEscalateMessage(campaignContactId, userId) {
 
       return user;
     })(),
-    escalatedContact: (async () => {
+    taggedContact: (async () => {
       const contact = await r
         .knex("campaign_contact")
         .where({ id: parseInt(campaignContactId) })
         .first("*");
+
+      return contact;
     })()
   };
 
   const [
     mostRecentlyReceivedMessage,
-    escalatingUser,
-    escalatedContact
+    taggingUser,
+    taggedContact
   ] = await Promise.all([
     promises.mostRecentlyReceivedMessage,
-    promises.escalatingUser,
-    promises.escalatedContact
+    promises.taggingUser,
+    promises.taggedContact
   ]);
 
-  await request
-    .post(ESCALATE_ALERT_ENDPOINT)
-    .send({ mostRecentlyReceivedMessage, escalatingUser, escalatedContact });
+  await Promise.all(
+    webhookUrls.map(url =>
+      request
+        .post(url)
+        .send({ mostRecentlyReceivedMessage, taggingUser, taggedContact })
+    )
+  );
 }
 
-export { checkForBadDeliverability, notifyOnEscalateMessage };
+export { checkForBadDeliverability, notifyOnTagConversation };

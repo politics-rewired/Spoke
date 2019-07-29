@@ -37,6 +37,7 @@ const contactDataFragment = `
         }
         contactTags {
           id
+          title
           description
           confirmationSteps
           isAssignable

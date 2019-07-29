@@ -48,9 +48,9 @@ class ApplyTagButton extends Component {
     this.addTag(tag);
   };
 
-  handleRemoveTag = deleteTag => {
+  handleRemoveTag = deleteTagId => {
     const selectedTags = this.state.selectedTags.filter(
-      tag => tag.id !== deleteTag.id
+      tag => tag.id !== deleteTagId
     );
     this.setState({ selectedTags });
   };

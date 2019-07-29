@@ -77,6 +77,12 @@ const rootSchema = `
     reason: String
   }
 
+  input ContactTagActionInput {
+    addedTagIds: [String]!
+    removedTagIds: [String]!
+    message: MessageInput
+  }
+
   input QuestionResponseInput {
     campaignContactId: String!
     interactionStepId: String!
@@ -271,7 +277,7 @@ const rootSchema = `
     updateOptOutMessage( organizationId: String!, optOutMessage: String!): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
-    escalateConversation(campaignContactId: String!, escalate: ContactActionInput!): CampaignContact
+    tagConversation(campaignContactId: String!, tag: ContactTagActionInput!): CampaignContact
     createOptOut(optOut:ContactActionInput!, campaignContactId:String!):CampaignContact,
     removeOptOut(cell:Phone!):[CampaignContact],
     editCampaignContactMessageStatus(messageStatus: String!, campaignContactId:String!): CampaignContact,

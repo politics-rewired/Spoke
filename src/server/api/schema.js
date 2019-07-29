@@ -78,7 +78,7 @@ import {
   queryCampaignOverlapCount
 } from "./campaign-overlap";
 import { change } from "../local-auth-helpers";
-import { notifyOnEscalateMessage } from "./lib/alerts";
+import { notifyOnTagConversation } from "./lib/alerts";
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
@@ -1381,44 +1381,36 @@ const rootMutations = {
         return { found: false };
       }
     },
-    escalateConversation: async (
-      _,
-      { campaignContactId, escalate },
-      { user, loaders }
-    ) => {
-      let campaignContact = await r
+    tagConversation: async (_, { campaignContactId, tag }, { user }) => {
+      const campaignContact = await r
         .knex("campaign_contact")
         .where({ id: campaignContactId })
         .first();
       await assignmentRequired(user, campaignContact.assignment_id);
 
-      const campaign = await r
-        .knex("campaign")
-        .where({ id: campaignContact.campaign_id })
-        .first("organization_id");
-      const escalationUserId = await getEscalationUserId(
-        campaign.organization_id
-      );
-      if (!escalationUserId) {
-        throw new GraphQLError(
-          `No escalation user set for organization ${campaign.organization_id}!`
-        );
-      }
+      const { addedTagIds, removedTagIds } = tag;
+      const tagsToInsert = addedTagIds.map(tagId => ({
+        campaign_contact_id: campaignContactId,
+        tag_id: tagId,
+        tagger_id: user.id
+      }));
+      const [deleteResult, insertResult] = await Promise.all([
+        await r
+          .knex("campaign_contact_tag")
+          .where({ campaign_contact_id: campaignContactId })
+          .whereIn("tag_id", removedTagIds)
+          .del(),
+        await r.knex("campaign_contact_tag").insert(tagsToInsert)
+      ]);
 
-      await reassignContacts([campaignContactId], escalationUserId);
-      campaignContact = await r
-        .knex("campaign_contact")
-        .where({ id: campaignContactId })
-        .first();
-
-      if (escalate.message) {
+      if (tag.message) {
         try {
           const checkOptOut = true;
           const checkAssignment = false;
           await sendMessage(
             user,
             campaignContactId,
-            escalate.message,
+            tag.message,
             checkOptOut,
             checkAssignment
           );
@@ -1428,7 +1420,12 @@ const rootMutations = {
         }
       }
 
-      await notifyOnEscalateMessage(campaignContactId, user.id);
+      const webhookUrls = await r
+        .knex("tag")
+        .whereIn("id", addedTagIds)
+        .pluck("webhook_url")
+        .then(urls => urls.filter(url => url.length > 0));
+      await notifyOnTagConversation(campaignContactId, user.id, webhookUrls);
 
       return campaignContact;
     },

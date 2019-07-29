@@ -463,8 +463,8 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ disabled: true });
 
     const tag = {
-      addedTags,
-      removedTags
+      addedTagIds: addedTags.map(tag => tag.id),
+      removedTagIds: removedTags.map(tag => tag.id)
     };
 
     if (tagMessageText && tagMessageText.length) {
