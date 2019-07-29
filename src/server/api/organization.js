@@ -207,9 +207,6 @@ export const resolvers = {
       r
         .knex("tag")
         .where({ organization_id: organization.id })
-        .orderBy([
-          { column: "is_system", order: "asc" },
-          { column: "title", order: "asc" }
-        ])
+        .orderBy(["is_system", "title"])
   }
 };
