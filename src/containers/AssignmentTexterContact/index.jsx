@@ -33,7 +33,7 @@ import CreateIcon from "material-ui/svg-icons/content/create";
 import { dataTest } from "../../lib/attributes";
 import ContactActionDialog from "./ContactActionDialog";
 import MessageTextField from "./MessageTextField";
-import EscalateButton from "./EscalateButton";
+import ApplyTagButton from "./ApplyTagButton";
 
 import { isContactBetweenTextingHours } from "./utils";
 import TopFixedSection from "./TopFixedSection";
@@ -622,6 +622,7 @@ export class AssignmentTexterContact extends React.Component {
     const {
       contact,
       campaign,
+      tags,
       assignment,
       navigationToolbarChildren,
       onFinishContact
@@ -721,7 +722,11 @@ export class AssignmentTexterContact extends React.Component {
                 label="Opt out"
                 onTouchTap={this.handleOpenOptOutDialog}
               />
-              <EscalateButton onEscalate={this.handleOpenEscalateDialog} />
+              <ApplyTagButton
+                contactTags={contact.contactTags}
+                allTags={tags}
+                onApplyTag={console.log}
+              />
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
               </div>
@@ -890,6 +895,7 @@ export class AssignmentTexterContact extends React.Component {
 AssignmentTexterContact.propTypes = {
   errors: PropTypes.array,
   contact: PropTypes.object,
+  tags: PropTypes.arrayOf(PropTypes.object).isRequired,
   campaign: PropTypes.object,
   assignment: PropTypes.object,
   texter: PropTypes.object,

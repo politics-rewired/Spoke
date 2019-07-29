@@ -379,7 +379,7 @@ class AssignmentTexter extends React.Component {
 
   renderTexter = () => {
     const { errors } = this.state;
-    const { assignment } = this.props;
+    const { assignment, organizationTags } = this.props;
     const { campaign, texter } = assignment;
     const contact = this.currentContact();
 
@@ -394,6 +394,7 @@ class AssignmentTexter extends React.Component {
         key={contact.id}
         assignment={assignment}
         contact={contact}
+        tags={organizationTags.organization.tagList}
         texter={texter}
         campaign={campaign}
         navigationToolbarChildren={navigationToolbarChildren}
@@ -448,6 +449,32 @@ AssignmentTexter.propTypes = {
   assignContactsIfNeeded: PropTypes.func,
   organizationId: PropTypes.string
 };
+
+const mapQueriesToProps = ({ ownProps }) => ({
+  organizationTags: {
+    query: gql`
+      query getTags($organizationId: String!) {
+        organization(id: $organizationId) {
+          id
+          tagList {
+            id
+            title
+            description
+            confirmationSteps
+            onApplyScript
+            isSystem
+            isAssignable
+            createdAt
+          }
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.organizationId
+    },
+    forceFetch: true
+  }
+});
 
 const mapMutationsToProps = () => ({
   createOptOut: (optOut, campaignContactId) => ({
@@ -586,5 +613,6 @@ const mapMutationsToProps = () => ({
 });
 
 export default loadData(wrapMutations(withRouter(AssignmentTexter)), {
+  mapQueriesToProps,
   mapMutationsToProps
 });
