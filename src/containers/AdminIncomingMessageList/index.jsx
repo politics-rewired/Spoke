@@ -71,7 +71,7 @@ export class AdminIncomingMessageList extends Component {
     super(props);
 
     const tagsFilter = props.escalatedConvosOnly
-      ? Object.assign(initialTagsFilter, {
+      ? Object.assign({}, initialTagsFilter, {
           excludeEscalated: false,
           escalatedConvosOnly: true
         })
