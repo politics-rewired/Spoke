@@ -51,6 +51,7 @@ import {
 import { schema as inviteSchema, resolvers as inviteResolvers } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
 import { schema as assignmentRequestSchema } from "./assignment-request";
+import { schema as tagSchema } from "./tag";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -74,6 +75,12 @@ const rootSchema = `
     cell: Phone!
     message: MessageInput
     reason: String
+  }
+
+  input ContactTagActionInput {
+    addedTagIds: [String]!
+    removedTagIds: [String]!
+    message: MessageInput
   }
 
   input QuestionResponseInput {
@@ -241,7 +248,7 @@ const rootSchema = `
     assignment(id:String!): Assignment
     organizations: [Organization]
     availableActions(organizationId:String!): [Action]
-    conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
+    conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
     campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
     people(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
     peopleByUserIds(userIds:[String], organizationId:String!): UsersList
@@ -268,10 +275,9 @@ const rootSchema = `
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
     updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
     updateOptOutMessage( organizationId: String!, optOutMessage: String!): Organization
-    updateEscalationUserId(organizationId: String!, escalationUserId: Int): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
-    escalateConversation(campaignContactId: String!, escalate: ContactActionInput!): CampaignContact
+    tagConversation(campaignContactId: String!, tag: ContactTagActionInput!): CampaignContact
     createOptOut(optOut:ContactActionInput!, campaignContactId:String!):CampaignContact,
     removeOptOut(cell:Phone!):[CampaignContact],
     editCampaignContactMessageStatus(messageStatus: String!, campaignContactId:String!): CampaignContact,
@@ -286,9 +292,9 @@ const rootSchema = `
     assignUserToCampaign(organizationUuid: String!, campaignId: String!): Campaign
     userAgreeTerms(userId: String!): User
     reassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserId:String!):[CampaignIdAssignmentId],
-    bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
+    bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]):[CampaignIdAssignmentId]
-    megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]):[CampaignIdAssignmentId]
+    megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!, organizationId: String!): String!
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Int): String!
     markForSecondPass(campaignId: String!, excludeAgeInHours: Int): String!
@@ -299,6 +305,8 @@ const rootSchema = `
     approveAssignmentRequest(assignmentRequestId: String!): Int!
     rejectAssignmentRequest(assignmentRequestId: String!): Boolean!
     setNumbersApiKey(organizationId: String!, numbersApiKey: String!): Organization!
+    saveTag(organizationId: String!, tag: TagInput!): Tag!
+    deleteTag(organizationId: String!, tagId: String!): Boolean!
   }
 
   schema {
@@ -326,5 +334,6 @@ export const schema = [
   inviteSchema,
   linkDomainSchema,
   assignmentRequestSchema,
-  conversationSchema
+  conversationSchema,
+  tagSchema
 ];

@@ -1,51 +1,39 @@
-import PropTypes from "prop-types";
 import React from "react";
+import PropTypes from "prop-types";
 import sample from "lodash/sample";
+import { withRouter } from "react-router";
+import * as yup from "yup";
+import sortBy from "lodash/sortBy";
+
 import { StyleSheet, css } from "aphrodite";
+import RaisedButton from "material-ui/RaisedButton";
+import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
+import CircularProgress from "material-ui/CircularProgress";
+import Snackbar from "material-ui/Snackbar";
+import { grey100 } from "material-ui/styles/colors";
+import CreateIcon from "material-ui/svg-icons/content/create";
+
+import { isContactBetweenTextingHours } from "./utils";
+import { getChildren, getTopMostParent, interactionStepForId } from "../../lib";
+import { applyScript } from "../../lib/scripts";
+import { dataTest } from "../../lib/attributes";
 import MessageList from "../../components/MessageList";
 import CannedResponseMenu from "../../components/CannedResponseMenu";
 import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import { grey100 } from "material-ui/styles/colors";
-import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
-import { Card, CardActions, CardTitle } from "material-ui/Card";
-import Divider from "material-ui/Divider";
-import { applyScript } from "../../lib/scripts";
-import * as yup from "yup";
+import Empty from "../../components/Empty";
 import GSForm from "../../components/forms/GSForm";
-import Form from "react-formal";
-import GSSubmitButton from "../../components/forms/GSSubmitButton";
 import SendButton from "../../components/SendButton";
 import BulkSendButton from "../../components/BulkSendButton";
 import SendButtonArrow from "../../components/SendButtonArrow";
-import CircularProgress from "material-ui/CircularProgress";
-import Snackbar from "material-ui/Snackbar";
-import {
-  getChildren,
-  getTopMostParent,
-  interactionStepForId,
-  log
-} from "../../lib";
-import { withRouter } from "react-router";
-import Empty from "../../components/Empty";
-import CreateIcon from "material-ui/svg-icons/content/create";
-import { dataTest } from "../../lib/attributes";
 import ContactActionDialog from "./ContactActionDialog";
 import MessageTextField from "./MessageTextField";
-import EscalateButton from "./EscalateButton";
-
-import { isContactBetweenTextingHours } from "./utils";
+import ApplyTagButton from "./ApplyTagButton";
 import TopFixedSection from "./TopFixedSection";
 
 const TexterDialogType = Object.freeze({
   None: "None",
-  OptOut: "OptOut",
-  Escalate: "Escalate"
+  OptOut: "OptOut"
 });
-
-const DEFAULT_ESCALATE_TEXT =
-  "Great question! I'm going to pass this on to someone more familiar with that specific topic area";
 
 const styles = StyleSheet.create({
   mobile: {
@@ -216,7 +204,9 @@ export class AssignmentTexterContact extends React.Component {
       snackbarActionTitle,
       snackbarOnTouchTap,
       optOutMessageText: campaign.organization.optOutMessage,
-      escalateMessageText: DEFAULT_ESCALATE_TEXT,
+      tagMessageText: "",
+      addedTags: [],
+      removedTags: [],
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
       dialogType: TexterDialogType.None,
@@ -264,8 +254,6 @@ export class AssignmentTexterContact extends React.Component {
       const { dialogType } = this.state;
       if (dialogType === TexterDialogType.OptOut) {
         this.handleOptOut();
-      } else if (dialogType === TexterDialogType.Escalate) {
-        this.handleEscalate();
       } else {
         this.handleClickSendMessageButton();
       }
@@ -392,14 +380,18 @@ export class AssignmentTexterContact extends React.Component {
   submitAction = async messageText => {
     const { contact } = this.props;
     const message = this.createMessageToContact(messageText);
-    const changes = this.gatherSurveyChanges();
+    const changes = this.gatherSurveyAndTagChanges();
     const payload = Object.assign({ message }, changes);
     this.props.sendMessage(contact.id, payload);
   };
 
-  gatherSurveyChanges = () => {
+  gatherSurveyAndTagChanges = () => {
     const { contact } = this.props;
+    const { addedTags, removedTags } = this.state;
 
+    const changes = {};
+
+    // Gather survey question changes
     const deletionIds = [];
     const questionResponseObjects = [];
 
@@ -421,10 +413,18 @@ export class AssignmentTexterContact extends React.Component {
       }
     }
 
-    const changes = {};
     if (questionResponseObjects.length)
       changes.questionResponseObjects = questionResponseObjects;
     if (deletionIds.length) changes.deletionIds = deletionIds;
+
+    // Gather tag changes
+    const tag = {
+      addedTagIds: addedTags.map(tag => tag.id),
+      removedTagIds: removedTags.map(tag => tag.id)
+    };
+    if (tag.addedTagIds || tag.removedTagIds) changes.tag = tag;
+
+    // Return aggregate changes
     return changes;
   };
 
@@ -459,29 +459,11 @@ export class AssignmentTexterContact extends React.Component {
       optOut.message = message;
     }
 
-    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges());
-    this.props.sendMessage(contact.id, payload);
-  };
-
-  handleEscalate = () => {
-    const { disabled, escalateMessageText } = this.state;
-    const { assignment, contact } = this.props;
-    if (disabled) {
-      return; // stops from multi-send
-    }
-    this.setState({ disabled: true });
-
-    const escalate = {
-      cell: contact.cell,
-      assignmentId: assignment.id
-    };
-
-    if (escalateMessageText && escalateMessageText.length) {
-      const message = this.createMessageToContact(escalateMessageText);
-      escalate.message = message;
-    }
-
-    const payload = Object.assign({}, { escalate });
+    const payload = Object.assign(
+      {},
+      { optOut },
+      this.gatherSurveyAndTagChanges()
+    );
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -489,8 +471,13 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.OptOut });
   };
 
-  handleOpenEscalateDialog = () => {
-    this.setState({ dialogType: TexterDialogType.Escalate });
+  handleApplyTags = (addedTags, removedTags) => {
+    this.setState({ addedTags, removedTags });
+    if (addedTags.length > 0) {
+      const mostImportantTag = sortBy(addedTags, "id")[0];
+      const tagMessageText = mostImportantTag.onApplyScript;
+      this.handleChangeScript(tagMessageText);
+    }
   };
 
   handleCloseDialog = () => {
@@ -499,10 +486,7 @@ export class AssignmentTexterContact extends React.Component {
 
   handleChangeScript = newScript => {
     const messageText = this.getMessageTextFromScript(newScript);
-
-    this.setState({
-      messageText
-    });
+    this.setState({ messageText });
   };
 
   handleQuestionResponseChange = ({
@@ -622,6 +606,7 @@ export class AssignmentTexterContact extends React.Component {
     const {
       contact,
       campaign,
+      tags,
       assignment,
       navigationToolbarChildren,
       onFinishContact
@@ -721,7 +706,11 @@ export class AssignmentTexterContact extends React.Component {
                 label="Opt out"
                 onTouchTap={this.handleOpenOptOutDialog}
               />
-              <EscalateButton onEscalate={this.handleOpenEscalateDialog} />
+              <ApplyTagButton
+                contactTags={contact.contactTags}
+                allTags={tags}
+                onApplyTag={this.handleApplyTags}
+              />
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
               </div>
@@ -806,20 +795,6 @@ export class AssignmentTexterContact extends React.Component {
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
-        {dialogType === TexterDialogType.Escalate && (
-          <ContactActionDialog
-            title="Escalate conversation"
-            messageText={this.state.escalateMessageText}
-            submitTitle={
-              this.state.escalateMessageText ? "Send" : "Escalate without Text"
-            }
-            onChange={({ messageText }) =>
-              this.setState({ escalateMessageText: messageText })
-            }
-            onSubmit={this.handleEscalate}
-            handleCloseDialog={this.handleCloseDialog}
-          />
-        )}
         {this.renderCannedResponsePopover()}
       </div>
     );
@@ -890,6 +865,7 @@ export class AssignmentTexterContact extends React.Component {
 AssignmentTexterContact.propTypes = {
   errors: PropTypes.array,
   contact: PropTypes.object,
+  tags: PropTypes.arrayOf(PropTypes.object).isRequired,
   campaign: PropTypes.object,
   assignment: PropTypes.object,
   texter: PropTypes.object,

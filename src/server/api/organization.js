@@ -116,33 +116,27 @@ export const resolvers = {
         return cat;
       }
     },
-    escalationUserId: async organization => {
-      try {
-        const features = JSON.parse(organization.features);
-        return parseInt(features.escalationUserId);
-      } catch (ex) {
-        return null;
-      }
-    },
     escalatedConversationCount: async organization => {
-      let escalationUserId;
-      try {
-        const features = JSON.parse(organization.features);
-        escalationUserId = parseInt(features.escalationUserId);
-      } catch (ex) {
-        // no-op
-      }
+      const subQuery = r.knex
+        .select("campaign_contact_tag.campaign_contact_id")
+        .from("campaign_contact_tag")
+        .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+        .where({
+          "lower(tag.title)": "escalated",
+          "tag.organization_id": organization.id
+        })
+        .whereRaw(
+          "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+        );
 
-      if (escalationUserId) {
-        const countQuery = r
-          .knex("campaign_contact")
-          .join("assignment", "assignment.id", "campaign_contact.assignment_id")
-          .where({ "assignment.user_id": escalationUserId })
-          .count("*");
-        const escalatedCount = await r.parseCount(countQuery);
-        return escalatedCount;
-      }
-      return 0;
+      const countQuery = r
+        .knex("campaign_contact")
+        .join("assignment", "assignment.id", "campaign_contact.assignment_id")
+        .whereExists(subQuery)
+        .count("*");
+
+      const escalatedCount = await r.parseCount(countQuery);
+      return escalatedCount;
     },
     numbersApiKey: async organization => {
       let numbersApiKey;
@@ -208,6 +202,14 @@ export const resolvers = {
         ;
       `);
       return rawResult.rows;
-    }
+    },
+    tagList: async organization =>
+      r
+        .knex("tag")
+        .where({ organization_id: organization.id })
+        .orderBy([
+          { column: "is_system", order: "asc" },
+          { column: "title", order: "asc" }
+        ])
   }
 };

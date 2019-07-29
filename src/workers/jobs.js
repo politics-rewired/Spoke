@@ -242,7 +242,9 @@ export async function uploadContacts(job) {
 
           try {
             await trx("campaign_contact").insert(chunk);
-            await numbersRequest.addPhoneNumbers(chunk.map(c => c.cell));
+            if (numbersApiKey) {
+              await numbersRequest.addPhoneNumbers(chunk.map(c => c.cell));
+            }
           } catch (exc) {
             console.error("Error inserting contacts:", exc);
             throw exc;
@@ -1065,14 +1067,17 @@ const fetchExportData = async job => {
     .knex("campaign")
     .first("title")
     .where({ id: campaignId });
+
   const { email: notificationEmail } = await r
     .knex("user")
     .first("email")
     .where({ id: requesterId });
+
   const interactionSteps = await r
     .knex("interaction_step")
     .select("*")
     .where({ campaign_id: campaignId });
+
   const assignments = await r
     .knex("assignment")
     .where("campaign_id", campaignId)
@@ -1146,12 +1151,23 @@ const processContactsChunk = async (
         zip_code.city,
         zip_code.state,
         question_response.interaction_step_id,
-        question_response.value
+        question_response.value,
+        tags.tag_titles
       from campaign_contacts
       left join question_response
         on question_response.campaign_contact_id = campaign_contacts.id
       left join zip_code
         on zip_code.zip = campaign_contacts.zip
+      left join (
+          select 
+            campaign_contact_tag.campaign_contact_id,
+            array_agg(tag.title) as tag_titles
+          from campaign_contact_tag
+          join tag
+            on campaign_contact_tag.tag_id = tag.id
+          group by campaign_contact_tag.campaign_contact_id
+        ) as tags
+        on tags.campaign_contact_id = campaign_contacts.id
       order by
         campaign_contacts.id asc
       ;
@@ -1203,6 +1219,8 @@ const processContactsChunk = async (
       const responseValue = response ? response.value : "";
       contactRow[`question[${questionText}]`] = responseValue;
     });
+
+    contactRow["tags"] = contact.tag_titles;
 
     return contactRow;
   });
@@ -1316,9 +1334,10 @@ export async function exportCampaign(job) {
 
   // Message rows
   let messageRows = [];
+  let lastContactId;
   try {
     let chunkMessageResult = undefined;
-    let lastContactId = 0;
+    lastContactId = 0;
     while (
       (chunkMessageResult = await processMessagesChunk(
         campaignId,

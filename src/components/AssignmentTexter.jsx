@@ -316,10 +316,10 @@ class AssignmentTexter extends React.Component {
       );
     }
 
-    if (payload.escalate) {
+    if (payload.tag) {
       promises.push(
         this.props.mutations
-          .escalateContact(contact_id, payload.escalate)
+          .tagContact(contact_id, payload.tag)
           .then(catchError)
       );
     }
@@ -379,7 +379,7 @@ class AssignmentTexter extends React.Component {
 
   renderTexter = () => {
     const { errors } = this.state;
-    const { assignment } = this.props;
+    const { assignment, organizationTags } = this.props;
     const { campaign, texter } = assignment;
     const contact = this.currentContact();
 
@@ -394,6 +394,7 @@ class AssignmentTexter extends React.Component {
         key={contact.id}
         assignment={assignment}
         contact={contact}
+        tags={organizationTags.organization.tagList}
         texter={texter}
         campaign={campaign}
         navigationToolbarChildren={navigationToolbarChildren}
@@ -449,6 +450,32 @@ AssignmentTexter.propTypes = {
   organizationId: PropTypes.string
 };
 
+const mapQueriesToProps = ({ ownProps }) => ({
+  organizationTags: {
+    query: gql`
+      query getTags($organizationId: String!) {
+        organization(id: $organizationId) {
+          id
+          tagList {
+            id
+            title
+            description
+            confirmationSteps
+            onApplyScript
+            isSystem
+            isAssignable
+            createdAt
+          }
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.organizationId
+    },
+    forceFetch: true
+  }
+});
+
 const mapMutationsToProps = () => ({
   createOptOut: (optOut, campaignContactId) => ({
     mutation: gql`
@@ -470,16 +497,13 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  escalateContact: (campaignContactId, escalate) => ({
+  tagContact: (campaignContactId, tag) => ({
     mutation: gql`
-      mutation escalateConversation(
+      mutation tagConversation(
         $campaignContactId: String!
-        $escalate: ContactActionInput!
+        $tag: ContactTagActionInput!
       ) {
-        escalateConversation(
-          campaignContactId: $campaignContactId
-          escalate: $escalate
-        ) {
+        tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
           id
           assignmentId
         }
@@ -487,7 +511,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: {
       campaignContactId,
-      escalate
+      tag
     }
   }),
   editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({
@@ -586,5 +610,6 @@ const mapMutationsToProps = () => ({
 });
 
 export default loadData(wrapMutations(withRouter(AssignmentTexter)), {
+  mapQueriesToProps,
   mapMutationsToProps
 });

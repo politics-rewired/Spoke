@@ -61,22 +61,29 @@ function getContactsFilterForConversationOptOutStatus(
 const initialCampaignsFilter = { isArchived: false };
 const initialContactsFilter = { isOptedOut: false };
 const initialAssignmentsFilter = {};
+const initialTagsFilter = {
+  excludeEscalated: false,
+  escalatedConvosOnly: false
+};
 
 export class AdminIncomingMessageList extends Component {
   constructor(props) {
     super(props);
 
-    const { escalationUserId: texterId } = props;
-    const assignmentsFilter = texterId
-      ? { includeEscalated: true, texterId }
-      : initialAssignmentsFilter;
+    const tagsFilter = props.escalatedConvosOnly
+      ? Object.assign({}, initialTagsFilter, {
+          excludeEscalated: false,
+          escalatedConvosOnly: true
+        })
+      : initialTagsFilter;
 
     this.state = {
       page: 0,
       pageSize: 10,
       campaignsFilter: initialCampaignsFilter,
       contactsFilter: initialContactsFilter,
-      assignmentsFilter,
+      assignmentsFilter: initialAssignmentsFilter,
+      tagsFilter: tagsFilter,
       contactNameFilter: undefined,
       needsRender: false,
       campaigns: [],
@@ -98,7 +105,8 @@ export class AdminIncomingMessageList extends Component {
       !nextState.needsRender &&
       _.isEqual(this.state.contactsFilter, nextState.contactsFilter) &&
       _.isEqual(this.state.campaignsFilter, nextState.campaignsFilter) &&
-      _.isEqual(this.state.assignmentsFilter, nextState.assignmentsFilter)
+      _.isEqual(this.state.assignmentsFilter, nextState.assignmentsFilter) &&
+      _.isEqual(this.state.tagsFilter, nextState, tagsFilter)
     ) {
       return false;
     }
@@ -132,11 +140,11 @@ export class AdminIncomingMessageList extends Component {
   };
 
   handleIncludeEscalatedToggled = () => {
-    const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter);
-    assignmentsFilter.includeEscalated = !(
-      assignmentsFilter && !!assignmentsFilter.includeEscalated
+    const tagsFilter = Object.assign({}, this.state.tagsFilter);
+    tagsFilter.excludeEscalated = !(
+      tagsFilter && !!tagsFilter.excludeEscalated
     );
-    this.setState({ assignmentsFilter });
+    this.setState({ tagsFilter });
   };
 
   handleMessageFilterChange = async messagesFilter => {
@@ -201,6 +209,7 @@ export class AdminIncomingMessageList extends Component {
         this.props.params.organizationId,
         this.state.campaignsFilter || {},
         this.state.assignmentsFilter || {},
+        this.state.tagsFilter || {},
         this.state.contactsFilter || {},
         newTexterUserIds
       );
@@ -223,6 +232,7 @@ export class AdminIncomingMessageList extends Component {
         this.props.params.organizationId,
         this.state.campaignsFilter || {},
         this.state.assignmentsFilter || {},
+        this.state.tagsFilter || {},
         this.state.contactsFilter || {},
         null
       );
@@ -367,12 +377,14 @@ export class AdminIncomingMessageList extends Component {
       campaignsFilter,
       contactsFilter,
       assignmentsFilter,
+      tagsFilter,
       contactNameFilter
     } = this.state;
     return (
       campaignsFilter !== initialCampaignsFilter ||
       contactsFilter !== initialContactsFilter ||
       assignmentsFilter !== initialAssignmentsFilter ||
+      tagsFilter !== initialTagsFilter ||
       contactNameFilter !== undefined
     );
   };
@@ -383,7 +395,8 @@ export class AdminIncomingMessageList extends Component {
       page,
       pageSize,
       reassignmentAlert,
-      assignmentsFilter
+      assignmentsFilter,
+      tagsFilter
     } = this.state;
     const areContactsSelected =
       selectedRows === "all" ||
@@ -394,8 +407,7 @@ export class AdminIncomingMessageList extends Component {
       limit: pageSize
     };
 
-    const includeEscalated =
-      assignmentsFilter && !!assignmentsFilter.includeEscalated;
+    const includeEscalated = tagsFilter && !tagsFilter.excludeEscalated;
 
     return (
       <div>
@@ -440,10 +452,8 @@ export class AdminIncomingMessageList extends Component {
             this.state.includeNotOptedOutConversations
           }
           includeOptedOutConversations={this.state.includeOptedOutConversations}
-          isTexterFilterable={this.props.escalationUserId === undefined}
-          isIncludeEscalatedFilterable={
-            this.props.escalationUserId === undefined
-          }
+          isTexterFilterable={!this.props.escalatedConvosOnly}
+          isIncludeEscalatedFilterable={!this.props.escalatedConvosOnly}
         />
         <br />
         <IncomingMessageActions
@@ -468,6 +478,7 @@ export class AdminIncomingMessageList extends Component {
             contactsFilter={this.state.contactsFilter}
             campaignsFilter={this.state.campaignsFilter}
             assignmentsFilter={this.state.assignmentsFilter}
+            tagsFilter={this.state.tagsFilter}
             includeEscalated={includeEscalated}
             contactNameFilter={this.state.contactNameFilter}
             selectedRows={this.state.selectedRows}
@@ -569,6 +580,7 @@ const mapMutationsToProps = () => ({
     organizationId,
     campaignsFilter,
     assignmentsFilter,
+    tagsFilter,
     contactsFilter,
     newTexterUserId
   ) => ({
@@ -578,6 +590,7 @@ const mapMutationsToProps = () => ({
         $contactsFilter: ContactsFilter
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
+        $tagsFilter: tagsFilter
         $newTexterUserId: String
       ) {
         bulkReassignCampaignContacts(
@@ -585,6 +598,7 @@ const mapMutationsToProps = () => ({
           contactsFilter: $contactsFilter
           campaignsFilter: $campaignsFilter
           assignmentsFilter: $assignmentsFilter
+          tagsFilter: $tagsFilter
           newTexterUserId: $newTexterUserId
         ) {
           campaignId
@@ -596,6 +610,7 @@ const mapMutationsToProps = () => ({
       organizationId,
       campaignsFilter,
       assignmentsFilter,
+      tagsFilter,
       contactsFilter,
       newTexterUserId
     }
@@ -605,6 +620,7 @@ const mapMutationsToProps = () => ({
     organizationId,
     campaignsFilter,
     assignmentsFilter,
+    tagsFilter,
     contactsFilter,
     newTexterUserIds
   ) => ({
@@ -614,6 +630,7 @@ const mapMutationsToProps = () => ({
         $contactsFilter: ContactsFilter
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
+        $tagsFilter: TagsFilter
         $newTexterUserIds: [String]
       ) {
         megaBulkReassignCampaignContacts(
@@ -621,6 +638,7 @@ const mapMutationsToProps = () => ({
           contactsFilter: $contactsFilter
           campaignsFilter: $campaignsFilter
           assignmentsFilter: $assignmentsFilter
+          tagsFilter: $tagsFilter
           newTexterUserIds: $newTexterUserIds
         ) {
           campaignId
@@ -632,6 +650,7 @@ const mapMutationsToProps = () => ({
       organizationId,
       campaignsFilter,
       assignmentsFilter,
+      tagsFilter,
       contactsFilter,
       newTexterUserIds
     }
@@ -639,7 +658,6 @@ const mapMutationsToProps = () => ({
 });
 
 AdminIncomingMessageList.propTypes = {
-  escalationUserId: PropTypes.number,
   mutations: PropTypes.object.isRequired,
   params: PropTypes.object.isRequired
 };

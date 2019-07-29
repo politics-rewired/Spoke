@@ -40,5 +40,7 @@ export const schema = `
     messageStatus: String
     assignmentId: String
     updatedAt: Date
+
+    contactTags: [Tag]
   }
 `;

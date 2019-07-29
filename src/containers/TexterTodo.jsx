@@ -35,6 +35,15 @@ const contactDataFragment = `
           text
           isFromContact
         }
+        contactTags {
+          id
+          title
+          description
+          confirmationSteps
+          isAssignable
+          isSystem
+          createdAt
+        }
 `;
 
 class TexterTodo extends React.Component {

@@ -72,12 +72,13 @@ import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
+import { resolvers as tagResolvers } from "./tag";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
 } from "./campaign-overlap";
 import { change } from "../local-auth-helpers";
-import { notifyOnEscalateMessage } from "./lib/alerts";
+import { notifyOnTagConversation } from "./lib/alerts";
 
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
@@ -968,39 +969,6 @@ const rootMutations = {
       return await Organization.get(organizationId);
     },
 
-    updateEscalationUserId: async (
-      _,
-      { organizationId, escalationUserId },
-      { user, loaders }
-    ) => {
-      await accessRequired(user, organizationId, "ADMIN");
-
-      const currentOrganization = await Organization.get(organizationId);
-      let currentFeatures = {};
-      try {
-        currentFeatures = JSON.parse(currentOrganization.features);
-      } catch (ex) {
-        // do nothing
-      }
-
-      // Ensure the user actually exists
-      const escalationUser = await r
-        .knex("user")
-        .where({ id: escalationUserId })
-        .first("id");
-      if (!escalationUser)
-        throw new GraphQLError("User with that ID does not exist!");
-
-      const nextFeatures = Object.assign({}, currentFeatures, {
-        escalationUserId
-      });
-      await Organization.get(organizationId).update({
-        features: JSON.stringify(nextFeatures)
-      });
-
-      return await loaders.organization.load(organizationId);
-    },
-
     createInvite: async (_, { user }) => {
       if ((user && user.is_superadmin) || !process.env.SUPPRESS_SELF_INVITE) {
         const inviteInstance = new Invite({
@@ -1299,22 +1267,28 @@ const rootMutations = {
         });
       }
 
-      const newOrganization = await Organization.save({
+      const [newOrganization] = await r.knex("organization").insert({
         name,
         uuid: uuidv4()
       });
-      await UserOrganization.save({
+      await r.knex("user_organization").insert({
         role: "OWNER",
         user_id: userId,
         organization_id: newOrganization.id
       });
-      await Invite.save(
-        {
-          id: inviteId,
-          is_valid: false
-        },
-        { conflict: "update" }
-      );
+      await r.knex("invite").update({
+        id: inviteId,
+        is_valid: false
+      });
+      await r.knex("tag").insert({
+        organization_id: newOrganization.id,
+        title: "Escalated",
+        description:
+          "Escalation is meant for situations where you have exhausted all available help resources and still do not know how to respond.",
+        confirmation_steps: [],
+        is_assignable: false,
+        is_system: true
+      });
 
       return newOrganization;
     },
@@ -1407,44 +1381,36 @@ const rootMutations = {
         return { found: false };
       }
     },
-    escalateConversation: async (
-      _,
-      { campaignContactId, escalate },
-      { user, loaders }
-    ) => {
-      let campaignContact = await r
+    tagConversation: async (_, { campaignContactId, tag }, { user }) => {
+      const campaignContact = await r
         .knex("campaign_contact")
         .where({ id: campaignContactId })
         .first();
       await assignmentRequired(user, campaignContact.assignment_id);
 
-      const campaign = await r
-        .knex("campaign")
-        .where({ id: campaignContact.campaign_id })
-        .first("organization_id");
-      const escalationUserId = await getEscalationUserId(
-        campaign.organization_id
-      );
-      if (!escalationUserId) {
-        throw new GraphQLError(
-          `No escalation user set for organization ${campaign.organization_id}!`
-        );
-      }
+      const { addedTagIds, removedTagIds } = tag;
+      const tagsToInsert = addedTagIds.map(tagId => ({
+        campaign_contact_id: campaignContactId,
+        tag_id: tagId,
+        tagger_id: user.id
+      }));
+      const [deleteResult, insertResult] = await Promise.all([
+        await r
+          .knex("campaign_contact_tag")
+          .where({ campaign_contact_id: campaignContactId })
+          .whereIn("tag_id", removedTagIds)
+          .del(),
+        await r.knex("campaign_contact_tag").insert(tagsToInsert)
+      ]);
 
-      await reassignContacts([campaignContactId], escalationUserId);
-      campaignContact = await r
-        .knex("campaign_contact")
-        .where({ id: campaignContactId })
-        .first();
-
-      if (escalate.message) {
+      if (tag.message) {
         try {
           const checkOptOut = true;
           const checkAssignment = false;
           await sendMessage(
             user,
             campaignContactId,
-            escalate.message,
+            tag.message,
             checkOptOut,
             checkAssignment
           );
@@ -1454,7 +1420,12 @@ const rootMutations = {
         }
       }
 
-      await notifyOnEscalateMessage(campaignContactId, user.id);
+      const webhookUrls = await r
+        .knex("tag")
+        .whereIn("id", addedTagIds)
+        .pluck("webhook_url")
+        .then(urls => urls.filter(url => url.length > 0));
+      await notifyOnTagConversation(campaignContactId, user.id, webhookUrls);
 
       return campaignContact;
     },
@@ -1913,6 +1884,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         newTexterUserIds
       },
@@ -1925,6 +1897,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter
       );
 
@@ -2032,6 +2005,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         newTexterUserId
       },
@@ -2047,6 +2021,7 @@ const rootMutations = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter
       );
 
@@ -2165,13 +2140,10 @@ const rootMutations = {
         .knex("campaign")
         .where({ id: campaignId })
         .first("organization_id");
-      const escalationUserId =
-        (await getEscalationUserId(campaign.organization_id)) || null;
 
       const updatedCount = await r.knex.transaction(async trx => {
         const queryArgs = [parseInt(campaignId), messageStatus];
         if (ageInHours) queryArgs.push(ageInHoursAgo);
-        if (escalationUserId) queryArgs.push(escalationUserId);
 
         const rawResult = await trx.raw(
           `
@@ -2186,15 +2158,18 @@ const rootMutations = {
             and assignment.id = campaign_contact.assignment_id
             and is_opted_out = false
             and message_status = ?
+            and not exists (
+              select 1 
+              from campaign_contact_tag
+              join tag on tag.id = campaign_contact_tag.tag_id
+              where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+            )
             ${ageInHours ? "and campaign_contact.updated_at < ?" : ""}
-            ${
-              escalationUserId
-                ? "and (assignment.user_id is null or assignment.user_id <> ?)"
-                : ""
-            }
         `,
           queryArgs
         );
+
         return rawResult.rowCount;
       });
 
@@ -2347,6 +2322,56 @@ const rootMutations = {
       await organizationCache.clear(organizationId);
 
       return await Organization.get(organizationId);
+    },
+    saveTag: async (_, { organizationId, tag }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      // Update existing tag
+      if (tag.id) {
+        const [updatedTag] = await r
+          .knex("tag")
+          .update({
+            title: tag.title,
+            description: tag.description,
+            is_assignable: tag.isAssignable
+          })
+          .where({
+            id: tag.id,
+            organization_id: organizationId,
+            is_system: false
+          })
+          .returning("*");
+        if (!updatedTag) throw new Error("No matching tag to update!");
+        return updatedTag;
+      }
+
+      // Create new tag
+      const [newTag] = await r
+        .knex("tag")
+        .insert({
+          organization_id: organizationId,
+          author_id: user.id,
+          title: tag.title,
+          description: tag.description,
+          is_assignable: tag.isAssignable
+        })
+        .returning("*");
+      return newTag;
+    },
+    deleteTag: async (_, { organizationId, tagId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const deleteCount = await r
+        .knex("tag")
+        .where({
+          id: tagId,
+          organization_id: organizationId,
+          is_system: false
+        })
+        .del();
+      if (deleteCount !== 1) throw new Error("Could not delete the tag.");
+
+      return true;
     }
   }
 };
@@ -2447,6 +2472,7 @@ const rootResolvers = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         contactNameFilter
       },
@@ -2459,6 +2485,7 @@ const rootResolvers = {
         organizationId,
         campaignsFilter,
         assignmentsFilter,
+        tagsFilter,
         contactsFilter,
         contactNameFilter
       );
@@ -2537,6 +2564,7 @@ const rootResolvers = {
 };
 
 export const resolvers = {
+  ...tagResolvers,
   ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,
