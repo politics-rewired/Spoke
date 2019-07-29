@@ -248,7 +248,7 @@ export const resolvers = {
         .knex("campaign")
         .where({ id: campaign_id })
         .first("organization_id");
-      await accessRequired(user, organization_id, "SUPERVOLUNTEER");
+      await accessRequired(user, organization_id, "TEXTER");
 
       return r
         .knex("tag")

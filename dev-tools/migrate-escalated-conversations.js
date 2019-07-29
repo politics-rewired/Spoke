@@ -1,5 +1,5 @@
 const config = {
-  client: "mysql",
+  client: "postgresql",
   connection: process.env.DATABASE_URL,
   pool: {
     min: 2,
@@ -33,6 +33,6 @@ async function go(organizationId, escalatedUserId) {
   );
 }
 
-go()
+go(process.argv[2], process.argv[3])
   .then(console.log)
   .catch(console.error);
