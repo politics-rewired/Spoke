@@ -156,18 +156,18 @@ export async function currentAssignmentTarget(organizationId, trx = r.knex) {
       and exists (
         select 1
         from campaign_contact
-        left join campaign_contact_tag as applied_unassignable_tags
-          on applied_unassignable_tags.campaign_contact_id = campaign_contact.id
-          and applied_unassignable_tags.tag_id in (
-            select id from tag
-            where tag.is_assignable = false
-          )
         where
           campaign_contact.campaign_id = campaign.id
           and assignment_id is null
           and message_status = ?
           and is_opted_out = false
-          and applied_unassignable_tags.tag_id is null
+          and not exists (
+            select 1
+            from campaign_contact_tag
+            join tag on campaign_contact_tag.tag_id = tag.id
+            where tag.is_assignable = false
+              and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+          )
       )
       ${
         organizationId !== undefined
@@ -392,18 +392,19 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
             id
           from
             campaign_contact
-          left join campaign_contact_tag as applied_unassignable_tags
-            on applied_unassignable_tags.campaign_contact_id = campaign_contact.id
-            and applied_unassignable_tags.tag_id in (
-              select id from tag
-              where tag.is_assignable = false
-            )
           where
             assignment_id is null
             and campaign_id = ?
             and message_status = ?
             and is_opted_out = false
             and applied_unassignable_tags.tag_id is null
+            and not exists (
+              select 1
+              from campaign_contact_tag
+              join tag on campaign_contact_tag.tag_id = tag.id
+              where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+            )
           limit ?
           for update skip locked
         ) matching_contact
