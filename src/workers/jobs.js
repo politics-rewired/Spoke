@@ -1183,7 +1183,6 @@ const processContactsChunk = async (
   const contacts = Object.keys(rowsByContactId).map(contactId => {
     // Use the first row for all the common campaign contact fields
     const contact = rowsByContactId[contactId][0];
-    console.log(contact);
     const contactRow = {
       campaignId,
       campaign: campaignTitle,
