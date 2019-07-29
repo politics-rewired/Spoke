@@ -32,8 +32,7 @@ import TopFixedSection from "./TopFixedSection";
 
 const TexterDialogType = Object.freeze({
   None: "None",
-  OptOut: "OptOut",
-  Tag: "Tag"
+  OptOut: "OptOut"
 });
 
 const styles = StyleSheet.create({
@@ -255,8 +254,6 @@ export class AssignmentTexterContact extends React.Component {
       const { dialogType } = this.state;
       if (dialogType === TexterDialogType.OptOut) {
         this.handleOptOut();
-      } else if (dialogType === TexterDialogType.Tag) {
-        this.handleTag();
       } else {
         this.handleClickSendMessageButton();
       }
@@ -383,14 +380,18 @@ export class AssignmentTexterContact extends React.Component {
   submitAction = async messageText => {
     const { contact } = this.props;
     const message = this.createMessageToContact(messageText);
-    const changes = this.gatherSurveyChanges();
+    const changes = this.gatherSurveyAndTagChanges();
     const payload = Object.assign({ message }, changes);
     this.props.sendMessage(contact.id, payload);
   };
 
-  gatherSurveyChanges = () => {
+  gatherSurveyAndTagChanges = () => {
     const { contact } = this.props;
+    const { addedTags, removedTags } = this.state;
 
+    const changes = {};
+
+    // Gather survey question changes
     const deletionIds = [];
     const questionResponseObjects = [];
 
@@ -412,10 +413,18 @@ export class AssignmentTexterContact extends React.Component {
       }
     }
 
-    const changes = {};
     if (questionResponseObjects.length)
       changes.questionResponseObjects = questionResponseObjects;
     if (deletionIds.length) changes.deletionIds = deletionIds;
+
+    // Gather tag changes
+    const tag = {
+      addedTagIds: addedTags.map(tag => tag.id),
+      removedTagIds: removedTags.map(tag => tag.id)
+    };
+    if (tag.addedTagIds || tag.removedTagIds) changes.tag = tag;
+
+    // Return aggregate changes
     return changes;
   };
 
@@ -450,29 +459,11 @@ export class AssignmentTexterContact extends React.Component {
       optOut.message = message;
     }
 
-    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges());
-    this.props.sendMessage(contact.id, payload);
-  };
-
-  handleTag = () => {
-    const { disabled, tagMessageText, addedTags, removedTags } = this.state;
-    const { contact } = this.props;
-    if (disabled) {
-      return; // stops from multi-send
-    }
-    this.setState({ disabled: true });
-
-    const tag = {
-      addedTagIds: addedTags.map(tag => tag.id),
-      removedTagIds: removedTags.map(tag => tag.id)
-    };
-
-    if (tagMessageText && tagMessageText.length) {
-      const message = this.createMessageToContact(tagMessageText);
-      tag.message = message;
-    }
-
-    const payload = Object.assign({}, { tag });
+    const payload = Object.assign(
+      {},
+      { optOut },
+      this.gatherSurveyAndTagChanges()
+    );
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -480,18 +471,13 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.OptOut });
   };
 
-  handleOpenTagDialog = (addedTags, removedTags) => {
-    let tagMessageText = "";
+  handleApplyTags = (addedTags, removedTags) => {
+    this.setState({ addedTags, removedTags });
     if (addedTags.length > 0) {
       const mostImportantTag = sortBy(addedTags, "id")[0];
-      tagMessageText = mostImportantTag.onApplyScript;
+      const tagMessageText = mostImportantTag.onApplyScript;
+      this.handleChangeScript(tagMessageText);
     }
-    this.setState({
-      dialogType: TexterDialogType.Tag,
-      tagMessageText,
-      addedTags,
-      removedTags
-    });
   };
 
   handleCloseDialog = () => {
@@ -500,10 +486,7 @@ export class AssignmentTexterContact extends React.Component {
 
   handleChangeScript = newScript => {
     const messageText = this.getMessageTextFromScript(newScript);
-
-    this.setState({
-      messageText
-    });
+    this.setState({ messageText });
   };
 
   handleQuestionResponseChange = ({
@@ -726,7 +709,7 @@ export class AssignmentTexterContact extends React.Component {
               <ApplyTagButton
                 contactTags={contact.contactTags}
                 allTags={tags}
-                onApplyTag={this.handleOpenTagDialog}
+                onApplyTag={this.handleApplyTags}
               />
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
@@ -809,20 +792,6 @@ export class AssignmentTexterContact extends React.Component {
               this.setState({ optOutMessageText: messageText })
             }
             onSubmit={this.handleOptOut}
-            handleCloseDialog={this.handleCloseDialog}
-          />
-        )}
-        {dialogType === TexterDialogType.Tag && (
-          <ContactActionDialog
-            title="Tag conversation"
-            messageText={this.state.tagMessageText}
-            submitTitle={
-              this.state.tagMessageText ? "Send" : "Tag without Text"
-            }
-            onChange={({ messageText }) =>
-              this.setState({ tagMessageText: messageText })
-            }
-            onSubmit={this.handleTag}
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
