@@ -18,13 +18,16 @@ import theme from "../../styles/theme";
 class AdminTagEditor extends Component {
   state = {
     editingTag: undefined,
-    isWorking: false
+    isWorking: false,
+    error: undefined
   };
 
   getTag = tagId => {
     const { tags = [] } = this.props.organizationTags.organization || {};
     return Object.assign({}, tags.find(tag => tag.id === tagId));
   };
+
+  handleCancelError = () => this.setState({ error: undefined });
 
   handleClickAddTag = () =>
     this.setState({
@@ -62,7 +65,7 @@ class AdminTagEditor extends Component {
       const result = await this.props.mutations.saveTag(tag);
       if (result.errors) throw new Error(result.errors);
     } catch (error) {
-      console.error(error);
+      this.setState({ error: error.message });
     } finally {
       this.setState({ isWorking: false });
       this.handleCancelEditTag();
@@ -75,7 +78,7 @@ class AdminTagEditor extends Component {
       const result = await this.props.mutations.deleteTag(tagId);
       if (result.errors) throw new Error(result.errors);
     } catch (error) {
-      console.error(error);
+      this.setState({ error: error.message });
     } finally {
       this.setState({ isWorking: false });
     }
@@ -89,7 +92,7 @@ class AdminTagEditor extends Component {
 
   render() {
     const { organizationTags } = this.props;
-    const { editingTag, isWorking } = this.state;
+    const { editingTag, isWorking, error } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
     if (organizationTags.errors) return <p>{organizationTags.errors}</p>;
@@ -101,6 +104,10 @@ class AdminTagEditor extends Component {
     const actions = [
       <FlatButton label="Cancel" onClick={this.handleCancelEditTag} />,
       <FlatButton label={tagVerb} primary={true} onClick={this.handleSaveTag} />
+    ];
+
+    const errorActions = [
+      <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
     ];
 
     return (
@@ -149,6 +156,14 @@ class AdminTagEditor extends Component {
             />
           </Dialog>
         )}
+        <Dialog
+          title="Error"
+          actions={errorActions}
+          open={error !== undefined}
+          onRequestClose={this.handleCancelError}
+        >
+          {error || ""}
+        </Dialog>
       </div>
     );
   }
