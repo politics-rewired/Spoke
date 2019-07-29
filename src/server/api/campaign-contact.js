@@ -263,11 +263,7 @@ export const resolvers = {
           "campaign_contact_tag.campaign_contact_id",
           "=",
           campaignContact.id
-        )
-        .orderBy([
-          { column: "is_system", order: "asc" },
-          { column: "title", order: "asc" }
-        ]);
+        );
     }
   }
 };
