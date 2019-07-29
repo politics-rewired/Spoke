@@ -164,7 +164,7 @@ export async function currentAssignmentTarget(organizationId, trx = r.knex) {
           and not exists (
             select 1
             from campaign_contact_tag
-            join tag on campaign_contact.tag_id = tag.id
+            join tag on campaign_contact_tag.tag_id = tag.id
             where tag.is_assignable = false
               and campaign_contact_tag.campaign_contact_id = campaign_contact.id
           )
@@ -401,7 +401,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
             and not exists (
               select 1
               from campaign_contact_tag
-              join tag on campaign_contact.tag_id = tag.id
+              join tag on campaign_contact_tag.tag_id = tag.id
               where tag.is_assignable = false
                 and campaign_contact_tag.campaign_contact_id = campaign_contact.id
             )
