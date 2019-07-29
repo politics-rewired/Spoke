@@ -397,7 +397,6 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
             and campaign_id = ?
             and message_status = ?
             and is_opted_out = false
-            and applied_unassignable_tags.tag_id is null
             and not exists (
               select 1
               from campaign_contact_tag
