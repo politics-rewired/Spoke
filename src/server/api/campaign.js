@@ -260,7 +260,7 @@ export const resolvers = {
         .from("campaign_contact_tag")
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
         .where({
-          "tag.title": "Escalated",
+          "lower(tag.title)": "escalated",
           "tag.organization_id": campaign.organization_id
         })
         .whereRaw(
