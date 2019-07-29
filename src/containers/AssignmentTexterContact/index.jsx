@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import sample from "lodash/sample";
 import { withRouter } from "react-router";
 import * as yup from "yup";
+import sortBy from "lodash/sortBy";
 
 import { StyleSheet, css } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
@@ -32,11 +33,8 @@ import TopFixedSection from "./TopFixedSection";
 const TexterDialogType = Object.freeze({
   None: "None",
   OptOut: "OptOut",
-  Escalate: "Escalate"
+  Tag: "Tag"
 });
-
-const DEFAULT_ESCALATE_TEXT =
-  "Great question! I'm going to pass this on to someone more familiar with that specific topic area";
 
 const styles = StyleSheet.create({
   mobile: {
@@ -207,7 +205,9 @@ export class AssignmentTexterContact extends React.Component {
       snackbarActionTitle,
       snackbarOnTouchTap,
       optOutMessageText: campaign.organization.optOutMessage,
-      escalateMessageText: DEFAULT_ESCALATE_TEXT,
+      tagMessageText: "",
+      addedTags: [],
+      removedTags: [],
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
       dialogType: TexterDialogType.None,
@@ -255,8 +255,8 @@ export class AssignmentTexterContact extends React.Component {
       const { dialogType } = this.state;
       if (dialogType === TexterDialogType.OptOut) {
         this.handleOptOut();
-      } else if (dialogType === TexterDialogType.Escalate) {
-        this.handleEscalate();
+      } else if (dialogType === TexterDialogType.Tag) {
+        this.handleTag();
       } else {
         this.handleClickSendMessageButton();
       }
@@ -454,25 +454,25 @@ export class AssignmentTexterContact extends React.Component {
     this.props.sendMessage(contact.id, payload);
   };
 
-  handleEscalate = () => {
-    const { disabled, escalateMessageText } = this.state;
-    const { assignment, contact } = this.props;
+  handleTag = () => {
+    const { disabled, tagMessageText, addedTags, removedTags } = this.state;
+    const { contact } = this.props;
     if (disabled) {
       return; // stops from multi-send
     }
     this.setState({ disabled: true });
 
-    const escalate = {
-      cell: contact.cell,
-      assignmentId: assignment.id
+    const tag = {
+      addedTags,
+      removedTags
     };
 
-    if (escalateMessageText && escalateMessageText.length) {
-      const message = this.createMessageToContact(escalateMessageText);
-      escalate.message = message;
+    if (tagMessageText && tagMessageText.length) {
+      const message = this.createMessageToContact(tagMessageText);
+      tag.message = message;
     }
 
-    const payload = Object.assign({}, { escalate });
+    const payload = Object.assign({}, { tag });
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -480,8 +480,18 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.OptOut });
   };
 
-  handleOpenEscalateDialog = () => {
-    this.setState({ dialogType: TexterDialogType.Escalate });
+  handleOpenTagDialog = (addedTags, removedTags) => {
+    let tagMessageText = "";
+    if (addedTags.length > 0) {
+      const mostImportantTag = sortBy(addedTags, "id")[0];
+      tagMessageText = mostImportantTag.onApplyScript;
+    }
+    this.setState({
+      dialogType: TexterDialogType.Tag,
+      tagMessageText,
+      addedTags,
+      removedTags
+    });
   };
 
   handleCloseDialog = () => {
@@ -716,7 +726,7 @@ export class AssignmentTexterContact extends React.Component {
               <ApplyTagButton
                 contactTags={contact.contactTags}
                 allTags={tags}
-                onApplyTag={console.log}
+                onApplyTag={this.handleOpenTagDialog}
               />
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
@@ -802,17 +812,17 @@ export class AssignmentTexterContact extends React.Component {
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
-        {dialogType === TexterDialogType.Escalate && (
+        {dialogType === TexterDialogType.Tag && (
           <ContactActionDialog
-            title="Escalate conversation"
-            messageText={this.state.escalateMessageText}
+            title="Tag conversation"
+            messageText={this.state.tagMessageText}
             submitTitle={
-              this.state.escalateMessageText ? "Send" : "Escalate without Text"
+              this.state.tagMessageText ? "Send" : "Tag without Text"
             }
             onChange={({ messageText }) =>
-              this.setState({ escalateMessageText: messageText })
+              this.setState({ tagMessageText: messageText })
             }
-            onSubmit={this.handleEscalate}
+            onSubmit={this.handleTag}
             handleCloseDialog={this.handleCloseDialog}
           />
         )}
