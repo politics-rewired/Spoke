@@ -6,20 +6,15 @@ import { log } from "../../../lib";
 // that end up just in the db appropriately and then using sendReply() graphql
 // queries for the reception (rather than a real service)
 
-async function sendMessage(message, trx) {
-  let options = { conflict: "update" };
-  if (trx) {
-    options.transaction = trx;
-  }
-  return Message.save(
-    {
-      ...message,
+async function sendMessage(message, _organizationId, _trx) {
+  return await r
+    .knex("message")
+    .update({
       send_status: "SENT",
       service: "fakeservice",
-      sent_at: new Date()
-    },
-    options
-  ).then((saveError, newMessage) => newMessage);
+      sent_at: r.knex.fn.now()
+    })
+    .where({ id: message.id });
 }
 
 // None of the rest of this is even used for fake-service
