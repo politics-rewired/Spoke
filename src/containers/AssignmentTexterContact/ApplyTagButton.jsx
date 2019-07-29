@@ -17,9 +17,8 @@ class ApplyTagButton extends Component {
     confirmStepIndex: -1
   };
 
-  componentDidMount() {
+  resetTags = () =>
     this.setState({ selectedTags: this.props.contactTags.slice() });
-  }
 
   addTag = tag => {
     const { selectedTags } = this.state;
@@ -27,8 +26,10 @@ class ApplyTagButton extends Component {
     this.setState({ selectedTags });
   };
 
-  handleOpenTagSelectionDialog = () =>
+  handleOpenTagSelectionDialog = () => {
+    this.resetTags();
     this.setState({ applyStepIndex: ApplyTagStep.TagSelect });
+  };
 
   handleCloseTagSelectionDialog = () =>
     this.setState({ applyStepIndex: ApplyTagStep.None });
