@@ -1,41 +1,32 @@
-import PropTypes from "prop-types";
 import React from "react";
+import PropTypes from "prop-types";
 import sample from "lodash/sample";
+import { withRouter } from "react-router";
+import * as yup from "yup";
+
 import { StyleSheet, css } from "aphrodite";
+import RaisedButton from "material-ui/RaisedButton";
+import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
+import CircularProgress from "material-ui/CircularProgress";
+import Snackbar from "material-ui/Snackbar";
+import { grey100 } from "material-ui/styles/colors";
+import CreateIcon from "material-ui/svg-icons/content/create";
+
+import { isContactBetweenTextingHours } from "./utils";
+import { getChildren, getTopMostParent, interactionStepForId } from "../../lib";
+import { applyScript } from "../../lib/scripts";
+import { dataTest } from "../../lib/attributes";
 import MessageList from "../../components/MessageList";
 import CannedResponseMenu from "../../components/CannedResponseMenu";
 import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import { grey100 } from "material-ui/styles/colors";
-import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
-import { Card, CardActions, CardTitle } from "material-ui/Card";
-import Divider from "material-ui/Divider";
-import { applyScript } from "../../lib/scripts";
-import * as yup from "yup";
+import Empty from "../../components/Empty";
 import GSForm from "../../components/forms/GSForm";
-import Form from "react-formal";
-import GSSubmitButton from "../../components/forms/GSSubmitButton";
 import SendButton from "../../components/SendButton";
 import BulkSendButton from "../../components/BulkSendButton";
 import SendButtonArrow from "../../components/SendButtonArrow";
-import CircularProgress from "material-ui/CircularProgress";
-import Snackbar from "material-ui/Snackbar";
-import {
-  getChildren,
-  getTopMostParent,
-  interactionStepForId,
-  log
-} from "../../lib";
-import { withRouter } from "react-router";
-import Empty from "../../components/Empty";
-import CreateIcon from "material-ui/svg-icons/content/create";
-import { dataTest } from "../../lib/attributes";
 import ContactActionDialog from "./ContactActionDialog";
 import MessageTextField from "./MessageTextField";
 import ApplyTagButton from "./ApplyTagButton";
-
-import { isContactBetweenTextingHours } from "./utils";
 import TopFixedSection from "./TopFixedSection";
 
 const TexterDialogType = Object.freeze({
