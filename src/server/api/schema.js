@@ -1397,7 +1397,7 @@ const rootMutations = {
       const [deleteResult, insertResult] = await Promise.all([
         await r
           .knex("campaign_contact_tag")
-          .where({ campaign_contact_id: campaignContactId })
+          .where({ campaign_contact_id: parseInt(campaignContactId) })
           .whereIn("tag_id", removedTagIds)
           .del(),
         await r.knex("campaign_contact_tag").insert(tagsToInsert)
@@ -1426,6 +1426,20 @@ const rootMutations = {
         .pluck("webhook_url")
         .then(urls => urls.filter(url => url.length > 0));
       await notifyOnTagConversation(campaignContactId, user.id, webhookUrls);
+
+      // See if any of the newly applied tags are is_assignable = false
+      const newlyAssignedTagsThatShouldUnassign = await r
+        .knex("tag")
+        .select("id")
+        .whereIn("id", addedTagIds)
+        .where({ is_assignable: false });
+
+      if (newlyAssignedTagsThatShouldUnassign.length > 0) {
+        await r
+          .knex("campaign_contact")
+          .update({ assignment_id: null })
+          .where({ id: parseInt(campaignContactId) });
+      }
 
       return campaignContact;
     },
