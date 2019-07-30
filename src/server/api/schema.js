@@ -1915,8 +1915,6 @@ const rootMutations = {
         contactsFilter
       );
 
-      console.log(campaignContactIdsToMessageIds);
-
       if (newTexterUserIds == null) {
         const campaignContactIdsToUnassign = campaignContactIdsToMessageIds.map(
           ([ccId, _]) => ccId
