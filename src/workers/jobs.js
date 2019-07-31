@@ -1278,9 +1278,14 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
 };
 
 const uploadToS3 = async (key, payload) => {
+  let endpoint = undefined;
+  if (process.env.AWS_ENDPOINT) {
+    endpoint = new AWS.Endpoint(process.env.AWS_ENDPOINT);
+  }
   const s3bucket = new AWS.S3({
     signatureVersion: "v4",
-    params: { Bucket: process.env.AWS_S3_BUCKET_NAME }
+    params: { Bucket: process.env.AWS_S3_BUCKET_NAME },
+    endpoint
   });
 
   const uploadPparams = { Key: key, Body: payload };
