@@ -7,7 +7,6 @@ if (isClient()) {
   config = window;
   clientConfig = {};
 } else {
-  console.log("this had to be figured out");
   const envalid = require("envalid");
   const pickBy = require("lodash/pickBy");
   const { str, bool, num, email, url, host, port } = envalid;
