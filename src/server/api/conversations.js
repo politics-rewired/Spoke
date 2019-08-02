@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { config } from "../../config";
 import { Assignment, r } from "../models";
 import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
 import { buildCampaignQuery } from "./campaign";
@@ -447,7 +448,7 @@ export async function reassignConversations(
       assignment = await Assignment.save({
         user_id: newTexterUserId,
         campaign_id: campaignId,
-        max_contacts: parseInt(process.env.MAX_CONTACTS_PER_TEXTER || 0, 10)
+        max_contacts: config.MAX_CONTACTS_PER_TEXTER
       });
     }
     campaignIdAssignmentIdMap.set(campaignId, assignment.id);

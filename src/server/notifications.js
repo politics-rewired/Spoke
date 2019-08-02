@@ -1,3 +1,4 @@
+import { config } from "../config";
 import { r, Assignment, Campaign, User, Organization } from "./models";
 import { log } from "../lib";
 import { sendEmail } from "./mail";
@@ -32,16 +33,16 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
   let text;
   if (notification === Notifications.ASSIGNMENT_UPDATED) {
     subject = `[${organization.name}] Updated assignment: ${campaign.title}`;
-    text = `Your assignment changed: \n\n${process.env.BASE_URL}/app/${
+    text = `Your assignment changed: \n\n${config.BASE_URL}/app/${
       campaign.organization_id
     }/todos`;
   } else if (notification === Notifications.ASSIGNMENT_CREATED) {
     subject = `[${organization.name}] New assignment: ${campaign.title}`;
     text = `You just got a new texting assignment from ${
       organization.name
-    }. You can start sending texts right away: \n\n${
-      process.env.BASE_URL
-    }/app/${campaign.organization_id}/todos`;
+    }. You can start sending texts right away: \n\n${config.BASE_URL}/app/${
+      campaign.organization_id
+    }/todos`;
   }
 
   try {
@@ -93,7 +94,7 @@ export const sendUserNotification = async notification => {
           replyTo: orgOwner.email,
           subject: `[${organization.name}] [${campaign.title}] New reply`,
           text: `Someone responded to your message. See all your replies here: \n\n${
-            process.env.BASE_URL
+            config.BASE_URL
           }/app/${campaign.organization_id}/todos/${
             notification.assignmentId
           }/reply`

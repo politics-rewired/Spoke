@@ -1,14 +1,15 @@
+import { config } from "../../config";
 import dumbThinky from "rethink-knex-adapter";
 import redis from "redis";
 import bluebird from "bluebird";
-import config from "../knex.js";
+import knexConfig from "../knex.js";
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
 // Instantiate the rethink-knex-adapter using the config defined in
 // /src/server/knex.js.
-const thinkyConn = dumbThinky(config);
+const thinkyConn = dumbThinky(knexConfig);
 
 thinkyConn.r.getCount = async query => {
   // helper method to get a count result
@@ -39,9 +40,9 @@ thinkyConn.r.parseCount = async query => {
   throw new Error("Multiple columns returned by the query!");
 };
 
-if (process.env.REDIS_URL) {
-  thinkyConn.r.redis = redis.createClient({ url: process.env.REDIS_URL });
-} else if (process.env.REDIS_FAKE) {
+if (config.REDIS_URL) {
+  thinkyConn.r.redis = redis.createClient({ url: config.REDIS_URL });
+} else if (config.REDIS_FAKE) {
   const fakeredis = require("fakeredis");
   bluebird.promisifyAll(fakeredis.RedisClient.prototype);
   bluebird.promisifyAll(fakeredis.Multi.prototype);

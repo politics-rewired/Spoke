@@ -1,17 +1,18 @@
+import { config } from "../config";
 import { log } from "../lib";
 import nodemailer from "nodemailer";
 import mailgunConstructor from "mailgun-js";
 
 const mailgun =
-  process.env.MAILGUN_API_KEY &&
-  process.env.MAILGUN_DOMAIN &&
+  config.MAILGUN_API_KEY &&
+  config.MAILGUN_DOMAIN &&
   mailgunConstructor({
-    apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.MAILGUN_DOMAIN
+    apiKey: config.MAILGUN_API_KEY,
+    domain: config.MAILGUN_DOMAIN
   });
 
 const sender =
-  process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN
+  config.MAILGUN_API_KEY && config.MAILGUN_DOMAIN
     ? {
         sendMail: ({ from, to, subject, replyTo, text }) =>
           mailgun.messages().send({
@@ -23,28 +24,25 @@ const sender =
           })
       }
     : nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_HOST_PORT,
-        secure:
-          typeof process.env.EMAIL_HOST_SECURE !== "undefined"
-            ? process.env.EMAIL_HOST_SECURE
-            : true,
+        host: config.EMAIL_HOST,
+        port: config.EMAIL_HOST_PORT,
+        secure: config.EMAIL_HOST_SECURE,
         auth: {
-          user: process.env.EMAIL_HOST_USER,
-          pass: process.env.EMAIL_HOST_PASSWORD
+          user: config.EMAIL_HOST_USER,
+          pass: config.EMAIL_HOST_PASSWORD
         }
       });
 
 export const sendEmail = async ({ to, subject, text, replyTo }) => {
   log.info(`Sending e-mail to ${to} with subject ${subject}.`);
 
-  if (process.env.NODE_ENV === "development") {
+  if (config.isDevelopment) {
     log.debug(`Would send e-mail with subject ${subject} and text ${text}.`);
     return null;
   }
 
   const params = {
-    from: process.env.EMAIL_FROM,
+    from: config.EMAIL_FROM,
     to,
     subject,
     text

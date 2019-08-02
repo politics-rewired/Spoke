@@ -492,7 +492,7 @@ if (isClient()) {
       desc: "Alternate static base url",
       example:
         "https://s3.us-east-1.amazonaws.com/my-spoke-bucket/spoke/static/",
-      default: undefined
+      default: "/assets/"
     }),
     SUPPRESS_SELF_INVITE: bool({
       desc:

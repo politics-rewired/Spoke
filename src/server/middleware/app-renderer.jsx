@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import { renderToString } from "react-dom/server";
 import { createMemoryHistory, match, RouterContext } from "react-router";
 import { syncHistoryWithStore } from "react-router-redux";
@@ -15,24 +16,24 @@ import path from "path";
 let assetMap = {
   "bundle.js": "/assets/bundle.js"
 };
-if (process.env.NODE_ENV === "production") {
+if (config.isProduction) {
   const assetMapData = JSON.parse(
     fs.readFileSync(
       // this is a bit overly complicated for the use case
       // of it being run from the build directory BY claudia.js
       // we need to make it REALLY relative, but not by the
       // starting process or the 'local' directory (which are both wrong then)
-      (process.env.ASSETS_DIR || "").startsWith(".")
+      config.ASSETS_DIR.startsWith(".")
         ? path.join(
             __dirname,
             "../../../../",
-            process.env.ASSETS_DIR,
-            process.env.ASSETS_MAP_FILE
+            config.ASSETS_DIR,
+            config.ASSETS_MAP_FILE
           )
-        : path.join(process.env.ASSETS_DIR, process.env.ASSETS_MAP_FILE)
+        : path.join(config.ASSETS_DIR, config.ASSETS_MAP_FILE)
     )
   );
-  const staticBase = process.env.STATIC_BASE_URL || "/assets/";
+  const staticBase = config.STATIC_BASE_URL;
   for (var a in assetMapData) {
     assetMap[a] = staticBase + assetMapData[a];
   }

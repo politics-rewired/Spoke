@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
 import { r, Organization } from "../models";
 import { accessRequired } from "./errors";
@@ -73,7 +74,7 @@ export const resolvers = {
       (organization.features &&
       organization.features.indexOf("opt_out_message") !== -1
         ? JSON.parse(organization.features).opt_out_message
-        : process.env.OPT_OUT_MESSAGE) ||
+        : config.OPT_OUT_MESSAGE) ||
       "I'm opting you out of texts immediately. Have a great day.",
     textingHoursStart: organization => organization.texting_hours_start,
     textingHoursEnd: organization => organization.texting_hours_end,

@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
 import { Assignment, r, cacheableData } from "../models";
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from "../../lib";
@@ -186,15 +187,12 @@ export async function currentAssignmentTarget(organizationId, trx = r.knex) {
   return { type: assignmentType, campaign };
 }
 
-const ASSIGNMENT_COMPLETE_NOTIFICATION_URL =
-  process.env.ASSIGNMENT_COMPLETE_NOTIFICATION_URL;
-
 async function notifyIfAllAssigned(type, user, organizationId) {
-  if (ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
+  if (config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
     const assignmentTarget = await currentAssignmentTarget(organizationId);
     if (assignmentTarget == null) {
       await request
-        .post(ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
+        .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
         .send({ type, user });
       console.log(`Notified about out of ${type} to assign`);
     }

@@ -1,3 +1,4 @@
+import { config } from "../../../config";
 import { r } from "../../models";
 
 // Datastructure:
@@ -8,7 +9,7 @@ import { r } from "../../models";
 // * needs to get by campaignId-userId pairs
 
 const cacheKey = (campaignId, userId) =>
-  `${process.env.CACHE_PREFIX | ""}canned-${campaignId}-${userId | ""}`;
+  `${config.CACHE_PREFIX}canned-${campaignId}-${userId | ""}`;
 
 export const cannedResponseCache = {
   clearQuery: async ({ campaignId, userId }) => {

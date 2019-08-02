@@ -1,21 +1,4 @@
-try {
-  require("dotenv").config();
-} catch (ex) {
-  // do nothing
-}
-
-const groupBy = require("lodash/groupby");
-
-const { DATABASE_URL } = process.env;
-const dbType = DATABASE_URL.match(/^\w+/)[0];
-const config = {
-  client: /postgres/.test(dbType) ? "pg" : dbType,
-  connection: DATABASE_URL,
-  pool: {
-    min: 2,
-    max: 10
-  }
-};
+import knexConfig from "../../server/knex";
 
 const moment = require("moment");
 const MINUTES_LATER = 10;
@@ -30,7 +13,7 @@ const DOMAIN_REGEX = new RegExp(
   `[^://\\s]*` + "(" + DOMAIN_ENDINGS.map(tld => `\\${tld}`).join("|") + ")"
 );
 
-const db = require("knex")(config);
+const db = require("knex")(knexConfig);
 
 async function chunkedMain() {
   const results = await db.raw(`

@@ -1,3 +1,4 @@
+import { config } from "../../../config";
 import { r } from "../../models";
 import _ from "lodash";
 import request from "superagent";
@@ -5,11 +6,8 @@ import { PlacesAllInclusive } from "material-ui/svg-icons";
 
 const THRESHOLD = 0.2;
 
-const ALERTS_ON = !!process.env.DELIVERABILITY_ALERT_ENDPOINT;
-const DELIVERABILITY_ALERT_ENDPOINT = process.env.DELIVERABILITY_ALERT_ENDPOINT;
-
 async function checkForBadDeliverability() {
-  if (!ALERTS_ON) return null;
+  if (config.DELIVERABILITY_ALERT_ENDPOINT !== undefined) return null;
   console.log("Running deliverability check");
   /*
     find domains that have been sent on in the past hour that
@@ -51,11 +49,13 @@ async function checkForBadDeliverability() {
     const errorPercent = errorCount / (deliveredCount + sentCount);
     if (errorPercent > THRESHOLD) {
       console.log(
-        `Sending deliverability alert to ${DELIVERABILITY_ALERT_ENDPOINT} because ${domain} is sending at ${errorPercent}`
+        `Sending deliverability alert to ${
+          config.DELIVERABILITY_ALERT_ENDPOINT
+        } because ${domain} is sending at ${errorPercent}`
       );
 
       await request
-        .post(DELIVERABILITY_ALERT_ENDPOINT)
+        .post(config.DELIVERABILITY_ALERT_ENDPOINT)
         .send({ domain, errorPercent });
     }
   }

@@ -1,18 +1,19 @@
+import { config } from "../../config";
 import r from "./index.js";
 
-let config;
+let warehouseConfig;
 
-if (process.env.WAREHOUSE_DB_TYPE) {
-  config = {
-    client: process.env.WAREHOUSE_DB_TYPE,
+if (config.WAREHOUSE_DB_TYPE) {
+  warehouseConfig = {
+    client: config.WAREHOUSE_DB_TYPE,
     connection: {
-      host: process.env.WAREHOUSE_DB_HOST,
-      port: process.env.WAREHOUSE_DB_PORT,
-      database: process.env.WAREHOUSE_DB_NAME,
-      password: process.env.WAREHOUSE_DB_PASSWORD,
-      user: process.env.WAREHOUSE_DB_USER
+      host: config.WAREHOUSE_DB_HOST,
+      port: config.WAREHOUSE_DB_PORT,
+      database: config.WAREHOUSE_DB_NAME,
+      password: config.WAREHOUSE_DB_PASSWORD,
+      user: config.WAREHOUSE_DB_USER
     }
   };
 }
 
-export default (process.env.WAREHOUSE_DB_TYPE ? () => r(config) : null);
+export default (config.WAREHOUSE_DB_TYPE ? () => r(warehouseConfig) : null);

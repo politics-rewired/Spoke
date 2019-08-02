@@ -1,11 +1,9 @@
+const { config } = require("../config");
+
 export function getProcessEnvTz() {
-  return process.env.TZ;
+  return config.TZ;
 }
 
 export function getProcessEnvDstReferenceTimezone() {
-  return (
-    process.env.DST_REFERENCE_TIMEZONE ||
-    global.DST_REFERENCE_TIMEZONE ||
-    "America/New_York"
-  );
+  return config.DST_REFERENCE_TIMEZONE;
 }

@@ -1,3 +1,4 @@
+import { config } from "../config";
 import { r } from "../server/models";
 import { getNextJob } from "./lib";
 import { log } from "../lib";
@@ -54,7 +55,7 @@ export async function processJobs() {
 }
 
 export async function checkMessageQueue() {
-  if (!process.env.TWILIO_SQS_QUEUE_URL) {
+  if (!config.TWILIO_SQS_QUEUE_URL) {
     return;
   }
 
@@ -141,20 +142,20 @@ export const failedDayMessageSender = messageSenderCreator(function(mQuery) {
 
 export async function handleIncomingMessages() {
   setupUserNotificationObservers();
-  if (process.env.DEBUG_INCOMING_MESSAGES) {
+  if (config.DEBUG_INCOMING_MESSAGES) {
     log.info("Running handleIncomingMessages");
   }
   // eslint-disable-next-line no-constant-condition
   let i = 0;
   while (true) {
     try {
-      if (process.env.DEBUG_SCALING) {
+      if (config.DEBUG_SCALING) {
         log.info("entering handleIncomingMessages. round: ", ++i);
       }
       const countPendingMessagePart = await r.parseCount(
         r.knex("pending_message_part").count()
       );
-      if (process.env.DEBUG_SCALING) {
+      if (config.DEBUG_SCALING) {
         log.info(
           "counting handleIncomingMessages. count: ",
           countPendingMessagePart
@@ -162,7 +163,7 @@ export async function handleIncomingMessages() {
       }
       await sleep(500);
       if (countPendingMessagePart > 0) {
-        if (process.env.DEBUG_SCALING) {
+        if (config.DEBUG_SCALING) {
           log.info("running handleIncomingMessages");
         }
         await handleIncomingMessageParts();
@@ -209,7 +210,7 @@ const processMap = {
   fixOrgless
 };
 
-// if process.env.JOBS_SAME_PROCESS then we don't need to run
+// if config.JOBS_SAME_PROCESS then we don't need to run
 // the others and messageSender should just pick up the stragglers
 const syncProcessMap = {
   // 'failedMessageSender': failedMessageSender, //see method for danger
@@ -219,11 +220,9 @@ const syncProcessMap = {
   clearOldJobs
 };
 
-const JOBS_SAME_PROCESS = !!process.env.JOBS_SAME_PROCESS;
-
 export async function dispatchProcesses(event, dispatcher, eventCallback) {
   const toDispatch =
-    event.processes || (JOBS_SAME_PROCESS ? syncProcessMap : processMap);
+    event.processes || (config.JOBS_SAME_PROCESS ? syncProcessMap : processMap);
   for (let p in toDispatch) {
     if (p in processMap) {
       // / not using dispatcher, but another interesting model would be

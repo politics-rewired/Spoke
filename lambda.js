@@ -1,4 +1,5 @@
 "use strict";
+const { config } = require("src/config");
 const AWS = require("aws-sdk");
 const awsServerlessExpress = require("aws-serverless-express");
 let app, server, jobs;
@@ -36,7 +37,7 @@ exports.handler = (event, context, handleCallback) => {
   // Note: When lambda is called with invoke() we MUST call handleCallback with a success
   // or Lambda will re-run/re-try the invocation twice:
   // https://docs.aws.amazon.com/lambda/latest/dg/retries-on-errors.html
-  if (process.env.LAMBDA_DEBUG_LOG) {
+  if (config.LAMBDA_DEBUG_LOG) {
     console.log("LAMBDA EVENT", event);
   }
   if (!event.command) {
@@ -46,7 +47,7 @@ exports.handler = (event, context, handleCallback) => {
       : 0;
     cleanHeaders(event);
     const webResponse = awsServerlessExpress.proxy(server, event, context);
-    if (process.env.DEBUG_SCALING) {
+    if (config.DEBUG_SCALING) {
       const endTime = context.getRemainingTimeInMillis
         ? context.getRemainingTimeInMillis()
         : 0;

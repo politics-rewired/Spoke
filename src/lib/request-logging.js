@@ -1,3 +1,4 @@
+import { config } from "../config";
 import winston from "winston";
 import expressWinston from "express-winston";
 import "winston-mongodb";
@@ -6,9 +7,9 @@ expressWinston.requestWhitelist.push("body");
 
 export default expressWinston.logger({
   transports: [
-    process.env.LOGGING_MONGODB_URI
+    config.LOGGING_MONGODB_URI
       ? new winston.transports.MongoDB({
-          db: process.env.LOGGING_MONGODB_URI
+          db: config.LOGGING_MONGODB_URI
         })
       : new winston.transports.Console()
   ],

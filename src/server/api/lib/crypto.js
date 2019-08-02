@@ -1,9 +1,10 @@
+const { config } = require("../../../config");
 const crypto = require("crypto");
 
-const key = process.env.SESSION_SECRET;
-const algorithm = process.env.ENCRYPTION_ALGORITHM || "aes256";
-const inputEncoding = process.env.ENCRYPTION_INPUT_ENCODING || "utf8";
-const outputEncoding = process.env.ENCRYPTION_OUTPUT_ENCODING || "hex";
+const key = config.SESSION_SECRET;
+const algorithm = config.ENCRYPTION_ALGORITHM;
+const inputEncoding = config.ENCRYPTION_INPUT_ENCODING;
+const outputEncoding = config.ENCRYPTION_OUTPUT_ENCODING;
 
 if (!key) {
   throw new Error(

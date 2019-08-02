@@ -1,4 +1,5 @@
 import request from "request";
+import { config } from "../../config";
 import { r } from "../models";
 import crypto from "crypto";
 
@@ -13,7 +14,7 @@ export const instructions = () =>
   `;
 
 export async function available(organizationId) {
-  if (process.env.AK_BASEURL && process.env.AK_SECRET) {
+  if (config.AK_BASEURL && config.AK_SECRET) {
     return true;
   }
   const org = await r
@@ -22,10 +23,10 @@ export async function available(organizationId) {
     .select("features");
   const features = JSON.parse(org.features || "{}");
   let needed = [];
-  if (!process.env.AK_BASEURL && !features.AK_BASEURL) {
+  if (!config.AK_BASEURL && !features.AK_BASEURL) {
     needed.push("AK_BASEURL");
   }
-  if (!process.env.AK_SECRET && !features.AK_SECRET) {
+  if (!config.AK_SECRET && !features.AK_SECRET) {
     needed.push("AK_SECRET");
   }
   if (needed.length) {
@@ -67,8 +68,8 @@ export async function processAction(
     try {
       const customFields = JSON.parse(contact.custom_fields || "{}");
       const features = JSON.parse(contact.features || "{}");
-      const actionkitBaseUrl = process.env.AK_BASEURL || features.AK_BASEURL;
-      const akSecret = process.env.AK_SECRET || features.AK_SECRET;
+      const actionkitBaseUrl = config.AK_BASEURL || features.AK_BASEURL;
+      const akSecret = config.AK_SECRET || features.AK_SECRET;
 
       if (
         actionkitBaseUrl &&

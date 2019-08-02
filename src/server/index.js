@@ -25,13 +25,12 @@ import requestLogging from "../lib/request-logging";
 import { checkForBadDeliverability } from "./api/lib/alerts";
 import cron from "node-cron";
 import connectDatadog from "connect-datadog-graphql";
+import { config } from "../config";
 
 cron.schedule("0 */1 * * *", checkForBadDeliverability);
 
 const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
 const PNF = googleLibPhoneNumber.PhoneNumberFormat;
-
-require("dotenv").config();
 
 process.on("uncaughtException", ex => {
   log.error(ex);
@@ -48,7 +47,7 @@ const {
   ASSIGNMENT_USERNAME,
   ASSIGNMENT_PASSWORD,
   CONTACT_REMOVAL_SECRET
-} = process.env;
+} = config;
 
 const DEBUG = NODE_ENV === "development";
 // Heroku requires you to use process.env.PORT
@@ -64,14 +63,14 @@ const app = express();
 // Don't rate limit heroku
 app.enable("trust proxy");
 
-if (!DEBUG && PUBLIC_DIR) {
+if (!config.isProduction && PUBLIC_DIR) {
   app.use(express.static(PUBLIC_DIR, { maxAge: "180 days" }));
 }
 
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-if (process.env.DD_AGENT_HOST && process.env.DD_DOGSTATSD_PORT) {
+if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
   const datadogOptions = {
     path: true,
     method: false,
@@ -79,8 +78,8 @@ if (process.env.DD_AGENT_HOST && process.env.DD_DOGSTATSD_PORT) {
     graphql_paths: "/graphql"
   };
 
-  if (process.env.CLIENT_NAME) {
-    datadogOptions.tags = [`client:${process.env.CLIENT_NAME}`];
+  if (config.CLIENT_NAME) {
+    datadogOptions.tags = [`client:${config.CLIENT_NAME}`];
   }
 
   app.use(connectDatadog(datadogOptions));

@@ -1,3 +1,4 @@
+import { config } from "../config";
 import {
   r,
   datawarehouse,
@@ -27,7 +28,7 @@ import { sendEmail } from "../server/mail";
 import { Notifications, sendUserNotification } from "../server/notifications";
 
 const CHUNK_SIZE = 1000;
-const BATCH_SIZE = parseInt(process.env.DB_MAX_POOL || 5, 10);
+const BATCH_SIZE = config.DB_MAX_POOL;
 
 const zipMemoization = {};
 let warehouseConnection = null;
@@ -43,7 +44,7 @@ function optOutsByInstance() {
 }
 
 function getOptOutSubQuery(orgId) {
-  return !!process.env.OPTOUTS_SHARE_ALL_ORGS
+  return !!config.OPTOUTS_SHARE_ALL_ORGS
     ? optOutsByInstance()
     : optOutsByOrgId(orgId);
 }
@@ -60,7 +61,7 @@ function optOutsByInstance() {
 }
 
 function getOptOutSubQuery(orgId) {
-  return !!process.env.OPTOUTS_SHARE_ALL_ORGS
+  return !!config.OPTOUTS_SHARE_ALL_ORGS
     ? optOutsByInstance()
     : optOutsByOrgId(orgId);
 }
@@ -86,11 +87,7 @@ export async function getTimezoneByZip(zip) {
 export async function sendJobToAWSLambda(job) {
   // job needs to be json-serializable
   // requires a 'command' key which should map to a function in job-processes.js
-  log.info(
-    "LAMBDA INVOCATION STARTING",
-    job,
-    process.env.AWS_LAMBDA_FUNCTION_NAME
-  );
+  log.info("LAMBDA INVOCATION STARTING", job, config.AWS_LAMBDA_FUNCTION_NAME);
 
   if (!job.command) {
     log.error("LAMBDA INVOCATION FAILED: JOB NOT INVOKABLE", job);
@@ -106,7 +103,7 @@ export async function sendJobToAWSLambda(job) {
   const p = new Promise((resolve, reject) => {
     const result = lambda.invoke(
       {
-        FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+        FunctionName: config.AWS_LAMBDA_FUNCTION_NAME,
         InvocationType: "Event",
         Payload: lambdaPayload
       },
@@ -130,14 +127,14 @@ export async function processSqsMessages() {
   // if SQS has messages, process messages into pending_message_part and dequeue messages (mark them as handled)
   // if SQS doesnt have messages, exit
 
-  if (!process.env.TWILIO_SQS_QUEUE_URL) {
+  if (!config.TWILIO_SQS_QUEUE_URL) {
     return Promise.reject("TWILIO_SQS_QUEUE_URL not set");
   }
 
   const sqs = new AWS.SQS();
 
   const params = {
-    QueueUrl: process.env.TWILIO_SQS_QUEUE_URL,
+    QueueUrl: config.TWILIO_SQS_QUEUE_URL,
     AttributeNames: ["All"],
     MessageAttributeNames: ["string"],
     MaxNumberOfMessages: 10,
@@ -163,7 +160,7 @@ export async function processSqsMessages() {
 
           sqs.deleteMessage(
             {
-              QueueUrl: process.env.TWILIO_SQS_QUEUE_URL,
+              QueueUrl: config.TWILIO_SQS_QUEUE_URL,
               ReceiptHandle: message.ReceiptHandle
             },
             (delMessageErr, delMessageData) => {
@@ -209,7 +206,7 @@ export async function uploadContacts(job) {
   const maxContacts = parseInt(
     orgFeatures.hasOwnProperty("maxContacts")
       ? orgFeatures.maxContacts
-      : process.env.MAX_CONTACTS || 0,
+      : config.MAX_CONTACTS,
     10
   );
 
@@ -255,7 +252,7 @@ export async function uploadContacts(job) {
         })
       );
 
-      const service = serviceMap[process.env.DEFAULT_SERVICE];
+      const service = serviceMap[config.DEFAULT_SERVICE];
       if (service.ensureAllNumbersHaveMessagingServiceSIDs) {
         await service.ensureAllNumbersHaveMessagingServiceSIDs(
           trx,
@@ -441,7 +438,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     knexResult.rows.map(async row => {
       const formatCell = getFormattedPhoneNumber(
         row.cell,
-        process.env.PHONE_NUMBER_COUNTRY || "US"
+        config.PHONE_NUMBER_COUNTRY
       );
       const contact = {
         campaign_id: jobEvent.campaignId,
@@ -570,7 +567,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
       limit: jobEvent.step,
       command: "loadContactsFromDataWarehouseFragmentJob"
     };
-    if (process.env.WAREHOUSE_DB_LAMBDA_ITERATION) {
+    if (config.WAREHOUSE_DB_LAMBDA_ITERATION) {
       log.info(
         "SENDING TO LAMBDA loadContactsFromDataWarehouseFragment",
         newJob
@@ -853,7 +850,7 @@ export async function assignTexters(job) {
         let maxContacts = null; // no limit
 
         const texterMax = parseInt(texter.maxContacts, 10);
-        const envMax = parseInt(process.env.MAX_CONTACTS_PER_TEXTER, 10);
+        const envMax = config.MAX_CONTACTS_PER_TEXTER;
         if (!isNaN(texterMax)) {
           maxContacts = Math.min(texterMax, envMax) || texterMax;
         } else if (!isNaN(envMax)) {
@@ -1279,12 +1276,12 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
 
 const uploadToS3 = async (key, payload) => {
   let endpoint = undefined;
-  if (process.env.AWS_ENDPOINT) {
-    endpoint = new AWS.Endpoint(process.env.AWS_ENDPOINT);
+  if (config.AWS_ENDPOINT) {
+    endpoint = new AWS.Endpoint(config.AWS_ENDPOINT);
   }
   const s3bucket = new AWS.S3({
     signatureVersion: "v4",
-    params: { Bucket: process.env.AWS_S3_BUCKET_NAME },
+    params: { Bucket: config.AWS_S3_BUCKET_NAME },
     endpoint
   });
 
@@ -1390,11 +1387,11 @@ export async function exportCampaign(job) {
   }
 
   if (
-    process.env.AWS_ACCESS_AVAILABLE ||
-    (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)
+    config.AWS_ACCESS_AVAILABLE ||
+    (config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY)
   ) {
     // Attempt upload to AWS S3
-    const objectKeyPrefix = process.env.AWS_S3_KEY_PREFIX || "";
+    const objectKeyPrefix = config.AWS_S3_KEY_PREFIX;
     const safeTitle = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
     const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
     const campaignContactsKey = `${objectKeyPrefix}${safeTitle}-${timestamp}.csv`;
@@ -1481,7 +1478,7 @@ export async function sendMessages(queryFunc, defaultStatus) {
                 message.id
             );
           }
-          message.service = message.service || process.env.DEFAULT_SERVICE;
+          message.service = message.service || config.DEFAULT_SERVICE;
           const service = serviceMap[message.service];
           log.info(
             `Sending (${message.service}): ${message.user_number} -> ${
@@ -1631,7 +1628,7 @@ export async function handleIncomingMessageParts() {
 // See https://github.com/MoveOnOrg/Spoke/issues/934
 // and job-processes.js
 export async function fixOrgless() {
-  if (process.env.FIX_ORGLESS) {
+  if (config.FIX_ORGLESS) {
     const orgless = await r.knex
       .select("user.id")
       .from("user")
@@ -1640,7 +1637,7 @@ export async function fixOrgless() {
     orgless.forEach(async orglessUser => {
       await UserOrganization.save({
         user_id: orglessUser.id.toString(),
-        organization_id: process.env.DEFAULT_ORG || 1,
+        organization_id: config.DEFAULT_ORG,
         role: "TEXTER"
       }).error(function(error) {
         // Unexpected errors
@@ -1650,7 +1647,7 @@ export async function fixOrgless() {
         "added orgless user " +
           user.id +
           " to organization " +
-          process.env.DEFAULT_ORG
+          config.DEFAULT_ORG
       );
     }); // forEach
   } // if
