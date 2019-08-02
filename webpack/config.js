@@ -1,14 +1,14 @@
-require("dotenv").config();
+const { config } = require("../src/config");
 const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
 
-const DEBUG = process.env.NODE_ENV !== "production";
+const DEBUG = !config.isProduction;
 
 const plugins = [
   new webpack.DefinePlugin({
-    "process.env.NODE_ENV": `"${process.env.NODE_ENV}"`,
-    "process.env.PHONE_NUMBER_COUNTRY": `"${process.env.PHONE_NUMBER_COUNTRY}"`
+    "process.env.NODE_ENV": `"${config.NODE_ENV}"`,
+    "process.env.PHONE_NUMBER_COUNTRY": `"${config.PHONE_NUMBER_COUNTRY}"`
   }),
   new webpack.ContextReplacementPlugin(
     /[\/\\]node_modules[\/\\]timezonecomplete[\/\\]/,
@@ -19,8 +19,8 @@ const plugins = [
   )
 ];
 const jsxLoaders = [{ loader: "babel-loader" }];
-const assetsDir = process.env.ASSETS_DIR;
-const assetMapFile = process.env.ASSETS_MAP_FILE;
+const assetsDir = config.ASSETS_DIR;
+const assetMapFile = config.ASSETS_MAP_FILE;
 const outputFile = DEBUG ? "[name].js" : "[name].[chunkhash].js";
 
 if (!DEBUG) {
@@ -44,7 +44,7 @@ if (!DEBUG) {
   jsxLoaders.unshift({ loader: "react-hot-loader" });
 }
 
-const config = {
+const webpackConfig = {
   entry: {
     bundle: ["babel-polyfill", "./src/client/index.jsx"]
   },
@@ -73,8 +73,8 @@ const config = {
 };
 
 if (DEBUG) {
-  config.devtool = "inline-source-map";
-  config.output.sourceMapFilename = `${outputFile}.map`;
+  webpackConfig.devtool = "inline-source-map";
+  webpackConfig.output.sourceMapFilename = `${outputFile}.map`;
 }
 
-module.exports = config;
+module.exports = webpackConfig;

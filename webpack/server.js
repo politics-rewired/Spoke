@@ -1,20 +1,21 @@
+import { config } from "../src/config";
 import WebpackDevServer from "webpack-dev-server";
 import webpack from "webpack";
-import config from "./config";
+import webpackConfig from "./config";
 import { log } from "../src/lib";
 
-const webpackPort = process.env.WEBPACK_PORT || 3000;
-const appPort = process.env.DEV_APP_PORT;
-const webpackHost = process.env.WEBPACK_HOST || "127.0.0.1";
+const webpackPort = config.WEBPACK_PORT;
+const appPort = config.DEV_APP_PORT;
+const webpackHost = config.WEBPACK_HOST;
 
-Object.keys(config.entry).forEach(key => {
-  config.entry[key].unshift(
+Object.keys(webpackConfig.entry).forEach(key => {
+  webpackConfig.entry[key].unshift(
     `webpack-dev-server/client?http://${webpackHost}:${webpackPort}/`
   );
-  config.entry[key].unshift("webpack/hot/only-dev-server");
+  webpackConfig.entry[key].unshift("webpack/hot/only-dev-server");
 });
 
-const compiler = webpack(config);
+const compiler = webpack(webpackConfig);
 const connstring = `http://127.0.0.1:${appPort}`;
 
 log.info(`Proxying requests to:${connstring}`);
@@ -47,7 +48,7 @@ const app = new WebpackDevServer(compiler, {
   }
 });
 
-app.listen(webpackPort || process.env.PORT, () => {
+app.listen(webpackPort || config.PORT, () => {
   log.info(
     `Webpack dev server is now running on http://${webpackHost}:${webpackPort}`
   );
