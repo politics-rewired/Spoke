@@ -1214,8 +1214,9 @@ const processContactsChunk = async (
     Object.keys(questionsById).forEach(stepId => {
       const questionText = questionsById[stepId];
       const response = rowsByContactId[contactId].find(
-        response => response.interaction_step_id === stepId
+        response => parseInt(response.interaction_step_id) == parseInt(stepId)
       );
+
       const responseValue = response ? response.value : "";
       contactRow[`question[${questionText}]`] = responseValue;
     });
