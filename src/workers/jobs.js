@@ -1170,6 +1170,7 @@ const processContactsChunk = async (
           group by campaign_contact_tag.campaign_contact_id
         ) as tags
         on tags.campaign_contact_id = campaign_contacts.id
+        order by campaign_contacts.id asc
       ;
     `,
     [campaignId, lastContactId, CHUNK_SIZE]
