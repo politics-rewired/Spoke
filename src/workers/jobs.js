@@ -1144,6 +1144,8 @@ const processContactsChunk = async (
         where
           campaign_id = ?
           and id > ?
+        order by
+          campaign_contact.id asc
         limit ?
       )
       select
@@ -1168,8 +1170,6 @@ const processContactsChunk = async (
           group by campaign_contact_tag.campaign_contact_id
         ) as tags
         on tags.campaign_contact_id = campaign_contacts.id
-      order by
-        campaign_contacts.id asc
       ;
     `,
     [campaignId, lastContactId, CHUNK_SIZE]
