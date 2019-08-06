@@ -34,6 +34,14 @@ const validators = {
   PUBLIC_DIR: str({
     desc: "Directory path server should use to serve files. Required.",
     default: "./build/client"
+  }),
+  WEBPACK_HOST: host({
+    desc: "Host domain or IP for Webpack development server.",
+    default: "127.0.0.1."
+  }),
+  WEBPACK_PORT: port({
+    desc: "Port for Webpack development server.",
+    default: 3000
   })
 };
 

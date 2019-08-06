@@ -115,7 +115,7 @@ if (isClient()) {
       example: "spoke/exports/",
       default: ""
     }),
-    BAD_WORD_TOKEN: url({
+    BAD_WORD_TOKEN: str({
       desc: "Bearer token used for authorization with BAD_WORD_URL.",
       default: undefined
     }),
@@ -243,7 +243,8 @@ if (isClient()) {
     }),
     DEV_APP_PORT: num({
       desc: "Port for development Webpack server.",
-      devDefault: 8090
+      devDefault: 8090,
+      default: undefined
     }),
     DST_REFERENCE_TIMEZONE: str({
       desc:
@@ -586,14 +587,6 @@ if (isClient()) {
       desc:
         "If the WAREHOUSE_DB connection/feature is enabled, then on AWS Lambda, queries that take longer than 5min can expire. This will enable incrementing through queries on new lambda invocations to avoid timeouts.",
       default: false
-    }),
-    WEBPACK_HOST: host({
-      desc: "Host domain or IP for Webpack development server.",
-      default: "127.0.0.1."
-    }),
-    WEBPACK_PORT: port({
-      desc: "Port for Webpack development server.",
-      default: 3000
     })
   };
 
