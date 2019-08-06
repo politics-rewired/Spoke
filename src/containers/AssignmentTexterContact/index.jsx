@@ -207,6 +207,7 @@ export class AssignmentTexterContact extends React.Component {
       tagMessageText: "",
       addedTags: [],
       removedTags: [],
+      pendingNewTags: [],
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
       dialogType: TexterDialogType.None,
@@ -422,6 +423,7 @@ export class AssignmentTexterContact extends React.Component {
       addedTagIds: addedTags.map(tag => tag.id),
       removedTagIds: removedTags.map(tag => tag.id)
     };
+
     if (tag.addedTagIds || tag.removedTagIds) changes.tag = tag;
 
     // Return aggregate changes
@@ -429,8 +431,10 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleClickCloseContactButton = async () => {
+    const { contact } = this.props;
     await this.handleEditMessageStatus("closed");
-    this.props.onFinishContact();
+    const payload = this.gatherSurveyAndTagChanges();
+    await this.props.sendMessage(contact.id, payload);
   };
 
   handleEditMessageStatus = async messageStatus => {
@@ -471,13 +475,48 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.OptOut });
   };
 
-  handleApplyTags = (addedTags, removedTags) => {
-    this.setState({ addedTags, removedTags });
-    if (addedTags.length > 0) {
+  handleApplyTags = (addedTags, removedTags, callback) => {
+    const pendingNewTags = this.props.contact.contactTags || [];
+
+    addedTags.forEach(addedTag => {
+      const tagDoesNotExist = !pendingNewTags.find(
+        currentTag => currentTag.id === addedTag.id
+      );
+
+      if (tagDoesNotExist) {
+        pendingNewTags.push(addedTag);
+      }
+    });
+
+    removedTags.forEach(removedTag => {
+      const idxOfExistingTag = pendingNewTags.findIndex(
+        currentTag => currentTag.id === removedTag.id
+      );
+
+      if (idxOfExistingTag > -1) {
+        pendingNewTags.splice(idxOfExistingTag, 1);
+      }
+    });
+
+    if (callback) {
+      this.setState({ addedTags, removedTags, pendingNewTags }, callback);
+    } else {
+      this.setState({ addedTags, removedTags, pendingNewTags });
+    }
+
+    if (!callback && addedTags.length > 0) {
       const mostImportantTag = sortBy(addedTags, "id")[0];
       const tagMessageText = mostImportantTag.onApplyScript;
       this.handleChangeScript(tagMessageText);
     }
+  };
+
+  handleApplyTagsAndMoveOn = (addedTags, removedTags) => {
+    this.handleApplyTags(addedTags, removedTags, async () => {
+      const { contact } = this.props;
+      const payload = this.gatherSurveyAndTagChanges();
+      await this.props.sendMessage(contact.id, payload);
+    });
   };
 
   handleCloseDialog = () => {
@@ -614,7 +653,7 @@ export class AssignmentTexterContact extends React.Component {
     const { userCannedResponses, campaignCannedResponses } = assignment;
     const isCannedResponseEnabled =
       userCannedResponses.length + campaignCannedResponses.length > 0;
-    const { justSentNew, alreadySent } = this.state;
+    const { justSentNew, alreadySent, pendingNewTags } = this.state;
     const { messageStatus } = contact;
     const size = document.documentElement.clientWidth;
 
@@ -708,8 +747,10 @@ export class AssignmentTexterContact extends React.Component {
               />
               <ApplyTagButton
                 contactTags={contact.contactTags}
+                pendingNewTags={pendingNewTags}
                 allTags={tags}
                 onApplyTag={this.handleApplyTags}
+                onApplyTagsAndMoveOn={this.handleApplyTagsAndMoveOn}
               />
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
