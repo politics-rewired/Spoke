@@ -128,6 +128,7 @@ class ApplyTagButton extends Component {
             dataSourceConfig={{ text: "title", value: "id" }}
             dataSource={allTags}
             fullWidth={true}
+            openOnFocus={true}
             onBeforeRequestAdd={this.handleBeforeRequestAdd}
             onRequestAdd={this.handleAddTag}
             onRequestDelete={this.handleRemoveTag}
