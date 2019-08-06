@@ -1,4 +1,4 @@
-import { config } from "../src/config";
+import { config } from "./build-config";
 import WebpackDevServer from "webpack-dev-server";
 import webpack from "webpack";
 import webpackConfig from "./config";
