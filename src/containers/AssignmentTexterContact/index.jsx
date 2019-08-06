@@ -423,6 +423,7 @@ export class AssignmentTexterContact extends React.Component {
       addedTagIds: addedTags.map(tag => tag.id),
       removedTagIds: removedTags.map(tag => tag.id)
     };
+
     if (tag.addedTagIds || tag.removedTagIds) changes.tag = tag;
 
     // Return aggregate changes
@@ -430,8 +431,10 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleClickCloseContactButton = async () => {
+    const { contact } = this.props;
     await this.handleEditMessageStatus("closed");
-    this.props.onFinishContact();
+    const payload = this.gatherSurveyAndTagChanges();
+    await this.props.sendMessage(contact.id, payload);
   };
 
   handleEditMessageStatus = async messageStatus => {
