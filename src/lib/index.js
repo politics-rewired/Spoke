@@ -1,4 +1,3 @@
-import { config } from "../config";
 import zlib from "zlib";
 export { getFormattedPhoneNumber, getDisplayPhoneNumber } from "./phone-format";
 export {
@@ -65,7 +64,7 @@ const getValidatedData = (data, optOuts) => {
 
   validatedData = _.map(validatedData, row =>
     _.extend(row, {
-      cell: getFormattedPhoneNumber(row.cell, config.PHONE_NUMBER_COUNTRY)
+      cell: getFormattedPhoneNumber(row.cell, window.PHONE_NUMBER_COUNTRY)
     })
   );
   result = _.partition(validatedData, row => !!row.cell);
