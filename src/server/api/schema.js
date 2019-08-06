@@ -1472,7 +1472,30 @@ const rootMutations = {
         await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       }
 
-      const { assignmentId, cell, message, reason } = optOut;
+      let { assignmentId, cell, message, reason } = optOut;
+      if (!assignmentId) {
+        // Check for existing assignment
+        const assignment = await r
+          .knex("assignment")
+          .where({
+            user_id: user.id,
+            campaign_id: contact.campaign_id
+          })
+          .first("id");
+        if (assignment && assignment.id) {
+          assignmentId = assignment.id;
+        } else {
+          // Create assignment if no exisiting
+          [assignmentId] = await r
+            .knex("assignment")
+            .insert({
+              user_id: user.id,
+              campaign_id: contact.campaign_id
+            })
+            .returning("id");
+        }
+      }
+
       await cacheableData.optOut.save({
         cell,
         reason,

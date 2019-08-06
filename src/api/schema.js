@@ -71,8 +71,8 @@ const rootSchema = `
   }
 
   input ContactActionInput {
-    assignmentId: String!
     cell: Phone!
+    assignmentId: String
     message: MessageInput
     reason: String
   }
