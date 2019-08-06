@@ -475,7 +475,7 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.OptOut });
   };
 
-  handleApplyTags = (addedTags, removedTags) => {
+  handleApplyTags = (addedTags, removedTags, callback) => {
     const pendingNewTags = this.props.contact.contactTags || [];
 
     addedTags.forEach(addedTag => {
@@ -498,12 +498,25 @@ export class AssignmentTexterContact extends React.Component {
       }
     });
 
-    this.setState({ addedTags, removedTags, pendingNewTags });
-    if (addedTags.length > 0) {
+    if (callback) {
+      this.setState({ addedTags, removedTags, pendingNewTags }, callback);
+    } else {
+      this.setState({ addedTags, removedTags, pendingNewTags });
+    }
+
+    if (!callback && addedTags.length > 0) {
       const mostImportantTag = sortBy(addedTags, "id")[0];
       const tagMessageText = mostImportantTag.onApplyScript;
       this.handleChangeScript(tagMessageText);
     }
+  };
+
+  handleApplyTagsAndMoveOn = (addedTags, removedTags) => {
+    this.handleApplyTags(addedTags, removedTags, async () => {
+      const { contact } = this.props;
+      const payload = this.gatherSurveyAndTagChanges();
+      await this.props.sendMessage(contact.id, payload);
+    });
   };
 
   handleCloseDialog = () => {
@@ -737,6 +750,7 @@ export class AssignmentTexterContact extends React.Component {
                 pendingNewTags={pendingNewTags}
                 allTags={tags}
                 onApplyTag={this.handleApplyTags}
+                onApplyTagsAndMoveOn={this.handleApplyTagsAndMoveOn}
               />
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}

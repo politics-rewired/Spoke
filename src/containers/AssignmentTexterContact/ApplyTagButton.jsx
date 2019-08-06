@@ -95,6 +95,19 @@ class ApplyTagButton extends Component {
     this.handleCloseTagSelectionDialog();
   };
 
+  handleApplyTagsAndMoveOn = () => {
+    const { contactTags } = this.props;
+    const { selectedTags } = this.state;
+    const contactTagIds = new Set(contactTags.map(tag => tag.id));
+    const selectedTagIds = new Set(selectedTags.map(tag => tag.id));
+    const addedTags = selectedTags.filter(tag => !contactTagIds.has(tag.id));
+    const removedTags = contactTags.filter(tag => !selectedTagIds.has(tag.id));
+
+    this.props.onApplyTagsAndMoveOn(addedTags, removedTags);
+    this.handleCloseConfirm();
+    this.handleCloseTagSelectionDialog();
+  };
+
   render() {
     const { allTags } = this.props;
     const {
@@ -103,15 +116,6 @@ class ApplyTagButton extends Component {
       pendingTag,
       confirmStepIndex
     } = this.state;
-
-    const selectTagActions = [
-      <FlatButton label="Save" primary onClick={this.handleApplyTags} />,
-      <FlatButton
-        label="Cancel"
-        primary
-        onClick={this.handleCloseTagSelectionDialog}
-      />
-    ];
 
     const confirmationStep = ((pendingTag || {}).confirmationSteps || [])[
       confirmStepIndex
@@ -123,6 +127,31 @@ class ApplyTagButton extends Component {
     ];
 
     const [escalateTag, tagsWithoutEscalated] = filterOutEscalatedTag(allTags);
+
+    const shouldAllowUserToMoveOn = isNonAssignableTagApplied(selectedTags);
+
+    const saveActions = shouldAllowUserToMoveOn
+      ? [
+          <FlatButton
+            label="Save and Type Message"
+            primary
+            onClick={this.handleApplyTags}
+          />,
+          <FlatButton
+            label="Save and Move On Without a Message"
+            primary
+            onClick={this.handleApplyTagsAndMoveOn}
+          />
+        ]
+      : [<FlatButton label="Save" primary onClick={this.handleApplyTags} />];
+
+    const selectTagActions = saveActions.concat([
+      <FlatButton
+        label="Cancel"
+        primary
+        onClick={this.handleCloseTagSelectionDialog}
+      />
+    ]);
 
     return (
       <div>
@@ -187,6 +216,14 @@ function filterOutEscalatedTag(allTags) {
   const tagsWithoutEscalated = allTags.filter(t => !isEscalateTag(t));
 
   return [foundEscalateTag, tagsWithoutEscalated];
+}
+
+function isNonAssignableTagApplied(appliedTags) {
+  const appliedNonAssignableTags = appliedTags.filter(t => {
+    return !t.isAssignable;
+  });
+
+  return appliedNonAssignableTags.length > 0;
 }
 
 export default ApplyTagButton;
