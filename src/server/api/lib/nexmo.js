@@ -1,3 +1,4 @@
+import { config } from "../../../config";
 import Nexmo from "nexmo";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Message, PendingMessagePart } from "../../models";
@@ -7,10 +8,10 @@ import faker from "faker";
 
 let nexmo = null;
 const MAX_SEND_ATTEMPTS = 5;
-if (process.env.NEXMO_API_KEY && process.env.NEXMO_API_SECRET) {
+if (config.NEXMO_API_KEY && config.NEXMO_API_SECRET) {
   nexmo = new Nexmo({
-    apiKey: process.env.NEXMO_API_KEY,
-    apiSecret: process.env.NEXMO_API_SECRET
+    apiKey: config.NEXMO_API_KEY,
+    apiSecret: config.NEXMO_API_SECRET
   });
 }
 

@@ -1,19 +1,19 @@
+import { config } from "../config";
 import minilog from "minilog";
 import { isClient } from "./is-client";
 const Rollbar = require("rollbar");
 let rollbar = undefined;
-let logInstance = null;
+let log = null;
 
 if (isClient()) {
   minilog.enable();
-  logInstance = minilog("client");
-  const existingErrorLogger = logInstance.error;
-  logInstance.error = (...err) => {
+  log = minilog("client");
+  const existingErrorLogger = log.error;
+  log.error = (...err) => {
     const errObj = err;
     if (window.rollbar) {
       window.rollbar.init({
         accessToken: window.ROLLBAR_CLIENT_TOKEN,
-        // enabled: ${process.env.NODE_ENV === 'production'},
         enabled: true,
         captureUncaught: true,
         captureUnhandledRejections: true,
@@ -21,38 +21,31 @@ if (isClient()) {
           environment: "production"
         }
       });
-      // console.log(window.rollbar)
       window.rollbar.error(...errObj);
     }
     existingErrorLogger.call(...errObj);
   };
 } else {
   let enableRollbar = false;
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.ROLLBAR_ACCESS_TOKEN
-  ) {
+  if (config.isProduction && config.ROLLBAR_ACCESS_TOKEN) {
     enableRollbar = true;
     rollbar = new Rollbar({
-      accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+      accessToken: config.ROLLBAR_ACCESS_TOKEN,
       captureUncaught: true,
       captureUnhandledRejections: true
     });
   }
 
-  minilog.suggest.deny(
-    /.*/,
-    process.env.NODE_ENV === "development" ? "debug" : "debug"
-  );
+  minilog.suggest.deny(/.*/, "debug");
 
   minilog
     .enable()
     .pipe(minilog.backends.console.formatWithStack)
     .pipe(minilog.backends.console);
 
-  logInstance = minilog("backend");
-  const existingErrorLogger = logInstance.error;
-  logInstance.error = (...err) => {
+  log = minilog("backend");
+  const existingErrorLogger = log.error;
+  log.error = (...err) => {
     if (enableRollbar) {
       if (typeof err === "object") {
         rollbar.error(...err);
@@ -69,8 +62,9 @@ if (isClient()) {
       existingErrorLogger(...err);
     }
   };
-}
 
-const log = process.env.LAMBDA_DEBUG_LOG ? console : logInstance;
+  // We always want to log with console on Lambda
+  log = config.LAMBDA_DEBUG_LOG ? console : log;
+}
 
 export { log };

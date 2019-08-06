@@ -1,3 +1,4 @@
+import { config } from "../../../config";
 import { r, Campaign } from "../../models";
 import { organizationCache } from "./organization";
 
@@ -18,7 +19,7 @@ import { organizationCache } from "./organization";
 // * organization metadata (saved in organization.js instead)
 // * campaignCannedResponses (saved in canned-responses.js instead)
 
-const cacheKey = id => `${process.env.CACHE_PREFIX | ""}campaign-${id}`;
+const cacheKey = id => `${config.CACHE_PREFIX}campaign-${id}`;
 
 const dbCustomFields = async id => {
   const campaignContacts = await r

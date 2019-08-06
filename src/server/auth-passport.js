@@ -4,6 +4,7 @@ import Auth0Strategy from "passport-auth0";
 import passportSlack from "@aoberoi/passport-slack";
 import { Strategy as LocalStrategy } from "passport-local";
 
+import { config } from "../config";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
 import localAuthHelpers from "./local-auth-helpers";
@@ -18,7 +19,7 @@ const {
   AUTH0_DOMAIN,
   AUTH0_CLIENT_ID,
   AUTH0_CLIENT_SECRET
-} = process.env;
+} = config;
 
 const SHOULD_AUTOJOIN_NEW_USER = !!AUTOJOIN_ORG_UUID;
 const AUTOJOIN_URL = SHOULD_AUTOJOIN_NEW_USER

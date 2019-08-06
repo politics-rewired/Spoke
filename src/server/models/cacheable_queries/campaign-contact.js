@@ -1,3 +1,4 @@
+import { config } from "../../../config";
 import { r, CampaignContact } from "../../models";
 import { optOutCache } from "./opt-out";
 import { log } from "../../../lib";
@@ -35,16 +36,16 @@ const getMessageServiceSid = organization => {
   }
   const orgSid = orgFeatures.message_service_sid;
   if (!orgSid) {
-    const service = orgFeatures.service || process.env.DEFAULT_SERVICE || "";
+    const service = orgFeatures.service || config.DEFAULT_SERVICE;
     if (service === "twilio") {
-      return process.env.TWILIO_MESSAGE_SERVICE_SID;
+      return config.TWILIO_MESSAGE_SERVICE_SID;
     }
     return "";
   }
   return orgSid;
 };
 
-const cacheKey = async id => `${process.env.CACHE_PREFIX | ""}contact-${id}`;
+const cacheKey = async id => `${config.CACHE_PREFIX | ""}contact-${id}`;
 
 const saveCacheRecord = async (dbRecord, organization, messageServiceSid) => {
   if (r.redis) {

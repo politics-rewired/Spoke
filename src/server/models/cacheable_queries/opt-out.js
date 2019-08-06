@@ -1,3 +1,4 @@
+import { config } from "../../../config";
 import { r, OptOut } from "../../models";
 import { log } from "../../../lib";
 
@@ -5,11 +6,11 @@ import { log } from "../../../lib";
 // maybe HASH by organization, so optout-<organization_id> has a <cell> key
 
 const orgCacheKey = orgId =>
-  !!process.env.OPTOUTS_SHARE_ALL_ORGS
-    ? `${process.env.CACHE_PREFIX | ""}optouts`
-    : `${process.env.CACHE_PREFIX | ""}optouts-${orgId}`;
+  config.OPTOUTS_SHARE_ALL_ORGS
+    ? `${config.CACHE_PREFIX}optouts`
+    : `${config.CACHE_PREFIX}optouts-${orgId}`;
 
-const sharingOptOuts = !!process.env.OPTOUTS_SHARE_ALL_ORGS;
+const sharingOptOuts = config.OPTOUTS_SHARE_ALL_ORGS;
 
 const loadMany = async organizationId => {
   if (r.redis) {

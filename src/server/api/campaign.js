@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
 import { Campaign, JobRequest, r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
@@ -178,7 +179,7 @@ export const resolvers = {
       campaign.organization ||
       loaders.organization.load(campaign.organization_id),
     datawarehouseAvailable: (campaign, _, { user }) =>
-      user.is_superadmin && !!process.env.WAREHOUSE_DB_HOST,
+      user.is_superadmin && !!config.WAREHOUSE_DB_HOST,
     pendingJobs: async campaign =>
       r
         .knex("job_request")

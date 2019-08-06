@@ -1,19 +1,6 @@
-try {
-  require("dotenv").config();
-} catch (ex) {
-  // do nothing
-}
+import knexConfig from "../../server/knex";
 
-const config = {
-  client: "mysql",
-  connection: process.env.DATABASE_URL,
-  pool: {
-    min: 2,
-    max: 10
-  }
-};
-
-const db = require("knex")(config);
+const db = require("knex")(knexConfig);
 
 async function main() {
   let oneHourAgo = new Date(),

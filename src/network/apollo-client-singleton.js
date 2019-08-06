@@ -1,11 +1,12 @@
 import ApolloClient, { addQueryMerging } from "apollo-client";
 import ResponseMiddlewareNetworkInterface from "./response-middleware-network-interface";
 import { log } from "../lib";
+import { config } from "../config";
 import fetch from "isomorphic-fetch";
 import { graphQLErrorParser } from "./errors";
 
 const responseMiddlewareNetworkInterface = new ResponseMiddlewareNetworkInterface(
-  process.env.GRAPHQL_URL || "/graphql",
+  config.GRAPHQL_URL || "/graphql",
   { credentials: "same-origin" }
 );
 

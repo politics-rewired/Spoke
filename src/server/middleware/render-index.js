@@ -1,9 +1,17 @@
+import { config, clientConfig } from "../../config";
+
 // the site is not very useful without auth0, unless you have a session cookie already
 // good for doing dev offline
-const externalLinks = process.env.NO_EXTERNAL_LINKS
+const externalLinks = config.NO_EXTERNAL_LINKS
   ? ""
   : `<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Poppins">
   <script src="https://cdn.auth0.com/js/lock/11.0.1/lock.min.js"></script>`;
+
+const windowVars = Object.keys(clientConfig).map(varName => {
+  const value = clientConfig[varName];
+  const escapedValue = typeof value === "string" ? `"${value}"` : value;
+  return `window.${varName}=${escapedValue};`;
+});
 
 export default function renderIndex(html, css, assetMap, store) {
   return `
@@ -39,34 +47,7 @@ export default function renderIndex(html, css, assetMap, store) {
     <script>
       window.INITIAL_STATE=${JSON.stringify(store.getState())}
       window.RENDERED_CLASS_NAMES=${JSON.stringify(css.renderedClassNames)}
-      window.AUTH0_CLIENT_ID="${process.env.AUTH0_CLIENT_ID}"
-      window.AUTH0_DOMAIN="${process.env.AUTH0_DOMAIN}"
-      window.PASSPORT_STRATEGY="${process.env.PASSPORT_STRATEGY}"
-      window.SLACK_CLIENT_ID="${process.env.SLACK_CLIENT_ID}"
-      window.SUPPRESS_SELF_INVITE="${process.env.SUPPRESS_SELF_INVITE || ""}"
-      window.NODE_ENV="${process.env.NODE_ENV}"
-      window.PRIVACY_URL="${process.env.PRIVACY_URL || ""}"
-      window.BASE_URL="${process.env.BASE_URL || ""}"
-      window.NOT_IN_USA=${process.env.NOT_IN_USA || 0}
-      window.ALLOW_SEND_ALL=${process.env.ALLOW_SEND_ALL || 0}
-      window.BULK_SEND_CHUNK_SIZE=${process.env.BULK_SEND_CHUNK_SIZE || 0}
-      window.MAX_MESSAGE_LENGTH=${process.env.MAX_MESSAGE_LENGTH || 99999}
-      window.TERMS_REQUIRE="${process.env.TERMS_REQUIRE || ""}"
-      window.TZ="${process.env.TZ || ""}"
-      window.DST_REFERENCE_TIMEZONE="${process.env.DST_REFERENCE_TIMEZONE ||
-        "America/New_York"}"
-      window.ROLLBAR_CLIENT_TOKEN="${process.env.ROLLBAR_CLIENT_TOKEN}"
-      window.DISABLE_ASSIGNMENT_PAGE=${!!process.env.ASSIGNMENT_REQUESTED_URL}
-      window.EXTERNAL_FAQ_URL=${
-        process.env.EXTERNAL_FAQ_URL
-          ? `"${process.env.EXTERNAL_FAQ_URL}"`
-          : "undefined"
-      };
-      window.ALTERNATE_LOGIN_URL=${
-        process.env.ALTERNATE_LOGIN_URL
-          ? `"${process.env.ALTERNATE_LOGIN_URL}"`
-          : "undefined"
-      };
+      ${windowVars.join("      \n")}
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>

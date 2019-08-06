@@ -1,3 +1,4 @@
+import { config } from "../../../config";
 import Twilio from "twilio";
 import _ from "lodash";
 import moment from "moment-timezone";
@@ -16,11 +17,7 @@ const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
 const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
 const headerValidator = () => {
-  const {
-    SKIP_TWILIO_VALIDATION,
-    TWILIO_VALIDATION_HOST,
-    BASE_URL
-  } = process.env;
+  const { SKIP_TWILIO_VALIDATION, TWILIO_VALIDATION_HOST, BASE_URL } = config;
   if (!!SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
 
   return async (req, res, next) => {
@@ -262,12 +259,12 @@ async function sendMessage(message, organizationId, trx) {
         to: message.contact_number,
         body: message.text,
         messagingServiceSid: messagingServiceSid,
-        statusCallback: process.env.TWILIO_STATUS_CALLBACK_URL
+        statusCallback: config.TWILIO_STATUS_CALLBACK_URL
       },
       parseMessageText(message)
     );
 
-    let twilioValidityPeriod = process.env.TWILIO_MESSAGE_VALIDITY_PERIOD;
+    let twilioValidityPeriod = config.TWILIO_MESSAGE_VALIDITY_PERIOD;
 
     if (message.send_before) {
       // the message is valid no longer than the time between now and
@@ -435,7 +432,7 @@ async function handleIncomingMessage(message) {
     contact_number: contactNumber
   };
 
-  if (!process.env.JOBS_SAME_PROCESS) {
+  if (!config.JOBS_SAME_PROCESS) {
     // If multiple processes, just insert the message part and let another job handle it
     await r.knex("pending_message_part").insert(pendingMessagePart);
   } else {
@@ -526,7 +523,7 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 };
 
 export default {
-  syncMessagePartProcessing: !!process.env.JOBS_SAME_PROCESS,
+  syncMessagePartProcessing: config.JOBS_SAME_PROCESS,
   headerValidator,
   convertMessagePartsToMessage,
   findNewCell,

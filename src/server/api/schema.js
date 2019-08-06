@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
@@ -83,10 +84,8 @@ import { notifyOnTagConversation } from "./lib/alerts";
 import { getSendBeforeTimeUtc } from "../../lib/timezones";
 
 const uuidv4 = require("uuid").v4;
-const JOBS_SAME_PROCESS = !!(
-  process.env.JOBS_SAME_PROCESS || global.JOBS_SAME_PROCESS
-);
-const JOBS_SYNC = !!(process.env.JOBS_SYNC || global.JOBS_SYNC);
+const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
+const JOBS_SYNC = config.JOBS_SYNC;
 
 const replaceCurlyApostrophes = rawText =>
   rawText.replace(/[\u2018\u2019]/g, "'");
@@ -495,7 +494,7 @@ async function sendMessage(
 
   const { contactNumber, text } = message;
 
-  if (text.length > (process.env.MAX_MESSAGE_LENGTH || 99999)) {
+  if (text.length > (config.MAX_MESSAGE_LENGTH || 99999)) {
     throw new GraphQLError("Message was longer than the limit");
   }
 
@@ -550,7 +549,7 @@ async function sendMessage(
     user_number: "",
     assignment_id: message.assignmentId,
     send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
-    service: process.env.DEFAULT_SERVICE || "",
+    service: config.DEFAULT_SERVICE,
     is_from_contact: false,
     queued_at: new Date(),
     send_before: sendBeforeDate
@@ -592,16 +591,15 @@ async function sendMessage(
   toInsert.id = messageInstance.id || messageInstance;
 
   // Send message after we are sure messageInstance has been persisted
-  const service =
-    serviceMap[messageInstance.service || process.env.DEFAULT_SERVICE];
+  const service = serviceMap[messageInstance.service || config.DEFAULT_SERVICE];
   service.sendMessage(toInsert, record.organization_id);
 
   // Send message to BernieSMS to be checked for bad words
-  const badWordUrl = process.env.BAD_WORD_URL;
+  const badWordUrl = config.BAD_WORD_URL;
   if (badWordUrl) {
     request
       .post(badWordUrl)
-      .set("Authorization", `Token ${process.env.BAD_WORD_TOKEN}`)
+      .set("Authorization", `Token ${config.BAD_WORD_TOKEN}`)
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
         if (err) {
@@ -884,7 +882,7 @@ const rootMutations = {
         await Assignment.save({
           user_id: user.id,
           campaign_id: campaign.id,
-          max_contacts: parseInt(process.env.MAX_CONTACTS_PER_TEXTER || 0, 10)
+          max_contacts: config.MAX_CONTACTS_PER_TEXTER
         });
       }
       return campaign;
@@ -970,7 +968,7 @@ const rootMutations = {
     },
 
     createInvite: async (_, { user }) => {
-      if ((user && user.is_superadmin) || !process.env.SUPPRESS_SELF_INVITE) {
+      if ((user && user.is_superadmin) || !config.SUPPRESS_SELF_INVITE) {
         const inviteInstance = new Invite({
           is_valid: true,
           hash: uuidv4()
@@ -1499,7 +1497,7 @@ const rootMutations = {
 
     removeOptOut: async (_, { cell }, { loaders, user }) => {
       // We assume that OptOuts are shared across orgs
-      // const sharingOptOuts = !!process.env.OPTOUTS_SHARE_ALL_ORGS
+      // const sharingOptOuts = config.OPTOUTS_SHARE_ALL_ORGS
 
       // Authorization (checking across all organizations)
       let userRoles = await r
@@ -1563,7 +1561,7 @@ const rootMutations = {
     },
 
     bulkSendMessages: async (_, { assignmentId }, loaders) => {
-      if (!process.env.ALLOW_SEND_ALL || !process.env.NOT_IN_USA) {
+      if (!config.ALLOW_SEND_ALL || !config.NOT_IN_USA) {
         log.error("Not allowed to send all messages at once");
         throw new GraphQLError({
           status: 403,
@@ -1578,7 +1576,7 @@ const rootMutations = {
         _,
         {
           assignmentId,
-          numberContacts: Number(process.env.BULK_SEND_CHUNK_SIZE) - 1
+          numberContacts: Number(config.BULK_SEND_CHUNK_SIZE) - 1
         },
         loaders
       );
@@ -1588,7 +1586,7 @@ const rootMutations = {
         .where({ message_status: "needsMessage" })
         .where({ assignment_id: assignmentId })
         .orderByRaw("updated_at")
-        .limit(process.env.BULK_SEND_CHUNK_SIZE);
+        .limit(config.BULK_SEND_CHUNK_SIZE);
 
       const texter = camelCaseKeys(await User.get(assignment.user_id));
       const customFields = Object.keys(JSON.parse(contacts[0].custom_fields));
@@ -2117,12 +2115,12 @@ const rootMutations = {
               });
 
               /* This will just throw if it errors */
-              if (process.env.ASSIGNMENT_REQUESTED_URL) {
+              if (config.ASSIGNMENT_REQUESTED_URL) {
                 const response = await request
-                  .post(process.env.ASSIGNMENT_REQUESTED_URL)
+                  .post(config.ASSIGNMENT_REQUESTED_URL)
                   .set(
                     "Authorization",
-                    `Token ${process.env.ASSIGNMENT_REQUESTED_TOKEN}`
+                    `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
                   )
                   .send({ count, email });
 
@@ -2470,10 +2468,10 @@ const rootResolvers = {
       return r.table("organization");
     },
     availableActions: (_, { organizationId }, { user }) => {
-      if (!process.env.ACTION_HANDLERS) {
+      if (!config.ACTION_HANDLERS) {
         return [];
       }
-      const allHandlers = process.env.ACTION_HANDLERS.split(",");
+      const allHandlers = config.ACTION_HANDLERS.split(",");
 
       const availableHandlers = allHandlers
         .map(handler => {

@@ -1,18 +1,19 @@
 import request from "request";
 import aws from "aws-sdk";
 import { r } from "../models";
+import { config } from "../../config";
 
 const sqs = new aws.SQS();
 // What the user sees as the option
 export const displayName = () => "Revere Signup";
 
-const listId = process.env.REVERE_LIST_ID;
-const defaultMobileFlowId = process.env.REVERE_NEW_SUBSCRIBER_MOBILE_FLOW;
-const mobileApiKey = process.env.REVERE_MOBILE_API_KEY;
-const sendContentUrl = process.env.REVERE_API_URL;
-const akAddUserUrl = process.env.AK_ADD_USER_URL;
-const akAddPhoneUrl = process.env.AK_ADD_PHONE_URL;
-const sqsUrl = process.env.REVERE_SQS_URL;
+const listId = config.REVERE_LIST_ID;
+const defaultMobileFlowId = config.REVERE_NEW_SUBSCRIBER_MOBILE_FLOW;
+const mobileApiKey = config.REVERE_MOBILE_API_KEY;
+const sendContentUrl = config.REVERE_API_URL;
+const akAddUserUrl = config.AK_ADD_USER_URL;
+const akAddPhoneUrl = config.AK_ADD_PHONE_URL;
+const sqsUrl = config.REVERE_SQS_URL;
 
 // The Help text for the user after selecting the action
 export const instructions = () =>
