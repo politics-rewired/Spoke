@@ -207,6 +207,7 @@ export class AssignmentTexterContact extends React.Component {
       tagMessageText: "",
       addedTags: [],
       removedTags: [],
+      pendingNewTags: [],
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
       dialogType: TexterDialogType.None,
@@ -472,7 +473,29 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleApplyTags = (addedTags, removedTags) => {
-    this.setState({ addedTags, removedTags });
+    const pendingNewTags = this.props.contact.contactTags || [];
+
+    addedTags.forEach(addedTag => {
+      const tagDoesNotExist = !pendingNewTags.find(
+        currentTag => currentTag.id === addedTag.id
+      );
+
+      if (tagDoesNotExist) {
+        pendingNewTags.push(addedTag);
+      }
+    });
+
+    removedTags.forEach(removedTag => {
+      const idxOfExistingTag = pendingNewTags.findIndex(
+        currentTag => currentTag.id === removedTag.id
+      );
+
+      if (idxOfExistingTag > -1) {
+        pendingNewTags.splice(idxOfExistingTag, 1);
+      }
+    });
+
+    this.setState({ addedTags, removedTags, pendingNewTags });
     if (addedTags.length > 0) {
       const mostImportantTag = sortBy(addedTags, "id")[0];
       const tagMessageText = mostImportantTag.onApplyScript;
@@ -614,7 +637,7 @@ export class AssignmentTexterContact extends React.Component {
     const { userCannedResponses, campaignCannedResponses } = assignment;
     const isCannedResponseEnabled =
       userCannedResponses.length + campaignCannedResponses.length > 0;
-    const { justSentNew, alreadySent } = this.state;
+    const { justSentNew, alreadySent, pendingNewTags } = this.state;
     const { messageStatus } = contact;
     const size = document.documentElement.clientWidth;
 
@@ -708,6 +731,7 @@ export class AssignmentTexterContact extends React.Component {
               />
               <ApplyTagButton
                 contactTags={contact.contactTags}
+                pendingNewTags={pendingNewTags}
                 allTags={tags}
                 onApplyTag={this.handleApplyTags}
               />

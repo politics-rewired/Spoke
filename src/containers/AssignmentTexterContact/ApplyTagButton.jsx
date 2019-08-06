@@ -18,6 +18,10 @@ class ApplyTagButton extends Component {
     confirmStepIndex: -1
   };
 
+  componentWillMount() {
+    this.selectedTags = this.props.pendingNewTags;
+  }
+
   resetTags = () =>
     this.setState({ selectedTags: this.props.contactTags.slice() });
 
@@ -172,6 +176,7 @@ class ApplyTagButton extends Component {
 ApplyTagButton.propTypes = {
   contactTags: PropTypes.arrayOf(PropTypes.string).isRequired,
   allTags: PropTypes.arrayOf(PropTypes.object).isRequired,
+  pendingNewTags: PropTypes.arrayOf(PropTypes.object).isRequired,
   onApplyTag: PropTypes.func.isRequired
 };
 
