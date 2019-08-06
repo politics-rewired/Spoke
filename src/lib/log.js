@@ -55,7 +55,7 @@ if (isClient()) {
   };
 
   // We always want to log with console on Lambda
-  log = config.LAMBDA_DEBUG_LOG ? console : log;
+  log = process.env.LAMBDA_DEBUG_LOG ? console : log;
 }
 
 export { log };
