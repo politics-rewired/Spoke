@@ -1,5 +1,5 @@
 const envalid = require("envalid");
-const { str, port } = envalid;
+const { str, port, host } = envalid;
 
 const validators = {
   ASSETS_DIR: str({
