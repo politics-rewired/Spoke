@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import ReactMarkdown from "react-markdown";
 import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
+import MoreIcon from "material-ui/svg-icons/navigation/more-vert";
 import Dialog from "material-ui/Dialog";
 import ChipInput from "material-ui-chip-input";
 
@@ -22,7 +23,14 @@ class ApplyTagButton extends Component {
 
   addTag = tag => {
     const { selectedTags } = this.state;
-    selectedTags.push(tag);
+
+    const tagAlreadySelected =
+      selectedTags.filter(existingTag => existingTag.id === tag.id).length > 0;
+
+    if (!tagAlreadySelected) {
+      selectedTags.push(tag);
+    }
+
     this.setState({ selectedTags });
   };
 
@@ -40,6 +48,7 @@ class ApplyTagButton extends Component {
 
   handleAddTag = ({ id: tagId }) => {
     const { allTags } = this.props;
+
     const tag = allTags.find(tag => tag.id === tagId);
 
     if (tag.confirmationSteps.length > 0) {
@@ -109,24 +118,37 @@ class ApplyTagButton extends Component {
       <FlatButton label={cancel} primary onClick={this.handleCloseConfirm} />
     ];
 
+    const [escalateTag, tagsWithoutEscalated] = filterOutEscalatedTag(allTags);
+
     return (
       <div>
         <RaisedButton
-          label="Tag"
+          label="More"
           disabled={allTags.length === 0}
           onClick={this.handleOpenTagSelectionDialog}
+          labelPosition="before"
+          icon={<MoreIcon />}
         />
         <Dialog
-          title="Manage Tags"
+          title="More Actions"
           open={applyStepIndex > 0}
           actions={selectTagActions}
           onRequestClose={this.handleCloseTagSelectionDialog}
         >
-          <p>Select tags:</p>
+          {!!escalateTag && (
+            <RaisedButton
+              buttonStyle={{ paddingLeft: 20, paddingRight: 20 }}
+              secondary={true}
+              onClick={() => this.handleAddTag(escalateTag)}
+            >
+              Escalate Conversation
+            </RaisedButton>
+          )}
+          <p>Apply tags:</p>
           <ChipInput
             value={selectedTags}
             dataSourceConfig={{ text: "title", value: "id" }}
-            dataSource={allTags}
+            dataSource={tagsWithoutEscalated}
             fullWidth={true}
             openOnFocus={true}
             onBeforeRequestAdd={this.handleBeforeRequestAdd}
@@ -152,5 +174,14 @@ ApplyTagButton.propTypes = {
   allTags: PropTypes.arrayOf(PropTypes.object).isRequired,
   onApplyTag: PropTypes.func.isRequired
 };
+
+function filterOutEscalatedTag(allTags) {
+  const isEscalateTag = t => t.title === "Escalated" || t.title === "Escalate";
+
+  const foundEscalateTag = allTags.find(isEscalateTag);
+  const tagsWithoutEscalated = allTags.filter(t => !isEscalateTag(t));
+
+  return [foundEscalateTag, tagsWithoutEscalated];
+}
 
 export default ApplyTagButton;
