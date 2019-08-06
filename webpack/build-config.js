@@ -37,7 +37,7 @@ const validators = {
   }),
   WEBPACK_HOST: host({
     desc: "Host domain or IP for Webpack development server.",
-    default: "127.0.0.1."
+    default: "127.0.0.1"
   }),
   WEBPACK_PORT: port({
     desc: "Port for Webpack development server.",
