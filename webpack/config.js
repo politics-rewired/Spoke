@@ -1,4 +1,4 @@
-const { config } = require("../src/config");
+const { config } = require("./build-config");
 const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
