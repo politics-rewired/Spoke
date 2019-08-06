@@ -305,7 +305,8 @@ if (isClient()) {
     GRAPHQL_URL: str({
       desc: "Optional URL for pointing GraphQL API requests. ",
       example: "https://externalservice.org/graphql",
-      default: "/graphql"
+      default: "/graphql",
+      isClient: true
     }),
     JOBS_SAME_PROCESS: bool({
       desc:
