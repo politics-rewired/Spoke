@@ -487,7 +487,7 @@ if (isClient()) {
         "If set, then on post-install (often from deploying) a message will be posted to a slack channel's #spoke channel",
       default: undefined
     }),
-    STATIC_BASE_URL: url({
+    STATIC_BASE_URL: str({
       desc: "Alternate static base url",
       example:
         "https://s3.us-east-1.amazonaws.com/my-spoke-bucket/spoke/static/",
