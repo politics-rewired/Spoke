@@ -1,4 +1,3 @@
-import { config } from "../config";
 import minilog from "minilog";
 import { isClient } from "./is-client";
 const Rollbar = require("rollbar");
@@ -27,14 +26,6 @@ if (isClient()) {
   };
 } else {
   let enableRollbar = false;
-  if (config.isProduction && config.ROLLBAR_ACCESS_TOKEN) {
-    enableRollbar = true;
-    rollbar = new Rollbar({
-      accessToken: config.ROLLBAR_ACCESS_TOKEN,
-      captureUncaught: true,
-      captureUnhandledRejections: true
-    });
-  }
 
   minilog.suggest.deny(/.*/, "debug");
 
