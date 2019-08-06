@@ -1,5 +1,5 @@
 const envalid = require("envalid");
-const { str, port, host } = envalid;
+const { str, port, host, num } = envalid;
 
 const validators = {
   ASSETS_DIR: str({
@@ -11,6 +11,11 @@ const validators = {
     desc:
       "File name of map file, within ASSETS_DIR, containing map of general file names to unique build-specific file names.",
     default: "assets.json"
+  }),
+  DEV_APP_PORT: num({
+    desc: "Port for development Webpack server.",
+    devDefault: 8090,
+    default: undefined
   }),
   NODE_ENV: str({
     desc: "Node environment",
@@ -45,7 +50,7 @@ const validators = {
   })
 };
 
-config = envalid.cleanEnv(process.env, validators, {
+const config = envalid.cleanEnv(process.env, validators, {
   strict: true
 });
 
