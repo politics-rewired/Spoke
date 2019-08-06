@@ -146,6 +146,7 @@ const mapMutationsToProps = () => ({
           messages {
             id
             createdAt
+            userId
             text
             isFromContact
           }

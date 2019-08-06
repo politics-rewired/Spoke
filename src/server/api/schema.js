@@ -421,7 +421,7 @@ async function sendMessage(
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId) })
     .where({ "campaign.is_archived": false })
-    .join("assignment", "campaign_contact.assignment_id", "assignment.id")
+    .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
     .leftJoin("opt_out", {
       // 'opt_out.organization_id': 'campaign.organization.id',
       "opt_out.cell": "campaign_contact.cell"
@@ -430,6 +430,7 @@ async function sendMessage(
       "campaign_contact.id as cc_id",
       "campaign_contact.assignment_id as assignment_id",
       "campaign_contact.message_status as cc_message_status",
+      "campaign.id as campaign_id",
       "campaign.is_archived as is_archived",
       "campaign.organization_id as organization_id",
       "campaign.override_organization_texting_hours as c_override_hours",
@@ -441,10 +442,40 @@ async function sendMessage(
       "campaign_contact.timezone_offset as contact_timezone_offset"
     );
 
-  if (
-    checkAssignment &&
-    record.assignment_id != parseInt(message.assignmentId)
-  ) {
+  // If the conversation is unassigned, create an assignment. This assignment will be applied to
+  // the message only, and not the campaign contact. We don't use message.assignment_id and the
+  // cleaner solution would be to remove the column entirely. I object to this workaround!!
+  // - @bchrobot
+  const isConversationUnassigned =
+    record.assignment_id === null && message.assignmentId === null;
+  if (isConversationUnassigned) {
+    // Check for existing assignment
+    const assignment = await r
+      .knex("assignment")
+      .where({
+        user_id: user.id,
+        campaign_id: record.campaign_id
+      })
+      .first("id");
+    if (assignment && assignment.id) {
+      record.assignment_id = assignment.id;
+    } else {
+      // Create assignment if no exisiting
+      const [assignmentId] = await r
+        .knex("assignment")
+        .insert({
+          user_id: user.id,
+          campaign_id: record.campaign_id
+        })
+        .returning("id");
+      record.assignment_id = assignmentId;
+    }
+    message.assignmentId = record.assignment_id;
+  }
+
+  const assignmentIdsMatch =
+    record.assignment_id === parseInt(message.assignmentId);
+  if (checkAssignment && !assignmentIdsMatch) {
     throw new GraphQLError("Your assignment has changed");
   }
 
@@ -1472,7 +1503,30 @@ const rootMutations = {
         await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       }
 
-      const { assignmentId, cell, message, reason } = optOut;
+      let { assignmentId, cell, message, reason } = optOut;
+      if (!assignmentId) {
+        // Check for existing assignment
+        const assignment = await r
+          .knex("assignment")
+          .where({
+            user_id: user.id,
+            campaign_id: contact.campaign_id
+          })
+          .first("id");
+        if (assignment && assignment.id) {
+          assignmentId = assignment.id;
+        } else {
+          // Create assignment if no exisiting
+          [assignmentId] = await r
+            .knex("assignment")
+            .insert({
+              user_id: user.id,
+              campaign_id: contact.campaign_id
+            })
+            .returning("id");
+        }
+      }
+
       await cacheableData.optOut.save({
         cell,
         reason,

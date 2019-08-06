@@ -1,5 +1,5 @@
 import { config } from "../../../config";
-import { r, OptOut } from "../../models";
+import { r } from "../../models";
 import { log } from "../../../lib";
 
 // STRUCTURE
@@ -95,12 +95,12 @@ export const optOutCache = {
     }
     // database
     try {
-      await new OptOut({
+      await r.knex("opt_out").insert({
         assignment_id: assignmentId,
         organization_id: organizationId,
         reason_code: reason,
         cell
-      }).save();
+      });
     } catch (error) {
       console.error(error);
     }
