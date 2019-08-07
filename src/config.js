@@ -68,6 +68,11 @@ if (isClient()) {
         "Bearer token to use as authorization with ASSIGNMENT_REQUESTED_URL.",
       default: undefined
     }),
+    ASSIGNMENT_COMPLETE_NOTIFICATION_URL: url({
+      desc:
+        "Webhook URL to notify when there are no more assignable campaign contacts.",
+      default: undefined
+    }),
     AUTH0_DOMAIN: host({
       desc: "Domain name on Auth0 account",
       example: "example.auth0.com",
