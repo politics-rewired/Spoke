@@ -467,7 +467,8 @@ if (isClient()) {
     }),
     ROLLBAR_ACCESS_TOKEN: str({
       desc: "Access token for Rollbar error tracking.",
-      default: undefined
+      default: undefined,
+      isClient: true
     }),
     ROLLBAR_ENDPOINT: url({
       desc: "Endpoint URL for Rollbar error tracking.",
