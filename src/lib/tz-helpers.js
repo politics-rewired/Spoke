@@ -1,11 +1,9 @@
-import isClient from "./is-client";
-
 export function getProcessEnvTz() {
-  return isClient() ? window.TZ : process.env.TZ;
+  return typeof window === "undefined" ? process.env.TZ : window.TZ;
 }
 
 export function getProcessEnvDstReferenceTimezone() {
-  return isClient()
-    ? window.DST_REFERENCE_TIMEZONE
-    : process.env.DST_REFERENCE_TIMEZONE;
+  return typeof window === "undefined"
+    ? process.env.DST_REFERENCE_TIMEZONE
+    : window.DST_REFERENCE_TIMEZONE;
 }
