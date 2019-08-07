@@ -63,7 +63,7 @@ const app = express();
 // Don't rate limit heroku
 app.enable("trust proxy");
 
-if (!config.isProduction && PUBLIC_DIR) {
+if (PUBLIC_DIR) {
   app.use(express.static(PUBLIC_DIR, { maxAge: "180 days" }));
 }
 
