@@ -58,4 +58,6 @@ if (isClient()) {
   log = process.env.LAMBDA_DEBUG_LOG ? console : log;
 }
 
+log = console;
+
 export { log };
