@@ -108,7 +108,6 @@
     "humps": "^1.1.0",
     "is-url": "^1.2.2",
     "isomorphic-fetch": "^2.2.1",
-    "json-loader": "^0.5.4",
     "knex": "^0.15.0",
     "lodash": "^4.13.1",
     "mailgun-js": "^0.16.0",
