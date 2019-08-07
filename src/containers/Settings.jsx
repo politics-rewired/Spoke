@@ -60,7 +60,8 @@ class Settings extends React.Component {
     formIsSubmitting: false,
     textRequestFormEnabled: undefined,
     textRequestType: undefined,
-    textRequestMaxCount: undefined
+    textRequestMaxCount: undefined,
+    numbersApiKey: undefined
   };
 
   handleSubmitTextingHoursForm = async ({
@@ -94,6 +95,12 @@ class Settings extends React.Component {
       payload
     );
     this.setState(response.data.updateTextRequestFormSettings);
+  };
+
+  doSetNumbersApiKey = () => {
+    return this.props.mutations.setNumbersApiKey({
+      numbersApiKey: this.state.numbersApiKey
+    });
   };
 
   renderTextingHoursForm() {
@@ -285,7 +292,7 @@ class Settings extends React.Component {
     });
 
     const numbersApiKeySchema = yup.object({
-      numbersApiKey: yup.string()
+      numbersApiKey: yup.string().nullable()
     });
 
     return (
@@ -358,11 +365,17 @@ class Settings extends React.Component {
             schema={numbersApiKeySchema}
             onChange={({ numbersApiKey: newValue }) =>
               this.setState({
-                hasNumbersApiKeyChanged: newValue !== numbersApiKey
+                hasNumbersApiKeyChanged: newValue !== numbersApiKey,
+                numbersApiKey: newValue
               })
             }
-            onSubmit={this.props.mutations.setNumbersApiKey}
-            defaultValue={{ numbersApiKey }}
+            onSubmit={this.doSetNumbersApiKey}
+            defaultValue={{
+              numbersApiKey:
+                this.state.numbersApiKey === undefined
+                  ? numbersApiKey
+                  : this.state.numbersApiKey
+            }}
           >
             <CardHeader title="Assemble Numbers API Key" />
             <CardText>

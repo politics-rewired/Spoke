@@ -330,7 +330,8 @@ class AdminCampaignEdit extends React.Component {
           "contactsCount",
           "customFields",
           "contactSql",
-          "excludeCampaignIds"
+          "excludeCampaignIds",
+          "filterOutLandlines"
         ],
         checkCompleted: () => this.state.campaignFormValues.contactsCount > 0,
         checkSaved: () =>
@@ -355,6 +356,9 @@ class AdminCampaignEdit extends React.Component {
                 /contacts/.test(job.jobType)
               )[0] || {}
             ).resultMessage || "",
+          canFilterLandlines:
+            this.props.organizationData.organization &&
+            !!this.props.organizationData.organization.numbersApiKey,
           otherCampaigns: this.props.organizationData.organization.campaigns.campaigns.filter(
             campaign => campaign.id != this.props.params.campaignId
           )
@@ -808,6 +812,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             lastName
             displayName
           }
+          numbersApiKey
           campaigns(cursor: { offset: 0, limit: 5000 }) {
             campaigns {
               id

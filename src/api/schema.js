@@ -122,6 +122,7 @@ const rootSchema = `
     introHtml: String
     useDynamicAssignment: Boolean
     contacts: [CampaignContactInput]
+    filterOutLandlines: Boolean
     excludeCampaignIds: [Int]
     contactSql: String
     organizationId: String

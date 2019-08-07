@@ -189,11 +189,6 @@ export async function uploadContacts(job) {
   const numbersApiKey = orgFeatures.numbersApiKey;
   let numbersClient, numbersRequest, landlinesFilteredOut;
 
-  if (numbersApiKey) {
-    numbersClient = new NumbersClient({ apiKey: numbersApiKey });
-    numbersRequest = await numbersClient.createRequest();
-  }
-
   await r
     .table("campaign_contact")
     .getAll(campaignId, { index: "campaign_id" })
@@ -201,7 +196,20 @@ export async function uploadContacts(job) {
 
   let jobPayload = await gunzip(new Buffer(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
-  let { contacts, excludeCampaignIds = [] } = jobPayload;
+  let {
+    contacts,
+    excludeCampaignIds = [],
+    filterOutLandlines = false
+  } = jobPayload;
+
+  const shouldRemoveLandlines = filterOutLandlines && numbersApiKey;
+  if (shouldRemoveLandlines) {
+    console.log(
+      "Initializing Numbers connection - we are filtering out landlines"
+    );
+    numbersClient = new NumbersClient({ apiKey: numbersApiKey });
+    numbersRequest = await numbersClient.createRequest();
+  }
 
   const maxContacts = parseInt(
     orgFeatures.hasOwnProperty("maxContacts")
@@ -239,7 +247,7 @@ export async function uploadContacts(job) {
 
           try {
             await trx("campaign_contact").insert(chunk);
-            if (numbersApiKey) {
+            if (shouldRemoveLandlines) {
               await numbersRequest.addPhoneNumbers(chunk.map(c => c.cell));
             }
           } catch (exc) {
@@ -262,7 +270,7 @@ export async function uploadContacts(job) {
       }
     }
 
-    if (numbersApiKey) {
+    if (shouldRemoveLandlines) {
       await numbersRequest.close();
       await numbersRequest.waitUntilDone({
         onProgressUpdate: async percentComplete => {

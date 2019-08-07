@@ -227,7 +227,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     });
     const jobPayload = {
       excludeCampaignIds: campaign.excludeCampaignIds || [],
-      contacts: contactsToSave
+      contacts: contactsToSave,
+      filterOutLandlines: campaign.filterOutLandlines
     };
     const compressedString = await gzip(JSON.stringify(jobPayload));
     let job = await JobRequest.save({
