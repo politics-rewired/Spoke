@@ -164,13 +164,26 @@ if (isClient()) {
       example: "postgres://username:password@127.0.0.1:5432/db_name",
       default: undefined
     }),
-    DB_JSON: str({
-      desc: "JSON string containing database configuration options.",
-      default: undefined
-    }),
     DB_HOST: host({
       desc: "Domain or IP address of database host.",
       example: "pg-db.example.org",
+      default: undefined
+    }),
+    DB_PORT: num({
+      desc: "Database port number.",
+      default: 5432
+    }),
+    DB_NAME: str({
+      desc: "Database name.",
+      example: "spoke_prod",
+      default: undefined
+    }),
+    DB_USER: str({
+      desc: "Database username.",
+      default: undefined
+    }),
+    DB_PASSWORD: str({
+      desc: "Database password.",
       default: undefined
     }),
     DB_MIN_POOL: num({
@@ -188,16 +201,6 @@ if (isClient()) {
     DB_REAP_INTERVAL_MS: num({
       desc: "How often to check for idle resources to destroy",
       default: 1000
-    }),
-    DB_NAME: str({
-      desc: "Database connection name.",
-      example: "spoke_prod",
-      default: undefined
-    }),
-    DB_TYPE: str({
-      desc: "Database connection type for Knex.",
-      choices: ["mysql", "pg", "sqlite3"],
-      default: undefined
     }),
     DB_USE_SSL: bool({
       desc:
