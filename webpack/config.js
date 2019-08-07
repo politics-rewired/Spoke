@@ -65,16 +65,12 @@ const webpackConfig = {
     extensions: [".js", ".jsx"]
   },
   plugins,
+  devtool: config.isProduction ? "hidden-source-map" : "inline-source-map",
   output: {
     filename: outputFile,
     path: path.resolve(DEBUG ? __dirname : assetsDir),
     publicPath: "/assets/"
   }
 };
-
-if (DEBUG) {
-  webpackConfig.devtool = "inline-source-map";
-  webpackConfig.output.sourceMapFilename = `${outputFile}.map`;
-}
 
 module.exports = webpackConfig;
