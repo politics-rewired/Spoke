@@ -3,7 +3,7 @@ const AWS = require("aws-sdk");
 const awsServerlessExpress = require("aws-serverless-express");
 let config, app, server, jobs;
 try {
-  ({ config } = require("./build/src/config"));
+  ({ config } = require("./build/server/config"));
   app = require("./build/server/server/index");
   server = awsServerlessExpress.createServer(app.default);
   jobs = require("./build/server/workers/job-processes");
