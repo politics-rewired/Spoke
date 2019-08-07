@@ -140,13 +140,15 @@ export const resolvers = {
       return escalatedCount;
     },
     numbersApiKey: async organization => {
-      let numbersApiKey;
+      let numbersApiKey = null;
+
       try {
         const features = JSON.parse(organization.features);
         numbersApiKey = features.numbersApiKey.slice(0, 4) + "****************";
       } catch (ex) {
         // no-op
       }
+
       return numbersApiKey;
     },
     pendingAssignmentRequestCount: async organization => {

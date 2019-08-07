@@ -227,7 +227,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     });
     const jobPayload = {
       excludeCampaignIds: campaign.excludeCampaignIds || [],
-      contacts: contactsToSave
+      contacts: contactsToSave,
+      filterOutLandlines: campaign.filterOutLandlines
     };
     const compressedString = await gzip(JSON.stringify(jobPayload));
     let job = await JobRequest.save({
@@ -2389,7 +2390,7 @@ const rootMutations = {
       await accessRequired(user, organizationId, "OWNER");
 
       // User probably made a mistake - no API key will have a *
-      if (numbersApiKey.includes("*")) {
+      if (numbersApiKey && numbersApiKey.includes("*")) {
         throw new Error("Numbers API Key cannot have character: *");
       }
 

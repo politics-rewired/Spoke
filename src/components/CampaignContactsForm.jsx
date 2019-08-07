@@ -7,6 +7,7 @@ import GSForm from "../components/forms/GSForm";
 import Form from "react-formal";
 import Subheader from "material-ui/Subheader";
 import Divider from "material-ui/Divider";
+import Toggle from "material-ui/Toggle";
 import { ListItem, List } from "material-ui/List";
 import { parseCSV } from "../lib";
 import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
@@ -123,7 +124,8 @@ export default class CampaignContactsForm extends React.Component {
       validationStats: null,
       uploading: false,
       contactUploadError: error,
-      contacts: null
+      contacts: null,
+      filterOutLandlines: false
     });
   }
 
@@ -133,16 +135,22 @@ export default class CampaignContactsForm extends React.Component {
       uploading: false,
       contactUploadError: null
     });
-    const { selectedCampaignIds } = this.state;
+    const { selectedCampaignIds, filterOutLandlines } = this.state;
     const contactCollection = {
       contactsCount: contacts.length,
       excludeCampaignIds: selectedCampaignIds,
       contactSql: null,
       customFields,
+      filterOutLandlines,
       contacts
     };
     this.props.onChange(contactCollection);
   }
+
+  onFilterOutLandlinesToggle = (_ev, toggled) => {
+    this.setState({ filterOutLandlines: toggled });
+    this.props.onChange({ filterOutLandlines: toggled });
+  };
 
   renderCampaignExclusion() {
     const sortedCampaigns = sortBy(
@@ -265,6 +273,7 @@ export default class CampaignContactsForm extends React.Component {
   }
 
   renderForm() {
+    const { canFilterLandlines } = this.props;
     const { contactUploadError, contactSqlError } = this.state;
     return (
       <div>
@@ -290,6 +299,17 @@ export default class CampaignContactsForm extends React.Component {
             this.props.onSubmit();
           }}
         >
+          {canFilterLandlines && (
+            <div>
+              <p>
+                Filter out landlines?
+                <Toggle
+                  value={this.state.filterOutLandlines}
+                  onToggle={this.onFilterOutLandlinesToggle}
+                />
+              </p>
+            </div>
+          )}
           {this.renderUploadButton()}
           {!this.props.datawarehouseAvailable ? (
             ""
@@ -399,5 +419,6 @@ CampaignContactsForm.propTypes = {
   saveDisabled: type.bool,
   saveLabel: type.string,
   jobResultMessage: type.string,
-  otherCampaigns: type.array
+  otherCampaigns: type.array,
+  canFilterLandlines: type.bool
 };
