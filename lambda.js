@@ -1,9 +1,9 @@
 "use strict";
-const { config } = require("src/config");
 const AWS = require("aws-sdk");
 const awsServerlessExpress = require("aws-serverless-express");
-let app, server, jobs;
+let config, app, server, jobs;
 try {
+  ({ config } = require("./build/src/config"));
   app = require("./build/server/server/index");
   server = awsServerlessExpress.createServer(app.default);
   jobs = require("./build/server/workers/job-processes");
@@ -11,6 +11,7 @@ try {
   if (!global.TEST_ENVIRONMENT) {
     console.error(`Unable to load built server: ${err}`);
   }
+  ({ config } = require("./src/config"));
   app = require("./src/server/index");
   server = awsServerlessExpress.createServer(app.default);
   jobs = require("./src/workers/job-processes");
