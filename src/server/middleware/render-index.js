@@ -13,7 +13,7 @@ const windowVars = Object.keys(clientConfig).map(varName => {
   return `window.${varName}=${escapedValue};`;
 });
 
-export default function renderIndex(html, css, assetMap, store) {
+export default function renderIndex(assetMap) {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -40,15 +40,12 @@ export default function renderIndex(html, css, assetMap, store) {
 
       /**/
     </style>
-    <style data-aphrodite>${css.content}</style>
-  </head>
-  <body>
-    <div id="mount">${html}</div>
     <script>
-      window.INITIAL_STATE=${JSON.stringify(store.getState())}
-      window.RENDERED_CLASS_NAMES=${JSON.stringify(css.renderedClassNames)}
       ${windowVars.join("      \n")}
     </script>
+  </head>
+  <body>
+    <div id="mount"></div>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>
 </html>
