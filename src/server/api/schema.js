@@ -2390,7 +2390,7 @@ const rootMutations = {
       await accessRequired(user, organizationId, "OWNER");
 
       // User probably made a mistake - no API key will have a *
-      if (numbersApiKey.includes("*")) {
+      if (numbersApiKey && numbersApiKey.includes("*")) {
         throw new Error("Numbers API Key cannot have character: *");
       }
 

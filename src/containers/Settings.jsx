@@ -97,9 +97,10 @@ class Settings extends React.Component {
     this.setState(response.data.updateTextRequestFormSettings);
   };
 
-  doSetNumbersApiKey = () => {
+  doSetNumbersApiKey = payload => {
     return this.props.mutations.setNumbersApiKey({
-      numbersApiKey: this.state.numbersApiKey
+      numbersApiKey:
+        this.state.numbersApiKey === "" ? null : this.state.numbersApiKey
     });
   };
 
@@ -510,7 +511,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
   setNumbersApiKey: ({ numbersApiKey }) => ({
     mutation: gql`
       mutation setNumbersApiKey(
-        $numbersApiKey: String!
+        $numbersApiKey: String
         $organizationId: String!
       ) {
         setNumbersApiKey(

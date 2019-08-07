@@ -305,7 +305,7 @@ const rootSchema = `
     deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
     approveAssignmentRequest(assignmentRequestId: String!): Int!
     rejectAssignmentRequest(assignmentRequestId: String!): Boolean!
-    setNumbersApiKey(organizationId: String!, numbersApiKey: String!): Organization!
+    setNumbersApiKey(organizationId: String!, numbersApiKey: String): Organization!
     saveTag(organizationId: String!, tag: TagInput!): Tag!
     deleteTag(organizationId: String!, tagId: String!): Boolean!
   }
