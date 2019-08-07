@@ -7,7 +7,7 @@ import { PlacesAllInclusive } from "material-ui/svg-icons";
 const THRESHOLD = 0.2;
 
 async function checkForBadDeliverability() {
-  if (config.DELIVERABILITY_ALERT_ENDPOINT !== undefined) return null;
+  if (config.DELIVERABILITY_ALERT_ENDPOINT === undefined) return null;
   console.log("Running deliverability check");
   /*
     find domains that have been sent on in the past hour that
