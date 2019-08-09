@@ -127,6 +127,8 @@ const rootSchema = `
     excludeCampaignIds: [Int]
     contactSql: String
     organizationId: String
+    isAssignmentLimitedToTeams: Boolean
+    teamIds: [ID]
     texters: [TexterInput]
     interactionSteps: InteractionStepInput
     cannedResponses: [CannedResponseInput]

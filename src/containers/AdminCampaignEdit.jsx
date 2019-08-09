@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
+import sortBy from "lodash/sortBy";
+import isEqual from "lodash/isEqual";
 
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import DoneIcon from "material-ui/svg-icons/action/done";
@@ -247,6 +249,10 @@ class AdminCampaignEdit extends React.Component {
       } else {
         newCampaign.contacts = null;
       }
+      if (newCampaign.hasOwnProperty("teams")) {
+        newCampaign.teamIds = newCampaign.teams.map(team => team.id);
+        delete newCampaign.teams;
+      }
       if (newCampaign.hasOwnProperty("texters")) {
         newCampaign.texters = newCampaign.texters.map(texter => ({
           id: texter.id,
@@ -383,10 +389,26 @@ class AdminCampaignEdit extends React.Component {
         title: "Teams",
         content: CampaignTeamsForm,
         keys: ["teams", "isAssignmentLimitedToTeams"],
-        checkCompleted: () => {
-          !this.state.campaignFormValues.isAssignmentLimitedToTeams ||
-            this.state.campaignFormValues.teams.length > 0;
+        checkSaved: () => {
+          const {
+            isAssignmentLimitedToTeams: newIsAssignmentLimitedToTeams,
+            teams: newTeams
+          } = this.state.campaignFormValues;
+          const {
+            isAssignmentLimitedToTeams,
+            teams
+          } = this.props.campaignData.campaign;
+          const sameIsAssignmentLimitedToTeams =
+            newIsAssignmentLimitedToTeams === isAssignmentLimitedToTeams;
+          const sameTeams = isEqual(
+            sortBy(newTeams.map(team => team.id)),
+            sortBy(teams.map(team => team.id))
+          );
+          return !newIsAssignmentLimitedToTeams
+            ? sameIsAssignmentLimitedToTeams
+            : sameIsAssignmentLimitedToTeams && sameTeams;
         },
+        checkCompleted: () => true,
         blocksStarting: false,
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: false,
