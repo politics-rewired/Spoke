@@ -142,6 +142,7 @@
     "redux-thunk": "^2.1.0",
     "request": "^2.81.0",
     "rethink-knex-adapter": "^0.4.17",
+    "slack": "^11.0.2",
     "superagent": "^4.1.0",
     "thinky": "^2.3.3",
     "timezonecomplete": "^5.5.0",

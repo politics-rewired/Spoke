@@ -74,6 +74,7 @@ import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as tagResolvers } from "./tag";
+import { resolvers as teamResolvers } from "./team";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -261,6 +262,31 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     if (JOBS_SAME_PROCESS) {
       loadContactsFromDataWarehouse(job);
     }
+  }
+  if (campaign.hasOwnProperty("isAssignmentLimitedToTeams")) {
+    await r
+      .knex("campaign")
+      .update({
+        limit_assignment_to_teams: campaign.isAssignmentLimitedToTeams
+      })
+      .where({ id });
+  }
+  if (campaign.hasOwnProperty("teamIds")) {
+    await r.knex.transaction(async trx => {
+      const existingTeamIds = await trx("campaign_team")
+        .where({ campaign_id: id })
+        .pluck("team_id");
+      const teamIdsToRemove = _.difference(existingTeamIds, campaign.teamIds);
+      const teamIdsToAdd = _.difference(campaign.teamIds, existingTeamIds);
+      await Promise.all([
+        trx("campaign_team")
+          .whereIn("team_id", teamIdsToRemove)
+          .del(),
+        trx("campaign_team").insert(
+          teamIdsToAdd.map(team_id => ({ team_id, campaign_id: id }))
+        )
+      ]);
+    });
   }
   if (campaign.hasOwnProperty("texters")) {
     let job = await JobRequest.save({
@@ -2453,6 +2479,54 @@ const rootMutations = {
       if (deleteCount !== 1) throw new Error("Could not delete the tag.");
 
       return true;
+    },
+    saveTeam: async (_, { organizationId, team }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      // Update existing team
+      if (team.id) {
+        const [updatedTeam] = await r
+          .knex("team")
+          .update({
+            title: team.title,
+            description: team.description,
+            assignment_priority: team.assignmentPriority
+          })
+          .where({
+            id: team.id,
+            organization_id: organizationId
+          })
+          .returning("*");
+        if (!updatedTeam) throw new Error("No matching team to update!");
+        return updatedTeam;
+      }
+
+      // Create new team
+      const [newTeam] = await r
+        .knex("team")
+        .insert({
+          organization_id: organizationId,
+          author_id: user.id,
+          title: team.title,
+          description: team.description,
+          assignment_priority: team.assignmentPriority
+        })
+        .returning("*");
+      return newTeam;
+    },
+    deleteTeam: async (_, { organizationId, teamId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const deleteCount = await r
+        .knex("team")
+        .where({
+          id: teamId,
+          organization_id: organizationId
+        })
+        .del();
+      if (deleteCount !== 1) throw new Error("Could not delete the team.");
+
+      return true;
     }
   }
 };
@@ -2646,6 +2720,7 @@ const rootResolvers = {
 
 export const resolvers = {
   ...tagResolvers,
+  ...teamResolvers,
   ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,

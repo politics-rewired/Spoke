@@ -5,6 +5,7 @@ import CircularProgress from "material-ui/CircularProgress";
 
 const styles = {
   button: {
+    display: "inline-block",
     marginTop: 15
   }
 };

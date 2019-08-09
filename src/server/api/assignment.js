@@ -131,6 +131,136 @@ export async function getCurrentAssignmentType(organizationId) {
   return features.textRequestType;
 }
 
+export async function allCurrentAssignmentTargets(organizationId) {
+  const assignmentType = await getCurrentAssignmentType(organizationId);
+
+  const campaignView = {
+    UNREPLIED: "assignable_campaigns_with_needs_reply",
+    UNSENT: "assignable_campaigns_with_needs_message"
+  }[assignmentType];
+
+  const contactsView = {
+    UNREPLIED: "assignable_needs_reply",
+    UNSENT: "assignable_needs_message"
+  }[assignmentType];
+
+  if (!campaignView || !contactsView) {
+    return null;
+  }
+
+  /**
+   * The second part of the union needs to be in parenthesis
+   * so that the limit applies only to it and not the whole
+   * query
+   */
+  const { rows: teamToCampaigns } = await r.knex.raw(
+    `
+      select team.title as team_title, campaign.id, campaign.title, (
+          select count(*)
+          from ${contactsView}
+          where campaign_id = campaign.id
+        ) as count_left
+      from team
+      join campaign_team on campaign_team.team_id = team.id
+      join campaign on campaign.id = campaign_team.campaign_id and campaign.id = (
+          select id 
+          from ${campaignView}
+          order by id asc
+          limit 1
+        )
+      union
+      ( 
+        select 'Everyone else' as team_title, ${campaignView}.id, ${campaignView}.title, (
+            select count(*)
+            from ${contactsView}
+            where campaign_id = ${campaignView}.id
+        ) as count_left
+        from ${campaignView}
+        where ${campaignView}.limit_assignment_to_teams = false
+        order by id
+        limit 1
+      )
+    `
+  );
+
+  return teamToCampaigns.map(ttc =>
+    Object.assign(ttc, { type: assignmentType })
+  );
+}
+
+export async function myCurrentAssignmentTarget(
+  userId,
+  organizationId,
+  trx = r.knex
+) {
+  const assignmentType = await getCurrentAssignmentType(organizationId);
+
+  const campaignView = {
+    UNREPLIED: "assignable_campaigns_with_needs_reply",
+    UNSENT: "assignable_campaigns_with_needs_message"
+  }[assignmentType];
+
+  const contactsView = {
+    UNREPLIED: "assignable_needs_reply",
+    UNSENT: "assignable_needs_message"
+  }[assignmentType];
+
+  if (!campaignView || !contactsView) {
+    return null;
+  }
+
+  /**
+   * This query works via a union – first, find the assignment for the highest
+   * priority team I'm a party of, then find the one for everyone,
+   * and then select the first of that
+   */
+
+  const { rows: teamToCampaigns } = await trx.raw(
+    `
+      (
+        select team.title as team_title, campaign.id, campaign.title, (
+            select count(*)
+            from ${contactsView}
+            where campaign_id = campaign.id
+          ) as count_left
+        from team
+        join user_team on user_team.user_id = ?
+        join campaign_team on campaign_team.team_id = team.id
+        join campaign on campaign.id = campaign_team.campaign_id and campaign.id = (
+            select id 
+            from ${campaignView}
+            order by id asc
+            limit 1
+          )
+        order by team.assignment_priority
+      )
+      union
+      ( 
+        select 'Everyone else' as team_title, ${campaignView}.id, ${campaignView}.title, (
+            select count(*)
+            from ${contactsView}
+            where campaign_id = ${campaignView}.id
+        ) as count_left
+        from ${campaignView}
+        where ${campaignView}.limit_assignment_to_teams = false
+        order by id
+      )
+      limit 1
+    `,
+    [userId]
+  );
+
+  return (
+    teamToCampaigns.slice(0, 1).map(ttc =>
+      Object.assign(ttc, {
+        type: assignmentType,
+        campaign: { id: ttc.id, title: ttc.title }
+      })
+    )[0] || null
+  );
+}
+
+// TODO – deprecate this resolver
 export async function currentAssignmentTarget(organizationId, trx = r.knex) {
   const assignmentType = await getCurrentAssignmentType(organizationId);
 
@@ -203,6 +333,7 @@ async function notifyIfAllAssigned(type, user, organizationId) {
   }
 }
 
+// TODO – deprecate this resolver
 export async function countLeft(assignmentType, campaign) {
   const campaignContactStatus = {
     UNREPLIED: "needsResponse",
@@ -295,7 +426,10 @@ export async function giveUserMoreTexts(
     throw new Error(`No user found with id ${auth0Id}`);
   }
 
-  const assignmentInfo = await currentAssignmentTarget(organizationId);
+  const assignmentInfo = await myCurrentAssignmentTarget(
+    user.id,
+    organizationId
+  );
   if (!assignmentInfo) {
     throw new Error("Could not find a suitable campaign to assign to.");
   }
@@ -334,7 +468,11 @@ export async function giveUserMoreTexts(
 }
 
 export async function assignLoop(user, organizationId, countLeft, trx) {
-  const assignmentInfo = await currentAssignmentTarget(organizationId, trx);
+  const assignmentInfo = await myCurrentAssignmentTarget(
+    user.id,
+    organizationId,
+    trx
+  );
   if (!assignmentInfo) {
     return 0;
   }

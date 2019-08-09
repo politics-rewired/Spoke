@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
+import sortBy from "lodash/sortBy";
+import isEqual from "lodash/isEqual";
 
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import DoneIcon from "material-ui/svg-icons/action/done";
@@ -22,6 +24,7 @@ import CampaignCannedResponsesForm from "../components/CampaignCannedResponsesFo
 import { dataTest, camelCase } from "../lib/attributes";
 import CampaignTextingHoursForm from "../components/CampaignTextingHoursForm";
 import CampaignAutoassignModeForm from "../components/CampaignAutoassignModeForm";
+import CampaignTeamsForm from "../components/CampaignTeamsForm";
 
 const campaignInfoFragment = `
   id
@@ -41,8 +44,13 @@ const campaignInfoFragment = `
   textingHoursEnforced
   textingHoursStart
   textingHoursEnd
+  isAssignmentLimitedToTeams
   isAutoassignEnabled
   timezone
+  teams {
+    id
+    title
+  }
   texters {
     id
     firstName
@@ -241,6 +249,10 @@ class AdminCampaignEdit extends React.Component {
       } else {
         newCampaign.contacts = null;
       }
+      if (newCampaign.hasOwnProperty("teams")) {
+        newCampaign.teamIds = newCampaign.teams.map(team => team.id);
+        delete newCampaign.teams;
+      }
       if (newCampaign.hasOwnProperty("texters")) {
         newCampaign.texters = newCampaign.texters.map(texter => ({
           id: texter.id,
@@ -372,6 +384,37 @@ class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: false,
         checkCompleted: () => true
+      },
+      {
+        title: "Teams",
+        content: CampaignTeamsForm,
+        keys: ["teams", "isAssignmentLimitedToTeams"],
+        checkSaved: () => {
+          const {
+            isAssignmentLimitedToTeams: newIsAssignmentLimitedToTeams,
+            teams: newTeams
+          } = this.state.campaignFormValues;
+          const {
+            isAssignmentLimitedToTeams,
+            teams
+          } = this.props.campaignData.campaign;
+          const sameIsAssignmentLimitedToTeams =
+            newIsAssignmentLimitedToTeams === isAssignmentLimitedToTeams;
+          const sameTeams = isEqual(
+            sortBy(newTeams.map(team => team.id)),
+            sortBy(teams.map(team => team.id))
+          );
+          return !newIsAssignmentLimitedToTeams
+            ? sameIsAssignmentLimitedToTeams
+            : sameIsAssignmentLimitedToTeams && sameTeams;
+        },
+        checkCompleted: () => true,
+        blocksStarting: false,
+        expandAfterCampaignStarts: true,
+        expandableBySuperVolunteers: false,
+        extraProps: {
+          orgTeams: this.props.organizationData.organization.teams
+        }
       },
       {
         title: "Texters",
@@ -806,6 +849,10 @@ const mapQueriesToProps = ({ ownProps }) => ({
         organization(id: $organizationId) {
           id
           uuid
+          teams {
+            id
+            title
+          }
           texters: people {
             id
             firstName

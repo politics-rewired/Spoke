@@ -4,7 +4,12 @@ import { r, Organization } from "../models";
 import { accessRequired } from "./errors";
 import { buildCampaignQuery, getCampaigns } from "./campaign";
 import { buildUserOrganizationQuery } from "./user";
-import { currentAssignmentTarget, countLeft } from "./assignment";
+import {
+  currentAssignmentTarget,
+  allCurrentAssignmentTargets,
+  myCurrentAssignmentTarget,
+  countLeft
+} from "./assignment";
 
 import { TextRequestType } from "../../api/organization";
 
@@ -103,10 +108,14 @@ export const resolvers = {
         return null;
       }
     },
-    textsAvailable: async organization => {
-      const assignmentTarget = await currentAssignmentTarget(organization.id);
+    textsAvailable: async (organization, _, context) => {
+      const assignmentTarget = await myCurrentAssignmentTarget(
+        context.user.id,
+        organization.id
+      );
       return !!assignmentTarget;
     },
+    // TODO – deprecate this resolver
     currentAssignmentTarget: async organization => {
       const cat = await currentAssignmentTarget(organization.id);
 
@@ -116,6 +125,19 @@ export const resolvers = {
       } else {
         return cat;
       }
+    },
+    currentAssignmentTargets: async organization => {
+      const cats = await allCurrentAssignmentTargets(organization.id);
+      const formatted = cats.map(cat => ({
+        type: cat.type,
+        countLeft: parseInt(cat.count_left),
+        campaign: {
+          id: cat.id,
+          title: cat.title
+        },
+        teamTitle: cat.team_title
+      }));
+      return formatted;
     },
     escalatedConversationCount: async organization => {
       const subQuery = r.knex
@@ -210,6 +232,11 @@ export const resolvers = {
       r
         .knex("tag")
         .where({ organization_id: organization.id })
-        .orderBy(["is_system", "title"])
+        .orderBy(["is_system", "title"]),
+    teams: async organization =>
+      r
+        .knex("team")
+        .where({ organization_id: organization.id })
+        .orderBy("assignment_priority", "asc")
   }
 };

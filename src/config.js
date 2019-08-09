@@ -493,6 +493,10 @@ if (isClient()) {
       desc: "The Slack client secret to use for sign-in.",
       default: undefined
     }),
+    SLACK_TOKEN: str({
+      desc: "The Slack token to use for the slack-teams-update cron job",
+      default: undefined
+    }),
     SLACK_NOTIFY_URL: url({
       desc:
         "If set, then on post-install (often from deploying) a message will be posted to a slack channel's #spoke channel",

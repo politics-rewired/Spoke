@@ -52,6 +52,7 @@ import { schema as inviteSchema, resolvers as inviteResolvers } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
 import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as tagSchema } from "./tag";
+import { schema as teamSchema } from "./team";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -126,6 +127,8 @@ const rootSchema = `
     excludeCampaignIds: [Int]
     contactSql: String
     organizationId: String
+    isAssignmentLimitedToTeams: Boolean
+    teamIds: [ID]
     texters: [TexterInput]
     interactionSteps: InteractionStepInput
     cannedResponses: [CannedResponseInput]
@@ -308,6 +311,8 @@ const rootSchema = `
     setNumbersApiKey(organizationId: String!, numbersApiKey: String): Organization!
     saveTag(organizationId: String!, tag: TagInput!): Tag!
     deleteTag(organizationId: String!, tagId: String!): Boolean!
+    saveTeam(organizationId: String!, team: TeamInput!): Team!
+    deleteTeam(organizationId: String!, teamId: String!): Boolean!
   }
 
   schema {
@@ -336,5 +341,6 @@ export const schema = [
   linkDomainSchema,
   assignmentRequestSchema,
   conversationSchema,
-  tagSchema
+  tagSchema,
+  teamSchema
 ];
