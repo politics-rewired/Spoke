@@ -164,6 +164,15 @@ export const resolvers = {
         .table("user_organization")
         .getAll([organizationId, user.id], { index: "organization_user" })
         .pluck("role")("role"),
+    teams: async (user, { organizationId }) =>
+      r
+        .knex("team")
+        .select("team.*")
+        .join("user_team", "user_team.team_id", "=", "team.id")
+        .where({
+          "user_team.user_id": user.id,
+          "team.organization_id": organizationId
+        }),
     todos: async (user, { organizationId }) =>
       r
         .table("assignment")
