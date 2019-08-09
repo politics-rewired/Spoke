@@ -71,18 +71,8 @@ class CampaignTeamsForm extends React.Component {
       >
         <CampaignFormSectionHeading
           title="Teams for campaign"
-          subtitle="You may limit texter assignments for this campaign to specific teams."
+          subtitle="Optionally prioritize assigning texters from specific teams for this campaign by selecting them below. Restrict assignment solely to members of selected teams by using the toggle below."
         />
-
-        <Form.Field
-          name={"isAssignmentLimitedToTeams"}
-          type={Toggle}
-          toggled={formValues["isAssignmentLimitedToTeams"]}
-          label={"Limit assignment to specific teams for this campaign?"}
-          onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
-        />
-
-        <br />
 
         <ChipInput
           value={formValues.teams}
@@ -94,6 +84,16 @@ class CampaignTeamsForm extends React.Component {
           onBeforeRequestAdd={this.handleBeforeRequestAdd}
           onRequestAdd={this.handleAddTeam}
           onRequestDelete={this.handleRemoveTeam}
+        />
+
+        <br />
+
+        <Form.Field
+          name={"isAssignmentLimitedToTeams"}
+          type={Toggle}
+          toggled={formValues["isAssignmentLimitedToTeams"]}
+          label={"Restrict assignment solely to members of these teams?"}
+          onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
         />
 
         <Form.Button type="submit" disabled={saveDisabled} label={saveLabel} />
