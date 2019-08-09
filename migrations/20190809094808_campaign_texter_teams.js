@@ -72,7 +72,10 @@ exports.up = function(knex, Promise) {
   return Promise.all([
     createTeamsTables,
     knex.schema.alterTable("campaign", table => {
-      table.boolean("limit_assignment_to_teams");
+      table
+        .boolean("limit_assignment_to_teams")
+        .notNullable()
+        .default(false);
       table.index("limit_assignment_to_teams");
     })
   ]);
