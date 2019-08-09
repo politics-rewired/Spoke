@@ -33,7 +33,7 @@ class CampaignTeamsForm extends React.Component {
     this.props.onChange({ teams });
   };
 
-  // Prevent user-defined tags
+  // Prevent user-defined teams
   handleBeforeRequestAdd = ({ id: tagId, title }) =>
     !isNaN(tagId) && tagId !== title;
 
