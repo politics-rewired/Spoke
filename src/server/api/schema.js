@@ -74,6 +74,7 @@ import { resolvers as questionResponseResolvers } from "./question-response";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as tagResolvers } from "./tag";
+import { resolvers as teamResolvers } from "./team";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -2646,6 +2647,7 @@ const rootResolvers = {
 
 export const resolvers = {
   ...tagResolvers,
+  ...teamResolvers,
   ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,
