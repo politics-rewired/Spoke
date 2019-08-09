@@ -7,6 +7,7 @@ import { buildUserOrganizationQuery } from "./user";
 import {
   currentAssignmentTarget,
   allCurrentAssignmentTargets,
+  myCurrentAssignmentTarget,
   countLeft
 } from "./assignment";
 
@@ -107,8 +108,11 @@ export const resolvers = {
         return null;
       }
     },
-    textsAvailable: async organization => {
-      const assignmentTarget = await currentAssignmentTarget(organization.id);
+    textsAvailable: async (organization, _, context) => {
+      const assignmentTarget = await myCurrentAssignmentTarget(
+        context.user.id,
+        organization.id
+      );
       return !!assignmentTarget;
     },
     // TODO – deprecate this resolver
@@ -124,7 +128,6 @@ export const resolvers = {
     },
     currentAssignmentTargets: async organization => {
       const cats = await allCurrentAssignmentTargets(organization.id);
-      console.log("TCL: cats", cats);
       const formatted = cats.map(cat => ({
         type: cat.type,
         countLeft: parseInt(cat.count_left),
@@ -134,7 +137,6 @@ export const resolvers = {
         },
         teamTitle: cat.team_title
       }));
-      console.log("TCL: formatted", formatted);
       return formatted;
     },
     escalatedConversationCount: async organization => {

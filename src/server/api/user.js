@@ -1,6 +1,7 @@
 import { mapFieldsToModel } from "./lib/utils";
 import { r, User } from "../models";
 import { addCampaignsFilterToQuery } from "./campaign";
+import { myCurrentAssignmentTarget } from "./assignment";
 
 export function buildUserOrganizationQuery(
   queryParam,
