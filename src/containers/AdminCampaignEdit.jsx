@@ -827,6 +827,10 @@ const mapQueriesToProps = ({ ownProps }) => ({
         organization(id: $organizationId) {
           id
           uuid
+          teams {
+            id
+            title
+          }
           texters: people {
             id
             firstName
