@@ -47,11 +47,13 @@ export const schema = `
     primaryColor: String
     logoImageUrl: String
     editors: String
+    teams: [Team]!
     overrideOrganizationTextingHours: Boolean
     textingHoursEnforced: Boolean
     textingHoursStart: Int
     textingHoursEnd: Int
     isAutoassignEnabled: Boolean!
+    isAssignmentLimitedToTeams: Boolean!
     timezone: String
     createdAt: Date
   }
