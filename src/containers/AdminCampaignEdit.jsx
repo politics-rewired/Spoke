@@ -22,6 +22,7 @@ import CampaignCannedResponsesForm from "../components/CampaignCannedResponsesFo
 import { dataTest, camelCase } from "../lib/attributes";
 import CampaignTextingHoursForm from "../components/CampaignTextingHoursForm";
 import CampaignAutoassignModeForm from "../components/CampaignAutoassignModeForm";
+import CampaignTeamsForm from "../components/CampaignTeamsForm";
 
 const campaignInfoFragment = `
   id
@@ -72,7 +73,11 @@ const campaignInfoFragment = `
 
 const valueOverrides = {
   overrideOrganizationTextingHours: true,
-  textingHoursEnforced: true
+  textingHoursEnforced: true,
+
+  // TODO: remove testing values and just use organizationData
+  isAssignmentLimitedToTeams: true,
+  teams: []
 };
 
 class AdminCampaignEdit extends React.Component {
@@ -372,6 +377,24 @@ class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: false,
         checkCompleted: () => true
+      },
+      {
+        title: "Teams",
+        content: CampaignTeamsForm,
+        keys: ["teams", "isAssignmentLimitedToTeams"],
+        checkCompleted: () => {
+          !this.state.campaignFormValues.isAssignmentLimitedToTeams ||
+            this.state.campaignFormValues.teams.length > 0;
+        },
+        blocksStarting: false,
+        expandAfterCampaignStarts: true,
+        expandableBySuperVolunteers: false,
+        extraProps: {
+          // TODO: remove testing values and just use organizationData
+          orgTeams: this.props.organizationData.organization.teams || [
+            { id: "1", title: "language:spanish" }
+          ]
+        }
       },
       {
         title: "Texters",
