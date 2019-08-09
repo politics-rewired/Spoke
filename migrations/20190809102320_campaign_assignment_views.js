@@ -70,11 +70,11 @@ exports.up = function(knex, Promise) {
 
 exports.down = function(knex, Promise) {
   return knex.schema.raw(`
-    drop view assignable_campaigns;
-    drop view assignable_campaign_contacts;
-    drop view assignable_needs_message;
-    drop view assignable_needs_reply;
-    drop view assignable_campaigns_with_needs_message;
     drop view assignable_campaigns_with_needs_reply;
+    drop view assignable_campaigns_with_needs_message;
+    drop view assignable_needs_reply;
+    drop view assignable_needs_message;
+    drop view assignable_campaign_contacts;
+    drop view assignable_campaigns;
   `);
 };
