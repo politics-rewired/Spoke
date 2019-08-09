@@ -251,7 +251,12 @@ export async function myCurrentAssignmentTarget(
   return (
     teamToCampaigns
       .slice(0, 1)
-      .map(ttc => Object.assign(ttc, { type: assignmentType }))[0] || null
+      .map(ttc =>
+        Object.assign(ttc, {
+          type: assignmentType,
+          campaign: { id: ttc.id, title: ttc.title }
+        })
+      )[0] || null
   );
 }
 
