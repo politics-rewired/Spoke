@@ -241,6 +241,7 @@ export async function myCurrentAssignmentTarget(
             where campaign_id = ${campaignView}.id
         ) as count_left
         from ${campaignView}
+        where ${campaignView}.limit_assignment_to_teams = false
         order by id
       )
       limit 1
@@ -249,14 +250,12 @@ export async function myCurrentAssignmentTarget(
   );
 
   return (
-    teamToCampaigns
-      .slice(0, 1)
-      .map(ttc =>
-        Object.assign(ttc, {
-          type: assignmentType,
-          campaign: { id: ttc.id, title: ttc.title }
-        })
-      )[0] || null
+    teamToCampaigns.slice(0, 1).map(ttc =>
+      Object.assign(ttc, {
+        type: assignmentType,
+        campaign: { id: ttc.id, title: ttc.title }
+      })
+    )[0] || null
   );
 }
 
