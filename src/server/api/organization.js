@@ -235,6 +235,6 @@ export const resolvers = {
       r
         .knex("team")
         .where({ organization_id: organization.id })
-        .orderBy("priority", "asc")
+        .orderBy("assignment_priority", "asc")
   }
 };
