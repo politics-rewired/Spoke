@@ -9,7 +9,7 @@ const slack = new Slack(params);
 const db = knex(knexConfig);
 
 async function main() {
-  const allTeams = await db("team").select("title id");
+  const allTeams = await db("team").select("title", "id");
   const { channels: allChannels } = await slack.conversations.list(
     Object.assign({}, params, {
       types: "public_channel,private_channel"
@@ -57,26 +57,29 @@ async function main() {
       }
     }
 
-    await knex.trx(async trx => {
+    const totalMembershipCount = await db.transaction(async trx => {
       await trx("user_team")
         .delete()
         .where({ team_id: teamId });
 
-      await trx.raw(
+      return await trx.raw(
         `
-        insert into user_team (user_id, team_id)
-        select ? as team_id, user_id as user_id
-        from user
-        where auth0_id in (??)
+        insert into user_team (team_id, user_id)
+        select ? as team_id, id as user_id
+        from public.user
+        where auth0_id in (${allMembers.map(str => `'${str}'`).join(", ")})
       `,
-        [teamId, members]
+        [teamId]
       );
     });
 
-    console.log(`Updated memberships for ${teamTitle}`);
+    console.log(`Updated memberships for ${teamTitle}`, totalMembershipCount);
   }
 }
 
 main()
   .then(() => process.exit())
-  .catch(() => process.exit());
+  .catch(error => {
+    console.error(error);
+    process.exit();
+  });
