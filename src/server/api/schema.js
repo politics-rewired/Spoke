@@ -2479,6 +2479,54 @@ const rootMutations = {
       if (deleteCount !== 1) throw new Error("Could not delete the tag.");
 
       return true;
+    },
+    saveTeam: async (_, { organizationId, team }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      // Update existing team
+      if (team.id) {
+        const [updatedTeam] = await r
+          .knex("team")
+          .update({
+            title: team.title,
+            description: team.description,
+            assignment_priority: team.assignmentPriority
+          })
+          .where({
+            id: team.id,
+            organization_id: organizationId
+          })
+          .returning("*");
+        if (!updatedTeam) throw new Error("No matching team to update!");
+        return updatedTeam;
+      }
+
+      // Create new team
+      const [newTeam] = await r
+        .knex("team")
+        .insert({
+          organization_id: organizationId,
+          author_id: user.id,
+          title: team.title,
+          description: team.description,
+          assignment_priority: team.assignmentPriority
+        })
+        .returning("*");
+      return newTeam;
+    },
+    deleteTeam: async (_, { organizationId, teamId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const deleteCount = await r
+        .knex("team")
+        .where({
+          id: teamId,
+          organization_id: organizationId
+        })
+        .del();
+      if (deleteCount !== 1) throw new Error("Could not delete the team.");
+
+      return true;
     }
   }
 };
