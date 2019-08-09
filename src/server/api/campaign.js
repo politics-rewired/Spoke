@@ -171,6 +171,7 @@ export const resolvers = {
       ],
       Campaign
     ),
+    isAssignmentLimitedToTeams: campaign => campaign.limit_assignment_to_teams,
     dueBy: campaign =>
       campaign.due_by instanceof Date || !campaign.due_by
         ? campaign.due_by || null
@@ -185,6 +186,14 @@ export const resolvers = {
         .knex("job_request")
         .where({ campaign_id: campaign.id })
         .orderBy("updated_at", "desc"),
+    teams: async campaign =>
+      r
+        .knex("team")
+        .select("team.*")
+        .join("campaign_team", "campaign_team.team_id", "=", "team.id")
+        .where({
+          "campaign_team.campaign_id": campaign.id
+        }),
     texters: async campaign =>
       getUsers(campaign.organization_id, null, { campaignId: campaign.id }),
     assignments: async (campaign, { assignmentsFilter }) => {

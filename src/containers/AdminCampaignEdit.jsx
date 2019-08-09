@@ -42,8 +42,13 @@ const campaignInfoFragment = `
   textingHoursEnforced
   textingHoursStart
   textingHoursEnd
+  isAssignmentLimitedToTeams
   isAutoassignEnabled
   timezone
+  teams {
+    id
+    title
+  }
   texters {
     id
     firstName
@@ -73,11 +78,7 @@ const campaignInfoFragment = `
 
 const valueOverrides = {
   overrideOrganizationTextingHours: true,
-  textingHoursEnforced: true,
-
-  // TODO: remove testing values and just use organizationData
-  isAssignmentLimitedToTeams: true,
-  teams: []
+  textingHoursEnforced: true
 };
 
 class AdminCampaignEdit extends React.Component {
@@ -390,10 +391,7 @@ class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: false,
         extraProps: {
-          // TODO: remove testing values and just use organizationData
-          orgTeams: this.props.organizationData.organization.teams || [
-            { id: "1", title: "language:spanish" }
-          ]
+          orgTeams: this.props.organizationData.organization.teams
         }
       },
       {

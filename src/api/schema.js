@@ -52,6 +52,7 @@ import { schema as inviteSchema, resolvers as inviteResolvers } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
 import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as tagSchema } from "./tag";
+import { schema as teamSchema } from "./team";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -336,5 +337,6 @@ export const schema = [
   linkDomainSchema,
   assignmentRequestSchema,
   conversationSchema,
-  tagSchema
+  tagSchema,
+  teamSchema
 ];

@@ -9,6 +9,7 @@ export const schema = `
     organizations(role: String): [Organization]
     todos(organizationId: String): [Assignment]
     roles(organizationId: String!): [String]
+    teams(organizationId: String!): [Team]!
     currentRequest(organizationId: String!): AssignmentRequest
     assignedCell: Phone
     assignment(campaignId: String): Assignment,
