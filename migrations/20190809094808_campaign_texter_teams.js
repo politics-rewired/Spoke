@@ -17,7 +17,10 @@ exports.up = function(knex, Promise) {
         .notNullable()
         .default("#000000");
       table.text("background_color").notNullable();
-      table.integer("assignment_priority").unsigned();
+      table
+        .integer("assignment_priority")
+        .unsigned()
+        .default(500);
       table
         .integer("author_id")
         .unsigned()
