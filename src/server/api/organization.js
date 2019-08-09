@@ -4,7 +4,11 @@ import { r, Organization } from "../models";
 import { accessRequired } from "./errors";
 import { buildCampaignQuery, getCampaigns } from "./campaign";
 import { buildUserOrganizationQuery } from "./user";
-import { currentAssignmentTarget, countLeft } from "./assignment";
+import {
+  currentAssignmentTarget,
+  allCurrentAssignmentTargets,
+  countLeft
+} from "./assignment";
 
 import { TextRequestType } from "../../api/organization";
 
@@ -107,6 +111,7 @@ export const resolvers = {
       const assignmentTarget = await currentAssignmentTarget(organization.id);
       return !!assignmentTarget;
     },
+    // TODO – deprecate this resolver
     currentAssignmentTarget: async organization => {
       const cat = await currentAssignmentTarget(organization.id);
 
@@ -116,6 +121,21 @@ export const resolvers = {
       } else {
         return cat;
       }
+    },
+    currentAssignmentTargets: async organization => {
+      const cats = await allCurrentAssignmentTargets(organization.id);
+      console.log("TCL: cats", cats);
+      const formatted = cats.map(cat => ({
+        type: cat.type,
+        countLeft: parseInt(cat.count_left),
+        campaign: {
+          id: cat.id,
+          title: cat.title
+        },
+        teamTitle: cat.team_title
+      }));
+      console.log("TCL: formatted", formatted);
+      return formatted;
     },
     escalatedConversationCount: async organization => {
       const subQuery = r.knex

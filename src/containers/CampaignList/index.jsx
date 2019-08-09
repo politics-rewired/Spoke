@@ -55,7 +55,7 @@ export class CampaignList extends React.Component {
       mutations,
       resultCountDidUpdate
     } = this.props;
-    const { currentAssignmentTarget } = data.organization;
+    const { currentAssignmentTargets } = data.organization;
     const { archiveCampaign, unarchiveCampaign } = mutations;
     return (
       <div>
@@ -71,15 +71,19 @@ export class CampaignList extends React.Component {
             executeOperation={this.executeOperation}
           />
         )}
-        {currentAssignmentTarget && (
+        {currentAssignmentTargets.length > 0 && (
           <Paper style={{ padding: 10 }}>
-            <h3>
-              {" "}
-              Currently Assigning {currentAssignmentTarget.type} to{" "}
-              {currentAssignmentTarget.campaign.id}:{" "}
-              {currentAssignmentTarget.campaign.title}{" "}
-            </h3>
-            <h4> {currentAssignmentTarget.countLeft} Left </h4>
+            <h3> Currently Assigning {currentAssignmentTargets[0].type} to </h3>
+            {currentAssignmentTargets.map(cat => (
+              <div>
+                <h4>
+                  {cat.teamTitle}: {cat.campaign.id}: {cat.campaign.title} ({
+                    cat.countLeft
+                  }{" "}
+                  left)
+                </h4>
+              </div>
+            ))}
           </Paper>
         )}
         <CampaignListLoader
@@ -205,12 +209,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
       query adminGetCampaigns($organizationId: String!) {
         organization(id: $organizationId) {
           id
-          currentAssignmentTarget {
+          currentAssignmentTargets {
             type
             campaign {
               id
               title
             }
+            teamTitle
             countLeft
           }
         }
