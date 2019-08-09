@@ -176,6 +176,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
             where campaign_id = ${campaignView}.id
         ) as count_left
         from ${campaignView}
+        where ${campaignView}.limit_assignment_to_teams = false
         order by id
         limit 1
       )
