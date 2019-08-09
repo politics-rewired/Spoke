@@ -17,9 +17,7 @@ class CampaignTeamsForm extends React.Component {
     _event,
     isAssignmentLimitedToTeams
   ) => {
-    const payload = { isAssignmentLimitedToTeams };
-    if (!isAssignmentLimitedToTeams) payload.teams = [];
-    this.props.onChange(payload);
+    this.props.onChange({ isAssignmentLimitedToTeams });
   };
 
   addTeam = team => {
@@ -93,7 +91,6 @@ class CampaignTeamsForm extends React.Component {
           placeholder="Select teams"
           fullWidth={true}
           openOnFocus={true}
-          disabled={!formValues.isAssignmentLimitedToTeams}
           onBeforeRequestAdd={this.handleBeforeRequestAdd}
           onRequestAdd={this.handleAddTeam}
           onRequestDelete={this.handleRemoveTeam}
