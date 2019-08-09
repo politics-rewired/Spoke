@@ -230,6 +230,11 @@ export const resolvers = {
       r
         .knex("tag")
         .where({ organization_id: organization.id })
-        .orderBy(["is_system", "title"])
+        .orderBy(["is_system", "title"]),
+    teams: async organization =>
+      r
+        .knex("team")
+        .where({ organization_id: organization.id })
+        .orderBy("priority", "asc")
   }
 };

@@ -41,5 +41,6 @@ export const schema = `
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
     numbersApiKey: String
     tagList: [Tag]
+    teams: [Team]!
   }
 `;
