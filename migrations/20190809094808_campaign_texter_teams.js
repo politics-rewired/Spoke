@@ -41,11 +41,13 @@ exports.up = function(knex, Promise) {
           table
             .integer("user_id")
             .unsigned()
-            .references("user.id");
+            .references("user.id")
+            .onDelete("CASCADE");
           table
             .integer("team_id")
             .unsigned()
-            .references("team.id");
+            .references("team.id")
+            .onDelete("CASCADE");
           table
             .timestamp("created_at")
             .notNullable()
@@ -56,11 +58,13 @@ exports.up = function(knex, Promise) {
           table
             .integer("campaign_id")
             .unsigned()
-            .references("campaign.id");
+            .references("campaign.id")
+            .onDelete("CASCADE");
           table
             .integer("team_id")
             .unsigned()
-            .references("team.id");
+            .references("team.id")
+            .onDelete("CASCADE");
           table
             .timestamp("created_at")
             .notNullable()
