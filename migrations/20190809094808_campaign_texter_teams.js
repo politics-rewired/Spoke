@@ -1,0 +1,87 @@
+exports.up = function(knex, Promise) {
+  const createTeamsTables = knex.schema
+    .createTable("team", table => {
+      table.increments("id").primary();
+      table
+        .integer("organization_id")
+        .unsigned()
+        .notNullable()
+        .references("organization.id");
+      table.text("title").notNullable();
+      table
+        .text("description")
+        .notNullable()
+        .default("");
+      table
+        .text("text_color")
+        .notNullable()
+        .default("#000000");
+      table.text("background_color").notNullable();
+      table.integer("assignment_priority").unsigned();
+      table
+        .integer("author_id")
+        .unsigned()
+        .references("user.id");
+      table
+        .timestamp("created_at")
+        .notNullable()
+        .defaultTo(knex.fn.now());
+
+      table.unique(["title", "organization_id"]);
+    })
+    .then(() =>
+      Promise.all([
+        knex.schema.createTable("user_team", table => {
+          table
+            .integer("user_id")
+            .unsigned()
+            .references("user.id");
+          table
+            .integer("team_id")
+            .unsigned()
+            .references("team.id");
+          table
+            .timestamp("created_at")
+            .notNullable()
+            .defaultTo(knex.fn.now());
+          table.unique(["user_id", "team_id"]);
+        }),
+        knex.schema.createTable("campaign_team", table => {
+          table
+            .integer("campaign_id")
+            .unsigned()
+            .references("campaign.id");
+          table
+            .integer("team_id")
+            .unsigned()
+            .references("team.id");
+          table
+            .timestamp("created_at")
+            .notNullable()
+            .defaultTo(knex.fn.now());
+          table.unique(["campaign_id", "team_id"]);
+        })
+      ])
+    );
+  return Promise.all([
+    createTeamsTables,
+    knex.schema.alterTable("campaign", table => {
+      table.boolean("limit_assignment_to_teams");
+      table.index("limit_assignment_to_teams");
+    })
+  ]);
+};
+
+exports.down = function(knex, Promise) {
+  const dropTeamsTables = Promise.all([
+    knex.schema.dropTable("user_team"),
+    knex.schema.dropTable("campaign_team")
+  ]).then(() => knex.schema.dropTable("team"));
+
+  return Promise.all([
+    dropTeamsTables,
+    knex.schema.alterTable("campaign", table => {
+      table.dropColumn("limit_assignment_to_teams");
+    })
+  ]);
+};
