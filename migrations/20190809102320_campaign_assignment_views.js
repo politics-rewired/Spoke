@@ -39,7 +39,7 @@ exports.up = function(knex, Promise) {
         create view assignable_needs_reply as (
           select *
           from assignable_campaign_contacts
-          where message_status = 'needsReply'
+          where message_status = 'needsResponse'
         );
     `);
     })
