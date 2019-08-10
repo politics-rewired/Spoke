@@ -234,6 +234,14 @@ export const resolvers = {
           where
             campaign_id = ?
             and assignment_id is null
+            and not exists (
+              select 1
+              from campaign_contact_tag
+              join tag on campaign_contact_tag.tag_id = tag.id
+              where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+            )
+            and is_opted_out = false
         ) as contact_exists
       `,
         [campaign.id]
