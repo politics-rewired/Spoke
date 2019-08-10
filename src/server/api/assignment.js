@@ -170,7 +170,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
         )
       union
       ( 
-        select 'Everyone else' as team_title, ${campaignView}.id, ${campaignView}.title, (
+        select 'General' as team_title, ${campaignView}.id, ${campaignView}.title, (
             select count(*)
             from ${contactsView}
             where campaign_id = ${campaignView}.id
@@ -236,7 +236,7 @@ export async function myCurrentAssignmentTarget(
       )
       union
       ( 
-        select 'Everyone else' as team_title, ${campaignView}.id, ${campaignView}.title, (
+        select 'General' as team_title, ${campaignView}.id, ${campaignView}.title, (
             select count(*)
             from ${contactsView}
             where campaign_id = ${campaignView}.id
