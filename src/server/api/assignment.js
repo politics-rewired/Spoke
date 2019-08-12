@@ -145,7 +145,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
   }[assignmentType];
 
   if (!campaignView || !contactsView) {
-    return null;
+    return [];
   }
 
   /**

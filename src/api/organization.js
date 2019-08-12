@@ -35,7 +35,7 @@ export const schema = `
     textsAvailable: Boolean
     pendingAssignmentRequestCount: Int!
     currentAssignmentTarget: AssignmentTarget
-    currentAssignmentTargets: [AssignmentTarget]
+    currentAssignmentTargets: [AssignmentTarget]!
     escalatedConversationCount: Int!
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
