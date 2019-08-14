@@ -4,8 +4,7 @@
   "description": "Spoke",
   "main": "src/server",
   "engines": {
-    "node": "8.10",
-    "npm": "3.10.10"
+    "node": "^8.10.0 || ^10.13.0"
   },
   "scripts": {
     "test": "jest --runInBand --forceExit",
