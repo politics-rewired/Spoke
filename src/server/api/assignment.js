@@ -174,18 +174,22 @@ export async function allCurrentAssignmentTargets(organizationId) {
             select count(*)
             from ${contactsView}
             where campaign_id = ${campaignView}.id
+              and organization_id = ?
         ) as count_left
         from ${campaignView}
         where ${campaignView}.limit_assignment_to_teams = false
-        order by id
+        order by id asc
         limit 1
       )
-    `
+    `,
+    [organizationId]
   );
 
-  return teamToCampaigns.map(ttc =>
+  const result = teamToCampaigns.map(ttc =>
     Object.assign(ttc, { type: assignmentType })
   );
+
+  return result;
 }
 
 export async function myCurrentAssignmentTarget(
@@ -229,6 +233,7 @@ export async function myCurrentAssignmentTarget(
         join campaign on campaign.id = campaign_team.campaign_id and campaign.id = (
             select id 
             from ${campaignView}
+            where organization_id = ?
             order by id asc
             limit 1
           )
@@ -240,24 +245,27 @@ export async function myCurrentAssignmentTarget(
             select count(*)
             from ${contactsView}
             where campaign_id = ${campaignView}.id
+              and organization_id = ?
         ) as count_left
         from ${campaignView}
         where ${campaignView}.limit_assignment_to_teams = false
-        order by id
+        order by id asc
+        limit 1
       )
       limit 1
     `,
-    [userId]
+    [userId, organizationId, organizationId]
   );
 
-  return (
+  const result =
     teamToCampaigns.slice(0, 1).map(ttc =>
       Object.assign(ttc, {
         type: assignmentType,
         campaign: { id: ttc.id, title: ttc.title }
       })
-    )[0] || null
-  );
+    )[0] || null;
+
+  return result;
 }
 
 // TODO – deprecate this resolver
