@@ -162,9 +162,11 @@ export async function allCurrentAssignmentTargets(organizationId) {
         ) as count_left
       from team
       join campaign_team on campaign_team.team_id = team.id
-      join campaign on campaign.id = campaign_team.campaign_id and campaign.id = (
+      join campaign on campaign.id = (
           select id 
           from ${campaignView}
+          where ${campaignView}.id = campaign_team.campaign_id
+            and organization_id = ?
           order by id asc
           limit 1
         )
@@ -182,7 +184,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
         limit 1
       )
     `,
-    [organizationId]
+    [organizationId, organizationId]
   );
 
   const result = teamToCampaigns.map(ttc =>
@@ -230,10 +232,11 @@ export async function myCurrentAssignmentTarget(
         from team
         join user_team on user_team.user_id = ?
         join campaign_team on campaign_team.team_id = team.id
-        join campaign on campaign.id = campaign_team.campaign_id and campaign.id = (
+        join campaign on campaign.id = (
             select id 
             from ${campaignView}
             where organization_id = ?
+              and ${campaignView}.id = campaign_team.campaign_id
             order by id asc
             limit 1
           )
