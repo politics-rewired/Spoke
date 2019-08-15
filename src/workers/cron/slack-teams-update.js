@@ -10,22 +10,18 @@ const db = knex(knexConfig);
 
 async function main() {
   const allTeams = await db("team").select("title", "id");
-  const { channels: allChannels } = await slack.conversations.list(
-    Object.assign({}, params, {
-      types: "public_channel,private_channel"
-    })
-  );
+  const allChannels = await fetchAllChannels();
 
   for (let team of allTeams) {
     const teamTitle = team.title;
     const teamId = team.id;
 
+    const normalizedTeamName = teamTitle.toLowerCase().replace(" ", "-", "g");
     const matchingChannel = allChannels.find(channel => {
-      return (
-        channel.name_normalized ===
-        teamTitle.toLowerCase().replace(" ", "-", "g")
-      );
+      return channel.name_normalized === normalizedTeamName;
     });
+
+    // console.log(normalizedTeamName);
 
     if (!matchingChannel) {
       console.log(`Did not find channel for ${teamTitle}`);
@@ -76,6 +72,31 @@ async function main() {
     console.log(`Updated memberships for ${teamTitle}`, totalMembershipCount);
   }
 }
+
+const fetchAllChannels = async (acc = [], next_cursor) => {
+  const response = await slack.conversations.list(
+    Object.assign(
+      {},
+      params,
+      {
+        types: "public_channel,private_channel",
+        limit: 1000
+      },
+      next_cursor === "" ? {} : { cursor: next_cursor }
+    )
+  );
+
+  const { channels, response_metadata } = response;
+
+  if (response_metadata.next_cursor) {
+    return await fetchAllChannels(
+      acc.concat(channels),
+      response_metadata.next_cursor
+    );
+  } else {
+    return acc.concat(channels);
+  }
+};
 
 main()
   .then(() => process.exit(0))
