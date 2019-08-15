@@ -230,7 +230,6 @@ export async function myCurrentAssignmentTarget(
             where campaign_id = campaign.id
           ) as count_left
         from team
-        join user_team on user_team.user_id = ?
         join campaign_team on campaign_team.team_id = team.id
         join campaign on campaign.id = (
             select id 
@@ -240,6 +239,10 @@ export async function myCurrentAssignmentTarget(
             order by id asc
             limit 1
           )
+        where exists (
+          select 1 from user_team
+          where user_id = ? and team_id = team.id
+        )
         order by team.assignment_priority
       )
       union
@@ -257,7 +260,7 @@ export async function myCurrentAssignmentTarget(
       )
       limit 1
     `,
-    [userId, organizationId, organizationId]
+    [organizationId, userId, organizationId]
   );
 
   const result =
