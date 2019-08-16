@@ -2217,6 +2217,7 @@ const rootMutations = {
 
         return "No texts available at the moment";
       } catch (e) {
+        console.error(e);
         return e.response ? e.response.body.message : e;
       }
     },
