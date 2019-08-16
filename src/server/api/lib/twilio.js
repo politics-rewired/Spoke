@@ -302,7 +302,6 @@ async function sendMessage(message, organizationId, trx) {
       const messageToSave = {
         ...message
       };
-      log.info("messageToSave", messageToSave);
       let hasError = false;
       if (err) {
         hasError = true;

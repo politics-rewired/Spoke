@@ -2205,6 +2205,8 @@ const rootMutations = {
                   )
                   .send({ count, email });
 
+                console.log("TCL: response", response);
+
                 return true;
               }
             });
