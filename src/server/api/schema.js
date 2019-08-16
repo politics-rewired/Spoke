@@ -2197,15 +2197,19 @@ const rootMutations = {
 
               /* This will just throw if it errors */
               if (config.ASSIGNMENT_REQUESTED_URL) {
-                const response = await request
-                  .post(config.ASSIGNMENT_REQUESTED_URL)
-                  .set(
-                    "Authorization",
-                    `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
-                  )
-                  .send({ count, email });
+                try {
+                  const response = await request
+                    .post(config.ASSIGNMENT_REQUESTED_URL)
+                    .set(
+                      "Authorization",
+                      `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
+                    )
+                    .send({ count, email });
 
-                console.log("TCL: response", response);
+                  console.log("TCL: response", response);
+                } catch (ex) {
+                  console.log("TCL: ex", ex);
+                }
 
                 return true;
               }
