@@ -70,7 +70,13 @@ if (PUBLIC_DIR) {
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+console.log(
+  `Found DD_AGENT_HOST: ${config.DD_AGENT_HOST} and DD_DOGSTATSD_PORT: ${
+    config.DD_DOGSTATSD_PORT
+  }.`
+);
 if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
+  console.log("Using connectDatadog.");
   const datadogOptions = {
     path: true,
     method: false,
@@ -83,6 +89,8 @@ if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
   }
 
   app.use(connectDatadog(datadogOptions));
+} else {
+  console.log("NOT using connectDatadog.");
 }
 
 app.use(
