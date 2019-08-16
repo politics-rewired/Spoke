@@ -306,6 +306,11 @@ if (isClient()) {
       choices: ["hex"],
       default: "hex"
     }),
+    EXPORT_DRIVER: str({
+      desc: "Which cloud storage driver to use for exports.",
+      choices: ["s3", "gs-json", "gs"],
+      default: "s3"
+    }),
     FIX_ORGLESS: bool({
       desc:
         "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
