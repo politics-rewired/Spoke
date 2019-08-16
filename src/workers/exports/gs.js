@@ -1,3 +1,4 @@
+const { config } = require("../../config");
 const { upload: awsUpload } = require("./s3");
 const crypto = require("crypto");
 
@@ -5,7 +6,7 @@ const {
   AWS_ENDPOINT: awsEndpoint = "https://storage.googleapis.com",
   AWS_ACCESS_KEY_ID: hmacKey,
   AWS_SECRET_ACCESS_KEY: hmacSecret
-} = process.env;
+} = config;
 const SIGNING_ALGORITHM = "GOOG4-RSA-SHA256";
 
 const base64Sign = url => {

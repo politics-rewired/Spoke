@@ -1,6 +1,7 @@
 const AWS = require("aws-sdk");
+const { config } = require("../../config");
 
-const { AWS_ENDPOINT: awsEndpoint } = process.env;
+const { AWS_ENDPOINT: awsEndpoint } = config;
 
 const createS3 = (bucket, endpointUrl = awsEndpoint) => {
   let endpoint = undefined;

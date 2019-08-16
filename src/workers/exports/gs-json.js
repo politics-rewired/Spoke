@@ -1,7 +1,8 @@
 const { Storage } = require("@google-cloud/storage");
+const { config } = require("../../config");
 
 const fetchKeys = () => {
-  const keysEnvVar = process.env["GOOGLE_APPLICATION_CREDENTIALS"];
+  const keysEnvVar = config.GOOGLE_APPLICATION_CREDENTIALS;
   if (!keysEnvVar) {
     throw new Error(
       "The $GOOGLE_APPLICATION_CREDENTIALS environment variable was not found!"

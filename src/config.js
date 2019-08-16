@@ -311,6 +311,10 @@ if (isClient()) {
         "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
       default: false
     }),
+    GOOGLE_APPLICATION_CREDENTIALS: str({
+      desc: "JSON token for service account",
+      default: undefined
+    }),
     GRAPHQL_URL: str({
       desc: "Optional URL for pointing GraphQL API requests. ",
       example: "https://externalservice.org/graphql",
