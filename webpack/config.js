@@ -6,19 +6,11 @@ const GitRevisionPlugin = require("git-revision-webpack-plugin");
 
 const DEBUG = !config.isProduction;
 
-let isGitAvailable = false;
-let commithash = config.COMMITHASH || "";
-try {
-  const gitRevisionPlugin = new GitRevisionPlugin();
-  commithash = gitRevisionPlugin.commithash();
-  isGitAvailable = true;
-} catch (err) {
-  console.log("Git was unavailable");
-}
+const gitRevisionPlugin = new GitRevisionPlugin();
 
 const plugins = [
   new webpack.DefinePlugin({
-    COMMITHASH: JSON.stringify(commithash),
+    "process.env.COMMITHASH": JSON.stringify(gitRevisionPlugin.commithash()),
     "process.env.NODE_ENV": `"${config.NODE_ENV}"`,
     "process.env.PHONE_NUMBER_COUNTRY": `"${config.PHONE_NUMBER_COUNTRY}"`
   }),
@@ -33,13 +25,7 @@ const plugins = [
 const jsxLoaders = [{ loader: "babel-loader" }];
 const assetsDir = config.ASSETS_DIR;
 const assetMapFile = config.ASSETS_MAP_FILE;
-const outputFile = DEBUG
-  ? "[name].js"
-  : isGitAvailable
-    ? "[name].[git-revision-hash].js"
-    : commithash !== ""
-      ? `[name].${commithash}.js`
-      : "[name].[chunkhash].js";
+const outputFile = DEBUG ? "[name].js" : "[name].[git-revision-hash].js";
 
 if (!DEBUG) {
   plugins.push(
