@@ -3,6 +3,11 @@ FROM node:8.10.0-alpine
 
 WORKDIR /usr/Spoke
 
+# Install Git
+RUN apk update && \
+  apk upgrade && \
+  apk add git
+
 # Cache dependencies
 COPY package.json .
 RUN yarn install
