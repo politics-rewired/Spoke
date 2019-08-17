@@ -47,10 +47,6 @@ const validators = {
   WEBPACK_PORT: port({
     desc: "Port for Webpack development server.",
     default: 3000
-  }),
-  COMMITHASH: str({
-    desc: "Git SHA",
-    default: undefined
   })
 };
 

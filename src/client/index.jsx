@@ -8,9 +8,6 @@ import Store from "../store";
 import { ApolloProvider } from "react-apollo";
 import ApolloClientSingleton from "../network/apollo-client-singleton";
 import { login, logout } from "./auth-service";
-import loadRollbar from "./load-rollbar";
-
-loadRollbar();
 
 window.AuthService = {
   login,
