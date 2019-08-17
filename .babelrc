@@ -3,6 +3,7 @@
   "only": ["*.js", "*.jsx"],
   "plugins": [
     [
+      "react-hot-loader/babel",
       "transform-runtime",
       {
         "polyfill": false,

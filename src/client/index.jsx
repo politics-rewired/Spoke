@@ -22,3 +22,5 @@ ReactDOM.render(
   </ApolloProvider>,
   document.getElementById("mount")
 );
+
+module.hot.accept();
