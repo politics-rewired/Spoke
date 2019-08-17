@@ -2,15 +2,11 @@ const { config } = require("./build-config");
 const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
-const GitRevisionPlugin = require("git-revision-webpack-plugin");
 
 const DEBUG = !config.isProduction;
 
-const gitRevisionPlugin = new GitRevisionPlugin();
-
 const plugins = [
   new webpack.DefinePlugin({
-    "process.env.COMMITHASH": JSON.stringify(gitRevisionPlugin.commithash()),
     "process.env.NODE_ENV": `"${config.NODE_ENV}"`,
     "process.env.PHONE_NUMBER_COUNTRY": `"${config.PHONE_NUMBER_COUNTRY}"`
   }),
@@ -25,7 +21,7 @@ const plugins = [
 const jsxLoaders = [{ loader: "babel-loader" }];
 const assetsDir = config.ASSETS_DIR;
 const assetMapFile = config.ASSETS_MAP_FILE;
-const outputFile = DEBUG ? "[name].js" : "[name].[git-revision-hash].js";
+const outputFile = DEBUG ? "[name].js" : "[name].[chunkhash].js";
 
 if (!DEBUG) {
   plugins.push(

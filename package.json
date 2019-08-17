@@ -167,7 +167,6 @@
     "eslint-plugin-react": "^5.2.2",
     "fakeredis": "^2.0.0",
     "foreman": "^1.4.1",
-    "git-revision-webpack-plugin": "2.5.1",
     "jest": "^22.1.4",
     "jest-each": "^24.8.0",
     "json2csv": "^3.6.2",
