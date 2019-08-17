@@ -14,13 +14,15 @@ RUN yarn install
 
 # Configure build environment
 ARG PHONE_NUMBER_COUNTRY=US
+ARG COMMITHASH=""
 ENV NODE_ENV="production" \
   PORT=3000 \
   OUTPUT_DIR="./build" \
   PUBLIC_DIR="./build/client" \
   ASSETS_DIR="./build/client/assets" \
   ASSETS_MAP_FILE="assets.json" \
-  PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY
+  PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY \
+  COMMITHASH=$COMMITHASH
 
 # Copy application codebase
 COPY . .
