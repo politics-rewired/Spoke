@@ -224,7 +224,7 @@ export async function myCurrentAssignmentTarget(
   const { rows: teamToCampaigns } = await trx.raw(
     `
       (
-        select team.title as team_title, campaign.id, campaign.title, (
+        select team.assignment_priority as priority, team.title as team_title, campaign.id, campaign.title, (
             select count(*)
             from ${contactsView}
             where campaign_id = campaign.id
@@ -243,11 +243,10 @@ export async function myCurrentAssignmentTarget(
           select 1 from user_team
           where user_id = ? and team_id = team.id
         )
-        order by team.assignment_priority
       )
       union
       ( 
-        select 'General' as team_title, ${campaignView}.id, ${campaignView}.title, (
+        select '+infinity'::float as priority, 'General' as team_title, ${campaignView}.id, ${campaignView}.title, (
             select count(*)
             from ${contactsView}
             where campaign_id = ${campaignView}.id
@@ -258,6 +257,7 @@ export async function myCurrentAssignmentTarget(
         order by id asc
         limit 1
       )
+      order by priority asc
       limit 1
     `,
     [organizationId, userId, organizationId]
