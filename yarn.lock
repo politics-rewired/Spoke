@@ -4718,6 +4718,7 @@ hosted-git-info@^2.1.4:
 hot-shots@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/hot-shots/-/hot-shots-6.3.0.tgz#f314eb46885b80dd8b85c031034a1839d93d5a67"
+  integrity sha512-9aSojxGXFDQG8EiRtUp7Cd/dG0vgiQ2E/dB/5B59rdEbV8++tqaa2v/OUJW7EYyplETaglnaXsjUA8DB3LFGrw==
   optionalDependencies:
     unix-dgram "2.0.x"
 

@@ -24,6 +24,7 @@ import googleLibPhoneNumber from "google-libphonenumber";
 import requestLogging from "../lib/request-logging";
 import { checkForBadDeliverability } from "./api/lib/alerts";
 import cron from "node-cron";
+import hotShots from "hot-shots";
 import connectDatadog from "connect-datadog";
 import { config } from "../config";
 
@@ -78,6 +79,10 @@ console.log(
 if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
   console.log("Using connectDatadog.");
   const datadogOptions = {
+    dogstatsd: new hotShots.StatsD(
+      config.DD_AGENT_HOST,
+      config.DD_DOGSTATSD_PORT
+    ),
     path: true,
     method: false,
     response_code: true,
