@@ -25,7 +25,7 @@ import requestLogging from "../lib/request-logging";
 import { checkForBadDeliverability } from "./api/lib/alerts";
 import cron from "node-cron";
 import hotShots from "hot-shots";
-import connectDatadog from "connect-datadog";
+import connectDatadog from "connect-datadog-graphql";
 
 cron.schedule("0 */1 * * *", checkForBadDeliverability);
 
@@ -70,13 +70,7 @@ if (PUBLIC_DIR) {
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-logger.debug(
-  `Found DD_AGENT_HOST: ${config.DD_AGENT_HOST} and DD_DOGSTATSD_PORT: ${
-    config.DD_DOGSTATSD_PORT
-  }.`
-);
 if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
-  logger.debug("Using connectDatadog.");
   const datadogOptions = {
     dogstatsd: new hotShots.StatsD(
       config.DD_AGENT_HOST,
@@ -85,6 +79,7 @@ if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
     path: true,
     method: false,
     response_code: true,
+    graphql_paths: ["/graphql"],
     tags: ["app:spoke"]
   };
 
@@ -93,8 +88,6 @@ if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
   }
 
   app.use(connectDatadog(datadogOptions));
-} else {
-  logger.debug("NOT using connectDatadog.");
 }
 
 app.use(
