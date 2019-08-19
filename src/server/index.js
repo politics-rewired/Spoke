@@ -14,7 +14,6 @@ import { createLoaders, r } from "./models";
 import passport from "passport";
 import cookieSession from "cookie-session";
 import authStrategies from "./auth-passport";
-import wrap from "./wrap";
 import nexmo from "./api/lib/nexmo";
 import twilio from "./api/lib/twilio";
 import { setupUserNotificationObservers } from "./notifications";
@@ -108,61 +107,53 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(authStrategies[loginStrategy]());
 
-app.post(
-  "/nexmo",
-  wrap(async (req, res) => {
-    try {
-      const messageId = await nexmo.handleIncomingMessage(req.body);
-      res.send(messageId);
-    } catch (ex) {
-      logger.error("Error handling incoming nexmo message", ex);
-      res.send("done");
-    }
-  })
-);
+app.post("/nexmo", async (req, res) => {
+  try {
+    const messageId = await nexmo.handleIncomingMessage(req.body);
+    res.send(messageId);
+  } catch (ex) {
+    logger.error("Error handling incoming nexmo message", ex);
+    res.status(500).send(ex.message);
+  }
+});
 
-app.post(
-  "/twilio",
-  twilio.headerValidator(),
-  wrap(async (req, res) => {
-    try {
-      await twilio.handleIncomingMessage(req.body);
-    } catch (ex) {
-      logger.error("Error handling incoming twilio message", ex);
-    }
-
+app.post("/twilio", twilio.headerValidator(), async (req, res) => {
+  try {
+    await twilio.handleIncomingMessage(req.body);
     const resp = new TwimlResponse();
     res.writeHead(200, { "Content-Type": "text/xml" });
     res.end(resp.toString());
-  })
-);
+  } catch (ex) {
+    logger.error("Error handling incoming twilio message", ex);
+    res.status(500).send(ex.message);
+  }
+});
 
-app.post(
-  "/nexmo-message-report",
-  wrap(async (req, res) => {
-    try {
-      const body = req.body;
-      await nexmo.handleDeliveryReport(body);
-    } catch (ex) {
-      logger.error("Error handling incoming nexmo message report", ex);
-    }
+app.post("/nexmo-message-report", async (req, res) => {
+  try {
+    const body = req.body;
+    await nexmo.handleDeliveryReport(body);
     res.send("done");
-  })
-);
+  } catch (ex) {
+    logger.error("Error handling incoming nexmo message report", ex);
+    res.status(500).send(ex.message);
+  }
+});
 
 app.post(
   "/twilio-message-report",
   twilio.headerValidator(),
-  wrap(async (req, res) => {
+  async (req, res) => {
     try {
       await twilio.handleDeliveryReport(req.body);
       const resp = new TwimlResponse();
       res.writeHead(200, { "Content-Type": "text/xml" });
       return res.end(resp.toString());
     } catch (exc) {
+      logger.error("Error handling twilio message report", exc);
       res.status(500).send(exc.message);
     }
-  })
+  }
 );
 
 app.get("/logout-callback", (req, res) => {
