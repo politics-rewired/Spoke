@@ -11,7 +11,6 @@ import NavigateBeforeIcon from "material-ui/svg-icons/image/navigate-before";
 import NavigateNextIcon from "material-ui/svg-icons/image/navigate-next";
 import Check from "material-ui/svg-icons/action/check-circle";
 
-import { log } from "../lib/log";
 import loadData from "../containers/hoc/load-data";
 import wrapMutations from "../containers/hoc/wrap-mutations";
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
@@ -162,7 +161,7 @@ class AssignmentTexter extends React.Component {
             contactCache
           });
         })
-        .catch(log.error);
+        .catch(console.error);
     }
   };
 
