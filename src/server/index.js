@@ -24,7 +24,7 @@ import googleLibPhoneNumber from "google-libphonenumber";
 import requestLogging from "../lib/request-logging";
 import { checkForBadDeliverability } from "./api/lib/alerts";
 import cron from "node-cron";
-import connectDatadog from "connect-datadog-graphql";
+import connectDatadog from "connect-datadog";
 import { config } from "../config";
 
 cron.schedule("0 */1 * * *", checkForBadDeliverability);
@@ -81,11 +81,11 @@ if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
     path: true,
     method: false,
     response_code: true,
-    graphql_paths: "/graphql"
+    tags: ["app:spoke"]
   };
 
   if (config.CLIENT_NAME) {
-    datadogOptions.tags = [`client:${config.CLIENT_NAME}`];
+    datadogOptions.tags.push(`client:${config.CLIENT_NAME}`);
   }
 
   app.use(connectDatadog(datadogOptions));
