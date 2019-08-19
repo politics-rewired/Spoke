@@ -1,6 +1,6 @@
 import { config } from "../config";
+import logger from "../logger";
 import { r, Assignment, Campaign, User, Organization } from "./models";
-import { log } from "../lib";
 import { sendEmail } from "./mail";
 
 export const Notifications = {
@@ -53,7 +53,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
       text
     });
   } catch (e) {
-    log.error(e);
+    logger.error("Error sending assignment notification email", e);
   }
 };
 
@@ -100,7 +100,7 @@ export const sendUserNotification = async notification => {
           }/reply`
         });
       } catch (e) {
-        log.error(e);
+        logger.error("Error sending conversation reply notification email", e);
       }
     }
   } else if (type === Notifications.ASSIGNMENT_CREATED) {

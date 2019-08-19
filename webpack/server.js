@@ -1,8 +1,8 @@
 import { config } from "./build-config";
+import logger from "../src/logger";
 import WebpackDevServer from "webpack-dev-server";
 import webpack from "webpack";
 import webpackConfig from "./config";
-import { log } from "../src/lib";
 
 const webpackPort = config.WEBPACK_PORT;
 const appPort = config.DEV_APP_PORT;
@@ -18,7 +18,7 @@ Object.keys(webpackConfig.entry).forEach(key => {
 const compiler = webpack(webpackConfig);
 const connstring = `http://127.0.0.1:${appPort}`;
 
-log.info(`Proxying requests to:${connstring}`);
+logger.info(`Proxying requests to:${connstring}`);
 
 const app = new WebpackDevServer(compiler, {
   contentBase: "/assets/",
@@ -49,7 +49,7 @@ const app = new WebpackDevServer(compiler, {
 });
 
 app.listen(webpackPort || config.PORT, () => {
-  log.info(
+  logger.info(
     `Webpack dev server is now running on http://${webpackHost}:${webpackPort}`
   );
 });

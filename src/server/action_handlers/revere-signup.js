@@ -2,6 +2,7 @@ import request from "request";
 import aws from "aws-sdk";
 import { r } from "../models";
 import { config } from "../../config";
+import logger from "../../logger";
 
 const sqs = new aws.SQS();
 // What the user sees as the option
@@ -80,7 +81,7 @@ const actionKitSignup = (cell, contact) => {
       }
     );
   } else {
-    console.log("No AK Post URLs Configured");
+    logger.error("No AK Post URLs Configured");
   }
 };
 
@@ -124,9 +125,9 @@ export async function processAction(
 
     sqs.sendMessage(sqsParams, (err, data) => {
       if (err) {
-        console.log("Error sending message to queue", err);
+        logger.error("Error sending message to queue", err);
       }
-      console.log("Sent message to queue with data:", data);
+      logger.info("Sent message to queue with data:", data);
     });
   } else {
     const options = {

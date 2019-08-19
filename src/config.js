@@ -335,6 +335,12 @@ if (isClient()) {
       desc: "If present, requestLogger will send logs events to MongoDB.",
       default: undefined
     }),
+    // npm log level choices: https://github.com/winstonjs/winston#logging-levels
+    LOG_LEVEL: str({
+      desc: "The winston log level.",
+      choices: ["silly", "debug", "verbose", "info", "warn", "error"],
+      default: "warn"
+    }),
     MAILGUN_DOMAIN: host({
       desc: "The domain you set up in Mailgun. Required for Mailgun usage.",
       example: "email.bartletforamerica.com",

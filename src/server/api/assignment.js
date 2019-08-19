@@ -1,3 +1,4 @@
+import logger from "../../logger";
 import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
 import { Assignment, r, cacheableData } from "../models";
@@ -338,10 +339,10 @@ async function notifyIfAllAssigned(type, user, organizationId) {
       await request
         .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
         .send({ type, user });
-      console.log(`Notified about out of ${type} to assign`);
+      logger.verbose(`Notified about out of ${type} to assign`);
     }
   } else {
-    console.log(
+    logger.verbose(
       "Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset"
     );
   }
@@ -406,8 +407,9 @@ export async function fulfillPendingRequestFor(auth0Id) {
 
       return numberAssigned;
     } catch (ex) {
-      console.log(
-        `Failed to give user ${auth0Id} more texts. Marking their request as rejected.`
+      logger.info(
+        `Failed to give user ${auth0Id} more texts. Marking their request as rejected.`,
+        ex.message
       );
 
       // Mark as rejected outside the transaction so it is unaffected by the rollback
@@ -432,7 +434,7 @@ export async function giveUserMoreTexts(
   organizationId,
   parentTrx = r.knex
 ) {
-  console.log(`Starting to give ${auth0Id} ${count} texts`);
+  logger.verbose(`Starting to give ${auth0Id} ${count} texts`);
 
   const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
   const user = matchingUsers[0];
@@ -494,7 +496,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
   // Determine which campaign to assign to – optimize to pick winners
   let campaignIdToAssignTo = assignmentInfo.campaign.id;
   let countToAssign = countLeft;
-  console.log(
+  logger.info(
     `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${
       assignmentInfo.type
     }`
@@ -522,7 +524,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
     assignmentId = existingAssignment.id;
   }
 
-  console.log(`Assigning to assignment id ${assignmentId}`);
+  logger.verbose(`Assigning to assignment id ${assignmentId}`);
 
   const campaignContactStatus = {
     UNREPLIED: "needsResponse",
@@ -586,7 +588,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
     [assignmentId, assignmentId]
   );
 
-  console.log(
+  logger.verbose(
     `Updated ${ccUpdateCount} campaign contacts and ${messageUpdateCount} messages.`
   );
   return ccUpdateCount;

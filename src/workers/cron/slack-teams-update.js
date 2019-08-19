@@ -1,5 +1,6 @@
 import knex from "knex";
 import Slack from "slack";
+import logger from "../../logger";
 import { config } from "../../config";
 import knexConfig from "../../server/knex";
 
@@ -21,14 +22,12 @@ async function main() {
       return channel.name_normalized === normalizedTeamName;
     });
 
-    // console.log(normalizedTeamName);
-
     if (!matchingChannel) {
-      console.log(`Did not find channel for ${teamTitle}`);
+      logger.warn(`Did not find channel for ${teamTitle}`);
       return;
     }
 
-    console.log(`Found channel (${matchingChannel.id}) for ${teamTitle}`);
+    logger.info(`Found channel (${matchingChannel.id}) for ${teamTitle}`);
 
     let done = false;
     let cursor = "dummy";
@@ -69,7 +68,7 @@ async function main() {
       );
     });
 
-    console.log(`Updated memberships for ${teamTitle}`, totalMembershipCount);
+    logger.info(`Updated memberships for ${teamTitle}`, totalMembershipCount);
   }
 }
 
@@ -101,6 +100,6 @@ const fetchAllChannels = async (acc = [], next_cursor) => {
 main()
   .then(() => process.exit(0))
   .catch(error => {
-    console.error(error);
+    logger.error(error);
     process.exit(1);
   });

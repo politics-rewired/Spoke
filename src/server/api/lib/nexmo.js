@@ -1,9 +1,9 @@
 import { config } from "../../../config";
+import logger from "../../../logger";
 import Nexmo from "nexmo";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Message, PendingMessagePart } from "../../models";
 import { getLastMessage } from "./message-sending";
-import { log } from "../../../lib";
 
 let nexmo = null;
 const MAX_SEND_ATTEMPTS = 5;
@@ -186,7 +186,7 @@ async function handleIncomingMessage(message) {
     !message.hasOwnProperty("text") ||
     !message.hasOwnProperty("messageId")
   ) {
-    log.error(`This is not an incoming message: ${JSON.stringify(message)}`);
+    logger.error(`This is not an incoming message: ${JSON.stringify(message)}`);
   }
 
   const { to, msisdn, concat } = message;
@@ -196,7 +196,7 @@ async function handleIncomingMessage(message) {
 
   let parentId = "";
   if (isConcat) {
-    log.info(
+    logger.info(
       `Incoming message part (${message["concat-part"]} of ${
         message["concat-total"]
       } for ref ${
@@ -205,7 +205,7 @@ async function handleIncomingMessage(message) {
     );
     parentId = message["concat-ref"];
   } else {
-    log.info(`Incoming message part from ${contactNumber} to ${userNumber}`);
+    logger.info(`Incoming message part from ${contactNumber} to ${userNumber}`);
   }
 
   const pendingMessagePart = new PendingMessagePart({

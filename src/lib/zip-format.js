@@ -98,7 +98,7 @@ const findZipRanges = function(r) {
       zipchanges.sort(function(a, b) {
         return b[4] - a[4];
       });
-      console.log(zipchanges);
+      console.info(zipchanges);
     });
   return zipchanges;
 };

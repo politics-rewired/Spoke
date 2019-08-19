@@ -1,4 +1,5 @@
 import { config } from "../../config";
+import logger from "../../logger";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
@@ -9,7 +10,7 @@ import _ from "lodash";
 import moment from "moment-timezone";
 import { organizationCache } from "../models/cacheable_queries/organization";
 
-import { gzip, log, makeTree } from "../../lib";
+import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
 import {
@@ -661,7 +662,7 @@ async function sendMessage(
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
         if (err) {
-          log.error(err);
+          logger.error(err);
         }
       });
   }
@@ -887,23 +888,20 @@ const rootMutations = {
             role: "TEXTER"
           }).error(function(error) {
             // Unexpected errors
-            log.error("error on userOrganization save", error);
+            logger.error("error on userOrganization save", error);
           });
         } else {
           // userOrg exists
-          log.error(
-            "existing userOrg " +
-              userOrg.id +
-              " user " +
-              user.id +
-              " organizationUuid " +
-              organizationUuid
+          logger.error(
+            `existing userOrg ${userOrg.id} user ${
+              user.id
+            } organizationUuid ${organizationUuid}`
           );
         }
       } else {
         // no organization
-        log.error(
-          "no organization with id " + organizationUuid + " for user " + user.id
+        logger.error(
+          `no organization with id ${organizationUuid} for user ${user.id}`
         );
       }
       return organization;
@@ -1443,7 +1441,7 @@ const rootMutations = {
         })
         .limit(numberContacts)
         .update({ assignment_id: assignmentId })
-        .catch(log.error);
+        .catch(logger.error);
 
       if (updateResult > 0) {
         return { found: true };
@@ -1486,7 +1484,7 @@ const rootMutations = {
           );
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
-          log.error(error);
+          logger.error("Error sending message for tag", error);
         }
       }
 
@@ -1567,7 +1565,7 @@ const rootMutations = {
           await sendMessage(user, campaignContactId, message, checkOptOut);
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
-          log.error(error);
+          logger.error("Error sending message for opt-out", error);
         }
       }
 
@@ -1643,7 +1641,7 @@ const rootMutations = {
 
     bulkSendMessages: async (_, { assignmentId }, loaders) => {
       if (!config.ALLOW_SEND_ALL || !config.NOT_IN_USA) {
-        log.error("Not allowed to send all messages at once");
+        logger.error("Not allowed to send all messages at once");
         throw new GraphQLError({
           status: 403,
           message: "Not allowed to send all messages at once"
@@ -1778,11 +1776,8 @@ const rootMutations = {
               campaignContactId
             );
           } catch (err) {
-            log.error(
-              "Handler for InteractionStep",
-              interactionStepId,
-              "Does Not Exist:",
-              interactionStepAction
+            logger.error(
+              `Handler for InteractionStep ${interactionStepId} "Does Not Exist: ${interactionStepAction}`
             );
           }
         }
@@ -2206,9 +2201,9 @@ const rootMutations = {
                     )
                     .send({ count, email });
 
-                  console.log("TCL: response", response);
+                  logger.debug("TCL: response", response);
                 } catch (ex) {
-                  console.log("TCL: ex", ex);
+                  logger.error("TCL: ex", ex);
                 }
 
                 return true;
@@ -2221,7 +2216,7 @@ const rootMutations = {
 
         return "No texts available at the moment";
       } catch (e) {
-        console.error(e);
+        logger.error(e);
         return e.response ? e.response.body.message : e;
       }
     },

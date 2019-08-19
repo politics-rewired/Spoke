@@ -1,6 +1,5 @@
 import { getLastMessage } from "./message-sending";
 import { Message, PendingMessagePart, r } from "../../models";
-import { log } from "../../../lib";
 
 // This 'fakeservice' allows for fake-sending messages
 // that end up just in the db appropriately and then using sendReply() graphql

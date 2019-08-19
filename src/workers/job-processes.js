@@ -1,7 +1,7 @@
 import { config } from "../config";
+import logger from "../logger";
 import { r } from "../server/models";
 import { getNextJob } from "./lib";
-import { log } from "../lib";
 import { sleep } from "../lib/utils";
 import {
   exportCampaign,
@@ -35,7 +35,7 @@ const jobMap = {
 
 export async function processJobs() {
   setupUserNotificationObservers();
-  log.info("Running processJobs");
+  logger.info("Running processJobs");
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
@@ -49,7 +49,7 @@ export async function processJobs() {
       // clear out stuck jobs
       await clearOldJobs(twoMinutesAgo);
     } catch (ex) {
-      log.error(ex);
+      logger.error("Error processing jobs", ex);
     }
   }
 }
@@ -59,20 +59,20 @@ export async function checkMessageQueue() {
     return;
   }
 
-  log.info("checking if messages are in message queue");
+  logger.info("checking if messages are in message queue");
   while (true) {
     try {
       await sleep(10000);
       processSqsMessages();
     } catch (ex) {
-      log.error(ex);
+      logger.error("Error checking message queue", ex);
     }
   }
 }
 
 const messageSenderCreator = (subQuery, defaultStatus) => {
   return async event => {
-    log.info("Running a message sender");
+    logger.info("Running a message sender");
     setupUserNotificationObservers();
     let delay = 1100;
     if (event && event.delay) {
@@ -84,7 +84,7 @@ const messageSenderCreator = (subQuery, defaultStatus) => {
         await sleep(delay);
         await sendMessages(subQuery, defaultStatus);
       } catch (ex) {
-        log.error(ex);
+        logger.error("Error sending messages from messageSender", ex);
       }
     }
   };
@@ -143,33 +143,32 @@ export const failedDayMessageSender = messageSenderCreator(function(mQuery) {
 export async function handleIncomingMessages() {
   setupUserNotificationObservers();
   if (config.DEBUG_INCOMING_MESSAGES) {
-    log.info("Running handleIncomingMessages");
+    logger.debug("Running handleIncomingMessages");
   }
   // eslint-disable-next-line no-constant-condition
   let i = 0;
   while (true) {
     try {
       if (config.DEBUG_SCALING) {
-        log.info("entering handleIncomingMessages. round: ", ++i);
+        logger.debug("entering handleIncomingMessages. round: ", ++i);
       }
       const countPendingMessagePart = await r.parseCount(
         r.knex("pending_message_part").count()
       );
       if (config.DEBUG_SCALING) {
-        log.info(
-          "counting handleIncomingMessages. count: ",
-          countPendingMessagePart
+        logger.debug(
+          `counting handleIncomingMessages. count: ${countPendingMessagePart}`
         );
       }
       await sleep(500);
       if (countPendingMessagePart > 0) {
         if (config.DEBUG_SCALING) {
-          log.info("running handleIncomingMessages");
+          logger.debug("running handleIncomingMessages");
         }
         await handleIncomingMessageParts();
       }
     } catch (ex) {
-      log.error("error at handleIncomingMessages", ex);
+      logger.error("Error at handleIncomingMessages", ex);
     }
   }
 }
@@ -187,7 +186,7 @@ export async function loadContactsFromDataWarehouseFragmentJob(
   eventCallback
 ) {
   const eventAsJob = event;
-  log.info("LAMBDA INVOCATION job-processes", event);
+  logger.info("LAMBDA INVOCATION job-processes", event);
   try {
     const rv = await loadContactsFromDataWarehouseFragment(eventAsJob);
     if (eventCallback) {
@@ -228,7 +227,7 @@ export async function dispatchProcesses(event, dispatcher, eventCallback) {
       // / not using dispatcher, but another interesting model would be
       // / to dispatch processes to other lambda invocations
       // dispatcher({'command': p})
-      log.info("process", p);
+      logger.info("process", p);
       toDispatch[p]().then();
     }
   }

@@ -1,5 +1,6 @@
 import request from "request";
 import { config } from "../../config";
+import logger from "../../logger";
 import { r } from "../models";
 import crypto from "crypto";
 
@@ -30,7 +31,7 @@ export async function available(organizationId) {
     needed.push("AK_SECRET");
   }
   if (needed.length) {
-    console.error(
+    logger.error(
       "actionkit-rsvp unavailable because " +
         needed.join(", ") +
         " must be set (either in environment variables or json value for organization)"
@@ -102,7 +103,7 @@ export async function processAction(
           async function(err, httpResponse, body) {
             // TODO: should we save the action id somewhere?
             if (err || (body && body.error)) {
-              console.error(
+              logger.error(
                 "error: actionkit event sign up failed",
                 err,
                 userData,
@@ -122,7 +123,7 @@ export async function processAction(
                     .update("custom_fields", JSON.stringify(customFields));
                 }
               }
-              console.info(
+              logger.info(
                 "actionkit event sign up SUCCESS!",
                 userData,
                 httpResponse,
@@ -133,7 +134,7 @@ export async function processAction(
         );
       }
     } catch (err) {
-      console.error(
+      logger.error(
         "Processing Actionkit RSVP action failed on custom field parsing",
         campaignContactId,
         err
