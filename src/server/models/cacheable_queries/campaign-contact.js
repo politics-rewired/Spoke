@@ -1,7 +1,7 @@
 import { config } from "../../../config";
+import logger from "../../../logger";
 import { r, CampaignContact } from "../../models";
 import { optOutCache } from "./opt-out";
-import { log } from "../../../lib";
 
 // <campaignContactId>
 //   - assignmentId
@@ -106,7 +106,7 @@ export const campaignContactCache = {
             organizationId: cacheData.organization_id
           });
         }
-        log.info("fromCache", cacheData);
+        logger.debug("contact fromCache", cacheData);
         return cacheData;
       }
     }

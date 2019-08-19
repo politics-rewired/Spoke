@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { log } from "../lib";
+import logger from "../logger";
 import nodemailer from "nodemailer";
 import mailgunConstructor from "mailgun-js";
 
@@ -34,12 +34,12 @@ const sender =
       });
 
 export const sendEmail = async ({ to, subject, text, replyTo }) => {
-  log.info(`Sending e-mail to ${to} with subject ${subject}.`);
-
   if (config.isDevelopment) {
-    log.debug(`Would send e-mail with subject ${subject} and text ${text}.`);
+    logger.info(`Would send e-mail with subject ${subject} and text ${text}.`);
     return null;
   }
+
+  logger.info(`Sending e-mail to ${to} with subject ${subject}.`);
 
   const params = {
     from: config.EMAIL_FROM,

@@ -1,4 +1,5 @@
 import knexConfig from "../../server/knex";
+import logger from "../../logger";
 
 const moment = require("moment");
 const MINUTES_LATER = 10;
@@ -41,7 +42,7 @@ async function chunkedMain() {
   nMinutesAgo = nMinutesAgo.subtract(MINUTES_LATER + COMPUTATION_DELAY);
 
   if (nMinutesAgo.isBefore(period_ends_at)) {
-    console.log(
+    logger.verbose(
       "Too early to compute report for period ending at",
       period_ends_at
     );
@@ -111,7 +112,7 @@ async function chunkedMain() {
   }
 
   const insertResult = await db("deliverability_report").insert(rows);
-  console.log("Successfully inserted with value: ", insertResult);
+  logger.verbose("Successfully inserted with value: ", insertResult);
   return chunkedMain();
 }
 
@@ -186,7 +187,7 @@ async function slidingWindowMain() {
     Object.keys(domainDeliverability).map(async domain => {
       const deliverability = domainDeliverability[domain];
       if (deliverability < sensorDeliverability - 0.3) {
-        console.log(
+        logger.warn(
           `Domain '${domain}' deemed unhealthy with deliverability ${deliverability} over the last ${SLIDING_WINDOW_SECONDS /
             60 /
             60} hours`
@@ -215,11 +216,11 @@ async function markDomainUnhealthy(domain) {
     .first();
 
   if (existingDomain) {
-    console.log("found one!");
+    logger.verbose(`Found existing unhealthy record for domain ${domain}`);
     return;
   }
 
-  console.log(`Marking ${domain} as unhealthy.`);
+  logger.warn(`Marking ${domain} as unhealthy.`);
   await db("unhealthy_link_domain").insert({ domain });
 }
 
@@ -262,10 +263,10 @@ async function main() {
 
 main()
   .then(result => {
-    console.log(result);
+    logger.info(result);
     process.exit(0);
   })
   .catch(error => {
-    console.error(error);
+    logger.error(error);
     process.exit(1);
   });

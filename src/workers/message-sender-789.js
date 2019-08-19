@@ -1,6 +1,6 @@
 import { messageSender789 } from "./job-processes";
-import { log } from "../lib/log";
+import logger from "../logger";
 
 messageSender789().catch(err => {
-  log.error(err);
+  logger.error(err);
 });

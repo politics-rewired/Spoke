@@ -1,4 +1,5 @@
 import { config } from "../../../config";
+import logger from "../../../logger";
 import { r } from "../../models";
 import _ from "lodash";
 import request from "superagent";
@@ -8,7 +9,7 @@ const THRESHOLD = 0.2;
 
 async function checkForBadDeliverability() {
   if (config.DELIVERABILITY_ALERT_ENDPOINT === undefined) return null;
-  console.log("Running deliverability check");
+  logger.info("Running deliverability check");
   /*
     find domains that have been sent on in the past hour that
       - have more than 1000 sends over the past 2 days
@@ -48,7 +49,7 @@ async function checkForBadDeliverability() {
 
     const errorPercent = errorCount / (deliveredCount + sentCount);
     if (errorPercent > THRESHOLD) {
-      console.log(
+      logger.info(
         `Sending deliverability alert to ${
           config.DELIVERABILITY_ALERT_ENDPOINT
         } because ${domain} is sending at ${errorPercent}`

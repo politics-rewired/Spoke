@@ -1,6 +1,7 @@
+import logger from "../../logger";
 import { CampaignContact, r, cacheableData } from "../models";
 import { mapFieldsToModel } from "./lib/utils";
-import { log, getTopMostParent, zipToTimeZone } from "../../lib";
+import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
 
 export const resolvers = {
@@ -110,7 +111,7 @@ export const resolvers = {
           "qres.created_at",
           "qres.interaction_step_id"
         )
-        .catch(log.error);
+        .catch(logger.error);
 
       let formatted = {};
 

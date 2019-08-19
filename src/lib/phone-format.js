@@ -1,5 +1,5 @@
 import { PhoneNumberUtil, PhoneNumberFormat } from "google-libphonenumber";
-import { log } from "./log";
+import logger from "../logger";
 
 export const getFormattedPhoneNumber = (cell, country = "US") => {
   const phoneUtil = PhoneNumberUtil.getInstance();
@@ -14,7 +14,7 @@ export const getFormattedPhoneNumber = (cell, country = "US") => {
     }
     return "";
   } catch (e) {
-    log.error(e);
+    logger.error(e);
     return "";
   }
 };

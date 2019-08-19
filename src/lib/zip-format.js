@@ -1,3 +1,5 @@
+import logger from "../logger";
+
 const getFormattedZip = (zip, country = "US") => {
   if (country === "US") {
     const regex = /(\d{5})([ \-]\d{4})?/;
@@ -98,7 +100,7 @@ const findZipRanges = function(r) {
       zipchanges.sort(function(a, b) {
         return b[4] - a[4];
       });
-      console.log(zipchanges);
+      logger.info(zipchanges);
     });
   return zipchanges;
 };

@@ -1,10 +1,10 @@
 import { config } from "../../../config";
+import logger from "../../../logger";
 import Twilio from "twilio";
 import _ from "lodash";
 import moment from "moment-timezone";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Log, Message, PendingMessagePart, r } from "../../models";
-import { log } from "../../../lib";
 import { sleep } from "../../../lib/utils";
 import {
   getCampaignContactAndAssignmentForIncomingMessage,
@@ -235,7 +235,7 @@ async function sendMessage(message, organizationId, trx) {
   const twilio = await twilioClient(messagingServiceSid);
 
   if (!twilio) {
-    log.warn(
+    logger.error(
       "cannot actually send SMS message -- twilio is not fully configured:",
       message.id
     );
@@ -251,7 +251,7 @@ async function sendMessage(message, organizationId, trx) {
 
   return new Promise(async (resolve, reject) => {
     if (message.service !== "twilio") {
-      log.warn("Message not marked as a twilio message", message.id);
+      logger.warn("Message not marked as a twilio message", message.id);
     }
 
     const messageParams = Object.assign(
@@ -305,8 +305,7 @@ async function sendMessage(message, organizationId, trx) {
       let hasError = false;
       if (err) {
         hasError = true;
-        log.error("Error sending message", err);
-        console.error(err);
+        logger.error(`Error sending message ${message.id}`, err);
         messageToSave.service_response += JSON.stringify(err);
       }
       if (response) {
@@ -397,13 +396,13 @@ async function handleDeliveryReport(report) {
     )
     .then(rowCount => {
       if (rowCount !== 1) {
-        console.warn(
+        logger.warn(
           `Received message report '${MessageStatus}' for Message SID ` +
             `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
         );
       }
     })
-    .catch(console.error);
+    .catch(logger.error);
 
   return insertResult;
 }
@@ -415,7 +414,7 @@ async function handleIncomingMessage(message) {
     !message.hasOwnProperty("Body") ||
     !message.hasOwnProperty("MessageSid")
   ) {
-    log.error(`This is not an incoming message: ${JSON.stringify(message)}`);
+    logger.error(`This is not an incoming message: ${JSON.stringify(message)}`);
   }
 
   const { From, To, MessageSid } = message;

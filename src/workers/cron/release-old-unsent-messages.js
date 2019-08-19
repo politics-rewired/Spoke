@@ -1,3 +1,4 @@
+import logger from "../../logger";
 import knexConfig from "../../server/knex";
 
 const db = require("knex")(knexConfig);
@@ -36,10 +37,10 @@ async function main() {
 
 main()
   .then(result => {
-    console.log(result);
+    logger.info(result);
     process.exit(0);
   })
   .catch(error => {
-    console.error(error);
+    logger.error(error);
     process.exit(1);
   });
