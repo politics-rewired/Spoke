@@ -279,14 +279,21 @@ export async function uploadContacts(job) {
       });
 
       landlinesFilteredOut = 0;
+
+      const deleteNumbers = async numbers => {
+        landlinesFilteredOut += numbers.length;
+        await trx("campaign_contact")
+          .where("campaign_id", campaignId)
+          .whereIn("cell", numbers.map(n => n.phoneNumber))
+          .delete();
+      };
+
       await numbersRequest.landlines.eachPage({
-        onPage: async numbers => {
-          landlinesFilteredOut += numbers.length;
-          await trx("campaign_contact")
-            .where("campaign_id", campaignId)
-            .whereIn("cell", numbers.map(n => n.phoneNumber))
-            .delete();
-        }
+        onPage: deleteNumbers
+      });
+
+      await numbersRequest.invalids.eachPage({
+        onPage: deleteNumbers
       });
 
       resultMessages.push(
