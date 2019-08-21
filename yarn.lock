@@ -2508,10 +2508,10 @@ configstore@^3.0.0:
     write-file-atomic "^2.0.0"
     xdg-basedir "^3.0.0"
 
-connect-datadog-graphql@^0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/connect-datadog-graphql/-/connect-datadog-graphql-0.0.10.tgz#204b60e5e61b5dd4327955e371aadb89c972f2fb"
-  integrity sha512-gmQaW5YTJ02UIXx+cidmRqFe8H0ujARVQ+OmyhoiAru+w2HcM2UWAvOrFOgh3j9Bx+gJalBoMQSoZCRN+/MD0w==
+connect-datadog-graphql@^0.0.11:
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/connect-datadog-graphql/-/connect-datadog-graphql-0.0.11.tgz#10043e0079c4b5f3cc369ce82b586a38b9dff3f2"
+  integrity sha512-NXowBZkLeCkdnUYUeQM5YpEQW74Kg57vcPjHAd9tfeM9/Taf6paNfkpOO1im3wxnBk+MDyVobgI1vLDzu0ncuw==
   dependencies:
     graphql "^14.4.2"
     hot-shots "^6.3.0"
