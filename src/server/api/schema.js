@@ -2699,7 +2699,15 @@ const rootResolvers = {
           "organization.id as organization_id"
         )
         .join("user", "user_id", "=", "user.id")
-        .join("organization", "organization_id", "=", "organization.id");
+        .join(
+          "organization",
+          "assignment_request.organization_id",
+          "=",
+          "organization.id"
+        )
+        .where({
+          "assignment_request.organization_id": organizationId
+        });
 
       if (status) {
         query.where({ status });
