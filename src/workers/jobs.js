@@ -1296,27 +1296,12 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
   return { lastContactId, messages };
 };
 
-const uploadToS3 = async (key, payload) => {
-  let endpoint = undefined;
-  if (config.AWS_ENDPOINT) {
-    endpoint = new AWS.Endpoint(config.AWS_ENDPOINT);
-  }
-  const s3bucket = new AWS.S3({
-    signatureVersion: "v4",
-    params: { Bucket: config.AWS_S3_BUCKET_NAME },
-    endpoint
-  });
-
-  const uploadPparams = { Key: key, Body: payload };
-  await s3bucket.putObject(uploadPparams).promise();
-
-  const exportUrlParams = { Key: key, Expires: 86400 };
-  const campaignExportUrl = await s3bucket.getSignedUrl(
-    "getObject",
-    exportUrlParams
-  );
-
-  return campaignExportUrl;
+const uploadToCloud = async (key, payload) => {
+  const { upload, getDownloadUrl } = require(`./exports/${
+    config.EXPORT_DRIVER
+  }`);
+  await upload(config.AWS_S3_BUCKET_NAME, key, payload);
+  return getDownloadUrl(config.AWS_S3_BUCKET_NAME, key);
 };
 
 const deleteJob = async (jobId, retries = 0) => {
@@ -1404,11 +1389,19 @@ export async function exportCampaign(job) {
     logger.error("Error building CSVs:", exc);
   }
 
-  if (
-    config.AWS_ACCESS_AVAILABLE ||
-    (config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY)
-  ) {
-    // Attempt upload to AWS S3
+  const validAwsCredentials =
+    config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY;
+  const valudGcpCredentials = !!config.GOOGLE_APPLICATION_CREDENTIALS;
+  const validS3Config =
+    config.EXPORT_DRIVER === "s3" &&
+    (validAwsCredentials || config.AWS_ACCESS_AVAILABLE);
+  const validGcpHmacConfig =
+    config.EXPORT_DRIVER === "gs" && validAwsCredentials;
+  const validGcpConfig =
+    config.EXPORT_DRIVER === "gs-json" && valudGcpCredentials;
+
+  if (validS3Config || validGcpHmacConfig || validGcpConfig) {
+    // Attempt upload to cloud storage
     const objectKeyPrefix = config.AWS_S3_KEY_PREFIX;
     const safeTitle = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
     const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
@@ -1416,8 +1409,8 @@ export async function exportCampaign(job) {
     const messagesKey = `${campaignContactsKey}-messages.csv`;
     try {
       const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
-        uploadToS3(campaignContactsKey, campaignsCsv),
-        uploadToS3(messagesKey, messagesCsv)
+        uploadToCloud(campaignContactsKey, campaignsCsv),
+        uploadToCloud(messagesKey, messagesCsv)
       ]);
       await sendEmail({
         to: notificationEmail,
@@ -1435,7 +1428,7 @@ export async function exportCampaign(job) {
       });
       logger.info(`Successfully exported ${campaignId}`);
     } catch (err) {
-      logger.error("Error uploading to S3", err);
+      logger.error("Error uploading to cloud storage", err);
 
       await sendEmail({
         to: notificationEmail,
@@ -1445,9 +1438,9 @@ export async function exportCampaign(job) {
       });
     }
   } else {
-    logger.debug("Would have saved the following to S3:");
-    logger.debug(campaignCsv);
-    logger.debug(messageCsv);
+    logger.debug("Would have saved the following to cloud storage:");
+    logger.debug(campaignsCsv);
+    logger.debug(messagesCsv);
   }
 
   // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)

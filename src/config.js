@@ -306,10 +306,19 @@ if (isClient()) {
       choices: ["hex"],
       default: "hex"
     }),
+    EXPORT_DRIVER: str({
+      desc: "Which cloud storage driver to use for exports.",
+      choices: ["s3", "gs-json"], // eventually add support for GCP w/ HMAC interoperability: ["gs"]
+      default: "s3"
+    }),
     FIX_ORGLESS: bool({
       desc:
         "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
       default: false
+    }),
+    GOOGLE_APPLICATION_CREDENTIALS: str({
+      desc: "JSON token for service account",
+      default: undefined
     }),
     GRAPHQL_URL: str({
       desc: "Optional URL for pointing GraphQL API requests. ",
