@@ -2695,18 +2695,11 @@ const rootResolvers = {
           "assignment_request.*",
           "user.id as user_id",
           "user.first_name",
-          "user.last_name",
-          "organization.id as organization_id"
+          "user.last_name"
         )
         .join("user", "user_id", "=", "user.id")
-        .join(
-          "organization",
-          "assignment_request.organization_id",
-          "=",
-          "organization.id"
-        )
         .where({
-          "assignment_request.organization_id": organizationId
+          organization_id: organizationId
         });
 
       if (status) {
