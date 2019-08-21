@@ -2695,11 +2695,12 @@ const rootResolvers = {
           "assignment_request.*",
           "user.id as user_id",
           "user.first_name",
-          "user.last_name",
-          "organization.id as organization_id"
+          "user.last_name"
         )
         .join("user", "user_id", "=", "user.id")
-        .join("organization", "organization_id", "=", "organization.id");
+        .where({
+          organization_id: organizationId
+        });
 
       if (status) {
         query.where({ status });
