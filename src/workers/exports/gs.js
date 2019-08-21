@@ -76,8 +76,10 @@ const getCanonicalRequest = (bucket, key) => {
  * @param {string} key Name of key of destination object
  * @param {Buffer|Uint8Array|Blob|string|Readable} payload Payload to upload
  */
-const upload = async (bucket, key, payload) =>
-  awsUpload(bucket, key, payload, awsEndpoint);
+const upload = async (bucket, key, payload) => {
+  throw new Error("Unimplemented storage engine!");
+  return awsUpload(bucket, key, payload, awsEndpoint);
+};
 
 /**
  * Get a signed URL for an object that is valid for 24 hours.
@@ -87,6 +89,8 @@ const upload = async (bucket, key, payload) =>
  * @returns {string} Signed download URL
  */
 const getDownloadUrl = async (bucket, key) => {
+  throw new Error("Unimplemented storage engine!");
+
   // See https://cloud.google.com/storage/docs/access-control/signing-urls-manually
   const currentDatetime = new Date().toISOString();
   const credentialScope = getCredentialScope();
