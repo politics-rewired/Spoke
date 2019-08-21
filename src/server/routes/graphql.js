@@ -5,6 +5,7 @@ import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
 
 import mocks from "../api/mocks";
 import { createLoaders } from "../models";
+import { config } from "../../config";
 import { resolvers } from "../api/schema";
 import { schema } from "../../api/schema";
 
@@ -31,11 +32,13 @@ router.use(
   }))
 );
 
-router.get(
-  "/graphiql",
-  graphiqlExpress({
-    endpointURL: "/graphql"
-  })
-);
+if (!config.isProduction) {
+  router.get(
+    "/graphiql",
+    graphiqlExpress({
+      endpointURL: "/graphql"
+    })
+  );
+}
 
 export default router;
