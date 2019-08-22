@@ -2482,39 +2482,77 @@ const rootMutations = {
 
       return true;
     },
-    saveTeam: async (_, { organizationId, team }, { user }) => {
+    saveTeams: async (_, { organizationId, teams }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      // Update existing team
-      if (team.id) {
-        const [updatedTeam] = await r
-          .knex("team")
-          .update({
-            title: team.title,
-            description: team.description,
-            assignment_priority: team.assignmentPriority
-          })
-          .where({
-            id: team.id,
-            organization_id: organizationId
-          })
-          .returning("*");
-        if (!updatedTeam) throw new Error("No matching team to update!");
-        return updatedTeam;
-      }
+      const stripUndefined = obj => {
+        const result = { ...obj };
+        Object.keys(result).forEach(
+          key => result[key] === undefined && delete result[key]
+        );
+        return result;
+      };
 
-      // Create new team
-      const [newTeam] = await r
-        .knex("team")
-        .insert({
-          organization_id: organizationId,
-          author_id: user.id,
-          title: team.title,
-          description: team.description,
-          assignment_priority: team.assignmentPriority
-        })
-        .returning("*");
-      return newTeam;
+      const updatedTeams = await r.knex.transaction(async trx => {
+        const isTeamOrg = team => team.id && team.id === "general";
+        const orgTeam = teams.find(isTeamOrg);
+        if (orgTeam) {
+          let { features: currentFeatures } = await trx("organization")
+            .where({ id: organizationId })
+            .first("features");
+          currentFeatures = JSON.parse(currentFeatures);
+          let nextFeatures = stripUndefined({
+            textRequestFormEnabled: orgTeam.isAssignmentEnabled,
+            textRequestType: orgTeam.assignmentType,
+            textRequestMaxCount: orgTeam.maxRequestCount
+          });
+          nextFeatures = Object.assign({}, currentFeatures, nextFeatures);
+          await trx("organization")
+            .update({ features: JSON.stringify(nextFeatures) })
+            .where({ id: organizationId });
+        }
+
+        const nonOrgTeams = teams.filter(team => !isTeamOrg(team));
+        return Promise.all(
+          nonOrgTeams.map(async team => {
+            const payload = stripUndefined({
+              title: team.title,
+              description: team.description,
+              text_color: team.textColor,
+              background_color: team.backgroundColor,
+              is_assignment_enabled: team.isAssignmentEnabled,
+              assignment_priority: team.assignmentPriority,
+              assignment_type: team.assignmentType,
+              max_request_count: team.maxRequestCount
+            });
+
+            // Update existing team
+            if (team.id) {
+              const [updatedTeam] = await trx("team")
+                .update(payload)
+                .where({
+                  id: team.id,
+                  organization_id: organizationId
+                })
+                .returning("*");
+              if (!updatedTeam) throw new Error("No matching team to update!");
+              return updatedTeam;
+            }
+
+            // Create new team
+            const [newTeam] = await trx("team")
+              .insert({
+                organization_id: organizationId,
+                author_id: user.id,
+                ...payload
+              })
+              .returning("*");
+            return newTeam;
+          })
+        );
+      });
+
+      return updatedTeams;
     },
     deleteTeam: async (_, { organizationId, teamId }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");

@@ -18,7 +18,10 @@ class TexterRequest extends React.Component {
 
     this.state = {
       count: this.props.data.organization
-        ? this.props.data.organization.textRequestMaxCount
+        ? this.props.data.organization.myCurrentAssignmentTarget
+          ? this.props.data.organization.myCurrentAssignmentTarget
+              .maxRequestCount
+          : undefined
         : undefined,
       email: undefined,
       submitting: false,
@@ -42,33 +45,27 @@ class TexterRequest extends React.Component {
       const message = response.data.requestTexts;
 
       if (message.includes("Created")) {
-        this.setState({ submitting: false, finished: true });
+        this.setState({ finished: true });
       } else if (message === "Unrecognized email") {
         this.setState({
-          error: `Unrecognized email: please make sure you're logged into Spoke with the same email as Slack.`,
-          submitting: false
+          error: `Unrecognized email: please make sure you're logged into Spoke with the same email as Slack.`
         });
       } else if (
         message === "Not created; a shift already requested < 10 mins ago."
       ) {
         this.setState({
-          error: "Sorry - you just requested! Please wait 10 minutes.",
-          submitting: false
+          error: "Sorry - you just requested! Please wait 10 minutes."
         });
       } else if (message === "No texts available at the moment") {
-        this.setState({
-          error: message,
-          submitting: false
-        });
+        this.setState({ error: message });
       } else {
-        this.setState({
-          finished: true,
-          submitting: false
-        });
+        this.setState({ finished: true });
       }
     } catch (e) {
       console.error(e);
-      this.setState({ error: e, submitting: false });
+      this.setState({ error: e });
+    } finally {
+      this.setState({ submitting: false });
     }
   };
 
@@ -81,11 +78,13 @@ class TexterRequest extends React.Component {
       return <LoadingIndicator />;
     }
 
-    const {
-      textsAvailable,
-      textRequestFormEnabled,
-      textRequestMaxCount
-    } = this.props.data.organization;
+    const { myCurrentAssignmentTarget } = this.props.data.organization;
+
+    const textsAvailable = !!myCurrentAssignmentTarget;
+    const textRequestFormEnabled = !!myCurrentAssignmentTarget;
+    const textRequestMaxCount = myCurrentAssignmentTarget
+      ? myCurrentAssignmentTarget.maxRequestCount
+      : undefined;
 
     if (this.props.data.currentUser.currentRequest) {
       const { amount, status } = this.props.data.currentUser.currentRequest;
@@ -203,9 +202,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
         organization(id: $organizationId) {
           id
-          textRequestFormEnabled
-          textRequestMaxCount
-          textsAvailable
+          myCurrentAssignmentTarget {
+            type
+            countLeft
+            maxRequestCount
+            teamTitle
+          }
         }
       }
     `,

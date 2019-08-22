@@ -9,6 +9,7 @@ import loadData from "../hoc/load-data";
 import wrapMutations from "../hoc/wrap-mutations";
 import CampaignListLoader from "./CampaignListLoader";
 import { OperationDialog, operations } from "./OperationDialog";
+import AssignmentHUD from "./AssignmentHUD";
 
 export class CampaignList extends React.Component {
   state = {
@@ -71,21 +72,7 @@ export class CampaignList extends React.Component {
             executeOperation={this.executeOperation}
           />
         )}
-        {currentAssignmentTargets.length > 0 && (
-          <Paper style={{ padding: 10 }}>
-            <h3> Currently Assigning {currentAssignmentTargets[0].type} to </h3>
-            {currentAssignmentTargets.map(cat => (
-              <div>
-                <h4>
-                  {cat.teamTitle}: {cat.campaign.id}: {cat.campaign.title} ({
-                    cat.countLeft
-                  }{" "}
-                  left)
-                </h4>
-              </div>
-            ))}
-          </Paper>
-        )}
+        <AssignmentHUD assignmentTargets={currentAssignmentTargets} />
         <CampaignListLoader
           organizationId={organizationId}
           campaignsFilter={campaignsFilter}
@@ -217,6 +204,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             }
             teamTitle
             countLeft
+            enabled
           }
         }
       }

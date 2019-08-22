@@ -311,7 +311,7 @@ const rootSchema = `
     setNumbersApiKey(organizationId: String!, numbersApiKey: String): Organization!
     saveTag(organizationId: String!, tag: TagInput!): Tag!
     deleteTag(organizationId: String!, tagId: String!): Boolean!
-    saveTeam(organizationId: String!, team: TeamInput!): Team!
+    saveTeams(organizationId: String!, teams: [TeamInput]!): [Team]!
     deleteTeam(organizationId: String!, teamId: String!): Boolean!
   }
 

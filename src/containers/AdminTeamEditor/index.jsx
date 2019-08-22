@@ -56,7 +56,7 @@ class AdminTeamEditor extends Component {
     ]);
     this.setState({ isWorking: true });
     try {
-      const result = await this.props.mutations.saveTeam(team);
+      const result = await this.props.mutations.saveTeams([team]);
       if (result.errors) throw new Error(result.errors);
     } catch (error) {
       this.setState({ error: error.message });
@@ -196,17 +196,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
 });
 
 const mapMutationsToProps = ({ ownProps }) => ({
-  saveTeam: team => ({
+  saveTeams: teams => ({
     mutation: gql`
-      mutation saveTeam($organizationId: String!, $team: TeamInput!) {
-        saveTeam(organizationId: $organizationId, team: $team) {
+      mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
+        saveTeams(organizationId: $organizationId, teams: $teams) {
           id
         }
       }
     `,
     variables: {
       organizationId: ownProps.params.organizationId,
-      team
+      teams
     },
     refetchQueries: ["getOrganizationTeams"]
   }),

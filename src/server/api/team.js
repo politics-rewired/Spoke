@@ -13,7 +13,10 @@ export const resolvers = {
         .knex("user")
         .where({ id: team.author_id })
         .first("*"),
+    isAssignmentEnabled: async team => team.is_assignment_enabled,
     assignmentPriority: async team => team.assignment_priority,
+    assignmentType: async team => team.assignment_type,
+    maxRequestCount: async team => team.max_request_count,
     createdAt: async team => team.created_at,
 
     users: async (team, {}, { user }) => {

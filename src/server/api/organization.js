@@ -115,29 +115,34 @@ export const resolvers = {
       );
       return !!assignmentTarget;
     },
-    // TODO – deprecate this resolver
-    currentAssignmentTarget: async organization => {
-      const cat = await currentAssignmentTarget(organization.id);
-
-      if (cat) {
-        const cl = await countLeft(cat.type, cat.campaign.id);
-        return Object.assign({}, cat, { countLeft: cl });
-      } else {
-        return cat;
-      }
-    },
     currentAssignmentTargets: async organization => {
       const cats = await allCurrentAssignmentTargets(organization.id);
       const formatted = cats.map(cat => ({
-        type: cat.type,
+        type: cat.assignment_type,
         countLeft: parseInt(cat.count_left),
         campaign: {
           id: cat.id,
           title: cat.title
         },
-        teamTitle: cat.team_title
+        teamTitle: cat.team_title,
+        enabled: cat.enabled
       }));
       return formatted;
+    },
+    myCurrentAssignmentTarget: async (organization, _, context) => {
+      const assignmentTarget = await myCurrentAssignmentTarget(
+        context.user.id,
+        organization.id
+      );
+
+      return assignmentTarget
+        ? {
+            type: assignmentTarget.type,
+            countLeft: parseInt(assignmentTarget.count_left),
+            maxRequestCount: parseInt(assignmentTarget.max_request_count),
+            teamTitle: assignmentTarget.team_title
+          }
+        : null;
     },
     escalatedConversationCount: async organization => {
       const subQuery = r.knex
