@@ -2494,8 +2494,27 @@ const rootMutations = {
       };
 
       const updatedTeams = await r.knex.transaction(async trx => {
+        const isTeamOrg = team => team.id && team.id === "general";
+        const orgTeam = teams.find(isTeamOrg);
+        if (orgTeam) {
+          let { features: currentFeatures } = await trx("organization")
+            .where({ id: organizationId })
+            .first("features");
+          currentFeatures = JSON.parse(currentFeatures);
+          let nextFeatures = stripUndefined({
+            textRequestFormEnabled: orgTeam.isAssignmentEnabled,
+            textRequestType: orgTeam.assignmentType,
+            textRequestMaxCount: orgTeam.maxRequestCount
+          });
+          nextFeatures = Object.assign({}, currentFeatures, nextFeatures);
+          await trx("organization")
+            .update({ features: JSON.stringify(nextFeatures) })
+            .where({ id: organizationId });
+        }
+
+        const nonOrgTeams = teams.filter(team => !isTeamOrg(team));
         await Promise.all(
-          teams.map(async team => {
+          nonOrgTeams.map(async team => {
             const payload = stripUndefined({
               title: team.title,
               description: team.description,
