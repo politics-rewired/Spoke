@@ -2485,15 +2485,27 @@ const rootMutations = {
     saveTeam: async (_, { organizationId, team }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
+      const stripUndefined = obj =>
+        Object.keys(obj).forEach(
+          key => obj[key] === undefined && delete obj[key]
+        );
+
+      const payload = stripUndefined({
+        title: team.title,
+        description: team.description,
+        text_color: team.textColor,
+        background_color: team.backgroundColor,
+        is_assignment_enabled: team.isAssignmentEnabled,
+        assignment_priority: team.assignmentPriority,
+        assignment_type: team.assignmentType,
+        max_request_count: team.maxRequestCount
+      });
+
       // Update existing team
       if (team.id) {
         const [updatedTeam] = await r
           .knex("team")
-          .update({
-            title: team.title,
-            description: team.description,
-            assignment_priority: team.assignmentPriority
-          })
+          .update(payload)
           .where({
             id: team.id,
             organization_id: organizationId
@@ -2509,9 +2521,7 @@ const rootMutations = {
         .insert({
           organization_id: organizationId,
           author_id: user.id,
-          title: team.title,
-          description: team.description,
-          assignment_priority: team.assignmentPriority
+          ...payload
         })
         .returning("*");
       return newTeam;
