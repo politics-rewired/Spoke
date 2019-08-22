@@ -133,7 +133,8 @@ export async function getCurrentAssignmentType(organizationId) {
 
   return {
     assignmentType: features.textRequestType,
-    generalEnabled: features.textRequestFormEnabled || false
+    generalEnabled: features.textRequestFormEnabled || false,
+    orgMaxRequestCount: features.textRequestMaxCount || 0
   };
 }
 
@@ -251,9 +252,11 @@ export async function myCurrentAssignmentTargets(
   organizationId,
   trx = r.knex
 ) {
-  const { assignmentType, generalEnabled } = await getCurrentAssignmentType(
-    organizationId
-  );
+  const {
+    assignmentType,
+    generalEnabled,
+    orgMaxRequestCount
+  } = await getCurrentAssignmentType(organizationId);
 
   const campaignView = {
     UNREPLIED: "assignable_campaigns_with_needs_reply",
@@ -294,7 +297,7 @@ export async function myCurrentAssignmentTargets(
       ),
       needs_message_team_campaign_pairings as (
         select
-            teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type,
+            teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type, teams.max_request_count,
             campaign.id as id, campaign.title, (
               select count(*)
               from assignable_needs_message
@@ -312,7 +315,7 @@ export async function myCurrentAssignmentTargets(
       ),
       needs_reply_team_campaign_pairings as (
         select
-            teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type,
+            teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type, teams.max_request_count,
             campaign.id as id, campaign.title, (
               select count(*)
               from assignable_needs_reply
@@ -330,7 +333,7 @@ export async function myCurrentAssignmentTargets(
       ),
       general_campaign_pairing as (
         select
-          '+infinity'::float as priority, -1 as team_id, 'General' as team_title, ${generalEnabledBit}::boolean as enabled, '${assignmentType}' as assignment_type,
+          '+infinity'::float as priority, -1 as team_id, 'General' as team_title, ${generalEnabledBit}::boolean as enabled, '${assignmentType}' as assignment_type, ${orgMaxRequestCount} as max_request_count,
           campaigns.id, campaigns.title, (
             select count(*)
             from ${contactsView}
@@ -361,6 +364,7 @@ export async function myCurrentAssignmentTargets(
         ( select * from general_campaign_pairing )
       )
       select * from my_possible_team_assignments
+      where enabled = true
       order by priority asc`,
     [organizationId, organizationId, organizationId, userId]
   );

@@ -15,6 +15,7 @@ export const schema = `
     countLeft: Int
     teamTitle: String
     enabled: Boolean
+    maxRequestCount: Int
   }
 
   type Organization {
@@ -35,8 +36,8 @@ export const schema = `
     textRequestMaxCount: Int
     textsAvailable: Boolean
     pendingAssignmentRequestCount: Int!
-    currentAssignmentTarget: AssignmentTarget
     currentAssignmentTargets: [AssignmentTarget]!
+    myCurrentAssignmentTarget: AssignmentTarget
     escalatedConversationCount: Int!
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!

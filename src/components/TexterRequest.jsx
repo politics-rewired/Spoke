@@ -18,7 +18,10 @@ class TexterRequest extends React.Component {
 
     this.state = {
       count: this.props.data.organization
-        ? this.props.data.organization.textRequestMaxCount
+        ? this.props.data.organization.myCurrentAssignmentTarget
+          ? this.props.data.organization.myCurrentAssignmentTarget
+              .maxRequestCount
+          : undefined
         : undefined,
       email: undefined,
       submitting: false,
@@ -75,11 +78,13 @@ class TexterRequest extends React.Component {
       return <LoadingIndicator />;
     }
 
-    const {
-      textsAvailable,
-      textRequestFormEnabled,
-      textRequestMaxCount
-    } = this.props.data.organization;
+    const { myCurrentAssignmentTarget } = this.props.data.organization;
+
+    const textsAvailable = !!myCurrentAssignmentTarget;
+    const textRequestFormEnabled = !!myCurrentAssignmentTarget;
+    const textRequestMaxCount = myCurrentAssignmentTarget
+      ? myCurrentAssignmentTarget.maxRequestCount
+      : undefined;
 
     if (this.props.data.currentUser.currentRequest) {
       const { amount, status } = this.props.data.currentUser.currentRequest;
@@ -197,9 +202,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
         organization(id: $organizationId) {
           id
-          textRequestFormEnabled
-          textRequestMaxCount
-          textsAvailable
+          myCurrentAssignmentTarget {
+            type
+            countLeft
+            maxRequestCount
+            teamTitle
+          }
         }
       }
     `,
