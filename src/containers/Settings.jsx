@@ -1,22 +1,24 @@
-import PropTypes from "prop-types";
 import React from "react";
-import loadData from "./hoc/load-data";
+import PropTypes from "prop-types";
+import moment from "moment";
 import gql from "graphql-tag";
-import wrapMutations from "./hoc/wrap-mutations";
-import GSForm from "../components/forms/GSForm";
+import * as yup from "yup";
+
 import Form from "react-formal";
+import { Card, CardText, CardActions, CardHeader } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
-import GSSubmitButton from "../components/forms/GSSubmitButton";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import * as yup from "yup";
-import { Card, CardText, CardActions, CardHeader } from "material-ui/Card";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
-import { StyleSheet, css } from "aphrodite";
 import Toggle from "material-ui/Toggle";
-import moment from "moment";
+import { StyleSheet, css } from "aphrodite";
+
 import { TextRequestType } from "../api/organization";
+import loadData from "./hoc/load-data";
+import wrapMutations from "./hoc/wrap-mutations";
+import GSForm from "../components/forms/GSForm";
+import GSSubmitButton from "../components/forms/GSSubmitButton";
 
 const styles = StyleSheet.create({
   sectionCard: {
