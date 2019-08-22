@@ -2513,7 +2513,7 @@ const rootMutations = {
         }
 
         const nonOrgTeams = teams.filter(team => !isTeamOrg(team));
-        await Promise.all(
+        return Promise.all(
           nonOrgTeams.map(async team => {
             const payload = stripUndefined({
               title: team.title,
