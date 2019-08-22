@@ -230,6 +230,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
         ) as count_left
       from ${campaignView} as campaigns
       where campaigns.limit_assignment_to_teams = false
+          and organization_id = ?
       order by id asc
       limit 1
     )
@@ -239,7 +240,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
     union
     ( select * from general_campaign_pairing )
     order by priority asc`,
-    [organizationId, organizationId]
+    [organizationId, organizationId, organizationId]
   );
 
   return teamToCampaigns;
@@ -338,6 +339,7 @@ export async function myCurrentAssignmentTargets(
           ) as count_left
         from ${campaignView} as campaigns
         where campaigns.limit_assignment_to_teams = false
+            and organization_id = ?
         order by id asc
         limit 1
       ),
@@ -360,7 +362,7 @@ export async function myCurrentAssignmentTargets(
       )
       select * from my_possible_team_assignments
       order by priority asc`,
-    [organizationId, organizationId, userId]
+    [organizationId, organizationId, organizationId, userId]
   );
 
   const results = teamToCampaigns.slice(0, 1).map(ttc =>
