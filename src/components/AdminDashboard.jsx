@@ -75,7 +75,7 @@ class AdminDashboard extends React.Component {
       {
         name: "Campaigns",
         path: "campaigns",
-        role: "SUPERVOLUNTEER"
+        role: "ADMIN"
       },
       {
         name: "People",
@@ -100,7 +100,7 @@ class AdminDashboard extends React.Component {
       {
         name: "Escalated Convos",
         path: "escalated",
-        role: "OWNER",
+        role: "ADMIN",
         badge: {
           count: escalatedConversationCount
         }
@@ -118,7 +118,7 @@ class AdminDashboard extends React.Component {
       {
         name: "Assignment Requests",
         path: "assignment-requests",
-        role: "ADMIN",
+        role: "SUPERVOLUNTEER",
         badge: {
           count: pendingAssignmentRequestCount
         }
@@ -126,7 +126,7 @@ class AdminDashboard extends React.Component {
       {
         name: "Settings",
         path: "settings",
-        role: "SUPERVOLUNTEER"
+        role: "OWNER"
       }
     ];
 
