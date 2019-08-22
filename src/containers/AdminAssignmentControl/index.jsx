@@ -3,96 +3,72 @@ import PropTypes from "prop-types";
 import gql from "graphql-tag";
 
 import { Card, CardText, CardActions, CardHeader } from "material-ui/Card";
-import AutoComplete from "material-ui/AutoComplete";
 import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
 
-import { TextRequestType } from "../../api/organization";
 import loadData from "../../containers/hoc/load-data";
 import AssignmentRow from "./AssignmentRow";
 
-// Mapping from Team type to AutoComplete data source
-const dataSourceConfig = {
-  text: "title",
-  value: "id"
-};
-
 class AdminAssignmentControl extends Component {
   state = {
-    generalAssignment: {
-      teamId: "general",
-      teamName: "General",
-      assignmentType: "NONE",
-      maxCount: 100
-    },
-    teamAssignments: [],
+    changes: {},
     working: false,
     error: undefined
   };
 
-  selectableTeams = () => {
-    const { teamAssignments } = this.state;
-    const { teams = [] } = this.props.organizationTeams.organization;
-    const assignedTeamIds = new Set(
-      teamAssignments.map(assignment => assignment.teamId)
-    );
-    return teams.filter(team => !assignedTeamIds.has(team.id));
-  };
-
-  handleTeamSelection = (team, index) => {
-    // Do not handle <enter> as we only want to allow selection directly from the list
-    if (index === -1) return;
-
-    const { teamAssignments } = this.state;
-    const assignmentPredicate = assignment => assignment.teamId === team.id;
-    const isAlreadyAssigned =
-      teamAssignments.findIndex(assignmentPredicate) > -1;
-    if (isAlreadyAssigned) return;
-
-    teamAssignments.push({
-      teamId: team.id,
-      teamName: team.title,
-      assignmentType: TextRequestType.UNSENT,
-      maxCount: 500
+  assignmentPoolsWithChanges = () => {
+    const { changes } = this.state;
+    let assignmentPools = this.assignmentPoolsFromProps();
+    assignmentPools = assignmentPools.map(pool => {
+      const poolChanges = changes[pool.id] || {};
+      return Object.assign(pool, poolChanges);
     });
-    this.setState({ teamAssignments });
+    return assignmentPools;
   };
 
-  handleChangeGeneralAssignment = payload => {
-    const { generalAssignment } = this.state;
-    Object.assign(generalAssignment, payload);
-    return this.setState({ generalAssignment });
+  assignmentPoolsFromProps = () => {
+    const {
+      textRequestFormEnabled,
+      textRequestType,
+      textRequestMaxCount,
+      teams
+    } = this.props.assignmentConfiguration.organization;
+    const generalAssignment = {
+      id: "general",
+      title: "General",
+      textColor: "",
+      backgroundColor: "",
+      isAssignmentEnabled: textRequestFormEnabled,
+      assignmentType: textRequestType,
+      maxRequestCount: textRequestMaxCount
+    };
+
+    const assignmentPools = [generalAssignment].concat(teams);
+    return assignmentPools;
   };
 
-  handleDeleteGeneralAssignment = () => {
-    const { generalAssignment } = this.state;
-    Object.assign(generalAssignment, { assignmentType: "NONE" });
-    return this.setState({ generalAssignment });
-  };
-
-  createHandleChangeAssignment = teamId => payload => {
-    const { teamAssignments } = this.state;
-    const assignment = teamAssignments.find(
-      assignment => assignment.teamId === teamId
-    );
-    Object.assign(assignment, payload);
-    this.setState({ teamAssignments });
-  };
-
-  createHandleDeleteAssignment = teamId => () => {
-    const teamAssignments = this.state.teamAssignments.filter(
-      assignment => assignment.teamId !== teamId
-    );
-    this.setState({ teamAssignments });
+  createHandleChangeAssignment = poolId => payload => {
+    const { changes } = this.state;
+    const poolChanges = this.state.changes[poolId] || {};
+    changes[poolId] = Object.assign(poolChanges, payload);
+    this.setState({ changes });
   };
 
   handleSaveAssignmentControls = () => {
+    const { changes } = this.state;
+    const payloads = Object.keys(changes).map(key => ({
+      id: key,
+      ...changes[key]
+    }));
+
     this.setState({ working: true });
     try {
       // TODO -- stub
+      console.log("Sending payloads", payloads);
       const response = { success: "true" };
       if (response.errors) throw response.errors;
+      this.setState({ changes: {} });
     } catch (err) {
       this.setState({ error: err.message });
     } finally {
@@ -104,7 +80,10 @@ class AdminAssignmentControl extends Component {
 
   render() {
     const { className, containerStyle, style } = this.props;
-    const { generalAssignment, teamAssignments, working, error } = this.state;
+    const { changes, working, error } = this.state;
+    const hasChanges = Object.keys(changes).length > 0;
+
+    const assignmentPools = this.assignmentPoolsWithChanges();
 
     const dialogActions = [
       <FlatButton
@@ -118,37 +97,20 @@ class AdminAssignmentControl extends Component {
       <Card className={className} containerStyle={containerStyle} style={style}>
         <CardHeader title="Assignment Request Controls" />
         <CardText>
-          <AssignmentRow
-            assignment={generalAssignment}
-            canBeNoneType={true}
-            isRowDisabled={working}
-            onChange={this.handleChangeGeneralAssignment}
-            onDelete={this.handleDeleteGeneralAssignment}
-          />
-          {teamAssignments.map(assignment => (
+          {assignmentPools.map(assignmentPool => (
             <AssignmentRow
-              key={assignment.teamId}
-              assignment={assignment}
+              key={assignmentPool.id}
+              assignmentPool={assignmentPool}
               isRowDisabled={working}
-              onChange={this.createHandleChangeAssignment(assignment.teamId)}
-              onDelete={this.createHandleDeleteAssignment(assignment.teamId)}
+              onChange={this.createHandleChangeAssignment(assignmentPool.id)}
             />
           ))}
-          <AutoComplete
-            floatingLabelText="Select team"
-            filter={AutoComplete.fuzzyFilter}
-            openOnFocus={true}
-            dataSource={this.selectableTeams()}
-            dataSourceConfig={dataSourceConfig}
-            disabled={working}
-            onNewRequest={this.handleTeamSelection}
-          />
         </CardText>
-        <CardActions>
+        <CardActions style={{ textAlign: "right" }}>
           <RaisedButton
             label="Save"
             primary
-            disabled={working}
+            disabled={working || !hasChanges}
             onClick={this.handleSaveAssignmentControls}
           />
         </CardActions>
@@ -167,18 +129,22 @@ class AdminAssignmentControl extends Component {
 }
 
 const mapQueriesToProps = ({ ownProps }) => ({
-  organizationTeams: {
+  assignmentConfiguration: {
     query: gql`
-      query getOrganizationTeams($organizationId: String!) {
+      query getAssignmentConfiguration($organizationId: String!) {
         organization(id: $organizationId) {
           id
+          textRequestFormEnabled
+          textRequestType
+          textRequestMaxCount
           teams {
             id
             title
-            description
             textColor
             backgroundColor
-            assignmentPriority
+            isAssignmentEnabled
+            assignmentType
+            maxRequestCount
           }
         }
       }
@@ -201,8 +167,7 @@ AdminAssignmentControl.defaultProps = {
 
 AdminAssignmentControl.propTypes = {
   params: PropTypes.object.isRequired,
-  organizationId: PropTypes.string.isRequired,
-  organizationTeams: PropTypes.object.isRequired,
+  assignmentConfiguration: PropTypes.object.isRequired,
   className: PropTypes.string,
   containerStyle: PropTypes.object,
   style: PropTypes.object

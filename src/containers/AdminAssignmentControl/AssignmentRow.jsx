@@ -3,40 +3,61 @@ import PropTypes from "prop-types";
 
 import Chip from "material-ui/Chip";
 import SelectField from "material-ui/SelectField";
-import TextField from "material-ui/TextField";
 import MenuItem from "material-ui/MenuItem";
-import IconButton from "material-ui/IconButton";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import { red500 } from "material-ui/styles/colors";
+import TextField from "material-ui/TextField";
+import Toggle from "material-ui/Toggle";
 
 import { TextRequestType } from "../../api/organization";
 
 const AssignmentRow = props => {
+  const { assignmentPool, isRowDisabled, onChange } = props;
   const {
-    assignment,
-    canBeNoneType,
-    isRowDisabled,
-    onChange,
-    onDelete
-  } = props;
-  const { teamName, assignmentType, maxCount } = assignment;
+    title,
+    textColor,
+    backgroundColor,
+    isAssignmentEnabled,
+    assignmentType,
+    maxRequestCount
+  } = assignmentPool;
+
+  const handleToggleIsEnabled = (_event, isAssignmentEnabled) =>
+    onChange({ isAssignmentEnabled });
 
   const handleChangeAssignmentType = (_event, _index, assignmentType) =>
     onChange({ assignmentType });
-  const handleChangeMaxCount = (_event, maxCount) => onChange({ maxCount });
+
+  const handleChangeMaxCount = (_event, maxRequestCount) =>
+    onChange({ maxRequestCount });
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
-      <Chip style={{ display: "inline-block" }}>{teamName}</Chip>
-      <div style={{ flexGrow: 1 }} />
+      <div style={{ minWidth: "200px" }}>
+        <Chip
+          style={{ display: "inline-block" }}
+          labelColor={textColor}
+          backgroundColor={backgroundColor}
+        >
+          {title}
+        </Chip>
+      </div>
+      <div>
+        <Toggle
+          label="Enable assignment?"
+          labelPosition="right"
+          toggled={isAssignmentEnabled}
+          disabled={isRowDisabled}
+          style={{ display: "inline-block" }}
+          onToggle={handleToggleIsEnabled}
+        />
+      </div>
+      <div style={{ flex: 1 }} />
       <SelectField
-        style={{ marginLeft: "10px" }}
+        style={{ marginLeft: "20px" }}
         floatingLabelText="Assignment Type"
         value={assignmentType}
-        disabled={isRowDisabled}
+        disabled={isRowDisabled || !isAssignmentEnabled}
         onChange={handleChangeAssignmentType}
       >
-        {canBeNoneType && <MenuItem value={"NONE"} primaryText="Disabled" />}
         <MenuItem
           value={TextRequestType.UNSENT}
           primaryText="Unsent Initial Messages"
@@ -47,37 +68,32 @@ const AssignmentRow = props => {
         />
       </SelectField>
       <TextField
-        style={{ marginLeft: "10px", width: "90px" }}
-        floatingLabelText="Max Count"
+        style={{ marginLeft: "10px" }}
+        floatingLabelText="Max to request at once"
         type="number"
-        value={maxCount}
-        disabled={isRowDisabled}
+        value={maxRequestCount}
+        disabled={isRowDisabled || !isAssignmentEnabled}
         onChange={handleChangeMaxCount}
       />
-      <IconButton disabled={isRowDisabled} onClick={onDelete}>
-        <DeleteForeverIcon color={red500} />
-      </IconButton>
     </div>
   );
 };
 
 AssignmentRow.defaultProps = {
-  canBeNoneType: false,
-  isRowDisabled: false,
-  onDelete: () => {}
+  isRowDisabled: false
 };
 
 AssignmentRow.propTypes = {
-  assignment: PropTypes.shape({
-    teamId: PropTypes.string.isRequired,
-    teamName: PropTypes.string.isRequired,
+  assignmentPool: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    textColor: PropTypes.string.isRequired,
+    backgroundColor: PropTypes.string.isRequired,
+    isAssignmentEnabled: PropTypes.bool.isRequired,
     assignmentType: PropTypes.string.isRequired,
-    maxCount: PropTypes.number.isRequired
+    maxRequestCount: PropTypes.number.isRequired
   }).isRequired,
-  canBeNoneType: PropTypes.bool,
   isRowDisabled: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  onDelete: PropTypes.func
+  onChange: PropTypes.func.isRequired
 };
 
 export default AssignmentRow;
