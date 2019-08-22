@@ -19,7 +19,6 @@ import loadData from "./hoc/load-data";
 import wrapMutations from "./hoc/wrap-mutations";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
-import SettingsAssignmentRequest from "../components/SettingsAssignmentRequest";
 
 const styles = StyleSheet.create({
   sectionCard: {
@@ -325,11 +324,6 @@ class Settings extends React.Component {
         </Card>
 
         {this.renderTexterRequestFormSettings()}
-
-        <SettingsAssignmentRequest
-          className={css(styles.sectionCard)}
-          organizationId={organization.id}
-        />
 
         <Card className={css(styles.sectionCard)}>
           <CardHeader title="Texting Hours" />

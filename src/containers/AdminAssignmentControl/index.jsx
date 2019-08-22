@@ -18,7 +18,7 @@ const dataSourceConfig = {
   value: "id"
 };
 
-class SettingsAssignmentRequest extends Component {
+class AdminAssignmentControl extends Component {
   state = {
     generalAssignment: {
       teamId: "general",
@@ -184,7 +184,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.organizationId
+      organizationId: ownProps.params.organizationId
     }
   }
 });
@@ -193,13 +193,14 @@ const mapMutationsToProps = () => ({
   // TODO -- stub
 });
 
-SettingsAssignmentRequest.defaultProps = {
+AdminAssignmentControl.defaultProps = {
   className: "",
   containerStyle: {},
   style: {}
 };
 
-SettingsAssignmentRequest.propTypes = {
+AdminAssignmentControl.propTypes = {
+  params: PropTypes.object.isRequired,
   organizationId: PropTypes.string.isRequired,
   organizationTeams: PropTypes.object.isRequired,
   className: PropTypes.string,
@@ -207,7 +208,7 @@ SettingsAssignmentRequest.propTypes = {
   style: PropTypes.object
 };
 
-export default loadData(SettingsAssignmentRequest, {
+export default loadData(AdminAssignmentControl, {
   mapMutationsToProps,
   mapQueriesToProps
 });
