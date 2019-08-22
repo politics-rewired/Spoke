@@ -363,15 +363,14 @@ export async function myCurrentAssignmentTargets(
     [organizationId, organizationId, userId]
   );
 
-  const result =
-    teamToCampaigns.slice(0, 1).map(ttc =>
-      Object.assign(ttc, {
-        type: ttc.assignment_type,
-        campaign: { id: ttc.id, title: ttc.title }
-      })
-    )[0] || null;
+  const results = teamToCampaigns.slice(0, 1).map(ttc =>
+    Object.assign(ttc, {
+      type: ttc.assignment_type,
+      campaign: { id: ttc.id, title: ttc.title }
+    })
+  );
 
-  return result;
+  return results;
 }
 
 export async function myCurrentAssignmentTarget(
