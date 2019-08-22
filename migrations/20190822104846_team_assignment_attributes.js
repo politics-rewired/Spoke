@@ -9,7 +9,7 @@ exports.up = function(knex, Promise) {
 exports.down = function(knex, Promise) {
   return knex.schema.alterTable("team", table => {
     table.dropColumn("is_assignment_enabled");
-    table.dropColumn("is_assignment_enabled");
+    table.dropColumn("assignment_type");
     table.dropColumn("max_request_count");
   });
 };

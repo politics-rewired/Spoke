@@ -6,7 +6,10 @@ export const schema = `
     textColor: String!
     backgroundColor: String!
     author: User
+    isAssignmentEnabled: Boolean!
     assignmentPriority: Int!
+    assignmentType: TextRequestType
+    maxRequestCount: Int
     createdAt: Date!
 
     users: [User]!
@@ -15,10 +18,13 @@ export const schema = `
 
   input TeamInput {
     id: ID
-    title: String!
-    description: String!
-    textColor: String!
-    backgroundColor: String!
-    assignmentPriority: Int!
+    title: String
+    description: String
+    textColor: String
+    backgroundColor: String
+    isAssignmentEnabled: Boolean
+    assignmentPriority: Int
+    assignmentType: TextRequestType
+    maxRequestCount: Int
   }
 `;
