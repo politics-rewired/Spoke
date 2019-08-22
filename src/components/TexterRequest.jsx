@@ -42,33 +42,27 @@ class TexterRequest extends React.Component {
       const message = response.data.requestTexts;
 
       if (message.includes("Created")) {
-        this.setState({ submitting: false, finished: true });
+        this.setState({ finished: true });
       } else if (message === "Unrecognized email") {
         this.setState({
-          error: `Unrecognized email: please make sure you're logged into Spoke with the same email as Slack.`,
-          submitting: false
+          error: `Unrecognized email: please make sure you're logged into Spoke with the same email as Slack.`
         });
       } else if (
         message === "Not created; a shift already requested < 10 mins ago."
       ) {
         this.setState({
-          error: "Sorry - you just requested! Please wait 10 minutes.",
-          submitting: false
+          error: "Sorry - you just requested! Please wait 10 minutes."
         });
       } else if (message === "No texts available at the moment") {
-        this.setState({
-          error: message,
-          submitting: false
-        });
+        this.setState({ error: message });
       } else {
-        this.setState({
-          finished: true,
-          submitting: false
-        });
+        this.setState({ finished: true });
       }
     } catch (e) {
       console.error(e);
-      this.setState({ error: e, submitting: false });
+      this.setState({ error: e });
+    } finally {
+      this.setState({ submitting: false });
     }
   };
 
