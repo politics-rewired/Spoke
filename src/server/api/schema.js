@@ -2485,10 +2485,13 @@ const rootMutations = {
     saveTeam: async (_, { organizationId, team }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      const stripUndefined = obj =>
-        Object.keys(obj).forEach(
-          key => obj[key] === undefined && delete obj[key]
+      const stripUndefined = obj => {
+        const result = { ...obj };
+        Object.keys(result).forEach(
+          key => result[key] === undefined && delete result[key]
         );
+        return result;
+      };
 
       const payload = stripUndefined({
         title: team.title,
