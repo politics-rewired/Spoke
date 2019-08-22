@@ -2482,7 +2482,7 @@ const rootMutations = {
 
       return true;
     },
-    saveTeam: async (_, { organizationId, team }, { user }) => {
+    saveTeams: async (_, { organizationId, teams }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
       const stripUndefined = obj => {
@@ -2493,41 +2493,47 @@ const rootMutations = {
         return result;
       };
 
-      const payload = stripUndefined({
-        title: team.title,
-        description: team.description,
-        text_color: team.textColor,
-        background_color: team.backgroundColor,
-        is_assignment_enabled: team.isAssignmentEnabled,
-        assignment_priority: team.assignmentPriority,
-        assignment_type: team.assignmentType,
-        max_request_count: team.maxRequestCount
+      const updatedTeams = await r.knex.transaction(async trx => {
+        await Promise.all(
+          teams.map(async team => {
+            const payload = stripUndefined({
+              title: team.title,
+              description: team.description,
+              text_color: team.textColor,
+              background_color: team.backgroundColor,
+              is_assignment_enabled: team.isAssignmentEnabled,
+              assignment_priority: team.assignmentPriority,
+              assignment_type: team.assignmentType,
+              max_request_count: team.maxRequestCount
+            });
+
+            // Update existing team
+            if (team.id) {
+              const [updatedTeam] = await trx("team")
+                .update(payload)
+                .where({
+                  id: team.id,
+                  organization_id: organizationId
+                })
+                .returning("*");
+              if (!updatedTeam) throw new Error("No matching team to update!");
+              return updatedTeam;
+            }
+
+            // Create new team
+            const [newTeam] = await trx("team")
+              .insert({
+                organization_id: organizationId,
+                author_id: user.id,
+                ...payload
+              })
+              .returning("*");
+            return newTeam;
+          })
+        );
       });
 
-      // Update existing team
-      if (team.id) {
-        const [updatedTeam] = await r
-          .knex("team")
-          .update(payload)
-          .where({
-            id: team.id,
-            organization_id: organizationId
-          })
-          .returning("*");
-        if (!updatedTeam) throw new Error("No matching team to update!");
-        return updatedTeam;
-      }
-
-      // Create new team
-      const [newTeam] = await r
-        .knex("team")
-        .insert({
-          organization_id: organizationId,
-          author_id: user.id,
-          ...payload
-        })
-        .returning("*");
-      return newTeam;
+      return updatedTeams;
     },
     deleteTeam: async (_, { organizationId, teamId }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");

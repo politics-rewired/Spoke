@@ -55,18 +55,15 @@ class AdminAssignmentControl extends Component {
     this.setState({ changes });
   };
 
-  handleSaveAssignmentControls = () => {
+  handleSaveAssignmentControls = async () => {
     const { changes } = this.state;
-    const payloads = Object.keys(changes).map(key => ({
-      id: key,
-      ...changes[key]
-    }));
+    const payloads = Object.keys(changes).map(key =>
+      Object.assign(changes[key], { id: key })
+    );
 
     this.setState({ working: true });
     try {
-      // TODO -- stub
-      console.log("Sending payloads", payloads);
-      const response = { success: "true" };
+      const response = await this.props.mutations.saveTeams(payloads);
       if (response.errors) throw response.errors;
       this.setState({ changes: {} });
     } catch (err) {
@@ -155,8 +152,21 @@ const mapQueriesToProps = ({ ownProps }) => ({
   }
 });
 
-const mapMutationsToProps = () => ({
-  // TODO -- stub
+const mapMutationsToProps = ({ ownProps }) => ({
+  saveTeams: teams => ({
+    mutation: gql`
+      mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
+        saveTeams(organizationId: $organizationId, teams: $teams) {
+          id
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.params.organizationId,
+      teams
+    },
+    refetchQueries: ["getAssignmentConfiguration"]
+  })
 });
 
 AdminAssignmentControl.defaultProps = {

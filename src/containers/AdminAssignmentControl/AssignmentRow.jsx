@@ -27,7 +27,7 @@ const AssignmentRow = props => {
     onChange({ assignmentType });
 
   const handleChangeMaxCount = (_event, maxRequestCount) =>
-    onChange({ maxRequestCount });
+    onChange({ maxRequestCount: parseInt(maxRequestCount, 10) });
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
