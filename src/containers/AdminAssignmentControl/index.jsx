@@ -158,6 +158,12 @@ const mapMutationsToProps = ({ ownProps }) => ({
       mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
         saveTeams(organizationId: $organizationId, teams: $teams) {
           id
+          title
+          textColor
+          backgroundColor
+          isAssignmentEnabled
+          assignmentType
+          maxRequestCount
         }
       }
     `,
