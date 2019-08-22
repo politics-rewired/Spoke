@@ -17,58 +17,57 @@ async function main() {
     const teamTitle = team.title;
     const teamId = team.id;
 
-    const normalizedTeamName = teamTitle.toLowerCase().replace(" ", "-", "g");
+    const normalizedTeamName = teamTitle.toLowerCase().replace(/ /g, "-");
     const matchingChannel = allChannels.find(channel => {
       return channel.name_normalized === normalizedTeamName;
     });
 
     if (!matchingChannel) {
       logger.warn(`Did not find channel for ${teamTitle}`);
-      return;
-    }
+    } else {
+      logger.info(`Found channel (${matchingChannel.id}) for ${teamTitle}`);
 
-    logger.info(`Found channel (${matchingChannel.id}) for ${teamTitle}`);
+      let done = false;
+      let cursor = "dummy";
+      let allMembers = [];
 
-    let done = false;
-    let cursor = "dummy";
-    let allMembers = [];
+      while (!done) {
+        const iterationParams = Object.assign(
+          {},
+          params,
+          { channel: matchingChannel.id },
+          cursor == "dummy" ? {} : { cursor }
+        );
 
-    while (!done) {
-      const iterationParams = Object.assign(
-        {},
-        params,
-        { channel: matchingChannel.id },
-        cursor == "dummy" ? {} : { cursor }
-      );
+        const {
+          members,
+          response_metadata: { next_cursor: cursor }
+        } = await slack.conversations.members(iterationParams);
+        allMembers = allMembers.concat(members);
 
-      const {
-        members,
-        response_metadata: { next_cursor: cursor }
-      } = await slack.conversations.members(iterationParams);
-      allMembers = allMembers.concat(members);
-
-      if (cursor === "") {
-        done = true;
+        if (cursor === "") {
+          done = true;
+        }
       }
-    }
 
-    const totalMembershipCount = await db.transaction(async trx => {
-      await trx("user_team")
-        .delete()
-        .where({ team_id: teamId });
+      const totalMembershipCount = await db.transaction(async trx => {
+        await trx("user_team")
+          .delete()
+          .where({ team_id: teamId });
 
-      return await trx.raw(
-        `
+        return await trx.raw(
+          `
         insert into user_team (team_id, user_id)
         select ? as team_id, id as user_id
         from public.user
         where auth0_id in (${allMembers.map(str => `'${str}'`).join(", ")})
       `,
-        [teamId]
-      );
-    });
+          [teamId]
+        );
+      });
 
-    logger.info(`Updated memberships for ${teamTitle}`, totalMembershipCount);
+      logger.info(`Updated memberships for ${teamTitle}`, totalMembershipCount);
+    }
   }
 }
 
