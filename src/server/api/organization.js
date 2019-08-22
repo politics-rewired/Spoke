@@ -129,7 +129,7 @@ export const resolvers = {
     currentAssignmentTargets: async organization => {
       const cats = await allCurrentAssignmentTargets(organization.id);
       const formatted = cats.map(cat => ({
-        type: cat.type,
+        type: cat.assignment_type,
         countLeft: parseInt(cat.count_left),
         campaign: {
           id: cat.id,
