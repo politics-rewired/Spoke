@@ -156,7 +156,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
    */
   const { rows: teamToCampaigns } = await r.knex.raw(
     `
-      select team.title as team_title, campaign.id, campaign.title, (
+      select team.title as team_title, team.is_assignment_enabled as enabled, campaign.id, campaign.title, (
           select count(*)
           from ${contactsView}
           where campaign_id = campaign.id
@@ -173,7 +173,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
         )
       union
       ( 
-        select 'General' as team_title, ${campaignView}.id, ${campaignView}.title, (
+        select 'General' as team_title, true as enabled, ${campaignView}.id, ${campaignView}.title, (
             select count(*)
             from ${contactsView}
             where campaign_id = ${campaignView}.id

@@ -135,7 +135,8 @@ export const resolvers = {
           id: cat.id,
           title: cat.title
         },
-        teamTitle: cat.team_title
+        teamTitle: cat.team_title,
+        enabled: cat.enabled
       }));
       return formatted;
     },

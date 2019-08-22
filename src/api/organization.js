@@ -14,6 +14,7 @@ export const schema = `
     campaign: Campaign
     countLeft: Int
     teamTitle: String
+    enabled: Boolean
   }
 
   type Organization {

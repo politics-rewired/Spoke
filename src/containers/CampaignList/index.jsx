@@ -204,6 +204,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             }
             teamTitle
             countLeft
+            enabled
           }
         }
       }
