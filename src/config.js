@@ -348,7 +348,8 @@ if (isClient()) {
     LOG_LEVEL: str({
       desc: "The winston log level.",
       choices: ["silly", "debug", "verbose", "info", "warn", "error"],
-      default: "warn"
+      default: "warn",
+      devDefault: "silly"
     }),
     MAILGUN_DOMAIN: host({
       desc: "The domain you set up in Mailgun. Required for Mailgun usage.",
