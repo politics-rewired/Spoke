@@ -27,6 +27,8 @@ import moment from "moment";
 import _ from "lodash";
 import { sendEmail } from "../server/mail";
 import { Notifications, sendUserNotification } from "../server/notifications";
+import s3 from "./exports/s3";
+import gsJson from "./exports/gs-json";
 
 const CHUNK_SIZE = 1000;
 const BATCH_SIZE = config.DB_MAX_POOL;
@@ -1296,10 +1298,14 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
   return { lastContactId, messages };
 };
 
+const exporters = {
+  s3: s3,
+  "gs-json": gsJson
+};
+
 const uploadToCloud = async (key, payload) => {
-  const { upload, getDownloadUrl } = require(`./exports/${
-    config.EXPORT_DRIVER
-  }`);
+  const { upload, getDownloadUrl } = exporters[config.EXPORT_DRIVER];
+
   await upload(config.AWS_S3_BUCKET_NAME, key, payload);
   return getDownloadUrl(config.AWS_S3_BUCKET_NAME, key);
 };
