@@ -15,20 +15,11 @@ const executableSchema = makeExecutableSchema({
   allowUndefinedInResolve: false
 });
 
-if (!config.isProduction) {
-  addMockFunctionsToSchema({
-    schema: executableSchema,
-    mocks,
-    preserveResolvers: true
-  });
-
-  router.get(
-    "/graphiql",
-    graphiqlExpress({
-      endpointURL: "/graphql"
-    })
-  );
-}
+addMockFunctionsToSchema({
+  schema: executableSchema,
+  mocks,
+  preserveResolvers: true
+});
 
 router.use(
   "/graphql",
@@ -40,5 +31,14 @@ router.use(
     }
   }))
 );
+
+if (!config.isProduction) {
+  router.get(
+    "/graphiql",
+    graphiqlExpress({
+      endpointURL: "/graphql"
+    })
+  );
+}
 
 export default router;
