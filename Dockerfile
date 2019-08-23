@@ -4,7 +4,7 @@ FROM node:8.10.0-alpine
 WORKDIR /usr/Spoke
 
 # Cache dependencies
-COPY package.json .
+COPY package.json yarn.lock ./
 RUN yarn install
 
 # Configure build environment
