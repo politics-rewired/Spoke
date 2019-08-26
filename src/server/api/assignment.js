@@ -385,7 +385,7 @@ export async function myCurrentAssignmentTarget(
   trx = r.knex
 ) {
   const options = await myCurrentAssignmentTargets(userId, organizationId, trx);
-  return options[0] || null;
+  return options ? options[0] || null;
 }
 
 async function notifyIfAllAssigned(type, user, organizationId) {
