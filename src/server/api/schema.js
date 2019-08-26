@@ -451,7 +451,7 @@ async function sendMessage(
     .where({ "campaign.is_archived": false })
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
     .leftJoin("opt_out", {
-      // 'opt_out.organization_id': 'campaign.organization.id',
+      "opt_out.organization_id": "campaign.organization.id",
       "opt_out.cell": "campaign_contact.cell"
     })
     .first(
