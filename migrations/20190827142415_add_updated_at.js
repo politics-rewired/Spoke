@@ -83,18 +83,6 @@ const OTHER_INITIALIZATION_OPTIONS = [
   ["message", ["service_response_at", "sent_at", "queued_at", "created_at"]]
 ];
 
-const query = ` ${TABLES_THAT_CAN_USE_CREATED_AT.map(
-  table => `update ${table} set updated_at = created_at;`
-).join("\n")}
-
-        ${OTHER_INITIALIZATION_OPTIONS.map(
-          ([table, columns]) =>
-            `update ${table} set updated_at = coalesce(${columns.join(", ")});`
-        ).join("\n")}
-    `;
-
-console.log("TCL: query", query);
-
 exports.up = function(knex, Promise) {
   return knex.schema
     .raw(
