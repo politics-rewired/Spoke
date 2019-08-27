@@ -73,8 +73,6 @@ const TABLES_THAT_CAN_USE_CREATED_AT = [
   "campaign_contact_tag",
   "campaign_team",
   "log",
-  "messaging_service",
-  "messaging_service_stick",
   "opt_out",
   "user_team"
 ];
@@ -94,19 +92,18 @@ exports.up = function(knex, Promise) {
     end; $$ language plpgsql;
   `
     )
-    .then(
+    .then(() =>
       Promise.all(
         TABLES_THAT_DONT_HAVE_UPDATED_AT.map(tableName =>
           knex.schema.alterTable(tableName, table => {
-            table.timestamp("updated_at").default(knex.fn.now());
+            // table.timestamp("updated_at").default(knex.fn.now());
+            table.timestamp("updated_at");
           })
         )
       )
     )
-    .then(
+    .then(() =>
       knex.raw(`
-        set session_replication_role = 'replica';
-
         ${TABLES_THAT_CAN_USE_CREATED_AT.map(
           table => `update public.${table} set updated_at = created_at;`
         ).join("\n")}
@@ -117,11 +114,9 @@ exports.up = function(knex, Promise) {
               ", "
             )});`
         ).join("\n")}
-
-        set session_replication_role = default;
     `)
     )
-    .then(
+    .then(() =>
       Promise.all(
         TABLES_THAT_HAVE_UPDATED_AT_VIA_CODE.concat(
           TABLES_THAT_DONT_HAVE_UPDATED_AT
