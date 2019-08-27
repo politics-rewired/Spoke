@@ -39,7 +39,8 @@ import {
 import { Notifications, sendUserNotification } from "../notifications";
 import {
   resolvers as assignmentResolvers,
-  giveUserMoreTexts
+  giveUserMoreTexts,
+  myCurrentAssignmentTarget
 } from "./assignment";
 import { getCampaigns, resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
@@ -2140,42 +2141,13 @@ const rootMutations = {
       { user, loaders }
     ) => {
       try {
-        const formEnabled = await (async () => {
-          const organization = await r
-            .knex("organization")
-            .select("features")
-            .where({ id: organizationId })
-            .first();
+        const myAssignmentTarget = await myCurrentAssignmentTarget(
+          user.id,
+          organizationId
+        );
 
-          try {
-            const features = JSON.parse(organization.features);
-            return features.textRequestFormEnabled || false;
-          } catch (ex) {
-            return false;
-          }
-        })();
-
-        if (formEnabled) {
-          const textsAvailable = await (async () => {
-            const ccsAvailableQuery = `
-              select campaign_contact.id
-              from campaign_contact
-              join campaign on campaign.id = campaign_contact.campaign_id
-              where assignment_id is null
-                and campaign.is_started = true 
-                and campaign.is_archived = false
-                and campaign.organization_id = ?
-              limit 1;
-            `;
-
-            const result = await r.knex.raw(ccsAvailableQuery, [
-              organizationId
-            ]);
-            return result.fields.length > 0;
-          })();
-
-          if (textsAvailable) {
-            /*
+        if (myAssignmentTarget) {
+          /*
               We create the assignment_request in a transaction
               If ASSIGNMENT_REQUESTED_URL is present,
                 - we send to it
@@ -2183,35 +2155,34 @@ const rootMutations = {
                   - we roll back the insert and return the error
                 - if it succeeds, return 'Created'!
             */
-            await r.knex.transaction(async trx => {
-              await trx("assignment_request").insert({
-                user_id: user.id,
-                organization_id: organizationId,
-                amount: count
-              });
-
-              /* This will just throw if it errors */
-              if (config.ASSIGNMENT_REQUESTED_URL) {
-                try {
-                  const response = await request
-                    .post(config.ASSIGNMENT_REQUESTED_URL)
-                    .set(
-                      "Authorization",
-                      `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
-                    )
-                    .send({ count, email });
-
-                  logger.debug("TCL: response", response);
-                } catch (ex) {
-                  logger.error("TCL: ex", ex);
-                }
-
-                return true;
-              }
+          await r.knex.transaction(async trx => {
+            await trx("assignment_request").insert({
+              user_id: user.id,
+              organization_id: organizationId,
+              amount: count
             });
 
-            return "Created";
-          }
+            /* This will just throw if it errors */
+            if (config.ASSIGNMENT_REQUESTED_URL) {
+              try {
+                const response = await request
+                  .post(config.ASSIGNMENT_REQUESTED_URL)
+                  .set(
+                    "Authorization",
+                    `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
+                  )
+                  .send({ count, email });
+
+                logger.debug("TCL: response", response);
+              } catch (ex) {
+                logger.error("TCL: ex", ex);
+              }
+
+              return true;
+            }
+          });
+
+          return "Created";
         }
 
         return "No texts available at the moment";
