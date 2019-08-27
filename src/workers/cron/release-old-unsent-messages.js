@@ -26,8 +26,7 @@ async function main() {
   const updateResult = await db("campaign_contact")
     // TODO - MySQL Specific. use knex.fn.now()
     .update({
-      assignment_id: null,
-      updated_at: db.raw("now()")
+      assignment_id: null
     })
     // TODO - MySQL Specific. Getting contactIds can be done in subquery
     .whereIn("id", campaignContactIdsToRelease);

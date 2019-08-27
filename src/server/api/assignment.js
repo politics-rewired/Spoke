@@ -385,7 +385,7 @@ export async function myCurrentAssignmentTarget(
   trx = r.knex
 ) {
   const options = await myCurrentAssignmentTargets(userId, organizationId, trx);
-  return options ? options[0] || null;
+  return options ? options[0] : null;
 }
 
 async function notifyIfAllAssigned(type, user, organizationId) {
@@ -456,8 +456,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
 
       await trx("assignment_request")
         .update({
-          status: "approved",
-          updated_at: r.knex.fn.now()
+          status: "approved"
         })
         .where({ id: pendingAssignmentRequest.id });
 
@@ -472,8 +471,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
       await r
         .knex("assignment_request")
         .update({
-          status: "rejected",
-          updated_at: r.knex.fn.now()
+          status: "rejected"
         })
         .where({ id: pendingAssignmentRequest.id });
 
@@ -592,8 +590,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
       update
         campaign_contact as target_contact
       set
-        assignment_id = ?,
-        updated_at = now()
+        assignment_id = ?
       from
         (
           select

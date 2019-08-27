@@ -100,7 +100,6 @@ export async function saveNewIncomingMessage(messageInstance) {
   let updateQuery = r
     .knex("campaign_contact")
     .update({ message_status: "needsResponse" })
-    .update("updated_at", r.knex.fn.now())
     .limit(1);
 
   // Prefer to match on campaign contact ID

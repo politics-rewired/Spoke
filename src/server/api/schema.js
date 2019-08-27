@@ -624,7 +624,6 @@ async function sendMessage(
     await r
       .knex("campaign_contact")
       .update({
-        updated_at: r.knex.fn.now(),
         message_status:
           cc_message_status === "needsResponse" || cc_message_status === "convo"
             ? "convo"
@@ -2373,7 +2372,6 @@ const rootMutations = {
         await trx("assignment_request")
           .update({
             status: "approved",
-            updated_at: r.knex.fn.now(),
             approved_by_user_id: user.id
           })
           .where({ id: parseInt(assignmentRequestId) });
@@ -2403,7 +2401,6 @@ const rootMutations = {
         .knex("assignment_request")
         .update({
           status: "rejected",
-          updated_at: r.knex.fn.now(),
           approved_by_user_id: user.id
         })
         .where({ id: parseInt(assignmentRequestId) });
