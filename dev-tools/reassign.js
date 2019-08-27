@@ -86,8 +86,7 @@ async function reassignContacts(contactsToReassign, assignment_id) {
   return await db("campaign_contact")
     .whereIn("id", contactsToReassign.map(c => c.id))
     .update({
-      assignment_id: assignment_id,
-      updated_at: db.fn.now()
+      assignment_id: assignment_id
     });
 }
 

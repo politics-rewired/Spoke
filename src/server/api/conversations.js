@@ -410,8 +410,7 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
           .knex("campaign_contact")
           .transacting(trx)
           .update({
-            assignment_id: assignmentId,
-            updated_at: r.knex.fn.now()
+            assignment_id: assignmentId
           })
           .whereIn("id", contactIds);
 
@@ -464,8 +463,7 @@ export async function reassignConversations(
         .where("campaign_id", campaignId)
         .whereIn("id", campaignContactIds)
         .update({
-          assignment_id: assignmentId,
-          updated_at: r.knex.fn.now()
+          assignment_id: assignmentId
         });
 
       result.push({
