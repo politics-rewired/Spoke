@@ -44,6 +44,7 @@ const TABLES_THAT_HAVE_UPDATED_AT_VIA_CODE = [
   "assignment_request",
   "campaign_contact"
 ];
+
 const TABLES_THAT_DONT_HAVE_UPDATED_AT = [
   "campaign",
   "canned_response",
@@ -60,11 +61,39 @@ const TABLES_THAT_DONT_HAVE_UPDATED_AT = [
   "campaign_contact_tag",
   "campaign_team",
   "log",
+  "message",
   "messaging_service",
   "messaging_service_stick",
   "opt_out",
   "user_team"
 ];
+
+const TABLES_THAT_CAN_USE_CREATED_AT = [
+  "assignment",
+  "campaign_contact_tag",
+  "campaign_team",
+  "log",
+  "messaging_service",
+  "messaging_service_stick",
+  "opt_out",
+  "user_team"
+];
+
+const OTHER_INITIALIZATION_OPTIONS = [
+  ["message", ["service_response_at", "sent_at", "queued_at", "created_at"]]
+];
+
+const query = ` ${TABLES_THAT_CAN_USE_CREATED_AT.map(
+  table => `update ${table} set updated_at = created_at;`
+).join("\n")}
+
+        ${OTHER_INITIALIZATION_OPTIONS.map(
+          ([table, columns]) =>
+            `update ${table} set updated_at = coalesce(${columns.join(", ")});`
+        ).join("\n")}
+    `;
+
+console.log("TCL: query", query);
 
 exports.up = function(knex, Promise) {
   return knex.schema
@@ -87,6 +116,24 @@ exports.up = function(knex, Promise) {
       )
     )
     .then(
+      knex.raw(`
+        set session_replication_role = 'replica';
+
+        ${TABLES_THAT_CAN_USE_CREATED_AT.map(
+          table => `update public.${table} set updated_at = created_at;`
+        ).join("\n")}
+
+        ${OTHER_INITIALIZATION_OPTIONS.map(
+          ([table, columns]) =>
+            `update public.${table} set updated_at = coalesce(${columns.join(
+              ", "
+            )});`
+        ).join("\n")}
+
+        set session_replication_role = default;
+    `)
+    )
+    .then(
       Promise.all(
         TABLES_THAT_HAVE_UPDATED_AT_VIA_CODE.concat(
           TABLES_THAT_DONT_HAVE_UPDATED_AT
@@ -107,13 +154,15 @@ exports.down = function(knex, Promise) {
   /**
    * Drop function cascades to all triggers
    */
-  return knex.schema.raw("drop function universal_updated_at cascade").then(
-    Promise.all(
-      TABLES_THAT_DONT_HAVE_UPDATED_AT.map(tableName =>
-        knex.schema.alterTable(tableName, table => {
-          table.dropColumn("updated_at");
-        })
+  return knex.schema
+    .raw("drop function universal_updated_at cascade")
+    .then(
+      Promise.all(
+        TABLES_THAT_DONT_HAVE_UPDATED_AT.map(tableName =>
+          knex.schema.raw(
+            `alter table public.${tableName} drop column updated_at cascade;`
+          )
+        )
       )
-    )
-  );
+    );
 };
