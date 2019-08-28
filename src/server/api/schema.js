@@ -1452,9 +1452,14 @@ const rootMutations = {
     tagConversation: async (_, { campaignContactId, tag }, { user }) => {
       const campaignContact = await r
         .knex("campaign_contact")
-        .where({ id: campaignContactId })
-        .first();
-      await assignmentRequired(user, campaignContact.assignment_id);
+        .join("campaign", "campaign.id", "campaign_contact.campaign_id")
+        .where({ "campaign_contact.id": campaignContactId })
+        .first(["campaign_contact.*", "campaign.organization_id"]);
+      try {
+        await assignmentRequired(user, campaignContact.assignment_id);
+      } catch (err) {
+        accessRequired(user, campaignContact.organization_id, "SUPERVOLUNTEER");
+      }
 
       const { addedTagIds, removedTagIds } = tag;
       const tagsToInsert = addedTagIds.map(tagId => ({
