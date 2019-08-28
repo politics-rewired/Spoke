@@ -96,8 +96,7 @@ exports.up = function(knex, Promise) {
       Promise.all(
         TABLES_THAT_DONT_HAVE_UPDATED_AT.map(tableName =>
           knex.schema.alterTable(tableName, table => {
-            // table.timestamp("updated_at").default(knex.fn.now());
-            table.timestamp("updated_at");
+            table.timestamp("updated_at").default(knex.fn.now());
           })
         )
       )
@@ -114,7 +113,7 @@ exports.up = function(knex, Promise) {
               ", "
             )});`
         ).join("\n")}
-    `)
+      `)
     )
     .then(() =>
       Promise.all(
@@ -122,12 +121,12 @@ exports.up = function(knex, Promise) {
           TABLES_THAT_DONT_HAVE_UPDATED_AT
         ).map(tableName =>
           knex.schema.raw(`
-            create trigger _500_${tableName}_updated_at
-              before update
-              on public.${tableName}
-              for each row
-              execute procedure universal_updated_at();
-        `)
+          create trigger _500_${tableName}_updated_at
+            before update
+            on public.${tableName}
+            for each row
+            execute procedure universal_updated_at();
+      `)
         )
       )
     );
