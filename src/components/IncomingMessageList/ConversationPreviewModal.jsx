@@ -24,25 +24,30 @@ const styles = StyleSheet.create({
 });
 
 const ConversationPreviewBody = props => {
-  const { conversation } = props,
+  const { conversation, organizationId } = props,
     { contact, campaign } = conversation;
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.column)}>
         <MessageColumn
           conversation={conversation}
-          organizationId={props.organizationId}
+          organizationId={organizationId}
         />
       </div>
       <div className={css(styles.column)}>
-        <SurveyColumn contact={contact} campaign={campaign} />
+        <SurveyColumn
+          contact={contact}
+          campaign={campaign}
+          organizationId={organizationId}
+        />
       </div>
     </div>
   );
 };
 
 ConversationPreviewBody.propTypes = {
-  conversation: PropTypes.object
+  conversation: PropTypes.object.isRequired,
+  organizationId: PropTypes.string.isRequired
 };
 
 const ConversationPreviewModal = props => {
@@ -82,7 +87,12 @@ const ConversationPreviewModal = props => {
   );
 };
 
+ConversationPreviewModal.defaultProps = {
+  onRequestClose: () => {}
+};
+
 ConversationPreviewModal.propTypes = {
+  organizationId: PropTypes.string.isRequired,
   conversation: PropTypes.object,
   onRequestClose: PropTypes.func
 };
