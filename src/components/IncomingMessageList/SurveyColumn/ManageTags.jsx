@@ -18,10 +18,6 @@ class ManageTags extends Component {
     error: undefined
   };
 
-  componentWillMount() {
-    this.state.selectedTags = [...this.props.contactTags.contact.tags];
-  }
-
   componentWillReceiveProps(nextProps) {
     const { tags: oldTags } = this.props.contactTags.contact;
     const { tags: newTags } = nextProps.contactTags.contact;
@@ -30,7 +26,11 @@ class ManageTags extends Component {
     }
   }
 
-  handleOnClickEditTags = () => this.setState({ isTagEditorOpen: true });
+  handleOnClickEditTags = () =>
+    this.setState({
+      selectedTags: [...this.props.contactTags.contact.tags],
+      isTagEditorOpen: true
+    });
 
   handleCloseTagManager = () => this.setState({ isTagEditorOpen: false });
 
