@@ -52,12 +52,8 @@ class MessageList extends Component {
           const senderName = sender ? sender.displayName : "Unknown";
 
           return (
-            <div style={containerStyle}>
-              <p
-                key={index}
-                className={css(styles.conversationRow)}
-                style={messageStyle}
-              >
+            <div key={index} style={containerStyle}>
+              <p className={css(styles.conversationRow)} style={messageStyle}>
                 {message.text}
               </p>
               <p style={senderInfoStyle}>
