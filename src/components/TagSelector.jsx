@@ -1,15 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-import ReactMarkdown from "react-markdown";
 import ChipInput from "material-ui-chip-input";
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
+
+import ApplyTagConfirmationDialog from "./ApplyTagConfirmationDialog";
 
 class TagSelector extends Component {
   state = {
-    pendingTag: undefined,
-    confirmStepIndex: -1
+    pendingTag: undefined
   };
 
   // Prevent user-defined tags
@@ -22,16 +20,25 @@ class TagSelector extends Component {
     const newTag = dataSource.find(tag => tag.id === tagId);
 
     if (newTag.confirmationSteps.length > 0) {
-      return this.setState({ pendingTag: newTag, confirmStepIndex: 0 });
+      return this.setState({ pendingTag: newTag });
     }
 
     this.addTag(newTag);
   };
 
   handleRemoveTag = deleteTagId => {
-    const { dataSource, onChange } = this.props;
-    const newTags = dataSource.filter(tag => tag.id !== deleteTagId);
-    onChange(newTags);
+    const { value, onChange } = this.props;
+    const newTags = value.filter(tag => tag.id !== deleteTagId);
+    if (newTags.length < value.length) {
+      onChange(newTags);
+    }
+  };
+
+  handleCancelConfirmTag = () => this.setState({ pendingTag: undefined });
+
+  handleConfirmAddTag = newTag => {
+    this.addTag(newTag);
+    this.handleCancelConfirmTag();
   };
 
   addTag = newTag => {
@@ -46,32 +53,9 @@ class TagSelector extends Component {
     }
   };
 
-  handleCloseConfirm = () =>
-    this.setState({ pendingTag: undefined, confirmStepIndex: -1 });
-
-  handleConfirmStep = () => {
-    const { pendingTag, confirmStepIndex } = this.state;
-    const { confirmationSteps } = pendingTag;
-
-    if (confirmStepIndex < confirmationSteps.length - 1)
-      return this.setState({ confirmStepIndex: confirmStepIndex + 1 });
-
-    this.addTag(pendingTag);
-    this.handleCloseConfirm();
-  };
-
   render() {
-    const { pendingTag, confirmStepIndex } = this.state;
+    const { pendingTag } = this.state;
     const { dataSource, value } = this.props;
-
-    const confirmationStep = ((pendingTag || {}).confirmationSteps || [])[
-      confirmStepIndex
-    ] || ["", "", ""];
-    const [content, confirm, cancel] = confirmationStep;
-    const confrimTagActions = [
-      <FlatButton label={confirm} primary onClick={this.handleConfirmStep} />,
-      <FlatButton label={cancel} primary onClick={this.handleCloseConfirm} />
-    ];
 
     return (
       <div>
@@ -86,14 +70,11 @@ class TagSelector extends Component {
           onRequestAdd={this.handleRequestAddTag}
           onRequestDelete={this.handleRemoveTag}
         />
-        <Dialog
-          title={"Confirm Add Tag"}
-          open={pendingTag !== undefined}
-          actions={confrimTagActions}
-          onRequestClose={this.handleCloseConfirm}
-        >
-          <ReactMarkdown source={content} />
-        </Dialog>
+        <ApplyTagConfirmationDialog
+          pendingTag={pendingTag}
+          onCancel={this.handleCancelConfirmTag}
+          onConfirm={this.handleConfirmAddTag}
+        />
       </div>
     );
   }
@@ -110,14 +91,16 @@ TagSelector.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
-      confirmationSteps: PropTypes.arrayOf(PropTypes.string).isRequired
+      confirmationSteps: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
+        .isRequired
     })
   ),
   value: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
-      confirmationSteps: PropTypes.arrayOf(PropTypes.string)
+      confirmationSteps: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
+        .isRequired
     })
   ),
   onChange: PropTypes.func

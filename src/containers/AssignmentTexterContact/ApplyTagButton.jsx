@@ -1,12 +1,17 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-import ReactMarkdown from "react-markdown";
 import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
 import MoreIcon from "material-ui/svg-icons/navigation/more-vert";
 import Dialog from "material-ui/Dialog";
-import ChipInput from "material-ui-chip-input";
+
+import TagSelector from "../../components/TagSelector";
+import ApplyTagConfirmationDialog from "../../components/ApplyTagConfirmationDialog";
+
+const isEscalateTag = t => t.title === "Escalated" || t.title === "Escalate";
+const isNonAssignableTagApplied = appliedTags =>
+  appliedTags.findIndex(t => !t.isAssignable) > -1;
 
 const ApplyTagStep = Object.freeze({ None: 0, TagSelect: 1 });
 
@@ -14,28 +19,33 @@ class ApplyTagButton extends Component {
   state = {
     applyStepIndex: ApplyTagStep.None,
     selectedTags: [],
-    pendingTag: undefined,
-    confirmStepIndex: -1
+    pendingTag: undefined
   };
 
   componentWillMount() {
-    this.selectedTags = this.props.pendingNewTags;
+    this.state.selectedTags = this.props.pendingNewTags;
   }
 
   resetTags = () =>
     this.setState({ selectedTags: this.props.contactTags.slice() });
 
-  addTag = tag => {
-    const { selectedTags } = this.state;
+  handleOnTagChange = selectedTags => this.setState({ selectedTags });
 
-    const tagAlreadySelected =
-      selectedTags.filter(existingTag => existingTag.id === tag.id).length > 0;
+  handleAddEscalatedTag = () => {
+    const { allTags } = this.props;
+    const escalateTag = allTags.find(isEscalateTag);
+    this.setState({ pendingTag: escalateTag });
+  };
 
-    if (!tagAlreadySelected) {
-      selectedTags.push(tag);
+  handleOnCancelEscalateTag = () => this.setState({ pendingTag: undefined });
+
+  handleOnConfirmAddEscalatedTag = escalateTag => {
+    const selectedTags = [...this.state.selectedTags];
+    if (selectedTags.findIndex(tag => tag.id === escalateTag.id) === -1) {
+      selectedTags.push(escalateTag);
+      this.setState({ selectedTags });
     }
-
-    this.setState({ selectedTags });
+    this.handleOnCancelEscalateTag();
   };
 
   handleOpenTagSelectionDialog = () => {
@@ -45,42 +55,6 @@ class ApplyTagButton extends Component {
 
   handleCloseTagSelectionDialog = () =>
     this.setState({ applyStepIndex: ApplyTagStep.None });
-
-  // Prevent user-defined tags
-  handleBeforeRequestAdd = ({ id: tagId, title }) =>
-    !isNaN(tagId) && tagId !== title;
-
-  handleAddTag = ({ id: tagId }) => {
-    const { allTags } = this.props;
-
-    const tag = allTags.find(tag => tag.id === tagId);
-
-    if (tag.confirmationSteps.length > 0) {
-      return this.setState({ pendingTag: tag, confirmStepIndex: 0 });
-    }
-
-    this.addTag(tag);
-  };
-
-  handleRemoveTag = deleteTagId => {
-    const selectedTags = this.state.selectedTags.filter(
-      tag => tag.id !== deleteTagId
-    );
-    this.setState({ selectedTags });
-  };
-
-  handleCloseConfirm = () => this.setState({ pendingTag: undefined });
-
-  handleConfirmStep = () => {
-    const { pendingTag, confirmStepIndex } = this.state;
-    const { confirmationSteps } = pendingTag;
-
-    if (confirmStepIndex < confirmationSteps.length - 1)
-      return this.setState({ confirmStepIndex: confirmStepIndex + 1 });
-
-    this.addTag(pendingTag);
-    this.handleCloseConfirm();
-  };
 
   handleApplyTags = () => {
     const { contactTags } = this.props;
@@ -110,23 +84,10 @@ class ApplyTagButton extends Component {
 
   render() {
     const { allTags } = this.props;
-    const {
-      applyStepIndex,
-      selectedTags,
-      pendingTag,
-      confirmStepIndex
-    } = this.state;
+    const { applyStepIndex, selectedTags, pendingTag } = this.state;
 
-    const confirmationStep = ((pendingTag || {}).confirmationSteps || [])[
-      confirmStepIndex
-    ] || ["", "", ""];
-    const [content, confirm, cancel] = confirmationStep;
-    const confrimTagActions = [
-      <FlatButton label={confirm} primary onClick={this.handleConfirmStep} />,
-      <FlatButton label={cancel} primary onClick={this.handleCloseConfirm} />
-    ];
-
-    const [escalateTag, tagsWithoutEscalated] = filterOutEscalatedTag(allTags);
+    const escalateTag = allTags.find(isEscalateTag);
+    const tagsWithoutEscalated = allTags.filter(t => !isEscalateTag(t));
 
     const shouldAllowUserToMoveOn = isNonAssignableTagApplied(selectedTags);
 
@@ -172,31 +133,22 @@ class ApplyTagButton extends Component {
             <RaisedButton
               buttonStyle={{ paddingLeft: 20, paddingRight: 20 }}
               secondary={true}
-              onClick={() => this.handleAddTag(escalateTag)}
+              onClick={this.handleAddEscalatedTag}
             >
               Escalate Conversation
             </RaisedButton>
           )}
-          <p>Apply tags:</p>
-          <ChipInput
+          <TagSelector
             value={selectedTags}
-            dataSourceConfig={{ text: "title", value: "id" }}
             dataSource={tagsWithoutEscalated}
-            fullWidth={true}
-            openOnFocus={true}
-            onBeforeRequestAdd={this.handleBeforeRequestAdd}
-            onRequestAdd={this.handleAddTag}
-            onRequestDelete={this.handleRemoveTag}
+            onChange={this.handleOnTagChange}
           />
         </Dialog>
-        <Dialog
-          title={"Confirm Add Tag"}
-          open={pendingTag !== undefined}
-          actions={confrimTagActions}
-          onRequestClose={this.handleCloseConfirm}
-        >
-          <ReactMarkdown source={content} />
-        </Dialog>
+        <ApplyTagConfirmationDialog
+          pendingTag={pendingTag}
+          onCancel={this.handleOnCancelEscalateTag}
+          onConfirm={this.handleOnConfirmAddEscalatedTag}
+        />
       </div>
     );
   }
@@ -208,22 +160,5 @@ ApplyTagButton.propTypes = {
   pendingNewTags: PropTypes.arrayOf(PropTypes.object).isRequired,
   onApplyTag: PropTypes.func.isRequired
 };
-
-function filterOutEscalatedTag(allTags) {
-  const isEscalateTag = t => t.title === "Escalated" || t.title === "Escalate";
-
-  const foundEscalateTag = allTags.find(isEscalateTag);
-  const tagsWithoutEscalated = allTags.filter(t => !isEscalateTag(t));
-
-  return [foundEscalateTag, tagsWithoutEscalated];
-}
-
-function isNonAssignableTagApplied(appliedTags) {
-  const appliedNonAssignableTags = appliedTags.filter(t => {
-    return !t.isAssignable;
-  });
-
-  return appliedNonAssignableTags.length > 0;
-}
 
 export default ApplyTagButton;
