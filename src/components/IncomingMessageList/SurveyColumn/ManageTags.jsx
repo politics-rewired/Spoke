@@ -60,10 +60,12 @@ class ManageTags extends Component {
     }
   };
 
+  handleCloseErrorDialog = () => this.setState({ error: undefined });
+
   render() {
     const { tagList } = this.props.organizationTags.organization;
     const { tags: contactTags } = this.props.contactTags.contact;
-    const { isTagEditorOpen, selectedTags, isWorking } = this.state;
+    const { isTagEditorOpen, selectedTags, isWorking, error } = this.state;
 
     const actions = [
       <RaisedButton
@@ -73,6 +75,15 @@ class ManageTags extends Component {
         onClick={this.handleSaveTags}
       />,
       <FlatButton label="Cancel" onClick={this.handleCloseTagManager} />
+    ];
+
+    const errorActions = [
+      <RaisedButton
+        label="OK"
+        primary={true}
+        disabled={isWorking}
+        onClick={this.handleCloseErrorDialog}
+      />
     ];
 
     return (
@@ -94,6 +105,15 @@ class ManageTags extends Component {
             value={selectedTags}
             onChange={this.handleOnChangeTags}
           />
+        </Dialog>
+        <Dialog
+          title="Error Updating Tags"
+          actions={errorActions}
+          open={error !== undefined}
+          modal={false}
+          onRequestClose={this.handleCloseErrorDialog}
+        >
+          {error}
         </Dialog>
       </div>
     );
