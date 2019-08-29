@@ -2621,7 +2621,6 @@ const rootResolvers = {
     organization: async (_, { id }, { loaders }) =>
       loaders.organization.load(id),
     team: async (_, { id }, { user }) => {
-      authRequired(user);
       const team = await r
         .knex("team")
         .where({ id })
