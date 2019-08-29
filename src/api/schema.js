@@ -314,6 +314,8 @@ const rootSchema = `
     deleteTag(organizationId: String!, tagId: String!): Boolean!
     saveTeams(organizationId: String!, teams: [TeamInput]!): [Team]!
     deleteTeam(organizationId: String!, teamId: String!): Boolean!
+    addUsersToTeam(teamId: String!, userIds: [String]!): Boolean!
+    removeUsersFromTeam(teamId: String!, userIds: [String]!): Boolean!
   }
 
   schema {
