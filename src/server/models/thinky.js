@@ -34,7 +34,9 @@ thinkyConn.r.parseCount = async query => {
   const keys = Object.keys(result);
   if (keys.length === 1) {
     const countKey = keys[0];
-    return result[countKey];
+    // Note that in Postgres, count returns a bigint type which will be a String and not a Number
+    // -- https://knexjs.org/#Builder-count
+    return parseInt(result[countKey], 10);
   }
 
   throw new Error("Multiple columns returned by the query!");
