@@ -2582,6 +2582,15 @@ const rootResolvers = {
     },
     organization: async (_, { id }, { loaders }) =>
       loaders.organization.load(id),
+    team: async (_, { id }, { user }) => {
+      authRequired(user);
+      const team = await r
+        .knex("team")
+        .where({ id })
+        .first();
+      await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
+      return team;
+    },
     inviteByHash: async (_, { hash }, { loaders, user }) => {
       authRequired(user);
       return r.table("invite").filter({ hash });

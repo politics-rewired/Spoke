@@ -250,6 +250,7 @@ const rootSchema = `
     inviteByHash(hash:String!): [Invite]
     contact(id:String!): CampaignContact
     assignment(id:String!): Assignment
+    team(id: String!): Team!
     organizations: [Organization]
     availableActions(organizationId:String!): [Action]
     conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
