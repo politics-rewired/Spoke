@@ -5,6 +5,7 @@ import AdminCampaignList from "./containers/AdminCampaignList";
 import AdminCampaignStats from "./containers/AdminCampaignStats";
 import AdminPersonList from "./containers/AdminPersonList";
 import AdminTeamEditor from "./containers/AdminTeamEditor";
+import TeamEditorDetail from "./containers/AdminTeamEditor/TeamEditorDetail";
 import AdminAssignmentControl from "./containers/AdminAssignmentControl";
 import AdminTagEditor from "./containers/AdminTagEditor";
 import AdminOptOutList from "./containers/AdminOptOutList";
@@ -48,7 +49,12 @@ export default function makeRoutes(requireAuth = () => {}) {
             </Route>
           </Route>
           <Route path="people" component={AdminPersonList} />
-          <Route path="teams" component={AdminTeamEditor} />
+          <Route path="teams">
+            <IndexRoute component={AdminTeamEditor} />
+            <Route path=":teamId">
+              <IndexRoute component={TeamEditorDetail} />
+            </Route>
+          </Route>
           <Route path="assignment-control" component={AdminAssignmentControl} />
           <Route path="tag-editor" component={AdminTagEditor} />
           <Route path="incoming" component={AdminIncomingMessageList} />

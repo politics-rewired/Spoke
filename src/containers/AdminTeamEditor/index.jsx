@@ -85,7 +85,10 @@ class AdminTeamEditor extends Component {
   };
 
   render() {
-    const { organizationTeams } = this.props;
+    const {
+      params: { organizationId },
+      organizationTeams
+    } = this.props;
     const { editingTeam, isWorking, error } = this.state;
 
     if (organizationTeams.loading) return <LoadingIndicator />;
@@ -111,6 +114,7 @@ class AdminTeamEditor extends Component {
     return (
       <div>
         <TeamEditorList
+          organizationId={organizationId}
           teams={teams}
           oEditTeam={this.handleEditTeam}
           onDeleteTeam={this.handleDeleteTeam}

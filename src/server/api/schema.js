@@ -2540,6 +2540,44 @@ const rootMutations = {
       if (deleteCount !== 1) throw new Error("Could not delete the team.");
 
       return true;
+    },
+    addUsersToTeam: async (_, { teamId, userIds }, { user }) => {
+      const { organization_id } = await r
+        .knex("team")
+        .where({ id: teamId })
+        .first("organization_id");
+      await accessRequired(user, organization_id, "ADMIN");
+      const userOrgCount = await r.parseCount(
+        r
+          .knex("user_organization")
+          .where({ organization_id })
+          .whereIn("user_id", userIds)
+          .count()
+      );
+      if (userOrgCount !== userIds.length)
+        throw new Error(
+          "Tried adding user to team in organization they are not part of!"
+        );
+      const payload = userIds.map(userId => ({
+        user_id: userId,
+        team_id: teamId
+      }));
+      // This will throw for duplicate memberships. That is fine.
+      await r.knex("user_team").insert(payload);
+      return true;
+    },
+    removeUsersFromTeam: async (_, { teamId, userIds }, { user }) => {
+      const { organization_id } = await r
+        .knex("team")
+        .where({ id: teamId })
+        .first("organization_id");
+      await accessRequired(user, organization_id, "ADMIN");
+      const result = await r
+        .knex("user_team")
+        .where({ team_id: teamId })
+        .whereIn("user_id", userIds)
+        .del();
+      return true;
     }
   }
 };
@@ -2582,6 +2620,14 @@ const rootResolvers = {
     },
     organization: async (_, { id }, { loaders }) =>
       loaders.organization.load(id),
+    team: async (_, { id }, { user }) => {
+      const team = await r
+        .knex("team")
+        .where({ id })
+        .first();
+      await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
+      return team;
+    },
     inviteByHash: async (_, { hash }, { loaders, user }) => {
       authRequired(user);
       return r.table("invite").filter({ hash });

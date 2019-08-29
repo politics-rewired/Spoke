@@ -250,6 +250,7 @@ const rootSchema = `
     inviteByHash(hash:String!): [Invite]
     contact(id:String!): CampaignContact
     assignment(id:String!): Assignment
+    team(id: String!): Team!
     organizations: [Organization]
     availableActions(organizationId:String!): [Action]
     conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
@@ -313,6 +314,8 @@ const rootSchema = `
     deleteTag(organizationId: String!, tagId: String!): Boolean!
     saveTeams(organizationId: String!, teams: [TeamInput]!): [Team]!
     deleteTeam(organizationId: String!, teamId: String!): Boolean!
+    addUsersToTeam(teamId: String!, userIds: [String]!): Boolean!
+    removeUsersFromTeam(teamId: String!, userIds: [String]!): Boolean!
   }
 
   schema {
