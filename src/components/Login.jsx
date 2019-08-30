@@ -5,7 +5,7 @@ import { StyleSheet, css } from "aphrodite";
 
 import { isClient } from "../lib";
 import theme from "../styles/theme";
-import UserEdit from "../containers/UserEdit";
+import UserEdit, { UserEditMode } from "../containers/UserEdit";
 
 const styles = StyleSheet.create({
   fieldContainer: {
@@ -47,16 +47,22 @@ const styles = StyleSheet.create({
   }
 });
 
+const saveLabels = {
+  [UserEditMode.SignUp]: "Sign Up",
+  [UserEditMode.Login]: "Log In",
+  [UserEditMode.Reset]: "Save New Password"
+};
+
 class LocalLogin extends React.Component {
   state = {
-    active: "login"
+    active: UserEditMode.Login
   };
 
   componentDidMount = () => {
     const { nextUrl } = this.props.location.query;
 
     if (nextUrl && nextUrl.includes("reset")) {
-      this.setState({ active: "reset" });
+      this.setState({ active: UserEditMode.Reset });
     }
   };
 
@@ -79,12 +85,6 @@ class LocalLogin extends React.Component {
       nextUrl && (nextUrl.includes("join") || nextUrl.includes("invite"));
     const displaySignUp = inviteLink && this.naiveVerifyInviteValid(nextUrl);
 
-    const saveLabels = {
-      login: "Log In",
-      signup: "Sign Up",
-      reset: "Save New Password"
-    };
-
     return (
       <div className={css(styles.loginPage)}>
         {/* Only display sign up option if there is a nextUrl */}
@@ -93,18 +93,18 @@ class LocalLogin extends React.Component {
             <button
               className={css(styles.button)}
               type="button"
-              name="login"
+              name={UserEditMode.Login}
               onClick={this.handleClick}
-              disabled={active === "login"}
+              disabled={active === UserEditMode.Login}
             >
               Log In
             </button>
             <button
               className={css(styles.button)}
               type="button"
-              name="signup"
+              name={UserEditMode.SignUp}
               onClick={this.handleClick}
-              disabled={active === "signup"}
+              disabled={active === UserEditMode.SignUp}
             >
               Sign Up
             </button>

@@ -48,7 +48,7 @@ class UserEdit extends React.Component {
       if (this.props.onRequestClose) {
         this.props.onRequestClose();
       }
-    } else if (this.props.authType === "change") {
+    } else if (this.props.authType === UserEditMode.Change) {
       // change password
       const res = await this.props.mutations.changeUserPassword(formData);
       if (res.errors) {
@@ -96,20 +96,24 @@ class UserEdit extends React.Component {
       };
     }
 
-    if (authType === "change") {
+    if (authType === UserEditMode.Change) {
       passwordFields = {
         ...passwordFields,
         newPassword: yup.string().required()
       };
     }
 
-    if (authType && authType !== "login") {
+    if (authType && authType !== UserEditMode.Login) {
       passwordFields = {
         ...passwordFields,
         passwordConfirm: yup
           .string()
           .oneOf(
-            [yup.ref(authType === "change" ? "newPassword" : "password")],
+            [
+              yup.ref(
+                authType === UserEditMode.Change ? "newPassword" : "password"
+              )
+            ],
             "Passwords must match"
           )
           .required()
@@ -117,7 +121,7 @@ class UserEdit extends React.Component {
     }
 
     let userFields = {};
-    if (!authType || authType === "signup") {
+    if (!authType || authType === UserEditMode.SignUp) {
       userFields = {
         firstName: yup.string().required(),
         lastName: yup.string().required(),
@@ -150,7 +154,7 @@ class UserEdit extends React.Component {
           className={style}
         >
           <Form.Field label="Email" name="email" {...dataTest("email")} />
-          {(!authType || authType === "signup") && (
+          {(!authType || authType === UserEditMode.SignUp) && (
             <span>
               <Form.Field
                 label="First name"
@@ -172,7 +176,7 @@ class UserEdit extends React.Component {
           {authType && (
             <Form.Field label="Password" name="password" type="password" />
           )}
-          {authType === "change" && (
+          {authType === UserEditMode.Change && (
             <Form.Field
               label="New Password"
               name="newPassword"
@@ -180,7 +184,7 @@ class UserEdit extends React.Component {
             />
           )}
           {authType &&
-            authType !== "login" && (
+            authType !== UserEditMode.Login && (
               <Form.Field
                 label="Confirm Password"
                 name="passwordConfirm"
@@ -188,7 +192,7 @@ class UserEdit extends React.Component {
               />
             )}
           <div className={css(styles.buttons)}>
-            {authType !== "change" &&
+            {authType !== UserEditMode.Change &&
               userId &&
               userId === data.currentUser.id && (
                 <div className={css(styles.container)}>
@@ -211,7 +215,7 @@ class UserEdit extends React.Component {
             onRequestClose={this.handleClose}
           >
             <UserEdit
-              authType="change"
+              authType={UserEditMode.Change}
               saveLabel="Save new password"
               handleClose={this.handleClose}
               openSuccessDialog={this.openSuccessDialog}
