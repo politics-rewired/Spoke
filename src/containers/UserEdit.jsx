@@ -12,6 +12,13 @@ import wrapMutations from "./hoc/wrap-mutations";
 import { dataTest } from "../lib/attributes";
 import GSForm from "../components/forms/GSForm";
 
+export const UserEditMode = Object.freeze({
+  SignUp: "signup",
+  Login: "login",
+  Change: "change",
+  Reset: "reset"
+});
+
 const styles = StyleSheet.create({
   buttons: {
     display: "flex"
