@@ -65,7 +65,7 @@ class ApplyTagButton extends Component {
     const removedTags = contactTags.filter(tag => !selectedTagIds.has(tag.id));
 
     this.props.onApplyTag(addedTags, removedTags);
-    this.handleCloseConfirm();
+    this.handleOnCancelEscalateTag();
     this.handleCloseTagSelectionDialog();
   };
 
@@ -78,7 +78,7 @@ class ApplyTagButton extends Component {
     const removedTags = contactTags.filter(tag => !selectedTagIds.has(tag.id));
 
     this.props.onApplyTagsAndMoveOn(addedTags, removedTags);
-    this.handleCloseConfirm();
+    this.handleOnCancelEscalateTag();
     this.handleCloseTagSelectionDialog();
   };
 
