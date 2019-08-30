@@ -90,12 +90,12 @@ const signup = async ({
 };
 
 const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
-  if (existingUser.length === 0) {
+  if (!existingUser) {
     throw new Error(errorMessages.invalidResetHash);
   }
 
   // Get user resetHash and date of hash creation
-  const pwFieldSplit = existingUser[0].auth0_id.split("|");
+  const pwFieldSplit = existingUser.auth0_id.split("|");
   const [resetHash, datetime] = [pwFieldSplit[1], pwFieldSplit[2]];
 
   // Verify hash was created in the last 15 mins
@@ -120,7 +120,7 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
       if (err) reject(err);
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const updatedUser = await User.get(existingUser[0].id)
+      const updatedUser = await User.get(existingUser.id)
         .update({ auth0_id: passwordToSave })
         .run();
       resolve(updatedUser);
