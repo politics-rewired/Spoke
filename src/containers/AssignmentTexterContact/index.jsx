@@ -7,11 +7,16 @@ import sortBy from "lodash/sortBy";
 
 import { StyleSheet, css } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
+import IconButton from "material-ui/IconButton";
 import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
+import IconMenu from "material-ui/IconMenu";
+import MenuItem from "material-ui/MenuItem";
 import CircularProgress from "material-ui/CircularProgress";
 import Snackbar from "material-ui/Snackbar";
-import { grey100 } from "material-ui/styles/colors";
+import { grey100, blueGrey100 } from "material-ui/styles/colors";
 import CreateIcon from "material-ui/svg-icons/content/create";
+import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
+import LocalOfferIcon from "material-ui/svg-icons/maps/local-offer";
 
 import { isContactBetweenTextingHours } from "./utils";
 import { getChildren, getTopMostParent, interactionStepForId } from "../../lib";
@@ -27,7 +32,7 @@ import BulkSendButton from "../../components/BulkSendButton";
 import SendButtonArrow from "../../components/SendButtonArrow";
 import ContactActionDialog from "./ContactActionDialog";
 import MessageTextField from "./MessageTextField";
-import ApplyTagButton from "./ApplyTagButton";
+import ApplyTagDialog from "./ApplyTagDialog";
 import TopFixedSection from "./TopFixedSection";
 
 const TexterDialogType = Object.freeze({
@@ -72,25 +77,6 @@ const styles = StyleSheet.create({
     color: "white",
     zIndex: 1000000
   },
-  optOutCard: {
-    "@media(max-width: 320px)": {
-      padding: "2px 10px !important"
-    },
-    zIndex: 2000,
-    backgroundColor: "white"
-  },
-  messageForm: {
-    backgroundColor: "red"
-  },
-  loadingIndicator: {
-    maxWidth: "50%"
-  },
-  navigationToolbarTitle: {
-    fontSize: "14px",
-    fontWeight: "bold",
-    position: "relative",
-    top: 5
-  },
   topFixedSection: {
     flex: "0 0 auto"
   },
@@ -109,56 +95,13 @@ const styles = StyleSheet.create({
     "@media(maxWidth: 450px)": {
       marginBottom: "8%"
     }
-  },
-  textField: {
-    "@media(max-width: 350px)": {
-      overflowY: "scroll !important"
-    }
-  },
-  dialogActions: {
-    marginTop: 20,
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-end"
-  },
-  lgMobileToolBar: {
-    "@media(max-width: 449px) and (min-width: 300px)": {
-      display: "inline-block"
-    },
-    "@media(max-width: 320px) and (min-width: 300px)": {
-      marginLeft: "-30px !important"
-    }
   }
 });
 
 const inlineStyles = {
-  mobileToolBar: {
-    position: "absolute",
-    bottom: "-5"
-  },
-  mobileCannedReplies: {
-    "@media(max-width: 450px)": {
-      marginBottom: "1"
-    }
-  },
-  dialogButton: {
-    display: "inline-block"
-  },
-  actionToolbar: {
-    height: 118,
-    backgroundColor: "white",
-    "@media(min-width: 450px)": {
-      marginBottom: 5
-    },
-    "@media(max-width: 450px)": {
-      marginBottom: 50
-    }
-  },
-
   actionToolbarFirst: {
     backgroundColor: "white"
   },
-
   snackbar: {
     zIndex: 1000001
   }
@@ -214,7 +157,8 @@ export class AssignmentTexterContact extends React.Component {
       currentInteractionStep:
         availableSteps.length > 0
           ? availableSteps[availableSteps.length - 1]
-          : null
+          : null,
+      isTagEditorOpen: false
     };
   }
 
@@ -499,9 +443,17 @@ export class AssignmentTexterContact extends React.Component {
     });
 
     if (callback) {
-      this.setState({ addedTags, removedTags, pendingNewTags }, callback);
+      this.setState(
+        { addedTags, removedTags, pendingNewTags, isTagEditorOpen: false },
+        callback
+      );
     } else {
-      this.setState({ addedTags, removedTags, pendingNewTags });
+      this.setState({
+        addedTags,
+        removedTags,
+        pendingNewTags,
+        isTagEditorOpen: false
+      });
     }
 
     if (!callback && addedTags.length > 0) {
@@ -653,7 +605,7 @@ export class AssignmentTexterContact extends React.Component {
     const { userCannedResponses, campaignCannedResponses } = assignment;
     const isCannedResponseEnabled =
       userCannedResponses.length + campaignCannedResponses.length > 0;
-    const { justSentNew, alreadySent, pendingNewTags } = this.state;
+    const { justSentNew, alreadySent } = this.state;
     const { messageStatus } = contact;
     const size = document.documentElement.clientWidth;
 
@@ -691,35 +643,48 @@ export class AssignmentTexterContact extends React.Component {
     } else if (size < 450) {
       // for needsResponse or messaged or convo
       return (
-        <div>
-          <Toolbar
-            className={css(styles.mobile)}
-            style={inlineStyles.actionToolbar}
+        <div
+          style={{
+            padding: "5px 5px 0 5px",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            backgroundColor: "white"
+          }}
+        >
+          <RaisedButton
+            {...dataTest("optOut")}
+            secondary
+            label="Opt out"
+            onTouchTap={this.handleOpenOptOutDialog}
+            tooltip="Opt out this contact"
+          />
+          <RaisedButton
+            label="Canned replies"
+            onTouchTap={this.handleOpenPopover}
+            disabled={!isCannedResponseEnabled}
+          />
+          {this.renderNeedsResponseToggleButton(contact)}
+          <div style={{ flexGrow: 1, textAlign: "center" }}>
+            {navigationToolbarChildren}
+          </div>
+          <IconMenu
+            iconButtonElement={
+              <IconButton style={{ backgroundColor: blueGrey100 }}>
+                <MoreVertIcon />
+              </IconButton>
+            }
+            anchorOrigin={{ horizontal: "right", vertical: "top" }}
+            targetOrigin={{ horizontal: "right", vertical: "bottom" }}
           >
-            <ToolbarGroup
-              style={inlineStyles.mobileToolBar}
-              className={css(styles.lgMobileToolBar)}
-              firstChild
-            >
-              <RaisedButton
-                {...dataTest("optOut")}
-                secondary
-                label="Opt out"
-                onTouchTap={this.handleOpenOptOutDialog}
-                tooltip="Opt out this contact"
-              />
-              <RaisedButton
-                style={inlineStyles.mobileCannedReplies}
-                label="Canned replies"
-                onTouchTap={this.handleOpenPopover}
-                disabled={!isCannedResponseEnabled}
-              />
-              {this.renderNeedsResponseToggleButton(contact)}
-              <div style={{ float: "right", marginLeft: "-30px" }}>
-                {navigationToolbarChildren}
-              </div>
-            </ToolbarGroup>
-          </Toolbar>
+            <MenuItem
+              primaryText="Manage Tags"
+              leftIcon={<LocalOfferIcon />}
+              disabled={tags.length === 0}
+              onClick={() => this.setState({ isTagEditorOpen: true })}
+            />
+          </IconMenu>
         </div>
       );
     } else if (size >= 768) {
@@ -745,12 +710,12 @@ export class AssignmentTexterContact extends React.Component {
                 label="Opt out"
                 onTouchTap={this.handleOpenOptOutDialog}
               />
-              <ApplyTagButton
-                contactTags={contact.contactTags}
-                pendingNewTags={pendingNewTags}
-                allTags={tags}
-                onApplyTag={this.handleApplyTags}
-                onApplyTagsAndMoveOn={this.handleApplyTagsAndMoveOn}
+              <RaisedButton
+                label="Manage Tags"
+                backgroundColor={blueGrey100}
+                icon={<LocalOfferIcon />}
+                disabled={tags.length === 0}
+                onClick={() => this.setState({ isTagEditorOpen: true })}
               />
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
@@ -798,7 +763,14 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderBottomFixedSection() {
-    const { dialogType, messageText, alreadySent } = this.state;
+    const { contact, tags } = this.props;
+    const {
+      dialogType,
+      messageText,
+      alreadySent,
+      isTagEditorOpen,
+      pendingNewTags
+    } = this.state;
 
     return (
       <div>
@@ -820,6 +792,15 @@ export class AssignmentTexterContact extends React.Component {
               </GSForm>
             </div>
             {this.renderActionToolbar()}
+            <ApplyTagDialog
+              open={isTagEditorOpen}
+              contactTags={contact.contactTags}
+              pendingNewTags={pendingNewTags}
+              allTags={tags}
+              onRequestClose={() => this.setState({ isTagEditorOpen: false })}
+              onApplyTag={this.handleApplyTags}
+              onApplyTagsAndMoveOn={this.handleApplyTagsAndMoveOn}
+            />
           </div>
         )}
         {dialogType === TexterDialogType.OptOut && (

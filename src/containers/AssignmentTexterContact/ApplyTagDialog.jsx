@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 
 import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
-import MoreIcon from "material-ui/svg-icons/navigation/more-vert";
 import Dialog from "material-ui/Dialog";
 
 import TagSelector from "../../components/TagSelector";
@@ -13,17 +12,20 @@ const isEscalateTag = t => t.title === "Escalated" || t.title === "Escalate";
 const isNonAssignableTagApplied = appliedTags =>
   appliedTags.findIndex(t => !t.isAssignable) > -1;
 
-const ApplyTagStep = Object.freeze({ None: 0, TagSelect: 1 });
-
-class ApplyTagButton extends Component {
+class ApplyTagDialog extends Component {
   state = {
-    applyStepIndex: ApplyTagStep.None,
     selectedTags: [],
     pendingTag: undefined
   };
 
   componentWillMount() {
     this.state.selectedTags = this.props.pendingNewTags;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!!nextProps.open && !this.props.open) {
+      this.resetTags();
+    }
   }
 
   resetTags = () =>
@@ -48,14 +50,6 @@ class ApplyTagButton extends Component {
     this.handleOnCancelEscalateTag();
   };
 
-  handleOpenTagSelectionDialog = () => {
-    this.resetTags();
-    this.setState({ applyStepIndex: ApplyTagStep.TagSelect });
-  };
-
-  handleCloseTagSelectionDialog = () =>
-    this.setState({ applyStepIndex: ApplyTagStep.None });
-
   handleApplyTags = () => {
     const { contactTags } = this.props;
     const { selectedTags } = this.state;
@@ -66,7 +60,6 @@ class ApplyTagButton extends Component {
 
     this.props.onApplyTag(addedTags, removedTags);
     this.handleOnCancelEscalateTag();
-    this.handleCloseTagSelectionDialog();
   };
 
   handleApplyTagsAndMoveOn = () => {
@@ -79,12 +72,11 @@ class ApplyTagButton extends Component {
 
     this.props.onApplyTagsAndMoveOn(addedTags, removedTags);
     this.handleOnCancelEscalateTag();
-    this.handleCloseTagSelectionDialog();
   };
 
   render() {
-    const { allTags } = this.props;
-    const { applyStepIndex, selectedTags, pendingTag } = this.state;
+    const { open, allTags } = this.props;
+    const { selectedTags, pendingTag } = this.state;
 
     const escalateTag = allTags.find(isEscalateTag);
     const tagsWithoutEscalated = allTags.filter(t => !isEscalateTag(t));
@@ -107,27 +99,20 @@ class ApplyTagButton extends Component {
       : [<FlatButton label="Save" primary onClick={this.handleApplyTags} />];
 
     const selectTagActions = saveActions.concat([
-      <FlatButton
-        label="Cancel"
-        primary
-        onClick={this.handleCloseTagSelectionDialog}
-      />
+      <FlatButton label="Cancel" primary onClick={this.props.onRequestClose} />
     ]);
 
     return (
       <div>
-        <RaisedButton
-          label="More"
-          disabled={allTags.length === 0}
-          onClick={this.handleOpenTagSelectionDialog}
-          labelPosition="before"
-          icon={<MoreIcon />}
-        />
         <Dialog
           title="More Actions"
-          open={applyStepIndex > 0}
+          open={open}
           actions={selectTagActions}
-          onRequestClose={this.handleCloseTagSelectionDialog}
+          contentStyle={{
+            width: "100%",
+            maxWidth: "none"
+          }}
+          onRequestClose={this.props.onRequestClose}
         >
           {!!escalateTag && (
             <RaisedButton
@@ -154,11 +139,21 @@ class ApplyTagButton extends Component {
   }
 }
 
-ApplyTagButton.propTypes = {
-  contactTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-  allTags: PropTypes.arrayOf(PropTypes.object).isRequired,
-  pendingNewTags: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onApplyTag: PropTypes.func.isRequired
+ApplyTagDialog.defaultProps = {
+  open: false,
+  onRequestClose: () => {},
+  onApplyTag: () => {},
+  onApplyTagsAndMoveOn: () => {}
 };
 
-export default ApplyTagButton;
+ApplyTagDialog.propTypes = {
+  open: PropTypes.bool,
+  contactTags: PropTypes.arrayOf(PropTypes.object).isRequired,
+  allTags: PropTypes.arrayOf(PropTypes.object).isRequired,
+  pendingNewTags: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onRequestClose: PropTypes.func,
+  onApplyTag: PropTypes.func,
+  onApplyTagsAndMoveOn: PropTypes.func
+};
+
+export default ApplyTagDialog;
