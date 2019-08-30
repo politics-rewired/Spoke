@@ -156,6 +156,8 @@ class AdminPersonList extends React.Component {
       return <Empty title="No people yet" icon={<PeopleIcon />} />;
     }
 
+    const canResetPassword = window.PASSPORT_STRATEGY === "local";
+
     return (
       <Table selectable={false}>
         <TableBody displayRowCheckbox={false} showRowHover>
@@ -196,13 +198,15 @@ class AdminPersonList extends React.Component {
                     this.editUser(person.id);
                   }}
                 />
-                <FlatButton
-                  label="Reset Password"
-                  disabled={currentUser.id === person.id}
-                  onTouchTap={() => {
-                    this.resetPassword(person.id);
-                  }}
-                />
+                {canResetPassword && (
+                  <FlatButton
+                    label="Reset Password"
+                    disabled={currentUser.id === person.id}
+                    onTouchTap={() => {
+                      this.resetPassword(person.id);
+                    }}
+                  />
+                )}
               </TableRowColumn>
             </TableRow>
           ))}

@@ -834,6 +834,10 @@ const rootMutations = {
     },
 
     resetUserPassword: async (_, { organizationId, userId }, { user }) => {
+      if (config.PASSPORT_STRATEGY !== "local")
+        throw new Error(
+          "Password reset may only be used with the 'local' login strategy."
+        );
       if (user.id === userId) {
         throw new Error("You can't reset your own password.");
       }
