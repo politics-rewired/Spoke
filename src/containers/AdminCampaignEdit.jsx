@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import React from "react";
-import sortBy from "lodash/sortBy";
 import isEqual from "lodash/isEqual";
 
 import WarningIcon from "material-ui/svg-icons/alert/warning";
@@ -401,12 +400,10 @@ class AdminCampaignEdit extends React.Component {
           const sameIsAssignmentLimitedToTeams =
             newIsAssignmentLimitedToTeams === isAssignmentLimitedToTeams;
           const sameTeams = isEqual(
-            sortBy(newTeams.map(team => team.id)),
-            sortBy(teams.map(team => team.id))
+            new Set(newTeams.map(team => team.id)),
+            new Set(teams.map(team => team.id))
           );
-          return !newIsAssignmentLimitedToTeams
-            ? sameIsAssignmentLimitedToTeams
-            : sameIsAssignmentLimitedToTeams && sameTeams;
+          return sameIsAssignmentLimitedToTeams && sameTeams;
         },
         checkCompleted: () => true,
         blocksStarting: false,

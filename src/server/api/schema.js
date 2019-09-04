@@ -275,19 +275,13 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
   if (campaign.hasOwnProperty("teamIds")) {
     await r.knex.transaction(async trx => {
-      const existingTeamIds = await trx("campaign_team")
+      // Remove all existing team memberships and then add everything again
+      await trx("campaign_team")
         .where({ campaign_id: id })
-        .pluck("team_id");
-      const teamIdsToRemove = _.difference(existingTeamIds, campaign.teamIds);
-      const teamIdsToAdd = _.difference(campaign.teamIds, existingTeamIds);
-      await Promise.all([
-        trx("campaign_team")
-          .whereIn("team_id", teamIdsToRemove)
-          .del(),
-        trx("campaign_team").insert(
-          teamIdsToAdd.map(team_id => ({ team_id, campaign_id: id }))
-        )
-      ]);
+        .del();
+      await trx("campaign_team").insert(
+        campaign.teamIds.map(team_id => ({ team_id, campaign_id: id }))
+      );
     });
   }
   if (campaign.hasOwnProperty("texters")) {
