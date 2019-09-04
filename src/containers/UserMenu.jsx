@@ -85,7 +85,12 @@ class UserMenu extends Component {
     // Handle only named routes (org navigation is done in OrganizationItem
     // becase MenuItem change is only handled if it's a direct descendent of Menu)
     if (value === "logout") {
-      window.AuthService.logout();
+      if (window.PASSPORT_STRATEGY === "auth0") {
+        // Handle Auth0 logout in-browser
+        return window.AuthService.logout();
+      }
+      // Let Passport handle the logout
+      window.location.href = "/logout-callback";
     } else if (value === "account") {
       if (orgId) {
         router.push(`/app/${orgId}/account/${currentUser.id}`);
