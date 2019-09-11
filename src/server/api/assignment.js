@@ -619,31 +619,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
     [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
   );
 
-  const { rowCount: messageUpdateCount } = await trx.raw(
-    `
-      update
-        message
-      set
-        assignment_id = ?
-      from
-        (
-          select
-            id
-          from
-            campaign_contact
-          where
-            assignment_id = ?
-        ) matching_contact
-      where
-        message.campaign_contact_id = matching_contact.id
-      ;
-    `,
-    [assignmentId, assignmentId]
-  );
-
-  logger.verbose(
-    `Updated ${ccUpdateCount} campaign contacts and ${messageUpdateCount} messages.`
-  );
+  logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
   return ccUpdateCount;
 }
 
