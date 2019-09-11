@@ -28,7 +28,7 @@ export const queryCampaignOverlaps = async (
     from campaign_contact
     join campaign_contact as overlapping_cc
       on campaign_contact.cell = overlapping_cc.cell
-    join campaign on campaign_contact.campaign_id = campaign.id
+    join campaign on overlapping_cc.campaign_id = campaign.id
     where
       campaign_contact.campaign_id = ?
       and campaign_contact.message_status = 'needsMessage'
