@@ -226,6 +226,10 @@ export const resolvers = {
         r.knex("campaign_contact").where({ campaign_id: campaign.id })
       ),
     hasUnassignedContacts: async campaign => {
+      if (config.BAD_BENS_DISABLE_HAS_UNASSIGNED_CONTACTS) {
+        return false;
+      }
+
       const { rows } = await r.knex.raw(
         `
         select exists (
@@ -246,6 +250,7 @@ export const resolvers = {
       `,
         [campaign.id]
       );
+
       return rows[0] && rows[0].contact_exists;
     },
     hasUnsentInitialMessages: async campaign => {

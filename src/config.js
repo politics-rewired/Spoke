@@ -120,6 +120,10 @@ if (isClient()) {
       example: "spoke/exports/",
       default: ""
     }),
+    BAD_BENS_DISABLE_HAS_UNASSIGNED_CONTACTS: bool({
+      dec: "Disable use of has unassigned contacts variable",
+      default: false
+    }),
     BAD_WORD_TOKEN: str({
       desc: "Bearer token used for authorization with BAD_WORD_URL.",
       default: undefined
