@@ -35,7 +35,9 @@ class TexterRequest extends React.Component {
   }
 
   submit = async () => {
-    const { count, email } = this.state;
+    const { count, email, submitting } = this.state;
+    if (submitting) return;
+
     this.setState({ submitting: true });
     try {
       const response = await this.props.mutations.requestTexts({
