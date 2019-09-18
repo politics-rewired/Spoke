@@ -89,7 +89,7 @@ async function convertMessagePartsToMessage(messageParts) {
       user_number: userNumber,
       is_from_contact: true,
       text: textIncludingMms(text, serviceMessages),
-      service_response: JSON.stringify(serviceMessages),
+      service_response: JSON.stringify(serviceMessages).replace(/\0/g, ""),
       service_id: serviceMessages[0].MessagingServiceSid,
       assignment_id: ccInfo && ccInfo.assignment_id,
       service: "twilio",
