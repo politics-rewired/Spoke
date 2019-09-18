@@ -368,8 +368,7 @@ export class AssignmentTexterContact extends React.Component {
       removedTagIds: removedTags.map(tag => tag.id)
     };
 
-    if (tag.addedTagIds.lenth > 0 || tag.removedTagIds.length > 0)
-      changes.tag = tag;
+    if (tag.addedTagIds || tag.removedTagIds) changes.tag = tag;
 
     // Return aggregate changes
     return changes;
