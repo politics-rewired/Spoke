@@ -133,7 +133,7 @@ export const appendServiceResponse = (responsesString, newResponse) => {
 
   let existingResponses = [];
   try {
-    existingResponses = JSON.parse(serviceResponses);
+    existingResponses = JSON.parse(responsesString);
   } catch (error) {}
 
   // service_response should be an array of responses (although this is usually of length 1)
