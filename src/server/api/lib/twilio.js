@@ -6,6 +6,7 @@ import moment from "moment-timezone";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Log, Message, PendingMessagePart, r } from "../../models";
 import { sleep } from "../../../lib/utils";
+import { appendServiceResponse } from "./message-sending";
 import {
   getCampaignContactAndAssignmentForIncomingMessage,
   saveNewIncomingMessage
@@ -306,12 +307,19 @@ async function sendMessage(message, organizationId, trx) {
       if (err) {
         hasError = true;
         logger.error(`Error sending message ${message.id}`, err);
-        messageToSave.service_response += JSON.stringify(err);
+        const jsonErr = typeof err === "object" ? err : { error: err };
+        messageToSave.service_response = appendServiceResponse(
+          messageToSave.service_response,
+          jsonErr
+        );
       }
       if (response) {
         messageToSave.service_id = response.sid;
         hasError = !!response.error_code;
-        messageToSave.service_response += JSON.stringify(response);
+        messageToSave.service_response = appendServiceResponse(
+          messageToSave.service_response,
+          response
+        );
       }
 
       if (hasError) {
