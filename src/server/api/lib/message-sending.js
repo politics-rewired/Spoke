@@ -124,6 +124,8 @@ export async function saveNewIncomingMessage(messageInstance) {
  * @param {object} newResponse a new service response object to append
  */
 export const appendServiceResponse = (responsesString, newResponse) => {
+  responsesString = responsesString !== undefined ? responsesString : "[]";
+
   // Account for service responses stored incorrectly prior to fix
   if (responsesString.indexOf("undefined") === 0) {
     responsesString = responsesString.slice(9);
