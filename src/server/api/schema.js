@@ -709,11 +709,13 @@ const rootMutations = {
         user_number: userNumber,
         is_from_contact: true,
         text: message,
-        service_response: JSON.stringify({
-          fakeMessage: true,
-          userId: user.id,
-          userFirstName: user.first_name
-        }),
+        service_response: JSON.stringify([
+          {
+            fakeMessage: true,
+            userId: user.id,
+            userFirstName: user.first_name
+          }
+        ]),
         service_id: mockId,
         assignment_id: lastMessage.assignment_id,
         service: lastMessage.service,

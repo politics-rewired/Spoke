@@ -116,3 +116,31 @@ export async function saveNewIncomingMessage(messageInstance) {
 
   await updateQuery;
 }
+
+/**
+ * Safely append a new service response to an existing service_response value.
+ * The existing value should be a stringified array but may not be so handle those cases.
+ * @param {string} responsesString stringified array of service responses
+ * @param {object} newResponse a new service response object to append
+ */
+export const appendServiceResponse = (responsesString, newResponse) => {
+  responsesString = responsesString !== undefined ? responsesString : "[]";
+
+  // Account for service responses stored incorrectly prior to fix
+  if (responsesString.indexOf("undefined") === 0) {
+    responsesString = responsesString.slice(9);
+  }
+
+  let existingResponses = [];
+  try {
+    existingResponses = JSON.parse(responsesString);
+  } catch (error) {}
+
+  // service_response should be an array of responses (although this is usually of length 1)
+  if (!Array.isArray(existingResponses)) {
+    existingResponses = [existingResponses];
+  }
+
+  existingResponses.push(newResponse);
+  return JSON.stringify(existingResponses);
+};

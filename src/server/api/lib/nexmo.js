@@ -3,7 +3,7 @@ import logger from "../../../logger";
 import Nexmo from "nexmo";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Message, PendingMessagePart } from "../../models";
-import { getLastMessage } from "./message-sending";
+import { getLastMessage, appendServiceResponse } from "./message-sending";
 
 let nexmo = null;
 const MAX_SEND_ATTEMPTS = 5;
@@ -119,7 +119,10 @@ async function sendMessage(message, trx) {
               hasError = true;
             }
           });
-          messageToSave.service_response += JSON.stringify(response);
+          messageToSave.service_response = appendServiceResponse(
+            messageToSave.service_response,
+            response
+          );
         }
 
         messageToSave.service = "nexmo";
@@ -165,7 +168,10 @@ async function sendMessage(message, trx) {
 async function handleDeliveryReport(report) {
   if (report.hasOwnProperty("client-ref")) {
     const message = await Message.get(report["client-ref"]);
-    message.service_response += JSON.stringify(report);
+    message.service_response = appendServiceResponse(
+      message.service_response,
+      report
+    );
     if (report.status === "delivered" || report.status === "accepted") {
       message.send_status = "DELIVERED";
     } else if (
