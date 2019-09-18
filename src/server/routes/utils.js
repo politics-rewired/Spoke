@@ -34,7 +34,7 @@ router.post("/remove-number-from-campaign", async (req, res) => {
 // The health check endpoint should ensure that the database is reachable
 router.get("/health", async (req, res) => {
   try {
-    await r.knex.raw("select sd1;");
+    await r.knex.raw("select 1;");
     return res.sendStatus(200);
   } catch (err) {
     // Service Unavailable!
