@@ -191,7 +191,6 @@ const rootSchema = `
   }
 
   input UserPasswordChange {
-    email: String!
     password: String!
     passwordConfirm: String!
     newPassword: String!
