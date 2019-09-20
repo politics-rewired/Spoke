@@ -3,11 +3,22 @@ import PropTypes from "prop-types";
 import { StyleSheet, css } from "aphrodite";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import IconButton from "material-ui/IconButton";
+import ChevronLeft from "material-ui/svg-icons/navigation/chevron-left";
+import ChevronRight from "material-ui/svg-icons/navigation/chevron-right";
 
 import MessageColumn from "./MessageColumn";
 import SurveyColumn from "./SurveyColumn";
 
-const styles = StyleSheet.create({
+const headerStyles = {
+  container: {
+    display: "flex",
+    alignItems: "baseline"
+  },
+  heading: { flex: "1" }
+};
+
+const columnStyles = StyleSheet.create({
   container: {
     display: "flex"
   },
@@ -27,14 +38,14 @@ const ConversationPreviewBody = props => {
   const { conversation, organizationId } = props,
     { contact, campaign } = conversation;
   return (
-    <div className={css(styles.container)}>
-      <div className={css(styles.column)}>
+    <div className={css(columnStyles.container)}>
+      <div className={css(columnStyles.column)}>
         <MessageColumn
           conversation={conversation}
           organizationId={organizationId}
         />
       </div>
-      <div className={css(styles.column)}>
+      <div className={css(columnStyles.column)}>
         <SurveyColumn
           contact={contact}
           campaign={campaign}
@@ -51,7 +62,13 @@ ConversationPreviewBody.propTypes = {
 };
 
 const ConversationPreviewModal = props => {
-  const { conversation, onRequestClose } = props,
+  const {
+      conversation,
+      navigation,
+      onRequestPrevious,
+      onRequestNext,
+      onRequestClose
+    } = props,
     isOpen = conversation !== undefined;
 
   const primaryActions = [
@@ -63,13 +80,25 @@ const ConversationPreviewModal = props => {
     maxWidth: "none"
   };
 
+  const title = (
+    <div style={headerStyles.container}>
+      <div style={headerStyles.heading}>
+        {conversation
+          ? `Conversation Review: ${conversation.campaign.title}`
+          : "Conversation Review"}
+      </div>
+      <IconButton disabled={!navigation.previous} onClick={onRequestPrevious}>
+        <ChevronLeft />
+      </IconButton>
+      <IconButton disabled={!navigation.next} onClick={onRequestNext}>
+        <ChevronRight />
+      </IconButton>
+    </div>
+  );
+
   return (
     <Dialog
-      title={
-        conversation
-          ? `Conversation Review: ${conversation.campaign.title}`
-          : "Conversation Review"
-      }
+      title={title}
       open={isOpen}
       actions={primaryActions}
       modal={false}
@@ -88,12 +117,21 @@ const ConversationPreviewModal = props => {
 };
 
 ConversationPreviewModal.defaultProps = {
+  navigation: { previous: false, next: false },
+  onRequestPrevious: () => {},
+  onRequestNext: () => {},
   onRequestClose: () => {}
 };
 
 ConversationPreviewModal.propTypes = {
   organizationId: PropTypes.string.isRequired,
   conversation: PropTypes.object,
+  navigation: PropTypes.shape({
+    previous: PropTypes.bool.isRequired,
+    next: PropTypes.bool.isRequired
+  }),
+  onRequestPrevious: PropTypes.func,
+  onRequestNext: PropTypes.func,
   onRequestClose: PropTypes.func
 };
 
