@@ -97,7 +97,9 @@ class AdminCampaignList extends React.Component {
   renderPagesDropdown() {
     const { pageSize, currentPageIndex, totalResults } = this.state;
 
-    if (!totalResults || totalResults === 0) {
+    const didFetchAll = pageSize === 0;
+    const hasResults = totalResults && totalResults > 0;
+    if (didFetchAll || !hasResults) {
       return "N/A";
     }
 
