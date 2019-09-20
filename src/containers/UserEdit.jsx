@@ -155,6 +155,11 @@ class UserEdit extends React.Component {
     const user = (editUser && editUser.editUser) || {};
 
     const formSchema = this.buildFormSchema(authType);
+    const isLocalAuth = window.PASSPORT_STRATEGY === "local";
+    const isCurrentUser = userId && userId === data.currentUser.id;
+    const isAlreadyChangePassword = authType === UserEditMode.Change;
+    const canChangePassword =
+      isLocalAuth && isCurrentUser && !isAlreadyChangePassword;
 
     return (
       <div>
@@ -168,7 +173,12 @@ class UserEdit extends React.Component {
             authType === UserEditMode.SignUp ||
             authType === UserEditMode.Reset ||
             authType === UserEditMode.Edit) && (
-            <Form.Field label="Email" name="email" {...dataTest("email")} />
+            <Form.Field
+              label="Email"
+              name="email"
+              disabled={!isLocalAuth}
+              {...dataTest("email")}
+            />
           )}
           {(authType === UserEditMode.SignUp ||
             authType === UserEditMode.Edit) && (
@@ -213,17 +223,15 @@ class UserEdit extends React.Component {
             />
           )}
           <div className={css(styles.buttons)}>
-            {authType !== UserEditMode.Change &&
-              userId &&
-              userId === data.currentUser.id && (
-                <div className={css(styles.container)}>
-                  <RaisedButton
-                    onTouchTap={this.handleClick}
-                    label="Change password"
-                    variant="outlined"
-                  />
-                </div>
-              )}
+            {canChangePassword && (
+              <div className={css(styles.container)}>
+                <RaisedButton
+                  onTouchTap={this.handleClick}
+                  label="Change password"
+                  variant="outlined"
+                />
+              </div>
+            )}
             <Form.Button type="submit" label={saveLabel || "Save"} />
           </div>
         </GSForm>
