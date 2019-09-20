@@ -104,10 +104,7 @@ class AdminCampaignList extends React.Component {
     }
 
     const pageCount = Math.ceil(totalResults / pageSize);
-    const pageArray = Array.apply(null, { length: pageCount }).map(
-      Number.call,
-      Number
-    );
+    const pageArray = [...Array(pageCount)].map((_, i) => i);
     return (
       <DropDownMenu
         value={currentPageIndex}
