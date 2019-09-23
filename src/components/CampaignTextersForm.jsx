@@ -107,19 +107,12 @@ export default class CampaignTextersForm extends React.Component {
   state = {
     autoSplit: false,
     focusedTexterId: null,
-    useDynamicAssignment: this.formValues().useDynamicAssignment,
     snackbarOpen: false,
     snackbarMessage: ""
   };
 
-  handleToggleChange() {
-    this.setState({
-      useDynamicAssignment: !this.state.useDynamicAssignment
-    });
-    this.props.onChange({
-      useDynamicAssignment: !this.state.useDynamicAssignment
-    });
-  }
+  handleDynamicAssignmentToggle = (_ev, toggled) =>
+    this.props.onChange({ useDynamicAssignment: toggled });
 
   onChange = formValues => {
     const existingFormValues = this.formValues();
@@ -410,7 +403,7 @@ export default class CampaignTextersForm extends React.Component {
               direction={0}
             />
           </div>
-          {this.state.useDynamicAssignment ? (
+          {this.formValues().useDynamicAssignment ? (
             <div className={css(styles.input)}>
               <Form.Field
                 name={`texters[${index}].assignment.maxContacts`}
@@ -463,7 +456,7 @@ export default class CampaignTextersForm extends React.Component {
 
   render() {
     const { organizationUuid, campaignId } = this.props;
-    const subtitle = this.state.useDynamicAssignment ? (
+    const subtitle = this.formValues().useDynamicAssignment ? (
       <div>
         <OrganizationJoinLink
           organizationUuid={organizationUuid}
@@ -493,8 +486,8 @@ export default class CampaignTextersForm extends React.Component {
           <Toggle
             {...dataTest("useDynamicAssignment")}
             label="Dynamically assign contacts"
-            toggled={this.state.useDynamicAssignment}
-            onToggle={this.handleToggleChange.bind(this)}
+            toggled={this.formValues().useDynamicAssignment}
+            onToggle={this.handleDynamicAssignmentToggle}
           />
         </div>
         <GSForm
