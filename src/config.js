@@ -270,6 +270,11 @@ if (isClient()) {
       default: false,
       isClient: true
     }),
+    DISABLE_TEXTER_NOTIFICATIONS: bool({
+      desc:
+        "Whether to disable texter notifications – if true, should be implemented externally.",
+      default: false
+    }),
     EMAIL_FROM: email({
       desc:
         "Email from address. Required to send email from either Mailgun or a custom SMTP server.",
