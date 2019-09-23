@@ -92,7 +92,7 @@ export class CampaignList extends React.Component {
     } = campaign;
 
     let listItemStyle = {};
-    let leftIcon = "";
+    let leftIcon = undefined;
     if (isArchived) {
       listItemStyle = inlineStyles.past;
     } else if (!isStarted || hasUnassignedContacts) {
