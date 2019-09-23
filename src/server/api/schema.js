@@ -1429,17 +1429,25 @@ const rootMutations = {
           is_opted_out: false
         })
       );
+
       if (result >= numberContacts) {
         return { found: false };
       }
 
       const updateResult = await r
         .knex("campaign_contact")
-        .where({
-          assignment_id: null,
-          campaign_id: campaign.id
-        })
-        .limit(numberContacts)
+        .where(
+          "id",
+          "in",
+          r
+            .knex("campaign_contact")
+            .where({
+              assignment_id: null,
+              campaign_id: campaign.id
+            })
+            .limit(numberContacts)
+            .select("id")
+        )
         .update({ assignment_id: assignmentId })
         .catch(logger.error);
 
