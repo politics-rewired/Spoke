@@ -48,7 +48,7 @@ function prepareSelectedRowsData(conversations, rowsSelected) {
 
 export class IncomingMessageList extends Component {
   state = {
-    activeConversation: undefined
+    activeConversationIndex: -1
   };
 
   componentDidUpdate(prevProps) {
@@ -212,16 +212,28 @@ export class IncomingMessageList extends Component {
     this.props.onConversationSelected(rowsSelected, selectedConversations);
   };
 
-  handleOpenConversation = index => {
-    const conversation = this.props.conversations.conversations.conversations[
-      index
-    ];
-    this.setState({ activeConversation: conversation });
-  };
+  handleOpenConversation = index =>
+    this.setState({ activeConversationIndex: index });
 
-  handleCloseConversation = () => {
-    this.setState({ activeConversation: undefined });
-  };
+  handleRequestPreviousConversation = () =>
+    this.setState(prevState => {
+      const { activeConversationIndex: oldIndex } = prevState;
+      const newIndex = oldIndex - 1;
+      if (newIndex < 0) return;
+      return { activeConversationIndex: newIndex };
+    });
+
+  handleRequestNextConversation = () =>
+    this.setState(prevState => {
+      const { activeConversationIndex: oldIndex } = prevState;
+      const { conversations } = this.props.conversations.conversations;
+      const newIndex = oldIndex + 1;
+      if (newIndex >= conversations.length) return;
+      return { activeConversationIndex: newIndex };
+    });
+
+  handleCloseConversation = () =>
+    this.setState({ activeConversationIndex: -1 });
 
   render() {
     if (this.props.conversations.loading) {
@@ -232,6 +244,13 @@ export class IncomingMessageList extends Component {
     const { limit, offset, total } = pageInfo;
     const displayPage = Math.floor(offset / limit) + 1;
     const tableData = prepareDataTableData(conversations);
+
+    const { activeConversationIndex } = this.state;
+    const activeConversation = conversations[activeConversationIndex];
+    const navigation = {
+      previous: conversations[activeConversationIndex - 1] !== undefined,
+      next: conversations[activeConversationIndex + 1] !== undefined
+    };
     return (
       <div>
         <DataTables
@@ -252,8 +271,11 @@ export class IncomingMessageList extends Component {
           selectedRows={this.props.selectedRows}
         />
         <ConversationPreviewModal
-          conversation={this.state.activeConversation}
+          conversation={activeConversation}
           organizationId={this.props.organizationId}
+          navigation={navigation}
+          onRequestPrevious={this.handleRequestPreviousConversation}
+          onRequestNext={this.handleRequestNextConversation}
           onRequestClose={this.handleCloseConversation}
         />
       </div>
