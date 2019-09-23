@@ -100,6 +100,10 @@ const inlineStyles = {
   },
   header: {
     ...theme.text.header
+  },
+  splitAssignmentToggle: {
+    width: "auto",
+    marginLeft: "auto"
   }
 };
 
@@ -529,10 +533,7 @@ export default class CampaignTextersForm extends React.Component {
                 <Toggle
                   {...dataTest("autoSplit")}
                   label="Split assignments"
-                  style={{
-                    width: "auto",
-                    marginLeft: "auto"
-                  }}
+                  style={inlineStyles.splitAssignmentToggle}
                   toggled={this.state.autoSplit}
                   onToggle={() => {
                     this.setState({ autoSplit: !this.state.autoSplit }, () => {
