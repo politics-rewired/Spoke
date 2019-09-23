@@ -942,26 +942,30 @@ export async function assignTexters(job) {
       );
 
       const assignContacts = async directive => {
-        const { assignment, contactsToAssign } = directive;
-
-        // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
-        const contactIds = await r
-          .knex("campaign_contact")
-          .transacting(trx)
-          .select("id")
-          .forUpdate()
-          .where({
-            assignment_id: null,
-            campaign_id: assignment.campaign_id
-          })
-          .limit(contactsToAssign)
-          .map(result => result.id);
-
-        await r
-          .knex("campaign_contact")
-          .transacting(trx)
-          .update({ assignment_id: assignment.id })
-          .whereIn("id", contactIds);
+        const {
+          assignment: { id: assignment_id, campaign_id },
+          contactsToAssign
+        } = directive;
+        await trx.raw(
+          `
+            with contacts_to_update as (
+              select id
+              from campaign_contact
+              where
+                assignment_id is null
+                and campaign_id = ?
+              limit ?
+              for update skip locked
+            )
+            update campaign_contact
+            set assignment_id = ?
+            from contacts_to_update
+            where
+              contacts_to_update.id = campaign_contact.id
+            ;
+          `,
+          [campaign_id, contactsToAssign, assignment_id]
+        );
       };
 
       // Assign contacts for updated existing assignments and notify users

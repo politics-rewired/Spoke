@@ -100,6 +100,10 @@ const inlineStyles = {
   },
   header: {
     ...theme.text.header
+  },
+  splitAssignmentToggle: {
+    width: "auto",
+    marginLeft: "auto"
   }
 };
 
@@ -107,19 +111,32 @@ export default class CampaignTextersForm extends React.Component {
   state = {
     autoSplit: false,
     focusedTexterId: null,
-    useDynamicAssignment: this.formValues().useDynamicAssignment,
     snackbarOpen: false,
     snackbarMessage: ""
   };
 
-  handleToggleChange() {
-    this.setState({
-      useDynamicAssignment: !this.state.useDynamicAssignment
+  handleDynamicAssignmentToggle = (_ev, toggled) =>
+    this.props.onChange({ useDynamicAssignment: toggled });
+
+  handleSplitAssignmentsToggle = (_ev, toggled) =>
+    this.setState({ autoSplit: toggled }, () => {
+      if (!this.state.autoSplit) return;
+
+      let { contactsCount, texters } = this.formValues();
+      contactsCount = Math.floor(contactsCount / texters.length);
+      const newTexters = texters.map(texter => ({
+        ...texter,
+        assignment: {
+          ...texter.assignment,
+          contactsCount
+        }
+      }));
+      const newFormValues = {
+        ...this.formValues(),
+        texters: newTexters
+      };
+      this.onChange(newFormValues);
     });
-    this.props.onChange({
-      useDynamicAssignment: !this.state.useDynamicAssignment
-    });
-  }
 
   onChange = formValues => {
     const existingFormValues = this.formValues();
@@ -410,7 +427,7 @@ export default class CampaignTextersForm extends React.Component {
               direction={0}
             />
           </div>
-          {this.state.useDynamicAssignment ? (
+          {this.formValues().useDynamicAssignment ? (
             <div className={css(styles.input)}>
               <Form.Field
                 name={`texters[${index}].assignment.maxContacts`}
@@ -457,13 +474,12 @@ export default class CampaignTextersForm extends React.Component {
     });
   }
 
-  handleSnackbarClose = () => {
+  handleSnackbarClose = () =>
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
-  };
 
   render() {
     const { organizationUuid, campaignId } = this.props;
-    const subtitle = this.state.useDynamicAssignment ? (
+    const subtitle = this.formValues().useDynamicAssignment ? (
       <div>
         <OrganizationJoinLink
           organizationUuid={organizationUuid}
@@ -493,8 +509,8 @@ export default class CampaignTextersForm extends React.Component {
           <Toggle
             {...dataTest("useDynamicAssignment")}
             label="Dynamically assign contacts"
-            toggled={this.state.useDynamicAssignment}
-            onToggle={this.handleToggleChange.bind(this)}
+            toggled={this.formValues().useDynamicAssignment}
+            onToggle={this.handleDynamicAssignmentToggle}
           />
         </div>
         <GSForm
@@ -536,34 +552,9 @@ export default class CampaignTextersForm extends React.Component {
                 <Toggle
                   {...dataTest("autoSplit")}
                   label="Split assignments"
-                  style={{
-                    width: "auto",
-                    marginLeft: "auto"
-                  }}
+                  style={inlineStyles.splitAssignmentToggle}
                   toggled={this.state.autoSplit}
-                  onToggle={() => {
-                    this.setState({ autoSplit: !this.state.autoSplit }, () => {
-                      if (this.state.autoSplit) {
-                        const contactsCount = Math.floor(
-                          this.formValues().contactsCount /
-                            this.formValues().texters.length
-                        );
-                        const newTexters = this.formValues().texters.map(
-                          texter => ({
-                            ...texter,
-                            assignment: {
-                              ...texter.assignment,
-                              contactsCount
-                            }
-                          })
-                        );
-                        this.onChange({
-                          ...this.formValues(),
-                          texters: newTexters
-                        });
-                      }
-                    });
-                  }}
+                  onToggle={this.handleSplitAssignmentsToggle}
                 />
               </div>
             </div>
