@@ -118,6 +118,26 @@ export default class CampaignTextersForm extends React.Component {
   handleDynamicAssignmentToggle = (_ev, toggled) =>
     this.props.onChange({ useDynamicAssignment: toggled });
 
+  handleSplitAssignmentsToggle = (_ev, toggled) =>
+    this.setState({ autoSplit: toggled }, () => {
+      if (!this.state.autoSplit) return;
+
+      let { contactsCount, texters } = this.formValues();
+      contactsCount = Math.floor(contactsCount / texters.length);
+      const newTexters = texters.map(texter => ({
+        ...texter,
+        assignment: {
+          ...texter.assignment,
+          contactsCount
+        }
+      }));
+      const newFormValues = {
+        ...this.formValues(),
+        texters: newTexters
+      };
+      this.onChange(newFormValues);
+    });
+
   onChange = formValues => {
     const existingFormValues = this.formValues();
     const changedTexterId = this.state.focusedTexterId;
@@ -534,29 +554,7 @@ export default class CampaignTextersForm extends React.Component {
                   label="Split assignments"
                   style={inlineStyles.splitAssignmentToggle}
                   toggled={this.state.autoSplit}
-                  onToggle={() => {
-                    this.setState({ autoSplit: !this.state.autoSplit }, () => {
-                      if (this.state.autoSplit) {
-                        const contactsCount = Math.floor(
-                          this.formValues().contactsCount /
-                            this.formValues().texters.length
-                        );
-                        const newTexters = this.formValues().texters.map(
-                          texter => ({
-                            ...texter,
-                            assignment: {
-                              ...texter.assignment,
-                              contactsCount
-                            }
-                          })
-                        );
-                        this.onChange({
-                          ...this.formValues(),
-                          texters: newTexters
-                        });
-                      }
-                    });
-                  }}
+                  onToggle={this.handleSplitAssignmentsToggle}
                 />
               </div>
             </div>
