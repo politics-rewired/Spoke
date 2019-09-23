@@ -569,8 +569,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
     const inserted = await trx("assignment")
       .insert({
         user_id: user.id,
-        campaign_id: campaignIdToAssignTo,
-        max_contacts: countToAssign
+        campaign_id: campaignIdToAssignTo
       })
       .returning("id");
     assignmentId = inserted[0];
