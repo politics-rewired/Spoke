@@ -1206,13 +1206,6 @@ const processContactsChunk = async (
     const contactRow = {
       campaignId,
       campaign: campaignTitle,
-      // TODO - Move this to messages table
-      // assignmentId: contact.assignment_id,
-      // "texter[firstName]": assignment.first_name,
-      // "texter[lastName]": assignment.last_name,
-      // "texter[email]": assignment.email,
-      // "texter[cell]": assignment.cell,
-      // "texter[assignedCell]": assignment.assigned_cell,
       "contact[firstName]": contact.first_name,
       "contact[lastName]": contact.last_name,
       "contact[cell]": contact.cell,
@@ -1268,10 +1261,16 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
         message.is_from_contact,
         message.text,
         message.send_status,
-        message.created_at
+        message.created_at,
+        public.user.first_name,
+        public.user.last_name,
+        public.user.email,
+        public.user.cell as user_cell
       from message
       join campaign_contact_ids
         on campaign_contact_ids.id = message.campaign_contact_id
+      left join public.user
+        on message.user_id = public.user.id
       order by
         campaign_contact_id asc,
         message.created_at asc
@@ -1292,7 +1291,11 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
     sendStatus: message.send_status,
     attemptedAt: moment(message.created_at).toISOString(),
     text: message.text,
-    campaignId
+    campaignId,
+    "texter[firstName]": message.first_name,
+    "texter[lastName]": message.last_name,
+    "texter[email]": message.email,
+    "texter[cell]": message.user_cell
   }));
 
   return { lastContactId, messages };
