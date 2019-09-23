@@ -16,7 +16,8 @@ export const UserEditMode = Object.freeze({
   SignUp: "signup",
   Login: "login",
   Change: "change",
-  Reset: "reset"
+  Reset: "reset",
+  Edit: "edit"
 });
 
 const styles = StyleSheet.create({
@@ -37,42 +38,48 @@ class UserEdit extends React.Component {
   };
 
   async componentWillMount() {
-    if (!this.props.authType) {
+    if (this.props.authType === UserEditMode.Edit) {
       await this.props.mutations.editUser(null);
     }
   }
 
   handleSave = async formData => {
-    if (!this.props.authType) {
-      await this.props.mutations.editUser(formData);
-      if (this.props.onRequestClose) {
-        this.props.onRequestClose();
-      }
-    } else if (this.props.authType === UserEditMode.Change) {
-      // change password
-      const res = await this.props.mutations.changeUserPassword(formData);
-      if (res.errors) {
-        throw new Error(res.errors.graphQLErrors[0].message);
-      }
-      this.props.openSuccessDialog();
-    } else {
-      // log in, sign up, or reset
-      const allData = {
-        nextUrl: this.props.nextUrl,
-        authType: this.props.authType,
-        ...formData
-      };
-      const res = await fetch("/login-callback", {
-        method: "POST",
-        body: JSON.stringify(allData),
-        headers: { "Content-Type": "application/json" }
-      });
-      const { redirected, headers, status, url } = res;
-      if (redirected && status === 200) {
-        this.props.router.replace(url);
-      } else if (status === 401) {
-        throw new Error(headers.get("www-authenticate") || "");
-      }
+    switch (this.props.authType) {
+      case UserEditMode.Edit:
+        await this.props.mutations.editUser(formData);
+        if (this.props.onRequestClose) {
+          this.props.onRequestClose();
+        }
+        break;
+      case UserEditMode.Change:
+        const changeRes = await this.props.mutations.changeUserPassword(
+          formData
+        );
+        if (changeRes.errors) {
+          throw new Error(changeRes.errors.graphQLErrors[0].message);
+        }
+        this.props.openSuccessDialog();
+        break;
+
+      default:
+        // log in, sign up, or reset
+        const allData = {
+          nextUrl: this.props.nextUrl,
+          authType: this.props.authType,
+          ...formData
+        };
+        const loginRes = await fetch("/login-callback", {
+          method: "POST",
+          body: JSON.stringify(allData),
+          headers: { "Content-Type": "application/json" }
+        });
+        const { redirected, headers, status, url } = loginRes;
+        if (redirected && status === 200) {
+          this.props.router.replace(url);
+        } else if (status === 401) {
+          throw new Error(headers.get("www-authenticate") || "");
+        }
+        break;
     }
   };
 
@@ -89,54 +96,58 @@ class UserEdit extends React.Component {
   openSuccessDialog = () => this.setState({ successDialog: true });
 
   buildFormSchema = authType => {
-    let passwordFields = {};
-    if (authType) {
-      passwordFields = {
-        password: yup.string().required()
-      };
-    }
-
-    if (authType === UserEditMode.Change) {
-      passwordFields = {
-        ...passwordFields,
-        newPassword: yup.string().required()
-      };
-    }
-
-    if (authType && authType !== UserEditMode.Login) {
-      passwordFields = {
-        ...passwordFields,
-        passwordConfirm: yup
-          .string()
-          .oneOf(
-            [
-              yup.ref(
-                authType === UserEditMode.Change ? "newPassword" : "password"
-              )
-            ],
-            "Passwords must match"
-          )
-          .required()
-      };
-    }
-
-    let userFields = {};
-    if (!authType || authType === UserEditMode.SignUp) {
-      userFields = {
-        firstName: yup.string().required(),
-        lastName: yup.string().required(),
-        cell: yup.string().required()
-      };
-    }
-
-    return yup.object({
-      email: yup
+    const email = yup
+      .string()
+      .email()
+      .required();
+    const userFields = {
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      cell: yup.string().required()
+    };
+    const password = yup.string().required();
+    const passwordConfirm = (refField = "password") =>
+      yup
         .string()
-        .email()
-        .required(),
-      ...userFields,
-      ...passwordFields
-    });
+        .oneOf([yup.ref(refField)], "Passwords must match")
+        .required();
+
+    switch (authType) {
+      case UserEditMode.Login:
+        // Handled by passport at /login-callback
+        return yup.object({
+          email,
+          password
+        });
+      case UserEditMode.SignUp:
+        // Handled by passport at /login-callback
+        return yup.object({
+          email,
+          password,
+          passwordConfirm: passwordConfirm("password"),
+          ...userFields
+        });
+      case UserEditMode.Reset:
+        // Handled by passport at /login-callback (thus why `email` is required)
+        return yup.object({
+          email,
+          password,
+          passwordConfirm: passwordConfirm("password")
+        });
+      case UserEditMode.Edit:
+        // Handled by editUser mutation
+        return yup.object({
+          email,
+          ...userFields
+        });
+      case UserEditMode.Change:
+        // Handled by changeUserPassword mutation
+        return yup.object({
+          password,
+          newPassword: yup.string().required(),
+          passwordConfirm: passwordConfirm("newPassword")
+        });
+    }
   };
 
   render() {
@@ -144,6 +155,11 @@ class UserEdit extends React.Component {
     const user = (editUser && editUser.editUser) || {};
 
     const formSchema = this.buildFormSchema(authType);
+    const isLocalAuth = window.PASSPORT_STRATEGY === "local";
+    const isCurrentUser = userId && userId === data.currentUser.id;
+    const isAlreadyChangePassword = authType === UserEditMode.Change;
+    const canChangePassword =
+      isLocalAuth && isCurrentUser && !isAlreadyChangePassword;
 
     return (
       <div>
@@ -153,8 +169,19 @@ class UserEdit extends React.Component {
           defaultValue={user}
           className={style}
         >
-          <Form.Field label="Email" name="email" {...dataTest("email")} />
-          {(!authType || authType === UserEditMode.SignUp) && (
+          {(authType === UserEditMode.Login ||
+            authType === UserEditMode.SignUp ||
+            authType === UserEditMode.Reset ||
+            authType === UserEditMode.Edit) && (
+            <Form.Field
+              label="Email"
+              name="email"
+              disabled={!isLocalAuth}
+              {...dataTest("email")}
+            />
+          )}
+          {(authType === UserEditMode.SignUp ||
+            authType === UserEditMode.Edit) && (
             <span>
               <Form.Field
                 label="First name"
@@ -173,7 +200,10 @@ class UserEdit extends React.Component {
               />
             </span>
           )}
-          {authType && (
+          {(authType === UserEditMode.Login ||
+            authType === UserEditMode.SignUp ||
+            authType === UserEditMode.Reset ||
+            authType === UserEditMode.Change) && (
             <Form.Field label="Password" name="password" type="password" />
           )}
           {authType === UserEditMode.Change && (
@@ -183,26 +213,25 @@ class UserEdit extends React.Component {
               type="password"
             />
           )}
-          {authType &&
-            authType !== UserEditMode.Login && (
-              <Form.Field
-                label="Confirm Password"
-                name="passwordConfirm"
-                type="password"
-              />
-            )}
+          {(authType === UserEditMode.SignUp ||
+            authType === UserEditMode.Reset ||
+            authType === UserEditMode.Change) && (
+            <Form.Field
+              label="Confirm Password"
+              name="passwordConfirm"
+              type="password"
+            />
+          )}
           <div className={css(styles.buttons)}>
-            {authType !== UserEditMode.Change &&
-              userId &&
-              userId === data.currentUser.id && (
-                <div className={css(styles.container)}>
-                  <RaisedButton
-                    onTouchTap={this.handleClick}
-                    label="Change password"
-                    variant="outlined"
-                  />
-                </div>
-              )}
+            {canChangePassword && (
+              <div className={css(styles.container)}>
+                <RaisedButton
+                  onTouchTap={this.handleClick}
+                  label="Change password"
+                  variant="outlined"
+                />
+              </div>
+            )}
             <Form.Button type="submit" label={saveLabel || "Save"} />
           </div>
         </GSForm>
@@ -239,6 +268,10 @@ class UserEdit extends React.Component {
     );
   }
 }
+
+UserEdit.defaultProps = {
+  authType: UserEditMode.Edit
+};
 
 UserEdit.propTypes = {
   mutations: PropTypes.object.isRequired,
