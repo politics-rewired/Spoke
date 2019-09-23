@@ -97,15 +97,14 @@ class AdminCampaignList extends React.Component {
   renderPagesDropdown() {
     const { pageSize, currentPageIndex, totalResults } = this.state;
 
-    if (!totalResults || totalResults === 0) {
+    const didFetchAll = pageSize === 0;
+    const hasResults = totalResults && totalResults > 0;
+    if (didFetchAll || !hasResults) {
       return "N/A";
     }
 
     const pageCount = Math.ceil(totalResults / pageSize);
-    const pageArray = Array.apply(null, { length: pageCount }).map(
-      Number.call,
-      Number
-    );
+    const pageArray = [...Array(pageCount)].map((_, i) => i);
     return (
       <DropDownMenu
         value={currentPageIndex}

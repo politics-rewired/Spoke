@@ -57,7 +57,10 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
   campaignsQuery = campaignsQuery.orderBy("due_by", "desc").orderBy("id");
 
   if (cursor) {
-    campaignsQuery = campaignsQuery.limit(cursor.limit).offset(cursor.offset);
+    // A limit of 0 means a page size of 'All'
+    if (cursor.limit !== 0) {
+      campaignsQuery = campaignsQuery.limit(cursor.limit).offset(cursor.offset);
+    }
     const campaigns = await campaignsQuery;
 
     const campaignsCountQuery = buildCampaignQuery(
