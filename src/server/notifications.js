@@ -74,7 +74,13 @@ export const sendUserNotification = async notification => {
         Notifications.ASSIGNMENT_CREATED
       );
     }
-  } else if (type === Notifications.ASSIGNMENT_MESSAGE_RECEIVED) {
+    return;
+  }
+
+  /* Notifications.CAMPAIGN_STARTED are the only ones to include if config.DISABLE_TEXTER_NOTIFICATIONS is false */
+  if (config.DISABLE_TEXTER_NOTIFICATIONS) return;
+
+  if (type === Notifications.ASSIGNMENT_MESSAGE_RECEIVED) {
     const assignment = await Assignment.get(notification.assignmentId);
     const campaign = await Campaign.get(assignment.campaign_id);
     const campaignContact = await r
