@@ -215,20 +215,22 @@ export class IncomingMessageList extends Component {
   handleOpenConversation = index =>
     this.setState({ activeConversationIndex: index });
 
-  handleRequestPreviousConversation = () => {
-    const { activeConversationIndex: oldIndex } = this.state;
-    const newIndex = oldIndex - 1;
-    if (newIndex < 0) return;
-    this.setState({ activeConversationIndex: newIndex });
-  };
+  handleRequestPreviousConversation = () =>
+    this.setState(prevState => {
+      const { activeConversationIndex: oldIndex } = prevState;
+      const newIndex = oldIndex - 1;
+      if (newIndex < 0) return;
+      return { activeConversationIndex: newIndex };
+    });
 
-  handleRequestNextConversation = () => {
-    const { activeConversationIndex: oldIndex } = this.state;
-    const { conversations } = this.props.conversations.conversations;
-    const newIndex = oldIndex + 1;
-    if (newIndex >= conversations.length) return;
-    this.setState({ activeConversationIndex: newIndex });
-  };
+  handleRequestNextConversation = () =>
+    this.setState(prevState => {
+      const { activeConversationIndex: oldIndex } = prevState;
+      const { conversations } = this.props.conversations.conversations;
+      const newIndex = oldIndex + 1;
+      if (newIndex >= conversations.length) return;
+      return { activeConversationIndex: newIndex };
+    });
 
   handleCloseConversation = () =>
     this.setState({ activeConversationIndex: -1 });
