@@ -454,9 +454,8 @@ export default class CampaignTextersForm extends React.Component {
     });
   }
 
-  handleSnackbarClose = () => {
+  handleSnackbarClose = () =>
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
-  };
 
   render() {
     const { organizationUuid, campaignId } = this.props;
