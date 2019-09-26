@@ -16,7 +16,7 @@ exports.up = function(knex, Promise) {
      * finally, once it's safe to do so, we remove the time zone constraint from the campaign level view
      */
     `
-    create function spoke_tz_to_iso_tz(spoke_tz text) returns text as $$
+    create or replace function spoke_tz_to_iso_tz(spoke_tz text) returns text as $$
       select case
         when spoke_tz = '-10_1' then 'Pacific/Honolulu'
         when spoke_tz = '-9_1' then 'America/Anchorage'
@@ -25,7 +25,7 @@ exports.up = function(knex, Promise) {
         when spoke_tz = '-6_0' then 'America/Chicago'
         when spoke_tz = '-5_1' then 'America/New_York'
         when spoke_tz = '-5_0' then 'America/New_York'
-        else null
+        else 'UNKNOWN'
       end;
     $$ language sql strict immutable;
 
@@ -61,7 +61,7 @@ exports.up = function(knex, Promise) {
       select
         campaign_contact.id, campaign_contact.campaign_id,
         campaign_contact.message_status, campaign.texting_hours_end,
-        coalesce(spoke_tz_to_iso_tz(timezone_offset), campaign.timezone) as contact_timezone
+        spoke_tz_to_iso_tz(campaign_contact.timezone_offset) as contact_timezone
       from campaign_contact
       join campaign on campaign_contact.campaign_id = campaign.id
       where assignment_id is null
@@ -79,14 +79,20 @@ exports.up = function(knex, Promise) {
       select acc.id, acc.campaign_id, acc.message_status
       from assignable_campaign_contacts as acc
       where message_status = 'needsMessage'
-        and acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
+        and (
+          acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
+          or ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+        )
     );
 
     create or replace view assignable_needs_reply as (
       select acc.id, acc.campaign_id, acc.message_status
       from assignable_campaign_contacts as acc
       where message_status = 'needsResponse'
-        and acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
+        and (
+          acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
+          or ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+        )
     );
 
     create or replace view assignable_campaigns as (
@@ -95,7 +101,9 @@ exports.up = function(knex, Promise) {
       where is_started = true
         and is_archived = false
         and is_autoassign_enabled = true
-    )
+    );
+
+    drop view old_assignable_campaign_contacts;
     `
   );
 };
@@ -117,7 +125,7 @@ exports.down = function(knex, Promise) {
         and is_archived = false
         and is_autoassign_enabled = true
         and texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone campaign.timezone))
-    )
+    );
 
     create or replace view assignable_needs_message as (
       select acc.id, acc.campaign_id, acc.message_status
