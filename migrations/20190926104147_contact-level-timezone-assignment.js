@@ -2,7 +2,10 @@ exports.up = function(knex, Promise) {
   return knex.schema.raw(
     /**
      * This adds a a condition that the contact is within certain assignable time zones
-     * by overriding this intermediate view,
+     * by overriding this intermediate view
+     *
+     * it uses texting hours start and end with the contacts local time zone, and falls back
+     * to conservative voter contact hours for unknown contacts
      *
      * Then, assignable_needs_message and assignable_needs_reply select from it with
      * their own buffer zones
@@ -80,8 +83,8 @@ exports.up = function(knex, Promise) {
       from assignable_campaign_contacts as acc
       where message_status = 'needsMessage'
         and (
-          acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
-          or ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+          ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+          or acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
         )
     );
 
@@ -90,8 +93,8 @@ exports.up = function(knex, Promise) {
       from assignable_campaign_contacts as acc
       where message_status = 'needsResponse'
         and (
-          acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
-          or ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+          ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+          or acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
         )
     );
 
