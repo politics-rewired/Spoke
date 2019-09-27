@@ -3,6 +3,7 @@ exports.up = function(knex, Promise) {
   return knex.schema.alterTable("message", table => {
     table.integer("campaign_contact_id").unsigned();
     table.foreign("campaign_contact_id").references("campaign_contact.id");
+    table.index("campaign_contact_id");
   });
 };
 
