@@ -28,7 +28,7 @@ exports.up = function(knex, Promise) {
         when spoke_tz = '-6_0' then 'America/Chicago'
         when spoke_tz = '-5_1' then 'America/New_York'
         when spoke_tz = '-5_0' then 'America/New_York'
-        else 'UNKNOWN'
+        else null
       end;
     $$ language sql strict immutable;
 
@@ -83,7 +83,7 @@ exports.up = function(knex, Promise) {
       from assignable_campaign_contacts as acc
       where message_status = 'needsMessage'
         and (
-          ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+          ( acc.contact_timezone is null and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
           or acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
         )
     );
@@ -93,7 +93,7 @@ exports.up = function(knex, Promise) {
       from assignable_campaign_contacts as acc
       where message_status = 'needsResponse'
         and (
-          ( acc.contact_timezone = 'UNKNOWN' and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
+          ( acc.contact_timezone is null and extract(hour from CURRENT_TIMESTAMP) < 21 and extract(hour from CURRENT_TIMESTAMP) > 12 )
           or acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
         )
     );
