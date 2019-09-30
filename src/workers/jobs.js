@@ -215,7 +215,7 @@ export async function uploadContacts(job) {
       "Initializing Numbers connection - we are filtering out landlines"
     );
     numbersClient = new NumbersClient({ apiKey: numbersApiKey });
-    numbersRequest = await numbersClient.createRequest();
+    numbersRequest = await numbersClient.lookup.createRequest();
   }
 
   const maxContacts = parseInt(
