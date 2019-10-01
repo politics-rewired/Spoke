@@ -464,7 +464,9 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         contact.timezone = zipCodeToTimeZone.lookup(contact.zip);
       }
       if (contactCustomFields.hasOwnProperty("timezone")) {
-        contact.timezone = contactCustomFields["timezone"];
+        const zone = moment.tz.zone(contactCustomFields.timezone);
+        if (zone) contact.timezone = contactCustomFields.timezone;
+        else contact.timezone = zipCodeToTimeZone.lookup(contact.zip);
       }
       return contact;
     })

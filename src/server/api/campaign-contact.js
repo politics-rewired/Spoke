@@ -165,6 +165,7 @@ export const resolvers = {
           timezone_offset: offset,
           has_dst: false
         };
+        return loc;
       }
       const mainZip = campaignContact.zip.split("-")[0];
       const calculated = zipToTimeZone(mainZip);
