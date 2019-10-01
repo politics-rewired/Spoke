@@ -80,6 +80,8 @@ export function getContacts(
           defaultTimezoneIsBetweenTextingHours(config)
         ]);
       } else if (validTimezone === false) {
+        // validTimezone === false means we're looking for an invalid timezone,
+        // which means the contact is NOT textable right now
         query = query.whereRaw(
           "contact_is_textable_now(timezone, ?, ?, ?) = false",
           [
