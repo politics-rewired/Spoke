@@ -2,7 +2,7 @@ import logger from "../../logger";
 import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
 import { Assignment, r, cacheableData } from "../models";
-import { getOffsets, defaultTimezoneIsBetweenTextingHours } from "../../lib";
+import { defaultTimezoneIsBetweenTextingHours } from "../../lib";
 import { Notifications, sendUserNotification } from "../notifications";
 import _ from "lodash";
 import request from "superagent";
@@ -57,7 +57,6 @@ export function getContacts(
     };
   }
 
-  const [validOffsets, invalidOffsets] = getOffsets(config);
   if (
     !includePastDue &&
     pastDue &&
@@ -75,17 +74,20 @@ export function getContacts(
     const validTimezone = contactsFilter.validTimezone;
     if (validTimezone !== null) {
       if (validTimezone === true) {
-        if (defaultTimezoneIsBetweenTextingHours(config)) {
-          // missing timezone ok
-          validOffsets.push("");
-        }
-        query = query.whereIn("timezone_offset", validOffsets);
+        query = query.whereRaw("contact_is_textable_now(timezone, ?, ?, ?)", [
+          config.campaignTextingHours.textingHoursStart,
+          config.campaignTextingHours.textingHoursEnd,
+          defaultTimezoneIsBetweenTextingHours(config)
+        ]);
       } else if (validTimezone === false) {
-        if (!defaultTimezoneIsBetweenTextingHours(config)) {
-          // missing timezones are not ok to text
-          invalidOffsets.push("");
-        }
-        query = query.whereIn("timezone_offset", invalidOffsets);
+        query = query.whereRaw(
+          "contact_is_textable_now(timezone, ?, ?, ?) = false",
+          [
+            config.campaignTextingHours.textingHoursStart,
+            config.campaignTextingHours.textingHoursEnd,
+            !defaultTimezoneIsBetweenTextingHours(config)
+          ]
+        );
       }
     }
 

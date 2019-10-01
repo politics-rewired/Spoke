@@ -29,6 +29,7 @@ import { sendEmail } from "../server/mail";
 import { Notifications, sendUserNotification } from "../server/notifications";
 import s3 from "./exports/s3";
 import gsJson from "./exports/gs-json";
+import zipCodeToTimeZone from "zipcode-to-timezone";
 
 const CHUNK_SIZE = 1000;
 const BATCH_SIZE = config.DB_MAX_POOL;
@@ -67,24 +68,6 @@ function getOptOutSubQuery(orgId) {
   return !!config.OPTOUTS_SHARE_ALL_ORGS
     ? optOutsByInstance()
     : optOutsByOrgId(orgId);
-}
-
-export async function getTimezoneByZip(zip) {
-  if (zip in zipMemoization) {
-    return zipMemoization[zip];
-  }
-  const rangeZip = zipToTimeZone(zip);
-  if (rangeZip) {
-    return `${rangeZip[2]}_${rangeZip[3]}`;
-  }
-  const zipDatum = await r.table("zip_code").get(zip);
-  if (zipDatum && zipDatum.timezone_offset && zipDatum.has_dst) {
-    zipMemoization[zip] = convertOffsetsToStrings([
-      [zipDatum.timezone_offset, zipDatum.has_dst]
-    ])[0];
-    return zipMemoization[zip];
-  }
-  return "";
 }
 
 export async function sendJobToAWSLambda(job) {
@@ -234,7 +217,7 @@ export async function uploadContacts(job) {
     const datum = contacts[index];
     if (datum.zip) {
       // using memoization and large ranges of homogenous zips
-      datum.timezone_offset = await getTimezoneByZip(datum.zip);
+      datum.timezone = zipCodeToTimeZone.lookup(datum.zip);
     }
   }
 
@@ -477,14 +460,11 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         contactCustomFields[f] = row[f];
       });
       contact.custom_fields = JSON.stringify(contactCustomFields);
-      if (
-        contact.zip &&
-        !contactCustomFields.hasOwnProperty("timezone_offset")
-      ) {
-        contact.timezone_offset = getTimezoneByZip(contact.zip);
+      if (contact.zip && !contactCustomFields.hasOwnProperty("timezone")) {
+        contact.timezone = zipCodeToTimeZone.lookup(contact.zip);
       }
-      if (contactCustomFields.hasOwnProperty("timezone_offset")) {
-        contact.timezone_offset = contactCustomFields["timezone_offset"];
+      if (contactCustomFields.hasOwnProperty("timezone")) {
+        contact.timezone = contactCustomFields["timezone"];
       }
       return contact;
     })

@@ -3,6 +3,7 @@ import { CampaignContact, r, cacheableData } from "../models";
 import { mapFieldsToModel } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
+import moment from "moment-timezone";
 
 export const resolvers = {
   Location: {
@@ -157,20 +158,13 @@ export const resolvers = {
       return Object.values(formatted);
     },
     location: async (campaignContact, _, { loaders }) => {
-      if (campaignContact.timezone_offset) {
-        // couldn't look up the timezone by zip record, so we load it
-        // from the campaign_contact directly if it's there
-        const [offset, hasDst] = campaignContact.timezone_offset.split("_");
+      if (campaignContact.timezone) {
+        const offset =
+          moment.tz.zone(campaignContact.timezone).utcOffset(Date.now()) / 60;
         const loc = {
-          timezone_offset: parseInt(offset, 10),
-          has_dst: hasDst === "1"
+          timezone_offset: offset,
+          has_dst: false
         };
-        // From cache
-        if (campaignContact.city) {
-          loc.city = campaignContact.city;
-          loc.state = campaignContact.state || undefined;
-        }
-        return loc;
       }
       const mainZip = campaignContact.zip.split("-")[0];
       const calculated = zipToTimeZone(mainZip);
