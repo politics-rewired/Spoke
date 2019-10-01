@@ -6,9 +6,11 @@ exports.up = function(knex, Promise) {
     .then(() =>
       knex.schema.raw(`
         create or replace function contact_is_textable_now(timezone text, start integer, stop integer, allow_null boolean) returns boolean as $$
-          select allow_null
-            or extract(hour from (CURRENT_TIMESTAMP at time zone timezone)) > start
-            and extract(hour from (CURRENT_TIMESTAMP at time zone timezone)) < stop
+          select (timezone is null and allow_null)
+            or (
+              extract(hour from (CURRENT_TIMESTAMP at time zone timezone)) > start
+              and extract(hour from (CURRENT_TIMESTAMP at time zone timezone)) < stop
+            )
         $$ language sql;
       `)
     );
