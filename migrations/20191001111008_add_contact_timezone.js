@@ -1,7 +1,8 @@
 exports.up = function(knex, Promise) {
   return knex.schema
     .alterTable("campaign_contact", table => {
-      table.string("timezone").index(); // indexing it makes the backfill script much faster
+      table.string("timezone").index(); // indexing it makes the backfill script much faster - index moved to concurrent
+      // table.string("timezone"); // indexing it makes the backfill script much faster - to do it concurrently, use this line
     })
     .then(() =>
       knex.schema.raw(`
