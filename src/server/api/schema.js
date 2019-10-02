@@ -462,7 +462,7 @@ async function sendMessage(
       "campaign.texting_hours_enforced as c_texting_hours_enforced",
       "assignment.user_id as a_assignment_user_id",
       "opt_out.id as is_opted_out",
-      "campaign_contact.timezone_offset as contact_timezone_offset"
+      "campaign_contact.timezone as contact_timezone"
     );
 
   // If the conversation is unassigned, create an assignment. This assignment will be applied to
@@ -559,12 +559,13 @@ async function sendMessage(
   );
 
   let contactTimezone = {};
-  if (record.contact_timezone_offset) {
+  if (record.contact_timezone) {
     // couldn't look up the timezone by zip record, so we load it
     // from the campaign_contact directly if it's there
-    const [offset, hasDST] = record.contact_timezone_offset.split("_");
-    contactTimezone.offset = parseInt(offset, 10);
-    contactTimezone.hasDST = hasDST === "1";
+    const offset =
+      moment.tz(record.contact_timezone).utcOffset(Date.now()) / 60;
+    contactTimezone.offset = offset;
+    contactTimezone.hasDST = false;
   }
 
   const {

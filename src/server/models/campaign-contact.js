@@ -32,10 +32,7 @@ const CampaignContact = thinky.createModel(
         ])
         .default("needsMessage"),
       is_opted_out: type.boolean().default(false),
-      timezone_offset: type
-        .string()
-        .default("")
-        .required()
+      timezone: type.string()
     })
     .allowExtra(false),
   { noAutoCreation: true }

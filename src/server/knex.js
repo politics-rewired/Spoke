@@ -49,9 +49,6 @@ const knexConfig = {
     idleTimeoutMillis: config.DB_IDLE_TIMEOUT_MS,
     reapIntervalMillis: config.DB_REAP_INTERVAL_MS,
     afterCreate
-  },
-  seeds: {
-    directory: "./seeds"
   }
 };
 
