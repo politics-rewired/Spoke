@@ -1255,6 +1255,8 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
         where
           campaign_id = ?
           and id > ?
+        order by
+          id asc
         limit ?
       )
       select
