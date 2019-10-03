@@ -121,9 +121,17 @@ export async function getConversations(
     contactNameFilter
   )).query;
 
+  offsetLimitQuery = offsetLimitQuery.join(
+    r.knex.raw(
+      "message on message.id = ( select id from message where campaign_contact_id = campaign_contact.id order by created_at desc limit 1 )"
+    )
+  );
+
   offsetLimitQuery = offsetLimitQuery
-    .orderBy("campaign_contact.updated_at", "DESC")
+    .orderBy("message.created_at", "desc")
+    .orderBy("campaign_contact.updated_at", "desc")
     .orderBy("cc_id");
+
   offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset);
 
   const ccIdRows = await offsetLimitQuery;
@@ -274,9 +282,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
   )).query;
 
   query = query.leftJoin("message", table => {
-    table
-      .on("message.assignment_id", "=", "assignment.id")
-      .andOn("message.contact_number", "=", "campaign_contact.cell");
+    table.on("message.campaign_contact_id", "=", "campaign_contact.id");
   });
 
   query = query.orderBy("cc_id");
