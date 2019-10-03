@@ -4,7 +4,7 @@ exports.up = function(knex) {
       select (timezone is null and allow_null)
         or (
           extract(hour from (CURRENT_TIMESTAMP at time zone timezone)) >= start
-          and extract(hour from (CURRENT_TIMESTAMP at time zone timezone)) <= stop
+          and extract(hour from (CURRENT_TIMESTAMP at time zone timezone)) < stop
         )
     $$ language sql;
   `);
