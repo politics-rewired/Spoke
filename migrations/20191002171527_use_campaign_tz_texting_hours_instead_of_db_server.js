@@ -11,8 +11,8 @@ exports.up = function(knex) {
               and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) >= campaign.texting_hours_start
             )
           or 
-            ( campaign.texting_hours_end < extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
-              and campaign.texting_hours_start >= extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone))
+            ( campaign.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
+              and campaign.texting_hours_start <= extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone))
             )
         )
     );
@@ -28,8 +28,8 @@ exports.up = function(knex) {
               and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) >= campaign.texting_hours_start
             )
           or 
-            ( campaign.texting_hours_end < extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
-              and campaign.texting_hours_start >= extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone))
+            ( campaign.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
+              and campaign.texting_hours_start <= extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone))
             )
         )
     );
