@@ -6,8 +6,14 @@ exports.up = function(knex) {
       join campaign on campaign.id = acc.campaign_id
       where message_status = 'needsMessage'
         and (
-          ( acc.contact_timezone is null and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) < 21 and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) > 12 )
-          or acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
+            ( acc.contact_timezone is null
+              and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) < campaign.texting_hours_end
+              and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) >= campaign.texting_hours_start
+            )
+          or 
+            ( campaign.texting_hours_end < extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '10 minutes')
+              and campaign.texting_hours_start >= extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone))
+            )
         )
     );
 
@@ -17,8 +23,14 @@ exports.up = function(knex) {
       join campaign on campaign.id = acc.campaign_id
       where message_status = 'needsResponse'
         and (
-          ( acc.contact_timezone is null and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) < 21 and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) > 12 )
-          or acc.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
+            ( acc.contact_timezone is null
+              and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) < campaign.texting_hours_end
+              and extract(hour from CURRENT_TIMESTAMP at time zone campaign.timezone) >= campaign.texting_hours_start
+            )
+          or 
+            ( campaign.texting_hours_end < extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone) + interval '2 minutes')
+              and campaign.texting_hours_start >= extract(hour from (CURRENT_TIMESTAMP at time zone acc.contact_timezone))
+            )
         )
     );
   `);
