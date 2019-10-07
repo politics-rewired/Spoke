@@ -161,20 +161,16 @@ const assignMessagingServiceSID = async (cell, organizationId) => {
   const result = await r.knex.raw(
     `
       with chosen_messaging_service_sid as (
-        select messaging_service_sid, count(*) as count
-        from messaging_service_stick
-        where organization_id = ?
-        group by messaging_service_sid
-        union
-        select messaging_service_sid, 0
+        select
+          messaging_service.messaging_service_sid,
+          count(messaging_service_stick.messaging_service_sid) as count
         from messaging_service
-        where organization_id = ?
-          and not exists (
-            select 1
-            from messaging_service_stick
-            where 
-              messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-          )
+        left join messaging_service_stick
+          on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+        where messaging_service.organization_id = ?
+          and messaging_service.service_type = 'twilio'
+        group by
+          messaging_service.messaging_service_sid
         order by count asc
         limit 1
     )
@@ -182,7 +178,7 @@ const assignMessagingServiceSID = async (cell, organizationId) => {
     values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
     returning messaging_service_sid;
     `,
-    [organizationId, organizationId, cell, organizationId]
+    [organizationId, cell, organizationId]
   );
 
   const chosen = result.rows[0].messaging_service_sid;
@@ -192,11 +188,14 @@ const assignMessagingServiceSID = async (cell, organizationId) => {
 const getMessageServiceSID = async (cell, organizationId) => {
   const { rows: existingStick } = await r.knex.raw(
     `
-    select messaging_service_sid
+    select messaging_service_stick.messaging_service_sid
     from messaging_service_stick
+    join messaging_service
+      on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
     where
-      cell = ?
-      and organization_id = ?
+      messaging_service_stick.cell = ?
+      and messaging_service_stick.organization_id = ?
+      and messaging_service.service_type = 'twilio'
   `,
     [cell, organizationId]
   );
@@ -215,7 +214,10 @@ const getTwilioCredentials = async messagingServiceSid => {
   const { account_sid: accountSid, encrypted_auth_token } = await r
     .knex("messaging_service")
     .first(["account_sid", "encrypted_auth_token"])
-    .where({ messaging_service_sid: messagingServiceSid });
+    .where({
+      messaging_service_sid: messagingServiceSid,
+      service_type: "twilio"
+    });
   const authToken = symmetricDecrypt(encrypted_auth_token);
   return { accountSid, authToken };
 };
@@ -476,12 +478,18 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 ) => {
   const { rows } = await trx.raw(
     `
-    select distinct campaign_contact.cell
-    from campaign_contact
-    left join messaging_service_stick
-      on messaging_service_stick.cell = campaign_contact.cell
-        and messaging_service_stick.organization_id = ?
-    where campaign_id = ?
+    select
+      distinct campaign_contact.cell
+    from
+      messaging_service_stick
+      join messaging_service
+        on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
+      right join campaign_contact
+        on messaging_service_stick.cell = campaign_contact.cell
+    where
+      messaging_service_stick.organization_id = ?
+      and messaging_service.service_type = 'twilio'
+      and campaign_contact.campaign_id = ?
       and messaging_service_stick.messaging_service_sid is null
   `,
     [organizationId, campaignId]
@@ -491,23 +499,19 @@ const ensureAllNumbersHaveMessagingServiceSIDs = async (
 
   const { rows: messagingServiceCandidates } = await trx.raw(
     `
-    select messaging_service_sid, count(*) as count
-    from messaging_service_stick
-    where organization_id = ?
-    group by messaging_service_sid
-    union
-    select messaging_service_sid, 0
+    select
+      messaging_service.messaging_service_sid,
+      count(*) as count
     from messaging_service
-    where organization_id = ?
-      and not exists (
-        select 1
-        from messaging_service_stick
-        where 
-          messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-      )
+    left join messaging_service_stick
+      on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+    where
+      messaging_service.organization_id = ?
+    group by
+      messaging_service.messaging_service_sid
     order by count desc
   `,
-    [organizationId, organizationId]
+    [organizationId]
   );
 
   const toInsert = cells.map((c, idx) => {
