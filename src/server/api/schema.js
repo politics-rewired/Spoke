@@ -563,7 +563,7 @@ async function sendMessage(
     // couldn't look up the timezone by zip record, so we load it
     // from the campaign_contact directly if it's there
     const offset =
-      moment.tz(record.contact_timezone).utcOffset(Date.now()) / 60;
+      moment.tz.zone(record.contact_timezone).utcOffset(Date.now()) / -60;
     contactTimezone.offset = offset;
     contactTimezone.hasDST = false;
   }
