@@ -1,4 +1,89 @@
 import { r } from "../../models";
+import { config } from "../../../config";
+
+/**
+ * Assign an appropriate messaging service for a (cell, organization) pairing.
+ * This creates a messaging_service_stick record.
+ * @param {string} cell An E164-formatted destination cell phone number
+ * @param {number} organizationId The ID of the organization to create the mapping for
+ * @returns {string} The (S)ID of the messaging service assigned to that (cell, organization)
+ */
+export const assignMessagingServiceSID = async (cell, organizationId) => {
+  const {
+    rows: [{ messaging_service_sid }]
+  } = await r.knex.raw(
+    `
+      with chosen_messaging_service_sid as (
+        select
+          messaging_service.messaging_service_sid,
+          count(messaging_service_stick.messaging_service_sid) as count
+        from messaging_service
+        left join messaging_service_stick
+          on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+        where messaging_service.organization_id = ?
+        group by
+          messaging_service.messaging_service_sid
+        order by count asc
+        limit 1
+      )
+      insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
+      values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
+      returning messaging_service_sid;
+    `,
+    [organizationId, cell, organizationId]
+  );
+
+  return messaging_service_sid;
+};
+
+/**
+ * Fetches an existing assigned messaging service for a campaign contact. If no messaging service
+ * has been assigned then assign one and return that.
+ * @param {number} campaignContactId The ID of the target campaign contact
+ * @returns {object} Assigned messaging service Postgres row
+ */
+export const getMessagingService = async campaignContactId => {
+  if (config.DEFAULT_SERVICE === "fakeservice")
+    return { service: "fakeservice" };
+
+  const campaignContact = await r
+    .knex("campaign_contact")
+    .join("campaign", "campaign.id", "campaign_contact.campaign_id")
+    .where({ "campaign_contact.id": campaignContactId })
+    .first(["campaign_contact.cell", "campaign.organization_id"]);
+
+  if (!campaignContact)
+    throw new Error(`Unknown campaign contact ID ${campaignContactId}`);
+
+  const { organization_id, cell } = campaignContact;
+
+  const {
+    rows: [existingMessagingService]
+  } = await r.knex.raw(
+    `
+      select messaging_service.*
+      from messaging_service
+      join messaging_service_stick
+        on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+      where
+        messaging_service_stick.organization_id = ?
+        and messaging_service_stick.cell = ?
+      ;
+    `,
+    [organization_id, cell]
+  );
+
+  // Return an existing match if there is one
+  if (existingMessagingService) return existingMessagingService;
+
+  // Otherwise select an appropriate messaging service and assign
+  const serviceSid = await assignMessagingServiceSID(cell, organization_id);
+  const messagingService = await r
+    .knex("messaging_service")
+    .where({ messaging_service_sid: serviceSid })
+    .first();
+  return messagingService;
+};
 
 /*
   This was changed to accommodate multiple organizationIds. There were two potential approaches:
