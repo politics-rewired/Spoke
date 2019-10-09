@@ -1208,6 +1208,7 @@ const rootMutations = {
         let campaignIdQuery = r
           .knex("campaign")
           .transacting(trx)
+          .where({ organization_id: organizationId })
           .pluck("id");
         if (!includeArchived) {
           campaignIdQuery = campaignIdQuery.where({ is_archived: false });
