@@ -226,37 +226,16 @@ export async function allCurrentAssignmentTargets(organizationId) {
       order by id asc
       limit 1
     )
-    (
-      select needs_message_team_campaign_pairings.*, (
-        select count(*)
-        from assignable_needs_message
-        where campaign_id = needs_message_team_campaign_pairings.id
-      ) as count_left
-      from needs_message_team_campaign_pairings
-    )
+    ( select * from needs_message_team_campaign_pairings )
     union
-    (
-      select needs_reply_team_campaign_pairings.*, (
-        select count(*)
-        from assignable_needs_reply
-        where campaign_id = needs_reply_team_campaign_pairings.id
-      ) as count_left
-      from needs_reply_team_campaign_pairings
-    )
+    ( select * from needs_reply_team_campaign_pairings )
     union
-    (
-      select general_campaign_pairing.*, (
-        select count(*)
-        from ${contactsView}
-        where campaign_id = general_campaign_pairing.id
-      ) as count_left
-      from general_campaign_pairing
-    )
+    ( select * from general_campaign_pairing )
     order by priority asc`,
     [organizationId, organizationId]
   );
 
-  return teamToCampaigns;
+  return teamToCampaigns.map(row => ({ ...row, count_left: 0 }));
 }
 
 export async function myCurrentAssignmentTargets(
@@ -346,23 +325,9 @@ export async function myCurrentAssignmentTargets(
         limit 1
       ),
       all_possible_team_assignments as (
-        (
-          select needs_message_team_campaign_pairings.*, (
-            select count(*)
-            from assignable_needs_message
-            where campaign_id = needs_message_team_campaign_pairings.id
-          ) as count_left
-          from needs_message_team_campaign_pairings
-        )
+        ( select * from needs_message_team_campaign_pairings )
         union
-        (
-          select needs_reply_team_campaign_pairings.*, (
-            select count(*)
-            from assignable_needs_reply
-            where campaign_id = needs_reply_team_campaign_pairings.id
-          ) as count_left
-          from needs_reply_team_campaign_pairings
-        )
+        ( select * from needs_reply_team_campaign_pairings )
       ),
       my_possible_team_assignments as (
         (
@@ -374,14 +339,7 @@ export async function myCurrentAssignmentTargets(
           )
         )
         union 
-        (
-          select general_campaign_pairing.*, (
-            select count(*)
-            from ${contactsView}
-            where campaign_id = general_campaign_pairing.id
-          ) as count_left
-          from general_campaign_pairing
-        )
+        ( select * from general_campaign_pairing )
       )
       select * from my_possible_team_assignments
       where enabled = true
