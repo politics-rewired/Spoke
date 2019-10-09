@@ -2,8 +2,38 @@ import { r } from "../../models";
 import { config } from "../../../config";
 
 /**
+ * Return a list of messaing services for an organization that are candidates for assignment.
+ *
+ * TODO: Update logic to allow for per-campaign decisions.
+ *
+ * @param {number} organizationId The ID of organization
+ */
+export const getMessagingServiceCandidates = async organizationId => {
+  const { rows: messagingServiceCandidates } = await r.knex.raw(
+    `
+      select
+        messaging_service.messaging_service_sid,
+        count(*) as count
+      from messaging_service
+      left join messaging_service_stick
+        on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+      where
+        messaging_service.organization_id = ?
+      group by
+        messaging_service.messaging_service_sid
+      order by count desc
+    `,
+    [organizationId]
+  );
+  return messagingServiceCandidates;
+};
+
+/**
  * Assign an appropriate messaging service for a (cell, organization) pairing.
  * This creates a messaging_service_stick record.
+ *
+ * TODO: Update logic to allow for per-campaign decisions.
+ *
  * @param {string} cell An E164-formatted destination cell phone number
  * @param {number} organizationId The ID of the organization to create the mapping for
  * @returns {string} The (S)ID of the messaging service assigned to that (cell, organization)
@@ -83,6 +113,63 @@ export const getMessagingService = async campaignContactId => {
     .where({ messaging_service_sid: serviceSid })
     .first();
   return messagingService;
+};
+
+/**
+ * Make best effort attempty to assign messaging services to all campaign contacts in a campaign
+ * for which there is not an existing messaging service assignment for that contacts cell. This
+ * will do nothing if DEFAULT_SERVICE is `fakeservice` or the organization has no messaging
+ * services.
+ *
+ * NOTE: This does not chunk inserts so make sure this is run only when you are sure the specified
+ * campaign has a reasonable size (< 1000) of cells without sticky messaging services.
+ *
+ * @param {object} trx Knex client
+ * @param {number} campaignId
+ * @param {number} organizationId
+ */
+export const assignMissingMessagingServices = async (
+  trx,
+  campaignId,
+  organizationId
+) => {
+  // Do not attempt assignment if we're using fakeservice
+  if (config.DEFAULT_SERVICE === "fakeservice") return;
+
+  const { rows } = await trx.raw(
+    `
+      select
+        distinct campaign_contact.cell
+      from
+        messaging_service_stick
+        join messaging_service
+          on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
+        right join campaign_contact
+          on messaging_service_stick.cell = campaign_contact.cell
+      where
+        messaging_service_stick.organization_id = ?
+        and campaign_contact.campaign_id = ?
+        and messaging_service_stick.messaging_service_sid is null
+    `,
+    [organizationId, campaignId]
+  );
+  const cells = rows.map(r => r.cell);
+
+  const candidateServices = await getMessagingServiceCandidates(organizationId);
+
+  // Do not attempt assignment if there are no messaging service candidates
+  if (candidateServices.length === 0) return;
+
+  // TODO - rather than assign the same amount to all candidate services, this should assign to
+  //        the candidates with the fewest assignments first to maintain an even distribution
+  const toInsert = cells.map((cell, idx) => ({
+    cell,
+    organization_id: organizationId,
+    messaging_service_sid:
+      candidateServices[idx % candidateServices.length].messaging_service_sid
+  }));
+
+  return await trx("messaging_service_stick").insert(toInsert);
 };
 
 /*

@@ -16,6 +16,7 @@ import { updateJob } from "./lib";
 import { getFormattedPhoneNumber } from "../lib/phone-format.js";
 import serviceMap from "../server/api/lib/services";
 import {
+  assignMissingMessagingServices,
   getLastMessage,
   saveNewIncomingMessage
 } from "../server/api/lib/message-sending";
@@ -250,14 +251,11 @@ export async function uploadContacts(job) {
         })
       );
 
-      const service = serviceMap[config.DEFAULT_SERVICE];
-      if (service.ensureAllNumbersHaveMessagingServiceSIDs) {
-        await service.ensureAllNumbersHaveMessagingServiceSIDs(
-          trx,
-          campaignId,
-          campaign.organization_id
-        );
-      }
+      await assignMissingMessagingServices(
+        trx,
+        campaignId,
+        campaign.organization_id
+      );
     }
 
     if (shouldRemoveLandlines) {
