@@ -191,11 +191,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
     needs_message_team_campaign_pairings as (
       select
           teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type,
-          campaign.id as id, campaign.title, (
-            select count(*)
-            from assignable_needs_message
-            where campaign_id = campaign.id
-          ) as count_left
+          campaign.id as id, campaign.title
       from needs_message_teams as teams
       join campaign_team on campaign_team.team_id = teams.id
       join campaign on campaign.id = (
@@ -209,11 +205,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
     needs_reply_team_campaign_pairings as (
       select
           teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type,
-          campaign.id as id, campaign.title, (
-            select count(*)
-            from assignable_needs_reply
-            where campaign_id = campaign.id
-          ) as count_left
+          campaign.id as id, campaign.title
       from needs_reply_teams as teams
       join campaign_team on campaign_team.team_id = teams.id
       join campaign on campaign.id = (
@@ -227,12 +219,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
     general_campaign_pairing as (
       select
         0 as priority, -1 as team_id, 'General' as team_title, ${generalEnabledBit}::boolean as enabled, '${assignmentType}' as assignment_type,
-        campaigns.id, campaigns.title, (
-          select count(*)
-          from ${contactsView}
-          where campaign_id = campaigns.id
-            and organization_id = ?
-        ) as count_left
+        campaigns.id, campaigns.title
       from ${campaignView} as campaigns
       where campaigns.limit_assignment_to_teams = false
           and organization_id = ?
@@ -245,10 +232,10 @@ export async function allCurrentAssignmentTargets(organizationId) {
     union
     ( select * from general_campaign_pairing )
     order by priority asc`,
-    [organizationId, organizationId, organizationId]
+    [organizationId, organizationId]
   );
 
-  return teamToCampaigns;
+  return teamToCampaigns.map(row => ({ ...row, count_left: 0 }));
 }
 
 export async function myCurrentAssignmentTargets(
@@ -302,11 +289,7 @@ export async function myCurrentAssignmentTargets(
       needs_message_team_campaign_pairings as (
         select
             teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type, teams.max_request_count,
-            campaign.id as id, campaign.title, (
-              select count(*)
-              from assignable_needs_message
-              where campaign_id = campaign.id
-            ) as count_left
+            campaign.id as id, campaign.title
         from needs_message_teams as teams
         join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
@@ -320,11 +303,7 @@ export async function myCurrentAssignmentTargets(
       needs_reply_team_campaign_pairings as (
         select
             teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type, teams.max_request_count,
-            campaign.id as id, campaign.title, (
-              select count(*)
-              from assignable_needs_reply
-              where campaign_id = campaign.id
-            ) as count_left
+            campaign.id as id, campaign.title
         from needs_reply_teams as teams
         join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
@@ -338,12 +317,7 @@ export async function myCurrentAssignmentTargets(
       general_campaign_pairing as (
         select
           '+infinity'::float as priority, -1 as team_id, 'General' as team_title, ${generalEnabledBit}::boolean as enabled, '${assignmentType}' as assignment_type, ${orgMaxRequestCount} as max_request_count,
-          campaigns.id, campaigns.title, (
-            select count(*)
-            from ${contactsView}
-            where campaign_id = campaigns.id
-              and organization_id = ?
-          ) as count_left
+          campaigns.id, campaigns.title
         from ${campaignView} as campaigns
         where campaigns.limit_assignment_to_teams = false
             and organization_id = ?
@@ -370,7 +344,7 @@ export async function myCurrentAssignmentTargets(
       select * from my_possible_team_assignments
       where enabled = true
       order by priority asc`,
-    [organizationId, organizationId, organizationId, userId]
+    [organizationId, organizationId, userId]
   );
 
   const results = teamToCampaigns.slice(0, 1).map(ttc =>
