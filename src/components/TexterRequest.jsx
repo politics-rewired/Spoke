@@ -206,7 +206,6 @@ const mapQueriesToProps = ({ ownProps }) => ({
           id
           myCurrentAssignmentTarget {
             type
-            countLeft
             maxRequestCount
             teamTitle
           }

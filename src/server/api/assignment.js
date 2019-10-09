@@ -226,16 +226,37 @@ export async function allCurrentAssignmentTargets(organizationId) {
       order by id asc
       limit 1
     )
-    ( select * from needs_message_team_campaign_pairings )
+    (
+      select needs_message_team_campaign_pairings.*, (
+        select count(*)
+        from assignable_needs_message
+        where campaign_id = needs_message_team_campaign_pairings.id
+      ) as count_left
+      from needs_message_team_campaign_pairings
+    )
     union
-    ( select * from needs_reply_team_campaign_pairings )
+    (
+      select needs_reply_team_campaign_pairings.*, (
+        select count(*)
+        from assignable_needs_reply
+        where campaign_id = needs_reply_team_campaign_pairings.id
+      ) as count_left
+      from needs_reply_team_campaign_pairings
+    )
     union
-    ( select * from general_campaign_pairing )
+    (
+      select general_campaign_pairing.*, (
+        select count(*)
+        from ${contactsView}
+        where campaign_id = general_campaign_pairing.id
+      ) as count_left
+      from general_campaign_pairing
+    )
     order by priority asc`,
     [organizationId, organizationId]
   );
 
-  return teamToCampaigns.map(row => ({ ...row, count_left: 0 }));
+  return teamToCampaigns;
 }
 
 export async function myCurrentAssignmentTargets(
@@ -350,7 +371,8 @@ export async function myCurrentAssignmentTargets(
   const results = teamToCampaigns.slice(0, 1).map(ttc =>
     Object.assign(ttc, {
       type: ttc.assignment_type,
-      campaign: { id: ttc.id, title: ttc.title }
+      campaign: { id: ttc.id, title: ttc.title },
+      count_left: 0
     })
   );
 
