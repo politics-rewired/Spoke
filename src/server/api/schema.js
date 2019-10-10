@@ -63,6 +63,7 @@ import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
 import { resolvers as linkDomainResolvers } from "./link-domain";
 import { saveNewIncomingMessage } from "./lib/message-sending";
+import { getTzOffset } from "./lib/utils";
 import serviceMap from "./lib/services";
 import { resolvers as messageResolvers } from "./message";
 import { resolvers as optOutResolvers } from "./opt-out";
@@ -562,8 +563,7 @@ async function sendMessage(
   if (record.contact_timezone) {
     // couldn't look up the timezone by zip record, so we load it
     // from the campaign_contact directly if it's there
-    const offset =
-      moment.tz.zone(record.contact_timezone).utcOffset(Date.now()) / -60;
+    const offset = getTzOffset(record.contact_timezone);
     contactTimezone.offset = offset;
     contactTimezone.hasDST = false;
   }
