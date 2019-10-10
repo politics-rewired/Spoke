@@ -172,6 +172,29 @@ export const assignMissingMessagingServices = async (
   return await trx("messaging_service_stick").insert(toInsert);
 };
 
+const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
+
+/**
+ * Extract Spoke-style media attachments from the plain message text.
+ * @param {string} messageText The raw Spoke message text.
+ * @returns {object} Object with properties `body` (required) and `mediaUrl` (optional).
+ *     `body` is the input text stripped of media markdown.
+ *     `mediaUrl` is the extracted media URL, if present.
+ */
+export const messageComponents = messageText => {
+  const params = {
+    body: messageText.replace(mediaExtractor, "")
+  };
+
+  // Image extraction
+  const results = messageText.match(mediaExtractor);
+  if (results) {
+    params.mediaUrl = results[1];
+  }
+
+  return params;
+};
+
 /*
   This was changed to accommodate multiple organizationIds. There were two potential approaches:
   - option one: with campaign_id_options as select campaigns from organizationId, where campaign_id = campaign.id

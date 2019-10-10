@@ -9,7 +9,8 @@ import { sleep } from "../../../lib/utils";
 import { getMessagingService, appendServiceResponse } from "./message-sending";
 import {
   getCampaignContactAndAssignmentForIncomingMessage,
-  saveNewIncomingMessage
+  saveNewIncomingMessage,
+  messageComponents
 } from "./message-sending";
 import { symmetricDecrypt } from "./crypto";
 
@@ -142,21 +143,6 @@ async function rentNewCell(messagingSericeSid) {
   throw new Error("Did not find any cell");
 }
 
-const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
-
-function parseMessageText(message) {
-  const text = message.text || "";
-  const params = {
-    body: text.replace(mediaExtractor, "")
-  };
-  // Image extraction
-  const results = text.match(mediaExtractor);
-  if (results) {
-    params.mediaUrl = results[1];
-  }
-  return params;
-}
-
 const getTwilioCredentials = async messagingServiceSid => {
   const { account_sid: accountSid, encrypted_auth_token } = await r
     .knex("messaging_service")
@@ -201,15 +187,14 @@ async function sendMessage(message, organizationId, trx) {
       logger.warn("Message not marked as a twilio message", message.id);
     }
 
-    const messageParams = Object.assign(
-      {
-        to: message.contact_number,
-        body: message.text,
-        messagingServiceSid: messagingServiceSid,
-        statusCallback: config.TWILIO_STATUS_CALLBACK_URL
-      },
-      parseMessageText(message)
-    );
+    const { body, mediaUrl } = messageComponents(message.text);
+    const messageParams = {
+      body,
+      mediaUrl,
+      to: message.contact_number,
+      messagingServiceSid: messagingServiceSid,
+      statusCallback: config.TWILIO_STATUS_CALLBACK_URL
+    };
 
     let twilioValidityPeriod = config.TWILIO_MESSAGE_VALIDITY_PERIOD;
 
@@ -407,6 +392,5 @@ export default {
   sendMessage,
   saveNewIncomingMessage,
   handleDeliveryReport,
-  handleIncomingMessage,
-  parseMessageText
+  handleIncomingMessage
 };
