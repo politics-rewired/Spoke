@@ -155,6 +155,8 @@ export const assignMissingMessagingServices = async (
   );
   const cells = rows.map(r => r.cell);
 
+  if (cells.length === 0) return;
+
   const candidateServices = await getMessagingServiceCandidates(organizationId);
 
   // Do not attempt assignment if there are no messaging service candidates
