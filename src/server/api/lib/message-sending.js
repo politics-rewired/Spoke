@@ -13,7 +13,7 @@ export const getMessagingServiceCandidates = async organizationId => {
     `
       select
         messaging_service.messaging_service_sid,
-        count(*) as count
+        count(messaging_service_stick.messaging_service_sid) as count
       from messaging_service
       left join messaging_service_stick
         on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
@@ -50,7 +50,7 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
         from messaging_service
         left join messaging_service_stick
           on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-        where messaging_service.organization_id = ?
+          and messaging_service.organization_id = ?
         group by
           messaging_service.messaging_service_sid
         order by count asc
@@ -146,9 +146,9 @@ export const assignMissingMessagingServices = async (
           on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
         right join campaign_contact
           on messaging_service_stick.cell = campaign_contact.cell
+          and messaging_service_stick.organization_id = ?
       where
-        messaging_service_stick.organization_id = ?
-        and campaign_contact.campaign_id = ?
+        campaign_contact.campaign_id = ?
         and messaging_service_stick.messaging_service_sid is null
     `,
     [organizationId, campaignId]
