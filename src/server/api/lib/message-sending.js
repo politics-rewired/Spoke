@@ -137,11 +137,8 @@ export const getContactMessagingService = async campaignContactId => {
     ...existingMessagingService
   } = lookupResult;
 
-  const isRealService =
-    Object.values(existingMessagingService).filter(val => val !== null)
-      .length === 6;
-
   // Return an existing match if there is one
+  const isRealService = existingMessagingService.messaging_service_sid !== null;
   if (isRealService) return existingMessagingService;
 
   // Otherwise select an appropriate messaging service and assign
