@@ -193,7 +193,7 @@ async function sendMessage(message, organizationId, trx) {
     const { body, mediaUrl } = messageComponents(message.text);
     const messageParams = {
       body,
-      mediaUrl,
+      mediaUrl: mediaUrl || [],
       to: message.contact_number,
       messagingServiceSid: messagingServiceSid,
       statusCallback: config.TWILIO_STATUS_CALLBACK_URL
