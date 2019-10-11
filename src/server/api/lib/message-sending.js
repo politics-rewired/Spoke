@@ -60,7 +60,7 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
         from messaging_service
         left join messaging_service_stick
           on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-          and messaging_service.organization_id = ?
+        where messaging_service.organization_id = ?
         group by
           messaging_service.messaging_service_sid
         order by count asc
