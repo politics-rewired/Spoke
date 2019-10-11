@@ -1,3 +1,5 @@
+import isEmpty from "lodash/isEmpty";
+
 import { r } from "../../models";
 import { config } from "../../../config";
 
@@ -97,35 +99,43 @@ export const getContactMessagingService = async campaignContactId => {
   if (config.DEFAULT_SERVICE === "fakeservice")
     return { service: "fakeservice" };
 
-  const campaignContact = await r
-    .knex("campaign_contact")
-    .join("campaign", "campaign.id", "campaign_contact.campaign_id")
-    .where({ "campaign_contact.id": campaignContactId })
-    .first(["campaign_contact.cell", "campaign.organization_id"]);
-
-  if (!campaignContact)
-    throw new Error(`Unknown campaign contact ID ${campaignContactId}`);
-
-  const { organization_id, cell } = campaignContact;
-
   const {
-    rows: [existingMessagingService]
+    rows: [lookupResult]
   } = await r.knex.raw(
     `
-      select messaging_service.*
+      with cc_record as (
+        select campaign_contact.cell, campaign.organization_id
+        from campaign_contact
+          join campaign on campaign.id = campaign_contact.campaign_id
+        where campaign_contact.id = ?
+        limit 1
+      )
+      select
+        cc_record.organization_id as cc_organization_id,
+        cc_record.cell as cc_cell,
+        messaging_service.*
       from messaging_service
       join messaging_service_stick
         on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-      where
-        messaging_service_stick.organization_id = ?
-        and messaging_service_stick.cell = ?
+      right join cc_record
+        on messaging_service_stick.organization_id = cc_record.organization_id
+        and messaging_service_stick.cell = cc_record.cell
       ;
     `,
-    [organization_id, cell]
+    [campaignContactId]
   );
 
+  if (!lookupResult)
+    throw new Error(`Unknown campaign contact ID ${campaignContactId}`);
+
+  const {
+    cc_organization_id: organization_id,
+    cc_cell: cell,
+    ...existingMessagingService
+  } = lookupResult;
+
   // Return an existing match if there is one
-  if (existingMessagingService) return existingMessagingService;
+  if (!isEmpty(existingMessagingService)) return existingMessagingService;
 
   // Otherwise select an appropriate messaging service and assign
   const assignedService = await assignMessagingServiceSID(
