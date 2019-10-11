@@ -1,9 +1,8 @@
 import logger from "../../logger";
 import { CampaignContact, r, cacheableData } from "../models";
-import { mapFieldsToModel } from "./lib/utils";
+import { mapFieldsToModel, getTzOffset } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
-import moment from "moment-timezone";
 
 export const resolvers = {
   Location: {
@@ -159,8 +158,7 @@ export const resolvers = {
     },
     location: async (campaignContact, _, { loaders }) => {
       if (campaignContact.timezone) {
-        const offset =
-          moment.tz.zone(campaignContact.timezone).utcOffset(Date.now()) / 60;
+        const offset = getTzOffset(campaignContact.timezone);
         const loc = {
           timezone_offset: offset,
           has_dst: false

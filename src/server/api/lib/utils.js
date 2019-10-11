@@ -1,4 +1,5 @@
 import humps from "humps";
+import moment from "moment-timezone";
 
 export function mapFieldsToModel(fields, model) {
   const resolvers = {};
@@ -23,4 +24,15 @@ export const capitalizeWord = word => {
     return word[0].toUpperCase() + word.slice(1);
   }
   return "";
+};
+
+/**
+ * Return the UTC offset in hours for a time zone.
+ * @param {string} timezoneName The timezone name
+ * @returns {number} UTC offset in hours
+ */
+export const getTzOffset = timezoneName => {
+  // POSIX compatibility requires that the offsets are inverted
+  // See: https://momentjs.com/timezone/docs/#/zone-object/offset/
+  moment.tz.zone(timezoneName).utcOffset(Date.now()) / -60;
 };
