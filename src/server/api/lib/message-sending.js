@@ -1,5 +1,3 @@
-import isEmpty from "lodash/isEmpty";
-
 import { r } from "../../models";
 import { config } from "../../../config";
 
@@ -62,15 +60,20 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
         from messaging_service
         left join messaging_service_stick
           on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-          and messaging_service.organization_id = ?
+        where messaging_service.organization_id = ?
         group by
           messaging_service.messaging_service_sid
         order by count asc
         limit 1
+      ),
+      insert_results as (
+        insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
+        values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
+        returning messaging_service_sid
       )
-      insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
-      values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
-      returning messaging_service.*;
+      select * from messaging_service, insert_results
+      where messaging_service.messaging_service_sid = insert_results.messaging_service_sid
+      limit 1;
     `,
     [organizationId, cell, organizationId]
   );
@@ -135,7 +138,8 @@ export const getContactMessagingService = async campaignContactId => {
   } = lookupResult;
 
   // Return an existing match if there is one
-  if (!isEmpty(existingMessagingService)) return existingMessagingService;
+  const isRealService = existingMessagingService.messaging_service_sid !== null;
+  if (isRealService) return existingMessagingService;
 
   // Otherwise select an appropriate messaging service and assign
   const assignedService = await assignMessagingServiceSID(
