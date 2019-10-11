@@ -65,10 +65,15 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
           messaging_service.messaging_service_sid
         order by count asc
         limit 1
+      ),
+      insert_results as (
+        insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
+        values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
+        returning messaging_service_sid
       )
-      insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
-      values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
-      returning messaging_service.*;
+      select * from messaging_service, insert_results
+      where messaging_service.messaging_service_sid = insert_results.messaging_service_sid
+      limit 1;
     `,
     [organizationId, cell, organizationId]
   );
