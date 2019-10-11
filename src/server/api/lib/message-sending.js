@@ -46,11 +46,11 @@ export const getMessagingServiceCandidates = async organizationId => {
  *
  * @param {string} cell An E164-formatted destination cell phone number
  * @param {number} organizationId The ID of the organization to create the mapping for
- * @returns {string} The (S)ID of the messaging service assigned to that (cell, organization)
+ * @returns {object} The messaging service record assigned to that (cell, organization)
  */
 export const assignMessagingServiceSID = async (cell, organizationId) => {
   const {
-    rows: [{ messaging_service_sid }]
+    rows: [messaging_service]
   } = await r.knex.raw(
     `
       with chosen_messaging_service_sid as (
@@ -68,12 +68,12 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
       )
       insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
       values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
-      returning messaging_service_sid;
+      returning messaging_service.*;
     `,
     [organizationId, cell, organizationId]
   );
 
-  return messaging_service_sid;
+  return messaging_service;
 };
 
 /**
@@ -128,16 +128,15 @@ export const getContactMessagingService = async campaignContactId => {
   if (existingMessagingService) return existingMessagingService;
 
   // Otherwise select an appropriate messaging service and assign
-  const serviceSid = await assignMessagingServiceSID(cell, organization_id);
-  const messagingService = await r
-    .knex("messaging_service")
-    .where({ messaging_service_sid: serviceSid })
-    .first();
-  return messagingService;
+  const assignedService = await assignMessagingServiceSID(
+    cell,
+    organization_id
+  );
+  return assignedService;
 };
 
 /**
- * Make best effort attempty to assign messaging services to all campaign contacts in a campaign
+ * Make best effort attempt to assign messaging services to all campaign contacts in a campaign
  * for which there is not an existing messaging service assignment for that contacts cell. This
  * will do nothing if DEFAULT_SERVICE is `fakeservice` or the organization has no messaging
  * services.

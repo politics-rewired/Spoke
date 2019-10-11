@@ -10,7 +10,6 @@ import {
   SpokeSendStatus,
   getMessagingServiceById,
   getContactMessagingService,
-  appendServiceResponse,
   messageComponents,
   getCampaignContactAndAssignmentForIncomingMessage,
   saveNewIncomingMessage
@@ -123,35 +122,23 @@ export const sendMessage = async (message, _organizationId, _trx) => {
     contactZipCode
   };
   try {
-    await r.knex.transaction(async trx => {
-      let { service_response } = await trx("message")
-        .where({ id: spokeMessageId })
-        .first("service_response");
-      const result = await numbers.sms.sendMessage(messageInput);
-      console.log("raw result", result);
-      const { sendMessage } = result;
-      // TODO: assemble-numbers-client squashes errors
-      if (!sendMessage) throw new Error("Missing sendMessage in payload!");
-
-      service_response = appendServiceResponse(service_response, result);
-      await r
-        .knex("message")
-        .update({
-          send_status: SpokeSendStatus.Sent,
-          sent_at: r.knex.fn.now(),
-          service_response
-        })
-        .where({ id: spokeMessageId });
-    });
-  } catch (exc) {
-    console.error("Error sending message with Assemble Numbers", exc);
+    const result = await numbers.sms.sendMessage(messageInput);
+    const { sendMessage } = result;
+    // TODO: assemble-numbers-client squashes errors
+    if (!sendMessage) throw new Error("Missing sendMessage in payload!");
     await r
       .knex("message")
       .update({
-        send_status: SpokeSendStatus.Error,
+        send_status: SpokeSendStatus.Sent,
         sent_at: r.knex.fn.now(),
-        service_response
+        service_response: JSON.stringify([result])
       })
+      .where({ id: spokeMessageId });
+  } catch (exc) {
+    logger.error("Error sending message with Assemble Numbers", exc);
+    await r
+      .knex("message")
+      .update({ send_status: SpokeSendStatus.Error })
       .where({ id: spokeMessageId });
   }
 };
