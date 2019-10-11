@@ -6,7 +6,10 @@ import moment from "moment-timezone";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Log, Message, PendingMessagePart, r } from "../../models";
 import { sleep } from "../../../lib/utils";
-import { getMessagingService, appendServiceResponse } from "./message-sending";
+import {
+  getContactMessagingService,
+  appendServiceResponse
+} from "./message-sending";
 import {
   getCampaignContactAndAssignmentForIncomingMessage,
   saveNewIncomingMessage,
@@ -163,7 +166,7 @@ const twilioClient = async messagingServiceSid => {
 };
 
 async function sendMessage(message, organizationId, trx) {
-  const service = await getMessagingService(message.campaign_contact_id);
+  const service = await getContactMessagingService(message.campaign_contact_id);
   const messagingServiceSid = service.messaging_service_sid;
   const twilio = await twilioClient(messagingServiceSid);
 

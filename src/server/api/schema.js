@@ -64,7 +64,7 @@ import { resolvers as inviteResolvers } from "./invite";
 import { resolvers as linkDomainResolvers } from "./link-domain";
 import {
   saveNewIncomingMessage,
-  getMessagingService
+  getContactMessagingService
 } from "./lib/message-sending";
 import { getTzOffset } from "./lib/utils";
 import serviceMap from "./lib/services";
@@ -599,7 +599,7 @@ async function sendMessage(
     throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
-  const { service_type } = await getMessagingService(campaignContactId);
+  const { service_type } = await getContactMessagingService(campaignContactId);
 
   const toInsert = {
     user_id: user.id,

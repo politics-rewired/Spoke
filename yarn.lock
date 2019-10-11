@@ -708,10 +708,10 @@ asn1@~0.2.3:
   dependencies:
     safer-buffer "~2.1.0"
 
-assemble-numbers-client@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/assemble-numbers-client/-/assemble-numbers-client-1.1.2.tgz#b9b7e5f5d361b0f883b141742c6188bfdc38a00d"
-  integrity sha512-NAeQDqZO3hO6MMhY8qw0hELpPMREd78skMJBXtm9hl5BoY3WXLkdlwRSEn/8egd1oXg+TMHBUOX0ZHWsKGqzqA==
+assemble-numbers-client@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/assemble-numbers-client/-/assemble-numbers-client-1.2.0.tgz#e74b07164fa5e2e4166339ae3d78df41fc006b44"
+  integrity sha512-XzVUFVaaalfMOFlznXkmIQs/oE5+qlIijZvYvqGeMip1P8mpkGXiSBUi8DvBFTDSlbnuH3xkl5h8BzWyc+ldmA==
   dependencies:
     lodash "^4.17.14"
     sha.js "^2.4.11"

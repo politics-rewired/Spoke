@@ -1,6 +1,16 @@
 import { r } from "../../models";
 import { config } from "../../../config";
 
+export const SpokeSendStatus = Object.freeze({
+  Queued: "QUEUED",
+  Sending: "SENDING",
+  Sent: "SENT",
+  Delivered: "DELIVERED",
+  Error: "ERROR",
+  Paused: "PAUSED",
+  NotAttempted: "NOT_ATTEMPTED"
+});
+
 /**
  * Return a list of messaing services for an organization that are candidates for assignment.
  *
@@ -67,12 +77,23 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
 };
 
 /**
+ * Fetch messaging service by its ID
+ * @param {string} messagingServiceId The messaging service ID
+ * @returns {object} The messaging service record if found, or undefined;
+ */
+export const getMessagingServiceById = async messagingServiceId =>
+  r
+    .knex("messaging_service")
+    .where({ messaging_service_sid: messagingServiceId })
+    .first();
+
+/**
  * Fetches an existing assigned messaging service for a campaign contact. If no messaging service
  * has been assigned then assign one and return that.
  * @param {number} campaignContactId The ID of the target campaign contact
  * @returns {object} Assigned messaging service Postgres row
  */
-export const getMessagingService = async campaignContactId => {
+export const getContactMessagingService = async campaignContactId => {
   if (config.DEFAULT_SERVICE === "fakeservice")
     return { service: "fakeservice" };
 
