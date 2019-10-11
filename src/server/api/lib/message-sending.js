@@ -1,5 +1,3 @@
-import isEmpty from "lodash/isEmpty";
-
 import { r } from "../../models";
 import { config } from "../../../config";
 
@@ -134,8 +132,12 @@ export const getContactMessagingService = async campaignContactId => {
     ...existingMessagingService
   } = lookupResult;
 
+  const isRealService =
+    Object.values(existingMessagingService).filter(val => val !== null)
+      .length === 6;
+
   // Return an existing match if there is one
-  if (!isEmpty(existingMessagingService)) return existingMessagingService;
+  if (isRealService) return existingMessagingService;
 
   // Otherwise select an appropriate messaging service and assign
   const assignedService = await assignMessagingServiceSID(
