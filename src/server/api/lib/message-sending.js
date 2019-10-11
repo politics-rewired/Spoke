@@ -1,4 +1,231 @@
+import isEmpty from "lodash/isEmpty";
+
 import { r } from "../../models";
+import { config } from "../../../config";
+
+export const SpokeSendStatus = Object.freeze({
+  Queued: "QUEUED",
+  Sending: "SENDING",
+  Sent: "SENT",
+  Delivered: "DELIVERED",
+  Error: "ERROR",
+  Paused: "PAUSED",
+  NotAttempted: "NOT_ATTEMPTED"
+});
+
+/**
+ * Return a list of messaing services for an organization that are candidates for assignment.
+ *
+ * TODO: Update logic to allow for per-campaign decisions.
+ *
+ * @param {number} organizationId The ID of organization
+ */
+export const getMessagingServiceCandidates = async organizationId => {
+  const { rows: messagingServiceCandidates } = await r.knex.raw(
+    `
+      select
+        messaging_service.messaging_service_sid,
+        count(messaging_service_stick.messaging_service_sid) as count
+      from messaging_service
+      left join messaging_service_stick
+        on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+      where
+        messaging_service.organization_id = ?
+      group by
+        messaging_service.messaging_service_sid
+      order by count desc
+    `,
+    [organizationId]
+  );
+  return messagingServiceCandidates;
+};
+
+/**
+ * Assign an appropriate messaging service for a (cell, organization) pairing.
+ * This creates a messaging_service_stick record.
+ *
+ * TODO: Update logic to allow for per-campaign decisions.
+ *
+ * @param {string} cell An E164-formatted destination cell phone number
+ * @param {number} organizationId The ID of the organization to create the mapping for
+ * @returns {object} The messaging service record assigned to that (cell, organization)
+ */
+export const assignMessagingServiceSID = async (cell, organizationId) => {
+  const {
+    rows: [messaging_service]
+  } = await r.knex.raw(
+    `
+      with chosen_messaging_service_sid as (
+        select
+          messaging_service.messaging_service_sid,
+          count(messaging_service_stick.messaging_service_sid) as count
+        from messaging_service
+        left join messaging_service_stick
+          on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+          and messaging_service.organization_id = ?
+        group by
+          messaging_service.messaging_service_sid
+        order by count asc
+        limit 1
+      )
+      insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
+      values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
+      returning messaging_service.*;
+    `,
+    [organizationId, cell, organizationId]
+  );
+
+  return messaging_service;
+};
+
+/**
+ * Fetch messaging service by its ID
+ * @param {string} messagingServiceId The messaging service ID
+ * @returns {object} The messaging service record if found, or undefined;
+ */
+export const getMessagingServiceById = async messagingServiceId =>
+  r
+    .knex("messaging_service")
+    .where({ messaging_service_sid: messagingServiceId })
+    .first();
+
+/**
+ * Fetches an existing assigned messaging service for a campaign contact. If no messaging service
+ * has been assigned then assign one and return that.
+ * @param {number} campaignContactId The ID of the target campaign contact
+ * @returns {object} Assigned messaging service Postgres row
+ */
+export const getContactMessagingService = async campaignContactId => {
+  if (config.DEFAULT_SERVICE === "fakeservice")
+    return { service: "fakeservice" };
+
+  const {
+    rows: [lookupResult]
+  } = await r.knex.raw(
+    `
+      with cc_record as (
+        select campaign_contact.cell, campaign.organization_id
+        from campaign_contact
+          join campaign on campaign.id = campaign_contact.campaign_id
+        where campaign_contact.id = ?
+        limit 1
+      )
+      select
+        cc_record.organization_id as cc_organization_id,
+        cc_record.cell as cc_cell,
+        messaging_service.*
+      from messaging_service
+      join messaging_service_stick
+        on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
+      right join cc_record
+        on messaging_service_stick.organization_id = cc_record.organization_id
+        and messaging_service_stick.cell = cc_record.cell
+      ;
+    `,
+    [campaignContactId]
+  );
+
+  if (!lookupResult)
+    throw new Error(`Unknown campaign contact ID ${campaignContactId}`);
+
+  const {
+    cc_organization_id: organization_id,
+    cc_cell: cell,
+    ...existingMessagingService
+  } = lookupResult;
+
+  // Return an existing match if there is one
+  if (!isEmpty(existingMessagingService)) return existingMessagingService;
+
+  // Otherwise select an appropriate messaging service and assign
+  const assignedService = await assignMessagingServiceSID(
+    cell,
+    organization_id
+  );
+  return assignedService;
+};
+
+/**
+ * Make best effort attempt to assign messaging services to all campaign contacts in a campaign
+ * for which there is not an existing messaging service assignment for that contacts cell. This
+ * will do nothing if DEFAULT_SERVICE is `fakeservice` or the organization has no messaging
+ * services.
+ *
+ * NOTE: This does not chunk inserts so make sure this is run only when you are sure the specified
+ * campaign has a reasonable size (< 1000) of cells without sticky messaging services.
+ *
+ * @param {object} trx Knex client
+ * @param {number} campaignId
+ * @param {number} organizationId
+ */
+export const assignMissingMessagingServices = async (
+  trx,
+  campaignId,
+  organizationId
+) => {
+  // Do not attempt assignment if we're using fakeservice
+  if (config.DEFAULT_SERVICE === "fakeservice") return;
+
+  const { rows } = await trx.raw(
+    `
+      select
+        distinct campaign_contact.cell
+      from
+        messaging_service_stick
+        join messaging_service
+          on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
+        right join campaign_contact
+          on messaging_service_stick.cell = campaign_contact.cell
+          and messaging_service_stick.organization_id = ?
+      where
+        campaign_contact.campaign_id = ?
+        and messaging_service_stick.messaging_service_sid is null
+    `,
+    [organizationId, campaignId]
+  );
+  const cells = rows.map(r => r.cell);
+
+  if (cells.length === 0) return;
+
+  const candidateServices = await getMessagingServiceCandidates(organizationId);
+
+  // Do not attempt assignment if there are no messaging service candidates
+  if (candidateServices.length === 0) return;
+
+  // TODO - rather than assign the same amount to all candidate services, this should assign to
+  //        the candidates with the fewest assignments first to maintain an even distribution
+  const toInsert = cells.map((cell, idx) => ({
+    cell,
+    organization_id: organizationId,
+    messaging_service_sid:
+      candidateServices[idx % candidateServices.length].messaging_service_sid
+  }));
+
+  return await trx("messaging_service_stick").insert(toInsert);
+};
+
+const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
+
+/**
+ * Extract Spoke-style media attachments from the plain message text.
+ * @param {string} messageText The raw Spoke message text.
+ * @returns {object} Object with properties `body` (required) and `mediaUrl` (optional).
+ *     `body` is the input text stripped of media markdown.
+ *     `mediaUrl` is the extracted media URL, if present.
+ */
+export const messageComponents = messageText => {
+  const params = {
+    body: messageText.replace(mediaExtractor, "")
+  };
+
+  // Image extraction
+  const results = messageText.match(mediaExtractor);
+  if (results) {
+    params.mediaUrl = results[1];
+  }
+
+  return params;
+};
 
 /*
   This was changed to accommodate multiple organizationIds. There were two potential approaches:

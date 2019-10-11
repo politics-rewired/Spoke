@@ -19,6 +19,7 @@ import {
   graphqlRouter,
   nexmoRouter,
   twilioRouter,
+  assembleRouter,
   utilsRouter
 } from "./routes";
 
@@ -90,6 +91,7 @@ app.use(authRouter);
 app.use(graphqlRouter);
 app.use(nexmoRouter);
 app.use(twilioRouter);
+app.use(assembleRouter);
 app.use(utilsRouter);
 
 app.post(

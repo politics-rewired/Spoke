@@ -62,7 +62,10 @@ import {
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
 import { resolvers as linkDomainResolvers } from "./link-domain";
-import { saveNewIncomingMessage } from "./lib/message-sending";
+import {
+  saveNewIncomingMessage,
+  getContactMessagingService
+} from "./lib/message-sending";
 import { getTzOffset } from "./lib/utils";
 import serviceMap from "./lib/services";
 import { resolvers as messageResolvers } from "./message";
@@ -596,6 +599,8 @@ async function sendMessage(
     throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
+  const { service_type } = await getContactMessagingService(campaignContactId);
+
   const toInsert = {
     user_id: user.id,
     campaign_contact_id: campaignContactId,
@@ -604,7 +609,7 @@ async function sendMessage(
     user_number: "",
     assignment_id: message.assignmentId,
     send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
-    service: config.DEFAULT_SERVICE,
+    service: service_type,
     is_from_contact: false,
     queued_at: new Date(),
     send_before: sendBeforeDate
@@ -645,7 +650,7 @@ async function sendMessage(
   toInsert.id = messageInstance.id || messageInstance;
 
   // Send message after we are sure messageInstance has been persisted
-  const service = serviceMap[messageInstance.service || config.DEFAULT_SERVICE];
+  const service = serviceMap[service_type];
   service.sendMessage(toInsert, record.organization_id);
 
   // Send message to BernieSMS to be checked for bad words

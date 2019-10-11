@@ -6,10 +6,14 @@ import moment from "moment-timezone";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { Log, Message, PendingMessagePart, r } from "../../models";
 import { sleep } from "../../../lib/utils";
-import { appendServiceResponse } from "./message-sending";
+import {
+  getContactMessagingService,
+  appendServiceResponse
+} from "./message-sending";
 import {
   getCampaignContactAndAssignmentForIncomingMessage,
-  saveNewIncomingMessage
+  saveNewIncomingMessage,
+  messageComponents
 } from "./message-sending";
 import { symmetricDecrypt } from "./crypto";
 
@@ -142,74 +146,6 @@ async function rentNewCell(messagingSericeSid) {
   throw new Error("Did not find any cell");
 }
 
-const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
-
-function parseMessageText(message) {
-  const text = message.text || "";
-  const params = {
-    body: text.replace(mediaExtractor, "")
-  };
-  // Image extraction
-  const results = text.match(mediaExtractor);
-  if (results) {
-    params.mediaUrl = results[1];
-  }
-  return params;
-}
-
-const assignMessagingServiceSID = async (cell, organizationId) => {
-  const result = await r.knex.raw(
-    `
-      with chosen_messaging_service_sid as (
-        select
-          messaging_service.messaging_service_sid,
-          count(messaging_service_stick.messaging_service_sid) as count
-        from messaging_service
-        left join messaging_service_stick
-          on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-        where messaging_service.organization_id = ?
-          and messaging_service.service_type = 'twilio'
-        group by
-          messaging_service.messaging_service_sid
-        order by count asc
-        limit 1
-    )
-    insert into messaging_service_stick (cell, organization_id, messaging_service_sid)
-    values (?, ?, (select messaging_service_sid from chosen_messaging_service_sid))
-    returning messaging_service_sid;
-    `,
-    [organizationId, cell, organizationId]
-  );
-
-  const chosen = result.rows[0].messaging_service_sid;
-  return chosen;
-};
-
-const getMessageServiceSID = async (cell, organizationId) => {
-  const { rows: existingStick } = await r.knex.raw(
-    `
-    select messaging_service_stick.messaging_service_sid
-    from messaging_service_stick
-    join messaging_service
-      on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
-    where
-      messaging_service_stick.cell = ?
-      and messaging_service_stick.organization_id = ?
-      and messaging_service.service_type = 'twilio'
-  `,
-    [cell, organizationId]
-  );
-
-  const existingMessageServiceSid =
-    existingStick[0] && existingStick[0].messaging_service_sid;
-
-  if (existingMessageServiceSid) {
-    return existingMessageServiceSid;
-  }
-
-  return await assignMessagingServiceSID(cell, organizationId);
-};
-
 const getTwilioCredentials = async messagingServiceSid => {
   const { account_sid: accountSid, encrypted_auth_token } = await r
     .knex("messaging_service")
@@ -230,11 +166,8 @@ const twilioClient = async messagingServiceSid => {
 };
 
 async function sendMessage(message, organizationId, trx) {
-  // Get (or assign) messaging service for contact's number
-  const messagingServiceSid = await getMessageServiceSID(
-    message.contact_number,
-    organizationId
-  );
+  const service = await getContactMessagingService(message.campaign_contact_id);
+  const messagingServiceSid = service.messaging_service_sid;
   const twilio = await twilioClient(messagingServiceSid);
 
   if (!twilio) {
@@ -257,15 +190,14 @@ async function sendMessage(message, organizationId, trx) {
       logger.warn("Message not marked as a twilio message", message.id);
     }
 
-    const messageParams = Object.assign(
-      {
-        to: message.contact_number,
-        body: message.text,
-        messagingServiceSid: messagingServiceSid,
-        statusCallback: config.TWILIO_STATUS_CALLBACK_URL
-      },
-      parseMessageText(message)
-    );
+    const { body, mediaUrl } = messageComponents(message.text);
+    const messageParams = {
+      body,
+      mediaUrl,
+      to: message.contact_number,
+      messagingServiceSid: messagingServiceSid,
+      statusCallback: config.TWILIO_STATUS_CALLBACK_URL
+    };
 
     let twilioValidityPeriod = config.TWILIO_MESSAGE_VALIDITY_PERIOD;
 
@@ -454,84 +386,6 @@ async function handleIncomingMessage(message) {
   }
 }
 
-function deterministicIntWithinRange(string, maxSize) {
-  const hash = hashStr(string);
-  const index = hash % maxSize;
-  return index;
-}
-
-function hashStr(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    let charCode = str.charCodeAt(i);
-    hash += charCode;
-  }
-  return hash;
-}
-
-// NOTE: This does not chunk inserts so make sure this is run only when you are sure the specified campaign
-// has a reasonable size (< 1000) of cells without sticky messaging services.
-const ensureAllNumbersHaveMessagingServiceSIDs = async (
-  trx,
-  campaignId,
-  organizationId
-) => {
-  const { rows } = await trx.raw(
-    `
-    select
-      distinct campaign_contact.cell
-    from
-      messaging_service_stick
-      join messaging_service
-        on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
-      right join campaign_contact
-        on messaging_service_stick.cell = campaign_contact.cell
-    where
-      messaging_service_stick.organization_id = ?
-      and messaging_service.service_type = 'twilio'
-      and campaign_contact.campaign_id = ?
-      and messaging_service_stick.messaging_service_sid is null
-  `,
-    [organizationId, campaignId]
-  );
-
-  const cells = rows.map(r => r.cell);
-
-  const { rows: messagingServiceCandidates } = await trx.raw(
-    `
-    select
-      messaging_service.messaging_service_sid,
-      count(*) as count
-    from messaging_service
-    left join messaging_service_stick
-      on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-    where
-      messaging_service.organization_id = ?
-    group by
-      messaging_service.messaging_service_sid
-    order by count desc
-  `,
-    [organizationId]
-  );
-
-  const toInsert = cells.map((c, idx) => {
-    return {
-      cell: c,
-      organization_id: organizationId,
-      messaging_service_sid:
-        messagingServiceCandidates[idx % messagingServiceCandidates.length]
-          .messaging_service_sid
-    };
-  });
-
-  // const foundCells = await trx("messaging_service_stick")
-  //   .pluck("cell")
-  //   .where({ organization_id: organizationId })
-  //   .whereIn("cell", rowsToInsert.map(r => r.cell));
-
-  return await trx("messaging_service_stick").insert(toInsert);
-};
-
 export default {
   syncMessagePartProcessing: config.JOBS_SAME_PROCESS,
   headerValidator,
@@ -541,7 +395,5 @@ export default {
   sendMessage,
   saveNewIncomingMessage,
   handleDeliveryReport,
-  handleIncomingMessage,
-  parseMessageText,
-  ensureAllNumbersHaveMessagingServiceSIDs
+  handleIncomingMessage
 };
