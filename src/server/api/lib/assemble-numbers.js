@@ -252,7 +252,7 @@ const convertInboundMessage = async assembleMessage => {
     service_id: serviceId,
     assignment_id: ccInfo && ccInfo.assignment_id,
     service: "assemble-numbers",
-    send_status: NumbersSendStatus.Delivered
+    send_status: NumbersSendStatus.Delivered.toUpperCase()
   };
 
   return spokeMessage;
@@ -272,7 +272,7 @@ export const convertMessagePartsToMessage = async messageParts =>
  */
 export const handleIncomingMessage = async message => {
   if (config.JOBS_SAME_PROCESS) {
-    const inboundMessage = convertInboundMessage(message);
+    const inboundMessage = await convertInboundMessage(message);
     await saveNewIncomingMessage(inboundMessage);
   } else {
     const { id: serviceId, from, to } = message;
