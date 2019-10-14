@@ -252,7 +252,7 @@ const convertInboundMessage = async assembleMessage => {
     service_id: serviceId,
     assignment_id: ccInfo && ccInfo.assignment_id,
     service: "assemble-numbers",
-    send_status: NumbersSendStatus.Delivered.toUpperCase()
+    send_status: SpokeSendStatus.Delivered
   };
 
   return spokeMessage;
