@@ -121,15 +121,16 @@ export async function getConversations(
     contactNameFilter
   )).query;
 
-  offsetLimitQuery = offsetLimitQuery.join(
+  offsetLimitQuery = offsetLimitQuery.leftJoin(
     r.knex.raw(
       "message on message.id = ( select id from message where campaign_contact_id = campaign_contact.id order by created_at desc limit 1 )"
     )
   );
 
   offsetLimitQuery = offsetLimitQuery
-    .orderBy("message.created_at", "desc")
-    .orderBy("campaign_contact.updated_at", "desc")
+    .orderByRaw(
+      "coalesce(message.created_at, campaign_contact.updated_at) desc"
+    )
     .orderBy("cc_id");
 
   offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset);
