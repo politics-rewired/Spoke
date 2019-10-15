@@ -64,3 +64,8 @@ insert into flat_analysis_table
 select from flat_analysis_seed_view_to_update
 limit N
 returning 1;
+
+-- To take it down
+drop table flat_analysis_table;
+drop view flat_analysis_seed_view_to_update;
+drop view flat_analysis_seed_view;
