@@ -128,8 +128,9 @@ export async function getConversations(
   );
 
   offsetLimitQuery = offsetLimitQuery
-    .orderBy("message.created_at", "desc")
-    .orderBy("campaign_contact.updated_at", "desc")
+    .orderByRaw(
+      "coalesce(message.created_at, campaign_contact.updated_at) desc"
+    )
     .orderBy("cc_id");
 
   offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset);
