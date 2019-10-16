@@ -33,7 +33,7 @@ import gsJson from "./exports/gs-json";
 import zipCodeToTimeZone from "zipcode-to-timezone";
 
 const CHUNK_SIZE = 1000;
-const BATCH_SIZE = Math.max(1, Math.floor(config.DB_MAX_POOL * 0.75));
+const BATCH_SIZE = Math.max(1, Math.floor(config.DB_MAX_POOL * 0.5));
 
 const zipMemoization = {};
 let warehouseConnection = null;
