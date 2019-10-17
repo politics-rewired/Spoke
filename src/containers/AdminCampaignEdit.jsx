@@ -2,6 +2,8 @@ import PropTypes from "prop-types";
 import React from "react";
 import isEqual from "lodash/isEqual";
 
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
@@ -92,7 +94,9 @@ class AdminCampaignEdit extends React.Component {
         props.campaignData.campaign,
         valueOverrides
       ),
-      startingCampaign: false
+      startingCampaign: false,
+      isWorking: false,
+      requestError: undefined
     };
   }
 
@@ -266,10 +270,25 @@ class AdminCampaignEdit extends React.Component {
           newCampaign.interactionSteps
         );
       }
-      await this.props.mutations.editCampaign(
-        this.props.campaignData.campaign.id,
-        newCampaign
-      );
+
+      this.setState({ isWorking: true });
+      try {
+        const response = await this.props.mutations.editCampaign(
+          this.props.campaignData.campaign.id,
+          newCampaign
+        );
+        if (response.errors) throw new Error(response.errors);
+      } catch (err) {
+        const isJsonError = err.message.includes(
+          "Unexpected token < in JSON at position 0"
+        );
+        const errorMessage = isJsonError
+          ? "There was an error with your request. This is likely due to uploading a contact list that is too large."
+          : err.message;
+        this.setState({ requestError: errorMessage });
+      } finally {
+        this.setState({ isWorking: false });
+      }
 
       this.pollDuringActiveJobs();
     }
@@ -534,15 +553,22 @@ class AdminCampaignEdit extends React.Component {
   }
 
   renderCampaignFormSection(section, forceDisable) {
-    let shouldDisable =
-      forceDisable || (!this.isNew() && this.checkSectionSaved(section));
+    const { isWorking } = this.state;
+    const shouldDisable =
+      isWorking ||
+      (forceDisable || (!this.isNew() && this.checkSectionSaved(section)));
+    const saveLabel = isWorking
+      ? "Working..."
+      : this.isNew()
+        ? "Save and goto next section"
+        : "Save";
     const ContentComponent = section.content;
     const formValues = this.getSectionState(section);
     return (
       <ContentComponent
         onChange={this.handleChange}
         formValues={formValues}
-        saveLabel={this.isNew() ? "Save and goto next section" : "Save"}
+        saveLabel={saveLabel}
         saveDisabled={shouldDisable}
         ensureComplete={this.props.campaignData.campaign.isStarted}
         onSubmit={this.handleSubmit}
@@ -680,10 +706,18 @@ class AdminCampaignEdit extends React.Component {
       </div>
     );
   }
+
+  handleCloseError = () => this.setState({ requestError: undefined });
+
   render() {
     const sections = this.sections();
-    const { expandedSection } = this.state;
+    const { expandedSection, requestError } = this.state;
     const { adminPerms } = this.props.params;
+
+    const errorActions = [
+      <FlatButton label="Ok" primary={true} onClick={this.handleCloseError} />
+    ];
+
     return (
       <div>
         {this.renderHeader()}
@@ -785,6 +819,14 @@ class AdminCampaignEdit extends React.Component {
             </Card>
           );
         })}
+        <Dialog
+          title="Request Error"
+          actions={errorActions}
+          open={requestError !== undefined}
+          onRequestClose={this.handleCloseError}
+        >
+          {requestError || ""}
+        </Dialog>
       </div>
     );
   }
