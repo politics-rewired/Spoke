@@ -123,12 +123,15 @@ export const sendMessage = async (message, _organizationId, _trx) => {
   };
   try {
     const result = await numbers.sms.sendMessage(messageInput);
-    const { sendMessage } = result;
-    // TODO: assemble-numbers-client squashes errors
-    if (!sendMessage) throw new Error("Missing sendMessage in payload!");
+    const { data, errors } = result;
+
+    if (errors && errors.length > 0) throw new Error(errors[0].message);
+
+    const { id: serviceId } = data.sendMessage.outboundMessage;
     await r
       .knex("message")
       .update({
+        service_id: serviceId,
         send_status: SpokeSendStatus.Sent,
         sent_at: r.knex.fn.now(),
         service_response: JSON.stringify([result])
