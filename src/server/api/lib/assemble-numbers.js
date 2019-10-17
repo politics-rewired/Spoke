@@ -191,6 +191,10 @@ export const handleDeliveryReport = async reportBody => {
           send_status: getMessageStatus(eventType)
         })
         .where({ service_id: messageId })
+        .whereNotIn("send_status", [
+          SpokeSendStatus.Delivered,
+          SpokeSendStatus.Error
+        ])
     )
     .then(rowCount => {
       if (rowCount !== 1) {
