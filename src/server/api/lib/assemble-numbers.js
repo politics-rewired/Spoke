@@ -191,6 +191,7 @@ export const handleDeliveryReport = async reportBody => {
           send_status: getMessageStatus(eventType)
         })
         .where({ service_id: messageId })
+        // Ignore late-arrival status updates for messages already in a final state
         .whereNotIn("send_status", [
           SpokeSendStatus.Delivered,
           SpokeSendStatus.Error
