@@ -50,7 +50,7 @@ export function buildCampaignQuery(
 
 export async function getCampaigns(organizationId, cursor, campaignsFilter) {
   let campaignsQuery = buildCampaignQuery(
-    r.knex.select("*"),
+    r.reader.select("*"),
     organizationId,
     campaignsFilter
   );

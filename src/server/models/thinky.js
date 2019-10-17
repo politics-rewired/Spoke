@@ -1,6 +1,7 @@
 import { config } from "../../config";
 import dumbThinky from "rethink-knex-adapter";
 import redis from "redis";
+import knex from "knex";
 import bluebird from "bluebird";
 import knexConfig from "../knex.js";
 
@@ -10,6 +11,10 @@ bluebird.promisifyAll(redis.Multi.prototype);
 // Instantiate the rethink-knex-adapter using the config defined in
 // /src/server/knex.js.
 const thinkyConn = dumbThinky(knexConfig);
+
+thinkyConn.r.reader = knexConfig.useReader
+  ? knex(knexConfig.readerConfig)
+  : thinkyConn.r.knex;
 
 thinkyConn.r.getCount = async query => {
   // helper method to get a count result
