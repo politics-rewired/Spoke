@@ -168,6 +168,11 @@ if (isClient()) {
       example: "postgres://username:password@127.0.0.1:5432/db_name",
       default: undefined
     }),
+    DATABASE_READER_URL: url({
+      desc: "Database reader connection URL",
+      example: "postgres://username:password@127.0.0.1:5432/db_name",
+      default: undefined
+    }),
     DB_HOST: host({
       desc: "Domain or IP address of database host.",
       example: "pg-db.example.org",

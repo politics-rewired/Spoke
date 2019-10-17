@@ -52,4 +52,13 @@ const knexConfig = {
   }
 };
 
+const useReader = !!config.DATABASE_READER_URL;
+
+const readerConfig = useReader
+  ? Object.assign({}, knexConfig, { connection: config.DATABASE_READER_URL })
+  : knexConfig;
+
+knexConfig.readerConfig = readerConfig;
+knexConfig.useReader = useReader;
+
 module.exports = knexConfig;

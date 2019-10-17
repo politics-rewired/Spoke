@@ -66,7 +66,7 @@ export function getContacts(
     return [];
   }
 
-  let query = r.knex("campaign_contact").where({
+  let query = r.reader("campaign_contact").where({
     assignment_id: assignment.id
   });
 
@@ -168,7 +168,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
    * so that the limit applies only to it and not the whole
    * query
    */
-  const { rows: teamToCampaigns } = await r.knex.raw(
+  const { rows: teamToCampaigns } = await r.reader.raw(
     /**
      * What a query!
      *
