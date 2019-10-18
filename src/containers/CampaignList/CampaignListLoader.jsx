@@ -94,6 +94,10 @@ const mapQueriesToProps = ({ ownProps }) => ({
               creator {
                 displayName
               }
+              teams {
+                id
+                title
+              }
             }
             pageInfo {
               total
