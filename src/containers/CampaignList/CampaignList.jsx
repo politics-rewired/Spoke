@@ -88,7 +88,8 @@ export class CampaignList extends React.Component {
       isAutoassignEnabled,
       hasUnassignedContacts,
       hasUnsentInitialMessages,
-      hasUnhandledMessages
+      hasUnhandledMessages,
+      teams
     } = campaign;
 
     let listItemStyle = {};
@@ -106,7 +107,7 @@ export class CampaignList extends React.Component {
 
     const dueByMoment = moment(campaign.dueBy);
     const creatorName = campaign.creator ? campaign.creator.displayName : null;
-    const tags = [];
+    let tags = [];
     if (!isStarted) {
       tags.push("Not started");
     }
@@ -126,6 +127,8 @@ export class CampaignList extends React.Component {
     if (isStarted && !isArchived && isAutoassignEnabled) {
       tags.push("Autoassign eligible");
     }
+
+    tags = tags.concat(teams.map(team => team.title));
 
     const primaryText = (
       <div>
