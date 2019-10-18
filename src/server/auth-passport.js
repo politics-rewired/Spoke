@@ -80,7 +80,7 @@ function setupSlackPassport() {
       throw new Error("Null user in login callback");
     }
     const existingUser = await r
-      .knex("user")
+      .reader("user")
       .where({ auth0_id: auth0Id })
       .first();
 
@@ -165,7 +165,7 @@ function setupAuth0Passport() {
     }
 
     const existingUser = await r
-      .knex("user")
+      .reader("user")
       .where({ auth0_id: auth0Id })
       .first();
 
@@ -211,7 +211,7 @@ function setupLocalAuthPassport() {
       const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
       const lowerCaseEmail = username.toLowerCase();
       const existingUser = await r
-        .knex("user")
+        .reader("user")
         .where({ email: lowerCaseEmail })
         .first();
 

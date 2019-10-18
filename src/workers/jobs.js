@@ -375,7 +375,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     batchSize: 1000
   };
   const jobCompleted = await r
-    .knex("job_request")
+    .reader("job_request")
     .where("id", jobEvent.jobId)
     .select("status")
     .first();
@@ -477,7 +477,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     .increment("status", 1);
   const validationStats = {};
   const completed = await r
-    .knex("job_request")
+    .reader("job_request")
     .where("id", jobEvent.jobId)
     .select("status")
     .first();
@@ -741,10 +741,10 @@ export async function assignTexters(job) {
   */
   const payload = JSON.parse(job.payload);
   const cid = job.campaign_id;
-  const campaign = (await r.knex("campaign").where({ id: cid }))[0];
+  const campaign = (await r.reader("campaign").where({ id: cid }))[0];
   const texters = payload.texters;
   const currentAssignments = await r
-    .knex("assignment")
+    .reader("assignment")
     .where("assignment.campaign_id", cid)
     .leftJoin(
       "campaign_contact",
@@ -754,11 +754,11 @@ export async function assignTexters(job) {
     .groupBy("user_id", "assignment.id")
     .select("user_id", "assignment.id as id", "max_contacts")
     .select(
-      r.knex.raw(
+      r.reader.raw(
         "SUM(CASE campaign_contact.message_status WHEN 'needsMessage' THEN 1 ELSE 0 END) as needs_message_count"
       )
     )
-    .select(r.knex.raw("COUNT(campaign_contact.id) as full_contact_count"));
+    .select(r.reader.raw("COUNT(campaign_contact.id) as full_contact_count"));
 
   const unchangedTexters = {}; // max_contacts and needsMessageCount unchanged
   const demotedTexters = {}; // needsMessageCount reduced
@@ -1067,22 +1067,22 @@ const fetchExportData = async job => {
   const { campaign_id: campaignId, payload: rawPayload } = job;
   const { requester: requesterId } = JSON.parse(rawPayload);
   const { title: campaignTitle } = await r
-    .knex("campaign")
+    .reader("campaign")
     .first("title")
     .where({ id: campaignId });
 
   const { email: notificationEmail } = await r
-    .knex("user")
+    .reader("user")
     .first("email")
     .where({ id: requesterId });
 
   const interactionSteps = await r
-    .knex("interaction_step")
+    .reader("interaction_step")
     .select("*")
     .where({ campaign_id: campaignId });
 
   const assignments = await r
-    .knex("assignment")
+    .reader("assignment")
     .where("campaign_id", campaignId)
     .join("user", "user_id", "user.id")
     .select(
@@ -1139,7 +1139,7 @@ const processContactsChunk = async (
   questionsById,
   lastContactId = 0
 ) => {
-  const { rows } = await r.knex.raw(
+  const { rows } = await r.reader.raw(
     `
       with campaign_contacts as (
         select *
@@ -1227,7 +1227,7 @@ const processContactsChunk = async (
 };
 
 const processMessagesChunk = async (campaignId, lastContactId = 0) => {
-  const { rows } = await r.knex.raw(
+  const { rows } = await r.reader.raw(
     `
       with campaign_contact_ids as (
         select id
@@ -1510,7 +1510,7 @@ export async function sendMessages(queryFunc, defaultStatus) {
 
 export async function handleIncomingMessageParts() {
   const messageParts = await r
-    .knex("pending_message_part")
+    .reader("pending_message_part")
     .select("*")
     .limit(100);
   const messagePartsByService = {};
@@ -1544,7 +1544,7 @@ export async function handleIncomingMessageParts() {
       const serviceMessageId = part.service_id;
       const savedCount = await r.parseCount(
         r
-          .knex("message")
+          .reader("message")
           .where({ service_id: serviceMessageId })
           .count()
       );

@@ -120,7 +120,7 @@ export const campaignContactCache = {
     }
     // 1. load the data
     let query = r
-      .knex("campaign_contact")
+      .reader("campaign_contact")
       .leftJoin("zip_code", "zip_code.zip", "campaign_contact.zip")
       .leftJoin("assignment", "assignment.id", "campaign_contact.assignment_id")
       .select(

@@ -122,7 +122,7 @@ export const resolvers = {
     optOutsCount: async campaign =>
       await r.getCount(
         r
-          .knex("campaign_contact")
+          .reader("campaign_contact")
           .where({ is_opted_out: true, campaign_id: campaign.id })
       )
   },
@@ -186,12 +186,12 @@ export const resolvers = {
       user.is_superadmin && !!config.WAREHOUSE_DB_HOST,
     pendingJobs: async campaign =>
       r
-        .knex("job_request")
+        .reader("job_request")
         .where({ campaign_id: campaign.id })
         .orderBy("updated_at", "desc"),
     teams: async campaign =>
       r
-        .knex("team")
+        .reader("team")
         .select("team.*")
         .join("campaign_team", "campaign_team.team_id", "=", "team.id")
         .where({
@@ -223,17 +223,17 @@ export const resolvers = {
         campaignId: campaign.id
       }),
     contacts: async campaign =>
-      r.knex("campaign_contact").where({ campaign_id: campaign.id }),
+      r.reader("campaign_contact").where({ campaign_id: campaign.id }),
     contactsCount: async campaign =>
       await r.getCount(
-        r.knex("campaign_contact").where({ campaign_id: campaign.id })
+        r.reader("campaign_contact").where({ campaign_id: campaign.id })
       ),
     hasUnassignedContacts: async campaign => {
       if (config.BAD_BENS_DISABLE_HAS_UNASSIGNED_CONTACTS) {
         return false;
       }
 
-      const { rows } = await r.knex.raw(
+      const { rows } = await r.reader.raw(
         `
         select exists (
           select 1
@@ -258,7 +258,7 @@ export const resolvers = {
     },
     hasUnsentInitialMessages: async campaign => {
       const contacts = await r
-        .knex("campaign_contact")
+        .reader("campaign_contact")
         .select("id")
         .where({
           campaign_id: campaign.id,
@@ -272,7 +272,7 @@ export const resolvers = {
       // TODO: restrict to sufficiently old values for updated_at
 
       let contactsQuery = r
-        .knex("campaign_contact")
+        .reader("campaign_contact")
         .pluck("campaign_contact.id")
         .where({
           "campaign_contact.campaign_id": campaign.id,
@@ -281,7 +281,7 @@ export const resolvers = {
         })
         .limit(1);
 
-      const notAssignableTagSubQuery = r.knex
+      const notAssignableTagSubQuery = r.reader
         .select("campaign_contact_tag.campaign_contact_id")
         .from("campaign_contact_tag")
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
