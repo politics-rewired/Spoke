@@ -23,11 +23,6 @@ export class PaginatedCampaignsRetriever extends Component {
       return;
     }
 
-    console.log(
-      "TCL: PaginatedCampaignsRetriever -> handleCampaignsReceived -> this.props.campaignsAndTags",
-      this.props.campaignsAndTags
-    );
-
     if (
       this.props.campaignsAndTags.campaigns.campaigns.length ===
       this.props.campaignsAndTags.campaigns.pageInfo.total

@@ -64,7 +64,7 @@ const initialAssignmentsFilter = {};
 const initialTagsFilter = {
   excludeEscalated: false,
   escalatedConvosOnly: false,
-  specificTags: []
+  specificTagIds: []
 };
 
 export class AdminIncomingMessageList extends Component {
@@ -134,7 +134,7 @@ export class AdminIncomingMessageList extends Component {
   handleTagsChanged = (_1, _2, values) => {
     this.setState(prevState => {
       const newTagsFilter = Object.assign({}, prevState.tagsFilter);
-      newTagsFilter.specificTags = values;
+      newTagsFilter.specificTagIds = values;
 
       return {
         tagsFilter: newTagsFilter,
@@ -460,7 +460,7 @@ export class AdminIncomingMessageList extends Component {
           onTagsChanged={this.handleTagsChanged}
           searchByContactName={this.searchByContactName}
           assignmentsFilter={this.state.assignmentsFilter}
-          tagsFilter={this.state.tagsFilter.specificTags}
+          tagsFilter={this.state.tagsFilter.specificTagIds}
           onActiveCampaignsToggled={this.handleActiveCampaignsToggled}
           onArchivedCampaignsToggled={this.handleArchivedCampaignsToggled}
           includeActiveCampaigns={this.state.includeActiveCampaigns}

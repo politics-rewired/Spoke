@@ -376,7 +376,7 @@ IncomingMessageFilter.propTypes = {
     texterId: type.number
   }).isRequired,
   tags: type.shape({
-    specificTags: type.arrayOf(
+    specificTagIds: type.arrayOf(
       type.shape({ id: type.string, title: type.string })
     )
   }),
