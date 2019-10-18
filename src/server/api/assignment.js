@@ -579,9 +579,9 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
 
   logger.verbose(`Assigning to assignment id ${assignmentId}`);
 
-  const campaignContactStatus = {
-    UNREPLIED: "needsResponse",
-    UNSENT: "needsMessage"
+  const contactView = {
+    UNREPLIED: "assignable_needs_reply",
+    UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
 
   const { rowCount: ccUpdateCount } = await trx.raw(
@@ -595,19 +595,9 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
           select
             id
           from
-            campaign_contact
+            ${contactView}
           where
-            assignment_id is null
-            and campaign_id = ?
-            and message_status = ?
-            and is_opted_out = false
-            and not exists (
-              select 1
-              from campaign_contact_tag
-              join tag on campaign_contact_tag.tag_id = tag.id
-              where tag.is_assignable = false
-                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
-            )
+            campaign_id = ?
           limit ?
           for update skip locked
         ) matching_contact
@@ -615,7 +605,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
         target_contact.id = matching_contact.id
       ;
     `,
-    [assignmentId, campaignIdToAssignTo, campaignContactStatus, countToAssign]
+    [assignmentId, campaignIdToAssignTo, countToAssign]
   );
 
   logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
