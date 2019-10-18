@@ -821,9 +821,7 @@ export async function assignTexters(job) {
       for (const assignmentIds of demotedChunks) {
         // Here we unassign ALL the demotedTexters contacts (not just the demotion count)
         // because they will get reapportioned below
-        await r
-          .knex("campaign_contact")
-          .transacting(trx)
+        await trx("campaign_contact")
           .where("assignment_id", "in", assignmentIds)
           .where({ message_status: "needsMessage" })
           .update({ assignment_id: null });
@@ -832,13 +830,10 @@ export async function assignTexters(job) {
       await updateJob(job, 20);
 
       let availableContacts = await r.getCount(
-        r
-          .knex("campaign_contact")
-          .transacting(trx)
-          .where({
-            assignment_id: null,
-            campaign_id: cid
-          })
+        trx("campaign_contact").where({
+          assignment_id: null,
+          campaign_id: cid
+        })
       );
 
       const newAssignments = [],
@@ -913,9 +908,7 @@ export async function assignTexters(job) {
       await Promise.all(
         dynamicAssignments.map(async assignment => {
           const { id, max_contacts } = assignment;
-          await r
-            .knex("assignment")
-            .transacting(trx)
+          await trx("assignment")
             .where({ id })
             .update({ max_contacts });
         })
@@ -971,9 +964,7 @@ export async function assignTexters(job) {
           // TODO - MySQL Specific. Must not do a bulk insert in order to be MySQL compatible
           const assignmentIds = await Promise.all(
             chunk.map(async directive => {
-              const assignmentIds = await r
-                .knex("assignment")
-                .transacting(trx)
+              const assignmentIds = await trx("assignment")
                 .insert([directive.assignment])
                 .returning("id");
               return assignmentIds[0];
@@ -1021,9 +1012,7 @@ export async function assignTexters(job) {
       // dynamic assignments, having zero initially is ok
       if (!campaign.use_dynamic_assignment) {
         // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
-        const assignmentIds = await r
-          .knex("assignment")
-          .transacting(trx)
+        const assignmentIds = await trx("assignment")
           .select("assignment.id as id")
           .where("assignment.campaign_id", cid)
           .leftJoin(
@@ -1035,9 +1024,7 @@ export async function assignTexters(job) {
           .havingRaw("COUNT(campaign_contact.id) = 0")
           .map(result => result.id);
 
-        await r
-          .knex("assignment")
-          .transacting(trx)
+        await trx("assignment")
           .delete()
           .whereIn("id", assignmentIds);
       }
@@ -1455,9 +1442,7 @@ export async function sendMessages(queryFunc, defaultStatus) {
     await knex.transaction(async trx => {
       let messages = [];
       try {
-        let messageQuery = r
-          .knex("message")
-          .transacting(trx)
+        let messageQuery = trx("message")
           .forUpdate()
           .where({ send_status: defaultStatus || "QUEUED" });
 
