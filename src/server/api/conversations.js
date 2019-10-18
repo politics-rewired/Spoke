@@ -47,7 +47,7 @@ async function getConversationsJoinsAndWhereClause(
   );
 
   if (contactsFilter && "isOptedOut" in contactsFilter) {
-    const subQuery = r.knex
+    const subQuery = r.reader
       .select("cell")
       .from("opt_out")
       .whereRaw("opt_out.cell=campaign_contact.cell");
@@ -59,7 +59,7 @@ async function getConversationsJoinsAndWhereClause(
   }
 
   if (tagsFilter) {
-    const subQuery = r.knex
+    const subQuery = r.reader
       .select("campaign_contact_tag.campaign_contact_id")
       .from("campaign_contact_tag")
       .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
@@ -122,7 +122,7 @@ export async function getConversations(
 ) {
   /* Query #1 == get campaign_contact.id for all the conversations matching
    * the criteria with offset and limit. */
-  let offsetLimitQuery = r.knex.select("campaign_contact.id as cc_id");
+  let offsetLimitQuery = r.reader.select("campaign_contact.id as cc_id");
 
   offsetLimitQuery = (await getConversationsJoinsAndWhereClause(
     offsetLimitQuery,
@@ -135,7 +135,7 @@ export async function getConversations(
   )).query;
 
   offsetLimitQuery = offsetLimitQuery.leftJoin(
-    r.knex.raw(
+    r.reader.raw(
       "message on message.id = ( select id from message where campaign_contact_id = campaign_contact.id order by created_at desc limit 1 )"
     )
   );
@@ -155,7 +155,7 @@ export async function getConversations(
 
   /* Query #2 -- get all the columns we need, including messages, using the
    * cc_ids from Query #1 to scope the results to limit, offset */
-  let query = r.knex.select(
+  let query = r.reader.select(
     "campaign_contact.id as cc_id",
     "campaign_contact.first_name as cc_first_name",
     "campaign_contact.last_name as cc_last_name",
@@ -250,7 +250,7 @@ export async function getConversations(
   const conversationsCount = await r.parseCount(
     (await getConversationsJoinsAndWhereClause(
       // Only grab one field in order to minimize bandwidth
-      r.knex.count("*"),
+      r.reader.count("*"),
       organizationId,
       campaignsFilter,
       assignmentsFilter,
@@ -279,7 +279,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
   tagsFilter,
   contactsFilter
 ) {
-  let query = r.knex.select(
+  let query = r.reader.select(
     "campaign_contact.id as cc_id",
     "campaign.id as cmp_id",
     "message.id as mess_id"
@@ -344,7 +344,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
   contactsFilter,
   contactNameFilter
 ) {
-  let query = r.knex.select(
+  let query = r.reader.select(
     "campaign_contact.id as cc_id",
     "campaign.id as cmp_id",
     "message.id as mess_id"
@@ -388,9 +388,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
 export const reassignContacts = async (campaignContactIds, newTexterId) => {
   const result = await r.knex.transaction(async trx => {
     // Fetch more complete information for campaign contacts
-    const campaignContacts = await r
-      .knex("campaign_contact")
-      .transacting(trx)
+    const campaignContacts = await trx("campaign_contact")
       .select(["id", "campaign_id"])
       .whereIn("id", campaignContactIds);
 
@@ -400,9 +398,7 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
     await Promise.all(
       campaignIds.map(async campaignId => {
         // See if newTexter already has an assignment for this campaign
-        const existingAssignment = await r
-          .knex("assignment")
-          .transacting(trx)
+        const existingAssignment = await trx("assignment")
           .where({
             campaign_id: campaignId,
             user_id: newTexterId
@@ -411,9 +407,7 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
         let assignmentId = existingAssignment && existingAssignment.id;
         if (!assignmentId) {
           // Create a new assignment if none exists
-          const inserted = await r
-            .knex("assignment")
-            .transacting(trx)
+          const inserted = await trx("assignment")
             .insert({
               campaign_id: campaignId,
               user_id: newTexterId
@@ -426,18 +420,14 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
         const contactIds = contactsByCampaignId[campaignId].map(
           contact => contact.id
         );
-        await r
-          .knex("campaign_contact")
-          .transacting(trx)
+        await trx("campaign_contact")
           .update({
             assignment_id: assignmentId
           })
           .whereIn("id", contactIds);
 
         // Update the conversations messages
-        await r
-          .knex("message")
-          .transacting(trx)
+        await trx("message")
           .update({ assignment_id: assignmentId })
           .whereIn("campaign_contact_id", contactIds);
       })
@@ -477,9 +467,7 @@ export async function reassignConversations(
 
     for (const [campaignId, campaignContactIds] of campaignIdContactIdsMap) {
       const assignmentId = campaignIdAssignmentIdMap.get(campaignId);
-      await r
-        .knex("campaign_contact")
-        .transacting(trx)
+      await trx("campaign_contact")
         .where("campaign_id", campaignId)
         .whereIn("id", campaignContactIds)
         .update({
@@ -494,9 +482,7 @@ export async function reassignConversations(
 
     for (const [campaignId, messageIds] of campaignIdMessagesIdsMap) {
       const assignmentId = campaignIdAssignmentIdMap.get(campaignId);
-      await r
-        .knex("message")
-        .transacting(trx)
+      await trx("message")
         .whereIn("id", messageIds)
         .update({
           assignment_id: assignmentId

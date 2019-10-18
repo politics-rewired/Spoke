@@ -148,7 +148,7 @@ async function rentNewCell(messagingSericeSid) {
 
 const getTwilioCredentials = async messagingServiceSid => {
   const { account_sid: accountSid, encrypted_auth_token } = await r
-    .knex("messaging_service")
+    .reader("messaging_service")
     .first(["account_sid", "encrypted_auth_token"])
     .where({
       messaging_service_sid: messagingServiceSid,

@@ -122,7 +122,7 @@ export function getContacts(
 // Returns either "replies", "initials", or null
 export async function getCurrentAssignmentType(organizationId) {
   const organization = await r
-    .knex("organization")
+    .reader("organization")
     .select("features")
     .where({ id: parseInt(organizationId) })
     .first();

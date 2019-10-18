@@ -62,7 +62,7 @@ export const resolvers = {
         return []; // it's the beginning, so there won't be any
       }
       const qr_results = await r
-        .knex("question_response")
+        .reader("question_response")
         .join(
           "interaction_step as istep",
           "question_response.interaction_step_id",
@@ -85,7 +85,7 @@ export const resolvers = {
     },
     questionResponses: async (campaignContact, _, { loaders }) => {
       const results = await r
-        .knex("question_response as qres")
+        .reader("question_response as qres")
         .where("qres.campaign_contact_id", campaignContact.id)
         .join(
           "interaction_step",
@@ -181,7 +181,7 @@ export const resolvers = {
       }
 
       let messages = await r
-        .knex("message")
+        .reader("message")
         .where({ campaign_contact_id: campaignContact.id })
         .orderBy("created_at");
 
@@ -191,7 +191,7 @@ export const resolvers = {
         campaignContact.message_status !== "needsMessage"
       ) {
         messages = await r
-          .knex("message")
+          .reader("message")
           .where({
             assignment_id: campaignContact.assignment_id,
             contact_number: campaignContact.cell
@@ -239,13 +239,13 @@ export const resolvers = {
     contactTags: async (campaignContact, _, { user }) => {
       const { campaign_id } = campaignContact;
       const { organization_id } = await r
-        .knex("campaign")
+        .reader("campaign")
         .where({ id: campaign_id })
         .first("organization_id");
       await accessRequired(user, organization_id, "TEXTER");
 
       return r
-        .knex("tag")
+        .reader("tag")
         .select("tag.*")
         .join(
           "campaign_contact_tag",

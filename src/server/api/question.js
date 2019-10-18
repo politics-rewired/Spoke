@@ -5,7 +5,7 @@ export const resolvers = {
     text: async interactionStep => interactionStep.question,
     answerOptions: async interactionStep =>
       r
-        .knex("interaction_step")
+        .reader("interaction_step")
         .select("*")
         .where({
           parent_interaction_id: interactionStep.id,
@@ -27,7 +27,7 @@ export const resolvers = {
     interactionStepId: answer => answer.interaction_step_id,
     nextInteractionStep: async answer =>
       r
-        .knex("interaction_step")
+        .reader("interaction_step")
         .first("*")
         .where({ id: answer.interaction_step_id }),
     responders: async answer =>
