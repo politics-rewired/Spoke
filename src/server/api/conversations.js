@@ -30,13 +30,13 @@ async function getConversationsJoinsAndWhereClause(
     if (contactNameFilter.firstName)
       query = query.where(
         "campaign_contact.first_name",
-        "like",
+        "ilike",
         `${contactNameFilter.firstName}%`
       );
     if (contactNameFilter.lastName)
       query = query.where(
         "campaign_contact.last_name",
-        "like",
+        "ilike",
         `${contactNameFilter.lastName}%`
       );
   }
