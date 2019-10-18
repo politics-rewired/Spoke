@@ -76,6 +76,19 @@ async function getConversationsJoinsAndWhereClause(
     } else if (tagsFilter.excludeEscalated) {
       query = query.whereNotExists(subQuery);
     }
+
+    if (tagsFilter.specificTagIds && tagsFilter.specificTagIds.length > 0) {
+      const specificTagIdsSubquery = r.knex
+        .select("campaign_contact_tag.campaign_contact_id")
+        .from("campaign_contact_tag")
+        .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+        .whereIn("tag.id", tagsFilter.specificTagIds)
+        .whereRaw(
+          "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+        );
+
+      query = query.whereExists(specificTagIdsSubquery);
+    }
   }
 
   return { query };

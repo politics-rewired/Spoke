@@ -314,6 +314,34 @@ class IncomingMessageFilter extends Component {
               floatingLabelText="Filter by Contact Name"
             />
           </div>
+
+          <div className={css(styles.spacer)}>
+            <div className={css(styles.flexColumn)}>
+              <SelectField
+                multiple
+                value={this.props.tagsFilter}
+                hintText="Filter by Contact Tags"
+                fullWidth
+                floatingLabelFixed
+                onChange={this.props.onTagsChanged}
+              >
+                {this.props.tags.map(({ id, title }) => {
+                  const isChecked =
+                    this.props.tagsFilter && this.props.tagsFilter.includes(id);
+
+                  return (
+                    <MenuItem
+                      key={id}
+                      value={id}
+                      primaryText={title}
+                      insetChildren
+                      checked={isChecked}
+                    />
+                  );
+                })}
+              </SelectField>
+            </div>
+          </div>
         </CardText>
       </Card>
     );
@@ -329,6 +357,7 @@ IncomingMessageFilter.propTypes = {
   isTexterFilterable: type.bool.isRequired,
   isIncludeEscalatedFilterable: type.bool.isRequired,
   onCampaignChanged: type.func.isRequired,
+  onTagsChanged: type.func.isRequired,
   onTexterChanged: type.func.isRequired,
   includeEscalated: type.bool.isRequired,
   onIncludeEscalatedChanged: type.func.isRequired,
@@ -345,7 +374,13 @@ IncomingMessageFilter.propTypes = {
   onMessageFilterChanged: type.func.isRequired,
   assignmentsFilter: type.shape({
     texterId: type.number
-  }).isRequired
+  }).isRequired,
+  tags: type.shape({
+    specificTagIds: type.arrayOf(
+      type.shape({ id: type.string, title: type.string })
+    )
+  }),
+  tagsFilter: type.arrayOf(type.string).isRequired
 };
 
 export default IncomingMessageFilter;

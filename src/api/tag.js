@@ -31,5 +31,6 @@ export const schema = `
   input TagsFilter {
     excludeEscalated: Boolean
     escalatedConvosOnly: Boolean
+    specificTagIds: [String]
   }
 `;

@@ -63,7 +63,8 @@ const initialContactsFilter = { isOptedOut: false };
 const initialAssignmentsFilter = {};
 const initialTagsFilter = {
   excludeEscalated: false,
-  escalatedConvosOnly: false
+  escalatedConvosOnly: false,
+  specificTagIds: []
 };
 
 export class AdminIncomingMessageList extends Component {
@@ -87,6 +88,7 @@ export class AdminIncomingMessageList extends Component {
       contactNameFilter: undefined,
       needsRender: false,
       campaigns: [],
+      tags: [],
       reassignmentTexters: [],
       campaignTexters: [],
       includeArchivedCampaigns: false,
@@ -126,6 +128,19 @@ export class AdminIncomingMessageList extends Component {
       campaignsFilter,
       campaignIdsContactIds: [],
       needsRender: true
+    });
+  };
+
+  handleTagsChanged = (_1, _2, values) => {
+    this.setState(prevState => {
+      const newTagsFilter = Object.assign({}, prevState.tagsFilter);
+      newTagsFilter.specificTagIds = values;
+
+      return {
+        tagsFilter: newTagsFilter,
+        campaignIdsContactIds: [],
+        needsRender: true
+      };
     });
   };
 
@@ -273,6 +288,10 @@ export class AdminIncomingMessageList extends Component {
 
   handleCampaignsReceived = async campaigns => {
     this.setState({ campaigns, needsRender: true });
+  };
+
+  handleTagsReceived = async tagList => {
+    this.setState({ tags: tagList });
   };
 
   handleCampaignTextersReceived = async campaignTexters => {
@@ -426,18 +445,22 @@ export class AdminIncomingMessageList extends Component {
           organizationId={this.props.params.organizationId}
           campaignsFilter={_.pick(this.state.campaignsFilter, "isArchived")}
           onCampaignsReceived={this.handleCampaignsReceived}
+          onTagsReceived={this.handleTagsReceived}
           pageSize={1000}
         />
         <IncomingMessageFilter
           campaigns={this.state.campaigns}
           texters={this.state.campaignTexters}
+          tags={this.state.tags}
           onCampaignChanged={this.handleCampaignChanged}
           onTexterChanged={this.handleTexterChanged}
           includeEscalated={includeEscalated}
           onIncludeEscalatedChanged={this.handleIncludeEscalatedToggled}
           onMessageFilterChanged={this.handleMessageFilterChange}
+          onTagsChanged={this.handleTagsChanged}
           searchByContactName={this.searchByContactName}
           assignmentsFilter={this.state.assignmentsFilter}
+          tagsFilter={this.state.tagsFilter.specificTagIds}
           onActiveCampaignsToggled={this.handleActiveCampaignsToggled}
           onArchivedCampaignsToggled={this.handleArchivedCampaignsToggled}
           includeActiveCampaigns={this.state.includeActiveCampaigns}
