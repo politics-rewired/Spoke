@@ -744,7 +744,7 @@ export async function assignTexters(job) {
   const campaign = (await r.reader("campaign").where({ id: cid }))[0];
   const texters = payload.texters;
   const currentAssignments = await r
-    .reader("assignment")
+    .knex("assignment")
     .where("assignment.campaign_id", cid)
     .leftJoin(
       "campaign_contact",
