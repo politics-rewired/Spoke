@@ -754,11 +754,11 @@ export async function assignTexters(job) {
     .groupBy("user_id", "assignment.id")
     .select("user_id", "assignment.id as id", "max_contacts")
     .select(
-      r.reader.raw(
+      r.knex.raw(
         "SUM(CASE campaign_contact.message_status WHEN 'needsMessage' THEN 1 ELSE 0 END) as needs_message_count"
       )
     )
-    .select(r.reader.raw("COUNT(campaign_contact.id) as full_contact_count"));
+    .select(r.knex.raw("COUNT(campaign_contact.id) as full_contact_count"));
 
   const unchangedTexters = {}; // max_contacts and needsMessageCount unchanged
   const demotedTexters = {}; // needsMessageCount reduced

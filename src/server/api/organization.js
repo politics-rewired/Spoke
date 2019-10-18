@@ -145,7 +145,7 @@ export const resolvers = {
         : null;
     },
     escalatedConversationCount: async organization => {
-      const subQuery = r.knex
+      const subQuery = r.reader
         .select("campaign_contact_tag.campaign_contact_id")
         .from("campaign_contact_tag")
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
