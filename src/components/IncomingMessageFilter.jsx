@@ -64,9 +64,13 @@ export const ALL_CAMPAIGNS = -1;
 
 export const CAMPAIGN_TYPE_FILTERS = [[ALL_CAMPAIGNS, "All Campaigns"]];
 
+export const UNASSIGNED_TEXTER = -2;
 export const ALL_TEXTERS = -1;
 
-export const TEXTER_FILTERS = [[ALL_TEXTERS, "All Texters"]];
+export const TEXTER_FILTERS = [
+  [UNASSIGNED_TEXTER, "Unassigned"],
+  [ALL_TEXTERS, "All Texters"]
+];
 
 const IDLE_KEY_TIME = 500;
 

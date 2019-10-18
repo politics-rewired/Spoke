@@ -7,6 +7,10 @@ import _ from "lodash";
 import IncomingMessageActions from "../../components/IncomingMessageActions";
 import IncomingMessageFilter from "../../components/IncomingMessageFilter";
 import IncomingMessageList from "../../components/IncomingMessageList";
+import {
+  UNASSIGNED_TEXTER,
+  ALL_TEXTERS
+} from "../../components/IncomingMessageFilter";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
 import gql from "graphql-tag";
@@ -146,7 +150,13 @@ export class AdminIncomingMessageList extends Component {
 
   handleTexterChanged = async texterId => {
     const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter);
-    assignmentsFilter.texterId = texterId >= 0 ? texterId : undefined;
+    if (texterId === UNASSIGNED_TEXTER) {
+      assignmentsFilter.texterId = texterId;
+    } else if (texterId === ALL_TEXTERS) {
+      assignmentsFilter.texterId = undefined;
+    } else {
+      assignmentsFilter.texterId = texterId;
+    }
     await this.setState({
       assignmentsFilter,
       campaignIdsContactIds: [],
