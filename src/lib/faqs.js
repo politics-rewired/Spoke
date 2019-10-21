@@ -13,8 +13,8 @@ const FAQs = [
   {
     question: "Does Spoke use my personal phone number to text people?",
     answer:
-      "No - We purchase phone numbers and connect them to the application using a service called Twilio. The " +
-      "texts you send use those purchased phone numbers."
+      "No - your personal phone number will not be used to text contacts. Spoke sends texts from a dedicated " +
+      "pool of phone numbers owned and managed by a 3rd party."
   },
   {
     question: "Is Spoke available as an Android/iPhone app?",
