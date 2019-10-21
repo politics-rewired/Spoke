@@ -1362,6 +1362,19 @@ const rootMutations = {
           is_system: true
         });
 
+        const { payload = {} } = invite;
+        if (payload.messaging_services) {
+          await trx("messaging_service").insert(
+            payload.messaging_services.map(service => ({
+              messaging_service_sid: service.messaging_service_sid,
+              organization_id: newOrganization.id,
+              account_sid: service.account_sid,
+              encrypted_auth_token: service.encrypted_auth_token,
+              service_type: service.service_type
+            }))
+          );
+        }
+
         return newOrganization;
       });
 
