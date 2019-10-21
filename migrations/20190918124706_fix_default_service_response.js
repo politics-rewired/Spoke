@@ -1,4 +1,4 @@
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   // Add stringified empty array as default
   return knex.schema.alterTable("message", table => {
     table
@@ -8,7 +8,7 @@ exports.up = function(knex, Promise) {
   });
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   // Revert to default of empty string
   return knex.schema.alterTable("message", table => {
     table

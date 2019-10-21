@@ -1,4 +1,4 @@
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema
     .alterTable("campaign_contact", table => {
       table.string("timezone").index(); // indexing it makes the backfill script much faster - index moved to concurrent
@@ -17,7 +17,7 @@ exports.up = function(knex, Promise) {
     );
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.alterTable("campaign_contact", table => {
     table.dropColumn("timezone");
   });

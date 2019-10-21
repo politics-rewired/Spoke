@@ -1,4 +1,4 @@
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema.alterTable("team", table => {
     table.boolean("is_assignment_enabled").default(false);
     table.enu("assignment_type", ["UNSENT", "UNREPLIED"]);
@@ -6,7 +6,7 @@ exports.up = function(knex, Promise) {
   });
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.alterTable("team", table => {
     table.dropColumn("is_assignment_enabled");
     table.dropColumn("assignment_type");
