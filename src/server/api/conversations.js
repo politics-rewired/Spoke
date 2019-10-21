@@ -3,6 +3,7 @@ import { config } from "../../config";
 import { Assignment, r } from "../models";
 import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
 import { buildCampaignQuery } from "./campaign";
+import { UNASSIGNED_TEXTER } from "../../lib/constants";
 
 async function getConversationsJoinsAndWhereClause(
   queryParam,
@@ -22,8 +23,20 @@ async function getConversationsJoinsAndWhereClause(
   query = buildCampaignQuery(query, organizationId, campaignsFilter);
 
   if (assignmentsFilter) {
-    if ("texterId" in assignmentsFilter && assignmentsFilter.texterId !== null)
-      query = query.where({ "assignment.user_id": assignmentsFilter.texterId });
+    if ("texterId" in assignmentsFilter) {
+      // Searching for Unassigned
+      if (assignmentsFilter.texterId === UNASSIGNED_TEXTER) {
+        query = query.whereNull("assignment.user_id");
+      }
+      // Searching for specific texter
+      else if (assignmentsFilter.texterId !== null) {
+        query = query.where({
+          "assignment.user_id": assignmentsFilter.texterId
+        });
+      } else {
+        // No-op: searching for all texters
+      }
+    }
   }
 
   if (contactNameFilter) {
