@@ -67,7 +67,7 @@ end;
 $$ language plpgsql;
 `;
 
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema
     .alterTable("question_response", table => {
       table
@@ -114,7 +114,7 @@ exports.up = function(knex, Promise) {
     );
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.raw(
     `
     drop trigger _500_question_response_insert on all_question_response; 

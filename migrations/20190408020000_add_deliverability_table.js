@@ -1,5 +1,5 @@
 // Create deliverability_report table
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema.createTable("deliverability_report", table => {
     table.increments("id").primary();
     table.timestamp("period_starts_at");
@@ -25,6 +25,6 @@ exports.up = function(knex, Promise) {
 };
 
 // Drop deliverability_report table
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.dropTable("deliverability_report");
 };

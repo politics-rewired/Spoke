@@ -1,5 +1,5 @@
 // Add unique contraint on Campaign Contacts (campaign_id, cell)
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   // Note: before running this, you will need to resolve all existing duplicates.
   //       See `dev-tools/mysql-migrations/007-make-unique-cc-campaign-id-cell.sql` for
   //       one possible strategy.
@@ -9,7 +9,7 @@ exports.up = function(knex, Promise) {
 };
 
 // Drop unique contraint
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.alterTable("campaign_contact", table => {
     table.dropUnique(["campaign_id", "cell"]);
   });

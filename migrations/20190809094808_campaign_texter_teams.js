@@ -1,4 +1,4 @@
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   const createTeamsTables = knex.schema
     .createTable("team", table => {
       table.increments("id").primary();
@@ -85,7 +85,7 @@ exports.up = function(knex, Promise) {
   ]);
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   const dropTeamsTables = Promise.all([
     knex.schema.dropTable("user_team"),
     knex.schema.dropTable("campaign_team")

@@ -1,4 +1,4 @@
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema
     .createTable("tag", table => {
       table.increments("id").primary();
@@ -78,7 +78,7 @@ exports.up = function(knex, Promise) {
     );
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema
     .dropTable("campaign_contact_tag")
     .then(() => knex.schema.dropTable("tag"));

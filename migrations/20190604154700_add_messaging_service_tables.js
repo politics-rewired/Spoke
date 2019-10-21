@@ -1,5 +1,5 @@
 // Add index for fetching current assignment target
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return Promise.all([
     knex.schema.createTable("messaging_service", t => {
       t.text("messaging_service_sid").primary(); // if we choose not to have the foreign key on sticks, we won't need the index here
@@ -26,7 +26,7 @@ exports.up = function(knex, Promise) {
 };
 
 // Drop index for fetching current assignment target
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return Promise.all([
     knex.schema.dropTable("messaging_service"),
     knex.schema.dropTable("messaging_service_stick")
