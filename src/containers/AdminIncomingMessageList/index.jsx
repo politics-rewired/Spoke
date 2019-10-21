@@ -7,10 +7,7 @@ import _ from "lodash";
 import IncomingMessageActions from "../../components/IncomingMessageActions";
 import IncomingMessageFilter from "../../components/IncomingMessageFilter";
 import IncomingMessageList from "../../components/IncomingMessageList";
-import {
-  UNASSIGNED_TEXTER,
-  ALL_TEXTERS
-} from "../../components/IncomingMessageFilter";
+import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../../lib/constants";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
 import gql from "graphql-tag";

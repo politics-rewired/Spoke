@@ -3,7 +3,7 @@ import { config } from "../../config";
 import { Assignment, r } from "../models";
 import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
 import { buildCampaignQuery } from "./campaign";
-import { UNASSIGNED_TEXTER } from "../../components/IncomingMessageFilter";
+import { UNASSIGNED_TEXTER } from "../../lib/constants";
 
 async function getConversationsJoinsAndWhereClause(
   queryParam,

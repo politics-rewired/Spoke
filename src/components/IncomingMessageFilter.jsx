@@ -12,6 +12,8 @@ import MenuItem from "material-ui/MenuItem";
 import theme from "../styles/theme";
 import { dataSourceItem } from "./utils";
 
+import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../lib/constants";
+
 import { StyleSheet, css } from "aphrodite";
 
 const styles = StyleSheet.create({
@@ -63,9 +65,6 @@ export const MESSAGE_STATUSES = {
 export const ALL_CAMPAIGNS = -1;
 
 export const CAMPAIGN_TYPE_FILTERS = [[ALL_CAMPAIGNS, "All Campaigns"]];
-
-export const UNASSIGNED_TEXTER = -2;
-export const ALL_TEXTERS = -1;
 
 export const TEXTER_FILTERS = [
   [UNASSIGNED_TEXTER, "Unassigned"],
