@@ -2772,7 +2772,7 @@ const rootResolvers = {
       return toReturn;
     },
     assignmentRequests: async (_, { organizationId, status }, { user }) => {
-      await accessRequired(user, organizationId, "ADMIN");
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
       const query = r
         .knex("assignment_request")

@@ -36,7 +36,15 @@ class ApplyTagDialog extends Component {
   handleAddEscalatedTag = () => {
     const { allTags } = this.props;
     const escalateTag = allTags.find(isEscalateTag);
-    this.setState({ pendingTag: escalateTag });
+
+    if (
+      escalateTag.confirmationSteps &&
+      escalateTag.confirmationSteps.length > 0
+    ) {
+      this.setState({ pendingTag: escalateTag });
+    } else {
+      this.handleOnConfirmAddEscalatedTag(escalateTag);
+    }
   };
 
   handleOnCancelEscalateTag = () => this.setState({ pendingTag: undefined });
