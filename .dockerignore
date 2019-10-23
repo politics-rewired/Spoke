@@ -8,6 +8,7 @@
 !/.babelrc
 !/knexfile.env.js
 !/dev-tools/babel-run
+!/dev-tools/insert-invite.js
 !/src/*
 !/migrations
 !/seeds
