@@ -10,7 +10,7 @@ export const resolvers = {
     backgroundColor: async team => team.background_color,
     author: async team =>
       r
-        .knex("user")
+        .reader("user")
         .where({ id: team.author_id })
         .first("*"),
     isAssignmentEnabled: async team => team.is_assignment_enabled,
@@ -23,7 +23,7 @@ export const resolvers = {
       await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
 
       return r
-        .knex("user")
+        .reader("user")
         .select("user.*")
         .join("user_team", "user_team.user_id", "=", "user.id")
         .where({
@@ -34,7 +34,7 @@ export const resolvers = {
       await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
 
       return r
-        .knex("campaign")
+        .reader("campaign")
         .select("campaign.*")
         .join("campaign_team", "campaign_team.campaign_id", "=", "campaign.id")
         .where({

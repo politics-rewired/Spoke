@@ -17,7 +17,7 @@ export const getEscalationUserId = async organizationId => {
   let escalationUserId;
   try {
     const organization = await r
-      .knex("organization")
+      .reader("organization")
       .where({ id: organizationId })
       .first("organization.features");
     const features = JSON.parse(organization.features);
@@ -38,7 +38,7 @@ export const resolvers = {
     uuid: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const result = await r
-        .knex("organization")
+        .reader("organization")
         .column("uuid")
         .where("id", organization.id);
       return result[0].uuid;
@@ -67,7 +67,7 @@ export const resolvers = {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       return r.getCount(
         r
-          .knex("user")
+          .reader("user")
           .join("user_organization", "user.id", "user_organization.user_id")
           .where("user_organization.organization_id", organization.id)
       );
@@ -145,7 +145,7 @@ export const resolvers = {
         : null;
     },
     escalatedConversationCount: async organization => {
-      const subQuery = r.knex
+      const subQuery = r.reader
         .select("campaign_contact_tag.campaign_contact_id")
         .from("campaign_contact_tag")
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
@@ -158,7 +158,7 @@ export const resolvers = {
         );
 
       const countQuery = r
-        .knex("campaign_contact")
+        .reader("campaign_contact")
         .join("assignment", "assignment.id", "campaign_contact.assignment_id")
         .whereExists(subQuery)
         .count("*");
@@ -181,7 +181,7 @@ export const resolvers = {
     pendingAssignmentRequestCount: async organization => {
       const count = await r.parseCount(
         r
-          .knex("assignment_request")
+          .reader("assignment_request")
           .count("*")
           .where({
             status: "pending",
@@ -191,7 +191,7 @@ export const resolvers = {
       return count;
     },
     linkDomains: async organization => {
-      const rawResult = await r.knex.raw(
+      const rawResult = await r.reader.raw(
         `
         select
           link_domain.*,
@@ -235,12 +235,12 @@ export const resolvers = {
     },
     tagList: async organization =>
       r
-        .knex("tag")
+        .reader("tag")
         .where({ organization_id: organization.id })
         .orderBy(["is_system", "title"]),
     teams: async organization =>
       r
-        .knex("team")
+        .reader("team")
         .where({ organization_id: organization.id })
         .orderBy("assignment_priority", "asc")
   }

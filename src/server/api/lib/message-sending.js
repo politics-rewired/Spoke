@@ -19,7 +19,7 @@ export const SpokeSendStatus = Object.freeze({
  * @param {number} organizationId The ID of organization
  */
 export const getMessagingServiceCandidates = async organizationId => {
-  const { rows: messagingServiceCandidates } = await r.knex.raw(
+  const { rows: messagingServiceCandidates } = await r.reader.raw(
     `
       select
         messaging_service.messaging_service_sid,
@@ -88,7 +88,7 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
  */
 export const getMessagingServiceById = async messagingServiceId =>
   r
-    .knex("messaging_service")
+    .reader("messaging_service")
     .where({ messaging_service_sid: messagingServiceId })
     .first();
 
@@ -104,7 +104,7 @@ export const getContactMessagingService = async campaignContactId => {
 
   const {
     rows: [lookupResult]
-  } = await r.knex.raw(
+  } = await r.reader.raw(
     `
       with cc_record as (
         select campaign_contact.cell, campaign.organization_id
@@ -289,7 +289,7 @@ export async function getCampaignContactAndAssignmentForIncomingMessage({
   service,
   messaging_service_sid
 }) {
-  const { rows } = await r.knex.raw(
+  const { rows } = await r.reader.raw(
     `
     with chosen_organization as (
       select organization_id

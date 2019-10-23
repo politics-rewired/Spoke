@@ -7,6 +7,7 @@ import _ from "lodash";
 import IncomingMessageActions from "../../components/IncomingMessageActions";
 import IncomingMessageFilter from "../../components/IncomingMessageFilter";
 import IncomingMessageList from "../../components/IncomingMessageList";
+import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../../lib/constants";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
 import gql from "graphql-tag";
@@ -63,7 +64,8 @@ const initialContactsFilter = { isOptedOut: false };
 const initialAssignmentsFilter = {};
 const initialTagsFilter = {
   excludeEscalated: false,
-  escalatedConvosOnly: false
+  escalatedConvosOnly: false,
+  specificTagIds: []
 };
 
 export class AdminIncomingMessageList extends Component {
@@ -87,6 +89,7 @@ export class AdminIncomingMessageList extends Component {
       contactNameFilter: undefined,
       needsRender: false,
       campaigns: [],
+      tags: [],
       reassignmentTexters: [],
       campaignTexters: [],
       includeArchivedCampaigns: false,
@@ -129,9 +132,28 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
+  handleTagsChanged = (_1, _2, values) => {
+    this.setState(prevState => {
+      const newTagsFilter = Object.assign({}, prevState.tagsFilter);
+      newTagsFilter.specificTagIds = values;
+
+      return {
+        tagsFilter: newTagsFilter,
+        campaignIdsContactIds: [],
+        needsRender: true
+      };
+    });
+  };
+
   handleTexterChanged = async texterId => {
     const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter);
-    assignmentsFilter.texterId = texterId >= 0 ? texterId : undefined;
+    if (texterId === UNASSIGNED_TEXTER) {
+      assignmentsFilter.texterId = texterId;
+    } else if (texterId === ALL_TEXTERS) {
+      assignmentsFilter.texterId = undefined;
+    } else {
+      assignmentsFilter.texterId = texterId;
+    }
     await this.setState({
       assignmentsFilter,
       campaignIdsContactIds: [],
@@ -273,6 +295,10 @@ export class AdminIncomingMessageList extends Component {
 
   handleCampaignsReceived = async campaigns => {
     this.setState({ campaigns, needsRender: true });
+  };
+
+  handleTagsReceived = async tagList => {
+    this.setState({ tags: tagList });
   };
 
   handleCampaignTextersReceived = async campaignTexters => {
@@ -426,18 +452,22 @@ export class AdminIncomingMessageList extends Component {
           organizationId={this.props.params.organizationId}
           campaignsFilter={_.pick(this.state.campaignsFilter, "isArchived")}
           onCampaignsReceived={this.handleCampaignsReceived}
+          onTagsReceived={this.handleTagsReceived}
           pageSize={1000}
         />
         <IncomingMessageFilter
           campaigns={this.state.campaigns}
           texters={this.state.campaignTexters}
+          tags={this.state.tags}
           onCampaignChanged={this.handleCampaignChanged}
           onTexterChanged={this.handleTexterChanged}
           includeEscalated={includeEscalated}
           onIncludeEscalatedChanged={this.handleIncludeEscalatedToggled}
           onMessageFilterChanged={this.handleMessageFilterChange}
+          onTagsChanged={this.handleTagsChanged}
           searchByContactName={this.searchByContactName}
           assignmentsFilter={this.state.assignmentsFilter}
+          tagsFilter={this.state.tagsFilter.specificTagIds}
           onActiveCampaignsToggled={this.handleActiveCampaignsToggled}
           onArchivedCampaignsToggled={this.handleArchivedCampaignsToggled}
           includeActiveCampaigns={this.state.includeActiveCampaigns}

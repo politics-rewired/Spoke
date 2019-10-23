@@ -109,7 +109,7 @@ export const sendMessage = async (message, _organizationId, _trx) => {
   const numbers = await numbersClient(service);
 
   const { zip: contactZipCode } = await r
-    .knex("campaign_contact")
+    .reader("campaign_contact")
     .where({ id: campaignContactId })
     .first("zip");
   const { body, mediaUrl } = messageComponents(messageText);

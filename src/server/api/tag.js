@@ -10,7 +10,7 @@ export const resolvers = {
     backgroundColor: async tag => tag.background_color,
     author: async tag =>
       r
-        .knex("user")
+        .reader("user")
         .where({ id: tag.author_id })
         .first("*"),
     confirmationSteps: async tag => tag.confirmation_steps,
@@ -24,7 +24,7 @@ export const resolvers = {
       await accessRequired(user, tag.organization_id, "SUPERVOLUNTEER");
 
       let query = r
-        .knex("campaign_contact")
+        .reader("campaign_contact")
         .select("campaign_contact.*")
         .join(
           "campaign_contact_tag",

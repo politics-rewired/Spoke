@@ -10,7 +10,7 @@ export async function userHasRole(userId, orgId, acceptableRoles) {
     if (!highestRole) {
       // need to get it from db, and then cache it
       const userRoles = await r
-        .knex("user_organization")
+        .reader("user_organization")
         .where({ user_id: userId, organization_id: orgId })
         .select("role");
       if (!userRoles.length) {
@@ -24,7 +24,7 @@ export async function userHasRole(userId, orgId, acceptableRoles) {
     // regular DB approach
     const userHasRole = await r.getCount(
       r
-        .knex("user_organization")
+        .reader("user_organization")
         .where({ user_id: userId, organization_id: orgId })
         .whereIn("role", acceptableRoles)
     );
@@ -43,7 +43,7 @@ export async function userLoggedIn(val, field = "id") {
   }
 
   const userAuth = await r
-    .knex("user")
+    .reader("user")
     .where(field, val)
     .select("*")
     .first();

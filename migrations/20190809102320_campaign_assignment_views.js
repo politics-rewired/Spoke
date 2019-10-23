@@ -1,4 +1,4 @@
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema
     .raw(
       `
@@ -68,7 +68,7 @@ exports.up = function(knex, Promise) {
     });
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.raw(`
     drop view assignable_campaigns_with_needs_reply;
     drop view assignable_campaigns_with_needs_message;

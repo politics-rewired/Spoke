@@ -19,21 +19,28 @@ export class PaginatedCampaignsRetriever extends Component {
   }
 
   handleCampaignsReceived() {
-    if (!this.props.campaigns || this.props.campaigns.loading) {
+    if (!this.props.campaignsAndTags || this.props.campaignsAndTags.loading) {
       return;
     }
 
     if (
-      this.props.campaigns.campaigns.campaigns.length ===
-      this.props.campaigns.campaigns.pageInfo.total
+      this.props.campaignsAndTags.campaigns.campaigns.length ===
+      this.props.campaignsAndTags.campaigns.pageInfo.total
     ) {
-      this.props.onCampaignsReceived(this.props.campaigns.campaigns.campaigns);
+      this.props.onCampaignsReceived(
+        this.props.campaignsAndTags.campaigns.campaigns
+      );
+      this.props.onTagsReceived(
+        this.props.campaignsAndTags.organization.tagList
+      );
     }
 
     const newOffset =
-      this.props.campaigns.campaigns.pageInfo.offset + this.props.pageSize;
-    if (newOffset < this.props.campaigns.campaigns.pageInfo.total) {
-      this.props.campaigns.fetchMore({
+      this.props.campaignsAndTags.campaigns.pageInfo.offset +
+      this.props.pageSize;
+
+    if (newOffset < this.props.campaignsAndTags.campaigns.pageInfo.total) {
+      this.props.campaignsAndTags.fetchMore({
         variables: {
           cursor: {
             offset: newOffset,
@@ -62,7 +69,7 @@ export class PaginatedCampaignsRetriever extends Component {
 }
 
 const mapQueriesToProps = ({ ownProps }) => ({
-  campaigns: {
+  campaignsAndTags: {
     query: gql`
       query qq(
         $organizationId: String!
@@ -87,6 +94,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
             }
           }
         }
+        organization(id: $organizationId) {
+          tagList {
+            id
+            title
+          }
+        }
       }
     `,
     variables: {
@@ -105,6 +118,7 @@ PaginatedCampaignsRetriever.propTypes = {
     campaignId: PropTypes.number
   }),
   onCampaignsReceived: PropTypes.func.isRequired,
+  onTagsReceived: PropTypes.func.isRequired,
   pageSize: PropTypes.number.isRequired
 };
 

@@ -153,7 +153,7 @@ export async function handleIncomingMessages() {
         logger.debug("entering handleIncomingMessages. round: ", ++i);
       }
       const countPendingMessagePart = await r.parseCount(
-        r.knex("pending_message_part").count()
+        r.reader("pending_message_part").count()
       );
       if (config.DEBUG_SCALING) {
         logger.debug(

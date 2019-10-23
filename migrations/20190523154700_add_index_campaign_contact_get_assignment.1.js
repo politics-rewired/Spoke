@@ -1,5 +1,5 @@
 // Add index for fetching current assignment target
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema.alterTable("campaign_contact", table => {
     table.index(
       ["campaign_id", "assignment_id", "message_status", "is_opted_out"],
@@ -9,7 +9,7 @@ exports.up = function(knex, Promise) {
 };
 
 // Drop index for fetching current assignment target
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.alterTable("campaign_contact", table => {
     table.dropIndex(
       ["campaign_id, assignment_id, message_status, is_opted_out"],

@@ -1,5 +1,5 @@
 // Add script_options column to interaction_step
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema
     .alterTable("interaction_step", table => {
       table.specificType("script_options", "text ARRAY").nullable();
@@ -27,7 +27,7 @@ exports.up = function(knex, Promise) {
 };
 
 // Drop script_options column to interaction_step
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema
     .alterTable("interaction_step", table => {
       table

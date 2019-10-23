@@ -92,7 +92,7 @@ export async function getUsers(organizationId, cursor, campaignsFilter, role) {
 
 export async function getUsersById(userIds) {
   let usersQuery = r
-    .knex("user")
+    .reader("user")
     .select("id", "first_name", "last_name")
     .whereIn("id", userIds);
   return usersQuery;
@@ -129,7 +129,7 @@ export const resolvers = {
     displayName: user => `${user.first_name} ${user.last_name}`,
     currentRequest: async (user, { organizationId }) => {
       const currentRequest = await r
-        .knex("assignment_request")
+        .reader("assignment_request")
         .where({
           user_id: user.id,
           organization_id: organizationId,
@@ -167,7 +167,7 @@ export const resolvers = {
         .pluck("role")("role"),
     teams: async (user, { organizationId }) =>
       r
-        .knex("team")
+        .reader("team")
         .select("team.*")
         .join("user_team", "user_team.team_id", "=", "team.id")
         .where({

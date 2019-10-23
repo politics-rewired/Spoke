@@ -34,7 +34,7 @@ const dbCustomFields = async id => {
 
 const dbInteractionSteps = async id => {
   return r
-    .knex("interaction_step")
+    .reader("interaction_step")
     .select("*")
     .where({
       campaign_id: id,

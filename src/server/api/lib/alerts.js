@@ -15,7 +15,7 @@ async function checkForBadDeliverability() {
       - have more than 1000 sends over the past 2 days
       - had deliverability less than 80%
   */
-  const results = await r.knex.raw(`
+  const results = await r.reader.raw(`
     with domains_sent_on_within_last_hour as (
       select domain
       from link_domain
@@ -66,7 +66,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
   const promises = {
     mostRecentlyReceivedMessage: (async () => {
       const message = await r
-        .knex("message")
+        .reader("message")
         .where({
           campaign_contact_id: parseInt(campaignContactId),
           is_from_contact: true
@@ -78,7 +78,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     })(),
     taggingUser: (async () => {
       const user = await r
-        .knex("user")
+        .reader("user")
         .where({ id: parseInt(userId) })
         .first("*");
 
@@ -86,7 +86,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     })(),
     taggedContact: (async () => {
       const contact = await r
-        .knex("campaign_contact")
+        .reader("campaign_contact")
         .where({ id: parseInt(campaignContactId) })
         .first("*");
 

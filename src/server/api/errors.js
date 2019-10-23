@@ -42,7 +42,7 @@ export async function assignmentRequired(user, assignmentId) {
   }
 
   const [assignment] = await r
-    .knex("assignment")
+    .reader("assignment")
     .where({
       user_id: user.id,
       id: assignmentId

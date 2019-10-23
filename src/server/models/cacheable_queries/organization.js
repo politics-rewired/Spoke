@@ -17,7 +17,7 @@ export const organizationCache = {
       }
     }
     const [dbResult] = await r
-      .knex("organization")
+      .reader("organization")
       .where("id", id)
       .select("*")
       .limit(1);
