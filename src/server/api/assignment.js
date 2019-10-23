@@ -74,16 +74,19 @@ export function getContacts(
     const validTimezone = contactsFilter.validTimezone;
     if (validTimezone !== null) {
       if (validTimezone === true) {
-        query = query.whereRaw("contact_is_textable_now(timezone, ?, ?, ?)", [
-          config.campaignTextingHours.textingHoursStart,
-          config.campaignTextingHours.textingHoursEnd,
-          defaultTimezoneIsBetweenTextingHours(config)
-        ]);
+        query = query.whereRaw(
+          "contact_is_textable_now(timezone, ?, ?, ?) = true",
+          [
+            config.campaignTextingHours.textingHoursStart,
+            config.campaignTextingHours.textingHoursEnd,
+            defaultTimezoneIsBetweenTextingHours(config)
+          ]
+        );
       } else if (validTimezone === false) {
         // validTimezone === false means we're looking for an invalid timezone,
         // which means the contact is NOT textable right now
         query = query.whereRaw(
-          "contact_is_textable_now(timezone, ?, ?, ?) = false",
+          "contact_is_textable_now(timezone, ?, ?, ?) != true",
           [
             config.campaignTextingHours.textingHoursStart,
             config.campaignTextingHours.textingHoursEnd,
