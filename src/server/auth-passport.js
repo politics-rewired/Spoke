@@ -7,7 +7,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { config } from "../config";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
-import localAuthHelpers from "./local-auth-helpers";
+import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
 import { capitalizeWord } from "./api/lib/utils";
 
 const {
@@ -216,7 +216,9 @@ function setupLocalAuthPassport() {
         .first();
 
       // Run login, signup, or reset functions based on request data
-      if (authType && !localAuthHelpers[authType]) return done(null, false);
+      if (authType && !localAuthHelpers[authType]) {
+        return done(new LocalAuthError("Unknown auth type"));
+      }
 
       try {
         const user = await localAuthHelpers[authType]({
@@ -229,8 +231,7 @@ function setupLocalAuthPassport() {
         });
         return done(null, user);
       } catch (error) {
-        // TODO - this should differentiate between invalid login and actual server error
-        return done(null, false);
+        return done(error);
       }
     }
   );
