@@ -245,9 +245,27 @@ function setupLocalAuthPassport() {
   );
 
   const app = express();
-  app.post("/login-callback", passport.authenticate("local"), (req, res) =>
-    res.redirect(req.body.nextUrl || "/")
-  );
+  app.post("/login-callback", (req, res, next) => {
+    // See: http://www.passportjs.org/docs/authenticate/#custom-callback
+    passport.authenticate("local", (err, user, info) => {
+      // Check custom property rather than using instanceof because errors are being passed as
+      // objects, not classes
+      if (err && err.errorType === "LocalAuthError") {
+        return res.status(400).send({ success: false, message: err.message });
+      } else if (err) {
+        // System error
+        return next(err);
+      }
+
+      // Default behavior
+      req.logIn(user, function(err) {
+        if (err) {
+          return next(err);
+        }
+        return res.redirect(req.body.nextUrl || "/");
+      });
+    })(req, res, next);
+  });
 
   return app;
 }

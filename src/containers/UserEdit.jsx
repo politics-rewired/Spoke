@@ -78,6 +78,12 @@ class UserEdit extends React.Component {
           this.props.router.replace(url);
         } else if (status === 401) {
           throw new Error(headers.get("www-authenticate") || "");
+        } else if (status === 400) {
+          const body = await loginRes.json();
+          throw new Error(body.message);
+        } else {
+          const body = await loginRes.text();
+          throw new Error(`Unknown error:\n\n${body}`);
         }
         break;
     }
