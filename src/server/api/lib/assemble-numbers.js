@@ -33,6 +33,7 @@ export const NumbersSendStatus = Object.freeze({
 export const numbersClient = async numbersService => {
   const encryptedApiKey = numbersService.encrypted_auth_token;
   const apiKey = symmetricDecrypt(encryptedApiKey);
+  console.log("TCL: apiKey", apiKey);
   const client = new NumbersClient({ apiKey });
   return client;
 };
@@ -183,20 +184,32 @@ export const handleDeliveryReport = async reportBody => {
 
   // Kick off message update after delay, but don't wait around for result
   sleep(5000)
-    .then(() =>
-      r
-        .knex("message")
-        .update({
-          service_response_at: r.knex.fn.now(),
-          send_status: getMessageStatus(eventType)
-        })
-        .where({ service_id: messageId })
-        // Ignore late-arrival status updates for messages already in a final state
-        .whereNotIn("send_status", [
-          SpokeSendStatus.Delivered,
-          SpokeSendStatus.Error
-        ])
-    )
+    .then(() => {
+      if (eventType === "sent") {
+        return (
+          r
+            .knex("message")
+            .update({
+              service_response_at: r.knex.fn.now(),
+              send_status: getMessageStatus(eventType)
+            })
+            .where({ service_id: messageId })
+            // Ignore late-arrival status updates for messages already in a final state
+            .whereNotIn("send_status", [
+              SpokeSendStatus.Delivered,
+              SpokeSendStatus.Error
+            ])
+        );
+      } else {
+        return r
+          .knex("message")
+          .update({
+            service_response_at: r.knex.fn.now(),
+            send_status: getMessageStatus(eventType)
+          })
+          .where({ service_id: messageId });
+      }
+    })
     .then(rowCount => {
       if (rowCount !== 1) {
         logger.warn(
