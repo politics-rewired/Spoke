@@ -33,7 +33,6 @@ export const NumbersSendStatus = Object.freeze({
 export const numbersClient = async numbersService => {
   const encryptedApiKey = numbersService.encrypted_auth_token;
   const apiKey = symmetricDecrypt(encryptedApiKey);
-  console.log("TCL: apiKey", apiKey);
   const client = new NumbersClient({ apiKey });
   return client;
 };
