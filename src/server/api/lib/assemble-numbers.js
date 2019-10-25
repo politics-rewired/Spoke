@@ -183,20 +183,24 @@ export const handleDeliveryReport = async reportBody => {
 
   // Kick off message update after delay, but don't wait around for result
   sleep(5000)
-    .then(() =>
-      r
+    .then(() => {
+      const message = r
         .knex("message")
-        .update({
-          service_response_at: r.knex.fn.now(),
-          send_status: getMessageStatus(eventType)
-        })
         .where({ service_id: messageId })
-        // Ignore late-arrival status updates for messages already in a final state
-        .whereNotIn("send_status", [
-          SpokeSendStatus.Delivered,
-          SpokeSendStatus.Error
-        ])
-    )
+        .first("send_status");
+
+      if (message.send_status !== SpokeSendStatus.Delivered) {
+        return r
+          .knex("message")
+          .update({
+            service_response_at: r.knex.fn.now(),
+            send_status: getMessageStatus(eventType)
+          })
+          .where({ service_id: messageId });
+      } else {
+        return message ? 1 : 0;
+      }
+    })
     .then(rowCount => {
       if (rowCount !== 1) {
         logger.warn(
