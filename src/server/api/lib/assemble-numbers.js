@@ -119,7 +119,7 @@ export const sendMessage = async (message, _organizationId, _trx) => {
     to,
     body,
     mediaUrls,
-    contactZipCode
+    contactZipCode: contactZipCode === "" ? null : contactZipCode
   };
   try {
     const result = await numbers.sms.sendMessage(messageInput);
