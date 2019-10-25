@@ -7,7 +7,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { config } from "../config";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
-import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
+import localAuthHelpers from "./local-auth-helpers";
 import { capitalizeWord } from "./api/lib/utils";
 
 const {
@@ -216,9 +216,7 @@ function setupLocalAuthPassport() {
         .first();
 
       // Run login, signup, or reset functions based on request data
-      if (authType && !localAuthHelpers[authType]) {
-        return done(new LocalAuthError("Unknown auth type"));
-      }
+      if (authType && !localAuthHelpers[authType]) return done(null, false);
 
       try {
         const user = await localAuthHelpers[authType]({
@@ -231,7 +229,8 @@ function setupLocalAuthPassport() {
         });
         return done(null, user);
       } catch (error) {
-        return done(error);
+        // TODO - this should differentiate between invalid login and actual server error
+        return done(null, false);
       }
     }
   );
@@ -245,27 +244,9 @@ function setupLocalAuthPassport() {
   );
 
   const app = express();
-  app.post("/login-callback", (req, res, next) => {
-    // See: http://www.passportjs.org/docs/authenticate/#custom-callback
-    passport.authenticate("local", (err, user, info) => {
-      // Check custom property rather than using instanceof because errors are being passed as
-      // objects, not classes
-      if (err && err.errorType === "LocalAuthError") {
-        return res.status(400).send({ success: false, message: err.message });
-      } else if (err) {
-        // System error
-        return next(err);
-      }
-
-      // Default behavior
-      req.logIn(user, function(err) {
-        if (err) {
-          return next(err);
-        }
-        return res.redirect(req.body.nextUrl || "/");
-      });
-    })(req, res, next);
-  });
+  app.post("/login-callback", passport.authenticate("local"), (req, res) =>
+    res.redirect(req.body.nextUrl || "/")
+  );
 
   return app;
 }
