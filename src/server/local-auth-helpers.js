@@ -134,8 +134,8 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
   const pwFieldSplit = existingUser.auth0_id.split("|");
   const [resetHash, datetime] = [pwFieldSplit[1], pwFieldSplit[2]];
 
-  // Verify hash was created in the last 15 mins
-  const isExpired = (Date.now() - datetime) / 1000 / 60 > 15;
+  // Verify hash was created in the last day
+  const isExpired = (Date.now() - datetime) / 1000 / 60 / 60 > 24;
   if (isExpired) {
     throw new InvalidResetHashError();
   }
