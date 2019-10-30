@@ -75,11 +75,11 @@ const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
   };
   return new Promise((resolve, reject) => {
     AuthHasher.verify(password, hashed, (err, verified) => {
-      if (err) reject(err);
+      if (err) reject(new LocalAuthError(err.message));
       if (verified) {
         resolve(existingUser);
       }
-      throw new InvalidCredentialsError();
+      reject(new InvalidCredentialsError());
     });
   });
 };
@@ -109,7 +109,7 @@ const signup = async ({
   // create the user
   return new Promise((resolve, reject) => {
     AuthHasher.hash(password, async function(err, hashed) {
-      if (err) reject(err);
+      if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
       const user = await User.save({
@@ -153,7 +153,7 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
   // Save new user password to DB
   return new Promise((resolve, reject) => {
     AuthHasher.hash(password, async function(err, hashed) {
-      if (err) reject(err);
+      if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
       const updatedUser = await User.get(existingUser.id)
@@ -184,10 +184,10 @@ export const change = ({ user, password, newPassword, passwordConfirm }) => {
 
   return new Promise((resolve, reject) => {
     AuthHasher.verify(password, hashedPassword, (error, verified) => {
-      if (error) throw new LocalAuthError(error.message);
-      if (!verified) throw new InvalidCredentialsError();
+      if (error) reject(new LocalAuthError(error.message));
+      if (!verified) reject(new InvalidCredentialsError());
       return AuthHasher.hash(newPassword, async function(err, hashed) {
-        if (err) throw new LocalAuthError(err.message);
+        if (err) reject(new LocalAuthError(err.message));
         const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
         const updatedUser = await User.get(user.id)
           .update({ auth0_id: passwordToSave })
