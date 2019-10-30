@@ -157,12 +157,13 @@ class UserEdit extends React.Component {
   };
 
   render() {
+    // Data may be `undefined` here due to refetch in child UserEdit component in change password dialog
     const { authType, editUser, style, userId, data, saveLabel } = this.props;
     const user = (editUser && editUser.editUser) || {};
 
     const formSchema = this.buildFormSchema(authType);
     const isLocalAuth = window.PASSPORT_STRATEGY === "local";
-    const isCurrentUser = userId && userId === data.currentUser.id;
+    const isCurrentUser = userId && data && userId === data.currentUser.id;
     const isAlreadyChangePassword = authType === UserEditMode.Change;
     const canChangePassword =
       isLocalAuth && isCurrentUser && !isAlreadyChangePassword;
