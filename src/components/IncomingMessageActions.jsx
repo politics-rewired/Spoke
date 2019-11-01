@@ -28,6 +28,12 @@ const styles = StyleSheet.create({
   }
 });
 
+const formatTexter = texter => {
+  const { displayName, email, roles } = texter;
+  const highestRole = getHighestRole(roles);
+  return `${displayName} (${email}) ${highestRole}`;
+};
+
 class IncomingMessageActions extends Component {
   state = {
     selectedTexters: [],
@@ -76,7 +82,7 @@ class IncomingMessageActions extends Component {
     let texters = this.props.people || [];
     texters = texters.map(texter => ({
       value: parseInt(texter.id, 10),
-      label: texter.displayName + " " + getHighestRole(texter.roles)
+      label: formatTexter(texter)
     }));
 
     const confirmDialogActions = (actionVerb, confirmAction) => [
