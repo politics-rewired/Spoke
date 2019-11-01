@@ -12,6 +12,7 @@ import MenuItem from "material-ui/MenuItem";
 import theme from "../styles/theme";
 import { dataSourceItem } from "./utils";
 
+import { nameComponents } from "../lib/attributes";
 import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../lib/constants";
 
 import { StyleSheet, css } from "aphrodite";
@@ -143,19 +144,7 @@ class IncomingMessageFilter extends Component {
 
   onContactNameChanged = ev => {
     const name = ev.target.value;
-    let firstName, lastName;
-    const splitName = name ? name.split(" ") : ["First", "Last"];
-    if (splitName.length == 1) {
-      firstName = splitName[0];
-      lastName = "";
-    } else if (splitName.length == 2) {
-      firstName = splitName[0];
-      lastName = splitName[1];
-    } else {
-      firstName = splitName[0];
-      lastName = splitName.slice(1, splitName.length + 1).join(" ");
-    }
-
+    const { firstName, lastName } = nameComponents(name);
     this.state.firstName = firstName;
     this.state.lastName = lastName;
     clearTimeout(this.submitNameUpdateTimeout);
