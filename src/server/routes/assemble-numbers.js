@@ -13,7 +13,10 @@ router.post(
       await assembleNumbers.handleIncomingMessage(req.body);
       return res.status(200).send({ success: true });
     } catch (err) {
-      logger.error("Error handling incoming twilio message", err);
+      logger.error("Error handling incoming assemble numbers message", {
+        err,
+        body: req.body
+      });
       res.status(500).send({ error: err.message });
     }
   }
@@ -28,7 +31,7 @@ router.post(
       await assembleNumbers.handleDeliveryReport(req.body);
       return res.status(200).send({ success: true });
     } catch (err) {
-      logger.error("Error handling twilio message report", err);
+      logger.error("Error handling assemble numbers message report", err);
       res.status(500).send({ error: err.message });
     }
   }
