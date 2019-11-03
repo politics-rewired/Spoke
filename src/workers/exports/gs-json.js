@@ -34,14 +34,18 @@ const storage = () => {
  */
 const upload = async (bucket, key, payload) => {
   return new Promise(async (resolve, reject) => {
-    const uploadStream = await storage()
-      .bucket(bucket)
-      .file(key)
-      .createWriteStream({ gzip: true });
-    uploadStream.write(payload);
-    uploadStream.end();
-    uploadStream.on("finish", resolve);
-    uploadStream.on("error", reject);
+    try {
+      const uploadStream = await storage()
+        .bucket(bucket)
+        .file(key)
+        .createWriteStream({ gzip: true });
+      uploadStream.write(payload);
+      uploadStream.end();
+      uploadStream.on("finish", resolve);
+      uploadStream.on("error", reject);
+    } catch (err) {
+      reject(err);
+    }
   });
 };
 
