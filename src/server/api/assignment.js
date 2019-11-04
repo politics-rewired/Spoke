@@ -75,7 +75,7 @@ export function getContacts(
     if (validTimezone !== null) {
       if (validTimezone === true) {
         query = query.whereRaw(
-          "contact_is_textable_now(timezone, ?, ?, ?) is not distinct from true",
+          "contact_is_textable_now(timezone, ?, ?, ?) = true",
           [
             config.campaignTextingHours.textingHoursStart,
             config.campaignTextingHours.textingHoursEnd,
@@ -90,7 +90,7 @@ export function getContacts(
           [
             config.campaignTextingHours.textingHoursStart,
             config.campaignTextingHours.textingHoursEnd,
-            !defaultTimezoneIsBetweenTextingHours(config)
+            defaultTimezoneIsBetweenTextingHours(config)
           ]
         );
       }
