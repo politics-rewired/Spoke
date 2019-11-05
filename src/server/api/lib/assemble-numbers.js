@@ -254,6 +254,12 @@ const convertInboundMessage = async assembleMessage => {
     messaging_service_sid: profileId
   });
 
+  if (!ccInfo) {
+    logger.error(
+      `No ccInfo for ${contactNumber} with messaging service sid ${profileId}`
+    );
+  }
+
   const spokeMessage = {
     campaign_contact_id: ccInfo && ccInfo.campaign_contact_id,
     contact_number: contactNumber,
