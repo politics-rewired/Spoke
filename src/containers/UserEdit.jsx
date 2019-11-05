@@ -78,6 +78,12 @@ class UserEdit extends React.Component {
           this.props.router.replace(url);
         } else if (status === 401) {
           throw new Error(headers.get("www-authenticate") || "");
+        } else if (status === 400) {
+          const body = await loginRes.json();
+          throw new Error(body.message);
+        } else {
+          const body = await loginRes.text();
+          throw new Error(`Unknown error:\n\n${body}`);
         }
         break;
     }
@@ -151,12 +157,13 @@ class UserEdit extends React.Component {
   };
 
   render() {
+    // Data may be `undefined` here due to refetch in child UserEdit component in change password dialog
     const { authType, editUser, style, userId, data, saveLabel } = this.props;
     const user = (editUser && editUser.editUser) || {};
 
     const formSchema = this.buildFormSchema(authType);
     const isLocalAuth = window.PASSPORT_STRATEGY === "local";
-    const isCurrentUser = userId && userId === data.currentUser.id;
+    const isCurrentUser = userId && data && userId === data.currentUser.id;
     const isAlreadyChangePassword = authType === UserEditMode.Change;
     const canChangePassword =
       isLocalAuth && isCurrentUser && !isAlreadyChangePassword;
