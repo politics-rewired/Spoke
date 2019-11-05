@@ -82,6 +82,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             users {
               id
               displayName
+              email
               roles(organizationId: $organizationId)
             }
           }
