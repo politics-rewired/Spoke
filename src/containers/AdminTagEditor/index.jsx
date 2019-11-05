@@ -23,8 +23,8 @@ class AdminTagEditor extends Component {
   };
 
   getTag = tagId => {
-    const { tags = [] } = this.props.organizationTags.organization || {};
-    return Object.assign({}, tags.find(tag => tag.id === tagId));
+    const { tagList = [] } = this.props.organizationTags.organization || {};
+    return Object.assign({}, tagList.find(tag => tag.id === tagId));
   };
 
   handleCancelError = () => this.setState({ error: undefined });
