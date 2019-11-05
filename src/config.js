@@ -232,8 +232,8 @@ if (isClient()) {
     }),
     DEFAULT_SERVICE: str({
       desc: "Default SMS service.",
-      choices: ["twilio", "nexmo", "fakeservice"],
-      default: "fakeservice"
+      choices: ["assemble-numbers", "twilio", "nexmo", "fakeservice"],
+      default: undefined
     }),
     DEFAULT_ORG: num({
       desc:

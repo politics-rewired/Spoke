@@ -100,7 +100,7 @@ export const getMessagingServiceById = async messagingServiceId =>
  */
 export const getContactMessagingService = async campaignContactId => {
   if (config.DEFAULT_SERVICE === "fakeservice")
-    return { service: "fakeservice" };
+    return { service_type: "fakeservice" };
 
   const {
     rows: [lookupResult]
