@@ -443,16 +443,22 @@ async function sendMessage(
   checkOptOut = true,
   checkAssignment = true
 ) {
+  const optOutJoinConditions = {
+    "opt_out.cell": "campaign_contact.cell"
+  };
+
+  if (config.OPTOUTS_SHARE_ALL_ORGS) {
+    optOutJoinConditions["opt_out.organization_id"] =
+      "campaign.organization_id";
+  }
+
   const record = await r
     .knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId) })
     .where({ "campaign.is_archived": false })
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
-    .leftJoin("opt_out", {
-      "opt_out.organization_id": "campaign.organization_id",
-      "opt_out.cell": "campaign_contact.cell"
-    })
+    .leftJoin("opt_out", optOutJoinConditions)
     .first(
       "campaign_contact.id as cc_id",
       "campaign_contact.assignment_id as assignment_id",
