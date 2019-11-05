@@ -161,6 +161,7 @@ export const isBetweenTextingHours = (offsetData, config) => {
     return true;
   }
 
+  // This should always exist/be true for Spoke Rewired
   if (config.campaignTextingHours) {
     const { campaignTextingHours } = config;
     const missingTimezoneConfig = {

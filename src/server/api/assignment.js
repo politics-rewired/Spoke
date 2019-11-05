@@ -1,3 +1,5 @@
+import moment from "moment-timezone";
+
 import logger from "../../logger";
 import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
@@ -24,6 +26,33 @@ export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDu
   return query;
 }
 
+/**
+ * Returns true if it is currently between the start and end hours in the specified timezone.
+ *
+ * @param {string} timezone The timezone in which to evaluate
+ * @param {number} starthour Interval starting hour in 24-hour format
+ * @param {number} endHour Interval ending hour in 24-hour format
+ */
+const isNowBetween = (timezone, starthour, endHour) => {
+  const campaignTime = moment()
+    .tz(timezone)
+    .startOf("day");
+
+  const startTime = campaignTime.clone().hour(starthour);
+  const endTime = campaignTime.clone().hour(endHour);
+  return moment().isBetween(startTime, endTime);
+};
+
+/**
+ * Given query parameters, an assignment record, and its associated records, build a Knex query
+ * to fetch matching contacts.
+ * @param {object} assignment The assignment record to fetch contacts for
+ * @param {object} contactsFilter A filter object
+ * @param {object} organization The record of the organization of the assignment's campaign
+ * @param {object} campaign The record of the campaign the assignment is part of
+ * @param {boolean} forCount When `true`, return a count(*) query
+ * @returns {Knex} The Knex query
+ */
 export function getContacts(
   assignment,
   contactsFilter,
@@ -73,25 +102,29 @@ export function getContacts(
   if (contactsFilter) {
     const validTimezone = contactsFilter.validTimezone;
     if (validTimezone !== null) {
+      const {
+        timezone: campaignTimezone,
+        textingHoursStart,
+        textingHoursEnd
+      } = config.campaignTextingHours;
+
+      const isCampaignTimezoneValid = isNowBetween(
+        campaignTimezone,
+        textingHoursStart,
+        textingHoursEnd
+      );
+
       if (validTimezone === true) {
         query = query.whereRaw(
           "contact_is_textable_now(timezone, ?, ?, ?) = true",
-          [
-            config.campaignTextingHours.textingHoursStart,
-            config.campaignTextingHours.textingHoursEnd,
-            defaultTimezoneIsBetweenTextingHours(config)
-          ]
+          [textingHoursStart, textingHoursEnd, isCampaignTimezoneValid]
         );
       } else if (validTimezone === false) {
         // validTimezone === false means we're looking for an invalid timezone,
         // which means the contact is NOT textable right now
         query = query.whereRaw(
           "contact_is_textable_now(timezone, ?, ?, ?) is distinct from true",
-          [
-            config.campaignTextingHours.textingHoursStart,
-            config.campaignTextingHours.textingHoursEnd,
-            defaultTimezoneIsBetweenTextingHours(config)
-          ]
+          [textingHoursStart, textingHoursEnd, isCampaignTimezoneValid]
         );
       }
     }
@@ -111,6 +144,7 @@ export function getContacts(
     }
   }
 
+  // Don't bother ordering the results if we only want the count
   if (!forCount) {
     if (contactsFilter && contactsFilter.messageStatus === "convo") {
       query = query.orderByRaw("message_status DESC, updated_at DESC");
