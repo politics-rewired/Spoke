@@ -1,25 +1,27 @@
 import React from "react";
 import PropTypes from "prop-types";
-
 import Chip from "material-ui/Chip";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
+import ChipInput from "material-ui-chip-input";
+import uniqBy from "lodash/uniqBy";
 
 import { TextRequestType } from "../../api/organization";
 
 const AssignmentRow = props => {
-  const { assignmentPool, isRowDisabled, onChange } = props;
+  const { assignmentPool, isRowDisabled, onChange, escalationTagList } = props;
   const {
+    id,
     title,
     textColor,
     backgroundColor,
     isAssignmentEnabled,
     assignmentType,
-    maxRequestCount
+    maxRequestCount,
+    escalationTags
   } = assignmentPool;
-
   const handleToggleIsEnabled = (_event, isAssignmentEnabled) =>
     onChange({ isAssignmentEnabled });
 
@@ -28,6 +30,16 @@ const AssignmentRow = props => {
 
   const handleChangeMaxCount = (_event, maxRequestCount) =>
     onChange({ maxRequestCount: parseInt(maxRequestCount, 10) });
+
+  const handleAddEscalationTag = newTag => {
+    const newEscalationTags = uniqBy(escalationTags.concat(newTag), t => t.id);
+    onChange({ escalationTags: newEscalationTags });
+  };
+
+  const handleRemoveEscalationTag = oldTagId => {
+    const newEscalationTags = escalationTags.filter(t => t.id !== oldTagId);
+    onChange({ escalationTags: newEscalationTags });
+  };
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
@@ -74,6 +86,19 @@ const AssignmentRow = props => {
         value={maxRequestCount}
         disabled={isRowDisabled || !isAssignmentEnabled}
         onChange={handleChangeMaxCount}
+      />
+      <ChipInput
+        style={{
+          marginLeft: "10px"
+        }}
+        floatingLabelText={id === "general" ? "N/A" : "Custom escalation tags"}
+        dataSource={escalationTagList}
+        value={escalationTags}
+        openOnFocus={true}
+        onRequestAdd={handleAddEscalationTag}
+        onRequestDelete={handleRemoveEscalationTag}
+        dataSourceConfig={{ text: "title", value: "id" }}
+        disabled={isRowDisabled || !isAssignmentEnabled || id === "general"}
       />
     </div>
   );

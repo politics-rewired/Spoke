@@ -2497,6 +2497,7 @@ const rootMutations = {
       const updatedTeams = await r.knex.transaction(async trx => {
         const isTeamOrg = team => team.id && team.id === "general";
         const orgTeam = teams.find(isTeamOrg);
+
         if (orgTeam) {
           let { features: currentFeatures } = await trx("organization")
             .where({ id: organizationId })
@@ -2514,6 +2515,7 @@ const rootMutations = {
         }
 
         const nonOrgTeams = teams.filter(team => !isTeamOrg(team));
+
         return Promise.all(
           nonOrgTeams.map(async team => {
             const payload = stripUndefined({
@@ -2527,8 +2529,10 @@ const rootMutations = {
               max_request_count: team.maxRequestCount
             });
 
+            let teamToReturn;
+
             // Update existing team
-            if (team.id) {
+            if (team.id && Object.keys(payload).length > 0) {
               const [updatedTeam] = await trx("team")
                 .update(payload)
                 .where({
@@ -2537,18 +2541,40 @@ const rootMutations = {
                 })
                 .returning("*");
               if (!updatedTeam) throw new Error("No matching team to update!");
-              return updatedTeam;
+              teamToReturn = updatedTeam;
+            } else if (team.id) {
+              teamToReturn = team;
+            } else {
+              const [newTeam] = await trx("team")
+                .insert({
+                  organization_id: organizationId,
+                  author_id: user.id,
+                  ...payload
+                })
+                .returning("*");
+
+              teamToReturn = newTeam;
             }
 
             // Create new team
-            const [newTeam] = await trx("team")
-              .insert({
-                organization_id: organizationId,
-                author_id: user.id,
-                ...payload
-              })
-              .returning("*");
-            return newTeam;
+
+            // Update team_escalation_tags
+            if (team.escalationTagIds) {
+              await trx("team_escalation_tags")
+                .where({ team_id: teamToReturn.id })
+                .del();
+
+              teamToReturn.escalationTags = await trx("team_escalation_tags")
+                .insert(
+                  team.escalationTagIds.map(tagId => ({
+                    team_id: teamToReturn.id,
+                    tag_id: tagId
+                  }))
+                )
+                .returning("*");
+            }
+
+            return teamToReturn;
           })
         );
       });
