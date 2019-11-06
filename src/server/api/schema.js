@@ -2541,6 +2541,7 @@ const rootMutations = {
             let teamToReturn;
 
             // Update existing team
+            // true for updating fields on the team itself
             if (team.id && Object.keys(payload).length > 0) {
               const [updatedTeam] = await trx("team")
                 .update(payload)
@@ -2552,8 +2553,10 @@ const rootMutations = {
               if (!updatedTeam) throw new Error("No matching team to update!");
               teamToReturn = updatedTeam;
             } else if (team.id) {
+              // true if we're only upating the escalationTags
               teamToReturn = team;
             } else {
+              // Create new team
               const [newTeam] = await trx("team")
                 .insert({
                   organization_id: organizationId,
@@ -2564,8 +2567,6 @@ const rootMutations = {
 
               teamToReturn = newTeam;
             }
-
-            // Create new team
 
             // Update team_escalation_tags
             if (team.escalationTagIds) {

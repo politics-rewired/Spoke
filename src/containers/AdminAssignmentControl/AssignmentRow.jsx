@@ -1,12 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
+import uniqBy from "lodash/uniqBy";
+
 import Chip from "material-ui/Chip";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import ChipInput from "material-ui-chip-input";
-import uniqBy from "lodash/uniqBy";
 
 import { TextRequestType } from "../../api/organization";
 
@@ -115,7 +116,13 @@ AssignmentRow.propTypes = {
     backgroundColor: PropTypes.string.isRequired,
     isAssignmentEnabled: PropTypes.bool.isRequired,
     assignmentType: PropTypes.string.isRequired,
-    maxRequestCount: PropTypes.number.isRequired
+    maxRequestCount: PropTypes.number.isRequired,
+    escalationTagList: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired
+      })
+    )
   }).isRequired,
   isRowDisabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired

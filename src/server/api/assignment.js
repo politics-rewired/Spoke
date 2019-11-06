@@ -192,6 +192,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
      * What a query!
      *
      * General is set to priority 0 here so that it shows up at the top of the page display
+     * 5 minute buffer for assignment – they should have time to send the texts
      */
     `
     select teams.title as team_title, teams.assignment_priority, teams.assignment_type, teams.is_assignment_enabled as enabled, campaign.id, campaign.title, 
@@ -214,8 +215,8 @@ export async function allCurrentAssignmentTargets(organizationId) {
             from campaign_contact_tag
             join tag
               on tag.id = campaign_contact_tag.tag_id
-              and campaign_contact_tag.campaign_contact_id = campaign_contact.id
             where tag.is_assignable = false
+              and campaign_contact_tag.campaign_contact_id = campaign_contact.id
               and not exists (
                 select 1
                 from team_escalation_tags
@@ -265,8 +266,8 @@ export async function allCurrentAssignmentTargets(organizationId) {
               from campaign_contact_tag
               join tag
                 on tag.id = campaign_contact_tag.tag_id
-                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
               where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
                 and not exists (
                   select 1
                   from team_escalation_tags
@@ -347,8 +348,8 @@ export async function myCurrentAssignmentTargets(
               from campaign_contact_tag
               join tag
                 on tag.id = campaign_contact_tag.tag_id
-                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
               where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
                 and not exists (
                   select 1
                   from team_escalation_tags
@@ -598,8 +599,8 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
               from campaign_contact_tag
               join tag
                 on tag.id = campaign_contact_tag.tag_id
-                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
               where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
                 and not exists (
                   select 1
                   from team_escalation_tags
