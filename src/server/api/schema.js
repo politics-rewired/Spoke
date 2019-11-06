@@ -2507,7 +2507,13 @@ const rootMutations = {
           let { features: currentFeatures } = await trx("organization")
             .where({ id: organizationId })
             .first("features");
-          currentFeatures = JSON.parse(currentFeatures);
+
+          try {
+            currentFeatures = JSON.parse(currentFeatures);
+          } catch (_ex) {
+            currentFeatures = {};
+          }
+
           let nextFeatures = stripUndefined({
             textRequestFormEnabled: orgTeam.isAssignmentEnabled,
             textRequestType: orgTeam.assignmentType,
