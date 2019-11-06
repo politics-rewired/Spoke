@@ -441,7 +441,8 @@ async function sendMessage(
   campaignContactId,
   message,
   checkOptOut = true,
-  checkAssignment = true
+  checkAssignment = true,
+  skipUpdatingMessageStatus = false
 ) {
   const record = await r
     .knex("campaign_contact")
@@ -622,15 +623,18 @@ async function sendMessage(
 
   const { cc_message_status } = record;
   const contactSavePromise = (async () => {
-    await r
-      .knex("campaign_contact")
-      .update({
-        message_status:
-          cc_message_status === "needsResponse" || cc_message_status === "convo"
-            ? "convo"
-            : "messaged"
-      })
-      .where({ id: record.cc_id });
+    if (!skipUpdatingMessageStatus) {
+      await r
+        .knex("campaign_contact")
+        .update({
+          message_status:
+            cc_message_status === "needsResponse" ||
+            cc_message_status === "convo"
+              ? "convo"
+              : "messaged"
+        })
+        .where({ id: record.cc_id });
+    }
 
     const contact = await r
       .knex("campaign_contact")
@@ -1504,6 +1508,16 @@ const rootMutations = {
         await r.knex("campaign_contact_tag").insert(tagsToInsert)
       ]);
 
+      // See if any of the newly applied tags are is_assignable = false
+      const newlyAssignedTagsThatShouldUnassign = await r
+        .knex("tag")
+        .select("id")
+        .whereIn("id", addedTagIds)
+        .where({ is_assignable: false });
+
+      const currentlyEscalating =
+        newlyAssignedTagsThatShouldUnassign.length > 0;
+
       if (tag.message) {
         try {
           const checkOptOut = true;
@@ -1513,7 +1527,8 @@ const rootMutations = {
             campaignContactId,
             tag.message,
             checkOptOut,
-            checkAssignment
+            checkAssignment,
+            currentlyEscalating
           );
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
@@ -1526,16 +1541,10 @@ const rootMutations = {
         .whereIn("id", addedTagIds)
         .pluck("webhook_url")
         .then(urls => urls.filter(url => url.length > 0));
+
       await notifyOnTagConversation(campaignContactId, user.id, webhookUrls);
 
-      // See if any of the newly applied tags are is_assignable = false
-      const newlyAssignedTagsThatShouldUnassign = await r
-        .knex("tag")
-        .select("id")
-        .whereIn("id", addedTagIds)
-        .where({ is_assignable: false });
-
-      if (newlyAssignedTagsThatShouldUnassign.length > 0) {
+      if (currentlyEscalating) {
         await r
           .knex("campaign_contact")
           .update({ assignment_id: null })
