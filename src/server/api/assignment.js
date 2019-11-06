@@ -184,27 +184,9 @@ export async function allCurrentAssignmentTargets(organizationId) {
     organizationId
   );
 
-  const campaignView = {
-    UNREPLIED: "assignable_campaigns_with_needs_reply",
-    UNSENT: "assignable_campaigns_with_needs_message"
-  }[assignmentType];
+  const generalAssignmentType = generalEnabled ? assignmentType : "NOTHING";
+  const generalAssignmentBit = generalEnabled ? 1 : 0;
 
-  const contactsView = {
-    UNREPLIED: "assignable_needs_reply",
-    UNSENT: "assignable_needs_message"
-  }[assignmentType];
-
-  if (!campaignView || !contactsView) {
-    return [];
-  }
-
-  const generalEnabledBit = generalEnabled ? 1 : 0;
-
-  /**
-   * The second part of the union needs to be in parenthesis
-   * so that the limit applies only to it and not the whole
-   * query
-   */
   const { rows: teamToCampaigns } = await r.reader.raw(
     /**
      * What a query!
@@ -212,85 +194,91 @@ export async function allCurrentAssignmentTargets(organizationId) {
      * General is set to priority 0 here so that it shows up at the top of the page display
      */
     `
-    with team_assignment_options as (
-      select *
-      from team
-      where organization_id = ?
-    ),
-    needs_message_teams as (
-      select * from team_assignment_options
-      where assignment_type = 'UNSENT'
-    ),
-    needs_reply_teams as (
-      select * from team_assignment_options
-      where assignment_type = 'UNREPLIED'
-    ),
-    needs_message_team_campaign_pairings as (
-      select
-          teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type,
-          campaign.id as id, campaign.title
-      from needs_message_teams as teams
-      join campaign_team on campaign_team.team_id = teams.id
-      join campaign on campaign.id = (
-        select id
-        from assignable_campaigns_with_needs_message as campaigns
-        where campaigns.id = campaign_team.campaign_id
-        order by id asc
-        limit 1
-      )
-    ),
-    needs_reply_team_campaign_pairings as (
-      select
-          teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type,
-          campaign.id as id, campaign.title
-      from needs_reply_teams as teams
-      join campaign_team on campaign_team.team_id = teams.id
-      join campaign on campaign.id = (
-        select id
-        from assignable_campaigns_with_needs_reply as campaigns
-        where campaigns.id = campaign_team.campaign_id
-        order by id asc
-        limit 1
-      )
-    ),
-    general_campaign_pairing as (
-      select
-        0 as priority, -1 as team_id, 'General' as team_title, ${generalEnabledBit}::boolean as enabled, '${assignmentType}' as assignment_type,
-        campaigns.id, campaigns.title
-      from ${campaignView} as campaigns
-      where campaigns.limit_assignment_to_teams = false
-          and organization_id = ?
+    select teams.title as team_title, teams.assignment_priority, teams.assignment_type, teams.is_assignment_enabled as enabled, campaign.id, campaign.title, 
+      (
+        select count(*)
+        from campaign_contact
+        where campaign_id = campaign.id
+          and message_status = (
+            case
+              when teams.assignment_type = 'UNSENT' then
+                'needsMessage'
+              when teams.assignment_type = 'UNREPLIED' then
+                'needsResponse'
+            end
+          ) 
+          and extract('hour' from current_timestamp at time zone coalesce(campaign_contact.timezone, campaign.timezone)) >= campaign.texting_hours_start
+          and extract('hour' from (current_timestamp + interval '5 minutes') at time zone coalesce(campaign_contact.timezone, campaign.timezone)) < campaign.texting_hours_end
+          and not exists (
+            select 1
+            from campaign_contact_tag
+            join tag
+              on tag.id = campaign_contact_tag.tag_id
+              and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+            where tag.is_assignable = false
+              and not exists (
+                select 1
+                from team_escalation_tags
+                where team_escalation_tags.tag_id = tag.id
+                  and team_escalation_tags.team_id = teams.id
+              )
+          )
+      ) as count_left
+    from (
+      select id, title, assignment_priority, assignment_type, organization_id, is_assignment_enabled from team
+      union
+      select 0, 'General', 'infinity'::float, '${generalAssignmentType}', ${organizationId}, '${generalAssignmentBit}'::boolean
+    ) as teams
+    join campaign on campaign.id = (
+      select id
+      from campaign
+      where organization_id = teams.organization_id
+        and is_started = true
+        and is_archived = false
+        and is_autoassign_enabled = true 
+        and (
+          limit_assignment_to_teams = false
+          or exists (
+            select 1
+            from campaign_team
+            where campaign_team.campaign_id = campaign.id
+              and campaign_team.team_id = teams.id
+          )
+        )
+        and exists (
+          select 1
+          from campaign_contact
+          where campaign_id = campaign.id
+            and assignment_id is null
+            and message_status = (
+              case
+                when teams.assignment_type = 'UNSENT' then
+                  'needsMessage'
+                when teams.assignment_type = 'UNREPLIED' then
+                  'needsResponse'
+              end
+            )
+            and extract('hour' from current_timestamp at time zone coalesce(campaign_contact.timezone, campaign.timezone)) >= campaign.texting_hours_start
+            and extract('hour' from (current_timestamp + interval '5 minutes') at time zone coalesce(campaign_contact.timezone, campaign.timezone)) < campaign.texting_hours_end
+            and not exists (
+              select 1
+              from campaign_contact_tag
+              join tag
+                on tag.id = campaign_contact_tag.tag_id
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+              where tag.is_assignable = false
+                and not exists (
+                  select 1
+                  from team_escalation_tags
+                  where team_escalation_tags.tag_id = tag.id
+                    and team_escalation_tags.team_id = teams.id
+                )
+            )
+        )
       order by id asc
-      limit 1
     )
-    (
-      select needs_message_team_campaign_pairings.*, (
-        select count(*)
-        from assignable_needs_message
-        where campaign_id = needs_message_team_campaign_pairings.id
-      ) as count_left
-      from needs_message_team_campaign_pairings
-    )
-    union
-    (
-      select needs_reply_team_campaign_pairings.*, (
-        select count(*)
-        from assignable_needs_reply
-        where campaign_id = needs_reply_team_campaign_pairings.id
-      ) as count_left
-      from needs_reply_team_campaign_pairings
-    )
-    union
-    (
-      select general_campaign_pairing.*, (
-        select count(*)
-        from ${contactsView}
-        where campaign_id = general_campaign_pairing.id
-      ) as count_left
-      from general_campaign_pairing
-    )
-    order by priority asc`,
-    [organizationId, organizationId]
+    where teams.organization_id = ?`,
+    [organizationId]
   );
 
   return teamToCampaigns;
@@ -307,102 +295,86 @@ export async function myCurrentAssignmentTargets(
     orgMaxRequestCount
   } = await getCurrentAssignmentType(organizationId);
 
-  const campaignView = {
-    UNREPLIED: "assignable_campaigns_with_needs_reply",
-    UNSENT: "assignable_campaigns_with_needs_message"
-  }[assignmentType];
-
-  const contactsView = {
-    UNREPLIED: "assignable_needs_reply",
-    UNSENT: "assignable_needs_message"
-  }[assignmentType];
-
-  if (!campaignView || !contactsView) {
-    return null;
-  }
-
-  const generalEnabledBit = generalEnabled ? 1 : 0;
+  const generalAssignmentType = generalEnabled ? assignmentType : "NOTHING";
+  const generalAssignmentBit = generalEnabled ? 1 : 0;
 
   const { rows: teamToCampaigns } = await trx.raw(
     /**
-     * This query is the same as allCurrentAssignmentTargets, except
-     *  - it restricts teams to those with is_assignment_enabled = true via the where clause in team_assignment_options
-     *  - it adds all_possible_team_assignments to set up my_possible_team_assignments
+     * What a query!
+     *
+     * General is set to priority 0 here so that it shows up at the top of the page display
      */
     `
-      with team_assignment_options as (
-        select *
-        from team
-        where organization_id = ?
-          and is_assignment_enabled = true
-      ),
-      needs_message_teams as (
-        select * from team_assignment_options
-        where assignment_type = 'UNSENT'
-      ),
-      needs_reply_teams as (
-        select * from team_assignment_options
-        where assignment_type = 'UNREPLIED'
-      ),
-      needs_message_team_campaign_pairings as (
-        select
-            teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type, teams.max_request_count,
-            campaign.id as id, campaign.title
-        from needs_message_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
-        join campaign on campaign.id = (
-          select id
-          from assignable_campaigns_with_needs_message as campaigns
-          where campaigns.id = campaign_team.campaign_id
-          order by id asc
-          limit 1
-        )
-      ),
-      needs_reply_team_campaign_pairings as (
-        select
-            teams.assignment_priority as priority, teams.id as team_id, teams.title as team_title, teams.is_assignment_enabled as enabled, teams.assignment_type, teams.max_request_count,
-            campaign.id as id, campaign.title
-        from needs_reply_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
-        join campaign on campaign.id = (
-          select id
-          from assignable_campaigns_with_needs_reply as campaigns
-          where campaigns.id = campaign_team.campaign_id
-          order by id asc
-          limit 1
-        )
-      ),
-      general_campaign_pairing as (
-        select
-          '+infinity'::float as priority, -1 as team_id, 'General' as team_title, ${generalEnabledBit}::boolean as enabled, '${assignmentType}' as assignment_type, ${orgMaxRequestCount} as max_request_count,
-          campaigns.id, campaigns.title
-        from ${campaignView} as campaigns
-        where campaigns.limit_assignment_to_teams = false
-            and organization_id = ?
-        order by id asc
-        limit 1
-      ),
-      all_possible_team_assignments as (
-        ( select * from needs_message_team_campaign_pairings )
-        union
-        ( select * from needs_reply_team_campaign_pairings )
-      ),
-      my_possible_team_assignments as (
-        (
-          select * from all_possible_team_assignments
-          where exists (
-            select 1 from user_team
-            where team_id = all_possible_team_assignments.team_id
-              and user_id = ?
+    select teams.title as team_title, teams.assignment_priority, teams.assignment_type, teams.is_assignment_enabled as enabled, teams.max_request_count, campaign.id, campaign.title
+    from (
+      select id, title, assignment_priority, assignment_type, organization_id, is_assignment_enabled, max_request_count from team
+      union
+      select 0, 'General', 'infinity'::float, '${generalAssignmentType}', ${organizationId}, '${generalAssignmentBit}'::boolean, ${orgMaxRequestCount}
+    ) as teams
+    join campaign on campaign.id = (
+      select id
+      from campaign
+      where organization_id = teams.organization_id
+        and is_started = true
+        and is_archived = false
+        and is_autoassign_enabled = true 
+        and (
+          limit_assignment_to_teams = false
+          or exists (
+            select 1
+            from campaign_team
+            where campaign_team.campaign_id = campaign.id
+              and campaign_team.team_id = teams.id
           )
         )
-        union 
-        ( select * from general_campaign_pairing )
+        and exists (
+          select 1
+          from campaign_contact
+          where campaign_id = campaign.id
+            and assignment_id is null
+            and message_status = (
+              case
+                when teams.assignment_type = 'UNSENT' then
+                  'needsMessage'
+                when teams.assignment_type = 'UNREPLIED' then
+                  'needsResponse'
+              end
+            )
+            and extract('hour' from current_timestamp at time zone coalesce(campaign_contact.timezone, campaign.timezone)) >= campaign.texting_hours_start
+            and extract('hour' from (current_timestamp + interval '5 minutes') at time zone coalesce(campaign_contact.timezone, campaign.timezone)) < campaign.texting_hours_end
+            and not exists (
+              select 1
+              from campaign_contact_tag
+              join tag
+                on tag.id = campaign_contact_tag.tag_id
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+              where tag.is_assignable = false
+                and not exists (
+                  select 1
+                  from team_escalation_tags
+                  where team_escalation_tags.tag_id = tag.id
+                    and team_escalation_tags.team_id in (
+                      select team_id
+                      from user_team
+                      where user_id = ?
+                    )
+                )
+            )
+        )
+      order by id asc
+    )
+    where teams.organization_id = ?
+      and (
+        teams.id = 0 or
+        exists (
+          select 1
+          from user_team
+          where user_id = ?
+            and team_id = teams.id
+        )
       )
-      select * from my_possible_team_assignments
-      where enabled = true
-      order by priority asc`,
-    [organizationId, organizationId, userId]
+    `,
+    [userId, organizationId, userId]
   );
 
   const results = teamToCampaigns.slice(0, 1).map(ttc =>
@@ -439,26 +411,6 @@ async function notifyIfAllAssigned(type, user, organizationId) {
       "Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset"
     );
   }
-}
-
-// TODO – deprecate this resolver
-export async function countLeft(assignmentType, campaign) {
-  const campaignContactStatus = {
-    UNREPLIED: "needsResponse",
-    UNSENT: "needsMessage"
-  }[assignmentType];
-
-  const result = await r.parseCount(
-    r
-      .knex("campaign_contact")
-      .count()
-      .where({
-        assignment_id: null,
-        message_status: campaignContactStatus,
-        campaign_id: campaign
-      })
-  );
-  return result;
 }
 
 export async function fulfillPendingRequestFor(auth0Id) {
@@ -580,6 +532,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
     organizationId,
     trx
   );
+
   if (!assignmentInfo) {
     return 0;
   }
@@ -616,10 +569,10 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
 
   logger.verbose(`Assigning to assignment id ${assignmentId}`);
 
-  const contactView = {
-    UNREPLIED: "assignable_needs_reply",
-    UNSENT: "assignable_needs_message"
-  }[assignmentInfo.type];
+  const messageStatus = {
+    UNSENT: "needsMessage",
+    UNREPLIED: "needsResponse"
+  }[assignmentInfo.assignment_type];
 
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
@@ -630,19 +583,42 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
       from
         (
           select
-            id
+            campaign_contact.id
           from
-            ${contactView}
+            campaign_contact
+          join campaign on campaign.id = campaign_contact.id
           where
             campaign_id = ?
+            and message_status = ?
+            and assignment_id is null
+            and extract('hour' from current_timestamp at time zone coalesce(campaign_contact.timezone, campaign.timezone)) >= campaign.texting_hours_start
+            and extract('hour' from (current_timestamp + interval '5 minutes') at time zone coalesce(campaign_contact.timezone, campaign.timezone)) < campaign.texting_hours_end
+            and not exists (
+              select 1
+              from campaign_contact_tag
+              join tag
+                on tag.id = campaign_contact_tag.tag_id
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+              where tag.is_assignable = false
+                and not exists (
+                  select 1
+                  from team_escalation_tags
+                  where team_escalation_tags.tag_id = tag.id
+                    and team_escalation_tags.team_id in (
+                      select team_id
+                      from user_team
+                      where user_id = ?
+                    )
+                )
+            )
+          order by (current_timestamp at time zone coalesce(campaign_contact.timezone, campaign.timezone)) asc
           limit ?
           for update skip locked
         ) matching_contact
       where
         target_contact.id = matching_contact.id
-      ;
     `,
-    [assignmentId, campaignIdToAssignTo, countToAssign]
+    [assignmentId, campaignIdToAssignTo, messageStatus, user.id, countToAssign]
   );
 
   logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
