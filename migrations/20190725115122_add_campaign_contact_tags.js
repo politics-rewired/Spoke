@@ -1,3 +1,48 @@
+/**
+ * Must create an escalate tag for each existing organization!
+ *
+ * Run once for each organization, substituting in the correct value for `ASSIGNMENT_USER_ID`
+
+  insert into tag (
+    organization_id,
+    title,
+    description,
+    is_assignable,
+    is_system
+  ) values (
+    select
+      organization.id,
+      'Escalated',
+      'Escalation is meant for situations where you have exhausted all available help resources and still do not know how to respond.',
+      false,
+      true
+    from organization
+  );
+
+  insert into campaign_contact_tag (
+    campaign_contact_id,
+    tag_id,
+    tagger_id
+  ) values (
+    select
+      campaign_contact.id,
+      tag.id,
+      assignment.user_id
+    from
+      campaign_contact
+      join assignment
+        on assignment.id = campaign_contact.assignment_id
+      join campaign
+        on campaign.id = campaign_contact.campaign_id
+      join tag
+        on tag.organization_id = campaign.organization_id
+    where
+      assignment.user_id = ASSIGNMENT_USER_ID
+      and tag.title = 'Escalated'
+  );
+
+ */
+
 exports.up = function(knex) {
   return knex.schema
     .createTable("tag", table => {

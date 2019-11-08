@@ -1,3 +1,9 @@
+/**
+ * `timezone` will need to be backfilled for all existing contacts. Use:
+ *
+ *    node ./dev-tools/backfill-timezones.js
+ */
+
 exports.up = function(knex) {
   return knex.schema
     .alterTable("campaign_contact", table => {
