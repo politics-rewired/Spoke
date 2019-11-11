@@ -441,8 +441,7 @@ async function sendMessage(
   campaignContactId,
   message,
   checkOptOut = true,
-  checkAssignment = true,
-  skipUpdatingMessageStatus = false
+  checkAssignment = true
 ) {
   const optOutJoinConditions = {
     "opt_out.cell": "campaign_contact.cell"
@@ -629,18 +628,15 @@ async function sendMessage(
 
   const { cc_message_status } = record;
   const contactSavePromise = (async () => {
-    if (!skipUpdatingMessageStatus) {
-      await r
-        .knex("campaign_contact")
-        .update({
-          message_status:
-            cc_message_status === "needsResponse" ||
-            cc_message_status === "convo"
-              ? "convo"
-              : "messaged"
-        })
-        .where({ id: record.cc_id });
-    }
+    await r
+      .knex("campaign_contact")
+      .update({
+        message_status:
+          cc_message_status === "needsResponse" || cc_message_status === "convo"
+            ? "convo"
+            : "messaged"
+      })
+      .where({ id: record.cc_id });
 
     const contact = await r
       .knex("campaign_contact")
@@ -1514,16 +1510,6 @@ const rootMutations = {
         await r.knex("campaign_contact_tag").insert(tagsToInsert)
       ]);
 
-      // See if any of the newly applied tags are is_assignable = false
-      const newlyAssignedTagsThatShouldUnassign = await r
-        .knex("tag")
-        .select("id")
-        .whereIn("id", addedTagIds)
-        .where({ is_assignable: false });
-
-      const currentlyEscalating =
-        newlyAssignedTagsThatShouldUnassign.length > 0;
-
       if (tag.message) {
         try {
           const checkOptOut = true;
@@ -1533,8 +1519,7 @@ const rootMutations = {
             campaignContactId,
             tag.message,
             checkOptOut,
-            checkAssignment,
-            currentlyEscalating
+            checkAssignment
           );
         } catch (error) {
           // Log the sendMessage error, but return successful opt out creation
@@ -1547,10 +1532,16 @@ const rootMutations = {
         .whereIn("id", addedTagIds)
         .pluck("webhook_url")
         .then(urls => urls.filter(url => url.length > 0));
-
       await notifyOnTagConversation(campaignContactId, user.id, webhookUrls);
 
-      if (currentlyEscalating) {
+      // See if any of the newly applied tags are is_assignable = false
+      const newlyAssignedTagsThatShouldUnassign = await r
+        .knex("tag")
+        .select("id")
+        .whereIn("id", addedTagIds)
+        .where({ is_assignable: false });
+
+      if (newlyAssignedTagsThatShouldUnassign.length > 0) {
         await r
           .knex("campaign_contact")
           .update({ assignment_id: null })
@@ -2512,7 +2503,6 @@ const rootMutations = {
       const updatedTeams = await r.knex.transaction(async trx => {
         const isTeamOrg = team => team.id && team.id === "general";
         const orgTeam = teams.find(isTeamOrg);
-
         if (orgTeam) {
           let { features: currentFeatures } = await trx("organization")
             .where({ id: organizationId })
@@ -2536,7 +2526,6 @@ const rootMutations = {
         }
 
         const nonOrgTeams = teams.filter(team => !isTeamOrg(team));
-
         return Promise.all(
           nonOrgTeams.map(async team => {
             const payload = stripUndefined({
@@ -2550,11 +2539,8 @@ const rootMutations = {
               max_request_count: team.maxRequestCount
             });
 
-            let teamToReturn;
-
             // Update existing team
-            // true for updating fields on the team itself
-            if (team.id && Object.keys(payload).length > 0) {
+            if (team.id) {
               const [updatedTeam] = await trx("team")
                 .update(payload)
                 .where({
@@ -2563,40 +2549,18 @@ const rootMutations = {
                 })
                 .returning("*");
               if (!updatedTeam) throw new Error("No matching team to update!");
-              teamToReturn = updatedTeam;
-            } else if (team.id) {
-              // true if we're only upating the escalationTags
-              teamToReturn = team;
-            } else {
-              // Create new team
-              const [newTeam] = await trx("team")
-                .insert({
-                  organization_id: organizationId,
-                  author_id: user.id,
-                  ...payload
-                })
-                .returning("*");
-
-              teamToReturn = newTeam;
+              return updatedTeam;
             }
 
-            // Update team_escalation_tags
-            if (team.escalationTagIds) {
-              await trx("team_escalation_tags")
-                .where({ team_id: teamToReturn.id })
-                .del();
-
-              teamToReturn.escalationTags = await trx("team_escalation_tags")
-                .insert(
-                  team.escalationTagIds.map(tagId => ({
-                    team_id: teamToReturn.id,
-                    tag_id: tagId
-                  }))
-                )
-                .returning("*");
-            }
-
-            return teamToReturn;
+            // Create new team
+            const [newTeam] = await trx("team")
+              .insert({
+                organization_id: organizationId,
+                author_id: user.id,
+                ...payload
+              })
+              .returning("*");
+            return newTeam;
           })
         );
       });

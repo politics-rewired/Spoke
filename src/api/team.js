@@ -14,7 +14,6 @@ export const schema = `
 
     users: [User]!
     campaigns: [Campaign]!
-    escalationTags: [Tag]
   }
 
   input TeamInput {
@@ -27,6 +26,5 @@ export const schema = `
     assignmentPriority: Int
     assignmentType: TextRequestType
     maxRequestCount: Int
-    escalationTagIds: [Int]
   }
 `;
