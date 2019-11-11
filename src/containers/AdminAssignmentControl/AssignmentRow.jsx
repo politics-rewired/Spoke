@@ -1,28 +1,25 @@
 import React from "react";
 import PropTypes from "prop-types";
-import uniqBy from "lodash/uniqBy";
 
 import Chip from "material-ui/Chip";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
-import ChipInput from "material-ui-chip-input";
 
 import { TextRequestType } from "../../api/organization";
 
 const AssignmentRow = props => {
-  const { assignmentPool, isRowDisabled, onChange, escalationTagList } = props;
+  const { assignmentPool, isRowDisabled, onChange } = props;
   const {
-    id,
     title,
     textColor,
     backgroundColor,
     isAssignmentEnabled,
     assignmentType,
-    maxRequestCount,
-    escalationTags
+    maxRequestCount
   } = assignmentPool;
+
   const handleToggleIsEnabled = (_event, isAssignmentEnabled) =>
     onChange({ isAssignmentEnabled });
 
@@ -31,16 +28,6 @@ const AssignmentRow = props => {
 
   const handleChangeMaxCount = (_event, maxRequestCount) =>
     onChange({ maxRequestCount: parseInt(maxRequestCount, 10) });
-
-  const handleAddEscalationTag = newTag => {
-    const newEscalationTags = uniqBy(escalationTags.concat(newTag), t => t.id);
-    onChange({ escalationTags: newEscalationTags });
-  };
-
-  const handleRemoveEscalationTag = oldTagId => {
-    const newEscalationTags = escalationTags.filter(t => t.id !== oldTagId);
-    onChange({ escalationTags: newEscalationTags });
-  };
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
@@ -88,19 +75,6 @@ const AssignmentRow = props => {
         disabled={isRowDisabled || !isAssignmentEnabled}
         onChange={handleChangeMaxCount}
       />
-      <ChipInput
-        style={{
-          marginLeft: "10px"
-        }}
-        floatingLabelText={id === "general" ? "N/A" : "Custom escalation tags"}
-        dataSource={escalationTagList}
-        value={escalationTags}
-        openOnFocus={true}
-        onRequestAdd={handleAddEscalationTag}
-        onRequestDelete={handleRemoveEscalationTag}
-        dataSourceConfig={{ text: "title", value: "id" }}
-        disabled={isRowDisabled || !isAssignmentEnabled || id === "general"}
-      />
     </div>
   );
 };
@@ -116,13 +90,7 @@ AssignmentRow.propTypes = {
     backgroundColor: PropTypes.string.isRequired,
     isAssignmentEnabled: PropTypes.bool.isRequired,
     assignmentType: PropTypes.string.isRequired,
-    maxRequestCount: PropTypes.number.isRequired,
-    escalationTagList: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        title: PropTypes.string.isRequired
-      })
-    )
+    maxRequestCount: PropTypes.number.isRequired
   }).isRequired,
   isRowDisabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired

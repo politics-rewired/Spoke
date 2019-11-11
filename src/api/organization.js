@@ -43,7 +43,6 @@ export const schema = `
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
     numbersApiKey: String
     tagList: [Tag]
-    escalationTagList: [Tag]
     teams: [Team]!
   }
 `;

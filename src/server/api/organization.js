@@ -238,11 +238,6 @@ export const resolvers = {
         .reader("tag")
         .where({ organization_id: organization.id })
         .orderBy(["is_system", "title"]),
-    escalationTagList: async organization =>
-      r
-        .reader("tag")
-        .where({ organization_id: organization.id, is_assignable: false })
-        .orderBy(["is_system", "title"]),
     teams: async organization =>
       r
         .reader("team")
