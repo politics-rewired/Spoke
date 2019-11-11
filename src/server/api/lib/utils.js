@@ -34,5 +34,5 @@ export const capitalizeWord = word => {
 export const getTzOffset = timezoneName => {
   // POSIX compatibility requires that the offsets are inverted
   // See: https://momentjs.com/timezone/docs/#/zone-object/offset/
-  moment.tz.zone(timezoneName).utcOffset(Date.now()) / -60;
+  return moment.tz.zone(timezoneName).utcOffset(Date.now()) / -60;
 };
