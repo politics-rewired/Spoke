@@ -176,13 +176,14 @@ export const resolvers = {
         }),
     todos: async (user, { organizationId }) =>
       r
-        .table("assignment")
-        .getAll(user.id, { index: "assignment.user_id" })
-        .eqJoin("campaign_id", r.table("campaign"))
-        .filter({
+        .reader("assignment")
+        .select("assignment.*")
+        .join("campaign", "campaign.id", "assignment.campaign_id")
+        .where({
+          "assignment.user_id": user.id,
           is_started: true,
-          organization_id: organizationId,
+          organization_id: parseInt(organizationId),
           is_archived: false
-        })("left")
+        })
   }
 };

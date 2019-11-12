@@ -659,11 +659,14 @@ export const resolvers = {
     campaign: async (assignment, _, { loaders }) =>
       loaders.campaign.load(assignment.campaign_id),
     contactsCount: async (assignment, { contactsFilter }) => {
-      const campaign = await r.table("campaign").get(assignment.campaign_id);
-
+      const campaign = await r
+        .reader("campaign")
+        .where({ id: assignment.campaign_id })
+        .first();
       const organization = await r
-        .table("organization")
-        .get(campaign.organization_id);
+        .reader("organization")
+        .where({ id: campaign.organization_id })
+        .first();
 
       return await r.getCount(
         getContacts(assignment, contactsFilter, organization, campaign, true)
