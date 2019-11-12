@@ -1,12 +1,14 @@
 import PropTypes from "prop-types";
 import React from "react";
 import isEqual from "lodash/isEqual";
+import moment from "moment";
 
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
+import { red600 } from "material-ui/styles/colors";
 
 import Avatar from "material-ui/Avatar";
 import theme from "../styles/theme";
@@ -448,6 +450,9 @@ class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true,
         extraProps: {
+          isOverdue: moment().isSameOrAfter(
+            this.props.campaignData.campaign.dueBy
+          ),
           orgTexters: this.props.organizationData.organization.texters,
           organizationUuid: this.props.organizationData.organization.uuid,
           campaignId: this.props.campaignData.campaign.id
@@ -580,20 +585,23 @@ class AdminCampaignEdit extends React.Component {
   }
 
   renderHeader() {
-    const title =
-      this.props.campaignData &&
-      this.props.campaignData.campaign &&
-      this.props.campaignData.campaign.title;
+    const {
+      campaign: { dueBy, isStarted, title } = {}
+    } = this.props.campaignData;
 
-    const notStarting = this.props.campaignData.campaign.isStarted ? (
+    const isOverdue = moment().isSameOrBefore(dueBy);
+
+    const notStarting = isStarted ? (
       <div
         {...dataTest("campaignIsStarted")}
         style={{
-          color: theme.colors.green,
+          color: isOverdue ? red600 : theme.colors.green,
           fontWeight: 800
         }}
       >
-        This campaign is running!
+        {isOverdue
+          ? "This campaign is running but is overdue!"
+          : "This campaign is running!"}
         {this.renderCurrentEditors()}
       </div>
     ) : (
