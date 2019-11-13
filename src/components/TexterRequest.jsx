@@ -38,12 +38,12 @@ class TexterRequest extends React.Component {
     const { count, email, submitting } = this.state;
     if (submitting) return;
 
-    this.setState({ submitting: true });
+    this.setState({ submitting: true, error: undefined });
     try {
-      const response = await this.props.mutations.requestTexts({
-        count,
-        email
-      });
+      const payload = { count, email };
+      const response = await this.props.mutations.requestTexts(payload);
+      if (response.errors) throw response.errors;
+
       const message = response.data.requestTexts;
 
       if (message.includes("Created")) {
@@ -63,9 +63,8 @@ class TexterRequest extends React.Component {
       } else {
         this.setState({ finished: true });
       }
-    } catch (e) {
-      console.error(e);
-      this.setState({ error: e });
+    } catch (err) {
+      this.setState({ error: err.message });
     } finally {
       this.setState({ submitting: false });
     }
