@@ -2209,23 +2209,17 @@ const rootMutations = {
               amount: count
             });
 
-            /* This will just throw if it errors */
+            // This will just throw if it errors
             if (config.ASSIGNMENT_REQUESTED_URL) {
-              try {
-                const response = await request
-                  .post(config.ASSIGNMENT_REQUESTED_URL)
-                  .set(
-                    "Authorization",
-                    `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
-                  )
-                  .send({ count, email });
+              const response = await request
+                .post(config.ASSIGNMENT_REQUESTED_URL)
+                .set(
+                  "Authorization",
+                  `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
+                )
+                .send({ count, email });
 
-                logger.debug("TCL: response", response);
-              } catch (ex) {
-                logger.error("TCL: ex", ex);
-              }
-
-              return true;
+              logger.debug("Assignment requested response", { response });
             }
           });
 
@@ -2233,9 +2227,13 @@ const rootMutations = {
         }
 
         return "No texts available at the moment";
-      } catch (e) {
-        logger.error(e);
-        return e.response ? e.response.body.message : e;
+      } catch (err) {
+        logger.error("Error submitting external assignment request!", {
+          error: err
+        });
+        throw new GraphQLError(
+          err.response ? err.response.body.message : err.message
+        );
       }
     },
     releaseMessages: async (
