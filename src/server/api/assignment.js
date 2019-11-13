@@ -289,6 +289,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
             from assignable_needs_reply_with_escalation_tags
             where campaign_id = campaigns.id
               and teams.this_teams_escalation_tags @> applied_escalation_tags
+              -- @> is true if teams.this_teams_escalation_tags has every member of applied_escalation_tags
           )
         order by id asc
         limit 1
@@ -722,6 +723,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
       select id from assignable_needs_reply
       union
       select id from assignable_needs_reply_with_escalation_tags
+      -- @< is true if every member of applied_escalation_tags is in the subquery
       where applied_escalation_tags @< (
         select array_agg(tag_id) as my_escalation_tags
         from team_escalation_tags
