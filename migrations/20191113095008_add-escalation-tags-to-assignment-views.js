@@ -2,8 +2,9 @@ exports.up = function(knex) {
   return knex.schema.raw(`
     create or replace view assignable_campaign_contacts_with_escalation_tags as (
       select
-        campaign_contact.id, campaign_contact.campaign_id,
-        campaign_contact.message_status, campaign.texting_hours_end,
+        campaign_contact.id,
+        campaign_contact.campaign_id,
+        campaign_contact.message_status,
         campaign_contact.timezone::text as contact_timezone,
         (
           select array_agg(tag.id)
@@ -13,7 +14,6 @@ exports.up = function(knex) {
            and tag.is_assignable = false
         )  as applied_escalation_tags
       from campaign_contact
-      join campaign on campaign_contact.campaign_id = campaign.id
       where assignment_id is null
         and is_opted_out = false
         and exists (
