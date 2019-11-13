@@ -164,7 +164,7 @@ class AdminCampaignStats extends React.Component {
       : "Export Data";
 
     const dueFormatted = moment(campaign.dueBy).format("MMM D, YYYY");
-    const isOverdue = moment().isSameOrBefore(campaign.dueBy);
+    const isOverdue = moment().isSameOrAfter(campaign.dueBy);
 
     return (
       <div>
