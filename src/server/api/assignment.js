@@ -738,6 +738,11 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
     UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
 
+  const queryVars =
+    assignmentInfo.type == "UNREPLIED"
+      ? [assignmentId, campaignIdToAssignTo, user.id, countToAssign]
+      : [assignmentId, campaignIdToAssignTo, countToAssign];
+
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
       update
@@ -759,7 +764,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
         target_contact.id = matching_contact.id
       ;
     `,
-    [assignmentId, campaignIdToAssignTo, user.id, countToAssign]
+    queryVars
   );
 
   logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
