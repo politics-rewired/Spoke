@@ -7,18 +7,25 @@ import { List, ListItem } from "material-ui/List";
 import IconButton from "material-ui/IconButton";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
+import Chip from "material-ui/Chip";
 import SpeakerNotesIcon from "material-ui/svg-icons/action/speaker-notes";
 import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ArchiveIcon from "material-ui/svg-icons/content/archive";
 import UnarchiveIcon from "material-ui/svg-icons/content/unarchive";
+import { red300, grey900 } from "material-ui/styles/colors";
 
 import theme from "../../styles/theme";
-import Chip from "../../components/Chip";
 import Empty from "../../components/Empty";
 import { dataTest } from "../../lib/attributes";
 
 const inlineStyles = {
+  chipWrapper: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center"
+  },
+  chip: { margin: "4px" },
   past: {
     opacity: 0.6
   },
@@ -86,6 +93,7 @@ export class CampaignList extends React.Component {
       isStarted,
       isArchived,
       isAutoassignEnabled,
+      dueBy,
       hasUnassignedContacts,
       hasUnsentInitialMessages,
       hasUnhandledMessages,
@@ -108,32 +116,45 @@ export class CampaignList extends React.Component {
     const dueByMoment = moment(campaign.dueBy);
     const creatorName = campaign.creator ? campaign.creator.displayName : null;
     let tags = [];
+    if (moment().isSameOrAfter(moment(dueBy))) {
+      tags.push({ title: "Overdue", color: grey900, backgroundColor: red300 });
+    }
+
     if (!isStarted) {
-      tags.push("Not started");
+      tags.push({ title: "Not started" });
     }
 
     if (hasUnassignedContacts) {
-      tags.push("Unassigned contacts");
+      tags.push({ title: "Unassigned contacts" });
     }
 
     if (isStarted && hasUnsentInitialMessages) {
-      tags.push("Unsent initial messages");
+      tags.push({ title: "Unsent initial messages" });
     }
 
     if (isStarted && hasUnhandledMessages) {
-      tags.push("Unhandled replies");
+      tags.push({ title: "Unhandled replies" });
     }
 
     if (isStarted && !isArchived && isAutoassignEnabled) {
-      tags.push("Autoassign eligible");
+      tags.push({ title: "Autoassign eligible" });
     }
 
-    tags = tags.concat(teams.map(team => team.title));
+    tags = tags.concat(teams.map(({ title }) => ({ title })));
 
     const primaryText = (
-      <div>
+      <div style={inlineStyles.chipWrapper}>
         {campaign.title}
-        {tags.map(tag => <Chip key={tag} text={tag} />)}
+        {tags.map(tag => (
+          <Chip
+            key={tag.title}
+            labelColor={tag.color}
+            backgroundColor={tag.backgroundColor}
+            style={inlineStyles.chip}
+          >
+            {tag.title}
+          </Chip>
+        ))}
       </div>
     );
     const secondaryText = (

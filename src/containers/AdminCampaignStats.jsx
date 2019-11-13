@@ -1,8 +1,10 @@
 import PropTypes from "prop-types";
 import React from "react";
+import moment from "moment";
 import RaisedButton from "material-ui/RaisedButton";
 import Chart from "../components/Chart";
 import { Card, CardTitle, CardText } from "material-ui/Card";
+import { red600 } from "material-ui/styles/colors";
 import TexterStats from "../components/TexterStats";
 import Snackbar from "material-ui/Snackbar";
 import { withRouter } from "react-router";
@@ -161,6 +163,9 @@ class AdminCampaignStats extends React.Component {
       ? `Exporting (${currentExportJob.status}%)`
       : "Export Data";
 
+    const dueFormatted = moment(campaign.dueBy).format("MMM D, YYYY");
+    const isOverdue = moment().isSameOrBefore(campaign.dueBy);
+
     return (
       <div>
         <div className={css(styles.container)}>
@@ -176,6 +181,11 @@ class AdminCampaignStats extends React.Component {
             {campaign.title}
             <br />
             Campaign ID: {campaign.id}
+            <br />
+            Due:{" "}
+            <span style={{ color: isOverdue ? red600 : undefined }}>
+              {dueFormatted} {isOverdue && "(Overdue)"}
+            </span>
           </div>
           <div className={css(styles.flexColumn)}>
             <div className={css(styles.rightAlign)}>
@@ -319,6 +329,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         campaign(id: $campaignId) {
           id
           title
+          dueBy
           isArchived
           useDynamicAssignment
           assignments {

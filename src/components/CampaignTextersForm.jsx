@@ -6,6 +6,7 @@ import AutoComplete from "material-ui/AutoComplete";
 import IconButton from "material-ui/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
+import { red600 } from "material-ui/styles/colors";
 import GSForm from "../components/forms/GSForm";
 import * as yup from "yup";
 import Form from "react-formal";
@@ -478,17 +479,7 @@ export default class CampaignTextersForm extends React.Component {
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
 
   render() {
-    const { organizationUuid, campaignId } = this.props;
-    const subtitle = this.formValues().useDynamicAssignment ? (
-      <div>
-        <OrganizationJoinLink
-          organizationUuid={organizationUuid}
-          campaignId={campaignId}
-        />
-      </div>
-    ) : (
-      ""
-    );
+    const { organizationUuid, campaignId, isOverdue } = this.props;
 
     const assignedContacts = this.formValues().texters.reduce(
       (prev, texter) => prev + texter.assignment.contactsCount,
@@ -503,7 +494,14 @@ export default class CampaignTextersForm extends React.Component {
       <div>
         <CampaignFormSectionHeading
           title="Who should send the texts?"
-          subtitle={subtitle}
+          subtitle={
+            isOverdue && (
+              <span style={{ color: red600 }}>
+                This campaign is overdue! Please change the due date before
+                editing Texters
+              </span>
+            )
+          }
         />
         <div>
           <Toggle
@@ -512,6 +510,12 @@ export default class CampaignTextersForm extends React.Component {
             toggled={this.formValues().useDynamicAssignment}
             onToggle={this.handleDynamicAssignmentToggle}
           />
+          {this.formValues().useDynamicAssignment && (
+            <OrganizationJoinLink
+              organizationUuid={organizationUuid}
+              campaignId={campaignId}
+            />
+          )}
         </div>
         <GSForm
           schema={this.formSchema}
