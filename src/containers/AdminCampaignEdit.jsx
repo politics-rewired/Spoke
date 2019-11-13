@@ -589,7 +589,7 @@ class AdminCampaignEdit extends React.Component {
       campaign: { dueBy, isStarted, title } = {}
     } = this.props.campaignData;
 
-    const isOverdue = moment().isSameOrBefore(dueBy);
+    const isOverdue = moment().isSameOrAfter(dueBy);
 
     const notStarting = isStarted ? (
       <div
