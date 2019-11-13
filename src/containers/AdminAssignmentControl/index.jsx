@@ -41,7 +41,8 @@ class AdminAssignmentControl extends Component {
       backgroundColor: "",
       isAssignmentEnabled: textRequestFormEnabled,
       assignmentType: textRequestType,
-      maxRequestCount: textRequestMaxCount
+      maxRequestCount: textRequestMaxCount,
+      escalationTags: []
     };
 
     const assignmentPools = [generalAssignment].concat(teams);
@@ -57,9 +58,18 @@ class AdminAssignmentControl extends Component {
 
   handleSaveAssignmentControls = async () => {
     const { changes } = this.state;
-    const payloads = Object.keys(changes).map(key =>
-      Object.assign(changes[key], { id: key })
-    );
+    const payloads = Object.keys(changes).map(key => {
+      const teamPayload = Object.assign({}, changes[key], { id: key });
+
+      if (teamPayload.escalationTags) {
+        teamPayload.escalationTagIds = teamPayload.escalationTags.map(
+          t => t.id
+        );
+        delete teamPayload.escalationTags;
+      }
+
+      return teamPayload;
+    });
 
     this.setState({ working: true });
     try {
@@ -81,6 +91,9 @@ class AdminAssignmentControl extends Component {
     const hasChanges = Object.keys(changes).length > 0;
 
     const assignmentPools = this.assignmentPoolsWithChanges();
+    const escalationTagList = this.props.assignmentConfiguration.organization
+      ? this.props.assignmentConfiguration.organization.escalationTagList
+      : [];
 
     const dialogActions = [
       <FlatButton
@@ -98,6 +111,7 @@ class AdminAssignmentControl extends Component {
             <AssignmentRow
               key={assignmentPool.id}
               assignmentPool={assignmentPool}
+              escalationTagList={escalationTagList}
               isRowDisabled={working}
               onChange={this.createHandleChangeAssignment(assignmentPool.id)}
             />
@@ -134,6 +148,10 @@ const mapQueriesToProps = ({ ownProps }) => ({
           textRequestFormEnabled
           textRequestType
           textRequestMaxCount
+          escalationTagList {
+            id
+            title
+          }
           teams {
             id
             title
@@ -142,6 +160,10 @@ const mapQueriesToProps = ({ ownProps }) => ({
             isAssignmentEnabled
             assignmentType
             maxRequestCount
+            escalationTags {
+              id
+              title
+            }
           }
         }
       }
@@ -164,6 +186,10 @@ const mapMutationsToProps = ({ ownProps }) => ({
           isAssignmentEnabled
           assignmentType
           maxRequestCount
+          escalationTags {
+            id
+            title
+          }
         }
       }
     `,

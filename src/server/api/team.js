@@ -40,6 +40,12 @@ export const resolvers = {
         .where({
           "campaign_team.team_id": team.id
         });
+    },
+    escalationTags: async (team, {}, { user }) => {
+      return r
+        .reader("team_escalation_tags")
+        .join("tag", "tag.id", "=", "team_escalation_tags.tag_id")
+        .where({ team_id: team.id });
     }
   }
 };
