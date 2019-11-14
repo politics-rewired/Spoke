@@ -723,8 +723,8 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
       select id from assignable_needs_reply
       union
       select id from assignable_needs_reply_with_escalation_tags
-      -- @< is true if every member of applied_escalation_tags is in the subquery
-      where applied_escalation_tags @< (
+      -- <@ is true if every member of applied_escalation_tags is in the subquery
+      where applied_escalation_tags <@ (
         select array_agg(tag_id) as my_escalation_tags
         from team_escalation_tags
         where exists (
