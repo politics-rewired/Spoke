@@ -96,6 +96,8 @@ export function getContacts(
   }
 
   let query = r.reader("campaign_contact").where({
+    campaign_id: campaign.id,
+    archived: campaign.is_archived,
     assignment_id: assignment.id
   });
 

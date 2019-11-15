@@ -121,9 +121,11 @@ export const resolvers = {
         .count(),
     optOutsCount: async campaign =>
       await r.getCount(
-        r
-          .reader("campaign_contact")
-          .where({ is_opted_out: true, campaign_id: campaign.id })
+        r.reader("campaign_contact").where({
+          is_opted_out: true,
+          campaign_id: campaign.id,
+          archived: campaign.is_archived
+        })
       )
   },
   CampaignsReturn: {
@@ -223,10 +225,14 @@ export const resolvers = {
         campaignId: campaign.id
       }),
     contacts: async campaign =>
-      r.reader("campaign_contact").where({ campaign_id: campaign.id }),
+      r
+        .reader("campaign_contact")
+        .where({ campaign_id: campaign.id, archived: campaign.is_archived }),
     contactsCount: async campaign =>
       await r.getCount(
-        r.reader("campaign_contact").where({ campaign_id: campaign.id })
+        r
+          .reader("campaign_contact")
+          .where({ campaign_id: campaign.id, archived: campaign.is_archived })
       ),
     hasUnassignedContacts: async campaign => {
       if (config.BAD_BENS_DISABLE_HAS_UNASSIGNED_CONTACTS) {
@@ -241,6 +247,7 @@ export const resolvers = {
           where
             campaign_id = ?
             and assignment_id is null
+            and archived = ?
             and not exists (
               select 1
               from campaign_contact_tag
@@ -251,7 +258,7 @@ export const resolvers = {
             and is_opted_out = false
         ) as contact_exists
       `,
-        [campaign.id]
+        [campaign.id, campaign.is_archived]
       );
 
       return rows[0] && rows[0].contact_exists;
@@ -263,6 +270,7 @@ export const resolvers = {
         .where({
           campaign_id: campaign.id,
           message_status: "needsMessage",
+          archived: campaign.is_archived,
           is_opted_out: false
         })
         .limit(1);
@@ -276,6 +284,7 @@ export const resolvers = {
         .pluck("campaign_contact.id")
         .where({
           "campaign_contact.campaign_id": campaign.id,
+          archived: campaign.is_archived,
           message_status: "needsResponse",
           is_opted_out: false
         })
