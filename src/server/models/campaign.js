@@ -25,14 +25,6 @@ const Campaign = thinky.createModel(
       logo_image_url: type.string(),
       intro_html: type.string(),
       primary_color: type.string(),
-      override_organization_texting_hours: type
-        .boolean()
-        .required()
-        .default(false),
-      texting_hours_enforced: type
-        .boolean()
-        .required()
-        .default(true),
       texting_hours_start: type
         .number()
         .integer()

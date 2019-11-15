@@ -60,31 +60,11 @@ export function getContacts(
   campaign,
   forCount = false
 ) {
-  // / returns list of contacts eligible for contacting _now_ by a particular user
-  const textingHoursEnforced = organization.texting_hours_enforced;
-  const textingHoursStart = organization.texting_hours_start;
-  const textingHoursEnd = organization.texting_hours_end;
-
   // 24-hours past due - why is this 24 hours offset?
   const includePastDue = contactsFilter && contactsFilter.includePastDue;
   const pastDue =
     campaign.due_by &&
     Number(campaign.due_by) + 24 * 60 * 60 * 1000 < Number(new Date());
-  const config = { textingHoursStart, textingHoursEnd, textingHoursEnforced };
-
-  if (campaign.override_organization_texting_hours) {
-    const textingHoursStart = campaign.texting_hours_start;
-    const textingHoursEnd = campaign.texting_hours_end;
-    const textingHoursEnforced = campaign.texting_hours_enforced;
-    const timezone = campaign.timezone;
-
-    config.campaignTextingHours = {
-      textingHoursStart,
-      textingHoursEnd,
-      textingHoursEnforced,
-      timezone
-    };
-  }
 
   if (
     !includePastDue &&
@@ -103,10 +83,10 @@ export function getContacts(
     const validTimezone = contactsFilter.validTimezone;
     if (validTimezone !== null) {
       const {
-        timezone: campaignTimezone,
-        textingHoursStart,
-        textingHoursEnd
-      } = config.campaignTextingHours;
+        texting_hours_start: textingHoursStart,
+        texting_hours_end: textingHoursEnd,
+        timezone: campaignTimezone
+      } = campaign;
 
       const isCampaignTimezoneValid = isNowBetween(
         campaignTimezone,

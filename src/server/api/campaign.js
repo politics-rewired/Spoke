@@ -164,8 +164,6 @@ export const resolvers = {
         "introHtml",
         "primaryColor",
         "logoImageUrl",
-        "overrideOrganizationTextingHours",
-        "textingHoursEnforced",
         "textingHoursStart",
         "textingHoursEnd",
         "isAutoassignEnabled",

@@ -48,8 +48,6 @@ export const schema = `
     logoImageUrl: String
     editors: String
     teams: [Team]!
-    overrideOrganizationTextingHours: Boolean
-    textingHoursEnforced: Boolean
     textingHoursStart: Int
     textingHoursEnd: Int
     isAutoassignEnabled: Boolean!

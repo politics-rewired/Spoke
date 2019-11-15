@@ -138,11 +138,11 @@ const mapQueriesToProps = ({ ownProps }) => ({
             id
             isArchived
             useDynamicAssignment
+            timezone
+            textingHoursStart
+            textingHoursEnd
             organization {
               id
-              textingHoursEnforced
-              textingHoursStart
-              textingHoursEnd
               threeClickEnabled
               optOutMessage
             }

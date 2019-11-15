@@ -43,8 +43,6 @@ const campaignInfoFragment = `
   logoImageUrl
   introHtml
   primaryColor
-  overrideOrganizationTextingHours
-  textingHoursEnforced
   textingHoursStart
   textingHoursEnd
   isAssignmentLimitedToTeams
@@ -81,21 +79,13 @@ const campaignInfoFragment = `
   editors
 `;
 
-const valueOverrides = {
-  overrideOrganizationTextingHours: true,
-  textingHoursEnforced: true
-};
-
 class AdminCampaignEdit extends React.Component {
   constructor(props) {
     super(props);
     const isNew = props.location.query.new;
     this.state = {
       expandedSection: isNew ? 0 : null,
-      campaignFormValues: Object.assign(
-        props.campaignData.campaign,
-        valueOverrides
-      ),
+      campaignFormValues: Object.assign({}, props.campaignData.campaign),
       startingCampaign: false,
       isWorking: false,
       requestError: undefined
@@ -150,7 +140,7 @@ class AdminCampaignEdit extends React.Component {
     }
 
     this.setState({
-      campaignFormValues: Object.assign({}, pushToFormValues, valueOverrides)
+      campaignFormValues: Object.assign({}, pushToFormValues)
     });
   }
 
@@ -487,13 +477,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Texting Hours",
         content: CampaignTextingHoursForm,
-        keys: [
-          "overrideOrganizationTextingHours",
-          "textingHoursEnforced",
-          "textingHoursStart",
-          "textingHoursEnd",
-          "timezone"
-        ],
+        keys: ["textingHoursStart", "textingHoursEnd", "timezone"],
         checkCompleted: () => true,
         blocksStarting: false,
         expandAfterCampaignStarts: true,

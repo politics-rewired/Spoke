@@ -20,8 +20,6 @@ export default class CampaignTextingHoursForm extends React.Component {
   };
 
   formSchema = yup.object({
-    overrideOrganizationTextingHours: yup.boolean(),
-    textingHoursEnforced: yup.boolean(),
     textingHoursStart: yup.number().integer(),
     textingHoursEnd: yup.number().integer(),
     timezone: yup.string().required()
@@ -165,58 +163,34 @@ export default class CampaignTextingHoursForm extends React.Component {
           subtitle="Please configure texting hours for each campaign, noting the time zone of the individuals in the list you are uploading."
         />
 
-        {/* Removed because it will always be true */}
-        {/*this.addToggleFormField(
-          'overrideOrganizationTextingHours',
-          'Override organization texting hours?'
-        )*/}
+        {this.addAutocompleteFormField(
+          "textingHoursStart",
+          "textingHoursStartSearchText",
+          formatTextingHours(this.props.formValues.textingHoursStart),
+          "Start time",
+          "Start typing a start time",
+          hourChoices,
+          hours
+        )}
 
-        {this.props.formValues.overrideOrganizationTextingHours ? (
-          <div>
-            {/* Removed because it will always be true */}
-            {/*this.addToggleFormField(
-              'textingHoursEnforced',
-              'Texting hours enforced?'
-            )*/}
+        {this.addAutocompleteFormField(
+          "textingHoursEnd",
+          "textingHoursEndSearchText",
+          formatTextingHours(this.props.formValues.textingHoursEnd),
+          "End time",
+          "Start typing an end time",
+          hourChoices,
+          hours
+        )}
 
-            {this.props.formValues.textingHoursEnforced ? (
-              <div>
-                {this.addAutocompleteFormField(
-                  "textingHoursStart",
-                  "textingHoursStartSearchText",
-                  formatTextingHours(this.props.formValues.textingHoursStart),
-                  "Start time",
-                  "Start typing a start time",
-                  hourChoices,
-                  hours
-                )}
-
-                {this.addAutocompleteFormField(
-                  "textingHoursEnd",
-                  "textingHoursEndSearchText",
-                  formatTextingHours(this.props.formValues.textingHoursEnd),
-                  "End time",
-                  "Start typing an end time",
-                  hourChoices,
-                  hours
-                )}
-
-                {this.addAutocompleteFormField(
-                  "timezone",
-                  "timezoneSearchText",
-                  this.props.formValues.timezone,
-                  "Timezone to use for contacts without ZIP code and to determine daylight savings",
-                  "Start typing a timezone",
-                  timezoneChoices,
-                  timezones
-                )}
-              </div>
-            ) : (
-              ""
-            )}
-          </div>
-        ) : (
-          ""
+        {this.addAutocompleteFormField(
+          "timezone",
+          "timezoneSearchText",
+          this.props.formValues.timezone,
+          "Timezone to use for contacts without ZIP code and to determine daylight savings",
+          "Start typing a timezone",
+          timezoneChoices,
+          timezones
         )}
 
         <Form.Button
