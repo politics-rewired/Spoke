@@ -1,13 +1,12 @@
 import moment from "moment-timezone";
+import request from "superagent";
+import _ from "lodash";
 
 import logger from "../../logger";
 import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
+import { isNowBetween } from "../../lib/timezones";
 import { Assignment, r, cacheableData } from "../models";
-import { defaultTimezoneIsBetweenTextingHours } from "../../lib";
-import { Notifications, sendUserNotification } from "../notifications";
-import _ from "lodash";
-import request from "superagent";
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -27,25 +26,8 @@ export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDu
 }
 
 /**
- * Returns true if it is currently between the start and end hours in the specified timezone.
- *
- * @param {string} timezone The timezone in which to evaluate
- * @param {number} starthour Interval starting hour in 24-hour format
- * @param {number} endHour Interval ending hour in 24-hour format
- */
-const isNowBetween = (timezone, starthour, endHour) => {
-  const campaignTime = moment()
-    .tz(timezone)
-    .startOf("day");
-
-  const startTime = campaignTime.clone().hour(starthour);
-  const endTime = campaignTime.clone().hour(endHour);
-  return moment().isBetween(startTime, endTime);
-};
-
-/**
  * Given query parameters, an assignment record, and its associated records, build a Knex query
- * to fetch matching contacts.
+ * to fetch contacts eligible for contacting _now_ by a particular user given filter constraints.
  * @param {object} assignment The assignment record to fetch contacts for
  * @param {object} contactsFilter A filter object
  * @param {object} organization The record of the organization of the assignment's campaign

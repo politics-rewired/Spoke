@@ -9,7 +9,7 @@ const mocks = {
   Int: () => 42,
   ID: () => `ID_MOCK_${randomString()}`,
   Phone: () => "+12223334444",
-  Timezone: () => ({ offset: -9, hasDST: true }),
+  Timezone: () => "America/New_York",
   JSON: () => '{"field1":"value1", "field2": "value2"}'
 };
 

@@ -6,13 +6,7 @@ export const schema = `
     includePastDue: Boolean
   }
 
-  type Timezone {
-    offset: Int
-    hasDST: Boolean
-  }
-
   type Location {
-    timezone: Timezone
     city: String
     state: String
   }
@@ -31,6 +25,7 @@ export const schema = `
     external_id: String
     customFields: JSON
     messages: [Message]
+    timezone: String
     location: Location
     optOut: OptOut
     campaign: Campaign

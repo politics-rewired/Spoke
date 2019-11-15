@@ -23,11 +23,8 @@ const contactDataFragment = `
         location {
           city
           state
-          timezone {
-            offset
-            hasDST
-          }
         }
+        timezone
         messageStatus
         messages {
           id
