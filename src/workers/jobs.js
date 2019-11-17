@@ -1222,6 +1222,11 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
         where
           campaign_id = ?
           and id > ?
+          and exists (
+            select 1
+            from message
+            where campaign_contact_id = campaign_contact.id
+          )
         order by
           id asc
         limit ?
@@ -1307,6 +1312,7 @@ export async function exportCampaign(job) {
     notificationEmail = undefined,
     interactionSteps = undefined,
     assignments = undefined;
+
   try {
     ({
       campaignId,
