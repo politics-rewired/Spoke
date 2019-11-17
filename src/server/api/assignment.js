@@ -639,6 +639,7 @@ export async function giveUserMoreTexts(
     user.id,
     organizationId
   );
+
   if (!assignmentInfo) {
     throw new Error("Could not find a suitable campaign to assign to.");
   }
@@ -720,50 +721,53 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
 
   const contactView = {
     UNREPLIED: `( 
-      select id, campaign_id from assignable_needs_reply
-      union
-      select id, campaign_id from assignable_needs_reply_with_escalation_tags
-      -- <@ is true if every member of applied_escalation_tags is in the subquery
-      where applied_escalation_tags <@ (
-        select array_agg(tag_id) as my_escalation_tags
-        from team_escalation_tags
-        where exists (
-          select 1
-          from user_team
-          where user_team.team_id = team_escalation_tags.team_id
-            and user_id = ?
+      select id, campaign_id
+      from campaign_contact
+      where id in ( select id from assignable_needs_reply )
+        or id in ( 
+          select id
+          from assignable_needs_reply_with_escalation_tags
+          where applied_escalation_tags <@ (
+            select array_agg(tag_id) as my_escalation_tags
+            from team_escalation_tags
+            where exists (
+              select 1
+              from user_team
+              where user_team.team_id = team_escalation_tags.team_id
+                and user_id = ?
+            )
+          )
         )
-      )
-    ) all_needs_reply`,
+      ) all_needs_reply`,
     UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
 
   const queryVars =
     assignmentInfo.type == "UNREPLIED"
-      ? [assignmentId, campaignIdToAssignTo, user.id, countToAssign]
-      : [assignmentId, campaignIdToAssignTo, countToAssign];
+      ? [user.id, campaignIdToAssignTo, countToAssign, assignmentId]
+      : [campaignIdToAssignTo, countToAssign, assignmentId];
+
+  const print = s => {
+    console.log(s);
+    return s;
+  };
 
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
+      with matching_contact as (
+        select id from ${contactView}
+        where campaign_id = ?
+        for update skip locked
+        limit ?
+      )
       update
-        campaign_contact as target_contact
-      set
-        assignment_id = ?
-      from
-        (
-          select
-            id
-          from
-            ${contactView}
-          where
-            campaign_id = ?
-          limit ?
-          for update skip locked
-        ) matching_contact
-      where
-        target_contact.id = matching_contact.id
-      ;
-    `,
+         campaign_contact as target_contact
+       set
+         assignment_id = ?
+       from
+         matching_contact
+       where
+         target_contact.id = matching_contact.id;`,
     queryVars
   );
 
