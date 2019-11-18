@@ -18,7 +18,7 @@ import CreateIcon from "material-ui/svg-icons/content/create";
 import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import LocalOfferIcon from "material-ui/svg-icons/maps/local-offer";
 
-import { isContactBetweenTextingHours } from "./utils";
+import { isContactNowWithinCampaignHours } from "../../lib/timezones";
 import { getChildren, getTopMostParent, interactionStepForId } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { dataTest } from "../../lib/attributes";
@@ -132,7 +132,7 @@ export class AssignmentTexterContact extends React.Component {
     } else if (contact.optOut) {
       disabledText = "Skipping opt-out...";
       disabled = true;
-    } else if (!isContactBetweenTextingHours(contact, campaign)) {
+    } else if (!isContactNowWithinCampaignHours(contact, campaign)) {
       disabledText = "Refreshing ...";
       disabled = true;
     }
@@ -166,7 +166,7 @@ export class AssignmentTexterContact extends React.Component {
     const { contact, campaign } = this.props;
     if (contact.optOut) {
       this.skipContact();
-    } else if (!isContactBetweenTextingHours(contact, campaign)) {
+    } else if (!isContactNowWithinCampaignHours(contact, campaign)) {
       setTimeout(() => {
         this.props.refreshData();
         this.setState({ disabled: false });

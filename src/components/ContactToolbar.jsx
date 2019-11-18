@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import React from "react";
+import moment from "moment-timezone";
+
 import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
-import { getLocalTime, getContactTimezone } from "../lib/timezones";
-import { getProcessEnvDstReferenceTimezone } from "../lib/tz-helpers";
 import { grey100 } from "material-ui/styles/colors";
 
 const inlineStyles = {
@@ -21,67 +21,36 @@ const inlineStyles = {
 };
 
 const ContactToolbar = function ContactToolbar(props) {
-  const { campaignContact, rightToolbarIcon } = props;
+  const { campaign, campaignContact, rightToolbarIcon } = props;
+  const {
+    location: { city, state },
+    timezone: contactTimezone
+  } = campaignContact;
 
-  const { location } = campaignContact;
+  const timezone = contactTimezone || campaign.timezone;
+  const localTime = moment()
+    .tz(timezone)
+    .format("LT"); // format('h:mm a')
+  const location = [city, state]
+    .filter(item => !!item)
+    .join(", ")
+    .trim();
 
-  let city = "";
-  let state = "";
-  let timezone = null;
-  let offset = 0;
-  let hasDST = false;
-
-  if (location) {
-    city = location.city;
-    state = location.state;
-    timezone = location.timezone;
-    if (timezone) {
-      offset = timezone.offset || offset;
-      hasDST = timezone.hasDST || hasDST;
-    }
-    const adjustedLocationTZ = getContactTimezone(props.campaign, location);
-    if (adjustedLocationTZ && adjustedLocationTZ.timezone) {
-      offset = adjustedLocationTZ.timezone.offset;
-      hasDST = adjustedLocationTZ.timezone.hasDST;
-    }
-  }
-
-  let formattedLocation = `${city}`;
-  if (city && state) {
-    formattedLocation = `${formattedLocation}, `;
-  }
-  formattedLocation = `${formattedLocation} ${state}`;
-
-  const dstReferenceTimezone = props.campaign.overrideOrganizationTextingHours
-    ? this.props.campaign.timezone
-    : getProcessEnvDstReferenceTimezone();
-
-  const formattedLocalTime = getLocalTime(
-    offset,
-    hasDST,
-    dstReferenceTimezone
-  ).format("LT"); // format('h:mm a')
   return (
     <div>
       <Toolbar style={inlineStyles.toolbar}>
         <ToolbarGroup>
           <ToolbarTitle text={campaignContact.firstName} />
           <ToolbarTitle style={inlineStyles.cellToolbarTitle} />
-          {location ? (
-            <ToolbarTitle
-              style={inlineStyles.timeToolbarTitle}
-              text={formattedLocalTime}
-            />
-          ) : (
-            ""
-          )}
-          {location ? (
+          <ToolbarTitle
+            text={localTime}
+            style={inlineStyles.timeToolbarTitle}
+          />
+          {location !== "" && (
             <ToolbarTitle
               style={inlineStyles.locationToolbarTitle}
               text={formattedLocation}
             />
-          ) : (
-            ""
           )}
           {rightToolbarIcon}
         </ToolbarGroup>

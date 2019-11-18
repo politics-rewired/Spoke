@@ -17,7 +17,7 @@ import { optOutCache } from "./opt-out";
 //   - location{} (join on zip)
 //     - city
 //     - state
-//     - timezone{ offset, hasDST }
+//     - timezone
 
 //   OTHER DATA
 //   - optout

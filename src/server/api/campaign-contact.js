@@ -6,13 +6,8 @@ import { accessRequired } from "./errors";
 
 export const resolvers = {
   Location: {
-    timezone: zipCode => zipCode || {},
     city: zipCode => zipCode.city || "",
     state: zipCode => zipCode.state || ""
-  },
-  Timezone: {
-    offset: zipCode => zipCode.timezone_offset || null,
-    hasDST: zipCode => zipCode.has_dst || null
   },
   CampaignContact: {
     ...mapFieldsToModel(
@@ -156,25 +151,8 @@ export const resolvers = {
       }
       return Object.values(formatted);
     },
-    location: async (campaignContact, _, { loaders }) => {
-      if (campaignContact.timezone) {
-        const offset = getTzOffset(campaignContact.timezone);
-        const loc = {
-          timezone_offset: offset,
-          has_dst: false
-        };
-        return loc;
-      }
-      const mainZip = campaignContact.zip.split("-")[0];
-      const calculated = zipToTimeZone(mainZip);
-      if (calculated) {
-        return {
-          timezone_offset: calculated[2],
-          has_dst: calculated[3] === 1
-        };
-      }
-      return await loaders.zipCode.load(mainZip);
-    },
+    location: async (campaignContact, _, { loaders }) =>
+      loaders.zipCode.load(campaignContact.zip.split("-")[0]),
     messages: async campaignContact => {
       if ("messages" in campaignContact) {
         return campaignContact.messages;

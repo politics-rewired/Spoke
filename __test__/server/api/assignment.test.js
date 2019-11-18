@@ -133,7 +133,6 @@ describe('test getContacts timezone stuff only', () => {
   })
 
   it('returns the correct query -- in default texting hours, with valid_timezone == true', () => {
-    timezones.defaultTimezoneIsBetweenTextingHours.mockReturnValueOnce(true)
     var query = getContacts(assignment, { validTimezone: true }, organization, campaign)
     expect(query.toString()).toMatch(
        "select * from \"campaign_contact\" where \"assignment_id\" = 1 and \"timezone_offset\" in ('-5_1', '') and \"message_status\" in ('needsResponse', 'needsMessage') order by message_status DESC, updated_at"
@@ -141,7 +140,6 @@ describe('test getContacts timezone stuff only', () => {
   }) // it
 
   it('returns the correct query -- in default texting hours, with valid_timezone == false', () => {
-    timezones.defaultTimezoneIsBetweenTextingHours.mockReturnValueOnce(true)
     var query = getContacts(assignment, { validTimezone: false }, organization, campaign)
     expect(query.toString()).toMatch(
        "select * from \"campaign_contact\" where \"assignment_id\" = 1 and \"timezone_offset\" in ('-4_1') and \"message_status\" in ('needsResponse', 'needsMessage') order by message_status DESC, updated_at"
@@ -149,7 +147,6 @@ describe('test getContacts timezone stuff only', () => {
   }) // it
 
   it('returns the correct query -- NOT in default texting hours, with valid_timezone == true', () => {
-    timezones.defaultTimezoneIsBetweenTextingHours.mockReturnValueOnce(false)
     var query = getContacts(assignment, { validTimezone: true }, organization, campaign)
     expect(query.toString()).toMatch(
       "select * from \"campaign_contact\" where \"assignment_id\" = 1 and \"timezone_offset\" in ('-5_1') and \"message_status\" in ('needsResponse', 'needsMessage') order by message_status DESC, updated_at"
@@ -157,7 +154,6 @@ describe('test getContacts timezone stuff only', () => {
   }) // it
 
   it('returns the correct query -- NOT in default texting hours, with valid_timezone == false', () => {
-    timezones.defaultTimezoneIsBetweenTextingHours.mockReturnValueOnce(false)
     var query = getContacts(assignment, { validTimezone: false }, organization, campaign)
     expect(query.toString()).toMatch(
       "select * from \"campaign_contact\" where \"assignment_id\" = 1 and \"timezone_offset\" in ('-4_1', '') and \"message_status\" in ('needsResponse', 'needsMessage') order by message_status DESC, updated_at"

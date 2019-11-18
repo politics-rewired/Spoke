@@ -23,11 +23,8 @@ const contactDataFragment = `
         location {
           city
           state
-          timezone {
-            offset
-            hasDST
-          }
         }
+        timezone
         messageStatus
         messages {
           id
@@ -138,11 +135,11 @@ const mapQueriesToProps = ({ ownProps }) => ({
             id
             isArchived
             useDynamicAssignment
+            timezone
+            textingHoursStart
+            textingHoursEnd
             organization {
               id
-              textingHoursEnforced
-              textingHoursStart
-              textingHoursEnd
               threeClickEnabled
               optOutMessage
             }

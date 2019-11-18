@@ -1,13 +1,12 @@
 import moment from "moment-timezone";
+import request from "superagent";
+import _ from "lodash";
 
 import logger from "../../logger";
 import { config } from "../../config";
 import { mapFieldsToModel } from "./lib/utils";
+import { isNowBetween } from "../../lib/timezones";
 import { Assignment, r, cacheableData } from "../models";
-import { defaultTimezoneIsBetweenTextingHours } from "../../lib";
-import { Notifications, sendUserNotification } from "../notifications";
-import _ from "lodash";
-import request from "superagent";
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -27,25 +26,8 @@ export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDu
 }
 
 /**
- * Returns true if it is currently between the start and end hours in the specified timezone.
- *
- * @param {string} timezone The timezone in which to evaluate
- * @param {number} starthour Interval starting hour in 24-hour format
- * @param {number} endHour Interval ending hour in 24-hour format
- */
-const isNowBetween = (timezone, starthour, endHour) => {
-  const campaignTime = moment()
-    .tz(timezone)
-    .startOf("day");
-
-  const startTime = campaignTime.clone().hour(starthour);
-  const endTime = campaignTime.clone().hour(endHour);
-  return moment().isBetween(startTime, endTime);
-};
-
-/**
  * Given query parameters, an assignment record, and its associated records, build a Knex query
- * to fetch matching contacts.
+ * to fetch contacts eligible for contacting _now_ by a particular user given filter constraints.
  * @param {object} assignment The assignment record to fetch contacts for
  * @param {object} contactsFilter A filter object
  * @param {object} organization The record of the organization of the assignment's campaign
@@ -60,31 +42,11 @@ export function getContacts(
   campaign,
   forCount = false
 ) {
-  // / returns list of contacts eligible for contacting _now_ by a particular user
-  const textingHoursEnforced = organization.texting_hours_enforced;
-  const textingHoursStart = organization.texting_hours_start;
-  const textingHoursEnd = organization.texting_hours_end;
-
   // 24-hours past due - why is this 24 hours offset?
   const includePastDue = contactsFilter && contactsFilter.includePastDue;
   const pastDue =
     campaign.due_by &&
     Number(campaign.due_by) + 24 * 60 * 60 * 1000 < Number(new Date());
-  const config = { textingHoursStart, textingHoursEnd, textingHoursEnforced };
-
-  if (campaign.override_organization_texting_hours) {
-    const textingHoursStart = campaign.texting_hours_start;
-    const textingHoursEnd = campaign.texting_hours_end;
-    const textingHoursEnforced = campaign.texting_hours_enforced;
-    const timezone = campaign.timezone;
-
-    config.campaignTextingHours = {
-      textingHoursStart,
-      textingHoursEnd,
-      textingHoursEnforced,
-      timezone
-    };
-  }
 
   if (
     !includePastDue &&
@@ -103,10 +65,10 @@ export function getContacts(
     const validTimezone = contactsFilter.validTimezone;
     if (validTimezone !== null) {
       const {
-        timezone: campaignTimezone,
-        textingHoursStart,
-        textingHoursEnd
-      } = config.campaignTextingHours;
+        texting_hours_start: textingHoursStart,
+        texting_hours_end: textingHoursEnd,
+        timezone: campaignTimezone
+      } = campaign;
 
       const isCampaignTimezoneValid = isNowBetween(
         campaignTimezone,

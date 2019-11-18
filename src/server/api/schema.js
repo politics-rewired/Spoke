@@ -35,7 +35,6 @@ import {
   r,
   cacheableData
 } from "../models";
-// import { isBetweenTextingHours } from '../../lib/timezones'
 import { Notifications, sendUserNotification } from "../notifications";
 import {
   resolvers as assignmentResolvers,
@@ -88,7 +87,7 @@ import {
 import { change } from "../local-auth-helpers";
 import { notifyOnTagConversation } from "./lib/alerts";
 
-import { getSendBeforeTimeUtc } from "../../lib/timezones";
+import { isNowBetween } from "../../lib/timezones";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -175,8 +174,6 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     logoImageUrl,
     introHtml,
     primaryColor,
-    overrideOrganizationTextingHours,
-    textingHoursEnforced,
     textingHoursStart,
     textingHoursEnd,
     isAutoassignEnabled,
@@ -201,8 +198,6 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     logo_image_url: isUrl(logoImageUrl) ? logoImageUrl : "",
     primary_color: primaryColor,
     intro_html: introHtml,
-    override_organization_texting_hours: overrideOrganizationTextingHours,
-    texting_hours_enforced: textingHoursEnforced,
     texting_hours_start: textingHoursStart,
     texting_hours_end: textingHoursEnd,
     is_autoassign_enabled: isAutoassignEnabled,
@@ -467,10 +462,9 @@ async function sendMessage(
       "campaign.id as campaign_id",
       "campaign.is_archived as is_archived",
       "campaign.organization_id as organization_id",
-      "campaign.override_organization_texting_hours as c_override_hours",
       "campaign.timezone as c_timezone",
+      "campaign.texting_hours_start as c_texting_hours_start",
       "campaign.texting_hours_end as c_texting_hours_end",
-      "campaign.texting_hours_enforced as c_texting_hours_enforced",
       "assignment.user_id as a_assignment_user_id",
       "opt_out.id as is_opted_out",
       "campaign_contact.timezone as contact_timezone"
@@ -540,22 +534,24 @@ async function sendMessage(
     );
   }
 
-  // const zipData = await r.table('zip_code')
-  //   .get(contact.zip)
-  //   .default(null)
+  const {
+    contact_timezone: contactTimezone,
+    c_timezone: campaignTimezone,
+    c_texting_hours_start: startHour,
+    c_texting_hours_end: endHour
+  } = record;
+  const timezone = contactTimezone || campaignTimezone;
+  const isValidSendTime = isNowBetween(timezone, startHour, endHour);
 
-  // const config = {
-  //   textingHoursEnforced: organization.texting_hours_enforced,
-  //   textingHoursStart: organization.texting_hours_start,
-  //   textingHoursEnd: organization.texting_hours_end,
-  // }
-  // const offsetData = zipData ? { offset: zipData.timezone_offset, hasDST: zipData.has_dst } : null
-  // if (!isBetweenTextingHours(offsetData, config)) {
-  //   throw new GraphQLError({
-  //     status: 400,
-  //     message: "Skipped sending because it's now outside texting hours for this contact"
-  //   })
-  // }
+  if (!isValidSendTime) {
+    throw new GraphQLError("Outside permitted texting time for this recipient");
+  }
+
+  const sendBefore = moment()
+    .tz(timezone)
+    .startOf("day")
+    .hour(endHour)
+    .utc();
 
   const { contactNumber, text } = message;
 
@@ -568,43 +564,6 @@ async function sendMessage(
     record.organization_id,
     escapedApostrophes
   );
-
-  let contactTimezone = {};
-  if (record.contact_timezone) {
-    // couldn't look up the timezone by zip record, so we load it
-    // from the campaign_contact directly if it's there
-    const offset = getTzOffset(record.contact_timezone);
-    contactTimezone.offset = offset;
-    contactTimezone.hasDST = false;
-  }
-
-  const {
-    c_override_hours,
-    c_timezone,
-    c_texting_hours_end,
-    c_texting_hours_enforced,
-    o_texting_hours_enforced,
-    o_texting_hours_end
-  } = record;
-  const sendBefore = getSendBeforeTimeUtc(
-    contactTimezone,
-    {
-      textingHoursEnd: o_texting_hours_end,
-      textingHoursEnforced: o_texting_hours_enforced
-    },
-    {
-      textingHoursEnd: c_texting_hours_end,
-      overrideOrganizationTextingHours: c_override_hours,
-      textingHoursEnforced: c_texting_hours_enforced,
-      timezone: c_timezone
-    }
-  );
-
-  const sendBeforeDate = sendBefore ? sendBefore.toDate() : null;
-
-  if (sendBeforeDate && moment(sendBeforeDate).isSameOrBefore(moment())) {
-    throw new GraphQLError("Outside permitted texting time for this recipient");
-  }
 
   const { service_type } = await getContactMessagingService(campaignContactId);
 
@@ -619,7 +578,7 @@ async function sendMessage(
     service: service_type,
     is_from_contact: false,
     queued_at: new Date(),
-    send_before: sendBeforeDate
+    send_before: sendBefore
   };
 
   const messageSavePromise = r
