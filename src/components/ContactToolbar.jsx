@@ -31,6 +31,7 @@ const ContactToolbar = function ContactToolbar(props) {
   const localTime = moment()
     .tz(timezone)
     .format("LT"); // format('h:mm a')
+
   const location = [city, state]
     .filter(item => !!item)
     .join(", ")
@@ -49,7 +50,7 @@ const ContactToolbar = function ContactToolbar(props) {
           {location !== "" && (
             <ToolbarTitle
               style={inlineStyles.locationToolbarTitle}
-              text={formattedLocation}
+              text={location}
             />
           )}
           {rightToolbarIcon}
