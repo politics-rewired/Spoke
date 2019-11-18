@@ -931,7 +931,7 @@ export async function assignTexters(job) {
               where
                 assignment_id is null
                 and campaign_id = ?
-                and archived = ?
+                and archived = ${campaign.is_archived}
               limit ?
               for update skip locked
             )
@@ -942,7 +942,7 @@ export async function assignTexters(job) {
               contacts_to_update.id = campaign_contact.id
             ;
           `,
-          [campaign_id, campaign.is_archived, contactsToAssign, assignment_id]
+          [campaign_id, contactsToAssign, assignment_id]
         );
       };
 

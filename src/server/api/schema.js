@@ -1808,9 +1808,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      const organizationId = (await r
+      const campaign = await r
         .knex("campaign")
-        .where({ id: parseInt(campaignId) }))[0].organization_id;
+        .where({ id: parseInt(campaignId) })
+        .first("*");
+
+      const organizationId = campaign.organization_id;
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
@@ -1829,12 +1832,10 @@ const rootMutations = {
           campaign_contact as current_contact
         set
           message_status = 'needsMessage'
-        from campaign
         where
-          campaign.id = current_contact.campaign_id
           and current_contact.campaign_id = ?
           and current_contact.message_status = 'messaged'
-          and archived = campaign.is_archived
+          and current_contact.archived = ${campaign.is_archived}
           and not exists (
             select
               cell
@@ -1853,6 +1854,7 @@ const rootMutations = {
       `,
         queryArgs
       );
+
       const updateResult = updateResultRaw.rowCount;
 
       return `Marked ${updateResult} campaign contacts for a second pass.`;
@@ -2234,7 +2236,7 @@ const rootMutations = {
       const campaign = await r
         .knex("campaign")
         .where({ id: campaignId })
-        .first("organization_id");
+        .first("*");
 
       const updatedCount = await r.knex.transaction(async trx => {
         const queryArgs = [parseInt(campaignId), messageStatus];
@@ -2254,7 +2256,7 @@ const rootMutations = {
             and assignment.id = campaign_contact.assignment_id
             and is_opted_out = false
             and message_status = ?
-            and archived = campaign.is_archived
+            and archived = ${campaign.is_archived}
             and not exists (
               select 1 
               from campaign_contact_tag
