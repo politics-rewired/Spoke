@@ -709,11 +709,6 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
       ? [user.id, campaignIdToAssignTo, countToAssign, assignmentId]
       : [campaignIdToAssignTo, countToAssign, assignmentId];
 
-  const print = s => {
-    console.log(s);
-    return s;
-  };
-
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
       with matching_contact as (
