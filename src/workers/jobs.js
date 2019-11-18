@@ -823,7 +823,10 @@ export async function assignTexters(job) {
         // because they will get reapportioned below
         await trx("campaign_contact")
           .where("assignment_id", "in", assignmentIds)
-          .where({ message_status: "needsMessage" })
+          .where({
+            message_status: "needsMessage",
+            archived: campaign.is_archived
+          })
           .update({ assignment_id: null });
       }
 
@@ -832,7 +835,8 @@ export async function assignTexters(job) {
       let availableContacts = await r.getCount(
         trx("campaign_contact").where({
           assignment_id: null,
-          campaign_id: cid
+          campaign_id: cid,
+          archived: campaign.is_archived
         })
       );
 
@@ -927,6 +931,7 @@ export async function assignTexters(job) {
               where
                 assignment_id is null
                 and campaign_id = ?
+                and archived = ?
               limit ?
               for update skip locked
             )
@@ -937,7 +942,7 @@ export async function assignTexters(job) {
               contacts_to_update.id = campaign_contact.id
             ;
           `,
-          [campaign_id, contactsToAssign, assignment_id]
+          [campaign_id, campaign.is_archived, contactsToAssign, assignment_id]
         );
       };
 
