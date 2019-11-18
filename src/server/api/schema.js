@@ -452,6 +452,7 @@ async function sendMessage(
     .knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId) })
+    .where({ "campaign_contact.archived": false })
     .where({ "campaign.is_archived": false })
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
     .leftJoin("opt_out", optOutJoinConditions)
@@ -1400,7 +1401,9 @@ const rootMutations = {
       }
 
       const contactsCount = await r.getCount(
-        r.knex("campaign_contact").where("assignment_id", assignmentId)
+        r
+          .knex("campaign_contact")
+          .where({ assignment_id: assignmentId, archived: false })
       );
 
       numberContacts = numberContacts || 1;
@@ -1415,7 +1418,8 @@ const rootMutations = {
         r.knex("campaign_contact").where({
           assignment_id: assignmentId,
           message_status: "needsMessage",
-          is_opted_out: false
+          is_opted_out: false,
+          archived: false
         })
       );
 
@@ -1432,7 +1436,8 @@ const rootMutations = {
             .knex("campaign_contact")
             .where({
               assignment_id: null,
-              campaign_id: campaign.id
+              campaign_id: campaign.id,
+              archived: false
             })
             .limit(numberContacts)
             .select("id")
@@ -1669,8 +1674,11 @@ const rootMutations = {
 
       const contacts = await r
         .knex("campaign_contact")
-        .where({ message_status: "needsMessage" })
-        .where({ assignment_id: assignmentId })
+        .where({
+          message_status: "needsMessage",
+          assignment_id: assignmentId,
+          archived: false
+        })
         .orderByRaw("updated_at")
         .limit(config.BULK_SEND_CHUNK_SIZE);
 
@@ -1821,9 +1829,12 @@ const rootMutations = {
           campaign_contact as current_contact
         set
           message_status = 'needsMessage'
+        from campaign
         where
-          current_contact.message_status = 'messaged'
+          campaign.id = current_contact.campaign_id
           and current_contact.campaign_id = ?
+          and current_contact.message_status = 'messaged'
+          and archived = campaign.is_archived
           and not exists (
             select
               cell
@@ -2236,12 +2247,14 @@ const rootMutations = {
           set
             assignment_id = null
           from
-            assignment
+            assignment, campaign
           where
             campaign_contact.campaign_id = ?
+            and campaign.id = campaign_contact.campaign_id
             and assignment.id = campaign_contact.assignment_id
             and is_opted_out = false
             and message_status = ?
+            and archived = campaign.is_archived
             and not exists (
               select 1 
               from campaign_contact_tag
