@@ -918,6 +918,10 @@ export async function assignTexters(job) {
         })
       );
 
+      /**
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
       const assignContacts = async directive => {
         const {
           assignment: { id: assignment_id, campaign_id },
@@ -931,7 +935,7 @@ export async function assignTexters(job) {
               where
                 assignment_id is null
                 and campaign_id = ?
-                and archived = ?
+                and archived = ${campaign.is_archived}
               limit ?
               for update skip locked
             )
@@ -942,7 +946,7 @@ export async function assignTexters(job) {
               contacts_to_update.id = campaign_contact.id
             ;
           `,
-          [campaign_id, campaign.is_archived, contactsToAssign, assignment_id]
+          [campaign_id, contactsToAssign, assignment_id]
         );
       };
 

@@ -245,7 +245,7 @@ export const resolvers = {
           where
             campaign_id = ?
             and assignment_id is null
-            and archived = ?
+            and archived = ${campaign.is_archived}
             and not exists (
               select 1
               from campaign_contact_tag
@@ -256,7 +256,7 @@ export const resolvers = {
             and is_opted_out = false
         ) as contact_exists
       `,
-        [campaign.id, campaign.is_archived]
+        [campaign.id]
       );
 
       return rows[0] && rows[0].contact_exists;
