@@ -1811,7 +1811,7 @@ const rootMutations = {
       const campaign = await r
         .knex("campaign")
         .where({ id: parseInt(campaignId) })
-        .first("*");
+        .first(["organization_id", "is_archived"]);
 
       const organizationId = campaign.organization_id;
 
@@ -2238,7 +2238,7 @@ const rootMutations = {
       const campaign = await r
         .knex("campaign")
         .where({ id: campaignId })
-        .first("*");
+        .first(["organization_id", "is_archived"]);
 
       const updatedCount = await r.knex.transaction(async trx => {
         const queryArgs = [parseInt(campaignId), messageStatus];
