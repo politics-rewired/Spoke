@@ -23,12 +23,11 @@ export const resolvers = {
     question: async interactionStep => interactionStep,
     questionResponse: async (interactionStep, { campaignContactId }) =>
       r
-        .table("question_response")
-        .getAll(campaignContactId, { index: "campaign_contact_id" })
-        .filter({
+        .reader("question_response")
+        .where({
+          campaign_contact_id: campaignContactId,
           interaction_step_id: interactionStep.id
         })
-        .limit(1)(0)
-        .default(null)
+        .first()
   }
 };

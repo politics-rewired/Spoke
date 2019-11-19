@@ -758,11 +758,15 @@ export const resolvers = {
       );
     },
     contacts: async (assignment, { contactsFilter }) => {
-      const campaign = await r.table("campaign").get(assignment.campaign_id);
+      const campaign = await r
+        .reader("campaign")
+        .where({ id: assignment.campaign_id })
+        .first();
 
       const organization = await r
-        .table("organization")
-        .get(campaign.organization_id);
+        .reader("organization")
+        .where({ id: campaign.organization_id })
+        .first();
       return getContacts(assignment, contactsFilter, organization, campaign);
     },
     campaignCannedResponses: async assignment =>

@@ -12,11 +12,13 @@ export const Notifications = {
 
 async function getOrganizationOwner(organizationId) {
   return await r
-    .table("user_organization")
-    .getAll(organizationId, { index: "organization_id" })
-    .filter({ role: "OWNER" })
-    .limit(1)
-    .eqJoin("user_id", r.table("user"))("right")(0);
+    .reader("user")
+    .join("user_organization", "user_organization.user_id", "user.id")
+    .where({
+      "user_organization.organization_id": organizationId,
+      role: "OWNER"
+    })
+    .first("user.*");
 }
 const sendAssignmentUserNotification = async (assignment, notification) => {
   const campaign = await Campaign.get(assignment.campaign_id);
@@ -62,8 +64,8 @@ export const sendUserNotification = async notification => {
 
   if (type === Notifications.CAMPAIGN_STARTED) {
     const assignments = await r
-      .table("assignment")
-      .getAll(notification.campaignId, { index: "campaign_id" })
+      .reader("assignment")
+      .where({ campaign_id: notification.campaignId })
       .pluck(["user_id", "campaign_id"]);
 
     const count = assignments.length;
@@ -84,10 +86,9 @@ export const sendUserNotification = async notification => {
     const assignment = await Assignment.get(notification.assignmentId);
     const campaign = await Campaign.get(assignment.campaign_id);
     const campaignContact = await r
-      .table("campaign_contact")
-      .getAll(notification.contactNumber, { index: "cell" })
-      .filter({ campaign_id: campaign.id })
-      .limit(1)(0);
+      .reader("campaign_contact")
+      .where({ campaign_id: campaign.id, cell: notification.contactNumber })
+      .first();
 
     if (!campaignContact.is_opted_out && !campaign.is_archived) {
       const user = await User.get(assignment.user_id);
@@ -118,6 +119,7 @@ export const sendUserNotification = async notification => {
   }
 };
 
+// TODO: knex does not support listening for changes
 const setupIncomingReplyNotification = () =>
   r
     .table("message")
@@ -132,6 +134,7 @@ const setupIncomingReplyNotification = () =>
       }
     });
 
+// TODO: knex does not support listening for changes
 const setupNewAssignmentNotification = () =>
   r
     .table("assignment")

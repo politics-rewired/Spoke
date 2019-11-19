@@ -327,6 +327,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     const convertedResponses = [];
     for (let index = 0; index < cannedResponses.length; index++) {
       const response = cannedResponses[index];
+      // TODO: this seems like a bad way of doing this...
       const newId = await Math.floor(Math.random() * 10000000);
       convertedResponses.push({
         ...response,
@@ -336,10 +337,10 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     }
 
     await r
-      .table("canned_response")
-      .getAll(id, { index: "campaign_id" })
-      .filter({ user_id: "" })
-      .delete();
+      .knex("canned_response")
+      .where({ campaign_id: id })
+      .whereNull("user_id")
+      .del();
     await CannedResponse.save(convertedResponses);
     await cacheableData.cannedResponse.clearQuery({
       userId: "",
@@ -643,12 +644,12 @@ async function sendMessage(
 const rootMutations = {
   RootMutation: {
     userAgreeTerms: async (_, { userId }, { user, loaders }) => {
-      const currentUser = await r
-        .table("user")
-        .get(userId)
-        .update({
-          terms: true
-        });
+      // TODO: permissions check needed -- user.id === userId
+      const [currentUser] = await r
+        .knex("user")
+        .where({ id: userId })
+        .update({ terms: true })
+        .returning("*");
       return currentUser;
     },
 
@@ -726,6 +727,7 @@ const rootMutations = {
       { userId, organizationId, roles },
       { user, loaders }
     ) => {
+      // TODO: wrap in transaction
       const currentRoles = (await r
         .knex("user_organization")
         .where({
@@ -743,10 +745,13 @@ const rootMutations = {
       currentRoles.forEach(async curRole => {
         if (roles.indexOf(curRole) === -1) {
           await r
-            .table("user_organization")
-            .getAll([organizationId, userId], { index: "organization_user" })
-            .filter({ role: curRole })
-            .delete();
+            .knex("user_organization")
+            .where({
+              user_id: userId,
+              organization_id: organizationId,
+              role: curRole
+            })
+            .del();
         }
       });
 
@@ -846,17 +851,18 @@ const rootMutations = {
     },
 
     joinOrganization: async (_, { organizationUuid }, { user, loaders }) => {
-      let organization;
-      [organization] = await r
+      const organization = await r
         .knex("organization")
-        .where("uuid", organizationUuid);
+        .where("uuid", organizationUuid)
+        .first();
       if (organization) {
         const userOrg = await r
-          .table("user_organization")
-          .getAll(user.id, { index: "user_id" })
-          .filter({ organization_id: organization.id })
-          .limit(1)(0)
-          .default(null);
+          .knex("user_organization")
+          .where({
+            user_id: user.id,
+            organization_id: organization.id
+          })
+          .first();
         if (!userOrg) {
           await UserOrganization.save({
             user_id: user.id,
@@ -890,26 +896,24 @@ const rootMutations = {
     ) => {
       const campaign = await r
         .knex("campaign")
-        .leftJoin("organization", "campaign.organization_id", "organization.id")
+        .join("organization", "campaign.organization_id", "organization.id")
         .where({
-          "campaign.id": campaignId,
+          "campaign.id": parseInt(campaignId),
           "campaign.use_dynamic_assignment": true,
           "organization.uuid": organizationUuid
         })
         .select("campaign.*")
         .first();
       if (!campaign) {
-        throw new GraphQLError({
-          status: 403,
-          message: "Invalid join request"
-        });
+        throw new Error("Invalid join request");
       }
       const assignment = await r
-        .table("assignment")
-        .getAll(user.id, { index: "user_id" })
-        .filter({ campaign_id: campaign.id })
-        .limit(1)(0)
-        .default(null);
+        .knex("assignment")
+        .where({
+          user_id: user.id,
+          campaign_id: campaign.id
+        })
+        .first();
       if (!assignment) {
         await Assignment.save({
           user_id: user.id,
@@ -1738,10 +1742,10 @@ const rootMutations = {
       }
       // TODO: maybe undo action_handler
       await r
-        .table("question_response")
-        .getAll(campaignContactId, { index: "campaign_contact_id" })
-        .getAll(...interactionStepIds, { index: "interaction_step_id" })
-        .delete();
+        .knex("question_response")
+        .where({ campaign_contact_id: campaignContactId })
+        .whereIn("interaction_step_id", interactionStepIds)
+        .del();
       return contact;
     },
 
@@ -1750,16 +1754,19 @@ const rootMutations = {
       { questionResponses, campaignContactId },
       { loaders }
     ) => {
+      // TODO: wrap in transaction
       const count = questionResponses.length;
 
       for (let i = 0; i < count; i++) {
         const questionResponse = questionResponses[i];
         const { interactionStepId, value } = questionResponse;
         await r
-          .table("question_response")
-          .getAll(campaignContactId, { index: "campaign_contact_id" })
-          .filter({ interaction_step_id: interactionStepId })
-          .delete();
+          .knex("question_response")
+          .where({
+            campaign_contact_id: campaignContactId,
+            interaction_step_id: interactionStepId
+          })
+          .del();
 
         // TODO: maybe undo action_handler if updated answer
 
@@ -2674,9 +2681,10 @@ const rootResolvers = {
       await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
       return team;
     },
+    // TODO: this return a single element, not a single element array
     inviteByHash: async (_, { hash }, { loaders, user }) => {
       authRequired(user);
-      return r.table("invite").filter({ hash });
+      return r.reader("invite").where({ hash });
     },
     currentUser: async (_, { id }, { user }) => {
       if (!user) {
@@ -2699,7 +2707,7 @@ const rootResolvers = {
     },
     organizations: async (_, { id }, { user }) => {
       await superAdminRequired(user);
-      return r.table("organization");
+      return r.reader("organization");
     },
     availableActions: (_, { organizationId }, { user }) => {
       if (!config.ACTION_HANDLERS) {

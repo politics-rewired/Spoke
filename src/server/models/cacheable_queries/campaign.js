@@ -22,13 +22,16 @@ import { organizationCache } from "./organization";
 const cacheKey = id => `${config.CACHE_PREFIX}campaign-${id}`;
 
 const dbCustomFields = async id => {
-  const campaignContacts = await r
-    .table("campaign_contact")
-    .getAll(id, { index: "campaign_id" })
-    .limit(1);
-  if (campaignContacts.length > 0) {
-    return Object.keys(JSON.parse(campaignContacts[0].custom_fields));
+  const campaignContact = await r
+    .reader("campaign_contact")
+    .where({ campaign_id: id })
+    .first("custom_fields");
+
+  if (campaignContact) {
+    const customFields = JSON.parse(campaignContact.custom_fields || "{}");
+    return Object.keys(customFields);
   }
+
   return [];
 };
 

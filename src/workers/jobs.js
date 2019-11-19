@@ -181,9 +181,9 @@ export async function uploadContacts(job) {
   let numbersClient, numbersRequest, landlinesFilteredOut;
 
   await r
-    .table("campaign_contact")
-    .getAll(campaignId, { index: "campaign_id" })
-    .delete();
+    .knex("campaign_contact")
+    .where({ campaign_id: campaignId })
+    .del();
 
   let jobPayload = await gunzip(new Buffer(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
@@ -355,9 +355,9 @@ export async function uploadContacts(job) {
         .update({ result_message: jobMessages.join("\n") });
     } else {
       await r
-        .table("job_request")
-        .get(job.id)
-        .delete();
+        .knex("job_request")
+        .where({ id: job.id })
+        .del();
     }
   }
   await cacheableData.campaign.reload(campaignId);
@@ -555,9 +555,9 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         });
     }
     await r
-      .table("job_request")
-      .get(jobEvent.jobId)
-      .delete();
+      .knex("job_request")
+      .where({ id: jobEvent.jobId })
+      .del();
     await cacheableData.campaign.reload(jobEvent.campaignId);
     return { completed: 1, validationStats };
   } else if (jobEvent.part < jobEvent.totalParts - 1) {

@@ -460,11 +460,12 @@ export async function reassignConversations(
   const campaignIdAssignmentIdMap = new Map();
   for (const [campaignId, _] of campaignIdContactIdsMap) {
     let assignment = await r
-      .table("assignment")
-      .getAll(newTexterUserId, { index: "user_id" })
-      .filter({ campaign_id: campaignId })
-      .limit(1)(0)
-      .default(null);
+      .knex("assignment")
+      .where({
+        user_id: newTexterUserId,
+        campaign_id: campaignId
+      })
+      .first();
     if (!assignment) {
       assignment = await Assignment.save({
         user_id: newTexterUserId,

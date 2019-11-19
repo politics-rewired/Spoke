@@ -45,9 +45,7 @@ export const resolvers = {
     },
     optOuts: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "ADMIN");
-      return r
-        .table("opt_out")
-        .getAll(organization.id, { index: "organization_id" });
+      return r.reader("opt_out").where({ organization_id: organization.id });
     },
     people: async (organization, { role, campaignId, offset }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
