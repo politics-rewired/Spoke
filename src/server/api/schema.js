@@ -1822,10 +1822,12 @@ const rootMutations = {
         queryArgs.push(parseInt(excludeAgeInHours));
       }
 
-      /*
-        "Mark Campaign for Second Pass", will only mark contacts for a second
-        pass that do not have a more recently created membership in another campaign.
-      */
+      /**
+       * "Mark Campaign for Second Pass", will only mark contacts for a second
+       * pass that do not have a more recently created membership in another campaign.
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
       const updateResultRaw = await r.knex.raw(
         `
         update
@@ -2242,6 +2244,10 @@ const rootMutations = {
         const queryArgs = [parseInt(campaignId), messageStatus];
         if (ageInHours) queryArgs.push(ageInHoursAgo);
 
+        /**
+         * Using SQL injection to avoid passing archived as a binding
+         * Should help with guaranteeing partial index usage
+         */
         const rawResult = await trx.raw(
           `
           update

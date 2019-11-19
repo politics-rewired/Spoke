@@ -918,6 +918,10 @@ export async function assignTexters(job) {
         })
       );
 
+      /**
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
       const assignContacts = async directive => {
         const {
           assignment: { id: assignment_id, campaign_id },
