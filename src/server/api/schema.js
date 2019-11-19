@@ -1834,8 +1834,7 @@ const rootMutations = {
           campaign_contact as current_contact
         set
           message_status = 'needsMessage'
-        where
-          and current_contact.campaign_id = ?
+        where current_contact.campaign_id = ?
           and current_contact.message_status = 'messaged'
           and current_contact.archived = ${campaign.is_archived}
           and not exists (
