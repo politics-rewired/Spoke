@@ -824,20 +824,21 @@ export async function assignTexters(job) {
         await trx("campaign_contact")
           .where("assignment_id", "in", assignmentIds)
           .where({
-            message_status: "needsMessage",
-            archived: campaign.is_archived
+            message_status: "needsMessage"
           })
+          .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
           .update({ assignment_id: null });
       }
 
       await updateJob(job, 20);
 
       let availableContacts = await r.getCount(
-        trx("campaign_contact").where({
-          assignment_id: null,
-          campaign_id: cid,
-          archived: campaign.is_archived
-        })
+        trx("campaign_contact")
+          .where({
+            assignment_id: null,
+            campaign_id: cid
+          })
+          .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
       );
 
       const newAssignments = [],

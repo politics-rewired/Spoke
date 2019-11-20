@@ -57,11 +57,13 @@ export function getContacts(
     return [];
   }
 
-  let query = r.reader("campaign_contact").where({
-    campaign_id: campaign.id,
-    archived: campaign.is_archived,
-    assignment_id: assignment.id
-  });
+  let query = r
+    .reader("campaign_contact")
+    .where({
+      campaign_id: campaign.id,
+      assignment_id: assignment.id
+    })
+    .whereRaw(`archived = ${campaign.is_archived}`);
 
   if (contactsFilter) {
     const validTimezone = contactsFilter.validTimezone;

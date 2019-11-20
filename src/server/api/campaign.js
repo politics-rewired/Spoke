@@ -121,11 +121,13 @@ export const resolvers = {
         .count(),
     optOutsCount: async campaign =>
       await r.getCount(
-        r.reader("campaign_contact").where({
-          is_opted_out: true,
-          campaign_id: campaign.id,
-          archived: campaign.is_archived
-        })
+        r
+          .reader("campaign_contact")
+          .where({
+            is_opted_out: true,
+            campaign_id: campaign.id
+          })
+          .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
       )
   },
   CampaignsReturn: {
@@ -225,18 +227,23 @@ export const resolvers = {
     contacts: async campaign =>
       r
         .reader("campaign_contact")
-        .where({ campaign_id: campaign.id, archived: campaign.is_archived }),
+        .where({ campaign_id: campaign.id })
+        .whereRaw(`archived = ${campaign.is_archived}`), // partial index friendly
     contactsCount: async campaign =>
       await r.getCount(
         r
           .reader("campaign_contact")
-          .where({ campaign_id: campaign.id, archived: campaign.is_archived })
+          .where({ campaign_id: campaign.id })
+          .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
       ),
     hasUnassignedContacts: async campaign => {
       if (config.BAD_BENS_DISABLE_HAS_UNASSIGNED_CONTACTS) {
         return false;
       }
 
+      /**
+       * SQL injection for archived = to enable use of partial index
+       */
       const { rows } = await r.reader.raw(
         `
         select exists (
@@ -268,9 +275,9 @@ export const resolvers = {
         .where({
           campaign_id: campaign.id,
           message_status: "needsMessage",
-          archived: campaign.is_archived,
           is_opted_out: false
         })
+        .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
         .limit(1);
       return contacts.length > 0;
     },
@@ -282,10 +289,10 @@ export const resolvers = {
         .pluck("campaign_contact.id")
         .where({
           "campaign_contact.campaign_id": campaign.id,
-          archived: campaign.is_archived,
           message_status: "needsResponse",
           is_opted_out: false
         })
+        .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
         .limit(1);
 
       const notAssignableTagSubQuery = r.reader
