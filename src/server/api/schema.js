@@ -452,7 +452,7 @@ async function sendMessage(
     .knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId) })
-    .where({ "campaign_contact.archived": false })
+    .whereRaw("campaign_contact.archived = false")
     .where({ "campaign.is_archived": false })
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
     .leftJoin("opt_out", optOutJoinConditions)
@@ -1403,7 +1403,8 @@ const rootMutations = {
       const contactsCount = await r.getCount(
         r
           .knex("campaign_contact")
-          .where({ assignment_id: assignmentId, archived: false })
+          .where({ assignment_id: assignmentId })
+          .whereRaw("archived = false") // partial index friendly
       );
 
       numberContacts = numberContacts || 1;
@@ -1415,12 +1416,14 @@ const rootMutations = {
       }
       // Don't add more if they already have that many
       const result = await r.getCount(
-        r.knex("campaign_contact").where({
-          assignment_id: assignmentId,
-          message_status: "needsMessage",
-          is_opted_out: false,
-          archived: false
-        })
+        r
+          .knex("campaign_contact")
+          .where({
+            assignment_id: assignmentId,
+            message_status: "needsMessage",
+            is_opted_out: false
+          })
+          .whereRaw("archived = false") // partial index friendly
       );
 
       if (result >= numberContacts) {
@@ -1436,9 +1439,9 @@ const rootMutations = {
             .knex("campaign_contact")
             .where({
               assignment_id: null,
-              campaign_id: campaign.id,
-              archived: false
+              campaign_id: campaign.id
             })
+            .whereRaw("archived = false") // partial index friendly
             .limit(numberContacts)
             .select("id")
         )
@@ -1676,9 +1679,9 @@ const rootMutations = {
         .knex("campaign_contact")
         .where({
           message_status: "needsMessage",
-          assignment_id: assignmentId,
-          archived: false
+          assignment_id: assignmentId
         })
+        .whereRaw("archived = false") // partial index friendly
         .orderByRaw("updated_at")
         .limit(config.BULK_SEND_CHUNK_SIZE);
 
