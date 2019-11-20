@@ -63,7 +63,7 @@ export function getContacts(
       campaign_id: campaign.id,
       assignment_id: assignment.id
     })
-    .whereRaw(`archived = ${campaign.is_archived}`);
+    .whereRaw(`archived = ${campaign.is_archived}`); // partial index friendly
 
   if (contactsFilter) {
     const validTimezone = contactsFilter.validTimezone;
