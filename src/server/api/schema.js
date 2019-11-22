@@ -1040,6 +1040,7 @@ const rootMutations = {
         title: "COPY - " + campaign.title,
         description: campaign.description,
         due_by: campaign.dueBy,
+        timezone: campaign.timezone,
         is_started: false,
         is_archived: false
       });
