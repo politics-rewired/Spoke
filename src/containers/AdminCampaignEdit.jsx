@@ -345,6 +345,15 @@ class AdminCampaignEdit extends React.Component {
           this.state.campaignFormValues.dueBy !== null
       },
       {
+        title: "Texting Hours",
+        content: CampaignTextingHoursForm,
+        keys: ["textingHoursStart", "textingHoursEnd", "timezone"],
+        checkCompleted: () => true,
+        blocksStarting: false,
+        expandAfterCampaignStarts: true,
+        expandableBySuperVolunteers: false
+      },
+      {
         title: "Contacts",
         content: CampaignContactsForm,
         keys: [
@@ -473,15 +482,6 @@ class AdminCampaignEdit extends React.Component {
         extraProps: {
           customFields: this.props.campaignData.campaign.customFields
         }
-      },
-      {
-        title: "Texting Hours",
-        content: CampaignTextingHoursForm,
-        keys: ["textingHoursStart", "textingHoursEnd", "timezone"],
-        checkCompleted: () => true,
-        blocksStarting: false,
-        expandAfterCampaignStarts: true,
-        expandableBySuperVolunteers: false
       },
       {
         title: "Autoassign Mode",
