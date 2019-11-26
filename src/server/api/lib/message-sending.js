@@ -1,5 +1,6 @@
 import { r } from "../../models";
 import { config } from "../../../config";
+import groupBy from "lodash/groupBy";
 
 export const SpokeSendStatus = Object.freeze({
   Queued: "QUEUED",
@@ -18,7 +19,10 @@ export const SpokeSendStatus = Object.freeze({
  *
  * @param {number} organizationId The ID of organization
  */
-export const getMessagingServiceCandidates = async organizationId => {
+export const getMessagingServiceCandidates = async (
+  organizationId,
+  serviceType
+) => {
   const { rows: messagingServiceCandidates } = await r.reader.raw(
     `
       select
@@ -27,13 +31,13 @@ export const getMessagingServiceCandidates = async organizationId => {
       from messaging_service
       left join messaging_service_stick
         on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-      where
-        messaging_service.organization_id = ?
+      where messaging_service.service_type = ?
+        and messaging_service.organization_id = ?
       group by
         messaging_service.messaging_service_sid
       order by count desc
     `,
-    [organizationId]
+    [serviceType, organizationId]
   );
   return messagingServiceCandidates;
 };
@@ -53,7 +57,15 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
     rows: [messaging_service]
   } = await r.knex.raw(
     `
-      with chosen_messaging_service_sid as (
+      with service_type_selection as (
+        select
+          cell,
+          get_messaging_service_type(max(zip)) as service_type
+        from campaign_contact
+        where cell = ?
+        group by cell
+      ),
+      chosen_messaging_service_sid as (
         select
           messaging_service.messaging_service_sid,
           count(messaging_service_stick.messaging_service_sid) as count
@@ -61,6 +73,7 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
         left join messaging_service_stick
           on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
         where messaging_service.organization_id = ?
+          and messaging_service.service_type = ( select service_type from service_type_selection )
         group by
           messaging_service.messaging_service_sid
         order by count asc
@@ -75,7 +88,7 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
       where messaging_service.messaging_service_sid = insert_results.messaging_service_sid
       limit 1;
     `,
-    [organizationId, cell, organizationId]
+    [cell, organizationId, cell, organizationId]
   );
 
   return messaging_service;
@@ -173,7 +186,8 @@ export const assignMissingMessagingServices = async (
   const { rows } = await trx.raw(
     `
       select
-        distinct campaign_contact.cell
+        distinct campaign_contact.cell,
+        get_messaging_service_type(campaign_contact.zip) as service_type
       from
         messaging_service_stick
         join messaging_service
@@ -187,25 +201,44 @@ export const assignMissingMessagingServices = async (
     `,
     [organizationId, campaignId]
   );
-  const cells = rows.map(r => r.cell);
 
-  if (cells.length === 0) return;
+  if (rows.length === 0) return;
 
-  const candidateServices = await getMessagingServiceCandidates(organizationId);
+  const cellsByServiceType = groupBy(rows, r => r.service_type);
+  const messagingServiceCandidatesByServiceType = {};
 
-  // Do not attempt assignment if there are no messaging service candidates
-  if (candidateServices.length === 0) return;
+  for (let serviceType of Object.keys(cellsByServiceType)) {
+    messagingServiceCandidatesByServiceType[
+      serviceType
+    ] = await getMessagingServiceCandidates(organizationId, serviceType);
 
-  // TODO - rather than assign the same amount to all candidate services, this should assign to
-  //        the candidates with the fewest assignments first to maintain an even distribution
-  const toInsert = cells.map((cell, idx) => ({
-    cell,
-    organization_id: organizationId,
-    messaging_service_sid:
-      candidateServices[idx % candidateServices.length].messaging_service_sid
-  }));
+    // Do not attempt assignment if there are no messaging service candidates
+    if (messagingServiceCandidatesByServiceType[serviceType].length === 0)
+      return;
+  }
 
-  return await trx("messaging_service_stick").insert(toInsert);
+  const toInsertByType = {};
+
+  for (let serviceType of Object.keys(cellsByServiceType)) {
+    const candidates = messagingServiceCandidatesByServiceType[serviceType];
+
+    toInsertByType[serviceType] = cellsByServiceType[serviceType].map(
+      (r, idx) => ({
+        cell: r.cell,
+
+        organization_id: organizationId,
+        messaging_service_sid:
+          candidates[idx % candidates.length].messaging_service_sid
+      })
+    );
+  }
+
+  let allToInsert = [];
+  for (let serviceType of Object.keys(toInsertByType)) {
+    allToInsert = allToInsert.concat(toInsertByType[serviceType]);
+  }
+
+  return await trx("messaging_service_stick").insert(allToInsert);
 };
 
 const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
