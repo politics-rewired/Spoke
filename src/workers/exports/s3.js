@@ -40,7 +40,12 @@ const getDownloadUrl = async (bucket, key) => {
   const s3Client = createS3(bucket);
   const expiresSeconds = 60 * 60 * 24;
   const options = { Key: key, Expires: expiresSeconds };
-  return s3Client.getSignedUrl("getObject", options);
+  return new Promise((resolve, reject) => {
+    s3Client.getSignedUrl("getObject", options, (err, url) => {
+      if (err) reject(err);
+      resolve(url);
+    });
+  });
 };
 
 module.exports = {
