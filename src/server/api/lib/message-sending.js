@@ -181,7 +181,6 @@ export const assignMissingMessagingServices = async (
   organizationId
 ) => {
   // Do not attempt assignment if we're using fakeservice
-  console.log("TCL: config.DEFAULT_SERVICE", config.DEFAULT_SERVICE);
   if (config.DEFAULT_SERVICE === "fakeservice") return;
 
   const { rows } = await trx.raw(
@@ -206,7 +205,6 @@ export const assignMissingMessagingServices = async (
   if (rows.length === 0) return;
 
   const cellsByServiceType = groupBy(rows, r => r.service_type);
-  console.log("TCL: cellsByServiceType", cellsByServiceType);
   const messagingServiceCandidatesByServiceType = {};
 
   for (let serviceType of Object.keys(cellsByServiceType)) {
@@ -222,15 +220,15 @@ export const assignMissingMessagingServices = async (
   const toInsertByType = {};
 
   for (let serviceType of Object.keys(cellsByServiceType)) {
+    const candidates = messagingServiceCandidatesByServiceType[serviceType];
+
     toInsertByType[serviceType] = cellsByServiceType[serviceType].map(
       (r, idx) => ({
         cell: r.cell,
 
         organization_id: organizationId,
         messaging_service_sid:
-          messagingServiceCandidatesByServiceType[serviceType][
-            idx % messagingServiceCandidatesByServiceType[serviceType].length
-          ].messaging_service_sid
+          candidates[idx % candidates.length].messaging_service_sid
       })
     );
   }
