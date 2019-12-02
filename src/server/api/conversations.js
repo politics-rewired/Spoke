@@ -54,6 +54,14 @@ async function getConversationsJoinsAndWhereClause(
       );
   }
 
+  if (campaignsFilter) {
+    if ("isArchived" in campaignsFilter) {
+      query = query.whereRaw(
+        `campaign_contact.archived = ${campaignsFilter.isArchived}`
+      );
+    }
+  }
+
   query = addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
     query,
     contactsFilter && contactsFilter.messageStatus
