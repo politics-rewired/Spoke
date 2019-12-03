@@ -54,7 +54,7 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
     organizationId,
     campaignsFilter
   );
-  campaignsQuery = campaignsQuery.orderBy("due_by", "desc").orderBy("id");
+  campaignsQuery = campaignsQuery.orderBy("id", "asc");
 
   if (cursor) {
     // A limit of 0 means a page size of 'All'
