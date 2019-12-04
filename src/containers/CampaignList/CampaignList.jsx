@@ -83,6 +83,15 @@ export class CampaignList extends React.Component {
             onClick={() => unarchiveCampaign(campaign.id)}
           />
         )}
+        <MenuItem
+          primaryText="Delete Unmessaged Contacts"
+          onClick={startOperation("deleteNeedsMessage", campaign)}
+        />
+
+        <MenuItem
+          primaryText="Un-Mark for Second Pass"
+          onClick={startOperation("unMarkForSecondPass", campaign)}
+        />
       </IconMenu>
     );
   }
