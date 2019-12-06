@@ -1865,6 +1865,94 @@ const rootMutations = {
       return `Marked ${updateResult} campaign contacts for a second pass.`;
     },
 
+    unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {
+      // verify permissions
+      const campaign = await r
+        .knex("campaign")
+        .where({ id: parseInt(campaignId) })
+        .first(["organization_id", "is_archived"]);
+
+      const organizationId = campaign.organization_id;
+
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      /**
+       * "Un-Mark Campaign for Second Pass", will only mark contacts as messaged
+       * if they are currently needsMessage and have been sent a message and have not replied
+       *
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
+      const updateResultRaw = await r.knex.raw(
+        `
+        update
+          campaign_contact
+        set
+          message_status = 'messaged'
+        where campaign_contact.campaign_id = ?
+          and campaign_contact.message_status = 'needsMessage'
+          and campaign_contact.archived = ${campaign.is_archived}
+          and exists (
+            select 1
+            from message
+            where message.campaign_contact_id = campaign_contact.id
+              and is_from_contact = false
+          ) 
+          and not exists (
+            select 1
+            from message
+            where message.campaign_contact_id = campaign_contact.id
+              and is_from_contact = true
+          )
+        ;
+      `,
+        [parseInt(campaignId)]
+      );
+
+      const updateResult = updateResultRaw.rowCount;
+
+      return `Un-Marked ${updateResult} campaign contacts for a second pass.`;
+    },
+
+    deleteNeedsMessage: async (_ignore, { campaignId }, { user }) => {
+      // verify permissions
+      const campaign = await r
+        .knex("campaign")
+        .where({ id: parseInt(campaignId) })
+        .first(["organization_id", "is_archived"]);
+
+      const organizationId = campaign.organization_id;
+
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      /**
+       * deleteNeedsMessage will only delete contacts
+       * if they are currently needsMessage and have NOT been sent a message
+       *
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
+      const deleteResult = await r.knex.raw(
+        `
+        delete from campaign_contact
+        where campaign_contact.campaign_id = ?
+          and campaign_contact.message_status = 'needsMessage'
+          and campaign_contact.archived = ${campaign.is_archived}
+          and not exists (
+            select 1
+            from message
+            where message.campaign_contact_id = campaign_contact.id
+          ) 
+        ;
+      `,
+        [parseInt(campaignId)]
+      );
+
+      const updateResult = deleteResult.rowCount;
+
+      return `Deleted ${updateResult} unmessaged campaign contacts`;
+    },
+
     insertLinkDomain: async (
       _ignore,
       { organizationId, domain, maxUsageCount },

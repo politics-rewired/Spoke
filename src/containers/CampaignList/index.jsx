@@ -187,6 +187,26 @@ const mapMutationsToProps = () => ({
       campaignId,
       ageInHours
     }
+  }),
+  deleteNeedsMessage: (campaignId, _) => ({
+    mutation: gql`
+      mutation deleteNeedsMessage($campaignId: String!) {
+        deleteNeedsMessage(campaignId: $campaignId)
+      }
+    `,
+    variables: {
+      campaignId
+    }
+  }),
+  unMarkForSecondPass: (campaignId, _) => ({
+    mutation: gql`
+      mutation unMarkForSecondPass($campaignId: String!) {
+        unMarkForSecondPass(campaignId: $campaignId)
+      }
+    `,
+    variables: {
+      campaignId
+    }
   })
 });
 
