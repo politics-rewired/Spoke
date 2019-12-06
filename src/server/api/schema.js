@@ -1876,10 +1876,8 @@ const rootMutations = {
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
-      const queryArgs = [parseInt(campaignId)];
-
       /**
-       * "UN-Mark Campaign for Second Pass", will only mark contacts as messaged
+       * "Un-Mark Campaign for Second Pass", will only mark contacts as messaged
        * if they are currently needsMessage and have been sent a message and have not replied
        *
        * Using SQL injection to avoid passing archived as a binding
@@ -1908,7 +1906,7 @@ const rootMutations = {
           )
         ;
       `,
-        queryArgs
+        [parseInt(campaignId)]
       );
 
       const updateResult = updateResultRaw.rowCount;
@@ -1927,11 +1925,9 @@ const rootMutations = {
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
-      const queryArgs = [parseInt(campaignId)];
-
       /**
-       * "UN-Mark Campaign for Second Pass", will only mark contacts as messaged
-       * if they are currently needsMessage and have been sent a message and have not replied
+       * deleteNeedsMessage will only delete contacts
+       * if they are currently needsMessage and have NOT been sent a message
        *
        * Using SQL injection to avoid passing archived as a binding
        * Should help with guaranteeing partial index usage
@@ -1949,7 +1945,7 @@ const rootMutations = {
           ) 
         ;
       `,
-        queryArgs
+        [parseInt(campaignId)]
       );
 
       const updateResult = deleteResult.rowCount;
