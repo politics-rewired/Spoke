@@ -15,24 +15,48 @@ async function getConversationsJoinsAndWhereClause(
   contactNameFilter
 ) {
   let query = queryParam
-    .leftJoin("campaign_contact", "campaign.id", "campaign_contact.campaign_id")
+    .from("campaign")
+    .join("campaign_contact", "campaign.id", "campaign_contact.campaign_id")
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
     .leftJoin("user", "assignment.user_id", "user.id")
     .where({ "campaign.organization_id": organizationId });
 
-  query = buildCampaignQuery(query, organizationId, campaignsFilter);
+  // Use a campaign id subquery instead of a filter on the campaign
+  // Plays better with compound indexes
+  query = query.whereIn(
+    "campaign_contact.campaign_id",
+    buildCampaignQuery(r.reader.select("id"), organizationId, campaignsFilter)
+  );
 
   if (assignmentsFilter) {
+    // Add the campaign id subquery to the assignment_id subquery
+    // even though its duplicative of the join
+    // Enables use of partial compound index
+
     if ("texterId" in assignmentsFilter) {
       // Searching for Unassigned
       if (assignmentsFilter.texterId === UNASSIGNED_TEXTER) {
-        query = query.whereNull("assignment.user_id");
+        query = query.where({ "campaign_contact.assignment_id": null });
       }
       // Searching for specific texter
       else if (assignmentsFilter.texterId !== null) {
-        query = query.where({
-          "assignment.user_id": assignmentsFilter.texterId
-        });
+        query = query.whereIn(
+          "campaign_contact.assignment_id",
+          r
+            .reader("assignment")
+            .select("id")
+            .whereIn(
+              "assignment.campaign_id",
+              buildCampaignQuery(
+                r.reader.select("id"),
+                organizationId,
+                campaignsFilter
+              )
+            )
+            .where({
+              user_id: assignmentsFilter.texterId
+            })
+        );
       } else {
         // No-op: searching for all texters
       }
