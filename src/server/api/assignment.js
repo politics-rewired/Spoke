@@ -248,24 +248,23 @@ export async function allCurrentAssignmentTargets(organizationId) {
       join campaign on campaign.id = (
         select id
         from assignable_campaigns as campaigns
-        where campaigns.id = campaign_team.campaign_id
-          and exists (
+        where exists (
+          select 1
+          from assignable_needs_reply_with_escalation_tags
+          where campaign_id = campaigns.id
+            and teams.this_teams_escalation_tags @> applied_escalation_tags
+            -- @> is true if teams.this_teams_escalation_tags has every member of applied_escalation_tags
+        )
+        and (
+          campaigns.limit_assignment_to_teams = false
+          or
+          exists (
             select 1
-            from assignable_needs_reply_with_escalation_tags
-            where campaign_id = campaigns.id
-              and teams.this_teams_escalation_tags @> applied_escalation_tags
-              -- @> is true if teams.this_teams_escalation_tags has every member of applied_escalation_tags
+            from campaign_team
+            where campaign_team.team_id = teams.id
+              and campaign_team.campaign_id = campaigns.id
           )
-          and (
-            campaigns.limit_assignment_to_teams = false
-            or
-            exists (
-              select 1
-              from campaign_team
-              where campaign_team.team_id = teams.id
-                and campaign_team.campaign_id = campaigns.id
-            )
-          )
+        )
         order by id asc
         limit 1
       )
@@ -460,23 +459,22 @@ export async function myCurrentAssignmentTargets(
         join campaign on campaign.id = (
           select id
           from assignable_campaigns as campaigns
-          where campaigns.id = campaign_team.campaign_id
-            and exists (
-              select 1
-              from assignable_needs_reply_with_escalation_tags
-              join my_escalation_tags on true
-              where campaign_id = campaigns.id
-                and my_escalation_tags.my_escalation_tags @> applied_escalation_tags
-                and (
-                  campaigns.limit_assignment_to_teams = false
-                  or
-                  exists (
-                    select 1
-                    from campaign_team
-                    where campaign_team.team_id = teams.id
-                      and campaign_team.campaign_id = campaigns.id
-                  )
+          where exists (
+            select 1
+            from assignable_needs_reply_with_escalation_tags
+            join my_escalation_tags on true
+            where campaign_id = campaigns.id
+              and my_escalation_tags.my_escalation_tags @> applied_escalation_tags
+              and (
+                campaigns.limit_assignment_to_teams = false
+                or
+                exists (
+                  select 1
+                  from campaign_team
+                  where campaign_team.team_id = teams.id
+                    and campaign_team.campaign_id = campaigns.id
                 )
+              )
             )
           order by id asc
           limit 1
