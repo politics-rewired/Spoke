@@ -104,22 +104,35 @@ async function getConversationsJoinsAndWhereClause(
   }
 
   if (tagsFilter) {
-    const subQuery = r.reader
-      .select("campaign_contact_tag.campaign_contact_id")
-      .from("campaign_contact_tag")
-      .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
-      .where({
-        "tag.title": "Escalated",
-        "tag.organization_id": organizationId
-      })
-      .whereRaw(
-        "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
-      );
-
     if (tagsFilter.escalatedConvosOnly) {
-      query = query.whereExists(subQuery);
+      query = query
+        .join(
+          "campaign_contact_tag",
+          "campaign_contact_tag.campaign_contact_id",
+          "=",
+          "campaign_contact.id"
+        )
+        .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+        .where({
+          "tag.title": "Escalated",
+          "tag.organization_id": organizationId
+        });
+
+      // query = query.whereExists(subQuery);
     } else if (tagsFilter.excludeEscalated) {
-      query = query.whereNotExists(subQuery);
+      query = query.whereNotExists(
+        r.reader
+          .select("campaign_contact_tag.campaign_contact_id")
+          .from("campaign_contact_tag")
+          .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+          .where({
+            "tag.title": "Escalated",
+            "tag.organization_id": organizationId
+          })
+          .whereRaw(
+            "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+          )
+      );
     }
 
     if (tagsFilter.specificTagIds && tagsFilter.specificTagIds.length > 0) {
