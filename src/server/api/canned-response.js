@@ -1,5 +1,4 @@
 import { sqlResolvers } from "./lib/utils";
-import { CannedResponse } from "../models";
 
 export const resolvers = {
   CannedResponse: {
@@ -7,5 +6,3 @@ export const resolvers = {
     isUserCreated: cannedResponse => cannedResponse.user_id !== ""
   }
 };
-
-CannedResponse.ensureIndex("campaign_id");

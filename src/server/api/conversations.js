@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { config } from "../../config";
-import { Assignment, r } from "../models";
+import { r } from "../models";
 import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
 import { buildCampaignQuery } from "./campaign";
 import { UNASSIGNED_TEXTER } from "../../lib/constants";
@@ -467,11 +467,15 @@ export async function reassignConversations(
       })
       .first();
     if (!assignment) {
-      assignment = await Assignment.save({
-        user_id: newTexterUserId,
-        campaign_id: campaignId,
-        max_contacts: config.MAX_CONTACTS_PER_TEXTER
-      });
+      const assignments = await r
+        .knex("assignment")
+        .insert({
+          user_id: newTexterUserId,
+          campaign_id: campaignId,
+          max_contacts: config.MAX_CONTACTS_PER_TEXTER
+        })
+        .returning("*");
+      assignment = assignments[0];
     }
     campaignIdAssignmentIdMap.set(campaignId, assignment.id);
   }

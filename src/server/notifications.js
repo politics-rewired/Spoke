@@ -1,6 +1,6 @@
 import { config } from "../config";
 import logger from "../logger";
-import { r, Assignment, Campaign, User, Organization } from "./models";
+import { r } from "./models";
 import { sendEmail } from "./mail";
 
 export const Notifications = {
@@ -21,14 +21,23 @@ async function getOrganizationOwner(organizationId) {
     .first("user.*");
 }
 const sendAssignmentUserNotification = async (assignment, notification) => {
-  const campaign = await Campaign.get(assignment.campaign_id);
+  const campaign = await r
+    .reader("campaign")
+    .where({ id: assignment.campaign_id })
+    .first();
 
   if (!campaign.is_started) {
     return;
   }
 
-  const organization = await Organization.get(campaign.organization_id);
-  const user = await User.get(assignment.user_id);
+  const organization = await r
+    .reader("organization")
+    .where({ id: campaign.organization_id })
+    .first();
+  const user = await r
+    .reader("organization")
+    .where({ id: assignment.user_id })
+    .first();
   const orgOwner = await getOrganizationOwner(organization.id);
 
   let subject;
@@ -83,16 +92,28 @@ export const sendUserNotification = async notification => {
   if (config.DISABLE_TEXTER_NOTIFICATIONS) return;
 
   if (type === Notifications.ASSIGNMENT_MESSAGE_RECEIVED) {
-    const assignment = await Assignment.get(notification.assignmentId);
-    const campaign = await Campaign.get(assignment.campaign_id);
+    const assignment = await r
+      .reader("assignment")
+      .where({ id: notification.assignmentId })
+      .first();
+    const campaign = await r
+      .reader("campaign")
+      .where({ id: assignment.campaign_id })
+      .first();
     const campaignContact = await r
       .reader("campaign_contact")
       .where({ campaign_id: campaign.id, cell: notification.contactNumber })
       .first();
 
     if (!campaignContact.is_opted_out && !campaign.is_archived) {
-      const user = await User.get(assignment.user_id);
-      const organization = await Organization.get(campaign.organization_id);
+      const user = await r
+        .reader("user")
+        .where({ id: assignment.user_id })
+        .first();
+      const organization = await r
+        .reader("organization")
+        .where({ id: campaign.organization_id })
+        .first();
       const orgOwner = await getOrganizationOwner(organization.id);
 
       try {

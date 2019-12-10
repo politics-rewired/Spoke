@@ -1,5 +1,5 @@
 import { config } from "../../../config";
-import { r, Campaign } from "../../models";
+import { r } from "../../models";
 import { organizationCache } from "./organization";
 
 // This should be cached data for a campaign that will not change
@@ -53,7 +53,10 @@ const clear = async id => {
 
 const loadDeep = async id => {
   if (r.redis) {
-    const campaign = await Campaign.get(id);
+    const campaign = await r
+      .reader("campaign")
+      .where({ id })
+      .first();
     if (campaign.is_archived) {
       // do not cache archived campaigns
       await clear(id);
@@ -91,13 +94,16 @@ export const campaignCache = {
         const { customFields, interactionSteps } = campaignObj;
         delete campaignObj.customFields;
         delete campaignObj.interactionSteps;
-        const campaign = new Campaign(campaignObj);
+        const campaign = { ...campaignObj };
         campaign.customFields = customFields;
         campaign.interactionSteps = interactionSteps;
         return campaign;
       }
     }
-    return await Campaign.get(id);
+    return await r
+      .reader("campaign")
+      .where({ id })
+      .first();
   },
   reload: loadDeep,
   dbCustomFields,

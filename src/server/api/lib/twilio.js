@@ -4,7 +4,7 @@ import Twilio from "twilio";
 import _ from "lodash";
 import moment from "moment-timezone";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
-import { Log, Message, PendingMessagePart, r } from "../../models";
+import { r } from "../../models";
 import { sleep } from "../../../lib/utils";
 import {
   getContactMessagingService,
@@ -166,6 +166,7 @@ const twilioClient = async messagingServiceSid => {
 };
 
 async function sendMessage(message, organizationId, trx) {
+  const knexObject = trx || r.knex;
   const service = await getContactMessagingService(message.campaign_contact_id);
   const messagingServiceSid = service.messaging_service_sid;
   const twilio = await twilioClient(messagingServiceSid);
@@ -176,15 +177,14 @@ async function sendMessage(message, organizationId, trx) {
       message.id
     );
     if (message.id) {
-      const options = trx ? { transaction: trx } : {};
-      await Message.get(message.id).update(
-        { send_status: "SENT", sent_at: new Date() },
-        options
-      );
+      await knexObject("message")
+        .update({ send_status: "SENT", sent_at: knexObject.fn.now() })
+        .where({ id: message.id });
     }
     return "test_message_uuid";
   }
 
+  // TODO: refactor this -- the Twilio client supports promises now
   return new Promise(async (resolve, reject) => {
     if (message.service !== "twilio") {
       logger.warn("Message not marked as a twilio message", message.id);
@@ -264,36 +264,30 @@ async function sendMessage(message, organizationId, trx) {
         ) {
           messageToSave.send_status = "ERROR";
         }
-        let options = { conflict: "update" };
-        if (trx) {
-          options.transaction = trx;
-        }
-        Message.save(messageToSave, options)
-          // eslint-disable-next-line no-unused-vars
-          .then((_, newMessage) => {
+        const { id: messageId, ...updatePayload } = messageToSave;
+        knexObject("message")
+          .update(updatePayload)
+          .where({ id: messageId })
+          .then(() =>
             reject(
               err ||
                 (response
                   ? new Error(JSON.stringify(response))
                   : new Error("Encountered unknown error"))
-            );
-          });
+            )
+          );
       } else {
-        let options = { conflict: "update" };
-        if (trx) {
-          options.transaction = trx;
-        }
-        Message.save(
-          {
-            ...messageToSave,
+        const { id: messageId, ...updatePayload } = messageToSave;
+        knexObject("message")
+          .update({
+            ...updatePayload,
             send_status: "SENT",
             service: "twilio",
-            sent_at: new Date()
-          },
-          options
-        ).then((saveError, newMessage) => {
-          resolve(newMessage);
-        });
+            sent_at: knexObject.fn.now()
+          })
+          .where({ id: messageId })
+          .returning("*")
+          .then(([newMessage]) => resolve(newMessage));
       }
     });
   });

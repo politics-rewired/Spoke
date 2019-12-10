@@ -1,11 +1,14 @@
-import { r, JobRequest } from "../server/models";
+import { r } from "../server/models";
 
 export async function updateJob(job, percentComplete) {
   if (job.id) {
-    await JobRequest.get(job.id).update({
-      status: percentComplete,
-      updated_at: new Date()
-    });
+    await r
+      .knex("job_request")
+      .update({
+        status: percentComplete,
+        updated_at: r.knex.fn.now()
+      })
+      .where({ id: job.id });
   }
 }
 
