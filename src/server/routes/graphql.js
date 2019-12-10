@@ -4,7 +4,7 @@ import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
 import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
 
 import mocks from "../api/mocks";
-import { createLoaders } from "../models";
+// import { createLoaders } from "../models";
 import { config } from "../../config";
 import { resolvers } from "../api/schema";
 import { schema } from "../../api/schema";
@@ -26,7 +26,8 @@ router.use(
   graphqlExpress(request => ({
     schema: executableSchema,
     context: {
-      loaders: createLoaders(),
+      // TODO: refactor this
+      // loaders: createLoaders(),
       user: request.user
     }
   }))
