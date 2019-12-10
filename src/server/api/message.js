@@ -1,21 +1,17 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { Message } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 export const resolvers = {
   Message: {
-    ...mapFieldsToModel(
-      [
-        "id",
-        "text",
-        "userNumber",
-        "contactNumber",
-        "isFromContact",
-        "sendStatus",
-        "createdAt"
-      ],
-      Message
-    ),
-    campaignId: instance => instance["campaign_id"],
-    userId: instance => instance["user_id"]
+    ...sqlResolvers([
+      "id",
+      "campaignId",
+      "userId",
+      "text",
+      "userNumber",
+      "contactNumber",
+      "isFromContact",
+      "sendStatus",
+      "createdAt"
+    ])
   }
 };

@@ -4,9 +4,9 @@ import _ from "lodash";
 
 import logger from "../../logger";
 import { config } from "../../config";
-import { mapFieldsToModel } from "./lib/utils";
+import { sqlResolvers } from "./lib/utils";
 import { isNowBetween } from "../../lib/timezones";
-import { Assignment, r, cacheableData } from "../models";
+import { r, cacheableData } from "../models";
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -736,7 +736,7 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
 
 export const resolvers = {
   Assignment: {
-    ...mapFieldsToModel(["id", "maxContacts"], Assignment),
+    ...sqlResolvers(["id", "maxContacts"]),
     texter: async (assignment, _, { loaders }) =>
       assignment.texter
         ? assignment.texter

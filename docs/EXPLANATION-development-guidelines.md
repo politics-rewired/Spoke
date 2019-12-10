@@ -126,9 +126,9 @@ we want to add a value to campaign info for that edit page. We might need to edi
   graphql-tools.
 - For new object/input types, if it doesn't directly map to a schema defined in one of the files in `src/server/api`,
   then you may need to definte it in `schema.js` under rootResolvers. See an example with rootResolvers.Action.
-  Model object resolvers are 'auto-generated' by calls with `mapFieldsToModel` which you'll
+  Model object resolvers are 'auto-generated' by calls with `sqlResolvers` which you'll
   see called in files like `src/server/api/campaign.js`
-- In `campaign.js` note that you will need to update `type Campaign` above, and possibly lower down in `Campaign: { ...mapFieldsToModel([...` (but only if it's a new field/column on the campaign table.
+- In `campaign.js` note that you will need to update `type Campaign` above, and possibly lower down in `Campaign: { ...sqlResolvers([...` (but only if it's a new field/column on the campaign table.
 
 ### Security and Access-control
 

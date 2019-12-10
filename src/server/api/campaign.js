@@ -1,6 +1,6 @@
 import { config } from "../../config";
-import { mapFieldsToModel } from "./lib/utils";
-import { Campaign, JobRequest, r, cacheableData } from "../models";
+import { sqlResolvers } from "./lib/utils";
+import { r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
 
@@ -87,10 +87,7 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
 
 export const resolvers = {
   JobRequest: {
-    ...mapFieldsToModel(
-      ["id", "assigned", "status", "jobType", "resultMessage"],
-      JobRequest
-    )
+    ...sqlResolvers(["id", "assigned", "status", "jobType", "resultMessage"])
   },
   CampaignStats: {
     sentMessagesCount: async campaign =>
@@ -151,25 +148,22 @@ export const resolvers = {
     }
   },
   Campaign: {
-    ...mapFieldsToModel(
-      [
-        "id",
-        "title",
-        "description",
-        "isStarted",
-        "isArchived",
-        "useDynamicAssignment",
-        "introHtml",
-        "primaryColor",
-        "logoImageUrl",
-        "textingHoursStart",
-        "textingHoursEnd",
-        "isAutoassignEnabled",
-        "timezone",
-        "createdAt"
-      ],
-      Campaign
-    ),
+    ...sqlResolvers([
+      "id",
+      "title",
+      "description",
+      "isStarted",
+      "isArchived",
+      "useDynamicAssignment",
+      "introHtml",
+      "primaryColor",
+      "logoImageUrl",
+      "textingHoursStart",
+      "textingHoursEnd",
+      "isAutoassignEnabled",
+      "timezone",
+      "createdAt"
+    ]),
     isAssignmentLimitedToTeams: campaign => campaign.limit_assignment_to_teams,
     dueBy: campaign =>
       campaign.due_by instanceof Date || !campaign.due_by

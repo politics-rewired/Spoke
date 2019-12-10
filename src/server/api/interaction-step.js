@@ -1,18 +1,15 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { InteractionStep, r } from "../models";
+import { sqlResolvers } from "./lib/utils";
+import { r } from "../models";
 
 export const resolvers = {
   InteractionStep: {
-    ...mapFieldsToModel(
-      [
-        "id",
-        "answerOption",
-        "answerActions",
-        "parentInteractionId",
-        "isDeleted"
-      ],
-      InteractionStep
-    ),
+    ...sqlResolvers([
+      "id",
+      "answerOption",
+      "answerActions",
+      "parentInteractionId",
+      "isDeleted"
+    ]),
     scriptOptions: async interactionStep => {
       const { script, script_options } = interactionStep;
       return script_options || [script];

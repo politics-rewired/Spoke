@@ -1,5 +1,5 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { r, User } from "../models";
+import { sqlResolvers } from "./lib/utils";
+import { r } from "../models";
 import { addCampaignsFilterToQuery } from "./campaign";
 import { myCurrentAssignmentTarget } from "./assignment";
 
@@ -122,10 +122,15 @@ export const resolvers = {
     }
   },
   User: {
-    ...mapFieldsToModel(
-      ["id", "firstName", "lastName", "email", "cell", "assignedCell", "terms"],
-      User
-    ),
+    ...sqlResolvers([
+      "id",
+      "firstName",
+      "lastName",
+      "email",
+      "cell",
+      "assignedCell",
+      "terms"
+    ]),
     displayName: user => `${user.first_name} ${user.last_name}`,
     currentRequest: async (user, { organizationId }) => {
       const currentRequest = await r

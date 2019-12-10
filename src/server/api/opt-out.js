@@ -1,9 +1,8 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { OptOut } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 export const resolvers = {
   OptOut: {
-    ...mapFieldsToModel(["id", "cell", "createdAt"], OptOut),
+    ...sqlResolvers(["id", "cell", "createdAt"]),
     assignment: async (optOut, _, { loaders }) =>
       loaders.assignment.load(optOut.assignment_id)
   }
