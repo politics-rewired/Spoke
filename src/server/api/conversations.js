@@ -136,16 +136,13 @@ async function getConversationsJoinsAndWhereClause(
     }
 
     if (tagsFilter.specificTagIds && tagsFilter.specificTagIds.length > 0) {
-      const specificTagIdsSubquery = r.knex
+      const specificTagIdsSubquery = r.reader
         .select("campaign_contact_tag.campaign_contact_id")
         .from("campaign_contact_tag")
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
-        .whereIn("tag.id", tagsFilter.specificTagIds)
-        .whereRaw(
-          "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
-        );
+        .whereIn("tag.id", tagsFilter.specificTagIds);
 
-      query = query.whereExists(specificTagIdsSubquery);
+      query = query.whereIn("campaign_contact.id", specificTagIdsSubquery);
     }
   }
 
