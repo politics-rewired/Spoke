@@ -1,5 +1,6 @@
 import { config } from "../config";
 import logger from "../logger";
+import { eventBus, EventType } from "../server/event-bus";
 import { r, datawarehouse, cacheableData } from "../server/models";
 import { gunzip, zipToTimeZone, convertOffsetsToStrings } from "../lib";
 import { updateJob } from "./lib";
@@ -965,10 +966,11 @@ export async function assignTexters(job) {
           // TODO - MySQL Specific. Must not do a bulk insert in order to be MySQL compatible
           const assignmentIds = await Promise.all(
             chunk.map(async directive => {
-              const assignmentIds = await trx("assignment")
-                .insert([directive.assignment])
-                .returning("id");
-              return assignmentIds[0];
+              const [newAssignment] = await trx("assignment")
+                .insert(directive.assignment)
+                .returning("*");
+              eventBus.emit(EventType.AssignmentCreated, newAssignment);
+              return newAssignment.id;
             })
           );
 

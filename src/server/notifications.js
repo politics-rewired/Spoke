@@ -1,14 +1,15 @@
 import { config } from "../config";
 import logger from "../logger";
+import { eventBus, EventType } from "./event-bus";
 import { r } from "./models";
 import { sendEmail } from "./mail";
 
-export const Notifications = {
+export const Notifications = Object.freeze({
   CAMPAIGN_STARTED: "campaign.started",
   ASSIGNMENT_MESSAGE_RECEIVED: "assignment.message.received",
   ASSIGNMENT_CREATED: "assignment.created",
   ASSIGNMENT_UPDATED: "assignment.updated"
-};
+});
 
 async function getOrganizationOwner(organizationId) {
   return await r
@@ -140,41 +141,26 @@ export const sendUserNotification = async notification => {
   }
 };
 
-// TODO: knex does not support listening for changes
-const setupIncomingReplyNotification = () =>
-  r
-    .table("message")
-    .changes()
-    .then(function(message) {
-      if (!message.old_val && message.new_val.is_from_contact) {
-        sendUserNotification({
-          type: Notifications.ASSIGNMENT_MESSAGE_RECEIVED,
-          assignmentId: message.new_val.assignment_id,
-          contactNumber: message.new_val.contact_number
-        });
-      }
-    });
+const handleAssignmentCreated = assignment =>
+  sendUserNotification({
+    type: Notifications.ASSIGNMENT_CREATED,
+    assignment
+  });
 
-// TODO: knex does not support listening for changes
-const setupNewAssignmentNotification = () =>
-  r
-    .table("assignment")
-    .changes()
-    .then(function(assignment) {
-      if (!assignment.old_val) {
-        sendUserNotification({
-          type: Notifications.ASSIGNMENT_CREATED,
-          assignment: assignment.new_val
-        });
-      }
-    });
+const handleMessageReceived = ({ assignmentId, contactNumber }) =>
+  sendUserNotification({
+    type: Notifications.ASSIGNMENT_MESSAGE_RECEIVED,
+    assignmentId,
+    contactNumber
+  });
 
-let notificationObserversSetup = false;
-
+// Ensure observers are only set up once
+let isNotificationObservationSetUp = false;
 export const setupUserNotificationObservers = () => {
-  if (!notificationObserversSetup) {
-    notificationObserversSetup = true;
-    setupIncomingReplyNotification();
-    setupNewAssignmentNotification();
-  }
+  if (isNotificationObservationSetUp) return;
+
+  eventBus.on(EventType.AssignmentCreated, handleAssignmentCreated);
+  eventBus.on(EventType.MessageReceived, handleMessageReceived);
+
+  isNotificationObservationSetUp = true;
 };

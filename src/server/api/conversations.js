@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { config } from "../../config";
 import { r } from "../models";
+import { eventBus, EventType } from "../event-bus";
 import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
 import { buildCampaignQuery } from "./campaign";
 import { UNASSIGNED_TEXTER } from "../../lib/constants";
@@ -420,13 +421,14 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
         let assignmentId = existingAssignment && existingAssignment.id;
         if (!assignmentId) {
           // Create a new assignment if none exists
-          const inserted = await trx("assignment")
+          const [newAssignment] = await trx("assignment")
             .insert({
               campaign_id: campaignId,
               user_id: newTexterId
             })
-            .returning("id");
-          assignmentId = inserted[0];
+            .returning("*");
+          eventBus.emit(EventType.AssignmentCreated, newAssignment);
+          assignmentId = newAssignment.id;
         }
 
         // Update the contact's assignment
@@ -467,7 +469,7 @@ export async function reassignConversations(
       })
       .first();
     if (!assignment) {
-      const assignments = await r
+      const [newAssignment] = await r
         .knex("assignment")
         .insert({
           user_id: newTexterUserId,
@@ -475,7 +477,8 @@ export async function reassignConversations(
           max_contacts: config.MAX_CONTACTS_PER_TEXTER
         })
         .returning("*");
-      assignment = assignments[0];
+      eventBus.emit(EventType.AssignmentCreated, newAssignment);
+      assignment = newAssignment;
     }
     campaignIdAssignmentIdMap.set(campaignId, assignment.id);
   }

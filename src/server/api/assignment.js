@@ -7,6 +7,7 @@ import { config } from "../../config";
 import { sqlResolvers } from "./lib/utils";
 import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
+import { eventBus, EventType } from "../event-bus";
 
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
@@ -670,13 +671,14 @@ export async function assignLoop(user, organizationId, countLeft, trx) {
     .first();
 
   if (!existingAssignment) {
-    const inserted = await trx("assignment")
+    const [newAssignment] = await trx("assignment")
       .insert({
         user_id: user.id,
         campaign_id: campaignIdToAssignTo
       })
-      .returning("id");
-    assignmentId = inserted[0];
+      .returning("*");
+    eventBus.emit(EventType.AssignmentCreated, newAssignment);
+    assignmentId = newAssignment.id;
   } else {
     assignmentId = existingAssignment.id;
   }

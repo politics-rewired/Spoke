@@ -1,5 +1,6 @@
 import { r } from "../../models";
 import { config } from "../../../config";
+import { eventBus, EventType } from "../../event-bus";
 
 export const SpokeSendStatus = Object.freeze({
   Queued: "QUEUED",
@@ -322,10 +323,16 @@ export async function getCampaignContactAndAssignmentForIncomingMessage({
 }
 
 export async function saveNewIncomingMessage(messageInstance) {
-  await r
+  const [newMessage] = await r
     .knex("message")
     .insert(messageInstance)
     .returning("*");
+  const { assignment_id, contact_number } = newMessage;
+  const payload = {
+    assignmentId: assignment_id,
+    contactNumber: contact_number
+  };
+  eventBus.emit(EventType.MessageReceived, payload);
 
   // Separate update fields according to: https://stackoverflow.com/a/42307979
   let updateQuery = r

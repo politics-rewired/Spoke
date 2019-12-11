@@ -1,5 +1,6 @@
 import { config } from "../../config";
 import logger from "../../logger";
+import { eventBus, EventType } from "../event-bus";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
@@ -485,14 +486,15 @@ async function sendMessage(
       record.assignment_id = assignment.id;
     } else {
       // Create assignment if no exisiting
-      const [assignmentId] = await r
+      const [newAssignment] = await r
         .knex("assignment")
         .insert({
           user_id: user.id,
           campaign_id: record.campaign_id
         })
-        .returning("id");
-      record.assignment_id = assignmentId;
+        .returning("*");
+      eventBus.emit(EventType.AssignmentCreated, newAssignment);
+      record.assignment_id = newAssignment.id;
     }
     message.assignmentId = record.assignment_id;
   }
@@ -912,11 +914,15 @@ const rootMutations = {
         })
         .first();
       if (!assignment) {
-        await r.knex("assignment").insert({
-          user_id: user.id,
-          campaign_id: campaign.id,
-          max_contacts: config.MAX_CONTACTS_PER_TEXTER
-        });
+        const [newAssignment] = await r
+          .knex("assignment")
+          .insert({
+            user_id: user.id,
+            campaign_id: campaign.id,
+            max_contacts: config.MAX_CONTACTS_PER_TEXTER
+          })
+          .returning("*");
+        eventBus.emit(EventType.AssignmentCreated, newAssignment);
       }
       return campaign;
     },
@@ -1596,13 +1602,15 @@ const rootMutations = {
           assignmentId = assignment.id;
         } else {
           // Create assignment if no exisiting
-          [assignmentId] = await r
+          const [newAssignment] = await r
             .knex("assignment")
             .insert({
               user_id: user.id,
               campaign_id: contact.campaign_id
             })
-            .returning("id");
+            .returning("*");
+          eventBus.emit(EventType.AssignmentCreated, newAssignment);
+          assignmentId = newAssignment.id;
         }
       }
 
