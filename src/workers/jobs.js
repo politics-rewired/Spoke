@@ -821,20 +821,21 @@ export async function assignTexters(job) {
         await trx("campaign_contact")
           .where("assignment_id", "in", assignmentIds)
           .where({
-            message_status: "needsMessage",
-            archived: campaign.is_archived
+            message_status: "needsMessage"
           })
+          .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
           .update({ assignment_id: null });
       }
 
       await updateJob(job, 20);
 
       let availableContacts = await r.getCount(
-        trx("campaign_contact").where({
-          assignment_id: null,
-          campaign_id: cid,
-          archived: campaign.is_archived
-        })
+        trx("campaign_contact")
+          .where({
+            assignment_id: null,
+            campaign_id: cid
+          })
+          .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
       );
 
       const newAssignments = [],
@@ -915,6 +916,10 @@ export async function assignTexters(job) {
         })
       );
 
+      /**
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
       const assignContacts = async directive => {
         const {
           assignment: { id: assignment_id, campaign_id },
@@ -928,7 +933,7 @@ export async function assignTexters(job) {
               where
                 assignment_id is null
                 and campaign_id = ?
-                and archived = ?
+                and archived = ${campaign.is_archived}
               limit ?
               for update skip locked
             )
@@ -939,7 +944,7 @@ export async function assignTexters(job) {
               contacts_to_update.id = campaign_contact.id
             ;
           `,
-          [campaign_id, campaign.is_archived, contactsToAssign, assignment_id]
+          [campaign_id, contactsToAssign, assignment_id]
         );
       };
 

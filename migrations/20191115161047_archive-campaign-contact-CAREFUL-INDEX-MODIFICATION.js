@@ -81,7 +81,7 @@ exports.up = function(knex) {
         where campaign_contact.campaign_id = campaign.id
           and campaign.is_archived = true;
 
-        create index todos_partial_idx on campaign_contact (campaign_id, assignment_id, message_status, is_opted_out) where (archived is false);
+        create index todos_partial_idx on campaign_contact (campaign_id, assignment_id, message_status, is_opted_out) where (archived = false);
         drop index campaign_contact_get_current_assignment_index;
         drop index campaign_contact_campaign_id_assignment_id_index;
       `);
