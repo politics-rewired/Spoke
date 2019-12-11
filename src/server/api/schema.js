@@ -340,10 +340,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     });
   }
 
-  const newCampaign = await r
+  const [newCampaign] = await r
     .knex("campaign")
     .update(campaignUpdates)
-    .where({ id });
+    .where({ id })
+    .returning("*");
   cacheableData.campaign.reload(id);
   return newCampaign || loaders.campaign.load(id);
 }
@@ -1823,11 +1824,14 @@ const rootMutations = {
 
         // TODO: maybe undo action_handler if updated answer
 
-        const [qr] = await r.knex("question_response").insert({
-          campaign_contact_id: campaignContactId,
-          interaction_step_id: interactionStepId,
-          value
-        });
+        const [qr] = await r
+          .knex("question_response")
+          .insert({
+            campaign_contact_id: campaignContactId,
+            interaction_step_id: interactionStepId,
+            value
+          })
+          .returning("*");
         const interactionStepResult = await r
           .knex("interaction_step")
           // TODO: is this really parent_interaction_id or just interaction_id?

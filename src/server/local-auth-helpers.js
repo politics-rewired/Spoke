@@ -118,7 +118,7 @@ const signup = async ({
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const user = await r
+      const [user] = await r
         .knex("user")
         .insert({
           email: lowerCaseEmail,
