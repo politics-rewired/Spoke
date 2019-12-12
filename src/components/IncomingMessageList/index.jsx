@@ -111,7 +111,7 @@ export class IncomingMessageList extends Component {
       },
       {
         key: "updatedAt",
-        label: "Updated At",
+        label: "Last Updated At",
         style: {
           textOverflow: "ellipsis",
           overflow: "scroll",
