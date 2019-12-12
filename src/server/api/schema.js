@@ -2249,7 +2249,7 @@ const rootMutations = {
 
     requestTexts: async (
       _,
-      { count, email, organizationId },
+      { count, email, organizationId, preferredTeamId },
       { user, loaders }
     ) => {
       try {
@@ -2271,7 +2271,8 @@ const rootMutations = {
             await trx("assignment_request").insert({
               user_id: user.id,
               organization_id: organizationId,
-              amount: count
+              amount: count,
+              preferred_team_id: preferredTeamId
             });
 
             // This will just throw if it errors

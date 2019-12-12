@@ -14,6 +14,7 @@ export const schema = `
     campaign: Campaign
     countLeft: Int
     teamTitle: String
+    teamId: Int
     enabled: Boolean
     maxRequestCount: Int
   }
@@ -38,6 +39,7 @@ export const schema = `
     pendingAssignmentRequestCount: Int!
     currentAssignmentTargets: [AssignmentTarget]!
     myCurrentAssignmentTarget: AssignmentTarget
+    myCurrentAssignmentTargets: [AssignmentTarget]!
     escalatedConversationCount: Int!
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!

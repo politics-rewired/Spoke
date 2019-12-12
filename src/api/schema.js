@@ -297,7 +297,7 @@ const rootSchema = `
     bulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter contactsFilter:ContactsFilter, newTexterUserId:String!):[CampaignIdAssignmentId]
     megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]):[CampaignIdAssignmentId]
-    requestTexts(count: Int!, email: String!, organizationId: String!): String!
+    requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: Int!): String!
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Int): String!
     markForSecondPass(campaignId: String!, excludeAgeInHours: Int): String!
     unMarkForSecondPass(campaignId: String!): String!

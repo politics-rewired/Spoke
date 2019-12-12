@@ -6,6 +6,8 @@ import wrapMutations from "../containers/hoc/wrap-mutations";
 import GSForm from "./forms/GSForm";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
+import SelectField from "material-ui/SelectField";
+import MenuItem from "material-ui/MenuItem";
 import Paper from "material-ui/Paper";
 import Form from "react-formal";
 import * as yup from "yup";
@@ -16,13 +18,20 @@ class TexterRequest extends React.Component {
   constructor(props) {
     super(props);
 
+    const myCurrentAssignmentTargets = this.props.data.organization
+      ? this.props.data.organization.myCurrentAssignmentTargets
+      : [];
+
+    const firstAssignmentTarget = myCurrentAssignmentTargets[0];
+
+    const [firstTeamId, maxRequestCount] = firstAssignmentTarget
+      ? [firstAssignmentTarget.teamId, firstAssignmentTarget.maxRequestCount]
+      : [undefined, undefined];
+
     this.state = {
-      count: this.props.data.organization
-        ? this.props.data.organization.myCurrentAssignmentTarget
-          ? this.props.data.organization.myCurrentAssignmentTarget
-              .maxRequestCount
-          : undefined
-        : undefined,
+      selectedAssignment: firstTeamId,
+      count: maxRequestCount,
+      maxRequestCount: maxRequestCount,
       email: undefined,
       submitting: false,
       error: undefined,
@@ -35,12 +44,12 @@ class TexterRequest extends React.Component {
   }
 
   submit = async () => {
-    const { count, email, submitting } = this.state;
+    const { count, email, selectedAssignment, submitting } = this.state;
     if (submitting) return;
 
     this.setState({ submitting: true, error: undefined });
     try {
-      const payload = { count, email };
+      const payload = { count, email, preferredTeamId: selectedAssignment };
       const response = await this.props.mutations.requestTexts(payload);
       if (response.errors) throw response.errors;
 
@@ -74,21 +83,33 @@ class TexterRequest extends React.Component {
     this.state.email = this.props.user.email;
   }
 
+  setSelectedAssignment = (_1, _2, teamId) => {
+    const myCurrentAssignmentTargets = this.props.data.organization
+      ? this.props.data.organization.myCurrentAssignmentTargets
+      : [];
+
+    const selection = myCurrentAssignmentTargets.find(
+      at => at.teamId === teamId
+    );
+
+    this.setState({
+      selectedAssignment: teamId,
+      count: Math.min(this.state.count, selection.maxRequestCount),
+      maxRequestCount: selection.maxRequestCount
+    });
+  };
+
   render() {
     if (this.props.data.loading) {
       return <LoadingIndicator />;
     }
 
-    const { myCurrentAssignmentTarget } = this.props.data.organization;
+    const { myCurrentAssignmentTargets } = this.props.data.organization;
 
-    const textsAvailable = !!myCurrentAssignmentTarget;
-    const textRequestFormEnabled = !!myCurrentAssignmentTarget;
-    const textRequestMaxCount = myCurrentAssignmentTarget
-      ? myCurrentAssignmentTarget.maxRequestCount
-      : undefined;
+    const textsAvailable = myCurrentAssignmentTargets.length > 0;
 
     if (this.props.data.currentUser.currentRequest) {
-      const { amount, status } = this.props.data.currentUser.currentRequest;
+      const { amount } = this.props.data.currentUser.currentRequest;
 
       return (
         <Paper>
@@ -103,7 +124,7 @@ class TexterRequest extends React.Component {
       );
     }
 
-    if (!(textsAvailable && textRequestFormEnabled)) {
+    if (!textsAvailable) {
       return (
         <Paper>
           <div style={{ padding: "20px" }}>
@@ -117,7 +138,15 @@ class TexterRequest extends React.Component {
       );
     }
 
-    const { email, count, error, submitting, finished } = this.state;
+    const {
+      email,
+      count,
+      error,
+      submitting,
+      finished,
+      selectedAssignment,
+      maxRequestCount
+    } = this.state;
     const inputSchema = yup.object({
       count: yup.number().required(),
       email: yup.string().required()
@@ -137,14 +166,33 @@ class TexterRequest extends React.Component {
       );
     }
 
+    const makeOptionText = at =>
+      `${at.teamTitle}: ${at.maxRequestCount} ${
+        at.type === "UNSENT" ? "Initials" : "Replies"
+      }`;
+
     return (
       <div>
         <div>
-          Ready for texts? Just tell us how many
-          {textRequestMaxCount > 0
-            ? ` (currently limited to ${textRequestMaxCount}/person)`
-            : ""}
-          .
+          Ready for texts? Pick an assignment: <br />
+          {this.props.data ? (
+            <SelectField
+              value={selectedAssignment}
+              onChange={this.setSelectedAssignment}
+            >
+              {this.props.data.organization.myCurrentAssignmentTargets.map(
+                at => (
+                  <MenuItem
+                    key={at.teamId}
+                    value={at.teamId}
+                    primaryText={makeOptionText(at)}
+                  />
+                )
+              )}
+            </SelectField>
+          ) : (
+            <LoadingIndicator />
+          )}
         </div>
         <GSForm
           ref="requestForm"
@@ -161,8 +209,8 @@ class TexterRequest extends React.Component {
             onChange={e => {
               const formVal = parseInt(e.target.value, 10) || 0;
               let count =
-                textRequestMaxCount > 0
-                  ? Math.min(textRequestMaxCount, formVal)
+                maxRequestCount > 0
+                  ? Math.min(maxRequestCount, formVal)
                   : formVal;
               count = Math.max(count, 0);
               this.setState({ count });
@@ -203,10 +251,11 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
         organization(id: $organizationId) {
           id
-          myCurrentAssignmentTarget {
+          myCurrentAssignmentTargets {
             type
             maxRequestCount
             teamTitle
+            teamId
           }
         }
       }
@@ -219,23 +268,26 @@ const mapQueriesToProps = ({ ownProps }) => ({
 });
 
 const mapMutationsToProps = ({ ownProps }) => ({
-  requestTexts: ({ count, email }) => ({
+  requestTexts: ({ count, email, preferredTeamId }) => ({
     mutation: gql`
       mutation requestTexts(
         $count: Int!
         $email: String!
         $organizationId: String!
+        $preferredTeamId: Int!
       ) {
         requestTexts(
           count: $count
           email: $email
           organizationId: $organizationId
+          preferredTeamId: $preferredTeamId
         )
       }
     `,
     variables: {
       count,
       email,
+      preferredTeamId,
       organizationId: ownProps.organizationId
     }
   })

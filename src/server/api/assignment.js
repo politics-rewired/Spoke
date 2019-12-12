@@ -509,7 +509,7 @@ export async function myCurrentAssignmentTargets(
     [organizationId, userId, userId, organizationId]
   );
 
-  const results = teamToCampaigns.slice(0, 1).map(ttc =>
+  const results = teamToCampaigns.map(ttc =>
     Object.assign(ttc, {
       type: ttc.assignment_type,
       campaign: { id: ttc.id, title: ttc.title },
@@ -572,6 +572,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
         auth0Id,
         pendingAssignmentRequest.amount,
         pendingAssignmentRequest.organization_id,
+        pendingAssignmentRequest.preferred_team_id,
         trx
       );
 
@@ -607,6 +608,7 @@ export async function giveUserMoreTexts(
   auth0Id,
   count,
   organizationId,
+  preferredTeamId,
   parentTrx = r.knex
 ) {
   logger.verbose(`Starting to give ${auth0Id} ${count} texts`);
@@ -635,6 +637,7 @@ export async function giveUserMoreTexts(
         user,
         organizationId,
         countLeftToUpdate,
+        preferredTeamId,
         trx
       );
 
@@ -659,15 +662,28 @@ export async function giveUserMoreTexts(
   return updated_result;
 }
 
-export async function assignLoop(user, organizationId, countLeft, trx) {
-  const assignmentInfo = await myCurrentAssignmentTarget(
+export async function assignLoop(
+  user,
+  organizationId,
+  countLeft,
+  preferredTeamId,
+  trx
+) {
+  const assignmentOptions = await myCurrentAssignmentTargets(
     user.id,
     organizationId,
     trx
   );
-  if (!assignmentInfo) {
+
+  if (assignmentOptions.length === 0) {
     return 0;
   }
+
+  const preferredAssignment = assignmentOptions.find(
+    assignment => assignment.team_id === preferredTeamId
+  );
+
+  const assignmentInfo = preferredAssignment || assignmentOptions[0];
 
   // Determine which campaign to assign to – optimize to pick winners
   let campaignIdToAssignTo = assignmentInfo.campaign.id;
