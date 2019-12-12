@@ -199,9 +199,8 @@ export async function getConversations(
   );
 
   offsetLimitQuery = offsetLimitQuery
-    .orderByRaw(
-      "coalesce(message.created_at, campaign_contact.updated_at) desc"
-    )
+    .orderByRaw("message.created_at desc nulls last")
+    .orderByRaw("campaign_contact.updated_at desc nulls last")
     .orderBy("cc_id");
 
   offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset);
@@ -288,7 +287,13 @@ export async function getConversations(
     .map(contactId => {
       const contactMessages = groupedContacts[contactId];
       const firstRow = contactMessages[0];
+
       const conversation = _.omit(firstRow, messageFields);
+
+      if (firstRow) {
+        conversation.updated_at = firstRow.created_at;
+      }
+
       conversation.messages = contactMessages
         // Sort ASC to display most recent _messages_ last
         .sort((messageA, messageB) => messageA.created_at - messageB.created_at)
