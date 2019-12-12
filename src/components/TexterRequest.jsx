@@ -107,7 +107,6 @@ class TexterRequest extends React.Component {
     const { myCurrentAssignmentTargets } = this.props.data.organization;
 
     const textsAvailable = myCurrentAssignmentTargets.length > 0;
-    const textRequestFormEnabled = myCurrentAssignmentTargets.length > 0;
 
     if (this.props.data.currentUser.currentRequest) {
       const { amount } = this.props.data.currentUser.currentRequest;
@@ -125,7 +124,7 @@ class TexterRequest extends React.Component {
       );
     }
 
-    if (!(textsAvailable && textRequestFormEnabled)) {
+    if (!textsAvailable) {
       return (
         <Paper>
           <div style={{ padding: "20px" }}>
@@ -167,6 +166,11 @@ class TexterRequest extends React.Component {
       );
     }
 
+    const makeOptionText = at =>
+      `${at.teamTitle}: ${at.maxRequestCount} ${
+        at.type === "UNSENT" ? "Initials" : "Replies"
+      }`;
+
     return (
       <div>
         <div>
@@ -181,9 +185,7 @@ class TexterRequest extends React.Component {
                   <MenuItem
                     key={at.teamId}
                     value={at.teamId}
-                    primaryText={`${at.teamTitle}: ${at.maxRequestCount} ${
-                      at.type === "UNSENT" ? "Initials" : "Replies"
-                    }`}
+                    primaryText={makeOptionText(at)}
                   />
                 )
               )}
