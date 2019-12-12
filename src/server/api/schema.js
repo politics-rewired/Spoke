@@ -439,14 +439,10 @@ async function sendMessage(
   checkAssignment = true,
   skipUpdatingMessageStatus = false
 ) {
-  const optOutJoinConditions = {
-    "opt_out.cell": "campaign_contact.cell"
-  };
-
-  if (config.OPTOUTS_SHARE_ALL_ORGS) {
-    optOutJoinConditions["opt_out.organization_id"] =
-      "campaign.organization_id";
-  }
+  // Scope opt-outs to organization if we are not sharing across all organizations
+  const optOutCondition = !config.OPTOUTS_SHARE_ALL_ORGS
+    ? "and opt_out.organization_id = campaign.organization_id"
+    : "";
 
   const record = await r
     .knex("campaign_contact")
@@ -455,7 +451,6 @@ async function sendMessage(
     .whereRaw("campaign_contact.archived = false")
     .where({ "campaign.is_archived": false })
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
-    .leftJoin("opt_out", optOutJoinConditions)
     .first(
       "campaign_contact.id as cc_id",
       "campaign_contact.assignment_id as assignment_id",
@@ -467,7 +462,15 @@ async function sendMessage(
       "campaign.texting_hours_start as c_texting_hours_start",
       "campaign.texting_hours_end as c_texting_hours_end",
       "assignment.user_id as a_assignment_user_id",
-      "opt_out.id as is_opted_out",
+      r.knex.raw(
+        `exists (
+          select 1
+          from opt_out
+          where
+            opt_out.cell = campaign_contact.cell
+              ${optOutCondition}
+        ) as is_opted_out`
+      ),
       "campaign_contact.timezone as contact_timezone"
     );
 
