@@ -7,7 +7,7 @@ import { config } from "../../config";
 import logger from "../../logger";
 import mocks from "../api/mocks";
 import { resolvers } from "../api/schema";
-import { createLoaders } from "../models";
+import { contextForRequest } from "../contexts";
 
 const router = express.Router();
 
@@ -54,8 +54,8 @@ const server = new ApolloServer({
   introspection: !config.isProduction,
   playground: !config.isProduction,
   context: ({ req, res: _res }) => ({
-    loaders: createLoaders(),
-    user: req.user
+    user: req.user,
+    ...contextForRequest(req)
   })
 });
 
