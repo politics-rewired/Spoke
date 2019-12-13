@@ -2,6 +2,7 @@ import ApolloClient, { addQueryMerging } from "apollo-client";
 import ResponseMiddlewareNetworkInterface from "./response-middleware-network-interface";
 import fetch from "isomorphic-fetch";
 import { graphQLErrorParser } from "./errors";
+import { eventBus, EventTypes } from "../client/events";
 
 const responseMiddlewareNetworkInterface = new ResponseMiddlewareNetworkInterface(
   (typeof window === "undefined" ? process.env : window).GRAPHQL_URL ||
@@ -31,6 +32,17 @@ responseMiddlewareNetworkInterface.use({
     next();
   }
 });
+
+responseMiddlewareNetworkInterface.defaultNetworkInterface.useAfter([
+  {
+    applyAfterware({ response }, next) {
+      const serverVersion = response.headers.get("x-spoke-version");
+      if (serverVersion)
+        eventBus.emit(EventTypes.NewSpokeVersionAvailble, serverVersion);
+      next();
+    }
+  }
+]);
 
 const networkInterface = addQueryMerging(responseMiddlewareNetworkInterface);
 
