@@ -165,8 +165,7 @@ const twilioClient = async messagingServiceSid => {
   return Twilio(accountSid, authToken);
 };
 
-async function sendMessage(message, organizationId, trx) {
-  const knexObject = trx || r.knex;
+async function sendMessage(message, organizationId, trx = r.knex) {
   const service = await getContactMessagingService(message.campaign_contact_id);
   const messagingServiceSid = service.messaging_service_sid;
   const twilio = await twilioClient(messagingServiceSid);
@@ -177,8 +176,8 @@ async function sendMessage(message, organizationId, trx) {
       message.id
     );
     if (message.id) {
-      await knexObject("message")
-        .update({ send_status: "SENT", sent_at: knexObject.fn.now() })
+      await trx("message")
+        .update({ send_status: "SENT", sent_at: trx.fn.now() })
         .where({ id: message.id });
     }
     return "test_message_uuid";
@@ -265,7 +264,7 @@ async function sendMessage(message, organizationId, trx) {
           messageToSave.send_status = "ERROR";
         }
         const { id: messageId, ...updatePayload } = messageToSave;
-        knexObject("message")
+        trx("message")
           .update(updatePayload)
           .where({ id: messageId })
           .then(() =>
@@ -278,12 +277,12 @@ async function sendMessage(message, organizationId, trx) {
           );
       } else {
         const { id: messageId, ...updatePayload } = messageToSave;
-        knexObject("message")
+        trx("message")
           .update({
             ...updatePayload,
             send_status: "SENT",
             service: "twilio",
-            sent_at: knexObject.fn.now()
+            sent_at: trx.fn.now()
           })
           .where({ id: messageId })
           .returning("*")

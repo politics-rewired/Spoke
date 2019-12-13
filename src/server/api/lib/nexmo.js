@@ -88,11 +88,9 @@ async function rentNewCell() {
   throw new Error("Did not find any cell");
 }
 
-async function sendMessage(message, trx) {
-  const knexClient = trx || r.knex;
-
+async function sendMessage(message, trx = r.knex) {
   if (!nexmo) {
-    await knexClient("message")
+    await trx("message")
       .update({ send_status: "SENT" })
       .where({ id: message.id });
     return "test_message_uuid";
@@ -135,7 +133,7 @@ async function sendMessage(message, trx) {
             messageToSave.send_status = "ERROR";
           }
           const { id: messageId, ...messagePayload } = message;
-          knexClient("message")
+          trx("message")
             .update(messagePayload)
             .where({ id: messageId })
             .then(() =>
@@ -148,7 +146,7 @@ async function sendMessage(message, trx) {
             );
         } else {
           const { id: messageId, ...messagePayload } = message;
-          knexClient("message")
+          trx("message")
             .update({ ...messagePayload, send_status: "SENT" })
             .where({ id: messageId })
             .returning("*")
