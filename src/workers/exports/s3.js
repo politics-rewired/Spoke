@@ -8,9 +8,15 @@ const createS3 = (bucket, endpointUrl = awsEndpoint) => {
   if (endpointUrl) {
     endpoint = new AWS.Endpoint(endpointUrl);
   }
+  const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
+  const credentials = new AWS.Credentials(
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY
+  );
   const s3Client = new AWS.S3({
     signatureVersion: "v4",
     params: { Bucket: bucket },
+    credentials,
     endpoint
   });
   return s3Client;
