@@ -26,16 +26,10 @@ export const getMessagingServiceCandidates = async (
   const { rows: messagingServiceCandidates } = await r.reader.raw(
     `
       select
-        messaging_service.messaging_service_sid,
-        count(messaging_service_stick.messaging_service_sid) as count
+        messaging_service.messaging_service_sid
       from messaging_service
-      left join messaging_service_stick
-        on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
       where messaging_service.service_type = ?
         and messaging_service.organization_id = ?
-      group by
-        messaging_service.messaging_service_sid
-      order by count desc
     `,
     [serviceType, organizationId]
   );
