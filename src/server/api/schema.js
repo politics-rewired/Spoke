@@ -1,5 +1,6 @@
 import { config } from "../../config";
 import logger from "../../logger";
+import escapeRegExp from "lodash/escapeRegExp";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
@@ -96,8 +97,6 @@ const JOBS_SYNC = config.JOBS_SYNC;
 const replaceCurlyApostrophes = rawText =>
   rawText.replace(/[\u2018\u2019]/g, "'");
 
-// From: https://stackoverflow.com/a/1144788
-const escapeRegExp = str => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 const replaceAll = (str, find, replace) =>
   str.replace(new RegExp(escapeRegExp(find), "g"), replace);
 
