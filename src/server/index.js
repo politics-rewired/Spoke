@@ -114,9 +114,10 @@ app.post(
     try {
       const numberAssigned = await fulfillPendingRequestFor(req.body.slack_id);
       return res.json({ numberAssigned });
-    } catch (ex) {
-      logger.error("Error handling autoassignment request", ex);
-      return res.status(500).json({ error: ex.message });
+    } catch (err) {
+      logger.error("Error handling autoassignment request: ", err);
+      const status = err.isFatal ? 500 : 200;
+      return res.status(status).json({ error: err.message });
     }
   }
 );
