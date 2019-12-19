@@ -630,15 +630,12 @@ async function sendMessage(
   if (badWordUrl) {
     request
       .post(badWordUrl)
-      .timeout({
-        response: 1000, // Wait 1 second for the server to start sending
-        deadline: 1000 // Allow 1 second for the response to finish loading
-      })
+      .timeout(30000)
       .set("Authorization", `Token ${config.BAD_WORD_TOKEN}`)
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
         if (err) {
-          logger.error(err);
+          logger.error("Error submitting message to bad word service: ", err);
         }
       });
   }
@@ -2285,10 +2282,7 @@ const rootMutations = {
             if (config.ASSIGNMENT_REQUESTED_URL) {
               const response = await request
                 .post(config.ASSIGNMENT_REQUESTED_URL)
-                .timeout({
-                  response: 1000, // Wait 1 second for the server to start sending
-                  deadline: 1000 // Allow 1 second for the response to finish loading
-                })
+                .timeout(30000)
                 .set(
                   "Authorization",
                   `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
