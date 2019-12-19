@@ -535,6 +535,10 @@ async function notifyIfAllAssigned(type, user, organizationId) {
     if (assignmentTarget == null) {
       await request
         .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
+        .timeout({
+          response: 1000, // Wait 1 second for the server to start sending
+          deadline: 1000 // Allow 1 second for the response to finish loading
+        })
         .send({ type, user });
       logger.verbose(`Notified about out of ${type} to assign`);
     }
