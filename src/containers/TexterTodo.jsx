@@ -133,6 +133,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
           }
           campaign {
             id
+            title
             isArchived
             useDynamicAssignment
             timezone

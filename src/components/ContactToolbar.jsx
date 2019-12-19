@@ -9,9 +9,6 @@ const inlineStyles = {
   toolbar: {
     backgroundColor: grey100
   },
-  cellToolbarTitle: {
-    fontSize: "1em"
-  },
   locationToolbarTitle: {
     fontSize: "1em"
   },
@@ -24,7 +21,8 @@ const ContactToolbar = function ContactToolbar(props) {
   const { campaign, campaignContact, rightToolbarIcon } = props;
   const {
     location: { city, state },
-    timezone: contactTimezone
+    timezone: contactTimezone,
+    firstName
   } = campaignContact;
 
   const timezone = contactTimezone || campaign.timezone;
@@ -37,26 +35,23 @@ const ContactToolbar = function ContactToolbar(props) {
     .join(", ")
     .trim();
 
+  const contactDetailText = (
+    <span>
+      {firstName} &nbsp;&nbsp; {location} {localTime}
+    </span>
+  );
+
   return (
-    <div>
-      <Toolbar style={inlineStyles.toolbar}>
-        <ToolbarGroup>
-          <ToolbarTitle text={campaignContact.firstName} />
-          <ToolbarTitle style={inlineStyles.cellToolbarTitle} />
-          <ToolbarTitle
-            text={localTime}
-            style={inlineStyles.timeToolbarTitle}
-          />
-          {location !== "" && (
-            <ToolbarTitle
-              style={inlineStyles.locationToolbarTitle}
-              text={location}
-            />
-          )}
-          {rightToolbarIcon}
-        </ToolbarGroup>
-      </Toolbar>
-    </div>
+    <Toolbar style={inlineStyles.toolbar}>
+      <ToolbarGroup>
+        {rightToolbarIcon}
+        <ToolbarTitle text={campaign.title} />
+        <ToolbarTitle
+          text={contactDetailText}
+          style={inlineStyles.timeToolbarTitle}
+        />
+      </ToolbarGroup>
+    </Toolbar>
   );
 };
 
