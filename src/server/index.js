@@ -116,8 +116,9 @@ app.post(
       return res.json({ numberAssigned });
     } catch (err) {
       logger.error("Error handling autoassignment request: ", err);
-      const status = err.isFatal ? 500 : 200;
-      return res.status(status).json({ error: err.message });
+      return err.isFatal
+        ? res.status(500).json({ error: err.message })
+        : res.status(200).json({ info: err.message });
     }
   }
 );
