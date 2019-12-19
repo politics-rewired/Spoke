@@ -8,6 +8,13 @@ import { mapFieldsToModel } from "./lib/utils";
 import { isNowBetween } from "../../lib/timezones";
 import { Assignment, r, cacheableData } from "../models";
 
+class AutoassignError extends Error {
+  constructor(message, isFatal = false) {
+    super(message);
+    this.isFatal = isFatal;
+  }
+}
+
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
   messageStatusFilter
@@ -535,11 +542,11 @@ async function notifyIfAllAssigned(type, user, organizationId) {
     if (assignmentTarget == null) {
       await request
         .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
-        .timeout({
-          response: 1000, // Wait 1 second for the server to start sending
-          deadline: 1000 // Allow 1 second for the response to finish loading
-        })
-        .send({ type, user });
+        .timeout(30000)
+        .send({ type, user })
+        .catch(err =>
+          logger.error("Encountered error notifying assignment complete: ", err)
+        );
       logger.verbose(`Notified about out of ${type} to assign`);
     }
   } else {
@@ -556,7 +563,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
     .where({ auth0_id: auth0Id });
 
   if (!user) {
-    throw new Error(`No user found with id ${auth0Id}`);
+    throw new AutoassignError(`No user found with id ${auth0Id}`);
   }
 
   // External assignment service may not be organization-aware so we default to the highest organization ID
@@ -567,7 +574,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
     .first("*");
 
   if (!pendingAssignmentRequest) {
-    throw new Error(`No pending request exists for ${auth0Id}`);
+    throw new AutoassignError(`No pending request exists for ${auth0Id}`);
   }
 
   const numberAssigned = await r.knex.transaction(async trx => {
@@ -587,10 +594,10 @@ export async function fulfillPendingRequestFor(auth0Id) {
         .where({ id: pendingAssignmentRequest.id });
 
       return numberAssigned;
-    } catch (ex) {
+    } catch (err) {
       logger.info(
-        `Failed to give user ${auth0Id} more texts. Marking their request as rejected.`,
-        ex.message
+        `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
+        err
       );
 
       // Mark as rejected outside the transaction so it is unaffected by the rollback
@@ -601,7 +608,8 @@ export async function fulfillPendingRequestFor(auth0Id) {
         })
         .where({ id: pendingAssignmentRequest.id });
 
-      throw new Error(ex.message);
+      const isFatal = err.isFatal !== undefined ? err.isFatal : true;
+      throw new AutoassignError(err.message, isFatal);
     }
   });
 
@@ -620,7 +628,7 @@ export async function giveUserMoreTexts(
   const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
   const user = matchingUsers[0];
   if (!user) {
-    throw new Error(`No user found with id ${auth0Id}`);
+    throw new AutoassignError(`No user found with id ${auth0Id}`);
   }
 
   const assignmentInfo = await myCurrentAssignmentTarget(
@@ -629,7 +637,9 @@ export async function giveUserMoreTexts(
   );
 
   if (!assignmentInfo) {
-    throw new Error("Could not find a suitable campaign to assign to.");
+    throw new AutoassignError(
+      "Could not find a suitable campaign to assign to."
+    );
   }
 
   let countUpdated = 0;
@@ -650,7 +660,9 @@ export async function giveUserMoreTexts(
 
       if (countUpdatedInLoop === 0) {
         if (countUpdated === 0) {
-          throw new Error("Could not find a suitable campaign to assign to.");
+          throw new AutoassignError(
+            "Could not find a suitable campaign to assign to."
+          );
         } else {
           return countUpdated;
         }
