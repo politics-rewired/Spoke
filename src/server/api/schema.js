@@ -631,6 +631,10 @@ async function sendMessage(
   if (badWordUrl) {
     request
       .post(badWordUrl)
+      .timeout({
+        response: 1000, // Wait 1 second for the server to start sending
+        deadline: 1000 // Allow 1 second for the response to finish loading
+      })
       .set("Authorization", `Token ${config.BAD_WORD_TOKEN}`)
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
@@ -2282,6 +2286,10 @@ const rootMutations = {
             if (config.ASSIGNMENT_REQUESTED_URL) {
               const response = await request
                 .post(config.ASSIGNMENT_REQUESTED_URL)
+                .timeout({
+                  response: 1000, // Wait 1 second for the server to start sending
+                  deadline: 1000 // Allow 1 second for the response to finish loading
+                })
                 .set(
                   "Authorization",
                   `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
