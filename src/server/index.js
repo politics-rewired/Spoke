@@ -118,7 +118,10 @@ app.post(
       logger.error("Error handling autoassignment request: ", err);
       return err.isFatal
         ? res.status(500).json({ error: err.message })
-        : res.status(200).json({ info: err.message });
+        : res.status(200).json({
+            numberAssigned: 0,
+            info: err.message
+          });
     }
   }
 );
