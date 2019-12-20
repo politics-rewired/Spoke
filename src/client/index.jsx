@@ -19,9 +19,13 @@ const history = syncHistoryWithStore(browserHistory, store.data);
 
 StyleSheet.rehydrate(window.RENDERED_CLASS_NAMES);
 
+const authCheck = (nextState, replace) => {
+  // TODO: check cookies here?
+};
+
 ReactDOM.render(
   <ApolloProvider store={store.data} client={ApolloClientSingleton}>
-    <Router history={history} routes={makeRoutes()} />
+    <Router history={history} routes={makeRoutes(authCheck)} />
   </ApolloProvider>,
   document.getElementById("mount")
 );
