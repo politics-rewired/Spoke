@@ -2255,6 +2255,8 @@ const rootMutations = {
       { count, email, organizationId, preferredTeamId },
       { user, loaders }
     ) => {
+      let assignmentRequestId;
+
       try {
         const myAssignmentTarget = await myCurrentAssignmentTarget(
           user.id,
@@ -2270,28 +2272,31 @@ const rootMutations = {
                   - we roll back the insert and return the error
                 - if it succeeds, return 'Created'!
             */
-          await r.knex.transaction(async trx => {
-            await trx("assignment_request").insert({
+          const inserted = await r
+            .knex("assignment_request")
+            .insert({
               user_id: user.id,
               organization_id: organizationId,
               amount: count,
               preferred_team_id: preferredTeamId
-            });
+            })
+            .returning("id");
 
-            // This will just throw if it errors
-            if (config.ASSIGNMENT_REQUESTED_URL) {
-              const response = await request
-                .post(config.ASSIGNMENT_REQUESTED_URL)
-                .timeout(30000)
-                .set(
-                  "Authorization",
-                  `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
-                )
-                .send({ count, email });
+          assignmentRequestId = inserted[0];
 
-              logger.debug("Assignment requested response", { response });
-            }
-          });
+          // This will just throw if it errors
+          if (config.ASSIGNMENT_REQUESTED_URL) {
+            const response = await request
+              .post(config.ASSIGNMENT_REQUESTED_URL)
+              .timeout(30000)
+              .set(
+                "Authorization",
+                `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
+              )
+              .send({ count, email });
+
+            logger.debug("Assignment requested response", { response });
+          }
 
           return "Created";
         }
@@ -2301,6 +2306,15 @@ const rootMutations = {
         logger.error("Error submitting external assignment request!", {
           error: err
         });
+
+        if (assignmentRequestId !== undefined) {
+          logger.debug("Deleting assignment request ", { assignmentRequestId });
+          await r
+            .knex("assignment_request")
+            .where({ id: assignmentRequestId })
+            .del();
+        }
+
         throw new GraphQLError(
           err.response ? err.response.body.message : err.message
         );
