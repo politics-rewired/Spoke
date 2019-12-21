@@ -2473,6 +2473,7 @@ const rootMutations = {
           auth0_id,
           assignmentRequest.amount,
           assignmentRequest.organization_id,
+          null,
           trx
         );
 
