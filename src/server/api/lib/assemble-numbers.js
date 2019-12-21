@@ -256,8 +256,10 @@ const convertInboundMessage = async assembleMessage => {
 
   if (!ccInfo) {
     logger.error(
-      `No ccInfo for ${contactNumber} with messaging service sid ${profileId}`
+      "Could not match inbound assemble message to existing conversation",
+      { payload: assembleMessage }
     );
+    return;
   }
 
   const spokeMessage = {
@@ -291,7 +293,10 @@ export const convertMessagePartsToMessage = async messageParts =>
 export const handleIncomingMessage = async message => {
   if (config.JOBS_SAME_PROCESS) {
     const inboundMessage = await convertInboundMessage(message);
-    await saveNewIncomingMessage(inboundMessage);
+    // Only persist the message if it was matched to an existing conversation
+    if (inboundMessage) {
+      await saveNewIncomingMessage(inboundMessage);
+    }
   } else {
     const { id: serviceId, from, to } = message;
     const contactNumber = getFormattedPhoneNumber(from);
