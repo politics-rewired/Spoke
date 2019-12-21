@@ -130,9 +130,11 @@ export function getContacts(
 }
 
 // Returns either "replies", "initials", or null
-export async function getCurrentAssignmentType(organizationId) {
-  const organization = await r
-    .reader("organization")
+export async function getCurrentAssignmentType(
+  organizationId,
+  parentTrx = r.reader
+) {
+  const organization = await parentTrx("organization")
     .select("features")
     .where({ id: parseInt(organizationId) })
     .first();
@@ -152,9 +154,13 @@ export async function getCurrentAssignmentType(organizationId) {
   };
 }
 
-export async function allCurrentAssignmentTargets(organizationId) {
+export async function allCurrentAssignmentTargets(
+  organizationId,
+  parentTrx = r.reader
+) {
   const { assignmentType, generalEnabled } = await getCurrentAssignmentType(
-    organizationId
+    organizationId,
+    parentTrx
   );
 
   const campaignView = {
@@ -178,7 +184,7 @@ export async function allCurrentAssignmentTargets(organizationId) {
    * so that the limit applies only to it and not the whole
    * query
    */
-  const { rows: teamToCampaigns } = await r.reader.raw(
+  const { rows: teamToCampaigns } = await parentTrx.raw(
     /**
      * What a query!
      *
