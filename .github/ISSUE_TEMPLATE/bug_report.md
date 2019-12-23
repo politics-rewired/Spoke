@@ -10,6 +10,8 @@ assignees: ''
 **Your issue may already be reported!**
 Please search on the [issue tracker](../) before creating one.
 
+- [ ] I have searched through existing issues and did not find an existing report
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
