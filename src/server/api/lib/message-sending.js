@@ -27,16 +27,10 @@ export const getMessagingServiceCandidates = async (
   const { rows: messagingServiceCandidates } = await r.reader.raw(
     `
       select
-        messaging_service.messaging_service_sid,
-        count(messaging_service_stick.messaging_service_sid) as count
+        messaging_service.messaging_service_sid
       from messaging_service
-      left join messaging_service_stick
-        on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
       where messaging_service.service_type = ?
         and messaging_service.organization_id = ?
-      group by
-        messaging_service.messaging_service_sid
-      order by count desc
     `,
     [serviceType, organizationId]
   );
@@ -68,16 +62,13 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
       ),
       chosen_messaging_service_sid as (
         select
-          messaging_service.messaging_service_sid,
-          count(messaging_service_stick.messaging_service_sid) as count
+          messaging_service.messaging_service_sid
         from messaging_service
-        left join messaging_service_stick
-          on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
         where messaging_service.organization_id = ?
           and messaging_service.service_type = ( select service_type from service_type_selection )
         group by
           messaging_service.messaging_service_sid
-        order by count asc
+        order by random()
         limit 1
       ),
       insert_results as (

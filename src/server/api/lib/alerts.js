@@ -108,7 +108,11 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     webhookUrls.map(url =>
       request
         .post(url)
+        .timeout(30000)
         .send({ mostRecentlyReceivedMessage, taggingUser, taggedContact })
+        .catch(err =>
+          logger.error("Encountered error notifying on tag assignment: ", err)
+        )
     )
   );
 }

@@ -7,7 +7,8 @@ import {
   Editor,
   Modifier
 } from "draft-js";
-import { delimit, escapeRegExp } from "../lib/scripts";
+import escapeRegExp from "lodash/escapeRegExp";
+import { delimit } from "../lib/scripts";
 import Chip from "./Chip";
 import { red400, green500, green600, grey100 } from "material-ui/styles/colors";
 

@@ -1060,7 +1060,9 @@ export async function assignTexters(job) {
  */
 const fetchExportData = async job => {
   const { campaign_id: campaignId, payload: rawPayload } = job;
-  const { requester: requesterId } = JSON.parse(rawPayload);
+  const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
+    rawPayload
+  );
   const { title: campaignTitle } = await r
     .reader("campaign")
     .first("title")
@@ -1094,7 +1096,8 @@ const fetchExportData = async job => {
     campaignTitle,
     notificationEmail,
     interactionSteps,
-    assignments
+    assignments,
+    isAutomatedExport
   };
 };
 
@@ -1319,7 +1322,8 @@ export async function exportCampaign(job) {
     campaignTitle = undefined,
     notificationEmail = undefined,
     interactionSteps = undefined,
-    assignments = undefined;
+    assignments = undefined,
+    isAutomatedExport = undefined;
 
   try {
     ({
@@ -1327,7 +1331,8 @@ export async function exportCampaign(job) {
       campaignTitle,
       notificationEmail,
       interactionSteps,
-      assignments
+      assignments,
+      isAutomatedExport
     } = await fetchExportData(job));
   } catch (exc) {
     logger.error("Error fetching export data:", exc);
@@ -1401,27 +1406,31 @@ export async function exportCampaign(job) {
     const objectKeyPrefix = config.AWS_S3_KEY_PREFIX;
     const safeTitle = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
     const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
-    const campaignContactsKey = `${objectKeyPrefix}${safeTitle}-${timestamp}.csv`;
-    const messagesKey = `${campaignContactsKey}-messages.csv`;
+    let campaignContactsKey = `${objectKeyPrefix}${safeTitle}`;
+    if (!isAutomatedExport)
+      campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
+    const messagesKey = `${campaignContactsKey}-messages`;
     try {
       const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
-        uploadToCloud(campaignContactsKey, campaignsCsv),
-        uploadToCloud(messagesKey, messagesCsv)
+        uploadToCloud(`${campaignContactsKey}.csv`, campaignsCsv),
+        uploadToCloud(`${messagesKey}.csv`, messagesCsv)
       ]);
-      await sendEmail({
-        to: notificationEmail,
-        subject: `Export ready for ${campaignTitle}`,
-        text:
-          `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
-          `    Campaign export: ${campaignExportUrl}` +
-          `    Message export: ${campaignMessagesExportUrl}`
-      }).catch(err => {
-        logger.error(err);
-        logger.info(`Campaign Export URL - ${campaignExportUrl}`);
-        logger.info(
-          `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
-        );
-      });
+      if (!isAutomatedExport) {
+        await sendEmail({
+          to: notificationEmail,
+          subject: `Export ready for ${campaignTitle}`,
+          text:
+            `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
+            `    Campaign export: ${campaignExportUrl}` +
+            `    Message export: ${campaignMessagesExportUrl}`
+        }).catch(err => {
+          logger.error(err);
+          logger.info(`Campaign Export URL - ${campaignExportUrl}`);
+          logger.info(
+            `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
+          );
+        });
+      }
       logger.info(`Successfully exported ${campaignId}`);
     } catch (err) {
       logger.error("Error uploading to cloud storage", err);

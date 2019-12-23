@@ -9,6 +9,13 @@ import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
 import { eventBus, EventType } from "../event-bus";
 
+class AutoassignError extends Error {
+  constructor(message, isFatal = false) {
+    super(message);
+    this.isFatal = isFatal;
+  }
+}
+
 export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue(
   queryParameter,
   messageStatusFilter
@@ -510,7 +517,7 @@ export async function myCurrentAssignmentTargets(
     [organizationId, userId, userId, organizationId]
   );
 
-  const results = teamToCampaigns.slice(0, 1).map(ttc =>
+  const results = teamToCampaigns.map(ttc =>
     Object.assign(ttc, {
       type: ttc.assignment_type,
       campaign: { id: ttc.id, title: ttc.title },
@@ -536,7 +543,11 @@ async function notifyIfAllAssigned(type, user, organizationId) {
     if (assignmentTarget == null) {
       await request
         .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
-        .send({ type, user });
+        .timeout(30000)
+        .send({ type, user })
+        .catch(err =>
+          logger.error("Encountered error notifying assignment complete: ", err)
+        );
       logger.verbose(`Notified about out of ${type} to assign`);
     }
   } else {
@@ -553,7 +564,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
     .where({ auth0_id: auth0Id });
 
   if (!user) {
-    throw new Error(`No user found with id ${auth0Id}`);
+    throw new AutoassignError(`No user found with id ${auth0Id}`);
   }
 
   // External assignment service may not be organization-aware so we default to the highest organization ID
@@ -564,7 +575,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
     .first("*");
 
   if (!pendingAssignmentRequest) {
-    throw new Error(`No pending request exists for ${auth0Id}`);
+    throw new AutoassignError(`No pending request exists for ${auth0Id}`);
   }
 
   const numberAssigned = await r.knex.transaction(async trx => {
@@ -573,6 +584,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
         auth0Id,
         pendingAssignmentRequest.amount,
         pendingAssignmentRequest.organization_id,
+        pendingAssignmentRequest.preferred_team_id,
         trx
       );
 
@@ -583,10 +595,10 @@ export async function fulfillPendingRequestFor(auth0Id) {
         .where({ id: pendingAssignmentRequest.id });
 
       return numberAssigned;
-    } catch (ex) {
+    } catch (err) {
       logger.info(
-        `Failed to give user ${auth0Id} more texts. Marking their request as rejected.`,
-        ex.message
+        `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
+        err
       );
 
       // Mark as rejected outside the transaction so it is unaffected by the rollback
@@ -597,7 +609,8 @@ export async function fulfillPendingRequestFor(auth0Id) {
         })
         .where({ id: pendingAssignmentRequest.id });
 
-      throw new Error(ex.message);
+      const isFatal = err.isFatal !== undefined ? err.isFatal : true;
+      throw new AutoassignError(err.message, isFatal);
     }
   });
 
@@ -608,6 +621,7 @@ export async function giveUserMoreTexts(
   auth0Id,
   count,
   organizationId,
+  preferredTeamId,
   parentTrx = r.knex
 ) {
   logger.verbose(`Starting to give ${auth0Id} ${count} texts`);
@@ -615,7 +629,7 @@ export async function giveUserMoreTexts(
   const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
   const user = matchingUsers[0];
   if (!user) {
-    throw new Error(`No user found with id ${auth0Id}`);
+    throw new AutoassignError(`No user found with id ${auth0Id}`);
   }
 
   const assignmentInfo = await myCurrentAssignmentTarget(
@@ -624,7 +638,9 @@ export async function giveUserMoreTexts(
   );
 
   if (!assignmentInfo) {
-    throw new Error("Could not find a suitable campaign to assign to.");
+    throw new AutoassignError(
+      "Could not find a suitable campaign to assign to."
+    );
   }
 
   let countUpdated = 0;
@@ -636,6 +652,7 @@ export async function giveUserMoreTexts(
         user,
         organizationId,
         countLeftToUpdate,
+        preferredTeamId,
         trx
       );
 
@@ -644,7 +661,9 @@ export async function giveUserMoreTexts(
 
       if (countUpdatedInLoop === 0) {
         if (countUpdated === 0) {
-          throw new Error("Could not find a suitable campaign to assign to.");
+          throw new AutoassignError(
+            "Could not find a suitable campaign to assign to."
+          );
         } else {
           return countUpdated;
         }
@@ -660,15 +679,28 @@ export async function giveUserMoreTexts(
   return updated_result;
 }
 
-export async function assignLoop(user, organizationId, countLeft, trx) {
-  const assignmentInfo = await myCurrentAssignmentTarget(
+export async function assignLoop(
+  user,
+  organizationId,
+  countLeft,
+  preferredTeamId,
+  trx
+) {
+  const assignmentOptions = await myCurrentAssignmentTargets(
     user.id,
     organizationId,
     trx
   );
-  if (!assignmentInfo) {
+
+  if (assignmentOptions.length === 0) {
     return 0;
   }
+
+  const preferredAssignment = assignmentOptions.find(
+    assignment => assignment.team_id === preferredTeamId
+  );
+
+  const assignmentInfo = preferredAssignment || assignmentOptions[0];
 
   // Determine which campaign to assign to – optimize to pick winners
   let campaignIdToAssignTo = assignmentInfo.campaign.id;

@@ -137,16 +137,13 @@ async function getConversationsJoinsAndWhereClause(
     }
 
     if (tagsFilter.specificTagIds && tagsFilter.specificTagIds.length > 0) {
-      const specificTagIdsSubquery = r.knex
+      const specificTagIdsSubquery = r.reader
         .select("campaign_contact_tag.campaign_contact_id")
         .from("campaign_contact_tag")
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
-        .whereIn("tag.id", tagsFilter.specificTagIds)
-        .whereRaw(
-          "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
-        );
+        .whereIn("tag.id", tagsFilter.specificTagIds);
 
-      query = query.whereExists(specificTagIdsSubquery);
+      query = query.whereIn("campaign_contact.id", specificTagIdsSubquery);
     }
   }
 
@@ -200,9 +197,8 @@ export async function getConversations(
   );
 
   offsetLimitQuery = offsetLimitQuery
-    .orderByRaw(
-      "coalesce(message.created_at, campaign_contact.updated_at) desc"
-    )
+    .orderByRaw("message.created_at desc nulls last")
+    .orderByRaw("campaign_contact.updated_at desc nulls last")
     .orderBy("cc_id");
 
   offsetLimitQuery = offsetLimitQuery.limit(cursor.limit).offset(cursor.offset);
@@ -289,7 +285,13 @@ export async function getConversations(
     .map(contactId => {
       const contactMessages = groupedContacts[contactId];
       const firstRow = contactMessages[0];
+
       const conversation = _.omit(firstRow, messageFields);
+
+      if (firstRow) {
+        conversation.updated_at = firstRow.created_at;
+      }
+
       conversation.messages = contactMessages
         // Sort ASC to display most recent _messages_ last
         .sort((messageA, messageB) => messageA.created_at - messageB.created_at)

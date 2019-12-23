@@ -1,6 +1,7 @@
 import { config } from "../../config";
 import logger from "../../logger";
 import { eventBus, EventType } from "../event-bus";
+import escapeRegExp from "lodash/escapeRegExp";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
@@ -82,8 +83,6 @@ const JOBS_SYNC = config.JOBS_SYNC;
 const replaceCurlyApostrophes = rawText =>
   rawText.replace(/[\u2018\u2019]/g, "'");
 
-// From: https://stackoverflow.com/a/1144788
-const escapeRegExp = str => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 const replaceAll = (str, find, replace) =>
   str.replace(new RegExp(escapeRegExp(find), "g"), replace);
 
@@ -436,14 +435,10 @@ async function sendMessage(
   checkAssignment = true,
   skipUpdatingMessageStatus = false
 ) {
-  const optOutJoinConditions = {
-    "opt_out.cell": "campaign_contact.cell"
-  };
-
-  if (config.OPTOUTS_SHARE_ALL_ORGS) {
-    optOutJoinConditions["opt_out.organization_id"] =
-      "campaign.organization_id";
-  }
+  // Scope opt-outs to organization if we are not sharing across all organizations
+  const optOutCondition = !config.OPTOUTS_SHARE_ALL_ORGS
+    ? "and opt_out.organization_id = campaign.organization_id"
+    : "";
 
   const record = await r
     .knex("campaign_contact")
@@ -452,7 +447,6 @@ async function sendMessage(
     .whereRaw("campaign_contact.archived = false")
     .where({ "campaign.is_archived": false })
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
-    .leftJoin("opt_out", optOutJoinConditions)
     .first(
       "campaign_contact.id as cc_id",
       "campaign_contact.assignment_id as assignment_id",
@@ -464,7 +458,15 @@ async function sendMessage(
       "campaign.texting_hours_start as c_texting_hours_start",
       "campaign.texting_hours_end as c_texting_hours_end",
       "assignment.user_id as a_assignment_user_id",
-      "opt_out.id as is_opted_out",
+      r.knex.raw(
+        `exists (
+          select 1
+          from opt_out
+          where
+            opt_out.cell = campaign_contact.cell
+              ${optOutCondition}
+        ) as is_opted_out`
+      ),
       "campaign_contact.timezone as contact_timezone"
     );
 
@@ -626,11 +628,12 @@ async function sendMessage(
   if (badWordUrl) {
     request
       .post(badWordUrl)
+      .timeout(30000)
       .set("Authorization", `Token ${config.BAD_WORD_TOKEN}`)
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
         if (err) {
-          logger.error(err);
+          logger.error("Error submitting message to bad word service: ", err);
         }
       });
   }
@@ -2313,9 +2316,11 @@ const rootMutations = {
 
     requestTexts: async (
       _,
-      { count, email, organizationId },
+      { count, email, organizationId, preferredTeamId },
       { user, loaders }
     ) => {
+      let assignmentRequestId;
+
       try {
         const myAssignmentTarget = await myCurrentAssignmentTarget(
           user.id,
@@ -2331,26 +2336,31 @@ const rootMutations = {
                   - we roll back the insert and return the error
                 - if it succeeds, return 'Created'!
             */
-          await r.knex.transaction(async trx => {
-            await trx("assignment_request").insert({
+          const inserted = await r
+            .knex("assignment_request")
+            .insert({
               user_id: user.id,
               organization_id: organizationId,
-              amount: count
-            });
+              amount: count,
+              preferred_team_id: preferredTeamId
+            })
+            .returning("id");
 
-            // This will just throw if it errors
-            if (config.ASSIGNMENT_REQUESTED_URL) {
-              const response = await request
-                .post(config.ASSIGNMENT_REQUESTED_URL)
-                .set(
-                  "Authorization",
-                  `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
-                )
-                .send({ count, email });
+          assignmentRequestId = inserted[0];
 
-              logger.debug("Assignment requested response", { response });
-            }
-          });
+          // This will just throw if it errors
+          if (config.ASSIGNMENT_REQUESTED_URL) {
+            const response = await request
+              .post(config.ASSIGNMENT_REQUESTED_URL)
+              .timeout(30000)
+              .set(
+                "Authorization",
+                `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
+              )
+              .send({ count, email });
+
+            logger.debug("Assignment requested response", { response });
+          }
 
           return "Created";
         }
@@ -2360,6 +2370,15 @@ const rootMutations = {
         logger.error("Error submitting external assignment request!", {
           error: err
         });
+
+        if (assignmentRequestId !== undefined) {
+          logger.debug("Deleting assignment request ", { assignmentRequestId });
+          await r
+            .knex("assignment_request")
+            .where({ id: assignmentRequestId })
+            .del();
+        }
+
         throw new GraphQLError(
           err.response ? err.response.body.message : err.message
         );

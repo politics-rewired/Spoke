@@ -8,6 +8,7 @@ import {
   currentAssignmentTarget,
   allCurrentAssignmentTargets,
   myCurrentAssignmentTarget,
+  myCurrentAssignmentTargets,
   countLeft
 } from "./assignment";
 
@@ -141,6 +142,20 @@ export const resolvers = {
             teamTitle: assignmentTarget.team_title
           }
         : null;
+    },
+    myCurrentAssignmentTargets: async (organization, _, context) => {
+      const assignmentTargets = await myCurrentAssignmentTargets(
+        context.user.id,
+        organization.id
+      );
+
+      return assignmentTargets.map(at => ({
+        type: at.type,
+        countLeft: parseInt(at.count_left),
+        maxRequestCount: parseInt(at.max_request_count),
+        teamTitle: at.team_title,
+        teamId: at.team_id
+      }));
     },
     escalatedConversationCount: async organization => {
       const subQuery = r.reader
