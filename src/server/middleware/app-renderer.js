@@ -1,4 +1,42 @@
+import fs from "fs";
+import path from "path";
+
 import { config, clientConfig } from "../../config";
+
+// -----------------------------------------
+// Asset Map
+// -----------------------------------------
+
+let assetMap = {
+  "bundle.js": "/assets/bundle.js"
+};
+
+if (config.isProduction) {
+  const assetMapData = JSON.parse(
+    fs.readFileSync(
+      // this is a bit overly complicated for the use case
+      // of it being run from the build directory BY claudia.js
+      // we need to make it REALLY relative, but not by the
+      // starting process or the 'local' directory (which are both wrong then)
+      config.ASSETS_DIR.startsWith(".")
+        ? path.join(
+            __dirname,
+            "../../../../",
+            config.ASSETS_DIR,
+            config.ASSETS_MAP_FILE
+          )
+        : path.join(config.ASSETS_DIR, config.ASSETS_MAP_FILE)
+    )
+  );
+  const staticBase = config.STATIC_BASE_URL;
+  for (var a in assetMapData) {
+    assetMap[a] = staticBase + assetMapData[a];
+  }
+}
+
+// -----------------------------------------
+// HTML Construction
+// -----------------------------------------
 
 // the site is not very useful without auth0, unless you have a session cookie already
 // good for doing dev offline
@@ -31,8 +69,7 @@ const windowVars = Object.keys(clientConfig).map(varName => {
   return `window.${varName}=${escapedValue};`;
 });
 
-export default function renderIndex(assetMap) {
-  return `
+const indexHtml = `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -69,4 +106,11 @@ export default function renderIndex(assetMap) {
   </body>
 </html>
 `;
-}
+
+// -----------------------------------------
+// Middleware
+// -----------------------------------------
+
+const appRenderer = async (req, res) => res.send(indexHtml);
+
+export default appRenderer;
