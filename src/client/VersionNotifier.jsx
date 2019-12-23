@@ -47,7 +47,7 @@ export default class VersionNotifier extends React.Component {
       <Dialog
         title="New Spoke Version Available"
         actions={actions}
-        modal={false}
+        modal={true}
         open={isOpen}
         onRequestClose={this.handleClose}
       >
