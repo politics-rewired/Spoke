@@ -5,6 +5,7 @@ import _ from "lodash";
 import logger from "../../logger";
 import { config } from "../../config";
 import { sqlResolvers } from "./lib/utils";
+import { sleep } from "../../lib/utils";
 import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
 import { eventBus, EventType } from "../event-bus";
@@ -537,19 +538,29 @@ export async function myCurrentAssignmentTarget(
   return options ? options[0] : null;
 }
 
-async function notifyIfAllAssigned(type, user, organizationId) {
+async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
   if (config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
-    const assignmentTarget = await currentAssignmentTarget(organizationId);
-    if (assignmentTarget == null) {
-      await request
-        .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
-        .timeout(30000)
-        .send({ type, user })
-        .catch(err =>
-          logger.error("Encountered error notifying assignment complete: ", err)
-        );
-      logger.verbose(`Notified about out of ${type} to assign`);
+    const assignmentTargets = await allCurrentAssignmentTargets(organizationId);
+    const existingTeamIds = assignmentTargets.map(cat => cat.team_id);
+
+    const isEmptiedTeam = ([id, _title]) => !existingTeamIds.includes(id);
+    let emptiedTeams = [...teamsAssignedTo.entries()].filter(isEmptiedTeam);
+
+    let notificationTeamIds = config.ASSIGNMENT_COMPLETE_NOTIFICATION_TEAM_IDS;
+    if (notificationTeamIds.length > 0) {
+      notificationTeamIds = notificationTeamIds.split(",").map(parseInt);
+      const isANotifyTeam = ([id, _title]) => notificationTeamIds.includes(id);
+      emptiedTeams = emptiedTeams.filter(isANotifyTeam);
     }
+
+    await Promise.all(
+      emptiedTeams.map(([_id, title]) =>
+        request
+          .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
+          .timeout(30000)
+          .send({ team: title })
+      )
+    );
   } else {
     logger.verbose(
       "Not checking if assignments are available – ASSIGNMENT_COMPLETE_NOTIFICATION_URL is unset"
@@ -643,12 +654,14 @@ export async function giveUserMoreTexts(
     );
   }
 
+  // Use a Map to de-duplicate and support integer-type keys
+  const teamsAssignedTo = new Map();
   let countUpdated = 0;
   let countLeftToUpdate = count;
 
   const updated_result = await parentTrx.transaction(async trx => {
     while (countLeftToUpdate > 0) {
-      const countUpdatedInLoop = await assignLoop(
+      const { count: countUpdatedInLoop, team } = await assignLoop(
         user,
         organizationId,
         countLeftToUpdate,
@@ -668,13 +681,23 @@ export async function giveUserMoreTexts(
           return countUpdated;
         }
       }
+
+      const { teamId, teamTitle } = team;
+      teamsAssignedTo.set(teamId, teamTitle);
     }
 
     return countUpdated;
   });
 
-  // Async function, not awaiting because response to external assignment tool does not depend on it
-  notifyIfAllAssigned(assignmentInfo.type, auth0Id, organizationId);
+  if (teamsAssignedTo.size > 0) {
+    // Hold off notifying until the current transaction has commited and propagated to any readers
+    // No need to await the notify result as giveUserMoreTexts doesn't depend on it
+    sleep(15000)
+      .then(() => notifyIfAllAssigned(organizationId, teamsAssignedTo))
+      .catch(err =>
+        logger.error("Encountered error notifying assignment complete: ", err)
+      );
+  }
 
   return updated_result;
 }
@@ -693,7 +716,7 @@ export async function assignLoop(
   );
 
   if (assignmentOptions.length === 0) {
-    return 0;
+    return { count: 0 };
   }
 
   const preferredAssignment = assignmentOptions.find(
@@ -783,7 +806,11 @@ export async function assignLoop(
   );
 
   logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
-  return ccUpdateCount;
+  const team = {
+    teamId: assignmentInfo.team_id,
+    teamTitle: assignmentInfo.team_title
+  };
+  return { count: ccUpdateCount, team };
 }
 
 export const resolvers = {

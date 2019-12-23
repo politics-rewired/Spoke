@@ -15,6 +15,8 @@ class ResponseMiddlewareNetworkInterface {
     responseMiddlewares.forEach(middleware => {
       if (typeof middleware.applyMiddleware === "function") {
         this.defaultNetworkInterface.use([middleware]);
+      } else if (typeof middleware.applyAfterware === "function") {
+        this.defaultNetworkInterface.useAfter([middleware]);
       } else if (typeof middleware.applyResponseMiddleware === "function") {
         this.responseMiddlewares.push(middleware);
       } else {

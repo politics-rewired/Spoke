@@ -73,6 +73,11 @@ if (isClient()) {
         "Webhook URL to notify when there are no more assignable campaign contacts.",
       default: undefined
     }),
+    ASSIGNMENT_COMPLETE_NOTIFICATION_TEAM_IDS: str({
+      desc:
+        "Comma separated list of team IDs to restrict 'assignment complete' notifications to.",
+      default: ""
+    }),
     AUTH0_DOMAIN: host({
       desc: "Domain name on Auth0 account",
       example: "example.auth0.com",
@@ -594,6 +599,11 @@ if (isClient()) {
     SKIP_TWILIO_VALIDATION: bool({
       desc: "Whether to bypass Twilio header validation altogether.",
       default: false
+    }),
+    SPOKE_VERSION: str({
+      desc: "The version of Spoke running",
+      default: "no-version",
+      isClient: true
     }),
     WAREHOUSE_DB_TYPE: str({
       desc:

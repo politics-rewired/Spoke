@@ -100,7 +100,7 @@
     "express-basic-auth": "^1.1.6",
     "express-winston": "^3.1.0",
     "fs": "^0.0.2",
-    "google-libphonenumber": "^1.0.25",
+    "google-libphonenumber": "^3.2.6",
     "graphql": "^0.13.2",
     "graphql-date": "^1.0.3",
     "graphql-tag": "^0.1.9",

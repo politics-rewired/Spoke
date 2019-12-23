@@ -1,5 +1,5 @@
 # Use latest LTS
-FROM node:8.10.0-alpine
+FROM node:12.14.0-alpine
 
 WORKDIR /usr/Spoke
 
@@ -20,6 +20,9 @@ ENV NODE_ENV="production" \
 # Copy application codebase
 COPY . .
 RUN yarn run prod-build
+
+ARG SPOKE_VERSION="no-version"
+ENV SPOKE_VERSION=$SPOKE_VERSION
 
 # Run the production compiled code
 EXPOSE 3000
