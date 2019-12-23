@@ -21,7 +21,7 @@ ENV NODE_ENV="production" \
 COPY . .
 RUN yarn run prod-build
 
-ARG SPOKE_VERSION=undefined
+ARG SPOKE_VERSION="no-version"
 ENV SPOKE_VERSION=$SPOKE_VERSION
 
 # Run the production compiled code

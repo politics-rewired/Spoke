@@ -597,7 +597,7 @@ if (isClient()) {
     }),
     SPOKE_VERSION: str({
       desc: "The version of Spoke running",
-      default: undefined,
+      default: "no-version",
       isClient: true
     }),
     WAREHOUSE_DB_TYPE: str({
