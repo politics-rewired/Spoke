@@ -51,7 +51,7 @@ async function convertMessagePartsToMessage(messageParts) {
 
 async function handleIncomingMessage(message) {
   const { contact_number, user_number, service_id, text } = message;
-  const [{ id: partId }] = await r
+  const [partId] = await r
     .knex("pending_message_part")
     .insert({
       service: "fakeservice",

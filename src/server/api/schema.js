@@ -1050,7 +1050,7 @@ const rootMutations = {
         "ADMIN",
         /* allowSuperadmin=*/ true
       );
-      const [{ id: newCampaignId }] = await r
+      const [newCampaignId] = await r
         .knex("campaign")
         .insert({
           organization_id: campaign.organizationId,
