@@ -10,35 +10,37 @@ const responseMiddlewareNetworkInterface = new ResponseMiddlewareNetworkInterfac
   { credentials: "same-origin" }
 );
 
-responseMiddlewareNetworkInterface.use({
-  applyResponseMiddleware: (response, next) => {
-    const parsedError = graphQLErrorParser(response);
-    if (parsedError) {
-      console.debug(parsedError);
-      if (parsedError.status === 401) {
-        window.location = `/login?nextUrl=${window.location.pathname}`;
-      } else if (parsedError.status === 403) {
-        window.location = "/";
-      } else if (parsedError.status === 404) {
-        window.location = "/404";
-      } else {
-        console.error(
-          `GraphQL request resulted in error:\nRequest:${JSON.stringify(
-            response.data
-          )}\nError:${JSON.stringify(response.errors)}`
-        );
-      }
-    }
-    next();
-  }
-});
-
-responseMiddlewareNetworkInterface.defaultNetworkInterface.useAfter([
+responseMiddlewareNetworkInterface.use([
   {
     applyAfterware({ response }, next) {
+      const clientVersion = window.SPOKE_VERSION;
       const serverVersion = response.headers.get("x-spoke-version");
-      if (serverVersion)
+      const didChange = !!serverVersion && clientVersion !== serverVersion;
+      if (didChange) {
         eventBus.emit(EventTypes.NewSpokeVersionAvailble, serverVersion);
+      }
+      next();
+    }
+  },
+  {
+    applyResponseMiddleware: (response, next) => {
+      const parsedError = graphQLErrorParser(response);
+      if (parsedError) {
+        console.debug(parsedError);
+        if (parsedError.status === 401) {
+          window.location = `/login?nextUrl=${window.location.pathname}`;
+        } else if (parsedError.status === 403) {
+          window.location = "/";
+        } else if (parsedError.status === 404) {
+          window.location = "/404";
+        } else {
+          console.error(
+            `GraphQL request resulted in error:\nRequest:${JSON.stringify(
+              response.data
+            )}\nError:${JSON.stringify(response.errors)}`
+          );
+        }
+      }
       next();
     }
   }

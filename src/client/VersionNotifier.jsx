@@ -8,10 +8,8 @@ import { eventBus, EventTypes } from "./events";
 export default class VersionNotifier extends React.Component {
   state = {
     isDismissed: false,
-    serverVersion: undefined
+    newServerVersion: undefined
   };
-
-  handleNewVersion = serverVersion => this.setState({ serverVersion });
 
   componentDidMount() {
     eventBus.on(EventTypes.NewSpokeVersionAvailble, this.handleNewVersion);
@@ -21,15 +19,15 @@ export default class VersionNotifier extends React.Component {
     eventBus.removeListener(this.handleNewVersion);
   }
 
+  handleNewVersion = newServerVersion => this.setState({ newServerVersion });
+
   handleClose = () => this.setState({ isDismissed: true });
 
   handleRefreshNow = () => window.location.reload();
 
   render() {
-    const { isDismissed, serverVersion } = this.state;
-    const clientVersion = window.SPOKE_VERSION;
-    const isOpen =
-      !isDismissed && !!serverVersion && clientVersion !== serverVersion;
+    const { isDismissed, newServerVersion } = this.state;
+    const isOpen = !isDismissed && newServerVersion !== undefined;
 
     const actions = [
       <FlatButton
@@ -53,9 +51,9 @@ export default class VersionNotifier extends React.Component {
         open={isOpen}
         onRequestClose={this.handleClose}
       >
-        {serverVersion &&
-          `Spoke ${serverVersion} is available! To get the update, you will need to refresh the page. ` +
-            `Some features may not work until you load the new version`}
+        Spoke {newServerVersion || "n/a"} is available! To get the update, you
+        will need to refresh the page. Some features may not work until you load
+        the new version
       </Dialog>
     );
   }

@@ -48,11 +48,12 @@ if (config.LOG_LEVEL === "verbose" || config.LOG_LEVEL === "debug") {
 }
 
 // Send version to client
-app.use(function(_req, res, next) {
-  if (config.SPOKE_VERSION)
+if (config.SPOKE_VERSION) {
+  app.use((_req, res, next) => {
     res.setHeader("x-spoke-version", config.SPOKE_VERSION);
-  next();
-});
+    next();
+  });
+}
 
 app.enable("trust proxy"); // Don't rate limit heroku
 app.use(bodyParser.json({ limit: "50mb" }));
