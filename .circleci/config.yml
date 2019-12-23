@@ -26,9 +26,12 @@ jobs:
       - run:
           name: Publish Docker image
           command: |
-            docker build --build-arg SPOKE_VERSION="$(git describe)" --rm=false -t gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 .
+            export SPOKE_VERSION="$(git describe)"
+            docker build --build-arg SPOKE_VERSION="$SPOKE_VERSION" --rm=false -t gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 .
+            docker tag gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 gcr.io/spoke-rewired/spoke:$SPOKE_VERSION
             docker tag gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 gcr.io/spoke-rewired/spoke:latest
-            docker push gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1
+            docker push gcr.io/spoke-rewired/spoke:CIRCLE_SHA1
+            docker push gcr.io/spoke-rewired/spoke:$SPOKE_VERSION
             docker push gcr.io/spoke-rewired/spoke:latest
 
 workflows:
