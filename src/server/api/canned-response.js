@@ -1,11 +1,8 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { CannedResponse } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 export const resolvers = {
   CannedResponse: {
-    ...mapFieldsToModel(["id", "title", "text"], CannedResponse),
+    ...sqlResolvers(["id", "title", "text"]),
     isUserCreated: cannedResponse => cannedResponse.user_id !== ""
   }
 };
-
-CannedResponse.ensureIndex("campaign_id");

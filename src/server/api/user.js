@@ -1,5 +1,5 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { r, User } from "../models";
+import { sqlResolvers } from "./lib/utils";
+import { r } from "../models";
 import { addCampaignsFilterToQuery } from "./campaign";
 import { myCurrentAssignmentTarget } from "./assignment";
 
@@ -122,10 +122,15 @@ export const resolvers = {
     }
   },
   User: {
-    ...mapFieldsToModel(
-      ["id", "firstName", "lastName", "email", "cell", "assignedCell", "terms"],
-      User
-    ),
+    ...sqlResolvers([
+      "id",
+      "firstName",
+      "lastName",
+      "email",
+      "cell",
+      "assignedCell",
+      "terms"
+    ]),
     displayName: user => `${user.first_name} ${user.last_name}`,
     currentRequest: async (user, { organizationId }) => {
       const currentRequest = await r
@@ -141,30 +146,32 @@ export const resolvers = {
     },
     assignment: async (user, { campaignId }) =>
       r
-        .table("assignment")
-        .getAll(user.id, { index: "user_id" })
-        .filter({ campaign_id: campaignId })
-        .limit(1)(0)
-        .default(null),
+        .reader("assignment")
+        .where({ user_id: user.id, campaign_id: campaignId })
+        .first(),
     organizations: async (user, { role }) => {
       if (!user || !user.id) {
         return [];
       }
-      let orgs = r
-        .table("user_organization")
-        .getAll(user.id, { index: "user_id" });
-      if (role) {
-        orgs = orgs.filter({ role });
-      }
-      return orgs
-        .eqJoin("organization_id", r.table("organization"))("right")
-        .distinct();
+      return r.reader("organization").whereExists(function() {
+        const whereClause = { user_id: user.id };
+        if (role) {
+          whereClause["role"] = role;
+        }
+        this.select(r.reader.raw("1"))
+          .from("user_organization")
+          .whereRaw("user_organization.organization_id = organization.id")
+          .where(whereClause);
+      });
     },
     roles: async (user, { organizationId }) =>
       r
-        .table("user_organization")
-        .getAll([organizationId, user.id], { index: "organization_user" })
-        .pluck("role")("role"),
+        .reader("user_organization")
+        .where({
+          organization_id: parseInt(organizationId),
+          user_id: user.id
+        })
+        .pluck("role"),
     teams: async (user, { organizationId }) =>
       r
         .reader("team")

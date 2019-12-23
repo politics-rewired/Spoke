@@ -1,6 +1,6 @@
 import { config } from "../../config";
-import { mapFieldsToModel } from "./lib/utils";
-import { r, Organization } from "../models";
+import { sqlResolvers } from "./lib/utils";
+import { r } from "../models";
 import { accessRequired } from "./errors";
 import { buildCampaignQuery, getCampaigns } from "./campaign";
 import { buildUserOrganizationQuery } from "./user";
@@ -31,7 +31,7 @@ export const getEscalationUserId = async organizationId => {
 
 export const resolvers = {
   Organization: {
-    ...mapFieldsToModel(["id", "name"], Organization),
+    ...sqlResolvers(["id", "name"]),
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       return getCampaigns(organization.id, cursor, campaignsFilter);
@@ -46,9 +46,7 @@ export const resolvers = {
     },
     optOuts: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "ADMIN");
-      return r
-        .table("opt_out")
-        .getAll(organization.id, { index: "organization_id" });
+      return r.reader("opt_out").where({ organization_id: organization.id });
     },
     people: async (organization, { role, campaignId, offset }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");

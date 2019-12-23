@@ -1,28 +1,21 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { LinkDomain, UnhealthyLinkDomain } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 export const resolvers = {
   LinkDomain: {
-    ...mapFieldsToModel(
-      [
-        "id",
-        "domain",
-        "maxUsageCount",
-        "currentUsageCount",
-        "isManuallyDisabled",
-        "cycledOutAt",
-        "createdAt"
-      ],
-      LinkDomain
-    ),
+    ...sqlResolvers([
+      "id",
+      "domain",
+      "maxUsageCount",
+      "currentUsageCount",
+      "isManuallyDisabled",
+      "cycledOutAt",
+      "createdAt"
+    ]),
     isHealthy: async linkDomain => {
       return linkDomain.is_healthy;
     }
   },
   UnhealthyLinkDomain: {
-    ...mapFieldsToModel(
-      ["id", "domain", "createdAt", "healthyAgainAt"],
-      UnhealthyLinkDomain
-    )
+    ...sqlResolvers(["id", "domain", "createdAt", "healthyAgainAt"])
   }
 };

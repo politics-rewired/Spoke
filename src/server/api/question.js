@@ -32,24 +32,31 @@ export const resolvers = {
         .where({ id: answer.interaction_step_id }),
     responders: async answer =>
       r
-        .table("question_response")
-        .getAll(answer.parent_interaction_step, {
-          index: "interaction_step_id"
-        })
-        .filter({
+        .reader("question_response")
+        .join(
+          "campaign_contact",
+          "campaign_contact.id",
+          "question_response.campaign_contact_id"
+        )
+        .where({
+          interaction_step_id: answer.parent_interaction_step,
           value: answer.value
-        })
-        .eqJoin("campaign_contact_id", r.table("campaign_contact"))("right"),
+        }),
     responderCount: async answer =>
-      r
-        .table("question_response")
-        .getAll(answer.parent_interaction_step, {
-          index: "interaction_step_id"
-        })
-        .filter({
-          value: answer.value
-        })
-        .count(),
+      r.parseCount(
+        r
+          .reader("question_response")
+          .join(
+            "campaign_contact",
+            "campaign_contact.id",
+            "question_response.campaign_contact_id"
+          )
+          .where({
+            interaction_step_id: answer.parent_interaction_step,
+            value: answer.value
+          })
+          .count()
+      ),
     question: async answer => answer.parent_interaction_step
   }
 };

@@ -1,6 +1,6 @@
 import { config } from "../../../config";
 import logger from "../../../logger";
-import { r, CampaignContact } from "../../models";
+import { r } from "../../models";
 import { optOutCache } from "./opt-out";
 
 // <campaignContactId>
@@ -110,7 +110,10 @@ export const campaignContactCache = {
         return cacheData;
       }
     }
-    return await CampaignContact.get(id);
+    return await r
+      .reader("campaign_contact")
+      .where({ id })
+      .first();
   },
   loadMany: async (organization, { campaign, queryFunc }) => {
     // queryFunc(query) has query input of a knex query

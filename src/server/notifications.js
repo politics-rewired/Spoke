@@ -1,32 +1,44 @@
 import { config } from "../config";
 import logger from "../logger";
-import { r, Assignment, Campaign, User, Organization } from "./models";
+import { eventBus, EventType } from "./event-bus";
+import { r } from "./models";
 import { sendEmail } from "./mail";
 
-export const Notifications = {
+export const Notifications = Object.freeze({
   CAMPAIGN_STARTED: "campaign.started",
   ASSIGNMENT_MESSAGE_RECEIVED: "assignment.message.received",
   ASSIGNMENT_CREATED: "assignment.created",
   ASSIGNMENT_UPDATED: "assignment.updated"
-};
+});
 
 async function getOrganizationOwner(organizationId) {
   return await r
-    .table("user_organization")
-    .getAll(organizationId, { index: "organization_id" })
-    .filter({ role: "OWNER" })
-    .limit(1)
-    .eqJoin("user_id", r.table("user"))("right")(0);
+    .reader("user")
+    .join("user_organization", "user_organization.user_id", "user.id")
+    .where({
+      "user_organization.organization_id": organizationId,
+      role: "OWNER"
+    })
+    .first("user.*");
 }
 const sendAssignmentUserNotification = async (assignment, notification) => {
-  const campaign = await Campaign.get(assignment.campaign_id);
+  const campaign = await r
+    .reader("campaign")
+    .where({ id: assignment.campaign_id })
+    .first();
 
   if (!campaign.is_started) {
     return;
   }
 
-  const organization = await Organization.get(campaign.organization_id);
-  const user = await User.get(assignment.user_id);
+  const organization = await r
+    .reader("organization")
+    .where({ id: campaign.organization_id })
+    .first();
+  const user = await r
+    .reader("organization")
+    .where({ id: assignment.user_id })
+    .first();
   const orgOwner = await getOrganizationOwner(organization.id);
 
   let subject;
@@ -62,8 +74,8 @@ export const sendUserNotification = async notification => {
 
   if (type === Notifications.CAMPAIGN_STARTED) {
     const assignments = await r
-      .table("assignment")
-      .getAll(notification.campaignId, { index: "campaign_id" })
+      .reader("assignment")
+      .where({ campaign_id: notification.campaignId })
       .pluck(["user_id", "campaign_id"]);
 
     const count = assignments.length;
@@ -81,17 +93,28 @@ export const sendUserNotification = async notification => {
   if (config.DISABLE_TEXTER_NOTIFICATIONS) return;
 
   if (type === Notifications.ASSIGNMENT_MESSAGE_RECEIVED) {
-    const assignment = await Assignment.get(notification.assignmentId);
-    const campaign = await Campaign.get(assignment.campaign_id);
+    const assignment = await r
+      .reader("assignment")
+      .where({ id: notification.assignmentId })
+      .first();
+    const campaign = await r
+      .reader("campaign")
+      .where({ id: assignment.campaign_id })
+      .first();
     const campaignContact = await r
-      .table("campaign_contact")
-      .getAll(notification.contactNumber, { index: "cell" })
-      .filter({ campaign_id: campaign.id })
-      .limit(1)(0);
+      .reader("campaign_contact")
+      .where({ campaign_id: campaign.id, cell: notification.contactNumber })
+      .first();
 
     if (!campaignContact.is_opted_out && !campaign.is_archived) {
-      const user = await User.get(assignment.user_id);
-      const organization = await Organization.get(campaign.organization_id);
+      const user = await r
+        .reader("user")
+        .where({ id: assignment.user_id })
+        .first();
+      const organization = await r
+        .reader("organization")
+        .where({ id: campaign.organization_id })
+        .first();
       const orgOwner = await getOrganizationOwner(organization.id);
 
       try {
@@ -118,39 +141,26 @@ export const sendUserNotification = async notification => {
   }
 };
 
-const setupIncomingReplyNotification = () =>
-  r
-    .table("message")
-    .changes()
-    .then(function(message) {
-      if (!message.old_val && message.new_val.is_from_contact) {
-        sendUserNotification({
-          type: Notifications.ASSIGNMENT_MESSAGE_RECEIVED,
-          assignmentId: message.new_val.assignment_id,
-          contactNumber: message.new_val.contact_number
-        });
-      }
-    });
+const handleAssignmentCreated = assignment =>
+  sendUserNotification({
+    type: Notifications.ASSIGNMENT_CREATED,
+    assignment
+  });
 
-const setupNewAssignmentNotification = () =>
-  r
-    .table("assignment")
-    .changes()
-    .then(function(assignment) {
-      if (!assignment.old_val) {
-        sendUserNotification({
-          type: Notifications.ASSIGNMENT_CREATED,
-          assignment: assignment.new_val
-        });
-      }
-    });
+const handleMessageReceived = ({ assignmentId, contactNumber }) =>
+  sendUserNotification({
+    type: Notifications.ASSIGNMENT_MESSAGE_RECEIVED,
+    assignmentId,
+    contactNumber
+  });
 
-let notificationObserversSetup = false;
-
+// Ensure observers are only set up once
+let isNotificationObservationSetUp = false;
 export const setupUserNotificationObservers = () => {
-  if (!notificationObserversSetup) {
-    notificationObserversSetup = true;
-    setupIncomingReplyNotification();
-    setupNewAssignmentNotification();
-  }
+  if (isNotificationObservationSetUp) return;
+
+  eventBus.on(EventType.AssignmentCreated, handleAssignmentCreated);
+  eventBus.on(EventType.MessageReceived, handleMessageReceived);
+
+  isNotificationObservationSetUp = true;
 };

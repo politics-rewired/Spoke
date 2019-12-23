@@ -1,23 +1,16 @@
 import humps from "humps";
 import moment from "moment-timezone";
 
-export function mapFieldsToModel(fields, model) {
-  const resolvers = {};
-
-  fields.forEach(field => {
-    const snakeKey = humps.decamelize(field, { separator: "_" });
-    // eslint-disable-next-line no-underscore-dangle
-    if (model._schema._schema.hasOwnProperty(snakeKey)) {
-      resolvers[field] = instance => instance[snakeKey];
-    } else {
-      // eslint-disable-next-line no-underscore-dangle
-      throw new Error(
-        `Could not find key ${snakeKey} in model ${model._schema._model._name}`
-      );
-    }
-  });
-  return resolvers;
-}
+/**
+ * Returns resolvers mapping GraphQL-style properties to their Postgres-style columns
+ * @param {string[]} gqlKeys The lower camel case GraphQL keys to map
+ */
+export const sqlResolvers = gqlKeys =>
+  gqlKeys.reduce((accumulator, gqlKey) => {
+    const sqlKey = humps.decamelize(gqlKey, { separator: "_" });
+    const resolver = instance => instance[sqlKey];
+    return Object.assign(accumulator, { [gqlKey]: resolver });
+  }, {});
 
 export const capitalizeWord = word => {
   if (word) {

@@ -25,9 +25,11 @@ export const cannedResponseCache = {
       }
     }
     const dbResult = await r
-      .table("canned_response")
-      .getAll(campaignId, { index: "campaign_id" })
-      .filter({ user_id: userId || "" })
+      .reader("canned_response")
+      .where({
+        campaign_id: parseInt(campaignId),
+        user_id: parseInt(userId) || null
+      })
       .orderBy("title");
     if (r.redis) {
       const cacheData = dbResult.map(cannedRes => ({

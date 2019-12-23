@@ -1,9 +1,8 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { QuestionResponse } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 export const resolvers = {
   QuestionResponse: {
-    ...mapFieldsToModel(["id", "value"], QuestionResponse),
+    ...sqlResolvers(["id", "value"]),
     question: async (question, _, { loaders }) =>
       loaders.question.load(question.id)
   }

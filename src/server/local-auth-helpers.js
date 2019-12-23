@@ -1,6 +1,6 @@
 import AuthHasher from "passport-local-authenticate";
 
-import { User, Invite, Organization } from "./models";
+import { r } from "./models";
 import { capitalizeWord } from "./api/lib/utils";
 
 export class LocalAuthError extends Error {
@@ -52,16 +52,22 @@ export class StalePasswordError extends LocalAuthError {
 const validUuid = async (nextUrl, uuidMatch) => {
   if (!nextUrl) throw new InvalidInviteError();
 
-  let foundUUID;
+  let matchingRecord;
   if (nextUrl.includes("join")) {
-    foundUUID = await Organization.filter({ uuid: uuidMatch[0] });
+    matchingRecord = await r
+      .knex("organization")
+      .where({ uuid: uuidMatch[0] })
+      .first("id");
   } else if (nextUrl.includes("invite")) {
     const splitUrl = nextUrl.split("/");
     const inviteHash = splitUrl[splitUrl.length - 1];
-    foundUUID = await Invite.filter({ hash: inviteHash });
+    matchingRecord = await r
+      .knex("invite")
+      .where({ hash: inviteHash })
+      .first("id");
   }
 
-  if (foundUUID.length === 0) throw new InvalidInviteError();
+  if (matchingRecord) throw new InvalidInviteError();
 };
 
 const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
@@ -112,14 +118,17 @@ const signup = async ({
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const user = await User.save({
-        email: lowerCaseEmail,
-        auth0_id: passwordToSave,
-        first_name: capitalizeWord(reqBody.firstName),
-        last_name: capitalizeWord(reqBody.lastName),
-        cell: reqBody.cell,
-        is_superadmin: false
-      });
+      const [user] = await r
+        .knex("user")
+        .insert({
+          email: lowerCaseEmail,
+          auth0_id: passwordToSave,
+          first_name: capitalizeWord(reqBody.firstName),
+          last_name: capitalizeWord(reqBody.lastName),
+          cell: reqBody.cell,
+          is_superadmin: false
+        })
+        .returning("*");
       resolve(user);
     });
   });
@@ -156,9 +165,10 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const updatedUser = await User.get(existingUser.id)
+      const updatedUser = await r
+        .knex("user")
         .update({ auth0_id: passwordToSave })
-        .run();
+        .where({ id: existingUser.id });
       resolve(updatedUser);
     });
   });
@@ -189,9 +199,10 @@ export const change = ({ user, password, newPassword, passwordConfirm }) => {
       return AuthHasher.hash(newPassword, async function(err, hashed) {
         if (err) reject(new LocalAuthError(err.message));
         const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-        const updatedUser = await User.get(user.id)
+        const updatedUser = await r
+          .knex("user")
           .update({ auth0_id: passwordToSave })
-          .run();
+          .where({ id: user.id });
         resolve(updatedUser);
       });
     });

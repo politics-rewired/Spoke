@@ -2,7 +2,7 @@ import { config } from "../../../config";
 import logger from "../../../logger";
 import Nexmo from "nexmo";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
-import { Message, PendingMessagePart } from "../../models";
+import { r } from "../../models";
 import { getLastMessage, appendServiceResponse } from "./message-sending";
 
 let nexmo = null;
@@ -30,7 +30,7 @@ async function convertMessagePartsToMessage(messageParts) {
     contactNumber
   });
 
-  return new Message({
+  return {
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,
@@ -40,7 +40,7 @@ async function convertMessagePartsToMessage(messageParts) {
     assignment_id: lastMessage.assignment_id,
     service: "nexmo",
     send_status: "DELIVERED"
-  });
+  };
 }
 
 async function findNewCell() {
@@ -88,10 +88,11 @@ async function rentNewCell() {
   throw new Error("Did not find any cell");
 }
 
-async function sendMessage(message, trx) {
+async function sendMessage(message, trx = r.knex) {
   if (!nexmo) {
-    const options = trx ? { transaction: trx } : {};
-    await Message.get(message.id).update({ send_status: "SENT" }, options);
+    await trx("message")
+      .update({ send_status: "SENT" })
+      .where({ id: message.id });
     return "test_message_uuid";
   }
 
@@ -131,34 +132,25 @@ async function sendMessage(message, trx) {
           if (messageToSave.service_messages.length >= MAX_SEND_ATTEMPTS) {
             messageToSave.send_status = "ERROR";
           }
-          let options = { conflict: "update" };
-          if (trx) {
-            options.transaction = trx;
-          }
-          Message.save(messageToSave, options)
-            // eslint-disable-next-line no-unused-vars
-            .then((_, newMessage) => {
+          const { id: messageId, ...messagePayload } = message;
+          trx("message")
+            .update(messagePayload)
+            .where({ id: messageId })
+            .then(() =>
               reject(
                 err ||
                   (response
                     ? new Error(JSON.stringify(response))
                     : new Error("Encountered unknown error"))
-              );
-            });
+              )
+            );
         } else {
-          let options = { conflict: "update" };
-          if (trx) {
-            options.transaction = trx;
-          }
-          Message.save(
-            {
-              ...messageToSave,
-              send_status: "SENT"
-            },
-            options
-          ).then((saveError, newMessage) => {
-            resolve(newMessage);
-          });
+          const { id: messageId, ...messagePayload } = message;
+          trx("message")
+            .update({ ...messagePayload, send_status: "SENT" })
+            .where({ id: messageId })
+            .returning("*")
+            .then(([newMessage]) => resolve(newMessage));
         }
       }
     );
@@ -167,7 +159,10 @@ async function sendMessage(message, trx) {
 
 async function handleDeliveryReport(report) {
   if (report.hasOwnProperty("client-ref")) {
-    const message = await Message.get(report["client-ref"]);
+    const message = await r
+      .knex("message")
+      .where({ id: report["client-ref"] })
+      .first();
     message.service_response = appendServiceResponse(
       message.service_response,
       report
@@ -181,7 +176,11 @@ async function handleDeliveryReport(report) {
     ) {
       message.send_status = "ERROR";
     }
-    Message.save(message, { conflict: "update" });
+    const { id: messageId, ...messagePayload } = message;
+    await r
+      .knex("message")
+      .update(messagePayload)
+      .where({ id: messageId });
   }
 }
 
@@ -214,17 +213,19 @@ async function handleIncomingMessage(message) {
     logger.info(`Incoming message part from ${contactNumber} to ${userNumber}`);
   }
 
-  const pendingMessagePart = new PendingMessagePart({
-    service: "nexmo",
-    service_id: message["concat-ref"] || message.messageId,
-    parent_id: parentId, // do we need this anymore, now we have service_id?
-    service_message: JSON.stringify(message),
-    user_number: userNumber,
-    contact_number: contactNumber
-  });
+  const [partId] = await r
+    .knex("pending_message_part")
+    .insert({
+      service: "nexmo",
+      service_id: message["concat-ref"] || message.messageId,
+      parent_id: parentId, // do we need this anymore, now we have service_id?
+      service_message: JSON.stringify(message),
+      user_number: userNumber,
+      contact_number: contactNumber
+    })
+    .returning("id");
 
-  const part = await pendingMessagePart.save();
-  return part.id;
+  return partId;
 }
 
 export default {

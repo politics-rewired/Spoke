@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { config } from "../../config";
-import { Assignment, r } from "../models";
+import { r } from "../models";
+import { eventBus, EventType } from "../event-bus";
 import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
 import { buildCampaignQuery } from "./campaign";
 import { UNASSIGNED_TEXTER } from "../../lib/constants";
@@ -467,13 +468,14 @@ export const reassignContacts = async (campaignContactIds, newTexterId) => {
         let assignmentId = existingAssignment && existingAssignment.id;
         if (!assignmentId) {
           // Create a new assignment if none exists
-          const inserted = await trx("assignment")
+          const [newAssignment] = await trx("assignment")
             .insert({
               campaign_id: campaignId,
               user_id: newTexterId
             })
-            .returning("id");
-          assignmentId = inserted[0];
+            .returning("*");
+          eventBus.emit(EventType.AssignmentCreated, newAssignment);
+          assignmentId = newAssignment.id;
         }
 
         // Update the contact's assignment
@@ -507,17 +509,23 @@ export async function reassignConversations(
   const campaignIdAssignmentIdMap = new Map();
   for (const [campaignId, _] of campaignIdContactIdsMap) {
     let assignment = await r
-      .table("assignment")
-      .getAll(newTexterUserId, { index: "user_id" })
-      .filter({ campaign_id: campaignId })
-      .limit(1)(0)
-      .default(null);
-    if (!assignment) {
-      assignment = await Assignment.save({
+      .knex("assignment")
+      .where({
         user_id: newTexterUserId,
-        campaign_id: campaignId,
-        max_contacts: config.MAX_CONTACTS_PER_TEXTER
-      });
+        campaign_id: campaignId
+      })
+      .first();
+    if (!assignment) {
+      const [newAssignment] = await r
+        .knex("assignment")
+        .insert({
+          user_id: newTexterUserId,
+          campaign_id: campaignId,
+          max_contacts: config.MAX_CONTACTS_PER_TEXTER
+        })
+        .returning("*");
+      eventBus.emit(EventType.AssignmentCreated, newAssignment);
+      assignment = newAssignment;
     }
     campaignIdAssignmentIdMap.set(campaignId, assignment.id);
   }

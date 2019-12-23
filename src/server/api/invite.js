@@ -1,8 +1,7 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { Invite } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 export const resolvers = {
   Invite: {
-    ...mapFieldsToModel(["id", "isValid", "hash"], Invite)
+    ...sqlResolvers(["id", "isValid", "hash"])
   }
 };

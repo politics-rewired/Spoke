@@ -4,10 +4,11 @@ import _ from "lodash";
 
 import logger from "../../logger";
 import { config } from "../../config";
-import { mapFieldsToModel } from "./lib/utils";
+import { sqlResolvers } from "./lib/utils";
 import { sleep } from "../../lib/utils";
 import { isNowBetween } from "../../lib/timezones";
-import { Assignment, r, cacheableData } from "../models";
+import { r, cacheableData } from "../models";
+import { eventBus, EventType } from "../event-bus";
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -743,13 +744,14 @@ export async function assignLoop(
     .first();
 
   if (!existingAssignment) {
-    const inserted = await trx("assignment")
+    const [newAssignment] = await trx("assignment")
       .insert({
         user_id: user.id,
         campaign_id: campaignIdToAssignTo
       })
-      .returning("id");
-    assignmentId = inserted[0];
+      .returning("*");
+    eventBus.emit(EventType.AssignmentCreated, newAssignment);
+    assignmentId = newAssignment.id;
   } else {
     assignmentId = existingAssignment.id;
   }
@@ -813,7 +815,7 @@ export async function assignLoop(
 
 export const resolvers = {
   Assignment: {
-    ...mapFieldsToModel(["id", "maxContacts"], Assignment),
+    ...sqlResolvers(["id", "maxContacts"]),
     texter: async (assignment, _, { loaders }) =>
       assignment.texter
         ? assignment.texter
@@ -835,11 +837,15 @@ export const resolvers = {
       );
     },
     contacts: async (assignment, { contactsFilter }) => {
-      const campaign = await r.table("campaign").get(assignment.campaign_id);
+      const campaign = await r
+        .reader("campaign")
+        .where({ id: assignment.campaign_id })
+        .first();
 
       const organization = await r
-        .table("organization")
-        .get(campaign.organization_id);
+        .reader("organization")
+        .where({ id: campaign.organization_id })
+        .first();
       return getContacts(assignment, contactsFilter, organization, campaign);
     },
     campaignCannedResponses: async assignment =>

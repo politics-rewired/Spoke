@@ -1,5 +1,5 @@
 import { config } from "../../../config";
-import { r, Campaign } from "../../models";
+import { r } from "../../models";
 import { organizationCache } from "./organization";
 
 // This should be cached data for a campaign that will not change
@@ -22,13 +22,16 @@ import { organizationCache } from "./organization";
 const cacheKey = id => `${config.CACHE_PREFIX}campaign-${id}`;
 
 const dbCustomFields = async id => {
-  const campaignContacts = await r
-    .table("campaign_contact")
-    .getAll(id, { index: "campaign_id" })
-    .limit(1);
-  if (campaignContacts.length > 0) {
-    return Object.keys(JSON.parse(campaignContacts[0].custom_fields));
+  const campaignContact = await r
+    .reader("campaign_contact")
+    .where({ campaign_id: id })
+    .first("custom_fields");
+
+  if (campaignContact) {
+    const customFields = JSON.parse(campaignContact.custom_fields || "{}");
+    return Object.keys(customFields);
   }
+
   return [];
 };
 
@@ -50,7 +53,10 @@ const clear = async id => {
 
 const loadDeep = async id => {
   if (r.redis) {
-    const campaign = await Campaign.get(id);
+    const campaign = await r
+      .reader("campaign")
+      .where({ id })
+      .first();
     if (campaign.is_archived) {
       // do not cache archived campaigns
       await clear(id);
@@ -88,13 +94,16 @@ export const campaignCache = {
         const { customFields, interactionSteps } = campaignObj;
         delete campaignObj.customFields;
         delete campaignObj.interactionSteps;
-        const campaign = new Campaign(campaignObj);
+        const campaign = { ...campaignObj };
         campaign.customFields = customFields;
         campaign.interactionSteps = interactionSteps;
         return campaign;
       }
     }
-    return await Campaign.get(id);
+    return await r
+      .reader("campaign")
+      .where({ id })
+      .first();
   },
   reload: loadDeep,
   dbCustomFields,

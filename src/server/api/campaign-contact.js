@@ -1,6 +1,6 @@
 import logger from "../../logger";
-import { CampaignContact, r, cacheableData } from "../models";
-import { mapFieldsToModel, getTzOffset } from "./lib/utils";
+import { r, cacheableData } from "../models";
+import { sqlResolvers, getTzOffset } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
 
@@ -10,20 +10,17 @@ export const resolvers = {
     state: zipCode => zipCode.state || ""
   },
   CampaignContact: {
-    ...mapFieldsToModel(
-      [
-        "id",
-        "firstName",
-        "lastName",
-        "cell",
-        "zip",
-        "customFields",
-        "messageStatus",
-        "assignmentId",
-        "external_id"
-      ],
-      CampaignContact
-    ),
+    ...sqlResolvers([
+      "id",
+      "firstName",
+      "lastName",
+      "cell",
+      "zip",
+      "customFields",
+      "messageStatus",
+      "assignmentId",
+      "external_id"
+    ]),
     updatedAt: async campaignContact => {
       let updatedAt;
       if (

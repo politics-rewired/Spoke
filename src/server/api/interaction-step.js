@@ -1,18 +1,15 @@
-import { mapFieldsToModel } from "./lib/utils";
-import { InteractionStep, r } from "../models";
+import { sqlResolvers } from "./lib/utils";
+import { r } from "../models";
 
 export const resolvers = {
   InteractionStep: {
-    ...mapFieldsToModel(
-      [
-        "id",
-        "answerOption",
-        "answerActions",
-        "parentInteractionId",
-        "isDeleted"
-      ],
-      InteractionStep
-    ),
+    ...sqlResolvers([
+      "id",
+      "answerOption",
+      "answerActions",
+      "parentInteractionId",
+      "isDeleted"
+    ]),
     scriptOptions: async interactionStep => {
       const { script, script_options } = interactionStep;
       return script_options || [script];
@@ -23,12 +20,11 @@ export const resolvers = {
     question: async interactionStep => interactionStep,
     questionResponse: async (interactionStep, { campaignContactId }) =>
       r
-        .table("question_response")
-        .getAll(campaignContactId, { index: "campaign_contact_id" })
-        .filter({
+        .reader("question_response")
+        .where({
+          campaign_contact_id: campaignContactId,
           interaction_step_id: interactionStep.id
         })
-        .limit(1)(0)
-        .default(null)
+        .first()
   }
 };

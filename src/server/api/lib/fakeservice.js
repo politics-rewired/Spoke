@@ -1,5 +1,5 @@
 import { getLastMessage } from "./message-sending";
-import { Message, PendingMessagePart, r } from "../../models";
+import { r } from "../../models";
 
 // This 'fakeservice' allows for fake-sending messages
 // that end up just in the db appropriately and then using sendReply() graphql
@@ -35,7 +35,8 @@ async function convertMessagePartsToMessage(messageParts) {
     `fakeservice_${Math.random()
       .toString(36)
       .replace(/[^a-zA-Z1-9]+/g, "")}`;
-  return new Message({
+
+  return {
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,
@@ -45,22 +46,23 @@ async function convertMessagePartsToMessage(messageParts) {
     assignment_id: lastMessage.assignment_id,
     service: "fakeservice",
     send_status: "DELIVERED"
-  });
+  };
 }
 
 async function handleIncomingMessage(message) {
   const { contact_number, user_number, service_id, text } = message;
-  const pendingMessagePart = new PendingMessagePart({
-    service: "fakeservice",
-    service_id,
-    parent_id: null,
-    service_message: text,
-    user_number,
-    contact_number
-  });
-
-  const part = await pendingMessagePart.save();
-  return part.id;
+  const [partId] = await r
+    .knex("pending_message_part")
+    .insert({
+      service: "fakeservice",
+      service_id,
+      parent_id: null,
+      service_message: text,
+      user_number,
+      contact_number
+    })
+    .returning("id");
+  return partId;
 }
 
 export default {

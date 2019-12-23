@@ -1,16 +1,7 @@
 import { config } from "../config";
 import logger from "../logger";
-import {
-  r,
-  datawarehouse,
-  cacheableData,
-  Assignment,
-  Campaign,
-  CampaignContact,
-  Organization,
-  User,
-  UserOrganization
-} from "../server/models";
+import { eventBus, EventType } from "../server/event-bus";
+import { r, datawarehouse, cacheableData } from "../server/models";
 import { gunzip, zipToTimeZone, convertOffsetsToStrings } from "../lib";
 import { updateJob } from "./lib";
 import { getFormattedPhoneNumber } from "../lib/phone-format.js";
@@ -173,17 +164,23 @@ export async function processSqsMessages() {
 export async function uploadContacts(job) {
   const campaignId = job.campaign_id;
   // We do this deletion in schema.js but we do it again here just in case the the queue broke and we had a backlog of contact uploads for one campaign
-  const campaign = await Campaign.get(campaignId);
-  const organization = await Organization.get(campaign.organization_id);
+  const campaign = await r
+    .knex("campaign")
+    .where({ id: campaignId })
+    .first();
+  const organization = await r
+    .knex("organization")
+    .where({ id: campaign.organization_id })
+    .first();
   const orgFeatures = JSON.parse(organization.features || "{}");
 
   const numbersApiKey = orgFeatures.numbersApiKey;
   let numbersClient, numbersRequest, landlinesFilteredOut;
 
   await r
-    .table("campaign_contact")
-    .getAll(campaignId, { index: "campaign_id" })
-    .delete();
+    .knex("campaign_contact")
+    .where({ campaign_id: campaignId })
+    .del();
 
   let jobPayload = await gunzip(new Buffer(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
@@ -355,9 +352,9 @@ export async function uploadContacts(job) {
         .update({ result_message: jobMessages.join("\n") });
     } else {
       await r
-        .table("job_request")
-        .get(job.id)
-        .delete();
+        .knex("job_request")
+        .where({ id: job.id })
+        .del();
     }
   }
   await cacheableData.campaign.reload(campaignId);
@@ -371,9 +368,6 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     jobEvent.offset,
     jobEvent
   );
-  const insertOptions = {
-    batchSize: 1000
-  };
   const jobCompleted = await r
     .reader("job_request")
     .where("id", jobEvent.jobId)
@@ -470,7 +464,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     })
   );
 
-  await CampaignContact.save(savePortion, insertOptions);
+  await r.knex.batchInsert("campaign_contact", savePortion, 1000);
   await r
     .knex("job_request")
     .where("id", jobEvent.jobId)
@@ -555,9 +549,9 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         });
     }
     await r
-      .table("job_request")
-      .get(jobEvent.jobId)
-      .delete();
+      .knex("job_request")
+      .where({ id: jobEvent.jobId })
+      .del();
     await cacheableData.campaign.reload(jobEvent.campaignId);
     return { completed: 1, validationStats };
   } else if (jobEvent.part < jobEvent.totalParts - 1) {
@@ -622,7 +616,10 @@ export async function loadContactsFromDataWarehouse(job) {
     r.kninky && r.kninky.defaultsUnsupported
       ? 10 // sqlite has a max of 100 variables and ~8 or so are used per insert
       : 10000; // default
-  const campaign = await Campaign.get(job.campaign_id);
+  const campaign = await r
+    .knex("campaign")
+    .where({ id: job.campaign_id })
+    .first();
   const totalParts = Math.ceil(knexCount / STEP);
 
   if (totalParts > 1 && /LIMIT/.test(sqlQuery)) {
@@ -974,10 +971,11 @@ export async function assignTexters(job) {
           // TODO - MySQL Specific. Must not do a bulk insert in order to be MySQL compatible
           const assignmentIds = await Promise.all(
             chunk.map(async directive => {
-              const assignmentIds = await trx("assignment")
-                .insert([directive.assignment])
-                .returning("id");
-              return assignmentIds[0];
+              const [newAssignment] = await trx("assignment")
+                .insert(directive.assignment)
+                .returning("*");
+              eventBus.emit(EventType.AssignmentCreated, newAssignment);
+              return newAssignment.id;
             })
           );
 
@@ -1650,20 +1648,21 @@ export async function fixOrgless() {
       .leftJoin("user_organization", "user.id", "user_organization.user_id")
       .whereNull("user_organization.id");
     orgless.forEach(async orglessUser => {
-      await UserOrganization.save({
-        user_id: orglessUser.id.toString(),
-        organization_id: config.DEFAULT_ORG,
-        role: "TEXTER"
-      }).error(function(error) {
-        // Unexpected errors
+      try {
+        await r.knex.insert({
+          user_id: orglessUser.id.toString(),
+          organization_id: config.DEFAULT_ORG,
+          role: "TEXTER"
+        });
+        logger.info(
+          "added orgless user " +
+            user.id +
+            " to organization " +
+            config.DEFAULT_ORG
+        );
+      } catch (err) {
         logger.error("error on userOrganization save in orgless", error);
-      });
-      logger.error(
-        "added orgless user " +
-          user.id +
-          " to organization " +
-          config.DEFAULT_ORG
-      );
+      }
     }); // forEach
   } // if
 } // function

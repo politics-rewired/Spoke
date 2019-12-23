@@ -1,6 +1,6 @@
 import { config } from "../../config";
-import { mapFieldsToModel } from "./lib/utils";
-import { Campaign, JobRequest, r, cacheableData } from "../models";
+import { sqlResolvers } from "./lib/utils";
+import { r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
 
@@ -87,38 +87,31 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
 
 export const resolvers = {
   JobRequest: {
-    ...mapFieldsToModel(
-      ["id", "assigned", "status", "jobType", "resultMessage"],
-      JobRequest
-    )
+    ...sqlResolvers(["id", "assigned", "status", "jobType", "resultMessage"])
   },
   CampaignStats: {
     sentMessagesCount: async campaign =>
-      r
-        .table("assignment")
-        .getAll(campaign.id, { index: "campaign_id" })
-        .eqJoin("id", r.table("message"), { index: "assignment_id" })
-        .filter({ is_from_contact: false })
-        .count(),
-    // TODO: NEEDS TESTING
-    // this is a change to avoid very weird map(...).sum() pattern
-    // that will work better with RDBMs
-    // main question is will/should filter work, or do we need to specify,
-    // e.g. 'right_is_from_contact': false, or something
-    // .map((assignment) => (
-    //   r.table('message')
-    //     .getAll(assignment('id'), { index: 'assignment_id' })
-    //     .filter({ is_from_contact: false })
-    //     .count()
-    // )).sum()
+      r.parseCount(
+        r
+          .reader("campaign_contact")
+          .join("message", "message.campaign_contact_id", "campaign_contact.id")
+          .where({
+            "campaign_contact.campaign_id": campaign.id,
+            "message.is_from_contact": false
+          })
+          .count()
+      ),
     receivedMessagesCount: async campaign =>
-      r
-        .table("assignment")
-        .getAll(campaign.id, { index: "campaign_id" })
-        // TODO: NEEDSTESTING -- see above setMessagesCount()
-        .eqJoin("id", r.table("message"), { index: "assignment_id" })
-        .filter({ is_from_contact: true })
-        .count(),
+      r.parseCount(
+        r
+          .reader("campaign_contact")
+          .join("message", "message.campaign_contact_id", "campaign_contact.id")
+          .where({
+            "campaign_contact.campaign_id": campaign.id,
+            "message.is_from_contact": true
+          })
+          .count()
+      ),
     optOutsCount: async campaign =>
       await r.getCount(
         r
@@ -157,25 +150,22 @@ export const resolvers = {
     }
   },
   Campaign: {
-    ...mapFieldsToModel(
-      [
-        "id",
-        "title",
-        "description",
-        "isStarted",
-        "isArchived",
-        "useDynamicAssignment",
-        "introHtml",
-        "primaryColor",
-        "logoImageUrl",
-        "textingHoursStart",
-        "textingHoursEnd",
-        "isAutoassignEnabled",
-        "timezone",
-        "createdAt"
-      ],
-      Campaign
-    ),
+    ...sqlResolvers([
+      "id",
+      "title",
+      "description",
+      "isStarted",
+      "isArchived",
+      "useDynamicAssignment",
+      "introHtml",
+      "primaryColor",
+      "logoImageUrl",
+      "textingHoursStart",
+      "textingHoursEnd",
+      "isAutoassignEnabled",
+      "timezone",
+      "createdAt"
+    ]),
     isAssignmentLimitedToTeams: campaign => campaign.limit_assignment_to_teams,
     dueBy: campaign =>
       campaign.due_by instanceof Date || !campaign.due_by
@@ -201,17 +191,12 @@ export const resolvers = {
         }),
     texters: async campaign =>
       getUsers(campaign.organization_id, null, { campaignId: campaign.id }),
-    assignments: async (campaign, { assignmentsFilter }) => {
-      let query = r
-        .table("assignment")
-        .getAll(campaign.id, { index: "campaign_id" });
+    assignments: async (campaign, { assignmentsFilter = {} }) => {
+      // TODO: permissions check needed
+      let query = r.reader("assignment").where({ campaign_id: campaign.id });
 
-      if (
-        assignmentsFilter &&
-        assignmentsFilter.hasOwnProperty("texterId") &&
-        assignmentsFilter.textId !== null
-      ) {
-        query = query.filter({ user_id: assignmentsFilter.texterId });
+      if (assignmentsFilter.texterId) {
+        query = query.where({ user_id: assignmentsFilter.texterId });
       }
 
       return query;
