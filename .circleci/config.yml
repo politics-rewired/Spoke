@@ -41,6 +41,6 @@ workflows:
     jobs:
       - build_image:
           context: gcp-spoke
-          # filters:
-          #   branches:
-          #     only: master
+          filters:
+            branches:
+              only: master
