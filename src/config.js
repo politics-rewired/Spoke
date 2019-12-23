@@ -600,6 +600,11 @@ if (isClient()) {
       desc: "Whether to bypass Twilio header validation altogether.",
       default: false
     }),
+    SPOKE_VERSION: str({
+      desc: "The version of Spoke running",
+      default: "no-version",
+      isClient: true
+    }),
     WAREHOUSE_DB_TYPE: str({
       desc:
         "Enables ability to load contacts directly from a SQL query from a separate data-warehouse db -- only is_superadmin-marked users will see the interface",

@@ -12,6 +12,7 @@ import GSScriptField from "./forms/GSScriptField";
 import GSScriptOptionsField from "./forms/GSScriptOptionsField";
 import GSSelectField from "./forms/GSSelectField";
 import GSPasswordField from "./forms/GSPasswordField";
+import VersionNotifier from "../client/VersionNotifier";
 
 // Needed for MaterialUI
 injectTapEventPlugin();
@@ -36,7 +37,10 @@ const styles = StyleSheet.create({
 
 const App = ({ children }) => (
   <MuiThemeProvider muiTheme={muiTheme}>
-    <div className={css(styles.root)}>{children}</div>
+    <div className={css(styles.root)}>
+      <VersionNotifier />
+      {children}
+    </div>
   </MuiThemeProvider>
 );
 
