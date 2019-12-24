@@ -2,7 +2,7 @@ const { config } = require("./webpack/build-config");
 const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const basePlugins = [
   new webpack.DefinePlugin({
@@ -50,7 +50,8 @@ module.exports = {
   },
   plugins: basePlugins.concat(config.isProduction ? productionPlugins : []),
   optimization: {
-    minimizer: [new UglifyJsPlugin()]
+    minimize: config.isProduction,
+    minimizer: [new TerserPlugin()]
   },
   devtool: config.isProduction ? "hidden-source-map" : "inline-source-map",
   output: {
