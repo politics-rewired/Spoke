@@ -56,7 +56,7 @@ module.exports = {
   devtool: config.isProduction ? "hidden-source-map" : "inline-source-map",
   output: {
     filename: config.isProduction ? "[name].[chunkhash].js" : "[name].js",
-    path: path.resolve(!config.isProduction ? __dirname : config.ASSETS_DIR),
+    path: path.resolve(config.isProduction ? config.ASSETS_DIR : __dirname),
     publicPath: "/assets/"
   },
   // See: https://webpack.js.org/configuration/dev-server/
