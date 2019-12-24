@@ -22,7 +22,11 @@ const basePlugins = [
 ];
 
 const productionPlugins = [
-  new ManifestPlugin({ fileName: config.ASSETS_MAP_FILE })
+  // Ignore publicPath as we use STATIC_BASE_URL at runtime instead
+  new ManifestPlugin({
+    fileName: config.ASSETS_MAP_FILE,
+    publicPath: ""
+  })
 ];
 
 module.exports = {
