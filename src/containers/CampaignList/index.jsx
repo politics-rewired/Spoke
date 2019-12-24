@@ -1,9 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
-import { withRouter } from "react-router";
-
-import Paper from "material-ui/Paper";
 
 import loadData from "../hoc/load-data";
 import wrapMutations from "../hoc/wrap-mutations";
@@ -95,7 +92,6 @@ CampaignList.propTypes = {
   pageSize: PropTypes.number.isRequired,
   currentPageIndex: PropTypes.number,
   adminPerms: PropTypes.bool.isRequired,
-  router: PropTypes.object.isRequired,
   data: PropTypes.object.isRequired,
   mutations: PropTypes.object.isRequired,
   resultCountDidUpdate: PropTypes.func.isRequired
@@ -236,7 +232,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
   }
 });
 
-export default loadData(wrapMutations(withRouter(CampaignList)), {
+export default loadData(wrapMutations(CampaignList), {
   mapQueriesToProps,
   mapMutationsToProps
 });

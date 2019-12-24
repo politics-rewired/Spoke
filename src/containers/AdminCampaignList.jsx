@@ -8,6 +8,7 @@ import { withRouter } from "react-router";
 import gql from "graphql-tag";
 import theme from "../styles/theme";
 import LoadingIndicator from "../components/LoadingIndicator";
+import { withAuthzContext } from "../components/AuthzProvider";
 import wrapMutations from "./hoc/wrap-mutations";
 import DropDownMenu from "material-ui/DropDownMenu";
 import { MenuItem } from "material-ui/Menu";
@@ -34,8 +35,8 @@ class AdminCampaignList extends React.Component {
   };
 
   handleClickNewButton = async () => {
-    const { router, params } = this.props;
-    const { organizationId } = params;
+    const { history, match } = this.props;
+    const { organizationId } = match.params;
     this.setState({ isCreating: true });
     const newCampaign = await this.props.mutations.createCampaign({
       title: "New Campaign",
@@ -53,7 +54,7 @@ class AdminCampaignList extends React.Component {
     }
 
     const { id: campaignId } = newCampaign.data.createCampaign;
-    router.push(
+    history.push(
       `/admin/${organizationId}/campaigns/${campaignId}/edit?new=true`
     );
   };
@@ -134,7 +135,8 @@ class AdminCampaignList extends React.Component {
   }
   render() {
     const { pageSize, currentPageIndex, campaignsFilter } = this.state;
-    const { organizationId, adminPerms } = this.props.params;
+    const { organizationId } = this.props.match.params;
+    const { adminPerms } = this.props;
     return (
       <div>
         <div style={styles.flexContainer}>
@@ -173,9 +175,10 @@ class AdminCampaignList extends React.Component {
 }
 
 AdminCampaignList.propTypes = {
-  params: PropTypes.object,
+  match: PropTypes.object,
+  history: PropTypes.object,
   mutations: PropTypes.object,
-  router: PropTypes.object
+  adminPerms: PropTypes.bool.isRequired
 };
 
 const mapMutationsToProps = () => ({
@@ -191,6 +194,9 @@ const mapMutationsToProps = () => ({
   })
 });
 
-export default loadData(wrapMutations(withRouter(AdminCampaignList)), {
-  mapMutationsToProps
-});
+export default loadData(
+  wrapMutations(withAuthzContext(withRouter(AdminCampaignList))),
+  {
+    mapMutationsToProps
+  }
+);
