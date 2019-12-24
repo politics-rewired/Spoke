@@ -1151,32 +1151,33 @@ const rootMutations = {
     },
 
     unarchiveCampaign: async (_, { id }, { user, loaders }) => {
-      const campaign = await loaders.campaign.load(id);
-      await accessRequired(user, campaign.organization_id, "ADMIN");
-      await r
+      const { organization_id } = await loaders.campaign.load(id);
+      await accessRequired(user, organization_id, "ADMIN");
+      const [campaign] = await r
         .knex("campaign")
         .update({ is_archived: false })
-        .where({ id });
+        .where({ id })
+        .returning("*");
       cacheableData.campaign.reload(id);
       return campaign;
     },
 
     archiveCampaign: async (_, { id }, { user, loaders }) => {
-      const campaign = await loaders.campaign.load(id);
-      await accessRequired(user, campaign.organization_id, "ADMIN");
-      campaign.is_archived = true;
-      await r
+      const { organization_id } = await loaders.campaign.load(id);
+      await accessRequired(user, organization_id, "ADMIN");
+      const [campaign] = await r
         .knex("campaign")
         .update({ is_archived: true })
-        .where({ id });
+        .where({ id })
+        .returning("*");
       cacheableData.campaign.reload(id);
       return campaign;
     },
 
     startCampaign: async (_, { id }, { user, loaders }) => {
-      const campaign = await loaders.campaign.load(id);
-      await accessRequired(user, campaign.organization_id, "ADMIN");
-      await r
+      const { organization_id } = await loaders.campaign.load(id);
+      await accessRequired(user, organization_id, "ADMIN");
+      const [campaign] = await r
         .knex("campaign")
         .update({ is_started: true })
         .where({ id });
@@ -1411,10 +1412,12 @@ const rootMutations = {
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
       await assignmentRequired(user, contact.assignment_id);
-      return await r
+      const [campaign] = await r
         .knex("campaign_contact")
         .update({ message_status: messageStatus })
-        .where({ id: campaignContactId });
+        .where({ id: campaignContactId })
+        .returning("*");
+      return campaign;
     },
 
     getAssignmentContacts: async (
