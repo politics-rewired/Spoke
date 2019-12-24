@@ -20,7 +20,7 @@ const LOADER_DEFAULTS = {
  * @param {object} options Additional loader options
  */
 const createLoader = (tableName, options = {}) => {
-  const { idKey, cacheObj } = Object.assign(LOADER_DEFAULTS, options);
+  const { idKey, cacheObj } = Object.assign({}, LOADER_DEFAULTS, options);
   return new DataLoader(async keys => {
     // Try Redis cache if available (this approach does not reduce round trips)
     if (cacheObj && cacheObj.load) {
@@ -30,7 +30,7 @@ const createLoader = (tableName, options = {}) => {
     // Make batch request and return in the order requested by the loader
     const docs = await r.reader(tableName).whereIn(idKey, keys);
     const docsById = groupBy(docs, idKey);
-    return keys.map(key => docsById[key][0]);
+    return keys.map(key => docsById[key] && docsById[key][0]);
   });
 };
 
@@ -64,7 +64,7 @@ const createLoaders = () => ({
   userCell: createLoader("user_cell"),
   userOrganization: createLoader("user_organization"),
   userTeam: createLoader("user_team"),
-  zipCode: createLoader("zip", { idKey: "zip" })
+  zipCode: createLoader("zip_code", { idKey: "zip" })
 });
 
 export { createLoaders, r, cacheableData, datawarehouse };
