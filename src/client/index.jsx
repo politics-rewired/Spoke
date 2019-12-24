@@ -1,11 +1,21 @@
+// Must be first imports
+import "react-hot-loader";
+import "babel-polyfill";
+
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter as Router } from "react-router-dom";
+import Form from "react-formal";
 import { StyleSheet } from "aphrodite";
-import AppRoutes from "../routes";
-import { ApolloProvider } from "react-apollo";
-import ApolloClientSingleton from "../network/apollo-client-singleton";
+import injectTapEventPlugin from "react-tap-event-plugin";
+
+import App from "./App";
 import { login, logout } from "./auth-service";
+import GSTextField from "../components/forms/GSTextField";
+import GSDateField from "../components//forms/GSDateField";
+import GSScriptField from "../components//forms/GSScriptField";
+import GSScriptOptionsField from "../components//forms/GSScriptOptionsField";
+import GSSelectField from "../components//forms/GSSelectField";
+import GSPasswordField from "../components//forms/GSPasswordField";
 
 window.AuthService = {
   login,
@@ -14,13 +24,18 @@ window.AuthService = {
 
 StyleSheet.rehydrate(window.RENDERED_CLASS_NAMES);
 
-ReactDOM.render(
-  <ApolloProvider client={ApolloClientSingleton}>
-    <Router>
-      <AppRoutes />
-    </Router>
-  </ApolloProvider>,
-  document.getElementById("mount")
-);
+Form.addInputTypes({
+  string: GSTextField,
+  number: GSTextField,
+  date: GSDateField,
+  email: GSTextField,
+  script: GSScriptField,
+  scriptoptions: GSScriptOptionsField,
+  select: GSSelectField,
+  password: GSPasswordField
+});
 
-module.hot.accept();
+// Needed for MaterialUI
+injectTapEventPlugin();
+
+ReactDOM.render(<App />, document.getElementById("mount"));
