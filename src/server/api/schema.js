@@ -1153,8 +1153,10 @@ const rootMutations = {
     unarchiveCampaign: async (_, { id }, { user, loaders }) => {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
-      campaign.is_archived = false;
-      await campaign.save();
+      await r
+        .knex("campaign")
+        .update({ is_archived: false })
+        .where({ id });
       cacheableData.campaign.reload(id);
       return campaign;
     },
@@ -1163,7 +1165,10 @@ const rootMutations = {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
       campaign.is_archived = true;
-      await campaign.save();
+      await r
+        .knex("campaign")
+        .update({ is_archived: true })
+        .where({ id });
       cacheableData.campaign.reload(id);
       return campaign;
     },
@@ -1171,9 +1176,10 @@ const rootMutations = {
     startCampaign: async (_, { id }, { user, loaders }) => {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
-      campaign.is_started = true;
-
-      await campaign.save();
+      await r
+        .knex("campaign")
+        .update({ is_started: true })
+        .where({ id });
       cacheableData.campaign.reload(id);
       await sendUserNotification({
         type: Notifications.CAMPAIGN_STARTED,
@@ -1405,8 +1411,10 @@ const rootMutations = {
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
       await assignmentRequired(user, contact.assignment_id);
-      contact.message_status = messageStatus;
-      return await contact.save();
+      return await r
+        .knex("campaign_contact")
+        .update({ message_status: messageStatus })
+        .where({ id: campaignContactId });
     },
 
     getAssignmentContacts: async (
