@@ -64,7 +64,7 @@ const createLoaders = () => ({
   userCell: createLoader("user_cell"),
   userOrganization: createLoader("user_organization"),
   userTeam: createLoader("user_team"),
-  zipCode: createLoader("zip", { idKey: "zip" })
+  zipCode: createLoader("zip_code", { idKey: "zip" })
 });
 
 export { createLoaders, r, cacheableData, datawarehouse };
