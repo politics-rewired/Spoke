@@ -35,16 +35,14 @@ module.exports = {
     bundle: "./client/index.jsx"
   },
   resolve: {
-    extensions: [".js", ".jsx", ".json"]
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
+        use: [{ loader: "awesome-typescript-loader" }]
       },
       {
         test: /\.css$/,

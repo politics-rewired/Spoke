@@ -11,11 +11,11 @@ import injectTapEventPlugin from "react-tap-event-plugin";
 import App from "./App";
 import { login, logout } from "./auth-service";
 import GSTextField from "../components/forms/GSTextField";
-import GSDateField from "../components//forms/GSDateField";
-import GSScriptField from "../components//forms/GSScriptField";
-import GSScriptOptionsField from "../components//forms/GSScriptOptionsField";
-import GSSelectField from "../components//forms/GSSelectField";
-import GSPasswordField from "../components//forms/GSPasswordField";
+import GSDateField from "../components/forms/GSDateField";
+import GSScriptField from "../components/forms/GSScriptField";
+import GSScriptOptionsField from "../components/forms/GSScriptOptionsField";
+import GSSelectField from "../components/forms/GSSelectField";
+import GSPasswordField from "../components/forms/GSPasswordField";
 
 window.AuthService = {
   login,
