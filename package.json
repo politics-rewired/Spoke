@@ -72,7 +72,7 @@
     "@google-cloud/storage": "^3.0.4",
     "aphrodite": "^0.4.1",
     "apollo-client": "^0.4.7",
-    "apollo-server-express": "^1.2.0",
+    "apollo-server-express": "^2.9.14",
     "assemble-numbers-client": "^1.2.0",
     "auth0-js": "^9.9.1",
     "aws-sdk": "^2.6.3",
