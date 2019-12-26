@@ -3,26 +3,20 @@ import PropTypes from "prop-types";
 import Form from "react-formal";
 import * as yup from "yup";
 import gql from "graphql-tag";
+
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 
-import loadData from "../../../containers/hoc/load-data";
-import wrapMutations from "../../../containers/hoc/wrap-mutations";
+import { loadData } from "../../../containers/hoc/with-operations";
 import GSForm from "../../forms/GSForm";
 import SendButton from "../../SendButton";
 
 class MessageResponse extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      messageText: "",
-      isSending: false,
-      sendError: ""
-    };
-
-    this.handleCloseErrorDialog = this.handleCloseErrorDialog.bind(this);
-  }
+  state = {
+    messageText: "",
+    isSending: false,
+    sendError: ""
+  };
 
   createMessageToContact(text) {
     const { contact, texter } = this.props.conversation;
@@ -61,13 +55,9 @@ class MessageResponse extends Component {
     this.setState(finalState);
   };
 
-  handleCloseErrorDialog() {
-    this.setState({ sendError: "" });
-  }
+  handleCloseErrorDialog = () => this.setState({ sendError: "" });
 
-  handleClickSendMessageButton = () => {
-    this.refs.messageForm.submit();
-  };
+  handleClickSendMessageButton = () => this.refs.messageForm.submit();
 
   render() {
     const messageSchema = yup.object({
@@ -129,12 +119,15 @@ class MessageResponse extends Component {
 }
 
 MessageResponse.propTypes = {
-  conversation: PropTypes.object,
-  messagesChanged: PropTypes.func
+  conversation: PropTypes.object.isRequired,
+  messagesChanged: PropTypes.func.isRequired,
+  mutations: PropTypes.shape({
+    sendMessage: PropTypes.func.isRequired
+  }).isRequired
 };
 
-const mapMutationsToProps = () => ({
-  sendMessage: (message, campaignContactId) => ({
+const mutations = {
+  sendMessage: ownProps => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!
@@ -158,8 +151,6 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   })
-});
+};
 
-export default loadData(wrapMutations(MessageResponse), {
-  mapMutationsToProps
-});
+export default loadData({ mutations })(MessageResponse);

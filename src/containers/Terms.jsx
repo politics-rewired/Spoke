@@ -1,15 +1,17 @@
 import PropTypes from "prop-types";
 import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 import queryString from "query-string";
-import loadData from "./hoc/load-data";
 import gql from "graphql-tag";
+
 import Paper from "material-ui/Paper";
 import { Step, Stepper, StepLabel, StepContent } from "material-ui/Stepper";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Divider from "material-ui/Divider";
-import wrapMutations from "./hoc/wrap-mutations";
-import { withRouter } from "react-router";
+
+import { loadData } from "./hoc/with-operations";
 
 class Terms extends React.Component {
   handleTermsAgree = async () => {
@@ -149,12 +151,14 @@ class Terms extends React.Component {
 }
 
 Terms.propTypes = {
-  mutations: PropTypes.object,
+  mutations: PropTypes.shape({
+    userAgreeTerms: PropTypes.func.isRequired
+  }).isRequired,
   history: PropTypes.object.isRequired,
-  data: PropTypes.object
+  data: PropTypes.object.isRequired
 };
 
-const mapQueriesToProps = () => ({
+const queries = {
   data: {
     query: gql`
       query getCurrentUser {
@@ -165,10 +169,10 @@ const mapQueriesToProps = () => ({
       }
     `
   }
-});
+};
 
-const mapMutationsToProps = ownProps => ({
-  userAgreeTerms: userId => ({
+const mutations = {
+  userAgreeTerms: ownProps => userId => ({
     mutation: gql`
       mutation userAgreeTerms($userId: String!) {
         userAgreeTerms(userId: $userId) {
@@ -181,9 +185,12 @@ const mapMutationsToProps = ownProps => ({
       userId
     }
   })
-});
+};
 
-export default loadData(wrapMutations(withRouter(Terms)), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  loadData({
+    queries,
+    mutations
+  }),
+  withRouter
+)(Terms);

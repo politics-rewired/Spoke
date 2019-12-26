@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+import gql from "graphql-tag";
+
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import Divider from "material-ui/Divider";
-import gql from "graphql-tag";
-import loadData from "./hoc/load-data";
+
+import { loadData } from "./hoc/with-operations";
 
 const styles = {
   previousStep: {
@@ -108,8 +110,8 @@ AssignmentTexterSurveyDropdown.propTypes = {
   mutations: PropTypes.object
 };
 
-const mapMutationsToProps = () => ({
-  editQuestionResponse: questionResponse => ({
+const mutations = {
+  editQuestionResponse: ownProps => questionResponse => ({
     mutation: gql`
       mutation editQuestionResponse($questionResponse: QuestionResponseInput!) {
         editQuestionResponse(questionResponse: $questionResponse) {
@@ -122,8 +124,6 @@ const mapMutationsToProps = () => ({
       questionResponse
     }
   })
-});
+};
 
-export default loadData(AssignmentTexterSurveyDropdown, {
-  mapMutationsToProps
-});
+export default loadData({ mutations })(AssignmentTexterSurveyDropdown);

@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
 import React from "react";
+import gql from "graphql-tag";
+
 import { List, ListItem } from "material-ui/List";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
+
+import { loadData } from "./hoc/with-operations";
 import Empty from "../components/Empty";
-import loadData from "./hoc/load-data";
-import gql from "graphql-tag";
 
 const AdminOptOutList = function AdminOptOutList(props) {
   const { data } = props;
@@ -28,7 +30,7 @@ AdminOptOutList.propTypes = {
   data: PropTypes.object
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query getOptOuts($organizationId: String!) {
@@ -41,11 +43,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      },
+      forceFetch: true
+    })
   }
-});
+};
 
-export default loadData(AdminOptOutList, { mapQueriesToProps });
+export default loadData({ queries })(AdminOptOutList);

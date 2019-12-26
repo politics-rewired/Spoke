@@ -1,14 +1,14 @@
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { Card, CardActions, CardTitle } from "material-ui/Card";
+import { withRouter } from "react-router";
 import { StyleSheet, css } from "aphrodite";
-import loadData from "../containers/hoc/load-data";
-import gql from "graphql-tag";
+import moment from "moment";
+
+import { Card, CardActions, CardTitle } from "material-ui/Card";
 import RaisedButton from "material-ui/RaisedButton";
 import Badge from "material-ui/Badge";
-import moment from "moment";
 import Divider from "material-ui/Divider";
-import { withRouter } from "react-router";
+
 import { dataTest } from "../lib/attributes";
 
 const inlineStyles = {

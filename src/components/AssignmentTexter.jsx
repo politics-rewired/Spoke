@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
+import { compose } from "react-apollo";
 import gql from "graphql-tag";
 
 import { StyleSheet, css } from "aphrodite";
@@ -11,8 +12,7 @@ import NavigateBeforeIcon from "material-ui/svg-icons/image/navigate-before";
 import NavigateNextIcon from "material-ui/svg-icons/image/navigate-next";
 import Check from "material-ui/svg-icons/action/check-circle";
 
-import loadData from "../containers/hoc/load-data";
-import wrapMutations from "../containers/hoc/wrap-mutations";
+import { loadData } from "../containers/hoc/with-operations";
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
 import Empty from "../components/Empty";
 import LoadingIndicator from "../components/LoadingIndicator";
@@ -449,7 +449,7 @@ AssignmentTexter.propTypes = {
   organizationId: PropTypes.string
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   organizationTags: {
     query: gql`
       query getTags($organizationId: String!) {
@@ -468,15 +468,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.organizationId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      },
+      forceFetch: true
+    })
   }
-});
+};
 
-const mapMutationsToProps = () => ({
-  createOptOut: (optOut, campaignContactId) => ({
+const mutations = {
+  createOptOut: ownProps => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -496,7 +498,7 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  tagContact: (campaignContactId, tag) => ({
+  tagContact: ownProps => (campaignContactId, tag) => ({
     mutation: gql`
       mutation tagConversation(
         $campaignContactId: String!
@@ -513,7 +515,10 @@ const mapMutationsToProps = () => ({
       tag
     }
   }),
-  editCampaignContactMessageStatus: (messageStatus, campaignContactId) => ({
+  editCampaignContactMessageStatus: ownProps => (
+    messageStatus,
+    campaignContactId
+  ) => ({
     mutation: gql`
       mutation editCampaignContactMessageStatus(
         $messageStatus: String!
@@ -533,7 +538,10 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  deleteQuestionResponses: (interactionStepIds, campaignContactId) => ({
+  deleteQuestionResponses: ownProps => (
+    interactionStepIds,
+    campaignContactId
+  ) => ({
     mutation: gql`
       mutation deleteQuestionResponses(
         $interactionStepIds: [String]
@@ -552,7 +560,10 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  updateQuestionResponses: (questionResponses, campaignContactId) => ({
+  updateQuestionResponses: ownProps => (
+    questionResponses,
+    campaignContactId
+  ) => ({
     mutation: gql`
       mutation updateQuestionResponses(
         $questionResponses: [QuestionResponseInput]
@@ -571,7 +582,7 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  sendMessage: (message, campaignContactId) => ({
+  sendMessage: ownProps => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!
@@ -594,7 +605,7 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  bulkSendMessages: assignmentId => ({
+  bulkSendMessages: ownProps => assignmentId => ({
     mutation: gql`
       mutation bulkSendMessages($assignmentId: Int!) {
         bulkSendMessages(assignmentId: $assignmentId) {
@@ -606,9 +617,12 @@ const mapMutationsToProps = () => ({
       assignmentId
     }
   })
-});
+};
 
-export default loadData(wrapMutations(withRouter(AssignmentTexter)), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  withRouter,
+  loadData({
+    queries,
+    mutations
+  })
+)(AssignmentTexter);

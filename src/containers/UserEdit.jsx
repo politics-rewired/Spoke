@@ -7,8 +7,7 @@ import { StyleSheet, css } from "aphrodite";
 import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 
-import loadData from "./hoc/load-data";
-import wrapMutations from "./hoc/wrap-mutations";
+import { loadData } from "./hoc/with-operations";
 import { dataTest } from "../lib/attributes";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
@@ -301,72 +300,64 @@ UserEdit.propTypes = {
   openSuccessDialog: PropTypes.func.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => {
-  if (ownProps.userId) {
-    return {
-      data: {
-        query: gql`
-          query getCurrentUser {
-            currentUser {
-              id
-            }
-          }
-        `
+const queries = {
+  data: {
+    query: gql`
+      query getCurrentUser {
+        currentUser {
+          id
+        }
       }
-    };
+    `
   }
 };
 
-const mapMutationsToProps = ({ ownProps }) => {
-  if (ownProps.userId) {
-    return {
-      editUser: userData => ({
-        mutation: gql`
-          mutation editUser(
-            $organizationId: String!
-            $userId: Int!
-            $userData: UserInput
-          ) {
-            editUser(
-              organizationId: $organizationId
-              userId: $userId
-              userData: $userData
-            ) {
-              id
-              firstName
-              lastName
-              cell
-              email
-            }
-          }
-        `,
-        variables: {
-          userId: ownProps.userId,
-          organizationId: ownProps.organizationId,
-          userData
+const mutations = {
+  editUser: ownProps => userData => ({
+    mutation: gql`
+      mutation editUser(
+        $organizationId: String!
+        $userId: Int!
+        $userData: UserInput
+      ) {
+        editUser(
+          organizationId: $organizationId
+          userId: $userId
+          userData: $userData
+        ) {
+          id
+          firstName
+          lastName
+          cell
+          email
         }
-      }),
-      changeUserPassword: formData => ({
-        mutation: gql`
-          mutation changeUserPassword(
-            $userId: Int!
-            $formData: UserPasswordChange
-          ) {
-            changeUserPassword(userId: $userId, formData: $formData) {
-              id
-            }
-          }
-        `,
-        variables: {
-          userId: ownProps.userId,
-          formData
+      }
+    `,
+    variables: {
+      userId: ownProps.userId,
+      organizationId: ownProps.organizationId,
+      userData
+    }
+  }),
+  changeUserPassword: ownProps => formData => ({
+    mutation: gql`
+      mutation changeUserPassword(
+        $userId: Int!
+        $formData: UserPasswordChange
+      ) {
+        changeUserPassword(userId: $userId, formData: $formData) {
+          id
         }
-      })
-    };
-  }
+      }
+    `,
+    variables: {
+      userId: ownProps.userId,
+      formData
+    }
+  })
 };
 
-export default loadData(wrapMutations(UserEdit), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(UserEdit);

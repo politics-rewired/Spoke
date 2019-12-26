@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import moment from "moment-timezone";
-import loadData from "../../../containers/hoc/load-data";
 import gql from "graphql-tag";
+import moment from "moment-timezone";
 import { StyleSheet, css } from "aphrodite";
+
+import { loadData } from "../../../containers/hoc/with-operations";
 
 const styles = StyleSheet.create({
   conversationRow: {
@@ -76,10 +77,11 @@ class MessageList extends Component {
 }
 
 MessageList.propTypes = {
-  messages: PropTypes.arrayOf(PropTypes.object)
+  userName: PropTypes.object.isRequired,
+  messages: PropTypes.arrayOf(PropTypes.object).isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   userNames: {
     query: gql`
       query getPeopleWithIds($userIds: [String!], $organizationId: String!) {
@@ -91,13 +93,15 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      userIds: [
-        ...new Set(ownProps.messages.map(m => m.userId).filter(uid => !!uid))
-      ],
-      organizationId: ownProps.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        userIds: [
+          ...new Set(ownProps.messages.map(m => m.userId).filter(uid => !!uid))
+        ],
+        organizationId: ownProps.organizationId
+      }
+    })
   }
-});
+};
 
-export default loadData(MessageList, { mapQueriesToProps });
+export default loadData({ queries })(MessageList);

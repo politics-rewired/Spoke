@@ -1,15 +1,17 @@
 import React, { Component } from "react";
-import type from "prop-types";
+import PropTypes from "prop-types";
+import { withRouter } from "react-router";
+import { compose } from "react-apollo";
+import gql from "graphql-tag";
+
+import DataTables from "material-ui-datatables";
 import FlatButton from "material-ui/FlatButton";
 import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";
-import loadData from "../../containers/hoc/load-data";
-import { withRouter } from "react-router";
-import gql from "graphql-tag";
-import LoadingIndicator from "../../components/LoadingIndicator";
-import DataTables from "material-ui-datatables";
-import ConversationPreviewModal from "./ConversationPreviewModal";
 
+import { loadData } from "../../containers/hoc/with-operations";
+import LoadingIndicator from "../../components/LoadingIndicator";
 import { MESSAGE_STATUSES } from "../../components/IncomingMessageFilter";
+import ConversationPreviewModal from "./ConversationPreviewModal";
 
 const formatContactName = contact => {
   const { firstName, lastName, optOut } = contact;
@@ -284,20 +286,20 @@ export class IncomingMessageList extends Component {
 }
 
 IncomingMessageList.propTypes = {
-  organizationId: type.string,
-  cursor: type.object,
-  contactsFilter: type.object,
-  campaignsFilter: type.object,
-  assignmentsFilter: type.object,
-  tagsFilter: type.object,
-  selectedRows: type.arrayOf(type.object),
-  onPageChanged: type.func,
-  onPageSizeChanged: type.func,
-  onConversationSelected: type.func,
-  onConversationCountChanged: type.func
+  organizationId: PropTypes.string,
+  cursor: PropTypes.object,
+  contactsFilter: PropTypes.object,
+  campaignsFilter: PropTypes.object,
+  assignmentsFilter: PropTypes.object,
+  tagsFilter: PropTypes.object,
+  selectedRows: PropTypes.arrayOf(PropTypes.object),
+  onPageChanged: PropTypes.func,
+  onPageSizeChanged: PropTypes.func,
+  onConversationSelected: PropTypes.func,
+  onConversationCountChanged: PropTypes.func
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   conversations: {
     query: gql`
       query Q(
@@ -356,17 +358,24 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.organizationId,
-      cursor: ownProps.cursor,
-      contactsFilter: ownProps.contactsFilter,
-      campaignsFilter: ownProps.campaignsFilter,
-      assignmentsFilter: ownProps.assignmentsFilter,
-      tagsFilter: ownProps.tagsFilter,
-      contactNameFilter: ownProps.contactNameFilter
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId,
+        cursor: ownProps.cursor,
+        contactsFilter: ownProps.contactsFilter,
+        campaignsFilter: ownProps.campaignsFilter,
+        assignmentsFilter: ownProps.assignmentsFilter,
+        tagsFilter: ownProps.tagsFilter,
+        contactNameFilter: ownProps.contactNameFilter
+      },
+      forceFetch: true
+    })
   }
-});
+};
 
-export default loadData(withRouter(IncomingMessageList), { mapQueriesToProps });
+export default compose(
+  withRouter,
+  loadData({
+    queries
+  })
+)(IncomingMessageList);

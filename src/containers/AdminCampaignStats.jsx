@@ -1,20 +1,22 @@
 import PropTypes from "prop-types";
 import React from "react";
 import moment from "moment";
-import RaisedButton from "material-ui/RaisedButton";
-import { withAuthzContext } from "../components/AuthzProvider";
-import Chart from "../components/Chart";
-import { Card, CardTitle, CardText } from "material-ui/Card";
-import { red600 } from "material-ui/styles/colors";
-import TexterStats from "../components/TexterStats";
-import Snackbar from "material-ui/Snackbar";
-import { withRouter } from "react-router";
-import { StyleSheet, css } from "aphrodite";
-import loadData from "./hoc/load-data";
 import gql from "graphql-tag";
-import theme from "../styles/theme";
-import wrapMutations from "./hoc/wrap-mutations";
+import { withRouter } from "react-router";
+import { compose } from "react-apollo";
+import { StyleSheet, css } from "aphrodite";
+
+import { Card, CardTitle, CardText } from "material-ui/Card";
+import Snackbar from "material-ui/Snackbar";
+import RaisedButton from "material-ui/RaisedButton";
+import { red600 } from "material-ui/styles/colors";
+
+import { withAuthzContext } from "../components/AuthzProvider";
+import { loadData } from "./hoc/with-operations";
 import { dataTest } from "../lib/attributes";
+import Chart from "../components/Chart";
+import TexterStats from "../components/TexterStats";
+import theme from "../styles/theme";
 
 const inlineStyles = {
   stat: {
@@ -368,7 +370,7 @@ AdminCampaignStats.propTypes = {
   adminPerms: PropTypes.bool.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query getCampaign(
@@ -417,18 +419,20 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.match.params.campaignId,
-      contactsFilter: {
-        messageStatus: "needsMessage"
-      }
-    },
-    pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.match.params.campaignId,
+        contactsFilter: {
+          messageStatus: "needsMessage"
+        }
+      },
+      pollInterval: 5000
+    })
   }
-});
+};
 
-const mapMutationsToProps = () => ({
-  archiveCampaign: campaignId => ({
+const mutations = {
+  archiveCampaign: ownProps => campaignId => ({
     mutation: gql`
       mutation archiveCampaign($campaignId: String!) {
         archiveCampaign(id: $campaignId) {
@@ -439,7 +443,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: { campaignId }
   }),
-  unarchiveCampaign: campaignId => ({
+  unarchiveCampaign: ownProps => campaignId => ({
     mutation: gql`
       mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
@@ -450,7 +454,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: { campaignId }
   }),
-  exportCampaign: campaignId => ({
+  exportCampaign: ownProps => campaignId => ({
     mutation: gql`
       mutation exportCampaign($campaignId: String!) {
         exportCampaign(id: $campaignId) {
@@ -460,7 +464,7 @@ const mapMutationsToProps = () => ({
     `,
     variables: { campaignId }
   }),
-  copyCampaign: campaignId => ({
+  copyCampaign: ownProps => campaignId => ({
     mutation: gql`
       mutation copyCampaign($campaignId: String!) {
         copyCampaign(id: $campaignId) {
@@ -470,12 +474,13 @@ const mapMutationsToProps = () => ({
     `,
     variables: { campaignId }
   })
-});
+};
 
-export default loadData(
-  withRouter(wrapMutations(withAuthzContext(AdminCampaignStats))),
-  {
-    mapQueriesToProps,
-    mapMutationsToProps
-  }
-);
+export default compose(
+  withRouter,
+  withAuthzContext,
+  loadData({
+    queries,
+    mutations
+  })
+)(AdminCampaignStats);

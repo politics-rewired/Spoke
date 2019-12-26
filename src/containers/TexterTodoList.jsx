@@ -1,13 +1,16 @@
 import PropTypes from "prop-types";
 import React from "react";
+import gql from "graphql-tag";
+import { withRouter } from "react-router";
+import { compose } from "react-apollo";
+
+import { RaisedButton } from "material-ui";
 import Check from "material-ui/svg-icons/action/check-circle";
+
+import { loadData } from "./hoc/with-operations";
 import Empty from "../components/Empty";
 import TexterRequest from "../components/TexterRequest";
 import AssignmentSummary from "../components/AssignmentSummary";
-import loadData from "./hoc/load-data";
-import gql from "graphql-tag";
-import { withRouter } from "react-router";
-import { RaisedButton } from "material-ui";
 
 const dueBySortFn = (x, y) => (x.dueBy > y.dueBy ? -1 : 1);
 const needSortFn = (x, y) =>
@@ -165,7 +168,7 @@ TexterTodoList.propTypes = {
   data: PropTypes.object
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query getTodos(
@@ -211,45 +214,47 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId,
-      needsMessageFilter: {
-        messageStatus: "needsMessage",
-        isOptedOut: false,
-        validTimezone: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId,
+        needsMessageFilter: {
+          messageStatus: "needsMessage",
+          isOptedOut: false,
+          validTimezone: true
+        },
+        needsResponseFilter: {
+          messageStatus: "needsResponse",
+          isOptedOut: false,
+          validTimezone: true
+        },
+        badTimezoneFilter: {
+          isOptedOut: false,
+          validTimezone: false,
+          messageStatus: "needsMessageOrNeedsResponse"
+        },
+        completedConvosFilter: {
+          isOptedOut: false,
+          validTimezone: true,
+          messageStatus: "messaged"
+        },
+        pastMessagesFilter: {
+          messageStatus: "convo",
+          isOptedOut: false,
+          validTimezone: true
+        },
+        skippedMessagesFilter: {
+          messageStatus: "closed",
+          isOptedOut: false,
+          validTimezone: true
+        }
       },
-      needsResponseFilter: {
-        messageStatus: "needsResponse",
-        isOptedOut: false,
-        validTimezone: true
-      },
-      badTimezoneFilter: {
-        isOptedOut: false,
-        validTimezone: false,
-        messageStatus: "needsMessageOrNeedsResponse"
-      },
-      completedConvosFilter: {
-        isOptedOut: false,
-        validTimezone: true,
-        messageStatus: "messaged"
-      },
-      pastMessagesFilter: {
-        messageStatus: "convo",
-        isOptedOut: false,
-        validTimezone: true
-      },
-      skippedMessagesFilter: {
-        messageStatus: "closed",
-        isOptedOut: false,
-        validTimezone: true
-      }
-    },
-    pollInterval: 10000
+      pollInterval: 10000
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  releaseMyReplies: organizationId => ({
+const mutations = {
+  releaseMyReplies: ownProps => organizationId => ({
     mutation: gql`
       mutation releaseMyReplies($organizationId: Int!) {
         releaseMyReplies(organizationId: $organizationId)
@@ -258,9 +263,12 @@ const mapMutationsToProps = ({ ownProps }) => ({
     variables: { organizationId },
     refetchQueries: ["getTodos"]
   })
-});
+};
 
-export default loadData(withRouter(TexterTodoList), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  withRouter,
+  loadData({
+    queries,
+    mutations
+  })
+)(TexterTodoList);

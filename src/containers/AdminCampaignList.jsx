@@ -1,21 +1,23 @@
 import PropTypes from "prop-types";
 import React from "react";
-import CampaignList from "./CampaignList";
-import FloatingActionButton from "material-ui/FloatingActionButton";
-import ContentAdd from "material-ui/svg-icons/content/add";
-import loadData from "./hoc/load-data";
 import { withRouter } from "react-router";
+import { compose } from "react-apollo";
 import gql from "graphql-tag";
-import theme from "../styles/theme";
-import LoadingIndicator from "../components/LoadingIndicator";
-import { withAuthzContext } from "../components/AuthzProvider";
-import wrapMutations from "./hoc/wrap-mutations";
+
 import DropDownMenu from "material-ui/DropDownMenu";
 import { MenuItem } from "material-ui/Menu";
-import { dataTest } from "../lib/attributes";
 import RaisedButton from "material-ui/RaisedButton";
 import Dialog from "material-ui/Dialog";
 import { TextField, Toggle } from "material-ui";
+import FloatingActionButton from "material-ui/FloatingActionButton";
+import ContentAdd from "material-ui/svg-icons/content/add";
+
+import { loadData } from "./hoc/with-operations";
+import { dataTest } from "../lib/attributes";
+import { withAuthzContext } from "../components/AuthzProvider";
+import LoadingIndicator from "../components/LoadingIndicator";
+import CampaignList from "./CampaignList";
+import theme from "../styles/theme";
 
 const styles = {
   flexContainer: {
@@ -322,8 +324,8 @@ AdminCampaignList.propTypes = {
   adminPerms: PropTypes.bool.isRequired
 };
 
-const mapMutationsToProps = () => ({
-  createCampaign: campaign => ({
+const mutations = {
+  createCampaign: ownProps => campaign => ({
     mutation: gql`
       mutation createBlankCampaign($campaign: CampaignInput!) {
         createCampaign(campaign: $campaign) {
@@ -364,11 +366,10 @@ const mapMutationsToProps = () => ({
       limitToCurrentlyTextableContacts
     }
   })
-});
+};
 
-export default loadData(
-  wrapMutations(withAuthzContext(withRouter(AdminCampaignList))),
-  {
-    mapMutationsToProps
-  }
-);
+export default compose(
+  withRouter,
+  withAuthzContext,
+  loadData({ mutations })
+)(AdminCampaignList);

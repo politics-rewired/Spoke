@@ -4,7 +4,6 @@ import Form from "react-formal";
 import GSSubmitButton from "./GSSubmitButton";
 import theme from "../../styles/theme";
 import { StyleSheet, css } from "aphrodite";
-import { GraphQLRequestError } from "../../network/errors";
 
 const styles = StyleSheet.create({
   errorMessage: {
@@ -30,9 +29,7 @@ export default class GSForm extends React.Component {
   };
 
   handleFormError(err) {
-    if (err instanceof GraphQLRequestError) {
-      this.setState({ globalErrorMessage: err.message });
-    } else if (err.message) {
+    if (err.message) {
       this.setState({ globalErrorMessage: err.message });
     } else {
       console.error(err);

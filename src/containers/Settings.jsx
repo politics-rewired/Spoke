@@ -12,8 +12,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import { StyleSheet, css } from "aphrodite";
 
-import loadData from "./hoc/load-data";
-import wrapMutations from "./hoc/wrap-mutations";
+import { loadData } from "./hoc/with-operations";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
 
@@ -283,13 +282,13 @@ class Settings extends React.Component {
 }
 
 Settings.propTypes = {
-  data: PropTypes.object,
+  data: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
-  mutations: PropTypes.object
+  mutations: PropTypes.object.isRequired
 };
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  updateTextingHours: (textingHoursStart, textingHoursEnd) => ({
+const mutations = {
+  updateTextingHours: ownProps => (textingHoursStart, textingHoursEnd) => ({
     mutation: gql`
       mutation updateTextingHours(
         $textingHoursStart: Int!
@@ -314,7 +313,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       textingHoursEnd
     }
   }),
-  updateTextingHoursEnforcement: textingHoursEnforced => ({
+  updateTextingHoursEnforcement: ownProps => textingHoursEnforced => ({
     mutation: gql`
       mutation updateTextingHoursEnforcement(
         $textingHoursEnforced: Boolean!
@@ -336,7 +335,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       textingHoursEnforced
     }
   }),
-  updateOptOutMessage: ({ optOutMessage }) => ({
+  updateOptOutMessage: ownProps => ({ optOutMessage }) => ({
     mutation: gql`
       mutation updateOptOutMessage(
         $optOutMessage: String!
@@ -356,7 +355,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       optOutMessage
     }
   }),
-  setNumbersApiKey: ({ numbersApiKey }) => ({
+  setNumbersApiKey: ownProps => ({ numbersApiKey }) => ({
     mutation: gql`
       mutation setNumbersApiKey(
         $numbersApiKey: String
@@ -376,9 +375,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
       numbersApiKey
     }
   })
-});
+};
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query adminGetCampaigns($organizationId: String!) {
@@ -393,14 +392,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      },
+      forceFetch: true
+    })
   }
-});
+};
 
-export default loadData(wrapMutations(Settings), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(Settings);

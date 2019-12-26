@@ -1,7 +1,8 @@
-import gql from "graphql-tag";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Component } from "react";
-import { connect } from "react-apollo";
+import gql from "graphql-tag";
+
+import { withOperations } from "./hoc/with-operations";
 
 export class PaginatedUsersRetriever extends Component {
   constructor(props) {
@@ -65,7 +66,7 @@ export class PaginatedUsersRetriever extends Component {
   }
 }
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   users: {
     query: gql`
       query getUsers(
@@ -94,14 +95,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      cursor: { offset: 0, limit: ownProps.pageSize },
-      organizationId: ownProps.organizationId,
-      campaignsFilter: ownProps.campaignsFilter
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        cursor: { offset: 0, limit: ownProps.pageSize },
+        organizationId: ownProps.organizationId,
+        campaignsFilter: ownProps.campaignsFilter
+      },
+      forceFetch: true
+    })
   }
-});
+};
 
 PaginatedUsersRetriever.propTypes = {
   organizationId: PropTypes.string.isRequired,
@@ -113,6 +116,6 @@ PaginatedUsersRetriever.propTypes = {
   pageSize: PropTypes.number.isRequired
 };
 
-export default connect({
-  mapQueriesToProps
+export default withOperations({
+  queries
 })(PaginatedUsersRetriever);

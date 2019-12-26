@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
+import { compose } from "react-apollo";
 import gql from "graphql-tag";
 import queryString from "query-string";
 
@@ -15,7 +16,7 @@ import ContentAdd from "material-ui/svg-icons/content/add";
 
 import { getHighestRole, ROLE_HIERARCHY } from "../lib";
 import { dataTest } from "../lib/attributes";
-import loadData from "./hoc/load-data";
+import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
 import UserEdit from "./UserEdit";
 import Empty from "../components/Empty";
@@ -290,15 +291,19 @@ class AdminPersonList extends React.Component {
 }
 
 AdminPersonList.propTypes = {
-  mutations: PropTypes.object,
+  mutations: PropTypes.shape({
+    editOrganizationRoles: PropTypes.func.isRequired,
+    resetUserPassword: PropTypes.func.isRequired
+  }).isRequired,
+  personData: PropTypes.object.isRequired,
+  userData: PropTypes.object.isRequired,
+  organizationData: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
-  personData: PropTypes.object,
-  userData: PropTypes.object,
-  organizationData: PropTypes.object,
   history: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired
 };
 
+// TODO: use Fragment
 const organizationFragment = `
   id
   peopleCount
@@ -309,8 +314,9 @@ const organizationFragment = `
     roles(organizationId: $organizationId)
   }
 `;
-const mapMutationsToProps = ({ ownProps }) => ({
-  editOrganizationRoles: (organizationId, userId, roles) => ({
+
+const mutations = {
+  editOrganizationRoles: ownProps => (organizationId, userId, roles) => ({
     mutation: gql`
       mutation editOrganizationRoles($organizationId: String!, $userId: String!, $roles: [String], $campaignId: String, $offset: Int) {
         editOrganizationRoles(organizationId: $organizationId, userId: $userId, roles: $roles, campaignId: $campaignId) {
@@ -329,7 +335,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
           : 0
     }
   }),
-  resetUserPassword: (organizationId, userId) => ({
+  resetUserPassword: ownProps => (organizationId, userId) => ({
     mutation: gql`
       mutation resetUserPassword($organizationId: String!, $userId: Int!) {
         resetUserPassword(organizationId: $organizationId, userId: $userId)
@@ -340,24 +346,26 @@ const mapMutationsToProps = ({ ownProps }) => ({
       userId
     }
   })
-});
+};
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   personData: {
     query: gql`query getPeople($organizationId: String!, $campaignId: String, $offset: Int) {
       organization(id: $organizationId) {
         ${organizationFragment}
       }
     }`,
-    variables: {
-      organizationId: ownProps.match.params.organizationId,
-      campaignId: queryString.parse(ownProps.location.search).campaignId,
-      offset:
-        queryString.parse(ownProps.location.search).offset !== undefined
-          ? queryString.parse(ownProps.location.search).offset * 200
-          : 0
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId,
+        campaignId: queryString.parse(ownProps.location.search).campaignId,
+        offset:
+          queryString.parse(ownProps.location.search).offset !== undefined
+            ? queryString.parse(ownProps.location.search).offset * 200
+            : 0
+      },
+      forceFetch: true
+    })
   },
   userData: {
     query: gql`
@@ -368,9 +376,11 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      }
+    })
   },
   organizationData: {
     query: gql`
@@ -390,13 +400,18 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      }
+    })
   }
-});
+};
 
-export default loadData(withRouter(AdminPersonList), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  withRouter,
+  loadData({
+    queries,
+    mutations
+  })
+)(AdminPersonList);

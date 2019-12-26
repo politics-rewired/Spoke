@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
-import { connect } from "react-apollo";
 import pick from "lodash/pick";
 
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -10,6 +9,7 @@ import TextField from "material-ui/TextField";
 import FlatButton from "material-ui/FlatButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 
+import { withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import TeamEditorList from "./TeamEditorList";
 import theme from "../../styles/theme";
@@ -176,7 +176,7 @@ AdminTeamEditor.propTypes = {
   match: PropTypes.object.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   organizationTeams: {
     query: gql`
       query getOrganizationTeams($organizationId: String!) {
@@ -193,14 +193,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      }
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  saveTeams: teams => ({
+const mutations = {
+  saveTeams: ownProps => teams => ({
     mutation: gql`
       mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
         saveTeams(organizationId: $organizationId, teams: $teams) {
@@ -214,7 +216,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getOrganizationTeams"]
   }),
-  deleteTeam: teamId => ({
+  deleteTeam: ownProps => teamId => ({
     mutation: gql`
       mutation deleteTeam($organizationId: String!, $teamId: String!) {
         deleteTeam(organizationId: $organizationId, teamId: $teamId)
@@ -226,9 +228,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getOrganizationTeams"]
   })
-});
+};
 
-export default connect({
-  mapQueriesToProps,
-  mapMutationsToProps
+export default withOperations({
+  queries,
+  mutations
 })(AdminTeamEditor);

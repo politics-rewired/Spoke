@@ -1,17 +1,15 @@
 import React from "react";
-import { StyleSheet, css } from "aphrodite";
-import theme from "../styles/theme";
-import loadData from "../containers/hoc/load-data";
-import wrapMutations from "../containers/hoc/wrap-mutations";
-import GSForm from "./forms/GSForm";
+import gql from "graphql-tag";
+import * as yup from "yup";
+
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import Paper from "material-ui/Paper";
-import Form from "react-formal";
-import * as yup from "yup";
-import gql from "graphql-tag";
+
+import { loadData } from "../containers/hoc/with-operations";
+import GSForm from "./forms/GSForm";
 import LoadingIndicator from "./LoadingIndicator";
 
 class TexterRequest extends React.Component {
@@ -238,7 +236,7 @@ class TexterRequest extends React.Component {
   }
 }
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query currentUserFormInfo($organizationId: String!) {
@@ -261,15 +259,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.organizationId
-    },
-    pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      },
+      pollInterval: 5000
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  requestTexts: ({ count, email, preferredTeamId }) => ({
+const mutations = {
+  requestTexts: ownProps => ({ count, email, preferredTeamId }) => ({
     mutation: gql`
       mutation requestTexts(
         $count: Int!
@@ -292,9 +292,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
       organizationId: ownProps.organizationId
     }
   })
-});
+};
 
-export default loadData(wrapMutations(TexterRequest), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(TexterRequest);

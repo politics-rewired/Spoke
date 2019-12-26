@@ -1,16 +1,18 @@
 import PropTypes from "prop-types";
 import React from "react";
-import loadData from "./hoc/load-data";
 import gql from "graphql-tag";
-import Form from "react-formal";
-import * as yup from "yup";
-import { StyleSheet, css } from "aphrodite";
-import wrapMutations from "./hoc/wrap-mutations";
-import theme from "../styles/theme";
-import Paper from "material-ui/Paper";
 import { withRouter } from "react-router";
-import GSForm from "../components/forms/GSForm";
+import { compose } from "react-apollo";
+import * as yup from "yup";
+import Form from "react-formal";
+import { StyleSheet, css } from "aphrodite";
+
+import Paper from "material-ui/Paper";
+
+import { loadData } from "./hoc/with-operations";
 import { dataTest } from "../lib/attributes";
+import theme from "../styles/theme";
+import GSForm from "../components/forms/GSForm";
 
 const styles = StyleSheet.create({
   container: {
@@ -110,7 +112,7 @@ class CreateOrganization extends React.Component {
   }
 }
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   inviteData: {
     query: gql`
       query getInvite($inviteId: String!) {
@@ -120,10 +122,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      inviteId: ownProps.match.params.inviteId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        inviteId: ownProps.match.params.inviteId
+      },
+      forceFetch: true
+    })
   },
   userData: {
     query: gql`
@@ -133,9 +137,9 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    forceFetch: true
+    options: ownProps => ({ forceFetch: true })
   }
-});
+};
 
 CreateOrganization.propTypes = {
   mutations: PropTypes.object,
@@ -145,8 +149,8 @@ CreateOrganization.propTypes = {
   inviteData: PropTypes.object
 };
 
-const mapMutationsToProps = () => ({
-  createOrganization: (name, userId, inviteId) => ({
+const mutations = {
+  createOrganization: ownProps => (name, userId, inviteId) => ({
     mutation: gql`
       mutation createOrganization(
         $name: String!
@@ -160,9 +164,12 @@ const mapMutationsToProps = () => ({
     `,
     variables: { name, userId, inviteId }
   })
-});
+};
 
-export default loadData(wrapMutations(withRouter(CreateOrganization)), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  withRouter,
+  loadData({
+    queries,
+    mutations
+  })
+)(CreateOrganization);

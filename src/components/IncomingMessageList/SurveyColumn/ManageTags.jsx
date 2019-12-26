@@ -7,7 +7,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
 import Dialog from "material-ui/Dialog";
 
-import loadData from "../../../containers/hoc/load-data";
+import { loadData } from "../../../containers/hoc/with-operations";
 import TagSelector from "../../TagSelector";
 
 class ManageTags extends Component {
@@ -129,7 +129,7 @@ ManageTags.propTypes = {
   contactTags: PropTypes.object.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   organizationTags: {
     query: gql`
       query getOrganizationTags($organizationId: String!) {
@@ -148,10 +148,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.organizationId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      },
+      forceFetch: true
+    })
   },
   contactTags: {
     query: gql`
@@ -171,15 +173,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      contactId: ownProps.contactId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        contactId: ownProps.contactId
+      },
+      forceFetch: true
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  tagContact: tagPayload => ({
+const mutations = {
+  tagContact: ownProps => tagPayload => ({
     mutation: gql`
       mutation tagConversation(
         $contactId: String!
@@ -197,6 +201,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getContactTags"]
   })
-});
+};
 
-export default loadData(ManageTags, { mapQueriesToProps, mapMutationsToProps });
+export default loadData({
+  queries,
+  mutations
+})(ManageTags);

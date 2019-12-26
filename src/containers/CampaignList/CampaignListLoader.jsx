@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
-import { connect } from "react-apollo";
 
+import { withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import CampaignList from "./CampaignList";
 
@@ -65,7 +65,7 @@ CampaignListLoader.propTypes = {
   unarchiveCampaign: PropTypes.func.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query adminGetCampaigns(
@@ -106,16 +106,18 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.organizationId,
-      campaignsFilter: ownProps.campaignsFilter,
-      offset: ownProps.offset,
-      limit: ownProps.limit
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId,
+        campaignsFilter: ownProps.campaignsFilter,
+        offset: ownProps.offset,
+        limit: ownProps.limit
+      },
+      forceFetch: true
+    })
   }
-});
+};
 
-export default connect({
-  mapQueriesToProps
+export default withOperations({
+  queries
 })(CampaignListLoader);
