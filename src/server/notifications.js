@@ -72,6 +72,11 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
 export const sendUserNotification = async notification => {
   const { type } = notification;
 
+  // Fine-grained notification preferences
+  let disabledTypes = config.DISABLED_TEXTER_NOTIFICATION_TYPES;
+  disabledTypes = disabledTypes.length > 0 ? disabledTypes.split(",") : [];
+  if (disabledTypes.includes(type)) return;
+
   if (type === Notifications.CAMPAIGN_STARTED) {
     const assignments = await r
       .reader("assignment")
@@ -89,7 +94,7 @@ export const sendUserNotification = async notification => {
     return;
   }
 
-  /* Notifications.CAMPAIGN_STARTED are the only ones to include if config.DISABLE_TEXTER_NOTIFICATIONS is false */
+  // Global notification toggle (campaign notifications are still allowed)
   if (config.DISABLE_TEXTER_NOTIFICATIONS) return;
 
   if (type === Notifications.ASSIGNMENT_MESSAGE_RECEIVED) {
