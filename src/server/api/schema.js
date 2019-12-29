@@ -129,6 +129,7 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
           current_usage_count asc
         limit 1
         for update
+        skip locked
       )
     returning link_domain.domain;
   `,
