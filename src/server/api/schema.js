@@ -580,7 +580,8 @@ async function sendMessage(
     service: service_type,
     is_from_contact: false,
     queued_at: new Date(),
-    send_before: sendBefore
+    send_before: sendBefore,
+    version_hash: message.versionHash
   };
 
   const messageSavePromise = r
