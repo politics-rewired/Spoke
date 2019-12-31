@@ -285,6 +285,11 @@ if (isClient()) {
         "Whether to disable texter notifications – if true, should be implemented externally.",
       default: false
     }),
+    DISABLED_TEXTER_NOTIFICATION_TYPES: str({
+      desc: "Comma-separated list of notification names to ignore.",
+      example: "assignment.message.received,assignment.updated",
+      default: ""
+    }),
     EMAIL_FROM: email({
       desc:
         "Email from address. Required to send email from either Mailgun or a custom SMTP server.",

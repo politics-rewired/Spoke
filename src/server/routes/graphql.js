@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-express";
 import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
 
 import mocks from "../api/mocks";
@@ -21,24 +21,20 @@ addMockFunctionsToSchema({
   preserveResolvers: true
 });
 
-router.use(
-  "/graphql",
-  graphqlExpress(request => ({
-    schema: executableSchema,
-    context: {
-      loaders: createLoaders(),
-      user: request.user
-    }
-  }))
-);
+const server = new ApolloServer({
+  schema: executableSchema,
+  debug: !config.isProduction,
+  introspection: !config.isProduction,
+  playground: !config.isProduction,
+  context: ({ req, res }) => ({
+    loaders: createLoaders(),
+    user: req.user
+  })
+});
 
-if (!config.isProduction) {
-  router.get(
-    "/graphiql",
-    graphiqlExpress({
-      endpointURL: "/graphql"
-    })
-  );
-}
+server.applyMiddleware({
+  app: router,
+  path: "/graphql"
+});
 
 export default router;
