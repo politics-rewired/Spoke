@@ -1,11 +1,11 @@
 exports.up = function(knex) {
   return knex.schema.alterTable("message", table => {
-    table.string("version_hash");
+    table.string("script_version_hash");
   });
 };
 
 exports.down = function(knex) {
   return knex.schema.alterTable("message", table => {
-    table.dropColumn("version_hash");
+    table.dropColumn("script_version_hash");
   });
 };
