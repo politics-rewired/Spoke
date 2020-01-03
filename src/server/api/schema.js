@@ -320,7 +320,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   if (campaign.hasOwnProperty("cannedResponses")) {
     // Ignore the mocked `id` automatically created on the input by GraphQL
     const convertedResponses = campaign.cannedResponses.map(
-      ({ id: cannedResponseId, ...response }) => ({
+      ({ id: _cannedResponseId, ...response }) => ({
         ...response,
         campaign_id: id
       })
