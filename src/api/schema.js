@@ -143,6 +143,7 @@ const rootSchema = `
     contactNumber: Phone
     assignmentId: String
     userId: String
+    versionHash: String
   }
 
   input InviteInput {
