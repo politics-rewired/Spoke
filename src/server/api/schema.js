@@ -318,15 +318,13 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
 
   if (campaign.hasOwnProperty("cannedResponses")) {
-    const cannedResponses = campaign.cannedResponses;
-    const convertedResponses = [];
-    for (let index = 0; index < cannedResponses.length; index++) {
-      const response = cannedResponses[index];
-      convertedResponses.push({
+    // Ignore the mocked `id` automatically created on the input by GraphQL
+    const convertedResponses = campaign.cannedResponses.map(
+      ({ id: cannedResponseId, ...response }) => ({
         ...response,
         campaign_id: id
-      });
-    }
+      })
+    );
 
     await r
       .knex("canned_response")
