@@ -1189,11 +1189,21 @@ const rootMutations = {
       return campaign;
     },
 
-    editCampaign: async (_, { id, campaign }, { user, loaders }) => {
+    editCampaign: async (
+      _,
+      { id, campaign: campaignEdits },
+      { user, loaders }
+    ) => {
       const origCampaign = await r
         .knex("campaign")
         .where({ id })
         .first();
+
+      // Sometimes, campaign was coming through as having
+      // a "null prototype", which caused .hasOwnProperty calls
+      // to fail – this fixes it by ensuring its a proper object
+      const campaign = Object.assign({}, campaignEdits);
+
       if (campaign.organizationId) {
         await accessRequired(user, campaign.organizationId, "ADMIN");
       } else {
