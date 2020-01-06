@@ -36,7 +36,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .where({ id: campaign.organization_id })
     .first();
   const user = await r
-    .reader("organization")
+    .reader("user")
     .where({ id: assignment.user_id })
     .first();
   const orgOwner = await getOrganizationOwner(organization.id);
