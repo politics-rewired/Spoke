@@ -138,7 +138,9 @@ export const sendMessage = async (message, _organizationId, _trx) => {
       })
       .where({ id: spokeMessageId });
   } catch (exc) {
-    logger.error("Error sending message with Assemble Numbers", exc);
+    logger.error("Error sending message with Assemble Numbers: ", exc, {
+      messageInput
+    });
     await r
       .knex("message")
       .update({ send_status: SpokeSendStatus.Error })
