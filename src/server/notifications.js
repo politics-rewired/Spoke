@@ -36,7 +36,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .where({ id: campaign.organization_id })
     .first();
   const user = await r
-    .reader("organization")
+    .reader("user")
     .where({ id: assignment.user_id })
     .first();
   const orgOwner = await getOrganizationOwner(organization.id);
@@ -65,7 +65,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
       text
     });
   } catch (e) {
-    logger.error("Error sending assignment notification email", e);
+    logger.error("Error sending assignment notification email: ", e);
   }
 };
 
@@ -134,7 +134,10 @@ export const sendUserNotification = async notification => {
           }/reply`
         });
       } catch (e) {
-        logger.error("Error sending conversation reply notification email", e);
+        logger.error(
+          "Error sending conversation reply notification email: ",
+          e
+        );
       }
     }
   } else if (type === Notifications.ASSIGNMENT_CREATED) {
