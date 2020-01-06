@@ -120,6 +120,7 @@
     "md5": "^2.2.1",
     "moment": "^2.14.1",
     "moment-timezone": "^0.5.14",
+    "mysql": "^2.17.1",
     "nexmo": "^1.0.0-beta-7",
     "node-cron": "^2.0.3",
     "nodemailer": "^4.3.1",
