@@ -1,12 +1,23 @@
 const getFormattedZip = (zip, country = "US") => {
   if (country === "US") {
-    const regex = /(\d{5})([ \-]\d{4})?/;
-    const [, first5] = zip.match(regex) || [];
+    // Matches 5 digit zip
+    const fiveDigitRegex = /(\d{5})([ \-]\d{4})?/;
+    const [, first5] = zip.match(fiveDigitRegex) || [];
 
-    return first5;
-  } else {
-    throw new Error(`Do not know how to format zip for country: ${country}`);
+    if (first5) return first5;
+
+    // 4 Digit zips are almost certainly excel treating
+    // NH, MA, and other 0 initial zips as numbers
+    // Because of that, we should just 0 pad it
+    const fourDigitRegex = /\d{4}/;
+    if (zip.match(fourDigitRegex)) {
+      return "0" + zip;
+    }
+
+    return null;
   }
+
+  throw new Error(`Do not know how to format zip for country: ${country}`);
 };
 
 var commonZipRanges = [
