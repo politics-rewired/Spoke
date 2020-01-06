@@ -67,7 +67,7 @@ const validUuid = async (nextUrl, uuidMatch) => {
       .first("id");
   }
 
-  if (matchingRecord) throw new InvalidInviteError();
+  if (!matchingRecord) throw new InvalidInviteError();
 };
 
 const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
