@@ -34,7 +34,9 @@ export class CampaignList extends React.Component {
       .then(resp => {
         const mutationName =
           operations[operationName].mutationName || operationName;
-        this.setState({ finished: resp.data[mutationName], executing: false });
+
+        const dataKey = Object.keys(resp.data)[0];
+        this.setState({ finished: resp.data[dataKey], executing: false });
       })
       .catch(error => {
         this.setState({ error, executing: false });
@@ -203,6 +205,32 @@ const mapMutationsToProps = () => ({
     variables: {
       campaignId
     }
+  }),
+  turnAutoAssignOn: (campaignId, _) => ({
+    mutation: gql`
+      mutation turnAutoAssignOn($campaignId: String!) {
+        editCampaign(id: $campaignId, campaign: { isAutoassignEnabled: true }) {
+          id
+          isAutoassignEnabled
+        }
+      }
+    `,
+    variables: { campaignId }
+  }),
+  turnAutoAssignOff: (campaignId, _) => ({
+    mutation: gql`
+      mutation turnAutoAssignOff($campaignId: String!) {
+        editCampaign(
+          id: $campaignId
+          campaign: { isAutoassignEnabled: false }
+        ) {
+          id
+          isAutoassignEnabled
+        }
+      }
+    `,
+
+    variables: { campaignId }
   })
 });
 

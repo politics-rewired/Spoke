@@ -4,6 +4,7 @@ import sample from "lodash/sample";
 import { withRouter } from "react-router";
 import * as yup from "yup";
 import sortBy from "lodash/sortBy";
+import md5 from "md5";
 
 import { StyleSheet, css } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
@@ -137,6 +138,8 @@ export class AssignmentTexterContact extends React.Component {
       disabled = true;
     }
 
+    const [messageVersionHash, messageText] = this.getStartingMessageText();
+
     this.state = {
       disabled,
       disabledText,
@@ -152,7 +155,8 @@ export class AssignmentTexterContact extends React.Component {
       removedTags: [],
       pendingNewTags: [],
       responsePopoverOpen: false,
-      messageText: this.getStartingMessageText(),
+      messageText,
+      messageVersionHash,
       dialogType: TexterDialogType.None,
       currentInteractionStep:
         availableSteps.length > 0
@@ -265,9 +269,10 @@ export class AssignmentTexterContact extends React.Component {
     if (contact.messageStatus === "needsMessage") {
       const { scriptOptions } = getTopMostParent(campaign.interactionSteps);
       const randomScript = sample(scriptOptions);
-      return this.getMessageTextFromScript(randomScript);
+      const scriptVersionHash = md5(randomScript);
+      return [scriptVersionHash, this.getMessageTextFromScript(randomScript)];
     }
-    return "";
+    return [null, ""];
   };
 
   handleOpenPopover = event => {
@@ -302,7 +307,8 @@ export class AssignmentTexterContact extends React.Component {
       contactNumber: contact.cell,
       userId: texter.id,
       text,
-      assignmentId: assignment.id
+      assignmentId: assignment.id,
+      versionHash: this.state.messageVersionHash
     };
   };
 
@@ -478,8 +484,9 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleChangeScript = newScript => {
+    const messageVersionHash = md5(newScript);
     const messageText = this.getMessageTextFromScript(newScript);
-    this.setState({ messageText });
+    this.setState({ messageText, messageVersionHash });
   };
 
   handleQuestionResponseChange = ({

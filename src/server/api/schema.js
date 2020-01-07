@@ -318,15 +318,13 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
 
   if (campaign.hasOwnProperty("cannedResponses")) {
-    const cannedResponses = campaign.cannedResponses;
-    const convertedResponses = [];
-    for (let index = 0; index < cannedResponses.length; index++) {
-      const response = cannedResponses[index];
-      convertedResponses.push({
+    // Ignore the mocked `id` automatically created on the input by GraphQL
+    const convertedResponses = campaign.cannedResponses.map(
+      ({ id: _cannedResponseId, ...response }) => ({
         ...response,
         campaign_id: id
-      });
-    }
+      })
+    );
 
     await r
       .knex("canned_response")
@@ -580,7 +578,8 @@ async function sendMessage(
     service: service_type,
     is_from_contact: false,
     queued_at: new Date(),
-    send_before: sendBefore
+    send_before: sendBefore,
+    script_version_hash: message.versionHash
   };
 
   const messageSavePromise = r
@@ -1190,11 +1189,21 @@ const rootMutations = {
       return campaign;
     },
 
-    editCampaign: async (_, { id, campaign }, { user, loaders }) => {
+    editCampaign: async (
+      _,
+      { id, campaign: campaignEdits },
+      { user, loaders }
+    ) => {
       const origCampaign = await r
         .knex("campaign")
         .where({ id })
         .first();
+
+      // Sometimes, campaign was coming through as having
+      // a "null prototype", which caused .hasOwnProperty calls
+      // to fail – this fixes it by ensuring its a proper object
+      const campaign = Object.assign({}, campaignEdits);
+
       if (campaign.organizationId) {
         await accessRequired(user, campaign.organizationId, "ADMIN");
       } else {
