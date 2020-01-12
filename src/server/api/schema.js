@@ -731,13 +731,13 @@ const rootMutations = {
       { user, loaders }
     ) => {
       // TODO: wrap in transaction
-      const currentRoles = (await r
+      const currentRoles = await r
         .knex("user_organization")
         .where({
           organization_id: organizationId,
           user_id: userId
         })
-        .select("role")).map(res => res.role);
+        .pluck("role");
       const oldRoleIsOwner = currentRoles.indexOf("OWNER") !== -1;
       const newRoleIsOwner = roles.indexOf("OWNER") !== -1;
       const roleRequired = oldRoleIsOwner || newRoleIsOwner ? "OWNER" : "ADMIN";
