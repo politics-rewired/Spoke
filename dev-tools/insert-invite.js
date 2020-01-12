@@ -59,6 +59,12 @@ Usage: insert-invite HASH [--include-env]
     } else {
       throw new Error("--include-env passed but missing required envvars!");
     }
+
+    if (process.env.SWITCHBOARD_LRN_API_KEY) {
+      payload.org_features = {
+        switchboard_lrn_api_key: process.env.SWITCHBOARD_LRN_API_KEY
+      };
+    }
   }
 
   await r.knex("invite").insert({

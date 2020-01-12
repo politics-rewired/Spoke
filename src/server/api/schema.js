@@ -1362,11 +1362,22 @@ const rootMutations = {
         });
       }
 
+      const { payload = {} } = invite;
+
       const newOrganization = await r.knex.transaction(async trx => {
+        const orgFeatures = {};
+        if (payload.org_features) {
+          const { switchboard_lrn_api_key } = payload.org_features;
+          if (switchboard_lrn_api_key) {
+            orgFeatures.numbersApiKey = switchboard_lrn_api_key;
+          }
+        }
+
         const insertResult = await trx("organization")
           .insert({
             name,
-            uuid: uuidv4()
+            uuid: uuidv4(),
+            features: JSON.stringify(orgFeatures)
           })
           .returning("*");
 
@@ -1396,7 +1407,6 @@ const rootMutations = {
           is_system: true
         });
 
-        const { payload = {} } = invite;
         if (payload.messaging_services) {
           await trx("messaging_service").insert(
             payload.messaging_services.map(service => ({
