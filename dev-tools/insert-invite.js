@@ -1,5 +1,6 @@
 require("dotenv").config();
 import { r } from "../src/server/models";
+import { symmetricEncrypt } from "../src/server/api/lib/crypto";
 
 const main = async () => {
   let inviteArgs = Object.values(process.argv);
@@ -42,14 +43,16 @@ Usage: insert-invite HASH [--include-env]
     if (
       process.env.MESSAGING_SERVICE_SID &&
       process.env.ACCOUNT_SID &&
-      process.env.ENCRYPTED_AUTH_TOKEN &&
+      process.env.UNENCRYPTED_AUTH_TOKEN &&
       process.env.SERVICE_TYPE
     ) {
       payload.messaging_services = [
         {
           messaging_service_sid: process.env.MESSAGING_SERVICE_SID,
           account_sid: process.env.ACCOUNT_SID,
-          encrypted_auth_token: process.env.ENCRYPTED_AUTH_TOKEN,
+          encrypted_auth_token: symmetricEncrypt(
+            process.env.UNENCRYPTED_AUTH_TOKEN
+          ),
           service_type: process.env.SERVICE_TYPE
         }
       ];
