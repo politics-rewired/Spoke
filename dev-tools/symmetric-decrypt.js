@@ -1,6 +1,6 @@
-// Run this script from the top level directory to encrypt a value:
+// Run this script from the top level directory to decrypt a value:
 //
-//    node ./dev-tools/symmetric-encrypt.js ValueToBeEncrypted
+//    node ./dev-tools/symmetric-decrypt.js ValueToBeDecrypted
 
 require("dotenv").config();
 const { symmetricDecrypt } = require("../src/server/api/lib/crypto");
