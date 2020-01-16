@@ -323,7 +323,10 @@ const mapMutationsToProps = ({ ownProps }) => ({
       userId,
       roles,
       campaignId: queryString.parse(ownProps.location.search).campaignId,
-      offset: queryString.parse(ownProps.location.search).offset || 0
+      offset:
+        queryString.parse(ownProps.location.search).offset !== undefined
+          ? queryString.parse(ownProps.location.search).offset * 200
+          : 0
     }
   }),
   resetUserPassword: (organizationId, userId) => ({

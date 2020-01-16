@@ -88,7 +88,7 @@ export function sortInteractionSteps(interactionSteps) {
 }
 
 export function getTopMostParent(interactionSteps, isModel) {
-  return getInteractionTree(interactionSteps, isModel)[0][0].interactionStep;
+  return interactionSteps.find(step => step.parentInteractionId === null);
 }
 
 export function makeTree(interactionSteps, id = null) {
