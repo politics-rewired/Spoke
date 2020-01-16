@@ -372,7 +372,7 @@ export async function myCurrentAssignmentTargets(
   }[assignmentType];
 
   if (!campaignView || !contactsView) {
-    return null;
+    return [];
   }
 
   const generalEnabledBit = generalEnabled ? 1 : 0;
@@ -535,7 +535,7 @@ export async function myCurrentAssignmentTarget(
   trx = r.knex
 ) {
   const options = await myCurrentAssignmentTargets(userId, organizationId, trx);
-  return options ? options[0] : null;
+  return options.length > 0 ? options[0] : null;
 }
 
 async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
