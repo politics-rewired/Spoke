@@ -26,7 +26,7 @@ class AdminNavigation extends React.Component {
             {...dataTest("navSwitchToTexter")}
             primaryText="Switch to texter"
             onTouchTap={() =>
-              this.props.router.push(`/app/${organizationId}/todos`)
+              this.props.history.push(`/app/${organizationId}/todos`)
             }
           />
         }
@@ -42,9 +42,9 @@ AdminNavigation.defaultProps = {
 AdminNavigation.propTypes = {
   data: PropTypes.object,
   organizationId: PropTypes.string,
-  router: PropTypes.object,
+  history: PropTypes.object.isRequired,
   sections: PropTypes.array,
-  params: PropTypes.object,
+  match: PropTypes.object.isRequired,
   onToggleMenu: PropTypes.func.isRequired,
   showMenu: PropTypes.bool
 };

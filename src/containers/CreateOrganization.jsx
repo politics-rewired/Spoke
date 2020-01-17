@@ -67,7 +67,7 @@ class CreateOrganization extends React.Component {
                   this.props.userData.currentUser.id,
                   this.props.inviteData.inviteByHash[0].id
                 );
-                this.props.router.push(
+                this.props.history.push(
                   `/admin/${newOrganization.data.createOrganization.id}`
                 );
               }}
@@ -121,7 +121,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      inviteId: ownProps.params.inviteId
+      inviteId: ownProps.match.params.inviteId
     },
     forceFetch: true
   },
@@ -139,7 +139,8 @@ const mapQueriesToProps = ({ ownProps }) => ({
 
 CreateOrganization.propTypes = {
   mutations: PropTypes.object,
-  router: PropTypes.object,
+  history: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired,
   userData: PropTypes.object,
   inviteData: PropTypes.object
 };

@@ -172,7 +172,7 @@ class AdminTagEditor extends Component {
 AdminTagEditor.defaultProps = {};
 
 AdminTagEditor.propTypes = {
-  params: PropTypes.object.isRequired
+  match: PropTypes.object.isRequired
 };
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -193,7 +193,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId
+      organizationId: ownProps.match.params.organizationId
     }
   }
 });
@@ -208,7 +208,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId,
+      organizationId: ownProps.match.params.organizationId,
       tag
     },
     refetchQueries: ["getOrganizationTags"]
@@ -220,7 +220,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId,
+      organizationId: ownProps.match.params.organizationId,
       tagId
     },
     refetchQueries: ["getOrganizationTags"]

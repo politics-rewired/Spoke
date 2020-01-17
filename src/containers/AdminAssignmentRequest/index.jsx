@@ -144,7 +144,7 @@ class AdminAssignmentRequest extends Component {
 }
 
 AdminAssignmentRequest.propTypes = {
-  params: PropTypes.object.isRequired
+  match: PropTypes.object.isRequired
 };
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -165,7 +165,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId,
+      organizationId: ownProps.match.params.organizationId,
       status: "pending"
     },
     forceFetch: true,

@@ -48,7 +48,8 @@ class TexterTodo extends React.Component {
     const { assignment } = this.props.data;
     this.assignContactsIfNeeded();
     if (!assignment || assignment.campaign.isArchived) {
-      this.props.router.push(`/app/${this.props.params.organizationId}/todos`);
+      const { organizationId } = this.props.match.params;
+      this.props.history.push(`/app/${organizationId}/todos`);
     }
   }
 
@@ -65,7 +66,8 @@ class TexterTodo extends React.Component {
           return;
         }
       }
-      this.props.router.push(`/app/${this.props.params.organizationId}/todos`);
+      const { organizationId } = this.props.match.params;
+      this.props.history.push(`/app/${organizationId}/todos`);
     }
   };
 
@@ -78,6 +80,7 @@ class TexterTodo extends React.Component {
 
   render() {
     const { assignment } = this.props.data;
+    const { organizationId } = this.props.match.params;
     const contactIds = assignment.contacts.map(contact => contact.id);
     const allContactsCount = assignment.allContactsCount;
     return (
@@ -89,7 +92,7 @@ class TexterTodo extends React.Component {
         refreshData={this.refreshData}
         loadContacts={this.loadContacts}
         onRefreshAssignmentContacts={this.refreshAssignmentContacts}
-        organizationId={this.props.params.organizationId}
+        organizationId={organizationId}
       />
     );
   }
@@ -98,10 +101,10 @@ class TexterTodo extends React.Component {
 TexterTodo.propTypes = {
   contactsFilter: PropTypes.string,
   messageStatus: PropTypes.string,
-  params: PropTypes.object,
+  match: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
   data: PropTypes.object,
-  mutations: PropTypes.object,
-  router: PropTypes.object
+  mutations: PropTypes.object
 };
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -174,7 +177,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
         isOptedOut: false,
         validTimezone: true
       },
-      assignmentId: ownProps.params.assignmentId
+      assignmentId: ownProps.match.params.assignmentId
     },
     forceFetch: true,
     pollInterval: 20000
@@ -210,7 +213,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      assignmentId: ownProps.params.assignmentId,
+      assignmentId: ownProps.match.params.assignmentId,
       contactIds,
       findNew: !!findNew
     }
