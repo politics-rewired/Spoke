@@ -292,10 +292,10 @@ const TexterOrganizationRoutes = props => {
         />
         <TexterDashboardRoute
           path={`${organizationPath}/account/:userId`}
-          main={mainProps => (
+          main={({ match }) => (
             <UserEdit
-              userId={mainProps.params.userId}
-              organizationId={mainProps.params.organizationId}
+              userId={match.params.userId}
+              organizationId={match.params.organizationId}
             />
           )}
           topNav={({ match }) => (
