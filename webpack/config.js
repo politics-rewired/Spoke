@@ -2,6 +2,7 @@ const { config } = require("./build-config");
 const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 const DEBUG = !config.isProduction;
 
@@ -30,7 +31,7 @@ if (!DEBUG) {
     })
   );
   plugins.push(
-    new webpack.optimize.UglifyJsPlugin({
+    new UglifyJsPlugin({
       sourceMap: true
     })
   );
