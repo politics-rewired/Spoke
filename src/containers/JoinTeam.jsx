@@ -29,7 +29,7 @@ class JoinTeam extends React.Component {
       });
     }
 
-    if (this.props.match.params.campaignId) {
+    if (this.props.params.campaignId) {
       try {
         campaign = await this.props.mutations.assignUserToCampaign();
       } catch (ex) {
@@ -41,7 +41,7 @@ class JoinTeam extends React.Component {
     }
 
     if (organization) {
-      this.props.history.push(`/app/${organization.data.joinOrganization.id}`);
+      this.props.router.push(`/app/${organization.data.joinOrganization.id}`);
     }
   }
 
@@ -59,8 +59,7 @@ class JoinTeam extends React.Component {
 
 JoinTeam.propTypes = {
   mutations: PropTypes.object,
-  history: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired
+  router: PropTypes.object
 };
 
 const mapMutationsToProps = ({ ownProps }) => ({
@@ -72,7 +71,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: { organizationUuid: ownProps.match.params.organizationUuid }
+    variables: { organizationUuid: ownProps.params.organizationUuid }
   }),
   assignUserToCampaign: () => ({
     mutation: gql`
@@ -89,8 +88,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      campaignId: ownProps.match.params.campaignId,
-      organizationUuid: ownProps.match.params.organizationUuid
+      campaignId: ownProps.params.campaignId,
+      organizationUuid: ownProps.params.organizationUuid
     }
   })
 });

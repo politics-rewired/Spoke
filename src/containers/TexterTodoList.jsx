@@ -17,7 +17,7 @@ const SORT_METHOD = dueBySortFn;
 
 class TexterTodoList extends React.Component {
   renderTodoList(assignments) {
-    const { organizationId } = this.props.match.params;
+    const organizationId = this.props.params.organizationId;
     return assignments
       .sort()
       .map(assignment => {
@@ -54,9 +54,9 @@ class TexterTodoList extends React.Component {
   }
 
   termsAgreed() {
-    const { data, history } = this.props;
+    const { data, router } = this.props;
     if (window.TERMS_REQUIRE && !data.currentUser.terms) {
-      history.push(`/terms?next=${this.props.location.pathname}`);
+      router.push(`/terms?next=${this.props.location.pathname}`);
     }
   }
 
@@ -84,7 +84,7 @@ class TexterTodoList extends React.Component {
         >
           <TexterRequest
             user={this.props.data.currentUser}
-            organizationId={this.props.match.params.organizationId}
+            organizationId={this.props.params.organizationId}
           />
         </div>
       </div>
@@ -94,8 +94,7 @@ class TexterTodoList extends React.Component {
 
 TexterTodoList.propTypes = {
   organizationId: PropTypes.string,
-  match: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
+  params: PropTypes.object,
   data: PropTypes.object
 };
 
@@ -146,7 +145,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       needsMessageFilter: {
         messageStatus: "needsMessage",
         isOptedOut: false,

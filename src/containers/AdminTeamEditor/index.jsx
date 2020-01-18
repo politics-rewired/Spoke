@@ -173,7 +173,7 @@ class AdminTeamEditor extends Component {
 AdminTeamEditor.defaultProps = {};
 
 AdminTeamEditor.propTypes = {
-  match: PropTypes.object.isRequired
+  params: PropTypes.object.isRequired
 };
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -194,7 +194,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId
+      organizationId: ownProps.params.organizationId
     }
   }
 });
@@ -209,7 +209,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       teams
     },
     refetchQueries: ["getOrganizationTeams"]
@@ -221,7 +221,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       teamId
     },
     refetchQueries: ["getOrganizationTeams"]

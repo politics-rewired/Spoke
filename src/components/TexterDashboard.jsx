@@ -18,37 +18,28 @@ const styles = StyleSheet.create({
 
 class TexterDashboard extends React.Component {
   render() {
-    const {
-      main: MainComponent,
-      topNav: TopNavComponent,
-      fullScreen: FullScreenComponent,
-      ...rest
-    } = this.props;
-
-    if (FullScreenComponent) {
-      return <FullScreenComponent {...rest} />;
-    }
+    const { main, topNav, fullScreen } = this.props;
     return (
-      <div>
-        {TopNavComponent && <TopNavComponent {...rest} />}
-        <div className={css(styles.container)}>
-          <div className={css(styles.content)}>
-            <MainComponent {...rest} />
+      fullScreen || (
+        <div>
+          {topNav}
+          <div className={css(styles.container)}>
+            <div className={css(styles.content)}>{main}</div>
           </div>
         </div>
-      </div>
+      )
     );
   }
 }
 
 TexterDashboard.propTypes = {
-  history: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
+  router: PropTypes.object,
+  params: PropTypes.object,
   children: PropTypes.object,
-  main: PropTypes.elementType,
-  topNav: PropTypes.elementType,
-  fullScreen: PropTypes.elementType
+  location: PropTypes.object,
+  main: PropTypes.element,
+  topNav: PropTypes.element,
+  fullScreen: PropTypes.element
 };
 
 export default withRouter(TexterDashboard);

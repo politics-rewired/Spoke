@@ -284,7 +284,7 @@ class Settings extends React.Component {
 
 Settings.propTypes = {
   data: PropTypes.object,
-  match: PropTypes.object.isRequired,
+  params: PropTypes.object,
   mutations: PropTypes.object
 };
 
@@ -309,7 +309,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       textingHoursStart,
       textingHoursEnd
     }
@@ -332,7 +332,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       textingHoursEnforced
     }
   }),
@@ -352,7 +352,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       optOutMessage
     }
   }),
@@ -372,7 +372,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       numbersApiKey
     }
   })
@@ -394,7 +394,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId
+      organizationId: ownProps.params.organizationId
     },
     forceFetch: true
   }

@@ -110,7 +110,7 @@ export class CampaignList extends React.Component {
   }
 
   renderRow(campaign) {
-    const { organizationId, adminPerms, history } = this.props;
+    const { organizationId, adminPerms, router } = this.props;
     const {
       isStarted,
       isArchived,
@@ -203,7 +203,7 @@ export class CampaignList extends React.Component {
         style={listItemStyle}
         key={campaign.id}
         primaryText={primaryText}
-        onClick={() => history.push(campaignUrl)}
+        onClick={() => router.push(campaignUrl)}
         secondaryText={secondaryText}
         leftIcon={leftIcon}
         rightIconButton={adminPerms && this.renderMenu(campaign)}
@@ -232,7 +232,7 @@ CampaignList.propTypes = {
   organizationId: PropTypes.string.isRequired,
   campaigns: PropTypes.arrayOf(campaignShape).isRequired,
   adminPerms: PropTypes.bool.isRequired,
-  history: PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
   startOperation: PropTypes.func.isRequired,
   archiveCampaign: PropTypes.func.isRequired,
   unarchiveCampaign: PropTypes.func.isRequired

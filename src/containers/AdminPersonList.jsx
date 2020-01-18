@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import gql from "graphql-tag";
-import queryString from "query-string";
 
 import { Table, TableBody, TableRow, TableRowColumn } from "material-ui/Table";
 import FlatButton from "material-ui/FlatButton";
@@ -41,8 +40,9 @@ class AdminPersonList extends React.Component {
   handleFilterChange = (campaignId, offset) => {
     let query = "?" + (campaignId ? `campaignId=${campaignId}` : "");
     query += offset ? `&offset=${offset}` : "";
-    const { organizationId } = this.props.match.params;
-    this.props.history.push(`/admin/${organizationId}/people${query}`);
+    this.props.router.push(
+      `/admin/${this.props.params.organizationId}/people${query}`
+    );
   };
 
   handleCampaignChange = (event, index, value) => {
@@ -51,8 +51,7 @@ class AdminPersonList extends React.Component {
   };
 
   handleOffsetChange = (event, index, value) => {
-    const { campaignId } = queryString.parse(this.props.location.search);
-    this.handleFilterChange(campaignId, value);
+    this.handleFilterChange(this.props.location.query.campaignId, value);
   };
 
   handleOpen() {
@@ -65,7 +64,7 @@ class AdminPersonList extends React.Component {
 
   handleChange = async (userId, value) => {
     await this.props.mutations.editOrganizationRoles(
-      this.props.match.params.organizationId,
+      this.props.params.organizationId,
       userId,
       [value]
     );
@@ -89,10 +88,13 @@ class AdminPersonList extends React.Component {
       const offsetList = Array.apply(null, {
         length: Math.ceil(organization.peopleCount / LIMIT)
       });
-      const { offset } = queryString.parse(this.props.location.search);
       return (
         <DropDownMenu
-          value={offset == "all" ? "all" : Number(offset || 0)}
+          value={
+            this.props.location.query.offset == "all"
+              ? "all"
+              : Number(this.props.location.query.offset || 0)
+          }
           onChange={this.handleOffsetChange}
         >
           {[<MenuItem value="all" primaryText="All" key="all" />].concat(
@@ -107,7 +109,7 @@ class AdminPersonList extends React.Component {
   }
 
   async resetPassword(userId) {
-    const { organizationId } = this.props.match.params;
+    const { organizationId } = this.props.params;
     const { currentUser } = this.props.userData;
     if (currentUser.id !== userId) {
       const res = await this.props.mutations.resetUserPassword(
@@ -124,9 +126,11 @@ class AdminPersonList extends React.Component {
       organizationData: { organization }
     } = this.props;
     const campaigns = organization ? organization.campaigns : [];
-    const { campaignId } = queryString.parse(this.props.location.search);
     return (
-      <DropDownMenu value={campaignId} onChange={this.handleCampaignChange}>
+      <DropDownMenu
+        value={this.props.location.query.campaignId}
+        onChange={this.handleCampaignChange}
+      >
         <MenuItem primaryText="All Campaigns" />
         {campaigns.campaigns.map(campaign => (
           <MenuItem
@@ -291,12 +295,12 @@ class AdminPersonList extends React.Component {
 
 AdminPersonList.propTypes = {
   mutations: PropTypes.object,
-  match: PropTypes.object.isRequired,
+  params: PropTypes.object,
   personData: PropTypes.object,
   userData: PropTypes.object,
   organizationData: PropTypes.object,
-  history: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired
+  router: PropTypes.object,
+  location: PropTypes.object
 };
 
 const organizationFragment = `
@@ -322,10 +326,10 @@ const mapMutationsToProps = ({ ownProps }) => ({
       organizationId,
       userId,
       roles,
-      campaignId: queryString.parse(ownProps.location.search).campaignId,
+      campaignId: ownProps.location.query.campaignId,
       offset:
-        queryString.parse(ownProps.location.search).offset !== undefined
-          ? queryString.parse(ownProps.location.search).offset * 200
+        ownProps.location.query.offset !== undefined
+          ? ownProps.location.query.offset * 200
           : 0
     }
   }),
@@ -350,11 +354,11 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     }`,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
-      campaignId: queryString.parse(ownProps.location.search).campaignId,
+      organizationId: ownProps.params.organizationId,
+      campaignId: ownProps.location.query.campaignId,
       offset:
-        queryString.parse(ownProps.location.search).offset !== undefined
-          ? queryString.parse(ownProps.location.search).offset * 200
+        ownProps.location.query.offset !== undefined
+          ? ownProps.location.query.offset * 200
           : 0
     },
     forceFetch: true
@@ -369,7 +373,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId
+      organizationId: ownProps.params.organizationId
     }
   },
   organizationData: {
@@ -391,7 +395,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId
+      organizationId: ownProps.params.organizationId
     }
   }
 });

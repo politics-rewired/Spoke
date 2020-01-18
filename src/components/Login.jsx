@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import React from "react";
-import queryString from "query-string";
 import { withRouter } from "react-router";
 import { StyleSheet, css } from "aphrodite";
 
@@ -60,7 +59,7 @@ class LocalLogin extends React.Component {
   };
 
   componentDidMount = () => {
-    const { nextUrl } = queryString.parse(this.props.location.search);
+    const { nextUrl } = this.props.location.query;
 
     if (nextUrl && nextUrl.includes("reset")) {
       this.setState({ active: UserEditMode.Reset });
@@ -76,8 +75,8 @@ class LocalLogin extends React.Component {
     nextUrl.includes("invite");
 
   render() {
-    const { location, history } = this.props;
-    const { nextUrl } = queryString.parse(location.search) || "/";
+    const { location, router } = this.props;
+    const { nextUrl } = location.query;
     const { active } = this.state;
 
     // If nextUrl is a valid (naive RegEx only) invite or organization
@@ -116,7 +115,7 @@ class LocalLogin extends React.Component {
           <UserEdit
             authType={active}
             saveLabel={saveLabels[active]}
-            history={history}
+            router={router}
             nextUrl={nextUrl}
             style={css(styles.authFields)}
           />
@@ -128,7 +127,7 @@ class LocalLogin extends React.Component {
 
 LocalLogin.propTypes = {
   location: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired
+  router: PropTypes.object.isRequired
 };
 
 const LocalLoginWrapper = withRouter(LocalLogin);
@@ -145,8 +144,7 @@ const Login = ({ location }) => {
       return <LocalLoginWrapper location={location} />;
 
     default:
-      const { nextUrl } = queryString.parse(location.search);
-      return isClient() ? window.AuthService.login(nextUrl) : "";
+      return isClient() ? window.AuthService.login(location.query.nextUrl) : "";
   }
 };
 

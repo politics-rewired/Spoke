@@ -24,19 +24,25 @@ const styles = StyleSheet.create({
 });
 
 class AdminDashboard extends React.Component {
-  state = {
-    showMenu: true
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      showMenu: true
+    };
 
+    this.handleToggleMenu = this.handleToggleMenu.bind(this);
+  }
   urlFromPath(path) {
-    const organizationId = this.props.match.params.organizationId;
+    const organizationId = this.props.params.organizationId;
     return `/admin/${organizationId}/${path}`;
   }
 
-  handleToggleMenu = () => this.setState({ showMenu: !this.state.showMenu });
+  async handleToggleMenu() {
+    await this.setState({ showMenu: !this.state.showMenu });
+  }
 
   renderNavigation(sections) {
-    const organizationId = this.props.match.params.organizationId;
+    const organizationId = this.props.params.organizationId;
 
     if (!organizationId) {
       return "";
@@ -55,12 +61,15 @@ class AdminDashboard extends React.Component {
   }
 
   render() {
-    const { location, children, match } = this.props;
+    const { location, children, params } = this.props;
     const { roles } = this.props.data.currentUser;
     const {
       escalatedConversationCount,
       pendingAssignmentRequestCount
     } = this.props.badgeCounts.organization;
+
+    // HACK: Setting params.adminPerms helps us hide non-supervolunteer functionality
+    params.adminPerms = hasRole("ADMIN", roles || []);
 
     const sections = [
       {
@@ -148,7 +157,7 @@ class AdminDashboard extends React.Component {
         <TopNav
           title={title}
           backToURL={backToURL}
-          orgId={match.params.organizationId}
+          orgId={params.organizationId}
         />
         <div className={css(styles.container)}>
           {this.renderNavigation(sections.filter(s => hasRole(s.role, roles)))}
@@ -160,13 +169,13 @@ class AdminDashboard extends React.Component {
 }
 
 AdminDashboard.propTypes = {
-  match: PropTypes.object,
-  location: PropTypes.object,
-  history: PropTypes.object,
-  children: PropTypes.object
+  router: PropTypes.object,
+  params: PropTypes.object,
+  children: PropTypes.object,
+  location: PropTypes.object
 };
 
-const mapQueriesToProps = ({ ownProps: { match } }) => ({
+const mapQueriesToProps = ({ ownProps }) => ({
   data: {
     query: gql`
       query getCurrentUserRoles($organizationId: String!) {
@@ -177,7 +186,7 @@ const mapQueriesToProps = ({ ownProps: { match } }) => ({
       }
     `,
     variables: {
-      organizationId: match.params.organizationId
+      organizationId: ownProps.params.organizationId
     }
   },
   badgeCounts: {
@@ -191,7 +200,7 @@ const mapQueriesToProps = ({ ownProps: { match } }) => ({
       }
     `,
     variables: {
-      organizationId: match.params.organizationId
+      organizationId: ownProps.params.organizationId
     },
     pollInterval: 20000
   }
