@@ -218,7 +218,7 @@ export class AdminIncomingMessageList extends Component {
   handleReassignRequested = async newTexterUserIds => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaReassignCampaignContacts(
-        this.props.match.params.organizationId,
+        this.props.params.organizationId,
         this.state.campaignIdsContactIds,
         newTexterUserIds
       );
@@ -228,7 +228,7 @@ export class AdminIncomingMessageList extends Component {
   handleReassignAllMatchingRequested = async newTexterUserIds => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaBulkReassignCampaignContacts(
-        this.props.match.params.organizationId,
+        this.props.params.organizationId,
         this.state.campaignsFilter || {},
         this.state.assignmentsFilter || {},
         this.state.tagsFilter || {},
@@ -241,7 +241,7 @@ export class AdminIncomingMessageList extends Component {
   handleUnassignRequested = async () => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaReassignCampaignContacts(
-        this.props.match.params.organizationId,
+        this.props.params.organizationId,
         this.state.campaignIdsContactIds,
         null
       );
@@ -251,7 +251,7 @@ export class AdminIncomingMessageList extends Component {
   handleUnassignAllMatchingRequested = async () => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaBulkReassignCampaignContacts(
-        this.props.match.params.organizationId,
+        this.props.params.organizationId,
         this.state.campaignsFilter || {},
         this.state.assignmentsFilter || {},
         this.state.tagsFilter || {},
@@ -263,7 +263,7 @@ export class AdminIncomingMessageList extends Component {
 
   markForSecondPass = async () => {
     await this.props.mutations.markForSecondPass(
-      this.props.match.params.organizationId,
+      this.props.params.organizationId,
       this.state.campaignIdsContactIds
     );
 
@@ -434,23 +434,22 @@ export class AdminIncomingMessageList extends Component {
     };
 
     const includeEscalated = tagsFilter && !tagsFilter.excludeEscalated;
-    const { organizationId } = this.props.match.params;
 
     return (
       <div>
         <PaginatedUsersRetriever
-          organizationId={organizationId}
+          organizationId={this.props.params.organizationId}
           onUsersReceived={this.handleReassignmentTextersReceived}
           pageSize={1000}
         />
         <PaginatedUsersRetriever
-          organizationId={organizationId}
+          organizationId={this.props.params.organizationId}
           onUsersReceived={this.handleCampaignTextersReceived}
           pageSize={1000}
           campaignsFilter={this.state.campaignsFilter}
         />
         <PaginatedCampaignsRetriever
-          organizationId={organizationId}
+          organizationId={this.props.params.organizationId}
           campaignsFilter={_.pick(this.state.campaignsFilter, "isArchived")}
           onCampaignsReceived={this.handleCampaignsReceived}
           onTagsReceived={this.handleTagsReceived}
@@ -504,7 +503,7 @@ export class AdminIncomingMessageList extends Component {
         <br />
         {this.haveFiltersChangedFromDefaults() ? (
           <IncomingMessageList
-            organizationId={organizationId}
+            organizationId={this.props.params.organizationId}
             cursor={cursor}
             contactsFilter={this.state.contactsFilter}
             campaignsFilter={this.state.campaignsFilter}
@@ -690,7 +689,7 @@ const mapMutationsToProps = () => ({
 
 AdminIncomingMessageList.propTypes = {
   mutations: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired
+  params: PropTypes.object.isRequired
 };
 
 export default loadData(withRouter(wrapMutations(AdminIncomingMessageList)), {

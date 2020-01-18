@@ -193,7 +193,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      teamId: ownProps.match.params.teamId
+      teamId: ownProps.params.teamId
     }
   },
   users: {
@@ -210,7 +210,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId
+      organizationId: ownProps.params.organizationId
     }
   }
 });
@@ -223,7 +223,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      teamId: ownProps.match.params.teamId,
+      teamId: ownProps.params.teamId,
       userIds
     },
     refetchQueries: ["getTeamWithMembers"]
@@ -235,7 +235,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      teamId: ownProps.match.params.teamId,
+      teamId: ownProps.params.teamId,
       userIds
     },
     refetchQueries: ["getTeamWithMembers"]

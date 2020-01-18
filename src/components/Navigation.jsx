@@ -46,7 +46,7 @@ const Navigation = function Navigation(props) {
                 {...dataTest(_.camelCase(`nav ${section.path}`))}
                 key={section.name}
                 primaryText={section.name}
-                onTouchTap={() => props.history.push(section.url)}
+                onTouchTap={() => props.router.push(section.url)}
                 rightAvatar={
                   section.badge && (
                     <Avatar backgroundColor="#FFAA00" size={30}>
@@ -81,7 +81,7 @@ Navigation.defaultProps = {
 Navigation.propTypes = {
   sections: PropTypes.array,
   switchListItem: PropTypes.object,
-  history: PropTypes.object.isRequired,
+  router: PropTypes.object,
   onToggleMenu: PropTypes.func.isRequired,
   showMenu: PropTypes.bool
 };

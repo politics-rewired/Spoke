@@ -169,7 +169,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId
+      organizationId: ownProps.params.organizationId
     }
   }
 });
@@ -194,7 +194,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.params.organizationId,
       teams
     },
     refetchQueries: ["getAssignmentConfiguration"]
@@ -208,7 +208,7 @@ AdminAssignmentControl.defaultProps = {
 };
 
 AdminAssignmentControl.propTypes = {
-  match: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
   assignmentConfiguration: PropTypes.object.isRequired,
   className: PropTypes.string,
   containerStyle: PropTypes.object,

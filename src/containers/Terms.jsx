@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import React from "react";
-import queryString from "query-string";
 import loadData from "./hoc/load-data";
 import gql from "graphql-tag";
 import Paper from "material-ui/Paper";
@@ -13,11 +12,10 @@ import { withRouter } from "react-router";
 
 class Terms extends React.Component {
   handleTermsAgree = async () => {
-    const { data, history, mutations, location } = this.props;
+    const { data, router, mutations, location } = this.props;
     const userData = await mutations.userAgreeTerms(data.currentUser.id);
     if (userData.data.userAgreeTerms.terms) {
-      const { next } = queryString.parse(location.search);
-      history.push(next);
+      router.push(location.query.next);
     }
   };
 
@@ -150,7 +148,7 @@ class Terms extends React.Component {
 
 Terms.propTypes = {
   mutations: PropTypes.object,
-  history: PropTypes.object.isRequired,
+  router: PropTypes.object,
   data: PropTypes.object
 };
 

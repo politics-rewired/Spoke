@@ -53,10 +53,10 @@ export class AssignmentSummary extends Component {
   };
 
   goToTodos(contactsFilter, assignmentId) {
-    const { organizationId, history } = this.props;
+    const { organizationId, router } = this.props;
 
     if (contactsFilter) {
-      history.push(
+      router.push(
         `/app/${organizationId}/todos/${assignmentId}/${contactsFilter}`
       );
     }
@@ -224,7 +224,7 @@ export class AssignmentSummary extends Component {
 
 AssignmentSummary.propTypes = {
   organizationId: PropTypes.string,
-  history: PropTypes.object.isRequired,
+  router: PropTypes.object,
   assignment: PropTypes.object,
   unmessagedCount: PropTypes.number,
   unrepliedCount: PropTypes.number,

@@ -42,7 +42,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId
+      organizationId: ownProps.params.organizationId
     },
     forceFetch: true
   }
