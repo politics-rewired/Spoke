@@ -2398,9 +2398,7 @@ const rootMutations = {
 
         return "No texts available at the moment";
       } catch (err) {
-        logger.error("Error submitting external assignment request!", {
-          error: err
-        });
+        logger.error("Error submitting external assignment request: ", err);
 
         if (assignmentRequestId !== undefined) {
           logger.debug("Deleting assignment request ", { assignmentRequestId });
