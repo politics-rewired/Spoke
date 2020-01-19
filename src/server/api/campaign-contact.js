@@ -161,7 +161,7 @@ export const resolvers = {
         return campaignContact.messages;
       }
 
-      let messages = await r
+      const messages = await r
         .reader("message")
         .where({ campaign_contact_id: campaignContact.id })
         .orderBy("created_at");
