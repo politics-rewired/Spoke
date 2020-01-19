@@ -50,9 +50,14 @@ export const resolvers = {
     // without using the outgoing answer_options array field, try this:
     //
     questionResponseValues: async (campaignContact, _, { loaders }) => {
+      if ("questionResponseValues" in campaignContact) {
+        return campaignContact.questionResponseValues;
+      }
+
       if (campaignContact.message_status === "needsMessage") {
         return []; // it's the beginning, so there won't be any
       }
+
       const qr_results = await r
         .reader("question_response")
         .join(
@@ -67,6 +72,7 @@ export const resolvers = {
           "istep.question as istep_question",
           "istep.id as istep_id"
         );
+
       return qr_results.map(qr_result => {
         const question = {
           id: qr_result.istep_id,
@@ -155,24 +161,10 @@ export const resolvers = {
         return campaignContact.messages;
       }
 
-      let messages = await r
+      const messages = await r
         .reader("message")
         .where({ campaign_contact_id: campaignContact.id })
         .orderBy("created_at");
-
-      // This covers edge case campaign contacts from mid-February 2019
-      if (
-        messages.length === 0 &&
-        campaignContact.message_status !== "needsMessage"
-      ) {
-        messages = await r
-          .reader("message")
-          .where({
-            assignment_id: campaignContact.assignment_id,
-            contact_number: campaignContact.cell
-          })
-          .orderBy("created_at");
-      }
 
       return messages;
     },
@@ -212,11 +204,16 @@ export const resolvers = {
       }
     },
     contactTags: async (campaignContact, _, { user }) => {
+      if ("contactTags" in campaignContact) {
+        return campaignContact.contactTags;
+      }
+
       const { campaign_id } = campaignContact;
       const { organization_id } = await r
         .reader("campaign")
         .where({ id: campaign_id })
         .first("organization_id");
+
       await accessRequired(user, organization_id, "TEXTER");
 
       return r

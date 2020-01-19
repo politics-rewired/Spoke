@@ -75,6 +75,7 @@ import { change } from "../local-auth-helpers";
 import { notifyOnTagConversation } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
+import groupBy from "lodash/groupBy";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -1446,18 +1447,90 @@ const rootMutations = {
       { loaders, user }
     ) => {
       await assignmentRequired(user, assignmentId);
-      const contacts = contactIds.map(async contactId => {
-        const contact = await loaders.campaignContact.load(contactId);
-        if (contact && contact.assignment_id === Number(assignmentId)) {
-          return contact;
-        }
-        return null;
-      });
-      if (findNew) {
-        // maybe TODO: we could automatically add dynamic assignments in the same api call
-        // findNewCampaignContact()
-      }
-      return contacts;
+
+      const contacts = await r
+        .knex("campaign_contact")
+        .select("*")
+        .whereIn("id", contactIds)
+        .where({ assignment_id: assignmentId });
+
+      const messages = await r
+        .knex("message")
+        .select(
+          "id",
+          "text",
+          "is_from_contact",
+          "created_at",
+          "campaign_contact_id"
+        )
+        .whereIn("campaign_contact_id", contactIds)
+        .orderBy("created_at", "asc");
+
+      const messagesByContactId = groupBy(messages, x => x.campaign_contact_id);
+
+      const shouldFetchTagsAndQuestionResponses =
+        contacts.filter(c => c.message_status !== "needsMessage").length > 0;
+
+      const tags = shouldFetchTagsAndQuestionResponses
+        ? await r
+            .knex("tag")
+            .select("tag.*")
+            .select("campaign_contact_id")
+            .join(
+              "campaign_contact_tag",
+              "campaign_contact_tag.tag_id",
+              "=",
+              "tag.id"
+            )
+            .whereIn("campaign_contact_tag.campaign_contact_id", contactIds)
+        : [];
+
+      const tagsByContactId = groupBy(tags, x => x.campaign_contact_id);
+
+      const questionResponses = shouldFetchTagsAndQuestionResponses
+        ? await r
+            .knex("question_response")
+            .join(
+              "interaction_step as istep",
+              "question_response.interaction_step_id",
+              "istep.id"
+            )
+            .whereIn("question_response.campaign_contact_id", contactIds)
+            .select(
+              "value",
+              "interaction_step_id",
+              "istep.question as istep_question",
+              "istep.id as istep_id",
+              "campaign_contact_id"
+            )
+        : [];
+
+      const questionResponsesByContactId = groupBy(
+        questionResponses,
+        x => x.campaign_contact_id
+      );
+
+      const contactsById = contacts.reduce(
+        (acc, c) =>
+          Object.assign(acc, {
+            [c.id]: {
+              ...c,
+              messages: messagesByContactId[c.id] || [],
+              contactTags: tagsByContactId[c.id] || [],
+              questionResponseValues: (
+                questionResponsesByContactId[c.id] || []
+              ).map(qr => ({
+                value: qr.value,
+                interaction_step_id: qr.interaction_step_id,
+                id: qr.interaction_step_id,
+                question: qr.istep_question
+              }))
+            }
+          }),
+        {}
+      );
+
+      return contactIds.map(cid => contactsById[cid]);
     },
 
     findNewCampaignContact: async (
