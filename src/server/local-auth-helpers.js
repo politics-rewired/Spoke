@@ -67,7 +67,7 @@ const validUuid = async (nextUrl, uuidMatch) => {
       .first("id");
   }
 
-  if (matchingRecord) throw new InvalidInviteError();
+  if (!matchingRecord) throw new InvalidInviteError();
 };
 
 const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
@@ -165,10 +165,11 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const updatedUser = await r
+      const [updatedUser] = await r
         .knex("user")
         .update({ auth0_id: passwordToSave })
-        .where({ id: existingUser.id });
+        .where({ id: existingUser.id })
+        .returning("*");
       resolve(updatedUser);
     });
   });

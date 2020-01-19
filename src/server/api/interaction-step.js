@@ -26,5 +26,6 @@ export const resolvers = {
           interaction_step_id: interactionStep.id
         })
         .first()
+        .then(qr => qr || null)
   }
 };

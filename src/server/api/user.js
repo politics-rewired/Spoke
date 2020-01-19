@@ -148,7 +148,8 @@ export const resolvers = {
       r
         .reader("assignment")
         .where({ user_id: user.id, campaign_id: campaignId })
-        .first(),
+        .first()
+        .then(record => record || null),
     organizations: async (user, { role }) => {
       if (!user || !user.id) {
         return [];

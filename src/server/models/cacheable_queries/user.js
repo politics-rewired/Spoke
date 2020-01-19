@@ -45,8 +45,7 @@ export async function userLoggedIn(val, field = "id") {
   const userAuth = await r
     .reader("user")
     .where(field, val)
-    .select("*")
-    .first();
+    .first("*");
 
   if (r.redis && userAuth) {
     await r.redis
