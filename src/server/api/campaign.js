@@ -3,6 +3,7 @@ import { sqlResolvers } from "./lib/utils";
 import { r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
+import { memoizer, cacheOpts } from "../memoredis";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -48,41 +49,50 @@ export function buildCampaignQuery(
   return query;
 }
 
-export async function getCampaigns(organizationId, cursor, campaignsFilter) {
-  let campaignsQuery = buildCampaignQuery(
-    r.reader.select("*"),
-    organizationId,
-    campaignsFilter
-  );
-  campaignsQuery = campaignsQuery.orderBy("id", "asc");
-
-  if (cursor) {
-    // A limit of 0 means a page size of 'All'
-    if (cursor.limit !== 0) {
-      campaignsQuery = campaignsQuery.limit(cursor.limit).offset(cursor.offset);
-    }
-    const campaigns = await campaignsQuery;
-
-    const campaignsCountQuery = buildCampaignQuery(
-      r.knex.count("*"),
+const doGetCampaigns = memoizer.memoize(
+  async ({ organizationId, cursor, campaignsFilter }) => {
+    let campaignsQuery = buildCampaignQuery(
+      r.reader.select("*"),
       organizationId,
       campaignsFilter
     );
+    campaignsQuery = campaignsQuery.orderBy("id", "asc");
 
-    const campaignsCount = await r.parseCount(campaignsCountQuery);
+    if (cursor) {
+      // A limit of 0 means a page size of 'All'
+      if (cursor.limit !== 0) {
+        campaignsQuery = campaignsQuery
+          .limit(cursor.limit)
+          .offset(cursor.offset);
+      }
+      const campaigns = await campaignsQuery;
 
-    const pageInfo = {
-      limit: cursor.limit,
-      offset: cursor.offset,
-      total: campaignsCount
-    };
-    return {
-      campaigns,
-      pageInfo
-    };
-  } else {
-    return campaignsQuery;
-  }
+      const campaignsCountQuery = buildCampaignQuery(
+        r.knex.count("*"),
+        organizationId,
+        campaignsFilter
+      );
+
+      const campaignsCount = await r.parseCount(campaignsCountQuery);
+
+      const pageInfo = {
+        limit: cursor.limit,
+        offset: cursor.offset,
+        total: campaignsCount
+      };
+      return {
+        campaigns,
+        pageInfo
+      };
+    } else {
+      return await campaignsQuery;
+    }
+  },
+  cacheOpts.CampaignsList
+);
+
+export async function getCampaigns(organizationId, cursor, campaignsFilter) {
+  return await doGetCampaigns({ organizationId, cursor, campaignsFilter });
 }
 
 export const resolvers = {
@@ -90,38 +100,70 @@ export const resolvers = {
     ...sqlResolvers(["id", "assigned", "status", "jobType", "resultMessage"])
   },
   CampaignStats: {
-    sentMessagesCount: async campaign =>
-      r.parseCount(
-        r
-          .reader("campaign_contact")
-          .join("message", "message.campaign_contact_id", "campaign_contact.id")
-          .where({
-            "campaign_contact.campaign_id": campaign.id,
-            "message.is_from_contact": false
-          })
-          .count()
-      ),
-    receivedMessagesCount: async campaign =>
-      r.parseCount(
-        r
-          .reader("campaign_contact")
-          .join("message", "message.campaign_contact_id", "campaign_contact.id")
-          .where({
-            "campaign_contact.campaign_id": campaign.id,
-            "message.is_from_contact": true
-          })
-          .count()
-      ),
-    optOutsCount: async campaign =>
-      await r.getCount(
-        r
-          .reader("campaign_contact")
-          .where({
-            is_opted_out: true,
-            campaign_id: campaign.id
-          })
-          .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
-      )
+    sentMessagesCount: async campaign => {
+      const getSentMessagesCount = memoizer.memoize(async ({ campaignId }) => {
+        return await r.parseCount(
+          r
+            .reader("campaign_contact")
+            .join(
+              "message",
+              "message.campaign_contact_id",
+              "campaign_contact.id"
+            )
+            .where({
+              "campaign_contact.campaign_id": campaignId,
+              "message.is_from_contact": false
+            })
+            .count()
+        );
+      }, cacheOpts.CampaignSentMessagesCount);
+
+      return await getSentMessagesCount({ campaignId: campaign.id });
+    },
+    receivedMessagesCount: async campaign => {
+      const getReceivedMessagesCount = memoizer.memoize(
+        async ({ campaignId }) => {
+          return await r.parseCount(
+            r
+              .reader("campaign_contact")
+              .join(
+                "message",
+                "message.campaign_contact_id",
+                "campaign_contact.id"
+              )
+              .where({
+                "campaign_contact.campaign_id": campaignId,
+                "message.is_from_contact": true
+              })
+              .count()
+          );
+        },
+        cacheOpts.CampaignReceivedMessagesCount
+      );
+
+      return await getReceivedMessagesCount({ campaignId: campaign.id });
+    },
+    optOutsCount: async campaign => {
+      const getOptOutsCount = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          return await r.getCount(
+            r
+              .reader("campaign_contact")
+              .where({
+                is_opted_out: true,
+                campaign_id: campaignId
+              })
+              .whereRaw(`archived = ${archived}`) // partial index friendly
+          );
+        },
+        cacheOpts.CampaignOptOutsCount
+      );
+
+      return await getOptOutsCount({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
+    }
   },
   CampaignsReturn: {
     __resolveType(obj, context, _) {
@@ -181,14 +223,19 @@ export const resolvers = {
         .reader("job_request")
         .where({ campaign_id: campaign.id })
         .orderBy("updated_at", "desc"),
-    teams: async campaign =>
-      r
-        .reader("team")
-        .select("team.*")
-        .join("campaign_team", "campaign_team.team_id", "=", "team.id")
-        .where({
-          "campaign_team.campaign_id": campaign.id
-        }),
+    teams: async campaign => {
+      const getCampaignTeams = memoizer.memoize(async ({ campaignId }) => {
+        return await r
+          .reader("team")
+          .select("team.*")
+          .join("campaign_team", "campaign_team.team_id", "=", "team.id")
+          .where({
+            "campaign_team.campaign_id": campaign.id
+          });
+      }, cacheOpts.CampaignTeams);
+
+      return await getCampaignTeams({ campaignId: campaign.id });
+    },
     texters: async campaign =>
       getUsers(campaign.organization_id, null, { campaignId: campaign.id }),
     assignments: async (campaign, { assignmentsFilter = {} }) => {
@@ -226,76 +273,105 @@ export const resolvers = {
         return false;
       }
 
-      /**
-       * SQL injection for archived = to enable use of partial index
-       */
-      const { rows } = await r.reader.raw(
-        `
-        select exists (
-          select 1
-          from campaign_contact
-          where
-            campaign_id = ?
-            and assignment_id is null
-            and archived = ${campaign.is_archived}
-            and not exists (
+      const getHasUnassignedContacts = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          // SQL injection for archived = to enable use of partial index
+          const { rows } = await r.reader.raw(
+            `
+            select exists (
               select 1
-              from campaign_contact_tag
-              join tag on campaign_contact_tag.tag_id = tag.id
-              where tag.is_assignable = false
-                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
-            )
-            and is_opted_out = false
-        ) as contact_exists
-      `,
-        [campaign.id]
+              from campaign_contact
+              where
+                campaign_id = ?
+                and assignment_id is null
+                and archived = ${archived}
+                and not exists (
+                  select 1
+                  from campaign_contact_tag
+                  join tag on campaign_contact_tag.tag_id = tag.id
+                  where tag.is_assignable = false
+                    and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+                )
+                and is_opted_out = false
+            ) as contact_exists
+          `,
+            [campaignId]
+          );
+
+          return rows[0] && rows[0].contact_exists;
+        },
+        cacheOpts.CampaignHasUnassignedContacts
       );
 
-      return rows[0] && rows[0].contact_exists;
+      return await getHasUnassignedContacts({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
     },
     hasUnsentInitialMessages: async campaign => {
-      const contacts = await r
-        .reader("campaign_contact")
-        .select("id")
-        .where({
-          campaign_id: campaign.id,
-          message_status: "needsMessage",
-          is_opted_out: false
-        })
-        .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
-        .limit(1);
-      return contacts.length > 0;
+      const getHasUnsentInitialMessages = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          const contacts = await r
+            .reader("campaign_contact")
+            .select("id")
+            .where({
+              campaign_id: campaignId,
+              message_status: "needsMessage",
+              is_opted_out: false
+            })
+            .whereRaw(`archived = ${archived}`) // partial index friendly
+            .limit(1);
+          return contacts.length > 0;
+        },
+        cacheOpts.CampaignHasUnsentInitialMessages
+      );
+
+      return await getHasUnsentInitialMessages({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
     },
     hasUnhandledMessages: async campaign => {
-      // TODO: restrict to sufficiently old values for updated_at
+      const getHasUnhandledMessages = memoizer.memoize(
+        async ({ campaignId, archived, organizationId }) => {
+          let contactsQuery = r
+            .reader("campaign_contact")
+            .pluck("campaign_contact.id")
+            .where({
+              "campaign_contact.campaign_id": campaignId,
+              message_status: "needsResponse",
+              is_opted_out: false
+            })
+            .whereRaw(`archived = ${archived}`) // partial index friendly
+            .limit(1);
 
-      let contactsQuery = r
-        .reader("campaign_contact")
-        .pluck("campaign_contact.id")
-        .where({
-          "campaign_contact.campaign_id": campaign.id,
-          message_status: "needsResponse",
-          is_opted_out: false
-        })
-        .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
-        .limit(1);
+          const notAssignableTagSubQuery = r.reader
+            .select("campaign_contact_tag.campaign_contact_id")
+            .from("campaign_contact_tag")
+            .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+            .where({
+              "tag.organization_id": organizationId
+            })
+            .whereRaw("lower(tag.title) = 'escalated'")
+            .whereRaw(
+              "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+            );
 
-      const notAssignableTagSubQuery = r.reader
-        .select("campaign_contact_tag.campaign_contact_id")
-        .from("campaign_contact_tag")
-        .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
-        .where({
-          "tag.organization_id": campaign.organization_id
-        })
-        .whereRaw("lower(tag.title) = 'escalated'")
-        .whereRaw(
-          "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
-        );
+          contactsQuery = contactsQuery.whereNotExists(
+            notAssignableTagSubQuery
+          );
 
-      contactsQuery = contactsQuery.whereNotExists(notAssignableTagSubQuery);
+          const contacts = await contactsQuery;
+          return contacts.length > 0;
+        },
+        cacheOpts.CampaignHasUnhandledMessages
+      );
 
-      const contacts = await contactsQuery;
-      return contacts.length > 0;
+      return await getHasUnhandledMessages({
+        campaignId: campaign.id,
+        archived: campaign.is_archived,
+        organizationId: campaign.organization_id
+      });
     },
     customFields: async campaign =>
       campaign.customFields ||

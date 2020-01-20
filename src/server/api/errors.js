@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql/error";
 import { r } from "../models";
-import { userHasRole } from "../models/cacheable_queries";
+import { memoizer, cacheOpts } from "../memoredis";
 
 const accessHierarchy = ["TEXTER", "SUPERVOLUNTEER", "ADMIN", "OWNER"];
 
@@ -13,6 +13,15 @@ export function authRequired(user) {
   }
 }
 
+const getUserRole = memoizer.memoize(async ({ userId, organizationId }) => {
+  const user_organization = await r
+    .reader("user_organization")
+    .where({ user_id: userId, organization_id: organizationId })
+    .first("role");
+
+  return user_organization.role;
+}, cacheOpts.GetUserOrganization);
+
 export async function accessRequired(
   user,
   orgId,
@@ -23,12 +32,19 @@ export async function accessRequired(
   if (!orgId) {
     throw new Error("orgId not passed correctly to accessRequired");
   }
+
   if (allowSuperadmin && user.is_superadmin) {
     return;
   }
   // require a permission at-or-higher than the permission requested
-  const acceptableRoles = accessHierarchy.slice(accessHierarchy.indexOf(role));
-  const hasRole = await userHasRole(user.id, orgId, acceptableRoles);
+  const userRole = await getUserRole({
+    userId: user.id,
+    organizationId: orgId
+  });
+
+  const hasRole =
+    accessHierarchy.indexOf(userRole) >= accessHierarchy.indexOf(role);
+
   if (!hasRole) {
     throw new GraphQLError("You are not authorized to access that resource.");
   }

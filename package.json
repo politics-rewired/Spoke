@@ -1,6 +1,6 @@
 {
   "name": "spoke",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Spoke",
   "main": "src/server",
   "engines": {
@@ -118,6 +118,7 @@
     "material-ui-color-picker": "^1.0.1",
     "material-ui-datatables": "^0.18.2",
     "md5": "^2.2.1",
+    "memoredis": "^1.0.3",
     "moment": "^2.14.1",
     "moment-timezone": "^0.5.14",
     "mysql": "^2.17.1",

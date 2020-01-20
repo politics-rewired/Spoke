@@ -422,6 +422,14 @@ if (isClient()) {
       default: 99999,
       isClient: true
     }),
+    MEMOREDIS_URL: url({
+      desc: "This enables caching using simple memoization",
+      default: undefined
+    }),
+    MEMOREDIS_PREFIX: str({
+      desc: "The key prefix to use for memoredis memoization",
+      default: undefined
+    }),
     NEXMO_API_KEY: str({
       desc: "Nexmo API key. Required if using Nexmo.",
       default: undefined

@@ -75,6 +75,7 @@ import { change } from "../local-auth-helpers";
 import { notifyOnTagConversation } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
+import { memoizer, cacheOpts } from "../memoredis";
 import groupBy from "lodash/groupBy";
 
 const uuidv4 = require("uuid").v4;
@@ -275,6 +276,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         campaign.teamIds.map(team_id => ({ team_id, campaign_id: id }))
       );
     });
+    memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (campaign.hasOwnProperty("texters")) {
     const [job] = await r
@@ -800,6 +802,12 @@ const rootMutations = {
               email: userData.email,
               cell: userData.cell
             });
+
+          memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
+          memoizer.invalidate(cacheOpts.GetUser.key, {
+            auth0Id: userRes.auth0_id
+          });
+
           userData = {
             id: userId,
             first_name: userData.firstName,
@@ -1054,6 +1062,11 @@ const rootMutations = {
         "ADMIN",
         /* allowSuperadmin=*/ true
       );
+
+      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: campaign.organizationId
+      });
+
       const [newCampaignId] = await r
         .knex("campaign")
         .insert({
@@ -1066,6 +1079,7 @@ const rootMutations = {
           is_archived: false
         })
         .returning("id");
+
       return editCampaign(newCampaignId, campaign, loaders, user);
     },
 
@@ -1154,39 +1168,55 @@ const rootMutations = {
     unarchiveCampaign: async (_, { id }, { user, loaders }) => {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
+
+      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
+
       const [campaign] = await r
         .knex("campaign")
         .update({ is_archived: false })
         .where({ id })
         .returning("*");
-      cacheableData.campaign.reload(id);
+
       return campaign;
     },
 
     archiveCampaign: async (_, { id }, { user, loaders }) => {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
+
+      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
+
       const [campaign] = await r
         .knex("campaign")
         .update({ is_archived: true })
         .where({ id })
         .returning("*");
-      cacheableData.campaign.reload(id);
+
       return campaign;
     },
 
     startCampaign: async (_, { id }, { user, loaders }) => {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
+
+      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
+
       const [campaign] = await r
         .knex("campaign")
         .update({ is_started: true })
         .where({ id });
-      cacheableData.campaign.reload(id);
+
       await sendUserNotification({
         type: Notifications.CAMPAIGN_STARTED,
         campaignId: id
       });
+
       return campaign;
     },
 
@@ -1214,6 +1244,11 @@ const rootMutations = {
           "SUPERVOLUNTEER"
         );
       }
+
+      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: campaign.organizationId
+      });
+
       if (
         origCampaign.is_started &&
         campaign.hasOwnProperty("contacts") &&
