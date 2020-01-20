@@ -7990,6 +7990,11 @@ json-bigint@^0.3.0:
   dependencies:
     bignumber.js "^7.0.0"
 
+json-date-parser@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/json-date-parser/-/json-date-parser-1.0.1.tgz#b70eb47c898f3b16643ad63ffb8d9620fd784f85"
+  integrity sha1-tw60fImPOxZkOtY/+42WIP14T4U=
+
 json-loader@^0.5.4:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/json-loader/-/json-loader-0.5.7.tgz#dca14a70235ff82f0ac9a3abeb60d337a365185d"
@@ -8869,11 +8874,12 @@ memoize-one@^5.0.0:
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.1.1.tgz#047b6e3199b508eaec03504de71229b8eb1d75c0"
   integrity sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA==
 
-memoredis@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.3.tgz#54f2e613be8d6ae86780a3269f3c9ee7f706e7ba"
-  integrity sha512-eZu72HEN75HYW2786SHYdGCWiivyzdhgsZeApBqYRvtVFwtTomg1oBvnSbFXGM0BRJu7A09c/fsQOC/iwvcO9w==
+memoredis@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.4.tgz#9930fa9368ad00e0c6453bf75f66e202e768b2a3"
+  integrity sha512-1Sm3Eh2/ZbczFjaNn2A3jv8uCDypHizMmpBzqXBwvHZGt1l+FoSxLYh45q8LZOAi0O1mud8B5Kh+ia/TSjJSZg==
   dependencies:
+    json-date-parser "^1.0.1"
     json-stable-stringify "^1.0.1"
     redis "^2.8.0"
     redis-lock "^0.1.4"
