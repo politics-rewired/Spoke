@@ -422,7 +422,8 @@ if (isClient()) {
       default: 99999,
       isClient: true
     }),
-    MEMOREDIS_URL: url({
+    // Note: redis url likely doesnt pass envalid url validation
+    MEMOREDIS_URL: str({
       desc: "This enables caching using simple memoization",
       default: undefined
     }),
