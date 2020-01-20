@@ -7774,9 +7774,9 @@ memoize-one@^5.0.0:
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.0.5.tgz#8cd3809555723a07684afafcd6f756072ac75d7e"
 
 memoredis@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.1.tgz#dee32792711f8fcebfa19021daaef3504592e53a"
-  integrity sha512-d6wEBRHwTH8iwrA7aEizBOkwcFB/tKsVgCzbyhIR726Eyp6AbrXwIp4BmDbVsfrCGiCzlsd0+aYpvOET5UbHnw==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.2.tgz#143637d9917f937b93ae185683b2863f9b546ca2"
+  integrity sha512-OSzt+sRjQY+2lXUmOyvUNNtb7qs8IA75sED7sKUf2Gk0qrNCxyR+c653GMSl9mrlxpeNViK4fhH1qW5IIp1Z2Q==
   dependencies:
     redis "^2.8.0"
     redis-lock "^0.1.4"

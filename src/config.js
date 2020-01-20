@@ -417,6 +417,14 @@ if (isClient()) {
       default: 99999,
       isClient: true
     }),
+    MEMOREDIS_URL: url({
+      desc: "This enables caching using simple memoization",
+      default: undefined
+    }),
+    MEMOREDIS_PREFIX: str({
+      desc: "The key prefix to use for memoredis memoization",
+      default: undefined
+    }),
     NEXMO_API_KEY: str({
       desc: "Nexmo API key. Required if using Nexmo.",
       default: undefined
@@ -483,6 +491,7 @@ if (isClient()) {
         "	This enables caching using the url option in redis library. This is an area of active development. More can be seen at server/models/cacheable-queries/README",
       default: undefined
     }),
+
     REVERE_SQS_URL: url({
       desc: "SQS URL to process outgoing Revere SMS Messages.",
       default: undefined

@@ -1,61 +1,35 @@
 import { r } from "../../models";
+import { memoizer, cacheOpts } from "../../memoredis";
 
-import { getHighestRole } from "../../../lib/permissions";
-
-export async function userHasRole(userId, orgId, acceptableRoles) {
-  if (r.redis) {
-    // cached approach
-    const userKey = `texterinfo-${userId}`;
-    let highestRole = await r.redis.hgetAsync(userKey, orgId);
-    if (!highestRole) {
-      // need to get it from db, and then cache it
-      const userRoles = await r
-        .reader("user_organization")
-        .where({ user_id: userId, organization_id: orgId })
-        .select("role");
-      if (!userRoles.length) {
-        return false; // who is this imposter!?
-      }
-      highestRole = getHighestRole(userRoles.map(r => r.role));
-      await r.redis.hsetAsync(userKey, orgId, highestRole);
-    }
-    return acceptableRoles.indexOf(highestRole) >= 0;
-  } else {
-    // regular DB approach
-    const userHasRole = await r.getCount(
-      r
-        .reader("user_organization")
-        .where({ user_id: userId, organization_id: orgId })
-        .whereIn("role", acceptableRoles)
-    );
-    return userHasRole;
-  }
-}
-
-export async function userLoggedIn(val, field = "id") {
-  const authKey = `texterauth-${val}`;
-
-  if (r.redis) {
-    const cachedAuth = await r.redis.getAsync(authKey);
-    if (cachedAuth) {
-      return JSON.parse(cachedAuth);
-    }
-  }
-
+const getUserByAuth0Id = memoizer.memoize(async ({ auth0Id }) => {
   const userAuth = await r
     .reader("user")
-    .where(field, val)
-    .select("*")
-    .first();
+    .where("auth0_id", auth0Id)
+    .first("*");
 
-  if (r.redis && userAuth) {
-    await r.redis
-      .multi()
-      .set(authKey, JSON.stringify(userAuth))
-      .expire(authKey, 86400)
-      .execAsync();
-  }
+  console.log("TCL: auth0Id", auth0Id);
+
   return userAuth;
+}, cacheOpts.GetUser);
+
+const getUserById = memoizer.memoize(async ({ id }) => {
+  const userAuth = await r
+    .reader("user")
+    .where({ id: id })
+    .first("*");
+
+  return userAuth;
+}, cacheOpts.GetUser);
+
+export async function userLoggedIn(val, field = "id") {
+  const result =
+    field == "id"
+      ? await getUserById({ id: val })
+      : field === "auth0_id"
+        ? await getUserByAuth0Id({ auth0Id: val })
+        : null;
+
+  return result;
 }
 
 export async function currentEditors(redis, campaign, user) {
@@ -68,7 +42,7 @@ export async function currentEditors(redis, campaign, user) {
     new Date()
   );
   await r.redis.expire(`campaign_editors_${campaign.id}`, 120);
-
+  By;
   let editors = await r.redis.hgetallAsync(`campaign_editors_${campaign.id}`);
 
   // Only get editors that were active in the last 2 mins, and exclude the

@@ -75,6 +75,7 @@ import { change } from "../local-auth-helpers";
 import { notifyOnTagConversation } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
+import { memoizer, cacheOpts } from "../memoredis";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -274,6 +275,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         campaign.teamIds.map(team_id => ({ team_id, campaign_id: id }))
       );
     });
+    memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (campaign.hasOwnProperty("texters")) {
     const [job] = await r
@@ -799,6 +801,12 @@ const rootMutations = {
               email: userData.email,
               cell: userData.cell
             });
+
+          memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
+          memoizer.invalidate(cacheOpts.GetUser.key, {
+            auth0Id: userRes.auth0_id
+          });
+
           userData = {
             id: userId,
             first_name: userData.firstName,
