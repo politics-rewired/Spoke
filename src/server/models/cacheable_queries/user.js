@@ -7,8 +7,6 @@ const getUserByAuth0Id = memoizer.memoize(async ({ auth0Id }) => {
     .where("auth0_id", auth0Id)
     .first("*");
 
-  console.log("TCL: auth0Id", auth0Id);
-
   return userAuth;
 }, cacheOpts.GetUser);
 

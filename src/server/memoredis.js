@@ -34,7 +34,8 @@ const cacheOpts = {
     ONE_MINUTE
   ],
   CampaignOptOutsCount: ["campaign-opt-outs-count", ONE_MINUTE],
-  CampaignTeams: ["campaign-teams", ONE_WEEK]
+  CampaignTeams: ["campaign-teams", ONE_WEEK],
+  CampaignsList: ["campaigns-list", ONE_WEEK]
 };
 
 Object.keys(cacheOpts).forEach(name => {

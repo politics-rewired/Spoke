@@ -49,41 +49,50 @@ export function buildCampaignQuery(
   return query;
 }
 
-export async function getCampaigns(organizationId, cursor, campaignsFilter) {
-  let campaignsQuery = buildCampaignQuery(
-    r.reader.select("*"),
-    organizationId,
-    campaignsFilter
-  );
-  campaignsQuery = campaignsQuery.orderBy("id", "asc");
-
-  if (cursor) {
-    // A limit of 0 means a page size of 'All'
-    if (cursor.limit !== 0) {
-      campaignsQuery = campaignsQuery.limit(cursor.limit).offset(cursor.offset);
-    }
-    const campaigns = await campaignsQuery;
-
-    const campaignsCountQuery = buildCampaignQuery(
-      r.knex.count("*"),
+const doGetCampaigns = memoizer.memoize(
+  async ({ organizationId, cursor, campaignsFilter }) => {
+    let campaignsQuery = buildCampaignQuery(
+      r.reader.select("*"),
       organizationId,
       campaignsFilter
     );
+    campaignsQuery = campaignsQuery.orderBy("id", "asc");
 
-    const campaignsCount = await r.parseCount(campaignsCountQuery);
+    if (cursor) {
+      // A limit of 0 means a page size of 'All'
+      if (cursor.limit !== 0) {
+        campaignsQuery = campaignsQuery
+          .limit(cursor.limit)
+          .offset(cursor.offset);
+      }
+      const campaigns = await campaignsQuery;
 
-    const pageInfo = {
-      limit: cursor.limit,
-      offset: cursor.offset,
-      total: campaignsCount
-    };
-    return {
-      campaigns,
-      pageInfo
-    };
-  } else {
-    return campaignsQuery;
-  }
+      const campaignsCountQuery = buildCampaignQuery(
+        r.knex.count("*"),
+        organizationId,
+        campaignsFilter
+      );
+
+      const campaignsCount = await r.parseCount(campaignsCountQuery);
+
+      const pageInfo = {
+        limit: cursor.limit,
+        offset: cursor.offset,
+        total: campaignsCount
+      };
+      return {
+        campaigns,
+        pageInfo
+      };
+    } else {
+      return await campaignsQuery;
+    }
+  },
+  cacheOpts.CampaignsList
+);
+
+export async function getCampaigns(organizationId, cursor, campaignsFilter) {
+  return await doGetCampaigns({ organizationId, cursor, campaignsFilter });
 }
 
 export const resolvers = {
