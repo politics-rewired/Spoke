@@ -40,7 +40,6 @@ export async function currentEditors(redis, campaign, user) {
     new Date()
   );
   await r.redis.expire(`campaign_editors_${campaign.id}`, 120);
-  By;
   let editors = await r.redis.hgetallAsync(`campaign_editors_${campaign.id}`);
 
   // Only get editors that were active in the last 2 mins, and exclude the
