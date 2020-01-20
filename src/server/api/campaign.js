@@ -275,9 +275,7 @@ export const resolvers = {
 
       const getHasUnassignedContacts = memoizer.memoize(
         async ({ campaignId, archived }) => {
-          /**
-           * SQL injection for archived = to enable use of partial index
-           */
+          // SQL injection for archived = to enable use of partial index
           const { rows } = await r.reader.raw(
             `
             select exists (
