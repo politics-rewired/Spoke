@@ -1,12 +1,14 @@
 import createMemoizer from "memoredis";
-import config from "../config";
+import { config } from "../config";
 
-const memoizer = config.MEMOREDIS_URL
-  ? createMemoizer({
+const opts = config.MEMOREDIS_URL
+  ? {
       clientOpts: config.MEMOREDIS_URL,
       prefix: config.MEMOREDIS_PREFIX
-    })
-  : createMemoizer({ emptyMode: true });
+    }
+  : { emptyMode: true };
+
+const memoizer = createMemoizer(opts);
 
 const ONE_SECOND = 1000;
 const THIRTY_SECONDS = ONE_SECOND * 30;
