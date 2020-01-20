@@ -491,7 +491,6 @@ if (isClient()) {
         "	This enables caching using the url option in redis library. This is an area of active development. More can be seen at server/models/cacheable-queries/README",
       default: undefined
     }),
-
     REVERE_SQS_URL: url({
       desc: "SQS URL to process outgoing Revere SMS Messages.",
       default: undefined
