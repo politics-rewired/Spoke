@@ -76,6 +76,7 @@ import { notifyOnTagConversation } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
+import groupBy from "lodash/groupBy";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -733,13 +734,13 @@ const rootMutations = {
       { user, loaders }
     ) => {
       // TODO: wrap in transaction
-      const currentRoles = (await r
+      const currentRoles = await r
         .knex("user_organization")
         .where({
           organization_id: organizationId,
           user_id: userId
         })
-        .select("role")).map(res => res.role);
+        .pluck("role");
       const oldRoleIsOwner = currentRoles.indexOf("OWNER") !== -1;
       const newRoleIsOwner = roles.indexOf("OWNER") !== -1;
       const roleRequired = oldRoleIsOwner || newRoleIsOwner ? "OWNER" : "ADMIN";
@@ -1219,11 +1220,20 @@ const rootMutations = {
       return campaign;
     },
 
-    editCampaign: async (_, { id, campaign }, { user, loaders }) => {
+    editCampaign: async (
+      _,
+      { id, campaign: campaignEdits },
+      { user, loaders }
+    ) => {
       const origCampaign = await r
         .knex("campaign")
         .where({ id })
         .first();
+
+      // Sometimes, campaign was coming through as having
+      // a "null prototype", which caused .hasOwnProperty calls
+      // to fail – this fixes it by ensuring its a proper object
+      const campaign = Object.assign({}, campaignEdits);
 
       if (campaign.organizationId) {
         await accessRequired(user, campaign.organizationId, "ADMIN");
@@ -1388,11 +1398,22 @@ const rootMutations = {
         });
       }
 
+      const { payload = {} } = invite;
+
       const newOrganization = await r.knex.transaction(async trx => {
+        const orgFeatures = {};
+        if (payload.org_features) {
+          const { switchboard_lrn_api_key } = payload.org_features;
+          if (switchboard_lrn_api_key) {
+            orgFeatures.numbersApiKey = switchboard_lrn_api_key;
+          }
+        }
+
         const insertResult = await trx("organization")
           .insert({
             name,
-            uuid: uuidv4()
+            uuid: uuidv4(),
+            features: JSON.stringify(orgFeatures)
           })
           .returning("*");
 
@@ -1422,7 +1443,6 @@ const rootMutations = {
           is_system: true
         });
 
-        const { payload = {} } = invite;
         if (payload.messaging_services) {
           await trx("messaging_service").insert(
             payload.messaging_services.map(service => ({
@@ -1462,18 +1482,90 @@ const rootMutations = {
       { loaders, user }
     ) => {
       await assignmentRequired(user, assignmentId);
-      const contacts = contactIds.map(async contactId => {
-        const contact = await loaders.campaignContact.load(contactId);
-        if (contact && contact.assignment_id === Number(assignmentId)) {
-          return contact;
-        }
-        return null;
-      });
-      if (findNew) {
-        // maybe TODO: we could automatically add dynamic assignments in the same api call
-        // findNewCampaignContact()
-      }
-      return contacts;
+
+      const contacts = await r
+        .knex("campaign_contact")
+        .select("*")
+        .whereIn("id", contactIds)
+        .where({ assignment_id: assignmentId });
+
+      const messages = await r
+        .knex("message")
+        .select(
+          "id",
+          "text",
+          "is_from_contact",
+          "created_at",
+          "campaign_contact_id"
+        )
+        .whereIn("campaign_contact_id", contactIds)
+        .orderBy("created_at", "asc");
+
+      const messagesByContactId = groupBy(messages, x => x.campaign_contact_id);
+
+      const shouldFetchTagsAndQuestionResponses =
+        contacts.filter(c => c.message_status !== "needsMessage").length > 0;
+
+      const tags = shouldFetchTagsAndQuestionResponses
+        ? await r
+            .knex("tag")
+            .select("tag.*")
+            .select("campaign_contact_id")
+            .join(
+              "campaign_contact_tag",
+              "campaign_contact_tag.tag_id",
+              "=",
+              "tag.id"
+            )
+            .whereIn("campaign_contact_tag.campaign_contact_id", contactIds)
+        : [];
+
+      const tagsByContactId = groupBy(tags, x => x.campaign_contact_id);
+
+      const questionResponses = shouldFetchTagsAndQuestionResponses
+        ? await r
+            .knex("question_response")
+            .join(
+              "interaction_step as istep",
+              "question_response.interaction_step_id",
+              "istep.id"
+            )
+            .whereIn("question_response.campaign_contact_id", contactIds)
+            .select(
+              "value",
+              "interaction_step_id",
+              "istep.question as istep_question",
+              "istep.id as istep_id",
+              "campaign_contact_id"
+            )
+        : [];
+
+      const questionResponsesByContactId = groupBy(
+        questionResponses,
+        x => x.campaign_contact_id
+      );
+
+      const contactsById = contacts.reduce(
+        (acc, c) =>
+          Object.assign(acc, {
+            [c.id]: {
+              ...c,
+              messages: messagesByContactId[c.id] || [],
+              contactTags: tagsByContactId[c.id] || [],
+              questionResponseValues: (
+                questionResponsesByContactId[c.id] || []
+              ).map(qr => ({
+                value: qr.value,
+                interaction_step_id: qr.interaction_step_id,
+                id: qr.interaction_step_id,
+                question: qr.istep_question
+              }))
+            }
+          }),
+        {}
+      );
+
+      return contactIds.map(cid => contactsById[cid]);
     },
 
     findNewCampaignContact: async (
@@ -2414,9 +2506,7 @@ const rootMutations = {
 
         return "No texts available at the moment";
       } catch (err) {
-        logger.error("Error submitting external assignment request!", {
-          error: err
-        });
+        logger.error("Error submitting external assignment request: ", err);
 
         if (assignmentRequestId !== undefined) {
           logger.debug("Deleting assignment request ", { assignmentRequestId });

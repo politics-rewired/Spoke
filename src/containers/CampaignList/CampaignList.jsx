@@ -92,6 +92,19 @@ export class CampaignList extends React.Component {
           primaryText="Un-Mark for Second Pass"
           onClick={startOperation("unMarkForSecondPass", campaign)}
         />
+        <MenuItem
+          primaryText={
+            campaign.isAutoassignEnabled
+              ? "Turn auto-assign OFF"
+              : "Turn auto-assign ON"
+          }
+          onClick={startOperation(
+            campaign.isAutoassignEnabled
+              ? "turnAutoAssignOff"
+              : "turnAutoAssignOn",
+            campaign
+          )}
+        />
       </IconMenu>
     );
   }

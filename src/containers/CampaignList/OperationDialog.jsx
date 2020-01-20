@@ -51,6 +51,18 @@ export const operations = {
       or because the event for which you were sending these messages has already happened. This will not affect contacts\
       that have not yet received one message, or contacts that have replied.`,
     mutationName: "unMarkForSecondPass"
+  },
+  turnAutoAssignOn: {
+    title: campaign => `Turn auto-assign ON for ${campaign.title}`,
+    body: () =>
+      `Turning auto-assign ON means that this campaign's contacts will be eligible to be assigned by the text request form`,
+    mutationName: "turnAutoAssignOn"
+  },
+  turnAutoAssignOff: {
+    title: campaign => `Turn auto-assign OFF for ${campaign.title}`,
+    body: () =>
+      `Turning auto-assign OFF means that this campaign's contacts will not be assigned by the text request form`,
+    mutationName: "turnAutoAssignOff"
   }
 };
 
@@ -63,7 +75,8 @@ export const OperationDialogBody = props => {
   if (executing) return <LoadingIndicator />;
   if (error)
     return <span style={{ color: "red" }}> {JSON.stringify(error)} </span>;
-  if (finished) return <div>{finished}</div>;
+  if (finished)
+    return <div>{typeof finished === "string" ? finished : "Done"}</div>;
 
   if (operationName === "releaseUnrepliedMessages") {
     const { ageInHours } = operationArs;

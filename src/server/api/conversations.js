@@ -115,7 +115,7 @@ async function getConversationsJoinsAndWhereClause(
         )
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
         .where({
-          "tag.title": "Escalated",
+          "tag.is_assignable": false,
           "tag.organization_id": organizationId
         });
 
@@ -127,7 +127,7 @@ async function getConversationsJoinsAndWhereClause(
           .from("campaign_contact_tag")
           .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
           .where({
-            "tag.title": "Escalated",
+            "tag.is_assignable": false,
             "tag.organization_id": organizationId
           })
           .whereRaw(

@@ -78,6 +78,11 @@ if (isClient()) {
         "Comma separated list of team IDs to restrict 'assignment complete' notifications to.",
       default: ""
     }),
+    ASSIGNMENT_MANAGER_DATABASE_URL: str({
+      desc:
+        "Database url of external assignent manager - used by 'update-sms-spanish-speakers' cron job",
+      default: ""
+    }),
     AUTH0_DOMAIN: host({
       desc: "Domain name on Auth0 account",
       example: "example.auth0.com",
@@ -612,6 +617,11 @@ if (isClient()) {
     SKIP_TWILIO_VALIDATION: bool({
       desc: "Whether to bypass Twilio header validation altogether.",
       default: false
+    }),
+    SPANISH_TEAM_ID: num({
+      desc:
+        "ID of Spanish team for use in 'update-sms-spanish-speakers' cron job",
+      default: undefined
     }),
     SPOKE_VERSION: str({
       desc: "The version of Spoke running",
