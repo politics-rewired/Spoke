@@ -9,6 +9,7 @@ import { sleep } from "../../lib/utils";
 import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
 import { eventBus, EventType } from "../event-bus";
+import { memoizer, cacheOpts } from "../memoredis";
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -872,8 +873,16 @@ export const resolvers = {
       assignment.texter
         ? assignment.texter
         : loaders.user.load(assignment.user_id),
-    campaign: async (assignment, _, { loaders }) =>
-      loaders.campaign.load(assignment.campaign_id),
+    campaign: async (assignment, _, { loaders }) => {
+      const getCampaign = memoizer.memoize(async ({ campaignId }) => {
+        return await r
+          .reader("campaign")
+          .where({ id: campaignId })
+          .first("*");
+      }, cacheOpts.CampaignOne);
+
+      return await getCampaign({ campaignId: assignment.campaign_id });
+    },
     contactsCount: async (assignment, { contactsFilter }) => {
       if ("shadowCounts" in assignment) {
         return getContactsCountFromShadowCounts(
