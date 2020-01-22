@@ -233,7 +233,7 @@ export const resolvers = {
 
       const assignments = await r
         .reader("assignment")
-        .whereIn("id", todos.rows.map(t => t.assignment_id));
+        .whereIn("id", Object.keys(shadowCountsByAssignmentId));
 
       return assignments.map(a =>
         Object.assign(a, {
