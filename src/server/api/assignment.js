@@ -813,6 +813,58 @@ export async function assignLoop(
   return { count: ccUpdateCount, team };
 }
 
+const getContactsCountFromShadowCounts = (shadowCounts, contactsFilter) => {
+  const countsPassingContactsFilter = shadowCounts.filter(
+    ({ message_status, is_opted_out, contact_is_textable_now }) => {
+      if (!contactsFilter) {
+        return true;
+      }
+
+      if (contactsFilter.validTimezone !== null) {
+        if (
+          contactsFilter.validTimezone === true &&
+          contact_is_textable_now === false
+        ) {
+          return false;
+        }
+
+        if (
+          contactsFilter.validTimezone === false &&
+          contact_is_textable_now === true
+        ) {
+          return false;
+        }
+      }
+
+      if (contactsFilter.messageStatus) {
+        if (contactsFilter.messageStatus === "needsMessageOrResponse") {
+          if (
+            message_status !== "needsResponse" &&
+            message_status !== "needsMessage"
+          ) {
+            return false;
+          }
+        }
+
+        const messageStatusOptions = contactsFilter.messageStatus.split(",");
+        if (!messageStatusOptions.includes(message_status)) {
+          return false;
+        }
+      }
+
+      if ("isOptedOut" in contactsFilter && contactsFilter.isOptedOut != null) {
+        if (is_opted_out !== contactsFilter.isOptedOut) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+  );
+
+  return countsPassingContactsFilter.reduce((acc, c) => acc + c.count, 0);
+};
+
 export const resolvers = {
   Assignment: {
     ...sqlResolvers(["id", "maxContacts"]),
@@ -823,6 +875,13 @@ export const resolvers = {
     campaign: async (assignment, _, { loaders }) =>
       loaders.campaign.load(assignment.campaign_id),
     contactsCount: async (assignment, { contactsFilter }) => {
+      if ("shadowCounts" in assignment) {
+        return getContactsCountFromShadowCounts(
+          assignment.shadowCounts,
+          contactsFilter
+        );
+      }
+
       const campaign = await r
         .reader("campaign")
         .where({ id: assignment.campaign_id })
