@@ -2,6 +2,7 @@ import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
 import { addCampaignsFilterToQuery } from "./campaign";
 import { myCurrentAssignmentTarget } from "./assignment";
+import groupBy from "lodash/groupBy";
 
 export function buildUserOrganizationQuery(
   queryParam,
@@ -182,16 +183,63 @@ export const resolvers = {
           "user_team.user_id": user.id,
           "team.organization_id": organizationId
         }),
-    todos: async (user, { organizationId }) =>
-      r
+    todos: async (user, { organizationId }) => {
+      const todos = await r.reader.raw(
+        `
+        select 
+          count(*), 
+          assignment_id,
+          campaign_id,
+          message_status,
+          is_opted_out,
+          contact_is_textable_now(
+            campaign_contact.timezone,
+            campaign.texting_hours_start,
+            campaign.texting_hours_end,
+            extract('hour' from current_timestamp at time zone campaign.timezone) < campaign.texting_hours_end
+            and 
+            extract('hour' from current_timestamp at time zone campaign.timezone) > campaign.texting_hours_start
+          )
+        from campaign_contact
+        join campaign on campaign.id = campaign_contact.campaign_id
+        where archived = false
+          and campaign_id in (
+            select id
+            from campaign
+            where campaign.is_started = true
+              and organization_id = ?
+              and is_archived = false
+          )
+          and assignment_id in (
+            select id
+            from assignment
+            where user_id = ?
+              and campaign_id in (
+                select id
+                from campaign
+                where campaign.is_started = true
+                  and organization_id = ?
+                  and is_archived = false 
+              )
+          )
+          group by 2, 3, 4, 5, 6;        `,
+        [organizationId, user.id, organizationId]
+      );
+
+      const shadowCountsByAssignmentId = groupBy(
+        todos.rows,
+        todo => todo.assignment_id
+      );
+
+      const assignments = await r
         .reader("assignment")
-        .select("assignment.*")
-        .join("campaign", "campaign.id", "assignment.campaign_id")
-        .where({
-          "assignment.user_id": user.id,
-          is_started: true,
-          organization_id: parseInt(organizationId),
-          is_archived: false
+        .whereIn("id", Object.keys(shadowCountsByAssignmentId));
+
+      return assignments.map(a =>
+        Object.assign(a, {
+          shadowCounts: shadowCountsByAssignmentId[a.id] || []
         })
+      );
+    }
   }
 };

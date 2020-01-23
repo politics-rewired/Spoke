@@ -1249,6 +1249,10 @@ const rootMutations = {
         organizationId: campaign.organizationId
       });
 
+      memoizer.invalidate(cacheOpts.CampaignOne.key, {
+        campaignId: id
+      });
+
       if (
         origCampaign.is_started &&
         campaign.hasOwnProperty("contacts") &&
