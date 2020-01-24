@@ -863,7 +863,10 @@ const getContactsCountFromShadowCounts = (shadowCounts, contactsFilter) => {
     }
   );
 
-  return countsPassingContactsFilter.reduce((acc, c) => acc + c.count, 0);
+  return countsPassingContactsFilter.reduce(
+    (acc, c) => acc + parseInt(c.count),
+    0
+  );
 };
 
 export const resolvers = {
