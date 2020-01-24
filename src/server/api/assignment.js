@@ -840,7 +840,7 @@ const getContactsCountFromShadowCounts = (shadowCounts, contactsFilter) => {
       if (contactsFilter.messageStatus) {
         if (contactsFilter.messageStatus === "needsMessageOrResponse") {
           if (
-            message_status !== "needsResponse" &&
+            message_status !== "needsResponse" ||
             message_status !== "needsMessage"
           ) {
             return false;

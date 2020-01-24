@@ -158,7 +158,8 @@ const mapQueriesToProps = ({ ownProps }) => ({
       },
       badTimezoneFilter: {
         isOptedOut: false,
-        validTimezone: false
+        validTimezone: false,
+        messageStatus: "needsMessageOrNeedsResponse"
       },
       completedConvosFilter: {
         isOptedOut: false,

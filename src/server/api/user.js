@@ -192,14 +192,17 @@ export const resolvers = {
           campaign_id,
           message_status,
           is_opted_out,
-          contact_is_textable_now(
-            campaign_contact.timezone,
-            campaign.texting_hours_start,
-            campaign.texting_hours_end,
-            extract('hour' from current_timestamp at time zone campaign.timezone) < campaign.texting_hours_end
-            and 
-            extract('hour' from current_timestamp at time zone campaign.timezone) > campaign.texting_hours_start
-          )
+          coalesce(
+            contact_is_textable_now(
+              campaign_contact.timezone,
+              campaign.texting_hours_start,
+              campaign.texting_hours_end,
+              extract('hour' from current_timestamp at time zone campaign.timezone) < campaign.texting_hours_end
+              and 
+              extract('hour' from current_timestamp at time zone campaign.timezone) > campaign.texting_hours_start
+            ),
+            false
+          ) as contact_is_textable_now
         from campaign_contact
         join campaign on campaign.id = campaign_contact.campaign_id
         where archived = false
@@ -233,7 +236,8 @@ export const resolvers = {
 
       const assignments = await r
         .reader("assignment")
-        .whereIn("id", Object.keys(shadowCountsByAssignmentId));
+        .whereIn("id", Object.keys(shadowCountsByAssignmentId))
+        .orderBy("updated_at", "desc");
 
       return assignments.map(a =>
         Object.assign(a, {
