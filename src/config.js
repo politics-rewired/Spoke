@@ -355,6 +355,11 @@ if (isClient()) {
       default: "/graphql",
       isClient: true
     }),
+    HIDE_CONTACT_INFO: bool({
+      desc:
+        "Whether to prevent shipping contact external_id, number, and last name to the client. If true, this items will render as blank in the script",
+      default: false
+    }),
     JOBS_SAME_PROCESS: bool({
       desc:
         "Whether jobs should be executed in the same process in which they are created (vs. processing asyncronously via worker processes).",
