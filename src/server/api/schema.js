@@ -304,6 +304,9 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
 
   if (campaign.hasOwnProperty("interactionSteps")) {
+    memoizer.invalidate(cacheOpts.CampaignInteractionSteps.key, {
+      campaignId: id
+    });
     // TODO: debug why { script: '' } is even being sent from the client in the first place
     if (!_.isEqual(campaign.interactionSteps, { scriptOptions: [""] })) {
       await accessRequired(
@@ -322,6 +325,10 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("cannedResponses")) {
     // Ignore the mocked `id` automatically created on the input by GraphQL
+    memoizer.invalidate(cacheOpts.CampaignCannedResponses.key, {
+      campaignId: id
+    });
+
     const convertedResponses = campaign.cannedResponses.map(
       ({ id: _cannedResponseId, ...response }) => ({
         ...response,
@@ -391,6 +398,12 @@ const persistInteractionStepTree = async (
       })
       .returning("id");
 
+    if (rootInteractionStep.parentInteractionId) {
+      memoizer.invalidate(cacheOpts.InteractionStepChildren.key, {
+        interactionStepId: rootInteractionStep.parentInteractionId
+      });
+    }
+
     // Update the mapping of temporary IDs
     temporaryIdMap[rootInteractionStep.id] = newId;
   } else if (!origCampaignRecord.is_started && rootInteractionStep.isDeleted) {
@@ -409,6 +422,10 @@ const persistInteractionStepTree = async (
         answer_actions: rootInteractionStep.answerActions,
         is_deleted: rootInteractionStep.isDeleted
       });
+
+    memoizer.invalidate(cacheOpts.InteractionStepSingleton.key, {
+      interactionStepId: rootInteractionStep.id
+    });
   }
 
   // Persist child interaction steps
@@ -772,6 +789,13 @@ const rootMutations = {
       if (newOrgRoles.length) {
         await r.knex("user_organization").insert(newOrgRoles);
       }
+
+      memoizer.invalidate(cacheOpts.UserOrganizations, { userId });
+      memoizer.invalidate(cacheOpts.UserOrganizationRoles, {
+        userId,
+        organizationId
+      });
+
       return loaders.organization.load(organizationId);
     },
 
@@ -2783,6 +2807,15 @@ const rootMutations = {
           is_assignable: tag.isAssignable
         })
         .returning("*");
+
+      memoizer.invalidate(cacheOpts.OrganizationTagList.key, {
+        organizationId
+      });
+
+      memoizer.invalidate(cacheOpts.OrganizationEscalatedTagList.key, {
+        organizationId
+      });
+
       return newTag;
     },
     deleteTag: async (_, { organizationId, tagId }, { user }) => {
@@ -2797,6 +2830,14 @@ const rootMutations = {
         })
         .del();
       if (deleteCount !== 1) throw new Error("Could not delete the tag.");
+
+      memoizer.invalidate(cacheOpts.OrganizationTagList.key, {
+        organizationId
+      });
+
+      memoizer.invalidate(cacheOpts.OrganizationEscalatedTagList.key, {
+        organizationId
+      });
 
       return true;
     },
@@ -2996,8 +3037,13 @@ const rootResolvers = {
       }
       return assignment;
     },
-    organization: async (_, { id }, { loaders }) =>
-      loaders.organization.load(id),
+    organization: async (_, { id }, { loaders }) => {
+      const getOrganization = memoizer.memoize(async ({ organizationId }) => {
+        return await loaders.organization.load(id);
+      }, cacheOpts.OrganizationSingleTon);
+
+      return await getOrganization({ organizationId: id });
+    },
     team: async (_, { id }, { user }) => {
       const team = await r
         .knex("team")

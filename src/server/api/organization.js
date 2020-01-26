@@ -11,6 +11,7 @@ import {
   myCurrentAssignmentTargets,
   countLeft
 } from "./assignment";
+import { memoizer, cacheOpts } from "../memoredis";
 
 import { TextRequestType } from "../../api/organization";
 
@@ -246,16 +247,29 @@ export const resolvers = {
       `);
       return rawResult.rows;
     },
-    tagList: async organization =>
-      r
-        .reader("tag")
-        .where({ organization_id: organization.id })
-        .orderBy(["is_system", "title"]),
-    escalationTagList: async organization =>
-      r
-        .reader("tag")
-        .where({ organization_id: organization.id, is_assignable: false })
-        .orderBy(["is_system", "title"]),
+    tagList: async organization => {
+      const getTags = await memoizer.memoize(async ({ organizationId }) => {
+        return await r
+          .reader("tag")
+          .where({ organization_id: organizationId })
+          .orderBy(["is_system", "title"]);
+      }, cacheOpts.OrganizationTagList);
+
+      return await getTags({ organizationId: organization.id });
+    },
+    escalationTagList: async organization => {
+      const getEscalationTags = await memoizer.memoize(
+        async ({ organizationId }) => {
+          return await r
+            .reader("tag")
+            .where({ organization_id: organization.id, is_assignable: false })
+            .orderBy(["is_system", "title"]);
+        },
+        cacheOpts.OrganizationEscalatedTagList
+      );
+
+      return await getEscalationTags({ organizationId: organization.id });
+    },
     teams: async organization =>
       r
         .reader("team")
