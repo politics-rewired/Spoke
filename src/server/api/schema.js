@@ -1162,6 +1162,10 @@ const rootMutations = {
           )
         );
 
+      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: campaign.organizationId
+      });
+
       return newCampaign;
     },
 
