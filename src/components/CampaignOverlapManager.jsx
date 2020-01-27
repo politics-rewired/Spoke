@@ -13,6 +13,7 @@ import {
   TableRowColumn
 } from "material-ui/Table";
 import Snackbar from "material-ui/Snackbar";
+import RaisedButton from "material-ui/RaisedButton";
 import IconButton from "material-ui/IconButton";
 import FlatButton from "material-ui/FlatButton";
 import DeleteIcon from "material-ui/svg-icons/action/delete-forever";
@@ -35,22 +36,25 @@ const hoveredCampaignStyle = {
 
 class CampaignOverlapManager extends React.Component {
   state = {
+    selectedCampaignIds: [],
     deleting: new Set(),
     errored: new Set(),
     deleteResults: {},
     hoveredRowId: undefined
   };
 
-  delete = id => async ev => {
+  deleteCampaign = async campaignId => {
     const { deleting, errored, deleteResults } = this.state;
 
-    errored.delete(id);
-    deleting.add(id);
+    errored.delete(campaignId);
+    deleting.add(campaignId);
 
     this.setState({ deleting, errored });
 
     try {
-      const response = await this.props.mutations.deleteCampaignOverlap(id);
+      const response = await this.props.mutations.deleteCampaignOverlap(
+        campaignId
+      );
       if (response.errors) throw new Error(response.errors);
 
       const {
@@ -58,19 +62,26 @@ class CampaignOverlapManager extends React.Component {
         remainingCount
       } = response.data.deleteCampaignOverlap;
       const timestamp = new Date().getTime();
-      deleteResults[id] = { id, deletedRowCount, remainingCount, timestamp };
+      deleteResults[campaignId] = {
+        id: campaignId,
+        deletedRowCount,
+        remainingCount,
+        timestamp
+      };
       this.setState({ deleteResults });
     } catch (exc) {
-      errored.add(id);
+      errored.add(campaignId);
     } finally {
-      deleting.delete(id);
+      deleting.delete(campaignId);
       this.setState({ deleting, errored });
     }
   };
 
-  setHoverId = hoveredRowId => () => this.setState({ hoveredRowId });
+  handleOnDeleteCampaign = id => _ev => this.deleteCampaign(id);
 
-  clearHover = () => this.setState({ hoveredRowId: undefined });
+  handleOnRowMouseOver = hoveredRowId => () => this.setState({ hoveredRowId });
+
+  handleOnRowMouseOut = () => this.setState({ hoveredRowId: undefined });
 
   clearDeleteResult = id => () => {
     const { deleteResults } = this.state;
@@ -78,9 +89,36 @@ class CampaignOverlapManager extends React.Component {
     this.setState({ deleteResults });
   };
 
+  isRowSelected = campaignId =>
+    this.state.selectedCampaignIds.includes(campaignId);
+
+  handleRowSelection = async selectedRows => {
+    const { fetchCampaignOverlaps: overlaps } = this.props;
+    if (!overlaps.fetchCampaignOverlaps) return;
+    const { fetchCampaignOverlaps: overlapList } = overlaps;
+
+    const selectedCampaignIds = selectedRows.map(
+      index => overlapList[index].campaign.id
+    );
+    this.setState({ selectedCampaignIds });
+  };
+
+  handleDeleteAllSelected = async () => {
+    const { selectedCampaignIds } = this.state;
+    this.setState({ selectedCampaignIds: [] });
+    await Promise.all(selectedCampaignIds.map(this.deleteCampaign));
+  };
+
   render() {
     const { fetchCampaignOverlaps: overlaps } = this.props;
-    const { deleting, errored, hoveredRowId, deleteResults } = this.state;
+    const {
+      deleting,
+      errored,
+      hoveredRowId,
+      deleteResults,
+      selectedCampaignIds
+    } = this.state;
+    const isDeleteAllDisabled = selectedCampaignIds.length === 0;
 
     if (overlaps.loading && !overlaps.fetchCampaignOverlaps)
       return <CircularProgress />;
@@ -97,29 +135,45 @@ class CampaignOverlapManager extends React.Component {
 
     return (
       <div>
-        <p>
-          Warning: clicking the trashcan will trigger an irreversible delete.
-        </p>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <p>
+            Warning: clicking the trashcan will trigger an irreversible delete.
+          </p>
+          <div style={{ flexGrow: 1 }} />
+          <RaisedButton
+            label="Delete Selected"
+            secondary={true}
+            disabled={isDeleteAllDisabled}
+            onClick={this.handleDeleteAllSelected}
+          />
+        </div>
         {hoveredTitle && (
           <div style={hoverBoxStyle}>
             <h3>Hovered on campaign:</h3>
             <p style={hoveredCampaignStyle}>{hoveredTitle}</p>
           </div>
         )}
-        <Table selectable={false}>
-          <TableHeader enableSelectAll={false} displaySelectAll={false}>
+        <Table multiSelectable={true} onRowSelection={this.handleRowSelection}>
+          <TableHeader
+            enableSelectAll={false}
+            displaySelectAll={false}
+            adjustForCheckbox={true}
+          >
             <TableHeaderColumn>Campaign</TableHeaderColumn>
             <TableHeaderColumn>Overlap Count</TableHeaderColumn>
             <TableHeaderColumn>Last Messaged</TableHeaderColumn>
             <TableHeaderColumn>Delete</TableHeaderColumn>
           </TableHeader>
-          <TableBody displayRowCheckbox={false}>
+          <TableBody deselectOnClickaway={false}>
             {overlapList.map(fco => (
-              <TableRow key={fco.campaign.id}>
+              <TableRow
+                key={fco.campaign.id}
+                selected={this.isRowSelected(fco.campaign.id)}
+              >
                 <TableRowColumn>
                   <span
-                    onMouseOver={this.setHoverId(fco.campaign.id)}
-                    onMouseOut={this.clearHover}
+                    onMouseOver={this.handleOnRowMouseOver(fco.campaign.id)}
+                    onMouseOut={this.handleOnRowMouseOut}
                   >
                     {fco.campaign.id + " " + fco.campaign.title}
                   </span>
@@ -129,9 +183,11 @@ class CampaignOverlapManager extends React.Component {
                   {new Date(fco.lastActivity).toLocaleString()}
                 </TableRowColumn>
                 <TableRowColumn>
-                  <IconButton onClick={this.delete(fco.campaign.id)}>
+                  <IconButton
+                    onClick={this.handleOnDeleteCampaign(fco.campaign.id)}
+                  >
                     {deleting.has(fco.campaign.id) ? (
-                      <CircularProgress />
+                      <CircularProgress size={30} />
                     ) : errored.has(fco.campaign.id) ? (
                       <FlatButton
                         label="Error. Retry?"
