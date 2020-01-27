@@ -355,7 +355,7 @@ if (isClient()) {
       default: "/graphql",
       isClient: true
     }),
-    CONTACT_FIELDS_TO_HIDE: bool({
+    CONTACT_FIELDS_TO_HIDE: str({
       desc:
         "A comma separated list of contact fields to not ship to the client. Can include 'external_id, cell, and lastName'",
       default: ""
