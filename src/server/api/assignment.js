@@ -919,15 +919,21 @@ export const resolvers = {
         .first();
       return getContacts(assignment, contactsFilter, organization, campaign);
     },
-    campaignCannedResponses: async assignment =>
-      await cacheableData.cannedResponse.query({
-        userId: "",
-        campaignId: assignment.campaign_id
-      }),
-    userCannedResponses: async assignment =>
-      await cacheableData.cannedResponse.query({
-        userId: assignment.user_id,
-        campaignId: assignment.campaign_id
-      })
+    campaignCannedResponses: async assignment => {
+      const getCannedResponses = memoizer.memoize(
+        async ({ campaignId, userId }) => {
+          return await cacheableData.cannedResponse.query({
+            userId: userId || "",
+            campaignId: campaignId
+          });
+        },
+        cacheOpts.CampaignCannedResponses
+      );
+
+      return await getCannedResponses({ campaignId: assignment.campaign_id });
+    },
+    userCannedResponses: async assignment => {
+      return [];
+    }
   }
 };

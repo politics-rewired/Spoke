@@ -40,7 +40,16 @@ const cacheOpts = {
   CampaignOptOutsCount: ["campaign-opt-outs-count", ONE_MINUTE],
   CampaignTeams: ["campaign-teams", ONE_WEEK],
   CampaignsList: ["campaigns-list", ONE_WEEK],
-  CampaignOne: ["campaign-one", ONE_WEEK]
+  CampaignOne: ["campaign-one", ONE_WEEK],
+  CampaignInteractionSteps: ["campaign-interaction-steps", ONE_WEEK],
+  CampaignCannedResponses: ["campaign-canned-responses", ONE_WEEK],
+  InteractionStepChildren: ["interaction-step-children", ONE_WEEK],
+  InteractionStepSingleton: ["interaction-step-singleton", ONE_WEEK],
+  OrganizationTagList: ["organization-tag-list", ONE_WEEK],
+  OrganizationEscalatedTagList: ["organization-escalated-tag-list", ONE_WEEK],
+  OrganizationSingleTon: ["organization-singleton", ONE_HOUR],
+  UserOrganizations: ["user-organizations", ONE_WEEK],
+  UserOrganizationRoles: ["user-organization-roles", ONE_WEEK]
 };
 
 Object.keys(cacheOpts).forEach(name => {

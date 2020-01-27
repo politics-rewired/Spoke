@@ -248,14 +248,33 @@ export const resolvers = {
 
       return query;
     },
-    interactionSteps: async campaign =>
-      campaign.interactionSteps ||
-      cacheableData.campaign.dbInteractionSteps(campaign.id),
-    cannedResponses: async (campaign, { userId }) =>
-      await cacheableData.cannedResponse.query({
-        userId: userId || "",
-        campaignId: campaign.id
-      }),
+    interactionSteps: async campaign => {
+      if (campaign.interactionSteps) {
+        return campaign.interactionSteps;
+      }
+
+      const getInteractionSteps = memoizer.memoize(async ({ campaignId }) => {
+        const interactionSteps = await cacheableData.campaign.dbInteractionSteps(
+          campaignId
+        );
+        return interactionSteps;
+      }, cacheOpts.CampaignInteractionSteps);
+
+      return await getInteractionSteps({ campaignId: campaign.id });
+    },
+    cannedResponses: async (campaign, { userId }) => {
+      const getCannedResponses = memoizer.memoize(
+        async ({ campaignId, userId }) => {
+          return await cacheableData.cannedResponse.query({
+            userId: userId || "",
+            campaignId: campaignId
+          });
+        },
+        cacheOpts.CampaignCannedResponses
+      );
+
+      return await getCannedResponses({ campaignId: campaign.id });
+    },
     contacts: async campaign =>
       r
         .reader("campaign_contact")

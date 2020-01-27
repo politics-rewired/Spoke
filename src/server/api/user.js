@@ -3,6 +3,7 @@ import { r } from "../models";
 import { addCampaignsFilterToQuery } from "./campaign";
 import { myCurrentAssignmentTarget } from "./assignment";
 import groupBy from "lodash/groupBy";
+import { memoizer, cacheOpts } from "../memoredis";
 
 export function buildUserOrganizationQuery(
   queryParam,
@@ -155,25 +156,44 @@ export const resolvers = {
       if (!user || !user.id) {
         return [];
       }
-      return r.reader("organization").whereExists(function() {
-        const whereClause = { user_id: user.id };
-        if (role) {
-          whereClause["role"] = role;
-        }
-        this.select(r.reader.raw("1"))
-          .from("user_organization")
-          .whereRaw("user_organization.organization_id = organization.id")
-          .where(whereClause);
+
+      const getOrganizationsForUserWithRole = memoizer.memoize(
+        async ({ userId, role }) => {
+          return r.reader("organization").whereExists(function() {
+            const whereClause = { user_id: user.id };
+            if (role) {
+              whereClause["role"] = role;
+            }
+            this.select(r.reader.raw("1"))
+              .from("user_organization")
+              .whereRaw("user_organization.organization_id = organization.id")
+              .where(whereClause);
+          });
+        },
+        cacheOpts.UserOrganizations
+      );
+
+      return await getOrganizationsForUserWithRole({ userId: user.id, role });
+    },
+    roles: async (user, { organizationId }) => {
+      const getRoleForUserInOrganization = await memoizer.memoize(
+        async ({ organizatonId: orgId, userId }) => {
+          return await r
+            .reader("user_organization")
+            .where({
+              organization_id: parseInt(orgId),
+              user_id: userId
+            })
+            .pluck("role");
+        },
+        cacheOpts.UserOrganizationRoles
+      );
+
+      return await getRoleForUserInOrganization({
+        userId: user.id,
+        organizationId
       });
     },
-    roles: async (user, { organizationId }) =>
-      r
-        .reader("user_organization")
-        .where({
-          organization_id: parseInt(organizationId),
-          user_id: user.id
-        })
-        .pluck("role"),
     teams: async (user, { organizationId }) =>
       r
         .reader("team")
