@@ -45,5 +45,11 @@ const main = async () => {
 };
 
 main()
-  .then(console.log)
-  .catch(console.error);
+  .then(result => {
+    console.log(result);
+    process.exit(0);
+  })
+  .catch(err => {
+    console.error("Update SMS Spanish Speakers failed", err);
+    process.exit(1);
+  });
