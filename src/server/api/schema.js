@@ -324,11 +324,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
 
   if (campaign.hasOwnProperty("cannedResponses")) {
-    // Ignore the mocked `id` automatically created on the input by GraphQL
     memoizer.invalidate(cacheOpts.CampaignCannedResponses.key, {
       campaignId: id
     });
 
+    // Ignore the mocked `id` automatically created on the input by GraphQL
     const convertedResponses = campaign.cannedResponses.map(
       ({ id: _cannedResponseId, ...response }) => ({
         ...response,
