@@ -5,6 +5,8 @@ import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
 import { config } from "../../config";
 
+const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
+
 export const resolvers = {
   Location: {
     city: zipCode => zipCode.city || "",
@@ -20,19 +22,19 @@ export const resolvers = {
       "assignmentId"
     ]),
     lastName: async campaignContact => {
-      if (config.HIDE_CONTACT_INFO) {
+      if (contactFieldsToHide.includes("lastName")) {
         return "";
       }
       return campaignContact.last_name;
     },
     cell: async campaignContact => {
-      if (config.HIDE_CONTACT_INFO) {
+      if (contactFieldsToHide.includes("cell")) {
         return "";
       }
       return campaignContact.cell;
     },
     external_id: async campaignContact => {
-      if (config.HIDE_CONTACT_INFO) {
+      if (contactFieldsToHide.includes("external_id")) {
         return "";
       }
       return campaignContact.external_id;
