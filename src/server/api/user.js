@@ -177,12 +177,12 @@ export const resolvers = {
     },
     roles: async (user, { organizationId }) => {
       const getRoleForUserInOrganization = await memoizer.memoize(
-        async ({ organizatonId: orgId, userId }) => {
+        async params => {
           return await r
             .reader("user_organization")
             .where({
-              organization_id: parseInt(orgId),
-              user_id: userId
+              organization_id: parseInt(params.organizationId),
+              user_id: params.userId
             })
             .pluck("role");
         },
