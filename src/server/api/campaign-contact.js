@@ -3,6 +3,9 @@ import { r, cacheableData } from "../models";
 import { sqlResolvers, getTzOffset } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
+import { config } from "../../config";
+
+const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
 
 export const resolvers = {
   Location: {
@@ -13,14 +16,29 @@ export const resolvers = {
     ...sqlResolvers([
       "id",
       "firstName",
-      "lastName",
-      "cell",
       "zip",
       "customFields",
       "messageStatus",
-      "assignmentId",
-      "external_id"
+      "assignmentId"
     ]),
+    lastName: async campaignContact => {
+      if (contactFieldsToHide.includes("lastName")) {
+        return "";
+      }
+      return campaignContact.last_name;
+    },
+    cell: async campaignContact => {
+      if (contactFieldsToHide.includes("cell")) {
+        return "";
+      }
+      return campaignContact.cell;
+    },
+    external_id: async campaignContact => {
+      if (contactFieldsToHide.includes("external_id")) {
+        return "";
+      }
+      return campaignContact.external_id;
+    },
     updatedAt: async campaignContact => {
       let updatedAt;
       if (
