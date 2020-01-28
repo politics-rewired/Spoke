@@ -115,7 +115,8 @@ export const resolvers = {
       );
       return !!assignmentTarget;
     },
-    currentAssignmentTargets: async organization => {
+    currentAssignmentTargets: async (organization, _, { user }) => {
+      await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const cats = await allCurrentAssignmentTargets(organization.id);
       const formatted = cats.map(cat => ({
         type: cat.assignment_type,
