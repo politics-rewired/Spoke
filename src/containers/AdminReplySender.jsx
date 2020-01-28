@@ -149,7 +149,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      campaignId: ownProps.params.campaignId
+      campaignId: ownProps.match.params.campaignId
     }
   }
 });

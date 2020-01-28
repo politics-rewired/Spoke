@@ -220,7 +220,7 @@ class AssignmentTexter extends React.Component {
   };
 
   handleExitTexter = () => {
-    this.props.router.push("/app/" + (this.props.organizationId || ""));
+    this.props.history.push("/app/" + (this.props.organizationId || ""));
   };
 
   contactCount = () => {
@@ -334,7 +334,7 @@ class AssignmentTexter extends React.Component {
 
   goBackToTodos = () => {
     const { campaign } = this.props.assignment;
-    this.props.router.push(`/app/${campaign.organization.id}/todos`);
+    this.props.history.push(`/app/${campaign.organization.id}/todos`);
   };
 
   handleSendMessageError = contact_id => e => {
@@ -442,7 +442,7 @@ AssignmentTexter.propTypes = {
   assignment: PropTypes.object, // current assignment
   contactIds: PropTypes.arrayOf(PropTypes.string), // contacts for current assignment
   allContactsCount: PropTypes.number,
-  router: PropTypes.object,
+  history: PropTypes.object.isRequired,
   refreshData: PropTypes.func,
   loadContacts: PropTypes.func,
   assignContactsIfNeeded: PropTypes.func,

@@ -16,7 +16,7 @@ import { hasRole } from "../lib/permissions";
 const avatarSize = 28;
 
 const OrganizationItemInner = props => {
-  const { organization, data, router } = props;
+  const { organization, data, history } = props;
   const { loading, currentUser } = data;
   const path =
     data.currentUser && hasRole("SUPERVOLUNTEER", currentUser.roles)
@@ -25,7 +25,7 @@ const OrganizationItemInner = props => {
 
   const handleClick = event => {
     event.preventDefault();
-    router.push(path);
+    history.push(path);
   };
 
   return (
@@ -77,7 +77,7 @@ class UserMenu extends Component {
   handleRequestClose = () => this.setState({ open: false });
 
   handleMenuChange = (_, value) => {
-    const { orgId, data, router } = this.props;
+    const { orgId, data, history } = this.props;
     const { currentUser } = data;
 
     this.handleRequestClose();
@@ -93,12 +93,12 @@ class UserMenu extends Component {
       window.location.href = "/logout-callback";
     } else if (value === "account") {
       if (orgId) {
-        router.push(`/app/${orgId}/account/${currentUser.id}`);
+        history.push(`/app/${orgId}/account/${currentUser.id}`);
       }
     } else if (value === "home") {
-      router.push(`/app/${orgId}/todos`);
+      history.push(`/app/${orgId}/todos`);
     } else if (value === "faqs") {
-      router.push(`/app/${orgId}/faqs`);
+      history.push(`/app/${orgId}/faqs`);
     }
   };
 
@@ -180,7 +180,7 @@ class UserMenu extends Component {
 UserMenu.propTypes = {
   data: PropTypes.object,
   orgId: PropTypes.string,
-  router: PropTypes.object
+  history: PropTypes.object.isRequired
 };
 
 const mapQueriesToProps = () => ({

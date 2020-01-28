@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import IconButton from "material-ui/IconButton";
 import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import UserMenu from "../containers/UserMenu";
 import theme from "../styles/theme";
 import { StyleSheet, css } from "aphrodite";
@@ -40,32 +40,23 @@ const styles = StyleSheet.create({
 });
 
 class TopNav extends React.Component {
-  state = {
-    userMenuOpen: false
-  };
-
-  renderBack(backToURL) {
-    if (backToURL) {
-      return (
-        <Link to={backToURL}>
-          <IconButton>
-            <ArrowBackIcon
-              style={{ fill: "white" }}
-              color={theme.colors.white}
-            />
-          </IconButton>
-        </Link>
-      );
-    }
-    return <div />;
-  }
-
   render() {
     const { backToURL, orgId, title } = this.props;
     return (
       <div className={css(styles.container)}>
         <div className={css(styles.flexColumn)}>
-          <div className={css(styles.inline)}>{this.renderBack(backToURL)}</div>
+          <div className={css(styles.inline)}>
+            {backToURL && (
+              <Link to={backToURL}>
+                <IconButton>
+                  <ArrowBackIcon
+                    style={{ fill: "white" }}
+                    color={theme.colors.white}
+                  />
+                </IconButton>
+              </Link>
+            )}
+          </div>
           <div className={css(styles.inline, styles.header)}>{title}</div>
         </div>
         <div className={css(styles.userMenu)}>
