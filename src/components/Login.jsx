@@ -77,7 +77,7 @@ class LocalLogin extends React.Component {
 
   render() {
     const { location, history } = this.props;
-    const { nextUrl } = queryString.parse(location.search) || "/";
+    const nextUrl = queryString.parse(location.search).nextUrl || "/";
     const { active } = this.state;
 
     // If nextUrl is a valid (naive RegEx only) invite or organization
@@ -134,19 +134,24 @@ LocalLogin.propTypes = {
 const LocalLoginWrapper = withRouter(LocalLogin);
 
 const Login = ({ location }) => {
+  if (window.ALTERNATE_LOGIN_URL) {
+    window.location.href = window.ALTERNATE_LOGIN_URL;
+    return <div />;
+  }
   switch (window.PASSPORT_STRATEGY) {
     case "slack":
       // If Slack strategy, the server needs to initiate the redirect
       // Force reload will hit the server redirect (as opposed to client routing)
-      return (window.location.href =
-        "https://www.bernietext.com/auth/login/slack/");
+      window.location = "/login";
+      return <div />;
 
     case "local":
       return <LocalLoginWrapper location={location} />;
 
     default:
       const { nextUrl } = queryString.parse(location.search);
-      return isClient() ? window.AuthService.login(nextUrl) : "";
+      window.AuthService.login(nextUrl);
+      return <div />;
   }
 };
 

@@ -22,21 +22,27 @@ class JoinTeam extends React.Component {
     let campaign = null;
     try {
       organization = await this.props.mutations.joinOrganization();
+      if (organization.errors) throw organization.errors;
     } catch (ex) {
       this.setState({
-        errors:
-          "Something went wrong trying to join this organization. Please contact your administrator."
+        errors: `Something went wrong trying to join this organization. Please contact your administrator.\n\n${
+          ex.message
+        }`
       });
+      return;
     }
 
     if (this.props.match.params.campaignId) {
       try {
         campaign = await this.props.mutations.assignUserToCampaign();
+        if (campaign.errors) throw campaign.errors;
       } catch (ex) {
         this.setState({
-          errors:
-            "Something went wrong trying to join this campaign. Please contact your administrator."
+          errors: `Something went wrong trying to join this campaign. Please contact your administrator.\n\n${
+            ex.message
+          }`
         });
+        return;
       }
     }
 
@@ -47,7 +53,11 @@ class JoinTeam extends React.Component {
 
   renderErrors() {
     if (this.state.errors) {
-      return <div className={css(styles.greenBox)}>{this.state.errors}</div>;
+      return (
+        <div className={css(styles.greenBox)}>
+          {this.state.errors.split("\n").map(part => <p>{part}</p>)}
+        </div>
+      );
     }
     return <div />;
   }

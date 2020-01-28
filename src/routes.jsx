@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Route, Redirect, withRouter } from "react-router-dom";
 import gql from "graphql-tag";
 
 import ApolloClientSingleton from "./network/apollo-client-singleton";
@@ -36,10 +36,11 @@ import UserEdit from "./containers/UserEdit";
 import TexterFaqs from "./components/TexterFaqs";
 import FAQs from "./lib/faqs";
 
-class Protected extends React.Component {
+class ProtectedInner extends React.Component {
   state = { isAuthed: false };
 
   componentDidMount() {
+    const { history } = this.props;
     const loginUrl = `/login?nextUrl=${window.location.pathname}`;
     ApolloClientSingleton.query({
       query: gql`
@@ -51,15 +52,16 @@ class Protected extends React.Component {
       `
     })
       .then(result => result.data.currentUser.id)
-      // We can't use replace(...) here because /login is not a react-router path
-      .catch(_err => (window.location = loginUrl))
-      .then(() => this.setState({ isAuthed: true }));
+      .then(() => this.setState({ isAuthed: true }))
+      .catch(_err => history.push(loginUrl));
   }
 
   render() {
     return this.state.isAuthed ? this.props.children : <div />;
   }
 }
+
+const Protected = withRouter(ProtectedInner);
 
 const AuthenticatedRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -343,10 +345,14 @@ const AppRoutes = () => (
         component={CreateOrganization}
       />
       <AuthenticatedRoute
+        path="/:organizationUuid/join"
+        exact={true}
+        component={JoinTeam}
+      />
+      <AuthenticatedRoute
         path="/:organizationUuid/join/:campaignId"
         component={JoinTeam}
       />
-      <AuthenticatedRoute path=":organizationUuid/join" component={JoinTeam} />
     </Switch>
   </App>
 );
