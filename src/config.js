@@ -357,7 +357,7 @@ if (isClient()) {
     }),
     CONTACT_FIELDS_TO_HIDE: str({
       desc:
-        "A comma separated list of contact fields to not ship to the client. Can include 'external_id, cell, and lastName'",
+        "A comma separated list of contact fields to not ship to the client. Can include 'external_id, cell, and last_name'",
       default: ""
     }),
     JOBS_SAME_PROCESS: bool({
