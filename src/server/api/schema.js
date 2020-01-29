@@ -2948,6 +2948,10 @@ const rootMutations = {
         );
       });
 
+      memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
+        organizationId
+      });
+
       return updatedTeams;
     },
     deleteTeam: async (_, { organizationId, teamId }, { user }) => {
