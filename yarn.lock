@@ -9003,10 +9003,10 @@ memoize-one@^5.0.0:
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.1.1.tgz#047b6e3199b508eaec03504de71229b8eb1d75c0"
   integrity sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA==
 
-memoredis@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.5.tgz#55197c4d28368226a5b7a64fd9c4c359d6b47656"
-  integrity sha512-FU1xo2J3MpU65APkrmbYsf+yq5MAhRb8UMz/TtZb+UUXBxyGRs+4XkOQau4vkYlsmtYAuUCuDypLbcqVX9rflg==
+memoredis@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.6.tgz#0b02a6f44f1df5bca89a3a82cabcbf72ed507507"
+  integrity sha512-HyHJW0vXi33tmYs+Q3NXxfoXQH6cFBRku/FCAifkm5x7VV5flPDA1B9CHvAQ8O4s3vfnufMUyeDcehxPfpEd/Q==
   dependencies:
     json-date-parser "^1.0.1"
     json-stable-stringify "^1.0.1"
