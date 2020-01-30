@@ -49,8 +49,7 @@ const cacheOpts = {
   OrganizationEscalatedTagList: ["organization-escalated-tag-list", ONE_WEEK],
   OrganizationSingleTon: ["organization-singleton", ONE_HOUR],
   UserOrganizations: ["user-organizations", ONE_WEEK],
-  UserOrganizationRoles: ["user-organization-roles", ONE_WEEK],
-  CampaignOrganizationId: ["campaign-organiation-id", ONE_WEEK]
+  UserOrganizationRoles: ["user-organization-roles", ONE_WEEK]
 };
 
 Object.keys(cacheOpts).forEach(name => {
