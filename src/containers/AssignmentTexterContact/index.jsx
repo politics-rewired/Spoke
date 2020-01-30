@@ -304,6 +304,7 @@ export class AssignmentTexterContact extends React.Component {
     const { contact } = this.props;
 
     return {
+      contactNumber: contact.cell,
       userId: texter.id,
       text,
       assignmentId: assignment.id,

@@ -140,6 +140,7 @@ const rootSchema = `
 
   input MessageInput {
     text: String
+    contactNumber: Phone
     assignmentId: String
     userId: String
     versionHash: String

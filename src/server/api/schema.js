@@ -471,7 +471,6 @@ async function sendMessage(
       "campaign_contact.assignment_id as assignment_id",
       "campaign_contact.message_status as cc_message_status",
       "campaign.id as campaign_id",
-      "campaign_contact.cell as cell",
       "campaign.is_archived as is_archived",
       "campaign.organization_id as organization_id",
       "campaign.timezone as c_timezone",
@@ -574,7 +573,7 @@ async function sendMessage(
     .hour(endHour)
     .utc();
 
-  const { text } = message;
+  const { contactNumber, text } = message;
 
   if (text.length > (config.MAX_MESSAGE_LENGTH || 99999)) {
     throw new GraphQLError("Message was longer than the limit");
@@ -592,7 +591,7 @@ async function sendMessage(
     user_id: user.id,
     campaign_contact_id: campaignContactId,
     text: replacedDomainsText,
-    contact_number: record.cell,
+    contact_number: contactNumber,
     user_number: "",
     assignment_id: message.assignmentId,
     send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
