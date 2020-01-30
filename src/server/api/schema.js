@@ -2941,7 +2941,7 @@ const rootMutations = {
         );
       });
 
-      memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
+      await memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
         organizationId
       });
 
