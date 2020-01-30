@@ -2643,30 +2643,22 @@ const rootMutations = {
           // Delete, excluding second pass contacts that have already been messaged
           const { rowCount: deletedRowCount } = await trx.raw(
             `
-          with exclude_cell as (
-            select distinct on (campaign_contact.cell)
-              campaign_contact.cell
-            from
+            delete from
               campaign_contact
             where
               campaign_contact.campaign_id = ?
-          )
-          delete from
-            campaign_contact
-          where
-            campaign_contact.campaign_id = ?
-            and not exists (
-              select 1
-              from message
-              where campaign_contact_id = campaign_contact.id
-            )
-            and exists (
-              select 1
-              from exclude_cell
-              where exclude_cell.cell = campaign_contact.cell
-            );
-        `,
-            [overlappingCampaignId, campaignId]
+              and not exists (
+                select 1
+                from message
+                where campaign_contact_id = campaign_contact.id
+              )
+              and exists (
+                select 1
+                from campaign_contact as other_campaign_contact
+                where other_campaign_contact.campaign_id = ?
+                  and other_campaign_contact.cell = campaign_contact.cell
+              );`,
+            [campaignId, overlappingCampaignId]
           );
 
           remainingCount = remainingCount - deletedRowCount;
