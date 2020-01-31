@@ -314,7 +314,7 @@ export class AssignmentTexterContact extends React.Component {
 
   goBackToTodos = () => {
     const { campaign } = this.props;
-    this.props.router.push(`/app/${campaign.organization.id}/todos`);
+    this.props.history.push(`/app/${campaign.organization.id}/todos`);
   };
 
   handleMessageFormSubmit = ({ messageText }) => {
@@ -902,7 +902,7 @@ AssignmentTexterContact.propTypes = {
   texter: PropTypes.object,
   navigationToolbarChildren: PropTypes.array,
   onFinishContact: PropTypes.func,
-  router: PropTypes.object,
+  history: PropTypes.object.isRequired,
   mutations: PropTypes.object,
   refreshData: PropTypes.func,
   onExitTexter: PropTypes.func,

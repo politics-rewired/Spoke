@@ -28,10 +28,10 @@ class TeamEditorList extends Component {
   handleCellClick = (rowIndex, columnIndex) => {
     if (columnIndex === ACTIONS_COLUMN_INDEX) return;
 
-    const { organizationId, teams, router } = this.props;
+    const { organizationId, teams, history } = this.props;
     const team = teams[rowIndex];
     const teamPagePath = `/admin/${organizationId}/teams/${team.id}`;
-    router.push(teamPagePath);
+    history.push(teamPagePath);
   };
 
   render() {
@@ -96,7 +96,7 @@ TeamEditorList.defaultProps = {};
 TeamEditorList.propTypes = {
   organizationId: PropTypes.string.isRequired,
   teams: PropTypes.arrayOf(PropTypes.object).isRequired,
-  router: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
   oEditTeam: PropTypes.func.isRequired,
   onDeleteTeam: PropTypes.func.isRequired
 };

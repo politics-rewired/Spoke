@@ -22,32 +22,42 @@ class JoinTeam extends React.Component {
     let campaign = null;
     try {
       organization = await this.props.mutations.joinOrganization();
+      if (organization.errors) throw organization.errors;
     } catch (ex) {
       this.setState({
-        errors:
-          "Something went wrong trying to join this organization. Please contact your administrator."
+        errors: `Something went wrong trying to join this organization. Please contact your administrator.\n\n${
+          ex.message
+        }`
       });
+      return;
     }
 
-    if (this.props.params.campaignId) {
+    if (this.props.match.params.campaignId) {
       try {
         campaign = await this.props.mutations.assignUserToCampaign();
+        if (campaign.errors) throw campaign.errors;
       } catch (ex) {
         this.setState({
-          errors:
-            "Something went wrong trying to join this campaign. Please contact your administrator."
+          errors: `Something went wrong trying to join this campaign. Please contact your administrator.\n\n${
+            ex.message
+          }`
         });
+        return;
       }
     }
 
     if (organization) {
-      this.props.router.push(`/app/${organization.data.joinOrganization.id}`);
+      this.props.history.push(`/app/${organization.data.joinOrganization.id}`);
     }
   }
 
   renderErrors() {
     if (this.state.errors) {
-      return <div className={css(styles.greenBox)}>{this.state.errors}</div>;
+      return (
+        <div className={css(styles.greenBox)}>
+          {this.state.errors.split("\n").map(part => <p>{part}</p>)}
+        </div>
+      );
     }
     return <div />;
   }
@@ -59,7 +69,8 @@ class JoinTeam extends React.Component {
 
 JoinTeam.propTypes = {
   mutations: PropTypes.object,
-  router: PropTypes.object
+  history: PropTypes.object.isRequired,
+  match: PropTypes.object.isRequired
 };
 
 const mapMutationsToProps = ({ ownProps }) => ({
@@ -71,7 +82,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: { organizationUuid: ownProps.params.organizationUuid }
+    variables: { organizationUuid: ownProps.match.params.organizationUuid }
   }),
   assignUserToCampaign: () => ({
     mutation: gql`
@@ -88,8 +99,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      campaignId: ownProps.params.campaignId,
-      organizationUuid: ownProps.params.organizationUuid
+      campaignId: ownProps.match.params.campaignId,
+      organizationUuid: ownProps.match.params.organizationUuid
     }
   })
 });

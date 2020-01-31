@@ -187,7 +187,7 @@ class AdminShortLinkDomains extends Component {
 }
 
 AdminShortLinkDomains.propTypes = {
-  params: PropTypes.object,
+  match: PropTypes.object.isRequired,
   shortLinkDomains: PropTypes.object
 };
 
@@ -211,7 +211,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId
+      organizationId: ownProps.match.params.organizationId
     }
   }
 });
@@ -241,7 +241,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId,
+      organizationId: ownProps.match.params.organizationId,
       domain,
       maxUsageCount
     }
@@ -264,7 +264,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId,
+      organizationId: ownProps.match.params.organizationId,
       domainId,
       payload: {
         isManuallyDisabled
@@ -278,7 +278,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId,
+      organizationId: ownProps.match.params.organizationId,
       domainId
     }
   })

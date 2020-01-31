@@ -910,7 +910,7 @@ const rootMutations = {
             .catch(err => logger.error("error on userOrganization save", err));
         } else {
           // userOrg exists
-          logger.error(
+          logger.info(
             `existing userOrg ${userOrg.id} user ${
               user.id
             } organizationUuid ${organizationUuid}`

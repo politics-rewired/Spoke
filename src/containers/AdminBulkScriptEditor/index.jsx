@@ -280,7 +280,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId,
+      organizationId: ownProps.match.params.organizationId,
       findAndReplace
     }
   })
