@@ -1,12 +1,14 @@
 import createMemoizer from "memoredis";
 import { config } from "../config";
+import logger from "../logger";
 
 const opts = config.MEMOREDIS_URL
   ? {
       clientOpts: config.MEMOREDIS_URL,
-      prefix: config.MEMOREDIS_PREFIX
+      prefix: config.MEMOREDIS_PREFIX,
+      logger
     }
-  : { emptyMode: true };
+  : { emptyMode: true, logger };
 
 const memoizer = createMemoizer(opts);
 
