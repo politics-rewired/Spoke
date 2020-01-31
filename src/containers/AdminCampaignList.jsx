@@ -97,11 +97,7 @@ class AdminCampaignList extends React.Component {
 
   releaseAllReplies = () => {
     const ageInHours = this.refs.numberOfHoursToRelease.input.value;
-    console.log(
-      "TCL: AdminCampaignList -> releaseAllReplies -> this.props.params.organizationId, ageInHours",
-      this.props.params.organizationId,
-      ageInHours
-    );
+
     this.props.mutations
       .releaseAllUnhandledReplies(this.props.params.organizationId, ageInHours)
       .then(result => {

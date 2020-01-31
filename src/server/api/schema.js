@@ -2607,7 +2607,7 @@ const rootMutations = {
       const queryArgs = [parseInt(organizationId)];
       if (ageInHours) queryArgs.push(ageInHoursAgo);
 
-      /**
+      /*
        * Using SQL injection to avoid passing archived as a binding
        * Should help with guaranteeing partial index usage
        */
@@ -2617,7 +2617,7 @@ const rootMutations = {
             campaign_contact
           set
             assignment_id = null
-         where
+          where
             exists (
               select 1
               from campaign
