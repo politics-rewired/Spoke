@@ -13,11 +13,16 @@ import wrapMutations from "./hoc/wrap-mutations";
 import DropDownMenu from "material-ui/DropDownMenu";
 import { MenuItem } from "material-ui/Menu";
 import { dataTest } from "../lib/attributes";
+import RaisedButton from "material-ui/RaisedButton";
+import Dialog from "material-ui/Dialog";
+import { TextField } from "material-ui";
 
 const styles = {
   flexContainer: {
     display: "flex",
-    alignItems: "baseline"
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    padding: 5
   }
 };
 
@@ -31,7 +36,10 @@ class AdminCampaignList extends React.Component {
     totalResults: undefined,
     campaignsFilter: {
       isArchived: false
-    }
+    },
+    releasingAllReplies: false,
+    releaseAllRepliesError: undefined,
+    releaseAllRepliesResult: undefined
   };
 
   handleClickNewButton = async () => {
@@ -78,6 +86,27 @@ class AdminCampaignList extends React.Component {
 
   onCurrentPageChange = (event, index, currentPageIndex) => {
     this.setState({ currentPageIndex });
+  };
+
+  startReleasingAllReplies = () => {
+    this.setState({ releasingAllReplies: true });
+  };
+
+  closeReleasingAllReplies = () => {
+    this.setState({ releasingAllReplies: false });
+  };
+
+  releaseAllReplies = () => {
+    const ageInHours = this.refs.numberOfHoursToRelease.input.value;
+
+    this.props.mutations
+      .releaseAllUnhandledReplies(this.props.params.organizationId, ageInHours)
+      .then(result => {
+        this.setState({
+          releaseAllRepliesResult: result.data.releaseAllUnhandledReplies
+        });
+      })
+      .catch(error => this.setState({ releaseAllRepliesError: error }));
   };
 
   renderPageSizeOptions() {
@@ -134,7 +163,16 @@ class AdminCampaignList extends React.Component {
     );
   }
   render() {
-    const { pageSize, currentPageIndex, campaignsFilter } = this.state;
+    const {
+      pageSize,
+      currentPageIndex,
+      campaignsFilter,
+      releasingAllReplies
+    } = this.state;
+
+    const doneReleasingReplies =
+      this.state.releaseAllRepliesResult || this.state.releaseAllRepliesError;
+
     const { organizationId } = this.props.match.params;
     const { adminPerms } = this.props;
     return (
@@ -144,7 +182,59 @@ class AdminCampaignList extends React.Component {
           Page Size:
           {this.renderPageSizeOptions()}
           Page: {this.renderPagesDropdown()}
+          <RaisedButton onClick={this.startReleasingAllReplies} primary={true}>
+            Release All Unhandled Replies
+          </RaisedButton>
         </div>
+        {releasingAllReplies && (
+          <Dialog
+            title="Release All Unhandled Replies"
+            modal={false}
+            open={true}
+            onRequestClose={this.closeReleasingAllReplies}
+            actions={
+              doneReleasingReplies
+                ? [
+                    <RaisedButton
+                      label="Done"
+                      onClick={this.closeReleasingAllReplies}
+                    />
+                  ]
+                : [
+                    <RaisedButton
+                      label="Cancel"
+                      onClick={this.closeReleasingAllReplies}
+                    />,
+                    <RaisedButton
+                      label="Release"
+                      onClick={this.releaseAllReplies}
+                      primary={true}
+                    />
+                  ]
+            }
+          >
+            {this.state.releaseAllRepliesError && (
+              <span>
+                Error: {JSON.stringify(this.state.releaseAllRepliesError)}
+              </span>
+            )}
+            {this.state.releaseAllRepliesResult && (
+              <span>Released {this.state.releaseAllRepliesResult} replies</span>
+            )}
+            {!doneReleasingReplies && (
+              <div>
+                How many hours ago should a conversation have been idle for it
+                to be unassigned?
+                <TextField
+                  type="number"
+                  floatingLabelText="Number of Hours"
+                  ref="numberOfHoursToRelease"
+                  defaultValue={1}
+                />
+              </div>
+            )}
+          </Dialog>
+        )}
         {this.state.isCreating ? (
           <LoadingIndicator />
         ) : (
@@ -191,6 +281,20 @@ const mapMutationsToProps = () => ({
       }
     `,
     variables: { campaign }
+  }),
+  releaseAllUnhandledReplies: (organizationId, ageInHours) => ({
+    mutation: gql`
+      mutation releaseAllUnhandledReplies(
+        $organizationId: String!
+        $ageInHours: Int
+      ) {
+        releaseAllUnhandledReplies(
+          organizationId: $organizationId
+          ageInHours: $ageInHours
+        )
+      }
+    `,
+    variables: { organizationId, ageInHours }
   })
 });
 
