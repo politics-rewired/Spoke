@@ -790,8 +790,8 @@ const rootMutations = {
         await r.knex("user_organization").insert(newOrgRoles);
       }
 
-      memoizer.invalidate(cacheOpts.UserOrganizations, { userId });
-      memoizer.invalidate(cacheOpts.UserOrganizationRoles, {
+      memoizer.invalidate(cacheOpts.UserOrganizations.key, { userId });
+      memoizer.invalidate(cacheOpts.UserOrganizationRoles.key, {
         userId,
         organizationId
       });
