@@ -75,7 +75,7 @@ class UserEdit extends React.Component {
         });
         const { redirected, headers, status, url } = loginRes;
         if (redirected && status === 200) {
-          this.props.router.replace(url);
+          window.location = url;
         } else if (status === 401) {
           throw new Error(headers.get("www-authenticate") || "");
         } else if (status === 400) {
@@ -283,7 +283,7 @@ UserEdit.defaultProps = {
 UserEdit.propTypes = {
   mutations: PropTypes.object.isRequired,
   data: PropTypes.object.isRequired,
-  router: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
   editUser: PropTypes.object.isRequired,
   userId: PropTypes.string.isRequired,
   organizationId: PropTypes.string.isRequired,

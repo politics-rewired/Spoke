@@ -4,40 +4,8 @@ import { sqlResolvers, getTzOffset } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
 import { config } from "../../config";
-import { memoizer, cacheOpts } from "../memoredis";
 
 const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
-
-const getOrganizationIdFromCampaignId = memoizer.memoize(
-  async ({ campaignId }) => {
-    const campaign = await r
-      .reader("campaign")
-      .first("*")
-      .where({ id: campaignId });
-    return campaign.organization_id;
-  },
-  cacheOpts.CampaignOrganizationId
-);
-
-const returnIfSuperVolunteerOrNotHidden = async (
-  campaignContact,
-  attribute
-) => {
-  if (!contactFieldsToHide.includes(attribute)) {
-    return campaignContact[attribute];
-  }
-
-  const organizationId = await getOrganizationIdFromCampaignId({
-    campaignId: campaignContact.campaignId
-  });
-
-  try {
-    await accessRequired(user, organizationId, "SUPERVOLUNTEER", true);
-    return campaignContact[attribute];
-  } catch (ex) {
-    return "";
-  }
-};
 
 export const resolvers = {
   Location: {
@@ -54,19 +22,22 @@ export const resolvers = {
       "assignmentId"
     ]),
     lastName: async campaignContact => {
-      return await returnIfSuperVolunteerOrNotHidden(
-        campaignContact,
-        "last_name"
-      );
+      if (contactFieldsToHide.includes("lastName")) {
+        return "";
+      }
+      return campaignContact.last_name;
     },
     cell: async campaignContact => {
-      return await returnIfSuperVolunteerOrNotHidden(campaignContact, "cell");
+      if (contactFieldsToHide.includes("cell")) {
+        return "";
+      }
+      return campaignContact.cell;
     },
     external_id: async campaignContact => {
-      return await returnIfSuperVolunteerOrNotHidden(
-        campaignContact,
-        "external_id"
-      );
+      if (contactFieldsToHide.includes("external_id")) {
+        return "";
+      }
+      return campaignContact.external_id;
     },
     updatedAt: async campaignContact => {
       let updatedAt;

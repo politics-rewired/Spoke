@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+import queryString from "query-string";
 import { withRouter } from "react-router";
 import { StyleSheet, css } from "aphrodite";
 
@@ -59,7 +60,7 @@ class LocalLogin extends React.Component {
   };
 
   componentDidMount = () => {
-    const { nextUrl } = this.props.location.query;
+    const { nextUrl } = queryString.parse(this.props.location.search);
 
     if (nextUrl && nextUrl.includes("reset")) {
       this.setState({ active: UserEditMode.Reset });
@@ -75,8 +76,8 @@ class LocalLogin extends React.Component {
     nextUrl.includes("invite");
 
   render() {
-    const { location, router } = this.props;
-    const { nextUrl } = location.query;
+    const { location, history } = this.props;
+    const nextUrl = queryString.parse(location.search).nextUrl || "/";
     const { active } = this.state;
 
     // If nextUrl is a valid (naive RegEx only) invite or organization
@@ -115,7 +116,7 @@ class LocalLogin extends React.Component {
           <UserEdit
             authType={active}
             saveLabel={saveLabels[active]}
-            router={router}
+            history={history}
             nextUrl={nextUrl}
             style={css(styles.authFields)}
           />
@@ -127,24 +128,30 @@ class LocalLogin extends React.Component {
 
 LocalLogin.propTypes = {
   location: PropTypes.object.isRequired,
-  router: PropTypes.object.isRequired
+  history: PropTypes.object.isRequired
 };
 
 const LocalLoginWrapper = withRouter(LocalLogin);
 
 const Login = ({ location }) => {
+  if (window.ALTERNATE_LOGIN_URL) {
+    window.location.href = window.ALTERNATE_LOGIN_URL;
+    return <div />;
+  }
   switch (window.PASSPORT_STRATEGY) {
     case "slack":
       // If Slack strategy, the server needs to initiate the redirect
       // Force reload will hit the server redirect (as opposed to client routing)
-      return (window.location.href =
-        "https://www.bernietext.com/auth/login/slack/");
+      window.location = "/login";
+      return <div />;
 
     case "local":
       return <LocalLoginWrapper location={location} />;
 
     default:
-      return isClient() ? window.AuthService.login(location.query.nextUrl) : "";
+      const { nextUrl } = queryString.parse(location.search);
+      window.AuthService.login(nextUrl);
+      return <div />;
   }
 };
 

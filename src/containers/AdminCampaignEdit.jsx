@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+import queryString from "query-string";
 import isEqual from "lodash/isEqual";
 import moment from "moment";
 
@@ -28,6 +29,7 @@ import { dataTest, camelCase } from "../lib/attributes";
 import CampaignTextingHoursForm from "../components/CampaignTextingHoursForm";
 import CampaignAutoassignModeForm from "../components/CampaignAutoassignModeForm";
 import CampaignTeamsForm from "../components/CampaignTeamsForm";
+import { withAuthzContext } from "../components/AuthzProvider";
 
 const campaignInfoFragment = `
   id
@@ -82,7 +84,7 @@ const campaignInfoFragment = `
 class AdminCampaignEdit extends React.Component {
   constructor(props) {
     super(props);
-    const isNew = props.location.query.new;
+    const isNew = queryString.parse(props.location.search).new;
     this.state = {
       expandedSection: isNew ? 0 : null,
       campaignFormValues: Object.assign({}, props.campaignData.campaign),
@@ -163,7 +165,7 @@ class AdminCampaignEdit extends React.Component {
   }
 
   isNew() {
-    return this.props.location.query.new;
+    return queryString.parse(this.props.location.search).new;
   }
 
   async handleDeleteJob(jobId) {
@@ -391,7 +393,7 @@ class AdminCampaignEdit extends React.Component {
             this.props.organizationData.organization &&
             !!this.props.organizationData.organization.numbersApiKey,
           otherCampaigns: this.props.organizationData.organization.campaigns.campaigns.filter(
-            campaign => campaign.id != this.props.params.campaignId
+            campaign => campaign.id != this.props.match.params.campaignId
           )
         }
       },
@@ -561,8 +563,8 @@ class AdminCampaignEdit extends React.Component {
         saveDisabled={shouldDisable}
         ensureComplete={this.props.campaignData.campaign.isStarted}
         onSubmit={this.handleSubmit}
-        campaignId={this.props.params.campaignId}
-        organizationId={this.props.params.organizationId}
+        campaignId={this.props.match.params.campaignId}
+        organizationId={this.props.match.params.organizationId}
         {...section.extraProps}
       />
     );
@@ -624,7 +626,7 @@ class AdminCampaignEdit extends React.Component {
   }
 
   renderStartButton() {
-    if (!this.props.params.adminPerms) {
+    if (!this.props.adminPerms) {
       // Supervolunteers don't have access to start the campaign or un/archive it
       return null;
     }
@@ -704,7 +706,7 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms } = this.props.params;
+    const { adminPerms } = this.props;
 
     const errorActions = [
       <FlatButton label="Ok" primary={true} onClick={this.handleCloseError} />
@@ -836,7 +838,8 @@ AdminCampaignEdit.propTypes = {
   campaignData: PropTypes.object,
   mutations: PropTypes.object,
   organizationData: PropTypes.object,
-  params: PropTypes.object,
+  match: PropTypes.object.isRequired,
+  adminPerms: PropTypes.bool.isRequired,
   location: PropTypes.object,
   pendingJobsData: PropTypes.object,
   availableActionsData: PropTypes.object
@@ -859,7 +862,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      campaignId: ownProps.params.campaignId
+      campaignId: ownProps.match.params.campaignId
     },
     pollInterval: 60000
   },
@@ -870,7 +873,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     }`,
     variables: {
-      campaignId: ownProps.params.campaignId
+      campaignId: ownProps.match.params.campaignId
     },
     pollInterval: 60000
   },
@@ -902,7 +905,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId
+      organizationId: ownProps.match.params.organizationId
     },
     pollInterval: 20000
   },
@@ -917,7 +920,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      organizationId: ownProps.params.organizationId
+      organizationId: ownProps.match.params.organizationId
     },
     forceFetch: true
   }
@@ -971,13 +974,13 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      campaignId: ownProps.params.campaignId,
+      campaignId: ownProps.match.params.campaignId,
       id: jobId
     }
   })
 });
 
-export default loadData(wrapMutations(AdminCampaignEdit), {
+export default loadData(wrapMutations(withAuthzContext(AdminCampaignEdit)), {
   mapQueriesToProps,
   mapMutationsToProps
 });

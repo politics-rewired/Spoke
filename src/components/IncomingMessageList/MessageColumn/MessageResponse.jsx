@@ -29,6 +29,7 @@ class MessageResponse extends Component {
 
     return {
       assignmentId: contact.assignmentId,
+      contactNumber: contact.cell,
       userId: texter.id,
       text
     };

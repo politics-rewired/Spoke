@@ -471,7 +471,6 @@ async function sendMessage(
       "campaign_contact.assignment_id as assignment_id",
       "campaign_contact.message_status as cc_message_status",
       "campaign.id as campaign_id",
-      "campaign_contact.cell as cell",
       "campaign.is_archived as is_archived",
       "campaign.organization_id as organization_id",
       "campaign.timezone as c_timezone",
@@ -574,7 +573,7 @@ async function sendMessage(
     .hour(endHour)
     .utc();
 
-  const { text } = message;
+  const { contactNumber, text } = message;
 
   if (text.length > (config.MAX_MESSAGE_LENGTH || 99999)) {
     throw new GraphQLError("Message was longer than the limit");
@@ -592,7 +591,7 @@ async function sendMessage(
     user_id: user.id,
     campaign_contact_id: campaignContactId,
     text: replacedDomainsText,
-    contact_number: record.cell,
+    contact_number: contactNumber,
     user_number: "",
     assignment_id: message.assignmentId,
     send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
@@ -791,8 +790,8 @@ const rootMutations = {
         await r.knex("user_organization").insert(newOrgRoles);
       }
 
-      memoizer.invalidate(cacheOpts.UserOrganizations, { userId });
-      memoizer.invalidate(cacheOpts.UserOrganizationRoles, {
+      memoizer.invalidate(cacheOpts.UserOrganizations.key, { userId });
+      memoizer.invalidate(cacheOpts.UserOrganizationRoles.key, {
         userId,
         organizationId
       });
@@ -911,7 +910,7 @@ const rootMutations = {
             .catch(err => logger.error("error on userOrganization save", err));
         } else {
           // userOrg exists
-          logger.error(
+          logger.info(
             `existing userOrg ${userOrg.id} user ${
               user.id
             } organizationUuid ${organizationUuid}`
@@ -2624,6 +2623,56 @@ const rootMutations = {
 
       return `Released ${updatedCount} ${target.toLowerCase()} messages for reassignment`;
     },
+    releaseAllUnhandledReplies: async (
+      _,
+      { organizationId, ageInHours },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN", true);
+      let ageInHoursAgo;
+      if (!!ageInHours) {
+        ageInHoursAgo = new Date();
+        ageInHoursAgo.setHours(new Date().getHours() - ageInHours);
+        ageInHoursAgo = ageInHoursAgo.toISOString();
+      }
+
+      const queryArgs = [parseInt(organizationId)];
+      if (ageInHours) queryArgs.push(ageInHoursAgo);
+
+      /*
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
+      const rawResult = await r.knex.raw(
+        `
+          update
+            campaign_contact
+          set
+            assignment_id = null
+          where
+            exists (
+              select 1
+              from campaign
+              where campaign_contact.campaign_id = campaign.id
+                and campaign.organization_id = ?
+            )
+            and is_opted_out = false
+            and message_status = 'needsResponse'
+            and archived = false
+            and not exists (
+              select 1 
+              from campaign_contact_tag
+              join tag on tag.id = campaign_contact_tag.tag_id
+              where tag.is_assignable = false
+                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+            )
+            ${ageInHours ? "and campaign_contact.updated_at < ?" : ""}
+        `,
+        queryArgs
+      );
+
+      return rawResult.rowCount;
+    },
     deleteCampaignOverlap: async (
       _,
       { organizationId, campaignId, overlappingCampaignId },
@@ -2941,7 +2990,7 @@ const rootMutations = {
         );
       });
 
-      memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
+      await memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
         organizationId
       });
 

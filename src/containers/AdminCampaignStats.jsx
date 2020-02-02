@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import moment from "moment";
 import RaisedButton from "material-ui/RaisedButton";
+import { withAuthzContext } from "../components/AuthzProvider";
 import Chart from "../components/Chart";
 import { Card, CardTitle, CardText } from "material-ui/Card";
 import { red600 } from "material-ui/styles/colors";
@@ -142,17 +143,18 @@ class AdminCampaignStats extends React.Component {
       <RaisedButton
         label="Copy Campaign"
         onTouchTap={async () =>
-          await this.props.mutations.copyCampaign(this.props.params.campaignId)
+          await this.props.mutations.copyCampaign(
+            this.props.match.params.campaignId
+          )
         }
       />
     );
   }
 
   render() {
-    const { data, params } = this.props;
-    const { organizationId, campaignId } = params;
+    const { data, match, adminPerms } = this.props;
+    const { organizationId, campaignId } = match.params;
     const campaign = data.campaign;
-    const { adminPerms } = this.props.params;
     const currentExportJob = this.props.data.campaign.pendingJobs.filter(
       job => job.jobType === "export"
     )[0];
@@ -196,7 +198,7 @@ class AdminCampaignStats extends React.Component {
                     <RaisedButton
                       {...dataTest("editCampaign")}
                       onTouchTap={() =>
-                        this.props.router.push(
+                        this.props.history.push(
                           `/admin/${organizationId}/campaigns/${campaignId}/edit`
                         )
                       }
@@ -253,7 +255,7 @@ class AdminCampaignStats extends React.Component {
                           label="Copy Campaign"
                           onTouchTap={async () => {
                             await this.props.mutations.copyCampaign(
-                              this.props.params.campaignId
+                              this.props.match.params.campaignId
                             );
                             this.setState({ campaignJustCopied: true });
                           }}
@@ -315,8 +317,9 @@ class AdminCampaignStats extends React.Component {
 AdminCampaignStats.propTypes = {
   mutations: PropTypes.object,
   data: PropTypes.object,
-  params: PropTypes.object,
-  router: PropTypes.object
+  match: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  adminPerms: PropTypes.bool.isRequired
 };
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -368,7 +371,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      campaignId: ownProps.params.campaignId,
+      campaignId: ownProps.match.params.campaignId,
       contactsFilter: {
         messageStatus: "needsMessage"
       }
@@ -422,7 +425,10 @@ const mapMutationsToProps = () => ({
   })
 });
 
-export default loadData(withRouter(wrapMutations(AdminCampaignStats)), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData(
+  withRouter(wrapMutations(withAuthzContext(AdminCampaignStats))),
+  {
+    mapQueriesToProps,
+    mapMutationsToProps
+  }
+);
