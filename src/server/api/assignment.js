@@ -590,43 +590,52 @@ export async function fulfillPendingRequestFor(auth0Id) {
     throw new AutoassignError(`No pending request exists for ${auth0Id}`);
   }
 
-  const numberAssigned = await r.knex.transaction(async trx => {
-    try {
-      const numberAssigned = await giveUserMoreTexts(
-        auth0Id,
-        pendingAssignmentRequest.amount,
-        pendingAssignmentRequest.organization_id,
-        pendingAssignmentRequest.preferred_team_id,
-        trx
-      );
+  const doAssignment = memoizer.memoize(
+    async ({ pendingAssignmentRequestId: _ignore }) => {
+      const numberAssigned = await r.knex.transaction(async trx => {
+        try {
+          const numberAssigned = await giveUserMoreTexts(
+            auth0Id,
+            pendingAssignmentRequest.amount,
+            pendingAssignmentRequest.organization_id,
+            pendingAssignmentRequest.preferred_team_id,
+            trx
+          );
 
-      await trx("assignment_request")
-        .update({
-          status: "approved"
-        })
-        .where({ id: pendingAssignmentRequest.id });
+          await trx("assignment_request")
+            .update({
+              status: "approved"
+            })
+            .where({ id: pendingAssignmentRequest.id });
+
+          return numberAssigned;
+        } catch (err) {
+          logger.info(
+            `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
+            err
+          );
+
+          // Mark as rejected outside the transaction so it is unaffected by the rollback
+          await r
+            .knex("assignment_request")
+            .update({
+              status: "rejected"
+            })
+            .where({ id: pendingAssignmentRequest.id });
+
+          const isFatal = err.isFatal !== undefined ? err.isFatal : true;
+          throw new AutoassignError(err.message, isFatal);
+        }
+      });
 
       return numberAssigned;
-    } catch (err) {
-      logger.info(
-        `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
-        err
-      );
+    },
+    cacheOpts.FullfillAssignmentLock
+  );
 
-      // Mark as rejected outside the transaction so it is unaffected by the rollback
-      await r
-        .knex("assignment_request")
-        .update({
-          status: "rejected"
-        })
-        .where({ id: pendingAssignmentRequest.id });
-
-      const isFatal = err.isFatal !== undefined ? err.isFatal : true;
-      throw new AutoassignError(err.message, isFatal);
-    }
+  return await doAssignment({
+    pendingAssignmentRequestId: pendingAssignmentRequest.id
   });
-
-  return numberAssigned;
 }
 
 export async function giveUserMoreTexts(
