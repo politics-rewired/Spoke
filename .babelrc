@@ -2,9 +2,13 @@
   "presets": ["react", "env", "stage-0"],
   "only": ["*.js", "*.jsx"],
   "plugins": [
-    ["transform-runtime", {
-      "polyfill": false,
-      "regenerator": true
-    }]
+    [
+      "react-hot-loader/babel",
+      "transform-runtime",
+      {
+        "polyfill": false,
+        "regenerator": true
+      }
+    ]
   ]
 }

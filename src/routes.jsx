@@ -4,7 +4,6 @@ import gql from "graphql-tag";
 
 import ApolloClientSingleton from "./network/apollo-client-singleton";
 import { AuthzProvider } from "./components/AuthzProvider";
-import App from "./components/App";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminCampaignList from "./containers/AdminCampaignList";
 import AdminCampaignStats from "./containers/AdminCampaignStats";
@@ -332,29 +331,27 @@ const TexterRoutes = ({ match }) => (
 );
 
 const AppRoutes = () => (
-  <App>
-    <Switch>
-      <Route path="/" exact={true} component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/terms" component={Terms} />
-      <AuthenticatedRoute path="/admin" component={AdminRoutes} />
-      <AuthenticatedRoute path="/app" component={TexterRoutes} />
-      <AuthenticatedRoute path="/reset/:resetHash" component={Home} />
-      <AuthenticatedRoute
-        path="/invite/:inviteId"
-        component={CreateOrganization}
-      />
-      <AuthenticatedRoute
-        path="/:organizationUuid/join"
-        exact={true}
-        component={JoinTeam}
-      />
-      <AuthenticatedRoute
-        path="/:organizationUuid/join/:campaignId"
-        component={JoinTeam}
-      />
-    </Switch>
-  </App>
+  <Switch>
+    <Route path="/" exact={true} component={Home} />
+    <Route path="/login" component={Login} />
+    <Route path="/terms" component={Terms} />
+    <AuthenticatedRoute path="/admin" component={AdminRoutes} />
+    <AuthenticatedRoute path="/app" component={TexterRoutes} />
+    <AuthenticatedRoute path="/reset/:resetHash" component={Home} />
+    <AuthenticatedRoute
+      path="/invite/:inviteId"
+      component={CreateOrganization}
+    />
+    <AuthenticatedRoute
+      path="/:organizationUuid/join"
+      exact={true}
+      component={JoinTeam}
+    />
+    <AuthenticatedRoute
+      path="/:organizationUuid/join/:campaignId"
+      component={JoinTeam}
+    />
+  </Switch>
 );
 
 export default AppRoutes;

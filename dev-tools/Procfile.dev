@@ -1,5 +1,5 @@
-server: npm run dev-start
-webpack: ./dev-tools/babel-run ./webpack/server.js
+server: npm run dev:server
+webpack: npm run dev:client
 ## These are only useful if you don't have JOBS_SAME_PROCESS environment variable set
 #messagesender01: npm run dev-message-sender-01
 #messagesender234: npm run dev-message-sender-234
