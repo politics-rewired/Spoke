@@ -155,6 +155,11 @@ class AdminCampaignStats extends React.Component {
     const { data, match, adminPerms } = this.props;
     const { organizationId, campaignId } = match.params;
     const campaign = data.campaign;
+
+    if (!campaign) {
+      return <h> Uh oh! This campaign doesn't seem to exist </h>;
+    }
+
     const currentExportJob = this.props.data.campaign.pendingJobs.filter(
       job => job.jobType === "export"
     )[0];
