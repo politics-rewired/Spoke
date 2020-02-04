@@ -153,7 +153,7 @@ const mapMutationsToProps = () => ({
     mutation: gql`
       mutation markForSecondPass(
         $campaignId: String!
-        $excludeAgeInHours: Int
+        $excludeAgeInHours: Float
       ) {
         markForSecondPass(
           campaignId: $campaignId
@@ -171,7 +171,7 @@ const mapMutationsToProps = () => ({
       mutation releaseUnrepliedMessages(
         $campaignId: String!
         $target: ReleaseActionTarget!
-        $ageInHours: Int!
+        $ageInHours: Float!
       ) {
         releaseMessages(
           campaignId: $campaignId

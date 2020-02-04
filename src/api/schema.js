@@ -299,9 +299,9 @@ const rootSchema = `
     megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]):[CampaignIdAssignmentId]
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: Int!): String!
-    releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Int): String!
-    releaseAllUnhandledReplies(organizationId: String!, ageInHours: Int): String!
-    markForSecondPass(campaignId: String!, excludeAgeInHours: Int): String!
+    releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
+    releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean): String!
+    markForSecondPass(campaignId: String!, excludeAgeInHours: Float): String!
     unMarkForSecondPass(campaignId: String!): String!
     deleteNeedsMessage(campaignId: String!): String!
     insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!

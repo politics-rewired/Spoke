@@ -2061,7 +2061,7 @@ const rootMutations = {
 
       const queryArgs = [parseInt(campaignId)];
       if (excludeAgeInHours) {
-        queryArgs.push(parseInt(excludeAgeInHours));
+        queryArgs.push(parseFloat(excludeAgeInHours));
       }
 
       /**
@@ -2625,19 +2625,12 @@ const rootMutations = {
     },
     releaseAllUnhandledReplies: async (
       _,
-      { organizationId, ageInHours },
+      { organizationId, ageInHours, releaseOnRestricted },
       { user }
     ) => {
       await accessRequired(user, organizationId, "ADMIN", true);
-      let ageInHoursAgo;
-      if (!!ageInHours) {
-        ageInHoursAgo = new Date();
-        ageInHoursAgo.setHours(new Date().getHours() - ageInHours);
-        ageInHoursAgo = ageInHoursAgo.toISOString();
-      }
 
-      const queryArgs = [parseInt(organizationId)];
-      if (ageInHours) queryArgs.push(ageInHoursAgo);
+      const releaseOnLimitAssignmentToTeams = releaseOnRestricted || false;
 
       /*
        * Using SQL injection to avoid passing archived as a binding
@@ -2645,30 +2638,47 @@ const rootMutations = {
        */
       const rawResult = await r.knex.raw(
         `
-          update
-            campaign_contact
-          set
-            assignment_id = null
-          where
-            exists (
-              select 1
-              from campaign
-              where campaign_contact.campaign_id = campaign.id
-                and campaign.organization_id = ?
-            )
-            and is_opted_out = false
-            and message_status = 'needsResponse'
-            and archived = false
-            and not exists (
-              select 1 
-              from campaign_contact_tag
-              join tag on tag.id = campaign_contact_tag.tag_id
-              where tag.is_assignable = false
-                and campaign_contact_tag.campaign_contact_id = campaign_contact.id
-            )
-            ${ageInHours ? "and campaign_contact.updated_at < ?" : ""}
+          with update_result as (
+            update
+              campaign_contact
+            set
+              assignment_id = null
+            from
+              campaign
+            where
+              campaign_contact.campaign_id = campaign.id
+              and campaign.organization_id = ?
+              and (? or campaign.limit_assignment_to_teams = false)
+              and not exists (
+                select 1
+                from message
+                where is_from_contact = false
+                  and campaign_contact_id = campaign_contact.id
+                  and created_at > now() - (? * interval '1 hours')
+              )
+              and is_opted_out = false
+              and message_status = 'needsResponse'
+              and archived = false
+              and not exists (
+                select 1 
+                from campaign_contact_tag
+                join tag on tag.id = campaign_contact_tag.tag_id
+                where tag.is_assignable = false
+                  and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+              )
+            returning 1, campaign_id
+          )
+          select
+            1, campaign_id
+          from
+            update_result
+          group by 2
         `,
-        queryArgs
+        [
+          parseInt(organizationId),
+          releaseOnLimitAssignmentToTeams,
+          ageInHours || 0
+        ]
       );
 
       return rawResult.rowCount;
