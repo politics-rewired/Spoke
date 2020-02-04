@@ -115,6 +115,13 @@ class AdminCampaignList extends React.Component {
         releaseOnRestricted
       )
       .then(result => {
+        if (result.errors) {
+          return this.setState({
+            releaseAllRepliesError: errors,
+            releasingInProgress: false
+          });
+        }
+
         this.setState({
           releaseAllRepliesResult: result.data.releaseAllUnhandledReplies,
           releasingInProgress: false
@@ -242,7 +249,10 @@ class AdminCampaignList extends React.Component {
                 Error: {JSON.stringify(this.state.releaseAllRepliesError)}
               </span>
             ) : this.state.releaseAllRepliesResult ? (
-              <span>Released {this.state.releaseAllRepliesResult} replies</span>
+              <span>
+                Released replies on {this.state.releaseAllRepliesResult}
+                campaigns
+              </span>
             ) : !doneReleasingReplies ? (
               <div>
                 How many hours ago should a conversation have been idle for it

@@ -2669,7 +2669,7 @@ const rootMutations = {
             returning 1, campaign_id
           )
           select
-            count(*) as count, campaign_id
+            1, campaign_id
           from
             update_result
           group by 2
