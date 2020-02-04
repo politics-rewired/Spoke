@@ -11,6 +11,7 @@ import loadData from "./hoc/load-data";
 import wrapMutations from "./hoc/wrap-mutations";
 import { dataTest } from "../lib/attributes";
 import GSForm from "../components/forms/GSForm";
+import GSSubmitButton from "../components/forms/GSSubmitButton";
 
 export const UserEditMode = Object.freeze({
   SignUp: "signup",
@@ -239,7 +240,11 @@ class UserEdit extends React.Component {
                 />
               </div>
             )}
-            <Form.Button type="submit" label={saveLabel || "Save"} />
+            <Form.Button
+              type="submit"
+              label={saveLabel || "Save"}
+              component={GSSubmitButton}
+            />
           </div>
         </GSForm>
         <div>

@@ -58,7 +58,7 @@ class LocalLogin extends React.Component {
   constructor(props) {
     super(props);
 
-    const { nextUrl } = queryString.parse(this.props.location.search);
+    const nextUrl = queryString.parse(location.search).nextUrl || "/";
     this.state = {
       active: nextUrl.includes("reset")
         ? UserEditMode.Reset
