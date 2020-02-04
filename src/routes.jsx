@@ -335,9 +335,14 @@ const AppRoutes = () => (
     <Route path="/" exact={true} component={Home} />
     <Route path="/login" component={Login} />
     <Route path="/terms" component={Terms} />
+    <Route
+      path="/reset/:resetHash"
+      render={({ location }) => (
+        <Redirect to={`/login?nextUrl=${location.pathname}`} />
+      )}
+    />
     <AuthenticatedRoute path="/admin" component={AdminRoutes} />
     <AuthenticatedRoute path="/app" component={TexterRoutes} />
-    <AuthenticatedRoute path="/reset/:resetHash" component={Home} />
     <AuthenticatedRoute
       path="/invite/:inviteId"
       component={CreateOrganization}
