@@ -15,7 +15,7 @@ import { MenuItem } from "material-ui/Menu";
 import { dataTest } from "../lib/attributes";
 import RaisedButton from "material-ui/RaisedButton";
 import Dialog from "material-ui/Dialog";
-import { TextField } from "material-ui";
+import { TextField, Toggle } from "material-ui";
 
 const styles = {
   flexContainer: {
@@ -37,6 +37,7 @@ class AdminCampaignList extends React.Component {
     campaignsFilter: {
       isArchived: false
     },
+    releasingInProgress: false,
     releasingAllReplies: false,
     releaseAllRepliesError: undefined,
     releaseAllRepliesResult: undefined
@@ -93,20 +94,38 @@ class AdminCampaignList extends React.Component {
   };
 
   closeReleasingAllReplies = () => {
-    this.setState({ releasingAllReplies: false });
+    this.setState({
+      releasingInProgress: false,
+      releasingAllReplies: false,
+      releaseAllRepliesError: undefined,
+      releaseAllRepliesResult: undefined
+    });
   };
 
   releaseAllReplies = () => {
     const ageInHours = this.refs.numberOfHoursToRelease.input.value;
+    const releaseOnRestricted = this.refs.releaseOnRestricted.state.switched;
+
+    this.setState({ releasingInProgress: true });
 
     this.props.mutations
-      .releaseAllUnhandledReplies(this.props.params.organizationId, ageInHours)
+      .releaseAllUnhandledReplies(
+        this.props.match.params.organizationId,
+        ageInHours,
+        releaseOnRestricted
+      )
       .then(result => {
         this.setState({
-          releaseAllRepliesResult: result.data.releaseAllUnhandledReplies
+          releaseAllRepliesResult: result.data.releaseAllUnhandledReplies,
+          releasingInProgress: false
         });
       })
-      .catch(error => this.setState({ releaseAllRepliesError: error }));
+      .catch(error =>
+        this.setState({
+          releaseAllRepliesError: error,
+          releasingInProgress: false
+        })
+      );
   };
 
   renderPageSizeOptions() {
@@ -167,7 +186,8 @@ class AdminCampaignList extends React.Component {
       pageSize,
       currentPageIndex,
       campaignsFilter,
-      releasingAllReplies
+      releasingAllReplies,
+      releasingInProgress
     } = this.state;
 
     const doneReleasingReplies =
@@ -193,35 +213,37 @@ class AdminCampaignList extends React.Component {
             open={true}
             onRequestClose={this.closeReleasingAllReplies}
             actions={
-              doneReleasingReplies
-                ? [
-                    <RaisedButton
-                      label="Done"
-                      onClick={this.closeReleasingAllReplies}
-                    />
-                  ]
-                : [
-                    <RaisedButton
-                      label="Cancel"
-                      onClick={this.closeReleasingAllReplies}
-                    />,
-                    <RaisedButton
-                      label="Release"
-                      onClick={this.releaseAllReplies}
-                      primary={true}
-                    />
-                  ]
+              releasingInProgress
+                ? []
+                : doneReleasingReplies
+                  ? [
+                      <RaisedButton
+                        label="Done"
+                        onClick={this.closeReleasingAllReplies}
+                      />
+                    ]
+                  : [
+                      <RaisedButton
+                        label="Cancel"
+                        onClick={this.closeReleasingAllReplies}
+                      />,
+                      <RaisedButton
+                        label="Release"
+                        onClick={this.releaseAllReplies}
+                        primary={true}
+                      />
+                    ]
             }
           >
-            {this.state.releaseAllRepliesError && (
+            {releasingInProgress ? (
+              <LoadingIndicator />
+            ) : this.state.releaseAllRepliesError ? (
               <span>
                 Error: {JSON.stringify(this.state.releaseAllRepliesError)}
               </span>
-            )}
-            {this.state.releaseAllRepliesResult && (
+            ) : this.state.releaseAllRepliesResult ? (
               <span>Released {this.state.releaseAllRepliesResult} replies</span>
-            )}
-            {!doneReleasingReplies && (
+            ) : !doneReleasingReplies ? (
               <div>
                 How many hours ago should a conversation have been idle for it
                 to be unassigned?
@@ -231,7 +253,15 @@ class AdminCampaignList extends React.Component {
                   ref="numberOfHoursToRelease"
                   defaultValue={1}
                 />
+                <br />
+                <br />
+                Should we release replies on campaigns that are restricted to
+                teams? If unchecked, replies on campaigns restricted to team
+                members will stay assigned to their current texter.
+                <Toggle ref="releaseOnRestricted" defaultValue={false} />
               </div>
+            ) : (
+              <div />
             )}
           </Dialog>
         )}
@@ -282,19 +312,25 @@ const mapMutationsToProps = () => ({
     `,
     variables: { campaign }
   }),
-  releaseAllUnhandledReplies: (organizationId, ageInHours) => ({
+  releaseAllUnhandledReplies: (
+    organizationId,
+    ageInHours,
+    releaseOnRestricted
+  ) => ({
     mutation: gql`
       mutation releaseAllUnhandledReplies(
         $organizationId: String!
-        $ageInHours: Int
+        $ageInHours: Float
+        $releaseOnRestricted: Boolean
       ) {
         releaseAllUnhandledReplies(
           organizationId: $organizationId
           ageInHours: $ageInHours
+          releaseOnRestricted: $releaseOnRestricted
         )
       }
     `,
-    variables: { organizationId, ageInHours }
+    variables: { organizationId, ageInHours, releaseOnRestricted }
   })
 });
 
