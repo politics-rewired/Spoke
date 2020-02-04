@@ -4,9 +4,9 @@ import queryString from "query-string";
 import { withRouter } from "react-router";
 import { StyleSheet, css } from "aphrodite";
 
-import { isClient } from "../lib";
 import theme from "../styles/theme";
 import UserEdit, { UserEditMode } from "../containers/UserEdit";
+import UserPasswordReset from "../components/UserPasswordReset";
 
 const styles = StyleSheet.create({
   fieldContainer: {
@@ -55,17 +55,16 @@ const saveLabels = {
 };
 
 class LocalLogin extends React.Component {
-  state = {
-    active: UserEditMode.Login
-  };
+  constructor(props) {
+    super(props);
 
-  componentDidMount = () => {
     const { nextUrl } = queryString.parse(this.props.location.search);
-
-    if (nextUrl && nextUrl.includes("reset")) {
-      this.setState({ active: UserEditMode.Reset });
-    }
-  };
+    this.state = {
+      active: nextUrl.includes("reset")
+        ? UserEditMode.Reset
+        : UserEditMode.Login
+    };
+  }
 
   handleClick = e => {
     this.setState({ active: e.target.name });
@@ -113,13 +112,21 @@ class LocalLogin extends React.Component {
         )}
         <div className={css(styles.fieldContainer)}>
           <h2 className={css(styles.header)}>Welcome to Spoke</h2>
-          <UserEdit
-            authType={active}
-            saveLabel={saveLabels[active]}
-            history={history}
-            nextUrl={nextUrl}
-            style={css(styles.authFields)}
-          />
+          {active === UserEditMode.Reset ? (
+            <UserPasswordReset
+              history={history}
+              nextUrl={nextUrl}
+              style={css(styles.authFields)}
+            />
+          ) : (
+            <UserEdit
+              authType={active}
+              saveLabel={saveLabels[active]}
+              history={history}
+              nextUrl={nextUrl}
+              style={css(styles.authFields)}
+            />
+          )}
         </div>
       </div>
     );
@@ -133,7 +140,7 @@ LocalLogin.propTypes = {
 
 const LocalLoginWrapper = withRouter(LocalLogin);
 
-const Login = ({ location }) => {
+const Login = ({ location, history }) => {
   if (window.ALTERNATE_LOGIN_URL) {
     window.location.href = window.ALTERNATE_LOGIN_URL;
     return <div />;
@@ -146,7 +153,7 @@ const Login = ({ location }) => {
       return <div />;
 
     case "local":
-      return <LocalLoginWrapper location={location} />;
+      return <LocalLoginWrapper location={location} history={history} />;
 
     default:
       const { nextUrl } = queryString.parse(location.search);
@@ -156,7 +163,8 @@ const Login = ({ location }) => {
 };
 
 Login.propTypes = {
-  location: PropTypes.object.isRequired
+  location: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired
 };
 
 export default Login;
