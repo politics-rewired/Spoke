@@ -84,10 +84,7 @@ class ScriptEditor extends React.Component {
 
     const editorState = this.getEditorState();
     this.state = {
-      editorState,
-      segmentCount: 0,
-      charsLeft: 160,
-      charSet: "gsm"
+      editorState
     };
   }
 
@@ -210,9 +207,17 @@ class ScriptEditor extends React.Component {
         </div>
         {this.renderCustomFields()}
         <div>
-          Segments: {info.sms_count} <br />
-          Characters left in segment: {info.chars_left} <br />
-          Character set: {info.char_set} <br />
+          Estimated Segments: {info.sms_count} <br />
+          Characters left in current segment: {info.chars_left} <br />
+          Encoding required: {info.char_set} <br />
+          <br />
+          Not sure what a segment is? Check out the{" "}
+          <a
+            href="https://secure.helpscout.net/docs/5d65589b04286350aeeb1576/article/5e3aea9404286364bc94e58b"
+            target="_blank"
+          >
+            docs here
+          </a>.
         </div>
       </div>
     );
