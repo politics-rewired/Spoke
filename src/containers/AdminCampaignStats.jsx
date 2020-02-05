@@ -157,7 +157,7 @@ class AdminCampaignStats extends React.Component {
     const campaign = data.campaign;
 
     if (!campaign) {
-      return <h> Uh oh! This campaign doesn't seem to exist </h>;
+      return <h1> Uh oh! Campaign {campaignId} doesn't seem to exist </h1>;
     }
 
     const currentExportJob = this.props.data.campaign.pendingJobs.filter(
