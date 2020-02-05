@@ -154,9 +154,7 @@ export const parseCSV = (file, optOuts, callback) => {
       } else {
         if (Object.keys(useAliases).length > 0) {
           for (const row of data) {
-            console.log("TCL: parseCSV -> row", row);
             for (const field of Object.keys(useAliases)) {
-              console.log("TCL: parseCSV -> field", field);
               row[field] = row[useAliases[field]];
               delete row[useAliases[field]];
             }
