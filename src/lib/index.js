@@ -24,7 +24,14 @@ export {
   getChildren,
   makeTree
 } from "./interaction-step-helpers";
+
+const fieldAliases = {
+  firstName: ["first_name", "firstname"],
+  lastName: ["last_name", "lastname"]
+};
+
 const requiredUploadFields = ["firstName", "lastName", "cell"];
+
 const topLevelUploadFields = [
   "firstName",
   "lastName",
@@ -32,6 +39,10 @@ const topLevelUploadFields = [
   "zip",
   "external_id"
 ];
+
+const notCustomFields = topLevelUploadFields
+  .map(field => fieldAliases[field] || [field])
+  .reduce((acc, fieldWithAliases) => acc.concat(fieldWithAliases), []);
 
 export {
   ROLE_HIERARCHY,
@@ -119,10 +130,21 @@ export const parseCSV = (file, optOuts, callback) => {
       const fields = meta.fields;
 
       const missingFields = [];
+      const useAliases = {};
 
       for (const field of requiredUploadFields) {
-        if (fields.indexOf(field) === -1) {
-          missingFields.push(field);
+        if (!fields.includes(field)) {
+          let fieldFoundViaAlias = false;
+          for (const alias of fieldAliases[field] || []) {
+            if (fields.includes(alias)) {
+              useAliases[field] = alias;
+              fieldFoundViaAlias = true;
+            }
+          }
+
+          if (!fieldFoundViaAlias) {
+            missingFields.push(field);
+          }
         }
       }
 
@@ -130,13 +152,22 @@ export const parseCSV = (file, optOuts, callback) => {
         const error = `Missing fields: ${missingFields.join(", ")}`;
         callback({ error });
       } else {
+        if (Object.keys(useAliases).length > 0) {
+          for (const row of data) {
+            for (const field of Object.keys(useAliases)) {
+              row[field] = row[useAliases[field]];
+              delete row[useAliases[field]];
+            }
+          }
+        }
+
         const { validationStats, validatedData } = getValidatedData(
           data,
           optOuts
         );
 
         const customFields = fields.filter(
-          field => topLevelUploadFields.indexOf(field) === -1
+          field => !notCustomFields.includes(field)
         );
 
         callback({
@@ -147,17 +178,4 @@ export const parseCSV = (file, optOuts, callback) => {
       }
     }
   });
-};
-
-export const convertRowToContact = row => {
-  const customFields = row;
-  const contact = {};
-  for (const field of topLevelUploadFields) {
-    if (_.has(row, field)) {
-      contact[field] = row[field];
-    }
-  }
-
-  contact.customFields = customFields;
-  return contact;
 };
