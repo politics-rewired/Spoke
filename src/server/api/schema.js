@@ -2088,6 +2088,12 @@ const rootMutations = {
               newer_contact.cell = current_contact.cell
               and newer_contact.created_at > current_contact.created_at
           )
+          and not exists (
+            select 1
+            from message
+            where campaign_contact.id = message.campaign_contact_id
+              and is_from_contact = true
+          )
           ${
             excludeAgeInHours
               ? "and current_contact.updated_at < now() - interval '?? hour'"
