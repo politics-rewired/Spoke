@@ -1186,7 +1186,7 @@ const rootMutations = {
           )
         );
 
-      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
       });
 
@@ -1197,7 +1197,7 @@ const rootMutations = {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
 
-      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: organization_id
       });
 
@@ -1214,7 +1214,7 @@ const rootMutations = {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
 
-      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: organization_id
       });
 
@@ -1231,7 +1231,7 @@ const rootMutations = {
       const { organization_id } = await loaders.campaign.load(id);
       await accessRequired(user, organization_id, "ADMIN");
 
-      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: organization_id
       });
 
