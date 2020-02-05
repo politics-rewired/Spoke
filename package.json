@@ -98,6 +98,7 @@
     "graphql-tag": "^0.1.9",
     "graphql-tools": "^2.8.0",
     "graphql-type-json": "^0.1.4",
+    "gsm": "^0.1.4",
     "hot-shots": "^6.3.0",
     "humps": "^1.1.0",
     "is-url": "^1.2.2",
