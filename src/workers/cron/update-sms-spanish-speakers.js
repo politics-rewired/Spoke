@@ -17,7 +17,7 @@ const main = async () => {
   const fiveAndAHalfMinutesAgo = now;
 
   const newAssignmentUsers = await assignmentManagerDb("berniesms_shiftrequest")
-    .select("auth_user.email")
+    .select(["auth_user.email", "auth_user.first_name"])
     .join("auth_user", "auth_user.id", "=", "user_id")
     .where(
       "berniesms_shiftrequest.created",
