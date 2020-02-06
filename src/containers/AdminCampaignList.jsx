@@ -119,10 +119,7 @@ class AdminCampaignList extends React.Component {
       )
       .then(result => {
         if (result.errors) {
-          return this.setState({
-            releaseAllRepliesError: result.errors,
-            releasingInProgress: false
-          });
+          throw result.errors;
         }
 
         this.setState({
@@ -274,9 +271,9 @@ class AdminCampaignList extends React.Component {
                 <Toggle ref="releaseOnRestricted" defaultValue={false} />
                 <br />
                 <br />
-                Should we limit the releasing to only contacts who are within
-                texting hours for their timezone? If unchecked, replies will be
-                released for contacts that may be not be textable yet or until
+                Release contacts only if it is within texting hours in the
+                contact's timezone? If unchecked, replies will be released for
+                contacts that may not be textable until later today or until
                 tomorrow.
                 <Toggle
                   ref="limitToCurrentlyTextableContacts"
