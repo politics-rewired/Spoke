@@ -94,7 +94,9 @@ Stat.propTypes = {
 class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
-    disableExportButton: false
+    disableExportButton: false,
+    copyingCampaign: false,
+    copiedCampaignId: undefined
   };
 
   renderSurveyStats() {
@@ -258,11 +260,23 @@ class AdminCampaignStats extends React.Component {
                         <RaisedButton
                           {...dataTest("copyCampaign")}
                           label="Copy Campaign"
-                          onTouchTap={async () => {
-                            await this.props.mutations.copyCampaign(
-                              this.props.match.params.campaignId
-                            );
-                            this.setState({ campaignJustCopied: true });
+                          disabled={this.state.copyingCampaign}
+                          onTouchTap={() => {
+                            this.setState({ copyingCampaign: true });
+
+                            this.props.mutations
+                              .copyCampaign(this.props.match.params.campaignId)
+                              .then(result => {
+                                console.log(
+                                  "TCL: AdminCampaignStats -> render -> result",
+                                  result
+                                );
+                                this.setState({
+                                  campaignJustCopied: true,
+                                  copyingCampaign: false,
+                                  copiedCampaignId: result.data.copyCampaign.id
+                                });
+                              });
                           }}
                         />
                       ]
@@ -308,10 +322,15 @@ class AdminCampaignStats extends React.Component {
         />
         <Snackbar
           open={this.state.campaignJustCopied}
-          message="Campaign successfully copied. Click &quot;Campaigns&quot; to see it"
+          message={`Campaign successfully copied to campaign ${
+            this.state.copiedCampaignId
+          }`}
           autoHideDuration={5000}
           onRequestClose={() => {
-            this.setState({ campaignJustCopied: false });
+            this.setState({
+              campaignJustCopied: false,
+              copiedCampaignId: undefined
+            });
           }}
         />
       </div>
