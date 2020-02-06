@@ -264,7 +264,8 @@ export const resolvers = {
           return await r
             .reader("tag")
             .where({ organization_id: organization.id, is_assignable: false })
-            .orderBy(["is_system", "title"]);
+            .orderBy("is_system", "desc")
+            .orderBy("title", "asc");
         },
         cacheOpts.OrganizationEscalatedTagList
       );
