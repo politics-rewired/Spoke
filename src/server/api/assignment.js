@@ -653,10 +653,21 @@ export async function giveUserMoreTexts(
     throw new AutoassignError(`No user found with id ${auth0Id}`);
   }
 
-  const assignmentInfo = await myCurrentAssignmentTarget(
+  const assignmentOptions = await myCurrentAssignmentTargets(
     user.id,
-    organizationId
+    organizationId,
+    trx
   );
+
+  if (assignmentOptions.length === 0) {
+    return { count: 0 };
+  }
+
+  const preferredAssignment = assignmentOptions.find(
+    assignment => assignment.team_id === preferredTeamId
+  );
+
+  const assignmentInfo = preferredAssignment || assignmentOptions[0];
 
   if (!assignmentInfo) {
     throw new AutoassignError(
@@ -667,7 +678,7 @@ export async function giveUserMoreTexts(
   // Use a Map to de-duplicate and support integer-type keys
   const teamsAssignedTo = new Map();
   let countUpdated = 0;
-  let countLeftToUpdate = count;
+  let countLeftToUpdate = Math.min(count, assignmentInfo.max_request_count);
 
   const updated_result = await parentTrx.transaction(async trx => {
     while (countLeftToUpdate > 0) {
@@ -737,7 +748,11 @@ export async function assignLoop(
 
   // Determine which campaign to assign to – optimize to pick winners
   let campaignIdToAssignTo = assignmentInfo.campaign.id;
-  let countToAssign = countLeft;
+  let countToAssign = Math.min(
+    countLeft,
+    parseInt(assignmentInfo.max_request_count)
+  );
+
   logger.info(
     `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${
       assignmentInfo.type
