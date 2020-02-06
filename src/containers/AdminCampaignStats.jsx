@@ -331,8 +331,8 @@ class AdminCampaignStats extends React.Component {
         <Snackbar
           open={this.state.campaignJustCopied}
           message={
-            copyCampaignError
-              ? `Error: ${copyCampaignError}`
+            this.state.copyCampaignError
+              ? `Error: ${this.state.copyCampaignError}`
               : `Campaign successfully copied to campaign ${
                   this.state.copiedCampaignId
                 }`
