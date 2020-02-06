@@ -105,6 +105,8 @@ class AdminCampaignList extends React.Component {
   releaseAllReplies = () => {
     const ageInHours = this.refs.numberOfHoursToRelease.input.value;
     const releaseOnRestricted = this.refs.releaseOnRestricted.state.switched;
+    const limitToCurrentlyTextableContacts = this.refs
+      .limitToCurrentlyTextableContacts.state.switched;
 
     this.setState({ releasingInProgress: true });
 
@@ -112,12 +114,13 @@ class AdminCampaignList extends React.Component {
       .releaseAllUnhandledReplies(
         this.props.match.params.organizationId,
         ageInHours,
-        releaseOnRestricted
+        releaseOnRestricted,
+        limitToCurrentlyTextableContacts
       )
       .then(result => {
         if (result.errors) {
           return this.setState({
-            releaseAllRepliesError: errors,
+            releaseAllRepliesError: result.errors,
             releasingInProgress: false
           });
         }
@@ -127,12 +130,12 @@ class AdminCampaignList extends React.Component {
           releasingInProgress: false
         });
       })
-      .catch(error =>
+      .catch(error => {
         this.setState({
           releaseAllRepliesError: error,
           releasingInProgress: false
-        })
-      );
+        });
+      });
   };
 
   renderPageSizeOptions() {
@@ -269,6 +272,16 @@ class AdminCampaignList extends React.Component {
                 teams? If unchecked, replies on campaigns restricted to team
                 members will stay assigned to their current texter.
                 <Toggle ref="releaseOnRestricted" defaultValue={false} />
+                <br />
+                <br />
+                Should we limit the releasing to only contacts who are within
+                texting hours for their timezone? If unchecked, replies will be
+                released for contacts that may be not be textable yet or until
+                tomorrow.
+                <Toggle
+                  ref="limitToCurrentlyTextableContacts"
+                  defaultValue={true}
+                />
               </div>
             ) : (
               <div />
@@ -325,22 +338,30 @@ const mapMutationsToProps = () => ({
   releaseAllUnhandledReplies: (
     organizationId,
     ageInHours,
-    releaseOnRestricted
+    releaseOnRestricted,
+    limitToCurrentlyTextableContacts
   ) => ({
     mutation: gql`
       mutation releaseAllUnhandledReplies(
         $organizationId: String!
         $ageInHours: Float
         $releaseOnRestricted: Boolean
+        $limitToCurrentlyTextableContacts: Boolean
       ) {
         releaseAllUnhandledReplies(
           organizationId: $organizationId
           ageInHours: $ageInHours
           releaseOnRestricted: $releaseOnRestricted
+          limitToCurrentlyTextableContacts: $limitToCurrentlyTextableContacts
         )
       }
     `,
-    variables: { organizationId, ageInHours, releaseOnRestricted }
+    variables: {
+      organizationId,
+      ageInHours,
+      releaseOnRestricted,
+      limitToCurrentlyTextableContacts
+    }
   })
 });
 

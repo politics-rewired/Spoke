@@ -2625,12 +2625,23 @@ const rootMutations = {
     },
     releaseAllUnhandledReplies: async (
       _,
-      { organizationId, ageInHours, releaseOnRestricted },
+      {
+        organizationId,
+        ageInHours,
+        releaseOnRestricted,
+        limitToCurrentlyTextableContacts
+      },
       { user }
     ) => {
       await accessRequired(user, organizationId, "ADMIN", true);
 
-      const releaseOnLimitAssignmentToTeams = releaseOnRestricted || false;
+      const releaseOnLimitAssignmentToTeams =
+        releaseOnRestricted != null ? releaseOnRestricted : false;
+
+      const limitToIsTextableNow =
+        limitToCurrentlyTextableContacts != null
+          ? limitToCurrentlyTextableContacts
+          : true;
 
       /*
        * Using SQL injection to avoid passing archived as a binding
@@ -2666,6 +2677,16 @@ const rootMutations = {
                 where tag.is_assignable = false
                   and campaign_contact_tag.campaign_contact_id = campaign_contact.id
               )
+              and (
+                ? or contact_is_textable_now(
+                  coalesce(campaign_contact.timezone, spoke_tz_to_iso_tz(campaign.timezone)),
+                  campaign.texting_hours_start,
+                  campaign.texting_hours_end,
+                  extract('hour' from current_timestamp at time zone campaign.timezone) < campaign.texting_hours_end
+                  and 
+                  extract('hour' from current_timestamp at time zone campaign.timezone) > campaign.texting_hours_start
+                )
+              )
             returning 1, campaign_id
           )
           select
@@ -2677,7 +2698,8 @@ const rootMutations = {
         [
           parseInt(organizationId),
           releaseOnLimitAssignmentToTeams,
-          ageInHours || 0
+          ageInHours || 0,
+          limitToIsTextableNow
         ]
       );
 
