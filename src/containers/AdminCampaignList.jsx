@@ -268,7 +268,7 @@ class AdminCampaignList extends React.Component {
                 Should we release replies on campaigns that are restricted to
                 teams? If unchecked, replies on campaigns restricted to team
                 members will stay assigned to their current texter.
-                <Toggle ref="releaseOnRestricted" defaultValue={false} />
+                <Toggle ref="releaseOnRestricted" defaultToggled={false} />
                 <br />
                 <br />
                 Release contacts only if it is within texting hours in the
@@ -277,7 +277,7 @@ class AdminCampaignList extends React.Component {
                 tomorrow.
                 <Toggle
                   ref="limitToCurrentlyTextableContacts"
-                  defaultValue={true}
+                  defaultToggled={true}
                 />
               </div>
             ) : (
