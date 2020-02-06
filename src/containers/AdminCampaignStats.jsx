@@ -267,10 +267,6 @@ class AdminCampaignStats extends React.Component {
                             this.props.mutations
                               .copyCampaign(this.props.match.params.campaignId)
                               .then(result => {
-                                console.log(
-                                  "TCL: AdminCampaignStats -> render -> result",
-                                  result
-                                );
                                 this.setState({
                                   campaignJustCopied: true,
                                   copyingCampaign: false,
