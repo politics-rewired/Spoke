@@ -2,13 +2,28 @@ import knex from "knex";
 import logger from "../../logger";
 import { config } from "../../config";
 import knexConfig from "../../server/knex";
+const fs = require("fs");
 
 const TEAM_ID = config.SPANISH_TEAM_ID;
+
+const ca = fs.readFileSync(process.env.MYSQL_CA_PATH);
+const key = fs.readFileSync(process.env.MYSQL_KEY_PATH);
+const cert = fs.readFileSync(process.env.MYSQL_CERT_PATH);
+
+console.log(ca.toString());
+console.log(key.toString());
+console.log(cert.toString());
 
 const spokeDb = knex(knexConfig);
 const assignmentManagerDb = knex({
   client: "mysql",
-  connection: config.ASSIGNMENT_MANAGER_DATABASE_URL
+  connection: {
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+    ssl: { ca, key, cert }
+  }
 });
 
 const main = async () => {
