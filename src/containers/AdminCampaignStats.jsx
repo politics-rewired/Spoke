@@ -96,7 +96,8 @@ class AdminCampaignStats extends React.Component {
     exportMessageOpen: false,
     disableExportButton: false,
     copyingCampaign: false,
-    copiedCampaignId: undefined
+    copiedCampaignId: undefined,
+    copyCampaignError: undefined
   };
 
   renderSurveyStats() {
@@ -267,12 +268,23 @@ class AdminCampaignStats extends React.Component {
                             this.props.mutations
                               .copyCampaign(this.props.match.params.campaignId)
                               .then(result => {
+                                if (result.errors) {
+                                  throw result.errors;
+                                }
+
                                 this.setState({
                                   campaignJustCopied: true,
                                   copyingCampaign: false,
                                   copiedCampaignId: result.data.copyCampaign.id
                                 });
-                              });
+                              })
+                              .catch(error =>
+                                this.setState({
+                                  campaignJustCopied: true,
+                                  copyingCampaign: false,
+                                  copyCampaignError: error
+                                })
+                              );
                           }}
                         />
                       ]
@@ -318,14 +330,19 @@ class AdminCampaignStats extends React.Component {
         />
         <Snackbar
           open={this.state.campaignJustCopied}
-          message={`Campaign successfully copied to campaign ${
-            this.state.copiedCampaignId
-          }`}
+          message={
+            copyCampaignError
+              ? `Error: ${copyCampaignError}`
+              : `Campaign successfully copied to campaign ${
+                  this.state.copiedCampaignId
+                }`
+          }
           autoHideDuration={5000}
           onRequestClose={() => {
             this.setState({
               campaignJustCopied: false,
-              copiedCampaignId: undefined
+              copiedCampaignId: undefined,
+              copyCampaignError: undefined
             });
           }}
         />
