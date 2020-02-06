@@ -36,11 +36,13 @@ const main = async () => {
       na => na.email === member.email
     );
 
-    await assignmentManagerDb("auth_user")
-      .update({ first_name: `SP ${assignmentManagerDbUser.first_name}` })
-      .where({ email: member.email });
+    if (assignmentManagerDbUser.first_name.slice(0, 3) !== "SP ") {
+      await assignmentManagerDb("auth_user")
+        .update({ first_name: `SP ${assignmentManagerDbUser.first_name}` })
+        .where({ email: member.email });
 
-    logger.info("Updated user with prefix SP", assignmentManagerDbUser);
+      logger.info("Updated user with prefix SP", assignmentManagerDbUser);
+    }
   }
 };
 
