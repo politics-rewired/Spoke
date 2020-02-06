@@ -656,7 +656,7 @@ export async function giveUserMoreTexts(
   const assignmentOptions = await myCurrentAssignmentTargets(
     user.id,
     organizationId,
-    trx
+    parentTrx
   );
 
   if (assignmentOptions.length === 0) {
