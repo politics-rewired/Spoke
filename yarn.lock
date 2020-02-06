@@ -9555,13 +9555,14 @@ memoize-one@^5.0.0:
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.1.1.tgz#047b6e3199b508eaec03504de71229b8eb1d75c0"
   integrity sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA==
 
-memoredis@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.6.tgz#0b02a6f44f1df5bca89a3a82cabcbf72ed507507"
-  integrity sha512-HyHJW0vXi33tmYs+Q3NXxfoXQH6cFBRku/FCAifkm5x7VV5flPDA1B9CHvAQ8O4s3vfnufMUyeDcehxPfpEd/Q==
+memoredis@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.7.tgz#ed12529d285bf0806ce564688066df1cf459ed7e"
+  integrity sha512-sfNSY2FdLmn1ARWCTlgfwEElry5uKSqvP57SRoPSflApFe+CNYlUJKNYreqehb+VL0+SiBtD4j48UoWl41ftow==
   dependencies:
     json-date-parser "^1.0.1"
     json-stable-stringify "^1.0.1"
+    lodash "^4.17.15"
     redis "^2.8.0"
     redis-lock "^0.1.4"
     runtypes "^4.0.3"
