@@ -660,7 +660,7 @@ export async function giveUserMoreTexts(
   );
 
   if (assignmentOptions.length === 0) {
-    return { count: 0 };
+    return 0;
   }
 
   const preferredAssignment = assignmentOptions.find(
