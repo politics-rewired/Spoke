@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import type from "prop-types";
 
-import Select from "react-select";
+import Select, { createFilter } from "react-select";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import { Tabs, Tab } from "material-ui/Tabs";
 import Dialog from "material-ui/Dialog";
@@ -32,6 +32,26 @@ const formatTexter = texter => {
   const { displayName, email, roles } = texter;
   const highestRole = getHighestRole(roles);
   return `${displayName} (${email}) ${highestRole}`;
+};
+
+const MenuList = props => {
+  const children = props.children;
+
+  if (!children.length) {
+    return <div>{children}</div>;
+  }
+
+  return (
+    <div>
+      {children.length &&
+        children.slice(0, 5).map((key, i) => {
+          delete key.props.innerProps.onMouseMove; //FIX LAG!!
+          delete key.props.innerProps.onMouseOver; //FIX LAG!!
+
+          return <div key={i}>{key}</div>;
+        })}
+    </div>
+  );
 };
 
 class IncomingMessageActions extends Component {
@@ -113,7 +133,9 @@ class IncomingMessageActions extends Component {
               <div>
                 <p>
                   <Select
+                    components={{ MenuList }}
                     onChange={this.handleTextersChanged}
+                    filterOption={createFilter({ ignoreAccents: false })}
                     options={texters}
                     isMulti
                     placeholder="Select at least one texter"
