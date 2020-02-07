@@ -20,7 +20,8 @@ import {
   nexmoRouter,
   twilioRouter,
   assembleRouter,
-  utilsRouter
+  utilsRouter,
+  previewRouter
 } from "./routes";
 
 process.on("uncaughtException", ex => {
@@ -101,6 +102,7 @@ app.use(nexmoRouter);
 app.use(twilioRouter);
 app.use(assembleRouter);
 app.use(utilsRouter);
+app.use(previewRouter);
 
 app.post(
   "/autoassign",

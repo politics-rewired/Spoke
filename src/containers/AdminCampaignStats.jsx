@@ -259,6 +259,15 @@ class AdminCampaignStats extends React.Component {
                           />
                         ) : null, // copy
                         <RaisedButton
+                          label="Open Script Preview"
+                          onTouchTap={() => {
+                            window.open(
+                              `/preview/${campaign.previewUrl}`,
+                              "_blank"
+                            );
+                          }}
+                        />,
+                        <RaisedButton
                           {...dataTest("copyCampaign")}
                           label="Copy Campaign"
                           disabled={this.state.copyingCampaign}
@@ -404,6 +413,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
             receivedMessagesCount
             optOutsCount
           }
+          previewUrl
         }
       }
     `,
