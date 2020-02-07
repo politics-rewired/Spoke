@@ -4,7 +4,7 @@ import * as yup from "yup";
 import Form from "react-formal";
 
 import RaisedButton from "material-ui/RaisedButton";
-import { Card, CardHeader, CardText } from "material-ui/Card";
+import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
 import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
@@ -72,6 +72,7 @@ const markDeleted = (stepId, interactionSteps) => {
 class CampaignInteractionStepsForm extends React.Component {
   state = {
     focusedField: null,
+    hasBlockCopied: false,
     interactionSteps: this.props.formValues.interactionSteps[0]
       ? this.props.formValues.interactionSteps
       : [
@@ -86,6 +87,10 @@ class CampaignInteractionStepsForm extends React.Component {
           }
         ]
   };
+
+  componentDidMount() {
+    this.doesClipboardHaveBlock();
+  }
 
   onSave = async () => {
     // Strip all empty script versions. "Save" should be disabled in this case, but just in case...
@@ -123,6 +128,41 @@ class CampaignInteractionStepsForm extends React.Component {
     });
   };
 
+  generateId = () =>
+    `new${Math.random()
+      .toString(36)
+      .replace(/[^a-zA-Z1-9]+/g, "")}`;
+
+  createPasteBlockHandler = parentInteractionId => () => {
+    navigator.clipboard.readText().then(text => {
+      const idMap = {};
+
+      const newBlocks = JSON.parse(text);
+
+      newBlocks.forEach(interactionStep => {
+        idMap[interactionStep.id] = this.generateId();
+      });
+
+      const mappedBlocks = newBlocks.map(interactionStep => {
+        // Prepend new to force it to create a new one, even if it was already new
+        return Object.assign({}, interactionStep, {
+          id: idMap[interactionStep.id],
+          parentInteractionId:
+            idMap[interactionStep.parentInteractionId] || parentInteractionId
+        });
+      });
+
+      console.log(
+        "TCL: CampaignInteractionStepsForm -> mappedBlocks",
+        mappedBlocks
+      );
+
+      this.setState({
+        interactionSteps: this.state.interactionSteps.concat(mappedBlocks)
+      });
+    });
+  };
+
   createDeleteStepHandler = id => () => {
     const interactionSteps = markDeleted(id, this.state.interactionSteps);
     this.setState({ interactionSteps });
@@ -136,6 +176,43 @@ class CampaignInteractionStepsForm extends React.Component {
       step => (step.id === updatedEvent.id ? updatedEvent : step)
     );
     this.setState({ interactionSteps });
+  };
+
+  copyBlock = interactionStep => {
+    const interactionStepsInBlock = new Set([interactionStep.id]);
+    const { parentInteractionId, ...orphanedInteractionStep } = interactionStep;
+    const block = [orphanedInteractionStep];
+
+    let interactionStepsAdded = 1;
+
+    while (interactionStepsAdded !== 0) {
+      interactionStepsAdded = 0;
+
+      for (const is of this.state.interactionSteps) {
+        if (
+          !interactionStepsInBlock.has(is.id) &&
+          interactionStepsInBlock.has(is.parentInteractionId)
+        ) {
+          block.push(is);
+          interactionStepsInBlock.add(is.id);
+          interactionStepsAdded++;
+        }
+      }
+    }
+
+    navigator.clipboard.writeText(JSON.stringify(block));
+    this.doesClipboardHaveBlock();
+  };
+
+  doesClipboardHaveBlock = () => {
+    navigator.clipboard.readText().then(text => {
+      try {
+        const newBlock = JSON.parse(text);
+        if (!this.state.hasBlockCopied) this.setState({ hasBlockCopied: true });
+      } catch (ex) {
+        if (this.state.hasBlockCopied) this.setState({ hasBlockCopied: false });
+      }
+    });
   };
 
   renderInteractionStep(interactionStep, title = "Start") {
@@ -173,6 +250,11 @@ class CampaignInteractionStepsForm extends React.Component {
                 : "Enter a script for your texter along with the question you want the texter be able to answer on behalf of the contact."
             }
           />
+          <CardActions>
+            <RaisedButton onClick={() => this.copyBlock(interactionStep)}>
+              Copy Block
+            </RaisedButton>
+          </CardActions>
           <CardText>
             <GSForm
               {...dataTest("childInteraction", !parentInteractionId)}
@@ -243,14 +325,27 @@ class CampaignInteractionStepsForm extends React.Component {
           </CardText>
         </Card>
         <div style={styles.answerContainer}>
-          {isAbleToAddResponse && (
-            <RaisedButton
-              {...dataTest("addResponse")}
-              label="+ Add a response"
-              onTouchTap={this.createAddStepHandler(interactionStep.id)}
-              style={{ marginBottom: "10px" }}
-            />
-          )}
+          {isAbleToAddResponse &&
+            [
+              <RaisedButton
+                {...dataTest("addResponse")}
+                label="+ Add a response"
+                onTouchTap={this.createAddStepHandler(interactionStep.id)}
+                style={{ marginBottom: "10px" }}
+              />
+            ].concat(
+              this.state.hasBlockCopied
+                ? [
+                    <RaisedButton
+                      label="+ Paste Block"
+                      onTouchTap={this.createPasteBlockHandler(
+                        interactionStep.id
+                      )}
+                      style={{ marginBottom: "10px" }}
+                    />
+                  ]
+                : []
+            )}
           {childSteps
             .filter(is => !is.isDeleted)
             .map(childStep =>
@@ -270,10 +365,14 @@ class CampaignInteractionStepsForm extends React.Component {
         step.scriptOptions.filter(version => version.trim() === "").length > 0;
       return hasNoOptions || hasEmptyScripts;
     });
+
     const hasEmptyScripts = emptyScriptSteps.length > 0;
 
     return (
-      <div>
+      <div
+        onFocus={this.doesClipboardHaveBlock}
+        onClick={this.doesClipboardHaveBlock}
+      >
         <CampaignFormSectionHeading
           title="What do you want to discuss?"
           subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
