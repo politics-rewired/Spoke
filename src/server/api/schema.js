@@ -2091,7 +2091,7 @@ const rootMutations = {
           and not exists (
             select 1
             from message
-            where campaign_contact.id = message.campaign_contact_id
+            where current_contact.id = message.campaign_contact_id
               and is_from_contact = true
           )
           ${
