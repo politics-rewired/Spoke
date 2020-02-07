@@ -89,7 +89,7 @@ class CampaignInteractionStepsForm extends React.Component {
   };
 
   componentDidMount() {
-    this.doesClipboardHaveBlock();
+    this.updateClipboardHasBlock();
   }
 
   onSave = async () => {
@@ -152,11 +152,6 @@ class CampaignInteractionStepsForm extends React.Component {
         });
       });
 
-      console.log(
-        "TCL: CampaignInteractionStepsForm -> mappedBlocks",
-        mappedBlocks
-      );
-
       this.setState({
         interactionSteps: this.state.interactionSteps.concat(mappedBlocks)
       });
@@ -201,13 +196,13 @@ class CampaignInteractionStepsForm extends React.Component {
     }
 
     navigator.clipboard.writeText(JSON.stringify(block));
-    this.doesClipboardHaveBlock();
+    this.updateClipboardHasBlock();
   };
 
-  doesClipboardHaveBlock = () => {
+  updateClipboardHasBlock = () => {
     navigator.clipboard.readText().then(text => {
       try {
-        const newBlock = JSON.parse(text);
+        const _newBlock = JSON.parse(text);
         if (!this.state.hasBlockCopied) this.setState({ hasBlockCopied: true });
       } catch (ex) {
         if (this.state.hasBlockCopied) this.setState({ hasBlockCopied: false });
@@ -370,8 +365,8 @@ class CampaignInteractionStepsForm extends React.Component {
 
     return (
       <div
-        onFocus={this.doesClipboardHaveBlock}
-        onClick={this.doesClipboardHaveBlock}
+        onFocus={this.updateClipboardHasBlock}
+        onClick={this.updateClipboardHasBlock}
       >
         <CampaignFormSectionHeading
           title="What do you want to discuss?"
