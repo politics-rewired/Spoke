@@ -53,7 +53,8 @@ const cacheOpts = {
   UserOrganizations: ["user-organizations", ONE_WEEK],
   UserOrganizationRoles: ["user-organization-roles", ONE_WEEK],
   CampaignOrganizationId: ["campaign-organiation-id", ONE_WEEK],
-  FullfillAssignmentLock: ["fulfull-assignment-lock", ONE_MINUTE * 2]
+  FullfillAssignmentLock: ["fulfull-assignment-lock", ONE_MINUTE * 2],
+  GetUsers: ["get-users", ONE_MINUTE * 5]
 };
 
 Object.keys(cacheOpts).forEach(name => {
