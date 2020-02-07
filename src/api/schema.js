@@ -240,6 +240,10 @@ const rootSchema = `
     replaced: String!
   }
 
+  type ReleaseAllUnhandledRepliesResult {
+    campaignCount: Int
+    contactCount: Int
+  }
 
   type RootQuery {
     currentUser: User
@@ -300,7 +304,7 @@ const rootSchema = `
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, newTexterUserIds:[String]):[CampaignIdAssignmentId]
     requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: Int!): String!
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
-    releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): String!
+    releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): ReleaseAllUnhandledRepliesResult!
     markForSecondPass(campaignId: String!, excludeAgeInHours: Float): String!
     unMarkForSecondPass(campaignId: String!): String!
     deleteNeedsMessage(campaignId: String!): String!

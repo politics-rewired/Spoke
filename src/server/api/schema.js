@@ -2696,10 +2696,10 @@ const rootMutations = {
             returning 1, campaign_id
           )
           select
-            1, campaign_id
+            count(*) as contact_count,
+            count(distinct campaign_id) as campaign_count
           from
             update_result
-          group by 2
         `,
         [
           parseInt(organizationId),
@@ -2709,7 +2709,11 @@ const rootMutations = {
         ]
       );
 
-      return rawResult.rowCount;
+      const result = rawResult.rows[0];
+      return {
+        contactCount: result.contact_count,
+        campaignCount: result.campaign_count
+      };
     },
     deleteCampaignOverlap: async (
       _,

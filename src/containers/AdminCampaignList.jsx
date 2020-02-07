@@ -250,7 +250,8 @@ class AdminCampaignList extends React.Component {
               </span>
             ) : this.state.releaseAllRepliesResult ? (
               <span>
-                Released replies on {this.state.releaseAllRepliesResult}
+                Released {this.state.releaseAllRepliesResult.contactCount}{" "}
+                replies on {this.state.releaseAllRepliesResult.campaignCount}{" "}
                 campaigns
               </span>
             ) : !doneReleasingReplies ? (
@@ -350,7 +351,10 @@ const mapMutationsToProps = () => ({
           ageInHours: $ageInHours
           releaseOnRestricted: $releaseOnRestricted
           limitToCurrentlyTextableContacts: $limitToCurrentlyTextableContacts
-        )
+        ) {
+          contactCount
+          campaignCount
+        }
       }
     `,
     variables: {
