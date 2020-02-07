@@ -78,6 +78,21 @@ UnrecognizedField.propTypes = {
   children: PropTypes.arrayOf(PropTypes.element)
 };
 
+const gsmReplacements = [
+  ["‘", "'"],
+  ["’", "'"],
+  ["”", '"'],
+  ["”", '"'],
+  ["“", '"'],
+  ["–", "-"]
+];
+
+const replaceEasyGsmWins = text =>
+  gsmReplacements.reduce(
+    (acc, replacement) => acc.replace(replacement[0], replacement[1]),
+    text
+  );
+
 class ScriptEditor extends React.Component {
   constructor(props) {
     super(props);
@@ -127,7 +142,7 @@ class ScriptEditor extends React.Component {
 
   getValue() {
     const { editorState } = this.state;
-    return editorState.getCurrentContent().getPlainText();
+    return replaceEasyGsmWins(editorState.getCurrentContent().getPlainText());
   }
 
   getCompositeDecorator(scriptFields) {
@@ -192,7 +207,7 @@ class ScriptEditor extends React.Component {
     const { name } = this.props;
 
     const text = this.state.editorState.getCurrentContent().getPlainText();
-    const info = gsm(text);
+    const info = gsm(replaceEasyGsmWins(text));
 
     return (
       <div>
