@@ -4,6 +4,8 @@ import { r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
 import { memoizer, cacheOpts } from "../memoredis";
+import { accessRequired } from "./errors";
+import { symmetricEncrypt } from "./lib/crypto";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -403,6 +405,22 @@ export const resolvers = {
       return "";
     },
     creator: async (campaign, _, { loaders }) =>
-      campaign.creator_id ? loaders.user.load(campaign.creator_id) : null
+      campaign.creator_id ? loaders.user.load(campaign.creator_id) : null,
+    previewUrl: async (campaign, _, { user }) => {
+      const organizaitonId = await getCampaignOrganization({
+        campaignId: campaign.id
+      });
+      await accessRequired(user, organizaitonId, "ADMIN");
+      const token = symmetricEncrypt(`${campaign.id}`);
+      return token;
+    }
   }
 };
+
+const getCampaignOrganization = memoizer.memoize(async ({ campaignId }) => {
+  const campaign = await r
+    .reader("campaign")
+    .where({ id: campaignId })
+    .first("organization_id");
+  return campaign.organization_id;
+}, cacheOpts.CampaignOrganizationId);

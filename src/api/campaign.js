@@ -54,6 +54,7 @@ export const schema = `
     isAssignmentLimitedToTeams: Boolean!
     timezone: String
     createdAt: Date
+    previewUrl: String
   }
 
   type CampaignsList {

@@ -4,6 +4,7 @@ import { default as nexmoRouter } from "./nexmo";
 import { default as twilioRouter } from "./twilio";
 import { default as assembleRouter } from "./assemble-numbers";
 import { default as utilsRouter } from "./utils";
+import { default as previewRouter } from "./campaign-preview";
 
 export {
   authRouter,
@@ -11,5 +12,6 @@ export {
   nexmoRouter,
   twilioRouter,
   assembleRouter,
-  utilsRouter
+  utilsRouter,
+  previewRouter
 };
