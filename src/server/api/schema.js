@@ -3062,9 +3062,14 @@ const rootMutations = {
         );
       });
 
-      await memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
-        organizationId
-      });
+      await Promise.all([
+        memoizer.invalidate(cacheOpts.OrganizationSingleTon.key, {
+          organizationId
+        }),
+        memoizer.invalidate(cacheOpts.MyCurrentAssignmentTargets.key, {
+          organizationId
+        })
+      ]);
 
       return updatedTeams;
     },

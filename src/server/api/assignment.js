@@ -351,6 +351,199 @@ export async function allCurrentAssignmentTargets(organizationId) {
   return teamToCampaigns;
 }
 
+export async function cachedMyCurrentAssignmentTargets(userId, organizationId) {
+  const {
+    assignmentType,
+    generalEnabled,
+    orgMaxRequestCount
+  } = await getCurrentAssignmentType(organizationId);
+
+  const campaignView = {
+    UNREPLIED: "assignable_campaigns_with_needs_reply",
+    UNSENT: "assignable_campaigns_with_needs_message"
+  }[assignmentType];
+
+  const contactsView = {
+    UNREPLIED: "assignable_needs_reply",
+    UNSENT: "assignable_needs_message"
+  }[assignmentType];
+
+  if (!campaignView || !contactsView) {
+    return [];
+  }
+
+  const generalEnabledBit = generalEnabled ? 1 : 0;
+
+  const myTeamIds = await r
+    .reader("team")
+    .join("user_team", "team.id", "=", "user_team.team_id")
+    .where({
+      user_id: parseInt(userId),
+      is_assignment_enabled: true,
+      organization_id: parseInt(organizationId)
+    })
+    .pluck("id");
+
+  const myEscalationTags = await r
+    .reader("team_escalation_tags")
+    .whereIn("team_id", myTeamIds)
+    .pluck("tag_id");
+
+  return await memoizedMyCurrentAssignmentTargets({
+    myTeamIds,
+    myEscalationTags,
+    generalEnabledBit,
+    campaignView,
+    contactsView,
+    orgMaxRequestCount,
+    assignmentType,
+    organizationId
+  });
+}
+
+const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
+  async ({
+    myTeamIds,
+    myEscalationTags,
+    generalEnabledBit,
+    campaignView,
+    orgMaxRequestCount,
+    assignmentType,
+    organizationId
+  }) => {
+    const { rows: teamToCampaigns } = await r.reader.raw(
+      /**
+       * This query is the same as allCurrentAssignmentTargets, except
+       *  - it restricts teams to those with is_assignment_enabled = true via the where clause in team_assignment_options
+       *  - it adds all_possible_team_assignments to set up my_possible_team_assignments
+       *
+       * @> is the Postgresql array includes operator
+       * ARRAY[1,2,3] @> ARRAY[1,2] is true
+       */
+      `
+      with needs_message_teams as (
+        select * from team
+        where assignment_type = 'UNSENT'
+          and id = ANY(?)
+      ),
+      needs_reply_teams as (
+        select * from team
+        where assignment_type = 'UNREPLIED'
+          and id = ANY(?)
+      ),
+      needs_message_team_campaign_pairings as (
+        select
+            teams.assignment_priority as priority,
+            teams.id as team_id,
+            teams.title as team_title,
+            teams.is_assignment_enabled as enabled,
+            teams.assignment_type,
+            teams.max_request_count,
+            campaign.id as id, campaign.title
+        from needs_message_teams as teams
+        join campaign_team on campaign_team.team_id = teams.id
+        join campaign on campaign.id = (
+          select id
+          from assignable_campaigns_with_needs_message as campaigns
+          where campaigns.id = campaign_team.campaign_id
+          order by id asc
+          limit 1
+        )
+      ),
+      needs_reply_team_campaign_pairings as (
+        select
+            teams.assignment_priority as priority,
+            teams.id as team_id,
+            teams.title as team_title,
+            teams.is_assignment_enabled as enabled,
+            teams.assignment_type,
+            teams.max_request_count,
+            campaign.id as id, campaign.title
+        from needs_reply_teams as teams
+        join campaign_team on campaign_team.team_id = teams.id
+        join campaign on campaign.id = (
+          select id
+          from assignable_campaigns_with_needs_reply as campaigns
+          where campaigns.id = campaign_team.campaign_id
+          order by id asc
+          limit 1
+        )
+      ),
+      custom_escalation_campaign_pairings as (
+        select
+          teams.assignment_priority as priority,
+          teams.id as team_id,
+          teams.title as team_title,
+          teams.is_assignment_enabled as enabled,
+          teams.assignment_type,
+          teams.max_request_count,
+          campaign.id as id, campaign.title
+        from needs_reply_teams as teams
+        join campaign on campaign.id = (
+          select id
+          from assignable_campaigns as campaigns
+          where exists (
+            select 1
+            from assignable_needs_reply_with_escalation_tags
+            where campaign_id = campaigns.id
+              and ? @> applied_escalation_tags
+              and (
+                campaigns.limit_assignment_to_teams = false
+                or
+                exists (
+                  select 1
+                  from campaign_team
+                  where campaign_team.team_id = teams.id
+                    and campaign_team.campaign_id = campaigns.id
+                )
+              )
+            )
+          order by id asc
+          limit 1
+        )
+      ),
+      general_campaign_pairing as (
+        select
+          '+infinity'::float as priority, -1 as team_id, 
+          'General' as team_title, 
+          ${generalEnabledBit}::boolean as enabled, 
+          '${assignmentType}' as assignment_type, 
+          ${orgMaxRequestCount} as max_request_count,
+          campaigns.id, campaigns.title
+        from ${campaignView} as campaigns
+        where campaigns.limit_assignment_to_teams = false
+            and organization_id = ?
+        order by id asc
+        limit 1
+      ),
+      all_possible_team_assignments as (
+        ( select * from needs_message_team_campaign_pairings )
+        union
+        ( select * from needs_reply_team_campaign_pairings )
+        union
+        ( select * from custom_escalation_campaign_pairings )
+        union
+        ( select * from general_campaign_pairing )
+      )
+      select * from all_possible_team_assignments
+      where enabled = true
+      order by priority, id asc`,
+      [myTeamIds, myTeamIds, myEscalationTags, organizationId]
+    );
+
+    const results = teamToCampaigns.map(ttc =>
+      Object.assign(ttc, {
+        type: ttc.assignment_type,
+        campaign: { id: ttc.id, title: ttc.title },
+        count_left: 0
+      })
+    );
+
+    return results;
+  },
+  cacheOpts.MyCurrentAssignmentTargets
+);
+
 export async function myCurrentAssignmentTargets(
   userId,
   organizationId,
