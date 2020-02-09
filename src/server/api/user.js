@@ -226,13 +226,13 @@ export const resolvers = {
         from campaign_contact
         join campaign on campaign.id = campaign_contact.campaign_id
         where archived = false
-          and campaign_id in (
-            select id
-            from campaign
-            where campaign.is_started = true
-              and organization_id = ?
-              and is_archived = false
-          )
+          -- and campaign_id in (
+            -- select id
+            -- from campaign
+            -- where campaign.is_started = true
+              -- and organization_id = ?
+              -- and is_archived = false
+          -- )
           and assignment_id in (
             select id
             from assignment
