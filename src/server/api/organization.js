@@ -9,7 +9,8 @@ import {
   allCurrentAssignmentTargets,
   myCurrentAssignmentTarget,
   myCurrentAssignmentTargets,
-  countLeft
+  countLeft,
+  cachedMyCurrentAssignmentTargets
 } from "./assignment";
 import { memoizer, cacheOpts } from "../memoredis";
 
@@ -146,7 +147,7 @@ export const resolvers = {
         : null;
     },
     myCurrentAssignmentTargets: async (organization, _, context) => {
-      const assignmentTargets = await myCurrentAssignmentTargets(
+      const assignmentTargets = await cachedMyCurrentAssignmentTargets(
         context.user.id,
         organization.id
       );
