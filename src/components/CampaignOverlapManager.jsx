@@ -18,6 +18,8 @@ import IconButton from "material-ui/IconButton";
 import FlatButton from "material-ui/FlatButton";
 import DeleteIcon from "material-ui/svg-icons/action/delete-forever";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
+import DataTable from "material-ui-datatables";
+import moment from "moment";
 
 const hoverBoxStyle = {
   position: "fixed",
@@ -36,11 +38,13 @@ const hoveredCampaignStyle = {
 
 class CampaignOverlapManager extends React.Component {
   state = {
-    selectedCampaignIds: [],
+    selectedCampaignIds: new Set(),
     deleting: new Set(),
     errored: new Set(),
     deleteResults: {},
-    hoveredRowId: undefined
+    hoveredRowId: undefined,
+    page: 0,
+    pageSize: 10
   };
 
   deleteCampaign = async campaignId => {
@@ -89,25 +93,84 @@ class CampaignOverlapManager extends React.Component {
     this.setState({ deleteResults });
   };
 
-  isRowSelected = campaignId =>
-    this.state.selectedCampaignIds.includes(campaignId);
-
-  handleRowSelection = async selectedRows => {
-    const { fetchCampaignOverlaps: overlaps } = this.props;
-    if (!overlaps.fetchCampaignOverlaps) return;
-    const { fetchCampaignOverlaps: overlapList } = overlaps;
-
-    const selectedCampaignIds = selectedRows.map(
-      index => overlapList[index].campaign.id
-    );
-    this.setState({ selectedCampaignIds });
-  };
+  isRowSelected = campaignId => this.state.selectedCampaignIds.has(campaignId);
 
   handleDeleteAllSelected = async () => {
     const { selectedCampaignIds } = this.state;
-    this.setState({ selectedCampaignIds: [] });
-    await Promise.all(selectedCampaignIds.map(this.deleteCampaign));
+    this.setState({ selectedCampaignIds: new Set() });
+    await Promise.all([...selectedCampaignIds].map(this.deleteCampaign));
   };
+
+  incrementPage = () => {
+    this.setState({ page: this.state.page + 1 });
+  };
+
+  decrementPage = () => {
+    this.setState({ page: Math.max(this.state.page - 1, 0) });
+  };
+
+  handleRowsSelected = (rows, secondParam) => {
+    const currentPage = this.getOverlapPage(
+      this.state.page,
+      this.state.pageSize,
+      this.state.search
+    );
+
+    const newSelectedCampaignIds = new Set([...this.state.selectedCampaignIds]);
+
+    if (rows === "all") {
+      new Array(this.state.pageSize)
+        .fill(null)
+        .map((_, idx) => idx)
+        .forEach(idx =>
+          newSelectedCampaignIds.add(currentPage[idx].campaignId)
+        );
+    }
+
+    if (rows === "none") {
+      new Array(this.state.pageSize)
+        .fill(null)
+        .map((_, idx) => idx)
+        .forEach(idx =>
+          newSelectedCampaignIds.delete(currentPage[idx].campaignId)
+        );
+    }
+
+    if (Array.isArray(rows)) {
+      // Add current elements
+      for (const row of rows) {
+        newSelectedCampaignIds.add(currentPage[row].campaignId);
+      }
+
+      // Remove things not present
+      currentPage.forEach((o, idx) => {
+        if (!rows.includes(idx)) {
+          newSelectedCampaignIds.delete(o.campaignId);
+        }
+      });
+    }
+
+    this.setState({
+      selectedCampaignIds: newSelectedCampaignIds
+    });
+  };
+
+  getOverlapPage = (page, pageSize, search) =>
+    (search
+      ? this.props.fetchCampaignOverlaps.fetchCampaignOverlaps.filter(
+          overlap => {
+            return overlap.campaign.title.match(search);
+          }
+        )
+      : this.props.fetchCampaignOverlaps.fetchCampaignOverlaps
+    )
+      .slice(page * pageSize, (page + 1) * pageSize)
+      .map(overlap => ({
+        campaignId: overlap.campaign.id,
+        campaignTitle: overlap.campaign.title,
+        overlapCount: overlap.overlapCount,
+        lastActivity: moment(overlap.lastActivity).fromNow()
+      }));
 
   render() {
     const { fetchCampaignOverlaps: overlaps } = this.props;
@@ -116,22 +179,32 @@ class CampaignOverlapManager extends React.Component {
       errored,
       hoveredRowId,
       deleteResults,
-      selectedCampaignIds
+      selectedCampaignIds,
+      page,
+      pageSize,
+      search
     } = this.state;
-    const isDeleteAllDisabled = selectedCampaignIds.length === 0;
+
+    const isDeleteAllDisabled = selectedCampaignIds.size === 0;
 
     if (overlaps.loading && !overlaps.fetchCampaignOverlaps)
       return <CircularProgress />;
 
     const { fetchCampaignOverlaps: overlapList } = overlaps;
-    const hoveredTitle =
-      hoveredRowId &&
-      overlapList.find(fco => fco.campaign.id === hoveredRowId).campaign.title;
-
     const sortedDeleteResults = sortBy(
       Object.values(deleteResults),
       "timestamp"
     );
+
+    const currentOverlapPage = this.getOverlapPage(page, pageSize, search);
+    const selectedRows = currentOverlapPage
+      .map(
+        (_, idx) =>
+          this.state.selectedCampaignIds.has(currentOverlapPage[idx].campaignId)
+            ? idx
+            : false
+      )
+      .filter(idxOrFalse => idxOrFalse !== false);
 
     return (
       <div>
@@ -141,70 +214,44 @@ class CampaignOverlapManager extends React.Component {
           </p>
           <div style={{ flexGrow: 1 }} />
           <RaisedButton
-            label="Delete Selected"
+            label={
+              isDeleteAllDisabled
+                ? "Delete Selected"
+                : `Delete ${selectedCampaignIds.size} Selected`
+            }
             secondary={true}
             disabled={isDeleteAllDisabled}
             onClick={this.handleDeleteAllSelected}
           />
         </div>
-        {hoveredTitle && (
-          <div style={hoverBoxStyle}>
-            <h3>Hovered on campaign:</h3>
-            <p style={hoveredCampaignStyle}>{hoveredTitle}</p>
-          </div>
-        )}
-        <Table multiSelectable={true} onRowSelection={this.handleRowSelection}>
-          <TableHeader
-            enableSelectAll={false}
-            displaySelectAll={false}
-            adjustForCheckbox={true}
-          >
-            <TableHeaderColumn>Campaign</TableHeaderColumn>
-            <TableHeaderColumn>Overlap Count</TableHeaderColumn>
-            <TableHeaderColumn>Last Messaged</TableHeaderColumn>
-            <TableHeaderColumn>Delete</TableHeaderColumn>
-          </TableHeader>
-          <TableBody deselectOnClickaway={false}>
-            {overlapList.map(fco => (
-              <TableRow
-                key={fco.campaign.id}
-                selected={this.isRowSelected(fco.campaign.id)}
-              >
-                <TableRowColumn>
-                  <span
-                    onMouseOver={this.handleOnRowMouseOver(fco.campaign.id)}
-                    onMouseOut={this.handleOnRowMouseOut}
-                  >
-                    {fco.campaign.id + " " + fco.campaign.title}
-                  </span>
-                </TableRowColumn>
-                <TableRowColumn>{fco.overlapCount}</TableRowColumn>
-                <TableRowColumn>
-                  {new Date(fco.lastActivity).toLocaleString()}
-                </TableRowColumn>
-                <TableRowColumn>
-                  <IconButton
-                    onClick={this.handleOnDeleteCampaign(fco.campaign.id)}
-                  >
-                    {deleting.has(fco.campaign.id) ? (
-                      <CircularProgress size={30} />
-                    ) : errored.has(fco.campaign.id) ? (
-                      <FlatButton
-                        label="Error. Retry?"
-                        labelPosition="before"
-                        labelStyle={{ color: "red" }}
-                        primary={true}
-                        icon={<RefreshIcon color="red" />}
-                      />
-                    ) : (
-                      <DeleteIcon color="red" />
-                    )}
-                  </IconButton>
-                </TableRowColumn>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <DataTable
+          multiSelectable
+          selectable
+          enableSelectAll
+          showCheckboxes
+          data={currentOverlapPage}
+          page={page + 1}
+          count={this.props.fetchCampaignOverlaps.fetchCampaignOverlaps.length}
+          selectedRows={selectedRows}
+          onRowSelection={this.handleRowsSelected}
+          onNextPageClick={this.incrementPage}
+          onPreviousPageClick={this.decrementPage}
+          columns={[
+            {
+              key: "overlapCount",
+              label: "Overlap Count",
+              style: { width: 50 }
+            },
+            { key: "campaignId", label: "ID", style: { width: 30 } },
+            {
+              key: "lastActivity",
+              label: "Last Messaged",
+              style: { width: 50 }
+            },
+            { key: "campaignTitle", label: "Title" }
+          ]}
+        />
+
         {sortedDeleteResults.map(({ id, deletedRowCount, remainingCount }) => {
           const remainingText =
             remainingCount > 0
