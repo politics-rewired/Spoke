@@ -2764,6 +2764,36 @@ const rootMutations = {
         remainingCount
       };
     },
+    deleteManyCampaignOverlap: async (
+      _,
+      { organizationId, campaignId, overlappingCampaignIds },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+      // Delete, excluding second pass contacts that have already been messaged
+      const { rowCount: deletedRowCount } = await r.knex.raw(
+        `
+        delete from
+          campaign_contact
+        where
+          campaign_contact.campaign_id = ?
+          and not exists (
+            select 1
+            from message
+            where campaign_contact_id = campaign_contact.id
+          )
+          and exists (
+            select 1
+            from campaign_contact as other_campaign_contact
+            where other_campaign_contact.campaign_id = ANY(?)
+              and other_campaign_contact.cell = campaign_contact.cell
+          );`,
+        [campaignId, overlappingCampaignIds]
+      );
+
+      return deletedRowCount;
+    },
     approveAssignmentRequest: async (_, { assignmentRequestId }, { user }) => {
       const assignmentRequest = await r
         .knex("assignment_request")
