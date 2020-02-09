@@ -3,102 +3,51 @@ import loadData from "../containers/hoc/load-data";
 import wrapMutations from "../containers/hoc/wrap-mutations";
 import CircularProgress from "material-ui/CircularProgress";
 import gql from "graphql-tag";
-import sortBy from "lodash/sortBy";
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn
-} from "material-ui/Table";
-import Snackbar from "material-ui/Snackbar";
 import RaisedButton from "material-ui/RaisedButton";
-import IconButton from "material-ui/IconButton";
-import FlatButton from "material-ui/FlatButton";
-import DeleteIcon from "material-ui/svg-icons/action/delete-forever";
-import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import DataTable from "material-ui-datatables";
 import moment from "moment";
-
-const hoverBoxStyle = {
-  position: "fixed",
-  top: "120px",
-  left: "50%",
-  width: "400px",
-  marginLeft: "-200px",
-  backgroundColor: "#D0D0D0",
-  padding: "20px"
-};
-
-const hoveredCampaignStyle = {
-  padding: "10px",
-  backgroundColor: "#F0F0F0"
-};
+import LoadingIndicator from "./LoadingIndicator";
 
 class CampaignOverlapManager extends React.Component {
   state = {
     selectedCampaignIds: new Set(),
+    deleted: new Set(),
     deleting: new Set(),
     errored: new Set(),
-    deleteResults: {},
     hoveredRowId: undefined,
     page: 0,
     pageSize: 10
   };
 
-  deleteCampaign = async campaignId => {
-    const { deleting, errored, deleteResults } = this.state;
-
-    errored.delete(campaignId);
-    deleting.add(campaignId);
-
-    this.setState({ deleting, errored });
-
+  deleteCampaigns = async campaignId => {
     try {
-      const response = await this.props.mutations.deleteCampaignOverlap(
-        campaignId
-      );
+      const newDeleting = new Set();
+
+      for (const id of this.state.selectedCampaignIds.values()) {
+        newDeleting.add(id);
+      }
+
+      this.setState({ deleting: newDeleting, selectedCampaignIds: new Set() });
+
+      const response = await this.props.mutations.deleteManyCampaignOverlap([
+        ...this.state.selectedCampaignIds
+      ]);
+
       if (response.errors) throw new Error(response.errors);
 
-      const {
-        deletedRowCount,
-        remainingCount
-      } = response.data.deleteCampaignOverlap;
-      const timestamp = new Date().getTime();
-      deleteResults[campaignId] = {
-        id: campaignId,
-        deletedRowCount,
-        remainingCount,
-        timestamp
-      };
-      this.setState({ deleteResults });
+      this.setState({
+        deleting: new Set(),
+        deleted: new Set([...this.state.deleted].concat([...newDeleting]))
+      });
     } catch (exc) {
       errored.add(campaignId);
     } finally {
-      deleting.delete(campaignId);
-      this.setState({ deleting, errored });
+      this.setState({ deleting: new Set(), errored });
     }
   };
 
-  handleOnDeleteCampaign = id => _ev => this.deleteCampaign(id);
-
-  handleOnRowMouseOver = hoveredRowId => () => this.setState({ hoveredRowId });
-
-  handleOnRowMouseOut = () => this.setState({ hoveredRowId: undefined });
-
-  clearDeleteResult = id => () => {
-    const { deleteResults } = this.state;
-    delete deleteResults[id];
-    this.setState({ deleteResults });
-  };
-
-  isRowSelected = campaignId => this.state.selectedCampaignIds.has(campaignId);
-
   handleDeleteAllSelected = async () => {
-    const { selectedCampaignIds } = this.state;
-    this.setState({ selectedCampaignIds: new Set() });
-    await Promise.all([...selectedCampaignIds].map(this.deleteCampaign));
+    await this.deleteCampaigns();
   };
 
   incrementPage = () => {
@@ -122,9 +71,11 @@ class CampaignOverlapManager extends React.Component {
       new Array(this.state.pageSize)
         .fill(null)
         .map((_, idx) => idx)
-        .forEach(idx =>
-          newSelectedCampaignIds.add(currentPage[idx].campaignId)
-        );
+        .forEach(idx => {
+          if (!this.state.deleted.has(currentPage[idx].campaignId)) {
+            newSelectedCampaignIds.add(currentPage[idx].campaignId);
+          }
+        });
     }
 
     if (rows === "none") {
@@ -139,7 +90,9 @@ class CampaignOverlapManager extends React.Component {
     if (Array.isArray(rows)) {
       // Add current elements
       for (const row of rows) {
-        newSelectedCampaignIds.add(currentPage[row].campaignId);
+        if (!this.state.deleted.has(currentPage[row].campaignId)) {
+          newSelectedCampaignIds.add(currentPage[row].campaignId);
+        }
       }
 
       // Remove things not present
@@ -176,25 +129,18 @@ class CampaignOverlapManager extends React.Component {
     const { fetchCampaignOverlaps: overlaps } = this.props;
     const {
       deleting,
-      errored,
-      hoveredRowId,
-      deleteResults,
+      deleted,
       selectedCampaignIds,
       page,
       pageSize,
       search
     } = this.state;
 
-    const isDeleteAllDisabled = selectedCampaignIds.size === 0;
+    const isDeleteAllDisabled =
+      selectedCampaignIds.size === 0 || deleting.size > 0;
 
     if (overlaps.loading && !overlaps.fetchCampaignOverlaps)
       return <CircularProgress />;
-
-    const { fetchCampaignOverlaps: overlapList } = overlaps;
-    const sortedDeleteResults = sortBy(
-      Object.values(deleteResults),
-      "timestamp"
-    );
 
     const currentOverlapPage = this.getOverlapPage(page, pageSize, search);
     const selectedRows = currentOverlapPage
@@ -215,9 +161,11 @@ class CampaignOverlapManager extends React.Component {
           <div style={{ flexGrow: 1 }} />
           <RaisedButton
             label={
-              isDeleteAllDisabled
-                ? "Delete Selected"
-                : `Delete ${selectedCampaignIds.size} Selected`
+              deleting.size > 0
+                ? "Deleting..."
+                : isDeleteAllDisabled
+                  ? "Delete Selected"
+                  : `Delete ${selectedCampaignIds.size} Selected`
             }
             secondary={true}
             disabled={isDeleteAllDisabled}
@@ -248,11 +196,27 @@ class CampaignOverlapManager extends React.Component {
               label: "Last Messaged",
               style: { width: 50 }
             },
-            { key: "campaignTitle", label: "Title" }
+            {
+              key: "campaignTitle",
+              label: "Title",
+              render: (title, { campaignId }) =>
+                deleting.has(campaignId) ? (
+                  <span>
+                    {title} <LoadingIndicator />
+                  </span>
+                ) : deleted.has(campaignId) ? (
+                  <span>
+                    <strike> {title} </strike>
+                  </span>
+                ) : (
+                  <span> {title} </span>
+                )
+            }
           ]}
         />
 
-        {sortedDeleteResults.map(({ id, deletedRowCount, remainingCount }) => {
+        {/* // TODO - bring back delete results */}
+        {/* {sortedDeleteResults.map(({ id, deletedRowCount, remainingCount }) => {
           const remainingText =
             remainingCount > 0
               ? `; skipped ${remainingCount} contacts that had already been messaged`
@@ -266,7 +230,7 @@ class CampaignOverlapManager extends React.Component {
               onRequestClose={this.clearDeleteResult(id)}
             />
           );
-        })}
+        })} */}
       </div>
     );
   }
@@ -300,32 +264,26 @@ const mapQueriesToProps = ({ ownProps }) => ({
 });
 
 const mapMutationsToProps = ({ ownProps }) => ({
-  deleteCampaignOverlap: overlappingCampaignId => ({
+  deleteManyCampaignOverlap: overlappingCampaignIds => ({
     mutation: gql`
-      mutation deleteCampaignOverlap(
+      mutation deleteManyCampaignOverlap(
         $organizationId: String!
         $campaignId: String!
-        $overlappingCampaignId: String!
+        $overlappingCampaignIds: [String]!
       ) {
-        deleteCampaignOverlap(
+        deleteManyCampaignOverlap(
           organizationId: $organizationId
           campaignId: $campaignId
-          overlappingCampaignId: $overlappingCampaignId
-        ) {
-          campaign {
-            id
-          }
-          deletedRowCount
-          remainingCount
-        }
+          overlappingCampaignIds: $overlappingCampaignIds
+        )
       }
     `,
     variables: {
       organizationId: ownProps.organizationId,
       campaignId: ownProps.campaignId,
-      overlappingCampaignId
-    },
-    refetchQueries: ["fetchCampaignOverlaps"]
+      overlappingCampaignIds
+    }
+    // refetchQueries: ["fetchCampaignOverlaps"]
   })
 });
 

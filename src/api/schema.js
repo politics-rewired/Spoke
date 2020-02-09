@@ -312,6 +312,7 @@ const rootSchema = `
     updateLinkDomain(organizationId: String!, domainId: String!, payload: UpdateLinkDomain!): LinkDomain!
     deleteLinkDomain(organizationId: String!, domainId: String!): Boolean!
     deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
+    deleteManyCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignIds: [String]!): Int!
     approveAssignmentRequest(assignmentRequestId: String!): Int!
     rejectAssignmentRequest(assignmentRequestId: String!): Boolean!
     setNumbersApiKey(organizationId: String!, numbersApiKey: String): Organization!
