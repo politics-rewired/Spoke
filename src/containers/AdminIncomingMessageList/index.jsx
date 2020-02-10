@@ -110,7 +110,7 @@ export class AdminIncomingMessageList extends Component {
       _.isEqual(this.state.contactsFilter, nextState.contactsFilter) &&
       _.isEqual(this.state.campaignsFilter, nextState.campaignsFilter) &&
       _.isEqual(this.state.assignmentsFilter, nextState.assignmentsFilter) &&
-      _.isEqual(this.state.tagsFilter, nextState, tagsFilter)
+      _.isEqual(this.state.tagsFilter, nextState.tagsFilter)
     ) {
       return false;
     }

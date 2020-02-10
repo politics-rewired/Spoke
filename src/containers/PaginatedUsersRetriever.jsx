@@ -1,73 +1,12 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
 
-import { withOperations } from "./hoc/with-operations";
+import apolloClient from "../network/apollo-client-singleton";
 
-export class PaginatedUsersRetriever extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = { offset: 0 };
-  }
-
-  componentDidMount() {
-    this.handleUsersReceived();
-  }
-
-  componentDidUpdate(prevProps) {
-    this.handleUsersReceived();
-  }
-
-  handleUsersReceived() {
-    if (!this.props.users || this.props.users.loading) {
-      return;
-    }
-
-    if (
-      this.props.users.people.users.length ===
-      this.props.users.people.pageInfo.total
-    ) {
-      this.props.onUsersReceived(this.props.users.people.users);
-    }
-
-    const newOffset =
-      this.props.users.people.pageInfo.offset + this.props.pageSize;
-
-    this.props.setCampaignTextersLoadedFraction(
-      newOffset / this.props.users.people.pageInfo.total
-    );
-
-    if (newOffset < this.props.users.people.pageInfo.total) {
-      this.props.users.fetchMore({
-        variables: {
-          cursor: {
-            offset: newOffset,
-            limit: this.props.pageSize
-          }
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult) {
-            return prev;
-          }
-          const returnValue = Object.assign({}, prev);
-          returnValue.people.users = returnValue.people.users.concat(
-            fetchMoreResult.data.people.users
-          );
-          returnValue.people.pageInfo = fetchMoreResult.data.people.pageInfo;
-          return returnValue;
-        }
-      });
-    }
-  }
-
-  render() {
-    return null;
-  }
-}
-
-const queries = {
-  users: {
+const fetchPeople = async (offset, limit, organizationId, campaignsFilter) =>
+  apolloClient.query({
     query: gql`
       query getUsers(
         $organizationId: String!
@@ -95,27 +34,66 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
-      variables: {
-        cursor: { offset: 0, limit: ownProps.pageSize },
-        organizationId: ownProps.organizationId,
-        campaignsFilter: ownProps.campaignsFilter
-      },
-      forceFetch: true
-    })
+    variables: {
+      cursor: { offset, limit },
+      organizationId,
+      campaignsFilter
+    },
+    fetchPolicy: "network-only"
+  });
+
+export class PaginatedUsersRetriever extends Component {
+  componentDidMount() {
+    this.handlePropsReceived();
   }
+
+  componentDidUpdate(prevProps) {
+    this.handlePropsReceived(prevProps);
+  }
+
+  handlePropsReceived = async (prevProps = {}) => {
+    if (isEqual(prevProps, this.props)) return;
+
+    const { organizationId, campaignsFilter, pageSize } = this.props;
+
+    let offset = 0;
+    let total = undefined;
+    let users = [];
+    do {
+      const results = await fetchPeople(
+        offset,
+        pageSize,
+        organizationId,
+        campaignsFilter
+      );
+      const { pageInfo, users: newUsers } = results.data.people;
+      users = users.concat(newUsers);
+      offset += pageSize;
+      total = pageInfo.total;
+      this.props.setCampaignTextersLoadedFraction(Math.min(1, offset / total));
+    } while (offset < total);
+
+    this.props.onUsersReceived(users);
+  };
+
+  render() {
+    return <div />;
+  }
+}
+
+PaginatedUsersRetriever.defaultProps = {
+  setCampaignTextersLoadedFraction: () => {}
 };
 
 PaginatedUsersRetriever.propTypes = {
   organizationId: PropTypes.string.isRequired,
+  pageSize: PropTypes.number.isRequired,
+  onUsersReceived: PropTypes.func.isRequired,
   campaignsFilter: PropTypes.shape({
     isArchived: PropTypes.bool,
     campaignId: PropTypes.number
   }),
-  onUsersReceived: PropTypes.func.isRequired,
-  pageSize: PropTypes.number.isRequired
+  setCampaignTextersLoadedFraction: PropTypes.func
 };
 
-export default withOperations({
-  queries
-})(PaginatedUsersRetriever);
+export default PaginatedUsersRetriever;
