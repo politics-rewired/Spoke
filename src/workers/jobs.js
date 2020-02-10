@@ -759,7 +759,10 @@ export async function assignTexters(job) {
 
   const unchangedTexters = {}; // max_contacts and needsMessageCount unchanged
   const demotedTexters = {}; // needsMessageCount reduced
-  const dynamic = campaign.use_dynamic_assignment;
+
+  // TODO: re-enable once dynamic assignment is fixed (#548)
+  // const dynamic = campaign.use_dynamic_assignment;
+  const dynamic = false;
 
   // detect changed assignments
   currentAssignments
@@ -864,8 +867,11 @@ export async function assignTexters(job) {
           availableContacts,
           texter.needsMessageCount
         );
+        // TODO: re-enable once dynamic assignment is fixed (#548)
+        // const isDynamic = campaign.use_dynamic_assignment;
+        const isDynamic = false;
         // Avoid creating a new assignment when the texter should get 0
-        if (contactsToAssign === 0 && !campaign.use_dynamic_assignment) {
+        if (contactsToAssign === 0 && !isDynamic) {
           continue;
         }
 
@@ -1017,8 +1023,12 @@ export async function assignTexters(job) {
         })
       );
 
+      // TODO: re-enable once dynamic assignment is fixed (#548)
+      // const isDynamic = campaign.use_dynamic_assignment;
+      const isDynamic = false;
+
       // dynamic assignments, having zero initially is ok
-      if (!campaign.use_dynamic_assignment) {
+      if (!isDynamic) {
         // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
         const assignmentIds = await trx("assignment")
           .select("assignment.id as id")
