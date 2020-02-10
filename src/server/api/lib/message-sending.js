@@ -126,6 +126,7 @@ export const getContactMessagingService = async (
               and campaign_contact.id = ?
           )
           and organization_id = ?
+          and messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
       );
     `,
     [campaignContactId, parseInt(organizationId)]
