@@ -123,7 +123,7 @@ export const getContactMessagingService = async (
             select 1
             from campaign_contact
             where messaging_service_stick.cell = campaign_contact.cell
-              and campaign_contact.id = 181403618
+              and campaign_contact.id = ?
           )
           and organization_id = ?
       );
@@ -131,12 +131,13 @@ export const getContactMessagingService = async (
     [campaignContactId, parseInt(organizationId)]
   );
 
-  if (!existingMessagingService)
-    throw new Error(`Unknown campaign contact ID ${campaignContactId}`);
-
-  // Return an existing match if there is one - this is the vast majorityu of cases
-  const isRealService = existingMessagingService.messaging_service_sid !== null;
-  if (isRealService) return existingMessagingService;
+  // Return an existing match if there is one - this is the vast majority of cases
+  if (
+    existingMessagingService &&
+    existingMessagingService.message_service_sid !== null
+  ) {
+    return existingMessagingService;
+  }
 
   const campaignContact = await r
     .reader("campaign_contact")
@@ -148,6 +149,7 @@ export const getContactMessagingService = async (
     campaignContact.cell,
     parseInt(organizationId)
   );
+
   return assignedService;
 };
 
