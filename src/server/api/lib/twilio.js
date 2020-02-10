@@ -166,7 +166,10 @@ const twilioClient = async messagingServiceSid => {
 };
 
 async function sendMessage(message, organizationId, trx = r.knex) {
-  const service = await getContactMessagingService(message.campaign_contact_id);
+  const service = await getContactMessagingService(
+    message.campaign_contact_id,
+    organizationId
+  );
   const messagingServiceSid = service.messaging_service_sid;
   const twilio = await twilioClient(messagingServiceSid);
 

@@ -97,14 +97,17 @@ export const deliveryReportValidator = () => async (req, res, next) => {
   }
 };
 
-export const sendMessage = async (message, _organizationId, _trx) => {
+export const sendMessage = async (message, organizationId, _trx) => {
   const {
     id: spokeMessageId,
     campaign_contact_id: campaignContactId,
     contact_number: to,
     text: messageText
   } = message;
-  const service = await getContactMessagingService(campaignContactId);
+  const service = await getContactMessagingService(
+    campaignContactId,
+    organizationId
+  );
   const profileId = service.messaging_service_sid;
   const numbers = await numbersClient(service);
 
