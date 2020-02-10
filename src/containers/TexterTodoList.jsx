@@ -19,7 +19,8 @@ const SORT_METHOD = dueBySortFn;
 class TexterTodoList extends React.Component {
   state = {
     releasingReplies: false,
-    releasedReplies: false
+    releasedReplies: false,
+    releasedRepliesError: undefined
   };
 
   renderTodoList(assignments) {
