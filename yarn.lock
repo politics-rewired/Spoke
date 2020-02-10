@@ -4047,6 +4047,11 @@ cssesc@^0.1.0:
   resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-0.1.0.tgz#c814903e45623371a0477b40109aaafbeeaddbb4"
   integrity sha1-yBSQPkViM3GgR3tAEJqq++6t27Q=
 
+cssesc@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-3.0.0.tgz#37741919903b868565e1c09ea747445cd18983ee"
+  integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
+
 "cssnano@>=2.6.1 <4":
   version "3.10.0"
   resolved "https://registry.yarnpkg.com/cssnano/-/cssnano-3.10.0.tgz#4f38f6cea2b9b17fa01490f23f1dc68ea65c1c38"
@@ -5464,7 +5469,7 @@ expect@^22.4.0:
     jest-message-util "^22.4.3"
     jest-regex-util "^22.4.3"
 
-express-basic-auth@^1.1.6:
+express-basic-auth@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/express-basic-auth/-/express-basic-auth-1.2.0.tgz#a1d40b07721376ba916e73571a60969211224808"
   integrity sha512-iJ0h1Gk6fZRrFmO7tP9nIbxwNgCUJASfNj5fb0Hy15lGtbqqsxpt7609+wq+0XlByZjXmC/rslWQtnuSTVRIcg==
@@ -6535,6 +6540,14 @@ gzip-size@3.0.0:
   dependencies:
     duplexer "^0.1.1"
 
+h@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/h/-/h-1.0.0.tgz#a637773a89b3c07d316bdbda87d4a65b2a5f8cf4"
+  integrity sha512-nxC1orTrM/gMBsMyWnFqLe2kzqD/iVIVoBIdpOtQc9hyKzWWPuuCiXGwi0o3TwC+3SyhIR5d73WGg6KlcokWzw==
+  dependencies:
+    cssesc "^3.0.0"
+    html-escape "^2.0.0"
+
 handle-thing@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/handle-thing/-/handle-thing-1.2.5.tgz#fd7aad726bf1a5fd16dfc29b2f7a6601d27139c4"
@@ -6800,6 +6813,11 @@ html-entities@^1.2.0, html-entities@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-1.2.1.tgz#0df29351f0721163515dfb9e5543e5f6eed5162f"
   integrity sha1-DfKTUfByEWNRXfueVUPl9u7VFi8=
+
+html-escape@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/html-escape/-/html-escape-2.0.0.tgz#60c8ddd465edf0cae02af9e99fdf5f883b09be49"
+  integrity sha1-YMjd1GXt8MrgKvnpn99fiDsJvkk=
 
 html-minifier@^3.2.3:
   version "3.5.21"

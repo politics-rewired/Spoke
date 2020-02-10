@@ -63,10 +63,11 @@ class TagSelector extends Component {
         <ChipInput
           value={value}
           dataSourceConfig={{ text: "title", value: "id" }}
-          placeholder="Click to search tags"
+          placeholder="Type to search tags"
+          maxHeight={200}
           dataSource={dataSource}
           fullWidth={true}
-          openOnFocus={true}
+          // openOnFocus={true}
           onBeforeRequestAdd={this.handleBeforeRequestAdd}
           onRequestAdd={this.handleRequestAddTag}
           onRequestDelete={this.handleRemoveTag}

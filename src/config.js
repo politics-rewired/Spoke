@@ -360,6 +360,7 @@ if (isClient()) {
         "A comma separated list of contact fields to not ship to the client. Can include 'external_id, cell, and lastName'",
       default: ""
     }),
+
     JOBS_SAME_PROCESS: bool({
       desc:
         "Whether jobs should be executed in the same process in which they are created (vs. processing asyncronously via worker processes).",
@@ -619,6 +620,11 @@ if (isClient()) {
       example: "Australia/Sydney",
       default: "America/New_York",
       isClient: true
+    }),
+    SCRIPT_PREVIEW_AUTH: str({
+      desc:
+        "A JSON blob passed directly to express-basic-auth for locking campaign previews",
+      default: undefined
     }),
     SKIP_TWILIO_VALIDATION: bool({
       desc: "Whether to bypass Twilio header validation altogether.",

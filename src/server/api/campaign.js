@@ -4,6 +4,8 @@ import { r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
 import { memoizer, cacheOpts } from "../memoredis";
+import { accessRequired } from "./errors";
+import { symmetricEncrypt } from "./lib/crypto";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -198,7 +200,8 @@ export const resolvers = {
       "description",
       "isStarted",
       "isArchived",
-      "useDynamicAssignment",
+      // TODO: re-enable once dynamic assignment is fixed (#548)
+      // "useDynamicAssignment",
       "introHtml",
       "primaryColor",
       "logoImageUrl",
@@ -208,6 +211,7 @@ export const resolvers = {
       "timezone",
       "createdAt"
     ]),
+    useDynamicAssignment: _ => false,
     isAssignmentLimitedToTeams: campaign => campaign.limit_assignment_to_teams,
     dueBy: campaign =>
       campaign.due_by instanceof Date || !campaign.due_by
@@ -403,6 +407,22 @@ export const resolvers = {
       return "";
     },
     creator: async (campaign, _, { loaders }) =>
-      campaign.creator_id ? loaders.user.load(campaign.creator_id) : null
+      campaign.creator_id ? loaders.user.load(campaign.creator_id) : null,
+    previewUrl: async (campaign, _, { user }) => {
+      const organizaitonId = await getCampaignOrganization({
+        campaignId: campaign.id
+      });
+      await accessRequired(user, organizaitonId, "ADMIN");
+      const token = symmetricEncrypt(`${campaign.id}`);
+      return token;
+    }
   }
 };
+
+const getCampaignOrganization = memoizer.memoize(async ({ campaignId }) => {
+  const campaign = await r
+    .reader("campaign")
+    .where({ id: campaignId })
+    .first("organization_id");
+  return campaign.organization_id;
+}, cacheOpts.CampaignOrganizationId);
