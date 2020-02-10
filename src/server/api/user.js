@@ -53,7 +53,7 @@ function buildUsersQuery(queryParam, organizationId, campaignsFilter, role) {
   return buildUserOrganizationQuery(queryParam, organizationId, role);
 }
 
-export async function getUsers(organizationId, cursor, campaignsFilter, role) {
+async function doGetUsers({ organizationId, cursor, campaignsFilter, role }) {
   let usersQuery = buildUsersQuery(
     r.knex.select("user.*"),
     organizationId,
@@ -91,6 +91,22 @@ export async function getUsers(organizationId, cursor, campaignsFilter, role) {
     return usersQuery;
   }
 }
+
+const memoizedGetUsers = memoizer.memoize(doGetUsers, cacheOpts.GetUsers);
+
+export const getUsers = async (
+  organizationId,
+  cursor,
+  campaignsFilter,
+  role
+) => {
+  return await memoizedGetUsers({
+    organizationId,
+    cursor,
+    campaignsFilter,
+    role
+  });
+};
 
 export async function getUsersById(userIds) {
   let usersQuery = r
