@@ -54,7 +54,7 @@ const cacheOpts = {
   UserOrganizationRoles: ["user-organization-roles", ONE_WEEK],
   CampaignOrganizationId: ["campaign-organiation-id", ONE_WEEK],
   FullfillAssignmentLock: ["fulfull-assignment-lock", ONE_MINUTE * 2],
-  MyCurrentAssignmentTargets: ["my-current-assignment-targets", ONE_MINUTE]
+  MyCurrentAssignmentTargets: ["my-current-assignment-targets", ONE_SECOND * 5]
 };
 
 Object.keys(cacheOpts).forEach(name => {
