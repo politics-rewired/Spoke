@@ -103,53 +103,50 @@ export const getMessagingServiceById = async messagingServiceId =>
  * @param {number} campaignContactId The ID of the target campaign contact
  * @returns {object} Assigned messaging service Postgres row
  */
-export const getContactMessagingService = async campaignContactId => {
+export const getContactMessagingService = async (
+  campaignContactId,
+  organizationId
+) => {
   if (config.DEFAULT_SERVICE === "fakeservice")
     return { service_type: "fakeservice" };
 
   const {
-    rows: [lookupResult]
+    rows: [existingMessagingService]
   } = await r.reader.raw(
     `
-      with cc_record as (
-        select campaign_contact.cell, campaign.organization_id
-        from campaign_contact
-          join campaign on campaign.id = campaign_contact.campaign_id
-        where campaign_contact.id = ?
-        limit 1
-      )
-      select
-        cc_record.organization_id as cc_organization_id,
-        cc_record.cell as cc_cell,
-        messaging_service.*
+      select *
       from messaging_service
-      join messaging_service_stick
-        on messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-      right join cc_record
-        on messaging_service_stick.organization_id = cc_record.organization_id
-        and messaging_service_stick.cell = cc_record.cell
-      ;
+      where exists (
+        select 1
+        from messaging_service_stick
+        where exists (
+            select 1
+            from campaign_contact
+            where messaging_service_stick.cell = campaign_contact.cell
+              and campaign_contact.id = 181403618
+          )
+          and organization_id = ?
+      );
     `,
-    [campaignContactId]
+    [campaignContactId, parseInt(organizationId)]
   );
 
-  if (!lookupResult)
+  if (!existingMessagingService)
     throw new Error(`Unknown campaign contact ID ${campaignContactId}`);
 
-  const {
-    cc_organization_id: organization_id,
-    cc_cell: cell,
-    ...existingMessagingService
-  } = lookupResult;
-
-  // Return an existing match if there is one
+  // Return an existing match if there is one - this is the vast majorityu of cases
   const isRealService = existingMessagingService.messaging_service_sid !== null;
   if (isRealService) return existingMessagingService;
 
+  const campaignContact = await r
+    .reader("campaign_contact")
+    .where({ id: campaignContactId })
+    .first("cell");
+
   // Otherwise select an appropriate messaging service and assign
   const assignedService = await assignMessagingServiceSID(
-    cell,
-    organization_id
+    campaignContact.cell,
+    parseInt(organizationId)
   );
   return assignedService;
 };

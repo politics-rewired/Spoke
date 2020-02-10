@@ -585,7 +585,10 @@ async function sendMessage(
     escapedApostrophes
   );
 
-  const { service_type } = await getContactMessagingService(campaignContactId);
+  const { service_type } = await getContactMessagingService(
+    campaignContactId,
+    record.organization_id
+  );
 
   const toInsert = {
     user_id: user.id,
