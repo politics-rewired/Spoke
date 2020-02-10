@@ -293,8 +293,21 @@ class IncomingMessageFilter extends Component {
                   }
                   searchText={this.state.texterSearchText}
                   dataSource={texterNodes}
-                  hintText={"Search for a texter"}
-                  floatingLabelText={"Texter"}
+                  disabled={this.props.texters.length === 0}
+                  hintText={
+                    this.props.texters.length === 0
+                      ? `Loading texters (${Math.floor(
+                          this.props.textersLoadedFraction * 100
+                        )}%)...`
+                      : "Search for a texter"
+                  }
+                  floatingLabelText={
+                    this.props.texters.length === 0
+                      ? `Loading texters (${Math.floor(
+                          this.props.textersLoadedFraction * 100
+                        )}%)...`
+                      : "Texter"
+                  }
                   onNewRequest={this.onTexterSelected}
                 />
               </div>

@@ -92,6 +92,7 @@ export class AdminIncomingMessageList extends Component {
       tags: [],
       reassignmentTexters: [],
       campaignTexters: [],
+      campaignTextersLoadedFraction: 0,
       includeArchivedCampaigns: false,
       conversationCount: 0,
       includeActiveCampaigns: true,
@@ -415,6 +416,10 @@ export class AdminIncomingMessageList extends Component {
     );
   };
 
+  setCampaignTextersLoadedFraction = percent => {
+    this.setState({ campaignTextersLoadedFraction: percent });
+  };
+
   render() {
     const {
       selectedRows,
@@ -446,6 +451,9 @@ export class AdminIncomingMessageList extends Component {
         <PaginatedUsersRetriever
           organizationId={organizationId}
           onUsersReceived={this.handleCampaignTextersReceived}
+          setCampaignTextersLoadedFraction={
+            this.setCampaignTextersLoadedFraction
+          }
           pageSize={1000}
           campaignsFilter={this.state.campaignsFilter}
         />
@@ -459,6 +467,7 @@ export class AdminIncomingMessageList extends Component {
         <IncomingMessageFilter
           campaigns={this.state.campaigns}
           texters={this.state.campaignTexters}
+          textersLoadedFraction={this.state.campaignTextersLoadedFraction}
           tags={this.state.tags}
           onCampaignChanged={this.handleCampaignChanged}
           onTexterChanged={this.handleTexterChanged}
