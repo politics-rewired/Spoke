@@ -182,7 +182,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     description,
     due_by: dueBy,
     organization_id: organizationId,
-    use_dynamic_assignment: useDynamicAssignment,
+    // TODO: re-enable once dynamic assignment is fixed (#548)
+    // use_dynamic_assignment: useDynamicAssignment,
     logo_image_url: isUrl(logoImageUrl) ? logoImageUrl : "",
     primary_color: primaryColor,
     intro_html: introHtml,
@@ -930,6 +931,8 @@ const rootMutations = {
       { organizationUuid, campaignId },
       { user, loaders }
     ) => {
+      // TODO: re-enable once dynamic assignment is fixed (#548)
+      throw new Error("Invalid join request");
       const campaign = await r
         .knex("campaign")
         .join("organization", "campaign.organization_id", "organization.id")
@@ -1605,6 +1608,11 @@ const rootMutations = {
       { assignmentId, numberContacts },
       { loaders, user }
     ) => {
+      // TODO: re-enable once dynamic assignment is fixed (#548)
+      throw new GraphQLError({
+        status: 400,
+        message: "Invalid assignment"
+      });
       /* This attempts to find a new contact for the assignment, in the case that useDynamicAssigment == true */
       const assignment = await r
         .knex("assignment")

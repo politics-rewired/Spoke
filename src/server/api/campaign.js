@@ -200,7 +200,8 @@ export const resolvers = {
       "description",
       "isStarted",
       "isArchived",
-      "useDynamicAssignment",
+      // TODO: re-enable once dynamic assignment is fixed (#548)
+      // "useDynamicAssignment",
       "introHtml",
       "primaryColor",
       "logoImageUrl",
@@ -210,6 +211,7 @@ export const resolvers = {
       "timezone",
       "createdAt"
     ]),
+    useDynamicAssignment: _ => false,
     isAssignmentLimitedToTeams: campaign => campaign.limit_assignment_to_teams,
     dueBy: campaign =>
       campaign.due_by instanceof Date || !campaign.due_by

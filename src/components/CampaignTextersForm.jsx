@@ -503,7 +503,8 @@ export default class CampaignTextersForm extends React.Component {
             )
           }
         />
-        <div>
+        {/* TODO: re-enable once dynamic assignment is fixed (#548) */}
+        {/* <div>
           <Toggle
             {...dataTest("useDynamicAssignment")}
             label="Dynamically assign contacts"
@@ -516,7 +517,7 @@ export default class CampaignTextersForm extends React.Component {
               campaignId={campaignId}
             />
           )}
-        </div>
+        </div> */}
         <GSForm
           schema={this.formSchema}
           value={this.formValues()}
