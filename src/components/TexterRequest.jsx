@@ -173,12 +173,14 @@ class TexterRequest extends React.Component {
 
     return (
       <div>
-        <div>
-          Ready for texts? Pick an assignment: <br />
+        <div style={{ textAlign: "center" }}>
+          <h1> Ready to text? </h1>
+          <p style={{ marginTop: 5, marginBottom: 5 }}>Pick an assignment: </p>
           {this.props.data ? (
             <SelectField
               value={selectedAssignment}
               onChange={this.setSelectedAssignment}
+              fullWidth
             >
               {this.props.data.organization.myCurrentAssignmentTargets.map(
                 at => (
@@ -223,8 +225,7 @@ class TexterRequest extends React.Component {
             disabled={submitting}
             fullWidth
           >
-            {" "}
-            Request More Texts{" "}
+            Request More Texts
           </RaisedButton>
         </GSForm>
         {error && (

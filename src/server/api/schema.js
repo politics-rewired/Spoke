@@ -3124,6 +3124,17 @@ const rootMutations = {
         .whereIn("user_id", userIds)
         .del();
       return true;
+    },
+    releaseMyReplies: async (_, { organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "TEXTER");
+
+      await r
+        .knex("camapign_contact")
+        .update({ assigment_id: null })
+        .join("assignment", "assignment_id", "=", "assignment.id")
+        .where({ user_id: parseInt(user.id), message_status: "needsResponse" });
+
+      return true;
     }
   }
 };
