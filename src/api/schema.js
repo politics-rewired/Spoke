@@ -322,6 +322,7 @@ const rootSchema = `
     deleteTeam(organizationId: String!, teamId: String!): Boolean!
     addUsersToTeam(teamId: String!, userIds: [String]!): Boolean!
     removeUsersFromTeam(teamId: String!, userIds: [String]!): Boolean!
+    releaseMyReplies(organizationId: String!): Boolean!
   }
 
   schema {

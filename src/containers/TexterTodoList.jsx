@@ -7,6 +7,7 @@ import AssignmentSummary from "../components/AssignmentSummary";
 import loadData from "./hoc/load-data";
 import gql from "graphql-tag";
 import { withRouter } from "react-router";
+import { RaisedButton } from "material-ui";
 
 const dueBySortFn = (x, y) => (x.dueBy > y.dueBy ? -1 : 1);
 const needSortFn = (x, y) =>
@@ -16,6 +17,12 @@ const needSortFn = (x, y) =>
 const SORT_METHOD = dueBySortFn;
 
 class TexterTodoList extends React.Component {
+  state = {
+    releasingReplies: false,
+    releasedReplies: false,
+    releasedRepliesError: undefined
+  };
+
   renderTodoList(assignments) {
     const { organizationId } = this.props.match.params;
     return assignments
@@ -60,6 +67,21 @@ class TexterTodoList extends React.Component {
     }
   }
 
+  releaseMyReplies = () => {
+    this.setState({
+      releasingReplies: true
+    });
+
+    this.props.mutations
+      .releaseMyReplies(this.props.match.params.organizationId)
+      .then(() => {
+        this.setState({ releasingReplies: false, releasedReplies: true });
+      })
+      .catch(error => {
+        this.setState({ releasingReplies: false, releasedRepliesError: error });
+      });
+  };
+
   render() {
     this.termsAgreed();
     const todos = this.props.data.currentUser.todos;
@@ -73,7 +95,6 @@ class TexterTodoList extends React.Component {
 
     return (
       <div>
-        {renderedTodos.length === 0 ? empty : renderedTodos}
         <div
           style={{
             display: "flex",
@@ -86,6 +107,51 @@ class TexterTodoList extends React.Component {
             user={this.props.data.currentUser}
             organizationId={this.props.match.params.organizationId}
           />
+        </div>
+        {renderedTodos.length === 0 ? empty : renderedTodos}
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 50
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+              maxWidth: 300,
+              textAlign: "center"
+            }}
+          >
+            {this.state.releasedReplies ? (
+              <h1> All gone! </h1>
+            ) : this.state.releasedRepliesError ? (
+              <p> Error releasing replies: {error} </p>
+            ) : (
+              [
+                <h1> Done for the day? </h1>,
+                <p>
+                  We can reassign conversations you haven't answered to other
+                  available texters
+                </p>
+              ]
+            )}
+            <RaisedButton
+              primary={true}
+              fullWidth
+              disabled={
+                this.state.releasingReplies || this.state.releasedReplies
+              }
+              onClick={this.releaseMyReplies}
+            >
+              Reassign My Replies
+            </RaisedButton>
+          </div>
         </div>
       </div>
     );
@@ -182,4 +248,19 @@ const mapQueriesToProps = ({ ownProps }) => ({
   }
 });
 
-export default loadData(withRouter(TexterTodoList), { mapQueriesToProps });
+const mapMutationsToProps = ({ ownProps }) => ({
+  releaseMyReplies: organizationId => ({
+    mutation: gql`
+      mutation releaseMyReplies($organizationId: Int!) {
+        releaseMyReplies(organizationId: $organizationId)
+      }
+    `,
+    variables: { organizationId },
+    refetchQueries: ["getTodos"]
+  })
+});
+
+export default loadData(withRouter(TexterTodoList), {
+  mapQueriesToProps,
+  mapMutationsToProps
+});
