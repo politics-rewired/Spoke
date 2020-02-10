@@ -32,6 +32,11 @@ export class PaginatedUsersRetriever extends Component {
 
     const newOffset =
       this.props.users.people.pageInfo.offset + this.props.pageSize;
+
+    this.props.setCampaignTextersLoadedFraction(
+      newOffset / this.props.users.people.pageInfo.total
+    );
+
     if (newOffset < this.props.users.people.pageInfo.total) {
       this.props.users.fetchMore({
         variables: {
