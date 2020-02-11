@@ -445,6 +445,7 @@ export class AdminIncomingMessageList extends Component {
       <div>
         <PaginatedUsersRetriever
           organizationId={organizationId}
+          setCampaignTextersLoadedFraction={() => null}
           onUsersReceived={this.handleReassignmentTextersReceived}
           pageSize={1000}
         />
