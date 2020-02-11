@@ -27,15 +27,17 @@ export class PaginatedUsersRetriever extends Component {
       this.props.users.people.users.length ===
       this.props.users.people.pageInfo.total
     ) {
-      this.props.onUsersReceived(this.props.users.people.users);
+      return this.props.onUsersReceived(this.props.users.people.users);
     }
 
     const newOffset =
       this.props.users.people.pageInfo.offset + this.props.pageSize;
 
-    this.props.setCampaignTextersLoadedFraction(
-      newOffset / this.props.users.people.pageInfo.total
-    );
+    if (this.props.setCampaignTextersLoadedFraction) {
+      this.props.setCampaignTextersLoadedFraction(
+        newOffset / this.props.users.people.pageInfo.total
+      );
+    }
 
     if (newOffset < this.props.users.people.pageInfo.total) {
       this.props.users.fetchMore({

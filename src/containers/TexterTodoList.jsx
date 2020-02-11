@@ -251,7 +251,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
 const mapMutationsToProps = ({ ownProps }) => ({
   releaseMyReplies: organizationId => ({
     mutation: gql`
-      mutation releaseMyReplies($organizationId: Int!) {
+      mutation releaseMyReplies($organizationId: String!) {
         releaseMyReplies(organizationId: $organizationId)
       }
     `,
