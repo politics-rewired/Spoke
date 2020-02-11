@@ -8,6 +8,8 @@ import DataTable from "material-ui-datatables";
 import moment from "moment";
 import LoadingIndicator from "./LoadingIndicator";
 
+const ROW_SIZE_OPTIONS = [25, 50, 100];
+
 class CampaignOverlapManager extends React.Component {
   state = {
     selectedCampaignIds: new Set(),
@@ -58,7 +60,7 @@ class CampaignOverlapManager extends React.Component {
     this.setState({ page: Math.max(this.state.page - 1, 0) });
   };
 
-  handleRowsSelected = (rows, secondParam) => {
+  handleRowsSelected = rows => {
     const currentPage = this.getOverlapPage(
       this.state.page,
       this.state.pageSize,
@@ -106,6 +108,10 @@ class CampaignOverlapManager extends React.Component {
     this.setState({
       selectedCampaignIds: newSelectedCampaignIds
     });
+  };
+
+  handleRowSizeChange = rowSizeIdx => {
+    this.setState({ pageSize: ROW_SIZE_OPTIONS[rowSizeIdx] });
   };
 
   getOverlapPage = (page, pageSize, search) =>
@@ -182,6 +188,9 @@ class CampaignOverlapManager extends React.Component {
           count={this.props.fetchCampaignOverlaps.fetchCampaignOverlaps.length}
           selectedRows={selectedRows}
           onRowSelection={this.handleRowsSelected}
+          onRowSizeChange={this.handleRowSizeChange}
+          rowSize={this.state.pageSize}
+          rowSizeList={ROW_SIZE_OPTIONS}
           onNextPageClick={this.incrementPage}
           onPreviousPageClick={this.decrementPage}
           columns={[
