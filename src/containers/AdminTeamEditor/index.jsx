@@ -86,7 +86,9 @@ class AdminTeamEditor extends Component {
 
   render() {
     const {
-      params: { organizationId },
+      match: {
+        params: { organizationId }
+      },
       organizationTeams
     } = this.props;
     const { editingTeam, isWorking, error } = this.state;

@@ -3139,11 +3139,18 @@ const rootMutations = {
     releaseMyReplies: async (_, { organizationId }, { user }) => {
       await accessRequired(user, organizationId, "TEXTER");
 
-      await r
-        .knex("camapign_contact")
-        .update({ assigment_id: null })
-        .join("assignment", "assignment_id", "=", "assignment.id")
-        .where({ user_id: parseInt(user.id), message_status: "needsResponse" });
+      await r.knex.raw(
+        `
+        update campaign_contact
+        set assignment_id = null
+        from assignment
+        where assignment_id = assignment.id
+          and assignment.user_id = ?
+          and message_status = 'needsResponse'
+          and archived = false
+      `,
+        [user.id]
+      );
 
       return true;
     }

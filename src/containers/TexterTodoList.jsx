@@ -256,7 +256,7 @@ const queries = {
 const mutations = {
   releaseMyReplies: ownProps => organizationId => ({
     mutation: gql`
-      mutation releaseMyReplies($organizationId: Int!) {
+      mutation releaseMyReplies($organizationId: String!) {
         releaseMyReplies(organizationId: $organizationId)
       }
     `,
