@@ -7,6 +7,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import DataTable from "material-ui-datatables";
 import moment from "moment";
 import LoadingIndicator from "./LoadingIndicator";
+import { TextField } from "material-ui";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100];
 
@@ -18,7 +19,8 @@ class CampaignOverlapManager extends React.Component {
     errored: new Set(),
     hoveredRowId: undefined,
     page: 0,
-    pageSize: 10
+    pageSize: 10,
+    search: ""
   };
 
   deleteCampaigns = async campaignId => {
@@ -74,8 +76,10 @@ class CampaignOverlapManager extends React.Component {
         .fill(null)
         .map((_, idx) => idx)
         .forEach(idx => {
-          if (!this.state.deleted.has(currentPage[idx].campaignId)) {
-            newSelectedCampaignIds.add(currentPage[idx].campaignId);
+          if (currentPage[idx]) {
+            if (!this.state.deleted.has(currentPage[idx].campaignId)) {
+              newSelectedCampaignIds.add(currentPage[idx].campaignId);
+            }
           }
         });
     }
@@ -84,9 +88,10 @@ class CampaignOverlapManager extends React.Component {
       new Array(this.state.pageSize)
         .fill(null)
         .map((_, idx) => idx)
-        .forEach(idx =>
-          newSelectedCampaignIds.delete(currentPage[idx].campaignId)
-        );
+        .forEach(idx => {
+          if (currentPage[idx])
+            newSelectedCampaignIds.delete(currentPage[idx].campaignId);
+        });
     }
 
     if (Array.isArray(rows)) {
@@ -115,7 +120,7 @@ class CampaignOverlapManager extends React.Component {
   };
 
   getOverlapPage = (page, pageSize, search) =>
-    (search
+    (search !== ""
       ? this.props.fetchCampaignOverlaps.fetchCampaignOverlaps.filter(
           overlap => {
             return overlap.campaign.title.match(search);
@@ -130,6 +135,10 @@ class CampaignOverlapManager extends React.Component {
         overlapCount: overlap.overlapCount,
         lastActivity: moment(overlap.lastActivity).fromNow()
       }));
+
+  setOverlapSearch = e => {
+    this.setState({ search: e.target.value });
+  };
 
   render() {
     const { fetchCampaignOverlaps: overlaps } = this.props;
@@ -178,6 +187,11 @@ class CampaignOverlapManager extends React.Component {
             onClick={this.handleDeleteAllSelected}
           />
         </div>
+        <TextField
+          fullWidth
+          placeholder="Search for campaigns"
+          onChange={this.setOverlapSearch}
+        />
         <DataTable
           multiSelectable
           selectable
