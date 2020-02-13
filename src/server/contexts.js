@@ -1,12 +1,12 @@
-import { r, createLoaders } from "./models";
+/* eslint-disable import/prefer-default-export */
+import { createLoaders } from "./models";
+import thinky from "./models/thinky";
 
-const createContext = _host => ({
-  // TODO: loaders must be schema-aware
-  loaders: createLoaders(),
+const createContext = (_host) => ({
   db: {
     schema: "public",
-    master: r.knex,
-    reader: r.reader
+    master: thinky.r.knex,
+    reader: thinky.r.reader
   }
 });
 
@@ -18,10 +18,15 @@ const contextByHost = {};
  * Create a GraphQL context for a request.
  * @param {object} req Express request
  */
-export const contextForRequest = req => {
+export const contextForRequest = (req) => {
   const host = req.get("host");
   if (!contextByHost[host]) {
     contextByHost[host] = createContext(host);
   }
-  return contextByHost[host];
+
+  const hostContext = contextByHost[host];
+  return {
+    loaders: createLoaders(hostContext),
+    ...hostContext
+  };
 };

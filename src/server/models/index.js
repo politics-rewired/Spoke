@@ -19,7 +19,8 @@ const LOADER_DEFAULTS = {
  * @param {string} tableName The database table name to load from
  * @param {object} options Additional loader options
  */
-const createLoader = (tableName, options = {}) => {
+const createLoader = (context, tableName, options = {}) => {
+  const { db } = context;
   const { idKey, cacheObj } = { ...LOADER_DEFAULTS, ...options };
   return new DataLoader(async (keys) => {
     // Try Redis cache if available (this approach does not reduce round trips)
@@ -28,43 +29,45 @@ const createLoader = (tableName, options = {}) => {
     }
 
     // Make batch request and return in the order requested by the loader
-    const docs = await r.reader(tableName).whereIn(idKey, keys);
+    const docs = await db.reader(tableName).whereIn(idKey, keys);
     const docsById = groupBy(docs, idKey);
     return keys.map((key) => docsById[key] && docsById[key][0]);
   });
 };
 
-const createLoaders = () => ({
-  assignment: createLoader("assignment"),
-  assignmentRequest: createLoader("assignment_request"),
-  campaign: createLoader("campaign", { cacheObj: cacheableData.campaign }),
-  campaignContact: createLoader("campaign_contact"),
-  campaignContactTag: createLoader("campaign_contact_tag"),
-  campaignTeam: createLoader("campaign_team"),
-  cannedResponse: createLoader("canned_response"),
-  interactionStep: createLoader("interaction_step"),
-  invite: createLoader("invite"),
-  jobRequest: createLoader("job_request"),
-  linkDomain: createLoader("link_domain"),
-  log: createLoader("log"),
-  message: createLoader("message"),
-  messagingService: createLoader("messaging_service"),
-  messagingServiceStick: createLoader("messaging_service_stick"),
-  optOut: createLoader("opt_out"),
-  organization: createLoader("organization", {
+const createLoaders = (context) => ({
+  assignment: createLoader(context, "assignment"),
+  assignmentRequest: createLoader(context, "assignment_request"),
+  campaign: createLoader(context, "campaign", {
+    cacheObj: cacheableData.campaign
+  }),
+  campaignContact: createLoader(context, "campaign_contact"),
+  campaignContactTag: createLoader(context, "campaign_contact_tag"),
+  campaignTeam: createLoader(context, "campaign_team"),
+  cannedResponse: createLoader(context, "canned_response"),
+  interactionStep: createLoader(context, "interaction_step"),
+  invite: createLoader(context, "invite"),
+  jobRequest: createLoader(context, "job_request"),
+  linkDomain: createLoader(context, "link_domain"),
+  log: createLoader(context, "log"),
+  message: createLoader(context, "message"),
+  messagingService: createLoader(context, "messaging_service"),
+  messagingServiceStick: createLoader(context, "messaging_service_stick"),
+  optOut: createLoader(context, "opt_out"),
+  organization: createLoader(context, "organization", {
     cacheObj: cacheableData.organization
   }),
-  pendingMessagePart: createLoader("pending_message_part"),
-  questionResponse: createLoader("question_response"),
-  tag: createLoader("tag"),
-  team: createLoader("team"),
-  teamEscalationTags: createLoader("team_escalation_tags"),
-  unhealthyLinkDomain: createLoader("unhealthy_link_domain"),
-  user: createLoader("user"),
-  userCell: createLoader("user_cell"),
-  userOrganization: createLoader("user_organization"),
-  userTeam: createLoader("user_team"),
-  zipCode: createLoader("zip_code", { idKey: "zip" })
+  pendingMessagePart: createLoader(context, "pending_message_part"),
+  questionResponse: createLoader(context, "question_response"),
+  tag: createLoader(context, "tag"),
+  team: createLoader(context, "team"),
+  teamEscalationTags: createLoader(context, "team_escalation_tags"),
+  unhealthyLinkDomain: createLoader(context, "unhealthy_link_domain"),
+  user: createLoader(context, "user"),
+  userCell: createLoader(context, "user_cell"),
+  userOrganization: createLoader(context, "user_organization"),
+  userTeam: createLoader(context, "user_team"),
+  zipCode: createLoader(context, "zip_code", { idKey: "zip" })
 });
 
 export { createLoaders, r, cacheableData, datawarehouse };
