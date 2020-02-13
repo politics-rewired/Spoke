@@ -53,10 +53,7 @@ const server = new ApolloServer({
   debug: !config.isProduction,
   introspection: !config.isProduction,
   playground: !config.isProduction,
-  context: ({ req, res: _res }) => ({
-    user: req.user,
-    ...contextForRequest(req)
-  })
+  context: ({ req, res: _res }) => contextForRequest(req)
 });
 
 server.applyMiddleware({
