@@ -37,6 +37,7 @@ const contextByHost = {};
 export const contextForRequest = (req) => {
   const host = req.get("host");
   if (!contextByHost[host]) {
+    logger.info(`Created context for host ${host}`);
     contextByHost[host] = createContext(host);
   }
 
