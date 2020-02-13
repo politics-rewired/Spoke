@@ -51,20 +51,20 @@ export class StalePasswordError extends LocalAuthError {
   }
 }
 
-const validUuid = async (nextUrl, uuidMatch) => {
+const validUuid = async (db, nextUrl, uuidMatch) => {
   if (!nextUrl) throw new InvalidInviteError();
 
   let matchingRecord;
   if (nextUrl.includes("join")) {
-    matchingRecord = await r
-      .knex("organization")
+    matchingRecord = await db
+      .master("organization")
       .where({ uuid: uuidMatch[0] })
       .first("id");
   } else if (nextUrl.includes("invite")) {
     const splitUrl = nextUrl.split("/");
     const inviteHash = splitUrl[splitUrl.length - 1];
-    matchingRecord = await r
-      .knex("invite")
+    matchingRecord = await db
+      .master("invite")
       .where({ hash: inviteHash })
       .first("id");
   }
@@ -93,17 +93,13 @@ const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
   });
 };
 
-const signup = async ({
-  lowerCaseEmail,
-  password,
-  existingUser,
-  nextUrl,
-  uuidMatch,
-  reqBody
-}) => {
+const signup = async (
+  db,
+  { lowerCaseEmail, password, existingUser, nextUrl, uuidMatch, reqBody }
+) => {
   // Verify UUID validity
   // If there is an error, it will be caught on local strategy invocation
-  await validUuid(nextUrl, uuidMatch);
+  await validUuid(db, nextUrl, uuidMatch);
 
   // Verify user doesn't already exist
   if (existingUser && existingUser.email === lowerCaseEmail) {
@@ -121,8 +117,8 @@ const signup = async ({
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const [user] = await r
-        .knex("user")
+      const [user] = await db
+        .master("user")
         .insert({
           email: lowerCaseEmail,
           auth0_id: passwordToSave,
@@ -137,7 +133,7 @@ const signup = async ({
   });
 };
 
-const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
+const reset = (db, { password, existingUser, reqBody, uuidMatch }) => {
   if (!existingUser) {
     throw new InvalidResetHashError();
   }
@@ -168,8 +164,8 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const [updatedUser] = await r
-        .knex("user")
+      const [updatedUser] = await db
+        .master("user")
         .update({ auth0_id: passwordToSave })
         .where({ id: existingUser.id })
         .returning("*");
@@ -179,7 +175,10 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
 };
 
 // Only used in the changeUserPassword GraphQl mutation
-export const change = ({ user, password, newPassword, passwordConfirm }) => {
+export const change = (
+  db,
+  { user, password, newPassword, passwordConfirm }
+) => {
   const pwFieldSplit = user.auth0_id.split("|");
   const hashedPassword = {
     salt: pwFieldSplit[1],
@@ -203,8 +202,8 @@ export const change = ({ user, password, newPassword, passwordConfirm }) => {
       return AuthHasher.hash(newPassword, async (err, hashed) => {
         if (err) reject(new LocalAuthError(err.message));
         const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-        const updatedUser = await r
-          .knex("user")
+        const updatedUser = await db
+          .master("user")
           .update({ auth0_id: passwordToSave })
           .where({ id: user.id });
         resolve(updatedUser);

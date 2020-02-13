@@ -8,6 +8,7 @@ import request from "superagent";
 import { config } from "../config";
 import logger from "../logger";
 import { capitalizeWord } from "./api/lib/utils";
+import { contextForRequest } from "./contexts";
 import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
@@ -97,13 +98,14 @@ function setupSlackPassport() {
   );
 
   const handleLogin = async (req, res) => {
+    const { db } = contextForRequest(req);
     const { user } = req;
     // set slack_id to auth0Id to avoid changing the schema
     const auth0Id = user && user.id;
     if (!auth0Id) {
       throw new Error("Null user in login callback");
     }
-    let existingUser = await r
+    let existingUser = await db
       .reader("user")
       .where({ auth0_id: auth0Id })
       .first()
@@ -151,8 +153,8 @@ function setupSlackPassport() {
         is_superadmin: false
       };
 
-      await r
-        .knex("user")
+      await db
+        .master("user")
         .insert(userData)
         .catch((err) => {
           logger.error("Slack login error: could not insert new user: ", err);
@@ -210,12 +212,13 @@ function setupAuth0Passport() {
   );
 
   const handleLogin = async (req, res) => {
+    const { db } = contextForRequest(req);
     const auth0Id = req.user && (req.user.id || req.user._json.sub);
     if (!auth0Id) {
       throw new Error("Null user in login callback");
     }
 
-    const existingUser = await r
+    const existingUser = await db
       .reader("user")
       .where({ auth0_id: auth0Id })
       .first();
@@ -234,7 +237,7 @@ function setupAuth0Passport() {
         is_superadmin: false
       };
 
-      await r.knex("user").insert(userData);
+      await db.master("user").insert(userData);
 
       return redirectPostSignIn(req, res, true);
     }
@@ -258,11 +261,12 @@ function setupLocalAuthPassport() {
       passReqToCallback: true
     },
     async (req, username, password, done) => {
+      const { db } = contextForRequest(req);
       const { nextUrl = "", authType } = req.body;
       // eslint-disable-next-line no-useless-escape
       const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
       const lowerCaseEmail = username.toLowerCase();
-      const existingUser = await r
+      const existingUser = await db
         .reader("user")
         .where({ email: lowerCaseEmail })
         .first();
