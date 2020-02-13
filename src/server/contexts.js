@@ -1,17 +1,33 @@
 /* eslint-disable import/prefer-default-export */
+import createMemoizer from "memoredis";
+
+import { config } from "../config";
+import logger from "../logger";
 import { createLoaders } from "./models";
 import thinky from "./models/thinky";
 
-const createContext = (_host) => ({
+const createHostMemoizer = (_host) => {
+  const opts = config.MEMOREDIS_URL
+    ? {
+        clientOpts: config.MEMOREDIS_URL,
+        prefix: config.MEMOREDIS_PREFIX,
+        logger
+      }
+    : { emptyMode: true, logger };
+
+  const memoizer = createMemoizer(opts);
+  return memoizer;
+};
+
+const createContext = (host) => ({
   db: {
     schema: "public",
     master: thinky.r.knex,
     reader: thinky.r.reader
-  }
+  },
+  memoizer: createHostMemoizer(host)
 });
 
-// TODO: this in-memory cache should be replaced with a Redis cache to allow for fleet-wide
-// invalidation
 const contextByHost = {};
 
 /**
