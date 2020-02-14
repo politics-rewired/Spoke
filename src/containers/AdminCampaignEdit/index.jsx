@@ -17,19 +17,19 @@ import DoneIcon from "material-ui/svg-icons/action/done";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import { red600 } from "material-ui/styles/colors";
 
-import { withAuthzContext } from "../components/AuthzProvider";
-import { loadData } from "./hoc/with-operations";
-import { dataTest, camelCase } from "../lib/attributes";
-import theme from "../styles/theme";
-import CampaignBasicsForm from "../components/CampaignBasicsForm";
-import CampaignContactsForm from "../components/CampaignContactsForm";
-import CampaignTextersForm from "../components/CampaignTextersForm";
-import CampaignOverlapManager from "../components/CampaignOverlapManager";
-import CampaignInteractionStepsForm from "../components/CampaignInteractionStepsForm";
-import CampaignCannedResponsesForm from "../components/CampaignCannedResponsesForm";
-import CampaignTextingHoursForm from "../components/CampaignTextingHoursForm";
-import CampaignAutoassignModeForm from "../components/CampaignAutoassignModeForm";
-import CampaignTeamsForm from "../components/CampaignTeamsForm";
+import { withAuthzContext } from "../../components/AuthzProvider";
+import { loadData } from "../hoc/with-operations";
+import { dataTest, camelCase } from "../../lib/attributes";
+import theme from "../../styles/theme";
+import CampaignBasicsForm from "../../components/CampaignBasicsForm";
+import CampaignContactsForm from "../../components/CampaignContactsForm";
+import CampaignTextersForm from "../../components/CampaignTextersForm";
+import CampaignOverlapManager from "../../components/CampaignOverlapManager";
+import CampaignInteractionStepsForm from "../../components/CampaignInteractionStepsForm";
+import CampaignCannedResponsesForm from "../../components/CampaignCannedResponsesForm";
+import CampaignTextingHoursForm from "../../components/CampaignTextingHoursForm";
+import CampaignAutoassignModeForm from "../../components/CampaignAutoassignModeForm";
+import CampaignTeamsForm from "../../components/CampaignTeamsForm";
 
 const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
 
