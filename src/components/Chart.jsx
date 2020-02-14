@@ -1,6 +1,16 @@
-import type from "prop-types";
+import PropTypes from "prop-types";
 import React from "react";
 import { Pie } from "react-chartjs";
+import { StyleSheet, css } from "aphrodite";
+
+const styles = StyleSheet.create({
+  label: {
+    width: 20,
+    padding: 5,
+    margin: 5,
+    fontSize: 12
+  }
+});
 
 const Chart = ({ data }) => {
   const chartColors = ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"];
@@ -17,13 +27,9 @@ const Chart = ({ data }) => {
       <div>
         {pieData.map(({ label, color }) => (
           <span
-            style={{
-              backgroundColor: color,
-              width: 20,
-              padding: 5,
-              margin: 5,
-              fontSize: 12
-            }}
+            key={label}
+            className={css(styles.label)}
+            style={{ backgroundColor: color }}
           >
             {label}
           </span>
@@ -34,7 +40,7 @@ const Chart = ({ data }) => {
 };
 
 Chart.propTypes = {
-  data: type.array
+  data: PropTypes.arrayOf(PropTypes.array).isRequired
 };
 
 export default Chart;

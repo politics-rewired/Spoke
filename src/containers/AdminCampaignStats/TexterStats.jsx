@@ -1,6 +1,10 @@
 import PropTypes from "prop-types";
 import React from "react";
+import gql from "graphql-tag";
+
 import LinearProgress from "material-ui/LinearProgress";
+
+import loadData from "../hoc/load-data";
 
 class TexterStats extends React.Component {
   renderAssignment(assignment) {
@@ -37,7 +41,7 @@ class TexterStats extends React.Component {
   }
 
   render() {
-    const { campaign } = this.props;
+    const { campaign } = this.props.data;
     const { assignments } = campaign;
     return (
       <div>
@@ -53,6 +57,40 @@ class TexterStats extends React.Component {
 }
 
 TexterStats.propTypes = {
-  campaign: PropTypes.object
+  campaignId: PropTypes.string.isRequired
 };
-export default TexterStats;
+
+const mapQueriesToProps = ({ ownProps }) => ({
+  data: {
+    query: gql`
+      query getCampaign(
+        $campaignId: String!
+        $contactsFilter: ContactsFilter!
+      ) {
+        campaign(id: $campaignId) {
+          id
+          useDynamicAssignment
+          assignments {
+            id
+            texter {
+              id
+              firstName
+              lastName
+            }
+            unmessagedCount: contactsCount(contactsFilter: $contactsFilter)
+            contactsCount
+          }
+        }
+      }
+    `,
+    variables: {
+      campaignId: ownProps.campaignId,
+      contactsFilter: {
+        messageStatus: "needsMessage"
+      }
+    }
+    // pollInterval: 5000
+  }
+});
+
+export default loadData(TexterStats, { mapQueriesToProps });
