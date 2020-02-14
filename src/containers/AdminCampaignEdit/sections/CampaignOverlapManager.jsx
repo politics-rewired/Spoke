@@ -5,10 +5,10 @@ import moment from "moment";
 import CircularProgress from "material-ui/CircularProgress";
 import DataTable from "material-ui-datatables";
 import RaisedButton from "material-ui/RaisedButton";
+import { TextField } from "material-ui";
 
 import { loadData } from "../containers/hoc/with-operations";
-import LoadingIndicator from "./LoadingIndicator";
-import { TextField } from "material-ui";
+import LoadingIndicator from "../../../components/LoadingIndicator";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100];
 
