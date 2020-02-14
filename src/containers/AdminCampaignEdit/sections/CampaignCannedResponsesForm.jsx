@@ -1,19 +1,21 @@
-import type from "prop-types";
+import PropTypes from "prop-types";
 import React from "react";
-import CampaignCannedResponseForm from "./CampaignCannedResponseForm";
-import FlatButton from "material-ui/FlatButton";
 import Form from "react-formal";
-import GSForm from "../../../components/forms/GSForm";
+import * as yup from "yup";
+import { StyleSheet, css } from "aphrodite";
+
+import FlatButton from "material-ui/FlatButton";
 import { List, ListItem } from "material-ui/List";
 import Divider from "material-ui/Divider";
-import CampaignFormSectionHeading from "../../../components/CampaignFormSectionHeading";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
 import IconButton from "material-ui/IconButton";
-import * as yup from "yup";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import theme from "../../../styles/theme";
-import { StyleSheet, css } from "aphrodite";
+
 import { dataTest } from "../../../lib/attributes";
+import theme from "../../../styles/theme";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignCannedResponseForm from "./CampaignCannedResponseForm";
+import CampaignFormSectionHeading from "../../../components/CampaignFormSectionHeading";
 
 const styles = StyleSheet.create({
   formContainer: {
@@ -152,10 +154,10 @@ export default class CampaignCannedResponsesForm extends React.Component {
 }
 
 CampaignCannedResponsesForm.propTypes = {
-  saveLabel: type.string,
-  saveDisabled: type.bool,
-  onSubmit: type.func,
-  onChange: type.func,
-  formValues: type.object,
-  customFields: type.array
+  saveLabel: PropTypes.string,
+  saveDisabled: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onChange: PropTypes.func,
+  formValues: PropTypes.object,
+  customFields: PropTypes.array
 };

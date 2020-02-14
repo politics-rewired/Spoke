@@ -1,7 +1,8 @@
-import React from "react";
 import PropTypes from "prop-types";
-import * as yup from "yup";
+import React from "react";
 import Form from "react-formal";
+import * as yup from "yup";
+
 import Toggle from "material-ui/Toggle";
 import ChipInput from "material-ui-chip-input";
 

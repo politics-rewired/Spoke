@@ -5,7 +5,7 @@ import moment from "moment";
 import CircularProgress from "material-ui/CircularProgress";
 import DataTable from "material-ui-datatables";
 import RaisedButton from "material-ui/RaisedButton";
-import { TextField } from "material-ui";
+import TextField from "material-ui/TextField";
 
 import { loadData } from "../containers/hoc/with-operations";
 import LoadingIndicator from "../../../components/LoadingIndicator";

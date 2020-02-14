@@ -21,6 +21,7 @@ import { withAuthzContext } from "../../components/AuthzProvider";
 import { loadData } from "../hoc/with-operations";
 import { dataTest, camelCase } from "../../lib/attributes";
 import theme from "../../styles/theme";
+
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
 import CampaignContactsForm from "../../components/CampaignContactsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
@@ -29,7 +30,7 @@ import CampaignInteractionStepsForm from "./sections/CampaignInteractionStepsFor
 import CampaignCannedResponsesForm from "./sections/CampaignCannedResponsesForm";
 import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
 import CampaignAutoassignModeForm from "../../components/CampaignAutoassignModeForm";
-import CampaignTeamsForm from "../../components/CampaignTeamsForm";
+import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 
 const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
 
