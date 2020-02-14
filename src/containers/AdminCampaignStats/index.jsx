@@ -2,19 +2,19 @@ import PropTypes from "prop-types";
 import React from "react";
 import moment from "moment";
 import RaisedButton from "material-ui/RaisedButton";
-import { withAuthzContext } from "../components/AuthzProvider";
-import Chart from "../components/Chart";
+import { withAuthzContext } from "../../components/AuthzProvider";
+import Chart from "../../components/Chart";
 import { Card, CardTitle, CardText } from "material-ui/Card";
 import { red600 } from "material-ui/styles/colors";
-import TexterStats from "../components/TexterStats";
+import TexterStats from "../../components/TexterStats";
 import Snackbar from "material-ui/Snackbar";
 import { withRouter } from "react-router";
 import { StyleSheet, css } from "aphrodite";
-import loadData from "./hoc/load-data";
+import loadData from "../hoc/load-data";
 import gql from "graphql-tag";
-import theme from "../styles/theme";
-import wrapMutations from "./hoc/wrap-mutations";
-import { dataTest } from "../lib/attributes";
+import theme from "../../styles/theme";
+import wrapMutations from "../hoc/wrap-mutations";
+import { dataTest } from "../../lib/attributes";
 
 const inlineStyles = {
   stat: {
