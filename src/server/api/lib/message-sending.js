@@ -115,19 +115,7 @@ export const getContactMessagingService = async (
   } = await r.reader.raw(
     `
       select *
-      from messaging_service
-      where exists (
-        select 1
-        from messaging_service_stick
-        where exists (
-            select 1
-            from campaign_contact
-            where messaging_service_stick.cell = campaign_contact.cell
-              and campaign_contact.id = ?
-          )
-          and organization_id = ?
-          and messaging_service_stick.messaging_service_sid = messaging_service.messaging_service_sid
-      );
+      from get_messaging_service_for_campaign_contact_in_organization(?, ?)
     `,
     [campaignContactId, parseInt(organizationId)]
   );
