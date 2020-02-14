@@ -23,13 +23,13 @@ import { dataTest, camelCase } from "../../lib/attributes";
 import theme from "../../styles/theme";
 
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
-import CampaignContactsForm from "../../components/CampaignContactsForm";
+import CampaignContactsForm from "./sections/CampaignContactsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
 import CampaignOverlapManager from "./sections/CampaignOverlapManager";
 import CampaignInteractionStepsForm from "./sections/CampaignInteractionStepsForm";
 import CampaignCannedResponsesForm from "./sections/CampaignCannedResponsesForm";
 import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
-import CampaignAutoassignModeForm from "../../components/CampaignAutoassignModeForm";
+import CampaignAutoassignModeForm from "./sections/CampaignAutoassignModeForm";
 import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 
 const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;

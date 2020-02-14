@@ -10,7 +10,7 @@ import Autocomplete from "material-ui/AutoComplete";
 import Toggle from "material-ui/Toggle";
 
 import GSForm from "../../../components/forms/GSForm";
-import CampaignFormSectionHeading from "../../../components/CampaignFormSectionHeading";
+import CampaignFormSectionHeading from "./components/CampaignFormSectionHeading";
 import { dataSourceItem } from "../../../components/utils";
 
 export default class CampaignTextingHoursForm extends React.Component {

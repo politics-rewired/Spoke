@@ -15,7 +15,7 @@ import { dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 import GSForm from "../../../components/forms/GSForm";
 import CampaignCannedResponseForm from "./CampaignCannedResponseForm";
-import CampaignFormSectionHeading from "../../../components/CampaignFormSectionHeading";
+import CampaignFormSectionHeading from "./components/CampaignFormSectionHeading";
 
 const styles = StyleSheet.create({
   formContainer: {

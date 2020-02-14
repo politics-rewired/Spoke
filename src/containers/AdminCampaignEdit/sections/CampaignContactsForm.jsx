@@ -16,10 +16,10 @@ import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
 import UploadIcon from "material-ui/svg-icons/file/file-upload";
 
-import { dataTest } from "../lib/attributes";
-import theme from "../styles/theme";
-import GSForm from "../components/forms/GSForm";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import { dataTest } from "../../../lib/attributes";
+import theme from "../../../styles/theme";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "./components/CampaignFormSectionHeading";
 
 import "./styles/file-drop.css";
 

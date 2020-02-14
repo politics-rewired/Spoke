@@ -13,7 +13,7 @@ import { makeTree } from "../../../lib/interaction-step-helpers";
 import { dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 import GSForm from "../../../components/forms/GSForm";
-import CampaignFormSectionHeading from "../../../components/CampaignFormSectionHeading";
+import CampaignFormSectionHeading from "./components/CampaignFormSectionHeading";
 
 const styles = {
   pullRight: {

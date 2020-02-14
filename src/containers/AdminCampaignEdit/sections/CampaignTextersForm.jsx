@@ -18,7 +18,7 @@ import { dataTest } from "../../../lib/attributes";
 import { dataSourceItem } from "../../../components/utils";
 import Slider from "../../../components/Slider";
 import GSForm from "../../../components/forms/GSForm";
-import CampaignFormSectionHeading from "../../../components/CampaignFormSectionHeading";
+import CampaignFormSectionHeading from "./components/CampaignFormSectionHeading";
 
 const styles = StyleSheet.create({
   sliderContainer: {
