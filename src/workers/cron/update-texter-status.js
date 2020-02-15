@@ -27,8 +27,7 @@ const main = async () => {
       "berniesms_texter.updated_at",
       ">",
       fiveAndAHalfMinutesAgo.toISOString()
-    )
-    .where({ rank: "do-not-assign" });
+    );
 
   for (const texterRank of texterRankUpdates) {
     const { email, rank } = texterRank;
