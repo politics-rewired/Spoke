@@ -9573,10 +9573,10 @@ memoize-one@^5.0.0:
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.1.1.tgz#047b6e3199b508eaec03504de71229b8eb1d75c0"
   integrity sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA==
 
-memoredis@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.7.tgz#ed12529d285bf0806ce564688066df1cf459ed7e"
-  integrity sha512-sfNSY2FdLmn1ARWCTlgfwEElry5uKSqvP57SRoPSflApFe+CNYlUJKNYreqehb+VL0+SiBtD4j48UoWl41ftow==
+memoredis@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/memoredis/-/memoredis-1.0.8.tgz#76ae4a34479f3f8b69d2c87a08b8d438bdd00d97"
+  integrity sha512-DBIrChLg7MvTdg88d2kVqAAQ1oO23IGz0peyWx5EKvl49qReaaZPpjQyqsk5czY/t6yqUX1XdESaDSeMQPQ0+g==
   dependencies:
     json-date-parser "^1.0.1"
     json-stable-stringify "^1.0.1"
