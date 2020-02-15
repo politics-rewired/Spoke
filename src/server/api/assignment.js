@@ -831,19 +831,59 @@ export async function fulfillPendingRequestFor(auth0Id) {
   });
 }
 
+export async function autoHandleRequest(pendingAssignmentRequest) {
+  // check texter status of pendingAssignmentRequest
+  const user_organization = r
+    .knex("user_organization")
+    .where({
+      user_id: pendingAssignmentRequest.user_id,
+      organization_id: pendingAssignmentRequest.organization_id
+    })
+    .first("*");
+
+  if (user_organization) {
+    if (user_organization.request_status === "auto_approve") {
+      // Even if the assignment fails, we still want to approve their request
+      // to let them request again if possible
+      try {
+        await giveUserMoreTexts(
+          pendingAssignmentRequest.user_id,
+          pendingAssignmentRequest.amount,
+          pendingAssignmentRequest.organization_id,
+          pendingAssignmentRequest.preferred_team_id
+        );
+      } catch (ex) {
+        logger.error("Error assigning", ex);
+      } finally {
+        await r
+          .knex("assignment_request")
+          .update({ status: "approved" })
+          .where({ id: pendingAssignmentRequest.id });
+      }
+    }
+
+    if (user_organization.request_status === "do_not_approve") {
+      await r
+        .knex("assignment_request")
+        .update({ status: "rejected " })
+        .where({ id: pendingAssignmentRequest.id });
+    }
+  }
+}
+
 export async function giveUserMoreTexts(
-  auth0Id,
+  userId,
   count,
   organizationId,
   preferredTeamId,
   parentTrx = r.knex
 ) {
-  logger.verbose(`Starting to give ${auth0Id} ${count} texts`);
+  logger.verbose(`Starting to give ${userId} ${count} texts`);
 
-  const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
+  const matchingUsers = await r.knex("user").where({ id: userId });
   const user = matchingUsers[0];
   if (!user) {
-    throw new AutoassignError(`No user found with id ${auth0Id}`);
+    throw new AutoassignError(`No user found with id ${userId}`);
   }
 
   const assignmentOptions = await myCurrentAssignmentTargets(

@@ -26,7 +26,8 @@ import { Notifications, sendUserNotification } from "../notifications";
 import {
   resolvers as assignmentResolvers,
   giveUserMoreTexts,
-  myCurrentAssignmentTarget
+  myCurrentAssignmentTarget,
+  autoHandleRequest
 } from "./assignment";
 import { getCampaigns, resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
@@ -2532,9 +2533,10 @@ const rootMutations = {
               amount: count,
               preferred_team_id: preferredTeamId
             })
-            .returning("id");
+            .returning("*");
 
-          assignmentRequestId = inserted[0];
+          const pendingAssignmentRequest = inserted[0];
+          assignmentRequestId = pendingAssignmentRequest[0].id;
 
           // This will just throw if it errors
           if (config.ASSIGNMENT_REQUESTED_URL) {
@@ -2549,6 +2551,10 @@ const rootMutations = {
 
             logger.debug("Assignment requested response", { response });
           }
+
+          // If it's been successfully posted to the external system,
+          // let's preemptively handle it now but not await the result
+          autoHandleRequest(pendingAssignmentRequest);
 
           return "Created";
         }
@@ -2821,14 +2827,9 @@ const rootMutations = {
         "SUPERVOLUNTEER"
       );
 
-      const { auth0_id } = await r
-        .knex("user")
-        .where({ id: assignmentRequest.user_id })
-        .first("auth0_id");
-
       const numberAssigned = await r.knex.transaction(async trx => {
         await giveUserMoreTexts(
-          auth0_id,
+          assignmentRequest.user_id,
           assignmentRequest.amount,
           assignmentRequest.organization_id,
           null,
