@@ -8,7 +8,7 @@ exports.up = function(knex) {
         table
           .specificType("request_status", "texter_status")
           .notNullable()
-          .defaultTo("auto_approve");
+          .defaultTo("approval_required");
       })
     );
 };

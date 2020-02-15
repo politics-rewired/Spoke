@@ -2536,7 +2536,7 @@ const rootMutations = {
             .returning("*");
 
           const pendingAssignmentRequest = inserted[0];
-          assignmentRequestId = pendingAssignmentRequest[0].id;
+          assignmentRequestId = pendingAssignmentRequest.id;
 
           // This will just throw if it errors
           if (config.ASSIGNMENT_REQUESTED_URL) {
@@ -2554,7 +2554,9 @@ const rootMutations = {
 
           // If it's been successfully posted to the external system,
           // let's preemptively handle it now but not await the result
-          autoHandleRequest(pendingAssignmentRequest);
+          if (config.AUTO_HANDLE_REQUESTS) {
+            autoHandleRequest(pendingAssignmentRequest);
+          }
 
           return "Created";
         }

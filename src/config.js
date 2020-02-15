@@ -98,6 +98,10 @@ if (isClient()) {
       desc: "Client secret from Auth0 app.",
       default: undefined
     }),
+    AUTO_HANDLE_REQUESTS: bool({
+      desc: "Whether to auto handle requests after submission",
+      default: false
+    }),
     AWS_ACCESS_AVAILABLE: bool({
       desc: "Enable or disable S3 campaign exports within Amazon Lambda.",
       default: false

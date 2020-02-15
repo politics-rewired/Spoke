@@ -833,7 +833,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
 
 export async function autoHandleRequest(pendingAssignmentRequest) {
   // check texter status of pendingAssignmentRequest
-  const user_organization = r
+  const user_organization = await r
     .knex("user_organization")
     .where({
       user_id: pendingAssignmentRequest.user_id,
