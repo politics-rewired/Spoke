@@ -15,13 +15,13 @@ import CircularProgress from "material-ui/CircularProgress";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
-import { red600 } from "material-ui/styles/colors";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { loadData } from "../hoc/with-operations";
 import { dataTest, camelCase } from "../../lib/attributes";
 import theme from "../../styles/theme";
 
+import CampaignEditHeader from "./components/CampaignEditHeader";
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
 import CampaignContactsForm from "./sections/CampaignContactsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
@@ -98,7 +98,6 @@ class AdminCampaignEdit extends React.Component {
     this.state = {
       expandedSection: isNew ? 0 : null,
       campaignFormValues: Object.assign({}, props.campaignData.campaign),
-      startingCampaign: false,
       isWorking: false,
       requestError: undefined
     };
@@ -549,14 +548,6 @@ class AdminCampaignEdit extends React.Component {
     };
   }
 
-  renderCurrentEditors() {
-    const { editors } = this.props.campaignData.campaign;
-    if (editors) {
-      return <div>This campaign is being edited by: {editors}</div>;
-    }
-    return "";
-  }
-
   renderCampaignFormSection(section, forceDisable) {
     const { isWorking } = this.state;
     const shouldDisable =
@@ -584,143 +575,33 @@ class AdminCampaignEdit extends React.Component {
     );
   }
 
-  renderHeader() {
-    const {
-      campaign: { dueBy, isStarted, title } = {}
-    } = this.props.campaignData;
+  handleCloseError = () => this.setState({ requestError: undefined });
 
-    const isOverdue = moment().isSameOrAfter(dueBy);
+  isCampaignComplete = () => {
+    const sections = this.sections();
+    const { pendingJobs } = this.props.pendingJobsData.campaign;
 
-    const notStarting = isStarted ? (
-      <div
-        {...dataTest("campaignIsStarted")}
-        style={{
-          color: isOverdue ? red600 : theme.colors.green,
-          fontWeight: 800
-        }}
-      >
-        {isOverdue
-          ? "This campaign is running but is overdue!"
-          : "This campaign is running!"}
-        {this.renderCurrentEditors()}
-      </div>
-    ) : (
-      this.renderStartButton()
-    );
+    const isJobErrored = job => /Error/.test(job.resultMessage || "");
+    const erroredJobs = pendingJobs.filter(isJobErrored);
+    let isCompleted = erroredJobs.length === 0;
 
-    return (
-      <div
-        style={{
-          marginBottom: 15,
-          fontSize: 16
-        }}
-      >
-        {title && <h1> {title} </h1>}
-        {this.state.startingCampaign ? (
-          <div
-            style={{
-              color: theme.colors.gray,
-              fontWeight: 800
-            }}
-          >
-            <CircularProgress
-              size={0.5}
-              style={{
-                verticalAlign: "middle",
-                display: "inline-block"
-              }}
-            />
-            Starting your campaign...
-          </div>
-        ) : (
-          notStarting
-        )}
-      </div>
-    );
-  }
-
-  renderStartButton() {
-    if (!this.props.adminPerms) {
-      // Supervolunteers don't have access to start the campaign or un/archive it
-      return null;
-    }
-    let isCompleted =
-      this.props.pendingJobsData.campaign.pendingJobs.filter(job =>
-        /Error/.test(job.resultMessage || "")
-      ).length === 0;
-    this.sections().forEach(section => {
-      if (
-        (section.blocksStarting && !this.checkSectionCompleted(section)) ||
-        !this.checkSectionSaved(section)
-      ) {
+    sections.forEach(section => {
+      const isIncomplete =
+        section.blocksStarting && !this.checkSectionCompleted(section);
+      const isSaved = this.checkSectionSaved(section);
+      if (isIncomplete || !isSaved) {
         isCompleted = false;
       }
     });
 
-    return (
-      <div
-        style={{
-          ...theme.layouts.multiColumn.container
-        }}
-      >
-        <div
-          style={{
-            ...theme.layouts.multiColumn.flexColumn
-          }}
-        >
-          {isCompleted
-            ? "Your campaign is all good to go! >>>>>>>>>"
-            : "You need to complete all the sections below before you can start this campaign"}
-          {this.renderCurrentEditors()}
-        </div>
-        <div>
-          {this.props.campaignData.campaign.isArchived ? (
-            <RaisedButton
-              label="Unarchive"
-              onTouchTap={async () =>
-                await this.props.mutations.unarchiveCampaign(
-                  this.props.campaignData.campaign.id
-                )
-              }
-            />
-          ) : (
-            <RaisedButton
-              label="Archive"
-              onTouchTap={async () =>
-                await this.props.mutations.archiveCampaign(
-                  this.props.campaignData.campaign.id
-                )
-              }
-            />
-          )}
-          <RaisedButton
-            {...dataTest("startCampaign")}
-            primary
-            label="Start This Campaign!"
-            disabled={!isCompleted}
-            onTouchTap={async () => {
-              this.setState({
-                startingCampaign: true
-              });
-              await this.props.mutations.startCampaign(
-                this.props.campaignData.campaign.id
-              );
-              this.setState({
-                startingCampaign: false
-              });
-            }}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  handleCloseError = () => this.setState({ requestError: undefined });
+    return isCompleted;
+  };
 
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms } = this.props;
+    const { adminPerms, match } = this.props;
+    const { campaignId } = match.params;
 
     const errorActions = [
       <FlatButton label="Ok" primary={true} onClick={this.handleCloseError} />
@@ -728,7 +609,10 @@ class AdminCampaignEdit extends React.Component {
 
     return (
       <div>
-        {this.renderHeader()}
+        <CampaignEditHeader
+          campaignId={campaignId}
+          isCampaignComplete={this.isCampaignComplete()}
+        />
         {sections.map((section, sectionIndex) => {
           const sectionIsDone =
             this.checkSectionCompleted(section) &&
@@ -955,30 +839,6 @@ const queries = {
 
 // Right now we are copying the result fields instead of using a fragment because of https://github.com/apollostack/apollo-client/issues/451
 const mutations = {
-  archiveCampaign: ownProps => campaignId => ({
-    mutation: gql`mutation archiveCampaign($campaignId: String!) {
-          archiveCampaign(id: $campaignId) {
-            ${campaignInfoFragment}
-          }
-        }`,
-    variables: { campaignId }
-  }),
-  unarchiveCampaign: ownProps => campaignId => ({
-    mutation: gql`mutation unarchiveCampaign($campaignId: String!) {
-        unarchiveCampaign(id: $campaignId) {
-          ${campaignInfoFragment}
-        }
-      }`,
-    variables: { campaignId }
-  }),
-  startCampaign: ownProps => campaignId => ({
-    mutation: gql`mutation startCampaign($campaignId: String!) {
-        startCampaign(id: $campaignId) {
-          ${campaignInfoFragment}
-        }
-      }`,
-    variables: { campaignId }
-  }),
   editCampaign: ownProps => (campaignId, campaign) => ({
     mutation: gql`
       mutation editCampaign($campaignId: String!, $campaign: CampaignInput!) {
