@@ -12,7 +12,7 @@ import { eventBus, EventType } from "../event-bus";
 import { memoizer, cacheOpts } from "../memoredis";
 import kue from "kue";
 
-export const assignmentQueue = kue.createQueue(config.MEMOREDIS_URL);
+export const assignmentQueue = kue.createQueue({ redis: config.MEMOREDIS_URL });
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
