@@ -27,7 +27,7 @@ import {
   resolvers as assignmentResolvers,
   giveUserMoreTexts,
   myCurrentAssignmentTarget,
-  autoHandleRequest
+  assignmentQueue
 } from "./assignment";
 import { getCampaigns, resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
@@ -2555,7 +2555,9 @@ const rootMutations = {
           // If it's been successfully posted to the external system,
           // let's preemptively handle it now but not await the result
           if (config.AUTO_HANDLE_REQUESTS) {
-            autoHandleRequest(pendingAssignmentRequest);
+            assignmentQueue
+              .create("auto-handle-request", pendingAssignmentRequest)
+              .save();
           }
 
           return "Created";

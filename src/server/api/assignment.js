@@ -10,6 +10,9 @@ import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
 import { eventBus, EventType } from "../event-bus";
 import { memoizer, cacheOpts } from "../memoredis";
+import kue from "kue";
+
+export const assignmentQueue = kue.createQueue(config.MEMOREDIS_URL);
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -870,6 +873,15 @@ export async function autoHandleRequest(pendingAssignmentRequest) {
     }
   }
 }
+
+assignmentQueue.process(
+  "auto-handle-request",
+  1,
+  async (pendingAssignmentRequest, done) => {
+    await autoHandleRequest(pendingAssignmentRequest);
+    done();
+  }
+);
 
 export async function giveUserMoreTexts(
   userId,
