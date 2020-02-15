@@ -874,14 +874,11 @@ export async function autoHandleRequest(pendingAssignmentRequest) {
   }
 }
 
-assignmentQueue.process(
-  "auto-handle-request",
-  1,
-  async (pendingAssignmentRequest, done) => {
-    await autoHandleRequest(pendingAssignmentRequest);
-    done();
-  }
-);
+assignmentQueue.process("auto-handle-request", 1, async (job, done) => {
+  const pendingAssignmentRequest = job.data;
+  await autoHandleRequest(pendingAssignmentRequest);
+  done();
+});
 
 export async function giveUserMoreTexts(
   userId,
