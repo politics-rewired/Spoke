@@ -1,37 +1,34 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { StyleSheet, css } from "aphrodite";
-
 import theme from "../styles/theme";
 import { dataTest } from "../lib/attributes";
 
 const inlineStyles = {
   icon: {
-    position: "absolute",
-    height: "100%",
-    width: "100%",
-    top: 0,
-    left: 0,
+    width: 200,
+    height: 200,
     opacity: 0.2
   }
 };
 
+// removing pencil image for mobile widths smaller than 450px
+
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-    marginLeft: "20px",
-    marginRight: "20px"
+    marginTop: "10px",
+    width: 200,
+    marginLeft: "auto",
+    marginRight: "auto"
   },
-  paddingBlock: {
-    flexGrow: "1"
-  },
-  iconWrapper: {
-    flexGrow: "10",
-    position: "relative",
-    maxHeight: "200px",
-    overflow: "hidden"
+  hideMobile: {
+    marginTop: "10px",
+    width: 200,
+    marginLeft: "auto",
+    marginRight: "auto",
+    "@media(maxWidth: 450px)": {
+      display: "none"
+    }
   },
   title: {
     ...theme.text.header,
@@ -44,22 +41,22 @@ const styles = StyleSheet.create({
   }
 });
 
-const Empty = ({ title, icon, content }) => (
-  <div className={css(styles.container)} {...dataTest("empty")}>
-    <div className={css(styles.paddingBlock)} />
-    <div className={css(styles.iconWrapper)}>
-      {React.cloneElement(icon, { style: inlineStyles.icon })}
-    </div>
+const Empty = ({ title, icon, content, hideMobile }) => (
+  <div
+    className={hideMobile ? css(styles.hideMobile) : css(styles.container)}
+    {...dataTest("empty")}
+  >
+    {React.cloneElement(icon, { style: inlineStyles.icon })}
     <div className={css(styles.title)}>{title}</div>
-    {content && <div className={css(styles.content)}>{content}</div>}
-    <div className={css(styles.paddingBlock)} />
+    {content ? <div className={css(styles.content)}>{content}</div> : ""}
   </div>
 );
 
 Empty.propTypes = {
-  title: PropTypes.string.isRequired,
-  icon: PropTypes.object.isRequired,
-  content: PropTypes.object
+  title: PropTypes.string,
+  icon: PropTypes.object,
+  content: PropTypes.object,
+  hideMobile: PropTypes.bool
 };
 
 export default Empty;
