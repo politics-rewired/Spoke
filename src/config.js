@@ -102,6 +102,11 @@ if (isClient()) {
       desc: "Whether to auto handle requests after submission",
       default: false
     }),
+    DISABLE_ASSIGNMENT_CASCADE: num({
+      desc:
+        "Whether to just assign from 1 campaign rather than gathering from multiple to fulfill a request",
+      default: false
+    }),
     AUTO_HANDLE_REQUESTS_CONCURRENCY: num({
       desc: "How many requests to handle at once",
       default: 1

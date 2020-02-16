@@ -939,7 +939,10 @@ export async function giveUserMoreTexts(
         trx
       );
 
-      countLeftToUpdate = countLeftToUpdate - countUpdatedInLoop;
+      countLeftToUpdate = config.DISABLE_ASSIGNMENT_CASCADE
+        ? 0
+        : countLeftToUpdate - countUpdatedInLoop;
+
       countUpdated = countUpdated + countUpdatedInLoop;
 
       if (countUpdatedInLoop === 0) {
