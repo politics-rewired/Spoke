@@ -102,6 +102,10 @@ if (isClient()) {
       desc: "Whether to auto handle requests after submission",
       default: false
     }),
+    AUTO_HANDLE_REQUESTS_CONCURRENCY: num({
+      desc: "How many requests to handle at once",
+      default: 1
+    }),
     AWS_ACCESS_AVAILABLE: bool({
       desc: "Enable or disable S3 campaign exports within Amazon Lambda.",
       default: false

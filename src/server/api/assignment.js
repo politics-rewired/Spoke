@@ -874,11 +874,15 @@ export async function autoHandleRequest(pendingAssignmentRequest) {
   }
 }
 
-assignmentQueue.process("auto-handle-request", 3, async (job, done) => {
-  const pendingAssignmentRequest = job.data;
-  await autoHandleRequest(pendingAssignmentRequest);
-  done();
-});
+assignmentQueue.process(
+  "auto-handle-request",
+  config.AUTO_HANDLE_REQUESTS_CONCURRENCY,
+  async (job, done) => {
+    const pendingAssignmentRequest = job.data;
+    await autoHandleRequest(pendingAssignmentRequest);
+    done();
+  }
+);
 
 export async function giveUserMoreTexts(
   userId,
