@@ -1034,20 +1034,20 @@ export async function assignLoop(
       select id, campaign_id
       from campaign_contact
       where id in ( select id from assignable_needs_reply )
-        or id in ( 
-          select id
-          from assignable_needs_reply_with_escalation_tags
-          where applied_escalation_tags <@ (
-            select array_agg(tag_id) as my_escalation_tags
-            from team_escalation_tags
-            where exists (
-              select 1
-              from user_team
-              where user_team.team_id = team_escalation_tags.team_id
-                and user_id = ?
-            )
-          )
-        )
+--        or id in ( 
+--          select id
+--          from assignable_needs_reply_with_escalation_tags
+--          where applied_escalation_tags <@ (
+--            select array_agg(tag_id) as my_escalation_tags
+--            from team_escalation_tags
+--            where exists (
+--              select 1
+--              from user_team
+--              where user_team.team_id = team_escalation_tags.team_id
+--                and user_id = ?
+--            )
+--          )
+--        )
       ) all_needs_reply`,
     UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
