@@ -12,7 +12,10 @@ import { eventBus, EventType } from "../event-bus";
 import { memoizer, cacheOpts } from "../memoredis";
 import kue from "kue";
 
-export const assignmentQueue = kue.createQueue({ redis: config.MEMOREDIS_URL });
+export const assignmentQueue =
+  config.MEMOREDIS_URL && config.AUTO_HANDLE_REQUESTS
+    ? kue.createQueue({ redis: config.MEMOREDIS_URL })
+    : { create: () => null, process: () => null };
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -1034,28 +1037,15 @@ export async function assignLoop(
       select id, campaign_id
       from campaign_contact
       where id in ( select id from assignable_needs_reply )
---        or id in ( 
---          select id
---          from assignable_needs_reply_with_escalation_tags
---          where applied_escalation_tags <@ (
---            select array_agg(tag_id) as my_escalation_tags
---            from team_escalation_tags
---            where exists (
---              select 1
---              from user_team
---              where user_team.team_id = team_escalation_tags.team_id
---                and user_id = ?
---            )
---          )
---        )
       ) all_needs_reply`,
     UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
 
   const queryVars =
-    assignmentInfo.type == "UNREPLIED"
-      ? [user.id, campaignIdToAssignTo, countToAssign, assignmentId]
-      : [campaignIdToAssignTo, countToAssign, assignmentId];
+    // assignmentInfo.type == "UNREPLIED"
+    // ? [user.id, campaignIdToAssignTo, countToAssign, assignmentId]
+    // : [campaignIdToAssignTo, countToAssign, assignmentId];
+    [campaignIdToAssignTo, countToAssign, assignmentId];
 
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
