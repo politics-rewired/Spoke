@@ -15,7 +15,7 @@ import kue from "kue";
 export const assignmentQueue =
   config.MEMOREDIS_URL && config.AUTO_HANDLE_REQUESTS
     ? kue.createQueue({ redis: config.MEMOREDIS_URL })
-    : { create: () => null, process: () => null };
+    : { create: () => ({ save: () => null }), process: () => null };
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -1035,20 +1035,58 @@ export async function assignLoop(
 
   logger.verbose(`Assigning to assignment id ${assignmentId}`);
 
+  const myEscalationTags = await r
+    .reader("team_escalation_tags")
+    .whereIn(
+      "team_id",
+      r
+        .reader("team")
+        .select("team.id")
+        .join("user_team", "team.id", "=", "user_team.team_id")
+        .where({
+          user_id: parseInt(user.id),
+          is_assignment_enabled: true,
+          organization_id: parseInt(organizationId)
+        })
+    )
+    .pluck("tag_id");
+
+  if (myEscalationTags.length > 0) {
+    const { rowCount: ccUpdateCount } = await trx.raw(
+      `
+      with matching_contact as (
+        select id from assignable_campaign_contacts_with_escalation_tags
+        where campaign_id = ?
+          
+          and ? @> applied_escalation_tags
+        for update skip locked
+        limit ?
+      )
+      update
+         campaign_contact as target_contact
+       set
+         assignment_id = ?
+       from
+         matching_contact
+       where
+         target_contact.id = matching_contact.id;`,
+      [campaignIdToAssignTo, myEscalationTags, countToAssign, assignmentId]
+    );
+
+    if (rowCount > 0) {
+      logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
+      const team = {
+        teamId: assignmentInfo.team_id,
+        teamTitle: assignmentInfo.team_title
+      };
+      return { count: ccUpdateCount, team };
+    }
+  }
+
   const contactView = {
-    UNREPLIED: `( 
-      select id, campaign_id
-      from campaign_contact
-      where id in ( select id from assignable_needs_reply )
-      ) all_needs_reply`,
+    UNREPLIED: `assignable_needs_reply`,
     UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
-
-  const queryVars =
-    // assignmentInfo.type == "UNREPLIED"
-    // ? [user.id, campaignIdToAssignTo, countToAssign, assignmentId]
-    // : [campaignIdToAssignTo, countToAssign, assignmentId];
-    [campaignIdToAssignTo, countToAssign, assignmentId];
 
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
@@ -1066,7 +1104,7 @@ export async function assignLoop(
          matching_contact
        where
          target_contact.id = matching_contact.id;`,
-    queryVars
+    [campaignIdToAssignTo, countToAssign, assignmentId]
   );
 
   logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
@@ -1074,6 +1112,7 @@ export async function assignLoop(
     teamId: assignmentInfo.team_id,
     teamTitle: assignmentInfo.team_title
   };
+
   return { count: ccUpdateCount, team };
 }
 
