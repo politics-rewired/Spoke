@@ -874,7 +874,7 @@ export async function autoHandleRequest(pendingAssignmentRequest) {
   }
 }
 
-assignmentQueue.process("auto-handle-request", 1, async (job, done) => {
+assignmentQueue.process("auto-handle-request", 3, async (job, done) => {
   const pendingAssignmentRequest = job.data;
   await autoHandleRequest(pendingAssignmentRequest);
   done();
