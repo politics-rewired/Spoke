@@ -794,7 +794,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
       const numberAssigned = await r.knex.transaction(async trx => {
         try {
           const numberAssigned = await giveUserMoreTexts(
-            auth0Id,
+            pendingAssignmentRequest.user_id,
             pendingAssignmentRequest.amount,
             pendingAssignmentRequest.organization_id,
             pendingAssignmentRequest.preferred_team_id,
