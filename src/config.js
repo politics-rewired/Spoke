@@ -308,6 +308,11 @@ if (isClient()) {
       example: "assignment.message.received,assignment.updated",
       default: ""
     }),
+    DISABLE_CAMPAIGN_EDIT_TEXTERS: bool({
+      desc: "Whether to disable showing the texters panel on campaign edit.",
+      default: "false",
+      isClient: true
+    }),
     EMAIL_FROM: email({
       desc:
         "Email from address. Required to send email from either Mailgun or a custom SMTP server.",
