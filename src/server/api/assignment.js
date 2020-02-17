@@ -1073,7 +1073,7 @@ export async function assignLoop(
       [campaignIdToAssignTo, myEscalationTags, countToAssign, assignmentId]
     );
 
-    if (rowCount > 0) {
+    if (ccUpdateCount > 0) {
       logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
       const team = {
         teamId: assignmentInfo.team_id,
