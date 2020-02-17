@@ -859,7 +859,7 @@ export async function autoHandleRequest(pendingAssignmentRequest) {
           pendingAssignmentRequest.preferred_team_id
         );
       } catch (ex) {
-        logger.error("Error assigning", ex);
+        logger.error("Error assigning: ", ex);
       } finally {
         await r
           .knex("assignment_request")
