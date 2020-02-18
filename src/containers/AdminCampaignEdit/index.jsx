@@ -6,22 +6,14 @@ import queryString from "query-string";
 import isEqual from "lodash/isEqual";
 import moment from "moment";
 
-import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
-import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
-import Avatar from "material-ui/Avatar";
-import CircularProgress from "material-ui/CircularProgress";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
-import DoneIcon from "material-ui/svg-icons/action/done";
-import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { loadData } from "../hoc/with-operations";
-import { dataTest, camelCase } from "../../lib/attributes";
-import theme from "../../styles/theme";
 
 import CampaignEditHeader from "./components/CampaignEditHeader";
+import SectionWrapper from "./components/SectionWrapper";
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
 import CampaignContactsForm from "./sections/CampaignContactsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
@@ -600,8 +592,9 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms, match } = this.props;
+    const { adminPerms, match, campaignData } = this.props;
     const { campaignId } = match.params;
+    const { isStarted } = campaignData.campaign;
 
     const errorActions = [
       <FlatButton label="Ok" primary={true} onClick={this.handleCloseError} />
@@ -614,101 +607,42 @@ class AdminCampaignEdit extends React.Component {
           isCampaignComplete={this.isCampaignComplete()}
         />
         {sections.map((section, sectionIndex) => {
-          const sectionIsDone =
-            this.checkSectionCompleted(section) &&
-            this.checkSectionSaved(section);
-          const sectionIsExpanded = sectionIndex === expandedSection;
-          let avatar = null;
-          const cardHeaderStyle = {
-            backgroundColor: theme.colors.lightGray
-          };
-          const avatarStyle = {
-            display: "inline-block",
-            verticalAlign: "middle"
-          };
-
+          const { expandableBySuperVolunteers } = section;
           const {
             sectionIsSaving,
             savePercent,
             jobMessage,
             jobId
           } = this.sectionSaveStatus(section);
-          const sectionCanExpandOrCollapse =
-            (section.expandAfterCampaignStarts ||
-              !this.props.campaignData.campaign.isStarted) &&
-            (adminPerms || section.expandableBySuperVolunteers);
+          const sectionIsDone =
+            this.checkSectionCompleted(section) &&
+            this.checkSectionSaved(section);
+          const sectionIsExpanded = sectionIndex === expandedSection;
 
-          if (sectionIsSaving) {
-            avatar = <CircularProgress style={avatarStyle} size={25} />;
-            cardHeaderStyle.background = theme.colors.lightGray;
-            cardHeaderStyle.width = `${
-              savePercent > 100 ? savePercent - 100 : savePercent
-            }%`;
-          } else if (sectionIsExpanded && sectionCanExpandOrCollapse) {
-            cardHeaderStyle.backgroundColor = theme.colors.lightYellow;
-          } else if (!sectionCanExpandOrCollapse) {
-            cardHeaderStyle.backgroundColor = theme.colors.lightGray;
-          } else if (sectionIsDone) {
-            avatar = (
-              <Avatar
-                icon={<DoneIcon style={{ fill: theme.colors.darkGreen }} />}
-                style={avatarStyle}
-                size={25}
-              />
-            );
-            cardHeaderStyle.backgroundColor = theme.colors.green;
-          } else if (!sectionIsDone) {
-            avatar = (
-              <Avatar
-                icon={<WarningIcon style={{ fill: theme.colors.orange }} />}
-                style={avatarStyle}
-                size={25}
-              />
-            );
-            cardHeaderStyle.backgroundColor = theme.colors.yellow;
-          }
+          const hasPermissions = adminPerms || expandableBySuperVolunteers;
+          const canExpand = section.expandAfterCampaignStarts || !isStarted;
+          const sectionCanExpandOrCollapse = canExpand && hasPermissions;
+
+          const handleDiscardJob = () => this.handleDeleteJob(jobId);
+          const handleExpandChange = expanded =>
+            this.onExpandChange(sectionIndex, expanded);
+
           return (
-            <Card
-              {...dataTest(camelCase(`${section.title}`))}
+            <SectionWrapper
               key={section.title}
-              expanded={sectionIsExpanded && sectionCanExpandOrCollapse}
-              expandable={sectionCanExpandOrCollapse}
-              onExpandChange={newExpandedState =>
-                this.onExpandChange(sectionIndex, newExpandedState)
-              }
-              style={{
-                marginTop: 1
-              }}
+              title={section.title}
+              sectionCanExpandOrCollapse={sectionCanExpandOrCollapse}
+              sectionIsExpanded={sectionIsExpanded}
+              sectionIsSaving={sectionIsSaving}
+              sectionIsDone={sectionIsDone}
+              savePercent={savePercent}
+              canDiscardJob={sectionIsSaving && adminPerms}
+              jobMessage={jobMessage}
+              onDiscardJob={handleDiscardJob}
+              onExpandChange={handleExpandChange}
             >
-              <CardHeader
-                title={section.title}
-                titleStyle={{
-                  width: "100%"
-                }}
-                style={cardHeaderStyle}
-                actAsExpander={!sectionIsSaving && sectionCanExpandOrCollapse}
-                showExpandableButton={
-                  !sectionIsSaving && sectionCanExpandOrCollapse
-                }
-                avatar={avatar}
-              />
-              <CardText expandable>
-                {this.renderCampaignFormSection(section, sectionIsSaving)}
-              </CardText>
-              {sectionIsSaving && adminPerms ? (
-                <CardActions>
-                  <div>
-                    Current Status: {extractStageAndStatus(savePercent)}
-                  </div>
-                  {jobMessage ? <div>Message: {jobMessage}</div> : null}
-                  <RaisedButton
-                    label="Discard Job"
-                    icon={<CancelIcon />}
-                    onTouchTap={() => this.handleDeleteJob(jobId)}
-                  />
-                </CardActions>
-              ) : null}
-            </Card>
+              {this.renderCampaignFormSection(section, sectionIsSaving)}
+            </SectionWrapper>
           );
         })}
         <Dialog
@@ -721,14 +655,6 @@ class AdminCampaignEdit extends React.Component {
         </Dialog>
       </div>
     );
-  }
-}
-
-function extractStageAndStatus(percentComplete) {
-  if (percentComplete > 100) {
-    return `Filtering out landlines. ${percentComplete - 100}% complete`;
-  } else {
-    return `Uploading. ${percentComplete}% complete`;
   }
 }
 
