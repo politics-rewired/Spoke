@@ -13,53 +13,53 @@ import { dataTest, camelCase } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 
 const inlineStyles = {
-  card: { marginTop: 1 },
-  title: { width: "100%" },
+  card: {
+    marginTop: 1
+  },
+  title: {
+    width: "100%"
+  },
   avatarStyle: {
     display: "inline-block",
     verticalAlign: "middle"
   }
 };
 
-const extractStageAndStatus = percentComplete => {
-  if (percentComplete > 100) {
-    return `Filtering out landlines. ${percentComplete - 100}% complete`;
-  } else {
-    return `Uploading. ${percentComplete}% complete`;
-  }
-};
+const extractStageAndStatus = percentComplete =>
+  percentComplete > 100
+    ? `Filtering out landlines. ${percentComplete - 100}% complete`
+    : `Uploading. ${percentComplete}% complete`;
 
 const SectionWrapper = props => {
   const {
     title,
-    sectionCanExpandOrCollapse,
-    sectionIsExpanded,
-    sectionIsSaving,
-    sectionIsDone,
-    savePercent,
-    canDiscardJob,
-    jobMessage,
-    onExpandChange,
+    expandable,
+    active,
+    saving,
+    done,
+    pendingJob,
     onDiscardJob,
+    onExpandChange,
     children
   } = props;
 
-  const expandable = !sectionIsSaving && sectionCanExpandOrCollapse;
+  const canDiscardJob = pendingJob && adminPerms;
+  const { resultMessage, status: savePercent = -1 } = pendingJob || {};
 
   let avatar = null;
   const cardHeaderStyle = {
     backgroundColor: theme.colors.lightGray
   };
 
-  if (sectionIsSaving) {
+  if (saving) {
     avatar = <CircularProgress style={inlineStyles.avatarStyle} size={25} />;
     cardHeaderStyle.background = theme.colors.lightGray;
     cardHeaderStyle.width = `${savePercent % 100}%`;
-  } else if (sectionIsExpanded && sectionCanExpandOrCollapse) {
+  } else if (active && expandable) {
     cardHeaderStyle.backgroundColor = theme.colors.lightYellow;
-  } else if (!sectionCanExpandOrCollapse) {
+  } else if (!expandable) {
     cardHeaderStyle.backgroundColor = theme.colors.lightGray;
-  } else if (sectionIsDone) {
+  } else if (done) {
     avatar = (
       <Avatar
         icon={<DoneIcon style={{ fill: theme.colors.darkGreen }} />}
@@ -68,7 +68,7 @@ const SectionWrapper = props => {
       />
     );
     cardHeaderStyle.backgroundColor = theme.colors.green;
-  } else if (!sectionIsDone) {
+  } else if (!done) {
     avatar = (
       <Avatar
         icon={<WarningIcon style={{ fill: theme.colors.orange }} />}
@@ -82,8 +82,8 @@ const SectionWrapper = props => {
   return (
     <Card
       {...dataTest(camelCase(title))}
-      expanded={sectionIsExpanded && sectionCanExpandOrCollapse}
-      expandable={sectionCanExpandOrCollapse}
+      expanded={active && expandable && !saving}
+      expandable={expandable}
       onExpandChange={onExpandChange}
       style={inlineStyles.card}
     >
@@ -99,7 +99,7 @@ const SectionWrapper = props => {
       {canDiscardJob && (
         <CardActions>
           <div>Current Status: {extractStageAndStatus(savePercent)}</div>
-          {jobMessage && <div>Message: {jobMessage}</div>}
+          {resultMessage && <div>Message: {resultMessage}</div>}
           <RaisedButton
             label="Discard Job"
             icon={<CancelIcon />}
@@ -113,13 +113,15 @@ const SectionWrapper = props => {
 
 SectionWrapper.propTypes = {
   title: PropTypes.string.isRequired,
-  sectionCanExpandOrCollapse: PropTypes.bool.isRequired,
-  sectionIsExpanded: PropTypes.bool.isRequired,
-  sectionIsSaving: PropTypes.bool.isRequired,
-  sectionIsDone: PropTypes.bool.isRequired,
-  savePercent: PropTypes.number.isRequired,
-  canDiscardJob: PropTypes.bool.isRequired,
-  jobMessage: PropTypes.string,
+  expandable: PropTypes.bool.isRequired,
+  active: PropTypes.bool.isRequired,
+  saving: PropTypes.bool.isRequired,
+  done: PropTypes.bool.isRequired,
+  adminPerms: PropTypes.bool.isRequired,
+  pendingJob: PropTypes.shape({
+    resultMessage: PropTypes.string.isRequired,
+    status: PropTypes.number.isRequired
+  }),
   onExpandChange: PropTypes.func.isRequired,
   onDiscardJob: PropTypes.func.isRequired
 };

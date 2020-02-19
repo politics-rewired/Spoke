@@ -17,10 +17,13 @@ const StartButton = props => {
     adminPerms,
     mutations,
     campaignId,
-    isCampaignComplete,
     isArchived,
     onChangeStarting
   } = props;
+
+  // TODO: this should be based on a new type on the campaign that performs minimal queries
+  // necessary for each section and is refreshed by saves and job polls
+  const isCampaignComplete = true;
 
   // Supervolunteers don't have access to start the campaign or un/archive it
   if (!adminPerms) return null;
@@ -63,7 +66,6 @@ StartButton.propTypes = {
   adminPerms: PropTypes.bool.isRequired,
   mutations: PropTypes.object.isRequired,
   campaignId: PropTypes.string.isRequired,
-  isCampaignComplete: PropTypes.bool.isRequired,
   isArchived: PropTypes.bool.isRequired,
   onChangeStarting: PropTypes.func.isRequired
 };
@@ -148,8 +150,12 @@ CampaignEditHeader.defaultProps = {};
 
 CampaignEditHeader.propTypes = {
   campaignId: PropTypes.string.isRequired,
-  mutations: PropTypes.object.isRequired,
+
+  // AuthzProvider props
   adminPerms: PropTypes.bool.isRequired,
+
+  // GraphQL props
+  mutations: PropTypes.object.isRequired,
   campaign: PropTypes.shape({
     campaign: PropTypes.shape({
       isArchived: PropTypes.bool.isRequired,
@@ -158,8 +164,7 @@ CampaignEditHeader.propTypes = {
       editors: PropTypes.string,
       dueBy: PropTypes.string
     }).isRequired
-  }).isRequired,
-  isCampaignComplete: PropTypes.bool.isRequired
+  }).isRequired
 };
 
 const queries = {
