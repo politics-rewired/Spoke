@@ -98,6 +98,19 @@ if (isClient()) {
       desc: "Client secret from Auth0 app.",
       default: undefined
     }),
+    AUTO_HANDLE_REQUESTS: bool({
+      desc: "Whether to auto handle requests after submission",
+      default: false
+    }),
+    DISABLE_ASSIGNMENT_CASCADE: bool({
+      desc:
+        "Whether to just assign from 1 campaign rather than gathering from multiple to fulfill a request",
+      default: false
+    }),
+    AUTO_HANDLE_REQUESTS_CONCURRENCY: num({
+      desc: "How many requests to handle at once",
+      default: 1
+    }),
     AWS_ACCESS_AVAILABLE: bool({
       desc: "Enable or disable S3 campaign exports within Amazon Lambda.",
       default: false
@@ -294,6 +307,11 @@ if (isClient()) {
       desc: "Comma-separated list of notification names to ignore.",
       example: "assignment.message.received,assignment.updated",
       default: ""
+    }),
+    DISABLE_CAMPAIGN_EDIT_TEXTERS: bool({
+      desc: "Whether to disable showing the texters panel on campaign edit.",
+      default: "false",
+      isClient: true
     }),
     EMAIL_FROM: email({
       desc:

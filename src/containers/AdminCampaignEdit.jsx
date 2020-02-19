@@ -31,6 +31,8 @@ import CampaignTextingHoursForm from "../components/CampaignTextingHoursForm";
 import CampaignAutoassignModeForm from "../components/CampaignAutoassignModeForm";
 import CampaignTeamsForm from "../components/CampaignTeamsForm";
 
+const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
+
 // TODO: replace with Fragment
 const campaignInfoFragment = `
   id
@@ -55,6 +57,10 @@ const campaignInfoFragment = `
     id
     title
   }
+  ${
+    disableTexters
+      ? ""
+      : `
   texters {
     id
     firstName
@@ -64,6 +70,8 @@ const campaignInfoFragment = `
       needsMessageCount: contactsCount(contactsFilter:{messageStatus:\"needsMessage\"})
       maxContacts
     }
+  }
+  `
   }
   interactionSteps {
     id
@@ -327,7 +335,7 @@ class AdminCampaignEdit extends React.Component {
   }
 
   sections() {
-    return [
+    const sections = [
       {
         title: "Basics",
         content: CampaignBasicsForm,
@@ -496,6 +504,10 @@ class AdminCampaignEdit extends React.Component {
         expandableBySuperVolunteers: false
       }
     ];
+
+    return disableTexters
+      ? sections.filter(section => section.title !== "Texters")
+      : sections;
   }
 
   sectionSaveStatus(section) {
@@ -892,11 +904,17 @@ const queries = {
             id
             title
           }
+          ${
+            disableTexters
+              ? ""
+              : `
           texters: people {
             id
             firstName
             lastName
             displayName
+          }
+          `
           }
           numbersApiKey
           campaigns(cursor: { offset: 0, limit: 5000 }) {

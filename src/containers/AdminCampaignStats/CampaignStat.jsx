@@ -1,0 +1,49 @@
+import PropTypes from "prop-types";
+import React from "react";
+
+import { Card, CardTitle, CardText } from "material-ui/Card";
+
+import LoadingIndicator from "../../components/LoadingIndicator";
+
+const inlineStyles = {
+  stat: {
+    margin: "10px 0",
+    width: "100%",
+    maxWidth: 400
+  },
+  count: {
+    fontSize: "60px",
+    paddingTop: "10px",
+    textAlign: "center",
+    fontWeight: "bold"
+  },
+  title: {
+    textTransform: "uppercase",
+    textAlign: "center",
+    color: "gray"
+  }
+};
+
+export const CampaignStat = ({ title, loading, error, count }) => (
+  <Card key={title} style={inlineStyles.stat}>
+    {loading && <LoadingIndicator />}
+    {error && <CardText>{error}</CardText>}
+    {count !== undefined && (
+      <CardTitle title={count} titleStyle={inlineStyles.count} />
+    )}
+    <CardText style={inlineStyles.title}>{title}</CardText>
+  </Card>
+);
+
+CampaignStat.defaultProps = {
+  loading: false
+};
+
+CampaignStat.propTypes = {
+  title: PropTypes.string.isRequired,
+  loading: PropTypes.bool,
+  error: PropTypes.string,
+  count: PropTypes.number
+};
+
+export default CampaignStat;

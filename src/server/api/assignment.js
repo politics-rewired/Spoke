@@ -10,6 +10,12 @@ import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
 import { eventBus, EventType } from "../event-bus";
 import { memoizer, cacheOpts } from "../memoredis";
+import kue from "kue";
+
+export const assignmentQueue =
+  config.MEMOREDIS_URL && config.AUTO_HANDLE_REQUESTS
+    ? kue.createQueue({ redis: config.MEMOREDIS_URL })
+    : { create: () => ({ save: () => null }), process: () => null };
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -788,7 +794,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
       const numberAssigned = await r.knex.transaction(async trx => {
         try {
           const numberAssigned = await giveUserMoreTexts(
-            auth0Id,
+            pendingAssignmentRequest.user_id,
             pendingAssignmentRequest.amount,
             pendingAssignmentRequest.organization_id,
             pendingAssignmentRequest.preferred_team_id,
@@ -831,19 +837,69 @@ export async function fulfillPendingRequestFor(auth0Id) {
   });
 }
 
+export async function autoHandleRequest(pendingAssignmentRequest) {
+  // check texter status of pendingAssignmentRequest
+  const user_organization = await r
+    .knex("user_organization")
+    .where({
+      user_id: pendingAssignmentRequest.user_id,
+      organization_id: pendingAssignmentRequest.organization_id
+    })
+    .first("*");
+
+  if (user_organization) {
+    if (user_organization.request_status === "auto_approve") {
+      // Even if the assignment fails, we still want to approve their request
+      // to let them request again if possible
+      try {
+        await giveUserMoreTexts(
+          pendingAssignmentRequest.user_id,
+          pendingAssignmentRequest.amount,
+          pendingAssignmentRequest.organization_id,
+          pendingAssignmentRequest.preferred_team_id
+        );
+      } catch (ex) {
+        logger.error("Error assigning: ", ex);
+      } finally {
+        await r
+          .knex("assignment_request")
+          .update({ status: "approved" })
+          .where({ id: pendingAssignmentRequest.id });
+      }
+    }
+
+    if (user_organization.request_status === "do_not_approve") {
+      await r
+        .knex("assignment_request")
+        .update({ status: "rejected " })
+        .where({ id: pendingAssignmentRequest.id });
+    }
+  }
+}
+
+assignmentQueue.process(
+  "auto-handle-request",
+  config.AUTO_HANDLE_REQUESTS_CONCURRENCY,
+  async (job, done) => {
+    const pendingAssignmentRequest = job.data;
+    await autoHandleRequest(pendingAssignmentRequest);
+    done();
+  }
+);
+
 export async function giveUserMoreTexts(
-  auth0Id,
+  userId,
   count,
   organizationId,
   preferredTeamId,
   parentTrx = r.knex
 ) {
-  logger.verbose(`Starting to give ${auth0Id} ${count} texts`);
+  logger.verbose(`Starting to give ${userId} ${count} texts`);
 
-  const matchingUsers = await r.knex("user").where({ auth0_id: auth0Id });
+  const matchingUsers = await r.knex("user").where({ id: userId });
   const user = matchingUsers[0];
   if (!user) {
-    throw new AutoassignError(`No user found with id ${auth0Id}`);
+    throw new AutoassignError(`No user found with id ${userId}`);
   }
 
   const assignmentOptions = await myCurrentAssignmentTargets(
@@ -883,7 +939,10 @@ export async function giveUserMoreTexts(
         trx
       );
 
-      countLeftToUpdate = countLeftToUpdate - countUpdatedInLoop;
+      countLeftToUpdate = config.DISABLE_ASSIGNMENT_CASCADE
+        ? 0
+        : countLeftToUpdate - countUpdatedInLoop;
+
       countUpdated = countUpdated + countUpdatedInLoop;
 
       if (countUpdatedInLoop === 0) {
@@ -976,33 +1035,58 @@ export async function assignLoop(
 
   logger.verbose(`Assigning to assignment id ${assignmentId}`);
 
+  const myEscalationTags = await r
+    .reader("team_escalation_tags")
+    .whereIn(
+      "team_id",
+      r
+        .reader("team")
+        .select("team.id")
+        .join("user_team", "team.id", "=", "user_team.team_id")
+        .where({
+          user_id: parseInt(user.id),
+          is_assignment_enabled: true,
+          organization_id: parseInt(organizationId)
+        })
+    )
+    .pluck("tag_id");
+
+  if (myEscalationTags.length > 0) {
+    const { rowCount: ccUpdateCount } = await trx.raw(
+      `
+      with matching_contact as (
+        select id from assignable_campaign_contacts_with_escalation_tags
+        where campaign_id = ?
+          
+          and ? @> applied_escalation_tags
+        for update skip locked
+        limit ?
+      )
+      update
+         campaign_contact as target_contact
+       set
+         assignment_id = ?
+       from
+         matching_contact
+       where
+         target_contact.id = matching_contact.id;`,
+      [campaignIdToAssignTo, myEscalationTags, countToAssign, assignmentId]
+    );
+
+    if (ccUpdateCount > 0) {
+      logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
+      const team = {
+        teamId: assignmentInfo.team_id,
+        teamTitle: assignmentInfo.team_title
+      };
+      return { count: ccUpdateCount, team };
+    }
+  }
+
   const contactView = {
-    UNREPLIED: `( 
-      select id, campaign_id
-      from campaign_contact
-      where id in ( select id from assignable_needs_reply )
-        or id in ( 
-          select id
-          from assignable_needs_reply_with_escalation_tags
-          where applied_escalation_tags <@ (
-            select array_agg(tag_id) as my_escalation_tags
-            from team_escalation_tags
-            where exists (
-              select 1
-              from user_team
-              where user_team.team_id = team_escalation_tags.team_id
-                and user_id = ?
-            )
-          )
-        )
-      ) all_needs_reply`,
+    UNREPLIED: `assignable_needs_reply`,
     UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
-
-  const queryVars =
-    assignmentInfo.type == "UNREPLIED"
-      ? [user.id, campaignIdToAssignTo, countToAssign, assignmentId]
-      : [campaignIdToAssignTo, countToAssign, assignmentId];
 
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
@@ -1020,7 +1104,7 @@ export async function assignLoop(
          matching_contact
        where
          target_contact.id = matching_contact.id;`,
-    queryVars
+    [campaignIdToAssignTo, countToAssign, assignmentId]
   );
 
   logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
@@ -1028,6 +1112,7 @@ export async function assignLoop(
     teamId: assignmentInfo.team_id,
     teamTitle: assignmentInfo.team_title
   };
+
   return { count: ccUpdateCount, team };
 }
 

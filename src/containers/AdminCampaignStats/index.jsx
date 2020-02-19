@@ -6,36 +6,17 @@ import { withRouter } from "react-router";
 import { compose } from "react-apollo";
 import { StyleSheet, css } from "aphrodite";
 
-import { Card, CardTitle, CardText } from "material-ui/Card";
-import Snackbar from "material-ui/Snackbar";
 import RaisedButton from "material-ui/RaisedButton";
+import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
 
-import { withAuthzContext } from "../components/AuthzProvider";
-import { loadData } from "./hoc/with-operations";
-import { dataTest } from "../lib/attributes";
-import Chart from "../components/Chart";
-import TexterStats from "../components/TexterStats";
-import theme from "../styles/theme";
-
-const inlineStyles = {
-  stat: {
-    margin: "10px 0",
-    width: "100%",
-    maxWidth: 400
-  },
-  count: {
-    fontSize: "60px",
-    paddingTop: "10px",
-    textAlign: "center",
-    fontWeight: "bold"
-  },
-  title: {
-    textTransform: "uppercase",
-    textAlign: "center",
-    color: "gray"
-  }
-};
+import { withAuthzContext } from "../../components/AuthzProvider";
+import { loadData } from "../hoc/with-operations";
+import theme from "../../styles/theme";
+import { dataTest } from "../../lib/attributes";
+import TopLineStats from "./TopLineStats";
+import CampaignSurveyStats from "./CampaignSurveyStats";
+import TexterStats from "./TexterStats";
 
 const styles = StyleSheet.create({
   container: {
@@ -61,9 +42,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
     display: "flex"
   },
-  question: {
-    marginBottom: 24
-  },
   rightAlign: {
     marginLeft: "auto",
     marginRight: 0
@@ -73,75 +51,20 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     verticalAlign: "middle"
   },
-  spacer: {
-    marginRight: 20
-  },
   secondaryHeader: {
     ...theme.text.secondaryHeader
   }
 });
-
-const Stat = ({ title, count }) => (
-  <Card key={title} style={inlineStyles.stat}>
-    <CardTitle title={count} titleStyle={inlineStyles.count} />
-    <CardText style={inlineStyles.title}>{title}</CardText>
-  </Card>
-);
-
-Stat.propTypes = {
-  title: PropTypes.string,
-  count: PropTypes.number
-};
 
 class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
     disableExportButton: false,
     copyingCampaign: false,
+    campaignJustCopied: false,
     copiedCampaignId: undefined,
     copyCampaignError: undefined
   };
-
-  renderSurveyStats() {
-    const { interactionSteps } = this.props.data.campaign;
-
-    return interactionSteps.map(step => {
-      if (step.question === "") {
-        return <div />;
-      }
-
-      const totalResponseCount = step.question.answerOptions.reduce(
-        (prev, answer) => prev + answer.responderCount,
-        0
-      );
-      return (
-        <div key={step.id}>
-          <div className={css(styles.secondaryHeader)}>
-            {step.question.text}
-          </div>
-          {totalResponseCount > 0 ? (
-            <div className={css(styles.container)}>
-              <div className={css(styles.flexColumn)}>
-                <Stat title="responses" count={totalResponseCount} />
-              </div>
-              <div className={css(styles.flexColumn)}>
-                <div className={css(styles.rightAlign)}>
-                  <Chart
-                    data={step.question.answerOptions.map(answer => [
-                      answer.value,
-                      answer.responderCount
-                    ])}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            "No responses yet"
-          )}
-        </div>
-      );
-    });
-  }
 
   renderCopyButton() {
     return (
@@ -305,32 +228,13 @@ class AdminCampaignStats extends React.Component {
             </div>
           </div>
         </div>
-        <div className={css(styles.container)}>
-          <div className={css(styles.flexColumn, styles.spacer)}>
-            <Stat title="Contacts" count={campaign.contactsCount} />
-          </div>
-          <div className={css(styles.flexColumn, styles.spacer)}>
-            <Stat title="Texters" count={campaign.assignments.length} />
-          </div>
-          <div className={css(styles.flexColumn, styles.spacer)}>
-            <Stat title="Sent" count={campaign.stats.sentMessagesCount} />
-          </div>
-          <div className={css(styles.flexColumn, styles.spacer)}>
-            <Stat
-              title="Replies"
-              count={campaign.stats.receivedMessagesCount}
-            />
-          </div>
-          <div className={css(styles.flexColumn)}>
-            <Stat title="Opt-outs" count={campaign.stats.optOutsCount} />
-          </div>
-        </div>
+        <TopLineStats campaignId={campaign.id} />
         <div className={css(styles.header)}>Survey Questions</div>
-        {this.renderSurveyStats()}
+        <CampaignSurveyStats campaignId={campaign.id} />
 
         <div className={css(styles.header)}>Texter stats</div>
         <div className={css(styles.secondaryHeader)}>% of first texts sent</div>
-        <TexterStats campaign={campaign} />
+        <TexterStats campaignId={campaign.id} />
         <Snackbar
           open={this.state.exportMessageOpen}
           message="Export started - we'll e-mail you when it's done"
@@ -373,47 +277,18 @@ AdminCampaignStats.propTypes = {
 const queries = {
   data: {
     query: gql`
-      query getCampaign(
-        $campaignId: String!
-        $contactsFilter: ContactsFilter!
-      ) {
+      query getCampaign($campaignId: String!) {
         campaign(id: $campaignId) {
           id
           title
           dueBy
           isArchived
           useDynamicAssignment
-          assignments {
-            id
-            texter {
-              id
-              firstName
-              lastName
-            }
-            unmessagedCount: contactsCount(contactsFilter: $contactsFilter)
-            contactsCount
-          }
           pendingJobs {
             id
             jobType
             assigned
             status
-          }
-          interactionSteps {
-            id
-            question {
-              text
-              answerOptions {
-                value
-                responderCount
-              }
-            }
-          }
-          contactsCount
-          stats {
-            sentMessagesCount
-            receivedMessagesCount
-            optOutsCount
           }
           previewUrl
         }
@@ -421,10 +296,7 @@ const queries = {
     `,
     options: ownProps => ({
       variables: {
-        campaignId: ownProps.match.params.campaignId,
-        contactsFilter: {
-          messageStatus: "needsMessage"
-        }
+        campaignId: ownProps.match.params.campaignId
       },
       pollInterval: 5000
     })
