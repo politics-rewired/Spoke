@@ -225,11 +225,14 @@ export async function allCurrentAssignmentTargets(organizationId) {
           teams.assignment_type,
           campaign.id as id, campaign.title
       from needs_message_teams as teams
-      join campaign_team on campaign_team.team_id = teams.id
       join campaign on campaign.id = (
         select id
         from assignable_campaigns_with_needs_message as campaigns
-        where campaigns.id = campaign_team.campaign_id
+        where campaigns.id in (
+          select campaign_id
+          from campaign_team
+          where team_id = teams.id
+        )
         order by id asc
         limit 1
       )
@@ -243,11 +246,14 @@ export async function allCurrentAssignmentTargets(organizationId) {
           teams.assignment_type,
           campaign.id as id, campaign.title
       from needs_reply_teams as teams
-      join campaign_team on campaign_team.team_id = teams.id
       join campaign on campaign.id = (
         select id
         from assignable_campaigns_with_needs_reply as campaigns
-        where campaigns.id = campaign_team.campaign_id
+        where campaigns.id in (
+          select campaign_id
+          from campaign_team
+          where team_id = teams.id
+        )
         order by id asc
         limit 1
       )
@@ -447,11 +453,14 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_message_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_message as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in (
+            select campaign_id
+            from campaign_team
+            where team_id = teams.id
+          )
           order by id asc
           limit 1
         )
@@ -466,11 +475,14 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_reply_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_reply as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in (
+            select campaign_id
+            from campaign_team
+            where team_id = teams.id
+          )
           order by id asc
           limit 1
         )
@@ -627,11 +639,14 @@ export async function myCurrentAssignmentTargets(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_message_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_message as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in (
+            select campaign_id
+            from campaign_team
+            where team_id = teams.id
+          )
           order by id asc
           limit 1
         )
@@ -646,11 +661,14 @@ export async function myCurrentAssignmentTargets(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_reply_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_reply as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in (
+            select campaign_id
+            from campaign_team
+            where team_id = teams.id
+          )
           order by id asc
           limit 1
         )
@@ -944,7 +962,6 @@ export async function giveUserMoreTexts(
         : countLeftToUpdate - countUpdatedInLoop;
 
       countUpdated = countUpdated + countUpdatedInLoop;
-
       if (countUpdatedInLoop === 0) {
         if (countUpdated === 0) {
           throw new AutoassignError(

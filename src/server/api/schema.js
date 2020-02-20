@@ -2836,7 +2836,7 @@ const rootMutations = {
           assignmentRequest.user_id,
           assignmentRequest.amount,
           assignmentRequest.organization_id,
-          null,
+          assignmentRequest.preferred_team_id,
           trx
         );
 
