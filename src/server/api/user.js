@@ -235,7 +235,7 @@ export const resolvers = {
               campaign.texting_hours_end,
               extract('hour' from current_timestamp at time zone campaign.timezone) < campaign.texting_hours_end
               and 
-              extract('hour' from current_timestamp at time zone campaign.timezone) > campaign.texting_hours_start
+              extract('hour' from current_timestamp at time zone campaign.timezone) >= campaign.texting_hours_start
             ),
             false
           ) as contact_is_textable_now
