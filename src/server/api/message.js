@@ -3,8 +3,8 @@ import { sqlResolvers } from "./lib/utils";
 export const resolvers = {
   Message: {
     ...sqlResolvers([
-      "id",
       "campaignId",
+      "campaignContactId",
       "userId",
       "text",
       "userNumber",
@@ -12,6 +12,9 @@ export const resolvers = {
       "isFromContact",
       "sendStatus",
       "createdAt"
-    ])
+    ]),
+    id: async message => {
+      return [message.campaign_id, message.id].join("|");
+    }
   }
 };

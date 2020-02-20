@@ -1174,6 +1174,9 @@ const getContactsCountFromShadowCounts = (shadowCounts, contactsFilter) => {
 export const resolvers = {
   Assignment: {
     ...sqlResolvers(["id", "maxContacts"]),
+    id: async assignment => {
+      return [assignment.campaign_id, assignment.id].join("|");
+    },
     texter: async (assignment, _, { loaders }) =>
       assignment.texter
         ? assignment.texter
