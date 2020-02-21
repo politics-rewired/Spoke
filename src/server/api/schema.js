@@ -74,6 +74,10 @@ import {
 } from "./campaign-overlap";
 import { change } from "../local-auth-helpers";
 import { notifyOnTagConversation } from "./lib/alerts";
+import {
+  parseIdentifier,
+  filterUndefinedObject
+} from "./lib/partition-id-helpers";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
@@ -1520,13 +1524,19 @@ const rootMutations = {
       { assignmentId, contactIds, findNew },
       { loaders, user }
     ) => {
-      await assignmentRequired(user, assignmentId);
+      const [campaignId, actualAssignmentId] = parseIdentifier(assignmentId);
+      await assignmentRequired(user, actualAssignmentId);
 
       const contacts = await r
         .knex("campaign_contact")
         .select("*")
-        .whereIn("id", contactIds)
-        .where({ assignment_id: assignmentId });
+        .whereIn("id", contactIds.map(parseIdentifier).map(arr => arr[1]))
+        .where(
+          filterUndefinedObject({
+            assignment_id: actualAssignmentId,
+            campaign_id: campaignId
+          })
+        );
 
       const messages = await r
         .knex("message")
@@ -1537,7 +1547,11 @@ const rootMutations = {
           "created_at",
           "campaign_contact_id"
         )
-        .whereIn("campaign_contact_id", contactIds)
+        .whereIn(
+          "campaign_contact_id",
+          contactIds.map(parseIdentifier).map(arr => arr[1])
+        )
+        .where(filterUndefinedObject({ campaign_id: campaignId }))
         .orderBy("created_at", "asc");
 
       const messagesByContactId = groupBy(messages, x => x.campaign_contact_id);
@@ -1557,6 +1571,7 @@ const rootMutations = {
               "tag.id"
             )
             .whereIn("campaign_contact_tag.campaign_contact_id", contactIds)
+            .where(filterUndefinedObject({ campaign_id: campaignId }))
         : [];
 
       const tagsByContactId = groupBy(tags, x => x.campaign_contact_id);
@@ -3182,7 +3197,8 @@ const rootResolvers = {
     },
     assignment: async (_, { id }, { loaders, user }) => {
       authRequired(user);
-      const assignment = await loaders.assignment.load(id);
+      const [campaignId, assignmentId] = parseIdentifier(id);
+      const assignment = await loaders.assignment.load(assignmentId);
       const campaign = await loaders.campaign.load(assignment.campaign_id);
       if (assignment.user_id == user.id) {
         await accessRequired(

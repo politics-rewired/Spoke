@@ -21,7 +21,7 @@ export const resolvers = {
       "assignmentId"
     ]),
     id: async campaignContact => {
-      return [campaignContact.campaign_id, campaignContact.id].join("|");
+      return [campaignContact.campaign_id, campaignContact.id].join("-");
     },
     lastName: async campaignContact => {
       if (contactFieldsToHide.includes("lastName")) {

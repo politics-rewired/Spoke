@@ -1,3 +1,8 @@
+// -- TODO
+// campaign_contact_tag
+// interaction_step
+// redefinining question_response view
+
 /*
 
 Actual migration in practice:
@@ -50,20 +55,20 @@ exports.up = function(knex) {
     knex.schema.alterTable("message", table => {
       table
         .integer("campaign_id")
-        .references("campaign(id)")
-        .notNullable();
+        .notNullable()
+        .references("campaign(id)");
     }),
     knex.schema.alterTable("opt_out", table => {
       table
         .integer("campaign_id")
-        .references("campaign(id)")
-        .notNullable();
+        .notNullable()
+        .references("campaign(id)");
     }),
     knex.schema.alterTable("all_question_response", table => {
       table
         .integer("campaign_id")
-        .references("campaign(id)")
-        .notNullable();
+        .notNullable()
+        .references("campaign(id)");
     })
   ]);
 };

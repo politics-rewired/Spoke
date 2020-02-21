@@ -14,7 +14,7 @@ export const resolvers = {
       "createdAt"
     ]),
     id: async message => {
-      return [message.campaign_id, message.id].join("|");
+      return [message.campaign_id, message.id].join("-");
     }
   }
 };
