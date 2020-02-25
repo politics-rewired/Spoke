@@ -191,7 +191,7 @@ async function handleIncomingMessage(message) {
     !message.hasOwnProperty("text") ||
     !message.hasOwnProperty("messageId")
   ) {
-    logger.error(`This is not an incoming message: ${JSON.stringify(message)}`);
+    logger.error("This is not an incoming message", { payload: message });
   }
 
   const { to, msisdn, concat } = message;

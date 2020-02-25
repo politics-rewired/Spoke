@@ -102,7 +102,7 @@ export const optOutCache = {
         cell
       });
     } catch (error) {
-      logger.error("Error creating opt-out", error);
+      logger.error("Error creating opt-out: ", error);
     }
 
     // update all organization's active campaigns as well

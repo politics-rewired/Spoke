@@ -141,7 +141,10 @@ export const sendMessage = async (message, organizationId, _trx) => {
       })
       .where({ id: spokeMessageId });
   } catch (exc) {
-    logger.error("Error sending message with Assemble Numbers: ", exc, {
+    const {}
+    logger.error({
+      message: `"Error sending message with Assemble Numbers: ${exc.message}`,
+      stack: exc.stack,
       messageInput
     });
     await r

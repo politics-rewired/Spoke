@@ -49,7 +49,7 @@ export async function processJobs() {
       // clear out stuck jobs
       await clearOldJobs(twoMinutesAgo);
     } catch (ex) {
-      logger.error("Error processing jobs", ex);
+      logger.error("Error processing jobs: ", ex);
     }
   }
 }
@@ -65,7 +65,7 @@ export async function checkMessageQueue() {
       await sleep(10000);
       processSqsMessages();
     } catch (ex) {
-      logger.error("Error checking message queue", ex);
+      logger.error("Error checking message queue: ", ex);
     }
   }
 }
@@ -84,7 +84,7 @@ const messageSenderCreator = (subQuery, defaultStatus) => {
         await sleep(delay);
         await sendMessages(subQuery, defaultStatus);
       } catch (ex) {
-        logger.error("Error sending messages from messageSender", ex);
+        logger.error("Error sending messages from messageSender: ", ex);
       }
     }
   };
@@ -168,7 +168,7 @@ export async function handleIncomingMessages() {
         await handleIncomingMessageParts();
       }
     } catch (ex) {
-      logger.error("Error at handleIncomingMessages", ex);
+      logger.error("Error at handleIncomingMessages: ", ex);
     }
   }
 }

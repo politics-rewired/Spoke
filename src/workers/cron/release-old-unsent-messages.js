@@ -40,6 +40,6 @@ main()
     process.exit(0);
   })
   .catch(error => {
-    logger.error(error);
+    logger.error("Error releasing old unsent messages: ", error);
     process.exit(1);
   });
