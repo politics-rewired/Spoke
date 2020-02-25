@@ -57,12 +57,12 @@ export const withMutations = (mutations = {}) =>
  * Takes multiple GraphQL queriy and/or mutation definitions and wraps Component in appropriate
  * graphql() calls.
  */
-export const withOperations = options => Component => {
+export const withOperations = options => {
   const { queries = {}, mutations = {} } = options;
   return compose(
     withQueries(queries),
     withMutations(mutations)
-  )(Component);
+  );
 };
 
 /**
