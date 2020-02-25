@@ -289,39 +289,23 @@ export const messageComponents = messageText => {
 
 export async function getCampaignContactAndAssignmentForIncomingMessage({
   contactNumber,
-  service,
   messaging_service_sid
 }) {
-  const { rows } = await r.reader.raw(
-    `
-    with chosen_organization as (
-      select organization_id
-      from messaging_service
-      where messaging_service_sid = ?
-    ),
-    campaign_contact_option as (
-      select campaign_contact.id
-      from campaign_contact
-      join campaign
-        on campaign_contact.campaign_id = campaign.id
-      where
-        campaign.organization_id in (
-          select organization_id from chosen_organization
-        )
-        and campaign_contact.cell = ?
-    )
-    select campaign_contact_id, assignment_id
-    from message
-    join campaign_contact_option
-      on message.campaign_contact_id = campaign_contact_option.id
-    where
-      message.is_from_contact = false
-    order by created_at desc
-    limit 1`,
-    [messaging_service_sid, contactNumber]
-  );
+  const sentMessage = await r
+    .reader("sent_message")
+    .where({ contact_number: contactNumber, messaging_service_sid })
+    .orderBy("created_at", "desc")
+    .first("*");
 
-  return rows[0];
+  const campaignContact = await r
+    .reader("campaign_contact")
+    .where({ campaign_id: sentMessage.campaign_id, cell: contactNumber });
+
+  return {
+    campaign_id: campaignContact.campaign_id,
+    campaign_contact_id: campaignContact.id,
+    assignment_id: campaignContact.assignment_id
+  };
 }
 
 export async function saveNewIncomingMessage(messageInstance) {
@@ -329,11 +313,14 @@ export async function saveNewIncomingMessage(messageInstance) {
     .knex("message")
     .insert(messageInstance)
     .returning("*");
+
   const { assignment_id, contact_number } = newMessage;
+
   const payload = {
     assignmentId: assignment_id,
     contactNumber: contact_number
   };
+
   eventBus.emit(EventType.MessageReceived, payload);
 
   // Separate update fields according to: https://stackoverflow.com/a/42307979

@@ -135,9 +135,11 @@ export const sendMessage = async (message, organizationId, _trx) => {
 
     const { id: serviceId } = data.sendMessage.outboundMessage;
 
-    await r.knex("sent_message_service_id").insert({
+    await r.knex("sent_message").insert({
       service_id: serviceId,
       message_id: spokeMessageId,
+      contact_number: to,
+      messaging_service_sid: service.messaging_service_sid,
       campaign_id: campaignId
     });
 
@@ -265,7 +267,6 @@ const convertInboundMessage = async assembleMessage => {
   const userNumber = getFormattedPhoneNumber(to);
 
   const ccInfo = await getCampaignContactAndAssignmentForIncomingMessage({
-    service: "assemble-numbers",
     contactNumber,
     messaging_service_sid: profileId
   });
@@ -280,6 +281,7 @@ const convertInboundMessage = async assembleMessage => {
 
   const spokeMessage = {
     campaign_contact_id: ccInfo && ccInfo.campaign_contact_id,
+    campaign_id: ccInfo && ccInfo.campaign_id,
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,

@@ -82,7 +82,6 @@ async function convertMessagePartsToMessage(messageParts) {
     .replace(/\0/g, ""); // strip all UTF-8 null characters (0x00)
 
   const ccInfo = await getCampaignContactAndAssignmentForIncomingMessage({
-    service: "twilio",
     contactNumber,
     messaging_service_sid: serviceMessages[0].MessagingServiceSid
   });
@@ -90,6 +89,7 @@ async function convertMessagePartsToMessage(messageParts) {
   return (
     ccInfo && {
       campaign_contact_id: ccInfo && ccInfo.campaign_contact_id,
+      campaign_id: ccInfo && ccInfo.campaign_id,
       contact_number: contactNumber,
       user_number: userNumber,
       is_from_contact: true,
@@ -253,9 +253,11 @@ async function sendMessage(message, organizationId, trx = r.knex) {
       if (response) {
         messageToSave.service_id = response.sid;
 
-        await trx("sent_message_service_id").insert({
+        await trx("sent_message").insert({
           service_id: response.sid,
           message_id: messageToSave.id,
+          contact_number: message.contact_number,
+          messaging_service_sid: messagingServiceSid,
           campaign_id: messageToSave.campaign_id
         });
 

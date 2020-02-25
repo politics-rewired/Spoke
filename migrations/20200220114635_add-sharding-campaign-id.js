@@ -112,11 +112,19 @@ exports.up = function(knex) {
         from all_question_response
         where all_question_response.is_deleted = false;
     `),
-    knex.schema.createTable("sent_message_service_id", table => {
+    // We can always safely delete entries from here that are duplicates or from archived campaigns
+    knex.schema.createTable("sent_message", table => {
       table.integer("service_id").primary();
       table.integer("campaign_id").references("campaign(id)");
       table.integer("message_id").references("message(id)");
+      table.integer("contact_number").notNullable();
+      table.text("messaging_service_sid").notNullable();
       table.timestamp("created_at").default(knex.fn.now());
+
+      table.index("sent_message_messaging_service_contact_number_idx", [
+        "messaging_service_sid",
+        "contact_number"
+      ]);
     }),
     knex.schema.raw(`
       create function get_messaging_service_for_cell_in_organization(cell text, organization_id integer)
@@ -147,9 +155,9 @@ exports.down = function(knex) {
     knex.schema.alterTable("opt_out", table => {
       table.dropColumn("campaign_id");
     }),
-    knex.schema.dropTable("sent_message_service_id")
-    // knex.schema.raw(
-    //   `drop function get_messaging_service_for_cell_in_organization`
-    // )
+    knex.schema.dropTable("sent_message"),
+    knex.schema.raw(
+      `drop function get_messaging_service_for_cell_in_organization`
+    )
   ]);
 };
