@@ -100,14 +100,14 @@ export const deliveryReportValidator = () => async (req, res, next) => {
 export const sendMessage = async (message, organizationId, _trx) => {
   const {
     id: spokeMessageId,
+    campaign_id: campaignId,
     campaign_contact_id: campaignContactId,
     contact_number: to,
     text: messageText
   } = message;
-  const service = await getContactMessagingService(
-    campaignContactId,
-    organizationId
-  );
+
+  const service = await getContactMessagingService(to, organizationId);
+
   const profileId = service.messaging_service_sid;
   const numbers = await numbersClient(service);
 
@@ -115,8 +115,10 @@ export const sendMessage = async (message, organizationId, _trx) => {
     .reader("campaign_contact")
     .where({ id: campaignContactId })
     .first("zip");
+
   const { body, mediaUrl } = messageComponents(messageText);
   const mediaUrls = mediaUrl ? [mediaUrl] : undefined;
+
   const messageInput = {
     profileId,
     to,
@@ -124,6 +126,7 @@ export const sendMessage = async (message, organizationId, _trx) => {
     mediaUrls,
     contactZipCode: contactZipCode === "" ? null : contactZipCode
   };
+
   try {
     const result = await numbers.sms.sendMessage(messageInput);
     const { data, errors } = result;
@@ -131,6 +134,13 @@ export const sendMessage = async (message, organizationId, _trx) => {
     if (errors && errors.length > 0) throw new Error(errors[0].message);
 
     const { id: serviceId } = data.sendMessage.outboundMessage;
+
+    await r.knex("sent_message_service_id").insert({
+      service_id: serviceId,
+      message_id: spokeMessageId,
+      campaign_id: campaignId
+    });
+
     await r
       .knex("message")
       .update({
@@ -139,15 +149,16 @@ export const sendMessage = async (message, organizationId, _trx) => {
         sent_at: r.knex.fn.now(),
         service_response: JSON.stringify([result])
       })
-      .where({ id: spokeMessageId });
+      .where({ id: spokeMessageId, campaign_id: campaignId });
   } catch (exc) {
     logger.error("Error sending message with Assemble Numbers: ", exc, {
       messageInput
     });
+
     await r
       .knex("message")
       .update({ send_status: SpokeSendStatus.Error })
-      .where({ id: spokeMessageId });
+      .where({ id: spokeMessageId, campaign_id: campaignId });
   }
 };
 

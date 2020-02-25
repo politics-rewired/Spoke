@@ -103,10 +103,8 @@ export const getMessagingServiceById = async messagingServiceId =>
  * @param {number} campaignContactId The ID of the target campaign contact
  * @returns {object} Assigned messaging service Postgres row
  */
-export const getContactMessagingService = async (
-  campaignContactId,
-  organizationId
-) => {
+// TODO - rewrite
+export const getContactMessagingService = async (cell, organizationId) => {
   if (config.DEFAULT_SERVICE === "fakeservice")
     return { service_type: "fakeservice" };
 
@@ -115,9 +113,9 @@ export const getContactMessagingService = async (
   } = await r.reader.raw(
     `
       select *
-      from get_messaging_service_for_campaign_contact_in_organization(?, ?)
+      from get_messaging_service_for_cell_in_organization(?, ?)
     `,
-    [campaignContactId, parseInt(organizationId)]
+    [cell, parseInt(organizationId)]
   );
 
   // Return an existing match if there is one - this is the vast majority of cases
@@ -125,14 +123,9 @@ export const getContactMessagingService = async (
     return existingMessagingService;
   }
 
-  const campaignContact = await r
-    .reader("campaign_contact")
-    .where({ id: campaignContactId })
-    .first("cell");
-
   // Otherwise select an appropriate messaging service and assign
   const assignedService = await assignMessagingServiceSID(
-    campaignContact.cell,
+    cell,
     parseInt(organizationId)
   );
 

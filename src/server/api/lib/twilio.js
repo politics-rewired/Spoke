@@ -167,9 +167,10 @@ const twilioClient = async messagingServiceSid => {
 
 async function sendMessage(message, organizationId, trx = r.knex) {
   const service = await getContactMessagingService(
-    message.campaign_contact_id,
+    message.contact_number,
     organizationId
   );
+
   const messagingServiceSid = service.messaging_service_sid;
   const twilio = await twilioClient(messagingServiceSid);
 
@@ -181,7 +182,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
     if (message.id) {
       await trx("message")
         .update({ send_status: "SENT", sent_at: trx.fn.now() })
-        .where({ id: message.id });
+        .where({ id: message.id, campaign_id: message.campaign_id });
     }
     return "test_message_uuid";
   }
@@ -235,7 +236,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
       messageParams.validityPeriod = twilioValidityPeriod;
     }
 
-    twilio.messages.create(messageParams, (err, response) => {
+    twilio.messages.create(messageParams, async (err, response) => {
       const messageToSave = {
         ...message
       };
@@ -251,6 +252,13 @@ async function sendMessage(message, organizationId, trx = r.knex) {
       }
       if (response) {
         messageToSave.service_id = response.sid;
+
+        await trx("sent_message_service_id").insert({
+          service_id: response.sid,
+          message_id: messageToSave.id,
+          campaign_id: messageToSave.campaign_id
+        });
+
         hasError = !!response.error_code;
         messageToSave.service_response = appendServiceResponse(
           messageToSave.service_response,
@@ -266,10 +274,15 @@ async function sendMessage(message, organizationId, trx = r.knex) {
         ) {
           messageToSave.send_status = "ERROR";
         }
-        const { id: messageId, ...updatePayload } = messageToSave;
+        const {
+          id: messageId,
+          campaign_id: messageCampaignId,
+          ...updatePayload
+        } = messageToSave;
+
         trx("message")
           .update(updatePayload)
-          .where({ id: messageId })
+          .where({ id: messageId, campaign_id: messageCampaignId })
           .then(() =>
             reject(
               err ||
@@ -279,7 +292,12 @@ async function sendMessage(message, organizationId, trx = r.knex) {
             )
           );
       } else {
-        const { id: messageId, ...updatePayload } = messageToSave;
+        const {
+          id: messageId,
+          campaign_id: messageCampaignId,
+          ...updatePayload
+        } = messageToSave;
+
         trx("message")
           .update({
             ...updatePayload,
@@ -287,7 +305,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
             service: "twilio",
             sent_at: trx.fn.now()
           })
-          .where({ id: messageId })
+          .where({ id: messageId, campaign_id: messageCampaignId })
           .returning("*")
           .then(([newMessage]) => resolve(newMessage));
       }

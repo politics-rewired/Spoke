@@ -13,7 +13,7 @@ async function sendMessage(message, _organizationId, _trx) {
       service: "fakeservice",
       sent_at: r.knex.fn.now()
     })
-    .where({ id: message.id });
+    .where({ id: message.id, campaign_id: message.campaign_id });
 }
 
 // None of the rest of this is even used for fake-service

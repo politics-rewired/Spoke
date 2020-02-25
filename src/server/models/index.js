@@ -5,6 +5,8 @@ import thinky from "./thinky";
 import datawarehouse from "./datawarehouse";
 import { cacheableData } from "./cacheable_queries";
 
+import { parseIdentifier } from "../api/lib/partition-id-helpers";
+
 const r = thinky.r;
 
 const LOADER_DEFAULTS = {
@@ -27,10 +29,24 @@ const createLoader = (tableName, options = {}) => {
       return keys.map(async key => await cacheObj.load(key));
     }
 
+    const isPartitionedTable = parseIdentifier(keys[0])[0] !== undefined;
+    const [campaignId] = parseIdentifier(keys[0]);
+    const extractedKeys = keys.map(k => parseIdentifier(k)[1]);
+
     // Make batch request and return in the order requested by the loader
-    const docs = await r.reader(tableName).whereIn(idKey, keys);
+    // NOTE: this assumes we'll only be fetching from one campaign at a time
+    // which is true for code written as of the introduction of the partition strategy
+    const docs = isPartitionedTable
+      ? await r
+          .reader(tableName)
+          .where({ campaign_id: campaignId })
+          .whereIn(idKey, extractedKeys)
+      : await r.reader(tableName).whereIn(idKey, keys);
+
     const docsById = groupBy(docs, idKey);
-    return keys.map(key => docsById[key] && docsById[key][0]);
+    return (isPartitionedTable ? extractedKeys : keys).map(
+      key => docsById[key] && docsById[key][0]
+    );
   });
 };
 

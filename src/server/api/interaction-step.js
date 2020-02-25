@@ -1,5 +1,9 @@
 import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
+import {
+  parseIdentifier,
+  filterUndefinedObject
+} from "./lib/partition-id-helpers";
 
 export const resolvers = {
   InteractionStep: {
@@ -18,14 +22,20 @@ export const resolvers = {
       return interactionStep.question;
     },
     question: async interactionStep => interactionStep,
-    questionResponse: async (interactionStep, { campaignContactId }) =>
-      r
+    questionResponse: async (interactionStep, { campaignContactId }) => {
+      const [campaignId, contactId] = parseIdentifier(campaignContactId);
+
+      return await r
         .reader("question_response")
-        .where({
-          campaign_contact_id: campaignContactId,
-          interaction_step_id: interactionStep.id
-        })
+        .where(
+          filterUndefinedObject({
+            campaign_contact_id: contactId,
+            campaign_id: campaignId,
+            interaction_step_id: interactionStep.id
+          })
+        )
         .first()
-        .then(qr => qr || null)
+        .then(qr => qr || null);
+    }
   }
 };

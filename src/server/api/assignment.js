@@ -1203,6 +1203,7 @@ export const resolvers = {
         .reader("campaign")
         .where({ id: assignment.campaign_id })
         .first();
+
       const organization = await r
         .reader("organization")
         .where({ id: campaign.organization_id })
@@ -1222,6 +1223,7 @@ export const resolvers = {
         .reader("organization")
         .where({ id: campaign.organization_id })
         .first();
+
       return getContacts(assignment, contactsFilter, organization, campaign);
     },
     campaignCannedResponses: async assignment => {

@@ -1,12 +1,16 @@
 const DELIMITER = "-";
 
 export const parseIdentifier = identifier => {
-  const split = identifier.split(DELIMITER);
-  if (split.length === 1) {
-    return [undefined, identifier];
-  } else {
-    return [split[0], split[1]];
+  if (typeof identifier === "string") {
+    const split = identifier.split(DELIMITER);
+    if (split.length === 1) {
+      return [undefined, identifier];
+    } else {
+      return [parseInt(split[0]), parseInt(split[1])];
+    }
   }
+
+  return [undefined, identifier];
 };
 
 export const getWhereClausesFromId = (identifier, idFieldName) => {
@@ -22,7 +26,9 @@ export const getWhereClausesFromId = (identifier, idFieldName) => {
 export const filterUndefinedObject = obj => {
   return Object.keys(obj).reduce(
     (acc, key) =>
-      obj[key] !== undefined ? Object.assign(acc, { [key]: obj[key] }) : acc,
+      obj[key] !== undefined
+        ? Object.assign(acc, { [key]: parseInt(obj[key]) })
+        : acc,
     {}
   );
 };

@@ -589,7 +589,8 @@ export const resolvers = {
         cc_id: "id",
         cc_first_name: "first_name",
         cc_last_name: "last_name",
-        opt_out_cell: "opt_out_cell"
+        opt_out_cell: "opt_out_cell",
+        cmp_id: "campaign_id"
       });
     },
     campaign: queryResult => {

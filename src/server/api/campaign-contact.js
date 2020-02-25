@@ -13,15 +13,14 @@ export const resolvers = {
     state: zipCode => zipCode.state || ""
   },
   CampaignContact: {
-    ...sqlResolvers([
-      "firstName",
-      "zip",
-      "customFields",
-      "messageStatus",
-      "assignmentId"
-    ]),
+    ...sqlResolvers(["firstName", "zip", "customFields", "messageStatus"]),
     id: async campaignContact => {
       return [campaignContact.campaign_id, campaignContact.id].join("-");
+    },
+    assignmentId: async campaignContact => {
+      return [campaignContact.campaign_id, campaignContact.assignment_id].join(
+        "-"
+      );
     },
     lastName: async campaignContact => {
       if (contactFieldsToHide.includes("lastName")) {
