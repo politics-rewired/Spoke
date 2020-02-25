@@ -202,9 +202,13 @@ export const handleDeliveryReport = async reportBody => {
   // Kick off message update after delay, but don't wait around for result
   sleep(5000)
     .then(() => {
-      const message = r
-        .knex("message")
+      const sentMessage = await r.knex('message')
         .where({ service_id: messageId })
+        .first('*')
+
+      const message = await r
+        .knex("message")
+        .where({ campaign_id: sentMessage.campaign_id, service_id: messageId })
         .first("send_status");
 
       if (message.send_status !== SpokeSendStatus.Delivered) {
