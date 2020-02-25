@@ -183,7 +183,7 @@ const queries = {
         },
         assignmentId: ownProps.match.params.assignmentId
       },
-      forceFetch: true,
+      fetchPolicy: "network-only",
       pollInterval: 20000
     })
   }

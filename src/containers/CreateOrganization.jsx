@@ -126,7 +126,7 @@ const queries = {
       variables: {
         inviteId: ownProps.match.params.inviteId
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   },
   userData: {
@@ -137,7 +137,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({ forceFetch: true })
+    options: ownProps => ({ fetchPolicy: "network-only" })
   }
 };
 

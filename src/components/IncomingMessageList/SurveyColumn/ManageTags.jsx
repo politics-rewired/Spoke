@@ -152,7 +152,7 @@ const queries = {
       variables: {
         organizationId: ownProps.organizationId
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   },
   contactTags: {
@@ -177,7 +177,7 @@ const queries = {
       variables: {
         contactId: ownProps.contactId
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   }
 };

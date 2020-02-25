@@ -248,6 +248,7 @@ const queries = {
           validTimezone: true
         }
       },
+      fetchPolicy: "cache-and-network",
       pollInterval: 10000
     })
   }

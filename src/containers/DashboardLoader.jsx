@@ -41,7 +41,7 @@ const queries = {
       }
     `,
     options: {
-      forceFetch: true
+      fetchPolicy: "network-only"
     }
   }
 };

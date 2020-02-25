@@ -878,6 +878,7 @@ const queries = {
       variables: {
         campaignId: ownProps.match.params.campaignId
       },
+      fetchPolicy: "cache-and-network",
       pollInterval: 60000
     })
   },
@@ -891,6 +892,7 @@ const queries = {
       variables: {
         campaignId: ownProps.match.params.campaignId
       },
+      fetchPolicy: "cache-and-network",
       pollInterval: 60000
     })
   },
@@ -948,7 +950,7 @@ const queries = {
       variables: {
         organizationId: ownProps.match.params.organizationId
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   }
 };

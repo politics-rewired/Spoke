@@ -472,7 +472,7 @@ const queries = {
       variables: {
         organizationId: ownProps.organizationId
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   }
 };

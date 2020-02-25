@@ -209,7 +209,7 @@ const queries = {
         campaignId: ownProps.campaign.id,
         contactId: ownProps.contact.id
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   }
 };

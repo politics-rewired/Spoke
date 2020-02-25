@@ -170,7 +170,7 @@ const queries = {
         organizationId: ownProps.match.params.organizationId,
         status: "pending"
       },
-      forceFetch: true,
+      fetchPolicy: "network-only",
       pollInterval: 10000
     })
   }

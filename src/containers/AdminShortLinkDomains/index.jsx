@@ -217,7 +217,8 @@ const queries = {
     options: ownProps => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
-      }
+      },
+      fetchPolicy: "cache-and-network"
     })
   }
 };

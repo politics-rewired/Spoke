@@ -364,7 +364,7 @@ const queries = {
             ? queryString.parse(ownProps.location.search).offset * 200
             : 0
       },
-      forceFetch: true
+      fetchPolicy: "cache-and-network"
     })
   },
   userData: {

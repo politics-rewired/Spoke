@@ -113,7 +113,7 @@ const queries = {
         offset: ownProps.offset,
         limit: ownProps.limit
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   }
 };

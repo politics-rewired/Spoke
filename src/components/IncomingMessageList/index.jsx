@@ -368,7 +368,7 @@ const queries = {
         tagsFilter: ownProps.tagsFilter,
         contactNameFilter: ownProps.contactNameFilter
       },
-      forceFetch: true
+      fetchPolicy: "network-only"
     })
   }
 };
