@@ -137,8 +137,8 @@ class TexterTodoList extends React.Component {
               <p> Error releasing replies: {error} </p>
             ) : (
               [
-                <h1> Done for the day? </h1>,
-                <p>
+                <h1 key={1}> Done for the day? </h1>,
+                <p key={2}>
                   We can reassign conversations you haven't answered to other
                   available texters
                 </p>
