@@ -4,6 +4,8 @@ import { ApolloLink } from "apollo-link";
 import { createHttpLink } from "apollo-link-http";
 import { onError } from "apollo-link-error";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import { getMainDefinition } from "apollo-utilities";
+import omitDeep from "omit-deep-lodash";
 
 import { eventBus, EventTypes } from "../client/events";
 
@@ -36,7 +38,21 @@ const checkVersionLink = new ApolloLink((operation, forward) => {
   });
 });
 
-const link = checkVersionLink.concat(errorLink).concat(httpLink);
+// See https://github.com/apollographql/apollo-feature-requests/issues/6#issuecomment-576687277
+const cleanTypenameLink = new ApolloLink((operation, forward) => {
+  const keysToOmit = ["__typename"]; // more keys like timestamps could be included here
+
+  const def = getMainDefinition(operation.query);
+  if (def && def.operation === "mutation") {
+    operation.variables = omitDeep(operation.variables, keysToOmit);
+  }
+  return forward ? forward(operation) : null;
+});
+
+const link = cleanTypenameLink
+  .concat(checkVersionLink)
+  .concat(errorLink)
+  .concat(httpLink);
 
 const cache = new InMemoryCache({
   addTypename: true
