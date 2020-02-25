@@ -263,7 +263,7 @@ const queries = {
       variables: {
         organizationId: ownProps.organizationId
       },
-      fetchPolicy: "cache-and-network",
+      fetchPolicy: "network-only",
       pollInterval: 5000
     })
   }

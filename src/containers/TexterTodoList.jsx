@@ -248,7 +248,7 @@ const queries = {
           validTimezone: true
         }
       },
-      fetchPolicy: "cache-and-network",
+      fetchPolicy: "network-only",
       pollInterval: 10000
     })
   }
