@@ -344,7 +344,7 @@ async function handleDeliveryReport(report) {
   // Kick off message update after delay, but don't wait around for result
   sleep(5000)
     .then(() => {
-      const sentMessage = await r.knex('message')
+      const sentMessage = await r.knex('sent_message')
         .where({ service_id: messageId })
         .first('*')
 
