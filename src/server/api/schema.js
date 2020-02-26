@@ -3224,7 +3224,7 @@ const rootMutations = {
             assignment.campaign_id,
             id as assignment_id
           from assignment
-          join campaign on assignment.campaign_id = campaign.idj
+          join campaign on assignment.campaign_id = campaign.id
           where user_id = ?
             and campaign.is_archived = false
         )
