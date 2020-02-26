@@ -1817,7 +1817,6 @@ const rootMutations = {
     ) => {
       const [campaignId, contactId] = parseIdentifier(campaignContactId);
 
-      // TODO - this needs to fetch with campaign id
       const contact = await loaders.campaignContact.load(campaignContactId);
 
       let organizationId = contact.organization_id;
