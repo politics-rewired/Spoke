@@ -1,11 +1,7 @@
-// -- TODO
-// campaign_contact_tag
-// interaction_step
-// redefinining question_response view
-
 /*
 
-Actual migration in practice:
+If this migration needs to be run on a very large database without downtime,
+the following backfill functions can be run in chunks of 1-2 million safetly.
 
 ALTER TABLE public.message ADD COLUMN campaign_id integer references campaign (id);
 
@@ -88,23 +84,44 @@ alter table campaign_contact_tag alter column campaign_id set not null;
 exports.up = function(knex) {
   return Promise.all([
     knex.schema.alterTable("message", table => {
-      table
-        .integer("campaign_id")
-        .notNullable()
-        .references("campaign(id)");
+      table.integer("campaign_id").references("campaign(id)");
     }),
     knex.schema.alterTable("opt_out", table => {
-      table
-        .integer("campaign_id")
-        .notNullable()
-        .references("campaign(id)");
+      table.integer("campaign_id").references("campaign(id)");
     }),
     knex.schema.alterTable("all_question_response", table => {
-      table
-        .integer("campaign_id")
-        .notNullable()
-        .references("campaign(id)");
+      table.integer("campaign_id").references("campaign(id)");
     }),
+    knex.schema.raw(`
+      UPDATE message
+      SET campaign_id = campaign_contact.campaign_id
+      FROM campaign_contact
+      WHERE campaign_contact.id = message.campaign_contact_id
+        and message.campaign_id is null;
+  
+      UPDATE opt_out
+      SET campaign_id = assignment.campaign_id
+      FROM assignment
+      WHERE assignment.id = opt_out.assignment_id
+        and opt_out.campaign_id is null;
+  
+      UPDATE all_question_response
+      SET campaign_id = campaign_contact.campaign_id
+      FROM campaign_contact
+      WHERE campaign_contact.id = all_question_response.campaign_contact_id
+        and all_question_response.campaign_id is null;
+  
+      UPDATE campaign_contact_tag
+      SET campaign_id = campaign_contact.campaign_id
+      FROM campaign_contact
+      WHERE campaign_contact.id = campaign_contact_tag.campaign_contact_id
+        and campaign_contact_tag.campaign_id is null;
+
+      alter table message alter column campaign_id set not null;
+      alter table opt_out alter column campaign_id set not null;
+      alter table all_question_response alter column campaign_id set not null;
+      alter table campaign_contact_tag alter column campaign_id set not null;
+    `),
     knex.schema.raw(`
       drop view question_response;
       create view question_response as
@@ -156,6 +173,13 @@ exports.down = function(knex) {
       table.dropColumn("campaign_id");
     }),
     knex.schema.dropTable("sent_message"),
+    knex.schema.raw(`
+      drop view question_response;
+      create view question_response as
+        select *
+        from all_question_response
+        where all_question_response.is_deleted = false;
+    `),
     knex.schema.raw(
       `drop function get_messaging_service_for_cell_in_organization`
     )
