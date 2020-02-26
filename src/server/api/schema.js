@@ -1539,7 +1539,6 @@ const rootMutations = {
       const extractedContactIds = contactIds
         .map(parseIdentifier)
         .map(arr => arr[1]);
-      console.log("TCL: contactIds", extractedContactIds);
 
       const contacts = await r
         .knex("campaign_contact")
