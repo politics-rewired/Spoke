@@ -3220,7 +3220,9 @@ const rootMutations = {
       await r.knex.raw(
         `
         with campaign_and_assignment_ids_to_release_from as (
-          select campaign_id, id as assignment_id
+          select
+            assignment.campaign_id,
+            id as assignment_id
           from assignment
           join campaign on assignment.campaign_id = campaign.idj
           where user_id = ?
