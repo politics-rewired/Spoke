@@ -103,7 +103,6 @@ export const getMessagingServiceById = async messagingServiceId =>
  * @param {number} campaignContactId The ID of the target campaign contact
  * @returns {object} Assigned messaging service Postgres row
  */
-// TODO - rewrite
 export const getContactMessagingService = async (cell, organizationId) => {
   if (config.DEFAULT_SERVICE === "fakeservice")
     return { service_type: "fakeservice" };
