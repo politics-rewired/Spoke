@@ -290,6 +290,7 @@ export async function getCampaignContactAndAssignmentForIncomingMessage({
   contactNumber,
   messaging_service_sid
 }) {
+  // Check sent message to avoid
   const sentMessage = await r
     .reader("sent_message")
     .where({ contact_number: contactNumber, messaging_service_sid })

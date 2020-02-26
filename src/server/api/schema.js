@@ -74,10 +74,7 @@ import {
 } from "./campaign-overlap";
 import { change } from "../local-auth-helpers";
 import { notifyOnTagConversation } from "./lib/alerts";
-import {
-  parseIdentifier,
-  filterUndefinedObject
-} from "./lib/partition-id-helpers";
+import { parseIdentifier } from "./lib/partition-id-helpers";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
@@ -470,12 +467,10 @@ async function sendMessage(
   const record = await r
     .knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
-    .where(
-      filterUndefinedObject({
-        "campaign_contact.id": contactId,
-        "campaign_contact.campaign_id": campaignId
-      })
-    )
+    .where({
+      "campaign_contact.id": contactId,
+      "campaign_contact.campaign_id": campaignId
+    })
     .whereRaw("campaign_contact.archived = false")
     .where({ "campaign.is_archived": false })
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
@@ -1547,12 +1542,10 @@ const rootMutations = {
         .knex("campaign_contact")
         .select("*")
         .whereIn("id", extractedContactIds)
-        .where(
-          filterUndefinedObject({
-            assignment_id: actualAssignmentId,
-            campaign_id: campaignId
-          })
-        );
+        .where({
+          assignment_id: actualAssignmentId,
+          campaign_id: campaignId
+        });
 
       const messages = await r
         .knex("message")
@@ -1564,7 +1557,7 @@ const rootMutations = {
           "campaign_contact_id"
         )
         .whereIn("campaign_contact_id", extractedContactIds)
-        .where(filterUndefinedObject({ campaign_id: campaignId }))
+        .where({ campaign_id: campaignId })
         .orderBy("created_at", "asc");
 
       const messagesByContactId = groupBy(messages, x => x.campaign_contact_id);
@@ -1587,7 +1580,7 @@ const rootMutations = {
               "campaign_contact_tag.campaign_contact_id",
               extractedContactIds
             )
-            .where(filterUndefinedObject({ campaign_id: campaignId }))
+            .where({ campaign_id: campaignId })
         : [];
 
       const tagsByContactId = groupBy(tags, x => x.campaign_contact_id);
