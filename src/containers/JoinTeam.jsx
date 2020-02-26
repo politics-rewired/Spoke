@@ -1,10 +1,11 @@
 import PropTypes from "prop-types";
 import React from "react";
-import loadData from "./hoc/load-data";
 import gql from "graphql-tag";
-import wrapMutations from "./hoc/wrap-mutations";
 import { withRouter } from "react-router";
+import { compose } from "react-apollo";
 import { StyleSheet, css } from "aphrodite";
+
+import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
 
 const styles = StyleSheet.create({
@@ -68,13 +69,13 @@ class JoinTeam extends React.Component {
 }
 
 JoinTeam.propTypes = {
-  mutations: PropTypes.object,
+  mutations: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired
 };
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  joinOrganization: () => ({
+const mutations = {
+  joinOrganization: ownProps => () => ({
     mutation: gql`
       mutation joinOrganization($organizationUuid: String!) {
         joinOrganization(organizationUuid: $organizationUuid) {
@@ -84,7 +85,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
     `,
     variables: { organizationUuid: ownProps.match.params.organizationUuid }
   }),
-  assignUserToCampaign: () => ({
+  assignUserToCampaign: ownProps => () => ({
     mutation: gql`
       mutation assignUserToCampaign(
         $organizationUuid: String!
@@ -103,8 +104,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
       organizationUuid: ownProps.match.params.organizationUuid
     }
   })
-});
+};
 
-export default loadData(wrapMutations(withRouter(JoinTeam)), {
-  mapMutationsToProps
-});
+export default compose(
+  withRouter,
+  loadData({ mutations })
+)(JoinTeam);

@@ -1,13 +1,16 @@
 import PropTypes from "prop-types";
 import React from "react";
-import { StyleSheet, css } from "aphrodite";
-import theme from "../styles/theme";
-import { hasRole } from "../lib";
-import TopNav from "./TopNav";
-import gql from "graphql-tag";
 import { withRouter } from "react-router";
-import loadData from "../containers/hoc/load-data";
+import { compose } from "react-apollo";
+import gql from "graphql-tag";
+import { StyleSheet, css } from "aphrodite";
+
+import { loadData } from "../containers/hoc/with-operations";
+import { hasRole } from "../lib";
+import theme from "../styles/theme";
+import TopNav from "./TopNav";
 import AdminNavigation from "../containers/AdminNavigation";
+
 const styles = StyleSheet.create({
   container: {
     ...theme.layouts.multiColumn.container
@@ -160,13 +163,15 @@ class AdminDashboard extends React.Component {
 }
 
 AdminDashboard.propTypes = {
-  match: PropTypes.object,
-  location: PropTypes.object,
-  history: PropTypes.object,
+  match: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  data: PropTypes.object.isRequired,
+  badgeCounts: PropTypes.object.isRequired,
   children: PropTypes.object
 };
 
-const mapQueriesToProps = ({ ownProps: { match } }) => ({
+const queries = {
   data: {
     query: gql`
       query getCurrentUserRoles($organizationId: String!) {
@@ -176,9 +181,11 @@ const mapQueriesToProps = ({ ownProps: { match } }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: match.params.organizationId
-    }
+    options: ({ match }) => ({
+      variables: {
+        organizationId: match.params.organizationId
+      }
+    })
   },
   badgeCounts: {
     query: gql`
@@ -190,11 +197,16 @@ const mapQueriesToProps = ({ ownProps: { match } }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: match.params.organizationId
-    },
-    pollInterval: 20000
+    options: ({ match }) => ({
+      variables: {
+        organizationId: match.params.organizationId
+      },
+      pollInterval: 20000
+    })
   }
-});
+};
 
-export default loadData(withRouter(AdminDashboard), { mapQueriesToProps });
+export default compose(
+  withRouter,
+  loadData({ queries })
+)(AdminDashboard);

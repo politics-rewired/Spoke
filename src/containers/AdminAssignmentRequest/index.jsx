@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
+
+import CircularProgress from "material-ui/CircularProgress";
+
+import { loadData } from "../hoc/with-operations";
+import { sleep } from "../../lib/utils";
 import AssignmentRequestTable, {
   RowWorkStatus
 } from "./AssignmentRequestTable";
-import loadData from "../hoc/load-data";
-import wrapMutations from "../hoc/wrap-mutations";
-import { sleep } from "../../lib/utils";
-import CircularProgress from "material-ui/CircularProgress";
 
 class AdminAssignmentRequest extends Component {
   state = {
@@ -147,7 +148,7 @@ AdminAssignmentRequest.propTypes = {
   match: PropTypes.object.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   pendingAssignmentRequests: {
     query: gql`
       query assignmentRequests($organizationId: String!, $status: String) {
@@ -164,17 +165,19 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId,
-      status: "pending"
-    },
-    forceFetch: true,
-    pollInterval: 10000
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId,
+        status: "pending"
+      },
+      fetchPolicy: "network-only",
+      pollInterval: 10000
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  approveAssignmentRequest: assignmentRequestId => ({
+const mutations = {
+  approveAssignmentRequest: ownProps => assignmentRequestId => ({
     mutation: gql`
       mutation approveAssignmentRequest($assignmentRequestId: String!) {
         approveAssignmentRequest(assignmentRequestId: $assignmentRequestId)
@@ -182,7 +185,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
     `,
     variables: { assignmentRequestId }
   }),
-  rejectAssignmentRequest: assignmentRequestId => ({
+  rejectAssignmentRequest: ownProps => assignmentRequestId => ({
     mutation: gql`
       mutation rejectAssignmentRequest($assignmentRequestId: String!) {
         rejectAssignmentRequest(assignmentRequestId: $assignmentRequestId)
@@ -190,9 +193,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
     `,
     variables: { assignmentRequestId }
   })
-});
+};
 
-export default loadData(wrapMutations(AdminAssignmentRequest), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(AdminAssignmentRequest);

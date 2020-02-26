@@ -15,7 +15,7 @@ import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import PersonAddIcon from "material-ui/svg-icons/social/person-add";
 
-import loadData from "../hoc/load-data";
+import { loadData } from "../hoc/with-operations";
 
 const styles = {
   addMemberContainer: { display: "flex", alignItems: "baseline" },
@@ -177,7 +177,7 @@ TeamEditorDetail.propTypes = {
   }).isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   team: {
     query: gql`
       query getTeamWithMembers($teamId: String!) {
@@ -192,9 +192,11 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      teamId: ownProps.match.params.teamId
-    }
+    options: ownProps => ({
+      variables: {
+        teamId: ownProps.match.params.teamId
+      }
+    })
   },
   users: {
     query: gql`
@@ -209,14 +211,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      }
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  addTeamMebers: userIds => ({
+const mutations = {
+  addTeamMebers: ownProps => userIds => ({
     mutation: gql`
       mutation addTeamMebers($teamId: String!, $userIds: [String]!) {
         addUsersToTeam(teamId: $teamId, userIds: $userIds)
@@ -228,7 +232,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getTeamWithMembers"]
   }),
-  removeTeamMembers: userIds => ({
+  removeTeamMembers: ownProps => userIds => ({
     mutation: gql`
       mutation removeTeamMembers($teamId: String!, $userIds: [String]!) {
         removeUsersFromTeam(teamId: $teamId, userIds: $userIds)
@@ -240,9 +244,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getTeamWithMembers"]
   })
-});
+};
 
-export default loadData(TeamEditorDetail, {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(TeamEditorDetail);

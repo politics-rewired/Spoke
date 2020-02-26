@@ -1,75 +1,12 @@
-import gql from "graphql-tag";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Component } from "react";
-import { connect } from "react-apollo";
+import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
 
-export class PaginatedCampaignsRetriever extends Component {
-  constructor(props) {
-    super(props);
+import apolloClient from "../network/apollo-client-singleton";
 
-    this.state = { offset: 0 };
-  }
-
-  componentDidMount() {
-    this.handleCampaignsReceived();
-  }
-
-  componentDidUpdate(prevProps) {
-    this.handleCampaignsReceived();
-  }
-
-  handleCampaignsReceived() {
-    if (!this.props.campaignsAndTags || this.props.campaignsAndTags.loading) {
-      return;
-    }
-
-    if (
-      this.props.campaignsAndTags.campaigns.campaigns.length ===
-      this.props.campaignsAndTags.campaigns.pageInfo.total
-    ) {
-      this.props.onCampaignsReceived(
-        this.props.campaignsAndTags.campaigns.campaigns
-      );
-      this.props.onTagsReceived(
-        this.props.campaignsAndTags.organization.tagList
-      );
-    }
-
-    const newOffset =
-      this.props.campaignsAndTags.campaigns.pageInfo.offset +
-      this.props.pageSize;
-
-    if (newOffset < this.props.campaignsAndTags.campaigns.pageInfo.total) {
-      this.props.campaignsAndTags.fetchMore({
-        variables: {
-          cursor: {
-            offset: newOffset,
-            limit: this.props.pageSize
-          }
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult) {
-            return prev;
-          }
-          const returnValue = Object.assign({}, prev);
-          returnValue.campaigns.campaigns = returnValue.campaigns.campaigns.concat(
-            fetchMoreResult.data.campaigns.campaigns
-          );
-          returnValue.campaigns.pageInfo =
-            fetchMoreResult.data.campaigns.pageInfo;
-          return returnValue;
-        }
-      });
-    }
-  }
-
-  render() {
-    return null;
-  }
-}
-
-const mapQueriesToProps = ({ ownProps }) => ({
-  campaignsAndTags: {
+const fetchCampaigns = async (offset, limit, organizationId, campaignsFilter) =>
+  apolloClient.query({
     query: gql`
       query qq(
         $organizationId: String!
@@ -88,13 +25,14 @@ const mapQueriesToProps = ({ ownProps }) => ({
               total
             }
             campaigns {
+              id
               dueBy
               title
-              id
             }
           }
         }
         organization(id: $organizationId) {
+          id
           tagList {
             id
             title
@@ -103,13 +41,53 @@ const mapQueriesToProps = ({ ownProps }) => ({
       }
     `,
     variables: {
-      cursor: { offset: 0, limit: ownProps.pageSize },
-      organizationId: ownProps.organizationId,
-      campaignsFilter: ownProps.campaignsFilter
+      cursor: { offset, limit },
+      organizationId,
+      campaignsFilter
     },
-    forceFetch: true
+    fetchPolicy: "network-only"
+  });
+
+export class PaginatedCampaignsRetriever extends Component {
+  componentDidMount() {
+    this.handlePropsReceived();
   }
-});
+
+  componentDidUpdate(prevProps) {
+    this.handlePropsReceived(prevProps);
+  }
+
+  handlePropsReceived = async (prevProps = {}) => {
+    if (isEqual(prevProps, this.props)) return;
+
+    const { organizationId, campaignsFilter, pageSize } = this.props;
+
+    let offset = 0;
+    let total = undefined;
+    let campaigns = [];
+    let tagList = [];
+    do {
+      const results = await fetchCampaigns(
+        offset,
+        pageSize,
+        organizationId,
+        campaignsFilter
+      );
+      tagList = results.data.organization.tagList;
+      const { pageInfo, campaigns: newCampaigns } = results.data.campaigns;
+      campaigns = campaigns.concat(newCampaigns);
+      offset += pageSize;
+      total = pageInfo.total;
+    } while (offset < total);
+
+    this.props.onTagsReceived(tagList);
+    this.props.onCampaignsReceived(campaigns);
+  };
+
+  render() {
+    return <div />;
+  }
+}
 
 PaginatedCampaignsRetriever.propTypes = {
   organizationId: PropTypes.string.isRequired,
@@ -122,6 +100,4 @@ PaginatedCampaignsRetriever.propTypes = {
   pageSize: PropTypes.number.isRequired
 };
 
-export default connect({
-  mapQueriesToProps
-})(PaginatedCampaignsRetriever);
+export default PaginatedCampaignsRetriever;

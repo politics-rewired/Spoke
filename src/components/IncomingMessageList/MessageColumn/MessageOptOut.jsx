@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { connect } from "react-apollo";
 import gql from "graphql-tag";
+
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Dialog from "material-ui/Dialog";
+
+import { withOperations } from "../../../containers/hoc/with-operations";
 
 class MessageOptOut extends Component {
   constructor(props) {
@@ -168,8 +170,8 @@ MessageOptOut.propTypes = {
   optOutChanged: PropTypes.func
 };
 
-const mapMutationsToProps = () => ({
-  createOptOut: (optOut, campaignContactId) => ({
+const mutations = {
+  createOptOut: ownProps => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -188,7 +190,7 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  removeOptOut: cell => ({
+  removeOptOut: ownProps => cell => ({
     mutation: gql`
       mutation removeOptOut($cell: Phone!) {
         removeOptOut(cell: $cell) {
@@ -201,8 +203,8 @@ const mapMutationsToProps = () => ({
     `,
     variables: { cell }
   })
-});
+};
 
-export default connect({
-  mapMutationsToProps
+export default withOperations({
+  mutations
 })(MessageOptOut);

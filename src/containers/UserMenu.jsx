@@ -1,5 +1,9 @@
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
+import gql from "graphql-tag";
+
 import Popover from "material-ui/Popover";
 import Menu from "material-ui/Menu";
 import MenuItem from "material-ui/MenuItem";
@@ -7,9 +11,8 @@ import Divider from "material-ui/Divider";
 import Subheader from "material-ui/Subheader";
 import IconButton from "material-ui/IconButton";
 import Avatar from "material-ui/Avatar";
-import { connect } from "react-apollo";
-import { withRouter } from "react-router";
-import gql from "graphql-tag";
+
+import { withOperations } from "../containers/hoc/with-operations";
 import { dataTest } from "../lib/attributes";
 import { hasRole } from "../lib/permissions";
 
@@ -38,7 +41,7 @@ const OrganizationItemInner = props => {
   );
 };
 
-const orgRoleProps = ({ ownProps }) => ({
+const orgRoleQueries = {
   data: {
     query: gql`
       query getCurrentUserRoles($organizationId: String!) {
@@ -48,15 +51,18 @@ const orgRoleProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.organization.id
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organization.id
+      }
+    })
   }
-});
+};
 
-const OrganizationItem = connect({
-  mapQueriesToProps: orgRoleProps
-})(withRouter(OrganizationItemInner));
+const OrganizationItem = compose(
+  withRouter,
+  withOperations({ queries: orgRoleQueries })
+)(OrganizationItemInner);
 
 class UserMenu extends Component {
   state = {
@@ -178,12 +184,12 @@ class UserMenu extends Component {
 }
 
 UserMenu.propTypes = {
-  data: PropTypes.object,
-  orgId: PropTypes.string,
-  history: PropTypes.object.isRequired
+  data: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  orgId: PropTypes.string
 };
 
-const mapQueriesToProps = () => ({
+const queries = {
   data: {
     query: gql`
       query getCurrentUserForMenu {
@@ -198,10 +204,13 @@ const mapQueriesToProps = () => ({
         }
       }
     `,
-    forceFetch: true
+    options: {
+      fetchPolicy: "network-only"
+    }
   }
-});
+};
 
-export default connect({
-  mapQueriesToProps
-})(withRouter(UserMenu));
+export default compose(
+  withRouter,
+  withOperations({ queries })
+)(UserMenu);

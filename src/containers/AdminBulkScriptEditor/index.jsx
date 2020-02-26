@@ -1,14 +1,15 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
-import { connect } from "react-apollo";
+import pick from "lodash/pick";
+
 import Paper from "material-ui/Paper";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import pick from "lodash/pick";
 
+import { withOperations } from "../hoc/with-operations";
 import CampaignPrefixSelector from "./CampaignPrefixSelector";
 
 const PROTECTED_CHARACTERS = ["/"];
@@ -262,8 +263,8 @@ class AdminBulkScriptEditor extends Component {
   }
 }
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  bulkUpdateScript: findAndReplace => ({
+const mutations = {
+  bulkUpdateScript: ownProps => findAndReplace => ({
     mutation: gql`
       mutation bulkUpdateScript(
         $organizationId: String!
@@ -284,8 +285,8 @@ const mapMutationsToProps = ({ ownProps }) => ({
       findAndReplace
     }
   })
-});
+};
 
-export default connect({
-  mapMutationsToProps
+export default withOperations({
+  mutations
 })(AdminBulkScriptEditor);

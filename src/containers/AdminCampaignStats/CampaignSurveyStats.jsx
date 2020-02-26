@@ -3,7 +3,7 @@ import React from "react";
 import gql from "graphql-tag";
 import { StyleSheet, css } from "aphrodite";
 
-import loadData from "../hoc/load-data";
+import { loadData } from "../hoc/with-operations";
 import Chart from "../../components/Chart";
 import CampaignStat from "./CampaignStat";
 import theme from "../../styles/theme";
@@ -74,7 +74,7 @@ CampaignSurveyStats.propTypes = {
   campaignId: PropTypes.string.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query getCampaign($campaignId: String!) {
@@ -93,11 +93,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId
-    }
-    // pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+      // pollInterval: 5000
+    })
   }
-});
+};
 
-export default loadData(CampaignSurveyStats, { mapQueriesToProps });
+export default loadData({ queries })(CampaignSurveyStats);

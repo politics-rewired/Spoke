@@ -1,10 +1,13 @@
 import PropTypes from "prop-types";
 import React from "react";
-import AssignmentTexter from "../components/AssignmentTexter";
 import { withRouter } from "react-router";
-import loadData from "./hoc/load-data";
+import { compose } from "react-apollo";
 import gql from "graphql-tag";
 
+import { loadData } from "./hoc/with-operations";
+import AssignmentTexter from "../components/AssignmentTexter";
+
+// TODO: use Fragment
 const contactDataFragment = `
         id
         assignmentId
@@ -107,7 +110,7 @@ TexterTodo.propTypes = {
   mutations: PropTypes.object
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query getContacts(
@@ -171,21 +174,23 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      contactsFilter: {
-        messageStatus: ownProps.messageStatus,
-        isOptedOut: false,
-        validTimezone: true
+    options: ownProps => ({
+      variables: {
+        contactsFilter: {
+          messageStatus: ownProps.messageStatus,
+          isOptedOut: false,
+          validTimezone: true
+        },
+        assignmentId: ownProps.match.params.assignmentId
       },
-      assignmentId: ownProps.match.params.assignmentId
-    },
-    forceFetch: true,
-    pollInterval: 20000
+      fetchPolicy: "network-only",
+      pollInterval: 20000
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  findNewCampaignContact: (assignmentId, numberContacts = 1) => ({
+const mutations = {
+  findNewCampaignContact: ownProps => (assignmentId, numberContacts = 1) => ({
     mutation: gql`
       mutation findNewCampaignContact(
         $assignmentId: String!
@@ -204,7 +209,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       numberContacts
     }
   }),
-  getAssignmentContacts: (contactIds, findNew) => ({
+  getAssignmentContacts: ownProps => (contactIds, findNew) => ({
     mutation: gql`
       mutation getAssignmentContacts($assignmentId: String!, $contactIds: [String]!, $findNew: Boolean) {
         getAssignmentContacts(assignmentId: $assignmentId, contactIds: $contactIds, findNew: $findNew) {
@@ -218,9 +223,12 @@ const mapMutationsToProps = ({ ownProps }) => ({
       findNew: !!findNew
     }
   })
-});
+};
 
-export default loadData(withRouter(TexterTodo), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  withRouter,
+  loadData({
+    queries,
+    mutations
+  })
+)(TexterTodo);

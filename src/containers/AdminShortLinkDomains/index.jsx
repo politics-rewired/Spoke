@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
-import { connect } from "react-apollo";
 
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import Dialog from "material-ui/Dialog";
@@ -10,9 +9,9 @@ import RaisedButton from "material-ui/RaisedButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 import CloudUploadIcon from "material-ui/svg-icons/file/cloud-upload";
 
+import { withOperations } from "../hoc/with-operations";
 import theme from "../../styles/theme";
 import LoadingIndicator from "../../components/LoadingIndicator";
-
 import ShortLinkDomainList from "./ShortLinkDomainList";
 import AddDomainDialog from "./AddDomainDialog";
 
@@ -188,10 +187,15 @@ class AdminShortLinkDomains extends Component {
 
 AdminShortLinkDomains.propTypes = {
   match: PropTypes.object.isRequired,
-  shortLinkDomains: PropTypes.object
+  shortLinkDomains: PropTypes.object.isRequired,
+  mutations: PropTypes.shape({
+    insertLinkDomain: PropTypes.func.isRequired,
+    setDomainManuallyDisabled: PropTypes.func.isRequired,
+    deleteLinkDomain: PropTypes.func.isRequired
+  }).isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   shortLinkDomains: {
     query: gql`
       query getShortLinkDomains($organizationId: String!) {
@@ -210,14 +214,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      },
+      fetchPolicy: "cache-and-network"
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  insertLinkDomain: (domain, maxUsageCount) => ({
+const mutations = {
+  insertLinkDomain: ownProps => (domain, maxUsageCount) => ({
     mutation: gql`
       mutation insertLinkDomain(
         $organizationId: String!
@@ -246,7 +253,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       maxUsageCount
     }
   }),
-  setDomainManuallyDisabled: (domainId, isManuallyDisabled) => ({
+  setDomainManuallyDisabled: ownProps => (domainId, isManuallyDisabled) => ({
     mutation: gql`
       mutation setDomainManuallyDisabled(
         $organizationId: String!
@@ -271,7 +278,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }
     }
   }),
-  deleteLinkDomain: domainId => ({
+  deleteLinkDomain: ownProps => domainId => ({
     mutation: gql`
       mutation deleteLinkDomain($organizationId: String!, $domainId: String!) {
         deleteLinkDomain(organizationId: $organizationId, domainId: $domainId)
@@ -282,9 +289,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
       domainId
     }
   })
-});
+};
 
-export default connect({
-  mapQueriesToProps,
-  mapMutationsToProps
+export default withOperations({
+  queries,
+  mutations
 })(AdminShortLinkDomains);

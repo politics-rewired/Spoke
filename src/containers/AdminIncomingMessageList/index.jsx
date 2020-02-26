@@ -1,19 +1,19 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
+import { withRouter } from "react-router";
+import { compose } from "react-apollo";
+import gql from "graphql-tag";
 import _ from "lodash";
 
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+
+import { loadData } from "../hoc/with-operations";
+import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../../lib/constants";
 import IncomingMessageActions from "../../components/IncomingMessageActions";
 import IncomingMessageFilter from "../../components/IncomingMessageFilter";
 import IncomingMessageList from "../../components/IncomingMessageList";
-import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../../lib/constants";
-import LoadingIndicator from "../../components/LoadingIndicator";
 import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
-import gql from "graphql-tag";
-import loadData from "../hoc/load-data";
-import { withRouter } from "react-router";
-import wrapMutations from "../hoc/wrap-mutations";
 import PaginatedUsersRetriever from "../PaginatedUsersRetriever";
 
 function getCampaignsFilterForCampaignArchiveStatus(
@@ -110,7 +110,7 @@ export class AdminIncomingMessageList extends Component {
       _.isEqual(this.state.contactsFilter, nextState.contactsFilter) &&
       _.isEqual(this.state.campaignsFilter, nextState.campaignsFilter) &&
       _.isEqual(this.state.assignmentsFilter, nextState.assignmentsFilter) &&
-      _.isEqual(this.state.tagsFilter, nextState, tagsFilter)
+      _.isEqual(this.state.tagsFilter, nextState.tagsFilter)
     ) {
       return false;
     }
@@ -550,8 +550,8 @@ export class AdminIncomingMessageList extends Component {
   }
 }
 
-const mapMutationsToProps = () => ({
-  reassignCampaignContacts: (
+const mutations = {
+  reassignCampaignContacts: ownProps => (
     organizationId,
     campaignIdsContactIds,
     newTexterUserId
@@ -575,7 +575,7 @@ const mapMutationsToProps = () => ({
     variables: { organizationId, campaignIdsContactIds, newTexterUserId }
   }),
 
-  megaReassignCampaignContacts: (
+  megaReassignCampaignContacts: ownProps => (
     organizationId,
     campaignIdsContactIds,
     newTexterUserIds
@@ -599,7 +599,7 @@ const mapMutationsToProps = () => ({
     variables: { organizationId, campaignIdsContactIds, newTexterUserIds }
   }),
 
-  markForSecondPass: (organizationId, campaignIdsContactIds) => ({
+  markForSecondPass: ownProps => (organizationId, campaignIdsContactIds) => ({
     mutation: gql`
       mutation markForSecondPass(
         $organizationId: String!
@@ -616,7 +616,7 @@ const mapMutationsToProps = () => ({
     variables: { organizationId, campaignIdsContactIds }
   }),
 
-  bulkReassignCampaignContacts: (
+  bulkReassignCampaignContacts: ownProps => (
     organizationId,
     campaignsFilter,
     assignmentsFilter,
@@ -656,7 +656,7 @@ const mapMutationsToProps = () => ({
     }
   }),
 
-  megaBulkReassignCampaignContacts: (
+  megaBulkReassignCampaignContacts: ownProps => (
     organizationId,
     campaignsFilter,
     assignmentsFilter,
@@ -695,13 +695,14 @@ const mapMutationsToProps = () => ({
       newTexterUserIds
     }
   })
-});
+};
 
 AdminIncomingMessageList.propTypes = {
   mutations: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired
 };
 
-export default loadData(withRouter(wrapMutations(AdminIncomingMessageList)), {
-  mapMutationsToProps
-});
+export default compose(
+  withRouter,
+  loadData({ mutations })
+)(AdminIncomingMessageList);

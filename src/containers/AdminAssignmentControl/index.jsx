@@ -7,7 +7,7 @@ import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
 
-import loadData from "../../containers/hoc/load-data";
+import { loadData } from "../../containers/hoc/with-operations";
 import AssignmentRow from "./AssignmentRow";
 
 class AdminAssignmentControl extends Component {
@@ -139,7 +139,7 @@ class AdminAssignmentControl extends Component {
   }
 }
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   assignmentConfiguration: {
     query: gql`
       query getAssignmentConfiguration($organizationId: String!) {
@@ -168,14 +168,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      }
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  saveTeams: teams => ({
+const mutations = {
+  saveTeams: ownProps => teams => ({
     mutation: gql`
       mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
         saveTeams(organizationId: $organizationId, teams: $teams) {
@@ -199,7 +201,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getAssignmentConfiguration"]
   })
-});
+};
 
 AdminAssignmentControl.defaultProps = {
   className: "",
@@ -210,12 +212,15 @@ AdminAssignmentControl.defaultProps = {
 AdminAssignmentControl.propTypes = {
   match: PropTypes.object.isRequired,
   assignmentConfiguration: PropTypes.object.isRequired,
+  mutations: PropTypes.shape({
+    saveTeams: PropTypes.func.isRequired
+  }).isRequired,
   className: PropTypes.string,
   containerStyle: PropTypes.object,
   style: PropTypes.object
 };
 
-export default loadData(AdminAssignmentControl, {
-  mapMutationsToProps,
-  mapQueriesToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(AdminAssignmentControl);

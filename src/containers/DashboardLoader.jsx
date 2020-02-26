@@ -2,7 +2,9 @@ import PropTypes from "prop-types";
 import React from "react";
 import gql from "graphql-tag";
 import { withRouter } from "react-router";
-import loadData from "./hoc/load-data";
+import { compose } from "react-apollo";
+
+import { loadData } from "./hoc/with-operations";
 
 class DashboardLoader extends React.Component {
   componentWillMount() {
@@ -21,12 +23,12 @@ class DashboardLoader extends React.Component {
 }
 
 DashboardLoader.propTypes = {
-  data: PropTypes.object,
+  data: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   path: PropTypes.string
 };
 
-const mapQueriesToProps = () => ({
+const queries = {
   data: {
     query: gql`
       query getCurrentUserForLoader {
@@ -38,8 +40,13 @@ const mapQueriesToProps = () => ({
         }
       }
     `,
-    forceFetch: true
+    options: {
+      fetchPolicy: "network-only"
+    }
   }
-});
+};
 
-export default loadData(withRouter(DashboardLoader), { mapQueriesToProps });
+export default compose(
+  withRouter,
+  loadData({ queries })
+)(DashboardLoader);

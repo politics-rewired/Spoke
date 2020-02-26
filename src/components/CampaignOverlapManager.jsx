@@ -1,11 +1,12 @@
 import React from "react";
-import loadData from "../containers/hoc/load-data";
-import wrapMutations from "../containers/hoc/wrap-mutations";
-import CircularProgress from "material-ui/CircularProgress";
 import gql from "graphql-tag";
-import RaisedButton from "material-ui/RaisedButton";
-import DataTable from "material-ui-datatables";
 import moment from "moment";
+
+import CircularProgress from "material-ui/CircularProgress";
+import DataTable from "material-ui-datatables";
+import RaisedButton from "material-ui/RaisedButton";
+
+import { loadData } from "../containers/hoc/with-operations";
 import LoadingIndicator from "./LoadingIndicator";
 import { TextField } from "material-ui";
 
@@ -259,7 +260,7 @@ class CampaignOverlapManager extends React.Component {
   }
 }
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   fetchCampaignOverlaps: {
     query: gql`
       query fetchCampaignOverlaps(
@@ -279,15 +280,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId,
-      organizationId: ownProps.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId,
+        organizationId: ownProps.organizationId
+      }
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  deleteManyCampaignOverlap: overlappingCampaignIds => ({
+const mutations = {
+  deleteManyCampaignOverlap: ownProps => overlappingCampaignIds => ({
     mutation: gql`
       mutation deleteManyCampaignOverlap(
         $organizationId: String!
@@ -308,9 +311,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
     }
     // refetchQueries: ["fetchCampaignOverlaps"]
   })
-});
+};
 
-export default loadData(wrapMutations(CampaignOverlapManager), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(CampaignOverlapManager);

@@ -1,11 +1,12 @@
-import PropTypes from "prop-types";
 import React from "react";
-import loadData from "./hoc/load-data";
+import PropTypes from "prop-types";
+import { withRouter } from "react-router";
+import { compose } from "react-apollo";
 import gql from "graphql-tag";
 import { StyleSheet, css } from "aphrodite";
-import wrapMutations from "./hoc/wrap-mutations";
+
+import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
-import { withRouter } from "react-router";
 
 const styles = StyleSheet.create({
   container: {
@@ -131,12 +132,14 @@ class Home extends React.Component {
 }
 
 Home.propTypes = {
-  mutations: PropTypes.object,
-  history: PropTypes.object,
-  data: PropTypes.object
+  mutations: PropTypes.shape({
+    createInvite: PropTypes.func.isRequired
+  }).isRequired,
+  history: PropTypes.object.isRequired,
+  data: PropTypes.object.isRequired
 };
 
-const mapQueriesToProps = () => ({
+const queries = {
   data: {
     query: gql`
       query getCurrentUser {
@@ -158,10 +161,10 @@ const mapQueriesToProps = () => ({
       }
     `
   }
-});
+};
 
-const mapMutationsToProps = () => ({
-  createInvite: invite => ({
+const mutations = {
+  createInvite: ownProps => invite => ({
     mutation: gql`
       mutation createInvite($invite: InviteInput!) {
         createInvite(invite: $invite) {
@@ -171,9 +174,9 @@ const mapMutationsToProps = () => ({
     `,
     variables: { invite }
   })
-});
+};
 
-export default loadData(wrapMutations(withRouter(Home)), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  loadData({ queries, mutations }),
+  withRouter
+)(Home);

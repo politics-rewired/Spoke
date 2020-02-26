@@ -2,8 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
 
-import loadData from "../hoc/load-data";
-import wrapMutations from "../hoc/wrap-mutations";
+import { loadData } from "../hoc/with-operations";
 import CampaignListLoader from "./CampaignListLoader";
 import { OperationDialog, operations } from "./OperationDialog";
 import AssignmentHUD from "./AssignmentHUD";
@@ -118,8 +117,8 @@ const campaignInfoFragment = `
   }
 `;
 
-const mapMutationsToProps = () => ({
-  archiveCampaign: campaignId => ({
+const mutations = {
+  archiveCampaign: ownProps => campaignId => ({
     mutation: gql`mutation archiveCampaign($campaignId: String!) {
           archiveCampaign(id: $campaignId) {
             ${campaignInfoFragment}
@@ -127,7 +126,7 @@ const mapMutationsToProps = () => ({
         }`,
     variables: { campaignId }
   }),
-  unarchiveCampaign: campaignId => ({
+  unarchiveCampaign: ownProps => campaignId => ({
     mutation: gql`mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
           ${campaignInfoFragment}
@@ -135,7 +134,7 @@ const mapMutationsToProps = () => ({
       }`,
     variables: { campaignId }
   }),
-  releaseUnsentMessages: campaignId => ({
+  releaseUnsentMessages: ownProps => campaignId => ({
     mutation: gql`
       mutation releaseUnsentMessages(
         $campaignId: String!
@@ -149,7 +148,10 @@ const mapMutationsToProps = () => ({
       campaignId
     }
   }),
-  markForSecondPass: (campaignId, { excludeRecentlyTexted, days, hours }) => ({
+  markForSecondPass: ownProps => (
+    campaignId,
+    { excludeRecentlyTexted, days, hours }
+  ) => ({
     mutation: gql`
       mutation markForSecondPass(
         $campaignId: String!
@@ -166,7 +168,7 @@ const mapMutationsToProps = () => ({
       campaignId
     }
   }),
-  releaseUnrepliedMessages: (campaignId, { ageInHours }) => ({
+  releaseUnrepliedMessages: ownProps => (campaignId, { ageInHours }) => ({
     mutation: gql`
       mutation releaseUnrepliedMessages(
         $campaignId: String!
@@ -186,7 +188,7 @@ const mapMutationsToProps = () => ({
       ageInHours
     }
   }),
-  deleteNeedsMessage: (campaignId, _) => ({
+  deleteNeedsMessage: ownProps => (campaignId, _) => ({
     mutation: gql`
       mutation deleteNeedsMessage($campaignId: String!) {
         deleteNeedsMessage(campaignId: $campaignId)
@@ -196,7 +198,7 @@ const mapMutationsToProps = () => ({
       campaignId
     }
   }),
-  unMarkForSecondPass: (campaignId, _) => ({
+  unMarkForSecondPass: ownProps => (campaignId, _) => ({
     mutation: gql`
       mutation unMarkForSecondPass($campaignId: String!) {
         unMarkForSecondPass(campaignId: $campaignId)
@@ -232,9 +234,9 @@ const mapMutationsToProps = () => ({
 
     variables: { campaignId }
   })
-});
+};
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query adminGetCampaigns($organizationId: String!) {
@@ -253,14 +255,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.organizationId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      },
+      fetchPolicy: "network-only"
+    })
   }
-});
+};
 
-export default loadData(wrapMutations(CampaignList), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default loadData({
+  queries,
+  mutations
+})(CampaignList);

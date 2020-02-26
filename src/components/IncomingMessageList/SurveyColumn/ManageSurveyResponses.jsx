@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
-import { connect } from "react-apollo";
 
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 
+import { withOperations } from "../../../containers/hoc/with-operations";
 import LoadingIndicator from "../../LoadingIndicator";
 
 class ManageSurveyResponses extends Component {
@@ -182,7 +182,7 @@ ManageSurveyResponsesWrapper.propTypes = {
   surveyQuestions: PropTypes.object.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   surveyQuestions: {
     query: gql`
       query getSurveyQuestions($campaignId: String!, $contactId: String!) {
@@ -204,16 +204,21 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaign.id,
-      contactId: ownProps.contact.id
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaign.id,
+        contactId: ownProps.contact.id
+      },
+      fetchPolicy: "network-only"
+    })
   }
-});
+};
 
-const mapMutationsToProps = () => ({
-  updateQuestionResponses: (questionResponses, campaignContactId) => ({
+const mutations = {
+  updateQuestionResponses: ownProps => (
+    questionResponses,
+    campaignContactId
+  ) => ({
     mutation: gql`
       mutation updateQuestionResponses(
         $questionResponses: [QuestionResponseInput]
@@ -232,7 +237,10 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   }),
-  deleteQuestionResponses: (interactionStepIds, campaignContactId) => ({
+  deleteQuestionResponses: ownProps => (
+    interactionStepIds,
+    campaignContactId
+  ) => ({
     mutation: gql`
       mutation deleteQuestionResponses(
         $interactionStepIds: [String]
@@ -251,9 +259,9 @@ const mapMutationsToProps = () => ({
       campaignContactId
     }
   })
-});
+};
 
-export default connect({
-  mapQueriesToProps,
-  mapMutationsToProps
+export default withOperations({
+  queries,
+  mutations
 })(ManageSurveyResponsesWrapper);

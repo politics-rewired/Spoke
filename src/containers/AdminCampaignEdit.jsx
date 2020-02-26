@@ -1,38 +1,39 @@
 import PropTypes from "prop-types";
 import React from "react";
+import { compose } from "react-apollo";
+import gql from "graphql-tag";
 import queryString from "query-string";
 import isEqual from "lodash/isEqual";
 import moment from "moment";
 
+import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
+import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
+import Avatar from "material-ui/Avatar";
+import CircularProgress from "material-ui/CircularProgress";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import { red600 } from "material-ui/styles/colors";
 
-import Avatar from "material-ui/Avatar";
+import { withAuthzContext } from "../components/AuthzProvider";
+import { loadData } from "./hoc/with-operations";
+import { dataTest, camelCase } from "../lib/attributes";
 import theme from "../styles/theme";
-import CircularProgress from "material-ui/CircularProgress";
-import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
-import gql from "graphql-tag";
-import loadData from "./hoc/load-data";
-import wrapMutations from "./hoc/wrap-mutations";
-import RaisedButton from "material-ui/RaisedButton";
 import CampaignBasicsForm from "../components/CampaignBasicsForm";
 import CampaignContactsForm from "../components/CampaignContactsForm";
 import CampaignTextersForm from "../components/CampaignTextersForm";
 import CampaignOverlapManager from "../components/CampaignOverlapManager";
 import CampaignInteractionStepsForm from "../components/CampaignInteractionStepsForm";
 import CampaignCannedResponsesForm from "../components/CampaignCannedResponsesForm";
-import { dataTest, camelCase } from "../lib/attributes";
 import CampaignTextingHoursForm from "../components/CampaignTextingHoursForm";
 import CampaignAutoassignModeForm from "../components/CampaignAutoassignModeForm";
 import CampaignTeamsForm from "../components/CampaignTeamsForm";
-import { withAuthzContext } from "../components/AuthzProvider";
 
 const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
 
+// TODO: replace with Fragment
 const campaignInfoFragment = `
   id
   title
@@ -857,7 +858,7 @@ AdminCampaignEdit.propTypes = {
   availableActionsData: PropTypes.object
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   pendingJobsData: {
     query: gql`
       query getCampaignJobs($campaignId: String!) {
@@ -873,10 +874,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.match.params.campaignId
-    },
-    pollInterval: 60000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.match.params.campaignId
+      },
+      fetchPolicy: "cache-and-network",
+      pollInterval: 60000
+    })
   },
   campaignData: {
     query: gql`query getCampaign($campaignId: String!) {
@@ -884,10 +888,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
         ${campaignInfoFragment}
       }
     }`,
-    variables: {
-      campaignId: ownProps.match.params.campaignId
-    },
-    pollInterval: 60000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.match.params.campaignId
+      },
+      fetchPolicy: "cache-and-network",
+      pollInterval: 60000
+    })
   },
   organizationData: {
     query: gql`
@@ -922,10 +929,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    },
-    pollInterval: 20000
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      },
+      pollInterval: 20000
+    })
   },
   availableActionsData: {
     query: gql`
@@ -937,16 +946,18 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    },
-    forceFetch: true
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      },
+      fetchPolicy: "network-only"
+    })
   }
-});
+};
 
 // Right now we are copying the result fields instead of using a fragment because of https://github.com/apollostack/apollo-client/issues/451
-const mapMutationsToProps = ({ ownProps }) => ({
-  archiveCampaign: campaignId => ({
+const mutations = {
+  archiveCampaign: ownProps => campaignId => ({
     mutation: gql`mutation archiveCampaign($campaignId: String!) {
           archiveCampaign(id: $campaignId) {
             ${campaignInfoFragment}
@@ -954,7 +965,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
         }`,
     variables: { campaignId }
   }),
-  unarchiveCampaign: campaignId => ({
+  unarchiveCampaign: ownProps => campaignId => ({
     mutation: gql`mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
           ${campaignInfoFragment}
@@ -962,7 +973,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }`,
     variables: { campaignId }
   }),
-  startCampaign: campaignId => ({
+  startCampaign: ownProps => campaignId => ({
     mutation: gql`mutation startCampaign($campaignId: String!) {
         startCampaign(id: $campaignId) {
           ${campaignInfoFragment}
@@ -970,7 +981,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       }`,
     variables: { campaignId }
   }),
-  editCampaign: (campaignId, campaign) => ({
+  editCampaign: ownProps => (campaignId, campaign) => ({
     mutation: gql`
       mutation editCampaign($campaignId: String!, $campaign: CampaignInput!) {
         editCampaign(id: $campaignId, campaign: $campaign) {
@@ -983,7 +994,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
       campaign
     }
   }),
-  deleteJob: jobId => ({
+  deleteJob: ownProps => jobId => ({
     mutation: gql`
       mutation deleteJob($campaignId: String!, $id: String!) {
         deleteJob(campaignId: $campaignId, id: $id) {
@@ -996,9 +1007,12 @@ const mapMutationsToProps = ({ ownProps }) => ({
       id: jobId
     }
   })
-});
+};
 
-export default loadData(wrapMutations(withAuthzContext(AdminCampaignEdit)), {
-  mapQueriesToProps,
-  mapMutationsToProps
-});
+export default compose(
+  withAuthzContext,
+  loadData({
+    queries,
+    mutations
+  })
+)(AdminCampaignEdit);

@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 
 import LinearProgress from "material-ui/LinearProgress";
 
-import loadData from "../hoc/load-data";
+import { loadData } from "../hoc/with-operations";
 
 class TexterStats extends React.Component {
   renderAssignment(assignment) {
@@ -60,7 +60,7 @@ TexterStats.propTypes = {
   campaignId: PropTypes.string.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   data: {
     query: gql`
       query getCampaign(
@@ -83,14 +83,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId,
-      contactsFilter: {
-        messageStatus: "needsMessage"
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId,
+        contactsFilter: {
+          messageStatus: "needsMessage"
+        }
       }
-    }
-    // pollInterval: 5000
+      // pollInterval: 5000
+    })
   }
-});
+};
 
-export default loadData(TexterStats, { mapQueriesToProps });
+export default loadData({ queries })(TexterStats);

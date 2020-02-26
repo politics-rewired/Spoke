@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import React from "react";
 import gql from "graphql-tag";
-import { connect } from "react-apollo";
 import { StyleSheet, css } from "aphrodite";
 
+import { withQueries } from "../hoc/with-operations";
 import theme from "../../styles/theme";
 import CampaignStat from "./CampaignStat";
 
@@ -95,7 +95,7 @@ TopLineStats.propTypes = {
   campaignId: PropTypes.string.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   contactsCount: {
     query: gql`
       query getCampaign($campaignId: String!) {
@@ -105,10 +105,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId
-    }
-    // pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+      // pollInterval: 5000
+    })
   },
   assignments: {
     query: gql`
@@ -121,10 +123,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId
-    }
-    // pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+      // pollInterval: 5000
+    })
   },
   sentMessagesCount: {
     query: gql`
@@ -137,10 +141,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId
-    }
-    // pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+      // pollInterval: 5000
+    })
   },
   receivedMessagesCount: {
     query: gql`
@@ -153,10 +159,12 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId
-    }
-    // pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+      // pollInterval: 5000
+    })
   },
   optOutsCount: {
     query: gql`
@@ -169,11 +177,13 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      campaignId: ownProps.campaignId
-    }
-    // pollInterval: 5000
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+      // pollInterval: 5000
+    })
   }
-});
+};
 
-export default connect({ mapQueriesToProps })(TopLineStats);
+export default withQueries(queries)(TopLineStats);

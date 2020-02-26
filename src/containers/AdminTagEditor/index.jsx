@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
-import { connect } from "react-apollo";
 import pick from "lodash/pick";
 
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -11,6 +10,7 @@ import Toggle from "material-ui/Toggle";
 import FlatButton from "material-ui/FlatButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 
+import { withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import TagEditorList from "./TagEditorList";
 import theme from "../../styles/theme";
@@ -175,7 +175,7 @@ AdminTagEditor.propTypes = {
   match: PropTypes.object.isRequired
 };
 
-const mapQueriesToProps = ({ ownProps }) => ({
+const queries = {
   organizationTags: {
     query: gql`
       query getOrganizationTags($organizationId: String!) {
@@ -192,14 +192,16 @@ const mapQueriesToProps = ({ ownProps }) => ({
         }
       }
     `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId
-    }
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
+      }
+    })
   }
-});
+};
 
-const mapMutationsToProps = ({ ownProps }) => ({
-  saveTag: tag => ({
+const mutations = {
+  saveTag: ownProps => tag => ({
     mutation: gql`
       mutation saveTag($organizationId: String!, $tag: TagInput!) {
         saveTag(organizationId: $organizationId, tag: $tag) {
@@ -213,7 +215,7 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getOrganizationTags"]
   }),
-  deleteTag: tagId => ({
+  deleteTag: ownProps => tagId => ({
     mutation: gql`
       mutation deleteTag($organizationId: String!, $tagId: String!) {
         deleteTag(organizationId: $organizationId, tagId: $tagId)
@@ -225,9 +227,9 @@ const mapMutationsToProps = ({ ownProps }) => ({
     },
     refetchQueries: ["getOrganizationTags"]
   })
-});
+};
 
-export default connect({
-  mapQueriesToProps,
-  mapMutationsToProps
+export default withOperations({
+  queries,
+  mutations
 })(AdminTagEditor);
