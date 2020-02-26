@@ -149,15 +149,7 @@ class AssignmentTexter extends React.Component {
           return getAssignmentContacts;
         })
         .then(getAssignmentContacts => {
-          console.log(
-            "TCL: AssignmentTexter -> getContactData -> getAssignmentContacts",
-            getAssignmentContacts
-          );
           const foldIn = (contactCache, newContact) => {
-            console.log(
-              "TCL: AssignmentTexter -> foldIn -> newContact",
-              newContact
-            );
             contactCache[newContact.id] = newContact;
             return contactCache;
           };
