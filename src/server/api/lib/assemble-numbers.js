@@ -284,15 +284,15 @@ const convertInboundMessage = async assembleMessage => {
   }
 
   const spokeMessage = {
-    campaign_contact_id: ccInfo && ccInfo.campaign_contact_id,
-    campaign_id: ccInfo && ccInfo.campaign_id,
+    campaign_contact_id: ccInfo.campaign_contact_id,
+    campaign_id: ccInfo.campaign_id,
     contact_number: contactNumber,
     user_number: userNumber,
     is_from_contact: true,
     text: formatInboundBody(body, numMedia),
     service_response: JSON.stringify([assembleMessage]).replace(/\0/g, ""),
     service_id: serviceId,
-    assignment_id: ccInfo && ccInfo.assignment_id,
+    assignment_id: ccInfo.assignment_id,
     service: "assemble-numbers",
     send_status: SpokeSendStatus.Delivered
   };

@@ -88,15 +88,15 @@ async function convertMessagePartsToMessage(messageParts) {
 
   return (
     ccInfo && {
-      campaign_contact_id: ccInfo && ccInfo.campaign_contact_id,
-      campaign_id: ccInfo && ccInfo.campaign_id,
+      campaign_contact_id: ccInfo.campaign_contact_id,
+      campaign_id: ccInfo.campaign_id,
       contact_number: contactNumber,
       user_number: userNumber,
       is_from_contact: true,
       text: textIncludingMms(text, serviceMessages),
       service_response: JSON.stringify(serviceMessages).replace(/\0/g, ""),
       service_id: serviceMessages[0].MessagingServiceSid,
-      assignment_id: ccInfo && ccInfo.assignment_id,
+      assignment_id: ccInfo.assignment_id,
       service: "twilio",
       send_status: "DELIVERED"
     }
