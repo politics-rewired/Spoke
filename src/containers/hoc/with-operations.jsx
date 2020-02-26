@@ -2,6 +2,8 @@ import React from "react";
 import { graphql, compose, withApollo } from "react-apollo";
 import { withProps, branch, renderComponent } from "recompose";
 
+import { Card, CardHeader, CardText } from "material-ui/Card";
+
 import LoadingIndicator from "../../components/LoadingIndicator";
 
 /**
@@ -65,6 +67,15 @@ export const withOperations = options => {
   );
 };
 
+const PrettyErrors = ({ errors }) => (
+  <Card style={{ margin: "10px" }}>
+    <CardHeader title="Encountered errors" />
+    <CardText>
+      <ul>{errors.map((err, index) => <li key={index}>{err.message}</li>)}</ul>
+    </CardText>
+  </Card>
+);
+
 /**
  * Similar to {@link withOperations}, but shows a loading indicator if any of the queries are loading.
  *
@@ -75,8 +86,5 @@ export const loadData = options =>
   compose(
     withOperations(options),
     branch(({ loading }) => loading, renderComponent(LoadingIndicator)),
-    branch(
-      ({ errors }) => errors.length > 0,
-      ({ errors }) => <div>{errors.map(err => JSON.stringify(err))}</div>
-    )
+    branch(({ errors }) => errors.length > 0, renderComponent(PrettyErrors))
   );
