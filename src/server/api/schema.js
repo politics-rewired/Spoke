@@ -1515,7 +1515,11 @@ const rootMutations = {
       { loaders, user }
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
-      await assignmentRequired(user, contact.assignment_id);
+      await assignmentRequired(
+        user,
+        contact.assignment_id,
+        contact.campaign_id
+      );
       const [campaign] = await r
         .knex("campaign_contact")
         .update({ message_status: messageStatus })
@@ -1530,7 +1534,7 @@ const rootMutations = {
       { loaders, user }
     ) => {
       const [campaignId, actualAssignmentId] = parseIdentifier(assignmentId);
-      await assignmentRequired(user, actualAssignmentId);
+      await assignmentRequired(user, actualAssignmentId, campaignId);
 
       const extractedContactIds = contactIds
         .map(parseIdentifier)
@@ -1717,29 +1721,45 @@ const rootMutations = {
       }
     },
     tagConversation: async (_, { campaignContactId, tag }, { user }) => {
+      const [campaignId, contactId] = parseIdentifier(campaignContactId);
+
       const campaignContact = await r
         .knex("campaign_contact")
         .join("campaign", "campaign.id", "campaign_contact.campaign_id")
-        .where({ "campaign_contact.id": campaignContactId })
+        .where({
+          "campaign_contact.id": contactId,
+          "campaign_contact.campaign_id": campaignId
+        })
         .first(["campaign_contact.*", "campaign.organization_id"]);
+
       try {
-        await assignmentRequired(user, campaignContact.assignment_id);
+        await assignmentRequired(
+          user,
+          campaignContact.assignment_id,
+          campaignContact.campaign_id
+        );
       } catch (err) {
         accessRequired(user, campaignContact.organization_id, "SUPERVOLUNTEER");
       }
 
       const { addedTagIds, removedTagIds } = tag;
       const tagsToInsert = addedTagIds.map(tagId => ({
-        campaign_contact_id: campaignContactId,
+        campaign_contact_id: contactId,
+        campaign_id: campaignContact.campaign_id,
         tag_id: tagId,
         tagger_id: user.id
       }));
+
       const [deleteResult, insertResult] = await Promise.all([
         await r
           .knex("campaign_contact_tag")
-          .where({ campaign_contact_id: parseInt(campaignContactId) })
+          .where({
+            campaign_contact_id: parseInt(contactId),
+            campaign_id: campaignContact.campaign_id
+          })
           .whereIn("tag_id", removedTagIds)
           .del(),
+
         await r.knex("campaign_contact_tag").insert(tagsToInsert)
       ]);
 
@@ -1783,7 +1803,10 @@ const rootMutations = {
         await r
           .knex("campaign_contact")
           .update({ assignment_id: null })
-          .where({ id: parseInt(campaignContactId) });
+          .where({
+            id: parseInt(contactId),
+            campaign_id: campaignContact.campaign_id
+          });
       }
 
       return campaignContact;
@@ -1806,7 +1829,7 @@ const rootMutations = {
       }
 
       try {
-        await assignmentRequired(user, contact.assignment_id);
+        await assignmentRequired(user, contact.assignment_id, campaignId);
       } catch (error) {
         await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       }
@@ -2004,7 +2027,7 @@ const rootMutations = {
       const contact = await loaders.campaignContact.load(campaignContactId);
 
       try {
-        await assignmentRequired(user, contact.assignment_id);
+        await assignmentRequired(user, contact.assignment_id, campaignId);
       } catch (error) {
         const campaign = await r
           .knex("campaign")

@@ -50,7 +50,7 @@ export async function accessRequired(
   }
 }
 
-export async function assignmentRequired(user, assignmentId) {
+export async function assignmentRequired(user, assignmentId, campaignid) {
   authRequired(user);
 
   if (user.is_superadmin) {
@@ -61,7 +61,8 @@ export async function assignmentRequired(user, assignmentId) {
     .reader("assignment")
     .where({
       user_id: user.id,
-      id: assignmentId
+      id: assignmentId,
+      campaign_id: campaignId
     })
     .limit(1);
 
