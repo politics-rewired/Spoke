@@ -1,5 +1,9 @@
 const DELIMITER = "-";
 
+export const joinIdentifier = (campaignId, id) => {
+  return [campaignId, id].join("-");
+};
+
 export const parseIdentifier = identifier => {
   if (typeof identifier === "string") {
     const split = identifier.split(DELIMITER);
@@ -32,5 +36,3 @@ export const filterUndefinedObject = obj => {
     {}
   );
 };
-
-// export const getJoinFunction = (identifier)

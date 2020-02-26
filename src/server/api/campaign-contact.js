@@ -3,6 +3,7 @@ import { r, cacheableData } from "../models";
 import { sqlResolvers, getTzOffset } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
+import { joinIdentifier } from "../lib/partition-id-helpers";
 import { config } from "../../config";
 
 const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
@@ -15,11 +16,12 @@ export const resolvers = {
   CampaignContact: {
     ...sqlResolvers(["firstName", "zip", "customFields", "messageStatus"]),
     id: async campaignContact => {
-      return [campaignContact.campaign_id, campaignContact.id].join("-");
+      return joinIdentifier(campaignContact.campaign_id, campaignContact.id);
     },
     assignmentId: async campaignContact => {
-      return [campaignContact.campaign_id, campaignContact.assignment_id].join(
-        "-"
+      return joinIdentifier(
+        campaignContact.campaign_id,
+        campaignContact.assignment_id
       );
     },
     lastName: async campaignContact => {

@@ -1,4 +1,5 @@
 import { sqlResolvers } from "./lib/utils";
+import { joinIdentifier } from "../lib/partition-id-helpers";
 
 export const resolvers = {
   Message: {
@@ -14,7 +15,7 @@ export const resolvers = {
       "createdAt"
     ]),
     id: async message => {
-      return [message.campaign_id, message.id].join("-");
+      return joinIdentifier(message.campaign_id, message.id);
     }
   }
 };

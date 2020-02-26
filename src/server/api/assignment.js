@@ -10,6 +10,7 @@ import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
 import { eventBus, EventType } from "../event-bus";
 import { memoizer, cacheOpts } from "../memoredis";
+import { joinIdentifier } from "../lib/partition-id-helpers";
 import kue from "kue";
 
 export const assignmentQueue =
@@ -1175,7 +1176,7 @@ export const resolvers = {
   Assignment: {
     ...sqlResolvers(["maxContacts"]),
     id: async assignment => {
-      return [assignment.campaign_id, assignment.id].join("-");
+      return joinIdentifier(cssignment.campaign_id, assignment.id);
     },
     texter: async (assignment, _, { loaders }) =>
       assignment.texter
