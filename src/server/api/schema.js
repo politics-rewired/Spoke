@@ -412,12 +412,12 @@ const persistInteractionStepTree = async (
   } else if (!origCampaignRecord.is_started && rootInteractionStep.isDeleted) {
     // Hard delete interaction steps if the campaign hasn't started
     await knexTrx("interaction_step")
-      .where({ id: rootInteractionStep.id })
+      .where({ id: rootInteractionStep.id, campaign_id: origCampaignRecord.id })
       .delete();
   } else {
     // Update the interaction step record
     await knexTrx("interaction_step")
-      .where({ id: rootInteractionStep.id })
+      .where({ id: rootInteractionStep.id, campaign_id: origCampaignRecord.id })
       .update({
         question: rootInteractionStep.questionText,
         script_options: rootInteractionStep.scriptOptions,
@@ -1375,7 +1375,7 @@ const rootMutations = {
             .knex("interaction_step")
             .transacting(trx)
             .update({ script_options })
-            .where({ id: step.id });
+            .where({ id: step.id, campaign_id: step.campaign_id });
         }
 
         return scriptUpdates;
@@ -1590,11 +1590,17 @@ const rootMutations = {
       const questionResponses = shouldFetchTagsAndQuestionResponses
         ? await r
             .knex("question_response")
-            .join(
-              "interaction_step as istep",
-              "question_response.interaction_step_id",
-              "istep.id"
-            )
+            .join("interaction_step as istep", function() {
+              this.on(
+                "question_response.interaction_step_id",
+                "=",
+                "istep.id"
+              ).andOn(
+                "question_response.campaign_id",
+                "=",
+                "istep.campaign_id"
+              );
+            })
             .whereIn(
               "question_response.campaign_contact_id",
               extractedContactIds
@@ -2083,6 +2089,7 @@ const rootMutations = {
           .knex("interaction_step")
           // TODO: is this really parent_interaction_id or just interaction_id?
           .where({
+            campaign_id: campaignId,
             parent_interaction_id: interactionStepId,
             answer_option: value
           })

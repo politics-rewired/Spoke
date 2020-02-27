@@ -41,7 +41,7 @@ export const resolvers = {
           return await r
             .reader("interaction_step")
             .first("*")
-            .where({ id: interactionStepId });
+            .where({ id: interactionStepId, campaign_id: answer.campaign_id });
         },
         cacheOpts.InteractionStepSingleton
       );
@@ -53,11 +53,17 @@ export const resolvers = {
     responders: async answer =>
       r
         .reader("question_response")
-        .join(
-          "campaign_contact",
-          "campaign_contact.id",
-          "question_response.campaign_contact_id"
-        )
+        .join("campaign_contact", function() {
+          this.on(
+            "campaign_contact.id",
+            "=",
+            "question_response.campaign_contact_id"
+          ).andOn(
+            "campaign_contact.campaign_id",
+            "=",
+            "question_response.campaign_id"
+          );
+        })
         .where({
           interaction_step_id: answer.parent_interaction_step,
           value: answer.value
@@ -66,11 +72,17 @@ export const resolvers = {
       r.parseCount(
         r
           .reader("question_response")
-          .join(
-            "campaign_contact",
-            "campaign_contact.id",
-            "question_response.campaign_contact_id"
-          )
+          .join("campaign_contact", function() {
+            this.on(
+              "campaign_contact.id",
+              "=",
+              "question_response.campaign_contact_id"
+            ).andOn(
+              "campaign_contact.campaign_id",
+              "=",
+              "question_response.campaign_id"
+            );
+          })
           .where({
             interaction_step_id: answer.parent_interaction_step,
             value: answer.value

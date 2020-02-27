@@ -81,11 +81,13 @@ export const resolvers = {
 
       const qr_results = await r
         .reader("question_response")
-        .join(
-          "interaction_step as istep",
-          "question_response.interaction_step_id",
-          "istep.id"
-        )
+        .join("interaction_step as istep", function() {
+          this.on(
+            "question_response.interaction_step_id",
+            "=",
+            "istep.id"
+          ).andOn("question_response.campaign_id", "=", "istep.campaign_id");
+        })
         .where("question_response.campaign_contact_id", campaignContact.id)
         .select(
           "value",
@@ -111,16 +113,20 @@ export const resolvers = {
           "interaction_step.campaign_id": campaignContact.campaign_id,
           "child.campaign_id": campaignContact.campaign_id
         })
-        .join(
-          "interaction_step",
-          "qres.interaction_step_id",
-          "interaction_step.id"
-        )
-        .join(
-          "interaction_step as child",
-          "qres.interaction_step_id",
-          "child.parent_interaction_id"
-        )
+        .join("interaction_step", function() {
+          this.on("qres.interaction_step_id", "=", "interaction_step.id").andOn(
+            "qres.campaign_id",
+            "=",
+            "interaction_step.campaign_id"
+          );
+        })
+        .join("interaction_step as child", function() {
+          this.on(
+            "qres.interaction_step_id",
+            "=",
+            "child.parent_interaction_id"
+          ).andOn("qres.campaign_id", "=", "child.campaign_id");
+        })
         .select(
           "child.answer_option",
           "child.id",
