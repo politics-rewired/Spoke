@@ -178,8 +178,13 @@ export const resolvers = {
 
       const countQuery = r
         .reader("campaign_contact")
-        .join("assignment", "assignment.id", "campaign_contact.assignment_id")
-        .whereRaw("assignment.campaign_id = campaign_contact.campaign_id")
+        .join("assignment", function() {
+          this.on("assignment.id", "=", "campaign_contact.assignment_id").andOn(
+            "assignment.campaign_id",
+            "=",
+            "campaign_contact.campaign_id"
+          );
+        })
         .whereExists(subQuery)
         .count("*");
 

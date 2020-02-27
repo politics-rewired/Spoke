@@ -107,16 +107,21 @@ export const resolvers = {
         return await r.parseCount(
           r
             .reader("campaign_contact")
-            .join(
-              "message",
-              "message.campaign_contact_id",
-              "campaign_contact.id"
-            )
+            .join("message", function() {
+              this.on(
+                "message.campaign_contact_id",
+                "=",
+                "campaign_contact.id"
+              ).andOn(
+                "message.campaign_id",
+                "=",
+                "campaign_contact.campaign_id"
+              );
+            })
             .where({
               "campaign_contact.campaign_id": campaignId,
               "message.is_from_contact": false
             })
-            .whereRaw("message.campaign_id = campaign_contact.campaign_id")
             .count()
         );
       }, cacheOpts.CampaignSentMessagesCount);
@@ -129,16 +134,21 @@ export const resolvers = {
           return await r.parseCount(
             r
               .reader("campaign_contact")
-              .join(
-                "message",
-                "message.campaign_contact_id",
-                "campaign_contact.id"
-              )
+              .join("message", function() {
+                this.on(
+                  "message.campaign_contact_id",
+                  "=",
+                  "campaign_contact.id"
+                ).andOn(
+                  "message.campaign_id",
+                  "=",
+                  "campaign_contact.campaign_id"
+                );
+              })
               .where({
                 "campaign_contact.campaign_id": campaignId,
                 "message.is_from_contact": true
               })
-              .whereRaw("message.campaign_id = campaign_contact.campaign_id")
               .count()
           );
         },
