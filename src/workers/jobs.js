@@ -743,12 +743,14 @@ export async function assignTexters(job) {
   const currentAssignments = await r
     .knex("assignment")
     .where("assignment.campaign_id", cid)
-    .leftJoin(
-      "campaign_contact",
-      "campaign_contact.assignment_id",
-      "assignment.id"
-    )
-    .groupBy("user_id", "assignment.id")
+    .leftJoin("campaign_contact", function() {
+      this.on("campaign_contact.assignment_id", "=", "assignment.id").andOn(
+        "campaign_contact.campaign_id",
+        "=",
+        "assignment.campaign_id"
+      );
+    })
+    .groupBy("user_id", "assignment.id", "max_contacts")
     .select("user_id", "assignment.id as id", "max_contacts")
     .select(
       r.knex.raw(
@@ -1033,11 +1035,17 @@ export async function assignTexters(job) {
         const assignmentIds = await trx("assignment")
           .select("assignment.id as id")
           .where("assignment.campaign_id", cid)
-          .leftJoin(
-            "campaign_contact",
-            "assignment.id",
-            "campaign_contact.assignment_id"
-          )
+          .leftJoin("campaign_contact", function() {
+            this.on(
+              "assignment.id",
+              "=",
+              "campaign_contact.assignment_id"
+            ).andOn(
+              "assignment.campaign_id",
+              "=",
+              "campaign_contact.campaign_id"
+            );
+          })
           .groupBy("assignment.id")
           .havingRaw("COUNT(campaign_contact.id) = 0")
           .map(result => result.id);
