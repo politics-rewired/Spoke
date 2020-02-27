@@ -39,7 +39,6 @@ const Navigation = function Navigation(props) {
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <FlatButton label={"Close Menu"} onClick={props.onToggleMenu} />
           </div>
-
           <List>
             {sections.map(section => (
               <ListItem

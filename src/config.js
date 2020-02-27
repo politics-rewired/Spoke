@@ -313,6 +313,11 @@ if (isClient()) {
       default: "false",
       isClient: true
     }),
+    DISABLE_SIDEBAR_BADGES: bool({
+      desc: "Whether to disable showing the badge counts on the admin sidebar.",
+      default: "false",
+      isClient: true
+    }),
     EMAIL_FROM: email({
       desc:
         "Email from address. Required to send email from either Mailgun or a custom SMTP server.",

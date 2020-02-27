@@ -161,6 +161,8 @@ export const resolvers = {
       }));
     },
     escalatedConversationCount: async organization => {
+      if (config.DISABLE_SIDEBAR_BADGES) return 0;
+
       const subQuery = r.reader
         .select("campaign_contact_tag.campaign_contact_id")
         .from("campaign_contact_tag")
@@ -194,18 +196,18 @@ export const resolvers = {
 
       return numbersApiKey;
     },
-    pendingAssignmentRequestCount: async organization => {
-      const count = await r.parseCount(
-        r
-          .reader("assignment_request")
-          .count("*")
-          .where({
-            status: "pending",
-            organization_id: organization.id
-          })
-      );
-      return count;
-    },
+    pendingAssignmentRequestCount: async organization =>
+      config.DISABLE_SIDEBAR_BADGES
+        ? 0
+        : r.parseCount(
+            r
+              .reader("assignment_request")
+              .count("*")
+              .where({
+                status: "pending",
+                organization_id: organization.id
+              })
+          ),
     linkDomains: async organization => {
       const rawResult = await r.reader.raw(
         `
