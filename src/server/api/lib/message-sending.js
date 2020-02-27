@@ -156,17 +156,21 @@ export const assignMissingMessagingServices = async (
     `
       select
         distinct campaign_contact.cell,
-        get_messaging_service_type(campaign_contact.zip) as service_type
+        'assemble-numbers'::text as service_type
       from
-        messaging_service_stick
-        join messaging_service
-          on messaging_service.messaging_service_sid = messaging_service_stick.messaging_service_sid
+        (
+          select
+            messaging_service_stick.cell,
+            messaging_service_stick.organization_id,
+            messaging_service_stick.messaging_service_sid
+          from messaging_service_stick
+          where messaging_service_stick.organization_id = ?
+        ) as sticks
         right join campaign_contact
-          on messaging_service_stick.cell = campaign_contact.cell
-          and messaging_service_stick.organization_id = ?
+          on sticks.cell = campaign_contact.cell
       where
         campaign_contact.campaign_id = ?
-        and messaging_service_stick.messaging_service_sid is null
+        and sticks.messaging_service_sid is null
     `,
     [organizationId, campaignId]
   );
