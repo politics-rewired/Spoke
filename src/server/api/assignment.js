@@ -433,10 +433,31 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
         where assignment_type = 'UNSENT'
           and id = ANY(?)
       ),
+      my_teams_campaigns as (
+        select campaign_id
+        from campaign_team
+        where team_id = ANY(?)
+      ),
       needs_reply_teams as (
         select * from team
         where assignment_type = 'UNREPLIED'
           and id = ANY(?)
+      ),
+      needs_message_campaign_ids as (
+        select campaign_id, team_id
+        from campaign_team
+        where team_id in (
+          select id
+          from needs_message_teams
+        )
+      ),
+      needs_reply_campaign_ids as (
+        select campaign_id, team_id
+        from campaign_team
+        where team_id in (
+          select id
+          from needs_reply_teams
+        )
       ),
       needs_message_team_campaign_pairings as (
         select
@@ -448,11 +469,10 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_message_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_message as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in ( select campaign_id from needs_message_campaign_ids where team_id = teams.id )
           order by id asc
           limit 1
         )
@@ -467,11 +487,10 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_reply_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_reply as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in ( select campaign_id from needs_reply_campaign_ids where team_id = teams.id )
           order by id asc
           limit 1
         )
@@ -497,12 +516,7 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
               and (
                 campaigns.limit_assignment_to_teams = false
                 or
-                exists (
-                  select 1
-                  from campaign_team
-                  where campaign_team.team_id = teams.id
-                    and campaign_team.campaign_id = campaigns.id
-                )
+                campaigns.id in ( select campaign_id from my_teams_campaigns )
               )
             )
           order by id asc
@@ -535,7 +549,7 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
       select * from all_possible_team_assignments
       where enabled = true
       order by priority, id asc`,
-      [myTeamIds, myTeamIds, myEscalationTags, organizationId]
+      [myTeamIds, myTeamIds, myTeamIds, myEscalationTags, organizationId]
     );
 
     const results = teamToCampaigns.map(ttc =>
@@ -600,6 +614,11 @@ export async function myCurrentAssignmentTargets(
               and user_id = ?
           )         
       ),
+      my_teams_campaigns as (
+        select campaign_id
+        from campaign_team
+        where team_id in ( select id from team_assignment_options )
+      ),
       my_escalation_tags as (
         select array_agg(tag_id) as my_escalation_tags
         from team_escalation_tags
@@ -618,6 +637,22 @@ export async function myCurrentAssignmentTargets(
         select * from team_assignment_options
         where assignment_type = 'UNREPLIED'
       ),
+      needs_message_campaign_ids as (
+        select campaign_id, team_id
+        from campaign_team
+        where team_id in (
+          select id
+          from needs_message_teams
+        )
+      ),
+      needs_reply_campaign_ids as (
+        select campaign_id, team_id
+        from campaign_team
+        where team_id in (
+          select id
+          from needs_reply_teams
+        )
+      ),
       needs_message_team_campaign_pairings as (
         select
             teams.assignment_priority as priority,
@@ -628,11 +663,10 @@ export async function myCurrentAssignmentTargets(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_message_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_message as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in ( select campaign_id from needs_message_campaign_ids where team_id = teams.id )
           order by id asc
           limit 1
         )
@@ -647,11 +681,10 @@ export async function myCurrentAssignmentTargets(
             teams.max_request_count,
             campaign.id as id, campaign.title
         from needs_reply_teams as teams
-        join campaign_team on campaign_team.team_id = teams.id
         join campaign on campaign.id = (
           select id
           from assignable_campaigns_with_needs_reply as campaigns
-          where campaigns.id = campaign_team.campaign_id
+          where campaigns.id in ( select campaign_id from needs_reply_campaign_ids where team_id = teams.id )
           order by id asc
           limit 1
         )
@@ -678,12 +711,7 @@ export async function myCurrentAssignmentTargets(
               and (
                 campaigns.limit_assignment_to_teams = false
                 or
-                exists (
-                  select 1
-                  from campaign_team
-                  where campaign_team.team_id = teams.id
-                    and campaign_team.campaign_id = campaigns.id
-                )
+                campaigns.id in ( select campaign_id from my_teams_campaigns )
               )
             )
           order by id asc
