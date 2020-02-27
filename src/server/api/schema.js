@@ -614,6 +614,7 @@ async function sendMessage(
     text: replacedDomainsText,
     contact_number: contactNumber,
     user_number: "",
+    assignment_id: parsedAssignmentId,
     send_status: JOBS_SAME_PROCESS ? "SENDING" : "QUEUED",
     service: service_type,
     is_from_contact: false,
