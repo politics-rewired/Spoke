@@ -160,33 +160,72 @@ exports.up = function(knex) {
     `),
     knex.schema.raw(`
       drop function get_messaging_service_for_campaign_contact_in_organization;
+    `),
+    knex.schema.raw(`
+      create or replace view assignable_campaign_contacts as (
+        select
+          campaign_contact.id, campaign_contact.campaign_id,
+          campaign_contact.message_status, campaign.texting_hours_end,
+          campaign_contact.timezone::text as contact_timezone
+        from campaign_contact
+        join campaign on campaign_contact.campaign_id = campaign.id
+        where assignment_id is null
+          and is_opted_out = false
+          and archived = false
+          and not exists (
+            select 1
+            from campaign_contact_tag
+            join tag on campaign_contact_tag.tag_id = tag.id
+            where tag.is_assignable = false
+              and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+              and campaign_contact_tag.campaign_id = campaign_contact.campaign_id
+          )
+      );
+
+      create or replace view assignable_campaign_contacts_with_escalation_tags as (
+        select
+          campaign_contact.id,
+          campaign_contact.campaign_id,
+          campaign_contact.message_status,
+          campaign_contact.timezone::text as contact_timezone,
+          array_agg(tag.id) as applied_escalation_tags
+        from campaign_contact
+        join campaign_contact_tag on campaign_contact_tag.campaign_contact_id = campaign_contact.id
+          and campaign_contact_tag.campaign_id = campaign_contact.campaign_id
+        join tag on campaign_contact_tag.tag_id = tag.id
+        where assignment_id is null
+          and is_opted_out = false
+          and tag.is_assignable = false
+        group by 1, 2, 3, 4
+      );
     `)
   ]);
 };
 
 exports.down = function(knex) {
-  return Promise.all([
-    knex.schema.alterTable("message", table => {
-      table.dropColumn("campaign_id");
-    }),
-    knex.schema.alterTable("all_question_response", table => {
-      table.dropColumn("campaign_id");
-    }),
-    knex.schema.alterTable("opt_out", table => {
-      table.dropColumn("campaign_id");
-    }),
-    knex.schema.dropTable("sent_message"),
-    knex.schema.raw(`
+  return (
+    Promise.all([
+      knex.schema.alterTable("message", table => {
+        table.dropColumn("campaign_id");
+      }),
+      knex.schema.alterTable("all_question_response", table => {
+        table.dropColumn("campaign_id");
+      }),
+      knex.schema.alterTable("opt_out", table => {
+        table.dropColumn("campaign_id");
+      }),
+      knex.schema.dropTable("sent_message"),
+      knex.schema.raw(`
       drop view question_response;
       create view question_response as
         select *
         from all_question_response
         where all_question_response.is_deleted = false;
     `),
-    knex.schema.raw(
-      `drop function get_messaging_service_for_cell_in_organization`
-    ),
-    knex.schema.raw(`
+      knex.schema.raw(
+        `drop function get_messaging_service_for_cell_in_organization`
+      ),
+      knex.schema.raw(`
       create function get_messaging_service_for_campaign_contact_in_organization(campaign_contact_id integer, organization_id integer)
       returns messaging_service
       as $$
@@ -206,5 +245,52 @@ exports.down = function(knex) {
         )
       $$ language sql strict stable;
     `)
-  ]);
+    ]),
+    knex.schema.raw(`
+    create or replace view assignable_campaign_contacts as (
+        select
+          campaign_contact.id, campaign_contact.campaign_id,
+          campaign_contact.message_status, campaign.texting_hours_end,
+          campaign_contact.timezone::text as contact_timezone
+        from campaign_contact
+        join campaign on campaign_contact.campaign_id = campaign.id
+        where assignment_id is null
+          and is_opted_out = false
+          and archived = false
+          and not exists (
+            select 1
+            from campaign_contact_tag
+            join tag on campaign_contact_tag.tag_id = tag.id
+            where tag.is_assignable = false
+              and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+          )
+    );
+
+    create or replace view assignable_campaign_contacts_with_escalation_tags as (
+      select
+        campaign_contact.id,
+        campaign_contact.campaign_id,
+        campaign_contact.message_status,
+        campaign_contact.timezone::text as contact_timezone,
+        (
+          select array_agg(tag.id)
+          from campaign_contact_tag
+          join tag on campaign_contact_tag.tag_id = tag.id
+          where campaign_contact_tag.campaign_contact_id = campaign_contact.id
+          and tag.is_assignable = false
+        )  as applied_escalation_tags
+      from campaign_contact
+      where assignment_id is null
+        and is_opted_out = false
+        and archived = false
+        and exists (
+          select 1
+          from campaign_contact_tag
+          join tag on campaign_contact_tag.tag_id = tag.id
+          where tag.is_assignable = false
+            and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+        )
+    );
+  `)
+  );
 };
