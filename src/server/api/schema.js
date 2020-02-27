@@ -459,21 +459,22 @@ async function sendMessage(
 ) {
   const [campaignId, contactId] = parseIdentifier(campaignContactId);
 
-  // Scope opt-outs to organization if we are not sharing across all organizations
-  const optOutCondition = !config.OPTOUTS_SHARE_ALL_ORGS
-    ? "and opt_out.organization_id = campaign.organization_id"
-    : "";
-
   const record = await r
     .knex("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
+    .leftJoin("assignment", function() {
+      this.on("campaign_contact.assignment_id", "=", "assignment.id").andOn(
+        "campaign_contact.campaign_id",
+        "=",
+        "assignment.campaign_id"
+      );
+    })
     .where({
       "campaign_contact.id": contactId,
       "campaign_contact.campaign_id": campaignId
     })
     .whereRaw("campaign_contact.archived = false")
     .where({ "campaign.is_archived": false })
-    .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
     .first(
       "campaign_contact.id as cc_id",
       "campaign_contact.assignment_id as assignment_id",
@@ -485,17 +486,23 @@ async function sendMessage(
       "campaign.texting_hours_start as c_texting_hours_start",
       "campaign.texting_hours_end as c_texting_hours_end",
       "assignment.user_id as a_assignment_user_id",
-      r.knex.raw(
-        `exists (
-          select 1
-          from opt_out
-          where
-            opt_out.cell = campaign_contact.cell
-              ${optOutCondition}
-        ) as is_opted_out`
-      ),
       "campaign_contact.timezone as contact_timezone"
     );
+
+  // Scope opt-outs to organization if we are not sharing across all organizations
+  const optOutCondition = !config.OPTOUTS_SHARE_ALL_ORGS
+    ? { "opt_out.organization_id": record.organization_id }
+    : {};
+
+  // We have to do this in a separate query :(
+  const isOptedOut = await r
+    .knex("opt_out")
+    .where({
+      cell: message.contactNumber,
+      ...optOutCondition
+    })
+    .first("id")
+    .then(optOut => optOut !== undefined);
 
   // If the conversation is unassigned, create an assignment. This assignment will be applied to
   // the message only, and not the campaign contact. We don't use message.assignment_id and the
@@ -529,8 +536,9 @@ async function sendMessage(
     message.assignmentId = record.assignment_id;
   }
 
+  const [_, parsedAssignmentId] = parseIdentifier(message.assignmentId);
   const assignmentIdsMatch =
-    record.assignment_id === parseInt(message.assignmentId);
+    record.assignment_id === parseInt(parsedAssignmentId);
   if (checkAssignment && !assignmentIdsMatch) {
     throw new GraphQLError("Your assignment has changed");
   }
@@ -556,7 +564,7 @@ async function sendMessage(
     }
   }
 
-  if (checkOptOut && !!record.is_opted_out) {
+  if (checkOptOut && isOptedOut) {
     throw new GraphQLError(
       "Skipped sending because this contact was already opted out"
     );
