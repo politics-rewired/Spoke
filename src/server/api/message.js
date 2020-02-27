@@ -1,5 +1,5 @@
 import { sqlResolvers } from "./lib/utils";
-import { joinIdentifier } from "../lib/partition-id-helpers";
+import { joinIdentifier } from "./lib/partition-id-helpers";
 
 export const resolvers = {
   Message: {

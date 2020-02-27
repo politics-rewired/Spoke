@@ -50,7 +50,7 @@ export async function accessRequired(
   }
 }
 
-export async function assignmentRequired(user, assignmentId, campaignid) {
+export async function assignmentRequired(user, assignmentId, campaignId) {
   authRequired(user);
 
   if (user.is_superadmin) {

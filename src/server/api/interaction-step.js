@@ -1,6 +1,6 @@
 import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
-import { parseIdentifier } from "./lib/partition-id-helpers";
+import { parseIdentifier, joinIdentifier } from "./lib/partition-id-helpers";
 
 export const resolvers = {
   InteractionStep: {

@@ -3,7 +3,7 @@ import { r, cacheableData } from "../models";
 import { sqlResolvers, getTzOffset } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
-import { joinIdentifier } from "../lib/partition-id-helpers";
+import { joinIdentifier } from "./lib/partition-id-helpers";
 import { config } from "../../config";
 
 const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
@@ -105,7 +105,12 @@ export const resolvers = {
     questionResponses: async (campaignContact, _, { loaders }) => {
       const results = await r
         .reader("question_response as qres")
-        .where("qres.campaign_contact_id", campaignContact.id)
+        .where({
+          "qres.campaign_contact_id": campaignContact.id,
+          "qres.campaign_id": campaignContact.campaign_id,
+          "interaction_step.campaign_id": campaignContact.campaign_id,
+          "child.campaign_id": campaignContact.campaign_id
+        })
         .join(
           "interaction_step",
           "qres.interaction_step_id",

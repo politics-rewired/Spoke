@@ -11,6 +11,7 @@ export const resolvers = {
             .reader("interaction_step")
             .select("*")
             .where({
+              campaign_id: interactionStep.campaign_id,
               parent_interaction_id: interactionStepId,
               is_deleted: false
             })
@@ -20,7 +21,8 @@ export const resolvers = {
             value: answerOption.answer_option,
             action: answerOption.answer_actions,
             interaction_step_id: answerOption.id,
-            parent_interaction_step: answerOption.parent_interaction_id
+            parent_interaction_step: answerOption.parent_interaction_id,
+            campaign_id: answerOption.campaign_id
           }));
         },
         cacheOpts.InteractionStepChildren
