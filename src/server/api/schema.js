@@ -1481,7 +1481,7 @@ const rootMutations = {
             id: parseInt(inviteId)
           });
 
-        await trx("tag").insert({
+        await trx("all_tag").insert({
           organization_id: newOrganization.id,
           title: "Escalated",
           description:
@@ -3004,7 +3004,7 @@ const rootMutations = {
 
       // Create new tag
       const [newTag] = await r
-        .knex("tag")
+        .knex("all_tag")
         .insert({
           organization_id: organizationId,
           author_id: user.id,
@@ -3028,13 +3028,14 @@ const rootMutations = {
       await accessRequired(user, organizationId, "ADMIN");
 
       const deleteCount = await r
-        .knex("tag")
+        .knex("all_tag")
         .where({
           id: tagId,
           organization_id: organizationId,
           is_system: false
         })
-        .del();
+        .update({ deleted_at: knex.fn.now() });
+
       if (deleteCount !== 1) throw new Error("Could not delete the tag.");
 
       memoizer.invalidate(cacheOpts.OrganizationTagList.key, {

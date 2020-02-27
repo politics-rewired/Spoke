@@ -18,7 +18,13 @@ async function getConversationsJoinsAndWhereClause(
   let query = queryParam
     .from("campaign")
     .join("campaign_contact", "campaign.id", "campaign_contact.campaign_id")
-    .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
+    .leftJoin("assignment", function() {
+      this.on("assignment.id", "=", "campaign_contact.assignment_id").andOn(
+        "assignment.campaign_id",
+        "=",
+        "campaign_contact.campaign_id"
+      );
+    })
     .leftJoin("user", "assignment.user_id", "user.id")
     .where({ "campaign.organization_id": organizationId });
 
@@ -93,26 +99,27 @@ async function getConversationsJoinsAndWhereClause(
   );
 
   if (contactsFilter && "isOptedOut" in contactsFilter) {
-    const subQuery = r.reader
-      .select("cell")
-      .from("opt_out")
-      .whereRaw("opt_out.cell=campaign_contact.cell");
     if (contactsFilter.isOptedOut) {
-      query = query.whereExists(subQuery);
+      query = query.where({ "campaign_contact.is_opted_out": true });
     } else {
-      query = query.whereNotExists(subQuery);
+      query = query.where({ "campaign_contact.is_opted_out": false });
     }
   }
 
   if (tagsFilter) {
     if (tagsFilter.escalatedConvosOnly) {
       query = query
-        .join(
-          "campaign_contact_tag",
-          "campaign_contact_tag.campaign_contact_id",
-          "=",
-          "campaign_contact.id"
-        )
+        .join("campaign_contact_tag", function() {
+          this.on(
+            "campaign_contact_tag.campaign_contact_id",
+            "=",
+            "campaign_contact.id"
+          ).andOn(
+            "campaign_contact_tag.campaign_id",
+            "=",
+            "campaign_contact.campaign_id"
+          );
+        })
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
         .where({
           "tag.is_assignable": false,
@@ -133,6 +140,9 @@ async function getConversationsJoinsAndWhereClause(
           .whereRaw(
             "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
           )
+          .whereRaw(
+            "campaign_contact_tag.campaign_id = campaign_contact.campaign_id"
+          )
       );
     }
 
@@ -141,7 +151,10 @@ async function getConversationsJoinsAndWhereClause(
         .select("campaign_contact_tag.campaign_contact_id")
         .from("campaign_contact_tag")
         .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
-        .whereIn("tag.id", tagsFilter.specificTagIds);
+        .whereIn("tag.id", tagsFilter.specificTagIds)
+        .whereRaw(
+          "campaign_contact_tag.campaign_id = campaign_contact.campaign_id"
+        );
 
       query = query.whereIn("campaign_contact.id", specificTagIdsSubquery);
     }
@@ -190,10 +203,24 @@ export async function getConversations(
     contactNameFilter
   )).query;
 
-  offsetLimitQuery = offsetLimitQuery.leftJoin(
-    r.reader.raw(
-      "message on message.id = ( select id from message where campaign_contact_id = campaign_contact.id order by created_at desc limit 1 )"
-    )
+  // We only want one campaign contact per row despite potentially being multiple messages
+  // we can do that with a join to all and then a not exists that excludes everything but the last one
+  offsetLimitQuery = offsetLimitQuery.leftJoin("message", function() {
+    this.on("message.campaign_contact_id", "=", "campaign_contact.id").andOn(
+      "message.campaign_id",
+      "=",
+      "campaign_contact.campaign_id"
+    );
+  });
+
+  offsetLimitQuery = offsetLimitQuery.whereNotExists(
+    r
+      .reader("message as later_message")
+      .whereRaw(
+        "message.campaign_contact_id = later_message.campaign_contact_id"
+      )
+      .whereRaw("message.campaign_id = later_message.campaign_id")
+      .whereRaw("message.created_at < later_message.created_at")
   );
 
   offsetLimitQuery = offsetLimitQuery
@@ -250,18 +277,20 @@ export async function getConversations(
 
   query = query.whereIn("campaign_contact.id", ccIds);
 
-  query = query.leftJoin(
-    "message",
-    "message.campaign_contact_id",
-    "=",
-    "campaign_contact.id"
-  );
+  query = query.leftJoin("message", function() {
+    this.on("message.campaign_contact_id", "=", "campaign_contact.id").andOn(
+      "message.campaign_id",
+      "=",
+      "campaign_contact.campaign_id"
+    );
+  });
 
   // Sorting has already happened in Query 1 and will happen in the JS grouping below
   query = query.leftJoin("opt_out", table => {
     table
       .on("opt_out.organization_id", "=", "campaign.organization_id")
-      .andOn("campaign_contact.cell", "opt_out.cell");
+      .andOn("campaign_contact.cell", "opt_out.cell")
+      .andOn("opt_out.campaign_id", "=", "campaign_contact.campaign_id");
   });
 
   const conversationRows = await query;

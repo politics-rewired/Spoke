@@ -116,6 +116,7 @@ export const resolvers = {
               "campaign_contact.campaign_id": campaignId,
               "message.is_from_contact": false
             })
+            .whereRaw("message.campaign_id = campaign_contact.campaign_id")
             .count()
         );
       }, cacheOpts.CampaignSentMessagesCount);
@@ -137,6 +138,7 @@ export const resolvers = {
                 "campaign_contact.campaign_id": campaignId,
                 "message.is_from_contact": true
               })
+              .whereRaw("message.campaign_id = campaign_contact.campaign_id")
               .count()
           );
         },
@@ -314,6 +316,7 @@ export const resolvers = {
                   join tag on campaign_contact_tag.tag_id = tag.id
                   where tag.is_assignable = false
                     and campaign_contact_tag.campaign_contact_id = campaign_contact.id
+                    and campaign_contact_tag.campaign_id = campaign_contact.campaign_id
                 )
                 and is_opted_out = false
             ) as contact_exists
@@ -378,6 +381,9 @@ export const resolvers = {
             .whereRaw("lower(tag.title) = 'escalated'")
             .whereRaw(
               "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+            )
+            .whereRaw(
+              "campaign_contact_tag.campaign_id = campaign_contact.campaign_id"
             );
 
           contactsQuery = contactsQuery.whereNotExists(

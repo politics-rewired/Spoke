@@ -171,11 +171,15 @@ export const resolvers = {
         .whereRaw("lower(tag.title) = 'escalated'")
         .whereRaw(
           "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+        )
+        .whereRaw(
+          "campaign_contact_tag.campaign_id = campaign_contact.campaign_id"
         );
 
       const countQuery = r
         .reader("campaign_contact")
         .join("assignment", "assignment.id", "campaign_contact.assignment_id")
+        .whereRaw("assignment.campaign_id = campaign_contact.campaign_id")
         .whereExists(subQuery)
         .count("*");
 
