@@ -3237,7 +3237,7 @@ const rootMutations = {
         with campaign_and_assignment_ids_to_release_from as (
           select
             assignment.campaign_id,
-            id as assignment_id
+            assignment.id as assignment_id
           from assignment
           join campaign on assignment.campaign_id = campaign.id
           where user_id = ?
@@ -3245,7 +3245,7 @@ const rootMutations = {
         )
         update campaign_contact
         set assignment_id = null
-        where assignment_id in ( select assignment_id from campaign_and_assignmennt_ids_to_release_from )
+        where assignment_id in ( select assignment_id from campaign_and_assignment_ids_to_release_from )
           and campaign_id in ( select campaign_id from campaign_and_assignment_ids_to_release_from )
           and message_status = 'needsResponse'
           and archived = false
