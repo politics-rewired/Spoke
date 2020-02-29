@@ -757,6 +757,15 @@ export async function myCurrentAssignmentTarget(
 }
 
 async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
+  const doNotification = memoizer.memoize(
+    async ({ team }) =>
+      request
+        .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
+        .timeout(30000)
+        .send({ team }),
+    cacheOpts.AssignmentCompleteLock
+  );
+
   if (config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
     const assignmentTargets = await allCurrentAssignmentTargets(organizationId);
     const existingTeamIds = assignmentTargets.map(cat => cat.team_id);
@@ -772,12 +781,7 @@ async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
     }
 
     await Promise.all(
-      emptiedTeams.map(([_id, title]) =>
-        request
-          .post(config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL)
-          .timeout(30000)
-          .send({ team: title })
-      )
+      emptiedTeams.map(([_id, title]) => doNotification({ team: title }))
     );
   } else {
     logger.verbose(
