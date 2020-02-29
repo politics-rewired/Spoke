@@ -109,7 +109,6 @@ const queries = {
       variables: {
         campaignId: ownProps.campaignId
       }
-      // pollInterval: 5000
     })
   },
   assignments: {
@@ -127,7 +126,6 @@ const queries = {
       variables: {
         campaignId: ownProps.campaignId
       }
-      // pollInterval: 5000
     })
   },
   sentMessagesCount: {
@@ -145,7 +143,6 @@ const queries = {
       variables: {
         campaignId: ownProps.campaignId
       }
-      // pollInterval: 5000
     })
   },
   receivedMessagesCount: {
@@ -163,7 +160,6 @@ const queries = {
       variables: {
         campaignId: ownProps.campaignId
       }
-      // pollInterval: 5000
     })
   },
   optOutsCount: {
@@ -181,7 +177,6 @@ const queries = {
       variables: {
         campaignId: ownProps.campaignId
       }
-      // pollInterval: 5000
     })
   }
 };

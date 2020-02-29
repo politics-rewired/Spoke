@@ -297,8 +297,7 @@ const queries = {
     options: ownProps => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
-      },
-      pollInterval: 5000
+      }
     })
   }
 };

@@ -90,7 +90,6 @@ const queries = {
           messageStatus: "needsMessage"
         }
       }
-      // pollInterval: 5000
     })
   }
 };
