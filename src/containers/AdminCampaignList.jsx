@@ -335,7 +335,7 @@ const mutations = {
     `,
     variables: { campaign }
   }),
-  releaseAllUnhandledReplies: (
+  releaseAllUnhandledReplies: ownProps => (
     organizationId,
     ageInHours,
     releaseOnRestricted,
