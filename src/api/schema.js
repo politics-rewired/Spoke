@@ -123,6 +123,7 @@ const rootSchema = `
     introHtml: String
     useDynamicAssignment: Boolean
     contacts: [CampaignContactInput]
+    contactsFile: Upload
     filterOutLandlines: Boolean
     excludeCampaignIds: [Int]
     contactSql: String
@@ -335,6 +336,7 @@ export const schema = [
   rootSchema,
   userSchema,
   organizationSchema,
+  "scalar Upload",
   "scalar Date",
   "scalar JSON",
   "scalar Phone",

@@ -142,7 +142,7 @@ class AdminCampaignEdit extends React.Component {
     // when contacts are done on backend so that Contacts section
     // can be marked saved, but only when user is NOT editing Contacts
     if (campaignDataCopy.contactsCount > 0) {
-      const specialCases = ["contacts", "contactSql"];
+      const specialCases = ["contacts", "contactsFile", "contactSql"];
       specialCases.forEach(key => {
         if (expandedKeys.indexOf(key) === -1) {
           delete pushToFormValues[key];
@@ -371,6 +371,7 @@ class AdminCampaignEdit extends React.Component {
           "contacts",
           "contactsCount",
           "customFields",
+          "contactsFile",
           "contactSql",
           "excludeCampaignIds",
           "filterOutLandlines"
@@ -384,6 +385,8 @@ class AdminCampaignEdit extends React.Component {
           //   at the right moment (see componentWillReceiveProps)
           this.state.campaignFormValues.contactsCount > 0 &&
           this.state.campaignFormValues.hasOwnProperty("contacts") === false &&
+          this.state.campaignFormValues.hasOwnProperty("contactsFile") ===
+            false &&
           this.state.campaignFormValues.hasOwnProperty("contactSql") === false,
         blocksStarting: true,
         expandAfterCampaignStarts: false,

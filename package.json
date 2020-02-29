@@ -78,6 +78,7 @@
     "apollo-link-error": "^1.1.12",
     "apollo-link-http": "^1.5.16",
     "apollo-server-express": "^2.9.14",
+    "apollo-upload-client": "^12.1.0",
     "assemble-numbers-client": "^1.2.1",
     "auth0-js": "^9.9.1",
     "aws-sdk": "^2.6.3",

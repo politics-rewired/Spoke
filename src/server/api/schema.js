@@ -12,6 +12,7 @@ import _ from "lodash";
 import moment from "moment-timezone";
 import { organizationCache } from "../models/cacheable_queries/organization";
 
+import { processContactsFile } from "./lib/edit-campaign";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
@@ -200,6 +201,10 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     }
   });
 
+  if (campaign.hasOwnProperty("contactsFile")) {
+    campaign.contacts = await processContactsFile(campaign.contactsFile);
+  }
+
   if (campaign.hasOwnProperty("contacts") && campaign.contacts) {
     await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
     const contactsToSave = campaign.contacts.map(datum => {
@@ -212,7 +217,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         custom_fields: datum.customFields,
         message_status: "needsMessage",
         is_opted_out: false,
-        zip: datum.zip
+        zip: datum.zip || ""
       };
       modelData.campaign_id = id;
       return modelData;

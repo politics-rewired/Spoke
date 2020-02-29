@@ -23,6 +23,10 @@ addMockFunctionsToSchema({
 
 const server = new ApolloServer({
   schema: executableSchema,
+  uploads: {
+    maxFileSize: 50 * 1000 * 1000, // 50 MB
+    maxFiles: 20
+  },
   debug: !config.isProduction,
   introspection: !config.isProduction,
   playground: !config.isProduction,

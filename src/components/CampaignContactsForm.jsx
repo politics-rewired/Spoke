@@ -101,22 +101,8 @@ export default class CampaignContactsForm extends React.Component {
 
   handleUpload = event => {
     event.preventDefault();
-    const file = event.target.files[0];
-    this.setState({ uploading: true }, () => {
-      parseCSV(
-        file,
-        this.props.optOuts,
-        ({ contacts, customFields, validationStats, error }) => {
-          if (error) {
-            this.handleUploadError(error);
-          } else if (contacts.length === 0) {
-            this.handleUploadError("Upload at least one contact");
-          } else if (contacts.length > 0) {
-            this.handleUploadSuccess(validationStats, contacts, customFields);
-          }
-        }
-      );
-    });
+    const contactsFile = event.target.files[0];
+    this.props.onChange({ contactsFile });
   };
 
   handleUploadError(error) {
