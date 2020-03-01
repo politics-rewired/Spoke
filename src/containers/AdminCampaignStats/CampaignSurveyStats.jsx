@@ -97,7 +97,6 @@ const queries = {
       variables: {
         campaignId: ownProps.campaignId
       }
-      // pollInterval: 5000
     })
   }
 };

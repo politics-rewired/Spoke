@@ -200,8 +200,7 @@ const queries = {
     options: ({ match }) => ({
       variables: {
         organizationId: match.params.organizationId
-      },
-      pollInterval: 20000
+      }
     })
   }
 };

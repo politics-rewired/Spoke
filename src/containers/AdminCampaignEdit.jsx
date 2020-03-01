@@ -892,8 +892,7 @@ const queries = {
       variables: {
         campaignId: ownProps.match.params.campaignId
       },
-      fetchPolicy: "cache-and-network",
-      pollInterval: 60000
+      fetchPolicy: "cache-and-network"
     })
   },
   organizationData: {
@@ -932,8 +931,7 @@ const queries = {
     options: ownProps => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
-      },
-      pollInterval: 20000
+      }
     })
   },
   availableActionsData: {
