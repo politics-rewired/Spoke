@@ -285,11 +285,9 @@ export class AdminIncomingMessageList extends Component {
   };
 
   handleRowSelection = async (newSelectedRows, data) => {
-    const isDeselectAll =
-      this.state.selectedRows === "all" && newSelectedRows !== "all";
     this.setState({
-      selectedRows: isDeselectAll ? [] : newSelectedRows,
-      campaignIdsContactIds: isDeselectAll ? [] : data,
+      selectedRows: newSelectedRows,
+      campaignIdsContactIds: data,
       needsRender: true
     });
   };

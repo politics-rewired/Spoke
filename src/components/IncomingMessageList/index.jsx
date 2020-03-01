@@ -38,7 +38,7 @@ function prepareSelectedRowsData(conversations, rowsSelected) {
     selection = [];
   }
 
-  return selection.map(selectedIndex => {
+  const selectedData = selection.map(selectedIndex => {
     const conversation = conversations[selectedIndex];
     return {
       campaignId: conversation.campaign.id,
@@ -46,6 +46,8 @@ function prepareSelectedRowsData(conversations, rowsSelected) {
       messageIds: conversation.contact.messages.map(message => message.id)
     };
   });
+
+  return [selection, selectedData];
 }
 
 export class IncomingMessageList extends Component {
@@ -206,12 +208,14 @@ export class IncomingMessageList extends Component {
   };
 
   handleRowsSelected = rowsSelected => {
+    console.log({ rowsSelected });
     const conversations = this.props.conversations.conversations.conversations;
-    const selectedConversations = prepareSelectedRowsData(
+    const [selection, selectedData] = prepareSelectedRowsData(
       conversations,
       rowsSelected
     );
-    this.props.onConversationSelected(rowsSelected, selectedConversations);
+    console.log({ selection });
+    this.props.onConversationSelected(selection, selectedData);
   };
 
   handleOpenConversation = index =>
@@ -292,7 +296,7 @@ IncomingMessageList.propTypes = {
   campaignsFilter: PropTypes.object,
   assignmentsFilter: PropTypes.object,
   tagsFilter: PropTypes.object,
-  selectedRows: PropTypes.arrayOf(PropTypes.object),
+  selectedRows: PropTypes.arrayOf(PropTypes.number).isRequired,
   onPageChanged: PropTypes.func,
   onPageSizeChanged: PropTypes.func,
   onConversationSelected: PropTypes.func,
