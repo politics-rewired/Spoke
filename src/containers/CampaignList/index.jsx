@@ -208,7 +208,7 @@ const mutations = {
       campaignId
     }
   }),
-  turnAutoAssignOn: (campaignId, _) => ({
+  turnAutoAssignOn: ownProps => (campaignId, _) => ({
     mutation: gql`
       mutation turnAutoAssignOn($campaignId: String!) {
         editCampaign(id: $campaignId, campaign: { isAutoassignEnabled: true }) {
@@ -219,7 +219,7 @@ const mutations = {
     `,
     variables: { campaignId }
   }),
-  turnAutoAssignOff: (campaignId, _) => ({
+  turnAutoAssignOff: ownProps => (campaignId, _) => ({
     mutation: gql`
       mutation turnAutoAssignOff($campaignId: String!) {
         editCampaign(
