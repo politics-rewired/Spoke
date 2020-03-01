@@ -60,10 +60,8 @@ class AdminDashboard extends React.Component {
   render() {
     const { location, children, match } = this.props;
     const { roles } = this.props.data.currentUser;
-    const {
-      escalatedConversationCount,
-      pendingAssignmentRequestCount
-    } = this.props.badgeCounts.organization;
+    const { escalatedConversationCount, pendingAssignmentRequestCount } =
+      (this.props.badgeCounts || {}).organization || {};
 
     const sections = [
       {
@@ -100,9 +98,11 @@ class AdminDashboard extends React.Component {
         name: "Escalated Convos",
         path: "escalated",
         role: "ADMIN",
-        badge: {
-          count: escalatedConversationCount
-        }
+        badge: window.DISABLE_SIDEBAR_BADGES
+          ? undefined
+          : {
+              count: escalatedConversationCount
+            }
       },
       {
         name: "Bulk Script Editor",
@@ -118,9 +118,11 @@ class AdminDashboard extends React.Component {
         name: "Assignment Requests",
         path: "assignment-requests",
         role: "SUPERVOLUNTEER",
-        badge: {
-          count: pendingAssignmentRequestCount
-        }
+        badge: window.DISABLE_SIDEBAR_BADGES
+          ? undefined
+          : {
+              count: pendingAssignmentRequestCount
+            }
       },
       {
         name: "Settings",
@@ -167,7 +169,7 @@ AdminDashboard.propTypes = {
   location: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   data: PropTypes.object.isRequired,
-  badgeCounts: PropTypes.object.isRequired,
+  badgeCounts: PropTypes.object,
   children: PropTypes.object
 };
 
@@ -186,8 +188,11 @@ const queries = {
         organizationId: match.params.organizationId
       }
     })
-  },
-  badgeCounts: {
+  }
+};
+
+if (!window.DISABLE_SIDEBAR_BADGES) {
+  queries.badgeCounts = {
     query: gql`
       query getBadgeCounts($organizationId: String!) {
         organization(id: $organizationId) {
@@ -202,8 +207,8 @@ const queries = {
         organizationId: match.params.organizationId
       }
     })
-  }
-};
+  };
+}
 
 export default compose(
   withRouter,
