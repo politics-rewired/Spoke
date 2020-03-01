@@ -267,6 +267,6 @@ main()
     process.exit(0);
   })
   .catch(error => {
-    logger.error(error);
+    logger.error("Error creating deliverability report: ", error);
     process.exit(1);
   });

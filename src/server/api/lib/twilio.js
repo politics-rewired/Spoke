@@ -175,8 +175,8 @@ async function sendMessage(message, organizationId, trx = r.knex) {
 
   if (!twilio) {
     logger.error(
-      "cannot actually send SMS message -- twilio is not fully configured:",
-      message.id
+      "cannot actually send SMS message -- twilio is not fully configured",
+      { messageId: message.id }
     );
     if (message.id) {
       await trx("message")
@@ -242,7 +242,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
       let hasError = false;
       if (err) {
         hasError = true;
-        logger.error(`Error sending message ${message.id}`, err);
+        logger.error(`Error sending message ${message.id}: `, err);
         const jsonErr = typeof err === "object" ? err : { error: err };
         messageToSave.service_response = appendServiceResponse(
           messageToSave.service_response,
@@ -352,7 +352,7 @@ async function handleIncomingMessage(message) {
     !message.hasOwnProperty("Body") ||
     !message.hasOwnProperty("MessageSid")
   ) {
-    logger.error(`This is not an incoming message: ${JSON.stringify(message)}`);
+    logger.error("This is not an incoming message", { payload: message });
   }
 
   const { From, To, MessageSid } = message;

@@ -99,6 +99,6 @@ const fetchAllChannels = async (acc = [], next_cursor) => {
 main()
   .then(() => process.exit(0))
   .catch(error => {
-    logger.error(error);
+    logger.error("Error updating Slack teams: ", error);
     process.exit(1);
   });

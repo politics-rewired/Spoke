@@ -128,7 +128,10 @@ export async function processSqsMessages() {
   const p = new Promise((resolve, reject) => {
     sqs.receiveMessage(params, async (err, data) => {
       if (err) {
-        logger.error(err, err.stack);
+        logger.error({
+          message: err.message,
+          stack: err.stack
+        });
         reject(err);
       } else if (data.Messages) {
         logger.info(data);
@@ -147,7 +150,10 @@ export async function processSqsMessages() {
             },
             (delMessageErr, delMessageData) => {
               if (delMessageErr) {
-                logger.error(delMessageErr, delMessageErr.stack); // an error occurred
+                logger.error({
+                  message: delMessageErr,
+                  stack: delMessageErr.stack
+                }); // an error occurred
               } else {
                 logger.info(delMessageData); // successful response
               }
@@ -239,7 +245,7 @@ export async function uploadContacts(job) {
               await numbersRequest.addPhoneNumbers(chunk.map(c => c.cell));
             }
           } catch (exc) {
-            logger.error("Error inserting contacts:", exc);
+            logger.error("Error inserting contacts: ", exc);
             throw exc;
           }
 
@@ -298,7 +304,7 @@ export async function uploadContacts(job) {
         );
       }
     } catch (exc) {
-      logger.error("Error deleting opt-outs:", exc);
+      logger.error("Error deleting opt-outs: ", exc);
       throw exc;
     }
 
@@ -337,7 +343,7 @@ export async function uploadContacts(job) {
         );
       }
     } catch (exc) {
-      logger.error("Error deleting excluded contacts:", exc);
+      logger.error("Error deleting excluded contacts: ", exc);
       throw exc;
     }
 
@@ -374,12 +380,11 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     .select("status")
     .first();
   if (!jobCompleted) {
-    logger.error(
-      "loadContactsFromDataWarehouseFragment job no longer exists",
-      jobEvent.campaignId,
+    logger.error("loadContactsFromDataWarehouseFragment job no longer exists", {
+      campaignId: jobEvent.campaignId,
       jobCompleted,
       jobEvent
-    );
+    });
     return { alreadyComplete: 1 };
   }
 
@@ -395,7 +400,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     warehouseConnection = warehouseConnection || datawarehouse();
     logger.error(
       "loadContactsFromDataWarehouseFragment RUNNING WAREHOUSE query",
-      sqlQuery
+      { sqlQuery }
     );
     knexResult = await warehouseConnection.raw(sqlQuery);
   } catch (err) {
@@ -421,9 +426,11 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
   });
   if (!("first_name" in fields && "last_name" in fields && "cell" in fields)) {
     logger.error(
-      "SQL statement does not return first_name, last_name, and cell: ",
-      sqlQuery,
-      fields
+      "SQL statement does not return first_name, last_name, and cell",
+      {
+        sqlQuery,
+        fields
+      }
     );
     jobMessages.push(
       `SQL statement does not return first_name, last_name and cell => ${sqlQuery} => with fields ${fields}`
@@ -475,18 +482,16 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     .where("id", jobEvent.jobId)
     .select("status")
     .first();
-  logger.error(
-    "loadContactsFromDataWarehouseFragment toward end",
+  logger.error("loadContactsFromDataWarehouseFragment toward end", {
     completed,
     jobEvent
-  );
+  });
 
   if (!completed) {
-    logger.error(
-      "loadContactsFromDataWarehouseFragment job has been deleted",
+    logger.error("loadContactsFromDataWarehouseFragment job has been deleted", {
       completed,
-      jobEvent.campaignId
-    );
+      campaignId: jobEvent.campaignId
+    });
   } else if (jobEvent.totalParts && completed.status >= jobEvent.totalParts) {
     if (jobEvent.organizationId) {
       // now that we've saved them all, we delete everyone that is opted out locally
@@ -500,9 +505,11 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         .delete()
         .then(result => {
           logger.error(
-            `loadContactsFromDataWarehouseFragment # of contacts opted out removed from DW query (${
-              jobEvent.campaignId
-            }): ${result}`
+            "loadContactsFromDataWarehouseFragment # of contacts opted out removed from DW query",
+            {
+              campaignId: jobEvent.campaignId,
+              result
+            }
           );
           validationStats.optOutCount = result;
         });
@@ -515,9 +522,11 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         .delete()
         .then(result => {
           logger.error(
-            `loadContactsFromDataWarehouseFragment # of contacts with invalid cells removed from DW query (${
-              jobEvent.campaignId
-            }): ${result}`
+            "loadContactsFromDataWarehouseFragment # of contacts with invalid cells removed from DW query",
+            {
+              campaignId: jobEvent.campaignId,
+              result
+            }
           );
           validationStats.invalidCellCount = result;
         });
@@ -541,9 +550,11 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         .delete()
         .then(result => {
           logger.error(
-            `loadContactsFromDataWarehouseFragment # of contacts with duplicate cells removed from DW query (${
-              jobEvent.campaignId
-            }): ${result}`
+            "loadContactsFromDataWarehouseFragment # of contacts with duplicate cells removed from DW query",
+            {
+              campaignId: jobEvent.campaignId,
+              result
+            }
           );
           validationStats.duplicateCellCount = result;
         });
@@ -583,13 +594,15 @@ export async function loadContactsFromDataWarehouse(job) {
 
   if (!sqlQuery.startsWith("SELECT") || sqlQuery.indexOf(";") >= 0) {
     logger.error(
-      "Malformed SQL statement.  Must begin with SELECT and not have any semicolons: ",
-      sqlQuery
+      "Malformed SQL statement.  Must begin with SELECT and not have any semicolons",
+      { sqlQuery }
     );
     return;
   }
   if (!datawarehouse) {
-    logger.error("No data warehouse connection, so cannot load contacts", job);
+    logger.error("No data warehouse connection, so cannot load contacts", {
+      job
+    });
     return;
   }
 
@@ -1058,7 +1071,7 @@ export async function assignTexters(job) {
     execute()
       .then(trx.commit)
       .catch(error => {
-        logger.error("Rolling back!", error);
+        logger.error("Error assigning texters. Rolling back! ", error);
         trx.rollback(error);
       });
   });
@@ -1322,7 +1335,7 @@ const deleteJob = async (jobId, retries = 0) => {
     if (retries < 5) {
       await deleteJob(jobId, retries + 1);
     } else {
-      logger.error(`Could not delete job. Err: ${err.message}`);
+      logger.error("Could not delete job. Err: ", err);
     }
   }
 };
@@ -1345,7 +1358,7 @@ export async function exportCampaign(job) {
       isAutomatedExport
     } = await fetchExportData(job));
   } catch (exc) {
-    logger.error("Error fetching export data:", exc);
+    logger.error("Error fetching export data: ", exc);
     return;
   }
 
@@ -1367,7 +1380,7 @@ export async function exportCampaign(job) {
       messageRows = messageRows.concat(chunkMessageResult.messages);
     }
   } catch (exc) {
-    logger.error("Error building message rows:", exc);
+    logger.error("Error building message rows: ", exc);
   }
 
   // Contact rows
@@ -1387,7 +1400,7 @@ export async function exportCampaign(job) {
       contactRows = contactRows.concat(chunkContactResult.contacts);
     }
   } catch (exc) {
-    logger.error("Error building campaign contact rows:", exc);
+    logger.error("Error building campaign contact rows: ", exc);
   }
 
   // Create the CSV paylaods
@@ -1397,7 +1410,7 @@ export async function exportCampaign(job) {
     campaignsCsv = Papa.unparse(contactRows);
     messagesCsv = Papa.unparse(messageRows);
   } catch (exc) {
-    logger.error("Error building CSVs:", exc);
+    logger.error("Error building CSVs: ", exc);
   }
 
   const validAwsCredentials =
@@ -1434,7 +1447,7 @@ export async function exportCampaign(job) {
             `    Campaign export: ${campaignExportUrl}` +
             `    Message export: ${campaignMessagesExportUrl}`
         }).catch(err => {
-          logger.error(err);
+          logger.error("Error sending export email: ", err);
           logger.info(`Campaign Export URL - ${campaignExportUrl}`);
           logger.info(
             `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
@@ -1443,7 +1456,7 @@ export async function exportCampaign(job) {
       }
       logger.info(`Successfully exported ${campaignId}`);
     } catch (err) {
-      logger.error("Error uploading to cloud storage", err);
+      logger.error("Error uploading export to cloud storage: ", err);
 
       await sendEmail({
         to: notificationEmail,
@@ -1515,14 +1528,12 @@ export async function sendMessages(queryFunc, defaultStatus) {
 
         trx.commit();
       } catch (err) {
-        logger.error("error sending messages:");
-        logger.error(err);
+        logger.error("Error in sendMessages: ", err);
         trx.rollback();
       }
     });
   } catch (err) {
-    logger.error("sendMessages transaction errored:");
-    logger.error(err);
+    logger.error("sendMessages transaction errored: ", err);
   }
 }
 
@@ -1671,7 +1682,7 @@ export async function fixOrgless() {
             config.DEFAULT_ORG
         );
       } catch (err) {
-        logger.error("error on userOrganization save in orgless", error);
+        logger.error("error on userOrganization save in orgless: ", error);
       }
     }); // forEach
   } // if
