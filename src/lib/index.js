@@ -32,7 +32,7 @@ export const fieldAliases = {
 
 export const requiredUploadFields = ["firstName", "lastName", "cell"];
 
-const topLevelUploadFields = [
+export const topLevelUploadFields = [
   "firstName",
   "lastName",
   "cell",
