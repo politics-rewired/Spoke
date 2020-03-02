@@ -1,6 +1,12 @@
+import partition from "lodash/partition";
 import Papa from "papaparse";
 
-import { validateCsv, requiredUploadFields, fieldAliases } from "../../../lib";
+import {
+  validateCsv,
+  requiredUploadFields,
+  topLevelUploadFields,
+  fieldAliases
+} from "../../../lib";
 
 const missingHeaderFields = fields =>
   requiredUploadFields.reduce((missingFields, requiredField) => {
@@ -8,6 +14,21 @@ const missingHeaderFields = fields =>
       ? missingFields
       : missingFields.concat([requiredField]);
   }, []);
+
+const isTopLevelEntry = ([field, _]) => topLevelUploadFields.includes(field);
+const trimEntry = ([key, value]) => [key, value.trim()];
+const FIELD_DEFAULTS = { external_id: "", zip: "" };
+
+const sanitizeRawContact = rawContact => {
+  const allFields = Object.entries({ ...FIELD_DEFAULTS, ...rawContact });
+  const [contactEntries, customFieldEntries] = partition(
+    allFields,
+    isTopLevelEntry
+  );
+  const contact = Object.fromEntries(contactEntries.map(trimEntry));
+  const customFields = Object.fromEntries(customFieldEntries.map(trimEntry));
+  return { ...contact, customFields };
+};
 
 export const processContactsFile = async file => {
   const { createReadStream } = await file;
@@ -37,8 +58,8 @@ export const processContactsFile = async file => {
             parser.abort();
           }
         }
-
-        resultData.push(data);
+        const contact = sanitizeRawContact(data);
+        resultData.push(contact);
       },
       complete: ({ meta: { aborted } }) => {
         if (aborted) return reject(`CSV missing fields: ${missingFields}`);
