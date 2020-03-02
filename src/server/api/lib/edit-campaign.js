@@ -16,7 +16,7 @@ export const processContactsFile = async file => {
   return new Promise((resolve, reject) => {
     let missingFields = undefined;
     let resultMeta = undefined;
-    const result = [];
+    const resultData = [];
 
     Papa.parse(stream, {
       header: true,
@@ -38,7 +38,7 @@ export const processContactsFile = async file => {
           }
         }
 
-        result.push(data);
+        resultData.push(data);
       },
       complete: ({ meta: { aborted } }) => {
         if (aborted) return reject(`CSV missing fields: ${missingFields}`);
