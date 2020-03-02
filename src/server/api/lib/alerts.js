@@ -104,12 +104,22 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     promises.taggedContact
   ]);
 
+  const taggedCampaign = await r
+    .reader("campaign")
+    .where({ id: taggedContact.campaign_id })
+    .first("*");
+
   await Promise.all(
     webhookUrls.map(url =>
       request
         .post(url)
         .timeout(30000)
-        .send({ mostRecentlyReceivedMessage, taggingUser, taggedContact })
+        .send({
+          mostRecentlyReceivedMessage,
+          taggingUser,
+          taggedContact,
+          taggedCampaign
+        })
         .catch(err =>
           logger.error("Encountered error notifying on tag assignment: ", err)
         )
