@@ -1,7 +1,7 @@
 import fetch from "isomorphic-fetch"; // TODO - remove?
 import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
-import { createHttpLink } from "apollo-link-http";
+import { createUploadLink } from "apollo-upload-client";
 import { onError } from "apollo-link-error";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { getMainDefinition } from "apollo-utilities";
@@ -9,7 +9,7 @@ import omitDeep from "omit-deep-lodash";
 
 import { eventBus, EventTypes } from "../client/events";
 
-const httpLink = createHttpLink({
+const uploadLink = createUploadLink({
   uri: window.GRAPHQL_URL || "/graphql",
   credentials: "same-origin"
 });
@@ -52,7 +52,7 @@ const cleanTypenameLink = new ApolloLink((operation, forward) => {
 const link = cleanTypenameLink
   .concat(checkVersionLink)
   .concat(errorLink)
-  .concat(httpLink);
+  .concat(uploadLink);
 
 const cache = new InMemoryCache({
   addTypename: true

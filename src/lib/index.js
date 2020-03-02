@@ -25,12 +25,12 @@ export {
   makeTree
 } from "./interaction-step-helpers";
 
-const fieldAliases = {
+export const fieldAliases = {
   firstName: ["first_name", "firstname"],
   lastName: ["last_name", "lastname"]
 };
 
-const requiredUploadFields = ["firstName", "lastName", "cell"];
+export const requiredUploadFields = ["firstName", "lastName", "cell"];
 
 const topLevelUploadFields = [
   "firstName",
@@ -51,6 +51,11 @@ export {
   isRoleGreater
 } from "./permissions";
 
+const PHONE_NUMBER_COUNTRY =
+  typeof window !== "undefined"
+    ? window.PHONE_NUMBER_COUNTRY
+    : require("../config").config.PHONE_NUMBER_COUNTRY;
+
 const getValidatedData = (data, optOuts) => {
   const optOutCells = optOuts.map(optOut => optOut.cell);
   let validatedData;
@@ -62,7 +67,7 @@ const getValidatedData = (data, optOuts) => {
 
   validatedData = _.map(validatedData, row =>
     _.extend(row, {
-      cell: getFormattedPhoneNumber(row.cell, window.PHONE_NUMBER_COUNTRY)
+      cell: getFormattedPhoneNumber(row.cell, PHONE_NUMBER_COUNTRY)
     })
   );
   result = _.partition(validatedData, row => !!row.cell);
@@ -127,55 +132,57 @@ export const parseCSV = (file, optOuts, callback) => {
     header: true,
     // eslint-disable-next-line no-shadow, no-unused-vars
     complete: ({ data, meta, errors }, file) => {
-      const fields = meta.fields;
-
-      const missingFields = [];
-      const useAliases = {};
-
-      for (const field of requiredUploadFields) {
-        if (!fields.includes(field)) {
-          let fieldFoundViaAlias = false;
-          for (const alias of fieldAliases[field] || []) {
-            if (fields.includes(alias)) {
-              useAliases[field] = alias;
-              fieldFoundViaAlias = true;
-            }
-          }
-
-          if (!fieldFoundViaAlias) {
-            missingFields.push(field);
-          }
-        }
-      }
-
-      if (missingFields.length > 0) {
-        const error = `Missing fields: ${missingFields.join(", ")}`;
-        callback({ error });
-      } else {
-        if (Object.keys(useAliases).length > 0) {
-          for (const row of data) {
-            for (const field of Object.keys(useAliases)) {
-              row[field] = row[useAliases[field]];
-              delete row[useAliases[field]];
-            }
-          }
-        }
-
-        const { validationStats, validatedData } = getValidatedData(
-          data,
-          optOuts
-        );
-
-        const customFields = fields.filter(
-          field => !notCustomFields.includes(field)
-        );
-
-        callback({
-          customFields,
-          validationStats,
-          contacts: validatedData
-        });
-      }
+      const result = validateCsv({ data, meta });
+      callback(result);
     }
   });
+};
+
+export const validateCsv = ({ data, meta }) => {
+  const fields = meta.fields;
+
+  const missingFields = [];
+  const useAliases = {};
+
+  for (const field of requiredUploadFields) {
+    if (!fields.includes(field)) {
+      let fieldFoundViaAlias = false;
+      for (const alias of fieldAliases[field] || []) {
+        if (fields.includes(alias)) {
+          useAliases[field] = alias;
+          fieldFoundViaAlias = true;
+        }
+      }
+
+      if (!fieldFoundViaAlias) {
+        missingFields.push(field);
+      }
+    }
+  }
+
+  if (missingFields.length > 0) {
+    const errorMessage = `Missing fields: ${missingFields.join(", ")}`;
+    throw new Error(errorMessage);
+  } else {
+    if (Object.keys(useAliases).length > 0) {
+      for (const row of data) {
+        for (const field of Object.keys(useAliases)) {
+          row[field] = row[useAliases[field]];
+          delete row[useAliases[field]];
+        }
+      }
+    }
+
+    const { validationStats, validatedData } = getValidatedData(data, []);
+
+    const customFields = fields.filter(
+      field => !notCustomFields.includes(field)
+    );
+
+    return {
+      customFields,
+      validationStats,
+      contacts: validatedData
+    };
+  }
 };

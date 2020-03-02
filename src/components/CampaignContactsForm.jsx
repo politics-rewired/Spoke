@@ -9,7 +9,7 @@ import Subheader from "material-ui/Subheader";
 import Divider from "material-ui/Divider";
 import Toggle from "material-ui/Toggle";
 import { ListItem, List } from "material-ui/List";
-import { parseCSV } from "../lib";
+import FileDrop from "react-file-drop";
 import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
@@ -18,6 +18,8 @@ import theme from "../styles/theme";
 import { StyleSheet, css } from "aphrodite";
 import * as yup from "yup";
 import { dataTest } from "../lib/attributes";
+
+import "./styles/file-drop.css";
 
 const checkIcon = <CheckIcon color={theme.colors.green} />;
 const warningIcon = <WarningIcon color={theme.colors.orange} />;
@@ -53,8 +55,6 @@ const styles = StyleSheet.create({
 
 export default class CampaignContactsForm extends React.Component {
   state = {
-    uploading: false,
-    validationStats: null,
     contactUploadError: null,
     selectedCampaignIds: []
   };
@@ -99,53 +99,8 @@ export default class CampaignContactsForm extends React.Component {
     }
   };
 
-  handleUpload = event => {
-    event.preventDefault();
-    const file = event.target.files[0];
-    this.setState({ uploading: true }, () => {
-      parseCSV(
-        file,
-        this.props.optOuts,
-        ({ contacts, customFields, validationStats, error }) => {
-          if (error) {
-            this.handleUploadError(error);
-          } else if (contacts.length === 0) {
-            this.handleUploadError("Upload at least one contact");
-          } else if (contacts.length > 0) {
-            this.handleUploadSuccess(validationStats, contacts, customFields);
-          }
-        }
-      );
-    });
-  };
-
-  handleUploadError(error) {
-    this.setState({
-      validationStats: null,
-      uploading: false,
-      contactUploadError: error,
-      contacts: null,
-      filterOutLandlines: false
-    });
-  }
-
-  handleUploadSuccess(validationStats, contacts, customFields) {
-    this.setState({
-      validationStats,
-      uploading: false,
-      contactUploadError: null
-    });
-    const { selectedCampaignIds, filterOutLandlines } = this.state;
-    const contactCollection = {
-      contactsCount: contacts.length,
-      excludeCampaignIds: selectedCampaignIds,
-      contactSql: null,
-      customFields,
-      filterOutLandlines,
-      contacts
-    };
-    this.props.onChange(contactCollection);
-  }
+  handleFileDrop = (files, event) =>
+    this.props.onChange({ contactsFile: files[0] });
 
   onFilterOutLandlinesToggle = (_ev, toggled) => {
     this.setState({ filterOutLandlines: toggled });
@@ -213,62 +168,17 @@ export default class CampaignContactsForm extends React.Component {
     );
   }
 
-  renderValidationStats() {
-    if (!this.state.validationStats) {
-      return "";
-    }
-
-    const {
-      dupeCount,
-      missingCellCount,
-      invalidCellCount,
-      optOutCount
-    } = this.state.validationStats;
-
-    let stats = [
-      [dupeCount, "duplicates"],
-      [missingCellCount, "rows with missing numbers"],
-      [invalidCellCount, "rows with invalid numbers"],
-      [optOutCount, "opt-outs"]
-    ];
-    stats = stats
-      .filter(([count]) => count > 0)
-      .map(([count, text]) => `${count} ${text} removed`);
-    return (
-      <List>
-        <Divider />
-        {stats.map((stat, index) => (
-          <ListItem
-            key={index}
-            leftIcon={warningIcon}
-            innerDivStyle={innerStyles.nestedItem}
-            primaryText={stat}
-          />
-        ))}
-      </List>
-    );
-  }
-
   renderUploadButton() {
-    const { uploading } = this.state;
+    const { contactsFile } = this.props.formValues;
     return (
-      <div>
-        <RaisedButton
-          {...dataTest("uploadButton")}
-          style={innerStyles.button}
-          label={uploading ? "Uploading..." : "Upload contacts"}
-          labelPosition="before"
-          disabled={uploading}
-          onClick={() => document.querySelector("#contact-upload").click()}
-        />
-        <input
-          id="contact-upload"
-          type="file"
-          className={css(styles.exampleImageInput)}
-          onChange={this.handleUpload}
-          style={{ display: "none" }}
-        />
-      </div>
+      <FileDrop
+        onDrop={this.handleFileDrop}
+        targetClassName={
+          contactsFile ? "file-drop-target with-file" : "file-drop-target"
+        }
+      >
+        {contactsFile ? contactsFile.name : "Drop a csv here"}
+      </FileDrop>
     );
   }
 
@@ -362,7 +272,6 @@ export default class CampaignContactsForm extends React.Component {
             </div>
           )}
           {this.renderContactStats()}
-          {this.renderValidationStats()}
           {contactUploadError ? (
             <List>
               <ListItem primaryText={contactUploadError} leftIcon={errorIcon} />
@@ -372,6 +281,7 @@ export default class CampaignContactsForm extends React.Component {
           )}
           <Form.Button
             type="submit"
+            component={RaisedButton}
             disabled={this.props.saveDisabled}
             label={this.props.saveLabel}
           />
