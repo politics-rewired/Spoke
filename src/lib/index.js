@@ -25,12 +25,12 @@ export {
   makeTree
 } from "./interaction-step-helpers";
 
-const fieldAliases = {
+export const fieldAliases = {
   firstName: ["first_name", "firstname"],
   lastName: ["last_name", "lastname"]
 };
 
-const requiredUploadFields = ["firstName", "lastName", "cell"];
+export const requiredUploadFields = ["firstName", "lastName", "cell"];
 
 const topLevelUploadFields = [
   "firstName",
