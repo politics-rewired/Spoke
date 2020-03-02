@@ -33,20 +33,24 @@ const styles = StyleSheet.create({
 
 class UserEdit extends React.Component {
   state = {
+    user: {},
     changePasswordDialog: false,
     successDialog: false
   };
 
-  async componentWillMount() {
+  componentDidMount() {
     if (this.props.authType === UserEditMode.Edit) {
-      await this.props.mutations.editUser(null);
+      this.props.mutations.editUser(null).then(({ data }) => {
+        this.setState({ user: data.editUser });
+      });
     }
   }
 
   handleSave = async formData => {
     switch (this.props.authType) {
       case UserEditMode.Edit:
-        await this.props.mutations.editUser(formData);
+        const result = await this.props.mutations.editUser(formData);
+        this.setState({ user: result.data.editUser });
         if (this.props.onRequestClose) {
           this.props.onRequestClose();
         }
@@ -58,13 +62,12 @@ class UserEdit extends React.Component {
         if (changeRes.errors) {
           throw new Error(changeRes.errors.graphQLErrors[0].message);
         }
-        this.props.openSuccessDialog();
         break;
 
       default:
         // log in, sign up, or reset
         const allData = {
-          nextUrl: this.props.nextUrl,
+          nextUrl: this.props.nextUrl || "/",
           authType: this.props.authType,
           ...formData
         };
@@ -91,13 +94,8 @@ class UserEdit extends React.Component {
 
   handleClick = () => this.setState({ changePasswordDialog: true });
 
-  handleClose = () => {
-    if (this.props.handleClose) {
-      this.props.handleClose();
-    } else {
-      this.setState({ changePasswordDialog: false, successDialog: false });
-    }
-  };
+  handleClose = () =>
+    this.setState({ changePasswordDialog: false, successDialog: false });
 
   openSuccessDialog = () => this.setState({ successDialog: true });
 
@@ -158,8 +156,8 @@ class UserEdit extends React.Component {
 
   render() {
     // Data may be `undefined` here due to refetch in child UserEdit component in change password dialog
-    const { authType, editUser, style, userId, data, saveLabel } = this.props;
-    const user = (editUser && editUser.editUser) || {};
+    const { authType, style, userId, data, saveLabel } = this.props;
+    const { user } = this.state;
 
     const formSchema = this.buildFormSchema(authType);
     const isLocalAuth = window.PASSPORT_STRATEGY === "local";
@@ -285,19 +283,20 @@ UserEdit.defaultProps = {
 };
 
 UserEdit.propTypes = {
-  mutations: PropTypes.object.isRequired,
-  data: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
-  editUser: PropTypes.object.isRequired,
-  userId: PropTypes.string.isRequired,
   organizationId: PropTypes.string.isRequired,
-  saveLabel: PropTypes.string.isRequired,
-  nextUrl: PropTypes.string.isRequired,
+  userId: PropTypes.string.isRequired,
+  saveLabel: PropTypes.string,
+  nextUrl: PropTypes.string,
   authType: PropTypes.string,
   style: PropTypes.string,
-  onRequestClose: PropTypes.func.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  openSuccessDialog: PropTypes.func.isRequired
+  onRequestClose: PropTypes.func,
+
+  // HOC props
+  data: PropTypes.object.isRequired,
+  mutations: PropTypes.shape({
+    editUser: PropTypes.func.isRequired,
+    changeUserPassword: PropTypes.func.isRequired
+  })
 };
 
 const queries = {
