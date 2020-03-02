@@ -37,6 +37,7 @@ const SectionWrapper = props => {
     active,
     saving,
     done,
+    adminPerms,
     pendingJob,
     onDiscardJob,
     onExpandChange,

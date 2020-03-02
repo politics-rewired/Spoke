@@ -6,6 +6,7 @@ import * as yup from "yup";
 import moment from "moment";
 import isEmpty from "lodash/isEmpty";
 
+import RaisedButton from "material-ui/RaisedButton";
 import ColorPicker from "material-ui-color-picker";
 
 import { loadData } from "../../hoc/with-operations";
@@ -62,6 +63,7 @@ class CampaignBasicsForm extends React.Component {
       const response = await editBasics(pendingChanges);
       if (response.errors) throw response.errors;
       this.setState({ pendingChanges: {} });
+      this.props.onComplete();
     } catch (err) {
       this.props.onError(err.message);
     } finally {
@@ -165,6 +167,7 @@ class CampaignBasicsForm extends React.Component {
             type="submit"
             label={finalSaveLabel}
             disabled={isSaveDisabled}
+            component={RaisedButton}
           />
         </GSForm>
       </SectionWrapper>
@@ -182,6 +185,7 @@ CampaignBasicsForm.propTypes = {
   onExpandChange: PropTypes.func.isRequired,
   onDiscardJob: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,
+  onComplete: PropTypes.func.isRequired,
 
   // GraphQL props
   mutations: PropTypes.shape({

@@ -1,39 +1,47 @@
 import PropTypes from "prop-types";
 import React from "react";
+import gql from "graphql-tag";
 import Form from "react-formal";
 import * as yup from "yup";
-import sortBy from "lodash/sortBy";
 import { StyleSheet, css } from "aphrodite";
 
 import FileDrop from "react-file-drop";
-import Select from "react-select";
-import RaisedButton from "material-ui/RaisedButton";
 import Subheader from "material-ui/Subheader";
+import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import { ListItem, List } from "material-ui/List";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
 import UploadIcon from "material-ui/svg-icons/file/file-upload";
 
+import { loadData } from "../../hoc/with-operations";
 import { dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 import GSForm from "../../../components/forms/GSForm";
+import SectionWrapper from "../components/SectionWrapper";
+import SelectExcludeCampaigns from "./components/SelectExcludeCampaigns";
+import ContactsSqlForm from "./components/ContactsSqlForm";
 import CampaignFormSectionHeading from "./components/CampaignFormSectionHeading";
 
 import "./styles/file-drop.css";
 
-const checkIcon = <CheckIcon color={theme.colors.green} />;
-const warningIcon = <WarningIcon color={theme.colors.orange} />;
-const errorIcon = <ErrorIcon color={theme.colors.red} />;
+export const SECTION_OPTIONS = {
+  blocksStarting: true,
+  expandAfterCampaignStarts: false,
+  expandableBySuperVolunteers: false
+};
 
-const innerStyles = {
+const inlineStyles = {
   button: {
     margin: "24px 5px 24px 0",
     fontSize: "10px"
   },
   nestedItem: {
     fontSize: "12px"
+  },
+  filterLandlinesToggle: {
+    marginTop: "15px",
+    marginBottom: "15px"
   }
 };
 
@@ -42,252 +50,221 @@ const styles = StyleSheet.create({
     fontFamily: "Courier",
     backgroundColor: theme.colors.lightGray,
     padding: 3
-  },
-  exampleImageInput: {
-    cursor: "pointer",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
-    width: "100%",
-    opacity: 0
   }
 });
 
-export default class CampaignContactsForm extends React.Component {
+const schema = yup.object({
+  contactSql: yup.string()
+});
+
+const checkIcon = () => <CheckIcon color={theme.colors.green} />;
+
+const sectionSubtitle = (
+  <span>
+    Your upload file should be in CSV format with column headings in the first
+    row. You must include{" "}
+    <span className={css(styles.csvHeader)}>firstName</span>,
+    <span className={css(styles.csvHeader)}>lastName</span>, and
+    <span className={css(styles.csvHeader)}>cell</span> columns. If you include
+    a <span className={css(styles.csvHeader)}>zip</span> column, we'll use the
+    zip to guess the contact's timezone for enforcing texting hours. An optional
+    column to map the contact to a CRM is{" "}
+    <span className={css(styles.csvHeader)}>external_id</span>
+    Any additional columns in your file will be available as custom fields to
+    use in your texting scripts.
+  </span>
+);
+
+class CampaignContactsForm extends React.Component {
   state = {
-    contactUploadError: null,
-    selectedCampaignIds: []
+    // UI
+    isWorking: false,
+    contactUploadError: undefined,
+
+    // Pending changes payload
+    selectedCampaignIds: [],
+    contactSql: undefined,
+    contactsFile: undefined,
+    filterOutLandlines: false
   };
 
-  handleCampaignExclusionChange = (selectedOptions, { action, option }) => {
-    const selectedCampaignIds = selectedOptions.map(option => option.value);
-    this.setState({ selectedCampaignIds });
-  };
+  handleOnChangeValidSql = contactSql => this.setState({ contactSql });
 
-  validateSql = sql => {
-    const errors = [];
-    if (!sql.startsWith("SELECT")) {
-      errors.push('Must start with "SELECT" in caps');
-    }
-    if (
-      /LIMIT (\d+)/i.test(sql) &&
-      parseInt(sql.match(/LIMIT (\d+)/i)[1], 10) > 10000
-    ) {
-      errors.push(
-        "Spoke currently does not support LIMIT statements of higher than 10000"
-      );
-    }
-    const requiredFields = ["first_name", "last_name", "cell"];
-    requiredFields.forEach(f => {
-      if (sql.indexOf(f) === -1) {
-        errors.push('"' + f + '" is a required column');
-      }
-    });
-    if (sql.indexOf(";") >= 0) {
-      errors.push('Do not include a trailing (or any) ";"');
-    }
-    if (!errors.length) {
-      this.setState({
-        contactSqlError: null
-      });
-      this.props.onChange({
-        contactSql: sql
-      });
-    } else {
-      this.setState({ contactSqlError: errors.join(", ") });
-      this.props.onChange({});
-    }
-  };
-
-  handleFileDrop = (files, event) =>
-    this.props.onChange({ contactsFile: files[0] });
-
+  handleFileDrop = files => this.setState({ contactsFile: files[0] });
   handleOnSelectFile = ({ target }) => {
     const files = target.files;
-    this.props.onChange({ contactsFile: files[0] });
+    this.setState({ contactsFile: files[0] });
   };
 
-  onFilterOutLandlinesToggle = (_ev, toggled) => {
-    this.setState({ filterOutLandlines: toggled });
-    this.props.onChange({ filterOutLandlines: toggled });
-  };
+  handleOnChangeExcludedCamapignIds = selectedCampaignIds =>
+    this.setState({ selectedCampaignIds });
 
-  renderCampaignExclusion() {
-    const sortedCampaigns = sortBy(
-      this.props.otherCampaigns,
-      ["createdAt"],
-      ["desc"]
-    );
-    const options = sortedCampaigns.map(campaign => ({
-      label: campaign.title,
-      value: campaign.id
-    }));
+  handleOnToggleFilterLandlines = (_ev, filterOutLandlines) =>
+    this.setState({ filterOutLandlines });
 
-    return (
-      <div>
-        <p>
-          You can also filter out contacts from this upload that are already
-          uploaded to an existing Spoke campaigns (regardless of whether they
-          have been texted yet in that campaign).
-        </p>
-        <Select
-          name="Campaigns"
-          placeholder="Select existing campaigns"
-          isMulti
-          options={options}
-          defaultValue={[]}
-          onChange={this.handleCampaignExclusionChange}
-          className="basic-multi-select"
-          classNamePrefix="select"
-        />
-      </div>
-    );
-  }
+  handleSubmitForm = async () => {
+    const {
+      contactsFile,
+      filterOutLandlines,
+      selectedCampaignIds
+    } = this.state;
 
-  renderContactStats() {
-    const { customFields, contactsCount } = this.props.formValues;
-
-    if (contactsCount === 0) {
-      return "";
+    this.setState({ isWorking: true, contactUploadError: undefined });
+    try {
+      const campaignInput = {
+        contactsFile,
+        filterOutLandlines,
+        excludeCampaignIds: selectedCampaignIds
+      };
+      const response = this.props.mutations.editCampaignContacts(campaignInput);
+      if (response.errors) throw new Error(response.errors);
+      this.props.onComplete();
+    } catch (err) {
+      this.setState({ contactUploadError: err.message });
+    } finally {
+      this.setState({ isWorking: false });
     }
-    return (
-      <List>
-        <Subheader>Uploaded</Subheader>
-        <ListItem
-          {...dataTest("uploadedContacts")}
-          primaryText={`${contactsCount} contacts`}
-          leftIcon={checkIcon}
-        />
-        <ListItem
-          primaryText={`${customFields.length} custom fields`}
-          leftIcon={checkIcon}
-          nestedItems={customFields.map((field, index) => (
-            <ListItem
-              key={index}
-              innerDivStyle={innerStyles.nestedItem}
-              primaryText={field}
-            />
-          ))}
-        />
-      </List>
-    );
-  }
+  };
 
-  renderUploadButton() {
-    const { contactsFile } = this.props.formValues;
+  render() {
+    const {
+      isWorking,
+      contactUploadError,
+      selectedCampaignIds,
+      contactSql,
+      contactsFile,
+      filterOutLandlines
+    } = this.state;
+    const {
+      campaignId,
+      active,
+      campaignData,
+      organizationData,
+      isNew,
+      adminPerms,
+      saveLabel,
+      jobs,
+      onDiscardJob,
+      onExpandChange
+    } = this.props;
+    const {
+      isStarted,
+      customFields,
+      contactsCount,
+      datawarehouseAvailable
+    } = campaignData.campaign;
+
+    const {
+      numbersApiKey,
+      campaigns: { campaigns: allCampaigns }
+    } = organizationData.organization;
+    const canFilterLandlines = !!numbersApiKey;
+
+    const userHasPermissions =
+      adminPerms || SECTION_OPTIONS.expandableBySuperVolunteers;
+    const sectionCanExpand =
+      SECTION_OPTIONS.expandAfterCampaignStarts || !isStarted;
+    const expandable = sectionCanExpand && userHasPermissions;
+
+    const pendingJob = jobs[0];
+    const isRunningJob =
+      !!pendingJob && pendingJob.status > 0 && pendingJob.status % 100 !== 0;
+    const isSaving = isWorking || isRunningJob;
+    const isSaveDisabled = isSaving || (!isNew && !contactsFile);
+
+    const isSectionComplete = contactsCount > 0 && !contactSql && !contactsFile;
+    const isSectionSaved = !contactsFile;
+    const sectionIsDone = isSectionComplete && isSectionSaved;
+    const finalSaveLabel = isWorking ? "Working..." : saveLabel;
+
+    const allOtherCampaigns = allCampaigns.filter(({ id }) => id != campaignId);
+
     return (
-      <FileDrop
-        onDrop={this.handleFileDrop}
-        targetClassName={
-          contactsFile ? "file-drop-target with-file" : "file-drop-target"
-        }
+      <SectionWrapper
+        title="Contacts"
+        expandable={expandable}
+        active={active}
+        saving={isSaving}
+        done={sectionIsDone}
+        adminPerms={adminPerms}
+        pendingJob={isRunningJob ? pendingJob : undefined}
+        onExpandChange={onExpandChange}
+        onDiscardJob={onDiscardJob}
       >
-        <p>{contactsFile ? contactsFile.name : "Drop a csv here, or"}</p>
-        <RaisedButton
-          label="Select a file"
-          containerElement="label"
-          icon={<UploadIcon />}
-        >
-          <input
-            id="csv-upload-field"
-            type="file"
-            accept=".csv"
-            style={{ display: "none" }}
-            onChange={this.handleOnSelectFile}
-          />
-        </RaisedButton>
-      </FileDrop>
-    );
-  }
-
-  renderForm() {
-    const { canFilterLandlines, jobResult } = this.props;
-    const { contactUploadError, contactSqlError } = this.state;
-    return (
-      <div>
-        {this.renderCampaignExclusion()}
-        <GSForm
-          schema={yup.object({
-            contactSql: yup.string()
-          })}
-          onSubmit={formValues => {
-            // sets values locally
-            this.setState({ ...formValues });
-            // triggers the parent to update values
-            this.props.onChange({ ...formValues });
-            // and now do whatever happens when clicking 'Next'
-            this.props.onSubmit();
-          }}
-        >
+        <CampaignFormSectionHeading
+          title="Who are you contacting?"
+          subtitle={sectionSubtitle}
+        />
+        <SelectExcludeCampaigns
+          allOtherCampaigns={allOtherCampaigns}
+          selectedCampaignIds={selectedCampaignIds}
+          onChangeExcludedCamapignIds={this.handleOnChangeExcludedCamapignIds}
+        />
+        {pendingJob && (
+          <div>
+            <CampaignFormSectionHeading title="Job Outcome" />
+            <div>{pendingJob.jobResultMessage}</div>
+          </div>
+        )}
+        <GSForm schema={schema} onSubmit={this.handleSubmitForm}>
           {canFilterLandlines && (
-            <div>
-              <p>
-                Filter out landlines?
-                <Toggle
-                  value={this.state.filterOutLandlines}
-                  onToggle={this.onFilterOutLandlinesToggle}
-                />
-              </p>
-            </div>
+            <Toggle
+              label="Filter out landlines?"
+              style={inlineStyles.filterLandlinesToggle}
+              value={filterOutLandlines}
+              onToggle={this.handleOnToggleFilterLandlines}
+            />
           )}
-          {this.renderUploadButton()}
-          {!this.props.datawarehouseAvailable ? (
-            ""
-          ) : (
-            <div>
-              <div>
-                Instead of uploading contacts, as a super-admin, you can also
-                create a SQL query directly from the data warehouse that will
-                load in contacts. The SQL requires some constraints:
-                <ul>
-                  <li>Start the query with "SELECT"</li>
-                  <li>Do not include a trailing (or any) semicolon</li>
-                  <li>
-                    Three columns are necessary:
-                    <span className={css(styles.csvHeader)}>first_name</span>,
-                    <span className={css(styles.csvHeader)}>last_name</span>,
-                    <span className={css(styles.csvHeader)}>cell</span>,
-                  </li>
-                  <li>
-                    Optional fields are:
-                    <span className={css(styles.csvHeader)}>zip</span>,
-                    <span className={css(styles.csvHeader)}>external_id</span>
-                  </li>
-                  <li>
-                    Make sure you make those names exactly possibly requiring an
-                    <span className={css(styles.csvHeader)}>
-                      as field_name
-                    </span>{" "}
-                    sometimes.
-                  </li>
-                  <li>Other columns will be added to the customFields</li>
-                </ul>
-              </div>
-              <Form.Field
-                name="contactSql"
-                type="textarea"
-                rows="5"
-                onChange={this.validateSql}
+          <FileDrop
+            onDrop={this.handleFileDrop}
+            targetClassName={
+              contactsFile ? "file-drop-target with-file" : "file-drop-target"
+            }
+          >
+            <p>{contactsFile ? contactsFile.name : "Drop a csv here, or"}</p>
+            <RaisedButton
+              label="Select a file"
+              containerElement="label"
+              icon={<UploadIcon />}
+            >
+              <input
+                id="csv-upload-field"
+                type="file"
+                accept=".csv"
+                style={{ display: "none" }}
+                onChange={this.handleOnSelectFile}
               />
-              {contactSqlError ? (
-                <List>
-                  <ListItem
-                    primaryText={contactSqlError}
-                    leftIcon={errorIcon}
-                  />
-                </List>
-              ) : (
-                ""
-              )}
-            </div>
+            </RaisedButton>
+          </FileDrop>
+          {datawarehouseAvailable && (
+            <ContactsSqlForm onChangeValidSql={handleOnChangeValidSql} />
           )}
-          {jobResult && (
+          {contactsCount > 0 && (
+            <List>
+              <Subheader>Uploaded</Subheader>
+              <ListItem
+                {...dataTest("uploadedContacts")}
+                primaryText={`${contactsCount} contacts`}
+                leftIcon={checkIcon()}
+              />
+              <ListItem
+                primaryText={`${customFields.length} custom fields`}
+                leftIcon={checkIcon()}
+                nestedItems={customFields.map(field => (
+                  <ListItem
+                    key={field}
+                    innerDivStyle={inlineStyles.nestedItem}
+                    primaryText={field}
+                  />
+                ))}
+              />
+            </List>
+          )}
+          {pendingJob && (
             <List>
               <Subheader>Upload Messages</Subheader>
-              {jobResult.resultMessage.split("\n").length > 0 ? (
-                jobResult.resultMessage
+              {pendingJob.resultMessage.split("\n").length > 0 ? (
+                pendingJob.resultMessage
                   .split("\n")
                   .map(message => (
                     <ListItem key={message} primaryText={message} />
@@ -297,64 +274,136 @@ export default class CampaignContactsForm extends React.Component {
               )}
             </List>
           )}
-          {this.renderContactStats()}
-          {contactUploadError ? (
+          {contactUploadError && (
             <List>
-              <ListItem primaryText={contactUploadError} leftIcon={errorIcon} />
+              <ListItem
+                primaryText={contactUploadError}
+                leftIcon={<ErrorIcon color={theme.colors.red} />}
+              />
             </List>
-          ) : (
-            ""
           )}
           <Form.Button
             type="submit"
+            disabled={isSaveDisabled}
+            label={finalSaveLabel}
             component={RaisedButton}
-            disabled={this.props.saveDisabled}
-            label={this.props.saveLabel}
           />
         </GSForm>
-      </div>
-    );
-  }
-
-  render() {
-    let subtitle = (
-      <span>
-        Your upload file should be in CSV format with column headings in the
-        first row. You must include{" "}
-        <span className={css(styles.csvHeader)}>firstName</span>,
-        <span className={css(styles.csvHeader)}>lastName</span>, and
-        <span className={css(styles.csvHeader)}>cell</span> columns. If you
-        include a <span className={css(styles.csvHeader)}>zip</span> column,
-        we'll use the zip to guess the contact's timezone for enforcing texting
-        hours. An optional column to map the contact to a CRM is{" "}
-        <span className={css(styles.csvHeader)}>external_id</span>
-        Any additional columns in your file will be available as custom fields
-        to use in your texting scripts.
-      </span>
-    );
-
-    return (
-      <div>
-        <CampaignFormSectionHeading
-          title="Who are you contacting?"
-          subtitle={subtitle}
-        />
-        {this.renderForm()}
-      </div>
+      </SectionWrapper>
     );
   }
 }
 
 CampaignContactsForm.propTypes = {
-  datawarehouseAvailable: PropTypes.bool,
-  onChange: PropTypes.func,
-  optOuts: PropTypes.array,
-  formValues: PropTypes.object,
-  ensureComplete: PropTypes.bool,
-  onSubmit: PropTypes.func,
-  saveDisabled: PropTypes.bool,
-  saveLabel: PropTypes.string,
-  jobResult: PropTypes.object,
-  otherCampaigns: PropTypes.array,
-  canFilterLandlines: PropTypes.bool
+  organizationId: PropTypes.string.isRequired,
+  campaignId: PropTypes.string.isRequired,
+  adminPerms: PropTypes.bool.isRequired,
+  active: PropTypes.bool.isRequired,
+  isNew: PropTypes.bool.isRequired,
+  saveLabel: PropTypes.string.isRequired,
+  jobs: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onExpandChange: PropTypes.func.isRequired,
+  onDiscardJob: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired,
+  onComplete: PropTypes.func.isRequired,
+
+  // GraphQL props
+  mutations: PropTypes.shape({
+    editCampaignContacts: PropTypes.func.isRequired
+  }).isRequired,
+  campaignData: PropTypes.shape({
+    campaign: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      isStarted: PropTypes.bool.isRequired,
+      customFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+      contactsCount: PropTypes.number.isRequired,
+      datawarehouseAvailable: PropTypes.bool.isRequired
+    }).isRequired
+  }).isRequired,
+  organizationData: PropTypes.shape({
+    organization: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      numbersApiKey: PropTypes.string.isRequired,
+      campaigns: PropTypes.shape({
+        campaigns: PropTypes.arrayOf(
+          PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            title: PropTypes.string.isRequired,
+            createdAt: PropTypes.string.isRequired
+          })
+        ).isRequired
+      }).isRequired
+    }).isRequired
+  }).isRequired
 };
+
+const queries = {
+  campaignData: {
+    query: gql`
+      query getCampaignDataForEditContacts($campaignId: String!) {
+        campaign(id: $campaignId) {
+          id
+          isStarted
+          customFields
+          contactsCount
+          datawarehouseAvailable
+        }
+      }
+    `,
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+    })
+  },
+  organizationData: {
+    query: gql`
+      query getOrganizationDataForEditContacts($organizationId: String!) {
+        organization(id: $organizationId) {
+          id
+          numbersApiKey
+          campaigns(cursor: { offset: 0, limit: 5000 }) {
+            campaigns {
+              id
+              title
+              createdAt
+            }
+          }
+        }
+      }
+    `,
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      }
+    })
+  }
+};
+
+const mutations = {
+  // TODO: this should fetch campaign.sectionProgress.contacts
+  editCampaignContacts: ownProps => campaign => ({
+    mutation: gql`
+      mutation editCampaignContacts(
+        $campaignId: String!
+        $campaign: CampaignInput!
+      ) {
+        editCampaign(id: $campaignId, campaign: $campaign) {
+          id
+          customFields
+          contactsCount
+          datawarehouseAvailable
+        }
+      }
+    `,
+    variables: {
+      campaignId: ownProps.campaignId,
+      campaign
+    }
+  })
+};
+
+export default loadData({
+  queries,
+  mutations
+})(CampaignContactsForm);

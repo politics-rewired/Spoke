@@ -64,23 +64,47 @@ class AdminCampaignEdit extends React.Component {
 
   sections = () => [
     {
+      key: "basics",
       content: CampaignBasicsForm,
       jobTypes: []
     },
     {
+      key: "textingHours",
       content: CampaignTextingHoursForm,
       jobTypes: []
+    },
+    {
+      key: "contacts",
+      content: CampaignContactsForm,
+      jobTypes: ["upload_contacts", "contact_sql"]
     }
   ];
 
   handleSectionOnError = requestError => this.setState({ requestError });
   handleCloseError = () => this.setState({ requestError: undefined });
 
+  /**
+   * If this is a new campaign, advance to next section. Otherwise, close the section
+   */
+  createHandleSectionComplete = sectionIndex => () => {
+    const { expandedSection } = this.state;
+    const isNew = this.isNew();
+    if (isNew) {
+      const nextSection = expandedSection + 1;
+      const isValidSection = nextSection < this.sections().length;
+      this.setState({ expandedSection: isValidSection ? nextSection : -1 });
+    } else {
+      if (sectionIndex === expandedSection) {
+        return this.setState({ expandedSection: -1 });
+      }
+    }
+  };
+
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
     const { adminPerms, match, pendingJobsData } = this.props;
-    const { campaignId } = match.params;
+    const { campaignId, organizationId } = match.params;
     const { pendingJobs } = pendingJobsData.campaign;
 
     const isNew = this.isNew();
@@ -105,7 +129,8 @@ class AdminCampaignEdit extends React.Component {
 
           return (
             <ContentComponent
-              key={section.title}
+              key={section.key}
+              organizationId={organizationId}
               campaignId={campaignId}
               adminPerms={adminPerms}
               active={sectionIsExpanded}
@@ -116,6 +141,7 @@ class AdminCampaignEdit extends React.Component {
               onExpandChange={handleExpandChange}
               onDiscardJob={this.handleDeleteJob}
               onError={this.handleSectionOnError}
+              onComplete={this.createHandleSectionComplete(sectionIndex)}
             />
           );
         })}

@@ -6,9 +6,10 @@ import * as yup from "yup";
 import moment from "moment";
 import isEmpty from "lodash/isEmpty";
 
+import RaisedButton from "material-ui/RaisedButton";
 import Autocomplete from "material-ui/AutoComplete";
 
-import {loadData} from "../../hoc/with-operations";
+import { loadData } from "../../hoc/with-operations";
 import { difference } from "../../../lib/utils";
 import { dataSourceItem } from "../../../components/utils";
 import GSForm from "../../../components/forms/GSForm";
@@ -62,6 +63,8 @@ class CampaignTextingHoursForm extends React.Component {
   };
 
   addAutocompleteFormField(name, stateName, value, label, hint, choices) {
+    const searchText =
+      this.state[stateName] !== undefined ? this.state[stateName] : value || "";
     return (
       <Form.Field
         name={name}
@@ -70,7 +73,7 @@ class CampaignTextingHoursForm extends React.Component {
         dataSource={choices}
         filter={Autocomplete.caseInsensitiveFilter}
         maxSearchResults={4}
-        searchText={this.state[stateName] || value || ""}
+        searchText={searchText}
         hintText={hint}
         floatingLabelText={label}
         onUpdateInput={text => this.setState({ [stateName]: text })}
@@ -104,8 +107,8 @@ class CampaignTextingHoursForm extends React.Component {
     try {
       const response = await editTextingHours(pendingChanges);
       if (response.errors) throw response.errors;
-      console.log(response.data.editCampaign);
       this.setState({ pendingChanges: {} });
+      this.props.onComplete();
     } catch (err) {
       this.props.onError(err.message);
     } finally {
@@ -205,8 +208,9 @@ class CampaignTextingHoursForm extends React.Component {
 
           <Form.Button
             type="submit"
-            disabled={isSaveDisabled}
             label={finalSaveLabel}
+            disabled={isSaveDisabled}
+            component={RaisedButton}
           />
         </GSForm>
       </SectionWrapper>
@@ -224,6 +228,7 @@ CampaignTextingHoursForm.propTypes = {
   onExpandChange: PropTypes.func.isRequired,
   onDiscardJob: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,
+  onComplete: PropTypes.func.isRequired,
 
   // GraphQL props
   mutations: PropTypes.shape({
@@ -254,12 +259,12 @@ const queries = {
       }
     `,
     options: ownProps => ({
-    variables: {
-      campaignId: ownProps.campaignId
-    }
-  })
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+    })
   }
-});
+};
 
 const mutations = {
   // TODO: this should fetch campaign.sectionProgress.basics
