@@ -563,6 +563,11 @@ if (isClient()) {
     SESSION_SECRET: str({
       desc: "Unique key used to encrypt sessions."
     }),
+    SHUTDOWN_GRACE_PERIOD: num({
+      desc:
+        "How long to wait after receiving kill signal before tearing down. Useful for waiting for readiness probe period.",
+      default: 5000
+    }),
     SLACK_TEAM_NAME: str({
       desc: "The name of the Slack team to use for sign-in.",
       default: undefined
