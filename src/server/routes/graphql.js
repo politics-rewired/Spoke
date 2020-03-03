@@ -3,6 +3,7 @@ const router = express.Router();
 import { ApolloServer } from "apollo-server-express";
 import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
 
+import logger from "../../logger";
 import mocks from "../api/mocks";
 import { createLoaders } from "../models";
 import { config } from "../../config";
@@ -15,6 +16,16 @@ const executableSchema = makeExecutableSchema({
   allowUndefinedInResolve: false
 });
 
+const formatError = err => {
+  // node-postgres does not use an Error subclass so we check for schema property
+  if (err.originalError.hasOwnProperty("schema") && config.isProduction) {
+    logger.error("Postgres error: ", err);
+    return new Error("Internal server error");
+  }
+
+  return err;
+};
+
 addMockFunctionsToSchema({
   schema: executableSchema,
   mocks,
@@ -23,6 +34,7 @@ addMockFunctionsToSchema({
 
 const server = new ApolloServer({
   schema: executableSchema,
+  formatError,
   uploads: {
     maxFileSize: 50 * 1000 * 1000, // 50 MB
     maxFiles: 20
