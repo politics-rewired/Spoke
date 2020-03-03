@@ -3,6 +3,8 @@ import { config } from "../config";
 import logger from "../logger";
 import bodyParser from "body-parser";
 import express from "express";
+import http from "http";
+import { createTerminus } from "@godaddy/terminus";
 import appRenderer from "./middleware/app-renderer";
 import passport from "passport";
 import cookieSession from "cookie-session";
@@ -23,6 +25,7 @@ import {
   utilsRouter,
   previewRouter
 } from "./routes";
+import { r } from "./models";
 
 process.on("uncaughtException", ex => {
   logger.error("uncaughtException", ex);
@@ -139,10 +142,51 @@ app.post(
 // This middleware should be last. Return the React app only if no other route is hit.
 app.use(appRenderer);
 
+const server = http.createServer(app);
+
+// Ensure database is reachable
+const onHealthCheck = async () =>
+  r.knex.raw("select 1;").then(() => ({ status: "healthy" }));
+
+const waitMs = config.SHUTDOWN_GRACE_PERIOD;
+const beforeShutdown = () => {
+  logger.info(
+    `Received kill signal, waiting ${waitMs}ms before shutting down...`
+  );
+  return new Promise(resolve => {
+    setTimeout(() => {
+      logger.info("Done waiting");
+      resolve();
+    }, waitMs);
+  });
+};
+
+const onSignal = () => {
+  logger.info("Starting cleanup of Postgres pools.");
+  return Promise.all([
+    r.knex.destroy(),
+    !!config.DATABASE_READER_URL ? r.reader.destroy() : Promise.resolve()
+  ]);
+};
+
+const onShutdown = () => {
+  logger.info("Cleanup finished, server is shutting down.");
+};
+
+createTerminus(server, {
+  signals: ["SIGTERM", "SIGINT"],
+  healthChecks: { "/health": onHealthCheck },
+  onSignal,
+  beforeShutdown,
+  onShutdown,
+  logger
+});
+
 // Heroku requires you to use process.env.PORT
 const port = DEV_APP_PORT || PORT;
-app.listen(port, () => {
+server.listen(port, () => {
   logger.info(`Node app is running on port ${port}`);
 });
 
+// Used by lambda handler
 export default app;

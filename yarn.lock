@@ -216,6 +216,14 @@
   resolved "https://registry.yarnpkg.com/@emotion/utils/-/utils-0.8.2.tgz#576ff7fb1230185b619a75d258cbc98f0867a8dc"
   integrity sha512-rLu3wcBWH4P5q1CGoSSH/i9hrXs7SlbRLkoq9IGuoPYNGQvDJ3pt/wmOM+XgYjIDRMVIdkUWt0RsfzF50JfnCw==
 
+"@godaddy/terminus@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@godaddy/terminus/-/terminus-4.3.1.tgz#20bc24271df373ae362b3948c9dd95d22736b5c2"
+  integrity sha512-zChILIprb4nWTGJ/pXafbGZqJA7yB6JzFQp5f8PBR5B0cJ6f9Nd40ySLFTBzko+PEZgVaJlKrJi5gUQLTI9dpw==
+  dependencies:
+    es6-promisify "^6.0.0"
+    stoppable "^1.0.5"
+
 "@google-cloud/common@^2.1.1":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@google-cloud/common/-/common-2.3.0.tgz#492ddd3a163c9c335ce596d70f8821fa83603a64"
@@ -5075,6 +5083,11 @@ es6-promisify@^5.0.0:
   integrity sha1-UQnWLz5W6pZ8S2NQWu8IKRyKUgM=
   dependencies:
     es6-promise "^4.0.3"
+
+es6-promisify@^6.0.0:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/es6-promisify/-/es6-promisify-6.0.2.tgz#525c23725b8510f5f1f2feb5a1fbad93a93e29b4"
+  integrity sha512-eO6vFm0JvqGzjWIQA6QVKjxpmELfhWbDUWHm1rPfIbn55mhKPiAa5xpLmQWJrNa629ZIeQ8ZvMAi13kvrjK6Mg==
 
 es6-set@~0.1.5:
   version "0.1.5"
@@ -13882,6 +13895,11 @@ stealthy-require@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
   integrity sha1-NbCYdbT/SfJqd35QmzCQoyJr8ks=
+
+stoppable@^1.0.5:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/stoppable/-/stoppable-1.1.0.tgz#32da568e83ea488b08e4d7ea2c3bcc9d75015d5b"
+  integrity sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==
 
 stream-browserify@^2.0.1:
   version "2.0.2"
