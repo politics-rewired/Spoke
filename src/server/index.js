@@ -26,6 +26,7 @@ import {
   previewRouter
 } from "./routes";
 import { r } from "./models";
+import { assignmentQueue } from "./api/assignment";
 
 process.on("uncaughtException", ex => {
   logger.error("uncaughtException", ex);
@@ -161,11 +162,20 @@ const beforeShutdown = () => {
   });
 };
 
+const teardownKue = async () =>
+  new Promise((resolve, reject) => {
+    assignmentQueue.shutdown(5000, err => {
+      if (err) reject(err);
+      resolve();
+    });
+  });
+
 const onSignal = () => {
   logger.info("Starting cleanup of Postgres pools.");
   return Promise.all([
     r.knex.destroy(),
-    !!config.DATABASE_READER_URL ? r.reader.destroy() : Promise.resolve()
+    !!config.DATABASE_READER_URL ? r.reader.destroy() : Promise.resolve(),
+    teardownKue()
   ]);
 };
 

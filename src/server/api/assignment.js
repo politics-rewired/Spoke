@@ -15,7 +15,11 @@ import kue from "kue";
 export const assignmentQueue =
   config.MEMOREDIS_URL && config.AUTO_HANDLE_REQUESTS
     ? kue.createQueue({ redis: config.MEMOREDIS_URL })
-    : { create: () => ({ save: () => null }), process: () => null };
+    : {
+        create: () => ({ save: () => null }),
+        process: () => null,
+        shutdown: (_, fn) => fn()
+      };
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
