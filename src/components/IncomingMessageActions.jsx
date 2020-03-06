@@ -118,6 +118,7 @@ class IncomingMessageActions extends Component {
       />
     ];
 
+    const { contactsAreSelected, conversationCount } = this.props;
     const { selectedTexters } = this.state;
     const hasSeletedTexters = selectedTexters.length > 0;
     return (
@@ -148,18 +149,14 @@ class IncomingMessageActions extends Component {
                   <FlatButton
                     label={"Reassign selected"}
                     onClick={this.onReassignmentClicked}
-                    disabled={!hasSeletedTexters}
+                    disabled={!contactsAreSelected || !hasSeletedTexters}
                   />
                 </div>
                 <div className={css(styles.flexColumn)}>
                   <FlatButton
-                    label={`Reassign all ${
-                      this.props.conversationCount
-                    } matching`}
+                    label={`Reassign all ${conversationCount} matching`}
                     onClick={this.onReassignAllMatchingClicked}
-                    disabled={
-                      !hasSeletedTexters || this.props.conversationCount === 0
-                    }
+                    disabled={conversationCount === 0}
                   />
                 </div>
                 <Dialog
@@ -171,9 +168,7 @@ class IncomingMessageActions extends Component {
                   modal={true}
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
-                  {`Reassign all ${
-                    this.props.conversationCount
-                  } matching conversations?`}
+                  {`Reassign all ${conversationCount} matching conversations?`}
                 </Dialog>
               </div>
             </Tab>
@@ -183,16 +178,14 @@ class IncomingMessageActions extends Component {
                   <FlatButton
                     label={"Unassign selected"}
                     onClick={this.onUnassignClicked}
-                    disabled={this.props.conversationCount === 0}
+                    disabled={!contactsAreSelected}
                   />
                 </div>
                 <div className={css(styles.flexColumn)}>
                   <FlatButton
-                    label={`Unassign all ${
-                      this.props.conversationCount
-                    } matching`}
+                    label={`Unassign all ${conversationCount} matching`}
                     onClick={this.onUnassignAllMatchingClicked}
-                    disabled={this.props.conversationCount === 0}
+                    disabled={conversationCount === 0}
                   />
                 </div>
                 <Dialog
@@ -204,9 +197,7 @@ class IncomingMessageActions extends Component {
                   modal={true}
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
-                  {`Unassign all ${
-                    this.props.conversationCount
-                  } matching conversations?`}
+                  {`Unassign all ${conversationCount} matching conversations?`}
                 </Dialog>
               </div>
             </Tab>
