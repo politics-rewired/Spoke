@@ -56,16 +56,14 @@ export class IncomingMessageList extends Component {
   };
 
   componentDidMount() {
-    const convos = (this.props.conversations || {}).conversations || {};
-    const { total = 0 } = convos.pageInfo;
+    const { total = 0 } = this.props.conversations.conversations.pageInfo;
     this.props.onConversationCountChanged(total);
   }
 
   componentDidUpdate(prevProps) {
-    const prevConvos = (prevProps.conversations || {}).conversations || {};
+    const prevConvos = prevProps.conversations.conversations;
     const { total: prevTotal = 0 } = prevConvos.pageInfo;
-    const convos = (this.props.conversations || {}).conversations || {};
-    const { total = 0 } = convos.pageInfo;
+    const { total = 0 } = this.props.conversations.conversations.pageInfo;
 
     if (prevTotal !== total) {
       this.props.onConversationCountChanged(pageInfo.total);
