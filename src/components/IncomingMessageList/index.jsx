@@ -55,21 +55,19 @@ export class IncomingMessageList extends Component {
     activeConversationIndex: -1
   };
 
+  componentDidMount() {
+    const convos = (this.props.conversations || {}).conversations || {};
+    const { total = 0 } = convos.pageInfo;
+    this.props.onConversationCountChanged(total);
+  }
+
   componentDidUpdate(prevProps) {
-    let previousPageInfo = { total: 0 };
-    if (prevProps.conversations.conversations) {
-      previousPageInfo = prevProps.conversations.conversations.pageInfo;
-    }
+    const prevConvos = (prevProps.conversations || {}).conversations || {};
+    const { total: prevTotal = 0 } = prevConvos.pageInfo;
+    const convos = (this.props.conversations || {}).conversations || {};
+    const { total = 0 } = convos.pageInfo;
 
-    let pageInfo = { total: 0 };
-    if (this.props.conversations.conversations) {
-      pageInfo = this.props.conversations.conversations.pageInfo;
-    }
-
-    if (
-      previousPageInfo.total !== pageInfo.total ||
-      (!previousPageInfo && pageInfo)
-    ) {
+    if (prevTotal !== total) {
       this.props.onConversationCountChanged(pageInfo.total);
     }
   }
@@ -208,13 +206,11 @@ export class IncomingMessageList extends Component {
   };
 
   handleRowsSelected = rowsSelected => {
-    console.log({ rowsSelected });
     const conversations = this.props.conversations.conversations.conversations;
     const [selection, selectedData] = prepareSelectedRowsData(
       conversations,
       rowsSelected
     );
-    console.log({ selection });
     this.props.onConversationSelected(selection, selectedData);
   };
 
