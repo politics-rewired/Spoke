@@ -165,8 +165,8 @@ const beforeShutdown = () => {
 const teardownKue = async () =>
   new Promise((resolve, reject) => {
     assignmentQueue.shutdown(5000, err => {
-      if (err) reject(err);
-      resolve();
+      if (err) return reject(err);
+      return resolve();
     });
   });
 
