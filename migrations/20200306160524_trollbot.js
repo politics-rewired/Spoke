@@ -11,7 +11,10 @@ exports.up = function(knex) {
         .notNull()
         .index();
 
-      table.boolean("dismissed").default(false);
+      table
+        .boolean("dismissed")
+        .default(false)
+        .index();
     }),
     knex.schema.createTable("troll_trigger", table => {
       table.string("token");
