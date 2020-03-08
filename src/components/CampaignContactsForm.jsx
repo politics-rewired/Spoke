@@ -14,6 +14,7 @@ import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
+import UploadIcon from "material-ui/svg-icons/file/file-upload";
 import theme from "../styles/theme";
 import { StyleSheet, css } from "aphrodite";
 import * as yup from "yup";
@@ -102,6 +103,11 @@ export default class CampaignContactsForm extends React.Component {
   handleFileDrop = (files, event) =>
     this.props.onChange({ contactsFile: files[0] });
 
+  handleOnSelectFile = ({ target }) => {
+    const files = target.files;
+    this.props.onChange({ contactsFile: files[0] });
+  };
+
   onFilterOutLandlinesToggle = (_ev, toggled) => {
     this.setState({ filterOutLandlines: toggled });
     this.props.onChange({ filterOutLandlines: toggled });
@@ -177,7 +183,20 @@ export default class CampaignContactsForm extends React.Component {
           contactsFile ? "file-drop-target with-file" : "file-drop-target"
         }
       >
-        {contactsFile ? contactsFile.name : "Drop a csv here"}
+        <p>{contactsFile ? contactsFile.name : "Drop a csv here, or"}</p>
+        <RaisedButton
+          label="Select a file"
+          containerElement="label"
+          icon={<UploadIcon />}
+        >
+          <input
+            id="csv-upload-field"
+            type="file"
+            accept=".csv"
+            style={{ display: "none" }}
+            onChange={this.handleOnSelectFile}
+          />
+        </RaisedButton>
       </FileDrop>
     );
   }
