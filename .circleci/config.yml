@@ -1,6 +1,17 @@
 version: 2
 
 jobs:
+  test:
+    docker:
+      - image: circleci/node:8.10.0
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run: yarn lint:commitlint-circle
+
   build_image:
     docker:
       - image: circleci/node:8.10.0
@@ -39,8 +50,11 @@ workflows:
 
   build_and_push:
     jobs:
+      - test
       - build_image:
           context: gcp-spoke
+          requires:
+            - test
           filters:
             branches:
               only: master
