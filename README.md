@@ -68,4 +68,4 @@ uploading or exporting) that may exceed Lambda's limits.
 
 # License
 
-Spoke is licensed under the MIT license.
+See [LICENSE](./LICENSE).
