@@ -15,7 +15,6 @@
     "test-knex": "jest --config jest.config.js __test__/server/db/",
     "clean": "rm -rf $OUTPUT_DIR",
     "lint": "eslint --fix --ext js --ext jsx src",
-    "lint:commitlint-circle": "commitlint-circle",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "prod-build-client": "webpack --mode production",
