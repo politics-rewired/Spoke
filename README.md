@@ -64,6 +64,10 @@ Twilio provides test credentials that will not charge your account as described 
 
 This project adheres to the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/). You can use `yarn commit` instead of `git commit`.
 
+### Merging PRs
+
+PRs merges should use the "Squash and merge" option. The final commit message should include relevant information from the component commits and its heading should reflect the goal of the PR itself.
+
 ## Deploying
 
 We deploy via https://github.com/assemble-main/spoke-terraform, which deploys one Elastic Beanstalk cluster and one Lambda function side-
