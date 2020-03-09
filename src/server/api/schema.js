@@ -41,6 +41,7 @@ import {
   reassignConversations,
   resolvers as conversationsResolver
 } from "./conversations";
+import { resolvers as messageReviewResolver } from "./message-review";
 import {
   accessRequired,
   assignmentRequired,
@@ -3394,5 +3395,6 @@ export const resolvers = {
   ...{ Phone: GraphQLPhone },
   ...questionResolvers,
   ...conversationsResolver,
+  ...messageReviewResolver,
   ...rootMutations
 };
