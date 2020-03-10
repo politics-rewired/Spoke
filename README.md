@@ -66,7 +66,7 @@ This project adheres to the [Conventional Commits specification](https://www.con
 
 ### Merging PRs
 
-PRs merges should use the "Squash and merge" option. The final commit message should include relevant information from the component commits and its heading should reflect the goal of the PR itself.
+Pull Request merges should use the "Squash and merge" strategy. The final commit message should include relevant information from the component commits and its heading should reflect the purpose of the PR itself; if the PR adds a feature, it should be a `feat: add feature x` even if it includes a necessary bug fix (ideally unrelated bug fixes are submitted as separate PRs in the first place).
 
 ## Deploying
 
