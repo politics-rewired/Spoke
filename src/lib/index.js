@@ -70,7 +70,10 @@ const getValidatedData = (data, optOuts) => {
       cell: getFormattedPhoneNumber(row.cell, PHONE_NUMBER_COUNTRY)
     })
   );
-  result = _.partition(validatedData, row => !!row.cell);
+  // Restrict to 10-digit US numbers
+  result = _.partition(validatedData, row =>
+    /^\+1[0-9]{10}$/.test(row.cell || "")
+  );
   validatedData = result[0];
   const invalidCellRows = result[1];
 
