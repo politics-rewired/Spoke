@@ -59,11 +59,7 @@ export const processContactsFile = async file => {
           }
         }
         const contact = sanitizeRawContact(data);
-
-        // Restrict to 10-digit US numbers
-        if (/^\+1[0-9]{10}$/.test(contact.cell)) {
-          resultData.push(contact);
-        }
+        resultData.push(contact);
       },
       complete: ({ meta: { aborted } }) => {
         if (aborted) return reject(`CSV missing fields: ${missingFields}`);
