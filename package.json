@@ -17,6 +17,8 @@
     "lint": "eslint --fix --ext js --ext jsx src",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
+    "release": "standard-version",
+    "release:changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "prod-build-client": "webpack --mode production",
     "prod-build-server": "babel ./src -d ./build/server --source-maps --copy-files",
     "prod-build": "yarn clean && yarn prod-build-client && yarn prod-build-server",
@@ -51,7 +53,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MoveOnOrg/spoke.git"
+    "url": "git+https://github.com/politics-rewired/spoke.git"
   },
   "keywords": [
     "spoke",
@@ -67,9 +69,9 @@
   "author": "Axle Factory",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MoveOnOrg/Spoke/issues"
+    "url": "https://github.com/politics-rewired/Spoke/issues"
   },
-  "homepage": "https://github.com/MoveOnOrg/Spoke/#readme",
+  "homepage": "https://github.com/politics-rewired/Spoke",
   "dependencies": {
     "@aoberoi/passport-slack": "^1.0.5",
     "@godaddy/terminus": "^4.3.1",
@@ -180,6 +182,7 @@
     "babel-runtime": "^6.26.0",
     "commitizen": "^4.0.3",
     "commitlint-circle": "^1.0.0",
+    "conventional-changelog-cli": "^2.0.31",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-15": "^1.0.5",
     "eslint": "2.13.1",
@@ -204,6 +207,7 @@
     "regenerator-runtime": "^0.10.5",
     "saucelabs": "^1.5.0",
     "selenium-webdriver": "^3.6.0",
+    "standard-version": "^7.1.0",
     "terser-webpack-plugin": "^2.3.1",
     "wait-on": "^2.1.0",
     "webpack": "^4.39.2",
