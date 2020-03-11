@@ -7,6 +7,9 @@ exports.up = function(knex) {
     drop index campaign_contact_timezone_index;
     drop index campaign_contact_assignment_id_index;
     drop index campaign_contact_cell_index;
+
+    drop index message_assignment_id_foreign;
+    alter table message drop constraint message_assignment_id_foreign;
   `);
 };
 
@@ -19,5 +22,8 @@ exports.down = function(knex) {
     create index campaign_contact_timezone_index on campaign_contact (timezone);
     create index campaign_contact_assignment_id_index on campaign_contact (assignment_id);
     create index campaign_contact_cell_index on campaign_contact (cell);
+
+    create index message_assignment_id_foreign on message (assigment_id);
+    alter table message add constraint message_assignment_id_foreign foreign key (assignment_id) references assignment (id);
   `);
 };
