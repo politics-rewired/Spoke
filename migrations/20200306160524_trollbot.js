@@ -17,7 +17,9 @@ exports.up = function(knex) {
         .index();
     }),
     knex.schema.createTable("troll_trigger", table => {
-      table.string("token");
+      table.string("token").primary();
+      table.integer("organization_id").references("organization(id)");
+      table.index("organization_id");
     })
   ]);
 };

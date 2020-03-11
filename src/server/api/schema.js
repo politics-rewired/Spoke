@@ -3158,6 +3158,41 @@ const rootMutations = {
       );
 
       return true;
+    },
+    dismissAlarm: async (_, { messageId, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_alarm")
+        .update({ dismissed: true })
+        .where({ message_id: messageId });
+
+      return true;
+    },
+    dismissManyAlarms: async (_, { messageIds, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_alarm")
+        .update({ dismissed: true })
+        .whereIn("message_id", messageIds);
+
+      return true;
+    },
+    addToken: async (_, { token, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_trigger")
+        .insert({ token, organizationId: parseInt(organizationId) });
+
+      return true;
+    },
+    removeToken: async (_, { token, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_trigger")
+        .where({ token, organizationId: parseInt(organizationId) })
+        .del();
+
+      return true;
     }
   }
 };
@@ -3363,6 +3398,46 @@ const rootResolvers = {
         return ar;
       });
       return result;
+    },
+    trollAlarms: async (
+      _,
+      { limit, offset, token, dismissed, organizationId },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      let query = r
+        .reader("troll_alarm")
+        .select("message_id", "trigger_token", "dismissed", "text")
+        .join("message", "message.id", "=", "troll_alarm.message_id")
+        .where({ dismissed: !!dismissed })
+        .limit(limit)
+        .offset(offset);
+
+      if (token !== undefined) {
+        query = query.where({ trigger_token: token });
+      }
+
+      const alarms = await query;
+
+      return alarms.map(a => ({
+        messageId: a.message_id,
+        messageText: a.text,
+        token: a.trigger_token,
+        dismissed: a.dismissed
+      }));
+    },
+    trollTokens: async (_, { organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      const tokens = await r
+        .reader("troll_trigger")
+        .where({ organization_id: parseInt(organizationId) });
+
+      return tokens.map(t => ({
+        token: t.token,
+        organization_id: organizationId
+      }));
     }
   }
 };

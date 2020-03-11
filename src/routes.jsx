@@ -16,6 +16,7 @@ import AdminOptOutList from "./containers/AdminOptOutList";
 import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
 import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
 import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
+import AdminTrollAlarms from "./containers/AdminTrollAlarms";
 import AdminIncomingMessageList from "./containers/AdminIncomingMessageList";
 import EscalatedConversationList from "./containers/AdminIncomingMessageList/EscalatedConversationList";
 import AdminCampaignEdit from "./containers/AdminCampaignEdit";
@@ -167,6 +168,14 @@ const AdminOrganizationRoutes = props => {
           <Route
             path={`${organizationPath}/assignment-requests`}
             component={AdminAssignmentRequest}
+          />
+          <Route
+            path={`${organizationPath}/trolltokens`}
+            component={Settings}
+          />
+          <Route
+            path={`${organizationPath}/trollalarms`}
+            component={AdminTrollAlarms}
           />
           <Route path={`${organizationPath}/settings`} component={Settings} />
           <Redirect to={`${organizationPath}/campaigns`} />

@@ -136,6 +136,20 @@ class AdminDashboard extends React.Component {
       sections.splice(index, 1);
     }
 
+    if (window.ENABLE_TROLLBOT) {
+      sections.push({
+        name: "Troll Tokens",
+        path: "trolltokens",
+        role: "SUPERVOLUNTEER"
+      });
+
+      sections.push({
+        name: "Troll Alarms",
+        path: "trollalarms",
+        role: "SUPERVOLUNTEER"
+      });
+    }
+
     let currentSection = sections.filter(section =>
       location.pathname.match(`/${section.path}`)
     );

@@ -298,6 +298,11 @@ if (isClient()) {
       default: false,
       isClient: true
     }),
+    ENABLE_TROLLBOT: bool({
+      desc: "Whether to enable trollbot",
+      default: false,
+      isClient: true
+    }),
     DISABLE_TEXTER_NOTIFICATIONS: bool({
       desc:
         "Whether to disable texter notifications – if true, should be implemented externally.",

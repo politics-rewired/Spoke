@@ -28,7 +28,7 @@ const main = async () => {
             )[1]
           ) as trigger_token
         from message
-        where created_at > now() - interval '6 minute'
+        where message.created_at > now() - interval '6 minute'
           and is_from_contact = false
           and to_tsvector(text) @@ ( select query from trigger_query )
       ),
