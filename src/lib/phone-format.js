@@ -12,8 +12,7 @@ export const getFormattedPhoneNumber = (cell, country = "US") => {
       return phoneUtil.format(inputNumber, PhoneNumberFormat.E164);
     }
     return "";
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
     return "";
   }
 };

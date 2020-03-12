@@ -1,3 +1,5 @@
+import iconv from "iconv-lite";
+import AutoDetectDecoderStream from "autodetect-decoder-stream";
 import partition from "lodash/partition";
 import Papa from "papaparse";
 
@@ -32,7 +34,9 @@ const sanitizeRawContact = rawContact => {
 
 export const processContactsFile = async file => {
   const { createReadStream } = await file;
-  const stream = createReadStream();
+  const stream = createReadStream()
+    .pipe(new AutoDetectDecoderStream())
+    .pipe(iconv.encodeStream("utf8"));
 
   return new Promise((resolve, reject) => {
     let missingFields = undefined;
