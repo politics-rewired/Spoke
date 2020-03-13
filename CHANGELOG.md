@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/politics-rewired/spoke/compare/v1.5.0...v1.5.1) (2020-03-13)
+
+
+### Bug Fixes
+
+* expose validation stats to user ([#600](https://github.com/politics-rewired/spoke/issues/600)) ([9b147d7](https://github.com/politics-rewired/spoke/commit/9b147d79a53ddd35a959ac8592483772b236b2f9))
+* **edit-campaign:** autodetect file encoding ([#599](https://github.com/politics-rewired/spoke/issues/599)) ([620609d](https://github.com/politics-rewired/spoke/commit/620609d56e3a4c99fdca03258b7ce23acd67d1d4))
+
 ## [1.5.0](https://github.com/politics-rewired/spoke/compare/v1.4.2...v1.5.0) (2020-03-12)
 
 

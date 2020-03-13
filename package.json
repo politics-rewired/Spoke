@@ -1,6 +1,6 @@
 {
   "name": "spoke",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Spoke",
   "main": "src/server",
   "engines": {
