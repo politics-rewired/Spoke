@@ -395,12 +395,9 @@ class AdminCampaignEdit extends React.Component {
           optOuts: [], // this.props.organizationData.organization.optOuts, // <= doesn't scale
           datawarehouseAvailable: this.props.campaignData.campaign
             .datawarehouseAvailable,
-          jobResultMessage:
-            (
-              this.props.pendingJobsData.campaign.pendingJobs.filter(job =>
-                /contacts/.test(job.jobType)
-              )[0] || {}
-            ).resultMessage || "",
+          jobResult: this.props.pendingJobsData.campaign.pendingJobs.find(job =>
+            /contacts/.test(job.jobType)
+          ),
           canFilterLandlines:
             this.props.organizationData.organization &&
             !!this.props.organizationData.organization.numbersApiKey,

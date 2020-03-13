@@ -202,8 +202,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     }
   });
 
+  let validationStats = {};
   if (campaign.hasOwnProperty("contactsFile")) {
-    campaign.contacts = await processContactsFile(campaign.contactsFile);
+    const processedContacts = await processContactsFile(campaign.contactsFile);
+    campaign.contacts = processedContacts.contacts;
+    validationStats = processedContacts.validationStats;
   }
 
   if (campaign.hasOwnProperty("contacts") && campaign.contacts) {
@@ -226,7 +229,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     const jobPayload = {
       excludeCampaignIds: campaign.excludeCampaignIds || [],
       contacts: contactsToSave,
-      filterOutLandlines: campaign.filterOutLandlines
+      filterOutLandlines: campaign.filterOutLandlines,
+      validationStats
     };
     const compressedString = await gzip(JSON.stringify(jobPayload));
     const [job] = await r

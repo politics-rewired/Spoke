@@ -202,19 +202,11 @@ export default class CampaignContactsForm extends React.Component {
   }
 
   renderForm() {
-    const { canFilterLandlines } = this.props;
+    const { canFilterLandlines, jobResult } = this.props;
     const { contactUploadError, contactSqlError } = this.state;
     return (
       <div>
         {this.renderCampaignExclusion()}
-        {!this.props.jobResultMessage ? (
-          ""
-        ) : (
-          <div>
-            <CampaignFormSectionHeading title="Job Outcome" />
-            <div>{this.props.jobResultMessage}</div>
-          </div>
-        )}
         <GSForm
           schema={yup.object({
             contactSql: yup.string()
@@ -290,6 +282,20 @@ export default class CampaignContactsForm extends React.Component {
               )}
             </div>
           )}
+          {jobResult && (
+            <List>
+              <Subheader>Upload Messages</Subheader>
+              {jobResult.resultMessage.split("\n").length > 0 ? (
+                jobResult.resultMessage
+                  .split("\n")
+                  .map(message => (
+                    <ListItem key={message} primaryText={message} />
+                  ))
+              ) : (
+                <ListItem primaryText={"No results"} />
+              )}
+            </List>
+          )}
           {this.renderContactStats()}
           {contactUploadError ? (
             <List>
@@ -347,7 +353,7 @@ CampaignContactsForm.propTypes = {
   onSubmit: type.func,
   saveDisabled: type.bool,
   saveLabel: type.string,
-  jobResultMessage: type.string,
+  jobResult: type.object,
   otherCampaigns: type.array,
   canFilterLandlines: type.bool
 };

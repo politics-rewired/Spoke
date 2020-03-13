@@ -193,7 +193,8 @@ export async function uploadContacts(job) {
   let {
     contacts,
     excludeCampaignIds = [],
-    filterOutLandlines = false
+    filterOutLandlines = false,
+    validationStats
   } = jobPayload;
 
   const shouldRemoveLandlines = filterOutLandlines && numbersApiKey;
@@ -301,6 +302,34 @@ export async function uploadContacts(job) {
       if (deleteOptOutCells) {
         resultMessages.push(
           `Number of contacts excluded due to their opt-out status: ${deleteOptOutCells}`
+        );
+      }
+
+      const {
+        dupeCount = 0,
+        missingCellCount = 0,
+        invalidCellCount = 0,
+        zipCount = 0
+      } = validationStats;
+
+      if (dupeCount) {
+        resultMessages.push(
+          `Number of duplicate contacts removed: ${dupeCount}`
+        );
+      }
+      if (missingCellCount) {
+        resultMessages.push(
+          `Number of contacts excluded due to missing cells: ${missingCellCount}`
+        );
+      }
+      if (invalidCellCount) {
+        resultMessages.push(
+          `Number of contacts with excluded due to invalid cells: ${invalidCellCount}`
+        );
+      }
+      if (zipCount) {
+        resultMessages.push(
+          `Number of contacts with valid zip codes: ${zipCount}`
         );
       }
     } catch (exc) {

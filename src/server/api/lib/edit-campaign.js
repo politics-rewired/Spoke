@@ -67,11 +67,11 @@ export const processContactsFile = async file => {
       },
       complete: ({ meta: { aborted } }) => {
         if (aborted) return reject(`CSV missing fields: ${missingFields}`);
-        const { contacts } = validateCsv({
+        const { contacts, validationStats } = validateCsv({
           data: resultData,
           meta: resultMeta
         });
-        return resolve(contacts);
+        return resolve({ contacts, validationStats });
       },
       error: err => reject(err)
     });
