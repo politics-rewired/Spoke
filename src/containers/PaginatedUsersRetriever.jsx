@@ -56,6 +56,9 @@ export class PaginatedUsersRetriever extends Component {
 
     const { organizationId, campaignsFilter, pageSize } = this.props;
 
+    this.props.onUsersReceived([]);
+    this.props.setCampaignTextersLoadedFraction(0);
+
     let offset = 0;
     let total = undefined;
     let users = [];
