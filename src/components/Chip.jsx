@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
-import _ from "lodash";
+import extend from "lodash/extend";
 
 // Credit to materialize CSS
 // Material UI coming out with Chip
@@ -37,7 +37,7 @@ function Chip({
   style = {}
 }) {
   return (
-    <div style={_.extend({}, styles.chip, style)} onTouchTap={onTouchTap}>
+    <div style={extend({}, styles.chip, style)} onTouchTap={onTouchTap}>
       {text}
       {iconRightClass
         ? React.createElement(iconRightClass, {

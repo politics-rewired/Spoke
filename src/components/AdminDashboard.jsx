@@ -6,7 +6,7 @@ import gql from "graphql-tag";
 import { StyleSheet, css } from "aphrodite";
 
 import { loadData } from "../containers/hoc/with-operations";
-import { hasRole } from "../lib";
+import { hasRole } from "../lib/permissions";
 import theme from "../styles/theme";
 import TopNav from "./TopNav";
 import AdminNavigation from "../containers/AdminNavigation";

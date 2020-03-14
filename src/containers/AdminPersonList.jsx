@@ -14,7 +14,7 @@ import Dialog from "material-ui/Dialog";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import ContentAdd from "material-ui/svg-icons/content/add";
 
-import { getHighestRole, ROLE_HIERARCHY } from "../lib";
+import { getHighestRole, ROLE_HIERARCHY } from "../lib/permissions";
 import { dataTest } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
