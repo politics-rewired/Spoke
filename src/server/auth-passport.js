@@ -5,6 +5,7 @@ import passportSlack from "@aoberoi/passport-slack";
 import { Strategy as LocalStrategy } from "passport-local";
 
 import { config } from "../config";
+import logger from "../logger";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
 import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
@@ -82,7 +83,11 @@ function setupSlackPassport() {
     const existingUser = await r
       .reader("user")
       .where({ auth0_id: auth0Id })
-      .first();
+      .first()
+      .catch(err => {
+        logger.error("Slack login error: could not find existing user: ", err);
+        throw err;
+      });
 
     if (!existingUser) {
       let first_name, last_name;
@@ -107,7 +112,13 @@ function setupSlackPassport() {
         is_superadmin: false
       };
 
-      await r.knex("user").insert(userData);
+      await r
+        .knex("user")
+        .insert(userData)
+        .catch(err => {
+          logger.error("Slack login error: could not insert new user: ", err);
+          throw err;
+        });
 
       return redirectPostSignIn(req, res, true);
     }
