@@ -3181,7 +3181,7 @@ const rootMutations = {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       await r
         .knex("troll_trigger")
-        .insert({ token, organizationId: parseInt(organizationId) });
+        .insert({ token, organization_id: parseInt(organizationId) });
 
       return true;
     },
@@ -3189,7 +3189,7 @@ const rootMutations = {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       await r
         .knex("troll_trigger")
-        .where({ token, organizationId: parseInt(organizationId) })
+        .where({ token, organization_id: parseInt(organizationId) })
         .del();
 
       return true;
