@@ -12,9 +12,9 @@ import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import { StyleSheet, css } from "aphrodite";
 
-import { loadData } from "./hoc/with-operations";
-import GSForm from "../components/forms/GSForm";
-import GSSubmitButton from "../components/forms/GSSubmitButton";
+import { loadData } from "../../hoc/with-operations";
+import GSForm from "../../../components/forms/GSForm";
+import GSSubmitButton from "../../../components/forms/GSSubmitButton";
 
 const styles = StyleSheet.create({
   sectionCard: {

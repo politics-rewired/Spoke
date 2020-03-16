@@ -31,7 +31,7 @@ import Terms from "./containers/Terms";
 import CreateOrganization from "./containers/CreateOrganization";
 import JoinTeam from "./containers/JoinTeam";
 import Home from "./containers/Home";
-import Settings from "./containers/Settings";
+import SettingsRouter from "./containers/Settings";
 import UserEdit from "./containers/UserEdit";
 import TexterFaqs from "./components/TexterFaqs";
 import FAQs from "./lib/faqs";
@@ -170,14 +170,18 @@ const AdminOrganizationRoutes = props => {
             component={AdminAssignmentRequest}
           />
           <Route
-            path={`${organizationPath}/trolltokens`}
-            component={Settings}
-          />
-          <Route
             path={`${organizationPath}/trollalarms`}
             component={AdminTrollAlarms}
           />
-          <Route path={`${organizationPath}/settings`} component={Settings} />
+          <Redirect
+            exact={true}
+            path={`${organizationPath}/settings`}
+            to={`${organizationPath}/settings/general`}
+          />
+          <Route
+            path={`${organizationPath}/settings/:page`}
+            component={SettingsRouter}
+          />
           <Redirect to={`${organizationPath}/campaigns`} />
         </Switch>
       </AdminDashboard>

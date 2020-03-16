@@ -125,6 +125,11 @@ class AdminDashboard extends React.Component {
             }
       },
       {
+        name: "Troll Alarms",
+        path: "trollalarms",
+        role: "SUPERVOLUNTEER"
+      },
+      {
         name: "Settings",
         path: "settings",
         role: "OWNER"
@@ -136,18 +141,9 @@ class AdminDashboard extends React.Component {
       sections.splice(index, 1);
     }
 
-    if (window.ENABLE_TROLLBOT) {
-      sections.push({
-        name: "Troll Tokens",
-        path: "trolltokens",
-        role: "SUPERVOLUNTEER"
-      });
-
-      sections.push({
-        name: "Troll Alarms",
-        path: "trollalarms",
-        role: "SUPERVOLUNTEER"
-      });
+    if (!window.ENABLE_TROLLBOT) {
+      const index = sections.findIndex(s => s.name === "Troll Alarms");
+      sections.splice(index, 1);
     }
 
     let currentSection = sections.filter(section =>
