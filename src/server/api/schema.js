@@ -3436,7 +3436,7 @@ const rootResolvers = {
 
       return tokens.map(t => ({
         token: t.token,
-        organization_id: organizationId
+        organizationId
       }));
     }
   }
