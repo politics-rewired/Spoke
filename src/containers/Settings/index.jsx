@@ -1,5 +1,8 @@
 import React from "react";
+
 import { Tabs, Tab } from "material-ui/Tabs";
+import SettingsIcon from "material-ui/svg-icons/action/settings";
+import AlarmIcon from "material-ui/svg-icons/device/access-alarms";
 
 import General from "./components/General";
 import TrollTokenSettings from "./components/TrollTokenSettings";
@@ -14,11 +17,15 @@ export const SettingsRouter = props => {
 
   return (
     <Tabs value={page} onChange={handleOnChangeTab}>
-      <Tab label="General" value={"general"}>
+      <Tab icon={<SettingsIcon />} label="General" value={"general"}>
         <br />
         <General match={match} />
       </Tab>
-      <Tab label="TrollBot Tokens" value={"trolltokens"}>
+      <Tab
+        icon={<AlarmIcon />}
+        label="TrollBot Trigger Tokens"
+        value={"trolltokens"}
+      >
         <TrollTokenSettings match={match} />
       </Tab>
     </Tabs>
