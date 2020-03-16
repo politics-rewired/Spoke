@@ -663,7 +663,7 @@ async function sendMessage(
   if (badWordUrl) {
     request
       .post(badWordUrl)
-      .timeout(30000)
+      .timeout(5000)
       .set("Authorization", `Token ${config.BAD_WORD_TOKEN}`)
       .send({ user_id: user.auth0_id, message: toInsert.text })
       .end((err, res) => {
