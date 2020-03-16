@@ -56,6 +56,7 @@ const formatTextingHours = hour => moment(hour, "H").format("h a");
 class Settings extends React.Component {
   state = {
     formIsSubmitting: false,
+    textingHoursDialogOpen: false,
     numbersApiKey: undefined
   };
 
