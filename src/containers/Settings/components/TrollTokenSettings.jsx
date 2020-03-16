@@ -74,8 +74,6 @@ class TrollTokenSettings extends React.Component {
     const { trollTokens } = this.props.trollTokens;
     const sortedTokens = sortBy(trollTokens, "token");
 
-    if (trollTokens.length === 0) return <p>No trigger tokens defined yet.</p>;
-
     const addActions = [
       <FlatButton label="Confirm" onClick={this.handleOnConfirmAddToken} />,
       <FlatButton
@@ -104,33 +102,37 @@ class TrollTokenSettings extends React.Component {
 
     return (
       <div>
-        <Table selectable={false} multiSelectable={false}>
-          <TableHeader
-            enableSelectAll={false}
-            displaySelectAll={false}
-            adjustForCheckbox={false}
-          >
-            <TableRow>
-              <TableHeaderColumn>Token</TableHeaderColumn>
-              <TableHeaderColumn>Actions</TableHeaderColumn>
-            </TableRow>
-          </TableHeader>
-          <TableBody displayRowCheckbox={false} showRowHover={true}>
-            {sortedTokens.map(({ token }) => (
-              <TableRow key={token} selectable={true} style={styles.row}>
-                <TableRowColumn>{token}</TableRowColumn>
-                <TableRowColumn>
-                  <RaisedButton
-                    label="Delete"
-                    labelPosition="before"
-                    icon={<DeleteForeverIcon color={red500} />}
-                    onClick={this.handleDeleteToken(token)}
-                  />
-                </TableRowColumn>
+        {trollTokens.length === 0 ? (
+          <p>No trigger tokens defined yet.</p>
+        ) : (
+          <Table selectable={false} multiSelectable={false}>
+            <TableHeader
+              enableSelectAll={false}
+              displaySelectAll={false}
+              adjustForCheckbox={false}
+            >
+              <TableRow>
+                <TableHeaderColumn>Token</TableHeaderColumn>
+                <TableHeaderColumn>Actions</TableHeaderColumn>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody displayRowCheckbox={false} showRowHover={true}>
+              {sortedTokens.map(({ token }) => (
+                <TableRow key={token} selectable={true} style={styles.row}>
+                  <TableRowColumn>{token}</TableRowColumn>
+                  <TableRowColumn>
+                    <RaisedButton
+                      label="Delete"
+                      labelPosition="before"
+                      icon={<DeleteForeverIcon color={red500} />}
+                      onClick={this.handleDeleteToken(token)}
+                    />
+                  </TableRowColumn>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
         <FloatingActionButton
           style={theme.components.floatingButton}
           disabled={isWorking}
