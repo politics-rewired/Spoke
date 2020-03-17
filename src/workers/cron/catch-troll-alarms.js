@@ -1,10 +1,14 @@
 import knex from "knex";
 import logger from "../../logger";
-import { config } from "../../config";
 import knexConfig from "../../server/knex";
 import request from "superagent";
 
 const db = knex(knexConfig);
+
+let { TROLL_ALERT_URL, TROLL_ALERT_PERIOD_MINUTES = 6 } = process.env;
+TROLL_ALERT_PERIOD_MINUTES = parseInt(TROLL_ALERT_PERIOD_MINUTES);
+
+const batchLogger = logger.child({ batch_timestamp: new Date().getTime() });
 
 const main = async () => {
   const { rows: newAlarms } = await db.raw(`
@@ -17,18 +21,19 @@ const main = async () => {
         select
           id as message_id,
           lower((
+            -- Extract first trigger match from ts-formatted result
             regexp_matches(
               ts_headline(
                 'english',
                 text,
-                to_tsquery('fuck'), 
+                ( select query from trigger_query ),
                 'MaxFragments=1,MaxWords=2,MinWords=1'
-              ), 
+              ),
               '<b>(.*)</b>')
             )[1]
           ) as trigger_token
         from message
-        where message.created_at > now() - interval '6 minute'
+        where message.created_at > now() - interval '${TROLL_ALERT_PERIOD_MINUTES} minute'
           and is_from_contact = false
           and to_tsvector(text) @@ ( select query from trigger_query )
       ),
@@ -47,18 +52,27 @@ const main = async () => {
         on public.user.id = message.user_id
   `);
 
-  if (process.env.TROLL_ALERT_URL) {
-    for (const alarm of newAlarms) {
-      await request.post(process.env.TROLL_ALERT_URL).send(alarm);
+  batchLogger.info(`TrollBot completed and raised ${newAlarms.length} alarms`);
+
+  return newAlarms;
+};
+
+const raiseAlarms = async alarms => {
+  if (TROLL_ALERT_URL) {
+    for (const alarm of alarms) {
+      await request.post(TROLL_ALERT_URL).send(alarm);
     }
   }
 };
 
 main()
-  .then(() => {
-    process.exit(0);
+  .catch(err => {
+    batchLogger.error("Error running TrollBot script: ", err);
+    process.exit(1);
   })
-  .catch(error => {
-    logger.error("Error catching troll scripts: ", error);
+  .then(raiseAlarms)
+  .then(() => process.exit(0))
+  .catch(err => {
+    batchLogger.error("Error raising external troll alarms: ", err);
     process.exit(1);
   });
