@@ -3423,25 +3423,29 @@ const rootResolvers = {
 
       let query = r
         .reader("troll_alarm")
-        .select("message_id", "trigger_token", "dismissed", "text")
         .join("message", "message.id", "=", "troll_alarm.message_id")
-        .where({ dismissed })
-        .limit(limit)
-        .offset(offset);
+        .where({ dismissed });
 
       if (token !== null) {
         query = query.where({ trigger_token: token });
       }
 
-      const alarms = await query;
+      const countQuery = query.clone();
+      const [{ count: totalCount }] = await countQuery.count();
+      const alarms = await query
+        .select("message_id", "trigger_token", "dismissed", "text")
+        .orderBy("id")
+        .limit(limit)
+        .offset(offset)
+        .map(a => ({
+          id: a.message_id,
+          messageId: a.message_id,
+          messageText: a.text,
+          token: a.trigger_token,
+          dismissed: a.dismissed
+        }));
 
-      return alarms.map(a => ({
-        id: a.message_id,
-        messageId: a.message_id,
-        messageText: a.text,
-        token: a.trigger_token,
-        dismissed: a.dismissed
-      }));
+      return { alarms, totalCount };
     },
     trollTokens: async (_, { organizationId }, { user }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");

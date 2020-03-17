@@ -7,6 +7,11 @@ export const schema = `
     dismissed: Boolean!
   }
 
+  type TrollAlarmPage {
+    totalCount: Int!
+    alarms: [TrollAlarm!]!
+  }
+
   type TrollTrigger {
     id: ID!
     token: String!

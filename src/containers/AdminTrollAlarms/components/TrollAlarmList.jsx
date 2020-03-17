@@ -31,23 +31,14 @@ const columns = [
 ];
 
 export const TrollAlarmList = props => {
-  const {
-    selectedAlarmIds,
-    dismissed,
-    token,
-    pageSize,
-    page,
-    trollAlarms: { trollAlarms }
-  } = props;
+  const { selectedAlarmIds, dismissed, token, pageSize, page } = props;
+  const { totalCount, alarms: trollAlarms } = props.trollAlarms.trollAlarms;
 
   if (trollAlarms.length === 0) {
     const state = dismissed ? "dismissed" : "triggered";
     const tokenSuffix = token ? ` for ${token}` : "";
     return <p>{`No ${state} alarms${tokenSuffix}.`}</p>;
   }
-
-  // TODO: query should return total alarm record count
-  const records = 200;
 
   const selectedRows = trollAlarms
     .map(({ id }, idx) => (selectedAlarmIds.includes(id) ? idx : false))
@@ -76,7 +67,7 @@ export const TrollAlarmList = props => {
   };
 
   const handleNextPageClick = () => {
-    const pageCount = Math.ceil(records / pageSize);
+    const pageCount = Math.ceil(totalCount / pageSize);
     const nextPage = Math.min(pageCount - 1, page + 1);
     props.onPageChange(nextPage);
   };
@@ -95,7 +86,7 @@ export const TrollAlarmList = props => {
       rowSizeList={ROW_SIZE_OPTIONS}
       onRowSizeChange={handleRowSizeChange}
       page={page + 1}
-      count={records}
+      count={totalCount}
       onNextPageClick={handleNextPageClick}
       onPreviousPageClick={handlePreviousPageClick}
     />
@@ -120,15 +111,18 @@ TrollAlarmList.propTypes = {
 
   // HOC props
   trollAlarms: PropTypes.shape({
-    trollAlarms: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        messageId: PropTypes.string.isRequired,
-        messageText: PropTypes.string.isRequired,
-        token: PropTypes.string.isRequired,
-        dismissed: PropTypes.bool.isRequired
-      })
-    ).isRequired
+    trollAlarms: PropTypes.shape({
+      totalCount: PropTypes.number.isRequired,
+      alarms: PropTypes.arrayOf(
+        PropTypes.shape({
+          id: PropTypes.string.isRequired,
+          messageId: PropTypes.string.isRequired,
+          messageText: PropTypes.string.isRequired,
+          token: PropTypes.string.isRequired,
+          dismissed: PropTypes.bool.isRequired
+        })
+      ).isRequired
+    }).isRequired
   }).isRequired
 };
 
@@ -149,11 +143,14 @@ const queries = {
           token: $token
           dismissed: $dismissed
         ) {
-          id
-          messageId
-          messageText
-          token
-          dismissed
+          totalCount
+          alarms {
+            id
+            messageId
+            messageText
+            token
+            dismissed
+          }
         }
       }
     `,

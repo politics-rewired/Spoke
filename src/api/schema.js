@@ -262,7 +262,7 @@ const rootSchema = `
     peopleByUserIds(userIds:[String], organizationId:String!): UsersList
     fetchCampaignOverlaps(organizationId: String!, campaignId: String!): [FetchCampaignOverlapResult]!
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
-    trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): [TrollAlarm]
+    trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
     trollTokens(organizationId: String!): [TrollTrigger]
   }
 
