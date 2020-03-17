@@ -3410,11 +3410,11 @@ const rootResolvers = {
         .reader("troll_alarm")
         .select("message_id", "trigger_token", "dismissed", "text")
         .join("message", "message.id", "=", "troll_alarm.message_id")
-        .where({ dismissed: !!dismissed })
+        .where({ dismissed })
         .limit(limit)
         .offset(offset);
 
-      if (token !== undefined) {
+      if (token !== null) {
         query = query.where({ trigger_token: token });
       }
 
