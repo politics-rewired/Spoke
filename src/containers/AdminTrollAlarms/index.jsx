@@ -75,6 +75,19 @@ class AdminTrollAlarms extends React.Component {
     }
   };
 
+  handleDismissMatching = async () => {
+    const { token } = this.state;
+    this.setState({ isWorking: true, error: undefined });
+    try {
+      await this.props.mutations.dismissMatchingAlarms(token);
+      this.setState({ selectedAlarmIds: [] });
+    } catch (err) {
+      this.setState({ error: err.message });
+    } finally {
+      this.setState({ isWorking: false });
+    }
+  };
+
   // Table selection
   handleAlarmSelectionChange = selectedAlarmIds =>
     this.setState({ selectedAlarmIds });
@@ -132,7 +145,7 @@ class AdminTrollAlarms extends React.Component {
             style={{ marginRight: "10px" }}
             secondary={true}
             disabled={token === null}
-            onClick={console.log}
+            onClick={this.handleDismissMatching}
           />
           <RaisedButton
             label={`Dismiss Selected (${selectedAlarmIds.length})`}
@@ -208,6 +221,21 @@ const mutations = {
     variables: {
       organizationId: ownProps.match.params.organizationId,
       alarmIds
+    },
+    refetchQueries: ["getTrollAlarmsForOrg"]
+  }),
+  dismissMatchingAlarms: ownProps => token => ({
+    mutation: gql`
+      mutation dismissMatchingTrollBotAlarms(
+        $organizationId: String!
+        $token: String!
+      ) {
+        dismissMatchingAlarms(token: $token, organizationId: $organizationId)
+      }
+    `,
+    variables: {
+      organizationId: ownProps.match.params.organizationId,
+      token
     },
     refetchQueries: ["getTrollAlarmsForOrg"]
   })

@@ -326,7 +326,7 @@ const rootSchema = `
     addUsersToTeam(teamId: String!, userIds: [String]!): Boolean!
     removeUsersFromTeam(teamId: String!, userIds: [String]!): Boolean!
     releaseMyReplies(organizationId: String!): Boolean!
-    dismissAlarm(messageId: String!, organizationId: String!): Boolean!
+    dismissMatchingAlarms(token: String!, organizationId: String!): Boolean!
     dismissAlarms(messageIds: [String!]!, organizationId: String!): Boolean!
     addToken(token: String!, organizationId: String!): Boolean!
     removeToken(token: String!, organizationId: String!): Boolean!

@@ -3159,12 +3159,27 @@ const rootMutations = {
 
       return true;
     },
-    dismissAlarm: async (_, { messageId, organizationId }, { user }) => {
+    dismissMatchingAlarms: async (_, { token, organizationId }, { user }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       await r
         .knex("troll_alarm")
         .update({ dismissed: true })
-        .where({ message_id: messageId });
+        .where({
+          dismissed: false,
+          trigger_token: token
+        })
+        .whereExists(function() {
+          this.select(r.knex.raw("1"))
+            .from("message")
+            .join(
+              "campaign_contact",
+              "campaign_contact.id",
+              "message.campaign_contact_id"
+            )
+            .join("campaign", "campaign.id", "campaign_contact.campaign_id")
+            .where({ organization_id: organizationId })
+            .whereRaw("message.id = troll_alarm.message_id");
+        });
 
       return true;
     },
