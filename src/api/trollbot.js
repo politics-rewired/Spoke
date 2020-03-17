@@ -1,5 +1,6 @@
 export const schema = `
   type TrollAlarm {
+    id: ID!
     messageId: ID!
     messageText: String!
     token: String!
@@ -7,6 +8,7 @@ export const schema = `
   }
 
   type TrollTrigger {
+    id: ID!
     token: String!
     organizationId: String!
   }

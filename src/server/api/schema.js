@@ -3421,6 +3421,7 @@ const rootResolvers = {
       const alarms = await query;
 
       return alarms.map(a => ({
+        id: a.message_id,
         messageId: a.message_id,
         messageText: a.text,
         token: a.trigger_token,
@@ -3435,6 +3436,7 @@ const rootResolvers = {
         .where({ organization_id: parseInt(organizationId) });
 
       return tokens.map(t => ({
+        id: t.token,
         token: t.token,
         organizationId
       }));
