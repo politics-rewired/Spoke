@@ -3168,7 +3168,7 @@ const rootMutations = {
 
       return true;
     },
-    dismissManyAlarms: async (_, { messageIds, organizationId }, { user }) => {
+    dismissAlarms: async (_, { messageIds, organizationId }, { user }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       await r
         .knex("troll_alarm")

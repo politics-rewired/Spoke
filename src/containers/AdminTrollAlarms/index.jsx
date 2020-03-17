@@ -198,14 +198,11 @@ const queries = {
 const mutations = {
   dismissAlarms: ownProps => alarmIds => ({
     mutation: gql`
-      mutation addTrollBotToken(
+      mutation dismissSelectedTrollBotAlarms(
         $organizationId: String!
         $alarmIds: [String!]!
       ) {
-        dismissManyAlarms(
-          messageIds: $alarmIds
-          organizationId: $organizationId
-        )
+        dismissAlarms(messageIds: $alarmIds, organizationId: $organizationId)
       }
     `,
     variables: {
