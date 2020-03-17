@@ -60,8 +60,7 @@ class TrollTokenSettings extends React.Component {
     const { addToken } = this.state;
     this.setState({ isWorking: true, error: undefined });
     try {
-      const result = await this.props.mutations.addToken(addToken);
-      console.log(result);
+      await this.props.mutations.addToken(addToken);
     } catch (err) {
       this.setState({ error: err.message });
     } finally {
