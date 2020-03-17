@@ -7,6 +7,7 @@ import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
+import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
 
 import { loadData } from "../hoc/with-operations";
@@ -26,6 +27,7 @@ class AdminTrollAlarms extends React.Component {
   state = {
     // UI Widgets
     tokenSearchText: "",
+    copiedAlarmID: undefined,
 
     // Query params
     pageSize: 25,
@@ -88,6 +90,25 @@ class AdminTrollAlarms extends React.Component {
     }
   };
 
+  handleDismissCopyAlarm = () => this.setState({ copiedAlarmID: undefined });
+  handleCopyAlarm = alarm => {
+    const clipboardContents = [
+      `Triggered Token: ${alarm.token}`,
+      `Message ID: ${alarm.messageId}`,
+      `Message Text: ${alarm.messageText}`,
+      `User ID: ${alarm.user.id}`,
+      `User Name: ${alarm.user.displayName}`,
+      `User Email: ${alarm.user.email}`
+    ].join("\n");
+
+    try {
+      navigator.clipboard.writeText(clipboardContents);
+      this.setState({ copiedAlarmID: alarm.id });
+    } catch (err) {
+      this.setState({ error: err.message });
+    }
+  };
+
   // Table selection
   handleAlarmSelectionChange = selectedAlarmIds =>
     this.setState({ selectedAlarmIds });
@@ -97,7 +118,7 @@ class AdminTrollAlarms extends React.Component {
   handlePageChange = page => this.setState({ page });
 
   render() {
-    const { tokenSearchText } = this.state;
+    const { tokenSearchText, copiedAlarmID } = this.state;
     const { pageSize, page, dismissed, token } = this.state;
     const { selectedAlarmIds, isWorking, error } = this.state;
     const { match } = this.props;
@@ -165,6 +186,7 @@ class AdminTrollAlarms extends React.Component {
           onAlarmSelectionChange={this.handleAlarmSelectionChange}
           onPageSizeChange={this.handlePageSizeChange}
           onPageChange={this.handlePageChange}
+          onCopyAlarm={this.handleCopyAlarm}
         />
         <Dialog
           title="Error"
@@ -174,6 +196,12 @@ class AdminTrollAlarms extends React.Component {
         >
           {error || ""}
         </Dialog>
+        <Snackbar
+          open={copiedAlarmID !== undefined}
+          message={`Alarm ${copiedAlarmID || ""} details copied to clipboard`}
+          autoHideDuration={4000}
+          onRequestClose={this.handleDismissCopyAlarm}
+        />
       </div>
     );
   }

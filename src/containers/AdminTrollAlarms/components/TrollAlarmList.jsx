@@ -3,32 +3,15 @@ import PropTypes from "prop-types";
 import gql from "graphql-tag";
 
 import DataTable from "material-ui-datatables";
+import IconButton from "material-ui/IconButton";
 import AlarmIcon from "material-ui/svg-icons/action/alarm";
 import AlarmOffIcon from "material-ui/svg-icons/action/alarm-off";
+import SaveIcon from "material-ui/svg-icons/content/save";
 import { red500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../hoc/with-operations";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100, 250, 500];
-
-const columns = [
-  {
-    key: "dismissed",
-    label: "Status",
-    style: { width: 40 },
-    render: (dismissed, _row) =>
-      dismissed ? <AlarmOffIcon /> : <AlarmIcon color={red500} />
-  },
-  {
-    key: "token",
-    label: "Token",
-    style: { width: 60 }
-  },
-  {
-    key: "messageText",
-    label: "Message Text"
-  }
-];
 
 export const TrollAlarmList = props => {
   const { selectedAlarmIds, dismissed, token, pageSize, page } = props;
@@ -72,12 +55,59 @@ export const TrollAlarmList = props => {
     props.onPageChange(nextPage);
   };
 
+  const handleClickCopyAlarm = alarm => event => {
+    event.preventDefault();
+    event.stopPropagation();
+    props.onCopyAlarm(alarm);
+  };
+
+  const columns = [
+    {
+      key: "dismissed",
+      label: "Status",
+      style: { width: 40 },
+      render: (dismissed, _row) =>
+        dismissed ? <AlarmOffIcon /> : <AlarmIcon color={red500} />
+    },
+    {
+      key: "token",
+      label: "Token",
+      style: { width: 60 }
+    },
+    {
+      key: "user",
+      label: "Texter",
+      style: { width: 60 },
+      render: (user, _row) => user.displayName
+    },
+    {
+      key: "messageText",
+      label: "Message Text"
+    },
+    {
+      label: "Actions",
+      style: { width: "50px" },
+      render: (_value, row) => {
+        return (
+          <IconButton
+            tooltip="Copy Texter Details"
+            onClick={handleClickCopyAlarm(row)}
+            onMouseEnter={event => event.stopPropagation()}
+          >
+            <SaveIcon />
+          </IconButton>
+        );
+      }
+    }
+  ];
+
   return (
     <DataTable
       multiSelectable
       selectable
       enableSelectAll
       showCheckboxes
+      showRowHover={false}
       data={trollAlarms}
       columns={columns}
       selectedRows={selectedRows}
@@ -108,6 +138,7 @@ TrollAlarmList.propTypes = {
   onAlarmSelectionChange: PropTypes.func.isRequired,
   onPageSizeChange: PropTypes.func.isRequired,
   onPageChange: PropTypes.func.isRequired,
+  onCopyAlarm: PropTypes.func.isRequired,
 
   // HOC props
   trollAlarms: PropTypes.shape({
@@ -150,6 +181,11 @@ const queries = {
             messageText
             token
             dismissed
+            user {
+              id
+              email
+              displayName
+            }
           }
         }
       }
