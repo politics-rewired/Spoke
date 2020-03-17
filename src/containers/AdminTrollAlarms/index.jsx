@@ -55,10 +55,11 @@ class AdminTrollAlarms extends React.Component {
       token = trollTokens.find(({ token }) => token === selection);
     }
     if (token) {
-      this.setState({ token });
+      this.setState({ token, selectedAlarmIds: [] });
     }
   };
-  handleToggleDismissed = (_event, dismissed) => this.setState({ dismissed });
+  handleToggleDismissed = (_event, dismissed) =>
+    this.setState({ dismissed, selectedAlarmIds: [] });
 
   // Actions
   handleDismissSelected = async () => {
