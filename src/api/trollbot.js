@@ -5,6 +5,7 @@ export const schema = `
     messageText: String!
     token: String!
     dismissed: Boolean!
+    user: User!
   }
 
   type TrollAlarmPage {

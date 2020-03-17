@@ -68,6 +68,7 @@ import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
+import { resolvers as trollbotResolvers } from "./trollbot";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -3419,12 +3420,20 @@ const rootResolvers = {
       { limit, offset, token, dismissed, organizationId },
       { user }
     ) => {
+      organizationId = parseInt(organizationId);
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
       let query = r
         .reader("troll_alarm")
         .join("message", "message.id", "=", "troll_alarm.message_id")
-        .where({ dismissed });
+        .join(
+          "campaign_contact",
+          "campaign_contact.id",
+          "=",
+          "message.campaign_contact_id"
+        )
+        .join("campaign", "campaign.id", "=", "campaign_contact.campaign_id")
+        .where({ dismissed, organization_id: organizationId });
 
       if (token !== null) {
         query = query.where({ trigger_token: token });
@@ -3433,16 +3442,26 @@ const rootResolvers = {
       const countQuery = query.clone();
       const [{ count: totalCount }] = await countQuery.count();
       const alarms = await query
-        .select("message_id", "trigger_token", "dismissed", "text")
-        .orderBy("id")
+        .join("user", "user.id", "message.user_id")
+        .select(
+          "message_id",
+          "trigger_token as token",
+          "dismissed",
+          "message.text as message_text",
+          "user.id",
+          "user.first_name",
+          "user.last_name",
+          "user.email"
+        )
+        .orderBy("troll_alarm.message_id")
         .limit(limit)
         .offset(offset)
-        .map(a => ({
-          id: a.message_id,
-          messageId: a.message_id,
-          messageText: a.text,
-          token: a.trigger_token,
-          dismissed: a.dismissed
+        .map(({ message_id, token, dismissed, message_text, ...user }) => ({
+          message_id,
+          token,
+          dismissed,
+          message_text,
+          user
         }));
 
       return { alarms, totalCount };
@@ -3480,6 +3499,7 @@ export const resolvers = {
   ...questionResponseResolvers,
   ...inviteResolvers,
   ...linkDomainResolvers,
+  ...trollbotResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },
