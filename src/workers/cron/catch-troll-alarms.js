@@ -59,6 +59,6 @@ main()
     process.exit(0);
   })
   .catch(error => {
-    logger.error("Error catching troll scripts", { error });
+    logger.error("Error catching troll scripts: ", error);
     process.exit(1);
   });
