@@ -30,7 +30,12 @@ export function buildUserOrganizationQuery(
   return queryParam;
 }
 
-async function doGetUsers({ organizationId, cursor, campaignsFilter, role }) {
+async function doGetUsers({
+  organizationId,
+  cursor,
+  campaignsFilter = {},
+  role
+}) {
   const query = r
     .knex("user")
     .innerJoin("user_organization", "user_organization.user_id", "user.id")
