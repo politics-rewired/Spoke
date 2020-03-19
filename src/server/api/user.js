@@ -45,8 +45,7 @@ async function doGetUsers({
     query.where({ role });
   }
 
-  // Only archived = false is performant enough to use at scale due to partial index
-  if (campaignsFilter.isArchived === false) {
+  if (campaignsFilter.isArchived !== undefined) {
     query.whereExists(function() {
       this.select(r.knex.raw("1"))
         .from("assignment")
@@ -69,15 +68,10 @@ async function doGetUsers({
 
   const countQuery = query.clone();
 
-  // Only `archived = false` is performant enough to sort by user name
-  if (campaignsFilter.isArchived !== false) {
-    query.orderBy("id");
-  } else {
-    query
-      .orderBy("first_name")
-      .orderBy("last_name")
-      .orderBy("id");
-  }
+  query
+    .orderBy("first_name")
+    .orderBy("last_name")
+    .orderBy("id");
 
   const { limit, offset } = cursor || {};
   if (offset !== undefined) {
