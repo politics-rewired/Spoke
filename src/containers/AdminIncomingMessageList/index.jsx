@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import { compose } from "react-apollo";
 import gql from "graphql-tag";
-import _ from "lodash";
+import omit from "lodash/omit";
+import pick from "lodash/pick";
+import isEqual from "lodash/isEqual";
 
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
@@ -107,10 +109,10 @@ export class AdminIncomingMessageList extends Component {
   shouldComponentUpdate(dummy, nextState) {
     if (
       !nextState.needsRender &&
-      _.isEqual(this.state.contactsFilter, nextState.contactsFilter) &&
-      _.isEqual(this.state.campaignsFilter, nextState.campaignsFilter) &&
-      _.isEqual(this.state.assignmentsFilter, nextState.assignmentsFilter) &&
-      _.isEqual(this.state.tagsFilter, nextState.tagsFilter)
+      isEqual(this.state.contactsFilter, nextState.contactsFilter) &&
+      isEqual(this.state.campaignsFilter, nextState.campaignsFilter) &&
+      isEqual(this.state.assignmentsFilter, nextState.assignmentsFilter) &&
+      isEqual(this.state.tagsFilter, nextState.tagsFilter)
     ) {
       return false;
     }
@@ -172,7 +174,7 @@ export class AdminIncomingMessageList extends Component {
 
   handleMessageFilterChange = async messagesFilter => {
     const contactsFilter = Object.assign(
-      _.omit(this.state.contactsFilter, ["messageStatus"]),
+      omit(this.state.contactsFilter, ["messageStatus"]),
       { messageStatus: messagesFilter }
     );
     await this.setState({
@@ -322,7 +324,7 @@ export class AdminIncomingMessageList extends Component {
     );
 
     const contactsFilter = Object.assign(
-      _.omit(this.state.contactsFilter, ["isOptedOut"]),
+      omit(this.state.contactsFilter, ["isOptedOut"]),
       contactsFilterUpdate
     );
 
@@ -344,7 +346,7 @@ export class AdminIncomingMessageList extends Component {
     );
 
     const contactsFilter = Object.assign(
-      _.omit(this.state.contactsFilter, ["isOptedOut"]),
+      omit(this.state.contactsFilter, ["isOptedOut"]),
       contactsFilterUpdate
     );
 
@@ -457,7 +459,7 @@ export class AdminIncomingMessageList extends Component {
         />
         <PaginatedCampaignsRetriever
           organizationId={organizationId}
-          campaignsFilter={_.pick(this.state.campaignsFilter, "isArchived")}
+          campaignsFilter={pick(this.state.campaignsFilter, "isArchived")}
           onCampaignsReceived={this.handleCampaignsReceived}
           onTagsReceived={this.handleTagsReceived}
           pageSize={1000}

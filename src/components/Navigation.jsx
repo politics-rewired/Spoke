@@ -5,8 +5,8 @@ import { List, ListItem } from "material-ui/List";
 import Divider from "material-ui/Divider";
 import Avatar from "material-ui/Avatar";
 import { withRouter } from "react-router";
-import _ from "lodash";
-import { dataTest, camelCase } from "../lib/attributes";
+import camelCase from "lodash/camelCase";
+import { dataTest } from "../lib/attributes";
 import { FlatButton } from "material-ui";
 import { StyleSheet, css } from "aphrodite";
 
@@ -42,7 +42,7 @@ const Navigation = function Navigation(props) {
           <List>
             {sections.map(section => (
               <ListItem
-                {...dataTest(_.camelCase(`nav ${section.path}`))}
+                {...dataTest(camelCase(`nav ${section.path}`))}
                 key={section.name}
                 primaryText={section.name}
                 onTouchTap={() => props.history.push(section.url)}

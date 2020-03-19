@@ -43,6 +43,8 @@ const fetchPeople = async (offset, limit, organizationId, campaignsFilter) =>
   });
 
 export class PaginatedUsersRetriever extends Component {
+  latestRequestRef = undefined;
+
   componentDidMount() {
     this.handlePropsReceived();
   }
@@ -54,7 +56,11 @@ export class PaginatedUsersRetriever extends Component {
   handlePropsReceived = async (prevProps = {}) => {
     if (isEqual(prevProps, this.props)) return;
 
-    const { organizationId, campaignsFilter, pageSize } = this.props;
+    const { organizationId, campaignsFilter = {}, pageSize } = this.props;
+
+    // Track current request so we can bail on fetching if a new request has been kicked off
+    const requestRef = new Date().getTime();
+    this.latestRequestRef = requestRef;
 
     this.props.onUsersReceived([]);
     this.props.setCampaignTextersLoadedFraction(0);
@@ -73,10 +79,18 @@ export class PaginatedUsersRetriever extends Component {
       users = users.concat(newUsers);
       offset += pageSize;
       total = pageInfo.total;
-      this.props.setCampaignTextersLoadedFraction(Math.min(1, offset / total));
-    } while (offset < total);
 
-    this.props.onUsersReceived(users);
+      // Ignore if not the most recent request
+      if (requestRef === this.latestRequestRef) {
+        const fraction = Math.min(1, offset / total);
+        this.props.setCampaignTextersLoadedFraction(fraction);
+      }
+    } while (offset < total && requestRef === this.latestRequestRef);
+
+    // Ignore if not the most recent request
+    if (requestRef === this.latestRequestRef) {
+      this.props.onUsersReceived(users);
+    }
   };
 
   render() {

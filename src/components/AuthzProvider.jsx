@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import createReactContext from "create-react-context";
 import gql from "graphql-tag";
 
-import { hasRole } from "../lib";
+import { hasRole } from "../lib/permissions";
 import ApolloClientSingleton from "../network/apollo-client-singleton";
 
 const AuthzContext = createReactContext(false);

@@ -20,7 +20,11 @@ import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import LocalOfferIcon from "material-ui/svg-icons/maps/local-offer";
 
 import { isContactNowWithinCampaignHours } from "../../lib/timezones";
-import { getChildren, getTopMostParent, interactionStepForId } from "../../lib";
+import {
+  getChildren,
+  getTopMostParent,
+  interactionStepForId
+} from "../../lib/interaction-step-helpers";
 import { applyScript } from "../../lib/scripts";
 import { dataTest } from "../../lib/attributes";
 import MessageList from "../../components/MessageList";
