@@ -77,6 +77,11 @@ class AdminCampaignEdit extends React.Component {
       key: "contacts",
       content: CampaignContactsForm,
       jobTypes: ["upload_contacts", "contact_sql"]
+    },
+    {
+      key: "contact-overlaps",
+      content: CampaignOverlapManager,
+      jobTypes: []
     }
   ];
 
