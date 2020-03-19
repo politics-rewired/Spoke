@@ -14,14 +14,14 @@ import CheckIcon from "material-ui/svg-icons/action/check-circle";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
 import UploadIcon from "material-ui/svg-icons/file/file-upload";
 
-import { loadData } from "../../hoc/with-operations";
-import { dataTest } from "../../../lib/attributes";
-import theme from "../../../styles/theme";
-import GSForm from "../../../components/forms/GSForm";
-import SectionWrapper from "../components/SectionWrapper";
+import { loadData } from "../../../hoc/with-operations";
+import { dataTest } from "../../../../lib/attributes";
+import theme from "../../../../styles/theme";
+import GSForm from "../../../../components/forms/GSForm";
+import SectionWrapper from "../../components/SectionWrapper";
 import SelectExcludeCampaigns from "./components/SelectExcludeCampaigns";
 import ContactsSqlForm from "./components/ContactsSqlForm";
-import CampaignFormSectionHeading from "./components/CampaignFormSectionHeading";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 import "./styles/file-drop.css";
 

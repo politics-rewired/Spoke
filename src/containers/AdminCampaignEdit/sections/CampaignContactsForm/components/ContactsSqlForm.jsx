@@ -6,7 +6,7 @@ import { StyleSheet, css } from "aphrodite";
 import { ListItem, List } from "material-ui/List";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
 
-import theme from "../../../../styles/theme";
+import theme from "../../../../../styles/theme";
 
 const validateSql = sql => {
   const errors = [];
