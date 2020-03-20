@@ -1,7 +1,5 @@
 import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
-import { addCampaignsFilterToQuery } from "./campaign";
-import { myCurrentAssignmentTarget } from "./assignment";
 import groupBy from "lodash/groupBy";
 import { memoizer, cacheOpts } from "../memoredis";
 
@@ -32,51 +30,60 @@ export function buildUserOrganizationQuery(
   return queryParam;
 }
 
-function buildUsersQuery(queryParam, organizationId, campaignsFilter, role) {
-  let query = undefined;
-  if (campaignsFilter) {
-    query = queryParam
-      .from("assignment")
-      .join("user", "assignment.user_id", "user.id")
-      .join("user_organization", "user.id", "user_organization.user_id")
-      .join("campaign", "assignment.campaign_id", "campaign.id")
-      .where("user_organization.organization_id", organizationId)
-      .distinct();
+async function doGetUsers({
+  organizationId,
+  cursor,
+  campaignsFilter = {},
+  role
+}) {
+  const query = r
+    .knex("user")
+    .innerJoin("user_organization", "user_organization.user_id", "user.id")
+    .where({ "user_organization.organization_id": organizationId });
 
-    if (role) {
-      query = query.where("user_organization.role", role);
-    }
-
-    return addCampaignsFilterToQuery(query, campaignsFilter);
+  if (role) {
+    query.where({ role });
   }
 
-  return buildUserOrganizationQuery(queryParam, organizationId, role);
-}
+  if (campaignsFilter.campaignId !== undefined) {
+    query.whereExists(function() {
+      this.select(r.knex.raw("1"))
+        .from("assignment")
+        .whereRaw("assignment.user_id = user.id")
+        .where({ campaign_id: parseInt(campaignsFilter.campaignId) });
+    });
+  } else if (campaignsFilter.isArchived !== undefined) {
+    query.whereExists(function() {
+      this.select(r.knex.raw("1"))
+        .from("assignment")
+        .join("campaign", "campaign.id", "assignment.campaign_id")
+        .whereRaw('"assignment"."user_id" = "user"."id"')
+        .where({
+          is_archived: campaignsFilter.isArchived
+        });
+    });
+  }
 
-async function doGetUsers({ organizationId, cursor, campaignsFilter, role }) {
-  let usersQuery = buildUsersQuery(
-    r.knex.select("user.*"),
-    organizationId,
-    campaignsFilter,
-    role
-  );
-  usersQuery = usersQuery
+  const countQuery = query.clone();
+
+  query
     .orderBy("first_name")
     .orderBy("last_name")
     .orderBy("id");
 
+  const { limit, offset } = cursor || {};
+  if (offset !== undefined) {
+    query.offset(offset);
+  }
+  if (limit !== undefined) {
+    query.limit(limit);
+  }
+
+  const users = await query.select("user.*");
+
   if (cursor) {
-    usersQuery = usersQuery.limit(cursor.limit).offset(cursor.offset);
-    const users = await usersQuery;
+    const [{ count: usersCount }] = await countQuery.count("*");
 
-    const usersCountQuery = buildUsersQuery(
-      r.knex.countDistinct("user.id"),
-      organizationId,
-      campaignsFilter,
-      role
-    );
-
-    const usersCount = await r.parseCount(usersCountQuery);
     const pageInfo = {
       limit: cursor.limit,
       offset: cursor.offset,
@@ -88,7 +95,7 @@ async function doGetUsers({ organizationId, cursor, campaignsFilter, role }) {
       pageInfo
     };
   } else {
-    return usersQuery;
+    return users;
   }
 }
 
