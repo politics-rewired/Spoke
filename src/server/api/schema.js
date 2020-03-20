@@ -70,6 +70,7 @@ import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
+import { resolvers as trollbotResolvers } from "./trollbot";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -3168,6 +3169,56 @@ const rootMutations = {
       );
 
       return true;
+    },
+    dismissMatchingAlarms: async (_, { token, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_alarm")
+        .update({ dismissed: true })
+        .where({
+          dismissed: false,
+          trigger_token: token
+        })
+        .whereExists(function() {
+          this.select(r.knex.raw("1"))
+            .from("message")
+            .join(
+              "campaign_contact",
+              "campaign_contact.id",
+              "message.campaign_contact_id"
+            )
+            .join("campaign", "campaign.id", "campaign_contact.campaign_id")
+            .where({ organization_id: organizationId })
+            .whereRaw("message.id = troll_alarm.message_id");
+        });
+
+      return true;
+    },
+    dismissAlarms: async (_, { messageIds, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_alarm")
+        .update({ dismissed: true })
+        .whereIn("message_id", messageIds);
+
+      return true;
+    },
+    addToken: async (_, { token, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_trigger")
+        .insert({ token, organization_id: parseInt(organizationId) });
+
+      return true;
+    },
+    removeToken: async (_, { token, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      await r
+        .knex("troll_trigger")
+        .where({ token, organization_id: parseInt(organizationId) })
+        .del();
+
+      return true;
     }
   }
 };
@@ -3373,6 +3424,70 @@ const rootResolvers = {
         return ar;
       });
       return result;
+    },
+    trollAlarms: async (
+      _,
+      { limit, offset, token, dismissed, organizationId },
+      { user }
+    ) => {
+      organizationId = parseInt(organizationId);
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      let query = r
+        .reader("troll_alarm")
+        .join("message", "message.id", "=", "troll_alarm.message_id")
+        .join(
+          "campaign_contact",
+          "campaign_contact.id",
+          "=",
+          "message.campaign_contact_id"
+        )
+        .join("campaign", "campaign.id", "=", "campaign_contact.campaign_id")
+        .where({ dismissed, organization_id: organizationId });
+
+      if (token !== null) {
+        query = query.where({ trigger_token: token });
+      }
+
+      const countQuery = query.clone();
+      const [{ count: totalCount }] = await countQuery.count();
+      const alarms = await query
+        .join("user", "user.id", "message.user_id")
+        .select(
+          "message_id",
+          "trigger_token as token",
+          "dismissed",
+          "message.text as message_text",
+          "user.id",
+          "user.first_name",
+          "user.last_name",
+          "user.email"
+        )
+        .orderBy("troll_alarm.message_id")
+        .limit(limit)
+        .offset(offset)
+        .map(({ message_id, token, dismissed, message_text, ...user }) => ({
+          message_id,
+          token,
+          dismissed,
+          message_text,
+          user
+        }));
+
+      return { alarms, totalCount };
+    },
+    trollTokens: async (_, { organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      const tokens = await r
+        .reader("troll_trigger")
+        .where({ organization_id: parseInt(organizationId) });
+
+      return tokens.map(t => ({
+        id: t.token,
+        token: t.token,
+        organizationId
+      }));
     }
   }
 };
@@ -3394,6 +3509,7 @@ export const resolvers = {
   ...questionResponseResolvers,
   ...inviteResolvers,
   ...linkDomainResolvers,
+  ...trollbotResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },

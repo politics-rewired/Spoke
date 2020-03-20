@@ -53,6 +53,7 @@ import { schema as linkDomainSchema } from "./link-domain";
 import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as tagSchema } from "./tag";
 import { schema as teamSchema } from "./team";
+import { schema as trollbotSchema } from "./trollbot";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -262,6 +263,8 @@ const rootSchema = `
     peopleByUserIds(userIds:[String], organizationId:String!): UsersList
     fetchCampaignOverlaps(organizationId: String!, campaignId: String!): [FetchCampaignOverlapResult]!
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
+    trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
+    trollTokens(organizationId: String!): [TrollTrigger]
   }
 
   type RootMutation {
@@ -324,6 +327,10 @@ const rootSchema = `
     addUsersToTeam(teamId: String!, userIds: [String]!): Boolean!
     removeUsersFromTeam(teamId: String!, userIds: [String]!): Boolean!
     releaseMyReplies(organizationId: String!): Boolean!
+    dismissMatchingAlarms(token: String!, organizationId: String!): Boolean!
+    dismissAlarms(messageIds: [String!]!, organizationId: String!): Boolean!
+    addToken(token: String!, organizationId: String!): Boolean!
+    removeToken(token: String!, organizationId: String!): Boolean!
   }
 
   schema {
@@ -354,5 +361,6 @@ export const schema = [
   assignmentRequestSchema,
   conversationSchema,
   tagSchema,
-  teamSchema
+  teamSchema,
+  trollbotSchema
 ];

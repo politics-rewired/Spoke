@@ -125,6 +125,11 @@ class AdminDashboard extends React.Component {
             }
       },
       {
+        name: "Troll Alarms",
+        path: "trollalarms",
+        role: "SUPERVOLUNTEER"
+      },
+      {
         name: "Settings",
         path: "settings",
         role: "OWNER"
@@ -133,6 +138,11 @@ class AdminDashboard extends React.Component {
 
     if (window.DISABLE_ASSIGNMENT_PAGE) {
       const index = sections.findIndex(s => s.name === "Assignment Requests");
+      sections.splice(index, 1);
+    }
+
+    if (!window.ENABLE_TROLLBOT) {
+      const index = sections.findIndex(s => s.name === "Troll Alarms");
       sections.splice(index, 1);
     }
 

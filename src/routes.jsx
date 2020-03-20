@@ -16,6 +16,7 @@ import AdminOptOutList from "./containers/AdminOptOutList";
 import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
 import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
 import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
+import AdminTrollAlarms from "./containers/AdminTrollAlarms";
 import AdminIncomingMessageList from "./containers/AdminIncomingMessageList";
 import EscalatedConversationList from "./containers/AdminIncomingMessageList/EscalatedConversationList";
 import AdminCampaignEdit from "./containers/AdminCampaignEdit";
@@ -30,7 +31,7 @@ import Terms from "./containers/Terms";
 import CreateOrganization from "./containers/CreateOrganization";
 import JoinTeam from "./containers/JoinTeam";
 import Home from "./containers/Home";
-import Settings from "./containers/Settings";
+import SettingsRouter from "./containers/Settings";
 import UserEdit from "./containers/UserEdit";
 import TexterFaqs from "./components/TexterFaqs";
 import FAQs from "./lib/faqs";
@@ -168,7 +169,19 @@ const AdminOrganizationRoutes = props => {
             path={`${organizationPath}/assignment-requests`}
             component={AdminAssignmentRequest}
           />
-          <Route path={`${organizationPath}/settings`} component={Settings} />
+          <Route
+            path={`${organizationPath}/trollalarms`}
+            component={AdminTrollAlarms}
+          />
+          <Redirect
+            exact={true}
+            path={`${organizationPath}/settings`}
+            to={`${organizationPath}/settings/general`}
+          />
+          <Route
+            path={`${organizationPath}/settings/:page`}
+            component={SettingsRouter}
+          />
           <Redirect to={`${organizationPath}/campaigns`} />
         </Switch>
       </AdminDashboard>
