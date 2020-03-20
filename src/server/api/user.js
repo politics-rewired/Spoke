@@ -45,7 +45,14 @@ async function doGetUsers({
     query.where({ role });
   }
 
-  if (campaignsFilter.isArchived !== undefined) {
+  if (campaignsFilter.campaignId !== undefined) {
+    query.whereExists(function() {
+      this.select(r.knex.raw("1"))
+        .from("assignment")
+        .whereRaw("assignment.user_id = user.id")
+        .where({ campaign_id: parseInt(campaignsFilter.campaignId) });
+    });
+  } else if (campaignsFilter.isArchived !== undefined) {
     query.whereExists(function() {
       this.select(r.knex.raw("1"))
         .from("assignment")
@@ -54,15 +61,6 @@ async function doGetUsers({
         .where({
           is_archived: campaignsFilter.isArchived
         });
-    });
-  }
-
-  if (campaignsFilter.campaignId !== undefined) {
-    query.whereExists(function() {
-      this.select(r.knex.raw("1"))
-        .from("assignment")
-        .whereRaw("assignment.user_id = user.id")
-        .where({ campaign_id: parseInt(campaignsFilter.campaignId) });
     });
   }
 
