@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/politics-rewired/spoke/compare/v1.5.1...v1.6.0) (2020-03-21)
+
+
+### Features
+
+* add v1 trollbot functionality ([#591](https://github.com/politics-rewired/spoke/issues/591)) ([7f25c4c](https://github.com/politics-rewired/spoke/commit/7f25c4c0b114299fd7346dd19a400007a1805141))
+
+
+### Bug Fixes
+
+* **message-review:** prevent duplicate fetches of users ([#605](https://github.com/politics-rewired/spoke/issues/605)) ([a02295e](https://github.com/politics-rewired/spoke/commit/a02295ee5c57baa027a44164b063b7e64358dd5a))
+* reset texter loading UI state on refetch ([#602](https://github.com/politics-rewired/spoke/issues/602)) ([cf07e59](https://github.com/politics-rewired/spoke/commit/cf07e59a3ef5d289109bc2fe2c8b0035c5ba0de3))
+
 ### [1.5.1](https://github.com/politics-rewired/spoke/compare/v1.5.0...v1.5.1) (2020-03-13)
 
 
