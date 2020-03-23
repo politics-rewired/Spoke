@@ -49,7 +49,7 @@ async function doGetUsers({
     query.whereExists(function() {
       this.select(r.knex.raw("1"))
         .from("assignment")
-        .whereRaw("assignment.user_id = user.id")
+        .whereRaw('"assignment"."user_id" = "user"."id"')
         .where({ campaign_id: parseInt(campaignsFilter.campaignId) });
     });
   } else if (campaignsFilter.isArchived !== undefined) {
