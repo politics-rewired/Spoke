@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.1](https://github.com/politics-rewired/spoke/compare/v1.6.0...v1.6.1) (2020-03-23)
+
+
+### Bug Fixes
+
+* fix index cleanup migration ([#607](https://github.com/politics-rewired/spoke/issues/607)) ([8c80cb2](https://github.com/politics-rewired/spoke/commit/8c80cb2997f8222572c0551c8998862d00687d35))
+* fully escape raw column names ([db73f60](https://github.com/politics-rewired/spoke/commit/db73f609db6362dbb9a6b628d63f427cdba1300e))
+
 ## [1.6.0](https://github.com/politics-rewired/spoke/compare/v1.5.1...v1.6.0) (2020-03-21)
 
 
