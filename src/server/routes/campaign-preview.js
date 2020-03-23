@@ -27,8 +27,6 @@ const makeCampaignPreviewHtml = async campaignId => {
     .reader("canned_response")
     .where({ campaign_id: campaignId });
 
-  console.log("TCL: annnedResponses", cannnedResponses);
-
   const rootInteractionStep = interactionSteps.find(
     is => !is.parent_interaction_id
   );
