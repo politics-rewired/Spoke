@@ -77,9 +77,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    opacity: 0.2,
-    backgroundColor: "black",
-    color: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    color: "black",
     zIndex: 1000000
   },
   topFixedSection: {
@@ -848,7 +847,7 @@ export class AssignmentTexterContact extends React.Component {
       <div>
         {disabled && (
           <div className={css(styles.overlay)}>
-            <CircularProgress size={0.5} />
+            <CircularProgress size={24} style={{ marginRight: "10px" }} />
             {this.state.disabledText}
           </div>
         )}
