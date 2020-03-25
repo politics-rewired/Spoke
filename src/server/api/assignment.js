@@ -1,4 +1,3 @@
-import moment from "moment-timezone";
 import request from "superagent";
 import _ from "lodash";
 
@@ -10,16 +9,6 @@ import { isNowBetween } from "../../lib/timezones";
 import { r, cacheableData } from "../models";
 import { eventBus, EventType } from "../event-bus";
 import { memoizer, cacheOpts } from "../memoredis";
-import kue from "kue";
-
-export const assignmentQueue =
-  config.MEMOREDIS_URL && config.AUTO_HANDLE_REQUESTS
-    ? kue.createQueue({ redis: config.MEMOREDIS_URL })
-    : {
-        create: () => ({ save: () => null }),
-        process: () => null,
-        shutdown: (_, fn) => fn()
-      };
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -903,16 +892,6 @@ export async function autoHandleRequest(pendingAssignmentRequest) {
   }
 }
 
-assignmentQueue.process(
-  "auto-handle-request",
-  config.AUTO_HANDLE_REQUESTS_CONCURRENCY,
-  async (job, done) => {
-    const pendingAssignmentRequest = job.data;
-    await autoHandleRequest(pendingAssignmentRequest);
-    done();
-  }
-);
-
 export async function giveUserMoreTexts(
   userId,
   count,
@@ -941,8 +920,6 @@ export async function giveUserMoreTexts(
   const preferredAssignment = assignmentOptions.find(
     assignment => assignment.team_id === preferredTeamId
   );
-
-  console.log("assignmentOptions", assignmentOptions);
 
   const assignmentInfo = preferredAssignment || assignmentOptions[0];
 

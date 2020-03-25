@@ -2,6 +2,7 @@ import { makeWorkerUtils, run, Logger } from "graphile-worker";
 
 import { config } from "../config";
 import logger from "../logger";
+import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 
 const logFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -20,7 +21,9 @@ export const getRunner = async (attempt = 0) => {
       // Signals are handled by Terminus
       noHandleSignals: true,
       pollInterval: 1000,
-      taskList: {}
+      taskList: {
+        "handle-autoassignment-request": handleAutoassignmentRequest
+      }
     });
   }
   // Someone beat us to the punch of initializing the worker

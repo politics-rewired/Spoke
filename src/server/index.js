@@ -26,7 +26,6 @@ import {
   previewRouter
 } from "./routes";
 import { r } from "./models";
-import { assignmentQueue } from "./api/assignment";
 import { getRunner } from "./worker";
 
 process.on("uncaughtException", ex => {
@@ -174,22 +173,13 @@ const teardownKnex = async () => {
   ]);
 };
 
-const teardownKue = async () =>
-  new Promise((resolve, reject) => {
-    assignmentQueue.shutdown(5000, err => {
-      if (err) return reject(err);
-      logger.info("  - tore down Kue");
-      return resolve();
-    });
-  });
-
 const teardownGraphile = async () =>
   getRunner()
     .then(runner => runner.stop())
     .then(() => logger.info("  - tore down Graphile worker"));
 
 const onSignal = () => {
-  return Promise.all([teardownKnex(), teardownKue(), teardownGraphile()]);
+  return Promise.all([teardownKnex(), teardownGraphile()]);
 };
 
 const onShutdown = () => {

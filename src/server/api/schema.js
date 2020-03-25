@@ -12,6 +12,7 @@ import _ from "lodash";
 import moment from "moment-timezone";
 import { organizationCache } from "../models/cacheable_queries/organization";
 
+import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
@@ -27,8 +28,7 @@ import { Notifications, sendUserNotification } from "../notifications";
 import {
   resolvers as assignmentResolvers,
   giveUserMoreTexts,
-  myCurrentAssignmentTarget,
-  assignmentQueue
+  myCurrentAssignmentTarget
 } from "./assignment";
 import { getCampaigns, resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
@@ -2566,9 +2566,11 @@ const rootMutations = {
           // If it's been successfully posted to the external system,
           // let's preemptively handle it now but not await the result
           if (config.AUTO_HANDLE_REQUESTS) {
-            assignmentQueue
-              .create("auto-handle-request", pendingAssignmentRequest)
-              .save();
+            const worker = await getWorker();
+            await worker.addJob(
+              "handle-autoassignment-request",
+              pendingAssignmentRequest
+            );
           }
 
           return "Created";
