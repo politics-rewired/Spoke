@@ -26,7 +26,7 @@ export const getRunner = async (attempt = 0) => {
       }
     });
   }
-  // Someone beat us to the punch of initializing the worker
+  // Someone beat us to the punch of initializing the runner
   else if (!runner && runnerSemaphore) {
     if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
     await new Promise((resolve, reject) => setTimeout(() => resolve(), 100));
