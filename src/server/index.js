@@ -27,6 +27,7 @@ import {
 } from "./routes";
 import { r } from "./models";
 import { assignmentQueue } from "./api/assignment";
+import { getRunner } from "./worker";
 
 process.on("uncaughtException", ex => {
   logger.error("uncaughtException", ex);
@@ -162,21 +163,33 @@ const beforeShutdown = () => {
   });
 };
 
+const teardownKnex = async () => {
+  logger.info("Starting cleanup of Postgres pools.");
+  const readerPromise = !!config.DATABASE_READER_URL
+    ? r.reader.destroy().then(() => logger.info("  - tore down Knex reader"))
+    : Promise.resolve();
+  return Promise.all([
+    r.knex.destroy().then(() => logger.info("  - tore down Knex writer")),
+    readerPromise
+  ]);
+};
+
 const teardownKue = async () =>
   new Promise((resolve, reject) => {
     assignmentQueue.shutdown(5000, err => {
       if (err) return reject(err);
+      logger.info("  - tore down Kue");
       return resolve();
     });
   });
 
+const teardownGraphile = async () =>
+  getRunner()
+    .then(runner => runner.stop())
+    .then(() => logger.info("  - tore down Graphile worker"));
+
 const onSignal = () => {
-  logger.info("Starting cleanup of Postgres pools.");
-  return Promise.all([
-    r.knex.destroy(),
-    !!config.DATABASE_READER_URL ? r.reader.destroy() : Promise.resolve(),
-    teardownKue()
-  ]);
+  return Promise.all([teardownKnex(), teardownKue(), teardownGraphile()]);
 };
 
 const onShutdown = () => {
@@ -192,10 +205,12 @@ createTerminus(server, {
   logger
 });
 
-// Heroku requires you to use process.env.PORT
-const port = DEV_APP_PORT || PORT;
-server.listen(port, () => {
-  logger.info(`Node app is running on port ${port}`);
+getRunner().then(() => {
+  // Heroku requires you to use process.env.PORT
+  const port = DEV_APP_PORT || PORT;
+  server.listen(port, () => {
+    logger.info(`Node app is running on port ${port}`);
+  });
 });
 
 // Used by lambda handler
