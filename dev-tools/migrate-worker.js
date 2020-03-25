@@ -4,7 +4,7 @@ import { config } from "../src/config";
 import logger from "../src/logger";
 
 const main = async () => {
-  logger.info(`migrating with connectio string ${config.DATABASE_URL}`);
+  logger.info(`migrating with connection string ${config.DATABASE_URL}`);
   await runMigrations({
     connectionString: config.DATABASE_URL,
     logger
@@ -13,10 +13,10 @@ const main = async () => {
 
 main()
   .then(result => {
-    logger.info("Finished migrating worker", { result });
+    logger.info("Finished migrating graphile-worker", { result });
     process.exit(0);
   })
   .catch(err => {
-    logger.error("Error migrating worker: ", err);
+    logger.error("Error migrating graphile-worker: ", err);
     process.exit(1);
   });
