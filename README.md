@@ -58,6 +58,26 @@ To simulate receiving a reply from a contact you can use the Send Replies utilit
 
 Twilio provides test credentials that will not charge your account as described in their [documentation](https://www.twilio.com/docs/iam/test-credentials). You may use either your test credentials or your live keys by following the instructions [here](https://github.com/MoveOnOrg/Spoke/blob/main/docs/HOWTO_INTEGRATE_TWILIO.md).
 
+### Migrations
+
+Spoke uses [`knex`](https://knexjs.org/) to manage application schema. Spoke also uses [`graphile-worker`](https://github.com/graphile/worker) as it's database-backed job queue.
+
+**graphile-worker**
+
+The `graphile-worker` migrations only need to be run once:
+
+```sh
+yarn migrate:worker
+```
+
+**knex**
+
+The knex migrations need to be run any time a new release has made changes to the application schema, as indicated by a new migration file in `./migrations`. Some migrations require application downtime, some do not. It is up to YOU to review migration notes before rolling out a new release.
+
+```sh
+yarn knex migrate:latest
+```
+
 ## Contributing
 
 ### Commit Messages
