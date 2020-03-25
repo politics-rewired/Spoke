@@ -49,7 +49,8 @@ jobs:
       - run:
           name: Publish Docker image
           command: |
-            export SPOKE_VERSION=$(git describe --tags --always)
+            export DIRTY_TAG=$(git describe --tags --always)
+            export SPOKE_VERSION=${DIRTY_TAG#"v"}
             docker build --build-arg SPOKE_VERSION="$SPOKE_VERSION" --rm=false -t gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 .
             docker tag gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 gcr.io/spoke-rewired/spoke:$SPOKE_VERSION
             docker tag gcr.io/spoke-rewired/spoke:$CIRCLE_SHA1 gcr.io/spoke-rewired/spoke:latest
