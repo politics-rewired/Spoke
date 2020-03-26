@@ -58,7 +58,7 @@ export const resolvers = {
         .where({ organization_id: organization.id });
 
       // Perform a a join if User fields are requested
-      let nodeTransformer = undefined;
+      let nodeTransformer = node => node;
       const edgesQuery = info.fieldNodes[0].selectionSet.selections.find(
         s => s.name.value === "edges"
       );
