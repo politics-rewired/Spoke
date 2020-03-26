@@ -3,17 +3,21 @@ import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 
-import CircularProgress from "material-ui/CircularProgress";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
 
 import { loadData } from "../hoc/with-operations";
+import { RequestAutoApproveType } from "../../api/organization-membership";
 import { sleep } from "../../lib/utils";
+import { hasRole } from "../../lib/permissions";
 import AssignmentRequestTable, {
   RowWorkStatus
 } from "./AssignmentRequestTable";
 
 class AdminAssignmentRequest extends Component {
   state = {
-    assignmentRequests: []
+    assignmentRequests: [],
+    autoApproveReqId: undefined
   };
 
   componentWillUpdate(nextProps) {
@@ -61,11 +65,29 @@ class AdminAssignmentRequest extends Component {
     this.setState({ assignmentRequests });
   };
 
-  handleResolveRequest = approved => async requestId => {
+  handleDismissAutoApproveRequest = () =>
+    this.setState({ autoApproveReqId: undefined });
+  handleAutoApproveRequest = autoApproveReqId =>
+    this.setState({ autoApproveReqId });
+  handleConfirmAutoApprove = () => {
+    const { autoApproveReqId } = this.state;
+    this.setState({ autoApproveReqId: undefined });
+    this.resolveRequest(autoApproveReqId, true, true);
+  };
+
+  handleResolveRequest = approved => requestId =>
+    this.resolveRequest(requestId, approved);
+
+  resolveRequest = async (requestId, approved, autoApprove = false) => {
     const { resolveAssignmentRequest } = this.props.mutations;
     this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
-      const response = await resolveAssignmentRequest(requestId, approved);
+      const level = autoApprove ? RequestAutoApproveType.AUTO_APPROVE : null;
+      const response = await resolveAssignmentRequest(
+        requestId,
+        approved,
+        level
+      );
       if (response.errors) throw response.errors[0];
 
       const newStatus = approved
@@ -84,20 +106,48 @@ class AdminAssignmentRequest extends Component {
   };
 
   render() {
-    const { pendingAssignmentRequests } = this.props;
+    const { currentUser } = this.props.pendingAssignmentRequests;
+    const { assignmentRequests, autoApproveReqId } = this.state;
+    const autoApproveRequest =
+      autoApproveReqId &&
+      assignmentRequests.find(({ id }) => id === autoApproveReqId);
 
-    if (pendingAssignmentRequests.loading) {
-      return <CircularProgress />;
-    }
-
-    const { assignmentRequests } = this.state;
+    const autoApproveActions = [
+      <FlatButton label="Confirm" onClick={this.handleConfirmAutoApprove} />,
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.handleDismissAutoApproveRequest}
+      />
+    ];
 
     return (
-      <AssignmentRequestTable
-        assignmentRequests={assignmentRequests}
-        onApproveRequest={this.handleResolveRequest(true)}
-        onDenyRequest={this.handleResolveRequest(false)}
-      />
+      <div>
+        <AssignmentRequestTable
+          isAdmin={hasRole("ADMIN", currentUser.roles)}
+          assignmentRequests={assignmentRequests}
+          onAutoApproveRequest={this.handleAutoApproveRequest}
+          onApproveRequest={this.handleResolveRequest(true)}
+          onDenyRequest={this.handleResolveRequest(false)}
+        />
+        <Dialog
+          title="Confirm Enable AutoAssignment"
+          open={!!autoApproveRequest}
+          actions={autoApproveActions}
+          onRequestClose={this.handleDismissAutoApproveRequest}
+        >
+          <p>
+            Are you sure you would like to enable automatic assignment request
+            fulfillment for {((autoApproveRequest || {}).user || {}).firstName}{" "}
+            {((autoApproveRequest || {}).user || {}).lastName}?
+          </p>
+          <p>
+            If enabled, all future assignment requests for this user will be
+            automatically fulfilled. This can be changed at any time from the
+            People page.
+          </p>
+        </Dialog>
+      </div>
     );
   }
 }
@@ -109,7 +159,14 @@ AdminAssignmentRequest.propTypes = {
 const queries = {
   pendingAssignmentRequests: {
     query: gql`
-      query assignmentRequests($organizationId: String!, $status: String) {
+      query assignmentRequestsWithUser(
+        $organizationId: String!
+        $status: String
+      ) {
+        currentUser {
+          id
+          roles(organizationId: "1")
+        }
         assignmentRequests(organizationId: $organizationId, status: $status) {
           id
           createdAt

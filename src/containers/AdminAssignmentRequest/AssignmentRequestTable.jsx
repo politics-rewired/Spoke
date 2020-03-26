@@ -10,9 +10,14 @@ import {
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
+import IconButton from "material-ui/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
 import CircularProgress from "material-ui/CircularProgress";
+import HighlightOffIcon from "material-ui/svg-icons/action/highlight-off";
+import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
+import AssignmentTurnedInIcon from "material-ui/svg-icons/action/assignment-turned-in";
+import { red500, green300 } from "material-ui/styles/colors";
 
 import theme from "../../styles/theme";
 
@@ -53,8 +58,16 @@ const styles = {
 };
 
 const AssignmentRequestTable = props => {
-  const { assignmentRequests, onApproveRequest, onDenyRequest } = props;
+  const {
+    isAdmin,
+    assignmentRequests,
+    onAutoApproveRequest,
+    onApproveRequest,
+    onDenyRequest
+  } = props;
 
+  const handleAutoApproveRow = requestId => () =>
+    onAutoApproveRequest(requestId);
   const handleApproveRow = requestId => () => onApproveRequest(requestId);
   const handleDenyRow = requestId => () => onDenyRequest(requestId);
 
@@ -81,28 +94,42 @@ const AssignmentRequestTable = props => {
                 <TableRowColumn>{request.amount}</TableRowColumn>
                 <TableRowColumn>{moment(createdAt).fromNow()}</TableRowColumn>
                 <TableRowColumn>
-                  {status === RowWorkStatus.Error && (
-                    <span style={styles.errorText}>Error. Try again.</span>
-                  )}
-                  {showActions && (
-                    <FlatButton
-                      label="Deny"
-                      secondary={true}
-                      style={{ margin: "3px" }}
-                      onClick={handleDenyRow(requestId)}
-                    />
-                  )}
-                  {showActions && (
-                    <RaisedButton
-                      label="Approve"
-                      primary={true}
-                      style={{ margin: "3px" }}
-                      onClick={handleApproveRow(requestId)}
-                    />
-                  )}
-                  {status === RowWorkStatus.Working && (
-                    <CircularProgress size={25} />
-                  )}
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {status === RowWorkStatus.Error && (
+                      <span style={styles.errorText}>Error. Try again.</span>
+                    )}
+                    {showActions && (
+                      <IconButton
+                        tooltip="Deny"
+                        tooltipPosition="top-center"
+                        onClick={handleDenyRow(requestId)}
+                      >
+                        <HighlightOffIcon color={red500} />
+                      </IconButton>
+                    )}
+                    {showActions && (
+                      <IconButton
+                        tooltip="Approve"
+                        tooltipPosition="top-center"
+                        onClick={handleApproveRow(requestId)}
+                      >
+                        <CheckCircleIcon color={green300} />
+                      </IconButton>
+                    )}
+                    {showActions &&
+                      isAdmin && (
+                        <FlatButton
+                          label="AutoApprove"
+                          labelPosition="before"
+                          primary={true}
+                          icon={<AssignmentTurnedInIcon color={green300} />}
+                          onClick={handleAutoApproveRow(requestId)}
+                        />
+                      )}
+                    {status === RowWorkStatus.Working && (
+                      <CircularProgress size={25} />
+                    )}
+                  </div>
                 </TableRowColumn>
               </TableRow>
             );
@@ -114,6 +141,7 @@ const AssignmentRequestTable = props => {
 };
 
 AssignmentRequestTable.propTypes = {
+  isAdmin: PropTypes.bool.isRequired,
   assignmentRequests: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
