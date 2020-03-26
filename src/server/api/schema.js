@@ -816,18 +816,50 @@ const rootMutations = {
       return loaders.organization.load(organizationId);
     },
 
-    editUserAutoApprove: async (
+    editOrganizationMembership: async (
       _,
-      { organizationId, userId, level },
+      { id, level, role },
       { user: authUser }
     ) => {
-      await accessRequired(authUser, organizationId, "ADMIN", true);
-
-      const [orgMembership] = await r
+      const membership = await r
         .knex("user_organization")
-        .where({ user_id: userId, organization_id: organizationId })
-        .update({ request_status: level.toLowerCase() })
+        .where({ id: parseInt(id) })
+        .first();
+      if (!membership) throw new Error("No such org membership");
+
+      let roleRequired = "ADMIN";
+      if (role && (membership.role === "OWNER" || role === "OWNER")) {
+        roleRequired = "OWNER";
+      }
+
+      await accessRequired(
+        authUser,
+        membership.organization_id,
+        roleRequired,
+        true
+      );
+
+      const updateQuery = r
+        .knex("user_organization")
+        .where({
+          user_id: membership.user_id,
+          organization_id: membership.organization_id
+        })
         .returning("*");
+
+      if (level) updateQuery.update({ request_status: level.toLowerCase() });
+      if (role) updateQuery.update({ role });
+
+      const [orgMembership] = await updateQuery;
+
+      memoizer.invalidate(cacheOpts.UserOrganizations.key, {
+        userId: membership.user_id
+      });
+      memoizer.invalidate(cacheOpts.UserOrganizationRoles.key, {
+        userId: membership.user_id,
+        organizationId: membership.organization_id
+      });
+
       return orgMembership;
     },
 
