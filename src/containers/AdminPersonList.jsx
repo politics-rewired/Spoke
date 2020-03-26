@@ -25,14 +25,6 @@ import PasswordResetLink from "../components/PasswordResetLink";
 import LoadingIndicator from "../components/LoadingIndicator";
 
 class AdminPersonList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleOpen = this.handleOpen.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.updateUser = this.updateUser.bind(this);
-  }
-
   state = {
     open: false,
     userEdit: false,
@@ -56,13 +48,9 @@ class AdminPersonList extends React.Component {
     this.handleFilterChange(campaignId, value);
   };
 
-  handleOpen() {
-    this.setState({ open: true });
-  }
+  handleOpen = () => this.setState({ open: true });
 
-  handleClose() {
-    this.setState({ open: false, passwordResetHash: "" });
-  }
+  handleClose = () => this.setState({ open: false, passwordResetHash: "" });
 
   handleChange = async (userId, value) => {
     await this.props.mutations.editOrganizationRoles(
@@ -72,14 +60,12 @@ class AdminPersonList extends React.Component {
     );
   };
 
-  editUser(userId) {
-    this.setState({ userEdit: userId });
-  }
+  editUser = userId => this.setState({ userEdit: userId });
 
-  updateUser() {
+  updateUser = () => {
     this.setState({ userEdit: false });
     this.props.personData.refetch();
-  }
+  };
 
   renderOffsetList() {
     const LIMIT = 200;
