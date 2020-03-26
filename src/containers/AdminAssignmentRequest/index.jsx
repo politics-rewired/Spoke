@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
 
 import CircularProgress from "material-ui/CircularProgress";
 
@@ -16,53 +17,29 @@ class AdminAssignmentRequest extends Component {
   };
 
   componentWillUpdate(nextProps) {
-    this.updateAssignmentRequestStateWithNewProps(nextProps);
+    this.updateAssignmentRequestStateWithNewProps(this.props, nextProps);
   }
 
   componentWillMount() {
-    this.updateAssignmentRequestStateWithNewProps(this.props);
+    this.updateAssignmentRequestStateWithNewProps(null, this.props);
   }
 
-  updateAssignmentRequestStateWithNewProps(nextProps) {
-    if (!nextProps.pendingAssignmentRequests) {
+  updateAssignmentRequestStateWithNewProps(lastProps, nextProps) {
+    if (
+      lastProps &&
+      lastProps.pendingAssignmentRequests.assignmentRequests &&
+      nextProps.pendingAssignmentRequests.assignmentRequests &&
+      isEqual(
+        lastProps.pendingAssignmentRequests.assignmentRequests,
+        nextProps.pendingAssignmentRequests.assignmentRequests
+      )
+    ) {
+      // Ignore the props/state update unless server-provided assignmentRequests have changed
       return;
     }
 
-    const newRequestIds = nextProps.pendingAssignmentRequests.assignmentRequests.map(
-      r => r.id
-    );
-
-    const deletableOldRequestIds = this.state.assignmentRequests
-      .filter(r => r.status === "pending")
-      .map(r => r.id);
-
-    const toAdd = newRequestIds.filter(
-      rId => !deletableOldRequestIds.includes(rId)
-    );
-
-    const toDelete = deletableOldRequestIds.filter(
-      rId => !newRequestIds.includes(rId)
-    );
-
-    if (toAdd.length > 0) {
-      for (let rId of toAdd) {
-        const r = nextProps.pendingAssignmentRequests.assignmentRequests.find(
-          r => r.id === rId
-        );
-        this.state.assignmentRequests.push(r);
-      }
-    }
-
-    if (toDelete.length > 0) {
-      this.state.pendingAssignmentRequests = this.state.assignmentRequests.filter(
-        r => !toDelete.includes(r.id)
-      );
-    }
-
-    if (toAdd.length > 0 || toDelete.length > 0) {
-      console.log({ toAdd, toDelete });
-      // this.forceUpdate();
-    }
+    const { assignmentRequests } = nextProps.pendingAssignmentRequests;
+    this.state.assignmentRequests = assignmentRequests;
   }
 
   setRequestStatus = (requestId, status) => {
