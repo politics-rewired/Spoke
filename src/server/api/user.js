@@ -1,7 +1,9 @@
+import { GraphQLError } from "graphql/error";
 import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
 import groupBy from "lodash/groupBy";
 import { memoizer, cacheOpts } from "../memoredis";
+import { formatPage } from "./lib/pagination";
 
 export function buildUserOrganizationQuery(
   queryParam,
@@ -175,6 +177,16 @@ export const resolvers = {
         .where({ user_id: user.id, campaign_id: campaignId })
         .first()
         .then(record => record || null),
+    memberships: async (user, { after, first }, { user: authUser }) => {
+      if (authUser.id !== user.id || !authUser.is_superadmin) {
+        throw new GraphQLError(
+          "You are not authorized to access that resource."
+        );
+      }
+
+      const query = r.reader("user_organization").where({ user_id: user.id });
+      return await formatPage(query, { after, first });
+    },
     organizations: async (user, { role }) => {
       if (!user || !user.id) {
         return [];

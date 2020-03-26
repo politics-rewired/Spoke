@@ -1,5 +1,6 @@
 import { config } from "../../config";
 import { sqlResolvers } from "./lib/utils";
+import { formatPage } from "./lib/pagination";
 import { r } from "../models";
 import { accessRequired } from "./errors";
 import { buildCampaignQuery, getCampaigns } from "./campaign";
@@ -49,6 +50,60 @@ export const resolvers = {
     optOuts: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "ADMIN");
       return r.reader("opt_out").where({ organization_id: organization.id });
+    },
+    memberships: async (organization, { first, after }, { user }, info) => {
+      await accessRequired(user, organization.id, "SUPERVOLUNTEER");
+      const query = r
+        .reader("user_organization")
+        .where({ organization_id: organization.id });
+
+      // Perform a a join if User fields are requested
+      let nodeTransformer = undefined;
+      const edgesQuery = info.fieldNodes[0].selectionSet.selections.find(
+        s => s.name.value === "edges"
+      );
+      if (edgesQuery) {
+        const nodeQuery = edgesQuery.selectionSet.selections.find(
+          s => s.name.value === "node"
+        );
+        if (
+          nodeQuery &&
+          nodeQuery.selectionSet.selections.find(s => s.name.value === "user")
+        ) {
+          query.join(
+            "public.user",
+            "public.user.id",
+            "user_organization.user_id"
+          );
+          query.select([
+            "user_organization.*",
+            "user.id as user_table_id",
+            "user.email",
+            "user.first_name",
+            "user.last_name"
+          ]);
+          nodeTransformer = record => {
+            const {
+              user_table_id,
+              email,
+              first_name,
+              last_name,
+              ...node
+            } = record;
+            return {
+              ...node,
+              user: {
+                id: user_table_id,
+                email,
+                first_name,
+                last_name
+              }
+            };
+          };
+        }
+      }
+
+      return await formatPage(query, { after, first, nodeTransformer });
     },
     people: async (organization, { role, campaignId, offset }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");

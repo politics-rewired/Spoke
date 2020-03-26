@@ -17,6 +17,7 @@ import { schema as tagSchema } from "./tag";
 import { schema as teamSchema } from "./team";
 import { schema as trollbotSchema } from "./trollbot";
 import { schema as paginationSchema } from "./pagination";
+import { schema as membershipSchema } from "./organization-membership";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -311,6 +312,7 @@ export const schema = [
   "scalar Date",
   "scalar JSON",
   "scalar Phone",
+  membershipSchema,
   campaignSchema,
   assignmentSchema,
   interactionStepSchema,

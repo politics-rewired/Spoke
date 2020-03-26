@@ -63,6 +63,7 @@ import {
   resolvers as organizationResolvers,
   getEscalationUserId
 } from "./organization";
+import { resolvers as membershipSchema } from "./organization-membership";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
@@ -3500,6 +3501,7 @@ export const resolvers = {
   ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,
+  ...membershipSchema,
   ...organizationResolvers,
   ...campaignResolvers,
   ...assignmentResolvers,
