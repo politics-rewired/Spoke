@@ -816,6 +816,21 @@ const rootMutations = {
       return loaders.organization.load(organizationId);
     },
 
+    editUserAutoApprove: async (
+      _,
+      { organizationId, userId, level },
+      { user: authUser }
+    ) => {
+      await accessRequired(authUser, organizationId, "ADMIN", true);
+
+      const [orgMembership] = await r
+        .knex("user_organization")
+        .where({ user_id: userId, organization_id: organizationId })
+        .update({ request_status: level.toLowerCase() })
+        .returning("*");
+      return orgMembership;
+    },
+
     editUser: async (_, { organizationId, userId, userData }, { user }) => {
       if (user.id !== userId) {
         // User can edit themselves

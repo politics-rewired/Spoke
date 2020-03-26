@@ -243,6 +243,7 @@ const rootSchema = `
     createOrganization(name: String!, userId: String!, inviteId: String!): Organization
     joinOrganization(organizationUuid: String!): Organization
     editOrganizationRoles(organizationId: String!, userId: String!, campaignId: String, roles: [String]): Organization
+    editUserAutoApprove(organizationId: String!, userId: String!, level: RequestAutoApprove!): OrganizationMembership
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     resetUserPassword(organizationId: String!, userId: Int!): String!
     changeUserPassword(userId: Int!, formData: UserPasswordChange): User
