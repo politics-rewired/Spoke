@@ -16,6 +16,7 @@ import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as tagSchema } from "./tag";
 import { schema as teamSchema } from "./team";
 import { schema as trollbotSchema } from "./trollbot";
+import { schema as paginationSchema } from "./pagination";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -305,6 +306,7 @@ export const schema = [
   rootSchema,
   userSchema,
   organizationSchema,
+  paginationSchema,
   "scalar Upload",
   "scalar Date",
   "scalar JSON",
