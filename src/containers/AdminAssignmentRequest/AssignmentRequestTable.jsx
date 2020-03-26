@@ -123,7 +123,7 @@ AssignmentRequestTable.propTypes = {
         lastName: PropTypes.string.isRequired
       }).isRequired,
       amount: PropTypes.number.isRequired,
-      createdAt: PropTypes.instanceOf(Date),
+      createdAt: PropTypes.string.isRequired,
       status: PropTypes.string.isRequired
     })
   ),
