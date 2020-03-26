@@ -15,7 +15,7 @@ import Snackbar from "material-ui/Snackbar";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import ContentAdd from "material-ui/svg-icons/content/add";
 
-import { getHighestRole, ROLE_HIERARCHY } from "../lib/permissions";
+import { getHighestRole, ROLE_HIERARCHY, hasRole } from "../lib/permissions";
 import { RequestAutoApproveType } from "../api/organization-membership";
 import { dataTest } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
@@ -211,7 +211,7 @@ class AdminPersonList extends React.Component {
               <TableRowColumn>
                 <DropDownMenu
                   value={person.memberships.edges[0].node.requestAutoApprove}
-                  disabled={false}
+                  disabled={!hasRole("ADMIN", currentUser.roles)}
                   onChange={this.handleOnChangeAutoApprovalLevel(
                     person.memberships.edges[0].node.id
                   )}
