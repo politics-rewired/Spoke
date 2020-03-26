@@ -63,6 +63,7 @@ import {
   resolvers as organizationResolvers,
   getEscalationUserId
 } from "./organization";
+import { resolvers as membershipSchema } from "./organization-membership";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
@@ -813,6 +814,53 @@ const rootMutations = {
       });
 
       return loaders.organization.load(organizationId);
+    },
+
+    editOrganizationMembership: async (
+      _,
+      { id, level, role },
+      { user: authUser }
+    ) => {
+      const membership = await r
+        .knex("user_organization")
+        .where({ id: parseInt(id) })
+        .first();
+      if (!membership) throw new Error("No such org membership");
+
+      let roleRequired = "ADMIN";
+      if (role && (membership.role === "OWNER" || role === "OWNER")) {
+        roleRequired = "OWNER";
+      }
+
+      await accessRequired(
+        authUser,
+        membership.organization_id,
+        roleRequired,
+        true
+      );
+
+      const updateQuery = r
+        .knex("user_organization")
+        .where({
+          user_id: membership.user_id,
+          organization_id: membership.organization_id
+        })
+        .returning("*");
+
+      if (level) updateQuery.update({ request_status: level.toLowerCase() });
+      if (role) updateQuery.update({ role });
+
+      const [orgMembership] = await updateQuery;
+
+      memoizer.invalidate(cacheOpts.UserOrganizations.key, {
+        userId: membership.user_id
+      });
+      memoizer.invalidate(cacheOpts.UserOrganizationRoles.key, {
+        userId: membership.user_id,
+        organizationId: membership.organization_id
+      });
+
+      return orgMembership;
     },
 
     editUser: async (_, { organizationId, userId, userData }, { user }) => {
@@ -3500,6 +3548,7 @@ export const resolvers = {
   ...assignmentRequestResolvers,
   ...rootResolvers,
   ...userResolvers,
+  ...membershipSchema,
   ...organizationResolvers,
   ...campaignResolvers,
   ...assignmentResolvers,

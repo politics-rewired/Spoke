@@ -24,6 +24,7 @@ export const schema = `
     uuid: String
     name: String
     campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): PaginatedCampaigns
+    memberships(after: Cursor, first: Int): OrganizationMembershipPage
     people(role: String, campaignId: String, offset: Int): [User]
     peopleCount: Int
     optOuts: [OptOut]

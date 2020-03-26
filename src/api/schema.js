@@ -1,59 +1,23 @@
-import {
-  schema as userSchema,
-  resolvers as userResolvers,
-  buildUserOrganizationQuery
-} from "./user";
-import {
-  schema as conversationSchema,
-  getConversations,
-  resolvers as conversationsResolver
-} from "./conversations";
-import {
-  schema as organizationSchema,
-  resolvers as organizationResolvers
-} from "./organization";
-import {
-  schema as campaignSchema,
-  resolvers as campaignResolvers
-} from "./campaign";
-import {
-  schema as assignmentSchema,
-  resolvers as assignmentResolvers
-} from "./assignment";
-import {
-  schema as interactionStepSchema,
-  resolvers as interactionStepResolvers
-} from "./interaction-step";
-import {
-  schema as questionSchema,
-  resolvers as questionResolvers
-} from "./question";
-import {
-  schema as questionResponseSchema,
-  resolvers as questionResponseResolvers
-} from "./question-response";
-import {
-  schema as optOutSchema,
-  resolvers as optOutResolvers
-} from "./opt-out";
-import {
-  schema as messageSchema,
-  resolvers as messageResolvers
-} from "./message";
-import {
-  schema as campaignContactSchema,
-  resolvers as campaignContactResolvers
-} from "./campaign-contact";
-import {
-  schema as cannedResponseSchema,
-  resolvers as cannedResponseResolvers
-} from "./canned-response";
-import { schema as inviteSchema, resolvers as inviteResolvers } from "./invite";
+import { schema as userSchema } from "./user";
+import { schema as conversationSchema } from "./conversations";
+import { schema as organizationSchema } from "./organization";
+import { schema as campaignSchema } from "./campaign";
+import { schema as assignmentSchema } from "./assignment";
+import { schema as interactionStepSchema } from "./interaction-step";
+import { schema as questionSchema } from "./question";
+import { schema as questionResponseSchema } from "./question-response";
+import { schema as optOutSchema } from "./opt-out";
+import { schema as messageSchema } from "./message";
+import { schema as campaignContactSchema } from "./campaign-contact";
+import { schema as cannedResponseSchema } from "./canned-response";
+import { schema as inviteSchema } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
 import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as tagSchema } from "./tag";
 import { schema as teamSchema } from "./team";
 import { schema as trollbotSchema } from "./trollbot";
+import { schema as paginationSchema } from "./pagination";
+import { schema as membershipSchema } from "./organization-membership";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -279,6 +243,7 @@ const rootSchema = `
     createOrganization(name: String!, userId: String!, inviteId: String!): Organization
     joinOrganization(organizationUuid: String!): Organization
     editOrganizationRoles(organizationId: String!, userId: String!, campaignId: String, roles: [String]): Organization
+    editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     resetUserPassword(organizationId: String!, userId: Int!): String!
     changeUserPassword(userId: Int!, formData: UserPasswordChange): User
@@ -343,10 +308,12 @@ export const schema = [
   rootSchema,
   userSchema,
   organizationSchema,
+  paginationSchema,
   "scalar Upload",
   "scalar Date",
   "scalar JSON",
   "scalar Phone",
+  membershipSchema,
   campaignSchema,
   assignmentSchema,
   interactionStepSchema,

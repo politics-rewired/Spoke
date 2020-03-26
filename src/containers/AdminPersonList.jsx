@@ -11,10 +11,12 @@ import FloatingActionButton from "material-ui/FloatingActionButton";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
 import Dialog from "material-ui/Dialog";
+import Snackbar from "material-ui/Snackbar";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import ContentAdd from "material-ui/svg-icons/content/add";
 
-import { getHighestRole, ROLE_HIERARCHY } from "../lib/permissions";
+import { getHighestRole, ROLE_HIERARCHY, hasRole } from "../lib/permissions";
+import { RequestAutoApproveType } from "../api/organization-membership";
 import { dataTest } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
@@ -24,19 +26,21 @@ import OrganizationJoinLink from "../components/OrganizationJoinLink";
 import PasswordResetLink from "../components/PasswordResetLink";
 import LoadingIndicator from "../components/LoadingIndicator";
 
-class AdminPersonList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleOpen = this.handleOpen.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.updateUser = this.updateUser.bind(this);
-  }
+const titleCase = value =>
+  `${value.charAt(0).toUpperCase()}${value.substring(1).toLowerCase()}`;
+const snakeToTitleCase = value =>
+  value
+    .split("_")
+    .map(s => titleCase(s))
+    .join(" ");
 
+class AdminPersonList extends React.Component {
   state = {
     open: false,
     userEdit: false,
-    passwordResetHash: ""
+    passwordResetHash: "",
+    isWorking: false,
+    saveError: undefined
   };
 
   handleFilterChange = (campaignId, offset) => {
@@ -56,13 +60,11 @@ class AdminPersonList extends React.Component {
     this.handleFilterChange(campaignId, value);
   };
 
-  handleOpen() {
-    this.setState({ open: true });
-  }
+  handleOpen = () => this.setState({ open: true });
 
-  handleClose() {
-    this.setState({ open: false, passwordResetHash: "" });
-  }
+  handleClose = () => this.setState({ open: false, passwordResetHash: "" });
+
+  handleDismissSaveError = () => this.setState({ saveError: undefined });
 
   handleChange = async (userId, value) => {
     await this.props.mutations.editOrganizationRoles(
@@ -72,14 +74,33 @@ class AdminPersonList extends React.Component {
     );
   };
 
-  editUser(userId) {
-    this.setState({ userEdit: userId });
-  }
+  handleOnChangeAutoApprovalLevel = membershipId => async (
+    _event,
+    _index,
+    level
+  ) => {
+    const { editOrganizationMembership } = this.props.mutations;
+    this.setState({ isWorking: true, saveError: undefined });
+    try {
+      const response = await editOrganizationMembership(membershipId, {
+        level
+      });
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      this.setState({
+        saveError: `Couldn't update approval level: ${err.message}`
+      });
+    } finally {
+      this.setState({ isWorking: false });
+    }
+  };
 
-  updateUser() {
+  editUser = userId => this.setState({ userEdit: userId });
+
+  updateUser = () => {
     this.setState({ userEdit: false });
     this.props.personData.refetch();
-  }
+  };
 
   renderOffsetList() {
     const LIMIT = 200;
@@ -182,12 +203,30 @@ class AdminPersonList extends React.Component {
                         option === "OWNER" &&
                         getHighestRole(currentUser.roles) !== "OWNER"
                       }
-                      primaryText={`${option
-                        .charAt(0)
-                        .toUpperCase()}${option.substring(1).toLowerCase()}`}
+                      primaryText={titleCase(option)}
                     />
                   ))}
                 </DropDownMenu>
+              </TableRowColumn>
+              <TableRowColumn>
+                <DropDownMenu
+                  value={person.memberships.edges[0].node.requestAutoApprove}
+                  disabled={!hasRole("ADMIN", currentUser.roles)}
+                  onChange={this.handleOnChangeAutoApprovalLevel(
+                    person.memberships.edges[0].node.id
+                  )}
+                >
+                  {Object.keys(RequestAutoApproveType).map(option => (
+                    <MenuItem
+                      key={`${person.id}_${option}`}
+                      value={option}
+                      disabled={false}
+                      primaryText={snakeToTitleCase(option)}
+                    />
+                  ))}
+                </DropDownMenu>
+              </TableRowColumn>
+              <TableRowColumn>
                 <FlatButton
                   {...dataTest("editPerson")}
                   label="Edit"
@@ -195,7 +234,9 @@ class AdminPersonList extends React.Component {
                     this.editUser(person.id);
                   }}
                 />
-                {canResetPassword && (
+              </TableRowColumn>
+              {canResetPassword && (
+                <TableRowColumn>
                   <FlatButton
                     label="Reset Password"
                     disabled={currentUser.id === person.id}
@@ -203,8 +244,8 @@ class AdminPersonList extends React.Component {
                       this.resetPassword(person.id);
                     }}
                   />
-                )}
-              </TableRowColumn>
+                </TableRowColumn>
+              )}
             </TableRow>
           ))}
         </TableBody>
@@ -285,6 +326,12 @@ class AdminPersonList extends React.Component {
             </Dialog>
           </div>
         )}
+        <Snackbar
+          open={this.state.saveError !== undefined}
+          message={this.state.saveError || ""}
+          autoHideDuration={4000}
+          onRequestClose={this.handleDismissSaveError}
+        />
       </div>
     );
   }
@@ -312,6 +359,14 @@ const organizationFragment = `
     displayName
     email
     roles(organizationId: $organizationId)
+    memberships(organizationId: $organizationId) {
+      edges {
+        node {
+          id
+          requestAutoApprove
+        }
+      }
+    }
   }
 `;
 
@@ -333,6 +388,33 @@ const mutations = {
         queryString.parse(ownProps.location.search).offset !== undefined
           ? queryString.parse(ownProps.location.search).offset * 200
           : 0
+    }
+  }),
+  editOrganizationMembership: ownProps => (
+    membershipId,
+    { level = null, role = null }
+  ) => ({
+    mutation: gql`
+      mutation editOrganizationMembership(
+        $membershipId: String!
+        $level: RequestAutoApprove
+        $role: String
+      ) {
+        editOrganizationMembership(
+          id: $membershipId
+          level: $level
+          role: $role
+        ) {
+          id
+          role
+          requestAutoApprove
+        }
+      }
+    `,
+    variables: {
+      membershipId: membershipId.toString(),
+      level,
+      role
     }
   }),
   resetUserPassword: ownProps => (organizationId, userId) => ({
