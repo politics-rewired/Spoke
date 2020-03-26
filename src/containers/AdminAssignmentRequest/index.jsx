@@ -1,68 +1,49 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
 
-import CircularProgress from "material-ui/CircularProgress";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
 
 import { loadData } from "../hoc/with-operations";
+import { RequestAutoApproveType } from "../../api/organization-membership";
 import { sleep } from "../../lib/utils";
+import { hasRole } from "../../lib/permissions";
 import AssignmentRequestTable, {
   RowWorkStatus
 } from "./AssignmentRequestTable";
 
 class AdminAssignmentRequest extends Component {
   state = {
-    assignmentRequests: []
+    assignmentRequests: [],
+    autoApproveReqId: undefined
   };
 
   componentWillUpdate(nextProps) {
-    this.updateAssignmentRequestStateWithNewProps(nextProps);
+    this.updateAssignmentRequestStateWithNewProps(this.props, nextProps);
   }
 
   componentWillMount() {
-    this.updateAssignmentRequestStateWithNewProps(this.props);
+    this.updateAssignmentRequestStateWithNewProps(null, this.props);
   }
 
-  updateAssignmentRequestStateWithNewProps(nextProps) {
-    if (!nextProps.pendingAssignmentRequests) {
+  updateAssignmentRequestStateWithNewProps(lastProps, nextProps) {
+    if (
+      lastProps &&
+      lastProps.pendingAssignmentRequests.assignmentRequests &&
+      nextProps.pendingAssignmentRequests.assignmentRequests &&
+      isEqual(
+        lastProps.pendingAssignmentRequests.assignmentRequests,
+        nextProps.pendingAssignmentRequests.assignmentRequests
+      )
+    ) {
+      // Ignore the props/state update unless server-provided assignmentRequests have changed
       return;
     }
 
-    const newRequestIds = nextProps.pendingAssignmentRequests.assignmentRequests.map(
-      r => r.id
-    );
-
-    const deletableOldRequestIds = this.state.assignmentRequests
-      .filter(r => r.status === "pending")
-      .map(r => r.id);
-
-    const toAdd = newRequestIds.filter(
-      rId => !deletableOldRequestIds.includes(rId)
-    );
-
-    const toDelete = deletableOldRequestIds.filter(
-      rId => !newRequestIds.includes(rId)
-    );
-
-    if (toAdd.length > 0) {
-      for (let rId of toAdd) {
-        const r = nextProps.pendingAssignmentRequests.assignmentRequests.find(
-          r => r.id === rId
-        );
-        this.state.assignmentRequests.push(r);
-      }
-    }
-
-    if (toDelete.length > 0) {
-      this.state.pendingAssignmentRequests = this.state.assignmentRequests.filter(
-        r => !toDelete.includes(r.id)
-      );
-    }
-
-    if (toAdd.length > 0 || toDelete.length > 0) {
-      console.log({ toAdd, toDelete });
-      // this.forceUpdate();
-    }
+    const { assignmentRequests } = nextProps.pendingAssignmentRequests;
+    this.state.assignmentRequests = assignmentRequests;
   }
 
   setRequestStatus = (requestId, status) => {
@@ -84,62 +65,89 @@ class AdminAssignmentRequest extends Component {
     this.setState({ assignmentRequests });
   };
 
-  handleApproveRequest = async requestId => {
-    console.log("Approve", requestId);
-    this.setRequestStatus(requestId, RowWorkStatus.Working);
-    try {
-      // simulate network request
-      const response = await this.props.mutations.approveAssignmentRequest(
-        requestId
-      );
-
-      if (response.errors) {
-        throw response.errors[0];
-      }
-
-      console.log("Approved request");
-      this.setRequestStatus(requestId, RowWorkStatus.Approved);
-      await sleep(2000);
-      this.deleteRequest(requestId);
-    } catch (exc) {
-      console.log("Request approval failed", exc);
-      this.setRequestStatus(requestId, RowWorkStatus.Error);
-    }
+  handleDismissAutoApproveRequest = () =>
+    this.setState({ autoApproveReqId: undefined });
+  handleAutoApproveRequest = autoApproveReqId =>
+    this.setState({ autoApproveReqId });
+  handleConfirmAutoApprove = () => {
+    const { autoApproveReqId } = this.state;
+    this.setState({ autoApproveReqId: undefined });
+    this.resolveRequest(autoApproveReqId, true, true);
   };
 
-  handleDenyRequest = async requestId => {
-    console.log("Deny", requestId);
+  handleResolveRequest = approved => requestId =>
+    this.resolveRequest(requestId, approved);
+
+  resolveRequest = async (requestId, approved, autoApprove = false) => {
+    const { resolveAssignmentRequest } = this.props.mutations;
     this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
-      // simulate network request
-      const response = await this.props.mutations.rejectAssignmentRequest(
-        requestId
+      const level = autoApprove ? RequestAutoApproveType.AUTO_APPROVE : null;
+      const response = await resolveAssignmentRequest(
+        requestId,
+        approved,
+        level
       );
-      if (response.errors) throw new Error(response.errors);
-      console.log("Denied request");
-      this.setRequestStatus(requestId, RowWorkStatus.Denied);
+      if (response.errors) throw response.errors[0];
+
+      const newStatus = approved
+        ? RowWorkStatus.Approved
+        : RowWorkStatus.Denied;
+      this.setRequestStatus(requestId, newStatus);
       await sleep(2000);
       this.deleteRequest(requestId);
     } catch (exc) {
+      console.error(
+        `Resolve request as "${approved ? "approved" : "denied"}" failed: `,
+        exc
+      );
       this.setRequestStatus(requestId, RowWorkStatus.Error);
     }
   };
 
   render() {
-    const { pendingAssignmentRequests } = this.props;
+    const { currentUser } = this.props.pendingAssignmentRequests;
+    const { assignmentRequests, autoApproveReqId } = this.state;
+    const autoApproveRequest =
+      autoApproveReqId &&
+      assignmentRequests.find(({ id }) => id === autoApproveReqId);
 
-    if (pendingAssignmentRequests.loading) {
-      return <CircularProgress />;
-    }
-
-    const { assignmentRequests } = this.state;
+    const autoApproveActions = [
+      <FlatButton label="Confirm" onClick={this.handleConfirmAutoApprove} />,
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.handleDismissAutoApproveRequest}
+      />
+    ];
 
     return (
-      <AssignmentRequestTable
-        assignmentRequests={assignmentRequests}
-        onApproveRequest={this.handleApproveRequest}
-        onDenyRequest={this.handleDenyRequest}
-      />
+      <div>
+        <AssignmentRequestTable
+          isAdmin={hasRole("ADMIN", currentUser.roles)}
+          assignmentRequests={assignmentRequests}
+          onAutoApproveRequest={this.handleAutoApproveRequest}
+          onApproveRequest={this.handleResolveRequest(true)}
+          onDenyRequest={this.handleResolveRequest(false)}
+        />
+        <Dialog
+          title="Confirm Enable AutoAssignment"
+          open={!!autoApproveRequest}
+          actions={autoApproveActions}
+          onRequestClose={this.handleDismissAutoApproveRequest}
+        >
+          <p>
+            Are you sure you would like to enable automatic assignment request
+            fulfillment for {((autoApproveRequest || {}).user || {}).firstName}{" "}
+            {((autoApproveRequest || {}).user || {}).lastName}?
+          </p>
+          <p>
+            If enabled, all future assignment requests for this user will be
+            automatically fulfilled. This can be changed at any time from the
+            People page.
+          </p>
+        </Dialog>
+      </div>
     );
   }
 }
@@ -151,7 +159,14 @@ AdminAssignmentRequest.propTypes = {
 const queries = {
   pendingAssignmentRequests: {
     query: gql`
-      query assignmentRequests($organizationId: String!, $status: String) {
+      query assignmentRequestsWithUser(
+        $organizationId: String!
+        $status: String
+      ) {
+        currentUser {
+          id
+          roles(organizationId: "1")
+        }
         assignmentRequests(organizationId: $organizationId, status: $status) {
           id
           createdAt
@@ -177,21 +192,25 @@ const queries = {
 };
 
 const mutations = {
-  approveAssignmentRequest: ownProps => assignmentRequestId => ({
+  resolveAssignmentRequest: ownProps => (
+    assignmentRequestId,
+    approved,
+    autoApproveLevel
+  ) => ({
     mutation: gql`
-      mutation approveAssignmentRequest($assignmentRequestId: String!) {
-        approveAssignmentRequest(assignmentRequestId: $assignmentRequestId)
+      mutation resolveAssignmentRequest(
+        $assignmentRequestId: String!
+        $approved: Boolean!
+        $autoApproveLevel: RequestAutoApprove
+      ) {
+        resolveAssignmentRequest(
+          assignmentRequestId: $assignmentRequestId
+          approved: $approved
+          autoApproveLevel: $autoApproveLevel
+        )
       }
     `,
-    variables: { assignmentRequestId }
-  }),
-  rejectAssignmentRequest: ownProps => assignmentRequestId => ({
-    mutation: gql`
-      mutation rejectAssignmentRequest($assignmentRequestId: String!) {
-        rejectAssignmentRequest(assignmentRequestId: $assignmentRequestId)
-      }
-    `,
-    variables: { assignmentRequestId }
+    variables: { assignmentRequestId, approved, autoApproveLevel }
   })
 };
 

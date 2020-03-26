@@ -282,8 +282,7 @@ const rootSchema = `
     deleteLinkDomain(organizationId: String!, domainId: String!): Boolean!
     deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
     deleteManyCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignIds: [String]!): Int!
-    approveAssignmentRequest(assignmentRequestId: String!): Int!
-    rejectAssignmentRequest(assignmentRequestId: String!): Boolean!
+    resolveAssignmentRequest(assignmentRequestId: String!, approved: Boolean!, autoApproveLevel: RequestAutoApprove): Int!
     setNumbersApiKey(organizationId: String!, numbersApiKey: String): Organization!
     saveTag(organizationId: String!, tag: TagInput!): Tag!
     deleteTag(organizationId: String!, tagId: String!): Boolean!

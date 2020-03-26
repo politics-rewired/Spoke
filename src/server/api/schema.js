@@ -2876,68 +2876,58 @@ const rootMutations = {
 
       return deletedRowCount;
     },
-    approveAssignmentRequest: async (_, { assignmentRequestId }, { user }) => {
+    resolveAssignmentRequest: async (
+      _,
+      { assignmentRequestId, approved, autoApproveLevel },
+      { user }
+    ) => {
+      assignmentRequestId = parseInt(assignmentRequestId);
       const assignmentRequest = await r
         .knex("assignment_request")
         .first("*")
-        .where({ id: parseInt(assignmentRequestId) });
+        .where({ id: assignmentRequestId });
 
       if (!assignmentRequest) {
         throw new Error("Assignment request not found");
       }
 
+      const roleRequired = autoApproveLevel ? "ADMIN" : "SUPERVOLUNTEER";
       await accessRequired(
         user,
         assignmentRequest.organization_id,
-        "SUPERVOLUNTEER"
+        roleRequired
       );
 
       const numberAssigned = await r.knex.transaction(async trx => {
-        await giveUserMoreTexts(
+        if (autoApproveLevel) {
+          await trx("user_organization")
+            .where({
+              user_id: assignmentRequest.user_id,
+              organization_id: assignmentRequest.organization_id
+            })
+            .update({ request_status: autoApproveLevel.toLowerCase() });
+        }
+
+        await trx("assignment_request")
+          .update({
+            status: approved ? "approved" : "rejected",
+            approved_by_user_id: user.id
+          })
+          .where({ id: assignmentRequestId });
+
+        if (!approved) return 0;
+
+        const countUpdated = await giveUserMoreTexts(
           assignmentRequest.user_id,
           assignmentRequest.amount,
           assignmentRequest.organization_id,
           assignmentRequest.preferred_team_id,
           trx
         );
-
-        await trx("assignment_request")
-          .update({
-            status: "approved",
-            approved_by_user_id: user.id
-          })
-          .where({ id: parseInt(assignmentRequestId) });
-
-        return numberAssigned;
+        return countUpdated;
       });
 
       return numberAssigned;
-    },
-    rejectAssignmentRequest: async (_, { assignmentRequestId }, { user }) => {
-      const assignmentRequest = await r
-        .knex("assignment_request")
-        .first("*")
-        .where({ id: parseInt(assignmentRequestId) });
-
-      if (!assignmentRequest) {
-        throw new Error("Assignment request not found");
-      }
-
-      await accessRequired(
-        user,
-        assignmentRequest.organization_id,
-        "SUPERVOLUNTEER"
-      );
-
-      await r
-        .knex("assignment_request")
-        .update({
-          status: "rejected",
-          approved_by_user_id: user.id
-        })
-        .where({ id: parseInt(assignmentRequestId) });
-
-      return true;
     },
     setNumbersApiKey: async (
       _,
