@@ -61,43 +61,24 @@ class AdminAssignmentRequest extends Component {
     this.setState({ assignmentRequests });
   };
 
-  handleApproveRequest = async requestId => {
-    console.log("Approve", requestId);
+  handleResolveRequest = approved => async requestId => {
+    const { resolveAssignmentRequest } = this.props.mutations;
     this.setRequestStatus(requestId, RowWorkStatus.Working);
     try {
-      // simulate network request
-      const response = await this.props.mutations.approveAssignmentRequest(
-        requestId
-      );
+      const response = await resolveAssignmentRequest(requestId, approved);
+      if (response.errors) throw response.errors[0];
 
-      if (response.errors) {
-        throw response.errors[0];
-      }
-
-      console.log("Approved request");
-      this.setRequestStatus(requestId, RowWorkStatus.Approved);
+      const newStatus = approved
+        ? RowWorkStatus.Approved
+        : RowWorkStatus.Denied;
+      this.setRequestStatus(requestId, newStatus);
       await sleep(2000);
       this.deleteRequest(requestId);
     } catch (exc) {
-      console.log("Request approval failed", exc);
-      this.setRequestStatus(requestId, RowWorkStatus.Error);
-    }
-  };
-
-  handleDenyRequest = async requestId => {
-    console.log("Deny", requestId);
-    this.setRequestStatus(requestId, RowWorkStatus.Working);
-    try {
-      // simulate network request
-      const response = await this.props.mutations.rejectAssignmentRequest(
-        requestId
+      console.error(
+        `Resolve request as "${approved ? "approved" : "denied"}" failed: `,
+        exc
       );
-      if (response.errors) throw new Error(response.errors);
-      console.log("Denied request");
-      this.setRequestStatus(requestId, RowWorkStatus.Denied);
-      await sleep(2000);
-      this.deleteRequest(requestId);
-    } catch (exc) {
       this.setRequestStatus(requestId, RowWorkStatus.Error);
     }
   };
@@ -114,8 +95,8 @@ class AdminAssignmentRequest extends Component {
     return (
       <AssignmentRequestTable
         assignmentRequests={assignmentRequests}
-        onApproveRequest={this.handleApproveRequest}
-        onDenyRequest={this.handleDenyRequest}
+        onApproveRequest={this.handleResolveRequest(true)}
+        onDenyRequest={this.handleResolveRequest(false)}
       />
     );
   }
@@ -154,21 +135,25 @@ const queries = {
 };
 
 const mutations = {
-  approveAssignmentRequest: ownProps => assignmentRequestId => ({
+  resolveAssignmentRequest: ownProps => (
+    assignmentRequestId,
+    approved,
+    autoApproveLevel
+  ) => ({
     mutation: gql`
-      mutation approveAssignmentRequest($assignmentRequestId: String!) {
-        approveAssignmentRequest(assignmentRequestId: $assignmentRequestId)
+      mutation resolveAssignmentRequest(
+        $assignmentRequestId: String!
+        $approved: Boolean!
+        $autoApproveLevel: RequestAutoApprove
+      ) {
+        resolveAssignmentRequest(
+          assignmentRequestId: $assignmentRequestId
+          approved: $approved
+          autoApproveLevel: $autoApproveLevel
+        )
       }
     `,
-    variables: { assignmentRequestId }
-  }),
-  rejectAssignmentRequest: ownProps => assignmentRequestId => ({
-    mutation: gql`
-      mutation rejectAssignmentRequest($assignmentRequestId: String!) {
-        rejectAssignmentRequest(assignmentRequestId: $assignmentRequestId)
-      }
-    `,
-    variables: { assignmentRequestId }
+    variables: { assignmentRequestId, approved, autoApproveLevel }
   })
 };
 
