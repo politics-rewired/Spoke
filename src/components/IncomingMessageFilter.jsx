@@ -2,12 +2,10 @@ import React, { Component } from "react";
 import type from "prop-types";
 import Toggle from "material-ui/Toggle";
 
-import { Card, CardHeader, CardText, CardTitle } from "material-ui/Card";
+import { Card, CardHeader, CardText } from "material-ui/Card";
 import AutoComplete from "material-ui/AutoComplete";
 import SelectField from "material-ui/SelectField";
 import TextField from "material-ui/TextField";
-import IconButton from "material-ui/IconButton";
-import UpdateIcon from "material-ui/svg-icons/action/update";
 import MenuItem from "material-ui/MenuItem";
 import theme from "../styles/theme";
 import { dataSourceItem } from "./utils";
@@ -75,24 +73,14 @@ export const TEXTER_FILTERS = [
 const IDLE_KEY_TIME = 500;
 
 class IncomingMessageFilter extends Component {
-  constructor(props) {
-    super(props);
+  state = {
+    firstName: undefined,
+    lastName: undefined
+  };
 
-    this.state = {
-      firstName: undefined,
-      lastName: undefined
-    };
+  submitNameUpdateTimeout = undefined;
 
-    this.onMessageFilterSelectChanged = this.onMessageFilterSelectChanged.bind(
-      this
-    );
-    this.onTexterSelected = this.onTexterSelected.bind(this);
-    this.onCampaignSelected = this.onCampaignSelected.bind(this);
-
-    this.submitNameUpdateTimeout = undefined;
-  }
-
-  onMessageFilterSelectChanged(event, index, values) {
+  onMessageFilterSelectChanged = (event, index, values) => {
     this.setState({ messageFilter: values });
     const messageStatuses = new Set();
     values.forEach(value => {
@@ -106,9 +94,9 @@ class IncomingMessageFilter extends Component {
 
     const messageStatusesString = Array.from(messageStatuses).join(",");
     this.props.onMessageFilterChanged(messageStatusesString);
-  }
+  };
 
-  onCampaignSelected(selection, index) {
+  onCampaignSelected = (selection, index) => {
     let campaignId = undefined;
     if (index === -1) {
       const campaign = this.props.texters.find(campaign => {
@@ -123,9 +111,9 @@ class IncomingMessageFilter extends Component {
     if (campaignId) {
       this.props.onCampaignChanged(parseInt(campaignId, 10));
     }
-  }
+  };
 
-  onTexterSelected(selection, index) {
+  onTexterSelected = (selection, index) => {
     let texterUserId = undefined;
     if (index === -1) {
       const texter = this.props.texters.find(texter => {
@@ -140,7 +128,7 @@ class IncomingMessageFilter extends Component {
     if (texterUserId) {
       this.props.onTexterChanged(parseInt(texterUserId, 10));
     }
-  }
+  };
 
   onContactNameChanged = ev => {
     const name = ev.target.value;
