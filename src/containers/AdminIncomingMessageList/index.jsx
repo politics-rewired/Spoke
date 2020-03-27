@@ -551,30 +551,6 @@ export class AdminIncomingMessageList extends Component {
 }
 
 const mutations = {
-  reassignCampaignContacts: ownProps => (
-    organizationId,
-    campaignIdsContactIds,
-    newTexterUserId
-  ) => ({
-    mutation: gql`
-      mutation reassignCampaignContacts(
-        $organizationId: String!
-        $campaignIdsContactIds: [CampaignIdContactId]!
-        $newTexterUserId: String!
-      ) {
-        reassignCampaignContacts(
-          organizationId: $organizationId
-          campaignIdsContactIds: $campaignIdsContactIds
-          newTexterUserId: $newTexterUserId
-        ) {
-          campaignId
-          assignmentId
-        }
-      }
-    `,
-    variables: { organizationId, campaignIdsContactIds, newTexterUserId }
-  }),
-
   megaReassignCampaignContacts: ownProps => (
     organizationId,
     campaignIdsContactIds,
@@ -590,10 +566,7 @@ const mutations = {
           organizationId: $organizationId
           campaignIdsContactIds: $campaignIdsContactIds
           newTexterUserIds: $newTexterUserIds
-        ) {
-          campaignId
-          assignmentId
-        }
+        )
       }
     `,
     variables: { organizationId, campaignIdsContactIds, newTexterUserIds }
@@ -614,46 +587,6 @@ const mutations = {
       }
     `,
     variables: { organizationId, campaignIdsContactIds }
-  }),
-
-  bulkReassignCampaignContacts: ownProps => (
-    organizationId,
-    campaignsFilter,
-    assignmentsFilter,
-    tagsFilter,
-    contactsFilter,
-    newTexterUserId
-  ) => ({
-    mutation: gql`
-      mutation bulkReassignCampaignContacts(
-        $organizationId: String!
-        $contactsFilter: ContactsFilter
-        $campaignsFilter: CampaignsFilter
-        $assignmentsFilter: AssignmentsFilter
-        $tagsFilter: tagsFilter
-        $newTexterUserId: String
-      ) {
-        bulkReassignCampaignContacts(
-          organizationId: $organizationId
-          contactsFilter: $contactsFilter
-          campaignsFilter: $campaignsFilter
-          assignmentsFilter: $assignmentsFilter
-          tagsFilter: $tagsFilter
-          newTexterUserId: $newTexterUserId
-        ) {
-          campaignId
-          assignmentId
-        }
-      }
-    `,
-    variables: {
-      organizationId,
-      campaignsFilter,
-      assignmentsFilter,
-      tagsFilter,
-      contactsFilter,
-      newTexterUserId
-    }
   }),
 
   megaBulkReassignCampaignContacts: ownProps => (
@@ -680,10 +613,7 @@ const mutations = {
           assignmentsFilter: $assignmentsFilter
           tagsFilter: $tagsFilter
           newTexterUserIds: $newTexterUserIds
-        ) {
-          campaignId
-          assignmentId
-        }
+        )
       }
     `,
     variables: {

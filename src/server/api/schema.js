@@ -41,7 +41,6 @@ import {
   reassignConversations,
   resolvers as conversationsResolver
 } from "./conversations";
-import { resolvers as messageReviewResolver } from "./message-review";
 import {
   accessRequired,
   assignmentRequired,
@@ -2348,15 +2347,12 @@ const rootMutations = {
           cc => cc.campaignContactId
         );
 
-        const updated_result = await r
+        await r
           .knex("campaign_contact")
           .update({ assignment_id: null })
           .whereIn("id", campaignContactIdsToUnassign);
 
-        return campaignContactIdsToUnassign.map(cc => ({
-          campaignId: cc.campaignId,
-          assignmentId: null
-        }));
+        return true;
       }
 
       // group contactIds by campaign
@@ -2374,7 +2370,6 @@ const rootMutations = {
       const numberOfCampaignContactsPerNextTexter = Math.ceil(
         numberOfCampaignContactsToReassign / newTexterUserIds.length
       );
-      const response = [];
       const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter);
 
       for (let [idx, chunk] of chunks.entries()) {
@@ -2395,17 +2390,14 @@ const rootMutations = {
           });
         });
 
-        const responses = await reassignConversations(
+        await reassignConversations(
           campaignIdContactIdsMap,
           campaignIdMessageIdsMap,
           newTexterUserIds[idx]
         );
-        for (let r of responses) {
-          response.push(r);
-        }
       }
 
-      return response;
+      return true;
     },
 
     megaBulkReassignCampaignContacts: async (
@@ -2436,15 +2428,12 @@ const rootMutations = {
           ([ccId, _]) => ccId
         );
 
-        const updated_result = await r
+        await r
           .knex("campaign_contact")
           .update({ assignment_id: null })
           .whereIn("id", campaignContactIdsToUnassign);
 
-        return campaignContactIdsToUnassign.map(cc => ({
-          campaignId: cc.campaignId,
-          assignmentId: null
-        }));
+        return true;
       }
 
       const numberOfCampaignContactsToReassign =
@@ -2452,7 +2441,6 @@ const rootMutations = {
       const numberOfCampaignContactsPerNextTexter = Math.ceil(
         numberOfCampaignContactsToReassign / newTexterUserIds.length
       );
-      const response = [];
       const chunks = _.chunk(
         campaignContactIdsToMessageIds,
         numberOfCampaignContactsPerNextTexter
@@ -2477,89 +2465,14 @@ const rootMutations = {
             });
         });
 
-        const responses = await reassignConversations(
+        await reassignConversations(
           campaignIdContactIdsMap,
           campaignIdMessageIdsMap,
           newTexterUserIds[idx]
         );
-        for (let r of responses) {
-          response.push(r);
-        }
       }
 
-      return response;
-    },
-
-    reassignCampaignContacts: async (
-      _,
-      { organizationId, campaignIdsContactIds, newTexterUserId },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      // group contactIds by campaign
-      // group messages by campaign
-      const campaignIdContactIdsMap = new Map();
-      const campaignIdMessagesIdsMap = new Map();
-      for (const campaignIdContactId of campaignIdsContactIds) {
-        const {
-          campaignId,
-          campaignContactId,
-          messageIds
-        } = campaignIdContactId;
-
-        if (!campaignIdContactIdsMap.has(campaignId)) {
-          campaignIdContactIdsMap.set(campaignId, []);
-        }
-
-        campaignIdContactIdsMap.get(campaignId).push(campaignContactId);
-
-        if (!campaignIdMessagesIdsMap.has(campaignId)) {
-          campaignIdMessagesIdsMap.set(campaignId, []);
-        }
-
-        campaignIdMessagesIdsMap.get(campaignId).push(...messageIds);
-      }
-
-      return await reassignConversations(
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap,
-        newTexterUserId
-      );
-    },
-
-    bulkReassignCampaignContacts: async (
-      _,
-      {
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        tagsFilter,
-        contactsFilter,
-        newTexterUserId
-      },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      const {
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap
-      } = await getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        tagsFilter,
-        contactsFilter
-      );
-
-      return await reassignConversations(
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap,
-        newTexterUserId
-      );
+      return true;
     },
 
     requestTexts: async (
@@ -3556,6 +3469,5 @@ export const resolvers = {
   ...{ Phone: GraphQLPhone },
   ...questionResolvers,
   ...conversationsResolver,
-  ...messageReviewResolver,
   ...rootMutations
 };
