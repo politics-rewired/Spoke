@@ -2497,39 +2497,6 @@ const rootMutations = {
       );
     },
 
-    bulkReassignCampaignContacts: async (
-      _,
-      {
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        tagsFilter,
-        contactsFilter,
-        newTexterUserId
-      },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      const {
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap
-      } = await getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
-        organizationId,
-        campaignsFilter,
-        assignmentsFilter,
-        tagsFilter,
-        contactsFilter
-      );
-
-      return await reassignConversations(
-        campaignIdContactIdsMap,
-        campaignIdMessagesIdsMap,
-        newTexterUserId
-      );
-    },
-
     requestTexts: async (
       _,
       { count, email, organizationId, preferredTeamId },

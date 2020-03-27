@@ -592,46 +592,6 @@ const mutations = {
     variables: { organizationId, campaignIdsContactIds }
   }),
 
-  bulkReassignCampaignContacts: ownProps => (
-    organizationId,
-    campaignsFilter,
-    assignmentsFilter,
-    tagsFilter,
-    contactsFilter,
-    newTexterUserId
-  ) => ({
-    mutation: gql`
-      mutation bulkReassignCampaignContacts(
-        $organizationId: String!
-        $contactsFilter: ContactsFilter
-        $campaignsFilter: CampaignsFilter
-        $assignmentsFilter: AssignmentsFilter
-        $tagsFilter: tagsFilter
-        $newTexterUserId: String
-      ) {
-        bulkReassignCampaignContacts(
-          organizationId: $organizationId
-          contactsFilter: $contactsFilter
-          campaignsFilter: $campaignsFilter
-          assignmentsFilter: $assignmentsFilter
-          tagsFilter: $tagsFilter
-          newTexterUserId: $newTexterUserId
-        ) {
-          campaignId
-          assignmentId
-        }
-      }
-    `,
-    variables: {
-      organizationId,
-      campaignsFilter,
-      assignmentsFilter,
-      tagsFilter,
-      contactsFilter,
-      newTexterUserId
-    }
-  }),
-
   megaBulkReassignCampaignContacts: ownProps => (
     organizationId,
     campaignsFilter,
