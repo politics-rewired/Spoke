@@ -64,6 +64,7 @@ import {
   getEscalationUserId
 } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
+import { RequestAutoApproveType } from "../../api/organization-membership";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
@@ -1499,7 +1500,10 @@ const rootMutations = {
       const { payload = {} } = invite;
 
       const newOrganization = await r.knex.transaction(async trx => {
-        const orgFeatures = {};
+        const defaultStatus = RequestAutoApproveType.APPROVAL_REQUIRED;
+        const orgFeatures = {
+          defaulTexterApprovalStatus: defaultStatus.toLowerCase()
+        };
         if (payload.org_features) {
           const { switchboard_lrn_api_key } = payload.org_features;
           if (switchboard_lrn_api_key) {
