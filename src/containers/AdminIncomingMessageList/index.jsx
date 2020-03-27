@@ -566,10 +566,7 @@ const mutations = {
           organizationId: $organizationId
           campaignIdsContactIds: $campaignIdsContactIds
           newTexterUserIds: $newTexterUserIds
-        ) {
-          campaignId
-          assignmentId
-        }
+        )
       }
     `,
     variables: { organizationId, campaignIdsContactIds, newTexterUserIds }
@@ -616,10 +613,7 @@ const mutations = {
           assignmentsFilter: $assignmentsFilter
           tagsFilter: $tagsFilter
           newTexterUserIds: $newTexterUserIds
-        ) {
-          campaignId
-          assignmentId
-        }
+        )
       }
     `,
     variables: {
