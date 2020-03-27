@@ -902,37 +902,45 @@ const rootMutations = {
         .knex("organization")
         .where("uuid", organizationUuid)
         .first();
-      if (organization) {
-        const userOrg = await r
-          .knex("user_organization")
-          .where({
-            user_id: user.id,
-            organization_id: organization.id
-          })
-          .first();
-        if (!userOrg) {
-          await r
-            .knex("user_organization")
-            .insert({
-              user_id: user.id,
-              organization_id: organization.id,
-              role: "TEXTER"
-            })
-            .catch(err => logger.error("error on userOrganization save", err));
-        } else {
-          // userOrg exists
-          logger.info(
-            `existing userOrg ${userOrg.id} user ${
-              user.id
-            } organizationUuid ${organizationUuid}`
-          );
-        }
-      } else {
-        // no organization
-        logger.error(
-          `no organization with id ${organizationUuid} for user ${user.id}`
-        );
+
+      if (!organization) {
+        logger.info("User tried to join non-existent organization", {
+          organizationUuid,
+          user
+        });
+        throw new Error("No such organization.");
       }
+
+      const existingMembership = await r
+        .knex("user_organization")
+        .where({
+          user_id: user.id,
+          organization_id: organization.id
+        })
+        .first();
+
+      if (existingMembership) {
+        logger.info("User tried to join organization they're already part of", {
+          organizationId: organization.id,
+          userId: user.id
+        });
+        return organization;
+      }
+
+      let approvalStatus = RequestAutoApproveType.APPROVAL_REQUIRED.toLowerCase();
+      try {
+        approvalStatus =
+          JSON.parse(organization.feature || "{}").defaulTexterApprovalStatus ||
+          approvalStatus;
+      } catch (err) {}
+
+      await r.knex("user_organization").insert({
+        user_id: user.id,
+        organization_id: organization.id,
+        role: "TEXTER",
+        request_status: approvalStatus
+      });
+
       return organization;
     },
 
