@@ -763,60 +763,6 @@ const rootMutations = {
       return newJob;
     },
 
-    editOrganizationRoles: async (
-      _,
-      { userId, organizationId, roles },
-      { user, loaders }
-    ) => {
-      // TODO: wrap in transaction
-      const currentRoles = await r
-        .knex("user_organization")
-        .where({
-          organization_id: organizationId,
-          user_id: userId
-        })
-        .pluck("role");
-      const oldRoleIsOwner = currentRoles.indexOf("OWNER") !== -1;
-      const newRoleIsOwner = roles.indexOf("OWNER") !== -1;
-      const roleRequired = oldRoleIsOwner || newRoleIsOwner ? "OWNER" : "ADMIN";
-      let newOrgRoles = [];
-
-      await accessRequired(user, organizationId, roleRequired);
-
-      currentRoles.forEach(async curRole => {
-        if (roles.indexOf(curRole) === -1) {
-          await r
-            .knex("user_organization")
-            .where({
-              user_id: userId,
-              organization_id: organizationId,
-              role: curRole
-            })
-            .del();
-        }
-      });
-
-      newOrgRoles = roles
-        .filter(newRole => currentRoles.indexOf(newRole) === -1)
-        .map(newRole => ({
-          organization_id: organizationId,
-          user_id: userId,
-          role: newRole
-        }));
-
-      if (newOrgRoles.length) {
-        await r.knex("user_organization").insert(newOrgRoles);
-      }
-
-      memoizer.invalidate(cacheOpts.UserOrganizations.key, { userId });
-      memoizer.invalidate(cacheOpts.UserOrganizationRoles.key, {
-        userId,
-        organizationId
-      });
-
-      return loaders.organization.load(organizationId);
-    },
-
     editOrganizationMembership: async (
       _,
       { id, level, role },
