@@ -1,5 +1,6 @@
 import { config } from "../../config";
 import { sqlResolvers } from "./lib/utils";
+import { infoHasQueryPath } from "./lib/apollo";
 import { formatPage } from "./lib/pagination";
 import { r } from "../models";
 import { accessRequired } from "./errors";
@@ -51,59 +52,87 @@ export const resolvers = {
       await accessRequired(user, organization.id, "ADMIN");
       return r.reader("opt_out").where({ organization_id: organization.id });
     },
-    memberships: async (organization, { first, after }, { user }, info) => {
+    memberships: async (
+      organization,
+      { first, after, filter },
+      { user },
+      info
+    ) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const query = r
         .reader("user_organization")
         .where({ organization_id: organization.id });
 
-      // Perform a a join if User fields are requested
-      let nodeTransformer = node => node;
-      const edgesQuery = info.fieldNodes[0].selectionSet.selections.find(
-        s => s.name.value === "edges"
-      );
-      if (edgesQuery) {
-        const nodeQuery = edgesQuery.selectionSet.selections.find(
-          s => s.name.value === "node"
-        );
-        if (
-          nodeQuery &&
-          nodeQuery.selectionSet.selections.find(s => s.name.value === "user")
-        ) {
-          query.join(
-            "public.user",
-            "public.user.id",
-            "user_organization.user_id"
-          );
-          query.select([
-            "user_organization.*",
-            "user.id as user_table_id",
-            "user.email",
-            "user.first_name",
-            "user.last_name"
-          ]);
-          nodeTransformer = record => {
-            const {
-              user_table_id,
-              email,
-              first_name,
-              last_name,
-              ...node
-            } = record;
-            return {
-              ...node,
-              user: {
-                id: user_table_id,
-                email,
-                first_name,
-                last_name
-              }
-            };
-          };
-        }
+      const pagerOptions = {
+        first,
+        after,
+        primaryColumn: "user_organization.id"
+      };
+
+      const { nameSearch, campaignId, campaignArchived } = filter || {};
+
+      const userQueryPath = "memberships.edges.node.user";
+      const wantsUserInfo = infoHasQueryPath(info, userQueryPath);
+
+      if (!!nameSearch || wantsUserInfo) {
+        query.join("user", "user.id", "user_organization.user_id");
       }
 
-      return await formatPage(query, { after, first, nodeTransformer });
+      if (!!nameSearch) {
+        query.whereRaw("user.first_name || ' ' || user.last_name ilike  ?", [
+          `%${nameSearch}%`
+        ]);
+      }
+
+      if (wantsUserInfo) {
+        query.select([
+          "user_organization.*",
+          "user.id as user_table_id",
+          "user.email",
+          "user.first_name",
+          "user.last_name"
+        ]);
+        pagerOptions.nodeTransformer = record => {
+          const {
+            user_table_id,
+            email,
+            first_name,
+            last_name,
+            ...node
+          } = record;
+          return {
+            ...node,
+            user: {
+              id: user_table_id,
+              email,
+              first_name,
+              last_name
+            }
+          };
+        };
+      }
+
+      const campaignIdInt = parseInt(campaignId);
+      if (!isNaN(campaignIdInt)) {
+        query.whereExists(function() {
+          this.select(r.knex.raw("1"))
+            .from("assignment")
+            .whereRaw('"assignment"."user_id" = "user"."id"')
+            .where({ campaign_id: campaignIdInt });
+        });
+      } else if (campaignArchived === true || campaignArchived === false) {
+        query.whereExists(function() {
+          this.select(r.knex.raw("1"))
+            .from("assignment")
+            .join("campaign", "campaign.id", "assignment.campaign_id")
+            .whereRaw('"assignment"."user_id" = "user"."id"')
+            .where({
+              is_archived: campaignArchived
+            });
+        });
+      }
+
+      return await formatPage(query, pagerOptions);
     },
     people: async (organization, { role, campaignId, offset }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
