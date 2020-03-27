@@ -2488,38 +2488,6 @@ const rootMutations = {
       }
 
       return response;
-    },
-
-    reassignCampaignContacts: async (
-      _,
-      { organizationId, campaignIdsContactIds, newTexterUserId },
-      { user }
-    ) => {
-      // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
-
-      // group contactIds by campaign
-      // group messages by campaign
-      const campaignIdContactIdsMap = new Map();
-      const campaignIdMessagesIdsMap = new Map();
-      for (const campaignIdContactId of campaignIdsContactIds) {
-        const {
-          campaignId,
-          campaignContactId,
-          messageIds
-        } = campaignIdContactId;
-
-        if (!campaignIdContactIdsMap.has(campaignId)) {
-          campaignIdContactIdsMap.set(campaignId, []);
-        }
-
-        campaignIdContactIdsMap.get(campaignId).push(campaignContactId);
-
-        if (!campaignIdMessagesIdsMap.has(campaignId)) {
-          campaignIdMessagesIdsMap.set(campaignId, []);
-        }
-
-        campaignIdMessagesIdsMap.get(campaignId).push(...messageIds);
       }
 
       return await reassignConversations(

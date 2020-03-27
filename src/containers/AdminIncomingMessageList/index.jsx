@@ -551,30 +551,6 @@ export class AdminIncomingMessageList extends Component {
 }
 
 const mutations = {
-  reassignCampaignContacts: ownProps => (
-    organizationId,
-    campaignIdsContactIds,
-    newTexterUserId
-  ) => ({
-    mutation: gql`
-      mutation reassignCampaignContacts(
-        $organizationId: String!
-        $campaignIdsContactIds: [CampaignIdContactId]!
-        $newTexterUserId: String!
-      ) {
-        reassignCampaignContacts(
-          organizationId: $organizationId
-          campaignIdsContactIds: $campaignIdsContactIds
-          newTexterUserId: $newTexterUserId
-        ) {
-          campaignId
-          assignmentId
-        }
-      }
-    `,
-    variables: { organizationId, campaignIdsContactIds, newTexterUserId }
-  }),
-
   megaReassignCampaignContacts: ownProps => (
     organizationId,
     campaignIdsContactIds,
