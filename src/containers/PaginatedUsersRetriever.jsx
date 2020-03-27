@@ -5,42 +5,60 @@ import isEqual from "lodash/isEqual";
 
 import apolloClient from "../network/apollo-client-singleton";
 
-const fetchPeople = async (offset, limit, organizationId, campaignsFilter) =>
-  apolloClient.query({
+const fetchPeople = async ({
+  organizationId,
+  after,
+  first,
+  campaignsFilter
+}) => {
+  const filter = {};
+  if (campaignsFilter.isArchived !== undefined) {
+    filter.campaignArchived = campaignsFilter.isArchived;
+  }
+  if (campaignsFilter.campaignId !== undefined) {
+    filter.campaignId = campaignsFilter.campaignId;
+  }
+
+  return apolloClient.query({
     query: gql`
       query getUsers(
         $organizationId: String!
-        $cursor: OffsetLimitCursor
-        $campaignsFilter: CampaignsFilter
+        $after: Cursor
+        $first: Int!
+        $filter: MembershipFilter
       ) {
-        people(
-          organizationId: $organizationId
-          cursor: $cursor
-          campaignsFilter: $campaignsFilter
-        ) {
-          ... on PaginatedUsers {
-            pageInfo {
-              offset
-              limit
-              total
+        organization(id: $organizationId) {
+          id
+          memberships(after: $after, first: $first, filter: $filter) {
+            edges {
+              node {
+                id
+                user {
+                  id
+                  displayName
+                  email
+                }
+                role
+              }
             }
-            users {
-              id
-              displayName
-              email
-              roles(organizationId: $organizationId)
+            pageInfo {
+              totalCount
+              hasNextPage
+              endCursor
             }
           }
         }
       }
     `,
     variables: {
-      cursor: { offset, limit },
       organizationId,
-      campaignsFilter
+      after,
+      first,
+      filter
     },
     fetchPolicy: "network-only"
   });
+};
 
 export class PaginatedUsersRetriever extends Component {
   latestRequestRef = undefined;
@@ -65,27 +83,31 @@ export class PaginatedUsersRetriever extends Component {
     this.props.onUsersReceived([]);
     this.props.setCampaignTextersLoadedFraction(0);
 
-    let offset = 0;
-    let total = undefined;
+    let after = null;
+    let totalCount = undefined;
     let users = [];
     do {
-      const results = await fetchPeople(
-        offset,
-        pageSize,
+      const results = await fetchPeople({
         organizationId,
+        after,
+        first: pageSize,
         campaignsFilter
-      );
-      const { pageInfo, users: newUsers } = results.data.people;
+      });
+      const { pageInfo, edges } = results.data.organization.memberships;
+      const newUsers = edges.map(edge => ({
+        ...edge.node.user,
+        role: edge.node.role
+      }));
       users = users.concat(newUsers);
-      offset += pageSize;
-      total = pageInfo.total;
+      after = pageInfo.hasNextPage ? pageInfo.endCursor : null;
+      totalCount = pageInfo.totalCount;
 
       // Ignore if not the most recent request
       if (requestRef === this.latestRequestRef) {
-        const fraction = Math.min(1, offset / total);
+        const fraction = Math.min(1, users.length / totalCount);
         this.props.setCampaignTextersLoadedFraction(fraction);
       }
-    } while (offset < total && requestRef === this.latestRequestRef);
+    } while (after !== null && requestRef === this.latestRequestRef);
 
     // Ignore if not the most recent request
     if (requestRef === this.latestRequestRef) {
