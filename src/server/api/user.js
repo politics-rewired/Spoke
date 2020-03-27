@@ -186,10 +186,11 @@ export const resolvers = {
       if (authUser.id !== user.id && !authUser.is_superadmin) {
         if (organizationId) {
           await accessRequired(authUser, organizationId, "SUPERVOLUNTEER");
+        } else {
+          throw new GraphQLError(
+            "You are not authorized to access that resource."
+          );
         }
-        throw new GraphQLError(
-          "You are not authorized to access that resource."
-        );
       }
 
       const query = r.reader("user_organization").where({ user_id: user.id });
