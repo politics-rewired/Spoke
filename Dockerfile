@@ -27,4 +27,4 @@ ENV SPOKE_VERSION=$SPOKE_VERSION
 
 # Run the production compiled code
 EXPOSE 3000
-CMD [ "node", "--no-deprecation", "./build/server/server" ]
+CMD [ "node", "--no-deprecation", "./build/src/server" ]

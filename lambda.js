@@ -3,10 +3,10 @@ const AWS = require("aws-sdk");
 const awsServerlessExpress = require("aws-serverless-express");
 let config, app, server, jobs;
 try {
-  ({ config } = require("./build/server/config"));
-  app = require("./build/server/server/index");
+  ({ config } = require("./build/src/config"));
+  app = require("./build/src/server/index");
   server = awsServerlessExpress.createServer(app.default);
-  jobs = require("./build/server/workers/job-processes");
+  jobs = require("./build/src/workers/job-processes");
 } catch (err) {
   if (!global.TEST_ENVIRONMENT) {
     console.error(`Unable to load built server: ${err}`);
