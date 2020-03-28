@@ -70,6 +70,7 @@ class TrollTokenSettings extends React.Component {
 
   render() {
     const { addToken, deleteToken, isWorking, error } = this.state;
+    const { isActive } = this.props;
     const { trollTokens } = this.props.trollTokens;
     const sortedTokens = sortBy(trollTokens, "token");
 
@@ -132,13 +133,15 @@ class TrollTokenSettings extends React.Component {
             </TableBody>
           </Table>
         )}
-        <FloatingActionButton
-          style={theme.components.floatingButton}
-          disabled={isWorking}
-          onClick={this.handleAddToken}
-        >
-          <ContentAddIcon />
-        </FloatingActionButton>
+        {isActive && (
+          <FloatingActionButton
+            style={theme.components.floatingButton}
+            disabled={isWorking}
+            onClick={this.handleAddToken}
+          >
+            <ContentAddIcon />
+          </FloatingActionButton>
+        )}
         <Dialog
           title="Add Trigger Token"
           actions={addActions}
@@ -175,6 +178,7 @@ class TrollTokenSettings extends React.Component {
 
 TrollTokenSettings.propTypes = {
   match: PropTypes.object.isRequired,
+  isActive: PropTypes.bool.isRequired,
   trollTokens: PropTypes.shape({
     trollTokens: PropTypes.arrayOf(
       PropTypes.shape({
