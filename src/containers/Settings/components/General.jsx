@@ -15,6 +15,7 @@ import MenuItem from "material-ui/MenuItem";
 import { StyleSheet, css } from "aphrodite";
 
 import { loadData } from "../../hoc/with-operations";
+import { snakeToTitleCase } from "../../../lib/attributes";
 import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import GSSubmitButton from "../../../components/forms/GSSubmitButton";
@@ -224,7 +225,11 @@ class Settings extends React.Component {
               onChange={this.handleChangeApprovalLevel}
             >
               {Object.keys(RequestAutoApproveType).map(level => (
-                <MenuItem key={level} value={level} primaryText={level} />
+                <MenuItem
+                  key={level}
+                  value={level}
+                  primaryText={snakeToTitleCase(level)}
+                />
               ))}
             </DropDownMenu>
           </CardText>
