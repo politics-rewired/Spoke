@@ -3,6 +3,7 @@ const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 const basePlugins = [
   new webpack.DefinePlugin({
@@ -18,7 +19,10 @@ const basePlugins = [
     {
       tzdata: "tzdata"
     }
-  )
+  ),
+  new ForkTsCheckerWebpackPlugin({
+    tsconfig: path.resolve(__dirname, "tsconfig.json")
+  })
 ];
 
 const productionPlugins = [
@@ -42,7 +46,11 @@ module.exports = {
       {
         test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
-        use: [{ loader: "awesome-typescript-loader" }]
+        loader: "ts-loader",
+        options: {
+          // disable type checker - we will use it in fork plugin
+          transpileOnly: true
+        }
       },
       {
         test: /\.css$/,
