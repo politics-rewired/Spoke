@@ -15,9 +15,13 @@ import Snackbar from "material-ui/Snackbar";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import ContentAdd from "material-ui/svg-icons/content/add";
 
-import { getHighestRole, ROLE_HIERARCHY, hasRole } from "../lib/permissions";
-import { RequestAutoApproveType } from "../api/organization-membership";
+import { hasRoleAtLeast } from "../lib/permissions";
+import {
+  UserRoleType,
+  RequestAutoApproveType
+} from "../api/organization-membership";
 import { dataTest } from "../lib/attributes";
+import { snakeToTitleCase } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
 import UserEdit from "./UserEdit";
@@ -25,14 +29,6 @@ import Empty from "../components/Empty";
 import OrganizationJoinLink from "../components/OrganizationJoinLink";
 import PasswordResetLink from "../components/PasswordResetLink";
 import LoadingIndicator from "../components/LoadingIndicator";
-
-const titleCase = value =>
-  `${value.charAt(0).toUpperCase()}${value.substring(1).toLowerCase()}`;
-const snakeToTitleCase = value =>
-  value
-    .split("_")
-    .map(s => titleCase(s))
-    .join(" ");
 
 class AdminPersonList extends React.Component {
   state = {
@@ -66,12 +62,19 @@ class AdminPersonList extends React.Component {
 
   handleDismissSaveError = () => this.setState({ saveError: undefined });
 
-  handleChange = async (userId, value) => {
-    await this.props.mutations.editOrganizationRoles(
-      this.props.match.params.organizationId,
-      userId,
-      [value]
-    );
+  handleRoleChange = membershipId => async (_event, _index, role) => {
+    const { editOrganizationMembership } = this.props.mutations;
+    this.setState({ isWorking: true, saveError: undefined });
+    try {
+      const response = await editOrganizationMembership(membershipId, { role });
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      this.setState({
+        saveError: `Couldn't update user role: ${err.message}`
+      });
+    } finally {
+      this.setState({ isWorking: false });
+    }
   };
 
   handleOnChangeAutoApprovalLevel = membershipId => async (
@@ -185,25 +188,25 @@ class AdminPersonList extends React.Component {
               <TableRowColumn>{person.email}</TableRowColumn>
               <TableRowColumn>
                 <DropDownMenu
-                  value={getHighestRole(person.roles)}
+                  value={person.memberships.edges[0].node.role}
                   disabled={
                     person.id === currentUser.id ||
-                    (getHighestRole(person.roles) === "OWNER" &&
-                      getHighestRole(currentUser.roles) !== "OWNER")
+                    (person.memberships.edges[0].node.role === "OWNER" &&
+                      currentUser.memberships.edges[0].node.role !== "OWNER")
                   }
-                  onChange={(event, index, value) =>
-                    this.handleChange(person.id, value)
-                  }
+                  onChange={this.handleRoleChange(
+                    person.memberships.edges[0].node.id
+                  )}
                 >
-                  {ROLE_HIERARCHY.map(option => (
+                  {Object.keys(UserRoleType).map(option => (
                     <MenuItem
-                      key={person.id + "_" + option}
+                      key={`${person.id}_${option}`}
                       value={option}
                       disabled={
                         option === "OWNER" &&
-                        getHighestRole(currentUser.roles) !== "OWNER"
+                        currentUser.memberships.edges[0].node.role !== "OWNER"
                       }
-                      primaryText={titleCase(option)}
+                      primaryText={snakeToTitleCase(option)}
                     />
                   ))}
                 </DropDownMenu>
@@ -211,7 +214,12 @@ class AdminPersonList extends React.Component {
               <TableRowColumn>
                 <DropDownMenu
                   value={person.memberships.edges[0].node.requestAutoApprove}
-                  disabled={!hasRole("ADMIN", currentUser.roles)}
+                  disabled={
+                    !hasRoleAtLeast(
+                      currentUser.memberships.edges[0].node.role,
+                      "ADMIN"
+                    )
+                  }
                   onChange={this.handleOnChangeAutoApprovalLevel(
                     person.memberships.edges[0].node.id
                   )}
@@ -339,7 +347,7 @@ class AdminPersonList extends React.Component {
 
 AdminPersonList.propTypes = {
   mutations: PropTypes.shape({
-    editOrganizationRoles: PropTypes.func.isRequired,
+    editOrganizationMembership: PropTypes.func.isRequired,
     resetUserPassword: PropTypes.func.isRequired
   }).isRequired,
   personData: PropTypes.object.isRequired,
@@ -358,11 +366,11 @@ const organizationFragment = `
     id
     displayName
     email
-    roles(organizationId: $organizationId)
     memberships(organizationId: $organizationId) {
       edges {
         node {
           id
+          role
           requestAutoApprove
         }
       }
@@ -371,25 +379,6 @@ const organizationFragment = `
 `;
 
 const mutations = {
-  editOrganizationRoles: ownProps => (organizationId, userId, roles) => ({
-    mutation: gql`
-      mutation editOrganizationRoles($organizationId: String!, $userId: String!, $roles: [String], $campaignId: String, $offset: Int) {
-        editOrganizationRoles(organizationId: $organizationId, userId: $userId, roles: $roles, campaignId: $campaignId) {
-          ${organizationFragment}
-        }
-      }
-    `,
-    variables: {
-      organizationId,
-      userId,
-      roles,
-      campaignId: queryString.parse(ownProps.location.search).campaignId,
-      offset:
-        queryString.parse(ownProps.location.search).offset !== undefined
-          ? queryString.parse(ownProps.location.search).offset * 200
-          : 0
-    }
-  }),
   editOrganizationMembership: ownProps => (
     membershipId,
     { level = null, role = null }
@@ -454,7 +443,14 @@ const queries = {
       query getCurrentUserAndRoles($organizationId: String!) {
         currentUser {
           id
-          roles(organizationId: $organizationId)
+          memberships(organizationId: $organizationId) {
+            edges {
+              node {
+                id
+                role
+              }
+            }
+          }
         }
       }
     `,

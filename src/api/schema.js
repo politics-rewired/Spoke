@@ -1,6 +1,7 @@
 import { schema as userSchema } from "./user";
 import { schema as conversationSchema } from "./conversations";
 import { schema as organizationSchema } from "./organization";
+import { schema as organizationSettingsSchema } from "./organization-settings";
 import { schema as campaignSchema } from "./campaign";
 import { schema as assignmentSchema } from "./assignment";
 import { schema as interactionStepSchema } from "./interaction-step";
@@ -236,16 +237,15 @@ const rootSchema = `
     exportCampaign(id:String!): JobRequest
     createCannedResponse(cannedResponse:CannedResponseInput!): CannedResponse
     createOrganization(name: String!, userId: String!, inviteId: String!): Organization
-    joinOrganization(organizationUuid: String!): Organization
-    editOrganizationRoles(organizationId: String!, userId: String!, campaignId: String, roles: [String]): Organization
+    joinOrganization(organizationUuid: String!): Organization!
     editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
+    editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OranizationSettings!
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     resetUserPassword(organizationId: String!, userId: Int!): String!
     changeUserPassword(userId: Int!, formData: UserPasswordChange): User
     updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
     updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
-    updateOptOutMessage( organizationId: String!, optOutMessage: String!): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
     tagConversation(campaignContactId: String!, tag: ContactTagActionInput!): CampaignContact
@@ -276,7 +276,6 @@ const rootSchema = `
     deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
     deleteManyCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignIds: [String]!): Int!
     resolveAssignmentRequest(assignmentRequestId: String!, approved: Boolean!, autoApproveLevel: RequestAutoApprove): Int!
-    setNumbersApiKey(organizationId: String!, numbersApiKey: String): Organization!
     saveTag(organizationId: String!, tag: TagInput!): Tag!
     deleteTag(organizationId: String!, tagId: String!): Boolean!
     saveTeams(organizationId: String!, teams: [TeamInput]!): [Team]!
@@ -305,6 +304,7 @@ export const schema = [
   "scalar Date",
   "scalar JSON",
   "scalar Phone",
+  organizationSettingsSchema,
   membershipSchema,
   campaignSchema,
   assignmentSchema,

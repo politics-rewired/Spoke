@@ -10,7 +10,6 @@ import isUrl from "is-url";
 import request from "superagent";
 import _ from "lodash";
 import moment from "moment-timezone";
-import { organizationCache } from "../models/cacheable_queries/organization";
 
 import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";
@@ -63,6 +62,11 @@ import {
   getEscalationUserId
 } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
+import { RequestAutoApproveType } from "../../api/organization-membership";
+import {
+  resolvers as settingsSchema,
+  updateOrganizationSettings
+} from "./organization-settings";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
@@ -761,60 +765,6 @@ const rootMutations = {
       return newJob;
     },
 
-    editOrganizationRoles: async (
-      _,
-      { userId, organizationId, roles },
-      { user, loaders }
-    ) => {
-      // TODO: wrap in transaction
-      const currentRoles = await r
-        .knex("user_organization")
-        .where({
-          organization_id: organizationId,
-          user_id: userId
-        })
-        .pluck("role");
-      const oldRoleIsOwner = currentRoles.indexOf("OWNER") !== -1;
-      const newRoleIsOwner = roles.indexOf("OWNER") !== -1;
-      const roleRequired = oldRoleIsOwner || newRoleIsOwner ? "OWNER" : "ADMIN";
-      let newOrgRoles = [];
-
-      await accessRequired(user, organizationId, roleRequired);
-
-      currentRoles.forEach(async curRole => {
-        if (roles.indexOf(curRole) === -1) {
-          await r
-            .knex("user_organization")
-            .where({
-              user_id: userId,
-              organization_id: organizationId,
-              role: curRole
-            })
-            .del();
-        }
-      });
-
-      newOrgRoles = roles
-        .filter(newRole => currentRoles.indexOf(newRole) === -1)
-        .map(newRole => ({
-          organization_id: organizationId,
-          user_id: userId,
-          role: newRole
-        }));
-
-      if (newOrgRoles.length) {
-        await r.knex("user_organization").insert(newOrgRoles);
-      }
-
-      memoizer.invalidate(cacheOpts.UserOrganizations.key, { userId });
-      memoizer.invalidate(cacheOpts.UserOrganizationRoles.key, {
-        userId,
-        organizationId
-      });
-
-      return loaders.organization.load(organizationId);
-    },
-
     editOrganizationMembership: async (
       _,
       { id, level, role },
@@ -860,6 +810,16 @@ const rootMutations = {
       });
 
       return orgMembership;
+    },
+
+    editOrganizationSettings: async (_, { id, input }, { user: authUser }) => {
+      const organizationId = parseInt(id);
+      await accessRequired(authUser, organizationId, "OWNER");
+      const updatedOrganization = await updateOrganizationSettings(
+        organizationId,
+        input
+      );
+      return updatedOrganization;
     },
 
     editUser: async (_, { organizationId, userId, userData }, { user }) => {
@@ -954,37 +914,45 @@ const rootMutations = {
         .knex("organization")
         .where("uuid", organizationUuid)
         .first();
-      if (organization) {
-        const userOrg = await r
-          .knex("user_organization")
-          .where({
-            user_id: user.id,
-            organization_id: organization.id
-          })
-          .first();
-        if (!userOrg) {
-          await r
-            .knex("user_organization")
-            .insert({
-              user_id: user.id,
-              organization_id: organization.id,
-              role: "TEXTER"
-            })
-            .catch(err => logger.error("error on userOrganization save", err));
-        } else {
-          // userOrg exists
-          logger.info(
-            `existing userOrg ${userOrg.id} user ${
-              user.id
-            } organizationUuid ${organizationUuid}`
-          );
-        }
-      } else {
-        // no organization
-        logger.error(
-          `no organization with id ${organizationUuid} for user ${user.id}`
-        );
+
+      if (!organization) {
+        logger.info("User tried to join non-existent organization", {
+          organizationUuid,
+          user
+        });
+        throw new Error("No such organization.");
       }
+
+      const existingMembership = await r
+        .knex("user_organization")
+        .where({
+          user_id: user.id,
+          organization_id: organization.id
+        })
+        .first();
+
+      if (existingMembership) {
+        logger.info("User tried to join organization they're already part of", {
+          organizationId: organization.id,
+          userId: user.id
+        });
+        return organization;
+      }
+
+      let approvalStatus = RequestAutoApproveType.APPROVAL_REQUIRED.toLowerCase();
+      try {
+        approvalStatus =
+          JSON.parse(organization.feature || "{}").defaulTexterApprovalStatus ||
+          approvalStatus;
+      } catch (err) {}
+
+      await r.knex("user_organization").insert({
+        user_id: user.id,
+        organization_id: organization.id,
+        role: "TEXTER",
+        request_status: approvalStatus
+      });
+
       return organization;
     },
 
@@ -1103,32 +1071,6 @@ const rootMutations = {
         .where({ id: organizationId });
 
       return await loaders.organization.load(organizationId);
-    },
-
-    updateOptOutMessage: async (
-      _,
-      { organizationId, optOutMessage },
-      { user }
-    ) => {
-      await accessRequired(user, organizationId, "OWNER");
-
-      const { features } = await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first("features");
-      const featuresJSON = JSON.parse(features || "{}");
-      featuresJSON.opt_out_message = optOutMessage;
-
-      await r
-        .knex("organization")
-        .update({ features: JSON.stringify(featuresJSON) })
-        .where({ id: organizationId });
-      await organizationCache.clear(organizationId);
-
-      return await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first();
     },
 
     createInvite: async (_, { user }) => {
@@ -1498,7 +1440,10 @@ const rootMutations = {
       const { payload = {} } = invite;
 
       const newOrganization = await r.knex.transaction(async trx => {
-        const orgFeatures = {};
+        const defaultStatus = RequestAutoApproveType.APPROVAL_REQUIRED;
+        const orgFeatures = {
+          defaulTexterApprovalStatus: defaultStatus.toLowerCase()
+        };
         if (payload.org_features) {
           const { switchboard_lrn_api_key } = payload.org_features;
           if (switchboard_lrn_api_key) {
@@ -2842,36 +2787,6 @@ const rootMutations = {
 
       return numberAssigned;
     },
-    setNumbersApiKey: async (
-      _,
-      { organizationId, numbersApiKey },
-      { user }
-    ) => {
-      await accessRequired(user, organizationId, "OWNER");
-
-      // User probably made a mistake - no API key will have a *
-      if (numbersApiKey && numbersApiKey.includes("*")) {
-        throw new Error("Numbers API Key cannot have character: *");
-      }
-
-      const { features } = await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first("features");
-      const featuresJSON = JSON.parse(features || "{}");
-      featuresJSON.numbersApiKey = numbersApiKey;
-
-      await r
-        .knex("organization")
-        .update({ features: JSON.stringify(featuresJSON) })
-        .where({ id: organizationId });
-      await organizationCache.clear(organizationId);
-
-      return await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first();
-    },
     saveTag: async (_, { organizationId, tag }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
@@ -3452,6 +3367,7 @@ export const resolvers = {
   ...rootResolvers,
   ...userResolvers,
   ...membershipSchema,
+  ...settingsSchema,
   ...organizationResolvers,
   ...campaignResolvers,
   ...assignmentResolvers,

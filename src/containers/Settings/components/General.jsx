@@ -10,9 +10,13 @@ import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
+import DropDownMenu from "material-ui/DropDownMenu";
+import MenuItem from "material-ui/MenuItem";
 import { StyleSheet, css } from "aphrodite";
 
 import { loadData } from "../../hoc/with-operations";
+import { snakeToTitleCase } from "../../../lib/attributes";
+import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import GSSubmitButton from "../../../components/forms/GSSubmitButton";
 
@@ -55,9 +59,28 @@ const formatTextingHours = hour => moment(hour, "H").format("h a");
 
 class Settings extends React.Component {
   state = {
-    formIsSubmitting: false,
     textingHoursDialogOpen: false,
-    numbersApiKey: undefined
+    hasNumbersApiKeyChanged: false,
+    numbersApiKey: undefined,
+    approvalLevel: undefined,
+    isWorking: false,
+    error: undefined
+  };
+
+  editSettings = async (name, input) => {
+    this.setState({ isWorking: true, error: undefined });
+    let success = false;
+    try {
+      const response = await this.props.mutations.editSettings(input);
+      if (response.errors) throw response.errors;
+      success = true;
+    } catch (err) {
+      const message = `Error saving ${name}: ${err.message}`;
+      this.setState({ error: message });
+    } finally {
+      this.setState({ isWorking: false });
+    }
+    return success;
   };
 
   handleSubmitTextingHoursForm = async ({
@@ -77,12 +100,36 @@ class Settings extends React.Component {
   handleCloseTextingHoursDialog = () =>
     this.setState({ textingHoursDialogOpen: false });
 
-  doSetNumbersApiKey = payload => {
-    return this.props.mutations.setNumbersApiKey({
-      numbersApiKey:
-        this.state.numbersApiKey === "" ? null : this.state.numbersApiKey
-    });
+  handleChangeApprovalLevel = (_event, _index, approvalLevel) =>
+    this.setState({ approvalLevel });
+
+  handleSaveApprovalLevel = async () => {
+    const { approvalLevel } = this.state;
+    const payload = { defaulTexterApprovalStatus: approvalLevel };
+    const success = await this.editSettings("Numbers API Key", payload);
+    if (!success) {
+      this.setState({ approvalLevel: undefined });
+    }
   };
+
+  handleEditNumbersApiKey = async payload => {
+    let { numbersApiKey } = this.state;
+    numbersApiKey = numbersApiKey !== "" ? numbersApiKey : null;
+    const input = { numbersApiKey };
+    const success = await this.editSettings("Numbers API Key", input);
+    if (!success) {
+      numbersApiKey = this.props.data.organization.settings.numbersApiKey;
+      this.setState({
+        hasNumbersApiKeyChanged: false,
+        numbersApiKey: undefined
+      });
+    }
+  };
+
+  handleEditOptOutMessage = ({ optOutMessage }) =>
+    this.editSettings("Opt Out Messasge", { optOutMessage });
+
+  handleDismissError = () => this.setState({ error: undefined });
 
   renderTextingHoursForm() {
     const { organization } = this.props.data;
@@ -92,34 +139,7 @@ class Settings extends React.Component {
       textingHoursEnd: yup.number().required()
     });
 
-    const hours = [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18,
-      19,
-      20,
-      21,
-      22,
-      23,
-      24
-    ];
-    const hourChoices = hours.map(hour => ({
+    const hourChoices = [...Array(25).keys()].map(hour => ({
       value: hour,
       label: formatTextingHours(hour)
     }));
@@ -167,8 +187,13 @@ class Settings extends React.Component {
   }
 
   render() {
+    const { hasNumbersApiKeyChanged, isWorking, error } = this.state;
     const { organization } = this.props.data;
-    const { optOutMessage, numbersApiKey } = organization;
+    const {
+      optOutMessage,
+      numbersApiKey,
+      defaulTexterApprovalStatus
+    } = organization.settings;
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
@@ -178,12 +203,49 @@ class Settings extends React.Component {
       numbersApiKey: yup.string().nullable()
     });
 
+    const approvalLevel =
+      this.state.approvalLevel || defaulTexterApprovalStatus;
+    const noApprovalChange = approvalLevel === defaulTexterApprovalStatus;
+
+    const errorActions = [
+      <FlatButton label="OK" primary={true} onClick={this.handleDismissError} />
+    ];
+
     return (
       <div>
         <Card className={css(styles.sectionCard)}>
+          <CardHeader title="Default Text Request Auto-Approval Level" />
+          <CardText>
+            <p>
+              When a new texter joins your organization they will be given this
+              auto-approval level for requesting text assignments.
+            </p>
+            <DropDownMenu
+              value={approvalLevel}
+              onChange={this.handleChangeApprovalLevel}
+            >
+              {Object.keys(RequestAutoApproveType).map(level => (
+                <MenuItem
+                  key={level}
+                  value={level}
+                  primaryText={snakeToTitleCase(level)}
+                />
+              ))}
+            </DropDownMenu>
+          </CardText>
+          <CardActions>
+            <RaisedButton
+              label="Save Default Level"
+              primary={true}
+              disabled={isWorking || noApprovalChange}
+              onClick={this.handleSaveApprovalLevel}
+            />
+          </CardActions>
+        </Card>
+        <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={formSchema}
-            onSubmit={this.props.mutations.updateOptOutMessage}
+            onSubmit={this.handleEditOptOutMessage}
             defaultValue={{ optOutMessage }}
           >
             <CardHeader title="Opt Out Message" />
@@ -196,8 +258,10 @@ class Settings extends React.Component {
             </CardText>
             <CardActions>
               <Form.Button
-                type="submit"
                 label={this.props.saveLabel || "Save Opt-Out Message"}
+                type="submit"
+                component={RaisedButton}
+                disabled={isWorking}
               />
             </CardActions>
           </GSForm>
@@ -250,7 +314,7 @@ class Settings extends React.Component {
                 numbersApiKey: newValue
               })
             }
-            onSubmit={this.doSetNumbersApiKey}
+            onSubmit={this.handleEditNumbersApiKey}
             defaultValue={{
               numbersApiKey:
                 this.state.numbersApiKey === undefined
@@ -270,13 +334,22 @@ class Settings extends React.Component {
             </CardText>
             <CardActions>
               <Form.Button
-                type="submit"
                 label={"Save"}
-                disabled={!this.state.hasNumbersApiKeyChanged}
+                type="submit"
+                component={RaisedButton}
+                disabled={isWorking || !hasNumbersApiKeyChanged}
               />
             </CardActions>
           </GSForm>
         </Card>
+        <Dialog
+          title="Error Saving Settings"
+          open={error !== undefined}
+          actions={errorActions}
+          onRequestClose={this.handleDismissError}
+        >
+          {error || ""}
+        </Dialog>
       </div>
     );
   }
@@ -336,44 +409,23 @@ const mutations = {
       textingHoursEnforced
     }
   }),
-  updateOptOutMessage: ownProps => ({ optOutMessage }) => ({
+  editSettings: ownProps => input => ({
     mutation: gql`
-      mutation updateOptOutMessage(
-        $optOutMessage: String!
-        $organizationId: String!
+      mutation editOrganizationSettings(
+        $id: String!
+        $input: OrganizationSettingsInput!
       ) {
-        updateOptOutMessage(
-          optOutMessage: $optOutMessage
-          organizationId: $organizationId
-        ) {
+        editOrganizationSettings(id: $id, input: $input) {
           id
           optOutMessage
-        }
-      }
-    `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId,
-      optOutMessage
-    }
-  }),
-  setNumbersApiKey: ownProps => ({ numbersApiKey }) => ({
-    mutation: gql`
-      mutation setNumbersApiKey(
-        $numbersApiKey: String
-        $organizationId: String!
-      ) {
-        setNumbersApiKey(
-          organizationId: $organizationId
-          numbersApiKey: $numbersApiKey
-        ) {
-          id
           numbersApiKey
+          defaulTexterApprovalStatus
         }
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
-      numbersApiKey
+      id: ownProps.match.params.organizationId,
+      input
     }
   })
 };
@@ -388,8 +440,12 @@ const queries = {
           textingHoursEnforced
           textingHoursStart
           textingHoursEnd
-          optOutMessage
-          numbersApiKey
+          settings {
+            id
+            optOutMessage
+            numbersApiKey
+            defaulTexterApprovalStatus
+          }
         }
       }
     `,
@@ -397,7 +453,7 @@ const queries = {
       variables: {
         organizationId: ownProps.match.params.organizationId
       },
-      fetchPolicy: "network-only"
+      fetchPolicy: "cache-and-network"
     })
   }
 };
