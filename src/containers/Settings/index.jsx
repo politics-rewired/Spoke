@@ -21,13 +21,15 @@ export const SettingsRouter = props => {
         <br />
         <General match={match} />
       </Tab>
-      <Tab
-        icon={<AlarmIcon />}
-        label="TrollBot Trigger Tokens"
-        value={"trolltokens"}
-      >
-        <TrollTokenSettings match={match} />
-      </Tab>
+      {window.ENABLE_TROLLBOT && (
+        <Tab
+          icon={<AlarmIcon />}
+          label="TrollBot Trigger Tokens"
+          value={"trolltokens"}
+        >
+          <TrollTokenSettings match={match} isActive={page === "trolltokens"} />
+        </Tab>
+      )}
     </Tabs>
   );
 };
