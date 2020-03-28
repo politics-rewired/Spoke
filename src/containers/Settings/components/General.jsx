@@ -10,9 +10,12 @@ import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
+import DropDownMenu from "material-ui/DropDownMenu";
+import MenuItem from "material-ui/MenuItem";
 import { StyleSheet, css } from "aphrodite";
 
 import { loadData } from "../../hoc/with-operations";
+import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import GSSubmitButton from "../../../components/forms/GSSubmitButton";
 
@@ -58,6 +61,7 @@ class Settings extends React.Component {
     textingHoursDialogOpen: false,
     hasNumbersApiKeyChanged: false,
     numbersApiKey: undefined,
+    approvalLevel: undefined,
     isWorking: false,
     error: undefined
   };
@@ -94,6 +98,18 @@ class Settings extends React.Component {
 
   handleCloseTextingHoursDialog = () =>
     this.setState({ textingHoursDialogOpen: false });
+
+  handleChangeApprovalLevel = (_event, _index, approvalLevel) =>
+    this.setState({ approvalLevel });
+
+  handleSaveApprovalLevel = async () => {
+    const { approvalLevel } = this.state;
+    const payload = { defaulTexterApprovalStatus: approvalLevel };
+    const success = await this.editSettings("Numbers API Key", payload);
+    if (!success) {
+      this.setState({ approvalLevel: undefined });
+    }
+  };
 
   handleEditNumbersApiKey = async payload => {
     let { numbersApiKey } = this.state;
@@ -172,7 +188,11 @@ class Settings extends React.Component {
   render() {
     const { hasNumbersApiKeyChanged, isWorking, error } = this.state;
     const { organization } = this.props.data;
-    const { optOutMessage, numbersApiKey } = organization.settings;
+    const {
+      optOutMessage,
+      numbersApiKey,
+      defaulTexterApprovalStatus
+    } = organization.settings;
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
@@ -182,12 +202,41 @@ class Settings extends React.Component {
       numbersApiKey: yup.string().nullable()
     });
 
+    const approvalLevel =
+      this.state.approvalLevel || defaulTexterApprovalStatus;
+    const noApprovalChange = approvalLevel === defaulTexterApprovalStatus;
+
     const errorActions = [
       <FlatButton label="OK" primary={true} onClick={this.handleDismissError} />
     ];
 
     return (
       <div>
+        <Card className={css(styles.sectionCard)}>
+          <CardHeader title="Default Text Request Auto-Approval Level" />
+          <CardText>
+            <p>
+              When a new texter joins your organization they will be given this
+              auto-approval level for requesting text assignments.
+            </p>
+            <DropDownMenu
+              value={approvalLevel}
+              onChange={this.handleChangeApprovalLevel}
+            >
+              {Object.keys(RequestAutoApproveType).map(level => (
+                <MenuItem key={level} value={level} primaryText={level} />
+              ))}
+            </DropDownMenu>
+          </CardText>
+          <CardActions>
+            <RaisedButton
+              label="Save Default Level"
+              primary={true}
+              disabled={isWorking || noApprovalChange}
+              onClick={this.handleSaveApprovalLevel}
+            />
+          </CardActions>
+        </Card>
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={formSchema}
@@ -365,6 +414,7 @@ const mutations = {
           id
           optOutMessage
           numbersApiKey
+          defaulTexterApprovalStatus
         }
       }
     `,
@@ -386,8 +436,10 @@ const queries = {
           textingHoursStart
           textingHoursEnd
           settings {
+            id
             optOutMessage
             numbersApiKey
+            defaulTexterApprovalStatus
           }
         }
       }
@@ -396,7 +448,7 @@ const queries = {
       variables: {
         organizationId: ownProps.match.params.organizationId
       },
-      fetchPolicy: "network-only"
+      fetchPolicy: "cache-and-network"
     })
   }
 };
