@@ -55,9 +55,27 @@ const formatTextingHours = hour => moment(hour, "H").format("h a");
 
 class Settings extends React.Component {
   state = {
-    formIsSubmitting: false,
     textingHoursDialogOpen: false,
-    numbersApiKey: undefined
+    hasNumbersApiKeyChanged: false,
+    numbersApiKey: undefined,
+    isWorking: false,
+    error: undefined
+  };
+
+  editSettings = async (name, input) => {
+    this.setState({ isWorking: true, error: undefined });
+    let success = false;
+    try {
+      const response = await this.props.mutations.editSettings(input);
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      success = false;
+      const message = `Error saving ${name}: ${err.message}`;
+      this.setState({ error: message });
+    } finally {
+      this.setState({ isWorking: false });
+    }
+    return success;
   };
 
   handleSubmitTextingHoursForm = async ({
@@ -77,15 +95,24 @@ class Settings extends React.Component {
   handleCloseTextingHoursDialog = () =>
     this.setState({ textingHoursDialogOpen: false });
 
-  handleEditNumbersApiKey = payload => {
+  handleEditNumbersApiKey = async payload => {
     let { numbersApiKey } = this.state;
     numbersApiKey = numbersApiKey !== "" ? numbersApiKey : null;
-    this.props.mutations.editSettings({ numbersApiKey });
+    const input = { numbersApiKey };
+    const success = await this.editSettings("Numbers API Key", input);
+    if (!success) {
+      numbersApiKey = this.props.data.organization.settings.numbersApiKey;
+      this.setState({
+        hasNumbersApiKeyChanged: false,
+        numbersApiKey: undefined
+      });
+    }
   };
 
-  handleEditOptOutMessage = ({ optOutMessage }) => {
-    this.props.mutations.editSettings({ optOutMessage });
-  };
+  handleEditOptOutMessage = ({ optOutMessage }) =>
+    this.editSettings("Opt Out Messasge", { optOutMessage });
+
+  handleDismissError = () => this.setState({ error: undefined });
 
   renderTextingHoursForm() {
     const { organization } = this.props.data;
@@ -143,6 +170,7 @@ class Settings extends React.Component {
   }
 
   render() {
+    const { hasNumbersApiKeyChanged, isWorking, error } = this.state;
     const { organization } = this.props.data;
     const { optOutMessage, numbersApiKey } = organization.settings;
 
@@ -153,6 +181,10 @@ class Settings extends React.Component {
     const numbersApiKeySchema = yup.object({
       numbersApiKey: yup.string().nullable()
     });
+
+    const errorActions = [
+      <FlatButton label="OK" primary={true} onClick={this.handleDismissError} />
+    ];
 
     return (
       <div>
@@ -172,8 +204,10 @@ class Settings extends React.Component {
             </CardText>
             <CardActions>
               <Form.Button
-                type="submit"
                 label={this.props.saveLabel || "Save Opt-Out Message"}
+                type="submit"
+                component={RaisedButton}
+                disabled={isWorking}
               />
             </CardActions>
           </GSForm>
@@ -249,11 +283,19 @@ class Settings extends React.Component {
                 label={"Save"}
                 type="submit"
                 component={RaisedButton}
-                disabled={!this.state.hasNumbersApiKeyChanged}
+                disabled={isWorking || !hasNumbersApiKeyChanged}
               />
             </CardActions>
           </GSForm>
         </Card>
+        <Dialog
+          title="Error Saving Settings"
+          open={error !== undefined}
+          actions={errorActions}
+          onRequestClose={this.handleDismissError}
+        >
+          {error || ""}
+        </Dialog>
       </div>
     );
   }
