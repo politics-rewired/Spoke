@@ -68,8 +68,8 @@ class Settings extends React.Component {
     try {
       const response = await this.props.mutations.editSettings(input);
       if (response.errors) throw response.errors;
+      success = true;
     } catch (err) {
-      success = false;
       const message = `Error saving ${name}: ${err.message}`;
       this.setState({ error: message });
     } finally {
