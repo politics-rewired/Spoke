@@ -15,6 +15,15 @@ export const camelCase = str => {
     .replace(/\s+/g, "");
 };
 
+export const titleCase = value =>
+  `${value.charAt(0).toUpperCase()}${value.substring(1).toLowerCase()}`;
+
+export const snakeToTitleCase = value =>
+  value
+    .split("_")
+    .map(s => titleCase(s))
+    .join(" ");
+
 export const nameComponents = name => {
   let firstName = undefined;
   let lastName = undefined;

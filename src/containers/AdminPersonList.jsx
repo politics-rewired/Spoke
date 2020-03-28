@@ -21,6 +21,7 @@ import {
   RequestAutoApproveType
 } from "../api/organization-membership";
 import { dataTest } from "../lib/attributes";
+import { snakeToTitleCase } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
 import UserEdit from "./UserEdit";
@@ -28,14 +29,6 @@ import Empty from "../components/Empty";
 import OrganizationJoinLink from "../components/OrganizationJoinLink";
 import PasswordResetLink from "../components/PasswordResetLink";
 import LoadingIndicator from "../components/LoadingIndicator";
-
-const titleCase = value =>
-  `${value.charAt(0).toUpperCase()}${value.substring(1).toLowerCase()}`;
-const snakeToTitleCase = value =>
-  value
-    .split("_")
-    .map(s => titleCase(s))
-    .join(" ");
 
 class AdminPersonList extends React.Component {
   state = {
