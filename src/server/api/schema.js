@@ -10,7 +10,6 @@ import isUrl from "is-url";
 import request from "superagent";
 import _ from "lodash";
 import moment from "moment-timezone";
-import { organizationCache } from "../models/cacheable_queries/organization";
 
 import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";

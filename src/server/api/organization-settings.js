@@ -1,4 +1,5 @@
 import { r } from "../models";
+import { organizationCache } from "../models/cacheable_queries/organization";
 import { config } from "../../config";
 import { RequestAutoApproveType } from "../../api/organization-membership";
 
