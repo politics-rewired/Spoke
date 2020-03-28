@@ -25,6 +25,12 @@ export const schema = `
     AUTO_APPROVE
   }
 
+  input MembershipFilter {
+    nameSearch: String
+    campaignId: String
+    campaignArchived: Boolean
+  }
+
   type OrganizationMembership {
     id: ID!
     user: User!

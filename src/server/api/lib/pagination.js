@@ -2,6 +2,7 @@ const encode = value => Buffer.from(`${value}`).toString("base64");
 const decode = value => Buffer.from(value, "base64").toString();
 
 const defaultOptions = {
+  primaryColumn: "id",
   nodeTransformer: node => node
 };
 
@@ -12,11 +13,13 @@ const defaultOptions = {
  * @param {Object} options Options for creating the page
  * @param {Cursor} [options.after] The cursor to begin the query at
  * @param {number} [options.first] How many results to return in the page
+ * @param {number} [options.primaryColumn] The name of the primary ID column.
+ * The needs to be passed if query is a join.
  * @param {Function} [options.nodeTransformer] Transformation to turn a record into a node.
  * This could be used for destructuring results of a join query.
  */
 export const formatPage = async (query, options) => {
-  const { after, first, nodeTransformer } = Object.assign(
+  const { after, first, primaryColumn, nodeTransformer } = Object.assign(
     {},
     defaultOptions,
     options
@@ -25,14 +28,14 @@ export const formatPage = async (query, options) => {
 
   if (after) {
     const afterId = decode(after);
-    query.where("id", ">", afterId);
+    query.where(primaryColumn, ">", afterId);
   }
 
   if (first) {
     query.limit(first + 1);
   }
 
-  query.orderBy("id");
+  query.orderBy(primaryColumn);
 
   const [{ count: totalCount }] = await countQuery.count();
   const results = await query;

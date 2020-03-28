@@ -29,9 +29,8 @@ const styles = StyleSheet.create({
 });
 
 const formatTexter = texter => {
-  const { displayName, email, roles } = texter;
-  const highestRole = getHighestRole(roles);
-  return `${displayName} (${email}) ${highestRole}`;
+  const { displayName, email, role } = texter;
+  return `${displayName} (${email}) ${role}`;
 };
 
 const MenuList = props => {
