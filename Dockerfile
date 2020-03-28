@@ -20,7 +20,7 @@ ENV NODE_ENV="production" \
 
 # Copy application codebase
 COPY . .
-RUN yarn run prod-build
+RUN yarn run build
 
 ARG SPOKE_VERSION="no-version"
 ENV SPOKE_VERSION=$SPOKE_VERSION
