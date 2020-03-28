@@ -1,7 +1,5 @@
 // Must be first imports
 import "react-hot-loader";
-import "core-js/stable";
-import "regenerator-runtime/runtime";
 
 import React from "react";
 import ReactDOM from "react-dom";

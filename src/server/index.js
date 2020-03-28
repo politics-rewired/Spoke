@@ -1,5 +1,3 @@
-import "core-js/stable";
-import "regenerator-runtime/runtime";
 import { config } from "../config";
 import logger from "../logger";
 import bodyParser from "body-parser";
