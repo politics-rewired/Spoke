@@ -65,6 +65,10 @@ import {
 } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
 import { RequestAutoApproveType } from "../../api/organization-membership";
+import {
+  resolvers as settingsSchema,
+  updateOrganizationSettings
+} from "./organization-settings";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
@@ -808,6 +812,16 @@ const rootMutations = {
       });
 
       return orgMembership;
+    },
+
+    editOrganizationSettings: async (_, { id, input }, { user: authUser }) => {
+      const organizationId = parseInt(id);
+      await accessRequired(authUser, organizationId, "OWNER");
+      const updatedOrganization = await updateOrganizationSettings(
+        organizationId,
+        input
+      );
+      return updatedOrganization;
     },
 
     editUser: async (_, { organizationId, userId, userData }, { user }) => {
@@ -3497,6 +3511,7 @@ export const resolvers = {
   ...rootResolvers,
   ...userResolvers,
   ...membershipSchema,
+  ...settingsSchema,
   ...organizationResolvers,
   ...campaignResolvers,
   ...assignmentResolvers,

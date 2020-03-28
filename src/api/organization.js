@@ -45,6 +45,7 @@ export const schema = `
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
     numbersApiKey: String
+    settings: OranizationSettings!
     tagList: [Tag]
     escalationTagList: [Tag]
     teams: [Team]!

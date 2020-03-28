@@ -1,6 +1,7 @@
 import { schema as userSchema } from "./user";
 import { schema as conversationSchema } from "./conversations";
 import { schema as organizationSchema } from "./organization";
+import { schema as organizationSettingsSchema } from "./organization-settings";
 import { schema as campaignSchema } from "./campaign";
 import { schema as assignmentSchema } from "./assignment";
 import { schema as interactionStepSchema } from "./interaction-step";
@@ -243,6 +244,7 @@ const rootSchema = `
     createOrganization(name: String!, userId: String!, inviteId: String!): Organization
     joinOrganization(organizationUuid: String!): Organization!
     editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
+    editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OranizationSettings!
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     resetUserPassword(organizationId: String!, userId: Int!): String!
     changeUserPassword(userId: Int!, formData: UserPasswordChange): User
@@ -311,6 +313,7 @@ export const schema = [
   "scalar Date",
   "scalar JSON",
   "scalar Phone",
+  organizationSettingsSchema,
   membershipSchema,
   campaignSchema,
   assignmentSchema,
