@@ -77,11 +77,14 @@ class Settings extends React.Component {
   handleCloseTextingHoursDialog = () =>
     this.setState({ textingHoursDialogOpen: false });
 
-  doSetNumbersApiKey = payload => {
-    return this.props.mutations.setNumbersApiKey({
-      numbersApiKey:
-        this.state.numbersApiKey === "" ? null : this.state.numbersApiKey
-    });
+  handleEditNumbersApiKey = payload => {
+    let { numbersApiKey } = this.state;
+    numbersApiKey = numbersApiKey !== "" ? numbersApiKey : null;
+    this.props.mutations.editSettings({ numbersApiKey });
+  };
+
+  handleEditOptOutMessage = ({ optOutMessage }) => {
+    this.props.mutations.editSettings({ optOutMessage });
   };
 
   renderTextingHoursForm() {
@@ -168,7 +171,7 @@ class Settings extends React.Component {
 
   render() {
     const { organization } = this.props.data;
-    const { optOutMessage, numbersApiKey } = organization;
+    const { optOutMessage, numbersApiKey } = organization.settings;
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
@@ -183,7 +186,7 @@ class Settings extends React.Component {
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={formSchema}
-            onSubmit={this.props.mutations.updateOptOutMessage}
+            onSubmit={this.handleEditOptOutMessage}
             defaultValue={{ optOutMessage }}
           >
             <CardHeader title="Opt Out Message" />
@@ -250,7 +253,7 @@ class Settings extends React.Component {
                 numbersApiKey: newValue
               })
             }
-            onSubmit={this.doSetNumbersApiKey}
+            onSubmit={this.handleEditNumbersApiKey}
             defaultValue={{
               numbersApiKey:
                 this.state.numbersApiKey === undefined
@@ -270,8 +273,9 @@ class Settings extends React.Component {
             </CardText>
             <CardActions>
               <Form.Button
-                type="submit"
                 label={"Save"}
+                type="submit"
+                component={RaisedButton}
                 disabled={!this.state.hasNumbersApiKeyChanged}
               />
             </CardActions>
@@ -336,44 +340,22 @@ const mutations = {
       textingHoursEnforced
     }
   }),
-  updateOptOutMessage: ownProps => ({ optOutMessage }) => ({
+  editSettings: ownProps => input => ({
     mutation: gql`
-      mutation updateOptOutMessage(
-        $optOutMessage: String!
-        $organizationId: String!
+      mutation editOrganizationSettings(
+        $id: String!
+        $input: OrganizationSettingsInput!
       ) {
-        updateOptOutMessage(
-          optOutMessage: $optOutMessage
-          organizationId: $organizationId
-        ) {
+        editOrganizationSettings(id: $id, input: $input) {
           id
           optOutMessage
-        }
-      }
-    `,
-    variables: {
-      organizationId: ownProps.match.params.organizationId,
-      optOutMessage
-    }
-  }),
-  setNumbersApiKey: ownProps => ({ numbersApiKey }) => ({
-    mutation: gql`
-      mutation setNumbersApiKey(
-        $numbersApiKey: String
-        $organizationId: String!
-      ) {
-        setNumbersApiKey(
-          organizationId: $organizationId
-          numbersApiKey: $numbersApiKey
-        ) {
-          id
           numbersApiKey
         }
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
-      numbersApiKey
+      id: ownProps.match.params.organizationId,
+      input
     }
   })
 };
@@ -388,8 +370,10 @@ const queries = {
           textingHoursEnforced
           textingHoursStart
           textingHoursEnd
-          optOutMessage
-          numbersApiKey
+          settings {
+            optOutMessage
+            numbersApiKey
+          }
         }
       }
     `,

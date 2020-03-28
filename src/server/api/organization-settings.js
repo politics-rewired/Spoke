@@ -17,6 +17,15 @@ const SETTINGS_TRANSFORMERS = {
   numbersApiKey: value => value.slice(0, 4) + "****************"
 };
 
+const SETTINGS_VALIDATORS = {
+  numbersApiKey: value => {
+    // User probably made a mistake - no API key will have a *
+    if (value.includes("*")) {
+      throw new Error("Numbers API Key cannot have character: *");
+    }
+  }
+};
+
 const getOrgFeature = (featureName, rawFeatures = "{}") => {
   const defaultValue = SETTINGS_DEFAULTS[featureName];
   featureName = SETTINGS_NAMES[featureName] || featureName;
@@ -58,6 +67,9 @@ export const updateOrganizationSettings = async (id, input) => {
     .catch(() => ({}));
 
   const features = Object.entries(input).reduce((acc, [key, value]) => {
+    if (SETTINGS_VALIDATORS[key]) {
+      SETTINGS_VALIDATORS[key](value);
+    }
     key = SETTINGS_NAMES[key] || key;
     return Object.assign(acc, { [key]: value });
   }, currentFeatures);
@@ -67,6 +79,8 @@ export const updateOrganizationSettings = async (id, input) => {
     .where({ id })
     .update({ features: JSON.stringify(features) })
     .returning("*");
+
+  await organizationCache.clear(id);
 
   return organization;
 };

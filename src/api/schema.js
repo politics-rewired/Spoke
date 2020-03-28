@@ -251,7 +251,6 @@ const rootSchema = `
     updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
     updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
-    updateOptOutMessage( organizationId: String!, optOutMessage: String!): Organization
     bulkSendMessages(assignmentId: Int!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
     tagConversation(campaignContactId: String!, tag: ContactTagActionInput!): CampaignContact
@@ -284,7 +283,6 @@ const rootSchema = `
     deleteCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignId: String!): DeleteCampaignOverlapResult!
     deleteManyCampaignOverlap(organizationId: String!, campaignId: String!, overlappingCampaignIds: [String]!): Int!
     resolveAssignmentRequest(assignmentRequestId: String!, approved: Boolean!, autoApproveLevel: RequestAutoApprove): Int!
-    setNumbersApiKey(organizationId: String!, numbersApiKey: String): Organization!
     saveTag(organizationId: String!, tag: TagInput!): Tag!
     deleteTag(organizationId: String!, tagId: String!): Boolean!
     saveTeams(organizationId: String!, teams: [TeamInput]!): [Team]!

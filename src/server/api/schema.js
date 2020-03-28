@@ -1075,32 +1075,6 @@ const rootMutations = {
       return await loaders.organization.load(organizationId);
     },
 
-    updateOptOutMessage: async (
-      _,
-      { organizationId, optOutMessage },
-      { user }
-    ) => {
-      await accessRequired(user, organizationId, "OWNER");
-
-      const { features } = await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first("features");
-      const featuresJSON = JSON.parse(features || "{}");
-      featuresJSON.opt_out_message = optOutMessage;
-
-      await r
-        .knex("organization")
-        .update({ features: JSON.stringify(featuresJSON) })
-        .where({ id: organizationId });
-      await organizationCache.clear(organizationId);
-
-      return await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first();
-    },
-
     createInvite: async (_, { user }) => {
       if ((user && user.is_superadmin) || !config.SUPPRESS_SELF_INVITE) {
         const [newInvite] = await r
@@ -2900,36 +2874,6 @@ const rootMutations = {
       });
 
       return numberAssigned;
-    },
-    setNumbersApiKey: async (
-      _,
-      { organizationId, numbersApiKey },
-      { user }
-    ) => {
-      await accessRequired(user, organizationId, "OWNER");
-
-      // User probably made a mistake - no API key will have a *
-      if (numbersApiKey && numbersApiKey.includes("*")) {
-        throw new Error("Numbers API Key cannot have character: *");
-      }
-
-      const { features } = await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first("features");
-      const featuresJSON = JSON.parse(features || "{}");
-      featuresJSON.numbersApiKey = numbersApiKey;
-
-      await r
-        .knex("organization")
-        .update({ features: JSON.stringify(featuresJSON) })
-        .where({ id: organizationId });
-      await organizationCache.clear(organizationId);
-
-      return await r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first();
     },
     saveTag: async (_, { organizationId, tag }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
