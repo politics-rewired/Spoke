@@ -571,7 +571,8 @@ if (isClient()) {
     SHUTDOWN_GRACE_PERIOD: num({
       desc:
         "How long to wait after receiving kill signal before tearing down. Useful for waiting for readiness probe period.",
-      default: 5000
+      default: 5000,
+      devDefault: 10
     }),
     SLACK_TEAM_NAME: str({
       desc: "The name of the Slack team to use for sign-in.",
