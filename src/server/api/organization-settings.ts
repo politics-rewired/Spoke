@@ -3,23 +3,31 @@ import { organizationCache } from "../models/cacheable_queries/organization";
 import { config } from "../../config";
 import { RequestAutoApproveType } from "../../api/organization-membership";
 
-const SETTINGS_NAMES = {
+interface IOrganizationSettings {
+  defaulTexterApprovalStatus: string;
+  optOutMessage: string;
+  numbersApiKey?: string;
+}
+
+const SETTINGS_NAMES: { [key: string]: string } = {
   optOutMessage: "opt_out_message"
 };
 
-const SETTINGS_DEFAULTS = {
+const SETTINGS_DEFAULTS: IOrganizationSettings = {
   defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED,
   optOutMessage:
     config.OPT_OUT_MESSAGE ||
     "I'm opting you out of texts immediately. Have a great day."
 };
 
-const SETTINGS_TRANSFORMERS = {
-  numbersApiKey: value => value.slice(0, 4) + "****************"
+const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
+  numbersApiKey: (value: string) => value.slice(0, 4) + "****************"
 };
 
-const SETTINGS_VALIDATORS = {
-  numbersApiKey: value => {
+const SETTINGS_VALIDATORS: {
+  [key in keyof IOrganizationSettings]?: { (value: string): void }
+} = {
+  numbersApiKey: (value: string) => {
     // User probably made a mistake - no API key will have a *
     if (value.includes("*")) {
       throw new Error("Numbers API Key cannot have character: *");
@@ -27,13 +35,17 @@ const SETTINGS_VALIDATORS = {
   }
 };
 
-const getOrgFeature = (featureName, rawFeatures = "{}") => {
+const getOrgFeature = (
+  featureName: keyof IOrganizationSettings,
+  rawFeatures = "{}"
+): string | null => {
   const defaultValue = SETTINGS_DEFAULTS[featureName];
-  featureName = SETTINGS_NAMES[featureName] || featureName;
+  const finalName = SETTINGS_NAMES[featureName] || featureName;
   try {
     const features = JSON.parse(rawFeatures);
-    const value = features[featureName] || defaultValue || null;
-    if (SETTINGS_TRANSFORMERS[featureName] && value) {
+    const value = features[finalName] || defaultValue || null;
+    const transformer = SETTINGS_TRANSFORMERS[featureName];
+    if (transformer && value) {
       return SETTINGS_TRANSFORMERS[featureName](value);
     }
     return value;
@@ -42,15 +54,16 @@ const getOrgFeature = (featureName, rawFeatures = "{}") => {
   }
 };
 
-const settingResolvers = settingNames =>
+const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
   settingNames.reduce((accumulator, settingName) => {
-    const resolver = ({ features }) => getOrgFeature(settingName, features);
+    const resolver = ({ features }: { features: string }) =>
+      getOrgFeature(settingName, features);
     return Object.assign(accumulator, { [settingName]: resolver });
   }, {});
 
 export const resolvers = {
   OranizationSettings: {
-    id: organization => organization.id,
+    id: (organization: { id: number }) => organization.id,
     ...settingResolvers([
       "defaulTexterApprovalStatus",
       "optOutMessage",
@@ -59,20 +72,28 @@ export const resolvers = {
   }
 };
 
-export const updateOrganizationSettings = async (id, input) => {
-  const currentFeatures = await r
+export const updateOrganizationSettings = async (
+  id: number,
+  input: Partial<IOrganizationSettings>
+) => {
+  const currentFeatures: IOrganizationSettings = await r
     .knex("organization")
     .where({ id })
     .first("features")
-    .then(({ features }) => JSON.parse(features))
+    .then(({ features }: { features: string }) => JSON.parse(features))
     .catch(() => ({}));
 
-  const features = Object.entries(input).reduce((acc, [key, value]) => {
-    if (SETTINGS_VALIDATORS[key]) {
-      SETTINGS_VALIDATORS[key](value);
+  const features = Object.entries(input).reduce((acc, entry) => {
+    const [key, value] = entry as [
+      keyof IOrganizationSettings,
+      string | undefined
+    ];
+    const validator = SETTINGS_VALIDATORS[key];
+    if (validator && value) {
+      validator(value);
     }
-    key = SETTINGS_NAMES[key] || key;
-    return Object.assign(acc, { [key]: value });
+    const dbKey = SETTINGS_NAMES[key] || key;
+    return Object.assign(acc, { [dbKey]: value });
   }, currentFeatures);
 
   const [organization] = await r
