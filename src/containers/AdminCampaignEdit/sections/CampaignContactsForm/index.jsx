@@ -22,8 +22,8 @@ import CampaignFormSectionHeading from "../../components/CampaignFormSectionHead
 
 import "./styles/file-drop.css";
 
-const checkIcon = <CheckIcon color={theme.colors.green} />;
-const errorIcon = <ErrorIcon color={theme.colors.red} />;
+const GreenCheckIcon = () => <CheckIcon color={theme.colors.green} />;
+const RedErrorIcon = () => <ErrorIcon color={theme.colors.red} />;
 
 const innerStyles = {
   button: {
@@ -156,11 +156,11 @@ export default class CampaignContactsForm extends React.Component {
         <ListItem
           {...dataTest("uploadedContacts")}
           primaryText={`${contactsCount} contacts`}
-          leftIcon={checkIcon}
+          leftIcon={<GreenCheckIcon />}
         />
         <ListItem
           primaryText={`${customFields.length} custom fields`}
-          leftIcon={checkIcon}
+          leftIcon={<GreenCheckIcon />}
           nestedItems={customFields.map((field, index) => (
             <ListItem
               key={index}
@@ -273,7 +273,7 @@ export default class CampaignContactsForm extends React.Component {
                 <List>
                   <ListItem
                     primaryText={contactSqlError}
-                    leftIcon={errorIcon}
+                    leftIcon={<RedErrorIcon />}
                   />
                 </List>
               ) : (
@@ -298,7 +298,10 @@ export default class CampaignContactsForm extends React.Component {
           {this.renderContactStats()}
           {contactUploadError ? (
             <List>
-              <ListItem primaryText={contactUploadError} leftIcon={errorIcon} />
+              <ListItem
+                primaryText={contactUploadError}
+                leftIcon={<RedErrorIcon />}
+              />
             </List>
           ) : (
             ""
