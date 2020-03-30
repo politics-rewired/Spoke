@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/politics-rewired/spoke/compare/v1.6.1...v1.7.0) (2020-03-30)
+
+
+### Features
+
+* add promote-on-assign button ([#611](https://github.com/politics-rewired/spoke/issues/611)) ([9cb2943](https://github.com/politics-rewired/spoke/commit/9cb29432f68bcfdabf88b5d585478af9a1d7b252))
+* default texter approval status ([#614](https://github.com/politics-rewired/spoke/issues/614)) ([b12a35f](https://github.com/politics-rewired/spoke/commit/b12a35f3f8a31f07aedd345decf09aa32ecd23e5))
+* expose texter auto-approval status ([#610](https://github.com/politics-rewired/spoke/issues/610)) ([f0a7e1c](https://github.com/politics-rewired/spoke/commit/f0a7e1c9c76faf3d2e5efaf901c049d00f2c175f))
+
+
+### Bug Fixes
+
+* message review action resolver errors ([#613](https://github.com/politics-rewired/spoke/issues/613)) ([649192d](https://github.com/politics-rewired/spoke/commit/649192dd84ad3de2e1ea41f54d1f89eb10f866d5))
+* throw error only if ineligible for access check ([770336c](https://github.com/politics-rewired/spoke/commit/770336cac41bf69c1cabca80a16a21d26811ab1d))
+* **ux:** avoid flashing background between texts ([#608](https://github.com/politics-rewired/spoke/issues/608)) ([0a605a2](https://github.com/politics-rewired/spoke/commit/0a605a2fcebbdd2b45c807b0c38dae202f38d273))
+
 ### [1.6.1](https://github.com/politics-rewired/spoke/compare/v1.6.0...v1.6.1) (2020-03-23)
 
 
