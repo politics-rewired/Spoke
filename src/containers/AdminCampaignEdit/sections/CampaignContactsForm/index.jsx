@@ -1,29 +1,28 @@
-import type from "prop-types";
+import PropTypes from "prop-types";
 import React from "react";
-import sortBy from "lodash/sortBy";
-import Select from "react-select";
-import RaisedButton from "material-ui/RaisedButton";
-import GSForm from "../../../../components/forms/GSForm";
+import yup from "yup";
 import Form from "react-formal";
+import { StyleSheet, css } from "aphrodite";
+import sortBy from "lodash/sortBy";
+
+import Select from "react-select";
+import FileDrop from "react-file-drop";
+import RaisedButton from "material-ui/RaisedButton";
 import Subheader from "material-ui/Subheader";
-import Divider from "material-ui/Divider";
 import Toggle from "material-ui/Toggle";
 import { ListItem, List } from "material-ui/List";
-import FileDrop from "react-file-drop";
-import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
 import UploadIcon from "material-ui/svg-icons/file/file-upload";
-import theme from "../../../../styles/theme";
-import { StyleSheet, css } from "aphrodite";
-import * as yup from "yup";
+
 import { dataTest } from "../../../../lib/attributes";
+import theme from "../../../../styles/theme";
+import GSForm from "../../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 
 import "./styles/file-drop.css";
 
 const checkIcon = <CheckIcon color={theme.colors.green} />;
-const warningIcon = <WarningIcon color={theme.colors.orange} />;
 const errorIcon = <ErrorIcon color={theme.colors.red} />;
 
 const innerStyles = {
@@ -345,15 +344,15 @@ export default class CampaignContactsForm extends React.Component {
 }
 
 CampaignContactsForm.propTypes = {
-  datawarehouseAvailable: type.bool,
-  onChange: type.func,
-  optOuts: type.array,
-  formValues: type.object,
-  ensureComplete: type.bool,
-  onSubmit: type.func,
-  saveDisabled: type.bool,
-  saveLabel: type.string,
-  jobResult: type.object,
-  otherCampaigns: type.array,
-  canFilterLandlines: type.bool
+  datawarehouseAvailable: PropTypes.bool,
+  onChange: PropTypes.func,
+  optOuts: PropTypes.array,
+  formValues: PropTypes.object,
+  ensureComplete: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  saveDisabled: PropTypes.bool,
+  saveLabel: PropTypes.string,
+  jobResult: PropTypes.object,
+  otherCampaigns: PropTypes.array,
+  canFilterLandlines: PropTypes.bool
 };

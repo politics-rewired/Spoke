@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import * as yup from "yup";
+import yup from "yup";
 import Form from "react-formal";
-import Toggle from "material-ui/Toggle";
+
 import ChipInput from "material-ui-chip-input";
+import Toggle from "material-ui/Toggle";
 
 import GSForm from "../../../components/forms/GSForm";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";

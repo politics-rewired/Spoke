@@ -1,15 +1,17 @@
-import type from "prop-types";
-import Toggle from "material-ui/Toggle";
+import PropTypes from "prop-types";
 import React from "react";
+import yup from "yup";
 import Form from "react-formal";
-import GSForm from "../../../components/forms/GSForm";
-import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import * as yup from "yup";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import moment from "moment";
+
 import Autocomplete from "material-ui/AutoComplete";
+import Toggle from "material-ui/Toggle";
+
 import { dataSourceItem } from "../../../components/utils";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 export default class CampaignTextingHoursForm extends React.Component {
   state = {
@@ -204,9 +206,9 @@ export default class CampaignTextingHoursForm extends React.Component {
 }
 
 CampaignTextingHoursForm.propTypes = {
-  saveLabel: type.string,
-  saveDisabled: type.bool,
-  onSubmit: type.func,
-  onChange: type.func,
-  formValues: type.object
+  saveLabel: PropTypes.string,
+  saveDisabled: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onChange: PropTypes.func,
+  formValues: PropTypes.object
 };

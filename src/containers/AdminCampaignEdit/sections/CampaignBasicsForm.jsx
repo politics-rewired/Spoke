@@ -1,13 +1,14 @@
 import PropTypes from "prop-types";
 import React from "react";
+import yup from "yup";
 import Form from "react-formal";
 import moment from "moment";
-import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import GSForm from "../../../components/forms/GSForm";
-import * as yup from "yup";
-import Toggle from "material-ui/Toggle";
+
 import ColorPicker from "material-ui-color-picker";
+
 import { dataTest } from "../../../lib/attributes";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const FormSchema = {
   title: yup.string(),

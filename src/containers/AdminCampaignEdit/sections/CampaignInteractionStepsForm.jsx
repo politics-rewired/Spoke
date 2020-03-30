@@ -1,6 +1,6 @@
 import React from "react";
-import type from "prop-types";
-import * as yup from "yup";
+import PropTypes from "prop-types";
+import yup from "yup";
 import Form from "react-formal";
 
 import RaisedButton from "material-ui/RaisedButton";
@@ -391,13 +391,13 @@ class CampaignInteractionStepsForm extends React.Component {
 }
 
 CampaignInteractionStepsForm.propTypes = {
-  formValues: type.object.isRequired,
-  customFields: type.array.isRequired,
-  availableActions: type.array.isRequired,
-  ensureComplete: type.bool.isRequired,
-  saveLabel: type.string.isRequired,
-  onChange: type.func.isRequired,
-  onSubmit: type.func.isRequired
+  formValues: PropTypes.object.isRequired,
+  customFields: PropTypes.array.isRequired,
+  availableActions: PropTypes.array.isRequired,
+  ensureComplete: PropTypes.bool.isRequired,
+  saveLabel: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired
 };
 
 export default CampaignInteractionStepsForm;

@@ -2,13 +2,13 @@ import React from "react";
 import gql from "graphql-tag";
 import moment from "moment";
 
-import CircularProgress from "material-ui/CircularProgress";
 import DataTable from "material-ui-datatables";
+import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";
+import TextField from "material-ui/TextField";
 
 import { loadData } from "../../hoc/with-operations";
 import LoadingIndicator from "../../../components/LoadingIndicator";
-import { TextField } from "material-ui";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100];
 

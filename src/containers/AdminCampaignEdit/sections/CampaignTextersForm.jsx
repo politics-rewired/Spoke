@@ -1,23 +1,24 @@
-import type from "prop-types";
+import PropTypes from "prop-types";
 import React from "react";
-import orderBy from "lodash/orderBy";
-import Slider from "../../../components/Slider";
-import AutoComplete from "material-ui/AutoComplete";
-import IconButton from "material-ui/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
-import Snackbar from "material-ui/Snackbar";
-import { red600 } from "material-ui/styles/colors";
-import GSForm from "../../../components/forms/GSForm";
-import * as yup from "yup";
+import yup from "yup";
 import Form from "react-formal";
-import OrganizationJoinLink from "../../../components/OrganizationJoinLink";
-import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
+import orderBy from "lodash/orderBy";
 import { StyleSheet, css } from "aphrodite";
-import theme from "../../../styles/theme";
+
+import AutoComplete from "material-ui/AutoComplete";
+import Snackbar from "material-ui/Snackbar";
+import RaisedButton from "material-ui/RaisedButton";
+import IconButton from "material-ui/IconButton";
 import Toggle from "material-ui/Toggle";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
+import { red600 } from "material-ui/styles/colors";
+
 import { dataTest } from "../../../lib/attributes";
 import { dataSourceItem } from "../../../components/utils";
+import theme from "../../../styles/theme";
+import GSForm from "../../../components/forms/GSForm";
+import Slider from "../../../components/Slider";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const styles = StyleSheet.create({
   sliderContainer: {
@@ -597,13 +598,13 @@ export default class CampaignTextersForm extends React.Component {
 }
 
 CampaignTextersForm.propTypes = {
-  onChange: type.func,
-  orgTexters: type.array,
-  ensureComplete: type.bool,
-  organizationId: type.string,
-  formValues: type.object,
-  contactsCount: type.number,
-  onSubmit: type.func,
-  saveLabel: type.string,
-  saveDisabled: type.bool
+  onChange: PropTypes.func,
+  orgTexters: PropTypes.array,
+  ensureComplete: PropTypes.bool,
+  organizationId: PropTypes.string,
+  formValues: PropTypes.object,
+  contactsCount: PropTypes.number,
+  onSubmit: PropTypes.func,
+  saveLabel: PropTypes.string,
+  saveDisabled: PropTypes.bool
 };
