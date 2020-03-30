@@ -5,8 +5,8 @@ import Form from "react-formal";
 import Toggle from "material-ui/Toggle";
 import ChipInput from "material-ui-chip-input";
 
-import GSForm from "./forms/GSForm";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const formSchema = yup.object({
   isAssignmentLimitedToTeams: yup.boolean()

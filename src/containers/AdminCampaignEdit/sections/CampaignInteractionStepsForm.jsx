@@ -9,11 +9,11 @@ import IconButton from "material-ui/IconButton";
 import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 
-import { makeTree } from "../lib/interaction-step-helpers";
-import { dataTest } from "../lib/attributes";
-import theme from "../styles/theme";
-import GSForm from "./forms/GSForm";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import { makeTree } from "../../../lib/interaction-step-helpers";
+import { dataTest } from "../../../lib/attributes";
+import theme from "../../../styles/theme";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const styles = {
   pullRight: {

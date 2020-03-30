@@ -2,14 +2,14 @@ import type from "prop-types";
 import Toggle from "material-ui/Toggle";
 import React from "react";
 import Form from "react-formal";
-import GSForm from "./forms/GSForm";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import * as yup from "yup";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import moment from "moment";
 import Autocomplete from "material-ui/AutoComplete";
-import { dataSourceItem } from "./utils";
+import { dataSourceItem } from "../../../components/utils";
 
 export default class CampaignTextingHoursForm extends React.Component {
   state = {

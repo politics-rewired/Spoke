@@ -2,10 +2,10 @@ import type from "prop-types";
 import React from "react";
 import { StyleSheet, css } from "aphrodite";
 import * as yup from "yup";
-import GSForm from "./forms/GSForm";
+import GSForm from "../../../components/forms/GSForm";
 import Form from "react-formal";
 import FlatButton from "material-ui/FlatButton";
-import { dataTest } from "../lib/attributes";
+import { dataTest } from "../../../lib/attributes";
 
 const styles = StyleSheet.create({
   buttonRow: {

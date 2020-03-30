@@ -1,23 +1,23 @@
 import type from "prop-types";
 import React from "react";
 import orderBy from "lodash/orderBy";
-import Slider from "./Slider";
+import Slider from "../../../components/Slider";
 import AutoComplete from "material-ui/AutoComplete";
 import IconButton from "material-ui/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
-import GSForm from "../components/forms/GSForm";
+import GSForm from "../../../components/forms/GSForm";
 import * as yup from "yup";
 import Form from "react-formal";
-import OrganizationJoinLink from "./OrganizationJoinLink";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import OrganizationJoinLink from "../../../components/OrganizationJoinLink";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import { StyleSheet, css } from "aphrodite";
-import theme from "../styles/theme";
+import theme from "../../../styles/theme";
 import Toggle from "material-ui/Toggle";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
-import { dataTest } from "../lib/attributes";
-import { dataSourceItem } from "./utils";
+import { dataTest } from "../../../lib/attributes";
+import { dataSourceItem } from "../../../components/utils";
 
 const styles = StyleSheet.create({
   sliderContainer: {

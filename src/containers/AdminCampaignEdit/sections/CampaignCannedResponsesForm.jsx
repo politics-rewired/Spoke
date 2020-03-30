@@ -3,17 +3,17 @@ import React from "react";
 import CampaignCannedResponseForm from "./CampaignCannedResponseForm";
 import FlatButton from "material-ui/FlatButton";
 import Form from "react-formal";
-import GSForm from "./forms/GSForm";
+import GSForm from "../../../components/forms/GSForm";
 import { List, ListItem } from "material-ui/List";
 import Divider from "material-ui/Divider";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 import IconButton from "material-ui/IconButton";
 import * as yup from "yup";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import theme from "../styles/theme";
+import theme from "../../../styles/theme";
 import { StyleSheet, css } from "aphrodite";
-import { dataTest } from "../lib/attributes";
+import { dataTest } from "../../../lib/attributes";
 
 const styles = StyleSheet.create({
   formContainer: {

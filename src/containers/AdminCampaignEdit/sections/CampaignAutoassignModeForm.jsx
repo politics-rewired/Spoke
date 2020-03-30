@@ -4,8 +4,8 @@ import * as yup from "yup";
 import Form from "react-formal";
 import Toggle from "material-ui/Toggle";
 
-import GSForm from "./forms/GSForm";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const formSchema = yup.object({
   isAutoassignEnabled: yup.boolean()

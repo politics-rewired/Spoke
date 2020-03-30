@@ -3,22 +3,22 @@ import React from "react";
 import sortBy from "lodash/sortBy";
 import Select from "react-select";
 import RaisedButton from "material-ui/RaisedButton";
-import GSForm from "../components/forms/GSForm";
+import GSForm from "../../../../components/forms/GSForm";
 import Form from "react-formal";
 import Subheader from "material-ui/Subheader";
 import Divider from "material-ui/Divider";
 import Toggle from "material-ui/Toggle";
 import { ListItem, List } from "material-ui/List";
 import FileDrop from "react-file-drop";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ErrorIcon from "material-ui/svg-icons/alert/error";
 import UploadIcon from "material-ui/svg-icons/file/file-upload";
-import theme from "../styles/theme";
+import theme from "../../../../styles/theme";
 import { StyleSheet, css } from "aphrodite";
 import * as yup from "yup";
-import { dataTest } from "../lib/attributes";
+import { dataTest } from "../../../../lib/attributes";
 
 import "./styles/file-drop.css";
 
