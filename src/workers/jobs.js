@@ -45,23 +45,6 @@ function getOptOutSubQuery(orgId) {
     : optOutsByOrgId(orgId);
 }
 
-function optOutsByOrgId(orgId) {
-  return r.knex
-    .select("cell")
-    .from("opt_out")
-    .where("organization_id", orgId);
-}
-
-function optOutsByInstance() {
-  return r.knex.select("cell").from("opt_out");
-}
-
-function getOptOutSubQuery(orgId) {
-  return !!config.OPTOUTS_SHARE_ALL_ORGS
-    ? optOutsByInstance()
-    : optOutsByOrgId(orgId);
-}
-
 export async function sendJobToAWSLambda(job) {
   // job needs to be json-serializable
   // requires a 'command' key which should map to a function in job-processes.js
