@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { StyleSheet, css } from "aphrodite";
-import theme from "../styles/theme";
+
+import theme from "../../../styles/theme";
 
 const styles = StyleSheet.create({
   header: theme.text.header,

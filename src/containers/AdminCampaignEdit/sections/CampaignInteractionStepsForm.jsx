@@ -1,5 +1,5 @@
 import React from "react";
-import type from "prop-types";
+import PropTypes from "prop-types";
 import * as yup from "yup";
 import Form from "react-formal";
 
@@ -9,11 +9,11 @@ import IconButton from "material-ui/IconButton";
 import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 
-import { makeTree } from "../lib/interaction-step-helpers";
-import { dataTest } from "../lib/attributes";
-import theme from "../styles/theme";
-import GSForm from "./forms/GSForm";
-import CampaignFormSectionHeading from "./CampaignFormSectionHeading";
+import { makeTree } from "../../../lib/interaction-step-helpers";
+import { dataTest } from "../../../lib/attributes";
+import theme from "../../../styles/theme";
+import GSForm from "../../../components/forms/GSForm";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const styles = {
   pullRight: {
@@ -391,13 +391,13 @@ class CampaignInteractionStepsForm extends React.Component {
 }
 
 CampaignInteractionStepsForm.propTypes = {
-  formValues: type.object.isRequired,
-  customFields: type.array.isRequired,
-  availableActions: type.array.isRequired,
-  ensureComplete: type.bool.isRequired,
-  saveLabel: type.string.isRequired,
-  onChange: type.func.isRequired,
-  onSubmit: type.func.isRequired
+  formValues: PropTypes.object.isRequired,
+  customFields: PropTypes.array.isRequired,
+  availableActions: PropTypes.array.isRequired,
+  ensureComplete: PropTypes.bool.isRequired,
+  saveLabel: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired
 };
 
 export default CampaignInteractionStepsForm;

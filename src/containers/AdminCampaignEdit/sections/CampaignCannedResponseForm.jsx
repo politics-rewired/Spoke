@@ -1,11 +1,13 @@
-import type from "prop-types";
+import PropTypes from "prop-types";
 import React from "react";
-import { StyleSheet, css } from "aphrodite";
 import * as yup from "yup";
-import GSForm from "./forms/GSForm";
 import Form from "react-formal";
+import { StyleSheet, css } from "aphrodite";
+
 import FlatButton from "material-ui/FlatButton";
-import { dataTest } from "../lib/attributes";
+
+import { dataTest } from "../../../lib/attributes";
+import GSForm from "../../../components/forms/GSForm";
 
 const styles = StyleSheet.create({
   buttonRow: {
@@ -71,8 +73,8 @@ class CannedResponseForm extends React.Component {
 }
 
 CannedResponseForm.propTypes = {
-  onSaveCannedResponse: type.func,
-  customFields: type.array
+  onSaveCannedResponse: PropTypes.func,
+  customFields: PropTypes.array
 };
 
 export default CannedResponseForm;
