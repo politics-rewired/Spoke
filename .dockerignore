@@ -6,7 +6,7 @@
 !/yarn.lock
 !/webpack.config.js
 !/webpack/build-config.js
-!/.babelrc
+!/babel.config.js
 !/knexfile.env.js
 !/dev-tools/babel-run
 !/dev-tools/insert-invite.js
