@@ -5,7 +5,10 @@ import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
 import { Link } from "react-router-dom";
 import UserMenu from "../containers/UserMenu";
 import theme from "../styles/theme";
+import { compose } from "react-apollo";
 import { StyleSheet, css } from "aphrodite";
+import { withOperations } from "../containers/hoc/with-operations";
+import gql from "graphql-tag";
 
 const styles = StyleSheet.create({
   container: {
@@ -42,6 +45,8 @@ const styles = StyleSheet.create({
 class TopNav extends React.Component {
   render() {
     const { backToURL, orgId, title } = this.props;
+    console.log(this.props);
+    // console.log(pros.data.organization);
     return (
       <div className={css(styles.container)}>
         <div className={css(styles.flexColumn)}>
@@ -57,7 +62,12 @@ class TopNav extends React.Component {
               </Link>
             )}
           </div>
-          <div className={css(styles.inline, styles.header)}>{title}</div>
+          <div className={css(styles.inline, styles.header)}>
+            {this.props.data && this.props.data.organization
+              ? `${this.props.data.organization.name} - `
+              : ""}
+            {title}
+          </div>
         </div>
         <div className={css(styles.userMenu)}>
           <UserMenu orgId={orgId} />
@@ -73,4 +83,22 @@ TopNav.propTypes = {
   orgId: PropTypes.string
 };
 
-export default TopNav;
+const queries = {
+  data: {
+    query: gql`
+      query getOrganizationName($id: String!) {
+        organization(id: $id) {
+          name
+        }
+      }
+    `,
+    options: ownProps => ({
+      variables: {
+        id: ownProps.orgId
+      }
+    })
+  }
+};
+
+const C = withOperations({ queries })(TopNav);
+export default C;
