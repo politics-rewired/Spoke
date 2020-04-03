@@ -46,26 +46,15 @@ const TexterDialogType = Object.freeze({
 });
 
 const styles = StyleSheet.create({
-  mobile: {
-    "@media(min-width: 425px)": {
-      display: "none !important"
-    }
+  fullSize: {
+    width: "100%",
+    height: "100%"
   },
-  desktop: {
-    "@media(max-width: 450px)": {
-      display: "none !important"
-    }
-  },
-  container: {
-    margin: 0,
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
+  flexContainer: {
     display: "flex",
     flexDirection: "column",
-    height: "100%"
+    height: "100%",
+    margin: 0
   },
   overlay: {
     margin: 0,
@@ -81,17 +70,24 @@ const styles = StyleSheet.create({
     color: "black",
     zIndex: 1000000
   },
-  topFixedSection: {
+  fixedFlexSection: {
     flex: "0 0 auto"
   },
-  middleScrollingSection: {
-    flex: "1 1 auto",
+  dynamicFlexSection: {
+    flex: "1 1 0",
+    position: "relative"
+  },
+  verticalScrollingSection: {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    bottom: "0",
+    right: "0",
     overflowY: "scroll",
     overflow: "-moz-scrollbars-vertical"
   },
-  bottomFixedSection: {
+  messageComposition: {
     borderTop: `1px solid ${grey100}`,
-    flex: "0 0 auto",
     marginBottom: "none"
   },
   messageField: {
@@ -180,10 +176,10 @@ export class AssignmentTexterContact extends React.Component {
       }, 1500);
     }
 
-    this.refs.messageScrollContainer.scrollTo(
-      0,
-      this.refs.messageScrollContainer.scrollHeight
-    );
+    const scroller = this.refs.messageScrollContainer;
+    if (scroller) {
+      scroller.scrollTo(0, scroller.scrollHeight);
+    }
 
     document.body.addEventListener("keyup", this.onEnterUp);
   }
@@ -556,30 +552,20 @@ export class AssignmentTexterContact extends React.Component {
 
   renderSurveySection() {
     const { contact } = this.props;
-    const { messages } = contact;
-
     const { questionResponses } = this.state;
 
     const availableInteractionSteps = this.getAvailableInteractionSteps(
       questionResponses
     );
 
-    return messages.length === 0 ? (
-      <Empty
-        title={"This is your first message to " + contact.firstName}
-        icon={<CreateIcon color="rgb(83, 180, 119)" />}
-        hideMobile
+    return (
+      <AssignmentTexterSurveys
+        contact={contact}
+        interactionSteps={availableInteractionSteps}
+        onQuestionResponseChange={this.handleQuestionResponseChange}
+        currentInteractionStep={this.state.currentInteractionStep}
+        questionResponses={questionResponses}
       />
-    ) : (
-      <div>
-        <AssignmentTexterSurveys
-          contact={contact}
-          interactionSteps={availableInteractionSteps}
-          onQuestionResponseChange={this.handleQuestionResponseChange}
-          currentInteractionStep={this.state.currentInteractionStep}
-          questionResponses={questionResponses}
-        />
-      </div>
     );
   }
 
@@ -786,7 +772,7 @@ export class AssignmentTexterContact extends React.Component {
 
     return (
       <div>
-        {this.renderSurveySection()}
+        {contact.messages.length > 0 && this.renderSurveySection()}
         {dialogType === TexterDialogType.None && (
           <div>
             <div className={css(styles.messageField)}>
@@ -844,29 +830,38 @@ export class AssignmentTexterContact extends React.Component {
         : "";
 
     return (
-      <div>
+      <div className={css(styles.fullSize)}>
         {disabled && (
           <div className={css(styles.overlay)}>
             <CircularProgress size={24} style={{ marginRight: "10px" }} />
             {this.state.disabledText}
           </div>
         )}
-        <div className={css(styles.container)} style={{ backgroundColor }}>
-          <div className={css(styles.topFixedSection)}>
+        <div className={css(styles.flexContainer)}>
+          <div className={css(styles.fixedFlexSection)}>
             <TopFixedSection
               campaign={campaign}
               contact={contact}
               onExitTexter={onExitTexter}
             />
           </div>
-          <div
-            {...dataTest("messageList")}
-            ref="messageScrollContainer"
-            className={css(styles.middleScrollingSection)}
-          >
-            <MessageList contact={contact} messages={contact.messages} />
+          <div className={css(styles.dynamicFlexSection)}>
+            {contact.messages.length > 0 ? (
+              <div
+                ref="messageScrollContainer"
+                className={css(styles.verticalScrollingSection)}
+                {...dataTest("messageList")}
+              >
+                <MessageList contact={contact} messages={contact.messages} />
+              </div>
+            ) : (
+              <Empty
+                title={`This is your first message to ${contact.firstName}`}
+                icon={<CreateIcon color="rgb(83, 180, 119)" />}
+              />
+            )}
           </div>
-          <div className={css(styles.bottomFixedSection)}>
+          <div className={css(styles.fixedFlexSection, css.messageComposition)}>
             {this.renderBottomFixedSection()}
           </div>
         </div>
