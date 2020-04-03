@@ -5,7 +5,6 @@ import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
 import { Link } from "react-router-dom";
 import UserMenu from "../containers/UserMenu";
 import theme from "../styles/theme";
-import { compose } from "react-apollo";
 import { StyleSheet, css } from "aphrodite";
 import { withOperations } from "../containers/hoc/with-operations";
 import gql from "graphql-tag";
@@ -45,8 +44,6 @@ const styles = StyleSheet.create({
 class TopNav extends React.Component {
   render() {
     const { backToURL, orgId, title } = this.props;
-    console.log(this.props);
-    // console.log(pros.data.organization);
     return (
       <div className={css(styles.container)}>
         <div className={css(styles.flexColumn)}>
@@ -88,6 +85,7 @@ const queries = {
     query: gql`
       query getOrganizationName($id: String!) {
         organization(id: $id) {
+          id
           name
         }
       }
@@ -100,5 +98,4 @@ const queries = {
   }
 };
 
-const C = withOperations({ queries })(TopNav);
-export default C;
+export default withOperations({ queries })(TopNav);
