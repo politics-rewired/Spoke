@@ -279,7 +279,7 @@ const TexterTodoRoutes = props => {
         exact={true}
         main={TexterTodoList}
         topNav={({ match }) => (
-          <TopNav title="Spoke Texting" orgId={match.params.organizationId} />
+          <TopNav title="Texting" orgId={match.params.organizationId} />
         )}
       />
       <Route

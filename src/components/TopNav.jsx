@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import UserMenu from "../containers/UserMenu";
 import theme from "../styles/theme";
 import { StyleSheet, css } from "aphrodite";
+import { withOperations } from "../containers/hoc/with-operations";
+import gql from "graphql-tag";
 
 const styles = StyleSheet.create({
   container: {
@@ -57,7 +59,12 @@ class TopNav extends React.Component {
               </Link>
             )}
           </div>
-          <div className={css(styles.inline, styles.header)}>{title}</div>
+          <div className={css(styles.inline, styles.header)}>
+            {this.props.data && this.props.data.organization
+              ? `${this.props.data.organization.name} - `
+              : ""}
+            {title}
+          </div>
         </div>
         <div className={css(styles.userMenu)}>
           <UserMenu orgId={orgId} />
@@ -73,4 +80,22 @@ TopNav.propTypes = {
   orgId: PropTypes.string
 };
 
-export default TopNav;
+const queries = {
+  data: {
+    query: gql`
+      query getOrganizationName($id: String!) {
+        organization(id: $id) {
+          id
+          name
+        }
+      }
+    `,
+    options: ownProps => ({
+      variables: {
+        id: ownProps.orgId
+      }
+    })
+  }
+};
+
+export default withOperations({ queries })(TopNav);
