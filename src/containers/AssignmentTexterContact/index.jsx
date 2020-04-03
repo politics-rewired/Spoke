@@ -74,9 +74,15 @@ const styles = StyleSheet.create({
     flex: "0 0 auto"
   },
   dynamicFlexSection: {
-    flex: "1 1 auto"
+    flex: "1 1 0",
+    position: "relative"
   },
   verticalScrollingSection: {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    bottom: "0",
+    right: "0",
     overflowY: "scroll",
     overflow: "-moz-scrollbars-vertical"
   },
