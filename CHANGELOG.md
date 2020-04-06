@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/politics-rewired/spoke/compare/v1.7.1...v1.8.0) (2020-04-06)
+
+
+### Features
+
+* add organization to topnav ([#622](https://github.com/politics-rewired/spoke/issues/622)) ([e77a041](https://github.com/politics-rewired/spoke/commit/e77a041ffd8596f5b4c77b83b05c02fd5f23da26))
+
+
+### Bug Fixes
+
+* export config as commonjs module to support knex cli ([1edba6b](https://github.com/politics-rewired/spoke/commit/1edba6bcee207f11edf8fbd0369377b0445d43b0))
+* **ux:** make pencil icon size dynamic (take 2) ([#583](https://github.com/politics-rewired/spoke/issues/583)) ([d85d648](https://github.com/politics-rewired/spoke/commit/d85d648ff8583569d1a2c02a2a73fb3982413648))
+
 ### [1.7.1](https://github.com/politics-rewired/spoke/compare/v1.7.0...v1.7.1) (2020-03-30)
 
 ## [1.7.0](https://github.com/politics-rewired/spoke/compare/v1.6.1...v1.7.0) (2020-03-30)
