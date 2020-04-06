@@ -699,11 +699,13 @@ const validators = {
   })
 };
 
-export const config = envalid.cleanEnv(process.env, validators, {
+const config = envalid.cleanEnv(process.env, validators, {
   strict: true
 });
 
-export const clientConfig = pickBy(
+const clientConfig = pickBy(
   Object.assign({}, config),
   (value, key) => validators[key].isClient
 );
+
+module.exports = { config, clientConfig };
