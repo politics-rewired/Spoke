@@ -4,9 +4,7 @@ import * as yup from "yup";
 import Form from "react-formal";
 import { StyleSheet, css } from "aphrodite";
 
-import { List, ListItem } from "material-ui/List";
 import FlatButton from "material-ui/FlatButton";
-import Divider from "material-ui/Divider";
 import IconButton from "material-ui/IconButton";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
@@ -14,6 +12,7 @@ import DeleteIcon from "material-ui/svg-icons/action/delete";
 import { dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 import GSForm from "../../../components/forms/GSForm";
+import { LargeList, LargeListItem } from "../../../components/LargeList";
 import CampaignCannedResponseForm from "./CampaignCannedResponseForm";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
@@ -87,9 +86,8 @@ export default class CampaignCannedResponsesForm extends React.Component {
 
   listItems(cannedResponses) {
     const listItems = cannedResponses.map(response => (
-      <ListItem
+      <LargeListItem
         {...dataTest("cannedResponse")}
-        value={response.text}
         key={response.id}
         primaryText={response.title}
         secondaryText={response.text}
@@ -113,7 +111,6 @@ export default class CampaignCannedResponsesForm extends React.Component {
             <DeleteIcon />
           </IconButton>
         }
-        secondaryTextLines={2}
       />
     ));
     return listItems;
@@ -124,10 +121,7 @@ export default class CampaignCannedResponsesForm extends React.Component {
     const cannedResponses = formValues.cannedResponses;
     const list =
       cannedResponses.length === 0 ? null : (
-        <List>
-          {this.listItems(cannedResponses)}
-          <Divider />
-        </List>
+        <LargeList>{this.listItems(cannedResponses)}</LargeList>
       );
 
     return (
@@ -142,6 +136,7 @@ export default class CampaignCannedResponsesForm extends React.Component {
           subtitle="Save some scripts for your texters to use to answer additional FAQs that may come up outside of the survey questions and scripts you already set up."
         />
         {list}
+        <hr />
         {this.showAddForm()}
         <Form.Button
           type="submit"
