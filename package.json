@@ -21,7 +21,7 @@
     "build": "run-s build:*",
     "build:clean": "rm -rf $OUTPUT_DIR",
     "build:client": "webpack --mode production",
-    "build:server": "babel -d ./build/src --source-maps --copy-files ./src",
+    "build:server": "babel -d ./build/src --source-maps --copy-files --extensions .ts,.js ./src",
     "build:tools": "babel -d ./build/tools ./dev-tools",
     "start": "node ./build/src/server",
     "knex": "knex --knexfile ./knexfile.env.js",
