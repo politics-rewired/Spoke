@@ -28,6 +28,9 @@ const CAPITALIZE_FIELDS = [
   "texterLastName"
 ];
 
+// Special first names that should not be capitalized
+const LOWERCASE_FIRST_NAMES = ["friend", "there"];
+
 // TODO: This will include zipCode even if you ddin't upload it
 export const allScriptFields = customFields =>
   TOP_LEVEL_UPLOAD_FIELDS.concat(TEXTER_SCRIPT_FIELDS).concat(customFields);
@@ -50,7 +53,11 @@ const getScriptFieldValue = (contact, texter, fieldName) => {
     result = customFieldNames[fieldName];
   }
 
-  if (CAPITALIZE_FIELDS.indexOf(fieldName) >= 0) {
+  const isCapitalizedField = CAPITALIZE_FIELDS.includes(fieldName);
+  const isSpecialFirstName =
+    fieldName === "firstName" &&
+    LOWERCASE_FIRST_NAMES.includes(result.toLowerCase());
+  if (isCapitalizedField && !isSpecialFirstName) {
     result = capitalize(result);
   }
 
