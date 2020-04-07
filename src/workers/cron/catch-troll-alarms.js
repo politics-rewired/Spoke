@@ -14,7 +14,7 @@ const main = async () => {
   const { rows: newAlarms } = await db.raw(`
     with
       trigger_query as (
-        select to_tsquery(array_to_string(array_agg(token), ' | ')) as query
+        select to_tsquery(string_agg($$token$$, ' | ')) as query
         from troll_trigger
       ),
       trigger_matches as (
