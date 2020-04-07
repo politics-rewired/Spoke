@@ -38,6 +38,7 @@ RUN yarn install --production
 COPY --from=builder /usr/Spoke/build ./build
 
 ARG SPOKE_VERSION="no-version"
+ARG PHONE_NUMBER_COUNTRY=US
 ENV NODE_ENV="production" \
   NODE_OPTIONS=--max_old_space_size=2048 \
   PORT=3000 \
