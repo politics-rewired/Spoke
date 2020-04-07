@@ -57,6 +57,7 @@
   "dependencies": {
     "@aoberoi/passport-slack": "^1.0.5",
     "@babel/runtime": "^7.9.2",
+    "@babel/runtime-corejs3": "^7.9.2",
     "@godaddy/terminus": "^4.3.1",
     "@google-cloud/storage": "^3.0.4",
     "aphrodite": "^0.4.1",
@@ -159,7 +160,6 @@
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-react": "^7.9.4",
     "@babel/preset-typescript": "^7.9.0",
-    "@babel/runtime-corejs3": "^7.9.2",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@types/react": "^16.9.27",
