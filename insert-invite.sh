@@ -1,11 +1,17 @@
 #!/bin/bash
 
+eval $(cat .env | grep DEFAULT_SERVICE)
+export SERVICE_TYPE=$DEFAULT_SERVICE
+
 eval $(cat .env | grep TWILIO_MESSAGE_SERVICE_SID)
 export MESSAGING_SERVICE_SID=$TWILIO_MESSAGE_SERVICE_SID
+
 eval $(cat .env | grep TWILIO_AUTH_TOKEN)
 export UNENCRYPTED_AUTH_TOKEN=$TWILIO_AUTH_TOKEN
+
 eval $(cat .env | grep TWILIO_API_KEY)
 export ACCOUNT_SID=$TWILIO_API_KEY
+
 export INVITE_NAME=$1
 
 echo "SERVICE_TYPE: $SERVICE_TYPE"
