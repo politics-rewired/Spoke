@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.2](https://github.com/politics-rewired/spoke/compare/v1.8.1...v1.8.2) (2020-04-08)
+
+
+### Bug Fixes
+
+* **trollbot:** escape trigger tokens ([#627](https://github.com/politics-rewired/spoke/issues/627)) ([1f9ffc1](https://github.com/politics-rewired/spoke/commit/1f9ffc11e9de4fce335a47414498d833e87b6a0e))
+* show all canned response text ([#623](https://github.com/politics-rewired/spoke/issues/623)) ([f347345](https://github.com/politics-rewired/spoke/commit/f3473454cf99f4ac576462702e5a2e6ddbafe66b))
+
 ### [1.8.1](https://github.com/politics-rewired/spoke/compare/v1.8.0...v1.8.1) (2020-04-07)
 
 ## [1.8.0](https://github.com/politics-rewired/spoke/compare/v1.7.1...v1.8.0) (2020-04-06)
