@@ -11,6 +11,7 @@ import WarningIcon from "material-ui/svg-icons/alert/warning";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 
+import { CampaignReadinessType } from "../types";
 import { withAuthzContext } from "../../../components/AuthzProvider";
 import { loadData } from "../../hoc/with-operations";
 import { dataTest, camelCase } from "../../../lib/attributes";
@@ -35,6 +36,7 @@ export interface WrapperOuterProps {
 
 export interface SectionOptions {
   title: string;
+  readinessName: keyof CampaignReadinessType;
   jobQueueNames: string[];
   expandAfterCampaignStarts: boolean;
   expandableBySuperVolunteers: boolean;
@@ -53,6 +55,7 @@ interface WrapperHocProps {
         status: number;
         resultMessage: string;
       }[];
+      readiness: CampaignReadinessType;
     };
   };
   mutations: {
@@ -63,9 +66,7 @@ interface WrapperHocProps {
 interface WrapperInnerProps
   extends WrapperOuterProps,
     WrapperHocProps,
-    SectionOptions {
-  [key: string]: any;
-}
+    SectionOptions {}
 
 const inlineStyles = {
   card: {
@@ -83,6 +84,7 @@ const inlineStyles = {
 const SectionWrapper: React.SFC<WrapperInnerProps> = props => {
   const {
     title,
+    readinessName,
     active,
     jobQueueNames,
     expandAfterCampaignStarts,
@@ -95,11 +97,8 @@ const SectionWrapper: React.SFC<WrapperInnerProps> = props => {
     data,
     mutations: { deleteJob }
   } = props;
-  const { isStarted, pendingJobs } = data.campaign;
-
-  // TODO: figure out how to do this. Probably fetch all CampaignStatus fields
-  // and then accept keyof CampaignStatusType as option
-  const sectionIsDone = false;
+  const { isStarted, pendingJobs, readiness } = data.campaign;
+  const sectionIsDone = readiness[readinessName];
 
   // Save state
   const pendingJob = pendingJobs.find(job =>
@@ -212,6 +211,10 @@ const queries = {
             jobType
             status
             resultMessage
+          }
+          readiness {
+            id
+            basics
           }
         }
       }

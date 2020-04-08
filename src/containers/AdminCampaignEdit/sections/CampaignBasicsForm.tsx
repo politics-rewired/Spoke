@@ -216,6 +216,10 @@ const mutations = {
           logoImageUrl
           primaryColor
           isStarted
+          readiness {
+            id
+            basics
+          }
         }
       }
     `,
@@ -233,6 +237,7 @@ export default compose<BasicsInnerProps, BasicsOuterProps>(
   }),
   asSection({
     title: "Basics",
+    readinessName: "basics",
     jobQueueNames: [],
     expandAfterCampaignStarts: true,
     expandableBySuperVolunteers: true
