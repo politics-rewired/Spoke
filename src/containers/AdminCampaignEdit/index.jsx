@@ -498,6 +498,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Autoassign Mode",
         content: CampaignAutoassignModeForm,
+        isStandalone: true,
         keys: ["isAutoassignEnabled"],
         checkCompleted: () => true,
         blocksStarting: true,
