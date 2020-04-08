@@ -232,8 +232,7 @@ const queries = {
       variables: {
         campaignId: ownProps.campaignId
       },
-      fetchPolicy: "cache-and-network",
-      pollInterval: 60000
+      pollInterval: 60 * 1000
     })
   }
 };
