@@ -135,7 +135,7 @@
     "react-router-dom": "^5.1.2",
     "react-select": "^2.0.0",
     "react-tap-event-plugin": "^2.0.0",
-    "recompose": "^0.30.0",
+    "recompose": "^0.24.0",
     "redis": "^2.8.0",
     "request": "^2.81.0",
     "rethink-knex-adapter": "^0.4.17",
@@ -162,9 +162,13 @@
     "@babel/preset-typescript": "^7.9.0",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
+    "@types/lodash": "^4.14.149",
     "@types/material-ui": "^0.21.7",
-    "@types/react": "^16.9.27",
-    "@types/react-dom": "^16.9.5",
+    "@types/moment": "^2.13.0",
+    "@types/react": "^15.6.28",
+    "@types/react-dom": "^15.5.11",
+    "@types/recompose": "^0.24.0",
+    "@types/yup": "^0.26.34",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^23.4.2",
@@ -205,6 +209,9 @@
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.8.0",
     "webpack-manifest-plugin": "^2.0.4"
+  },
+  "resolutions": {
+    "@types/react": "^15.6.28"
   },
   "config": {
     "commitizen": {
