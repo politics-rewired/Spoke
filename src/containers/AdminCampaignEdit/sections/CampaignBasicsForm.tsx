@@ -19,12 +19,6 @@ import {
   RequiredComponentProps
 } from "../components/SectionWrapper";
 
-export const SECTION_OPTIONS = {
-  blocksStarting: true,
-  expandAfterCampaignStarts: true,
-  expandableBySuperVolunteers: true
-};
-
 interface BasicsValues {
   title?: string;
   description?: string;
@@ -34,12 +28,9 @@ interface BasicsValues {
   introHtml?: string;
 }
 
-interface BasicsOuterProps extends RequiredComponentProps {}
-
 interface BasicsHocProps {
-  adminPerms: boolean;
   mutations: {
-    editBasics(payload: BasicsValues): ApolloQueryResult<any>;
+    editCampaign(payload: BasicsValues): ApolloQueryResult<any>;
   };
   data: {
     campaign: BasicsValues & {
@@ -49,7 +40,7 @@ interface BasicsHocProps {
   };
 }
 
-interface BasicsInnerProps extends BasicsOuterProps, BasicsHocProps {}
+interface BasicsInnerProps extends RequiredComponentProps, BasicsHocProps {}
 
 interface BasicsState {
   pendingChanges: BasicsValues;
@@ -93,11 +84,11 @@ class CampaignBasicsForm extends React.Component<
 
   handleSubmit = async () => {
     const { pendingChanges } = this.state;
-    const { editBasics } = this.props.mutations;
+    const { editCampaign } = this.props.mutations;
 
     this.setState({ isWorking: true });
     try {
-      const response = await editBasics(pendingChanges);
+      const response = await editCampaign(pendingChanges);
       if (response.errors) throw response.errors;
       this.setState({ pendingChanges: {} });
     } catch (err) {
@@ -182,7 +173,7 @@ class CampaignBasicsForm extends React.Component<
 const queries = {
   data: {
     query: gql`
-      query getCampaign($campaignId: String!) {
+      query getCampaignBasics($campaignId: String!) {
         campaign(id: $campaignId) {
           id
           title
@@ -206,7 +197,10 @@ const queries = {
 const mutations = {
   editCampaign: (ownProps: BasicsInnerProps) => (payload: BasicsValues) => ({
     mutation: gql`
-      mutation editCampaign($campaignId: String!, $payload: CampaignInput!) {
+      mutation editCampaignBasics(
+        $campaignId: String!
+        $payload: CampaignInput!
+      ) {
         editCampaign(id: $campaignId, campaign: $payload) {
           id
           title
@@ -230,7 +224,7 @@ const mutations = {
   })
 };
 
-export default compose<BasicsInnerProps, BasicsOuterProps>(
+export default compose<BasicsInnerProps, RequiredComponentProps>(
   loadData({
     queries,
     mutations
