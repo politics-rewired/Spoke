@@ -32,6 +32,7 @@ export interface WrapperOuterProps {
   campaignId: string;
   active: boolean;
   onExpandChange(expanded: boolean): void;
+  onError(message: string): void;
 }
 
 export interface SectionOptions {
@@ -157,12 +158,20 @@ const SectionWrapper: React.SFC<WrapperInnerProps> = props => {
   const handleDiscardJob = async () => {
     if (!jobId) return;
 
+    const didConfirm = confirm(
+      "Discarding the job will not necessarily stop it from running." +
+        " However, if the job failed, discarding will let you try again." +
+        " Are you sure you want to discard the job?"
+    );
+
+    if (!didConfirm) return;
+
     try {
       const response = await deleteJob(jobId);
       if (response.errors)
         throw new Error(response.errors.map(err => `${err}`).join("\n"));
     } catch (err) {
-      console.error(err.message);
+      props.onError(err.message);
     }
   };
 
@@ -264,12 +273,13 @@ export const asSection = <T extends RequiredComponentProps>(
   options: SectionOptions
 ) => (Component: React.ComponentType<T>) => {
   return (props: T & WrapperOuterProps) => {
-    const { campaignId, active, onExpandChange } = props;
+    const { campaignId, active, onExpandChange, onError } = props;
     return (
       <SectionWrapperComplete
         campaignId={campaignId}
         active={active}
         onExpandChange={onExpandChange}
+        onError={onError}
         {...options}
       >
         <Component {...props} />
