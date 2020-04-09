@@ -58,7 +58,6 @@ that goal. See [`HOWTO_MIGRATE_FROM_MOVEON_MAIN.md`](./docs/HOWTO_MIGRATE_FROM_M
    DEFAULT_SERVICE=fakeservice
    ```
 
-   
 8. Decide if you want to use auth0(google auth, ect) or the local authentication database(quicker setup). 
 
    **TO USE THE LOCAL DATABASE:**
@@ -136,12 +135,13 @@ that goal. See [`HOWTO_MIGRATE_FROM_MOVEON_MAIN.md`](./docs/HOWTO_MIGRATE_FROM_M
       If on Linux, a script called `./insert-invite.sh` can be used to create the invite. It is used in the following manner:
       `./insert-invite.sh AMadeUpInviteCode`
 
-      
+
+​      
 
       You can then visit https://localhost:3000/invite/AMadeUpInviteCode or http://localhost:3000/invite/AMadeUpInviteCode to claim that invite and create your org.
-
+    
       **NOTE: If you already have an organization set up and want to use Twilio**, it may be easier just to insert the messaging service records manually:
-
+    
       ```
       	# Make sure that SESSION_SECRET is set to your production value in .env before:
       	$ node ./dev-tools/symmetric-encrypt.js SecretTwilioAuthToken
@@ -154,7 +154,8 @@ that goal. See [`HOWTO_MIGRATE_FROM_MOVEON_MAIN.md`](./docs/HOWTO_MIGRATE_FROM_M
       	values (:my_existing_org_id, 'twilio', 'MSTwilioMessagingServiceSID', 'ACTwilioAccountSID', 'OutputFromSymmetricEncrypt');
       ```
 
-      
+
+​      
 
 14. You should then be prompted to create an organization. Create it.
 
@@ -170,6 +171,12 @@ To use Twilio, you will need to set `DEFAULT_SERVICE` to `twilio` in your `.env`
 `DEFAULT_SERVICE=twilio`
 
 Twilio provides test credentials that will not charge your account as described in their [documentation](https://www.twilio.com/docs/iam/test-credentials). You may use either your test credentials or your live keys by following the instructions [here](./docs/HOWTO_INTEGRATE_TWILIO.md).
+
+**Note:** Secure connections from Twilio require that your endpoint support SSLv3. Most default SSL configs only include TLS. If you followed the tutorials above for setting up a reverse proxy, you must enable SSLv3, so this needs to be added to the ssl_protocols line in the nginx config above, like so:
+
+```
+ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+```
 
 ### Migrations
 
