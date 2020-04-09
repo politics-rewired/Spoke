@@ -224,6 +224,7 @@ const queries = {
           readiness {
             id
             basics
+            textingHours
             autoassign
           }
         }

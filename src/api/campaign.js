@@ -23,6 +23,7 @@ export const schema = `
   type CampaignReadiness {
     id: ID!
     basics: Boolean!
+    textingHours: Boolean!
     autoassign: Boolean!
   }
 
