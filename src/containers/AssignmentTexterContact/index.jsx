@@ -74,7 +74,8 @@ const styles = StyleSheet.create({
     flex: "0 0 auto"
   },
   dynamicFlexSection: {
-    flex: "1 1 0",
+    flex: "1 1 auto",
+    height: "0px",
     display: "flex"
   },
   verticalScrollingSection: {
