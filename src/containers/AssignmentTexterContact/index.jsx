@@ -75,14 +75,10 @@ const styles = StyleSheet.create({
   },
   dynamicFlexSection: {
     flex: "1 1 0",
-    position: "relative"
+    display: "flex"
   },
   verticalScrollingSection: {
-    position: "absolute",
-    top: "0",
-    left: "0",
-    bottom: "0",
-    right: "0",
+    flex: "1 1 auto",
     overflowY: "scroll",
     overflow: "-moz-scrollbars-vertical"
   },
@@ -858,6 +854,7 @@ export class AssignmentTexterContact extends React.Component {
               <Empty
                 title={`This is your first message to ${contact.firstName}`}
                 icon={<CreateIcon color="rgb(83, 180, 119)" />}
+                style={{ flex: "1 1 auto" }}
               />
             )}
           </div>

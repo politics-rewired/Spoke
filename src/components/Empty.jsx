@@ -44,8 +44,8 @@ const styles = StyleSheet.create({
   }
 });
 
-const Empty = ({ title, icon, content }) => (
-  <div className={css(styles.container)} {...dataTest("empty")}>
+const Empty = ({ title, icon, content, style = {} }) => (
+  <div className={css(styles.container)} style={style} {...dataTest("empty")}>
     <div className={css(styles.paddingBlock)} />
     <div className={css(styles.iconWrapper)}>
       {React.cloneElement(icon, { style: inlineStyles.icon })}
