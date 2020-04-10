@@ -175,15 +175,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     isAutoassignEnabled,
     timezone
   } = campaign;
-  // some changes require ADMIN and we recheck below
-  const organizationId =
-    campaign.organizationId || origCampaignRecord.organization_id;
-  await accessRequired(
-    user,
-    organizationId,
-    "SUPERVOLUNTEER",
-    /* superadmin*/ true
-  );
+  const organizationId = origCampaignRecord.organization_id;
   const campaignUpdates = {
     id,
     title,
