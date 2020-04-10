@@ -1,3 +1,13 @@
+### Dependency Cacher
+### -------------------------
+FROM endeveit/docker-jq:latest as deps
+
+# To prevent cache invalidation from changes in fields other than dependencies
+# https://stackoverflow.com/a/59606373
+COPY package.json /tmp
+RUN jq '{ dependencies, devDependencies }' < /tmp/package.json > /tmp/deps.json
+
+
 ### Fat Build
 ### -------------------------
 FROM node:12.16.1-alpine AS builder
@@ -5,7 +15,8 @@ FROM node:12.16.1-alpine AS builder
 WORKDIR /usr/Spoke
 
 # Cache dependencies
-COPY package.json yarn.lock ./
+COPY --from=deps /tmp/deps.json ./package.json
+COPY yarn.lock ./
 RUN yarn install
 
 # Configure build environment
@@ -31,7 +42,8 @@ FROM node:12.16.1-alpine
 WORKDIR /usr/Spoke
 
 # Install and cache production dependencies
-COPY package.json yarn.lock ./
+COPY --from=deps /tmp/deps.json ./package.json
+COPY yarn.lock ./
 RUN yarn install --production
 
 # Copy only the built source
