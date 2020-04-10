@@ -36,7 +36,10 @@ export const getEscalationUserId = async organizationId => {
 export const resolvers = {
   Organization: {
     ...sqlResolvers(["id", "name"]),
-    settings: organization => organization,
+    settings: async (organization, _, { user }) => {
+      await accessRequired(user, organization.id, "OWNER");
+      return organization;
+    },
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       return getCampaigns(organization.id, cursor, campaignsFilter);
