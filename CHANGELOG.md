@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.3](https://github.com/politics-rewired/spoke/compare/v1.8.2...v1.8.3) (2020-04-10)
+
+
+### Bug Fixes
+
+* fix flexbox height calculation in Safari ([#630](https://github.com/politics-rewired/spoke/issues/630)) ([83cf4a2](https://github.com/politics-rewired/spoke/commit/83cf4a2dd8cb53ebee97b2cd88c4295d0bba798b))
+
 ### [1.8.2](https://github.com/politics-rewired/spoke/compare/v1.8.1...v1.8.2) (2020-04-08)
 
 
