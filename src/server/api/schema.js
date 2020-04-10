@@ -1270,15 +1270,7 @@ const rootMutations = {
       // to fail – this fixes it by ensuring its a proper object
       const campaign = Object.assign({}, campaignEdits);
 
-      if (campaign.organizationId) {
-        await accessRequired(user, campaign.organizationId, "ADMIN");
-      } else {
-        await accessRequired(
-          user,
-          origCampaign.organization_id,
-          "SUPERVOLUNTEER"
-        );
-      }
+      await accessRequired(user, origCampaign.organization_id, "ADMIN");
 
       memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
