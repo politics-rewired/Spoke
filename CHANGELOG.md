@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.4](https://github.com/politics-rewired/spoke/compare/v1.8.3...v1.8.4) (2020-04-10)
+
+
+### Bug Fixes
+
+* prevent conversation overflow ([7098c25](https://github.com/politics-rewired/spoke/commit/7098c258d200bf6b8004d252980c41449571ccf7))
+
 ### [1.8.3](https://github.com/politics-rewired/spoke/compare/v1.8.2...v1.8.3) (2020-04-10)
 
 
