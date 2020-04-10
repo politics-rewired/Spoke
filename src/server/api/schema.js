@@ -175,15 +175,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     isAutoassignEnabled,
     timezone
   } = campaign;
-  // some changes require ADMIN and we recheck below
-  const organizationId =
-    campaign.organizationId || origCampaignRecord.organization_id;
-  await accessRequired(
-    user,
-    organizationId,
-    "SUPERVOLUNTEER",
-    /* superadmin*/ true
-  );
+  const organizationId = origCampaignRecord.organization_id;
   const campaignUpdates = {
     id,
     title,
@@ -1270,15 +1262,7 @@ const rootMutations = {
       // to fail – this fixes it by ensuring its a proper object
       const campaign = Object.assign({}, campaignEdits);
 
-      if (campaign.organizationId) {
-        await accessRequired(user, campaign.organizationId, "ADMIN");
-      } else {
-        await accessRequired(
-          user,
-          origCampaign.organization_id,
-          "SUPERVOLUNTEER"
-        );
-      }
+      await accessRequired(user, origCampaign.organization_id, "ADMIN");
 
       memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
