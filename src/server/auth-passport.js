@@ -17,6 +17,8 @@ const {
   SLACK_TEAM_NAME,
   SLACK_CLIENT_ID,
   SLACK_CLIENT_SECRET,
+  SLACK_SCOPES,
+  SLACK_CONVERT_EXISTING,
   AUTH0_DOMAIN,
   AUTH0_CLIENT_ID,
   AUTH0_CLIENT_SECRET
@@ -80,7 +82,7 @@ function setupSlackPassport() {
     if (!auth0Id) {
       throw new Error("Null user in login callback");
     }
-    const existingUser = await r
+    let existingUser = await r
       .reader("user")
       .where({ auth0_id: auth0Id })
       .first()
@@ -88,6 +90,18 @@ function setupSlackPassport() {
         logger.error("Slack login error: could not find existing user: ", err);
         throw err;
       });
+
+    if (!existingUser && SLACK_CONVERT_EXISTING) {
+      const [existingEmailUser] = await r
+        .knex("user")
+        .update({ auth0_id: user.id })
+        .where({ email: user.email })
+        .returning("*");
+
+      if (existingEmailUser) {
+        existingUser = existingEmailUser;
+      }
+    }
 
     if (!existingUser) {
       let first_name, last_name;
@@ -130,7 +144,7 @@ function setupSlackPassport() {
   app.get(
     "/login",
     passport.authenticate("slack", {
-      scope: ["identity.basic", "identity.email", "identity.team"]
+      scope: SLACK_SCOPES.split(",")
     })
   );
 
