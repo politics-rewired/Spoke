@@ -61,6 +61,8 @@ ENV NODE_ENV="production" \
   PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY \
   SPOKE_VERSION=$SPOKE_VERSION
 
+COPY package.json ./
+
 # Run the production compiled code
 EXPOSE 3000
 CMD [ "node", "--no-deprecation", "./build/src/server" ]
