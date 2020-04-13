@@ -103,6 +103,7 @@ const rootSchema = `
     textingHoursEnd: Int
     isAutoassignEnabled: Boolean
     timezone: String
+    repliesStaleAt: Int
   }
 
   input MessageInput {
