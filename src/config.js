@@ -566,6 +566,10 @@ const validators = {
     desc: "The name of the Slack team to use for sign-in.",
     default: undefined
   }),
+  SLACK_TEAM_ID: str({
+    desc: "The ID of the Slack team to use for sign-in.",
+    default: undefined
+  }),
   SLACK_CLIENT_ID: str({
     desc: "The Slack client ID to use for sign-in.",
     default: undefined,
