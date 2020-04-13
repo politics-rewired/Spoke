@@ -5,7 +5,7 @@ FROM endeveit/docker-jq:latest as deps
 # To prevent cache invalidation from changes in fields other than dependencies
 # https://stackoverflow.com/a/59606373
 COPY package.json /tmp
-RUN jq '{ dependencies, devDependencies }' < /tmp/package.json > /tmp/deps.json
+RUN jq '{ dependencies, devDependencies, resolutions }' < /tmp/package.json > /tmp/deps.json
 
 
 ### Fat Build
