@@ -172,7 +172,8 @@ export const resolvers = {
     basics: campaign =>
       campaign.title !== "" &&
       campaign.description !== "" &&
-      campaign.due_by !== null
+      campaign.due_by !== null,
+    autoassign: () => true
   },
   CampaignsReturn: {
     __resolveType(obj, context, _) {
