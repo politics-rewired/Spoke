@@ -129,9 +129,9 @@ class CampaignTextingHoursForm extends React.Component<
     } finally {
       this.setState({
         isWorking: false,
-        timezoneSearchText: "",
-        textingHoursStartSearchText: "",
-        textingHoursEndSearchText: ""
+        timezoneSearchText: undefined,
+        textingHoursStartSearchText: undefined,
+        textingHoursEndSearchText: undefined
       });
     }
   };
@@ -151,26 +151,30 @@ class CampaignTextingHoursForm extends React.Component<
       dataSource={choices}
       filter={Autocomplete.caseInsensitiveFilter}
       maxSearchResults={4}
-      searchText={this.state[stateName] || value || ""}
+      searchText={
+        this.state[stateName] !== undefined
+          ? this.state[stateName]
+          : value || ""
+      }
       hintText={hint}
       floatingLabelText={label}
       onUpdateInput={(text: string) => {
         this.setState(updateState(stateName, text));
       }}
-      onNewRequest={(selection: string, index: number) => {
+      onNewRequest={(selection: DataSourceItemType, index: number) => {
         // If enter was pressed, try to match current search text to an item
         let choice: DataSourceItemType | undefined = undefined;
         if (index === -1) {
-          choice = choices.find(item => item.text === selection);
+          choice = choices.find(item => item.text === selection.text);
           if (!choice) return;
-          selection = choice!.rawValue;
+          selection = choice;
         }
 
         // Clear pending search term
         this.setState(updateState(stateName, undefined));
         // Update pendingChanges with selected value
         const { pendingChanges: existingChanges } = this.state;
-        const updates = { [name]: selection };
+        const updates = { [name]: selection.rawValue };
         const pendingChanges = Object.assign({}, existingChanges, updates);
         this.setState({ pendingChanges });
       }}
