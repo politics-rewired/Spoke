@@ -9,13 +9,6 @@ const pg = require("pg");
 // see https://github.com/tgriesser/knex/issues/852
 pg.defaults.ssl = config.DB_USE_SSL;
 
-// https://dba.stackexchange.com/questions/164419/is-it-possible-to-limit-timeout-on-postgres-server
-const afterCreate = (conn, done) =>
-  conn.query(
-    `SET idle_in_transaction_session_timeout = ${config.DB_IDLE_TIMEOUT_MS};`,
-    (error, _results, _fields) => done(error, conn)
-  );
-
 let connection = {};
 
 if (config.isTest) {
@@ -47,8 +40,7 @@ const knexConfig = {
     min: config.DB_MAX_POOL,
     max: config.DB_MAX_POOL,
     idleTimeoutMillis: config.DB_IDLE_TIMEOUT_MS,
-    reapIntervalMillis: config.DB_REAP_INTERVAL_MS,
-    afterCreate
+    reapIntervalMillis: config.DB_REAP_INTERVAL_MS
   }
 };
 
