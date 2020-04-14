@@ -243,10 +243,12 @@ class CampaignTextingHoursForm extends React.Component<
 const queries = {
   data: {
     query: gql`
-      query getCampaignAutoassign($campaignId: String!) {
+      query getCampaignTextingHours($campaignId: String!) {
         campaign(id: $campaignId) {
           id
-          isAutoassignEnabled
+          textingHoursStart
+          textingHoursEnd
+          timezone
         }
       }
     `,
@@ -263,16 +265,18 @@ const mutations = {
     payload: Partial<TextingHoursValues>
   ) => ({
     mutation: gql`
-      mutation editCampaignAutoassign(
+      mutation editCampaignTextingHours(
         $campaignId: String!
         $payload: CampaignInput!
       ) {
         editCampaign(id: $campaignId, campaign: $payload) {
           id
-          isAutoassignEnabled
+          textingHoursStart
+          textingHoursEnd
+          timezone
           readiness {
             id
-            autoassign
+            textingHours
           }
         }
       }
