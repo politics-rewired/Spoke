@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.5](https://github.com/politics-rewired/spoke/compare/v1.8.4...v1.8.5) (2020-04-15)
+
+
+### Bug Fixes
+
+* fix permission check ([#631](https://github.com/politics-rewired/spoke/issues/631)) ([b549f9d](https://github.com/politics-rewired/spoke/commit/b549f9d91d18c5b9d35e32c31df72077a567dd8c))
+* remove auth query param from segments helpdesk url ([#637](https://github.com/politics-rewired/spoke/issues/637)) ([29512aa](https://github.com/politics-rewired/spoke/commit/29512aa94146c38321c050e983f82365e25963ed))
+* require owner permissions to query settings ([#632](https://github.com/politics-rewired/spoke/issues/632)) ([03c9890](https://github.com/politics-rewired/spoke/commit/03c9890cc2580fcb0e917c36bf0093947ff62dc6))
+* use the same knex client throughout query builder ([#640](https://github.com/politics-rewired/spoke/issues/640)) ([43aba59](https://github.com/politics-rewired/spoke/commit/43aba59f0b256b42009e7595942055df841d9d1a))
+
 ### [1.8.4](https://github.com/politics-rewired/spoke/compare/v1.8.3...v1.8.4) (2020-04-10)
 
 
