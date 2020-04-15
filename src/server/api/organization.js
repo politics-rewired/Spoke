@@ -119,14 +119,14 @@ export const resolvers = {
       const campaignIdInt = parseInt(campaignId);
       if (!isNaN(campaignIdInt)) {
         query.whereExists(function() {
-          this.select(r.knex.raw("1"))
+          this.select(this.client.raw("1"))
             .from("assignment")
             .whereRaw('"assignment"."user_id" = "user"."id"')
             .where({ campaign_id: campaignIdInt });
         });
       } else if (campaignArchived === true || campaignArchived === false) {
         query.whereExists(function() {
-          this.select(r.knex.raw("1"))
+          this.select(this.client.raw("1"))
             .from("assignment")
             .join("campaign", "campaign.id", "assignment.campaign_id")
             .whereRaw('"assignment"."user_id" = "user"."id"')
