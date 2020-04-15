@@ -173,6 +173,10 @@ export const resolvers = {
       campaign.title !== "" &&
       campaign.description !== "" &&
       campaign.due_by !== null,
+    textingHours: campaign =>
+      campaign.textingHoursStart !== null &&
+      campaign.textingHoursEnd !== null &&
+      campaign.timezone !== null,
     autoassign: () => true
   },
   CampaignsReturn: {

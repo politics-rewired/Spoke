@@ -359,6 +359,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Texting Hours",
         content: CampaignTextingHoursForm,
+        isStandalone: true,
         keys: ["textingHoursStart", "textingHoursEnd", "timezone"],
         checkCompleted: () => true,
         blocksStarting: false,
