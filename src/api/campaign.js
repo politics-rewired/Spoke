@@ -59,6 +59,7 @@ export const schema = `
     textingHoursStart: Int
     textingHoursEnd: Int
     isAutoassignEnabled: Boolean!
+    repliesStaleAfter: Int
     isAssignmentLimitedToTeams: Boolean!
     timezone: String
     createdAt: Date

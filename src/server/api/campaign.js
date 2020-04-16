@@ -224,6 +224,7 @@ export const resolvers = {
       "createdAt"
     ]),
     readiness: campaign => campaign,
+    repliesStaleAfter: campaign => campaign.replies_stale_after_minutes,
     useDynamicAssignment: _ => false,
     isAssignmentLimitedToTeams: campaign => campaign.limit_assignment_to_teams,
     dueBy: campaign =>
