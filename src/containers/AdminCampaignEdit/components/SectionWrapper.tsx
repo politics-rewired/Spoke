@@ -212,7 +212,8 @@ const makeQueries = (hasJobQueues: boolean) => ({
     options: (ownProps: RequiredComponentProps) => ({
       variables: {
         campaignId: ownProps.campaignId
-      }
+      },
+      pollInterval: hasJobQueues ? 10 * 1000 : undefined
     })
   },
   jobs: {
