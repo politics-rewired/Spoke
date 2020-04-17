@@ -1,6 +1,6 @@
 import React from "react";
 import gql from "graphql-tag";
-import { compose } from "recompose";
+import { compose, withProps } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
 
 import Avatar from "material-ui/Avatar";
@@ -17,57 +17,36 @@ import { loadData } from "../../hoc/with-operations";
 import { dataTest, camelCase } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 
-const extractStageAndStatus = (percentComplete: number) => {
-  const progressPercent =
-    percentComplete > 100 ? percentComplete - 100 : percentComplete;
-  const progressMessage =
-    percentComplete > 100
-      ? `Filtering out landlines. ${progressPercent}% complete`
-      : `Uploading. ${progressPercent}% complete`;
+interface PendingJobType {
+  id: string;
+  jobType: string;
+  status: number;
+  resultMessage: string;
+}
 
-  return { progressPercent, progressMessage };
-};
+interface DeleteJobType {
+  (jobId: string): ApolloQueryResult<{ id: string }>;
+}
 
-export interface WrapperOuterProps {
+interface WrapperProps {
+  // Required Props
   campaignId: string;
   active: boolean;
   onExpandChange(expanded: boolean): void;
   onError(message: string): void;
-}
 
-export interface SectionOptions {
+  // Options
   title: string;
-  readinessName: keyof CampaignReadinessType;
-  jobQueueNames: string[];
-  expandAfterCampaignStarts: boolean;
-  expandableBySuperVolunteers: boolean;
-}
 
-interface WrapperHocProps {
+  // HOC
   adminPerms: boolean;
-  // GraphQL
-  data: {
-    campaign: {
-      id: string;
-      isStarted: boolean;
-      pendingJobs: {
-        id: string;
-        jobType: string;
-        status: number;
-        resultMessage: string;
-      }[];
-      readiness: CampaignReadinessType;
-    };
-  };
-  mutations: {
-    deleteJob(jobId: string): ApolloQueryResult<{ id: string }>;
-  };
-}
 
-interface WrapperInnerProps
-  extends WrapperOuterProps,
-    WrapperHocProps,
-    SectionOptions {}
+  // withProps
+  pendingJob?: PendingJobType;
+  isExpandable: boolean;
+  sectionIsDone: boolean;
+  deleteJob: DeleteJobType;
+}
 
 const inlineStyles = {
   card: {
@@ -82,41 +61,47 @@ const inlineStyles = {
   }
 };
 
-const SectionWrapper: React.SFC<WrapperInnerProps> = props => {
+const unpackStatus = (percentComplete: number) => {
+  const progressPercent =
+    percentComplete > 100 ? percentComplete - 100 : percentComplete;
+  const progressMessage =
+    percentComplete > 100
+      ? `Filtering out landlines. ${progressPercent}% complete`
+      : `Uploading. ${progressPercent}% complete`;
+
+  return { progressPercent, progressMessage };
+};
+
+const unpackJob = (job?: PendingJobType) => ({
+  jobId: job ? job.id : null,
+  savePercent: job ? job.status : 0,
+  jobMessage: job ? job.resultMessage : "",
+  isSaving: job !== undefined && !job.resultMessage
+});
+
+const SectionWrapper: React.SFC<WrapperProps> = props => {
   const {
-    title,
-    readinessName,
+    // Required props
     active,
-    jobQueueNames,
-    expandAfterCampaignStarts,
-    expandableBySuperVolunteers,
     children,
     onExpandChange,
+    onError,
 
-    // HOC
+    // Options
+    title,
+
+    // Authz HOC
     adminPerms,
-    data,
-    mutations: { deleteJob }
+
+    // withProps HOC
+    isExpandable,
+    pendingJob,
+    sectionIsDone,
+    deleteJob
   } = props;
-  const { isStarted, pendingJobs, readiness } = data.campaign;
-  const sectionIsDone = readiness[readinessName];
 
-  // Save state
-  const pendingJob = pendingJobs.find(job =>
-    jobQueueNames.includes(job.jobType)
-  );
-  const jobId = pendingJob ? pendingJob.id : null;
-  const savePercent = pendingJob ? pendingJob.status : 0;
-  const jobMessage = pendingJob ? pendingJob.resultMessage : "";
-  const isSaving = pendingJob !== undefined && !jobMessage;
-
-  const { progressPercent, progressMessage } = extractStageAndStatus(
-    savePercent
-  );
-
-  const isExpandable =
-    (expandAfterCampaignStarts || !isStarted) &&
-    (expandableBySuperVolunteers || adminPerms);
+  const { jobId, savePercent, jobMessage, isSaving } = unpackJob(pendingJob);
+  const { progressPercent, progressMessage } = unpackStatus(savePercent);
 
   let avatar = null;
   const cardHeaderStyle: React.CSSProperties = {
@@ -171,7 +156,7 @@ const SectionWrapper: React.SFC<WrapperInnerProps> = props => {
       if (response.errors)
         throw new Error(response.errors.map(err => `${err}`).join("\n"));
     } catch (err) {
-      props.onError(err.message);
+      onError(err.message);
     }
   };
 
@@ -230,7 +215,7 @@ const queries = {
         }
       }
     `,
-    options: (ownProps: WrapperInnerProps) => ({
+    options: (ownProps: RequiredComponentProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       },
@@ -240,7 +225,7 @@ const queries = {
 };
 
 const mutations = {
-  deleteJob: (ownProps: WrapperInnerProps) => (jobId: string) => ({
+  deleteJob: (ownProps: RequiredComponentProps) => (jobId: string) => ({
     mutation: gql`
       mutation deleteJob($campaignId: String!, $id: String!) {
         deleteJob(campaignId: $campaignId, id: $id) {
@@ -255,36 +240,132 @@ const mutations = {
   })
 };
 
-const SectionWrapperComplete = compose<WrapperInnerProps, WrapperOuterProps>(
-  withAuthzContext,
-  loadData({
-    queries,
-    mutations
-  })
-)(SectionWrapper);
-
 export interface RequiredComponentProps {
+  organizationId: string;
   campaignId: string;
+  active: boolean;
   isNew: boolean;
   saveLabel: string;
+  onExpandChange(expanded: boolean): void;
   onError(message: string): void;
 }
 
-export const asSection = <T extends RequiredComponentProps>(
-  options: SectionOptions
-) => (Component: React.ComponentType<T>) => {
-  return (props: T & WrapperOuterProps) => {
-    const { campaignId, active, onExpandChange, onError } = props;
+export interface SectionOptions {
+  title: string;
+  readinessName: keyof CampaignReadinessType;
+  jobQueueNames: string[];
+  expandAfterCampaignStarts: boolean;
+  expandableBySuperVolunteers: boolean;
+}
+
+interface WrapperGraphqlProps {
+  data: {
+    campaign: {
+      id: string;
+      isStarted: boolean;
+      pendingJobs: PendingJobType[];
+      readiness: CampaignReadinessType;
+    };
+  };
+  mutations: {
+    deleteJob: DeleteJobType;
+  };
+}
+
+interface AuthzProviderProps {
+  adminPerms: boolean;
+}
+
+interface WrappedComponentProps
+  extends RequiredComponentProps,
+    AuthzProviderProps {
+  pendingJob?: PendingJobType;
+  isExpandable: boolean;
+  sectionIsDone: boolean;
+  deleteJob: DeleteJobType;
+}
+
+export const asSection = (options: SectionOptions) => (
+  Component: React.ComponentType<
+    RequiredComponentProps & {
+      pendingJob?: PendingJobType;
+    }
+  >
+) =>
+  compose<WrappedComponentProps, RequiredComponentProps>(
+    withAuthzContext,
+    loadData({
+      queries,
+      mutations
+    }),
+    withProps((ownerProps: WrapperGraphqlProps & AuthzProviderProps) => {
+      const {
+        expandableBySuperVolunteers,
+        expandAfterCampaignStarts,
+        readinessName
+      } = options;
+      const { data, adminPerms, mutations } = ownerProps;
+      const { deleteJob } = mutations;
+      const { pendingJobs, isStarted, readiness } = data.campaign;
+      const pendingJob = pendingJobs.find(job =>
+        options.jobQueueNames.includes(job.jobType)
+      );
+
+      const isExpandable =
+        (expandAfterCampaignStarts || !isStarted) &&
+        (expandableBySuperVolunteers || adminPerms);
+
+      const sectionIsDone = readiness[readinessName];
+
+      return { pendingJob, isExpandable, sectionIsDone, deleteJob };
+    })
+  )(props => {
+    const {
+      // Required props
+      organizationId,
+      campaignId,
+      active,
+      isNew,
+      saveLabel,
+      onExpandChange,
+      onError,
+
+      // Authz HOC
+      adminPerms,
+
+      // withProps HOC
+      pendingJob,
+      isExpandable,
+      sectionIsDone,
+      deleteJob,
+
+      ...otherProps
+    } = props;
+
     return (
-      <SectionWrapperComplete
+      <SectionWrapper
         campaignId={campaignId}
         active={active}
         onExpandChange={onExpandChange}
         onError={onError}
-        {...options}
+        title={options.title}
+        adminPerms={adminPerms}
+        pendingJob={pendingJob}
+        isExpandable={isExpandable}
+        sectionIsDone={sectionIsDone}
+        deleteJob={deleteJob}
       >
-        <Component {...props} />
-      </SectionWrapperComplete>
+        <Component
+          organizationId={organizationId}
+          campaignId={campaignId}
+          active={active}
+          isNew={isNew}
+          saveLabel={saveLabel}
+          pendingJob={pendingJob}
+          onExpandChange={onExpandChange}
+          onError={onError}
+          {...otherProps}
+        />
+      </SectionWrapper>
     );
-  };
-};
+  });

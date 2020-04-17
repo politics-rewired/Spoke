@@ -293,15 +293,15 @@ const mutations = {
 };
 
 export default compose<AutoassignInnerProps, RequiredComponentProps>(
-  loadData({
-    queries,
-    mutations
-  }),
   asSection({
     title: "Texting Hours",
     readinessName: "textingHours",
     jobQueueNames: [],
     expandAfterCampaignStarts: true,
     expandableBySuperVolunteers: false
+  }),
+  loadData({
+    queries,
+    mutations
   })
 )(CampaignTextingHoursForm);

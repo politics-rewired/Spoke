@@ -225,15 +225,15 @@ const mutations = {
 };
 
 export default compose<BasicsInnerProps, RequiredComponentProps>(
-  loadData({
-    queries,
-    mutations
-  }),
   asSection({
     title: "Basics",
     readinessName: "basics",
     jobQueueNames: [],
     expandAfterCampaignStarts: true,
     expandableBySuperVolunteers: true
+  }),
+  loadData({
+    queries,
+    mutations
   })
 )(CampaignBasicsForm);
