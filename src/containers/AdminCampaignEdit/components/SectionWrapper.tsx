@@ -204,6 +204,7 @@ const makeQueries = (hasJobQueues: boolean) => ({
             id
             basics
             textingHours
+            contacts
             autoassign
           }
         }

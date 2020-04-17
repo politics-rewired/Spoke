@@ -177,6 +177,13 @@ export const resolvers = {
       campaign.textingHoursStart !== null &&
       campaign.textingHoursEnd !== null &&
       campaign.timezone !== null,
+    contacts: campaign =>
+      r
+        .reader("campaign_contact")
+        .select("campaign_contact.id")
+        .where({ campaign_id: campaign.id })
+        .limit(1)
+        .then(records => records.length > 0),
     autoassign: () => true
   },
   CampaignsReturn: {

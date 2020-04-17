@@ -24,6 +24,7 @@ export const schema = `
     id: ID!
     basics: Boolean!
     textingHours: Boolean!
+    contacts: Boolean!
     autoassign: Boolean!
   }
 
