@@ -193,19 +193,13 @@ const SectionWrapper: React.SFC<WrapperProps> = props => {
   );
 };
 
-const queries = {
-  data: {
+const makeQueries = (hasJobQueues: boolean) => ({
+  status: {
     query: gql`
-      query getCampaignJobs($campaignId: String!) {
+      query getCampaignReadiness($campaignId: String!) {
         campaign(id: $campaignId) {
           id
           isStarted
-          pendingJobs {
-            id
-            jobType
-            status
-            resultMessage
-          }
           readiness {
             id
             basics
@@ -218,11 +212,32 @@ const queries = {
     options: (ownProps: RequiredComponentProps) => ({
       variables: {
         campaignId: ownProps.campaignId
+      }
+    })
+  },
+  jobs: {
+    query: gql`
+      query getCampaignJobs($campaignId: String!) {
+        campaign(id: $campaignId) {
+          id
+          pendingJobs {
+            id
+            jobType
+            status
+            resultMessage
+          }
+        }
+      }
+    `,
+    skip: !hasJobQueues,
+    options: (ownProps: RequiredComponentProps) => ({
+      variables: {
+        campaignId: ownProps.campaignId
       },
-      pollInterval: 60 * 1000
+      pollInterval: 10 * 1000
     })
   }
-};
+});
 
 const mutations = {
   deleteJob: (ownProps: RequiredComponentProps) => (jobId: string) => ({
@@ -259,16 +274,21 @@ export interface SectionOptions {
 }
 
 interface WrapperGraphqlProps {
-  data: {
+  status: {
     campaign: {
       id: string;
       isStarted: boolean;
-      pendingJobs: PendingJobType[];
       readiness: CampaignReadinessType;
     };
   };
+  jobs?: {
+    campaign: {
+      id: string;
+      pendingJobs: PendingJobType[];
+    };
+  };
   mutations: {
-    deleteJob: DeleteJobType;
+    deleteJob?: DeleteJobType;
   };
 }
 
@@ -295,21 +315,24 @@ export const asSection = (options: SectionOptions) => (
   compose<WrappedComponentProps, RequiredComponentProps>(
     withAuthzContext,
     loadData({
-      queries,
+      queries: makeQueries(options.jobQueueNames.length > 0),
       mutations
     }),
     withProps((ownerProps: WrapperGraphqlProps & AuthzProviderProps) => {
       const {
         expandableBySuperVolunteers,
         expandAfterCampaignStarts,
-        readinessName
+        readinessName,
+        jobQueueNames
       } = options;
-      const { data, adminPerms, mutations } = ownerProps;
+      const { status, jobs, adminPerms, mutations } = ownerProps;
       const { deleteJob } = mutations;
-      const { pendingJobs, isStarted, readiness } = data.campaign;
-      const pendingJob = pendingJobs.find(job =>
-        options.jobQueueNames.includes(job.jobType)
-      );
+      const { isStarted, readiness } = status.campaign;
+      const pendingJob = jobs
+        ? jobs.campaign.pendingJobs.find(job =>
+            jobQueueNames.includes(job.jobType)
+          )
+        : undefined;
 
       const isExpandable =
         (expandAfterCampaignStarts || !isStarted) &&
