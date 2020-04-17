@@ -251,7 +251,8 @@ const mutations = {
     variables: {
       campaignId: ownProps.campaignId,
       id: jobId
-    }
+    },
+    refetchQueries: ["getCampaignJobs"]
   })
 };
 
