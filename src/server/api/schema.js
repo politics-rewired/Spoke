@@ -931,18 +931,18 @@ const rootMutations = {
         return organization;
       }
 
-      let approvalStatus = RequestAutoApproveType.APPROVAL_REQUIRED.toLowerCase();
+      let approvalStatus = RequestAutoApproveType.APPROVAL_REQUIRED;
       try {
         approvalStatus =
-          JSON.parse(organization.feature || "{}").defaulTexterApprovalStatus ||
-          approvalStatus;
+          JSON.parse(organization.features || "{}")
+            .defaulTexterApprovalStatus || approvalStatus;
       } catch (err) {}
 
       await r.knex("user_organization").insert({
         user_id: user.id,
         organization_id: organization.id,
         role: "TEXTER",
-        request_status: approvalStatus
+        request_status: approvalStatus.toLowerCase()
       });
 
       return organization;
@@ -1424,9 +1424,8 @@ const rootMutations = {
       const { payload = {} } = invite;
 
       const newOrganization = await r.knex.transaction(async trx => {
-        const defaultStatus = RequestAutoApproveType.APPROVAL_REQUIRED;
         const orgFeatures = {
-          defaulTexterApprovalStatus: defaultStatus.toLowerCase()
+          defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED
         };
         if (payload.org_features) {
           const { switchboard_lrn_api_key } = payload.org_features;
