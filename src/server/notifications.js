@@ -26,6 +26,7 @@ async function getOrganizationOwner(organizationId) {
       "user_organization.organization_id": organizationId,
       role: "OWNER"
     })
+    .orderBy("user.id")
     .first("user.*");
 }
 const sendAssignmentUserNotification = async (assignment, notification) => {
