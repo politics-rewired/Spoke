@@ -16,6 +16,7 @@ import GSForm from "../../../components/forms/GSForm";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import {
   asSection,
+  FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
 
@@ -40,7 +41,7 @@ interface BasicsHocProps {
   };
 }
 
-interface BasicsInnerProps extends RequiredComponentProps, BasicsHocProps {}
+interface BasicsInnerProps extends FullComponentProps, BasicsHocProps {}
 
 interface BasicsState {
   pendingChanges: BasicsValues;

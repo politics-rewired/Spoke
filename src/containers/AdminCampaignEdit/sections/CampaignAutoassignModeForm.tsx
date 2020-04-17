@@ -9,6 +9,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import { loadData } from "../../hoc/with-operations";
 import {
   asSection,
+  FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -28,9 +29,7 @@ interface AutoassignHocProps {
   };
 }
 
-interface AutoassignInnerProps
-  extends RequiredComponentProps,
-    AutoassignHocProps {}
+interface AutoassignInnerProps extends FullComponentProps, AutoassignHocProps {}
 
 interface AutoassignState {
   isAutoassignEnabled?: boolean;

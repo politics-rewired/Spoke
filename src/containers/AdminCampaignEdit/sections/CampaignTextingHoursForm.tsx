@@ -12,6 +12,7 @@ import Autocomplete from "material-ui/AutoComplete";
 
 import {
   asSection,
+  FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
 import { DataSourceItemType } from "../types";
@@ -74,9 +75,7 @@ interface AutoassignHocProps {
   };
 }
 
-interface AutoassignInnerProps
-  extends RequiredComponentProps,
-    AutoassignHocProps {}
+interface AutoassignInnerProps extends FullComponentProps, AutoassignHocProps {}
 
 interface AutoassignState {
   pendingChanges: Partial<TextingHoursValues>;

@@ -265,6 +265,10 @@ export interface RequiredComponentProps {
   onError(message: string): void;
 }
 
+export interface FullComponentProps extends RequiredComponentProps {
+  pendingJob?: PendingJobType;
+}
+
 export interface SectionOptions {
   title: string;
   readinessName: keyof CampaignReadinessType;
@@ -306,11 +310,7 @@ interface WrappedComponentProps
 }
 
 export const asSection = (options: SectionOptions) => (
-  Component: React.ComponentType<
-    RequiredComponentProps & {
-      pendingJob?: PendingJobType;
-    }
-  >
+  Component: React.ComponentType<FullComponentProps>
 ) =>
   compose<WrappedComponentProps, RequiredComponentProps>(
     withAuthzContext,
