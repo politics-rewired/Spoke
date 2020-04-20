@@ -51,7 +51,7 @@ export const getRunner = async (attempt = 0) => {
     return getRunner(attempt + 1);
   }
 
-  return runner;
+  return { runner, scheduler };
 };
 
 let worker = undefined;
