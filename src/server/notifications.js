@@ -11,6 +11,13 @@ export const Notifications = Object.freeze({
   ASSIGNMENT_UPDATED: "assignment.updated"
 });
 
+const replyToForOrg = async organizationId => {
+  if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
+
+  const orgOwner = await getOrganizationOwner(organizationId);
+  return orgOwner.email;
+};
+
 async function getOrganizationOwner(organizationId) {
   return await r
     .reader("user")
@@ -19,6 +26,7 @@ async function getOrganizationOwner(organizationId) {
       "user_organization.organization_id": organizationId,
       role: "OWNER"
     })
+    .orderBy("user.id")
     .first("user.*");
 }
 const sendAssignmentUserNotification = async (assignment, notification) => {
@@ -39,7 +47,8 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .reader("user")
     .where({ id: assignment.user_id })
     .first();
-  const orgOwner = await getOrganizationOwner(organization.id);
+
+  const replyTo = await replyToForOrg(organization.id);
 
   let subject;
   let text;
@@ -60,7 +69,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
   try {
     await sendEmail({
       to: user.email,
-      replyTo: orgOwner.email,
+      replyTo,
       subject,
       text
     });
@@ -120,12 +129,12 @@ export const sendUserNotification = async notification => {
         .reader("organization")
         .where({ id: campaign.organization_id })
         .first();
-      const orgOwner = await getOrganizationOwner(organization.id);
+      const replyTo = await replyToForOrg(organization.id);
 
       try {
         await sendEmail({
           to: user.email,
-          replyTo: orgOwner.email,
+          replyTo,
           subject: `[${organization.name}] [${campaign.title}] New reply`,
           text: `Someone responded to your message. See all your replies here: \n\n${
             config.BASE_URL
