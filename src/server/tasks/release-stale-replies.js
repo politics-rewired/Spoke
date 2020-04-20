@@ -6,6 +6,7 @@ const CONCURRENCY = 2;
 export const releaseStaleReplies = async (_payload, _helpers) => {
   const campaignsToReleaseStaleRepliesFrom = await r
     .knex("campaign")
+    .select(["id", "replies_stale_after_minutes"])
     .whereNotNull("replies_stale_after_minutes")
     .where({ is_archived: false });
 
