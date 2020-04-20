@@ -12,6 +12,7 @@ import Autocomplete from "material-ui/AutoComplete";
 
 import {
   asSection,
+  FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
 import { DataSourceItemType } from "../types";
@@ -74,9 +75,7 @@ interface AutoassignHocProps {
   };
 }
 
-interface AutoassignInnerProps
-  extends RequiredComponentProps,
-    AutoassignHocProps {}
+interface AutoassignInnerProps extends FullComponentProps, AutoassignHocProps {}
 
 interface AutoassignState {
   pendingChanges: Partial<TextingHoursValues>;
@@ -293,15 +292,15 @@ const mutations = {
 };
 
 export default compose<AutoassignInnerProps, RequiredComponentProps>(
-  loadData({
-    queries,
-    mutations
-  }),
   asSection({
     title: "Texting Hours",
     readinessName: "textingHours",
     jobQueueNames: [],
     expandAfterCampaignStarts: true,
     expandableBySuperVolunteers: false
+  }),
+  loadData({
+    queries,
+    mutations
   })
 )(CampaignTextingHoursForm);
