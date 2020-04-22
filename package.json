@@ -167,6 +167,7 @@
     "@types/moment": "^2.13.0",
     "@types/react": "^15.6.28",
     "@types/react-dom": "^15.5.11",
+    "@types/react-router": "^5.1.5",
     "@types/recompose": "^0.24.0",
     "@types/yup": "^0.26.34",
     "babel-core": "^7.0.0-bridge.0",
