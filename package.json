@@ -168,6 +168,7 @@
     "@types/moment": "^2.13.0",
     "@types/react": "^15.6.28",
     "@types/react-dom": "^15.5.11",
+    "@types/react-router": "^5.1.5",
     "@types/react-select": "^2.0.0",
     "@types/recompose": "^0.24.0",
     "@types/yup": "^0.26.34",
