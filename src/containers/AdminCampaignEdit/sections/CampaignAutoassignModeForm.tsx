@@ -13,10 +13,14 @@ import {
   RequiredComponentProps
 } from "../components/SectionWrapper";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
+import { TextField } from "material-ui";
 
 interface AutoassignValues {
   isAutoassignEnabled: boolean;
+  repliesStaleAfter: number | null;
 }
+
+const DEFAULT_RELEASE_STALE_REPLIES_AFTER = 30;
 
 interface AutoassignHocProps {
   data: {
@@ -33,6 +37,7 @@ interface AutoassignInnerProps extends FullComponentProps, AutoassignHocProps {}
 
 interface AutoassignState {
   isAutoassignEnabled?: boolean;
+  repliesStaleAfter?: number | null;
   isWorking: boolean;
 }
 
@@ -40,8 +45,12 @@ class CampaignAutoassignModeForm extends React.Component<
   AutoassignInnerProps,
   AutoassignState
 > {
-  state = {
+  state: AutoassignState = {
     isAutoassignEnabled: undefined,
+
+    // Undefined means there are no client side changes (use props.campaign.repliesStaleAfter)
+    // Null means a database value of null
+    repliesStaleAfter: undefined,
     isWorking: false
   };
 
@@ -50,15 +59,39 @@ class CampaignAutoassignModeForm extends React.Component<
     isAutoassignEnabled: boolean
   ) => this.setState({ isAutoassignEnabled });
 
+  handleAutoReleaseToggle = (
+    _event: React.MouseEvent<{}>,
+    isAutoReleaseEnabled: boolean
+  ) =>
+    this.setState({
+      repliesStaleAfter: isAutoReleaseEnabled
+        ? DEFAULT_RELEASE_STALE_REPLIES_AFTER
+        : null
+    });
+
+  handleReleaseStaleRepliesAfterChange = (
+    _event: React.FormEvent<{}>,
+    newVal: string
+  ) =>
+    this.setState({
+      repliesStaleAfter: parseInt(newVal)
+    });
+
   handleDidSubmit = async () => {
-    const isAutoassignEnabled = this.state.isAutoassignEnabled!;
+    const { isAutoassignEnabled, repliesStaleAfter } = this.state;
     const { editCampaign } = this.props.mutations;
 
     this.setState({ isWorking: true });
     try {
-      const response = await editCampaign({ isAutoassignEnabled });
+      const response = await editCampaign({
+        isAutoassignEnabled: isAutoassignEnabled!,
+        repliesStaleAfter: repliesStaleAfter!
+      });
       if (response.errors) throw response.errors;
-      this.setState({ isAutoassignEnabled: undefined });
+      this.setState({
+        isAutoassignEnabled: undefined,
+        repliesStaleAfter: undefined
+      });
     } catch (err) {
       this.props.onError(err.message);
     } finally {
@@ -77,9 +110,18 @@ class CampaignAutoassignModeForm extends React.Component<
       this.state.isAutoassignEnabled !== undefined
         ? this.state.isAutoassignEnabled!
         : campaign.isAutoassignEnabled;
+
+    const repliesStaleAfter =
+      this.state.repliesStaleAfter === undefined
+        ? campaign.repliesStaleAfter
+        : this.state.repliesStaleAfter;
+    const isAutoReleaseEnabled = repliesStaleAfter !== null;
+
     const hasPendingChanges =
-      this.state.isAutoassignEnabled !== campaign.isAutoassignEnabled &&
-      this.state.isAutoassignEnabled !== undefined;
+      (this.state.isAutoassignEnabled !== campaign.isAutoassignEnabled &&
+        this.state.isAutoassignEnabled !== undefined) ||
+      (this.state.repliesStaleAfter !== campaign.repliesStaleAfter &&
+        this.state.repliesStaleAfter !== undefined);
 
     const isSaveDisabled = isWorking || !hasPendingChanges;
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
@@ -96,6 +138,24 @@ class CampaignAutoassignModeForm extends React.Component<
           toggled={isAutoassignEnabled}
           onToggle={this.handleDidToggle}
         />
+
+        <Toggle
+          label="Should we automatically release unhandled replies after a certain period of time?"
+          toggled={isAutoReleaseEnabled}
+          onToggle={this.handleAutoReleaseToggle}
+        />
+
+        {isAutoReleaseEnabled && (
+          <div>
+            <TextField
+              name="idle_minutes"
+              floatingLabelText="Idle Minutes"
+              type="number"
+              value={repliesStaleAfter!}
+              onChange={this.handleReleaseStaleRepliesAfterChange}
+            />
+          </div>
+        )}
 
         <RaisedButton
           label={finalSaveLabel}
@@ -114,6 +174,7 @@ const queries = {
         campaign(id: $campaignId) {
           id
           isAutoassignEnabled
+          repliesStaleAfter
         }
       }
     `,
@@ -137,6 +198,7 @@ const mutations = {
         editCampaign(id: $campaignId, campaign: $payload) {
           id
           isAutoassignEnabled
+          repliesStaleAfter
           readiness {
             id
             autoassign

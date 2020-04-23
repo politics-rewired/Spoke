@@ -173,8 +173,10 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     textingHoursStart,
     textingHoursEnd,
     isAutoassignEnabled,
+    repliesStaleAfter,
     timezone
   } = campaign;
+
   const organizationId = origCampaignRecord.organization_id;
   const campaignUpdates = {
     id,
@@ -190,6 +192,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_start: textingHoursStart,
     texting_hours_end: textingHoursEnd,
     is_autoassign_enabled: isAutoassignEnabled,
+    replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
     timezone
   };
 
