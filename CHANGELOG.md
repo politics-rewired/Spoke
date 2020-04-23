@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/politics-rewired/spoke/compare/v1.8.5...v1.9.0) (2020-04-23)
+
+
+### Features
+
+* allow selection of organization from home page ([#645](https://github.com/politics-rewired/spoke/issues/645)) ([4e78468](https://github.com/politics-rewired/spoke/commit/4e78468fc7681ab37bad74ad83fdc5229e15fc97))
+* reply-to address ([#642](https://github.com/politics-rewired/spoke/issues/642)) ([5347418](https://github.com/politics-rewired/spoke/commit/534741847de386ffd141ba5b4b6b21f17da6e25d))
+
+
+### Bug Fixes
+
+* **settings:** fix capitalization of auto-approve type ([#643](https://github.com/politics-rewired/spoke/issues/643)) ([c18d71e](https://github.com/politics-rewired/spoke/commit/c18d71e6b55339485cf73be10bb22f96a390588f))
+* remove afterCreate hook ([#638](https://github.com/politics-rewired/spoke/issues/638)) ([75c6744](https://github.com/politics-rewired/spoke/commit/75c67447bfa3466cf0a09c5398ad9f70074513ee))
+
 ### [1.8.5](https://github.com/politics-rewired/spoke/compare/v1.8.4...v1.8.5) (2020-04-15)
 
 
