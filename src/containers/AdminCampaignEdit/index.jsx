@@ -369,6 +369,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Contacts",
         content: CampaignContactsForm,
+        isStandalone: true,
         keys: [
           "contacts",
           "contactsCount",

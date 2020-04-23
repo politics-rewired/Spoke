@@ -363,17 +363,15 @@ export async function uploadContacts(job) {
   });
 
   if (job.id) {
-    if (jobMessages.length) {
-      await r
-        .knex("job_request")
-        .where("id", job.id)
-        .update({ result_message: jobMessages.join("\n") });
-    } else {
-      await r
-        .knex("job_request")
-        .where({ id: job.id })
-        .del();
-    }
+    // Always set a result message to mark the job as complete
+    const message =
+      jobMessages.length > 0
+        ? jobMessages.join("\n")
+        : "Contact upload successful.";
+    await r
+      .knex("job_request")
+      .where("id", job.id)
+      .update({ result_message: message });
   }
   await cacheableData.campaign.reload(campaignId);
 }
