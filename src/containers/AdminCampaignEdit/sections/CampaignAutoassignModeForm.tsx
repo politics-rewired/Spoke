@@ -46,8 +46,11 @@ class CampaignAutoassignModeForm extends React.Component<
   AutoassignInnerProps,
   AutoassignState
 > {
-  state = {
+  state: AutoassignState = {
     isAutoassignEnabled: undefined,
+
+    // Undefined means there are no client side changes (use props.campaign.repliesStaleAfter)
+    // Null means a database value of null
     repliesStaleAfter: undefined,
     isWorking: false
   };
@@ -145,10 +148,9 @@ class CampaignAutoassignModeForm extends React.Component<
 
         {isAutoReleaseEnabled && (
           <div>
-            <label htmlFor="idle_minutes"> Idle Minutes: </label>
             <TextField
               name="idle_minutes"
-              // label="Idle Minutes"
+              floatingLabelText="Idle Minutes"
               type="number"
               value={repliesStaleAfter!}
               onChange={this.handleReleaseStaleRepliesAfterChange}
