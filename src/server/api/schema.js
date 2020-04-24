@@ -1093,7 +1093,7 @@ const rootMutations = {
         organizationId: campaign.organizationId
       });
 
-      const [newCampaignId] = await r
+      const [origCampaignRecord] = await r
         .knex("campaign")
         .insert({
           organization_id: campaign.organizationId,
@@ -1104,9 +1104,15 @@ const rootMutations = {
           is_started: false,
           is_archived: false
         })
-        .returning("id");
+        .returning("*");
 
-      return editCampaign(newCampaignId, campaign, loaders, user);
+      return editCampaign(
+        origCampaignRecord.id,
+        campaign,
+        loaders,
+        user,
+        origCampaignRecord
+      );
     },
 
     copyCampaign: async (_, { id }, { user, loaders }) => {
