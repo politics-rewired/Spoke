@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/politics-rewired/spoke/compare/v1.9.0...v1.9.1) (2020-04-29)
+
+
+### Features
+
+* release stale replies ([#635](https://github.com/politics-rewired/spoke/issues/635)) ([595eae3](https://github.com/politics-rewired/spoke/commit/595eae33a4f6eb5530857def59451148f4f0ad2e))
+
+
+### Bug Fixes
+
+* fix campaign creation error ([#647](https://github.com/politics-rewired/spoke/issues/647)) ([4a91132](https://github.com/politics-rewired/spoke/commit/4a9113212431d502858aa2a9c844a9b36fd97713))
+
 ## [1.9.0](https://github.com/politics-rewired/spoke/compare/v1.8.5...v1.9.0) (2020-04-23)
 
 
