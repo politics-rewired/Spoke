@@ -16,7 +16,7 @@ export default class GSTextField extends GSFormField {
         }}
         onFocus={event => event.target.select()}
         {...safeProps}
-        value={value}
+        value={value || ''}
         onChange={event => {
           this.props.onChange(event.target.value);
         }}
