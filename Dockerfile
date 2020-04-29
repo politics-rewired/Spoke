@@ -61,7 +61,7 @@ ENV NODE_ENV="production" \
   PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY \
   SPOKE_VERSION=$SPOKE_VERSION
 
-COPY package.json ./
+COPY package.json knexfile.env.js migrations seeds ./
 
 # Run the production compiled code
 EXPOSE 3000
