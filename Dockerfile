@@ -62,8 +62,6 @@ ENV NODE_ENV="production" \
   SPOKE_VERSION=$SPOKE_VERSION
 
 COPY package.json knexfile.env.js ./
-COPY src/config.js ./src/config.js
-COPY src/server/knex.js ./src/server/knex.js
 COPY migrations ./migrations
 COPY seeds ./seeds
 

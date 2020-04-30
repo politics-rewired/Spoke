@@ -1,4 +1,5 @@
 const { config } = require("../config");
+const logger = require("../logger");
 
 // Define a Knex connection. Currently, this is used only to instantiate the
 // rethink-knex-adapter's connection. In the future, if the adapter is
@@ -41,6 +42,12 @@ const knexConfig = {
     max: config.DB_MAX_POOL,
     idleTimeoutMillis: config.DB_IDLE_TIMEOUT_MS,
     reapIntervalMillis: config.DB_REAP_INTERVAL_MS
+  },
+  log: {
+    warn: message => logger.warn(message),
+    error: message => logger.error(message),
+    deprecate: message => logger.info(message),
+    debug: message => logger.debug(message)
   }
 };
 
