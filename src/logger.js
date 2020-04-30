@@ -1,6 +1,6 @@
-import winston from "winston";
+const winston = require("winston");
 
-import { config } from "./config";
+const { config } = require("./config");
 
 // Winston configuration
 const logger = winston.createLogger({
@@ -16,4 +16,4 @@ const logger = winston.createLogger({
   ]
 });
 
-export default logger;
+module.exports = logger;
