@@ -15,6 +15,7 @@ import { config } from "../config";
 import logger from "../logger";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import { Pool } from "pg";
+import url from "url";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
@@ -25,7 +26,20 @@ let runner: Runner | undefined = undefined;
 let scheduler: ScheduleRunner | undefined = undefined;
 let runnerSemaphore = false;
 
-const workerPool = new Pool({ connectionString: config.DATABASE_URL });
+// https://github.com/brianc/node-postgres/tree/master/packages/pg-pool#note
+const params = url.parse(config.DATABASE_URL);
+const auth = params.auth ? params.auth.split(":") : [];
+const poolConfig = {
+  user: auth[0],
+  password: auth[1],
+  host: params.hostname || undefined,
+  port: params.port ? parseInt(params.port) : undefined,
+  database: params.pathname ? params.pathname.split("/")[1] : undefined,
+  ssl: config.DB_USE_SSL,
+  max: config.WORKER_MAX_POOL
+};
+
+const workerPool = new Pool(poolConfig);
 
 export const getRunner = async (
   attempt = 0
@@ -35,7 +49,7 @@ export const getRunner = async (
     runnerSemaphore = true;
     runner = await run({
       pgPool: workerPool,
-      concurrency: 5,
+      concurrency: config.WORKER_CONCURRENCY,
       logger: graphileLogger,
       // Signals are handled by Terminus
       noHandleSignals: true,
@@ -76,7 +90,7 @@ export const getWorker = async (attempt = 0): Promise<WorkerUtils> => {
   if (!worker && !workerSemaphore) {
     workerSemaphore = true;
     worker = await makeWorkerUtils({
-      connectionString: config.DATABASE_URL
+      pgPool: workerPool
     });
   }
   // Someone beat us to the punch of initializing the worker

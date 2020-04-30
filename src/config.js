@@ -715,6 +715,14 @@ const validators = {
     desc:
       "If the WAREHOUSE_DB connection/feature is enabled, then on AWS Lambda, queries that take longer than 5min can expire. This will enable incrementing through queries on new lambda invocations to avoid timeouts.",
     default: false
+  }),
+  WORKER_CONCURRENCY: num({
+    desc: "Worker concurrency. ",
+    default: 2
+  }),
+  WORKER_MAX_POOL: num({
+    desc: "Worker database connection pool maximum size. ",
+    default: 2
   })
 };
 
