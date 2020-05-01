@@ -60,7 +60,7 @@ export const getRunner = async (
     });
 
     scheduler = await runSchedule({
-      pgPool: workerPool,
+      pgPool: new Pool({ ...poolConfig }),
       logger: graphileLogger,
       schedules: [
         {
