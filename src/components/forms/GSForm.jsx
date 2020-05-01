@@ -46,10 +46,9 @@ export default class GSForm extends React.Component {
 
   renderChildren(children) {
     return React.Children.map(children, child => {
-      const isReactElement = child && child.type && typeof child.type === "function";
-      if (child === null) {
+      if (!React.isValidElement(child)) {
         return child;
-      } else if (isReactElement && child.type.toString() === Form.Field.toString()) {
+      } else if (child.type.prototype instanceof Form.Field) {
         const name = child.props.name;
         let error = this.state.formErrors ? this.state.formErrors[name] : null;
         let clonedElement = child;
@@ -64,7 +63,7 @@ export default class GSForm extends React.Component {
         return React.cloneElement(clonedElement, {
           events: ["onBlur"]
         });
-      } else if (isReactElement && child.type.toString() === Form.Button.toString()) {
+      } else if (child.type.prototype instanceof Form.Button) {
         return React.cloneElement(child, {
           component: GSSubmitButton,
           isSubmitting: this.state.isSubmitting
