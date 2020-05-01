@@ -61,8 +61,7 @@ export const getRunner = async (
 
     scheduler = await runSchedule({
       pgPool: workerPool,
-      // Use <any> cast as short-term workaround for https://github.com/davbeck/graphile-scheduler/pull/2
-      logger: <any>graphileLogger,
+      logger: graphileLogger,
       schedules: [
         {
           name: "release-stale-replies",
