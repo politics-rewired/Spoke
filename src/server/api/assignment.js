@@ -1055,8 +1055,6 @@ export async function assignLoop(
     )
     .pluck("tag_id");
 
-  console.log("myEscalationTags", myEscalationTags);
-
   if (myEscalationTags.length > 0) {
     const { rowCount: ccUpdateCount } = await trx.raw(
       `
@@ -1094,8 +1092,6 @@ export async function assignLoop(
     UNSENT: "assignable_needs_message"
   }[assignmentInfo.type];
 
-  console.log("contactView", contactView);
-
   const { rowCount: ccUpdateCount } = await trx.raw(
     `
       with matching_contact as (
@@ -1114,12 +1110,6 @@ export async function assignLoop(
          target_contact.id = matching_contact.id;`,
     [campaignIdToAssignTo, countToAssign, assignmentId]
   );
-  console.log("[campaignIdToAssignTo, countToAssign, assignmentId]", [
-    campaignIdToAssignTo,
-    countToAssign,
-    assignmentId
-  ]);
-  console.log("ccUpdateCount", ccUpdateCount);
 
   logger.verbose(`Updated ${ccUpdateCount} campaign contacts`);
   const team = {
