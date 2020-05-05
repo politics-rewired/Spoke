@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.6](https://github.com/politics-rewired/spoke/compare/v1.9.5...v1.9.6) (2020-05-05)
+
+
+### Bug Fixes
+
+* admin ui button react element ([#652](https://github.com/politics-rewired/spoke/issues/652)) ([7c342d1](https://github.com/politics-rewired/spoke/commit/7c342d17aa0217a3c482d6c02eb27ccfcdb6d747))
+* fix graphile-scheduler jobs ([#655](https://github.com/politics-rewired/spoke/issues/655)) ([06e53fb](https://github.com/politics-rewired/spoke/commit/06e53fb91ceac1fb70fbdf9523c644954add8b60))
+
 ### [1.9.5](https://github.com/politics-rewired/spoke/compare/v1.9.4...v1.9.5) (2020-04-29)
 
 ### [1.9.4](https://github.com/politics-rewired/spoke/compare/v1.9.3...v1.9.4) (2020-04-29)
