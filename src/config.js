@@ -608,6 +608,11 @@ const validators = {
     example: "https://s3.us-east-1.amazonaws.com/my-spoke-bucket/spoke/static/",
     default: "/assets/"
   }),
+  SUPERADMIN_LOGIN_SECRET: str({
+    desc:
+      "A secret login code to allow a superadmin to assume the role of an organization owner.",
+    default: undefined
+  }),
   SUPPRESS_SELF_INVITE: bool({
     desc:
       "Prevent self-invitations. Recommend setting before making sites available to public.",

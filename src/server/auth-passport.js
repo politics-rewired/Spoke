@@ -297,6 +297,13 @@ function setupLocalAuthPassport() {
   return app;
 }
 
+// Convert a Spoke user record to the type expected by passport.(de)serializeUser
+export const sessionUserMap = {
+  local: user => ({ id: user.id }),
+  auth0: user => ({ id: user.auth0_id }),
+  slack: user => ({ id: user.auth0_id })
+};
+
 export default {
   local: setupLocalAuthPassport,
   auth0: setupAuth0Passport,
