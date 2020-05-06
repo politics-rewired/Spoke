@@ -12,6 +12,7 @@ import { List, ListItem } from "material-ui/List";
 import { loadData } from "./hoc/with-operations";
 import { RelayPaginatedResponse } from "../api/types";
 import theme from "../styles/theme";
+import SuperAdminLogin from "../components/SuperAdminLogin";
 
 const styles = StyleSheet.create({
   container: {
@@ -67,6 +68,7 @@ interface HomeProps {
       id: string;
       memberships: RelayPaginatedResponse<MembershipType>;
     };
+    refetch(): void;
   };
   mutations: {
     createInvite(
@@ -107,6 +109,8 @@ const Home: React.SFC<HomeProps> = props => {
     }
     return props.history.push(`/admin/${orgId}`);
   };
+
+  const handleOnSuperadminLogin = () => props.data.refetch();
 
   const renderContent = () => {
     const { currentUser } = props.data;
@@ -174,6 +178,7 @@ const Home: React.SFC<HomeProps> = props => {
 
   return (
     <div className={css(styles.container)}>
+      <SuperAdminLogin onLoginComplete={handleOnSuperadminLogin} />
       <div className={css(styles.logoDiv)}>
         <img
           src="https://politics-rewired.surge.sh/spoke_logo.svg"
