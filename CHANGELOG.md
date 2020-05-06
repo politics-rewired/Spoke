@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.7](https://github.com/politics-rewired/spoke/compare/v1.9.6...v1.9.7) (2020-05-06)
+
+
+### Bug Fixes
+
+* use component comparison from react-hot-loader ([be9ac6b](https://github.com/politics-rewired/spoke/commit/be9ac6baa947b5c6aa86105844edd26f163d9040))
+
 ### [1.9.6](https://github.com/politics-rewired/spoke/compare/v1.9.5...v1.9.6) (2020-05-05)
 
 
