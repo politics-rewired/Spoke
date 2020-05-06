@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+import { areComponentsEqual } from "react-hot-loader";
 import Form from "react-formal";
 import GSSubmitButton from "./GSSubmitButton";
 import theme from "../../styles/theme";
@@ -48,7 +49,7 @@ export default class GSForm extends React.Component {
     return React.Children.map(children, child => {
       if (!React.isValidElement(child)) {
         return child;
-      } else if (child.type.prototype instanceof Form.Field) {
+      } else if (areComponentsEqual(child.type, Form.Field)) {
         const name = child.props.name;
         let error = this.state.formErrors ? this.state.formErrors[name] : null;
         let clonedElement = child;
@@ -63,7 +64,7 @@ export default class GSForm extends React.Component {
         return React.cloneElement(clonedElement, {
           events: ["onBlur"]
         });
-      } else if (child.type.prototype instanceof Form.Button) {
+      } else if (areComponentsEqual(child.type, Form.Button)) {
         return React.cloneElement(child, {
           component: GSSubmitButton,
           isSubmitting: this.state.isSubmitting
