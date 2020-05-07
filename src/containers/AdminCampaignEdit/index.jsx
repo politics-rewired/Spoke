@@ -23,6 +23,7 @@ import { dataTest, camelCase } from "../../lib/attributes";
 import theme from "../../styles/theme";
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
 import CampaignContactsForm from "./sections/CampaignContactsForm";
+import CampaignFilterLandlinesForm from "./sections/CampaignFilterLandlinesForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
 import CampaignOverlapManager from "./sections/CampaignOverlapManager";
 import CampaignInteractionStepsForm from "./sections/CampaignInteractionStepsForm";
@@ -408,6 +409,24 @@ class AdminCampaignEdit extends React.Component {
             campaign => campaign.id != this.props.match.params.campaignId
           )
         }
+      },
+      {
+        title: "Filtering Landlines",
+        content: CampaignFilterLandlinesForm,
+        isStandalone: true,
+        keys: ["landlinesFiltered"],
+        checkCompleted: () => this.state.campaignFormValues.contactsCount > 0,
+        checkSaved: () =>
+          // Must be false for save to be tried
+          // Must be true for green bar, etc.
+          // This is a little awkward because neither of these fields are 'updated'
+          //   from the campaignData query, so we must delete them after save/update
+          //   at the right moment (see componentWillReceiveProps)
+          this.state.campaignFormValues.contactsCount > 0 &&
+          this.state.campaignFormValues.hasOwnProperty("contacts") === false,
+        blocksStarting: false,
+        expandAfterCampaignStarts: false,
+        extraProps: {}
       },
       {
         title: "Contact Overlap Management",

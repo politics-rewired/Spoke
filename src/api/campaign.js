@@ -65,6 +65,7 @@ export const schema = `
     timezone: String
     createdAt: Date
     previewUrl: String
+    landlinesFiltered: Boolean!
   }
 
   type CampaignsList {

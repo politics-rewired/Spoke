@@ -20,7 +20,8 @@ import {
   assignTexters,
   exportCampaign,
   loadContactsFromDataWarehouse,
-  uploadContacts
+  uploadContacts,
+  filterLandlines
 } from "../../workers/jobs";
 import { datawarehouse, r, cacheableData } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
@@ -1292,6 +1293,47 @@ const rootMutations = {
         });
       }
       return editCampaign(id, campaign, loaders, user, origCampaign);
+    },
+
+    filterLandlines: async (_, { id }, { user, loaders }) => {
+      const campaign = await r
+        .knex("campaign")
+        .where({ id })
+        .first();
+
+      await accessRequired(user, campaign.organization_id, "ADMIN");
+
+      if (campaign.is_started) {
+        throw new GraphQLError({
+          status: 400,
+          message: "Not allowed to filter landlines after the campaign starts"
+        });
+      }
+
+      if (campaign.landlines_filtered) {
+        throw new GraphQLError({
+          status: 400,
+          message: "Landlines already filtered"
+        });
+      }
+
+      const [job] = await r
+        .knex("job_request")
+        .insert({
+          queue_name: `${id}:edit_campaign`,
+          job_type: "filter_landlines",
+          locks_queue: true,
+          assigned: JOBS_SAME_PROCESS, // can get called immediately, below
+          campaign_id: id,
+          payload: ""
+        })
+        .returning("*");
+
+      if (JOBS_SAME_PROCESS) {
+        filterLandlines(job);
+      }
+
+      return loaders.campaign.load(id);
     },
 
     bulkUpdateScript: async (
