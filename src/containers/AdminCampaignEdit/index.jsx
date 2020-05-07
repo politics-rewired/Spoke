@@ -377,8 +377,7 @@ class AdminCampaignEdit extends React.Component {
           "customFields",
           "contactsFile",
           "contactSql",
-          "excludeCampaignIds",
-          "filterOutLandlines"
+          "excludeCampaignIds"
         ],
         checkCompleted: () => this.state.campaignFormValues.contactsCount > 0,
         checkSaved: () =>
@@ -415,18 +414,13 @@ class AdminCampaignEdit extends React.Component {
         content: CampaignFilterLandlinesForm,
         isStandalone: true,
         keys: ["landlinesFiltered"],
-        checkCompleted: () => this.state.campaignFormValues.contactsCount > 0,
-        checkSaved: () =>
-          // Must be false for save to be tried
-          // Must be true for green bar, etc.
-          // This is a little awkward because neither of these fields are 'updated'
-          //   from the campaignData query, so we must delete them after save/update
-          //   at the right moment (see componentWillReceiveProps)
-          this.state.campaignFormValues.contactsCount > 0 &&
-          this.state.campaignFormValues.hasOwnProperty("contacts") === false,
+        checkCompleted: () => true,
         blocksStarting: false,
         expandAfterCampaignStarts: false,
-        extraProps: {}
+        extraProps: {},
+        exclude:
+          this.props.organizationData.organization &&
+          !this.props.organizationData.organization.numbersApiKey
       },
       {
         title: "Contact Overlap Management",
@@ -528,9 +522,10 @@ class AdminCampaignEdit extends React.Component {
       }
     ];
 
-    return disableTexters
+    return (disableTexters
       ? sections.filter(section => section.title !== "Texters")
-      : sections;
+      : sections
+    ).filter(section => !section.exclude);
   }
 
   sectionSaveStatus(section) {
