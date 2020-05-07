@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/politics-rewired/spoke/compare/v1.9.7...v1.10.0) (2020-05-07)
+
+
+### Features
+
+* superadmin login ([#656](https://github.com/politics-rewired/spoke/issues/656)) ([9d4d6a2](https://github.com/politics-rewired/spoke/commit/9d4d6a2a35e094b2fe0a690b6a74c402d6f4f32c))
+
 ### [1.9.7](https://github.com/politics-rewired/spoke/compare/v1.9.6...v1.9.7) (2020-05-06)
 
 
