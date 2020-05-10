@@ -355,22 +355,20 @@ export async function filterLandlines(job) {
   const numbersRequest = await numbersClient.lookup.createRequest();
 
   let highestId = 0;
-  while (true) {
-    const nextBatch = await r
+  let nextBatch = [];
+
+  do {
+    nextBatch = await r
       .knex("campaign_contact")
       .where({ campaign_id })
       .where("id", ">", highestId)
       .orderBy("id", "asc")
       .select("id", "cell");
 
-    if (nextBatch.length === 0) {
-      break;
-    }
-
     highestId = nextBatch[nextBatch.length - 1].id;
 
     numbersRequest.addPhoneNumbers(nextBatch.map(cc => cc.cell));
-  }
+  } while (nextBatch.length > 0);
 
   await numbersRequest.close();
 

@@ -75,13 +75,16 @@ class FilterLandlinesForm extends React.Component<Props, State> {
           subtitle={
             !landlinesFiltered && (
             <span>
-              Filtering landlines or otherwise un-textable numbers will cost
+              <p>
+                Filtering landlines or otherwise un-textable numbers will cost
               $.0025 (1/4 cent) per phone number, but as long as more than a
               third of your phone numbers are likely to be invalid, it will save
               you money.
-              <br /> <br />
+              </p>
+                <p>
               If you're pretty sure your phone numbers are valid, skip this
               section!
+              </p>
             </span>
             )
           }
@@ -137,7 +140,7 @@ const queries = {
 };
 
 const mutations = {
-  filterLandlines: (ownProps: Props) => (payload: FilterLandlinesValues) => ({
+  filterLandlines: (ownProps: Props) => () => ({
     mutation: gql`
       mutation filterLandlines($campaignId: String!) {
         filterLandlines(id: $campaignId) {
