@@ -2,8 +2,10 @@ import React from "react";
 import gql from "graphql-tag";
 import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
+
 import RaisedButton from "material-ui/RaisedButton";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
+
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import {
