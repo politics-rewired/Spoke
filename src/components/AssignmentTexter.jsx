@@ -290,6 +290,10 @@ class AssignmentTexter extends React.Component {
         this.props.mutations
           .sendMessage(payload.message, contact_id)
           .then(catchError)
+          .then(response => {
+            const { id, messages } = response.data.sendMessage;
+            this.state.contactCache[id].messages = messages;
+          })
           .catch(this.handleSendMessageError(contact_id))
       );
 
