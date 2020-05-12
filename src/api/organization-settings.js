@@ -3,6 +3,8 @@ export const schema = `
     defaulTexterApprovalStatus: RequestAutoApprove
     optOutMessage: String
     numbersApiKey: String
+    showContactLastName: Boolean
+    showContactCell: Boolean
   }
 
   type OranizationSettings {
@@ -10,5 +12,7 @@ export const schema = `
     defaulTexterApprovalStatus: RequestAutoApprove!
     optOutMessage: String
     numbersApiKey: String
+    showContactLastName: Boolean
+    showContactCell: Boolean
   }
 `;

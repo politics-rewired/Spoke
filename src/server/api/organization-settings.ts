@@ -8,12 +8,16 @@ interface IOrganizationSettings {
   defaulTexterApprovalStatus: string;
   optOutMessage: string;
   numbersApiKey?: string;
+  showContactLastName: boolean;
+  showContactCell: boolean;
 }
 
 const SETTINGS_PERMISSIONS: { [key in keyof IOrganizationSettings]: string } = {
   defaulTexterApprovalStatus: "OWNER",
   optOutMessage: "OWNER",
-  numbersApiKey: "OWNER"
+  numbersApiKey: "OWNER",
+  showContactLastName: "TEXTER",
+  showContactCell: "TEXTER"
 };
 
 const SETTINGS_NAMES: { [key: string]: string } = {
@@ -25,6 +29,8 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   optOutMessage:
     config.OPT_OUT_MESSAGE ??
     "I'm opting you out of texts immediately. Have a great day.",
+  showContactLastName: false,
+  showContactCell: false
 };
 
 const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
@@ -45,7 +51,7 @@ const SETTINGS_VALIDATORS: {
 const getOrgFeature = (
   featureName: keyof IOrganizationSettings,
   rawFeatures = "{}"
-): string | null => {
+): string | boolean | null => {
   const defaultValue = SETTINGS_DEFAULTS[featureName];
   const finalName = SETTINGS_NAMES[featureName] ?? featureName;
   try {
@@ -66,7 +72,7 @@ interface SettingsResolverType {
     organization: { id: string; features: string },
     _: any,
     context: { user: { id: string } }
-  ): Promise<string | null>;
+  ): Promise<string | boolean | null>;
 }
 
 const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
@@ -89,7 +95,9 @@ export const resolvers = {
     ...settingResolvers([
       "defaulTexterApprovalStatus",
       "optOutMessage",
-      "numbersApiKey"
+      "numbersApiKey",
+      "showContactLastName",
+      "showContactCell"
     ])
   }
 };
