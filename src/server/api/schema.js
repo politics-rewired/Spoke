@@ -1453,11 +1453,18 @@ const rootMutations = {
 
         const newOrganization = insertResult[0];
 
-        await trx("user_organization").insert({
-          role: "OWNER",
-          user_id: userId,
-          organization_id: newOrganization.id
-        });
+        const superadminIds = await trx("user")
+          .where({ is_superadmin: true })
+          .pluck("id");
+        const ownerIds = new Set(superadminIds.concat([parseInt(userId)]));
+
+        await trx("user_organization").insert(
+          [...ownerIds].map(ownerId => ({
+            role: "OWNER",
+            user_id: ownerId,
+            organization_id: newOrganization.id
+          }))
+        );
 
         await trx("invite")
           .update({
