@@ -7,7 +7,6 @@ import { StyleSheet, css } from "aphrodite";
 import FileDrop from "react-file-drop";
 import RaisedButton from "material-ui/RaisedButton";
 import Subheader from "material-ui/Subheader";
-import Toggle from "material-ui/Toggle";
 import { ListItem, List } from "material-ui/List";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
 import UploadIcon from "material-ui/svg-icons/file/file-upload";
@@ -152,11 +151,6 @@ class CampaignContactsForm extends React.Component<
   handleOnChangeExcludedCamapignIds = (selectedCampaignIds: string[]) =>
     this.setState({ selectedCampaignIds });
 
-  handleOnToggleFilterLandlines = (
-    _ev: React.MouseEvent<{}>,
-    filterOutLandlines: boolean
-  ) => this.setState({ filterOutLandlines });
-
   handleOnSubmit = async () => {
     const {
       contactsSql,
@@ -206,10 +200,8 @@ class CampaignContactsForm extends React.Component<
     } = campaignData.campaign;
 
     const {
-      numbersApiKey,
       campaigns: { campaigns: allCampaigns }
     } = organizationData.organization;
-    const canFilterLandlines = !!numbersApiKey;
 
     const allOtherCampaigns = allCampaigns.filter(({ id }) => id != campaignId);
 
@@ -228,14 +220,6 @@ class CampaignContactsForm extends React.Component<
           selectedCampaignIds={selectedCampaignIds}
           onChangeExcludedCamapignIds={this.handleOnChangeExcludedCamapignIds}
         />
-        {canFilterLandlines && (
-          <Toggle
-            label="Filter out landlines?"
-            style={inlineStyles.filterLandlinesToggle}
-            toggled={filterOutLandlines}
-            onToggle={this.handleOnToggleFilterLandlines}
-          />
-        )}
         <FileDrop
           onDrop={this.handleFileDrop}
           targetClassName={

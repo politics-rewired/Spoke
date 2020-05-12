@@ -228,7 +228,8 @@ export const resolvers = {
       "textingHoursEnd",
       "isAutoassignEnabled",
       "timezone",
-      "createdAt"
+      "createdAt",
+      "landlinesFiltered"
     ]),
     readiness: campaign => campaign,
     repliesStaleAfter: campaign => campaign.replies_stale_after_minutes,

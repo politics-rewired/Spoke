@@ -157,37 +157,28 @@ export async function uploadContacts(job) {
     .knex("campaign")
     .where({ id: campaignId })
     .first();
+
   const organization = await r
     .knex("organization")
     .where({ id: campaign.organization_id })
     .first();
+
   const orgFeatures = JSON.parse(organization.features || "{}");
 
-  const numbersApiKey = orgFeatures.numbersApiKey;
-  let numbersClient, numbersRequest, landlinesFilteredOut;
-
-  await r
-    .knex("campaign_contact")
-    .where({ campaign_id: campaignId })
-    .del();
+  await Promise.all([
+    r
+      .knex("campaign_contact")
+      .where({ campaign_id: campaignId })
+      .del(),
+    r
+      .knex("campaign")
+      .update({ landlines_filtered: false })
+      .where({ id: campaignId })
+  ]);
 
   let jobPayload = await gunzip(new Buffer(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
-  let {
-    contacts,
-    excludeCampaignIds = [],
-    filterOutLandlines = false,
-    validationStats
-  } = jobPayload;
-
-  const shouldRemoveLandlines = filterOutLandlines && numbersApiKey;
-  if (shouldRemoveLandlines) {
-    logger.info(
-      "Initializing Numbers connection - we are filtering out landlines"
-    );
-    numbersClient = new NumbersClient({ apiKey: numbersApiKey });
-    numbersRequest = await numbersClient.lookup.createRequest();
-  }
+  let { contacts, excludeCampaignIds = [], validationStats } = jobPayload;
 
   const maxContacts = parseInt(
     orgFeatures.hasOwnProperty("maxContacts")
@@ -225,9 +216,6 @@ export async function uploadContacts(job) {
 
           try {
             await trx("campaign_contact").insert(chunk);
-            if (shouldRemoveLandlines) {
-              await numbersRequest.addPhoneNumbers(chunk.map(c => c.cell));
-            }
           } catch (exc) {
             logger.error("Error inserting contacts: ", exc);
             throw exc;
@@ -242,37 +230,6 @@ export async function uploadContacts(job) {
         trx,
         campaignId,
         campaign.organization_id
-      );
-    }
-
-    if (shouldRemoveLandlines) {
-      await numbersRequest.close();
-      await numbersRequest.waitUntilDone({
-        onProgressUpdate: async percentComplete => {
-          await updateJob(job, 100 + Math.round(percentComplete * 100));
-        }
-      });
-
-      landlinesFilteredOut = 0;
-
-      const deleteNumbers = async numbers => {
-        landlinesFilteredOut += numbers.length;
-        await trx("campaign_contact")
-          .where("campaign_id", campaignId)
-          .whereIn("cell", numbers.map(n => n.phoneNumber))
-          .delete();
-      };
-
-      await numbersRequest.landlines.eachPage({
-        onPage: deleteNumbers
-      });
-
-      await numbersRequest.invalids.eachPage({
-        onPage: deleteNumbers
-      });
-
-      resultMessages.push(
-        `Number of contacts excluded because they were landlines: ${landlinesFilteredOut}`
       );
     }
 
@@ -373,7 +330,92 @@ export async function uploadContacts(job) {
       .where("id", job.id)
       .update({ result_message: message });
   }
+
   await cacheableData.campaign.reload(campaignId);
+}
+
+export async function filterLandlines(job) {
+  const { campaign_id } = job;
+
+  const organization = await r
+    .knex("organization")
+    .join("campaign", "campaign.organization_id", "=", "organization.id")
+    .where({ "campaign.id": job.campaign_id })
+    .first("features");
+
+  const orgFeatures = JSON.parse(organization.features || "{}");
+
+  const numbersApiKey = orgFeatures.numbersApiKey;
+
+  if (!numbersApiKey) {
+    throw new Error("Cannot filter landlines - no numbers api key configured");
+  }
+
+  const numbersClient = new NumbersClient({ apiKey: numbersApiKey });
+  const numbersRequest = await numbersClient.lookup.createRequest();
+
+  let highestId = 0;
+  let nextBatch = [];
+
+  do {
+    nextBatch = await r
+      .knex("campaign_contact")
+      .where({ campaign_id })
+      .where("id", ">", highestId)
+      .orderBy("id", "asc")
+      .select("id", "cell");
+
+    highestId = nextBatch[nextBatch.length - 1].id;
+
+    numbersRequest.addPhoneNumbers(nextBatch.map(cc => cc.cell));
+  } while (nextBatch.length > 0);
+
+  await numbersRequest.close();
+
+  await numbersRequest.waitUntilDone({
+    onProgressUpdate: async percentComplete => {
+      await r
+        .knex("job_request")
+        .where({ id: job.id })
+        .update({
+          status: Math.round(percentComplete * 100),
+          updated_at: r.knex.fn.now()
+        });
+    }
+  });
+
+  let landlinesFilteredOut = 0;
+
+  const deleteNumbers = async numbers => {
+    landlinesFilteredOut += numbers.length;
+    await r
+      .knex("campaign_contact")
+      .where("campaign_id", campaign_id)
+      .whereIn("cell", numbers.map(n => n.phoneNumber))
+      .delete();
+  };
+
+  await numbersRequest.landlines.eachPage({
+    onPage: deleteNumbers
+  });
+
+  await numbersRequest.invalids.eachPage({
+    onPage: deleteNumbers
+  });
+
+  // Setting result_message marks the job as complete
+  await Promise.all([
+    r
+      .knex("job_request")
+      .where({ id: job.id })
+      .update({
+        result_message: `${landlinesFilteredOut} contacts removed because they were landlines or invalid`
+      }),
+    r
+      .knex("campaign")
+      .update({ landlines_filtered: true })
+      .where({ id: campaign_id })
+  ]);
 }
 
 export async function loadContactsFromDataWarehouseFragment(jobEvent) {

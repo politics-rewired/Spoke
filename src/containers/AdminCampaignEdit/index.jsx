@@ -23,6 +23,7 @@ import { dataTest, camelCase } from "../../lib/attributes";
 import theme from "../../styles/theme";
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
 import CampaignContactsForm from "./sections/CampaignContactsForm";
+import CampaignFilterLandlinesForm from "./sections/CampaignFilterLandlinesForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
 import CampaignOverlapManager from "./sections/CampaignOverlapManager";
 import CampaignInteractionStepsForm from "./sections/CampaignInteractionStepsForm";
@@ -376,8 +377,7 @@ class AdminCampaignEdit extends React.Component {
           "customFields",
           "contactsFile",
           "contactSql",
-          "excludeCampaignIds",
-          "filterOutLandlines"
+          "excludeCampaignIds"
         ],
         checkCompleted: () => this.state.campaignFormValues.contactsCount > 0,
         checkSaved: () =>
@@ -408,6 +408,19 @@ class AdminCampaignEdit extends React.Component {
             campaign => campaign.id != this.props.match.params.campaignId
           )
         }
+      },
+      {
+        title: "Filtering Landlines",
+        content: CampaignFilterLandlinesForm,
+        isStandalone: true,
+        keys: ["landlinesFiltered"],
+        checkCompleted: () => true,
+        blocksStarting: false,
+        expandAfterCampaignStarts: false,
+        extraProps: {},
+        exclude:
+          this.props.organizationData.organization &&
+          !this.props.organizationData.organization.numbersApiKey
       },
       {
         title: "Contact Overlap Management",
@@ -509,9 +522,10 @@ class AdminCampaignEdit extends React.Component {
       }
     ];
 
-    return disableTexters
+    return (disableTexters
       ? sections.filter(section => section.title !== "Texters")
-      : sections;
+      : sections
+    ).filter(section => !section.exclude);
   }
 
   sectionSaveStatus(section) {
