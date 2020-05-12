@@ -58,14 +58,15 @@ class TexterTodo extends React.Component {
 
   assignContactsIfNeeded = async (checkServer = false) => {
     const { assignment } = this.props.data;
-    if (assignment.contacts.length === 0 || checkServer) {
+    const { contacts } = this.props.contacts.assignment;
+    if (contacts.length === 0 || checkServer) {
       if (assignment.campaign.useDynamicAssignment) {
         const didAddContacts = (await this.props.mutations.findNewCampaignContact(
           assignment.id,
           1
         )).data.findNewCampaignContact.found;
         if (didAddContacts) {
-          this.props.data.refetch();
+          this.props.contacts.refetch();
           return;
         }
       }
@@ -84,8 +85,9 @@ class TexterTodo extends React.Component {
   render() {
     const { assignment } = this.props.data;
     const { organizationId } = this.props.match.params;
-    const contactIds = assignment.contacts.map(contact => contact.id);
-    const allContactsCount = assignment.allContactsCount;
+    const { contacts, allContactsCount } = this.props.contacts.assignment;
+    const contactIds = contacts.map(contact => contact.id);
+
     return (
       <AssignmentTexter
         assignment={assignment}
@@ -113,10 +115,7 @@ TexterTodo.propTypes = {
 const queries = {
   data: {
     query: gql`
-      query getContacts(
-        $assignmentId: String!
-        $contactsFilter: ContactsFilter!
-      ) {
+      query getTexterAssignmentData($assignmentId: String!) {
         assignment(id: $assignmentId) {
           id
           userCannedResponses {
@@ -167,6 +166,24 @@ const queries = {
               }
             }
           }
+        }
+      }
+    `,
+    options: ownProps => ({
+      variables: {
+        assignmentId: ownProps.match.params.assignmentId
+      },
+      pollInterval: 20000
+    })
+  },
+  contacts: {
+    query: gql`
+      query getTexterAssignmentContactIds(
+        $assignmentId: String!
+        $contactsFilter: ContactsFilter!
+      ) {
+        assignment(id: $assignmentId) {
+          id
           contacts(contactsFilter: $contactsFilter) {
             id
           }
