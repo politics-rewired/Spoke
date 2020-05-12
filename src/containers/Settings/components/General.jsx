@@ -129,6 +129,16 @@ class Settings extends React.Component {
   handleEditOptOutMessage = ({ optOutMessage }) =>
     this.editSettings("Opt Out Messasge", { optOutMessage });
 
+  handleEditShowContactLastName = async (event, isToggled) =>
+    this.editSettings("Show Contact Last Name", {
+      showContactLastName: isToggled
+    });
+
+  handleEditShowContactCell = async (event, isToggled) =>
+    this.editSettings("Show Contact Cell Phone", {
+      showContactCell: isToggled
+    });
+
   handleDismissError = () => this.setState({ error: undefined });
 
   renderTextingHoursForm() {
@@ -192,7 +202,9 @@ class Settings extends React.Component {
     const {
       optOutMessage,
       numbersApiKey,
-      defaulTexterApprovalStatus
+      defaulTexterApprovalStatus,
+      showContactLastName,
+      showContactCell
     } = organization.settings;
 
     const formSchema = yup.object({
@@ -342,6 +354,27 @@ class Settings extends React.Component {
             </CardActions>
           </GSForm>
         </Card>
+
+        <Card className={css(styles.sectionCard)}>
+          <CardHeader title="Contact Information Display" />
+          <CardText>
+            <p>
+              Choose how much information about a contact is displayed to the
+              texter.
+            </p>
+            <Toggle
+              toggled={showContactLastName}
+              label="Show contact's last name?"
+              onToggle={this.handleEditShowContactLastName}
+            />
+            <Toggle
+              toggled={showContactCell}
+              label="Show contact's cell phone number?"
+              onToggle={this.handleEditShowContactCell}
+            />
+          </CardText>
+        </Card>
+
         <Dialog
           title="Error Saving Settings"
           open={error !== undefined}
@@ -420,6 +453,8 @@ const mutations = {
           optOutMessage
           numbersApiKey
           defaulTexterApprovalStatus
+          showContactLastName
+          showContactCell
         }
       }
     `,
@@ -445,6 +480,8 @@ const queries = {
             optOutMessage
             numbersApiKey
             defaulTexterApprovalStatus
+            showContactLastName
+            showContactCell
           }
         }
       }
@@ -452,8 +489,7 @@ const queries = {
     options: ownProps => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
-      },
-      fetchPolicy: "cache-and-network"
+      }
     })
   }
 };
