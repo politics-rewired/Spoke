@@ -75,6 +75,8 @@ import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
+import { resolvers as externalListResolvers } from "./external-list";
+import { resolvers as externalSystemResolvers } from "./external-system";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -3091,6 +3093,31 @@ const rootMutations = {
         .del();
 
       return true;
+    },
+    createExternalSystem: async (
+      _,
+      { organizationId, externalSystem },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+
+      const worker = await getWorker();
+
+      await worker.setSecret(truncatedKey, externalSystem.apiKey);
+
+      const [externalSystem] = await r
+        .knex("external_system")
+        .insert({
+          name: externalSystem.name,
+          type: externalSystem.type,
+          organization_id: parseInt(organizationId),
+          api_key_ref: truncatedKey
+        })
+        .returning("*");
+
+      return externalSystem;
     }
   }
 };
@@ -3360,6 +3387,21 @@ const rootResolvers = {
         token: t.token,
         organizationId
       }));
+    },
+    externalSystems: async (_, { organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      return r
+        .reader("external_system")
+        .where({ organization_id: parseInt(organizationId) });
+    },
+    externalLists: async (_, { organizationId, systemId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      return r.reader("external_list").where({
+        organization_id: parseInt(organizationId),
+        system_id: systemId
+      });
     }
   }
 };
@@ -3384,6 +3426,8 @@ export const resolvers = {
   ...inviteResolvers,
   ...linkDomainResolvers,
   ...trollbotResolvers,
+  ...externalListResolvers,
+  ...externalSystemResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },

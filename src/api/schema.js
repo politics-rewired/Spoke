@@ -19,6 +19,8 @@ import { schema as teamSchema } from "./team";
 import { schema as trollbotSchema } from "./trollbot";
 import { schema as paginationSchema } from "./pagination";
 import { schema as membershipSchema } from "./organization-membership";
+import { schema as externalSystemSchema } from "./external-system";
+import { schema as externalListSchema } from "./external-list";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -323,5 +325,7 @@ export const schema = [
   conversationSchema,
   tagSchema,
   teamSchema,
-  trollbotSchema
+  trollbotSchema,
+  externalSystemSchema,
+  externalListSchema
 ];

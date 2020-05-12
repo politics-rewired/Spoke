@@ -1,15 +1,5 @@
-import {
-  makeWorkerUtils,
-  run,
-  LogFunctionFactory,
-  Logger,
-  Runner,
-  WorkerUtils
-} from "graphile-worker";
-import {
-  run as runSchedule,
-  Runner as ScheduleRunner
-} from "graphile-scheduler";
+import { LogFunctionFactory, Logger, Runner } from "graphile-worker";
+import { run, loadYaml } from "pg-compose";
 
 import { config } from "../config";
 import logger from "../logger";
@@ -20,11 +10,11 @@ import { releaseStaleReplies } from "./tasks/release-stale-replies";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
+
 const graphileLogger = new Logger(logFactory);
 
-let runner: Runner | undefined = undefined;
-let scheduler: ScheduleRunner | undefined = undefined;
-let runnerSemaphore = false;
+let worker: Runner | undefined = undefined;
+let workerSemaphore = false;
 
 // https://github.com/brianc/node-postgres/tree/master/packages/pg-pool#note
 const params = url.parse(config.DATABASE_URL);
@@ -41,60 +31,33 @@ const poolConfig = {
 
 const workerPool = new Pool(poolConfig);
 
-export const getRunner = async (
-  attempt = 0
-): Promise<{ runner: Runner; scheduler: ScheduleRunner }> => {
-  // We are the first one to request the runner
-  if (!runner && !runnerSemaphore) {
-    runnerSemaphore = true;
-    runner = await run({
+export const getWorker = async (attempt = 0): Promise<Runner> => {
+  const m = await loadYaml({ include: `${__dirname}/pg-compose/**/*.yaml` });
+
+  m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
+  m.taskList!["release-stale-replies"] = releaseStaleReplies;
+
+  m.cronJobs!.push({
+    name: "release-stale-replies",
+    task_name: "release-stale-replies",
+    pattern: "*/5 * * * *",
+    time_zone: config.TZ
+  });
+
+  if (!worker) {
+    workerSemaphore = true;
+
+    worker = await run(m, {
       pgPool: workerPool,
       concurrency: config.WORKER_CONCURRENCY,
       logger: graphileLogger,
       // Signals are handled by Terminus
       noHandleSignals: true,
-      pollInterval: 1000,
-      taskList: {
-        "handle-autoassignment-request": handleAutoassignmentRequest
-      }
-    });
-
-    scheduler = await runSchedule({
-      pgPool: new Pool({ ...poolConfig }),
-      logger: graphileLogger,
-      // Signals are handled by Terminus
-      noHandleSignals: true,
-      schedules: [
-        {
-          name: "release-stale-replies",
-          pattern: "*/5 * * * *",
-          timeZone: config.TZ,
-          task: releaseStaleReplies
-        }
-      ]
+      pollInterval: 1000
     });
   }
+
   // Someone beat us to the punch of initializing the runner
-  else if (!runner && runnerSemaphore) {
-    if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
-    await new Promise((resolve, reject) => setTimeout(() => resolve(), 100));
-    return getRunner(attempt + 1);
-  }
-
-  return { runner: runner!, scheduler: scheduler! };
-};
-
-let worker: WorkerUtils | undefined = undefined;
-let workerSemaphore = false;
-export const getWorker = async (attempt = 0): Promise<WorkerUtils> => {
-  // We are the first one to request the worker
-  if (!worker && !workerSemaphore) {
-    workerSemaphore = true;
-    worker = await makeWorkerUtils({
-      pgPool: workerPool
-    });
-  }
-  // Someone beat us to the punch of initializing the worker
   else if (!worker && workerSemaphore) {
     if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
     await new Promise((resolve, reject) => setTimeout(() => resolve(), 100));
