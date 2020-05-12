@@ -1,6 +1,7 @@
 import { r } from "../models";
 import { organizationCache } from "../models/cacheable_queries/organization";
 import { config } from "../../config";
+import { accessRequired } from "./errors";
 import { RequestAutoApproveType } from "../../api/organization-membership";
 
 interface IOrganizationSettings {
@@ -8,6 +9,12 @@ interface IOrganizationSettings {
   optOutMessage: string;
   numbersApiKey?: string;
 }
+
+const SETTINGS_PERMISSIONS: { [key in keyof IOrganizationSettings]: string } = {
+  defaulTexterApprovalStatus: "OWNER",
+  optOutMessage: "OWNER",
+  numbersApiKey: "OWNER"
+};
 
 const SETTINGS_NAMES: { [key: string]: string } = {
   optOutMessage: "opt_out_message"
@@ -54,10 +61,25 @@ const getOrgFeature = (
   }
 };
 
+interface SettingsResolverType {
+  (
+    organization: { id: string; features: string },
+    _: any,
+    context: { user: { id: string } }
+  ): Promise<string | null>;
+}
+
 const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
   settingNames.reduce((accumulator, settingName) => {
-    const resolver = ({ features }: { features: string }) =>
-      getOrgFeature(settingName, features);
+    const resolver: SettingsResolverType = async (
+      { id: organizationId, features },
+      _,
+      { user }
+    ) => {
+      const permission = SETTINGS_PERMISSIONS[settingName];
+      await accessRequired(user, organizationId, permission);
+      return getOrgFeature(settingName, features);
+    };
     return Object.assign(accumulator, { [settingName]: resolver });
   }, {});
 
