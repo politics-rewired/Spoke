@@ -183,8 +183,7 @@ const queries = {
         },
         assignmentId: ownProps.match.params.assignmentId
       },
-      fetchPolicy: "network-only",
-      pollInterval: 20000
+      fetchPolicy: "network-only"
     })
   }
 };
