@@ -16,8 +16,8 @@ const SETTINGS_NAMES: { [key: string]: string } = {
 const SETTINGS_DEFAULTS: IOrganizationSettings = {
   defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED,
   optOutMessage:
-    config.OPT_OUT_MESSAGE ||
-    "I'm opting you out of texts immediately. Have a great day."
+    config.OPT_OUT_MESSAGE ??
+    "I'm opting you out of texts immediately. Have a great day.",
 };
 
 const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
@@ -40,17 +40,17 @@ const getOrgFeature = (
   rawFeatures = "{}"
 ): string | null => {
   const defaultValue = SETTINGS_DEFAULTS[featureName];
-  const finalName = SETTINGS_NAMES[featureName] || featureName;
+  const finalName = SETTINGS_NAMES[featureName] ?? featureName;
   try {
     const features = JSON.parse(rawFeatures);
-    const value = features[finalName] || defaultValue || null;
+    const value = features[finalName] ?? defaultValue ?? null;
     const transformer = SETTINGS_TRANSFORMERS[featureName];
     if (transformer && value) {
       return SETTINGS_TRANSFORMERS[featureName](value);
     }
     return value;
   } catch (_err) {
-    return SETTINGS_DEFAULTS[featureName] || null;
+    return SETTINGS_DEFAULTS[featureName] ?? null;
   }
 };
 
@@ -92,7 +92,7 @@ export const updateOrganizationSettings = async (
     if (validator && value) {
       validator(value);
     }
-    const dbKey = SETTINGS_NAMES[key] || key;
+    const dbKey = SETTINGS_NAMES[key] ?? key;
     return Object.assign(acc, { [dbKey]: value });
   }, currentFeatures);
 
