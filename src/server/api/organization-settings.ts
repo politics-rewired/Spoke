@@ -1,13 +1,24 @@
 import { r } from "../models";
 import { organizationCache } from "../models/cacheable_queries/organization";
 import { config } from "../../config";
+import { accessRequired } from "./errors";
 import { RequestAutoApproveType } from "../../api/organization-membership";
 
 interface IOrganizationSettings {
   defaulTexterApprovalStatus: string;
   optOutMessage: string;
   numbersApiKey?: string;
+  showContactLastName: boolean;
+  showContactCell: boolean;
 }
+
+const SETTINGS_PERMISSIONS: { [key in keyof IOrganizationSettings]: string } = {
+  defaulTexterApprovalStatus: "OWNER",
+  optOutMessage: "OWNER",
+  numbersApiKey: "OWNER",
+  showContactLastName: "TEXTER",
+  showContactCell: "TEXTER"
+};
 
 const SETTINGS_NAMES: { [key: string]: string } = {
   optOutMessage: "opt_out_message"
@@ -16,8 +27,10 @@ const SETTINGS_NAMES: { [key: string]: string } = {
 const SETTINGS_DEFAULTS: IOrganizationSettings = {
   defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED,
   optOutMessage:
-    config.OPT_OUT_MESSAGE ||
-    "I'm opting you out of texts immediately. Have a great day."
+    config.OPT_OUT_MESSAGE ??
+    "I'm opting you out of texts immediately. Have a great day.",
+  showContactLastName: false,
+  showContactCell: false
 };
 
 const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
@@ -38,26 +51,41 @@ const SETTINGS_VALIDATORS: {
 const getOrgFeature = (
   featureName: keyof IOrganizationSettings,
   rawFeatures = "{}"
-): string | null => {
+): string | boolean | null => {
   const defaultValue = SETTINGS_DEFAULTS[featureName];
-  const finalName = SETTINGS_NAMES[featureName] || featureName;
+  const finalName = SETTINGS_NAMES[featureName] ?? featureName;
   try {
     const features = JSON.parse(rawFeatures);
-    const value = features[finalName] || defaultValue || null;
+    const value = features[finalName] ?? defaultValue ?? null;
     const transformer = SETTINGS_TRANSFORMERS[featureName];
     if (transformer && value) {
       return SETTINGS_TRANSFORMERS[featureName](value);
     }
     return value;
   } catch (_err) {
-    return SETTINGS_DEFAULTS[featureName] || null;
+    return SETTINGS_DEFAULTS[featureName] ?? null;
   }
 };
 
+interface SettingsResolverType {
+  (
+    organization: { id: string; features: string },
+    _: any,
+    context: { user: { id: string } }
+  ): Promise<string | boolean | null>;
+}
+
 const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
   settingNames.reduce((accumulator, settingName) => {
-    const resolver = ({ features }: { features: string }) =>
-      getOrgFeature(settingName, features);
+    const resolver: SettingsResolverType = async (
+      { id: organizationId, features },
+      _,
+      { user }
+    ) => {
+      const permission = SETTINGS_PERMISSIONS[settingName];
+      await accessRequired(user, organizationId, permission);
+      return getOrgFeature(settingName, features);
+    };
     return Object.assign(accumulator, { [settingName]: resolver });
   }, {});
 
@@ -67,7 +95,9 @@ export const resolvers = {
     ...settingResolvers([
       "defaulTexterApprovalStatus",
       "optOutMessage",
-      "numbersApiKey"
+      "numbersApiKey",
+      "showContactLastName",
+      "showContactCell"
     ])
   }
 };
@@ -92,7 +122,7 @@ export const updateOrganizationSettings = async (
     if (validator && value) {
       validator(value);
     }
-    const dbKey = SETTINGS_NAMES[key] || key;
+    const dbKey = SETTINGS_NAMES[key] ?? key;
     return Object.assign(acc, { [dbKey]: value });
   }, currentFeatures);
 

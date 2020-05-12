@@ -378,7 +378,7 @@ class AssignmentTexter extends React.Component {
 
   renderTexter = () => {
     const { errors } = this.state;
-    const { assignment, organizationTags } = this.props;
+    const { assignment, organizationTags, contactSettings } = this.props;
     const { campaign, texter } = assignment;
     const contact = this.currentContact();
 
@@ -393,6 +393,7 @@ class AssignmentTexter extends React.Component {
         key={contact.id}
         assignment={assignment}
         contact={contact}
+        contactSettings={contactSettings.organization.settings}
         tags={organizationTags.organization.tagList}
         texter={texter}
         campaign={campaign}
@@ -450,6 +451,25 @@ AssignmentTexter.propTypes = {
 };
 
 const queries = {
+  contactSettings: {
+    query: gql`
+      query getOrganizationContactSettings($organizationId: String!) {
+        organization(id: $organizationId) {
+          id
+          settings {
+            id
+            showContactLastName
+            showContactCell
+          }
+        }
+      }
+    `,
+    options: ownProps => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      }
+    })
+  },
   organizationTags: {
     query: gql`
       query getTags($organizationId: String!) {

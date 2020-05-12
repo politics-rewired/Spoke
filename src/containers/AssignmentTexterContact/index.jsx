@@ -819,7 +819,7 @@ export class AssignmentTexterContact extends React.Component {
 
   render() {
     const { disabled } = this.state;
-    const { campaign, contact, onExitTexter } = this.props;
+    const { campaign, contact, contactSettings, onExitTexter } = this.props;
 
     const backgroundColor =
       contact.messageStatus === "needsResponse"
@@ -837,6 +837,7 @@ export class AssignmentTexterContact extends React.Component {
         <div className={css(styles.flexContainer)}>
           <div className={css(styles.fixedFlexSection)}>
             <TopFixedSection
+              contactSettings={contactSettings}
               campaign={campaign}
               contact={contact}
               onExitTexter={onExitTexter}
@@ -892,6 +893,7 @@ export class AssignmentTexterContact extends React.Component {
 AssignmentTexterContact.propTypes = {
   errors: PropTypes.array,
   contact: PropTypes.object,
+  contactSettings: PropTypes.object,
   tags: PropTypes.arrayOf(PropTypes.object).isRequired,
   campaign: PropTypes.object,
   assignment: PropTypes.object,
