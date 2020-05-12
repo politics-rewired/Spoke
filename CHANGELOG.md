@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/politics-rewired/spoke/compare/v1.10.0...v1.11.0) (2020-05-12)
+
+
+### Features
+
+* add contact display settings ([#661](https://github.com/politics-rewired/spoke/issues/661)) ([5aee74c](https://github.com/politics-rewired/spoke/commit/5aee74c329bd96600bff6a34e769c4e1c4e65eb8))
+* add superadmins as owners to new organizations ([#660](https://github.com/politics-rewired/spoke/issues/660)) ([751e4e4](https://github.com/politics-rewired/spoke/commit/751e4e4ba57e19fd3bd8f8453bd8d0b376de1970))
+* breakout landline filtration ([ac5d674](https://github.com/politics-rewired/spoke/commit/ac5d6748ba3d3f00af0503ad033ff291c8662fc4))
+
+
+### Bug Fixes
+
+* texter stuck loading ([#659](https://github.com/politics-rewired/spoke/issues/659)) ([f2b0ed5](https://github.com/politics-rewired/spoke/commit/f2b0ed550d4948e1320e2ea4853c18d8e98d0136))
+* update client-side messages cache after sending ([#658](https://github.com/politics-rewired/spoke/issues/658)) ([e5652f9](https://github.com/politics-rewired/spoke/commit/e5652f9b85d3a4553635380da0da34209e62865b))
+
 ## [1.10.0](https://github.com/politics-rewired/spoke/compare/v1.9.7...v1.10.0) (2020-05-07)
 
 
