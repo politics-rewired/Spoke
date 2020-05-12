@@ -18,12 +18,22 @@ const inlineStyles = {
 };
 
 const ContactToolbar = function ContactToolbar(props) {
-  const { campaign, campaignContact, rightToolbarIcon } = props;
+  const {
+    campaign,
+    campaignContact,
+    contactSettings,
+    rightToolbarIcon
+  } = props;
   const {
     location: { city, state },
     timezone: contactTimezone,
-    firstName
+    firstName,
+    lastName
   } = campaignContact;
+
+  const contactName = contactSettings.showContactLastName
+    ? `${firstName} ${lastName}`
+    : `${firstName}`;
 
   const timezone = contactTimezone || campaign.timezone;
   const localTime = moment()
@@ -35,9 +45,14 @@ const ContactToolbar = function ContactToolbar(props) {
     .join(", ")
     .trim();
 
+  const cell = contactSettings.showContactCell
+    ? campaignContact.cell
+    : undefined;
+  const detailComponents = [location, localTime, cell].filter(item => !!item);
+
   const contactDetailText = (
     <span>
-      {firstName} &nbsp;&nbsp; {location} {localTime}
+      {contactName} &nbsp;&nbsp; {detailComponents.join(" ")}
     </span>
   );
 
