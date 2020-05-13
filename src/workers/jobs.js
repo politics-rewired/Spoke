@@ -365,7 +365,7 @@ export async function filterLandlines(job) {
       .orderBy("id", "asc")
       .select("id", "cell");
 
-    highestId = nextBatch[nextBatch.length - 1].id;
+    highestId = nextBatch.length > 0 ? nextBatch[nextBatch.length - 1].id : 0;
 
     numbersRequest.addPhoneNumbers(nextBatch.map(cc => cc.cell));
   } while (nextBatch.length > 0);
