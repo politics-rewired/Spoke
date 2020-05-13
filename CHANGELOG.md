@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.11.1](https://github.com/politics-rewired/spoke/compare/v1.11.0...v1.11.1) (2020-05-13)
+
+
+### Bug Fixes
+
+* filter landlines ([#663](https://github.com/politics-rewired/spoke/issues/663)) ([c1e308b](https://github.com/politics-rewired/spoke/commit/c1e308b821bc71ad8fdfb1d21be07999f0b6bee0))
+
 ## [1.11.0](https://github.com/politics-rewired/spoke/compare/v1.10.0...v1.11.0) (2020-05-12)
 
 
