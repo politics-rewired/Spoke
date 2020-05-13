@@ -335,6 +335,8 @@ export async function uploadContacts(job) {
 }
 
 export async function filterLandlines(job) {
+  const LRN_BATCH_SIZE = 1000;
+
   const { campaign_id } = job;
 
   const organization = await r
@@ -363,7 +365,8 @@ export async function filterLandlines(job) {
       .where({ campaign_id })
       .where("id", ">", highestId)
       .orderBy("id", "asc")
-      .select("id", "cell");
+      .select("id", "cell")
+      .limit(LRN_BATCH_SIZE);
 
     highestId = nextBatch.length > 0 ? nextBatch[nextBatch.length - 1].id : 0;
 
