@@ -11,7 +11,7 @@ import escapeRegExp from "lodash/escapeRegExp";
 import { delimit } from "../lib/scripts";
 import Chip from "./Chip";
 import { red400, green500, green600, grey100 } from "material-ui/styles/colors";
-import gsm from "gsm";
+import { getCharCount } from "@trt2/gsm-charset-utils";
 
 const styles = {
   editor: {
@@ -207,7 +207,7 @@ class ScriptEditor extends React.Component {
     const { name } = this.props;
 
     const text = this.state.editorState.getCurrentContent().getPlainText();
-    const info = gsm(replaceEasyGsmWins(text));
+    const info = getCharCount(replaceEasyGsmWins(text));
 
     return (
       <div>
@@ -222,9 +222,10 @@ class ScriptEditor extends React.Component {
         </div>
         {this.renderCustomFields()}
         <div>
-          Estimated Segments: {info.sms_count} <br />
-          Characters left in current segment: {info.chars_left} <br />
-          Encoding required: {info.char_set} <br />
+          Estimated Segments: {info.msgCount} <br />
+          Characters left in current segment:{" "}
+          {info.charCount % info.charsPerSegment} <br />
+          Encoding required: {info.encoding} <br />
           <br />
           Not sure what a segment is? Check out the{" "}
           <a
