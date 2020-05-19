@@ -28,7 +28,7 @@ class MessageList extends Component {
     return (
       <div
         ref="messageWindow"
-        style={{ maxHeight: "380px", overflowY: "scroll" }}
+        style={{ flex: "1 1 auto", height: "0px", overflowY: "scroll" }}
       >
         {this.props.messages.map((message, index) => {
           const isFromContact = message.isFromContact;
@@ -77,7 +77,7 @@ class MessageList extends Component {
 }
 
 MessageList.propTypes = {
-  userName: PropTypes.object.isRequired,
+  userNames: PropTypes.object.isRequired,
   messages: PropTypes.arrayOf(PropTypes.object).isRequired
 };
 

@@ -4,6 +4,14 @@ import MessageList from "./MessageList";
 import MessageResponse from "./MessageResponse";
 import MessageOptOut from "./MessageOptOut";
 
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%"
+  }
+};
+
 class MessageColumn extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +39,7 @@ class MessageColumn extends Component {
       { contact } = conversation;
 
     return (
-      <div>
+      <div style={styles.container}>
         <h4>Messages</h4>
         <MessageList
           messages={messages}
