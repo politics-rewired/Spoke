@@ -68,6 +68,12 @@ const validators = {
       "Comma separated list of team IDs to restrict 'assignment complete' notifications to.",
     default: ""
   }),
+  ASSIGNMENT_SHOW_REQUESTS_AVAILABLE: bool({
+    desc:
+      "If enabled, display icons on the home page organization selection list indicating availability of assignments.",
+    default: false,
+    isClient: true
+  }),
   ASSIGNMENT_MANAGER_DATABASE_URL: str({
     desc:
       "Database url of external assignent manager - used by 'update-sms-spanish-speakers' cron job",

@@ -8,6 +8,9 @@ import { StyleSheet, css } from "aphrodite";
 
 import Paper from "material-ui/Paper";
 import { List, ListItem } from "material-ui/List";
+import { amber500, grey500 } from "material-ui/styles/colors";
+import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
+import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 
 import { loadData } from "./hoc/with-operations";
 import { RelayPaginatedResponse } from "../api/types";
@@ -59,6 +62,9 @@ interface MembershipType {
   organization: {
     id: string;
     name: string;
+    myCurrentAssignmentTargets: {
+      maxRequestCount: number;
+    }[];
   };
 }
 
@@ -158,18 +164,40 @@ const Home: React.SFC<HomeProps> = props => {
       return <Redirect to={`/${path}/${orgId}`} />;
     }
 
+    const showIcons = window.ASSIGNMENT_SHOW_REQUESTS_AVAILABLE;
+
     return (
       <div>
         <div className={css(styles.header)}>Select your organization</div>
+        {showIcons && (
+          <p>
+            Organizations with available assignments are marked with an amber
+            mailbox icon.
+          </p>
+        )}
         <Paper style={{ margin: "15px auto", maxWidth: "450px" }}>
           <List>
-            {memberships.map(({ node: membership }) => (
-              <ListItem
-                key={membership.organization.id}
-                primaryText={membership.organization.name}
-                onClick={handleSelectOrg(membership)}
-              />
-            ))}
+            {memberships.map(({ node: membership }) => {
+              const hasAssignments =
+                membership.organization.myCurrentAssignmentTargets.length > 0;
+              const leftIcon = showIcons ? (
+                hasAssignments ? (
+                  <MailboxIcon color={amber500} />
+                ) : (
+                  <NotificationsPausedIcon color={grey500} />
+                )
+              ) : (
+                undefined
+              );
+              return (
+                <ListItem
+                  leftIcon={leftIcon}
+                  key={membership.organization.id}
+                  primaryText={membership.organization.name}
+                  onClick={handleSelectOrg(membership)}
+                />
+              );
+            })}
           </List>
         </Paper>
       </div>
@@ -204,6 +232,9 @@ const queries = {
                 organization {
                   id
                   name
+                  myCurrentAssignmentTargets {
+                    maxRequestCount
+                  }
                 }
               }
             }
