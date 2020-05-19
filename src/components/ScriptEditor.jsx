@@ -224,7 +224,8 @@ class ScriptEditor extends React.Component {
         <div>
           Estimated Segments: {info.msgCount} <br />
           Characters left in current segment:{" "}
-          {info.charCount % info.charsPerSegment} <br />
+          {info.msgCount * info.charsPerSegment - info.charCount}
+          <br />
           Encoding required: {info.encoding} <br />
           <br />
           Not sure what a segment is? Check out the{" "}
