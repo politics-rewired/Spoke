@@ -368,9 +368,10 @@ export async function filterLandlines(job) {
       .select("id", "cell")
       .limit(LRN_BATCH_SIZE);
 
-    highestId = nextBatch.length > 0 ? nextBatch[nextBatch.length - 1].id : 0;
-
-    numbersRequest.addPhoneNumbers(nextBatch.map(cc => cc.cell));
+    if (nextBatch.length > 0) {
+      highestId = nextBatch[nextBatch.length - 1].id;
+      await numbersRequest.addPhoneNumbers(nextBatch.map(cc => cc.cell));
+    }
   } while (nextBatch.length > 0);
 
   await numbersRequest.close();
