@@ -104,7 +104,11 @@ class ManageSurveyResponses extends Component {
     let startingStep = interactionSteps.find(
       iStep => iStep.parentInteractionId === null
     );
-    const renderSteps = this.getResponsesFrom(startingStep.id);
+
+    // There may not be an interaction step, or it may not define a question
+    const renderSteps = startingStep
+      ? this.getResponsesFrom(startingStep.id)
+      : [];
 
     if (renderSteps.length === 0) {
       return <p>No answerable questions for this campaign.</p>;
