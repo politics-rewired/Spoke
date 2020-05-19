@@ -164,27 +164,34 @@ const Home: React.SFC<HomeProps> = props => {
       return <Redirect to={`/${path}/${orgId}`} />;
     }
 
+    const showIcons = window.ASSIGNMENT_SHOW_REQUESTS_AVAILABLE;
+
     return (
       <div>
         <div className={css(styles.header)}>Select your organization</div>
-        <p>
-          Organizations with available assignments are marked with an amber
-          mailbox icon.
-        </p>
+        {showIcons && (
+          <p>
+            Organizations with available assignments are marked with an amber
+            mailbox icon.
+          </p>
+        )}
         <Paper style={{ margin: "15px auto", maxWidth: "450px" }}>
           <List>
             {memberships.map(({ node: membership }) => {
               const hasAssignments =
                 membership.organization.myCurrentAssignmentTargets.length > 0;
+              const leftIcon = showIcons ? (
+                hasAssignments ? (
+                  <MailboxIcon color={amber500} />
+                ) : (
+                  <NotificationsPausedIcon color={grey500} />
+                )
+              ) : (
+                undefined
+              );
               return (
                 <ListItem
-                  leftIcon={
-                    hasAssignments ? (
-                      <MailboxIcon color={amber500} />
-                    ) : (
-                      <NotificationsPausedIcon color={grey500} />
-                    )
-                  }
+                  leftIcon={leftIcon}
                   key={membership.organization.id}
                   primaryText={membership.organization.name}
                   onClick={handleSelectOrg(membership)}
