@@ -28,7 +28,12 @@ import { r } from "./models";
 import { getRunner } from "./worker";
 
 process.on("uncaughtException", ex => {
-  logger.error("uncaughtException", ex);
+  logger.error("uncaughtException: ", ex);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", err => {
+  logger.error("unhandledRejection: ", err);
   process.exit(1);
 });
 
