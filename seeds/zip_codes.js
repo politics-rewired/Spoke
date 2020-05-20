@@ -8,7 +8,7 @@ try {
   logger = require("../src/logger");
 } catch {
   ({ zipToTimeZone } = require(`${__dirname}/../build/src/lib/zip-format`));
-  logger = require(`${__dirname}/../build/src/logger`).default;
+  logger = require(`${__dirname}/../build/src/logger`);
 }
 
 const fetchZipCodes = () => {
