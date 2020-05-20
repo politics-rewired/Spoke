@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/politics-rewired/spoke/compare/v1.11.1...v1.12.0) (2020-05-20)
+
+
+### Features
+
+* display icon next to organizations with available assignments ([#669](https://github.com/politics-rewired/spoke/issues/669)) ([5ff6e02](https://github.com/politics-rewired/spoke/commit/5ff6e02e88fad5e668ea0d938b48391c2824905b))
+
+
+### Bug Fixes
+
+* handle case where campaign has no interaction steps ([#668](https://github.com/politics-rewired/spoke/issues/668)) ([4b482d6](https://github.com/politics-rewired/spoke/commit/4b482d6cde8bef44c2e539f6f06445a9e774ace8))
+* prevent passing empty array to addPhoneNumbers ([#665](https://github.com/politics-rewired/spoke/issues/665)) ([2659d36](https://github.com/politics-rewired/spoke/commit/2659d364a2e1fa41c3b490ea81fd43c0ea3b1646))
+* use fullscreen modal to fix overflow ([#667](https://github.com/politics-rewired/spoke/issues/667)) ([b30ec9a](https://github.com/politics-rewired/spoke/commit/b30ec9aaae7c9d19c7e91856e6a548aa88c48947))
+
 ### [1.11.1](https://github.com/politics-rewired/spoke/compare/v1.11.0...v1.11.1) (2020-05-13)
 
 
