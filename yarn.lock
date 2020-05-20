@@ -2719,10 +2719,10 @@ asn1@~0.2.3:
   dependencies:
     safer-buffer "~2.1.0"
 
-assemble-numbers-client@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/assemble-numbers-client/-/assemble-numbers-client-1.2.1.tgz#73aeb208eba945d4fcfe518089c440ea523d5794"
-  integrity sha512-nCIsGUEFoRRkqQcp8NmnS5yGUDculFLogqDJ16p2RU4VXwMawm6d+vOpQdkVbXvm7tgyIaI3NWfnmo9LyoZFMg==
+assemble-numbers-client@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/assemble-numbers-client/-/assemble-numbers-client-1.2.2.tgz#4f054b624999fca4e925e79095aa3685f8b6d04d"
+  integrity sha512-uCWLDgu6gVQ+xEWmUhTfzV4kK6dmugktzZqTGXx55plfO39oxlhes4rIZVDBPdfvOUWwSvveyBaK4wO6RvDFxQ==
   dependencies:
     lodash "^4.17.14"
     sha.js "^2.4.11"
