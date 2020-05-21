@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.12.1](https://github.com/politics-rewired/spoke/compare/v1.12.0...v1.12.1) (2020-05-21)
+
+
+### Bug Fixes
+
+* log and exit on unhandled promise rejection ([#670](https://github.com/politics-rewired/spoke/issues/670)) ([4eea58c](https://github.com/politics-rewired/spoke/commit/4eea58cc1a2a071b3456c08727db861b887902ed)), closes [/github.com/nodejs/node/issues/9523#issuecomment-453505625](https://github.com/politics-rewired//github.com/nodejs/node/issues/9523/issues/issuecomment-453505625)
+* pass expected error logging function to terminus ([#671](https://github.com/politics-rewired/spoke/issues/671)) ([5b8e7c6](https://github.com/politics-rewired/spoke/commit/5b8e7c6621076e98a4921b1b338d9d7da7e17aee))
+* pass human-readable message to GraphQLError constructor ([22b7890](https://github.com/politics-rewired/spoke/commit/22b78907fc924ef1058deb6eede823a1168662fd))
+
 ## [1.12.0](https://github.com/politics-rewired/spoke/compare/v1.11.1...v1.12.0) (2020-05-20)
 
 
