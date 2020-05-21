@@ -704,11 +704,9 @@ const rootMutations = {
         .first();
 
       if (!lastMessage) {
-        throw new GraphQLError({
-          status: 400,
-          message:
-            "Cannot fake a reply to a contact that has no existing thread yet"
-        });
+        throw new GraphQLError(
+          "Cannot fake a reply to a contact that has no existing thread yet"
+        );
       }
 
       const userNumber = lastMessage.user_number;
@@ -1287,10 +1285,9 @@ const rootMutations = {
         campaign.hasOwnProperty("contacts") &&
         campaign.contacts
       ) {
-        throw new GraphQLError({
-          status: 400,
-          message: "Not allowed to add contacts after the campaign starts"
-        });
+        throw new GraphQLError(
+          "Not allowed to add contacts after the campaign starts"
+        );
       }
       return editCampaign(id, campaign, loaders, user, origCampaign);
     },
@@ -1304,17 +1301,15 @@ const rootMutations = {
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
       if (campaign.is_started) {
-        throw new GraphQLError({
-          status: 400,
-          message: "Not allowed to filter landlines after the campaign starts"
-        });
+        throw new GraphQLError(
+          "Not allowed to filter landlines after the campaign starts"
+        );
       }
 
       if (campaign.landlines_filtered) {
-        throw new GraphQLError({
-          status: 400,
-          message: "Landlines already filtered"
-        });
+        throw new GraphQLError(
+          "Landlines already filtered. You may need to wait for current contact upload to finish."
+        );
       }
 
       const [job] = await r
@@ -1466,10 +1461,7 @@ const rootMutations = {
       authRequired(user);
       const invite = await loaders.invite.load(inviteId);
       if (!invite || !invite.is_valid) {
-        throw new GraphQLError({
-          status: 400,
-          message: "That invitation is no longer valid"
-        });
+        throw new GraphQLError("That invitation is no longer valid");
       }
 
       const { payload = {} } = invite;
@@ -1657,20 +1649,14 @@ const rootMutations = {
       { loaders, user }
     ) => {
       // TODO: re-enable once dynamic assignment is fixed (#548)
-      throw new GraphQLError({
-        status: 400,
-        message: "Invalid assignment"
-      });
+      throw new GraphQLError("Invalid assignment");
       /* This attempts to find a new contact for the assignment, in the case that useDynamicAssigment == true */
       const assignment = await r
         .knex("assignment")
         .where({ id: assignmentId })
         .first();
       if (assignment.user_id != user.id) {
-        throw new GraphQLError({
-          status: 400,
-          message: "Invalid assignment"
-        });
+        throw new GraphQLError("Invalid assignment");
       }
       const campaign = await r
         .knex("campaign")
@@ -1939,10 +1925,7 @@ const rootMutations = {
     bulkSendMessages: async (_, { assignmentId }, loaders) => {
       if (!config.ALLOW_SEND_ALL || !config.NOT_IN_USA) {
         logger.error("Not allowed to send all messages at once");
-        throw new GraphQLError({
-          status: 403,
-          message: "Not allowed to send all messages at once"
-        });
+        throw new GraphQLError("Not allowed to send all messages at once");
       }
 
       const assignment = await r
