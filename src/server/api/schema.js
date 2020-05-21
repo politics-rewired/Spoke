@@ -81,7 +81,7 @@ import {
   queryCampaignOverlapCount
 } from "./campaign-overlap";
 import { change } from "../local-auth-helpers";
-import { notifyOnTagConversation } from "./lib/alerts";
+import { notifyOnTagConversation, notifyAssignmentCreated } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
@@ -2446,82 +2446,63 @@ const rootMutations = {
 
     requestTexts: async (
       _,
-      { count, email, organizationId, preferredTeamId },
+      { count, organizationId, preferredTeamId },
       { user, loaders }
     ) => {
-      let assignmentRequestId;
+      const myAssignmentTarget = await myCurrentAssignmentTarget(
+        user.id,
+        organizationId
+      );
 
-      try {
-        const myAssignmentTarget = await myCurrentAssignmentTarget(
-          user.id,
-          organizationId
-        );
-
-        if (myAssignmentTarget) {
-          /*
-              We create the assignment_request in a transaction
-              If ASSIGNMENT_REQUESTED_URL is present,
-                - we send to it
-                - if it returns as error
-                  - we roll back the insert and return the error
-                - if it succeeds, return 'Created'!
-            */
-          const inserted = await r
-            .knex("assignment_request")
-            .insert({
-              user_id: user.id,
-              organization_id: organizationId,
-              amount: count,
-              preferred_team_id: preferredTeamId
-            })
-            .returning("*");
-
-          const pendingAssignmentRequest = inserted[0];
-          assignmentRequestId = pendingAssignmentRequest.id;
-
-          // This will just throw if it errors
-          if (config.ASSIGNMENT_REQUESTED_URL) {
-            const response = await request
-              .post(config.ASSIGNMENT_REQUESTED_URL)
-              .timeout(30000)
-              .set(
-                "Authorization",
-                `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
-              )
-              .send({ count, email });
-
-            logger.debug("Assignment requested response", { response });
-          }
-
-          // If it's been successfully posted to the external system,
-          // let's preemptively handle it now but not await the result
-          if (config.AUTO_HANDLE_REQUESTS) {
-            const worker = await getWorker();
-            await worker.addJob(
-              "handle-autoassignment-request",
-              pendingAssignmentRequest
-            );
-          }
-
-          return "Created";
-        }
-
+      if (!myAssignmentTarget) {
         return "No texts available at the moment";
-      } catch (err) {
-        logger.error("Error submitting external assignment request: ", err);
+      }
 
-        if (assignmentRequestId !== undefined) {
-          logger.debug("Deleting assignment request ", { assignmentRequestId });
-          await r
-            .knex("assignment_request")
-            .where({ id: assignmentRequestId })
-            .del();
+      return r.knex.transaction(async trx => {
+        const [pendingAssignmentRequest] = await trx("assignment_request")
+          .insert({
+            user_id: user.id,
+            organization_id: organizationId,
+            amount: count,
+            preferred_team_id: preferredTeamId
+          })
+          .returning("*");
+
+        const { request_status } = await trx("user_organization")
+          .where({
+            user_id: user.id,
+            organization_id: organizationId
+          })
+          .first(["request_status"]);
+
+        // Only trigger webhook if approval is required (may want to allow expanding list in future)
+        if (["approval_required"].includes(request_status)) {
+          await notifyAssignmentCreated({
+            userId: user.id,
+            organizationId,
+            count
+          }).catch(err => {
+            logger.error("Error submitting external assignment request: ", err);
+
+            if (config.ASSIGNMENT_REQUESTED_URL_REQUIRED) {
+              const message = err.response
+                ? err.response.body.message
+                : err.message;
+              throw new Error(`Could not submit external requst: ${message}`);
+            }
+          });
         }
 
-        throw new GraphQLError(
-          err.response ? err.response.body.message : err.message
-        );
-      }
+        if (config.AUTO_HANDLE_REQUESTS) {
+          const worker = await getWorker();
+          await worker.addJob(
+            "handle-autoassignment-request",
+            pendingAssignmentRequest
+          );
+        }
+
+        return "Created";
+      });
     },
     releaseMessages: async (
       _,
