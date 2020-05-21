@@ -1,11 +1,34 @@
+import request from "superagent";
+import _ from "lodash";
+
 import { config } from "../../../config";
 import logger from "../../../logger";
 import { r } from "../../models";
-import _ from "lodash";
-import request from "superagent";
-import { PlacesAllInclusive } from "material-ui/svg-icons";
 
 const THRESHOLD = 0.2;
+
+const notifyAssignmentCreated = async options => {
+  const { organizationId, userId, count } = options;
+
+  if (!config.ASSIGNMENT_REQUESTED_URL) return;
+
+  const { auth0_id: externalUserId, email } = await r
+    .reader("user")
+    .where({ id: userId })
+    .first(["auth0_id", "email"]);
+
+  const payload = { organizationId, count, email };
+
+  if (["slack"].includes(config.PASSPORT_STRATEGY)) {
+    payload.externalUserId = externalUserId;
+  }
+
+  return request
+    .post(config.ASSIGNMENT_REQUESTED_URL)
+    .timeout(30000)
+    .set("Authorization", `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`)
+    .send(payload);
+};
 
 async function checkForBadDeliverability() {
   if (config.DELIVERABILITY_ALERT_ENDPOINT === undefined) return null;
@@ -127,4 +150,8 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
   );
 }
 
-export { checkForBadDeliverability, notifyOnTagConversation };
+export {
+  checkForBadDeliverability,
+  notifyOnTagConversation,
+  notifyAssignmentCreated
+};

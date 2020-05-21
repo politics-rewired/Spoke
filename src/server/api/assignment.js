@@ -886,7 +886,7 @@ export async function autoHandleRequest(pendingAssignmentRequest) {
     if (user_organization.request_status === "do_not_approve") {
       await r
         .knex("assignment_request")
-        .update({ status: "rejected " })
+        .update({ status: "rejected" })
         .where({ id: pendingAssignmentRequest.id });
     }
   }
