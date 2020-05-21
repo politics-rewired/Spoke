@@ -32,6 +32,7 @@ import CreateOrganization from "./containers/CreateOrganization";
 import JoinTeam from "./containers/JoinTeam";
 import Home from "./containers/Home";
 import SettingsRouter from "./containers/Settings";
+import AdminExternalSystems from "./containers/AdminExternalSystems";
 import UserEdit from "./containers/UserEdit";
 import TexterFaqs from "./components/TexterFaqs";
 import FAQs from "./lib/faqs";
@@ -172,6 +173,10 @@ const AdminOrganizationRoutes = props => {
           <Route
             path={`${organizationPath}/trollalarms`}
             component={AdminTrollAlarms}
+          />
+          <Route
+            path={`${organizationPath}/integrations`}
+            component={AdminExternalSystems}
           />
           <Redirect
             exact={true}

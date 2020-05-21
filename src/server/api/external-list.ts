@@ -13,12 +13,12 @@ import { sqlResolvers } from "./lib/utils";
 export const resolvers = {
   ExternalList: {
     ...sqlResolvers([
-      "system_id",
-      "external_id",
       "name",
       "description",
-      "list_count",
-      "door_count"
+      "listCount",
+      "doorCount",
+      "systemId",
+      "externalId"
     ])
   }
 };

@@ -1,5 +1,5 @@
 import { LogFunctionFactory, Logger, Runner } from "graphile-worker";
-import { run, loadYaml } from "pg-compose";
+import { run, loadYaml, PgComposeWorker } from "pg-compose";
 
 import { config } from "../config";
 import logger from "../logger";
@@ -13,7 +13,7 @@ const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
 
 const graphileLogger = new Logger(logFactory);
 
-let worker: Runner | undefined = undefined;
+let worker: PgComposeWorker | undefined = undefined;
 let workerSemaphore = false;
 
 // https://github.com/brianc/node-postgres/tree/master/packages/pg-pool#note
@@ -31,7 +31,7 @@ const poolConfig = {
 
 const workerPool = new Pool(poolConfig);
 
-export const getWorker = async (attempt = 0): Promise<Runner> => {
+export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   const m = await loadYaml({ include: `${__dirname}/pg-compose/**/*.yaml` });
 
   m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
@@ -49,6 +49,7 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
 
     worker = await run(m, {
       pgPool: workerPool,
+      encryptionSecret: config.SESSION_SECRET,
       concurrency: config.WORKER_CONCURRENCY,
       logger: graphileLogger,
       // Signals are handled by Terminus

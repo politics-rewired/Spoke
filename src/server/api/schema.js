@@ -3099,7 +3099,9 @@ const rootMutations = {
       { organizationId, externalSystem },
       { user }
     ) => {
+      console.log("Doing creation");
       await accessRequired(user, organizationId, "ADMIN");
+      console.log(externalSystem);
 
       const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
 
@@ -3107,17 +3109,17 @@ const rootMutations = {
 
       await worker.setSecret(truncatedKey, externalSystem.apiKey);
 
-      const [externalSystem] = await r
+      const [created] = await r
         .knex("external_system")
         .insert({
           name: externalSystem.name,
-          type: externalSystem.type,
+          type: externalSystem.type.toLowerCase(),
           organization_id: parseInt(organizationId),
           api_key_ref: truncatedKey
         })
         .returning("*");
 
-      return externalSystem;
+      return created;
     }
   }
 };

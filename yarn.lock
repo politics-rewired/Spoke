@@ -13361,10 +13361,10 @@ pg-compose@^0.0.10:
     yaml "^1.8.2"
     yargs "^15.3.1"
 
-pg-compose@^0.0.17:
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/pg-compose/-/pg-compose-0.0.17.tgz#6c3ce3a9d848fbbb4e48baa7947ab3de194cbf1a"
-  integrity sha512-vIIg4avyw5cVIeuGgc5cSI2c+KVBmsWgdvzRkLxXxkfwqNKFw23KLHfOLR7yd5Vw+q6hkFH+cFAlZT76pgjNwA==
+pg-compose@^0.0.19:
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/pg-compose/-/pg-compose-0.0.19.tgz#edecab47ff628505f8061c594b40fe5d286eeb35"
+  integrity sha512-SzC5pzwtYwPRO8wZ2e/ZdUJqiKXANWLNz8RIQwPRprfg3KfgCcAXM3ecyyjo+VUqVWeLtqU96RS46AwUPbUFKA==
   dependencies:
     "@types/lodash" "^4.14.149"
     "@types/tape" "^4.2.34"
@@ -13474,10 +13474,10 @@ pg@^6.4.2:
     pgpass "1.*"
     semver "4.3.2"
 
-pgc-ngp-van@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-0.0.4.tgz#30523ed1b0e91d3128014fb36e8a2b655475cb1e"
-  integrity sha512-TBmQhbud1Fj5rJd+DTeQz3GM1VPbOAq9LRDa54vjRyYn0Hd/h4jXpBxGwNY9yVbuDoQc53/Gk1/m2Xn5HYFY3g==
+pgc-ngp-van@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-0.0.5.tgz#ab3603fb09ea9b2aebd3a1fdcd689b3e8bea8511"
+  integrity sha512-+ErB15dWv9agdvPYFu2b10Lmj0MkfzeIwBJaX8mtaUj78hZBVnA43YY5LcVYam1n+gWKhGS5hYp7FwAyT04uPg==
   dependencies:
     copy "^0.3.2"
     fast-csv "^4.1.3"

@@ -228,6 +228,8 @@ const rootSchema = `
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
     trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
     trollTokens(organizationId: String!): [TrollTrigger]
+    externalSystems(organizationId: String!): [ExternalSystem]
+    externalLists(organizationId: String!, systemId: String!): [ExternalList]
   }
 
   type RootMutation {
@@ -291,6 +293,7 @@ const rootSchema = `
     dismissAlarms(messageIds: [String!]!, organizationId: String!): Boolean!
     addToken(token: String!, organizationId: String!): Boolean!
     removeToken(token: String!, organizationId: String!): Boolean!
+    createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem
   }
 
   schema {
