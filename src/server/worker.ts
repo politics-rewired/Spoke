@@ -62,6 +62,8 @@ export const getRunner = async (
     scheduler = await runSchedule({
       pgPool: new Pool({ ...poolConfig }),
       logger: graphileLogger,
+      // Signals are handled by Terminus
+      noHandleSignals: true,
       schedules: [
         {
           name: "release-stale-replies",

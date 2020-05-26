@@ -198,7 +198,13 @@ createTerminus(server, {
   onSignal,
   beforeShutdown,
   onShutdown,
-  logger: (msg, err) => logger.error(`${msg}: `, err)
+  logger: (msg, err) => {
+    if (err) {
+      logger.error(`${msg}: `, err);
+    } else {
+      logger.info(msg);
+    }
+  }
 });
 
 getRunner().then(() => {
