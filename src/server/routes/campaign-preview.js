@@ -8,7 +8,12 @@ import { sortBy } from "lodash";
 router.get("/preview/:campaignId", async (req, res) => {
   const token = req.params.campaignId;
 
-  const campaignId = symmetricDecrypt(token);
+  let campaignId;
+  try {
+    campaignId = symmetricDecrypt(token);
+  } catch {
+    return res.status(400).send("bad token");
+  }
   const campaignPreviewHtml = await makeCampaignPreviewHtml(campaignId);
   return res.send(campaignPreviewHtml);
 });
