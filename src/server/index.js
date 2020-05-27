@@ -179,9 +179,7 @@ const teardownKnex = async () => {
 
 const teardownGraphile = async () =>
   getWorker()
-    .then(async rs => {
-      await Promise.all([rs.runner.stop(), rs.scheduler.stop()]);
-    })
+    .then(worker => worker.stop())
     .then(() => logger.info("  - tore down Graphile runner"));
 
 const onSignal = () => {
