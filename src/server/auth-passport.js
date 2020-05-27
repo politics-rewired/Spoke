@@ -3,6 +3,7 @@ import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import passportSlack from "@aoberoi/passport-slack";
 import { Strategy as LocalStrategy } from "passport-local";
+import request from "superagent";
 
 import { config } from "../config";
 import logger from "../logger";
@@ -54,14 +55,26 @@ function setupSlackPassport() {
 
   const strategy = new passportSlack.Strategy(
     options,
-    (
+    async (
       accessToken,
       scopes,
       team,
       { bot, incomingWebhook },
-      { user: userProfile, team: teamProfile },
+      { user, team: teamProfile },
       done
-    ) => done(null, userProfile)
+    ) => {
+      // scopes is a Set
+      if (scopes.has("users.profile:read")) {
+        const userProfile = await request
+          .get(`https://slack.com/api/users.profile.get`)
+          .query({ token: accessToken, user: user.id })
+          .then(res => res.body.profile);
+        const { real_name, first_name, last_name, phone } = userProfile;
+        user = { ...user, real_name, first_name, last_name, phone };
+      }
+
+      return done(null, user);
+    }
   );
 
   passport.use(strategy);
@@ -107,7 +120,11 @@ function setupSlackPassport() {
     if (!existingUser) {
       let first_name, last_name;
       const splitName = user.name ? user.name.split(" ") : ["First", "Last"];
-      if (splitName.length == 1) {
+      if (user.first_name && user.last_name) {
+        // Spoke was granted the 'users.profile:read' scope so use Slack-provided first/last
+        first_name = user.first_name;
+        last_name = user.last_name;
+      } else if (splitName.length == 1) {
         first_name = splitName[0];
         last_name = "";
       } else if (splitName.length == 2) {
@@ -122,7 +139,7 @@ function setupSlackPassport() {
         auth0_id: auth0Id,
         first_name,
         last_name,
-        cell: "unknown",
+        cell: user.phone ?? "unknown",
         email: user.email,
         is_superadmin: false
       };
