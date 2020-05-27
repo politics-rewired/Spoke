@@ -188,7 +188,7 @@ class AdminExternalSystems extends Component<Props, State> {
             fullWidth={true}
           >
             {EXTERNAL_SYSTEM_OPTS.map(([display, val]) => (
-              <MenuItem value={val} primaryText={display} />
+              <MenuItem key={val} value={val} primaryText={display} />
             ))}
           </SelectField>
           <br />
