@@ -45,9 +45,9 @@ export const SelectExcludeCampaigns: React.SFC<
   return (
     <div>
       <p>
-        You can also filter out contacts from this upload that are already
-        uploaded to an existing Spoke campaigns (regardless of whether they have
-        been texted yet in that campaign).
+        You can filter out contacts from this upload that are already uploaded
+        to an existing Spoke campaigns (regardless of whether they have been
+        texted yet in that campaign).
       </p>
       <Select
         name="Campaigns"

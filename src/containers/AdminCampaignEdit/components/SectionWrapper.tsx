@@ -17,7 +17,7 @@ import { loadData } from "../../hoc/with-operations";
 import { dataTest, camelCase } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 
-interface PendingJobType {
+export interface PendingJobType {
   id: string;
   jobType: string;
   status: number;
