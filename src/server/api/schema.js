@@ -3103,6 +3103,7 @@ const rootMutations = {
       await accessRequired(user, organizationId, "ADMIN");
       console.log(externalSystem);
 
+      // TODO: this should be a combination of organizaiton and external system IDs
       const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
 
       const worker = await getWorker();
@@ -3120,6 +3121,54 @@ const rootMutations = {
         .returning("*");
 
       return created;
+    },
+    editExternalSystem: async (
+      _,
+      { id: externalSystemId, externalSystem },
+      { user }
+    ) => {
+      const savedSystem = await r
+        .knex("external_system")
+        .where({ id: externalSystemId })
+        .first();
+
+      await accessRequired(user, savedSystem.organization_id, "ADMIN");
+
+      const payload = {
+        name: externalSystem.name,
+        type: externalSystem.type.toLowerCase()
+      };
+
+      if (!externalSystem.apiKey.includes("*")) {
+        // TODO: this should be a combination of organizaiton and external system IDs
+        const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+        await getWorker().then(worker =>
+          worker.setSecret(truncatedKey, externalSystem.apiKey)
+        );
+        payload.api_key_ref = truncatedKey;
+      }
+
+      const [updated] = await r
+        .knex("external_system")
+        .update(payload)
+        .where({ id: externalSystemId })
+        .returning("*");
+
+      return updated;
+    },
+    refreshExternalSystem: async (_, { externalSystemId }, { user }) => {
+      const externalSystem = await r
+        .knex("external_system")
+        .where({ id: externalSystemId })
+        .first();
+
+      await accessRequired(user, externalSystem.organization_id, "ADMIN");
+
+      await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
+        externalSystemId
+      ]);
+
+      return true;
     }
   }
 };

@@ -293,7 +293,9 @@ const rootSchema = `
     dismissAlarms(messageIds: [String!]!, organizationId: String!): Boolean!
     addToken(token: String!, organizationId: String!): Boolean!
     removeToken(token: String!, organizationId: String!): Boolean!
-    createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem
+    createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
+    editExternalSystem(id: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
+    refreshExternalSystem(externalSystemId: String!): Boolean!
   }
 
   schema {
