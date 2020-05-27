@@ -371,8 +371,7 @@ export const resolvers = {
 
       return r
         .reader("external_system")
-        .where({ organization_id: organizationId })
-        .map(({ type, ...rest }) => ({ ...rest, type: type.toUpperCase() }));
+        .where({ organization_id: organizationId });
     }
   }
 };

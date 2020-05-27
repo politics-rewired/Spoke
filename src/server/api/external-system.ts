@@ -1,5 +1,5 @@
 import { sqlResolvers } from "./lib/utils";
-// import { r } from "../models";
+import { r } from "../models";
 
 export enum ExternalSystemType {
   Van = "van"
@@ -15,7 +15,10 @@ interface ExternalSystem {
 
 export const resolvers = {
   ExternalSystem: {
-    ...sqlResolvers(["id", "organizationId", "name", "type"]),
-    apiKey: async (system: ExternalSystem) => system.api_key_ref
+    ...sqlResolvers(["id", "organizationId", "name"]),
+    type: (system: ExternalSystem) => system.type.toUpperCase(),
+    apiKey: async (system: ExternalSystem) => system.api_key_ref,
+    lists: async (system: ExternalSystem) =>
+      r.reader("external_list").where({ system_id: system.id })
   }
 };
