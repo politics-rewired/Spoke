@@ -364,6 +364,15 @@ export const resolvers = {
       r
         .reader("team")
         .where({ organization_id: organization.id })
-        .orderBy("assignment_priority", "asc")
+        .orderBy("assignment_priority", "asc"),
+    externalSystems: async (organization, _, { user }) => {
+      const organizationId = parseInt(organization.id);
+      await accessRequired(user, organizationId, "ADMIN");
+
+      return r
+        .reader("external_system")
+        .where({ organization_id: organizationId })
+        .map(({ type, ...rest }) => ({ ...rest, type: type.toUpperCase() }));
+    }
   }
 };
