@@ -12,7 +12,7 @@ export const schema = `
   type ExternalSystem {
     id: String!
     name: String!
-    type: String!
+    type: ExternalSystemType!
     apiKey: String!
     organizationId: Int!
   }
