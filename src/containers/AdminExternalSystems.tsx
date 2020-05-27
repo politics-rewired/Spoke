@@ -88,13 +88,17 @@ class AdminExternalSystems extends Component<Props, State> {
   startCreateExternalSystem = () =>
     this.setState({ editingExternalSystem: "new" });
 
-  makeStartEditExternalSystem = (systemId: string) => () =>
+  makeStartEditExternalSystem = (systemId: string) => () => {
+    const system = this.props.data.externalSystems.find(
+      s => s.id === systemId
+    )!;
+
+    const { id: _id, ...externalSystem } = system;
     this.setState({
       editingExternalSystem: systemId,
-      externalSystem: this.props.data.externalSystems.find(
-        s => s.id === systemId
-      )!
+      externalSystem
     });
+  };
 
   cancelEditingExternalSystem = () =>
     this.setState({ editingExternalSystem: undefined });
