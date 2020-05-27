@@ -54,7 +54,7 @@ export const UploadResults: React.SFC<Props> = props => {
           .map(message => <ListItem key={message} primaryText={message} />)
       ) : (
         <ListItem primaryText={"No results"} />
-      )}}
+      )}
     </List>
   );
 };

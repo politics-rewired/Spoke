@@ -1,13 +1,17 @@
 import React, { Component } from "react";
-import { withOperations } from "./hoc/with-operations";
 import gql from "graphql-tag";
-import { RaisedButton, SelectField, MenuItem } from "material-ui";
-import CreateIcon from "material-ui/svg-icons/content/create";
+
+import SelectField from "material-ui/SelectField";
+import MenuItem from "material-ui/MenuItem";
+import RaisedButton from "material-ui/RaisedButton";
+import FlatButton from "material-ui/FlatButton";
 import Dialog from "material-ui/Dialog";
 import TextField from "material-ui/TextField";
 import Paper from "material-ui/Paper";
 import Chip from "material-ui/Chip";
-import FlatButton from "material-ui/FlatButton";
+import CreateIcon from "material-ui/svg-icons/content/create";
+
+import { withOperations } from "./hoc/with-operations";
 // import pick from "lodash/pick";
 
 // import FloatingActionButton from "material-ui/FloatingActionButton";
