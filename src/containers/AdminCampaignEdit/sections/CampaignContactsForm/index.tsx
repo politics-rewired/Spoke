@@ -15,12 +15,14 @@ import {
   RequiredComponentProps
 } from "../../components/SectionWrapper";
 import CSVForm from "./components/CSVForm";
+import ExternalSystemsSource from "./components/ExternalSystemsSource";
 import SelectExcludeCampaigns from "./components/SelectExcludeCampaigns";
 import ContactsSqlForm from "./components/ContactsSqlForm";
 import UploadResults from "./components/UploadResults";
 
 enum ContactSourceType {
   CSV = "CSV",
+  ExternalSystem = "ExternalSystem",
   SQL = "SQL"
 }
 
@@ -41,6 +43,7 @@ interface ContactsCampaign {
 interface ContactsOrganization {
   id: string;
   numbersApiKey: string;
+  externalSystems: { id: string }[];
   campaigns: {
     campaigns: {
       id: string;
@@ -142,6 +145,7 @@ class CampaignContactsForm extends React.Component<
       contactsFile
     } = this.state;
     const {
+      organizationId,
       campaignId,
       campaignData,
       organizationData,
@@ -156,6 +160,7 @@ class CampaignContactsForm extends React.Component<
     } = campaignData.campaign;
 
     const {
+      externalSystems,
       campaigns: { campaigns: allCampaigns }
     } = organizationData.organization;
 
@@ -167,6 +172,9 @@ class CampaignContactsForm extends React.Component<
 
     // Configure contact sources
     const sourceOptions = [ContactSourceType.CSV];
+    if (externalSystems.length > 0) {
+      sourceOptions.push(ContactSourceType.ExternalSystem);
+    }
     if (datawarehouseAvailable) {
       sourceOptions.push(ContactSourceType.SQL);
     }
@@ -200,6 +208,9 @@ class CampaignContactsForm extends React.Component<
             contactsFile={contactsFile}
             onContactsFileChange={this.handleOnContactsFileChange}
           />
+        )}
+        {source === ContactSourceType.ExternalSystem && (
+          <ExternalSystemsSource organizationId={organizationId} />
         )}
         {source === ContactSourceType.SQL && (
           <ContactsSqlForm
@@ -247,6 +258,9 @@ const queries = {
         organization(id: $organizationId) {
           id
           numbersApiKey
+          externalSystems {
+            id
+          }
           campaigns(cursor: { offset: 0, limit: 5000 }) {
             campaigns {
               id
