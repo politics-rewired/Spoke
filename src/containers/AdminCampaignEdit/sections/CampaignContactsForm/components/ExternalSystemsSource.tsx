@@ -10,13 +10,14 @@ import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import ActionGrade from "material-ui/svg-icons/action/grade";
 import ContentDrafts from "material-ui/svg-icons/content/drafts";
 import ContentSend from "material-ui/svg-icons/content/send";
-import { green500, grey500 } from "material-ui/styles/colors";
+import { green500, grey200, grey500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../../../hoc/with-operations";
 import { ExternalSystem } from "../../../../../api/external-system";
 
 interface Props {
   organizationId: string;
+  selectedListId?: string;
   onChangeExternalList(listId?: string): void;
 
   // HOC props
@@ -34,7 +35,7 @@ interface Props {
 interface State {}
 
 export class ExternalSystemsSource extends React.Component<Props, State> {
-  state = {};
+  state: State = {};
 
   handleRefreshSystem = (systemId: string) => async () => {
     const { refreshSystem } = this.props.mutations;
@@ -49,8 +50,16 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
     }
   };
 
+  handleSelectList = (listId: string) => async () => {
+    const { selectedListId } = this.props;
+    this.props.onChangeExternalList(
+      selectedListId === listId ? undefined : listId
+    );
+  };
+
   render() {
     const {
+      selectedListId,
       externalLists: {
         organization: { externalSystems }
       }
@@ -93,6 +102,12 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
                     list.doorCount
                   }`}
                   secondaryTextLines={2}
+                  style={
+                    selectedListId === list.externalId
+                      ? { backgroundColor: grey200 }
+                      : undefined
+                  }
+                  onClick={this.handleSelectList(list.externalId)}
                 />
               ))}
             />

@@ -92,6 +92,7 @@ const rootSchema = `
     useDynamicAssignment: Boolean
     contacts: [CampaignContactInput]
     contactsFile: Upload
+    externalListId: String
     filterOutLandlines: Boolean
     excludeCampaignIds: [Int]
     contactSql: String

@@ -204,8 +204,19 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     }
   });
 
+  if (campaign.hasOwnProperty("externalListId") && campaign.externalListId) {
+    await r
+      .knex("campaign_contact")
+      .where({ campaign_id: id })
+      .del();
+    await r.knex.raw(
+      `select * from public.queue_load_list_into_campaign(?, ?)`,
+      [id, parseInt(campaign.externalListId)]
+    );
+  }
+
   let validationStats = {};
-  if (campaign.hasOwnProperty("contactsFile")) {
+  if (campaign.hasOwnProperty("contactsFile") && campaign.contactsFile) {
     const processedContacts = await processContactsFile(campaign.contactsFile);
     campaign.contacts = processedContacts.contacts;
     validationStats = processedContacts.validationStats;

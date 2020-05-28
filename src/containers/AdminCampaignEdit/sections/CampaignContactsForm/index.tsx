@@ -72,6 +72,7 @@ interface ContactsState {
   selectedCampaignIds: string[];
   contactsSql: string | null;
   contactsFile: File | null;
+  externalListId: string | null;
   filterOutLandlines: boolean;
 
   // UI
@@ -92,6 +93,7 @@ class CampaignContactsForm extends React.Component<
     selectedCampaignIds: [],
     contactsSql: null,
     contactsFile: null,
+    externalListId: null,
     filterOutLandlines: false
   };
 
@@ -101,6 +103,9 @@ class CampaignContactsForm extends React.Component<
   handleOnContactsFileChange = (contactsFile?: File) =>
     this.setState({ contactsFile: contactsFile || null });
 
+  handleOnExternalListChange = (externalListId: string) =>
+    this.setState({ externalListId });
+
   handleOnChangeExcludedCamapignIds = (selectedCampaignIds: string[]) =>
     this.setState({ selectedCampaignIds });
 
@@ -108,6 +113,7 @@ class CampaignContactsForm extends React.Component<
     const {
       contactsSql,
       contactsFile,
+      externalListId,
       filterOutLandlines,
       selectedCampaignIds
     } = this.state;
@@ -117,6 +123,7 @@ class CampaignContactsForm extends React.Component<
       const campaignInput = {
         contactSql: contactsSql,
         contactsFile,
+        externalListId,
         filterOutLandlines,
         excludeCampaignIds: selectedCampaignIds
       };
@@ -134,7 +141,18 @@ class CampaignContactsForm extends React.Component<
     _e: React.SyntheticEvent<{}>,
     _index: number,
     source: any
-  ) => this.setState({ source });
+  ) => {
+    if (source !== ContactSourceType.CSV) {
+      this.setState({ contactsFile: null });
+    }
+    if (source !== ContactSourceType.ExternalSystem) {
+      this.setState({ externalListId: null });
+    }
+    if (source !== ContactSourceType.SQL) {
+      this.setState({ contactsSql: null });
+    }
+    this.setState({ source });
+  };
 
   render() {
     const {
@@ -142,7 +160,8 @@ class CampaignContactsForm extends React.Component<
       isWorking,
       selectedCampaignIds,
       contactsSql,
-      contactsFile
+      contactsFile,
+      externalListId
     } = this.state;
     const {
       organizationId,
@@ -167,7 +186,7 @@ class CampaignContactsForm extends React.Component<
     const allOtherCampaigns = allCampaigns.filter(({ id }) => id != campaignId);
 
     const isSaveDisabled =
-      isWorking || (!isNew && !contactsFile && !contactsSql);
+      isWorking || (!isNew && !contactsFile && !contactsSql && !externalListId);
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
     // Configure contact sources
@@ -210,7 +229,11 @@ class CampaignContactsForm extends React.Component<
           />
         )}
         {source === ContactSourceType.ExternalSystem && (
-          <ExternalSystemsSource organizationId={organizationId} />
+          <ExternalSystemsSource
+            organizationId={organizationId}
+            selectedListId={externalListId}
+            onChangeExternalList={this.handleOnExternalListChange}
+          />
         )}
         {source === ContactSourceType.SQL && (
           <ContactsSqlForm
