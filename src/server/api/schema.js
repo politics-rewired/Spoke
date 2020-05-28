@@ -6,7 +6,6 @@ import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLError } from "graphql/error";
-import isUrl from "is-url";
 import request from "superagent";
 import _ from "lodash";
 import moment from "moment-timezone";
@@ -187,7 +186,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     organization_id: organizationId,
     // TODO: re-enable once dynamic assignment is fixed (#548)
     // use_dynamic_assignment: useDynamicAssignment,
-    logo_image_url: isUrl(logoImageUrl) ? logoImageUrl : "",
+    logo_image_url: logoImageUrl,
     primary_color: primaryColor,
     intro_html: introHtml,
     texting_hours_start: textingHoursStart,
