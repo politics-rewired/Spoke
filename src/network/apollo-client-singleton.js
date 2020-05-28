@@ -59,7 +59,7 @@ const cache = new InMemoryCache({
   dataIdFromObject: object => {
     switch (object.__typename) {
       case "ExternalList":
-        return `${systemId}:${externalId}`;
+        return `${object.systemId}:${object.externalId}`;
       default:
         return defaultDataIdFromObject(object);
     }
