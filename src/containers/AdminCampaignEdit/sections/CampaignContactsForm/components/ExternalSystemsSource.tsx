@@ -3,13 +3,14 @@ import gql from "graphql-tag";
 import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
 
-import { Avatar } from "material-ui/Avatar";
+import Avatar from "material-ui/Avatar";
 import { List, ListItem } from "material-ui/List";
 import IconButton from "material-ui/IconButton";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import ActionGrade from "material-ui/svg-icons/action/grade";
 import ContentDrafts from "material-ui/svg-icons/content/drafts";
 import ContentSend from "material-ui/svg-icons/content/send";
+import { green500, grey500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../../../hoc/with-operations";
 import { ExternalSystem } from "../../../../../api/external-system";
@@ -69,8 +70,13 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
               primaryText={system.name}
               // TODO: use real sync time
               secondaryText={`Last synced ${new Date().toLocaleString()}`}
-              // TODO: fix the list count:
-              // leftAvatar={<Avatar>A</Avatar>}
+              leftAvatar={
+                <Avatar
+                  backgroundColor={system.lists.length > 0 ? green500 : grey500}
+                >
+                  {system.lists.length > 9 ? "9+" : system.lists.length}
+                </Avatar>
+              }
               secondaryTextLines={2}
               rightIconButton={
                 <IconButton onClick={this.handleRefreshSystem(system.id)}>
