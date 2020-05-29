@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/politics-rewired/spoke/compare/v1.12.1...v1.13.0) (2020-05-29)
+
+
+### Features
+
+* improve assignment request webhook ([#672](https://github.com/politics-rewired/spoke/issues/672)) ([7250e5e](https://github.com/politics-rewired/spoke/commit/7250e5e050da96c6723cf5c547c019e8ec6efa62))
+
+
+### Bug Fixes
+
+* prevent clearing campaign logo image url ([#676](https://github.com/politics-rewired/spoke/issues/676)) ([41f119c](https://github.com/politics-rewired/spoke/commit/41f119ca1aae0fdbdb3b77dd7c5c2223873bc1e3))
+* prevent crash on bad script preview token ([#673](https://github.com/politics-rewired/spoke/issues/673)) ([459347d](https://github.com/politics-rewired/spoke/commit/459347db66669b6a294657e925f7abf927b819a7))
+
 ### [1.12.1](https://github.com/politics-rewired/spoke/compare/v1.12.0...v1.12.1) (2020-05-21)
 
 
