@@ -598,7 +598,7 @@ const validators = {
   SLACK_SCOPES: str({
     desc: "Comma separated list Slack scopes to request.",
     example: "groups:read",
-    default: "users.profile:read"
+    default: "identity.basic,identity.email,identity.team"
   }),
   SLACK_CONVERT_EXISTING: bool({
     desc:

@@ -64,13 +64,18 @@ function setupSlackPassport() {
       done
     ) => {
       // scopes is a Set
-      if (scopes.has("users.profile:read")) {
-        const userProfile = await request
+      if (config.SLACK_TOKEN) {
+        const response = await request
           .get(`https://slack.com/api/users.profile.get`)
-          .query({ token: accessToken, user: user.id })
-          .then(res => res.body.profile);
-        const { real_name, first_name, last_name, phone } = userProfile;
-        user = { ...user, real_name, first_name, last_name, phone };
+          .query({ token: config.SLACK_TOKEN, user: user.id })
+          .then(res => res.body);
+        if (!response.ok) {
+          logger.error("Error fetching Slack profile", { response });
+        } else {
+          const userProfile = response.profile;
+          const { real_name, first_name, last_name, phone } = userProfile;
+          user = { ...user, real_name, first_name, last_name, phone };
+        }
       }
 
       return done(null, user);
@@ -162,7 +167,6 @@ function setupSlackPassport() {
   app.get(
     "/login",
     passport.authenticate("slack", {
-      scope: SLACK_SCOPES.split(","),
       team: SLACK_TEAM_ID
     })
   );
