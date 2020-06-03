@@ -5,6 +5,8 @@ export interface ExternalList {
   description: string;
   listCount: number;
   doorCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const schema = `
@@ -15,5 +17,7 @@ export const schema = `
     description: String!
     listCount: Int!
     doorCount: Int!
+    createdAt: String!
+    updatedAt: String!
   }
 `;

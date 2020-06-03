@@ -3455,7 +3455,8 @@ const rootResolvers = {
 
       return r
         .reader("external_system")
-        .where({ organization_id: parseInt(organizationId) });
+        .where({ organization_id: parseInt(organizationId) })
+        .orderBy("name");
     },
     externalLists: async (_, { organizationId, systemId }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");

@@ -250,6 +250,8 @@ const mutations = {
           name
           type
           apiKey
+          createdAt
+          updatedAt
         }
       }
     `,

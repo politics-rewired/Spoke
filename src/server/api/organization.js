@@ -371,7 +371,8 @@ export const resolvers = {
 
       return r
         .reader("external_system")
-        .where({ organization_id: organizationId });
+        .where({ organization_id: organizationId })
+        .orderBy("name");
     }
   }
 };

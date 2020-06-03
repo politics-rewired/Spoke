@@ -15,7 +15,14 @@ interface ExternalSystem {
 
 export const resolvers = {
   ExternalSystem: {
-    ...sqlResolvers(["id", "organizationId", "name"]),
+    ...sqlResolvers([
+      "id",
+      "organizationId",
+      "name",
+      "createdAt",
+      "updatedAt",
+      "syncedAt"
+    ]),
     type: (system: ExternalSystem) => system.type.toUpperCase(),
     apiKey: async (system: ExternalSystem) => system.api_key_ref,
     lists: async (system: ExternalSystem) =>

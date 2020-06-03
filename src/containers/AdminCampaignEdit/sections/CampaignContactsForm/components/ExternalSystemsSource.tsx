@@ -1,6 +1,6 @@
 import React from "react";
 import gql from "graphql-tag";
-import { compose } from "recompose";
+import moment from "moment";
 import { ApolloQueryResult } from "apollo-client";
 
 import Avatar from "material-ui/Avatar";
@@ -77,8 +77,9 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
             <ListItem
               key={system.id}
               primaryText={system.name}
-              // TODO: use real sync time
-              secondaryText={`Last synced ${new Date().toLocaleString()}`}
+              secondaryText={`Last synced: ${
+                system.syncedAt ? moment(system.syncedAt).fromNow() : "never"
+              }`}
               leftAvatar={
                 <Avatar
                   backgroundColor={system.lists.length > 0 ? green500 : grey500}
@@ -130,12 +131,17 @@ const queries = {
             name
             type
             apiKey
+            createdAt
+            updatedAt
+            syncedAt
             lists {
               externalId
               name
               description
               listCount
               doorCount
+              createdAt
+              updatedAt
             }
           }
         }

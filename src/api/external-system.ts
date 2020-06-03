@@ -10,6 +10,9 @@ export interface ExternalSystem {
   type: ExternalSystemType;
   apiKey: string;
   organizationId: number;
+  createdAt: string;
+  updatedAt: string;
+  syncedAt?: string;
   lists: ExternalList[];
 }
 
@@ -30,6 +33,9 @@ export const schema = `
     type: ExternalSystemType!
     apiKey: String!
     organizationId: Int!
+    createdAt: String!
+    updatedAt: String!
+    syncedAt: String
     lists: [ExternalList]!
   }
 `;

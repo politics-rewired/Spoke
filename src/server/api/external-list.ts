@@ -8,7 +8,9 @@ export const resolvers = {
       "listCount",
       "doorCount",
       "systemId",
-      "externalId"
+      "externalId",
+      "createdAt",
+      "updatedAt"
     ])
   }
 };
