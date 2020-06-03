@@ -5,15 +5,15 @@ import { ApolloQueryResult } from "apollo-client";
 
 import Avatar from "material-ui/Avatar";
 import { List, ListItem } from "material-ui/List";
+import RaisedButton from "material-ui/RaisedButton";
 import IconButton from "material-ui/IconButton";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
-import ActionGrade from "material-ui/svg-icons/action/grade";
-import ContentDrafts from "material-ui/svg-icons/content/drafts";
-import ContentSend from "material-ui/svg-icons/content/send";
+import SyncIcon from "material-ui/svg-icons/notification/sync";
 import { green500, grey200, grey500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../../../hoc/with-operations";
 import { ExternalSystem } from "../../../../../api/external-system";
+import { Snackbar } from "material-ui";
 
 interface Props {
   organizationId: string;
@@ -26,28 +26,42 @@ interface Props {
       id: string;
       externalSystems: ExternalSystem[];
     };
+    refetch(): void;
   };
   mutations: {
     refreshSystem(externalSystemId: string): ApolloQueryResult<{}>;
   };
 }
 
-interface State {}
+interface State {
+  syncInitiatedForIds: string[];
+}
 
 export class ExternalSystemsSource extends React.Component<Props, State> {
-  state: State = {};
+  state: State = {
+    syncInitiatedForIds: []
+  };
 
-  handleRefreshSystem = (systemId: string) => async () => {
+  handleSyncSystem = (systemId: string) => async () => {
     const { refreshSystem } = this.props.mutations;
     try {
       const response = await refreshSystem(systemId);
       if (response.errors) throw response.errors;
-      // Stub
+
+      const ids = new Set(this.state.syncInitiatedForIds);
+      ids.add(systemId);
+      this.setState({ syncInitiatedForIds: [...ids] });
     } catch {
       // Stub
     } finally {
       // Stub
     }
+  };
+
+  handleDismissSyncSnackbar = (systemId: string) => async () => {
+    const ids = new Set(this.state.syncInitiatedForIds);
+    ids.delete(systemId);
+    this.setState({ syncInitiatedForIds: [...ids] });
   };
 
   handleSelectList = (listId: string) => async () => {
@@ -56,6 +70,8 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
       selectedListId === listId ? undefined : listId
     );
   };
+
+  handleRefreshSystems = () => this.props.externalLists.refetch();
 
   render() {
     const {
@@ -72,6 +88,12 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
     return (
       <div>
         <h4>External Systems</h4>
+        <RaisedButton
+          label="Refresh"
+          labelPosition="before"
+          icon={<RefreshIcon />}
+          onClick={this.handleRefreshSystems}
+        />
         <List>
           {externalSystems.map(system => (
             <ListItem
@@ -89,8 +111,11 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
               }
               secondaryTextLines={2}
               rightIconButton={
-                <IconButton onClick={this.handleRefreshSystem(system.id)}>
-                  <RefreshIcon />
+                <IconButton
+                  onClick={this.handleSyncSystem(system.id)}
+                  disabled={this.state.syncInitiatedForIds.includes(system.id)}
+                >
+                  <SyncIcon />
                 </IconButton>
               }
               disabled={system.lists.length === 0}
@@ -114,6 +139,23 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
             />
           ))}
         </List>
+        {[...this.state.syncInitiatedForIds].map(systemId => {
+          const system = this.props.externalLists.organization.externalSystems.find(
+            ({ id }) => id === systemId
+          );
+          if (!system) return null;
+          return (
+            <Snackbar
+              key={systemId}
+              open={true}
+              message={`Sync started for ${
+                system.name
+              }. Please refresh systems to see updated lists.`}
+              autoHideDuration={4000}
+              onRequestClose={this.handleDismissSyncSnackbar(systemId)}
+            />
+          );
+        })}
       </div>
     );
   }

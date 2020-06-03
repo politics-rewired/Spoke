@@ -20,6 +20,7 @@ import TextField from "material-ui/TextField";
 import ContentAdd from "material-ui/svg-icons/content/add";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
+import SyncIcon from "material-ui/svg-icons/notification/sync";
 
 import { withOperations } from "./hoc/with-operations";
 import {
@@ -64,6 +65,7 @@ interface Props {
   };
   data: {
     externalSystems: ExternalSystem[];
+    refetch(): void;
   };
 }
 
@@ -100,6 +102,8 @@ class AdminExternalSystems extends Component<Props, State> {
   makeHandleRefreshExternalSystem = (systemId: string) => () => {
     this.props.mutations.refreshSystem(systemId);
   };
+
+  handleRefreshSystems = () => this.props.data.refetch();
 
   cancelEditingExternalSystem = () =>
     this.setState({ editingExternalSystem: undefined });
@@ -140,6 +144,13 @@ class AdminExternalSystems extends Component<Props, State> {
           <ContentAdd />
         </FloatingActionButton>
 
+        <RaisedButton
+          label="Refresh"
+          labelPosition="before"
+          icon={<RefreshIcon />}
+          onClick={this.handleRefreshSystems}
+        />
+
         <Table selectable={false}>
           <TableHeader displaySelectAll={false} enableSelectAll={false}>
             <TableRow>
@@ -171,7 +182,7 @@ class AdminExternalSystems extends Component<Props, State> {
                   <RaisedButton
                     label="Sync"
                     labelPosition="before"
-                    icon={<RefreshIcon />}
+                    icon={<SyncIcon />}
                     style={{ marginRight: 10 }}
                     onClick={this.makeHandleRefreshExternalSystem(system.id)}
                   />
