@@ -16,6 +16,12 @@ export interface ExternalSystem {
   lists: ExternalList[];
 }
 
+export interface ExternalSystemInput {
+  name: string;
+  type: ExternalSystemType;
+  apiKey: string;
+}
+
 export const schema = `
   enum ExternalSystemType {
     VAN

@@ -1,28 +1,33 @@
 import React, { Component } from "react";
+import moment from "moment";
 import gql from "graphql-tag";
 
+import {
+  Table,
+  TableHeader,
+  TableHeaderColumn,
+  TableBody,
+  TableRow,
+  TableRowColumn
+} from "material-ui/Table";
+import FloatingActionButton from "material-ui/FloatingActionButton";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
 import Dialog from "material-ui/Dialog";
 import TextField from "material-ui/TextField";
-import Paper from "material-ui/Paper";
-import Chip from "material-ui/Chip";
+import ContentAdd from "material-ui/svg-icons/content/add";
 import CreateIcon from "material-ui/svg-icons/content/create";
+import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 
 import { withOperations } from "./hoc/with-operations";
-// import pick from "lodash/pick";
-
-// import FloatingActionButton from "material-ui/FloatingActionButton";
-// import Dialog from "material-ui/Dialog";
-// import TextField from "material-ui/TextField";
-// import Toggle from "material-ui/Toggle";
-// import ContentAddIcon from "material-ui/svg-icons/content/add";
-
-// import LoadingIndicator from "../../components/LoadingIndicator";
-// import TagEditorList from "./TagEditorList";
-// import theme from "../../styles/theme";
+import {
+  ExternalSystemType,
+  ExternalSystem,
+  ExternalSystemInput
+} from "../api/external-system";
+import theme from "../styles/theme";
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
 
@@ -45,25 +50,17 @@ const styles = {
   }
 };
 
-interface ExternalSystem {
-  id: string;
-  name: string | undefined;
-  type: string;
-  apiKey: string | undefined;
-}
-
-type CreateExternalSystemInput = Omit<ExternalSystem, "id">;
-
 interface Props {
   match: any;
   mutations: {
     createExternalSystem: (
-      input: CreateExternalSystemInput
+      input: ExternalSystemInput
     ) => Promise<{ data: { createExternalSystem: ExternalSystem } }>;
     editExternalSystem: (
       id: string,
-      input: CreateExternalSystemInput
+      input: ExternalSystemInput
     ) => Promise<{ data: { editExternalSystem: ExternalSystem } }>;
+    refreshSystem: (externalSystemId: string) => Promise<{ data: Boolean }>;
   };
   data: {
     externalSystems: ExternalSystem[];
@@ -72,16 +69,16 @@ interface Props {
 
 interface State {
   editingExternalSystem: "new" | string | undefined;
-  externalSystem: CreateExternalSystemInput;
+  externalSystem: ExternalSystemInput;
 }
 
 class AdminExternalSystems extends Component<Props, State> {
   state = {
     editingExternalSystem: undefined,
     externalSystem: {
-      name: undefined,
-      type: EXTERNAL_SYSTEM_OPTS[0][1],
-      apiKey: undefined
+      name: "",
+      type: ExternalSystemType.VAN,
+      apiKey: ""
     }
   };
 
@@ -98,6 +95,10 @@ class AdminExternalSystems extends Component<Props, State> {
       editingExternalSystem: systemId,
       externalSystem
     });
+  };
+
+  makeHandleRefreshExternalSystem = (systemId: string) => () => {
+    this.props.mutations.refreshSystem(systemId);
   };
 
   cancelEditingExternalSystem = () =>
@@ -132,35 +133,53 @@ class AdminExternalSystems extends Component<Props, State> {
 
     return (
       <div>
-        <RaisedButton
-          label="New Integration"
-          primary={true}
-          icon={<CreateIcon />}
+        <FloatingActionButton
+          style={theme.components.floatingButton}
           onClick={this.startCreateExternalSystem}
-        />
+        >
+          <ContentAdd />
+        </FloatingActionButton>
 
-        <br />
-
-        {(externalSystems || []).map(system => (
-          <Paper key={system.id} style={styles.card}>
-            <div style={{ display: "flex" }}>
-              <Chip backgroundColor={"#DDEEEE"} style={styles.chip}>
-                {system.name}
-              </Chip>
-            </div>
-
-            <div style={{ display: "flex" }}>
-              <RaisedButton
-                label="Edit"
-                labelPosition="before"
-                primary={true}
-                icon={<CreateIcon />}
-                style={{ marginRight: 10 }}
-                onClick={this.makeStartEditExternalSystem(system.id)}
-              />
-            </div>
-          </Paper>
-        ))}
+        <Table selectable={false}>
+          <TableHeader displaySelectAll={false} enableSelectAll={false}>
+            <TableRow>
+              <TableHeaderColumn>Name</TableHeaderColumn>
+              <TableHeaderColumn>Type</TableHeaderColumn>
+              <TableHeaderColumn>Last Synced</TableHeaderColumn>
+              <TableHeaderColumn>Actions</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody displayRowCheckbox={false} showRowHover>
+            {(externalSystems || []).map(system => (
+              <TableRow key={system.id}>
+                <TableRowColumn>{system.name}</TableRowColumn>
+                <TableRowColumn>{system.type}</TableRowColumn>
+                <TableRowColumn>
+                  {system.syncedAt
+                    ? moment(system.syncedAt).fromNow()
+                    : "never"}
+                </TableRowColumn>
+                <TableRowColumn>
+                  <RaisedButton
+                    label="Edit"
+                    labelPosition="before"
+                    primary={true}
+                    icon={<CreateIcon />}
+                    style={{ marginRight: 10 }}
+                    onClick={this.makeStartEditExternalSystem(system.id)}
+                  />
+                  <RaisedButton
+                    label="Sync"
+                    labelPosition="before"
+                    icon={<RefreshIcon />}
+                    style={{ marginRight: 10 }}
+                    onClick={this.makeHandleRefreshExternalSystem(system.id)}
+                  />
+                </TableRowColumn>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Dialog
           title={
@@ -222,6 +241,7 @@ const queries = {
           name
           type
           apiKey
+          syncedAt
         }
       }
     `,
@@ -235,7 +255,7 @@ const queries = {
 
 const mutations = {
   createExternalSystem: (ownProps: Props) => (
-    externalSystem: CreateExternalSystemInput
+    externalSystem: ExternalSystemInput
   ) => ({
     mutation: gql`
       mutation createExternalSystem(
@@ -263,7 +283,7 @@ const mutations = {
   }),
   editExternalSystem: (ownProps: Props) => (
     id: string,
-    externalSystem: CreateExternalSystemInput
+    externalSystem: ExternalSystemInput
   ) => ({
     mutation: gql`
       mutation editExternalSystem(
@@ -281,6 +301,16 @@ const mutations = {
     variables: {
       id: id,
       externalSystem
+    }
+  }),
+  refreshSystem: (ownProps: Props) => (externalSystemId: string) => ({
+    mutation: gql`
+      mutation refreshExternalSystem($externalSystemId: String!) {
+        refreshExternalSystem(externalSystemId: $externalSystemId)
+      }
+    `,
+    variables: {
+      externalSystemId
     }
   })
 };
