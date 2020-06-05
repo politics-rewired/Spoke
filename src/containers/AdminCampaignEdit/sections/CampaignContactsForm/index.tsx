@@ -334,7 +334,11 @@ export default compose<ContactsInnerProps, RequiredComponentProps>(
   asSection({
     title: "Contacts",
     readinessName: "contacts",
-    jobQueueNames: ["upload_contacts", "upload_contacts_sql"],
+    jobQueueNames: [
+      "upload_contacts",
+      "upload_contacts_sql",
+      "load_external_list"
+    ],
     expandAfterCampaignStarts: false,
     expandableBySuperVolunteers: false
   }),
