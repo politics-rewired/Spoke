@@ -244,11 +244,16 @@ export const resolvers = {
       loaders.organization.load(campaign.organization_id),
     datawarehouseAvailable: (campaign, _, { user }) =>
       user.is_superadmin && !!config.WAREHOUSE_DB_HOST,
-    pendingJobs: async campaign =>
-      r
+    pendingJobs: async (campaign, { jobTypes = [] }) => {
+      const query = r
         .reader("job_request")
         .where({ campaign_id: campaign.id })
-        .orderBy("updated_at", "desc"),
+        .orderBy("updated_at", "desc");
+      if (jobTypes.length > 0) {
+        query.whereIn("job_type", jobTypes);
+      }
+      return query;
+    },
     teams: async campaign => {
       const getCampaignTeams = memoizer.memoize(async ({ campaignId }) => {
         return await r

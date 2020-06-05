@@ -193,7 +193,7 @@ const SectionWrapper: React.SFC<WrapperProps> = props => {
   );
 };
 
-const makeQueries = (hasJobQueues: boolean) => ({
+const makeQueries = (jobTypes: string[]) => ({
   status: {
     query: gql`
       query getCampaignReadiness($campaignId: String!) {
@@ -214,15 +214,15 @@ const makeQueries = (hasJobQueues: boolean) => ({
       variables: {
         campaignId: ownProps.campaignId
       },
-      pollInterval: hasJobQueues ? 10 * 1000 : undefined
+      pollInterval: jobTypes.length > 0 ? 10 * 1000 : undefined
     })
   },
   jobs: {
     query: gql`
-      query getCampaignJobs($campaignId: String!) {
+      query getCampaignJobs($campaignId: String!, $jobTypes: [String]) {
         campaign(id: $campaignId) {
           id
-          pendingJobs {
+          pendingJobs(jobTypes: $jobTypes) {
             id
             jobType
             status
@@ -231,10 +231,11 @@ const makeQueries = (hasJobQueues: boolean) => ({
         }
       }
     `,
-    skip: !hasJobQueues,
+    skip: jobTypes.length === 0,
     options: (ownProps: RequiredComponentProps) => ({
       variables: {
-        campaignId: ownProps.campaignId
+        campaignId: ownProps.campaignId,
+        jobTypes
       },
       pollInterval: 10 * 1000
     })
@@ -318,7 +319,7 @@ export const asSection = (options: SectionOptions) => (
   compose<WrappedComponentProps, RequiredComponentProps>(
     withAuthzContext,
     loadData({
-      queries: makeQueries(options.jobQueueNames.length > 0),
+      queries: makeQueries(options.jobQueueNames),
       mutations
     }),
     withProps((ownerProps: WrapperGraphqlProps & AuthzProviderProps) => {
@@ -331,11 +332,7 @@ export const asSection = (options: SectionOptions) => (
       const { status, jobs, adminPerms, mutations } = ownerProps;
       const { deleteJob } = mutations;
       const { isStarted, readiness } = status.campaign;
-      const pendingJob = jobs
-        ? jobs.campaign.pendingJobs.find(job =>
-            jobQueueNames.includes(job.jobType)
-          )
-        : undefined;
+      const pendingJob = jobs ? jobs.campaign.pendingJobs[0] : undefined;
 
       const isExpandable =
         (expandAfterCampaignStarts || !isStarted) &&
