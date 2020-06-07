@@ -167,6 +167,7 @@ function setupSlackPassport() {
   app.get(
     "/login",
     passport.authenticate("slack", {
+      scope: SLACK_SCOPES.split(","),
       team: SLACK_TEAM_ID
     })
   );
