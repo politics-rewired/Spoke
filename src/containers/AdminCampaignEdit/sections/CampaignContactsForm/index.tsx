@@ -22,7 +22,7 @@ import UploadResults from "./components/UploadResults";
 
 enum ContactSourceType {
   CSV = "CSV",
-  ExternalSystem = "ExternalSystem",
+  ExternalSystem = "Integration",
   SQL = "SQL"
 }
 
