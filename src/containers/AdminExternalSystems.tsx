@@ -184,7 +184,7 @@ class AdminExternalSystems extends Component<Props, State> {
                     onClick={this.makeStartEditExternalSystem(system.id)}
                   />
                   <RaisedButton
-                    label="Sync"
+                    label="Pull lists"
                     labelPosition="before"
                     icon={<SyncIcon />}
                     style={{ marginRight: 10 }}

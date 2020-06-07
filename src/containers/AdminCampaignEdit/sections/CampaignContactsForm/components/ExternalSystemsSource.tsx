@@ -99,7 +99,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
             <ListItem
               key={system.id}
               primaryText={system.name}
-              secondaryText={`Last synced: ${
+              secondaryText={`Lists last pulled: ${
                 system.syncedAt ? moment(system.syncedAt).fromNow() : "never"
               }`}
               leftAvatar={
