@@ -10,6 +10,7 @@ interface ExternalSystem {
   organization_id: number;
   name: string;
   type: ExternalSystemType;
+  username: string;
   api_key_ref: string;
 }
 
@@ -19,6 +20,7 @@ export const resolvers = {
       "id",
       "organizationId",
       "name",
+      "username",
       "createdAt",
       "updatedAt",
       "syncedAt"

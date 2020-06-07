@@ -1,5 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.raw(`
+    alter table public.external_system add column username text not null default '';
     alter table public.external_system add column created_at timestamptz not null default now();
     alter table public.external_system add column updated_at timestamptz not null default now();
     alter table public.external_system add column synced_at timestamptz null default null;
@@ -91,12 +92,139 @@ exports.up = function(knex) {
       );
     end;
     $$ language plpgsql volatile SECURITY definer SET search_path = "public";
+
+    -- Include username with VAN request
+    create or replace function "public".queue_refresh_saved_lists(van_system_id uuid) returns void as $$
+    declare
+      v_username text;
+      v_api_key_ref text;
+      v_secret graphile_secrets.secrets;
+    begin
+      select username, api_key_ref
+      into v_username, v_api_key_ref
+      from external_system
+      where id = queue_refresh_saved_lists.van_system_id;
+
+      if v_api_key_ref is null then
+        raise 'No API key configured for with id %', queue_refresh_saved_lists.van_system_id;
+      end if;
+
+      perform graphile_worker.add_job(
+        'van-get-saved-lists',
+        json_build_object(
+          'username', v_username,
+          'api_key', json_build_object('__secret', v_api_key_ref),
+          'van_system_id', queue_refresh_saved_lists.van_system_id,
+          '__after', 'insert_saved_lists'
+        )
+      );
+    end;
+    $$ language plpgsql volatile SECURITY definer SET search_path = "public";
+
+    -- Include username with VAN request
+    create or replace function "public".fetch_saved_list(saved_list_id integer, row_merge json, column_config json, handler text, after text, context json) returns void as $$
+    declare
+      v_van_system_id uuid;
+      v_username text;
+      v_api_key_ref text;
+    begin
+      select system_id
+      into v_van_system_id
+      from external_list
+      where external_list.external_id = fetch_saved_list.saved_list_id;
+
+      select username
+      into v_username
+      from external_system
+      where id = v_van_system_id;
+
+      select get_api_key_ref_from_van_system_with_id(v_van_system_id)
+      into v_api_key_ref;
+
+      if v_api_key_ref is null then
+      raise 'No API key configured for with id %', v_van_system_id;
+      end if;
+
+      perform graphile_worker.add_job(
+        'van-fetch-saved-list',
+        json_build_object(
+          'username', v_username,
+          'api_key', json_build_object('__secret', v_api_key_ref),
+          'saved_list_id', fetch_saved_list.saved_list_id,
+          'row_merge', fetch_saved_list.row_merge,
+          'extract_phone_type', 'cell',
+          'column_config', fetch_saved_list.column_config,
+          'handler', fetch_saved_list.handler,
+          'first_n_rows', 10,
+          '__after', fetch_saved_list.after,
+          '__context', fetch_saved_list.context
+        )
+      );
+    end;
+    $$ language plpgsql volatile SECURITY definer SET search_path = "public";
   `);
 };
 
 exports.down = function(knex) {
   return knex.schema.raw(`
     -- Restore function versions from 20200510204235_external_list
+
+    CREATE OR REPLACE FUNCTION "public".fetch_saved_list(saved_list_id integer, row_merge json, column_config json, handler text, after text, context json) RETURNS void as $$ declare
+      v_van_system_id uuid;
+      v_api_key_ref text;
+    begin
+      select system_id
+      from external_list
+      where external_list.external_id = fetch_saved_list.saved_list_id
+      into v_van_system_id;
+
+      select get_api_key_ref_from_van_system_with_id(v_van_system_id)
+      into v_api_key_ref;
+
+      if v_api_key_ref is null then
+       raise 'No API key configured for with id %', v_van_system_id;
+      end if;
+
+      perform graphile_worker.add_job(
+        'van-fetch-saved-list',
+        json_build_object(
+          'api_key', json_build_object('__secret', v_api_key_ref),
+          'saved_list_id', fetch_saved_list.saved_list_id,
+          'row_merge', fetch_saved_list.row_merge,
+          'extract_phone_type', 'cell',
+          'column_config', fetch_saved_list.column_config,
+          'handler', fetch_saved_list.handler,
+          'first_n_rows', 10,
+          '__after', fetch_saved_list.after,
+          '__context', fetch_saved_list.context
+        )
+      );
+    end;
+    $$ language plpgsql volatile SECURITY definer SET search_path = "public";
+
+    CREATE OR REPLACE FUNCTION "public".queue_refresh_saved_lists(van_system_id uuid) RETURNS void as $$ declare
+      v_api_key_ref text;
+      v_secret graphile_secrets.secrets;
+    begin
+      select api_key_ref
+      from external_system
+      where id = queue_refresh_saved_lists.van_system_id
+      into v_api_key_ref;
+
+      if v_api_key_ref is null then
+        raise 'No API key configured for with id %', queue_refresh_saved_lists.van_system_id;
+      end if;
+
+      perform graphile_worker.add_job(
+        'van-get-saved-lists',
+        json_build_object(
+          'api_key', json_build_object('__secret', v_api_key_ref),
+          'van_system_id', queue_refresh_saved_lists.van_system_id,
+          '__after', 'insert_saved_lists'
+        )
+      );
+    end;
+     $$ language plpgsql volatile SECURITY definer SET search_path = "public";
 
     CREATE OR REPLACE FUNCTION "public".queue_load_list_into_campaign(campaign_id integer, list_external_id integer) RETURNS void as $$ select fetch_saved_list(
       list_external_id,
@@ -142,5 +270,6 @@ exports.down = function(knex) {
     alter table public.external_system drop column synced_at;
     alter table public.external_system drop column updated_at;
     alter table public.external_system drop column created_at;
+    alter table public.external_system drop column username;
   `);
 };

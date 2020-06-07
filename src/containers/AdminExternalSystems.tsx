@@ -80,6 +80,7 @@ class AdminExternalSystems extends Component<Props, State> {
     externalSystem: {
       name: "",
       type: ExternalSystemType.VAN,
+      username: "",
       apiKey: ""
     }
   };
@@ -136,7 +137,7 @@ class AdminExternalSystems extends Component<Props, State> {
   render() {
     const { externalSystems } = this.props.data;
     const { editingExternalSystem, externalSystem } = this.state;
-    const { name, type, apiKey } = externalSystem;
+    const { name, type, username, apiKey } = externalSystem;
 
     return (
       <div>
@@ -234,6 +235,14 @@ class AdminExternalSystems extends Component<Props, State> {
           </SelectField>
           <br />
           <TextField
+            name="username"
+            floatingLabelText="Username"
+            fullWidth={true}
+            value={username}
+            onChange={this.editExternalSystemProp("username")}
+          />
+          <br />
+          <TextField
             name="apiKey"
             floatingLabelText="API Key"
             fullWidth={true}
@@ -254,6 +263,7 @@ const queries = {
           id
           name
           type
+          username
           apiKey
           syncedAt
         }
@@ -283,6 +293,7 @@ const mutations = {
           id
           name
           type
+          username
           apiKey
           createdAt
           updatedAt
@@ -308,6 +319,7 @@ const mutations = {
           id
           name
           type
+          username
           apiKey
         }
       }

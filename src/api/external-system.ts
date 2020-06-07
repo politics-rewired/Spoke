@@ -8,6 +8,7 @@ export interface ExternalSystem {
   id: string;
   name: string;
   type: ExternalSystemType;
+  username: string;
   apiKey: string;
   organizationId: number;
   createdAt: string;
@@ -19,6 +20,7 @@ export interface ExternalSystem {
 export interface ExternalSystemInput {
   name: string;
   type: ExternalSystemType;
+  username: string;
   apiKey: string;
 }
 
@@ -30,6 +32,7 @@ export const schema = `
   input ExternalSystemInput {
     name: String!
     type: ExternalSystemType!
+    username: String!
     apiKey: String!
   }
 
@@ -37,6 +40,7 @@ export const schema = `
     id: String!
     name: String!
     type: ExternalSystemType!
+    username: String!
     apiKey: String!
     organizationId: Int!
     createdAt: String!
