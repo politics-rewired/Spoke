@@ -92,7 +92,7 @@ class AdminExternalSystems extends Component<Props, State> {
       s => s.id === systemId
     )!;
 
-    const { id: _id, ...externalSystem } = system;
+    const { id: _id, syncedAt: _syncedAt, ...externalSystem } = system;
     this.setState({
       editingExternalSystem: systemId,
       externalSystem
@@ -125,7 +125,10 @@ class AdminExternalSystems extends Component<Props, State> {
           .catch(handleError);
   };
 
-  editExternalSystemProp = (prop: string) => (_: unknown, newVal: string) =>
+  editExternalSystemProp = (prop: keyof ExternalSystemInput) => (
+    _: unknown,
+    newVal: string
+  ) =>
     this.setState(prevState => ({
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
