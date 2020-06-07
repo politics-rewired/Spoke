@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.1](https://github.com/politics-rewired/spoke/compare/v1.13.0...v1.13.1) (2020-06-07)
+
+
+### Bug Fixes
+
+* request Slack identity scopes ([406fa16](https://github.com/politics-rewired/spoke/commit/406fa16509437f943b63c5083a1b4611b23aef73))
+* use Slack application token for non-identity scope requests ([746c551](https://github.com/politics-rewired/spoke/commit/746c55111c196bbd43d18877ba707ca5610d6cc3))
+
 ## [1.13.0](https://github.com/politics-rewired/spoke/compare/v1.12.1...v1.13.0) (2020-05-29)
 
 
