@@ -129,7 +129,7 @@ class TexterRequest extends React.Component {
             <h3> No texts available right now </h3>
             <p>
               {" "}
-              Watch Slack for an announcement on when new texts are available!{" "}
+              Watch out for an announcement when new texts are available!{" "}
             </p>
           </div>
         </Paper>
