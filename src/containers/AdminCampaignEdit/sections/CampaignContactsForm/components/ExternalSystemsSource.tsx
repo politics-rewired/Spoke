@@ -4,7 +4,9 @@ import moment from "moment";
 import { ApolloQueryResult } from "apollo-client";
 
 import Avatar from "material-ui/Avatar";
-import { List, ListItem } from "material-ui/List";
+import DropDownMenu from "material-ui/DropDownMenu";
+import MenuItem from "material-ui/MenuItem";
+import { Card, CardHeader, CardText } from "material-ui/Card";
 import RaisedButton from "material-ui/RaisedButton";
 import IconButton from "material-ui/IconButton";
 import Snackbar from "material-ui/Snackbar";
@@ -58,7 +60,11 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
   handleDismissSyncSnackbar = (systemId: string) => async () =>
     this.setState({ syncInitiatedForId: undefined });
 
-  handleSelectList = (listId: string) => async () => {
+  handleSelectList = (
+    _event: React.SyntheticEvent<{}>,
+    _index: number,
+    listId: string
+  ) => {
     const { selectedListId } = this.props;
     this.props.onChangeExternalList(
       selectedListId === listId ? undefined : listId
@@ -85,30 +91,34 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
 
     return (
       <div>
-        <h4>External Systems</h4>
+        <h4>Integrations</h4>
         <RaisedButton
           label="Refresh"
           labelPosition="before"
           icon={<RefreshIcon />}
           onClick={this.handleRefreshSystems}
         />
-        <List>
-          {externalSystems.map(system => (
-            <ListItem
-              key={system.id}
-              primaryText={system.name}
-              secondaryText={`Lists last pulled: ${
+        {externalSystems.map(system => (
+          <Card
+            key={system.id}
+            style={{ marginTop: "10px" }}
+            expanded={false}
+            onExpandChange={() => {}}
+          >
+            <CardHeader
+              title={system.name}
+              subtitle={`Lists last pulled: ${
                 system.syncedAt ? moment(system.syncedAt).fromNow() : "never"
               }`}
-              leftAvatar={
+              avatar={
                 <Avatar
                   backgroundColor={system.lists.length > 0 ? green500 : grey500}
                 >
                   {system.lists.length > 9 ? "9+" : system.lists.length}
                 </Avatar>
               }
-              secondaryTextLines={2}
-              rightIconButton={
+              showExpandableButton={true}
+              closeIcon={
                 <IconButton
                   onClick={this.handleSyncSystem(system.id)}
                   disabled={this.state.syncInitiatedForId === system.id}
@@ -116,27 +126,27 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
                   <SyncIcon />
                 </IconButton>
               }
-              disabled={system.lists.length === 0}
-              primaryTogglesNestedList={true}
-              nestedItems={system.lists.map(list => (
-                <ListItem
-                  key={list.externalId}
-                  primaryText={list.name}
-                  secondaryText={`${list.description}\nContacts: ${
-                    list.doorCount
-                  }`}
-                  secondaryTextLines={2}
-                  style={
-                    selectedListId === list.externalId
-                      ? { backgroundColor: grey200 }
-                      : undefined
-                  }
-                  onClick={this.handleSelectList(list.externalId)}
-                />
-              ))}
             />
-          ))}
-        </List>
+
+            {system.lists.length > 0 && (
+              <CardText>
+                Choose a list:<br />
+                <DropDownMenu
+                  value={selectedListId}
+                  onChange={this.handleSelectList}
+                  style={{ width: "50%" }}
+                >
+                  {system.lists.map(list => (
+                    <MenuItem
+                      value={list.externalId}
+                      primaryText={`${list.name} (${list.listCount} contacts)`}
+                    />
+                  ))}
+                </DropDownMenu>
+              </CardText>
+            )}
+          </Card>
+        ))}
         <Snackbar
           open={system !== undefined}
           message={
