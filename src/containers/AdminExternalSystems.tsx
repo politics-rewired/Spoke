@@ -23,7 +23,7 @@ import CreateIcon from "material-ui/svg-icons/content/create";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import SyncIcon from "material-ui/svg-icons/notification/sync";
 
-import { withOperations } from "./hoc/with-operations";
+import { loadData } from "./hoc/with-operations";
 import {
   ExternalSystemType,
   ExternalSystem,
@@ -372,7 +372,7 @@ const mutations = {
   })
 };
 
-export default withOperations({
+export default loadData({
   queries,
   mutations
 })(AdminExternalSystems);
