@@ -7,13 +7,13 @@ import Avatar from "material-ui/Avatar";
 import { List, ListItem } from "material-ui/List";
 import RaisedButton from "material-ui/RaisedButton";
 import IconButton from "material-ui/IconButton";
+import Snackbar from "material-ui/Snackbar";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import SyncIcon from "material-ui/svg-icons/notification/sync";
 import { green500, grey200, grey500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../../../hoc/with-operations";
 import { ExternalSystem } from "../../../../../api/external-system";
-import { Snackbar } from "material-ui";
 
 interface Props {
   organizationId: string;
@@ -34,12 +34,12 @@ interface Props {
 }
 
 interface State {
-  syncInitiatedForIds: string[];
+  syncInitiatedForId?: string;
 }
 
 export class ExternalSystemsSource extends React.Component<Props, State> {
   state: State = {
-    syncInitiatedForIds: []
+    syncInitiatedForId: undefined
   };
 
   handleSyncSystem = (systemId: string) => async () => {
@@ -47,10 +47,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
     try {
       const response = await refreshSystem(systemId);
       if (response.errors) throw response.errors;
-
-      const ids = new Set(this.state.syncInitiatedForIds);
-      ids.add(systemId);
-      this.setState({ syncInitiatedForIds: [...ids] });
+      this.setState({ syncInitiatedForId: systemId });
     } catch {
       // Stub
     } finally {
@@ -58,11 +55,8 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
     }
   };
 
-  handleDismissSyncSnackbar = (systemId: string) => async () => {
-    const ids = new Set(this.state.syncInitiatedForIds);
-    ids.delete(systemId);
-    this.setState({ syncInitiatedForIds: [...ids] });
-  };
+  handleDismissSyncSnackbar = (systemId: string) => async () =>
+    this.setState({ syncInitiatedForId: undefined });
 
   handleSelectList = (listId: string) => async () => {
     const { selectedListId } = this.props;
@@ -84,6 +78,10 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
     if (externalSystems.length === 0) {
       return <p>No external systems.</p>;
     }
+
+    const system = this.props.externalLists.organization.externalSystems.find(
+      ({ id }) => id === this.state.syncInitiatedForId
+    );
 
     return (
       <div>
@@ -113,7 +111,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
               rightIconButton={
                 <IconButton
                   onClick={this.handleSyncSystem(system.id)}
-                  disabled={this.state.syncInitiatedForIds.includes(system.id)}
+                  disabled={this.state.syncInitiatedForId === system.id}
                 >
                   <SyncIcon />
                 </IconButton>
@@ -139,23 +137,20 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
             />
           ))}
         </List>
-        {[...this.state.syncInitiatedForIds].map(systemId => {
-          const system = this.props.externalLists.organization.externalSystems.find(
-            ({ id }) => id === systemId
-          );
-          if (!system) return null;
-          return (
-            <Snackbar
-              key={systemId}
-              open={true}
-              message={`Sync started for ${
-                system.name
-              }. Please refresh systems to see updated lists.`}
-              autoHideDuration={4000}
-              onRequestClose={this.handleDismissSyncSnackbar(systemId)}
-            />
-          );
-        })}
+        <Snackbar
+          open={system !== undefined}
+          message={
+            system
+              ? `Sync started for ${
+                  system.name
+                }. Please refresh systems to see updated lists.`
+              : undefined
+          }
+          autoHideDuration={4000}
+          onRequestClose={
+            system ? this.handleDismissSyncSnackbar(system.id) : undefined
+          }
+        />
       </div>
     );
   }

@@ -17,6 +17,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
 import Dialog from "material-ui/Dialog";
 import TextField from "material-ui/TextField";
+import Snackbar from "material-ui/Snackbar";
 import ContentAdd from "material-ui/svg-icons/content/add";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
@@ -72,17 +73,19 @@ interface Props {
 interface State {
   editingExternalSystem: "new" | string | undefined;
   externalSystem: ExternalSystemInput;
+  syncInitiatedForId?: string;
 }
 
 class AdminExternalSystems extends Component<Props, State> {
-  state = {
+  state: State = {
     editingExternalSystem: undefined,
     externalSystem: {
       name: "",
       type: ExternalSystemType.VAN,
       username: "",
       apiKey: ""
-    }
+    },
+    syncInitiatedForId: undefined
   };
 
   startCreateExternalSystem = () =>
@@ -102,7 +105,11 @@ class AdminExternalSystems extends Component<Props, State> {
 
   makeHandleRefreshExternalSystem = (systemId: string) => () => {
     this.props.mutations.refreshSystem(systemId);
+    this.setState({ syncInitiatedForId: systemId });
   };
+
+  handleDismissSyncSnackbar = (systemId: string) => async () =>
+    this.setState({ syncInitiatedForId: undefined });
 
   handleRefreshSystems = () => this.props.data.refetch();
 
@@ -136,8 +143,16 @@ class AdminExternalSystems extends Component<Props, State> {
 
   render() {
     const { externalSystems } = this.props.data;
-    const { editingExternalSystem, externalSystem } = this.state;
+    const {
+      editingExternalSystem,
+      externalSystem,
+      syncInitiatedForId
+    } = this.state;
     const { name, type, username, apiKey } = externalSystem;
+
+    const system = this.props.data.externalSystems.find(
+      ({ id }) => id === syncInitiatedForId
+    );
 
     return (
       <div>
@@ -189,6 +204,7 @@ class AdminExternalSystems extends Component<Props, State> {
                     icon={<SyncIcon />}
                     style={{ marginRight: 10 }}
                     onClick={this.makeHandleRefreshExternalSystem(system.id)}
+                    disabled={this.state.syncInitiatedForId === system.id}
                   />
                 </TableRowColumn>
               </TableRow>
@@ -250,6 +266,21 @@ class AdminExternalSystems extends Component<Props, State> {
             onChange={this.editExternalSystemProp("apiKey")}
           />
         </Dialog>
+
+        <Snackbar
+          open={system !== undefined}
+          message={
+            system
+              ? `Sync started for ${
+                  system.name
+                }. Please refresh systems to see updated lists.`
+              : undefined
+          }
+          autoHideDuration={4000}
+          onRequestClose={
+            system ? this.handleDismissSyncSnackbar(system.id) : undefined
+          }
+        />
       </div>
     );
   }
