@@ -161,12 +161,39 @@ exports.up = function(knex) {
       );
     end;
     $$ language plpgsql volatile SECURITY definer SET search_path = "public";
+
+    create or replace function "public".insert_van_contact_batch_to_campaign_contact(record_list json) returns void as $$
+      insert into campaign_contact (campaign_id, first_name, last_name, zip, custom_fields, cell)
+      select
+        (r ->> 'campaign_id')::integer,
+        r ->> 'first_name',
+        r ->> 'last_name',
+        r ->> 'zip',
+        r ->> 'custom_fields',
+        r ->> 'cell'
+      from json_array_elements(record_list) as r
+        where r ->> 'first_name' is not null
+          and r ->> 'last_name' is not null
+          and r ->> 'cell' is not null
+      on conflict (campaign_id, cell) do nothing
+    $$ language sql volatile SECURITY definer SET search_path = "public";
   `);
 };
 
 exports.down = function(knex) {
   return knex.schema.raw(`
     -- Restore function versions from 20200510204235_external_list
+
+    CREATE OR REPLACE FUNCTION "public".insert_van_contact_batch_to_campaign_contact(record_list json) RETURNS void as $$ insert into campaign_contact (campaign_id, first_name, last_name, zip, custom_fields, cell)
+    select
+      (r ->> 'campaign_id')::integer,
+      r ->> 'first_name',
+      r ->> 'last_name',
+      r ->> 'zip',
+      r ->> 'custom_fields',
+      r ->> 'cell'
+    from json_array_elements(record_list) as r
+     $$ language sql volatile SECURITY definer SET search_path = "public";
 
     CREATE OR REPLACE FUNCTION "public".fetch_saved_list(saved_list_id integer, row_merge json, column_config json, handler text, after text, context json) RETURNS void as $$ declare
       v_van_system_id uuid;
