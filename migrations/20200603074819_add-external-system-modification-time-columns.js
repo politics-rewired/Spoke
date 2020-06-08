@@ -155,7 +155,6 @@ exports.up = function(knex) {
           'extract_phone_type', 'cell',
           'column_config', fetch_saved_list.column_config,
           'handler', fetch_saved_list.handler,
-          'first_n_rows', 10,
           '__after', fetch_saved_list.after,
           '__context', fetch_saved_list.context
         )
