@@ -1423,13 +1423,21 @@ const rootMutations = {
         .where({ id: campaignId })
         .first();
       await accessRequired(user, campaign.organization_id, "ADMIN");
-      const res = await r
-        .knex("job_request")
-        .where({
-          id,
-          campaign_id: campaignId
-        })
-        .delete();
+      await r.knex.transaction(async trx => {
+        await trx("job_request")
+          .where({
+            id,
+            campaign_id: campaignId
+          })
+          .delete();
+
+        // Delete any associated Graphile Worker job
+        await trx("graphile_worker.jobs")
+          .whereRaw(`(payload->'__context'->>'job_request_id')::integer = ?`, [
+            id
+          ])
+          .del();
+      });
       return { id };
     },
 
