@@ -11,7 +11,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import SyncIcon from "material-ui/svg-icons/notification/sync";
-import { green500, grey200, grey500 } from "material-ui/styles/colors";
+import { green50, green500, grey200, grey500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../../../hoc/with-operations";
 import { ExternalSystem } from "../../../../../api/external-system";
@@ -92,6 +92,14 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
     const syncingEdge = edges.find(edge => edge.node.id === syncInitiatedForId);
     const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
 
+    const selectedEdge = edges.find(
+      ({ node: system }) =>
+        system.lists.edges.find(
+          ({ node: list }) => list.externalId === selectedListId
+        ) !== undefined
+    );
+    const selectedSystemId = selectedEdge ? selectedEdge.node.id : undefined;
+
     return (
       <div>
         <h4>Integrations</h4>
@@ -104,7 +112,11 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
         {externalSystems.edges.map(({ node: system }) => (
           <Card
             key={system.id}
-            style={{ marginTop: "10px" }}
+            style={{
+              marginTop: "10px",
+              backgroundColor:
+                selectedSystemId === system.id ? green50 : undefined
+            }}
             expanded={false}
             onExpandChange={this.handleSyncSystem(system.id)}
           >
