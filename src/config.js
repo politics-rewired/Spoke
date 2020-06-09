@@ -696,6 +696,16 @@ const validators = {
     default: "no-version",
     isClient: true
   }),
+  VAN_BASE_URL: url({
+    desc:
+      "The base url to use when interacting with VAN (may need to change for international use)",
+    default: "https://api.securevan.com/v4"
+  }),
+  VAN_EXPORT_TYPE: num({
+    desc:
+      "The numeric coding of the VAN list export type. The default is the Hustle format.",
+    default: 8
+  }),
   WAREHOUSE_DB_TYPE: str({
     desc:
       "Enables ability to load contacts directly from a SQL query from a separate data-warehouse db -- only is_superadmin-marked users will see the interface",
