@@ -34,25 +34,6 @@ import theme from "../styles/theme";
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
 
-const styles = {
-  wrapper: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "flex-start"
-  },
-  card: {
-    margin: 10,
-    padding: 10
-  },
-  chip: {
-    marginRight: "auto",
-    color: "#000000"
-  },
-  description: {
-    maxWidth: "200px"
-  }
-};
-
 interface Props {
   match: any;
   mutations: {
@@ -180,7 +161,7 @@ class AdminExternalSystems extends Component<Props, State> {
             </TableRow>
           </TableHeader>
           <TableBody displayRowCheckbox={false} showRowHover>
-            {(externalSystems.edges).map(({ node: system }) => (
+            {externalSystems.edges.map(({ node: system }) => (
               <TableRow key={system.id}>
                 <TableRowColumn>{system.name}</TableRowColumn>
                 <TableRowColumn>{system.type}</TableRowColumn>
