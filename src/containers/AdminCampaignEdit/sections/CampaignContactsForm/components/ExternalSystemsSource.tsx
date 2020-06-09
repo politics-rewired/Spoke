@@ -8,7 +8,6 @@ import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import RaisedButton from "material-ui/RaisedButton";
-import IconButton from "material-ui/IconButton";
 import Snackbar from "material-ui/Snackbar";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import SyncIcon from "material-ui/svg-icons/notification/sync";
@@ -46,6 +45,8 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
   };
 
   handleSyncSystem = (systemId: string) => async () => {
+    if (this.state.syncInitiatedForId === systemId) return;
+
     const { refreshSystem } = this.props.mutations;
     try {
       const response = await refreshSystem(systemId);
@@ -81,6 +82,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
         organization: { externalSystems }
       }
     } = this.props;
+    const { syncInitiatedForId } = this.state;
 
     if (externalSystems.edges.length === 0) {
       return <p>No external systems.</p>;
@@ -104,7 +106,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
             key={system.id}
             style={{ marginTop: "10px" }}
             expanded={false}
-            onExpandChange={() => {}}
+            onExpandChange={this.handleSyncSystem(system.id)}
           >
             <CardHeader
               title={system.name}
@@ -124,12 +126,9 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
               }
               showExpandableButton={true}
               closeIcon={
-                <IconButton
-                  onClick={this.handleSyncSystem(system.id)}
-                  disabled={this.state.syncInitiatedForId === system.id}
-                >
-                  <SyncIcon />
-                </IconButton>
+                <SyncIcon
+                  color={syncInitiatedForId === system.id ? grey200 : undefined}
+                />
               }
             />
 
@@ -143,6 +142,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
                 >
                   {system.lists.edges.map(({ node: list }) => (
                     <MenuItem
+                      key={list.externalId}
                       value={list.externalId}
                       primaryText={`${list.name} (${list.listCount} contacts)`}
                     />
