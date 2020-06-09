@@ -298,6 +298,11 @@ const validators = {
     default: false,
     isClient: true
   }),
+  ENABLE_INTEGRATIONS: bool({
+    desc: "Whether to enable external system integration",
+    default: false,
+    isClient: true
+  }),
   ENABLE_TROLLBOT: bool({
     desc: "Whether to enable trollbot",
     default: false,

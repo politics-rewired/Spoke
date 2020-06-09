@@ -16,6 +16,17 @@ export interface RelayPaginatedResponse<T> {
   edges: RelayEdge<T>[];
 }
 
+export const emptyRelayPage: RelayPaginatedResponse<any> = {
+  pageInfo: {
+    totalCount: 0,
+    hasNextPage: false,
+    hasPreviousPage: false,
+    startCursor: null,
+    endCursor: null
+  },
+  edges: []
+};
+
 export const schema = `
   scalar Cursor
 

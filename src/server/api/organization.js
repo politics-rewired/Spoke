@@ -17,6 +17,7 @@ import {
 import { memoizer, cacheOpts } from "../memoredis";
 
 import { TextRequestType } from "../../api/organization";
+import { emptyRelayPage } from "../../api/pagination";
 
 export const getEscalationUserId = async organizationId => {
   let escalationUserId;
@@ -368,6 +369,8 @@ export const resolvers = {
     externalSystems: async (organization, { after, first }, { user }) => {
       const organizationId = parseInt(organization.id);
       await accessRequired(user, organizationId, "ADMIN");
+
+      if (!config.ENABLE_INTEGRATIONS) return emptyRelayPage;
 
       const query = r
         .reader("external_system")

@@ -13,6 +13,7 @@ import moment from "moment-timezone";
 import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";
 import { formatPage } from "./lib/pagination";
+import { emptyRelayPage } from "../../api/pagination";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
@@ -3463,6 +3464,8 @@ const rootResolvers = {
     },
     externalSystems: async (_, { organizationId, after, first }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
+
+      if (!config.ENABLE_INTEGRATIONS) return emptyRelayPage;
 
       const query = r
         .reader("external_system")
