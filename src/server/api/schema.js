@@ -12,6 +12,8 @@ import moment from "moment-timezone";
 
 import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";
+import { formatPage } from "./lib/pagination";
+import { emptyRelayPage } from "../../api/pagination";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
@@ -75,6 +77,8 @@ import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
+import { resolvers as externalListResolvers } from "./external-list";
+import { resolvers as externalSystemResolvers } from "./external-system";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -202,8 +206,19 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     }
   });
 
+  if (campaign.hasOwnProperty("externalListId") && campaign.externalListId) {
+    await r
+      .knex("campaign_contact")
+      .where({ campaign_id: id })
+      .del();
+    await r.knex.raw(
+      `select * from public.queue_load_list_into_campaign(?, ?)`,
+      [id, parseInt(campaign.externalListId)]
+    );
+  }
+
   let validationStats = {};
-  if (campaign.hasOwnProperty("contactsFile")) {
+  if (campaign.hasOwnProperty("contactsFile") && campaign.contactsFile) {
     const processedContacts = await processContactsFile(campaign.contactsFile);
     campaign.contacts = processedContacts.contacts;
     validationStats = processedContacts.validationStats;
@@ -1410,13 +1425,21 @@ const rootMutations = {
         .where({ id: campaignId })
         .first();
       await accessRequired(user, campaign.organization_id, "ADMIN");
-      const res = await r
-        .knex("job_request")
-        .where({
-          id,
-          campaign_id: campaignId
-        })
-        .delete();
+      await r.knex.transaction(async trx => {
+        await trx("job_request")
+          .where({
+            id,
+            campaign_id: campaignId
+          })
+          .delete();
+
+        // Delete any associated Graphile Worker job
+        await trx("graphile_worker.jobs")
+          .whereRaw(`(payload->'__context'->>'job_request_id')::integer = ?`, [
+            id
+          ])
+          .del();
+      });
       return { id };
     },
 
@@ -3091,6 +3114,84 @@ const rootMutations = {
         .del();
 
       return true;
+    },
+    createExternalSystem: async (
+      _,
+      { organizationId, externalSystem },
+      { user }
+    ) => {
+      console.log("Doing creation");
+      await accessRequired(user, organizationId, "ADMIN");
+      console.log(externalSystem);
+
+      // TODO: this should be a combination of organizaiton and external system IDs
+      const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+
+      const worker = await getWorker();
+
+      await worker.setSecret(truncatedKey, externalSystem.apiKey);
+
+      const [created] = await r
+        .knex("external_system")
+        .insert({
+          name: externalSystem.name,
+          type: externalSystem.type.toLowerCase(),
+          organization_id: parseInt(organizationId),
+          username: externalSystem.username,
+          api_key_ref: truncatedKey
+        })
+        .returning("*");
+
+      return created;
+    },
+    editExternalSystem: async (
+      _,
+      { id: externalSystemId, externalSystem },
+      { user }
+    ) => {
+      const savedSystem = await r
+        .knex("external_system")
+        .where({ id: externalSystemId })
+        .first();
+
+      await accessRequired(user, savedSystem.organization_id, "ADMIN");
+
+      const payload = {
+        name: externalSystem.name,
+        type: externalSystem.type.toLowerCase(),
+        username: externalSystem.username
+      };
+
+      if (!externalSystem.apiKey.includes("*")) {
+        // TODO: this should be a combination of organizaiton and external system IDs
+        const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+        await getWorker().then(worker =>
+          worker.setSecret(truncatedKey, externalSystem.apiKey)
+        );
+        payload.api_key_ref = truncatedKey;
+      }
+
+      const [updated] = await r
+        .knex("external_system")
+        .update(payload)
+        .where({ id: externalSystemId })
+        .returning("*");
+
+      return updated;
+    },
+    refreshExternalSystem: async (_, { externalSystemId }, { user }) => {
+      const externalSystem = await r
+        .knex("external_system")
+        .where({ id: externalSystemId })
+        .first();
+
+      await accessRequired(user, externalSystem.organization_id, "ADMIN");
+
+      await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
+        externalSystemId
+      ]);
+
+      return true;
     }
   }
 };
@@ -3360,6 +3461,29 @@ const rootResolvers = {
         token: t.token,
         organizationId
       }));
+    },
+    externalSystems: async (_, { organizationId, after, first }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      if (!config.ENABLE_INTEGRATIONS) return emptyRelayPage;
+
+      const query = r
+        .reader("external_system")
+        .where({ organization_id: parseInt(organizationId) });
+      return await formatPage(query, { after, first });
+    },
+    externalLists: async (
+      _,
+      { organizationId, systemId, after, first },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const query = r.reader("external_list").where({
+        organization_id: parseInt(organizationId),
+        system_id: systemId
+      });
+      return await formatPage(query, { after, first });
     }
   }
 };
@@ -3384,6 +3508,8 @@ export const resolvers = {
   ...inviteResolvers,
   ...linkDomainResolvers,
   ...trollbotResolvers,
+  ...externalListResolvers,
+  ...externalSystemResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },

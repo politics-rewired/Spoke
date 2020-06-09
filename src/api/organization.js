@@ -49,5 +49,6 @@ export const schema = `
     tagList: [Tag]
     escalationTagList: [Tag]
     teams: [Team]!
+    externalSystems: ExternalSystemPage!
   }
 `;

@@ -13,7 +13,7 @@ import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
 import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 
 import { loadData } from "./hoc/with-operations";
-import { RelayPaginatedResponse } from "../api/types";
+import { RelayPaginatedResponse } from "../api/pagination";
 import theme from "../styles/theme";
 import SuperAdminLogin from "../components/SuperAdminLogin";
 

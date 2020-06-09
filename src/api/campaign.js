@@ -49,7 +49,7 @@ export const schema = `
     customFields: [String]
     cannedResponses(userId: String): [CannedResponse]
     stats: CampaignStats,
-    pendingJobs: [JobRequest]
+    pendingJobs(jobTypes: [String]): [JobRequest]!
     datawarehouseAvailable: Boolean
     useDynamicAssignment: Boolean
     introHtml: String

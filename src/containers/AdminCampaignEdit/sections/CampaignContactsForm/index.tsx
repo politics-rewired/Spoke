@@ -2,28 +2,30 @@ import React from "react";
 import gql from "graphql-tag";
 import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-import { StyleSheet, css } from "aphrodite";
 
-import FileDrop from "react-file-drop";
 import RaisedButton from "material-ui/RaisedButton";
-import Subheader from "material-ui/Subheader";
-import { ListItem, List } from "material-ui/List";
-import CheckIcon from "material-ui/svg-icons/action/check-circle";
-import UploadIcon from "material-ui/svg-icons/file/file-upload";
+import SelectField from "material-ui/SelectField";
+import MenuItem from "material-ui/MenuItem";
 
 import { loadData } from "../../../hoc/with-operations";
-import { dataTest } from "../../../../lib/attributes";
-import theme from "../../../../styles/theme";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
   asSection,
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import CSVForm from "./components/CSVForm";
+import ExternalSystemsSource from "./components/ExternalSystemsSource";
 import SelectExcludeCampaigns from "./components/SelectExcludeCampaigns";
 import ContactsSqlForm from "./components/ContactsSqlForm";
+import UploadResults from "./components/UploadResults";
+import { RelayPaginatedResponse } from "../../../../api/pagination";
 
-import "./styles/file-drop.css";
+enum ContactSourceType {
+  CSV = "CSV",
+  ExternalSystem = "Integration",
+  SQL = "SQL"
+}
 
 interface ContactsValues {
   contactSql: string | null;
@@ -42,6 +44,7 @@ interface ContactsCampaign {
 interface ContactsOrganization {
   id: string;
   numbersApiKey: string;
+  externalSystems: RelayPaginatedResponse<{ id: string }>;
   campaigns: {
     campaigns: {
       id: string;
@@ -70,57 +73,13 @@ interface ContactsState {
   selectedCampaignIds: string[];
   contactsSql: string | null;
   contactsFile: File | null;
+  externalListId: string | null;
   filterOutLandlines: boolean;
 
   // UI
+  source: ContactSourceType;
   isWorking: boolean;
 }
-
-const inlineStyles = {
-  nestedItem: {
-    fontSize: "12px"
-  },
-  filterLandlinesToggle: {
-    marginTop: "15px",
-    marginBottom: "15px"
-  }
-};
-
-const checkIcon = () => <CheckIcon color={theme.colors.green} />;
-
-const styles = StyleSheet.create({
-  csvHeader: {
-    fontFamily: "Courier",
-    backgroundColor: theme.colors.lightGray,
-    padding: 3
-  },
-  exampleImageInput: {
-    cursor: "pointer",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
-    width: "100%",
-    opacity: 0
-  }
-});
-
-const SectionSubtitle: React.SFC = () => (
-  <span>
-    Your upload file should be in CSV format with column headings in the first
-    row. You must include{" "}
-    <span className={css(styles.csvHeader)}>firstName</span>,
-    <span className={css(styles.csvHeader)}>lastName</span>, and
-    <span className={css(styles.csvHeader)}>cell</span> columns. If you include
-    a <span className={css(styles.csvHeader)}>zip</span> column, we'll use the
-    zip to guess the contact's timezone for enforcing texting hours. An optional
-    column to map the contact to a CRM is{" "}
-    <span className={css(styles.csvHeader)}>external_id</span>
-    Any additional columns in your file will be available as custom fields to
-    use in your texting scripts.
-  </span>
-);
 
 class CampaignContactsForm extends React.Component<
   ContactsInnerProps,
@@ -128,25 +87,25 @@ class CampaignContactsForm extends React.Component<
 > {
   state: ContactsState = {
     // UI
+    source: ContactSourceType.CSV,
     isWorking: false,
 
     // Pending changes payload
     selectedCampaignIds: [],
     contactsSql: null,
     contactsFile: null,
+    externalListId: null,
     filterOutLandlines: false
   };
 
   handleOnChangeValidSql = (contactsSql: string | null) =>
     this.setState({ contactsSql });
 
-  handleFileDrop = (files: FileList | null) =>
-    this.setState({ contactsFile: (files || [])[0] });
+  handleOnContactsFileChange = (contactsFile?: File) =>
+    this.setState({ contactsFile: contactsFile || null });
 
-  handleOnSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files || [];
-    this.setState({ contactsFile: files[0] });
-  };
+  handleOnExternalListChange = (externalListId: string) =>
+    this.setState({ externalListId });
 
   handleOnChangeExcludedCamapignIds = (selectedCampaignIds: string[]) =>
     this.setState({ selectedCampaignIds });
@@ -155,6 +114,7 @@ class CampaignContactsForm extends React.Component<
     const {
       contactsSql,
       contactsFile,
+      externalListId,
       filterOutLandlines,
       selectedCampaignIds
     } = this.state;
@@ -164,6 +124,7 @@ class CampaignContactsForm extends React.Component<
       const campaignInput = {
         contactSql: contactsSql,
         contactsFile,
+        externalListId,
         filterOutLandlines,
         excludeCampaignIds: selectedCampaignIds
       };
@@ -177,15 +138,34 @@ class CampaignContactsForm extends React.Component<
     }
   };
 
+  handleOnChangeSource = (
+    _e: React.SyntheticEvent<{}>,
+    _index: number,
+    source: any
+  ) => {
+    if (source !== ContactSourceType.CSV) {
+      this.setState({ contactsFile: null });
+    }
+    if (source !== ContactSourceType.ExternalSystem) {
+      this.setState({ externalListId: null });
+    }
+    if (source !== ContactSourceType.SQL) {
+      this.setState({ contactsSql: null });
+    }
+    this.setState({ source });
+  };
+
   render() {
     const {
+      source,
       isWorking,
       selectedCampaignIds,
       contactsSql,
       contactsFile,
-      filterOutLandlines
+      externalListId
     } = this.state;
     const {
+      organizationId,
       campaignId,
       campaignData,
       organizationData,
@@ -200,88 +180,73 @@ class CampaignContactsForm extends React.Component<
     } = campaignData.campaign;
 
     const {
+      externalSystems,
       campaigns: { campaigns: allCampaigns }
     } = organizationData.organization;
 
     const allOtherCampaigns = allCampaigns.filter(({ id }) => id != campaignId);
 
     const isSaveDisabled =
-      isWorking || (!isNew && !contactsFile && !contactsSql);
+      isWorking || (!isNew && !contactsFile && !contactsSql && !externalListId);
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
+
+    // Configure contact sources
+    const sourceOptions = [ContactSourceType.CSV];
+    if (externalSystems.edges.length > 0) {
+      sourceOptions.push(ContactSourceType.ExternalSystem);
+    }
+    if (datawarehouseAvailable) {
+      sourceOptions.push(ContactSourceType.SQL);
+    }
 
     return (
       <div>
-        <CampaignFormSectionHeading
-          title="Who are you contacting?"
-          subtitle={<SectionSubtitle />}
-        />
+        <CampaignFormSectionHeading title="Who are you contacting?" />
         <SelectExcludeCampaigns
           allOtherCampaigns={allOtherCampaigns}
           selectedCampaignIds={selectedCampaignIds}
           onChangeExcludedCamapignIds={this.handleOnChangeExcludedCamapignIds}
         />
-        <FileDrop
-          onDrop={this.handleFileDrop}
-          targetClassName={
-            contactsFile ? "file-drop-target with-file" : "file-drop-target"
-          }
+        <SelectField
+          floatingLabelText="Contact source"
+          value={source}
+          fullWidth={true}
+          onChange={this.handleOnChangeSource}
         >
-          <p>{contactsFile ? contactsFile.name : "Drop a csv here, or"}</p>
-          <RaisedButton
-            label="Select a file"
-            containerElement="label"
-            icon={<UploadIcon />}
-          >
-            <input
-              id="csv-upload-field"
-              type="file"
-              accept=".csv"
-              style={{ display: "none" }}
-              onChange={this.handleOnSelectFile}
+          {sourceOptions.map(sourceOption => (
+            <MenuItem
+              key={sourceOption}
+              value={sourceOption}
+              primaryText={sourceOption}
             />
-          </RaisedButton>
-        </FileDrop>
-        {datawarehouseAvailable && (
+          ))}
+        </SelectField>
+        <br />
+        <br />
+        {source === ContactSourceType.CSV && (
+          <CSVForm
+            contactsFile={contactsFile}
+            onContactsFileChange={this.handleOnContactsFileChange}
+          />
+        )}
+        {source === ContactSourceType.ExternalSystem && (
+          <ExternalSystemsSource
+            organizationId={organizationId}
+            selectedListId={externalListId}
+            onChangeExternalList={this.handleOnExternalListChange}
+          />
+        )}
+        {source === ContactSourceType.SQL && (
           <ContactsSqlForm
             style={{ marginTop: "20px" }}
             onChangeValidSql={this.handleOnChangeValidSql}
           />
         )}
-        {contactsCount > 0 && (
-          <List>
-            <Subheader>Uploaded</Subheader>
-            <ListItem
-              {...dataTest("uploadedContacts")}
-              primaryText={`${contactsCount} contacts`}
-              leftIcon={checkIcon()}
-            />
-            <ListItem
-              primaryText={`${customFields.length} custom fields`}
-              leftIcon={checkIcon()}
-              nestedItems={customFields.map(field => (
-                <ListItem
-                  key={field}
-                  innerDivStyle={inlineStyles.nestedItem}
-                  primaryText={field}
-                />
-              ))}
-            />
-          </List>
-        )}
-        {pendingJob && (
-          <List>
-            <Subheader>Upload Messages</Subheader>
-            {pendingJob.resultMessage.split("\n").length > 0 ? (
-              pendingJob.resultMessage
-                .split("\n")
-                .map(message => (
-                  <ListItem key={message} primaryText={message} />
-                ))
-            ) : (
-              <ListItem primaryText={"No results"} />
-            )}
-          </List>
-        )}
+        <UploadResults
+          contactsCount={contactsCount}
+          customFields={customFields}
+          pendingJob={pendingJob}
+        />
         <br />
         <RaisedButton
           label={finalSaveLabel}
@@ -317,6 +282,13 @@ const queries = {
         organization(id: $organizationId) {
           id
           numbersApiKey
+          externalSystems {
+            edges {
+              node {
+                id
+              }
+            }
+          }
           campaigns(cursor: { offset: 0, limit: 5000 }) {
             campaigns {
               id
@@ -367,7 +339,11 @@ export default compose<ContactsInnerProps, RequiredComponentProps>(
   asSection({
     title: "Contacts",
     readinessName: "contacts",
-    jobQueueNames: ["upload_contacts", "upload_contacts_sql"],
+    jobQueueNames: [
+      "upload_contacts",
+      "upload_contacts_sql",
+      "load_external_list"
+    ],
     expandAfterCampaignStarts: false,
     expandableBySuperVolunteers: false
   }),

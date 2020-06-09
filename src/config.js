@@ -298,6 +298,11 @@ const validators = {
     default: false,
     isClient: true
   }),
+  ENABLE_INTEGRATIONS: bool({
+    desc: "Whether to enable external system integration",
+    default: false,
+    isClient: true
+  }),
   ENABLE_TROLLBOT: bool({
     desc: "Whether to enable trollbot",
     default: false,
@@ -695,6 +700,16 @@ const validators = {
     desc: "The version of Spoke running",
     default: "no-version",
     isClient: true
+  }),
+  VAN_BASE_URL: url({
+    desc:
+      "The base url to use when interacting with VAN (may need to change for international use)",
+    default: "https://api.securevan.com/v4"
+  }),
+  VAN_EXPORT_TYPE: num({
+    desc:
+      "The numeric coding of the VAN list export type. The default is the Hustle format.",
+    default: 8
   }),
   WAREHOUSE_DB_TYPE: str({
     desc:

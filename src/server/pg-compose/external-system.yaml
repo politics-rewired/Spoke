@@ -1,0 +1,148 @@
+---
+kind: Dependency
+module: ngp-van
+---
+kind: Table
+name: external_system
+implements:
+  - trait: van_system
+columns:
+  id:
+    type: uuid
+    default:
+      type: function
+      fn: uuid_generate_v1mc()
+    nullable: false
+  name:
+    type: text
+    nullable: false
+  type:
+    type: text
+    nullable: false
+  api_key_ref:
+    type: text
+    nullable: false
+  organization_id:
+    type: integer
+foreign_keys:
+  - references:
+      table: organization
+      columns:
+        - id
+    on:
+      - organization_id
+---
+kind: Table
+name: external_list
+implements:
+  - trait: van_saved_list
+    via:
+      columns:
+        van_system_id: system_id
+        saved_list_id: external_id
+  # Note: van_contact is an emtpy trait designed to be implemented by campaign_contact,
+  #       but we're keeping campaign_contact migrations out of pg-compose for now
+  - trait: van_contact
+columns:
+  system_id:
+    type: uuid
+    nullable: false
+  external_id:
+    type: integer
+    nullable: false
+  name:
+    type: text
+    nullable: false
+  description:
+    type: text
+    nullable: false
+    default: ""
+  list_count:
+    type: integer
+    nullable: false
+  door_count:
+    type: integer
+    nullable: false
+foreign_keys:
+  - references:
+      table: external_system
+      columns:
+        - id
+    on:
+      - system_id
+indexes:
+  external_list_pkey:
+    - unique: true
+      primary_key: true
+      on:
+        - column: system_id
+        - column: external_id
+---
+kind: Function
+name: insert_van_contact_batch_to_campaign_contact
+implements:
+  - handle_van_contact_batch
+arguments:
+  - name: record_list
+    type: json
+returns: void
+security: definer
+volatility: volatile
+language: sql
+body: |
+  insert into campaign_contact (campaign_id, first_name, last_name, zip, custom_fields, cell)
+  select
+    (r ->> 'campaign_id')::integer,
+    r ->> 'first_name',
+    r ->> 'last_name',
+    r ->> 'zip',
+    r ->> 'custom_fields',
+    r ->> 'cell'
+  from json_array_elements(record_list) as r
+---
+kind: Function
+name: mark_loading_job_done
+arguments:
+  - name: payload
+    type: json
+  - name: result
+    type: json
+  - name: context
+    type: json
+returns: void
+security: definer
+volatility: volatile
+language: sql
+body: |
+  select 1
+---
+kind: Function
+name: queue_load_list_into_campaign
+arguments:
+  - name: campaign_id
+    type: integer
+  - name: list_external_id
+    type: integer
+language: sql
+volatility: volatile
+security: definer
+returns: void
+body: |
+  select fetch_saved_list(
+    list_external_id,
+    json_build_object('campaign_id', campaign_id),
+    json_build_object(
+      'first_name', 'FirstName',
+      'last_name', 'LastName',
+      'zip', 'ZipOrPostal',
+      'custom_fields', json_build_array(
+        'CongressionalDistrict', 'StateHouse', 'StateSenate', 'Party',
+        'PollingLocation', 'PollingAddress', 'PollingCity', 'Email',
+        'phone_id'
+      ),
+      'cell', 'cell'
+    ),
+    'insert_van_contact_batch_to_campaign_contact',
+    'mark_loading_job_done',
+    null::json
+  )

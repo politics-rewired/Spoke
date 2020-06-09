@@ -25,7 +25,7 @@ import {
   previewRouter
 } from "./routes";
 import { r } from "./models";
-import { getRunner } from "./worker";
+import { getWorker } from "./worker";
 
 process.on("uncaughtException", ex => {
   logger.error("uncaughtException: ", ex);
@@ -178,10 +178,8 @@ const teardownKnex = async () => {
 };
 
 const teardownGraphile = async () =>
-  getRunner()
-    .then(async rs => {
-      await Promise.all([rs.runner.stop(), rs.scheduler.stop()]);
-    })
+  getWorker()
+    .then(worker => worker.stop())
     .then(() => logger.info("  - tore down Graphile runner"));
 
 const onSignal = () => {
@@ -207,7 +205,7 @@ createTerminus(server, {
   }
 });
 
-getRunner().then(() => {
+getWorker().then(() => {
   // Heroku requires you to use process.env.PORT
   const port = DEV_APP_PORT || PORT;
   server.listen(port, () => {

@@ -19,6 +19,8 @@ import { schema as teamSchema } from "./team";
 import { schema as trollbotSchema } from "./trollbot";
 import { schema as paginationSchema } from "./pagination";
 import { schema as membershipSchema } from "./organization-membership";
+import { schema as externalSystemSchema } from "./external-system";
+import { schema as externalListSchema } from "./external-list";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -90,6 +92,7 @@ const rootSchema = `
     useDynamicAssignment: Boolean
     contacts: [CampaignContactInput]
     contactsFile: Upload
+    externalListId: String
     filterOutLandlines: Boolean
     excludeCampaignIds: [Int]
     contactSql: String
@@ -226,6 +229,8 @@ const rootSchema = `
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
     trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
     trollTokens(organizationId: String!): [TrollTrigger]
+    externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!
+    externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
   }
 
   type RootMutation {
@@ -289,6 +294,9 @@ const rootSchema = `
     dismissAlarms(messageIds: [String!]!, organizationId: String!): Boolean!
     addToken(token: String!, organizationId: String!): Boolean!
     removeToken(token: String!, organizationId: String!): Boolean!
+    createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
+    editExternalSystem(id: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
+    refreshExternalSystem(externalSystemId: String!): Boolean!
   }
 
   schema {
@@ -323,5 +331,7 @@ export const schema = [
   conversationSchema,
   tagSchema,
   teamSchema,
-  trollbotSchema
+  trollbotSchema,
+  externalSystemSchema,
+  externalListSchema
 ];

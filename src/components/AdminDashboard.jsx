@@ -130,6 +130,11 @@ class AdminDashboard extends React.Component {
         role: "SUPERVOLUNTEER"
       },
       {
+        name: "Integrations",
+        path: "integrations",
+        role: "OWNER"
+      },
+      {
         name: "Settings",
         path: "settings",
         role: "OWNER"
@@ -138,6 +143,11 @@ class AdminDashboard extends React.Component {
 
     if (window.DISABLE_ASSIGNMENT_PAGE) {
       const index = sections.findIndex(s => s.name === "Assignment Requests");
+      sections.splice(index, 1);
+    }
+
+    if (!window.ENABLE_INTEGRATIONS) {
+      const index = sections.findIndex(s => s.name === "Integrations");
       sections.splice(index, 1);
     }
 

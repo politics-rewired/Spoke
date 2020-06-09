@@ -3,7 +3,7 @@ import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
 import { createUploadLink } from "apollo-upload-client";
 import { onError } from "apollo-link-error";
-import { InMemoryCache } from "apollo-cache-inmemory";
+import { InMemoryCache, defaultDataIdFromObject } from "apollo-cache-inmemory";
 import { getMainDefinition } from "apollo-utilities";
 import omitDeep from "omit-deep-lodash";
 
@@ -55,7 +55,15 @@ const link = cleanTypenameLink
   .concat(uploadLink);
 
 const cache = new InMemoryCache({
-  addTypename: true
+  addTypename: true,
+  dataIdFromObject: object => {
+    switch (object.__typename) {
+      case "ExternalList":
+        return `${object.systemId}:${object.externalId}`;
+      default:
+        return defaultDataIdFromObject(object);
+    }
+  }
 });
 
 const ApolloClientSingleton = new ApolloClient({
