@@ -243,7 +243,7 @@ export const resolvers = {
       campaign.organization ||
       loaders.organization.load(campaign.organization_id),
     datawarehouseAvailable: (campaign, _, { user }) =>
-      user.is_superadmin && !!config.WAREHOUSE_DB_HOST,
+      user.is_superadmin && config.WAREHOUSE_DB_TYPE !== undefined,
     pendingJobs: async campaign =>
       r
         .reader("job_request")
