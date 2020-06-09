@@ -40,7 +40,7 @@ export const formatPage = async (query, options) => {
   const [{ count: totalCount }] = await countQuery.count();
   const results = await query;
   const edges = results.slice(0, first || undefined).map(record => ({
-    cursor: encode(record.id),
+    cursor: encode(record[primaryColumn]),
     node: nodeTransformer(record)
   }));
   const pageInfo = {
