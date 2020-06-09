@@ -20,4 +20,14 @@ export const schema = `
     createdAt: String!
     updatedAt: String!
   }
+
+  type ExternalListEdge {
+    cursor: Cursor!
+    node: ExternalList!
+  }
+
+  type ExternalListPage {
+    edges: [ExternalListEdge!]!
+    pageInfo: RelayPageInfo!
+  }
 `;

@@ -365,14 +365,14 @@ export const resolvers = {
         .reader("team")
         .where({ organization_id: organization.id })
         .orderBy("assignment_priority", "asc"),
-    externalSystems: async (organization, _, { user }) => {
+    externalSystems: async (organization, { after, first }, { user }) => {
       const organizationId = parseInt(organization.id);
       await accessRequired(user, organizationId, "ADMIN");
 
-      return r
+      const query = r
         .reader("external_system")
-        .where({ organization_id: organizationId })
-        .orderBy("name");
+        .where({ organization_id: organizationId });
+      return formatPage(query, { after, first });
     }
   }
 };

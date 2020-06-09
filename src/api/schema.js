@@ -229,8 +229,8 @@ const rootSchema = `
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
     trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
     trollTokens(organizationId: String!): [TrollTrigger]
-    externalSystems(organizationId: String!): [ExternalSystem]
-    externalLists(organizationId: String!, systemId: String!): [ExternalList]
+    externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!
+    externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
   }
 
   type RootMutation {

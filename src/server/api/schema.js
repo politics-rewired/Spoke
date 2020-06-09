@@ -12,6 +12,7 @@ import moment from "moment-timezone";
 
 import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";
+import { formatPage } from "./lib/pagination";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
@@ -3460,21 +3461,26 @@ const rootResolvers = {
         organizationId
       }));
     },
-    externalSystems: async (_, { organizationId }, { user }) => {
+    externalSystems: async (_, { organizationId, after, first }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      return r
+      const query = r
         .reader("external_system")
-        .where({ organization_id: parseInt(organizationId) })
-        .orderBy("name");
+        .where({ organization_id: parseInt(organizationId) });
+      return await formatPage(query, { after, first });
     },
-    externalLists: async (_, { organizationId, systemId }, { user }) => {
+    externalLists: async (
+      _,
+      { organizationId, systemId, after, first },
+      { user }
+    ) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      return r.reader("external_list").where({
+      const query = r.reader("external_list").where({
         organization_id: parseInt(organizationId),
         system_id: systemId
       });
+      return await formatPage(query, { after, first });
     }
   }
 };

@@ -29,6 +29,7 @@ import {
   ExternalSystem,
   ExternalSystemInput
 } from "../api/external-system";
+import { RelayPaginatedResponse } from "../api/pagination";
 import theme from "../styles/theme";
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
@@ -65,7 +66,7 @@ interface Props {
     refreshSystem: (externalSystemId: string) => Promise<{ data: Boolean }>;
   };
   data: {
-    externalSystems: ExternalSystem[];
+    externalSystems: RelayPaginatedResponse<ExternalSystem>;
     refetch(): void;
   };
 }
@@ -92,9 +93,8 @@ class AdminExternalSystems extends Component<Props, State> {
     this.setState({ editingExternalSystem: "new" });
 
   makeStartEditExternalSystem = (systemId: string) => () => {
-    const system = this.props.data.externalSystems.find(
-      s => s.id === systemId
-    )!;
+    const { edges } = this.props.data.externalSystems;
+    const system = edges.find(edge => edge.node.id === systemId)!.node;
 
     const { id: _id, syncedAt: _syncedAt, ...externalSystem } = system;
     this.setState({
@@ -150,9 +150,9 @@ class AdminExternalSystems extends Component<Props, State> {
     } = this.state;
     const { name, type, username, apiKey } = externalSystem;
 
-    const system = this.props.data.externalSystems.find(
-      ({ id }) => id === syncInitiatedForId
-    );
+    const { edges } = this.props.data.externalSystems;
+    const syncingEdge = edges.find(edge => edge.node.id === syncInitiatedForId);
+    const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
 
     return (
       <div>
@@ -180,7 +180,7 @@ class AdminExternalSystems extends Component<Props, State> {
             </TableRow>
           </TableHeader>
           <TableBody displayRowCheckbox={false} showRowHover>
-            {(externalSystems || []).map(system => (
+            {(externalSystems.edges).map(({ node: system }) => (
               <TableRow key={system.id}>
                 <TableRowColumn>{system.name}</TableRowColumn>
                 <TableRowColumn>{system.type}</TableRowColumn>
@@ -268,17 +268,19 @@ class AdminExternalSystems extends Component<Props, State> {
         </Dialog>
 
         <Snackbar
-          open={system !== undefined}
+          open={syncingSystem !== undefined}
           message={
-            system
+            syncingSystem
               ? `Sync started for ${
-                  system.name
+                  syncingSystem.name
                 }. Please refresh systems to see updated lists.`
-              : undefined
+              : ""
           }
           autoHideDuration={4000}
           onRequestClose={
-            system ? this.handleDismissSyncSnackbar(system.id) : undefined
+            syncingSystem
+              ? this.handleDismissSyncSnackbar(syncingSystem.id)
+              : undefined
           }
         />
       </div>
@@ -291,12 +293,16 @@ const queries = {
     query: gql`
       query getExternalSystems($organizationId: String!) {
         externalSystems(organizationId: $organizationId) {
-          id
-          name
-          type
-          username
-          apiKey
-          syncedAt
+          edges {
+            node {
+              id
+              name
+              type
+              username
+              apiKey
+              syncedAt
+            }
+          }
         }
       }
     `,

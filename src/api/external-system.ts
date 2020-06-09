@@ -1,3 +1,4 @@
+import { RelayPaginatedResponse } from "./pagination";
 import { ExternalList } from "./external-list";
 
 export enum ExternalSystemType {
@@ -14,7 +15,7 @@ export interface ExternalSystem {
   createdAt: string;
   updatedAt: string;
   syncedAt?: string;
-  lists: ExternalList[];
+  lists: RelayPaginatedResponse<ExternalList>;
 }
 
 export interface ExternalSystemInput {
@@ -46,6 +47,16 @@ export const schema = `
     createdAt: String!
     updatedAt: String!
     syncedAt: String
-    lists: [ExternalList]!
+    lists(after: Cursor, first: Int): ExternalListPage!
+  }
+
+  type ExternalSystemEdge {
+    cursor: Cursor!
+    node: ExternalSystem!
+  }
+
+  type ExternalSystemPage {
+    edges: [ExternalSystemEdge!]!
+    pageInfo: RelayPageInfo!
   }
 `;

@@ -16,6 +16,7 @@ import { green500, grey200, grey500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../../../hoc/with-operations";
 import { ExternalSystem } from "../../../../../api/external-system";
+import { RelayPaginatedResponse } from "../../../../../api/pagination";
 
 interface Props {
   organizationId: string;
@@ -26,7 +27,7 @@ interface Props {
   externalLists: {
     organization: {
       id: string;
-      externalSystems: ExternalSystem[];
+      externalSystems: RelayPaginatedResponse<ExternalSystem>;
     };
     refetch(): void;
   };
@@ -81,13 +82,13 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
       }
     } = this.props;
 
-    if (externalSystems.length === 0) {
+    if (externalSystems.edges.length === 0) {
       return <p>No external systems.</p>;
     }
 
-    const system = this.props.externalLists.organization.externalSystems.find(
-      ({ id }) => id === this.state.syncInitiatedForId
-    );
+    const { edges } = this.props.externalLists.organization.externalSystems;
+    const syncingEdge = edges.find(edge => edge.node.id === syncInitiatedForId);
+    const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
 
     return (
       <div>
@@ -98,7 +99,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
           icon={<RefreshIcon />}
           onClick={this.handleRefreshSystems}
         />
-        {externalSystems.map(system => (
+        {externalSystems.edges.map(({ node: system }) => (
           <Card
             key={system.id}
             style={{ marginTop: "10px" }}
@@ -112,9 +113,13 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
               }`}
               avatar={
                 <Avatar
-                  backgroundColor={system.lists.length > 0 ? green500 : grey500}
+                  backgroundColor={
+                    system.lists.edges.length > 0 ? green500 : grey500
+                  }
                 >
-                  {system.lists.length > 9 ? "9+" : system.lists.length}
+                  {system.lists.edges.length > 9
+                    ? "9+"
+                    : system.lists.edges.length}
                 </Avatar>
               }
               showExpandableButton={true}
@@ -128,7 +133,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
               }
             />
 
-            {system.lists.length > 0 && (
+            {system.lists.edges.length > 0 && (
               <CardText>
                 Choose a list:<br />
                 <DropDownMenu
@@ -136,7 +141,7 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
                   onChange={this.handleSelectList}
                   style={{ width: "50%" }}
                 >
-                  {system.lists.map(list => (
+                  {system.lists.edges.map(({ node: list }) => (
                     <MenuItem
                       value={list.externalId}
                       primaryText={`${list.name} (${list.listCount} contacts)`}
@@ -148,17 +153,19 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
           </Card>
         ))}
         <Snackbar
-          open={system !== undefined}
+          open={syncingSystem !== undefined}
           message={
-            system
+            syncingSystem
               ? `Sync started for ${
-                  system.name
+                  syncingSystem.name
                 }. Please refresh systems to see updated lists.`
-              : undefined
+              : ""
           }
           autoHideDuration={4000}
           onRequestClose={
-            system ? this.handleDismissSyncSnackbar(system.id) : undefined
+            syncingSystem
+              ? this.handleDismissSyncSnackbar(syncingSystem.id)
+              : undefined
           }
         />
       </div>
@@ -168,27 +175,34 @@ export class ExternalSystemsSource extends React.Component<Props, State> {
 
 const queries = {
   externalLists: {
-    // TODO: paginate these results relay-style
     query: gql`
       query getExternalLists($organizationId: String!) {
         organization(id: $organizationId) {
           id
           externalSystems {
-            id
-            name
-            type
-            apiKey
-            createdAt
-            updatedAt
-            syncedAt
-            lists {
-              externalId
-              name
-              description
-              listCount
-              doorCount
-              createdAt
-              updatedAt
+            edges {
+              node {
+                id
+                name
+                type
+                apiKey
+                createdAt
+                updatedAt
+                syncedAt
+                lists {
+                  edges {
+                    node {
+                      externalId
+                      name
+                      description
+                      listCount
+                      doorCount
+                      createdAt
+                      updatedAt
+                    }
+                  }
+                }
+              }
             }
           }
         }

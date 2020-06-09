@@ -1,5 +1,7 @@
 import { sqlResolvers } from "./lib/utils";
+import { formatPage } from "./lib/pagination";
 import { r } from "../models";
+import { RelayPageArgs } from "./types";
 
 export enum ExternalSystemType {
   Van = "van"
@@ -27,7 +29,9 @@ export const resolvers = {
     ]),
     type: (system: ExternalSystem) => system.type.toUpperCase(),
     apiKey: async (system: ExternalSystem) => system.api_key_ref,
-    lists: async (system: ExternalSystem) =>
-      r.reader("external_list").where({ system_id: system.id })
+    lists: async (system: ExternalSystem, { after, first }: RelayPageArgs) => {
+      const query = r.reader("external_list").where({ system_id: system.id });
+      return formatPage(query, { after, first, primaryColumn: "created_at" });
+    }
   }
 };

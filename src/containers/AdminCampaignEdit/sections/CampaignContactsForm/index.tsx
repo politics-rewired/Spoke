@@ -19,6 +19,7 @@ import ExternalSystemsSource from "./components/ExternalSystemsSource";
 import SelectExcludeCampaigns from "./components/SelectExcludeCampaigns";
 import ContactsSqlForm from "./components/ContactsSqlForm";
 import UploadResults from "./components/UploadResults";
+import { RelayPaginatedResponse } from "../../../../api/pagination";
 
 enum ContactSourceType {
   CSV = "CSV",
@@ -43,7 +44,7 @@ interface ContactsCampaign {
 interface ContactsOrganization {
   id: string;
   numbersApiKey: string;
-  externalSystems: { id: string }[];
+  externalSystems: RelayPaginatedResponse<{ id: string }>;
   campaigns: {
     campaigns: {
       id: string;
@@ -191,7 +192,7 @@ class CampaignContactsForm extends React.Component<
 
     // Configure contact sources
     const sourceOptions = [ContactSourceType.CSV];
-    if (externalSystems.length > 0) {
+    if (externalSystems.edges.length > 0) {
       sourceOptions.push(ContactSourceType.ExternalSystem);
     }
     if (datawarehouseAvailable) {
@@ -282,7 +283,11 @@ const queries = {
           id
           numbersApiKey
           externalSystems {
-            id
+            edges {
+              node {
+                id
+              }
+            }
           }
           campaigns(cursor: { offset: 0, limit: 5000 }) {
             campaigns {
