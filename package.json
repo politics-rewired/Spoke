@@ -185,7 +185,7 @@
     "conventional-changelog-cli": "^2.0.31",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-15": "^1.0.5",
-    "eslint": "2.13.1",
+    "eslint": "4.18.2",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-import": "^2.20.0",
