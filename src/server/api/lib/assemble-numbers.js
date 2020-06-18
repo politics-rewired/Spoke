@@ -2,6 +2,7 @@ import NumbersClient from "assemble-numbers-client";
 
 import { config } from "../../../config";
 import logger from "../../../logger";
+import { errToObj } from "../../utils";
 import { r } from "../../models";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { sleep } from "../../../lib/utils";
@@ -216,7 +217,12 @@ export const handleDeliveryReport = async reportBody => {
         );
       }
     })
-    .catch(logger.error);
+    .catch(err =>
+      logger.error("Error handling Assemble Numbers delivery report: ", {
+        ...errToObj(err),
+        reportBody
+      })
+    );
 
   return insertResult;
 };
