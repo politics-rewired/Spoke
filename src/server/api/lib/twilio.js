@@ -1,9 +1,11 @@
-import { config } from "../../../config";
-import logger from "../../../logger";
-import { errToObj } from "../../utils";
 import Twilio from "twilio";
 import _ from "lodash";
 import moment from "moment-timezone";
+
+import { config } from "../../../config";
+import logger from "../../../logger";
+import { symmetricDecrypt } from "./crypto";
+import { errToObj } from "../../utils";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { r } from "../../models";
 import { sleep } from "../../../lib/utils";
@@ -16,7 +18,6 @@ import {
   saveNewIncomingMessage,
   messageComponents
 } from "./message-sending";
-import { symmetricDecrypt } from "./crypto";
 
 const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
