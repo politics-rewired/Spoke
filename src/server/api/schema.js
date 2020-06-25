@@ -1133,86 +1133,88 @@ const rootMutations = {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
-      const [newCampaign] = await r
-        .knex("campaign")
-        .insert({
-          organization_id: campaign.organization_id,
-          creator_id: user.id,
-          title: "COPY - " + campaign.title,
-          description: campaign.description,
-          due_by: campaign.dueBy,
-          timezone: campaign.timezone,
-          is_started: false,
-          is_archived: false
-        })
-        .returning("*");
-      const newCampaignId = newCampaign.id;
-      const oldCampaignId = campaign.id;
+      const result = await r.knex.transaction(async trx => {
+        const [newCampaign] = await trx("campaign")
+          .insert({
+            organization_id: campaign.organization_id,
+            creator_id: user.id,
+            title: "COPY - " + campaign.title,
+            description: campaign.description,
+            due_by: campaign.dueBy,
+            timezone: campaign.timezone,
+            is_started: false,
+            is_archived: false
+          })
+          .returning("*");
+        const newCampaignId = newCampaign.id;
+        const oldCampaignId = campaign.id;
 
-      let interactions = await r
-        .knex("interaction_step")
-        .where({ campaign_id: oldCampaignId });
+        let interactions = await trx("interaction_step").where({
+          campaign_id: oldCampaignId
+        });
 
-      const interactionsArr = [];
-      interactions.forEach((interaction, index) => {
-        if (interaction.parent_interaction_id) {
-          let is = {
-            id: "new" + interaction.id,
-            questionText: interaction.question,
-            scriptOptions: interaction.script_options,
-            answerOption: interaction.answer_option,
-            answerActions: interaction.answer_actions,
-            isDeleted: interaction.is_deleted,
-            campaign_id: newCampaignId,
-            parentInteractionId: "new" + interaction.parent_interaction_id
-          };
-          interactionsArr.push(is);
-        } else if (!interaction.parent_interaction_id) {
-          let is = {
-            id: "new" + interaction.id,
-            questionText: interaction.question,
-            scriptOptions: interaction.script_options,
-            answerOption: interaction.answer_option,
-            answerActions: interaction.answer_actions,
-            isDeleted: interaction.is_deleted,
-            campaign_id: newCampaignId,
-            parentInteractionId: interaction.parent_interaction_id
-          };
-          interactionsArr.push(is);
-        }
-      });
+        const interactionsArr = [];
+        interactions.forEach((interaction, index) => {
+          if (interaction.parent_interaction_id) {
+            let is = {
+              id: "new" + interaction.id,
+              questionText: interaction.question,
+              scriptOptions: interaction.script_options,
+              answerOption: interaction.answer_option,
+              answerActions: interaction.answer_actions,
+              isDeleted: interaction.is_deleted,
+              campaign_id: newCampaignId,
+              parentInteractionId: "new" + interaction.parent_interaction_id
+            };
+            interactionsArr.push(is);
+          } else if (!interaction.parent_interaction_id) {
+            let is = {
+              id: "new" + interaction.id,
+              questionText: interaction.question,
+              scriptOptions: interaction.script_options,
+              answerOption: interaction.answer_option,
+              answerActions: interaction.answer_actions,
+              isDeleted: interaction.is_deleted,
+              campaign_id: newCampaignId,
+              parentInteractionId: interaction.parent_interaction_id
+            };
+            interactionsArr.push(is);
+          }
+        });
 
-      const interactionStepTree = makeTree(interactionsArr, (id = null));
-      await persistInteractionStepTree(
-        newCampaignId,
-        interactionStepTree,
-        campaign
-      );
-
-      const newCannedResponseIds = await r
-        .knex("canned_response")
-        .where({ campaign_id: oldCampaignId })
-        .then(responses =>
-          Promise.all(
-            responses.map(async response => {
-              const [newId] = await r
-                .knex("canned_response")
-                .insert({
-                  campaign_id: newCampaignId,
-                  title: response.title,
-                  text: response.text
-                })
-                .returning("id");
-              return newId;
-            })
-          )
+        const interactionStepTree = makeTree(interactionsArr, (id = null));
+        await persistInteractionStepTree(
+          newCampaignId,
+          interactionStepTree,
+          campaign,
+          trx
         );
+
+        const newCannedResponseIds = await trx("canned_response")
+          .where({ campaign_id: oldCampaignId })
+          .then(responses =>
+            Promise.all(
+              responses.map(async response => {
+                const [newId] = await trx("canned_response")
+                  .insert({
+                    campaign_id: newCampaignId,
+                    title: response.title,
+                    text: response.text
+                  })
+                  .returning("id");
+                return newId;
+              })
+            )
+          );
+
+        return newCampaign;
+      });
 
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
       });
 
-      return newCampaign;
+      return result;
     },
 
     unarchiveCampaign: async (_, { id }, { user, loaders }) => {
