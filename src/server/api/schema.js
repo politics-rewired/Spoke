@@ -1190,22 +1190,19 @@ const rootMutations = {
           trx
         );
 
-        const newCannedResponseIds = await trx("canned_response")
-          .where({ campaign_id: oldCampaignId })
-          .then(responses =>
-            Promise.all(
-              responses.map(async response => {
-                const [newId] = await trx("canned_response")
-                  .insert({
-                    campaign_id: newCampaignId,
-                    title: response.title,
-                    text: response.text
-                  })
-                  .returning("id");
-                return newId;
-              })
-            )
-          );
+        // Copy canned responses
+        await trx.raw(
+          `
+            insert into canned_response (campaign_id, title, text)
+            select
+              ? as campaign_id,
+              title,
+              text
+            from canned_response
+            where campaign_id = ?
+          `,
+          [newCampaignId, oldCampaignId]
+        );
 
         return newCampaign;
       });
