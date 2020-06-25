@@ -316,7 +316,7 @@ const getMessageStatus = twilioStatus => {
 const handleDeliveryReport = async report =>
   r.knex("log").insert({
     message_sid: report.MessageSid,
-    service_type: ServiceTypes.AssembleNumbers,
+    service_type: ServiceTypes.Twilio,
     body: JSON.stringify(report)
   });
 
