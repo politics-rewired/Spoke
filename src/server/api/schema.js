@@ -1,5 +1,6 @@
 import { config } from "../../config";
 import logger from "../../logger";
+import { errToObj } from "../utils";
 import { eventBus, EventType } from "../event-bus";
 import escapeRegExp from "lodash/escapeRegExp";
 import camelCaseKeys from "camelcase-keys";
@@ -2094,9 +2095,11 @@ const rootMutations = {
               campaignContactId
             );
           } catch (err) {
-            logger.error(
-              `Handler for InteractionStep ${interactionStepId} "Does Not Exist: ${interactionStepAction}`
-            );
+            logger.error("Handler for InteractionStep does not exist", {
+              error: errToObj(err),
+              interactionStepId,
+              interactionStepAction
+            });
           }
         }
       }

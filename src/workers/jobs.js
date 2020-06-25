@@ -1,5 +1,6 @@
 import { config } from "../config";
 import logger from "../logger";
+import { errToObj } from "../server/utils";
 import { eventBus, EventType } from "../server/event-bus";
 import { r, datawarehouse, cacheableData } from "../server/models";
 import { gunzip, zipToTimeZone, convertOffsetsToStrings } from "../lib";
@@ -111,9 +112,8 @@ export async function processSqsMessages() {
   const p = new Promise((resolve, reject) => {
     sqs.receiveMessage(params, async (err, data) => {
       if (err) {
-        logger.error({
-          message: err.message,
-          stack: err.stack
+        logger.error("Error receiving SQS message: ", {
+          ...errToObj(err)
         });
         reject(err);
       } else if (data.Messages) {
@@ -133,9 +133,8 @@ export async function processSqsMessages() {
             },
             (delMessageErr, delMessageData) => {
               if (delMessageErr) {
-                logger.error({
-                  message: delMessageErr,
-                  stack: delMessageErr.stack
+                logger.error("Error deleting SQS message: ", {
+                  ...errToObj(delMessageErr)
                 }); // an error occurred
               } else {
                 logger.info(delMessageData); // successful response
@@ -461,7 +460,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     knexResult = await warehouseConnection.raw(sqlQuery);
   } catch (err) {
     // query failed
-    logger.error("Data warehouse query failed: ", err);
+    logger.error("Data warehouse query failed: ", { ...errToObj(err) });
     jobMessages.push(`Data warehouse count query failed with ${err}`);
     // TODO: send feedback about job
   }

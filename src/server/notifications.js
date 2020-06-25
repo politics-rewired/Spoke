@@ -1,5 +1,6 @@
 import { config } from "../config";
 import logger from "../logger";
+import { errToObj } from "./utils";
 import { eventBus, EventType } from "./event-bus";
 import { r } from "./models";
 import { sendEmail } from "./mail";
@@ -142,11 +143,10 @@ export const sendUserNotification = async notification => {
             notification.assignmentId
           }/reply`
         });
-      } catch (e) {
-        logger.error(
-          "Error sending conversation reply notification email: ",
-          e
-        );
+      } catch (err) {
+        logger.error("Error sending conversation reply notification email: ", {
+          ...errToObj(err)
+        });
       }
     }
   } else if (type === Notifications.ASSIGNMENT_CREATED) {

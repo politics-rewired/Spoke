@@ -1,5 +1,6 @@
 import { config } from "../../../config";
 import logger from "../../../logger";
+import { errToObj } from "../../utils";
 import Twilio from "twilio";
 import _ from "lodash";
 import moment from "moment-timezone";
@@ -340,7 +341,12 @@ async function handleDeliveryReport(report) {
         );
       }
     })
-    .catch(logger.error);
+    .catch(err =>
+      logger.error("Error handling Twilio delivery report: ", {
+        ...errToObj(err),
+        reportBody
+      })
+    );
 
   return insertResult;
 }

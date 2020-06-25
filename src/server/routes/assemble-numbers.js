@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 
 import logger from "../../logger";
+import { errToObj } from "../utils";
 import assembleNumbers from "../api/lib/assemble-numbers";
 
 router.post(
@@ -13,11 +14,8 @@ router.post(
       await assembleNumbers.handleIncomingMessage(req.body);
       return res.status(200).send({ success: true });
     } catch (err) {
-      logger.error({
-        message: `Error handling incoming assemble numbers message: ${
-          err.message
-        }`,
-        stack: err.stack,
+      logger.error("Error handling incoming assemble numbers message: ", {
+        ...errToObj(err),
         body: req.body
       });
       res.status(500).send({ error: err.message });

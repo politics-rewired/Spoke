@@ -1,5 +1,6 @@
 import logger from "../../logger";
 import { r, cacheableData } from "../models";
+import { errToObj } from "../utils";
 import { sqlResolvers, getTzOffset } from "./lib/utils";
 import { getTopMostParent, zipToTimeZone } from "../../lib";
 import { accessRequired } from "./errors";
@@ -127,7 +128,11 @@ export const resolvers = {
           "qres.created_at",
           "qres.interaction_step_id"
         )
-        .catch(logger.error);
+        .catch(err =>
+          logger.error("Error fetching question responses: ", {
+            ...errToObj(err)
+          })
+        );
 
       let formatted = {};
 
