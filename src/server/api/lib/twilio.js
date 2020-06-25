@@ -5,10 +5,9 @@ import moment from "moment-timezone";
 import { config } from "../../../config";
 import logger from "../../../logger";
 import { symmetricDecrypt } from "./crypto";
-import { errToObj } from "../../utils";
+import { ServiceTypes } from "./types";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { r } from "../../models";
-import { sleep } from "../../../lib/utils";
 import {
   getContactMessagingService,
   appendServiceResponse
@@ -320,37 +319,27 @@ async function handleDeliveryReport(report) {
   // Record the delivery report
   const insertResult = await r.knex("log").insert({
     message_sid: service_id,
+    service_type: ServiceTypes.AssembleNumbers,
     body: JSON.stringify(report)
   });
 
-  // Kick off message update after delay, but don't wait around for result
-  sleep(5000)
-    .then(() =>
-      r
-        .knex("message")
-        .update({
-          service_response_at: r.knex.fn.now(),
-          send_status: getMessageStatus(MessageStatus)
-        })
-        .where({ service_id })
-    )
-    .then(rowCount => {
-      if (rowCount !== 1) {
-        logger.warn(
-          `Received message report '${MessageStatus}' for Message SID ` +
-            `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
-        );
-      }
-    })
-    .catch(err =>
-      logger.error("Error handling Twilio delivery report: ", {
-        ...errToObj(err),
-        reportBody
-      })
-    );
-
   return insertResult;
 }
+
+export const processDeliveryReport = async body => {
+  const { MessageSid: service_id, MessageStatus } = body;
+
+  await r
+    .knex("message")
+    .update({
+      service_response_at: r.knex.fn.now(),
+      send_status: getMessageStatus(MessageStatus)
+    })
+    .where({ service_id })
+    .whereNot({
+      send_status: SpokeSendStatus.Delivered
+    });
+};
 
 async function handleIncomingMessage(message) {
   if (
@@ -398,5 +387,6 @@ export default {
   sendMessage,
   saveNewIncomingMessage,
   handleDeliveryReport,
+  processDeliveryReport,
   handleIncomingMessage
 };
