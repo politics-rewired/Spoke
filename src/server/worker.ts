@@ -1,11 +1,11 @@
+import url from "url";
+import { Pool } from "pg";
 import { LogFunctionFactory, Logger, Runner } from "graphile-worker";
 import { run, loadYaml, PgComposeWorker } from "pg-compose";
 
 import { config } from "../config";
 import logger from "../logger";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
-import { Pool } from "pg";
-import url from "url";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
