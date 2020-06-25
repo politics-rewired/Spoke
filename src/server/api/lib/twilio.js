@@ -313,18 +313,12 @@ const getMessageStatus = twilioStatus => {
 // the delivery report itself rather than updating the message. We can then "replay"
 // the delivery reports back on the message table at a later date. We still attempt
 // to update the message record status (after a slight delay).
-async function handleDeliveryReport(report) {
-  const { MessageSid: service_id, MessageStatus } = report;
-
-  // Record the delivery report
-  const insertResult = await r.knex("log").insert({
-    message_sid: service_id,
+const handleDeliveryReport = async report =>
+  r.knex("log").insert({
+    message_sid: report.MessageSid,
     service_type: ServiceTypes.AssembleNumbers,
     body: JSON.stringify(report)
   });
-
-  return insertResult;
-}
 
 export const processDeliveryReport = async body => {
   const { MessageSid: service_id, MessageStatus } = body;
