@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/politics-rewired/spoke/compare/v1.13.1...v2.0.0) (2020-06-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* introduces pg-compose
+
+### Features
+
+* van list loading ([#657](https://github.com/politics-rewired/spoke/issues/657)) ([18c0853](https://github.com/politics-rewired/spoke/commit/18c0853c1aeac2b906d727cf49cd2dfbea9f3ebd))
+
+
+### Bug Fixes
+
+* check correct data warehouse envvar ([9794146](https://github.com/politics-rewired/spoke/commit/97941465e81f46d07a98ea9e8bc47e84c12d9e9c))
+* check if returned record is an empty record ([#683](https://github.com/politics-rewired/spoke/issues/683)) ([d1a2036](https://github.com/politics-rewired/spoke/commit/d1a20363c9c82e6a2542a3f38331cb5363a3634a))
+* copy campaign in transaction ([#685](https://github.com/politics-rewired/spoke/issues/685)) ([43e9025](https://github.com/politics-rewired/spoke/commit/43e9025df21abe8c3aab76ea27d44d18d6ca7e5b))
+* set default text request type for General team ([#687](https://github.com/politics-rewired/spoke/issues/687)) ([be3c13d](https://github.com/politics-rewired/spoke/commit/be3c13d1343d54a93a473f25e79084f440b17917))
+* use primary column rather than hardcoded 'id' ([24e886e](https://github.com/politics-rewired/spoke/commit/24e886eb23ed75d420c6d0a750f3561c24dc13e9))
+
 ### [1.13.1](https://github.com/politics-rewired/spoke/compare/v1.13.0...v1.13.1) (2020-06-07)
 
 
