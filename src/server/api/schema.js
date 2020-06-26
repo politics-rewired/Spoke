@@ -1491,7 +1491,9 @@ const rootMutations = {
 
       const newOrganization = await r.knex.transaction(async trx => {
         const orgFeatures = {
+          textRequestFormEnabled: false,
           textRequestType: TextRequestType.UNSENT,
+          maxRequestCount: 100,
           defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED
         };
         if (payload.org_features) {
