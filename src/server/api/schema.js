@@ -15,6 +15,7 @@ import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";
 import { formatPage } from "./lib/pagination";
 import { emptyRelayPage } from "../../api/pagination";
+import { TextRequestType } from "../../api/organization";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
@@ -1490,6 +1491,9 @@ const rootMutations = {
 
       const newOrganization = await r.knex.transaction(async trx => {
         const orgFeatures = {
+          textRequestFormEnabled: false,
+          textRequestType: TextRequestType.UNSENT,
+          maxRequestCount: 100,
           defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED
         };
         if (payload.org_features) {
