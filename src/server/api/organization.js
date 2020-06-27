@@ -16,6 +16,8 @@ import {
 } from "./assignment";
 import { memoizer, cacheOpts } from "../memoredis";
 
+import logger from "../../logger";
+import { errToObj } from "../utils";
 import { TextRequestType } from "../../api/organization";
 import { emptyRelayPage } from "../../api/pagination";
 
@@ -233,18 +235,27 @@ export const resolvers = {
         : null;
     },
     myCurrentAssignmentTargets: async (organization, _, context) => {
-      const assignmentTargets = await cachedMyCurrentAssignmentTargets(
-        context.user.id,
-        organization.id
-      );
+      try {
+        const assignmentTargets = await cachedMyCurrentAssignmentTargets(
+          context.user.id,
+          organization.id
+        );
 
-      return assignmentTargets.map(at => ({
-        type: at.type,
-        countLeft: parseInt(at.count_left),
-        maxRequestCount: parseInt(at.max_request_count),
-        teamTitle: at.team_title,
-        teamId: at.team_id
-      }));
+        return assignmentTargets.map(at => ({
+          type: at.type,
+          countLeft: parseInt(at.count_left),
+          maxRequestCount: parseInt(at.max_request_count),
+          teamTitle: at.team_title,
+          teamId: at.team_id
+        }));
+      } catch (err) {
+        logger.error("Error fetching myCurrentAssignmentTargets: ", {
+          error: errToObj(err),
+          organization,
+          context
+        });
+        throw err;
+      }
     },
     escalatedConversationCount: async organization => {
       if (config.DISABLE_SIDEBAR_BADGES) return 0;
