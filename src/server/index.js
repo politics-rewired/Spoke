@@ -94,7 +94,7 @@ if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
     method: false,
     response_code: true,
     graphql_paths: ["/graphql"],
-    tags: ["app:spoke"]
+    tags: config.DD_TAGS.split(",")
   };
 
   if (config.CLIENT_NAME) {

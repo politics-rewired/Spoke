@@ -276,6 +276,11 @@ const validators = {
     desc: "Datadog dogstatd port",
     default: undefined
   }),
+  DD_TAGS: str({
+    desc: "Comma-separated list of DataDog tags to apply to metrics.",
+    example: "app:spoke,client:rewired",
+    default: "app:spoke"
+  }),
   DELIVERABILITY_ALERT_ENDPOINT: url({
     desc:
       "When present, notification payloads will be sent to this URL when deliverability for a domain becomes poor.",
