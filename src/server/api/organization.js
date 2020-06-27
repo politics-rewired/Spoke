@@ -1,23 +1,21 @@
+import { r } from "../models";
+import { memoizer, cacheOpts } from "../memoredis";
 import { config } from "../../config";
+import logger from "../../logger";
+
+import { errToObj } from "../utils";
 import { sqlResolvers } from "./lib/utils";
 import { infoHasQueryPath } from "./lib/apollo";
 import { formatPage } from "./lib/pagination";
-import { r } from "../models";
 import { accessRequired } from "./errors";
-import { buildCampaignQuery, getCampaigns } from "./campaign";
+
+import { getCampaigns } from "./campaign";
 import { buildUserOrganizationQuery } from "./user";
 import {
-  currentAssignmentTarget,
   allCurrentAssignmentTargets,
   myCurrentAssignmentTarget,
-  myCurrentAssignmentTargets,
-  countLeft,
   cachedMyCurrentAssignmentTargets
 } from "./assignment";
-import { memoizer, cacheOpts } from "../memoredis";
-
-import logger from "../../logger";
-import { errToObj } from "../utils";
 import { TextRequestType } from "../../api/organization";
 import { emptyRelayPage } from "../../api/pagination";
 
