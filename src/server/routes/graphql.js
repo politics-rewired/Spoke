@@ -18,12 +18,12 @@ const executableSchema = makeExecutableSchema({
 
 const formatError = err => {
   // node-postgres does not use an Error subclass so we check for schema property
-  console.log(err);
   if (err.originalError.hasOwnProperty("schema") && config.isProduction) {
     logger.error("Postgres error: ", err);
     return new Error("Internal server error");
   }
 
+  logger.error("GraphQL error: ", err);
   return err;
 };
 
