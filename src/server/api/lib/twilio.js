@@ -1,12 +1,13 @@
-import { config } from "../../../config";
-import logger from "../../../logger";
-import { errToObj } from "../../utils";
 import Twilio from "twilio";
 import _ from "lodash";
 import moment from "moment-timezone";
+
+import { config } from "../../../config";
+import logger from "../../../logger";
+import { symmetricDecrypt } from "./crypto";
+import { ServiceTypes } from "./types";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { r } from "../../models";
-import { sleep } from "../../../lib/utils";
 import {
   getContactMessagingService,
   appendServiceResponse
@@ -16,7 +17,6 @@ import {
   saveNewIncomingMessage,
   messageComponents
 } from "./message-sending";
-import { symmetricDecrypt } from "./crypto";
 
 const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
@@ -313,43 +313,27 @@ const getMessageStatus = twilioStatus => {
 // the delivery report itself rather than updating the message. We can then "replay"
 // the delivery reports back on the message table at a later date. We still attempt
 // to update the message record status (after a slight delay).
-async function handleDeliveryReport(report) {
-  const { MessageSid: service_id, MessageStatus } = report;
-
-  // Record the delivery report
-  const insertResult = await r.knex("log").insert({
-    message_sid: service_id,
+const handleDeliveryReport = async report =>
+  r.knex("log").insert({
+    message_sid: report.MessageSid,
+    service_type: ServiceTypes.Twilio,
     body: JSON.stringify(report)
   });
 
-  // Kick off message update after delay, but don't wait around for result
-  sleep(5000)
-    .then(() =>
-      r
-        .knex("message")
-        .update({
-          service_response_at: r.knex.fn.now(),
-          send_status: getMessageStatus(MessageStatus)
-        })
-        .where({ service_id })
-    )
-    .then(rowCount => {
-      if (rowCount !== 1) {
-        logger.warn(
-          `Received message report '${MessageStatus}' for Message SID ` +
-            `'${service_id}' that matched ${rowCount} messages. Expected only 1 match.`
-        );
-      }
-    })
-    .catch(err =>
-      logger.error("Error handling Twilio delivery report: ", {
-        ...errToObj(err),
-        reportBody
-      })
-    );
+export const processDeliveryReport = async body => {
+  const { MessageSid: service_id, MessageStatus } = body;
 
-  return insertResult;
-}
+  await r
+    .knex("message")
+    .update({
+      service_response_at: r.knex.fn.now(),
+      send_status: getMessageStatus(MessageStatus)
+    })
+    .where({ service_id })
+    .whereNot({
+      send_status: SpokeSendStatus.Delivered
+    });
+};
 
 async function handleIncomingMessage(message) {
   if (
@@ -397,5 +381,6 @@ export default {
   sendMessage,
   saveNewIncomingMessage,
   handleDeliveryReport,
+  processDeliveryReport,
   handleIncomingMessage
 };

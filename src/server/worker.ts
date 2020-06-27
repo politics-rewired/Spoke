@@ -1,11 +1,12 @@
+import url from "url";
+import { Pool } from "pg";
 import { LogFunctionFactory, Logger, Runner } from "graphile-worker";
 import { run, loadYaml, PgComposeWorker } from "pg-compose";
 
 import { config } from "../config";
 import logger from "../logger";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
-import { Pool } from "pg";
-import url from "url";
+import handleDeliveryReport from "./tasks/handle-delivery-report";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
@@ -36,6 +37,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
 
   m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
   m.taskList!["release-stale-replies"] = releaseStaleReplies;
+  m.taskList!["handle-delivery-report"] = handleDeliveryReport;
 
   m.cronJobs!.push({
     name: "release-stale-replies",

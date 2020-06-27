@@ -4,8 +4,8 @@ import { config } from "../../../config";
 import logger from "../../../logger";
 import { errToObj } from "../../utils";
 import { r } from "../../models";
+import { ServiceTypes } from "./types";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
-import { sleep } from "../../../lib/utils";
 import { symmetricDecrypt } from "./crypto";
 import {
   SpokeSendStatus,
@@ -179,51 +179,26 @@ const getMessageStatus = assembleNumbersStatus => {
  * Process an Assemble Numbers delivery report
  * @param {object} reportBody Assemble Numbers delivery report
  */
-export const handleDeliveryReport = async reportBody => {
-  const { eventType, messageId } = reportBody;
-
-  // Record the delivery report
-  const insertResult = await r.knex("log").insert({
-    message_sid: messageId,
+export const handleDeliveryReport = async reportBody =>
+  r.knex("log").insert({
+    message_sid: reportBody.messageId,
+    service_type: ServiceTypes.AssembleNumbers,
     body: JSON.stringify(reportBody)
   });
 
-  // Kick off message update after delay, but don't wait around for result
-  sleep(5000)
-    .then(() => {
-      const message = r
-        .knex("message")
-        .where({ service_id: messageId })
-        .first("send_status");
+export const processDeliveryReport = async reportBody => {
+  const { eventType, messageId } = reportBody;
 
-      if (message.send_status !== SpokeSendStatus.Delivered) {
-        return r
-          .knex("message")
-          .update({
-            service_response_at: r.knex.fn.now(),
-            send_status: getMessageStatus(eventType)
-          })
-          .where({ service_id: messageId });
-      } else {
-        return message ? 1 : 0;
-      }
+  await r
+    .knex("message")
+    .update({
+      service_response_at: r.knex.fn.now(),
+      send_status: getMessageStatus(eventType)
     })
-    .then(rowCount => {
-      if (rowCount !== 1) {
-        logger.warn(
-          `Received Assemble Numbers message report '${eventType}' for Message ID ` +
-            `'${messageId}' that matched ${rowCount} messages. Expected only 1 match.`
-        );
-      }
-    })
-    .catch(err =>
-      logger.error("Error handling Assemble Numbers delivery report: ", {
-        ...errToObj(err),
-        reportBody
-      })
-    );
-
-  return insertResult;
+    .where({ service_id: messageId })
+    .whereNot({
+      send_status: SpokeSendStatus.Delivered
+    });
 };
 
 /**
@@ -331,6 +306,7 @@ export default {
   inboundMessageValidator,
   deliveryReportValidator,
   handleDeliveryReport,
+  processDeliveryReport,
   handleIncomingMessage,
   convertMessagePartsToMessage
 };
