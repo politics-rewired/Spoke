@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/politics-rewired/spoke/compare/v2.0.1...v2.1.0) (2020-06-27)
+
+
+### Features
+
+* support configurable datadog tags ([4492b0b](https://github.com/politics-rewired/spoke/commit/4492b0bda903c2e7a11cb4c62d941edb1a622211))
+
 ### [2.0.1](https://github.com/politics-rewired/spoke/compare/v2.0.0...v2.0.1) (2020-06-27)
 
 
