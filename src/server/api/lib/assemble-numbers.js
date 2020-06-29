@@ -196,9 +196,15 @@ export const processDeliveryReport = async reportBody => {
       send_status: getMessageStatus(eventType)
     })
     .where({ service_id: messageId })
-    .whereNot({
-      send_status: SpokeSendStatus.Delivered
-    });
+    .where(builder =>
+      builder
+        .whereNot({
+          send_status: SpokeSendStatus.Delivered
+        })
+        .orWhereNot({
+          send_status: SpokeSendStatus.Error
+        })
+    );
 };
 
 /**

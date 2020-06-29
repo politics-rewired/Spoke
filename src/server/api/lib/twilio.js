@@ -330,9 +330,15 @@ export const processDeliveryReport = async body => {
       send_status: getMessageStatus(MessageStatus)
     })
     .where({ service_id })
-    .whereNot({
-      send_status: SpokeSendStatus.Delivered
-    });
+    .where(builder =>
+      builder
+        .whereNot({
+          send_status: SpokeSendStatus.Delivered
+        })
+        .orWhereNot({
+          send_status: SpokeSendStatus.Error
+        })
+    );
 };
 
 async function handleIncomingMessage(message) {
