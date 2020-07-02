@@ -58,6 +58,8 @@ ENV NODE_ENV="production" \
   PUBLIC_DIR="./build/client" \
   ASSETS_DIR="./build/client/assets" \
   ASSETS_MAP_FILE="assets.json" \
+  VAN_BASE_URL="https://api.securevan.com/v4" \
+  VAN_EXPORT_TYPE="8" \
   PHONE_NUMBER_COUNTRY=$PHONE_NUMBER_COUNTRY \
   SPOKE_VERSION=$SPOKE_VERSION
 

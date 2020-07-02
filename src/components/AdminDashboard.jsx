@@ -146,11 +146,6 @@ class AdminDashboard extends React.Component {
       sections.splice(index, 1);
     }
 
-    if (!window.ENABLE_INTEGRATIONS) {
-      const index = sections.findIndex(s => s.name === "Integrations");
-      sections.splice(index, 1);
-    }
-
     if (!window.ENABLE_TROLLBOT) {
       const index = sections.findIndex(s => s.name === "Troll Alarms");
       sections.splice(index, 1);
