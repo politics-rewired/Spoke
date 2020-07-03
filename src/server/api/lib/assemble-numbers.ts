@@ -236,7 +236,7 @@ export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPay
       .update({
         service_response_at: r.knex.fn.now(),
         send_status: getMessageStatus(eventType),
-        errors: errorCodes,
+        error_codes: errorCodes,
       })
       .where({ service_id: messageId })
       .where((builder: any) =>
