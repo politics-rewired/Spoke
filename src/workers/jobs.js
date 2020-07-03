@@ -1329,7 +1329,7 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
         message.text,
         message.send_status,
         message.created_at,
-        array_to_string(message.error_codes, ',') as error_codes,
+        array_to_string(message.error_codes, '|') as error_codes,
         message.num_segments,
         message.num_media,
         public.user.first_name,
