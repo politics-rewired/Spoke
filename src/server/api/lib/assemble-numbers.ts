@@ -295,6 +295,7 @@ const convertInboundMessage = async (assembleMessage: NumbersInboundMessagePaylo
     from,
     to,
     numMedia,
+    numSegments,
     profileId
   } = assembleMessage;
   const contactNumber = getFormattedPhoneNumber(from);
@@ -324,7 +325,9 @@ const convertInboundMessage = async (assembleMessage: NumbersInboundMessagePaylo
     service_id: serviceId,
     assignment_id: ccInfo && ccInfo.assignment_id,
     service: "assemble-numbers",
-    send_status: SpokeSendStatus.Delivered
+    send_status: SpokeSendStatus.Delivered,
+    num_segments: numSegments,
+    num_media: numMedia,
   };
 
   return spokeMessage;
