@@ -244,16 +244,16 @@ export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPay
     // Update segment counts
     if (extra) {
       await trx("message")
-      .update({
-        num_segments: extra.num_segments,
-        num_media: extra.num_media,
-      })
-      .where({ service_id: messageId })
-      .where((builder) =>
-        builder
-          .whereNull('num_segments')
-          .orWhereNull('num_media')
-      );
+        .update({
+          num_segments: extra.num_segments,
+          num_media: extra.num_media,
+        })
+        .where({ service_id: messageId })
+        .where((builder) =>
+          builder
+            .whereNull('num_segments')
+            .orWhereNull('num_media')
+        );
     }
   });
 };
