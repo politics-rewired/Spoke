@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/politics-rewired/spoke/compare/v2.1.1...v2.2.0) (2020-07-03)
+
+
+### Features
+
+* handle message metadata ([#688](https://github.com/politics-rewired/spoke/issues/688)) ([fd432d4](https://github.com/politics-rewired/spoke/commit/fd432d40bd6d98b029575d176913ecd5844383fa))
+
+
+### Bug Fixes
+
+* **twilio:** fix logic for delivery report handling ([cce4652](https://github.com/politics-rewired/spoke/commit/cce4652e0cdc83bd15da10a6ae4a8beedc042c7b))
+* fix logic for delivery report handling ([a359120](https://github.com/politics-rewired/spoke/commit/a359120e52c480a151953d357e750d0770e88f00))
+* **exports:** include fields in csv output ([eae3b3c](https://github.com/politics-rewired/spoke/commit/eae3b3c2ee402f270ae3ea735317139cc9c98a98))
+
 ### [2.1.1](https://github.com/politics-rewired/spoke/compare/v2.1.0...v2.1.1) (2020-06-29)
 
 
