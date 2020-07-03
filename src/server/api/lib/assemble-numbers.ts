@@ -57,6 +57,10 @@ interface NumbersDeliveryReportPayload {
   messageId: string;
   profileId: string;
   sendingLocationId: string;
+  extra?: {
+    num_segments: number;
+    num_media: number;
+  }
  };
 
 /**
@@ -224,24 +228,42 @@ export const handleDeliveryReport = async (reportBody: NumbersDeliveryReportPayl
   });
 
 export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPayload) => {
-  const { eventType, messageId } = reportBody;
+  const { eventType, messageId, errorCodes, extra } = reportBody;
 
-  await r
-    .knex("message")
-    .update({
-      service_response_at: r.knex.fn.now(),
-      send_status: getMessageStatus(eventType)
-    })
-    .where({ service_id: messageId })
-    .where((builder: any) =>
-      builder
-        .whereNot({
-          send_status: SpokeSendStatus.Delivered
-        })
-        .orWhereNot({
-          send_status: SpokeSendStatus.Error
-        })
-    );
+  await r.knex.transaction(async (trx: Knex.Transaction) => {
+    // Update send status if message is not already "complete"
+    await trx("message")
+      .update({
+        service_response_at: r.knex.fn.now(),
+        send_status: getMessageStatus(eventType),
+        errors: errorCodes,
+      })
+      .where({ service_id: messageId })
+      .where((builder: any) =>
+        builder
+          .whereNot({
+            send_status: SpokeSendStatus.Delivered
+          })
+          .orWhereNot({
+            send_status: SpokeSendStatus.Error
+          })
+      );
+
+    // Update segment counts
+    if (extra) {
+      await trx("message")
+      .update({
+        num_segments: extra.num_segments,
+        num_media: extra.num_media,
+      })
+      .where({ service_id: messageId })
+      .where((builder) =>
+        builder
+          .whereNull('num_segments')
+          .orWhereNull('num_media')
+      );
+    }
+  });
 };
 
 /**
