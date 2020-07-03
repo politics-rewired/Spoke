@@ -13,6 +13,7 @@ import {
   appendServiceResponse
 } from "./message-sending";
 import {
+  SpokeSendStatus,
   getCampaignContactAndAssignmentForIncomingMessage,
   saveNewIncomingMessage,
   messageComponents
@@ -330,15 +331,10 @@ export const processDeliveryReport = async body => {
       send_status: getMessageStatus(MessageStatus)
     })
     .where({ service_id })
-    .where(builder =>
-      builder
-        .whereNot({
-          send_status: SpokeSendStatus.Delivered
-        })
-        .orWhereNot({
-          send_status: SpokeSendStatus.Error
-        })
-    );
+    .whereNotIn("send_status", [
+      SpokeSendStatus.Delivered,
+      SpokeSendStatus.Error
+    ]);
 };
 
 async function handleIncomingMessage(message) {
