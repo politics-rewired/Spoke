@@ -5,7 +5,7 @@ import moment from "moment-timezone";
 import { config } from "../../../config";
 import logger from "../../../logger";
 import { symmetricDecrypt } from "./crypto";
-import { ServiceTypes } from "./types";
+import { MessagingServiceType } from "../types";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { r } from "../../models";
 import {
@@ -316,7 +316,7 @@ const getMessageStatus = twilioStatus => {
 const handleDeliveryReport = async report =>
   r.knex("log").insert({
     message_sid: report.MessageSid,
-    service_type: ServiceTypes.Twilio,
+    service_type: MessagingServiceType.Twilio,
     body: JSON.stringify(report)
   });
 
