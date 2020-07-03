@@ -239,15 +239,7 @@ export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPay
         error_codes: errorCodes,
       })
       .where({ service_id: messageId })
-      .where((builder: any) =>
-        builder
-          .whereNot({
-            send_status: SpokeSendStatus.Delivered
-          })
-          .orWhereNot({
-            send_status: SpokeSendStatus.Error
-          })
-      );
+      .whereNotIn('send_status', [SpokeSendStatus.Delivered, SpokeSendStatus.Error]);
 
     // Update segment counts
     if (extra) {
