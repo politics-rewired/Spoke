@@ -29,3 +29,6 @@ export const getTzOffset = (timezoneName: string) => {
   // See: https://momentjs.com/timezone/docs/#/zone-object/offset/
   return moment.tz.zone(timezoneName).utcOffset(Date.now()) / -60;
 };
+
+export const graphileSecretRef = (organizationId: string, ref: string) =>
+  `${organizationId}|${ref}`;

@@ -56,7 +56,7 @@ import {
   saveNewIncomingMessage,
   getContactMessagingService
 } from "./lib/message-sending";
-import { getTzOffset } from "./lib/utils";
+import { graphileSecretRef } from "./lib/utils";
 import serviceMap from "./lib/services";
 import { resolvers as messageResolvers } from "./message";
 import { resolvers as optOutResolvers } from "./opt-out";
@@ -3129,12 +3129,12 @@ const rootMutations = {
       await accessRequired(user, organizationId, "ADMIN");
       console.log(externalSystem);
 
-      // TODO: this should be a combination of organizaiton and external system IDs
       const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+      const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
 
-      const worker = await getWorker();
-
-      await worker.setSecret(truncatedKey, externalSystem.apiKey);
+      await getWorker().then(worker =>
+        worker.setSecret(apiKeyRef, externalSystem.apiKey)
+      );
 
       const [created] = await r
         .knex("external_system")
@@ -3143,7 +3143,7 @@ const rootMutations = {
           type: externalSystem.type.toLowerCase(),
           organization_id: parseInt(organizationId),
           username: externalSystem.username,
-          api_key_ref: truncatedKey
+          api_key_ref: apiKeyRef
         })
         .returning("*");
 
@@ -3168,12 +3168,12 @@ const rootMutations = {
       };
 
       if (!externalSystem.apiKey.includes("*")) {
-        // TODO: this should be a combination of organizaiton and external system IDs
         const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+        const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
         await getWorker().then(worker =>
-          worker.setSecret(truncatedKey, externalSystem.apiKey)
+          worker.setSecret(apiKeyRef, externalSystem.apiKey)
         );
-        payload.api_key_ref = truncatedKey;
+        payload.api_key_ref = apiKeyRef;
       }
 
       const [updated] = await r
