@@ -3125,9 +3125,7 @@ const rootMutations = {
       { organizationId, externalSystem },
       { user }
     ) => {
-      console.log("Doing creation");
       await accessRequired(user, organizationId, "ADMIN");
-      console.log(externalSystem);
 
       const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
       const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
