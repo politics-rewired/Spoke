@@ -3167,7 +3167,14 @@ const rootMutations = {
 
       if (!externalSystem.apiKey.includes("*")) {
         const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
-        const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
+        const apiKeyRef = graphileSecretRef(
+          savedSystem.organization_id,
+          truncatedKey
+        );
+        await r
+          .knex("graphile_secrets.secrets")
+          .where({ ref: savedSystem.api_key_ref })
+          .del();
         await getWorker().then(worker =>
           worker.setSecret(apiKeyRef, externalSystem.apiKey)
         );
