@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.2](https://github.com/politics-rewired/spoke/compare/v2.2.1...v2.2.2) (2020-07-07)
+
+
+### Bug Fixes
+
+* **integrations:** fix API key ref handling ([6cedb62](https://github.com/politics-rewired/spoke/commit/6cedb6233ea63e9e7064aff46d547be21d59b4c0))
+
 ### [2.2.1](https://github.com/politics-rewired/spoke/compare/v2.2.0...v2.2.1) (2020-07-04)
 
 
