@@ -17,6 +17,7 @@ import { dataTest } from "../../lib/attributes";
 import TopLineStats from "./TopLineStats";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import TexterStats from "./TexterStats";
+import VanExportModal from "./VanExportModal";
 
 const styles = StyleSheet.create({
   container: {
@@ -59,6 +60,7 @@ const styles = StyleSheet.create({
 class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
+    exportVanOpen: false,
     disableExportButton: false,
     disableVanExportButton: false,
     copyingCampaign: false,
@@ -81,10 +83,8 @@ class AdminCampaignStats extends React.Component {
     await this.props.mutations.exportCampaign();
   };
 
-  handleOnClickVanExport = async () => {
-    this.setState({ disableVanExportButton: true });
-    await this.props.mutations.exportCampaignForVan("external_id");
-  };
+  handleOnClickVanExport = () => this.setState({ exportVanOpen: true });
+  handleDismissVanExport = () => this.setState({ exportVanOpen: false });
 
   render() {
     const { disableExportButton, disableVanExportButton } = this.state;
@@ -264,6 +264,11 @@ class AdminCampaignStats extends React.Component {
               copyCampaignError: undefined
             });
           }}
+        />
+        <VanExportModal
+          campaignId={campaignId}
+          open={this.state.exportVanOpen}
+          onRequestClose={this.handleDismissVanExport}
         />
       </div>
     );
