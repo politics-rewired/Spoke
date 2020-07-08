@@ -1483,11 +1483,10 @@ export async function exportCampaign(job) {
       await sendEmail({
         to: notificationEmail,
         subject: `Export ready for ${campaignTitle}`,
-        text: `Your Spoke exports are ready! These URLs will be valid for 24 hours.
-
-          Campaign export:\n${campaignExportUrl}
-
-          Message export:\n${campaignMessagesExportUrl}`
+        text:
+          `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
+          `\n\nCampaign export:\n${campaignExportUrl}` +
+          `\n\nMessage export:\n${campaignMessagesExportUrl}`
       }).catch(err => {
         logger.error("Error sending export email: ", err);
         logger.info(`Campaign Export URL - ${campaignExportUrl}`);
