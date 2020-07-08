@@ -90,6 +90,15 @@ class VanExportModal extends React.Component<InnerProps, State> {
         actions={actions}
         onRequestClose={this.props.onRequestClose}
       >
+        This will export data collected from contacts for upload into VAN. For
+        more information see{" "}
+        <a
+          href="https://docs.spokerewired.com/article/97-export-for-upload-to-van"
+          target="_blank"
+        >
+          Export for Upload to VAN
+        </a>.
+        <br />
         <SelectField
           floatingLabelText="VAN ID field"
           value={vanIdField}
