@@ -5,7 +5,6 @@ import moment from "moment";
 import { JobRequestRecord } from "../../server/api/types";
 import { r } from "../../server/models";
 import { sendEmail } from "../../server/mail";
-import { config } from "../../config";
 import logger from "../../logger";
 import { errToObj } from "../../server/utils";
 import { deleteJob } from "./index";
@@ -15,8 +14,8 @@ const DEFAULT_VAN_ID_FIELD = "Voter File VANID";
 
 export interface ExportForVANOptions {
   requesterId: number;
-  vanIdField?: string;
-  includeUnmessaged?: boolean;
+  vanIdField: string;
+  includeUnmessaged: boolean;
 }
 
 interface VanExportRow {
@@ -32,11 +31,7 @@ const FILTER_MESSAGED_FRAGMENT = `and exists ( select 1 from message where campa
 export const exportForVan = async (job: JobRequestRecord) => {
   const reader: Knex = r.reader;
   const payload: ExportForVANOptions = JSON.parse(job.payload);
-  const {
-    requesterId,
-    includeUnmessaged = false,
-    vanIdField = DEFAULT_VAN_ID_FIELD
-  } = payload;
+  const { requesterId, includeUnmessaged, vanIdField } = payload;
 
   const { email } = await reader("user")
     .where({ id: requesterId })
@@ -53,8 +48,8 @@ export const exportForVan = async (job: JobRequestRecord) => {
             id,
             (
               case
-                when cc.external_id is null then (cc.custom_fields::json)->>'${vanIdField}'
-                else cc.external_id
+                when cc.external_id <> '' then cc.external_id
+                else (cc.custom_fields::json)->>'${vanIdField}'
               end
             ) as VAN_ID
           from campaign_contact cc
