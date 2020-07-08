@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/politics-rewired/spoke/compare/v2.2.2...v2.3.0) (2020-07-08)
+
+
+### Features
+
+* van export button ([#692](https://github.com/politics-rewired/spoke/issues/692)) ([5bbb66f](https://github.com/politics-rewired/spoke/commit/5bbb66f8a366c40ba2c5245c1aae1c478c3bceec))
+
+
+### Bug Fixes
+
+* **van:** include additional fields ([9933d91](https://github.com/politics-rewired/spoke/commit/9933d9160c1510d50f2f040a6ab5bccd41a3abcc))
+* **van:** perform ordering in node ([e469737](https://github.com/politics-rewired/spoke/commit/e4697372ad0f0fb6c3f7df4ef0e460e7853d131b))
+
 ### [2.2.2](https://github.com/politics-rewired/spoke/compare/v2.2.1...v2.2.2) (2020-07-07)
 
 
