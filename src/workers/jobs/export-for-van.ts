@@ -40,18 +40,18 @@ export const exportForVan = async (job: JobRequestRecord) => {
     .where({ id: job.campaign_id })
     .first(["title"]);
 
+  const vanIdSelector =
+    vanIdField === "external_id"
+      ? "cc.external_id"
+      : `(cc.custom_fields::json)->>'${vanIdField}'`;
+
   const fetchChunk = async (lastContactId: number) => {
     const { rows } = await reader.raw<{ rows: VanExportRow[] }>(
       `
         with campaign_contact_ids as (
           select
             id,
-            (
-              case
-                when cc.external_id <> '' then cc.external_id
-                else (cc.custom_fields::json)->>'${vanIdField}'
-              end
-            ) as VAN_ID
+            ${vanIdSelector} as VAN_ID
           from campaign_contact cc
           where
             campaign_id = ?
