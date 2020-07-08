@@ -60,6 +60,7 @@ class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
     disableExportButton: false,
+    disableVanExportButton: false,
     copyingCampaign: false,
     campaignJustCopied: false,
     copiedCampaignId: undefined,
@@ -80,8 +81,13 @@ class AdminCampaignStats extends React.Component {
     await this.props.mutations.exportCampaign();
   };
 
+  handleOnClickVanExport = async () => {
+    this.setState({ disableVanExportButton: true });
+    await this.props.mutations.exportCampaignForVan("external_id");
+  };
+
   render() {
-    const { disableExportButton } = this.state;
+    const { disableExportButton, disableVanExportButton } = this.state;
     const { data, match, adminPerms } = this.props;
     const { organizationId, campaignId } = match.params;
     const campaign = data.campaign;
@@ -97,6 +103,13 @@ class AdminCampaignStats extends React.Component {
     const exportLabel = currentExportJob
       ? `Exporting (${currentExportJob.status}%)`
       : "Export Data";
+
+    const vanExportJob = pendingJobs.find(job => job.jobType === "van-export");
+    const isVanExportDisabled =
+      disableVanExportButton || vanExportJob !== undefined;
+    const vanExportLabel = vanExportJob
+      ? `Exporting for VAN (${vanExportJob.status}%)`
+      : "Export for VAN";
 
     const dueFormatted = moment(campaign.dueBy).format("MMM D, YYYY");
     const isOverdue = moment().isSameOrAfter(campaign.dueBy);
@@ -143,6 +156,13 @@ class AdminCampaignStats extends React.Component {
                           onClick={this.handleOnClickExport}
                           label={exportLabel}
                           disabled={shouldDisableExport}
+                        />,
+                        // Export for VAN
+                        <RaisedButton
+                          key="van-export"
+                          label={vanExportLabel}
+                          disabled={isVanExportDisabled}
+                          onClick={this.handleOnClickVanExport}
                         />,
                         // unarchive
                         campaign.isArchived ? (
@@ -320,6 +340,25 @@ const mutations = {
       }
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
+  }),
+  exportCampaignForVan: ownProps => vanIdField => ({
+    mutation: gql`
+      mutation exportCampaignForVan($options: CampaignExportInput!) {
+        exportCampaign(options: $options) {
+          id
+        }
+      }
+    `,
+    variables: {
+      options: {
+        campaignId: ownProps.match.params.campaignId,
+        exportType: "VAN",
+        vanOptions: {
+          vanIdField,
+          includeUnmessaged: false
+        }
+      }
+    }
   }),
   copyCampaign: ownProps => () => ({
     mutation: gql`

@@ -211,6 +211,22 @@ const rootSchema = `
     contactCount: Int
   }
 
+  enum CampaignExportType {
+    SPOKE
+    VAN
+  }
+
+  input ExportForVanInput {
+    includeUnmessaged: Boolean!
+    vanIdField: String!
+  }
+
+  input CampaignExportInput {
+    campaignId: String!
+    exportType: CampaignExportType!
+    vanOptions: ExportForVanInput
+  }
+
   type RootQuery {
     currentUser: User
     organization(id:String!, utc:String): Organization
@@ -241,7 +257,7 @@ const rootSchema = `
     bulkUpdateScript(organizationId:String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateResult]
     deleteJob(campaignId:String!, id:String!): JobRequest
     copyCampaign(id: String!): Campaign
-    exportCampaign(id:String!): JobRequest
+    exportCampaign(options: CampaignExportInput!): JobRequest
     createCannedResponse(cannedResponse:CannedResponseInput!): CannedResponse
     createOrganization(name: String!, userId: String!, inviteId: String!): Organization
     joinOrganization(organizationUuid: String!): Organization!
