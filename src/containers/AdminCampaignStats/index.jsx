@@ -17,6 +17,7 @@ import { dataTest } from "../../lib/attributes";
 import TopLineStats from "./TopLineStats";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import TexterStats from "./TexterStats";
+import VanExportModal from "./VanExportModal";
 
 const styles = StyleSheet.create({
   container: {
@@ -59,44 +60,62 @@ const styles = StyleSheet.create({
 class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
+    exportVanOpen: false,
     disableExportButton: false,
+    disableVanExportButton: false,
     copyingCampaign: false,
     campaignJustCopied: false,
     copiedCampaignId: undefined,
     copyCampaignError: undefined
   };
 
-  renderCopyButton() {
-    return (
-      <RaisedButton
-        label="Copy Campaign"
-        onTouchTap={async () =>
-          await this.props.mutations.copyCampaign(
-            this.props.match.params.campaignId
-          )
-        }
-      />
-    );
-  }
+  handleNavigateToEdit = () => {
+    const { organizationId, campaignId } = this.props.match.params;
+    const editUrl = `/admin/${organizationId}/campaigns/${campaignId}/edit`;
+    this.props.history.push(editUrl);
+  };
+
+  handleOnClickExport = async () => {
+    this.setState({
+      exportMessageOpen: true,
+      disableExportButton: true
+    });
+    await this.props.mutations.exportCampaign();
+  };
+
+  handleOnClickVanExport = () => this.setState({ exportVanOpen: true });
+  handleDismissVanExport = () => this.setState({ exportVanOpen: false });
+  handleCompleteVanExport = () =>
+    this.setState({
+      exportVanOpen: false,
+      exportMessageOpen: true,
+      disableVanExportButton: true
+    });
 
   render() {
+    const { disableExportButton, disableVanExportButton } = this.state;
     const { data, match, adminPerms } = this.props;
     const { organizationId, campaignId } = match.params;
     const campaign = data.campaign;
+    const { pendingJobs } = campaign;
 
     if (!campaign) {
       return <h1> Uh oh! Campaign {campaignId} doesn't seem to exist </h1>;
     }
 
-    const currentExportJob = this.props.data.campaign.pendingJobs.filter(
-      job => job.jobType === "export"
-    )[0];
+    const currentExportJob = pendingJobs.find(job => job.jobType === "export");
     const shouldDisableExport =
-      this.state.disableExportButton || currentExportJob;
-
+      disableExportButton || currentExportJob !== undefined;
     const exportLabel = currentExportJob
       ? `Exporting (${currentExportJob.status}%)`
       : "Export Data";
+
+    const vanExportJob = pendingJobs.find(job => job.jobType === "van-export");
+    const isVanExportDisabled =
+      disableVanExportButton || vanExportJob !== undefined;
+    const vanExportLabel = vanExportJob
+      ? `Exporting for VAN (${vanExportJob.status}%)`
+      : "Export for VAN";
 
     const dueFormatted = moment(campaign.dueBy).format("MMM D, YYYY");
     const isOverdue = moment().isSameOrAfter(campaign.dueBy);
@@ -130,11 +149,7 @@ class AdminCampaignStats extends React.Component {
                     // edit
                     <RaisedButton
                       {...dataTest("editCampaign")}
-                      onTouchTap={() =>
-                        this.props.history.push(
-                          `/admin/${organizationId}/campaigns/${campaignId}/edit`
-                        )
-                      }
+                      onClick={this.handleNavigateToEdit}
                       label="Edit"
                     />
                   ) : null}
@@ -143,47 +158,40 @@ class AdminCampaignStats extends React.Component {
                         // Buttons for Admins (and not Supervolunteers)
                         // export
                         <RaisedButton
-                          onTouchTap={async () => {
-                            this.setState(
-                              {
-                                exportMessageOpen: true,
-                                disableExportButton: true
-                              },
-                              () => {
-                                this.setState({
-                                  exportMessageOpen: true,
-                                  disableExportButton: false
-                                });
-                              }
-                            );
-                            await this.props.mutations.exportCampaign(
-                              campaignId
-                            );
-                          }}
+                          key="export"
+                          onClick={this.handleOnClickExport}
                           label={exportLabel}
                           disabled={shouldDisableExport}
-                        />, // unarchive
+                        />,
+                        // Export for VAN
+                        <RaisedButton
+                          key="van-export"
+                          label={vanExportLabel}
+                          disabled={isVanExportDisabled}
+                          onClick={this.handleOnClickVanExport}
+                        />,
+                        // unarchive
                         campaign.isArchived ? (
                           <RaisedButton
+                            key="unarchive"
                             onTouchTap={async () =>
-                              await this.props.mutations.unarchiveCampaign(
-                                campaignId
-                              )
+                              await this.props.mutations.unarchiveCampaign()
                             }
                             label="Unarchive"
                           />
                         ) : null, // archive
                         !campaign.isArchived ? (
                           <RaisedButton
+                            key="archive"
                             onTouchTap={async () =>
-                              await this.props.mutations.archiveCampaign(
-                                campaignId
-                              )
+                              await this.props.mutations.archiveCampaign()
                             }
                             label="Archive"
                           />
-                        ) : null, // copy
+                        ) : null,
+                        // Open script preview
                         <RaisedButton
+                          key="open-script-preview"
                           label="Open Script Preview"
                           onTouchTap={() => {
                             window.open(
@@ -192,7 +200,9 @@ class AdminCampaignStats extends React.Component {
                             );
                           }}
                         />,
+                        // Copy
                         <RaisedButton
+                          key="copy"
                           {...dataTest("copyCampaign")}
                           label="Copy Campaign"
                           disabled={this.state.copyingCampaign}
@@ -200,7 +210,7 @@ class AdminCampaignStats extends React.Component {
                             this.setState({ copyingCampaign: true });
 
                             this.props.mutations
-                              .copyCampaign(this.props.match.params.campaignId)
+                              .copyCampaign()
                               .then(result => {
                                 if (result.errors) {
                                   throw result.errors;
@@ -261,6 +271,12 @@ class AdminCampaignStats extends React.Component {
             });
           }}
         />
+        <VanExportModal
+          campaignId={campaignId}
+          open={this.state.exportVanOpen}
+          onRequestClose={this.handleDismissVanExport}
+          onComplete={this.handleCompleteVanExport}
+        />
       </div>
     );
   }
@@ -303,7 +319,7 @@ const queries = {
 };
 
 const mutations = {
-  archiveCampaign: ownProps => campaignId => ({
+  archiveCampaign: ownProps => () => ({
     mutation: gql`
       mutation archiveCampaign($campaignId: String!) {
         archiveCampaign(id: $campaignId) {
@@ -312,9 +328,9 @@ const mutations = {
         }
       }
     `,
-    variables: { campaignId }
+    variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  unarchiveCampaign: ownProps => campaignId => ({
+  unarchiveCampaign: ownProps => () => ({
     mutation: gql`
       mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
@@ -323,19 +339,21 @@ const mutations = {
         }
       }
     `,
-    variables: { campaignId }
+    variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  exportCampaign: ownProps => campaignId => ({
+  exportCampaign: ownProps => () => ({
     mutation: gql`
       mutation exportCampaign($campaignId: String!) {
-        exportCampaign(id: $campaignId) {
+        exportCampaign(
+          options: { campaignId: $campaignId, exportType: SPOKE }
+        ) {
           id
         }
       }
     `,
-    variables: { campaignId }
+    variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  copyCampaign: ownProps => campaignId => ({
+  copyCampaign: ownProps => () => ({
     mutation: gql`
       mutation copyCampaign($campaignId: String!) {
         copyCampaign(id: $campaignId) {
@@ -343,7 +361,7 @@ const mutations = {
         }
       }
     `,
-    variables: { campaignId }
+    variables: { campaignId: ownProps.match.params.campaignId }
   })
 };
 

@@ -10,6 +10,11 @@ export enum MessagingServiceType {
   Twilio = "twilio"
 }
 
+export type RequestHandlerFactory = () => RequestHandler;
+
+// Database record types
+// ------------------------------------
+
 export interface MessagingServiceRecord {
   messaging_service_sid: string;
   organization_id: number;
@@ -19,4 +24,16 @@ export interface MessagingServiceRecord {
   service_type: MessagingServiceType;
 }
 
-export type RequestHandlerFactory = () => RequestHandler;
+export interface JobRequestRecord {
+  id: number;
+  campaign_id: number;
+  payload: string;
+  queue_name: string;
+  job_type: string;
+  result_message: string;
+  locks_queue: boolean;
+  assigned: boolean;
+  status: number;
+  updated_at: string;
+  created_at: string;
+}

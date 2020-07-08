@@ -11,6 +11,7 @@ import request from "superagent";
 import _ from "lodash";
 import moment from "moment-timezone";
 
+import { CampaignExportType } from "../../api/types";
 import { getWorker } from "../worker";
 import { processContactsFile } from "./lib/edit-campaign";
 import { formatPage } from "./lib/pagination";
@@ -25,6 +26,7 @@ import {
   uploadContacts,
   filterLandlines
 } from "../../workers/jobs";
+import { exportForVan } from "../../workers/jobs/export-for-van";
 import { datawarehouse, r, cacheableData } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
 import {
@@ -750,26 +752,45 @@ const rootMutations = {
       return loaders.campaignContact.load(id);
     },
 
-    exportCampaign: async (_, { id }, { user, loaders }) => {
-      const campaign = await loaders.campaign.load(id);
+    exportCampaign: async (_, { options }, { user, loaders }) => {
+      const { campaignId, exportType, vanOptions } = options;
+
+      if (exportType === CampaignExportType.VAN && !vanOptions) {
+        throw new Error("Input must include vanOptions when exposting as VAN!");
+      }
+
+      const campaign = await loaders.campaign.load(campaignId);
       const organizationId = campaign.organization_id;
       await accessRequired(user, organizationId, "ADMIN");
+
+      const jobTypes = {};
+      jobTypes[CampaignExportType.SPOKE] = "export";
+      jobTypes[CampaignExportType.VAN] = "van-export";
+
+      let payload = {};
+      if (exportType === CampaignExportType.SPOKE) {
+        payload = { id: campaignId, requester: user.id };
+      } else if (exportType === CampaignExportType.VAN) {
+        payload = { ...vanOptions, requesterId: user.id };
+      }
+
       const [newJob] = await r
         .knex("job_request")
         .insert({
-          queue_name: `${id}:export`,
-          job_type: "export",
+          queue_name: `${campaignId}:export`,
+          job_type: jobTypes[exportType],
           locks_queue: false,
           assigned: JOBS_SAME_PROCESS, // can get called immediately, below
-          campaign_id: id,
-          payload: JSON.stringify({
-            id,
-            requester: user.id
-          })
+          campaign_id: campaignId,
+          payload: JSON.stringify(payload)
         })
         .returning("*");
       if (JOBS_SAME_PROCESS) {
-        exportCampaign(newJob);
+        if (exportType === CampaignExportType.SPOKE) {
+          exportCampaign(newJob);
+        } else if (exportType === CampaignExportType.VAN) {
+          exportForVan(newJob);
+        }
       }
       return newJob;
     },
