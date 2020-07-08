@@ -1,6 +1,7 @@
 import Knex from "knex";
 import Papa from "papaparse";
 import moment from "moment";
+import sortBy from "lodash/sortBy";
 
 import { JobRequestRecord } from "../../server/api/types";
 import { r } from "../../server/models";
@@ -77,7 +78,6 @@ export const exportForVan = async (job: JobRequestRecord) => {
           to_char(aqr.created_at,'MM-DD-YYYY') as date
         from campaign_contact_ids cc
         left join all_question_response aqr on cc.id = aqr.campaign_contact_id
-        order by cell
       `,
       [job.campaign_id, lastContactId, CHUNK_SIZE]
     );
@@ -90,7 +90,7 @@ export const exportForVan = async (job: JobRequestRecord) => {
   do {
     const rows = await fetchChunk(lastContactId);
     exportRows = exportRows.concat(
-      rows.map(({ campaign_contact_id, ...rest }) => rest)
+      sortBy(rows.map(({ campaign_contact_id, ...rest }) => rest), ["cell"])
     );
 
     lastContactId =
