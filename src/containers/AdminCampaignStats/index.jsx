@@ -346,25 +346,6 @@ const mutations = {
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  exportCampaignForVan: ownProps => vanIdField => ({
-    mutation: gql`
-      mutation exportCampaignForVan($options: CampaignExportInput!) {
-        exportCampaign(options: $options) {
-          id
-        }
-      }
-    `,
-    variables: {
-      options: {
-        campaignId: ownProps.match.params.campaignId,
-        exportType: "VAN",
-        vanOptions: {
-          vanIdField,
-          includeUnmessaged: false
-        }
-      }
-    }
-  }),
   copyCampaign: ownProps => () => ({
     mutation: gql`
       mutation copyCampaign($campaignId: String!) {
