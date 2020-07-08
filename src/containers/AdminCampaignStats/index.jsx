@@ -84,11 +84,12 @@ class AdminCampaignStats extends React.Component {
   };
 
   handleOnClickVanExport = () => this.setState({ exportVanOpen: true });
-  handleDismissVanExport = () =>
+  handleDismissVanExport = () => this.setState({ exportVanOpen: false });
+  handleCompleteVanExport = () =>
     this.setState({
       exportVanOpen: false,
       exportMessageOpen: true,
-      disableExportButton: true
+      disableVanExportButton: true
     });
 
   render() {
@@ -274,6 +275,7 @@ class AdminCampaignStats extends React.Component {
           campaignId={campaignId}
           open={this.state.exportVanOpen}
           onRequestClose={this.handleDismissVanExport}
+          onComplete={this.handleCompleteVanExport}
         />
       </div>
     );

@@ -29,6 +29,7 @@ interface OuterProps {
   open: boolean;
   campaignId: string;
   onRequestClose(): void;
+  onComplete(): void;
 }
 
 interface InnerProps extends OuterProps, HocProps {}
@@ -50,7 +51,7 @@ class VanExportModal extends React.Component<InnerProps, State> {
       vanIdField,
       includeUnmessaged
     );
-    this.props.onRequestClose();
+    this.props.onComplete();
   };
 
   handleOnChangeVanIdField = (
