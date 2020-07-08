@@ -23,8 +23,7 @@ import {
   Notifications,
   sendUserNotification
 } from "../../server/notifications";
-import s3 from "../exports/s3";
-import gsJson from "../exports/gs-json";
+import { uploadToCloud } from "../exports/upload";
 import zipCodeToTimeZone from "zipcode-to-timezone";
 
 const CHUNK_SIZE = 1000;
@@ -1377,19 +1376,7 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
   return { lastContactId, messages };
 };
 
-const exporters = {
-  s3: s3,
-  "gs-json": gsJson
-};
-
-const uploadToCloud = async (key, payload) => {
-  const { upload, getDownloadUrl } = exporters[config.EXPORT_DRIVER];
-
-  await upload(config.AWS_S3_BUCKET_NAME, key, payload);
-  return getDownloadUrl(config.AWS_S3_BUCKET_NAME, key);
-};
-
-const deleteJob = async (jobId, retries = 0) => {
+export const deleteJob = async (jobId, retries = 0) => {
   try {
     await r
       .knex("job_request")
@@ -1477,62 +1464,48 @@ export async function exportCampaign(job) {
     logger.error("Error building CSVs: ", exc);
   }
 
-  const validAwsCredentials =
-    config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY;
-  const valudGcpCredentials = !!config.GOOGLE_APPLICATION_CREDENTIALS;
-  const validS3Config =
-    config.EXPORT_DRIVER === "s3" &&
-    (validAwsCredentials || config.AWS_ACCESS_AVAILABLE);
-  const validGcpHmacConfig =
-    config.EXPORT_DRIVER === "gs" && validAwsCredentials;
-  const validGcpConfig =
-    config.EXPORT_DRIVER === "gs-json" && valudGcpCredentials;
-
-  if (validS3Config || validGcpHmacConfig || validGcpConfig) {
-    // Attempt upload to cloud storage
-    const objectKeyPrefix = config.AWS_S3_KEY_PREFIX;
-    const safeTitle = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
+  // Attempt upload to cloud storage
+  let campaignContactsKey = campaignTitle
+    .replace(/ /g, "_")
+    .replace(/\//g, "_");
+  if (!isAutomatedExport) {
     const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
-    let campaignContactsKey = `${objectKeyPrefix}${safeTitle}`;
-    if (!isAutomatedExport)
-      campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
-    const messagesKey = `${campaignContactsKey}-messages`;
-    try {
-      const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
-        uploadToCloud(`${campaignContactsKey}.csv`, campaignsCsv),
-        uploadToCloud(`${messagesKey}.csv`, messagesCsv)
-      ]);
-      if (!isAutomatedExport) {
-        await sendEmail({
-          to: notificationEmail,
-          subject: `Export ready for ${campaignTitle}`,
-          text:
-            `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
-            `    Campaign export: ${campaignExportUrl}` +
-            `    Message export: ${campaignMessagesExportUrl}`
-        }).catch(err => {
-          logger.error("Error sending export email: ", err);
-          logger.info(`Campaign Export URL - ${campaignExportUrl}`);
-          logger.info(
-            `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
-          );
-        });
-      }
-      logger.info(`Successfully exported ${campaignId}`);
-    } catch (err) {
-      logger.error("Error uploading export to cloud storage: ", err);
+    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
+  }
+  const messagesKey = `${campaignContactsKey}-messages`;
 
+  try {
+    const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
+      uploadToCloud(`${campaignContactsKey}.csv`, campaignsCsv),
+      uploadToCloud(`${messagesKey}.csv`, messagesCsv)
+    ]);
+    if (!isAutomatedExport) {
       await sendEmail({
         to: notificationEmail,
-        subject: `Export failed for ${campaignTitle}`,
-        text: `Your Spoke exports failed... please try again later.
-        Error: ${err.message}`
+        subject: `Export ready for ${campaignTitle}`,
+        text: `Your Spoke exports are ready! These URLs will be valid for 24 hours.
+
+          Campaign export:\n${campaignExportUrl}
+
+          Message export:\n${campaignMessagesExportUrl}`
+      }).catch(err => {
+        logger.error("Error sending export email: ", err);
+        logger.info(`Campaign Export URL - ${campaignExportUrl}`);
+        logger.info(
+          `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
+        );
       });
     }
-  } else {
-    logger.debug("Would have saved the following to cloud storage:");
-    logger.debug(campaignsCsv);
-    logger.debug(messagesCsv);
+    logger.info(`Successfully exported ${campaignId}`);
+  } catch (err) {
+    logger.error("Error uploading export to cloud storage: ", err);
+
+    await sendEmail({
+      to: notificationEmail,
+      subject: `Export failed for ${campaignTitle}`,
+      text: `Your Spoke exports failed... please try again later.
+        Error: ${err.message}`
+    });
   }
 
   // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
