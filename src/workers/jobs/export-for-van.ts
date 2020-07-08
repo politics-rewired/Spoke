@@ -10,8 +10,6 @@ import { errToObj } from "../../server/utils";
 import { deleteJob } from "./index";
 import { uploadToCloud } from "../exports/upload";
 
-const DEFAULT_VAN_ID_FIELD = "Voter File VANID";
-
 export interface ExportForVANOptions {
   requesterId: number;
   vanIdField: string;
@@ -21,6 +19,9 @@ export interface ExportForVANOptions {
 interface VanExportRow {
   campaign_contact_id: number;
   VAN_ID: string;
+  cell: string;
+  first_name: string;
+  last_name: string;
   value: string;
   date: string;
 }
@@ -51,6 +52,9 @@ export const exportForVan = async (job: JobRequestRecord) => {
         with campaign_contact_ids as (
           select
             id,
+            cell,
+            first_name,
+            last_name,
             ${vanIdSelector} as VAN_ID
           from campaign_contact cc
           where
@@ -63,6 +67,9 @@ export const exportForVan = async (job: JobRequestRecord) => {
         select
           distinct on (cc.VAN_ID) VAN_ID,
           cc.id as campaign_contact_id,
+          cc.cell,
+          cc.first_name,
+          cc.last_name,
           (case
             when aqr.value is null then 'canvassed, no response'
             else aqr.value
@@ -70,6 +77,7 @@ export const exportForVan = async (job: JobRequestRecord) => {
           to_char(aqr.created_at,'MM-DD-YYYY') as date
         from campaign_contact_ids cc
         left join all_question_response aqr on cc.id = aqr.campaign_contact_id
+        order by cell
       `,
       [job.campaign_id, lastContactId, CHUNK_SIZE]
     );
@@ -77,11 +85,13 @@ export const exportForVan = async (job: JobRequestRecord) => {
     return rows;
   };
 
-  let exportRows: VanExportRow[] = [];
+  let exportRows: Omit<VanExportRow, "campaign_contact_id">[] = [];
   let lastContactId = 0;
   do {
     const rows = await fetchChunk(lastContactId);
-    exportRows = exportRows.concat(rows);
+    exportRows = exportRows.concat(
+      rows.map(({ campaign_contact_id, ...rest }) => rest)
+    );
 
     lastContactId =
       rows.length > 0 ? rows[rows.length - 1].campaign_contact_id : -1;
