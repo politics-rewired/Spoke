@@ -18,7 +18,10 @@ interface HocProps {
     };
   };
   mutations: {
-    exportCampaignForVan(vanIdField: string): ApolloQueryResult<any>;
+    exportCampaignForVan(
+      vanIdField: string,
+      includeUnmessaged: boolean
+    ): ApolloQueryResult<any>;
   };
 }
 
