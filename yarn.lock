@@ -13429,10 +13429,10 @@ pg@^6.4.2:
     pgpass "1.*"
     semver "4.3.2"
 
-pgc-ngp-van@0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-0.0.10.tgz#dad9a804093a3682d373be9a01dbce2913ea15c5"
-  integrity sha512-lV6EOiGc1nrfcM5iou9Ew/jc+ZunGG7XchyFvphfNSUf9K7x44UDDq/Ftbe4Jfiw9lMq1R1wvN3nJQajxPi5Ug==
+pgc-ngp-van@0.0.11:
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-0.0.11.tgz#35fa228ff44817cfe07693d101a0f379b7f378a5"
+  integrity sha512-5fwcah7j5L9yYLCFRhxRyQI93L+uwo46fok/zExeLHqvZQh1cc3Hy2Rei6MSk+StenBBCZ1N8mXan/199firVg==
   dependencies:
     copy "^0.3.2"
     fast-csv "^4.3.0"
