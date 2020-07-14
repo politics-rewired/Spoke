@@ -30,7 +30,7 @@ const poolConfig = {
   max: config.WORKER_MAX_POOL
 };
 
-const workerPool = new Pool(poolConfig);
+export const workerPool = new Pool(poolConfig);
 
 export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   const m = await loadYaml({ include: `${__dirname}/pg-compose/**/*.yaml` });

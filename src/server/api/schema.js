@@ -214,9 +214,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       .knex("campaign_contact")
       .where({ campaign_id: id })
       .del();
+
+    const webhookBaseUrl = `${config.BASE_URL}/integrations/van`;
     await r.knex.raw(
-      `select * from public.queue_load_list_into_campaign(?, ?)`,
-      [id, parseInt(campaign.externalListId)]
+      `select * from public.queue_load_list_into_campaign(?, ?, ?)`,
+      [id, parseInt(campaign.externalListId), webhookBaseUrl]
     );
   }
 

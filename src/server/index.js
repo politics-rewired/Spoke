@@ -22,7 +22,8 @@ import {
   twilioRouter,
   assembleRouter,
   utilsRouter,
-  previewRouter
+  previewRouter,
+  integrationsRouter
 } from "./routes";
 import { r } from "./models";
 import { getWorker } from "./worker";
@@ -111,6 +112,7 @@ app.use(twilioRouter);
 app.use(assembleRouter);
 app.use(utilsRouter);
 app.use(previewRouter);
+app.use("/integrations", integrationsRouter);
 
 app.post(
   "/autoassign",
