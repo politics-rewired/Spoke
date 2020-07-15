@@ -1,3 +1,4 @@
+# Note: this file is out of sync with recent migrations and should not be used to generate migrations until that is fixed
 ---
 kind: Dependency
 module: ngp-van
@@ -90,15 +91,20 @@ security: definer
 volatility: volatile
 language: sql
 body: |
-  insert into campaign_contact (campaign_id, first_name, last_name, zip, custom_fields, cell)
+  insert into campaign_contact (campaign_id, external_id, first_name, last_name, zip, custom_fields, cell)
   select
     (r ->> 'campaign_id')::integer,
+    r ->> 'external_id',
     r ->> 'first_name',
     r ->> 'last_name',
     r ->> 'zip',
     r ->> 'custom_fields',
     r ->> 'cell'
   from json_array_elements(record_list) as r
+  where r ->> 'first_name' is not null
+    and r ->> 'last_name' is not null
+    and r ->> 'cell' is not null
+  on conflict (campaign_id, cell) do nothing
 ---
 kind: Function
 name: mark_loading_job_done
@@ -132,6 +138,7 @@ body: |
     list_external_id,
     json_build_object('campaign_id', campaign_id),
     json_build_object(
+      'external_id', 'VanID',
       'first_name', 'FirstName',
       'last_name', 'LastName',
       'zip', 'ZipOrPostal',
