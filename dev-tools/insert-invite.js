@@ -71,8 +71,11 @@ Usage: insert-invite HASH [--include-env]
     .knex("invite")
     .where({ hash })
     .first("id");
-  if (existingRecord)
-    throw new Error(`An invite with hash '${hash}' already exists!`);
+
+  if (existingRecord) {
+    console.info(`Invite with hash '${hash}' already exists!`);
+    process.exit(0);
+  }
 
   await r.knex("invite").insert({
     is_valid: true,
