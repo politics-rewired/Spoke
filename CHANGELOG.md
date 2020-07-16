@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](https://github.com/politics-rewired/spoke/compare/v2.3.0...v2.3.1) (2020-07-16)
+
+
+### Bug Fixes
+
+* exit with 0 on duplicate invite ([d6b6675](https://github.com/politics-rewired/spoke/commit/d6b6675e6e6db43142420931c4924f9924378cac))
+* include external id on van fetch saved list ([#694](https://github.com/politics-rewired/spoke/issues/694)) ([9044136](https://github.com/politics-rewired/spoke/commit/9044136036c5ce2bd5c968a6bb1d2f2ae8e600a4))
+
 ## [2.3.0](https://github.com/politics-rewired/spoke/compare/v2.2.2...v2.3.0) (2020-07-08)
 
 
