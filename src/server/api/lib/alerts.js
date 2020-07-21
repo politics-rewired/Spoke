@@ -17,7 +17,12 @@ const notifyAssignmentCreated = async options => {
     .where({ id: userId })
     .first(["auth0_id", "email"]);
 
-  const payload = { organizationId, count, email };
+  const { name: organizationName } = await r
+    .reader("organization")
+    .where({ id: organizationId })
+    .first(["name"]);
+
+  const payload = { organizationId, organizationName, count, email };
 
   if (["slack"].includes(config.PASSPORT_STRATEGY)) {
     payload.externalUserId = externalUserId;
