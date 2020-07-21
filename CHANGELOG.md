@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/politics-rewired/spoke/compare/v2.3.1...v2.4.0) (2020-07-21)
+
+
+### Features
+
+* include organization name in assignment requested webhook payload ([8cb36c5](https://github.com/politics-rewired/spoke/commit/8cb36c514dfd8d43bbb639d4a760e310e2b5a381))
+
 ### [2.3.1](https://github.com/politics-rewired/spoke/compare/v2.3.0...v2.3.1) (2020-07-16)
 
 
