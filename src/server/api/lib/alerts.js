@@ -28,11 +28,18 @@ const notifyAssignmentCreated = async options => {
     payload.externalUserId = externalUserId;
   }
 
-  return request
+  const webhookRequest = request
     .post(config.ASSIGNMENT_REQUESTED_URL)
-    .timeout(30000)
-    .set("Authorization", `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`)
-    .send(payload);
+    .timeout(30000);
+
+  if (config.ASSIGNMENT_REQUESTED_TOKEN) {
+    webhookRequest.set(
+      "Authorization",
+      `Token ${config.ASSIGNMENT_REQUESTED_TOKEN}`
+    );
+  }
+
+  return webhookRequest.send(payload);
 };
 
 async function checkForBadDeliverability() {
