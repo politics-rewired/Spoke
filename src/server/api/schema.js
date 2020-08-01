@@ -3180,6 +3180,9 @@ const rootMutations = {
 
       await accessRequired(user, savedSystem.organization_id, "ADMIN");
 
+      // We will check if the password/API key changed below
+      let authDidChange = externalSystem.username !== savedSystem.username;
+
       const payload = {
         name: externalSystem.name,
         type: externalSystem.type.toLowerCase(),
@@ -3187,6 +3190,7 @@ const rootMutations = {
       };
 
       if (!externalSystem.apiKey.includes("*")) {
+        authDidChange = true;
         const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
         const apiKeyRef = graphileSecretRef(
           savedSystem.organization_id,
@@ -3207,6 +3211,19 @@ const rootMutations = {
         .update(payload)
         .where({ id: externalSystemId })
         .returning("*");
+
+      // Completely refresh external lists after auth credentials change to make sure we're
+      // not caching lists the new credentials do not have access to
+      if (authDidChange) {
+        await r
+          .knex("external_list")
+          .where({ system_id: savedSystem.id })
+          .del();
+
+        await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
+          savedSystem.id
+        ]);
+      }
 
       return updated;
     },
