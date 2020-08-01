@@ -15,6 +15,7 @@ const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
 const graphileLogger = new Logger(logFactory);
 
 let worker: PgComposeWorker | undefined = undefined;
+let deliveryReportsWorker: PgComposeWorker | undefined = undefined;
 let workerSemaphore = false;
 
 // https://github.com/brianc/node-postgres/tree/master/packages/pg-pool#note
@@ -37,7 +38,6 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
 
   m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
   m.taskList!["release-stale-replies"] = releaseStaleReplies;
-  m.taskList!["handle-delivery-report"] = handleDeliveryReport;
 
   m.cronJobs!.push({
     name: "release-stale-replies",
@@ -58,6 +58,21 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
       noHandleSignals: true,
       pollInterval: 1000
     });
+
+    deliveryReportsWorker = await run(
+      {
+        taskList: {
+          "handle-delivery-report": handleDeliveryReport
+        }
+      },
+      {
+        pgPool: workerPool,
+        encryptionSecret: config.SESSION_SECRET,
+        concurrency: config.WORKER_CONCURRENCY,
+        logger: graphileLogger,
+        pollInterval: 1000
+      }
+    );
   }
 
   // Someone beat us to the punch of initializing the runner
