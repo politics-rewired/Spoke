@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/politics-rewired/spoke/compare/v2.4.0...v2.5.0) (2020-08-01)
+
+
+### Features
+
+* better auto vacuum parameters ([#698](https://github.com/politics-rewired/spoke/issues/698)) ([f3bdd36](https://github.com/politics-rewired/spoke/commit/f3bdd366c87e23b6f9d57dc740540b0438b40e05))
+
+
+### Bug Fixes
+
+* skip setting empty authorization header ([428dd1f](https://github.com/politics-rewired/spoke/commit/428dd1f72a586a7cabb69de57f664031df54b9e0))
+
 ## [2.4.0](https://github.com/politics-rewired/spoke/compare/v2.3.1...v2.4.0) (2020-07-21)
 
 
