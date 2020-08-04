@@ -3215,11 +3215,6 @@ const rootMutations = {
       // Completely refresh external lists after auth credentials change to make sure we're
       // not caching lists the new credentials do not have access to
       if (authDidChange) {
-        await r
-          .knex("external_list")
-          .where({ system_id: savedSystem.id })
-          .del();
-
         await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
           savedSystem.id
         ]);
