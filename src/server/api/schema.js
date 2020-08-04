@@ -3166,6 +3166,11 @@ const rootMutations = {
         })
         .returning("*");
 
+      // Kick off initial list load
+      await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
+        created.id
+      ]);
+
       return created;
     },
     editExternalSystem: async (
