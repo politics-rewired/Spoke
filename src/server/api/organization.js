@@ -66,8 +66,7 @@ export const resolvers = {
 
       const pagerOptions = {
         first,
-        after,
-        primaryColumn: "user_organization.id"
+        after
       };
 
       const { nameSearch, campaignId, campaignArchived } = filter || {};
