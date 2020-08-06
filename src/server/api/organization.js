@@ -111,6 +111,8 @@ export const resolvers = {
             }
           };
         };
+      } else {
+        query.select(["user_organization.*"]);
       }
 
       const campaignIdInt = parseInt(campaignId);
