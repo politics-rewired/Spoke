@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/politics-rewired/spoke/compare/v2.5.0...v2.6.0) (2020-08-07)
+
+
+### Features
+
+* deprioritize handling delivery reports ([#702](https://github.com/politics-rewired/spoke/issues/702)) ([aab32c0](https://github.com/politics-rewired/spoke/commit/aab32c07c0dced9a0e9f182bdf879adf1ae6c283))
+
+
+### Bug Fixes
+
+* add default select statement ([#707](https://github.com/politics-rewired/spoke/issues/707)) ([40e8ed7](https://github.com/politics-rewired/spoke/commit/40e8ed73fc29ffb25693eb2bb1697050e56393a4))
+* invalidate cached external lists ([#700](https://github.com/politics-rewired/spoke/issues/700)) ([67a307a](https://github.com/politics-rewired/spoke/commit/67a307a41d6b6b298fc74ff2dd266c550da4bdd5))
+* use id as primary column ([#706](https://github.com/politics-rewired/spoke/issues/706)) ([cc186a7](https://github.com/politics-rewired/spoke/commit/cc186a7eff6fc069c44e44b77078f5a2ed24be8d))
+
 ## [2.5.0](https://github.com/politics-rewired/spoke/compare/v2.4.0...v2.5.0) (2020-08-01)
 
 
