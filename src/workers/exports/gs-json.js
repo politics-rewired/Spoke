@@ -49,6 +49,14 @@ const upload = async (bucket, key, payload) => {
   });
 };
 
+const getUploadStream = async (bucket, key) => {
+  const uploadStream = await storage()
+    .bucket(bucket)
+    .file(key)
+    .createWriteStream({ gzip: true });
+  return uploadStream;
+};
+
 /**
  * Get a signed URL for an object that is valid for 24 hours.
  *
@@ -70,5 +78,6 @@ const getDownloadUrl = async (bucket, key) => {
 
 module.exports = {
   upload,
+  getUploadStream,
   getDownloadUrl
 };
