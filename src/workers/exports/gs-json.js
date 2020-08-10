@@ -35,10 +35,7 @@ const storage = () => {
 const upload = async (bucket, key, payload) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const uploadStream = await storage()
-        .bucket(bucket)
-        .file(key)
-        .createWriteStream({ gzip: true });
+      const uploadStream = await getUploadStream(bucket, key);
       uploadStream.write(payload);
       uploadStream.end();
       uploadStream.on("finish", resolve);
@@ -47,6 +44,14 @@ const upload = async (bucket, key, payload) => {
       reject(err);
     }
   });
+};
+
+const getUploadStream = async (bucket, key) => {
+  const uploadStream = await storage()
+    .bucket(bucket)
+    .file(key)
+    .createWriteStream({ gzip: true });
+  return uploadStream;
 };
 
 /**
@@ -70,5 +75,6 @@ const getDownloadUrl = async (bucket, key) => {
 
 module.exports = {
   upload,
+  getUploadStream,
   getDownloadUrl
 };

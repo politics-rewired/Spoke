@@ -1,5 +1,6 @@
 const AWS = require("aws-sdk");
 const { config } = require("../../config");
+const stream = require("stream");
 
 const { AWS_ENDPOINT: awsEndpoint } = config;
 
@@ -36,6 +37,21 @@ const upload = async (bucket, key, payload, endpointUrl) => {
 };
 
 /**
+ * Get a writeable upload stream
+ *
+ * @param {string} bucket Name of the S3 bucket to upload the object to
+ * @param {string} key Name of key of destination object
+ */
+const getUploadStream = async (bucket, key, endpointUrl) => {
+  const s3Client = createS3(bucket, endpointUrl);
+  const passThrough = new stream.PassThrough();
+  const uploadParams = { Key: key, Body: passThrough };
+  s3Client.upload(uploadParams);
+
+  return passThrough;
+};
+
+/**
  * Get a signed URL for an object that is valid for 24 hours.
  *
  * @param {string} bucket Name of the S3 bucket to upload the object to
@@ -56,5 +72,6 @@ const getDownloadUrl = async (bucket, key) => {
 
 module.exports = {
   upload,
+  getUploadStream,
   getDownloadUrl
 };

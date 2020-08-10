@@ -31,3 +31,23 @@ export const uploadToCloud = async (key: string, payload: string) => {
   await upload(config.AWS_S3_BUCKET_NAME, prefixedKey, payload);
   return getDownloadUrl(config.AWS_S3_BUCKET_NAME, prefixedKey) as string;
 };
+
+export const getUploadStream = async (key: string) => {
+  if (!validS3Config && !validGcpHmacConfig && !validGcpConfig) {
+    logger.debug(`Would have saved ${key} to cloud storage`);
+    throw new Error("Invalid cloud storage configuration!");
+  }
+
+  const exportDriver = config.EXPORT_DRIVER as "s3" | "gs-json";
+  const { getUploadStream } = exporters[exportDriver];
+
+  const prefixedKey = `${config.AWS_S3_KEY_PREFIX}${key}`;
+  return await getUploadStream(config.AWS_S3_BUCKET_NAME, prefixedKey);
+};
+
+export const getDownloadUrl = async (key: string) => {
+  const exportDriver = config.EXPORT_DRIVER as "s3" | "gs-json";
+  const { getDownloadUrl } = exporters[exportDriver];
+  const prefixedKey = `${config.AWS_S3_KEY_PREFIX}${key}`;
+  return getDownloadUrl(config.AWS_S3_BUCKET_NAME, prefixedKey) as string;
+};
