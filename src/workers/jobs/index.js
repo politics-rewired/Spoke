@@ -539,6 +539,12 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     .where("id", jobEvent.jobId)
     .increment("status", 1);
   const validationStats = {};
+
+  logger.error("loadContactsFromDataWarehouseFragment toward end", {
+    completed,
+    jobEvent
+  });
+
   const completed = await r
     .reader("job_request")
     .where("id", jobEvent.jobId)
@@ -1454,7 +1460,7 @@ export async function exportCampaign(job) {
       ))
     ) {
       lastContactId = chunkMessageResult.lastContactId;
-      logger.info(
+      logger.debug(
         `Processing export for ${campaignId} chunk part`,
         lastContactId
       );
@@ -1482,7 +1488,7 @@ export async function exportCampaign(job) {
       ))
     ) {
       lastContactId = chunkContactResult.lastContactId;
-      logger.info(
+      logger.debug(
         `Processing export for ${campaignId} chunk part`,
         lastContactId
       );
