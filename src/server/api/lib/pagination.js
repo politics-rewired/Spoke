@@ -24,6 +24,9 @@ export const formatPage = async (query, options) => {
     defaultOptions,
     options
   );
+  // Name of the Knex result record key will not include table
+  const [cursorKey] = primaryColumn.split(".").slice(-1);
+
   const countQuery = query.clone().clearSelect();
 
   if (after) {
@@ -40,7 +43,7 @@ export const formatPage = async (query, options) => {
   const [{ count: totalCount }] = await countQuery.count();
   const results = await query;
   const edges = results.slice(0, first || undefined).map(record => ({
-    cursor: encode(record[primaryColumn]),
+    cursor: encode(record[cursorKey]),
     node: nodeTransformer(record)
   }));
   const pageInfo = {
