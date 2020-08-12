@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.1](https://github.com/politics-rewired/spoke/compare/v2.6.0...v2.6.1) (2020-08-12)
+
+
+### Bug Fixes
+
+* fix pagination primary key naming ([81a88c6](https://github.com/politics-rewired/spoke/commit/81a88c65997bec94e3f9ba633ddb29c1d138e064))
+* **load-van-list:** filter opt outs ([#703](https://github.com/politics-rewired/spoke/issues/703)) ([92ff6fe](https://github.com/politics-rewired/spoke/commit/92ff6fe3416c3cbe17336f8b94ee3465b0725f41))
+* handle very large exports ([#704](https://github.com/politics-rewired/spoke/issues/704)) ([56065bb](https://github.com/politics-rewired/spoke/commit/56065bbce5ab23194a616a7900f18a159f8bfa93))
+
 ## [2.6.0](https://github.com/politics-rewired/spoke/compare/v2.5.0...v2.6.0) (2020-08-07)
 
 
