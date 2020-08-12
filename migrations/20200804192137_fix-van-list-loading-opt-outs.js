@@ -18,7 +18,7 @@ exports.up = function(knex) {
           select 1
           from opt_out
           where opt_out.cell = r->>'cell'
-            and opt_out.organization_id = ( select organization_id from campaign where id = campaign_id )
+            and opt_out.organization_id = ( select organization_id from campaign where id = (r ->> 'campaign_id')::integer )
         )
       on conflict (campaign_id, cell) do nothing
     $$ language sql volatile SECURITY definer SET search_path = "public";
