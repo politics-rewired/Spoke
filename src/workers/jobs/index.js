@@ -1441,11 +1441,23 @@ export async function exportCampaign(job) {
     writeHeaders: true
   });
 
+  campaignContactsUploadStream.on("error", err => {
+    logger.error("error in campaignContactsUploadStream: ", err);
+  });
+  campaignContactsWriteStream.on("error", err => {
+    logger.error("error in campaignContactsWriteStream: ", err);
+  });
   campaignContactsWriteStream.pipe(campaignContactsUploadStream);
 
   const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
   const messagesWriteStream = format({ headers: true, writeHeaders: true });
 
+  messagesUploadStream.on("error", err => {
+    logger.error("error in messagesUploadStream: ", err);
+  });
+  messagesWriteStream.on("error", err => {
+    logger.error("error in messagesWriteStream: ", err);
+  });
   messagesWriteStream.pipe(messagesUploadStream);
 
   // Message rows
