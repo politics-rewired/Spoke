@@ -1477,7 +1477,9 @@ export async function exportCampaign(job) {
         lastContactId
       );
       for (const m of chunkMessageResult.messages) {
-        messagesWriteStream.write(m);
+        await new Promise((resolve, reject) =>
+          messagesWriteStream.write(m, err => (err ? reject(err) : resolve()))
+        );
       }
     }
   } catch (exc) {
@@ -1505,7 +1507,12 @@ export async function exportCampaign(job) {
         lastContactId
       );
       for (const c of chunkContactResult.contacts) {
-        campaignContactsWriteStream.write(c);
+        await new Promise((resolve, reject) =>
+          campaignContactsWriteStream.write(
+            m,
+            err => (err ? reject(err) : resolve())
+          )
+        );
       }
     }
   } catch (exc) {
