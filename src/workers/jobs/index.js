@@ -13,7 +13,6 @@ import {
   saveNewIncomingMessage
 } from "../../server/api/lib/message-sending";
 import NumbersClient from "assemble-numbers-client";
-import { format } from "fast-csv";
 
 import AWS from "aws-sdk";
 import Papa from "papaparse";
@@ -24,11 +23,7 @@ import {
   Notifications,
   sendUserNotification
 } from "../../server/notifications";
-import {
-  uploadToCloud,
-  getUploadStream,
-  getDownloadUrl
-} from "../exports/upload";
+import { uploadToCloud } from "../exports/upload";
 import zipCodeToTimeZone from "zipcode-to-timezone";
 
 const CHUNK_SIZE = 1000;
@@ -539,17 +534,15 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     .where("id", jobEvent.jobId)
     .increment("status", 1);
   const validationStats = {};
-
-  logger.error("loadContactsFromDataWarehouseFragment toward end", {
-    completed,
-    jobEvent
-  });
-
   const completed = await r
     .reader("job_request")
     .where("id", jobEvent.jobId)
     .select("status")
     .first();
+  logger.error("loadContactsFromDataWarehouseFragment toward end", {
+    completed,
+    jobEvent
+  });
 
   if (!completed) {
     logger.error("loadContactsFromDataWarehouseFragment job has been deleted", {
@@ -1422,33 +1415,8 @@ export async function exportCampaign(job) {
 
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
-  // Attempt upload to cloud storage
-  let campaignContactsKey = campaignTitle
-    .replace(/ /g, "_")
-    .replace(/\//g, "_");
-
-  if (!isAutomatedExport) {
-    const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
-    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
-  }
-  const messagesKey = `${campaignContactsKey}-messages`;
-
-  const campaignContactsUploadStream = await getUploadStream(
-    `${campaignContactsKey}.csv`
-  );
-  const campaignContactsWriteStream = format({
-    headers: true,
-    writeHeaders: true
-  });
-
-  campaignContactsWriteStream.pipe(campaignContactsUploadStream);
-
-  const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
-  const messagesWriteStream = format({ headers: true, writeHeaders: true });
-
-  messagesWriteStream.pipe(messagesUploadStream);
-
   // Message rows
+  let messageRows = [];
   let lastContactId;
   try {
     let chunkMessageResult = undefined;
@@ -1460,22 +1428,14 @@ export async function exportCampaign(job) {
       ))
     ) {
       lastContactId = chunkMessageResult.lastContactId;
-      logger.debug(
-        `Processing export for ${campaignId} chunk part`,
-        lastContactId
-      );
-      for (const m of chunkMessageResult.messages) {
-        messagesWriteStream.write(m);
-      }
+      messageRows = messageRows.concat(chunkMessageResult.messages);
     }
   } catch (exc) {
     logger.error("Error building message rows: ", exc);
   }
 
-  messagesWriteStream.end();
-  messagesUploadStream.end();
-
   // Contact rows
+  let contactRows = [];
   try {
     let chunkContactResult = undefined;
     lastContactId = 0;
@@ -1488,25 +1448,36 @@ export async function exportCampaign(job) {
       ))
     ) {
       lastContactId = chunkContactResult.lastContactId;
-      logger.debug(
-        `Processing export for ${campaignId} chunk part`,
-        lastContactId
-      );
-      for (const c of chunkContactResult.contacts) {
-        campaignContactsWriteStream.write(c);
-      }
+      contactRows = contactRows.concat(chunkContactResult.contacts);
     }
   } catch (exc) {
     logger.error("Error building campaign contact rows: ", exc);
   }
 
-  campaignContactsWriteStream.end();
-  campaignContactsUploadStream.end();
+  // Create the CSV paylaods
+  let campaignsCsv = undefined,
+    messagesCsv = undefined;
+  try {
+    campaignsCsv = Papa.unparse(contactRows);
+    messagesCsv = Papa.unparse(messageRows);
+  } catch (exc) {
+    logger.error("Error building CSVs: ", exc);
+  }
+
+  // Attempt upload to cloud storage
+  let campaignContactsKey = campaignTitle
+    .replace(/ /g, "_")
+    .replace(/\//g, "_");
+  if (!isAutomatedExport) {
+    const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
+    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
+  }
+  const messagesKey = `${campaignContactsKey}-messages`;
 
   try {
     const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
-      getDownloadUrl(`${campaignContactsKey}.csv`),
-      getDownloadUrl(`${messagesKey}.csv`)
+      uploadToCloud(`${campaignContactsKey}.csv`, campaignsCsv),
+      uploadToCloud(`${messagesKey}.csv`, messagesCsv)
     ]);
     if (!isAutomatedExport) {
       await sendEmail({
