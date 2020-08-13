@@ -1,5 +1,7 @@
-const { Storage } = require("@google-cloud/storage");
-const { config } = require("../../config");
+import { Storage } from "@google-cloud/storage";
+
+import { StorageBackend } from "./types";
+import { config } from "../../config";
 
 const fetchKeys = () => {
   const keysEnvVar = config.GOOGLE_APPLICATION_CREDENTIALS;
@@ -12,8 +14,8 @@ const fetchKeys = () => {
   return keys;
 };
 
-let _storage = undefined;
-const storage = () => {
+let _storage: Storage | undefined = undefined;
+const storage = (): Storage => {
   if (_storage === undefined) {
     const keys = fetchKeys();
     const credentials = {
@@ -32,7 +34,7 @@ const storage = () => {
  * @param {string} key Name of key of destination object
  * @param {Buffer|Uint8Array|Blob|string|Readable} payload Payload to upload
  */
-const upload = async (bucket, key, payload) => {
+const upload = async (bucket: string, key: string, payload: any) => {
   return new Promise(async (resolve, reject) => {
     try {
       const uploadStream = await getUploadStream(bucket, key);
@@ -46,7 +48,7 @@ const upload = async (bucket, key, payload) => {
   });
 };
 
-const getUploadStream = async (bucket, key) => {
+const getUploadStream = async (bucket: string, key: string) => {
   const uploadStream = await storage()
     .bucket(bucket)
     .file(key)
@@ -61,7 +63,7 @@ const getUploadStream = async (bucket, key) => {
  * @param {string} key Name of key of destination object
  * @returns {string} Signed download URL
  */
-const getDownloadUrl = async (bucket, key) => {
+const getDownloadUrl = async (bucket: string, key: string) => {
   const [url] = await storage()
     .bucket(bucket)
     .file(key)
@@ -73,8 +75,10 @@ const getDownloadUrl = async (bucket, key) => {
   return url;
 };
 
-module.exports = {
+const backend: StorageBackend = {
   upload,
   getUploadStream,
   getDownloadUrl
 };
+
+export default backend;

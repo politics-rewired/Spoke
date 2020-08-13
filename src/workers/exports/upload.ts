@@ -2,6 +2,7 @@ import { config } from "../../config";
 import logger from "../../logger";
 import s3 from "./s3";
 import gsJson from "./gs-json";
+import { StorageBackend } from "./types";
 
 const validAwsCredentials =
   config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY;
@@ -13,7 +14,7 @@ const validGcpHmacConfig = config.EXPORT_DRIVER === "gs" && validAwsCredentials;
 const validGcpConfig =
   config.EXPORT_DRIVER === "gs-json" && valudGcpCredentials;
 
-const exporters = {
+const exporters: { [key: string]: StorageBackend } = {
   s3: s3,
   "gs-json": gsJson
 };
@@ -29,7 +30,7 @@ export const uploadToCloud = async (key: string, payload: string) => {
 
   const prefixedKey = `${config.AWS_S3_KEY_PREFIX}${key}`;
   await upload(config.AWS_S3_BUCKET_NAME, prefixedKey, payload);
-  return getDownloadUrl(config.AWS_S3_BUCKET_NAME, prefixedKey) as string;
+  return getDownloadUrl(config.AWS_S3_BUCKET_NAME, prefixedKey);
 };
 
 export const getUploadStream = async (key: string) => {
@@ -42,12 +43,12 @@ export const getUploadStream = async (key: string) => {
   const { getUploadStream } = exporters[exportDriver];
 
   const prefixedKey = `${config.AWS_S3_KEY_PREFIX}${key}`;
-  return await getUploadStream(config.AWS_S3_BUCKET_NAME, prefixedKey);
+  return getUploadStream(config.AWS_S3_BUCKET_NAME, prefixedKey);
 };
 
 export const getDownloadUrl = async (key: string) => {
   const exportDriver = config.EXPORT_DRIVER as "s3" | "gs-json";
   const { getDownloadUrl } = exporters[exportDriver];
   const prefixedKey = `${config.AWS_S3_KEY_PREFIX}${key}`;
-  return getDownloadUrl(config.AWS_S3_BUCKET_NAME, prefixedKey) as string;
+  return getDownloadUrl(config.AWS_S3_BUCKET_NAME, prefixedKey);
 };
