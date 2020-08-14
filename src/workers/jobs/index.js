@@ -1447,6 +1447,11 @@ export async function exportCampaign(job) {
   campaignContactsWriteStream.on("error", err => {
     logger.error("error in campaignContactsWriteStream: ", err);
   });
+
+  const campaignContactsUploadPromise = new Promise((resolve, reject) =>
+    campaignContactsUploadStream.on("finish", resolve)
+  );
+
   campaignContactsWriteStream.pipe(campaignContactsUploadStream);
 
   const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
@@ -1458,6 +1463,11 @@ export async function exportCampaign(job) {
   messagesWriteStream.on("error", err => {
     logger.error("error in messagesWriteStream: ", err);
   });
+
+  const messagesUploadPromise = new Promise((resolve, reject) =>
+    messagesUploadStream.on("finish", resolve)
+  );
+
   messagesWriteStream.pipe(messagesUploadStream);
 
   // Message rows
@@ -1473,8 +1483,7 @@ export async function exportCampaign(job) {
     ) {
       lastContactId = chunkMessageResult.lastContactId;
       logger.debug(
-        `Processing export for ${campaignId} chunk part`,
-        lastContactId
+        `Processing message export for ${campaignId} chunk part ${lastContactId}`
       );
       for (const m of chunkMessageResult.messages) {
         messagesWriteStream.write(m);
@@ -1485,7 +1494,6 @@ export async function exportCampaign(job) {
   }
 
   messagesWriteStream.end();
-  messagesUploadStream.end();
 
   // Contact rows
   try {
@@ -1501,8 +1509,7 @@ export async function exportCampaign(job) {
     ) {
       lastContactId = chunkContactResult.lastContactId;
       logger.debug(
-        `Processing export for ${campaignId} chunk part`,
-        lastContactId
+        `Processing contact export for ${campaignId} chunk part ${lastContactId}`
       );
       for (const c of chunkContactResult.contacts) {
         campaignContactsWriteStream.write(c);
@@ -1513,7 +1520,9 @@ export async function exportCampaign(job) {
   }
 
   campaignContactsWriteStream.end();
-  campaignContactsUploadStream.end();
+
+  logger.debug("Waiting for streams to finish");
+  await Promise.all([campaignContactsUploadPromise, messagesUploadPromise]);
 
   try {
     const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
