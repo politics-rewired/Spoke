@@ -12,6 +12,7 @@
 !/dev-tools/insert-invite.js
 !/dev-tools/migrate-worker.js
 !/dev-tools/export-all-campaigns.js
+!/dev-tools/export-campaigns-by-argv.js
 !/src/*
 !/migrations
 !/seeds
