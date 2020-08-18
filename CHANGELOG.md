@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/politics-rewired/spoke/compare/v2.6.3...v2.7.0) (2020-08-18)
+
+
+### Features
+
+* add option to send payload as all strings ([4e4fada](https://github.com/politics-rewired/spoke/commit/4e4fada3908cd446c2216321a9c58b32f7165af2))
+* export all campaigns by argv query script ([05c06e3](https://github.com/politics-rewired/spoke/commit/05c06e363d80d8b8c15dc8afcda16e25cb590ae7))
+
 ### [2.6.3](https://github.com/politics-rewired/spoke/compare/v2.6.2...v2.6.3) (2020-08-14)
 
 ### [2.6.2](https://github.com/politics-rewired/spoke/compare/v2.6.1...v2.6.2) (2020-08-12)
