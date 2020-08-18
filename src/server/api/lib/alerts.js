@@ -22,10 +22,16 @@ const notifyAssignmentCreated = async options => {
     .where({ id: organizationId })
     .first(["name"]);
 
-  const payload = { organizationId, organizationName, count, email };
+  let payload = { organizationId, organizationName, count, email };
 
   if (["slack"].includes(config.PASSPORT_STRATEGY)) {
     payload.externalUserId = externalUserId;
+  }
+
+  if (config.ASSIGNMENT_REQUESTED_ALL_STRINGS) {
+    payload = Object.fromEntries(
+      Object.entries(payload).map(([key, value]) => [key, `${value}`])
+    );
   }
 
   const webhookRequest = request

@@ -54,6 +54,10 @@ const validators = {
     desc: "Webhook URL to notify when a texter assignment is requested.",
     default: undefined
   }),
+  ASSIGNMENT_REQUESTED_ALL_STRINGS: bool({
+    desc: "If true, all payload values will be converted to strings.",
+    default: false
+  }),
   ASSIGNMENT_REQUESTED_URL_REQUIRED: bool({
     desc:
       "Require successful assignment requested webhook to persist assignment request in Spoke.",
