@@ -1280,7 +1280,8 @@ const rootMutations = {
       const [campaign] = await r
         .knex("campaign")
         .update({ is_started: true })
-        .where({ id });
+        .where({ id })
+        .returning("*");
 
       await sendUserNotification({
         type: Notifications.CAMPAIGN_STARTED,
