@@ -45,7 +45,10 @@ const notifyAssignmentCreated = async options => {
     );
   }
 
-  return webhookRequest.send(payload);
+  return webhookRequest.send(payload).catch(err => {
+    logger.error("Error sending assignment requested webhook: ", err);
+    throw err;
+  });
 };
 
 async function checkForBadDeliverability() {
