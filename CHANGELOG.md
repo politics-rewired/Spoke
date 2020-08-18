@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.1](https://github.com/politics-rewired/spoke/compare/v2.7.0...v2.7.1) (2020-08-18)
+
+
+### Bug Fixes
+
+* return inserted record ([7c20949](https://github.com/politics-rewired/spoke/commit/7c209499cef9e791aa6c685d23472a22a922d33e))
+
 ## [2.7.0](https://github.com/politics-rewired/spoke/compare/v2.6.3...v2.7.0) (2020-08-18)
 
 
