@@ -705,6 +705,10 @@ const validators = {
     default: "no-version",
     isClient: true
   }),
+  SWITCHBOARD_BASE_URL: url({
+    desc: "Custom base URL for Switchboard client.",
+    default: undefined
+  }),
   VAN_BASE_URL: url({
     desc:
       "The base url to use when interacting with VAN (may need to change for international use)",

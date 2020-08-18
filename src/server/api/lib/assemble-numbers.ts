@@ -1,4 +1,3 @@
-import NumbersClient from "assemble-numbers-client";
 import Knex from 'knex';
 
 import { config } from "../../../config";
@@ -7,6 +6,7 @@ import { errToObj } from "../../utils";
 import { r } from "../../models";
 import { SendMessagePayload } from './types';
 import { MessagingServiceType, MessagingServiceRecord, RequestHandlerFactory } from "../types";
+import { makeNumbersClient } from "../../lib/assemble-numbers";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { symmetricDecrypt } from "./crypto";
 import {
@@ -71,7 +71,7 @@ interface NumbersDeliveryReportPayload {
 export const numbersClient = async (service: MessagingServiceRecord) => {
   const encryptedApiKey = service.encrypted_auth_token;
   const apiKey = symmetricDecrypt(encryptedApiKey);
-  const client = new NumbersClient({ apiKey });
+  const client = makeNumbersClient(apiKey);
   return client;
 };
 

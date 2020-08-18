@@ -12,7 +12,7 @@ import {
   getLastMessage,
   saveNewIncomingMessage
 } from "../../server/api/lib/message-sending";
-import NumbersClient from "assemble-numbers-client";
+import { makeNumbersClient } from "../../server/lib/assemble-numbers";
 
 import AWS from "aws-sdk";
 import Papa from "papaparse";
@@ -354,7 +354,7 @@ export async function filterLandlines(job) {
     throw new Error("Cannot filter landlines - no numbers api key configured");
   }
 
-  const numbersClient = new NumbersClient({ apiKey: numbersApiKey });
+  const numbersClient = makeNumbersClient(numbersApiKey);
   const numbersRequest = await numbersClient.lookup.createRequest();
 
   let highestId = 0;
