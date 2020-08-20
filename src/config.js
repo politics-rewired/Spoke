@@ -397,6 +397,11 @@ const validators = {
     default: "/graphql",
     isClient: true
   }),
+  HIDE_CAMPAIGN_STATE_VARS_ON_ARCHIVED_CAMPAIGNS: bool({
+    desc:
+      "If true, campaign state tags on the campaigns list page will be hidden for archived campaigns",
+    default: false
+  }),
   CONTACT_FIELDS_TO_HIDE: str({
     desc:
       "A comma separated list of contact fields to not ship to the client. Can include 'external_id, cell, and lastName'",

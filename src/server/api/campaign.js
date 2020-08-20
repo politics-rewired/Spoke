@@ -323,6 +323,13 @@ export const resolvers = {
         return false;
       }
 
+      if (
+        config.HIDE_CAMPAIGN_STATE_VARS_ON_ARCHIVED_CAMPAIGNS &&
+        campaign.is_archived
+      ) {
+        return false;
+      }
+
       const getHasUnassignedContacts = memoizer.memoize(
         async ({ campaignId, archived }) => {
           // SQL injection for archived = to enable use of partial index
@@ -359,6 +366,13 @@ export const resolvers = {
       });
     },
     hasUnsentInitialMessages: async campaign => {
+      if (
+        config.HIDE_CAMPAIGN_STATE_VARS_ON_ARCHIVED_CAMPAIGNS &&
+        campaign.is_archived
+      ) {
+        return false;
+      }
+
       const getHasUnsentInitialMessages = memoizer.memoize(
         async ({ campaignId, archived }) => {
           const contacts = await r
@@ -382,6 +396,13 @@ export const resolvers = {
       });
     },
     hasUnhandledMessages: async campaign => {
+      if (
+        config.HIDE_CAMPAIGN_STATE_VARS_ON_ARCHIVED_CAMPAIGNS &&
+        campaign.is_archived
+      ) {
+        return false;
+      }
+
       const getHasUnhandledMessages = memoizer.memoize(
         async ({ campaignId, archived, organizationId }) => {
           let contactsQuery = r
