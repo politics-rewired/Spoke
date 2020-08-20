@@ -1420,6 +1420,12 @@ export async function exportCampaign(job) {
     return;
   }
 
+  const countQueryResult = await r
+    .reader("campaign_contact")
+    .count("*")
+    .where({ campaign_id: campaignId });
+  const contactsCount = countQueryResult[0].count;
+
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
   // Attempt upload to cloud storage
@@ -1472,6 +1478,7 @@ export async function exportCampaign(job) {
 
   // Message rows
   let lastContactId;
+  let processed = 0;
   try {
     let chunkMessageResult = undefined;
     lastContactId = 0;
@@ -1485,6 +1492,11 @@ export async function exportCampaign(job) {
       logger.debug(
         `Processing message export for ${campaignId} chunk part ${lastContactId}`
       );
+      processed += CHUNK_SIZE;
+      await r
+        .knex("job_request")
+        .where({ id: job.id })
+        .update({ status: Math.round((processed / contactsCount / 2) * 100) });
       for (const m of chunkMessageResult.messages) {
         messagesWriteStream.write(m);
       }
@@ -1499,6 +1511,7 @@ export async function exportCampaign(job) {
   try {
     let chunkContactResult = undefined;
     lastContactId = 0;
+    processed = 0;
     while (
       (chunkContactResult = await processContactsChunk(
         campaignId,
@@ -1511,6 +1524,13 @@ export async function exportCampaign(job) {
       logger.debug(
         `Processing contact export for ${campaignId} chunk part ${lastContactId}`
       );
+      processed += CHUNK_SIZE;
+      await r
+        .knex("job_request")
+        .where({ id: job.id })
+        .update({
+          status: Math.round((processed / contactsCount / 2) * 100) + 50
+        });
       for (const c of chunkContactResult.contacts) {
         campaignContactsWriteStream.write(c);
       }
