@@ -13,6 +13,7 @@ import {
   saveNewIncomingMessage
 } from "../../server/api/lib/message-sending";
 import { makeNumbersClient } from "../../server/lib/assemble-numbers";
+import { format } from "fast-csv";
 
 import AWS from "aws-sdk";
 import Papa from "papaparse";
@@ -23,7 +24,11 @@ import {
   Notifications,
   sendUserNotification
 } from "../../server/notifications";
-import { uploadToCloud } from "../exports/upload";
+import {
+  uploadToCloud,
+  getUploadStream,
+  getDownloadUrl
+} from "../exports/upload";
 import zipCodeToTimeZone from "zipcode-to-timezone";
 
 const CHUNK_SIZE = 1000;
@@ -534,15 +539,17 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     .where("id", jobEvent.jobId)
     .increment("status", 1);
   const validationStats = {};
+
+  logger.error("loadContactsFromDataWarehouseFragment toward end", {
+    completed,
+    jobEvent
+  });
+
   const completed = await r
     .reader("job_request")
     .where("id", jobEvent.jobId)
     .select("status")
     .first();
-  logger.error("loadContactsFromDataWarehouseFragment toward end", {
-    completed,
-    jobEvent
-  });
 
   if (!completed) {
     logger.error("loadContactsFromDataWarehouseFragment job has been deleted", {
@@ -1415,8 +1422,55 @@ export async function exportCampaign(job) {
 
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
+  // Attempt upload to cloud storage
+  let campaignContactsKey = campaignTitle
+    .replace(/ /g, "_")
+    .replace(/\//g, "_");
+
+  if (!isAutomatedExport) {
+    const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
+    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
+  }
+  const messagesKey = `${campaignContactsKey}-messages`;
+
+  const campaignContactsUploadStream = await getUploadStream(
+    `${campaignContactsKey}.csv`
+  );
+  const campaignContactsWriteStream = format({
+    headers: true,
+    writeHeaders: true
+  });
+
+  campaignContactsUploadStream.on("error", err => {
+    logger.error("error in campaignContactsUploadStream: ", err);
+  });
+  campaignContactsWriteStream.on("error", err => {
+    logger.error("error in campaignContactsWriteStream: ", err);
+  });
+
+  const campaignContactsUploadPromise = new Promise((resolve, reject) =>
+    campaignContactsUploadStream.on("finish", resolve)
+  );
+
+  campaignContactsWriteStream.pipe(campaignContactsUploadStream);
+
+  const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
+  const messagesWriteStream = format({ headers: true, writeHeaders: true });
+
+  messagesUploadStream.on("error", err => {
+    logger.error("error in messagesUploadStream: ", err);
+  });
+  messagesWriteStream.on("error", err => {
+    logger.error("error in messagesWriteStream: ", err);
+  });
+
+  const messagesUploadPromise = new Promise((resolve, reject) =>
+    messagesUploadStream.on("finish", resolve)
+  );
+
+  messagesWriteStream.pipe(messagesUploadStream);
+
   // Message rows
-  let messageRows = [];
   let lastContactId;
   try {
     let chunkMessageResult = undefined;
@@ -1428,14 +1482,20 @@ export async function exportCampaign(job) {
       ))
     ) {
       lastContactId = chunkMessageResult.lastContactId;
-      messageRows = messageRows.concat(chunkMessageResult.messages);
+      logger.debug(
+        `Processing message export for ${campaignId} chunk part ${lastContactId}`
+      );
+      for (const m of chunkMessageResult.messages) {
+        messagesWriteStream.write(m);
+      }
     }
   } catch (exc) {
     logger.error("Error building message rows: ", exc);
   }
 
+  messagesWriteStream.end();
+
   // Contact rows
-  let contactRows = [];
   try {
     let chunkContactResult = undefined;
     lastContactId = 0;
@@ -1448,36 +1508,26 @@ export async function exportCampaign(job) {
       ))
     ) {
       lastContactId = chunkContactResult.lastContactId;
-      contactRows = contactRows.concat(chunkContactResult.contacts);
+      logger.debug(
+        `Processing contact export for ${campaignId} chunk part ${lastContactId}`
+      );
+      for (const c of chunkContactResult.contacts) {
+        campaignContactsWriteStream.write(c);
+      }
     }
   } catch (exc) {
     logger.error("Error building campaign contact rows: ", exc);
   }
 
-  // Create the CSV paylaods
-  let campaignsCsv = undefined,
-    messagesCsv = undefined;
-  try {
-    campaignsCsv = Papa.unparse(contactRows);
-    messagesCsv = Papa.unparse(messageRows);
-  } catch (exc) {
-    logger.error("Error building CSVs: ", exc);
-  }
+  campaignContactsWriteStream.end();
 
-  // Attempt upload to cloud storage
-  let campaignContactsKey = campaignTitle
-    .replace(/ /g, "_")
-    .replace(/\//g, "_");
-  if (!isAutomatedExport) {
-    const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
-    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
-  }
-  const messagesKey = `${campaignContactsKey}-messages`;
+  logger.debug("Waiting for streams to finish");
+  await Promise.all([campaignContactsUploadPromise, messagesUploadPromise]);
 
   try {
     const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
-      uploadToCloud(`${campaignContactsKey}.csv`, campaignsCsv),
-      uploadToCloud(`${messagesKey}.csv`, messagesCsv)
+      getDownloadUrl(`${campaignContactsKey}.csv`),
+      getDownloadUrl(`${messagesKey}.csv`)
     ]);
     if (!isAutomatedExport) {
       await sendEmail({
