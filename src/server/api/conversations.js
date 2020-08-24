@@ -293,8 +293,8 @@ export async function getConversations(
       }
 
       conversation.messages = contactMessages
-        // Sort ASC to display most recent _messages_ last
         .filter(messageRow => messageRow.mess_id !== null)
+        // Sort ASC to display most recent _messages_ last
         .sort((messageA, messageB) => messageA.created_at - messageB.created_at)
         .map(message => {
           return mapQueryFieldsToResolverFields(
