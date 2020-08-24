@@ -25,11 +25,31 @@ class MessageList extends Component {
   }
 
   render() {
+    const messageContainerStyle = {
+      flex: "1 1 auto",
+      height: "0px",
+      overflowY: "scroll"
+    };
+
+    if (this.props.messages.length === 0) {
+      return (
+        <div style={messageContainerStyle}>
+          <p
+            style={{
+              backgroundColor: "#EEEEEE",
+              margin: "0 60px",
+              padding: "10px 0",
+              textAlign: "center"
+            }}
+          >
+            No messages yet
+          </p>
+        </div>
+      );
+    }
+
     return (
-      <div
-        ref="messageWindow"
-        style={{ flex: "1 1 auto", height: "0px", overflowY: "scroll" }}
-      >
+      <div ref="messageWindow" style={messageContainerStyle}>
         {this.props.messages.map((message, index) => {
           const isFromContact = message.isFromContact;
           const containerStyle = {

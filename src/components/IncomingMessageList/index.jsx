@@ -162,20 +162,15 @@ export class IncomingMessageList extends Component {
           overflow: "scroll",
           whiteSpace: "pre-line"
         },
-        render: (columnKey, row) => {
-          if (row.messages && row.messages.length > 0) {
-            return (
-              <FlatButton
-                onClick={event => {
-                  event.stopPropagation();
-                  this.handleOpenConversation(row.index);
-                }}
-                icon={<ActionOpenInNew />}
-              />
-            );
-          }
-          return "";
-        }
+        render: (columnKey, row) => (
+          <FlatButton
+            onClick={event => {
+              event.stopPropagation();
+              this.handleOpenConversation(row.index);
+            }}
+            icon={<ActionOpenInNew />}
+          />
+        )
       }
     ];
   };
