@@ -1314,21 +1314,6 @@ const processContactsChunk = async (
 const processMessagesChunk = async (campaignId, lastContactId = 0) => {
   const { rows } = await r.reader.raw(
     `
-      with campaign_contact_ids as (
-        select id
-        from campaign_contact
-        where
-          campaign_id = ?
-          and id > ?
-          and exists (
-            select 1
-            from message
-            where campaign_contact_id = campaign_contact.id
-          )
-        order by
-          id asc
-        limit ?
-      )
       select
         message.campaign_contact_id,
         message.assignment_id,
@@ -1346,10 +1331,18 @@ const processMessagesChunk = async (campaignId, lastContactId = 0) => {
         public.user.email,
         public.user.cell as user_cell
       from message
-      join campaign_contact_ids
-        on campaign_contact_ids.id = message.campaign_contact_id
       left join public.user
         on message.user_id = public.user.id
+      where campaign_contact_id in (
+        select id
+        from campaign_contact
+        where
+          campaign_id = ?
+          and id > ?
+        order by
+          id asc
+        limit ?
+      )
       order by
         campaign_contact_id asc,
         message.created_at asc
