@@ -288,11 +288,12 @@ export async function getConversations(
 
       const conversation = _.omit(firstRow, messageFields);
 
-      if (firstRow) {
+      if (firstRow.created_at) {
         conversation.updated_at = firstRow.created_at;
       }
 
       conversation.messages = contactMessages
+        .filter(messageRow => messageRow.mess_id !== null)
         // Sort ASC to display most recent _messages_ last
         .sort((messageA, messageB) => messageA.created_at - messageB.created_at)
         .map(message => {
