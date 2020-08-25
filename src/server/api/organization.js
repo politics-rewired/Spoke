@@ -259,22 +259,22 @@ export const resolvers = {
     escalatedConversationCount: async organization => {
       if (config.DISABLE_SIDEBAR_BADGES) return 0;
 
-      const subQuery = r.reader
-        .select("campaign_contact_tag.campaign_contact_id")
-        .from("campaign_contact_tag")
-        .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
-        .where({
-          "tag.organization_id": organization.id
-        })
-        .whereRaw("lower(tag.title) = 'escalated'")
-        .whereRaw(
-          "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
-        );
-
       const countQuery = r
         .reader("campaign_contact")
-        .join("assignment", "assignment.id", "campaign_contact.assignment_id")
-        .whereExists(subQuery)
+        .whereNull("assignment_id")
+        .whereNot({ message_status: "closed" })
+        .whereExists(function() {
+          this.select("campaign_contact_tag.campaign_contact_id")
+            .from("campaign_contact_tag")
+            .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
+            .where({
+              "tag.organization_id": organization.id
+            })
+            .whereRaw("lower(tag.title) = 'escalated'")
+            .whereRaw(
+              "campaign_contact_tag.campaign_contact_id = campaign_contact.id"
+            );
+        })
         .count("*");
 
       const escalatedCount = await r.parseCount(countQuery);

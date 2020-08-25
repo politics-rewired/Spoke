@@ -81,11 +81,22 @@ export class AdminIncomingMessageList extends Component {
         })
       : initialTagsFilter;
 
+    const contactsFilter = props.escalatedConvosOnly
+      ? Object.assign({}, initialContactsFilter, {
+          messageStatus: [
+            "needsResponse",
+            "needsMessage",
+            "convo",
+            "messaged"
+          ].join(",")
+        })
+      : initialContactsFilter;
+
     this.state = {
       page: 0,
       pageSize: 10,
       campaignsFilter: initialCampaignsFilter,
-      contactsFilter: initialContactsFilter,
+      contactsFilter: contactsFilter,
       assignmentsFilter: initialAssignmentsFilter,
       tagsFilter: tagsFilter,
       contactNameFilter: undefined,
