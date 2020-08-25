@@ -24,9 +24,10 @@ const makeCampaignPreviewHtml = async campaignId => {
     .where({ id: campaignId })
     .first("*");
 
-  const interactionSteps = await r
-    .reader("interaction_step")
-    .where({ campaign_id: campaignId });
+  const interactionSteps = await r.reader("interaction_step").where({
+    campaign_id: campaignId,
+    is_deleted: false
+  });
 
   const cannnedResponses = await r
     .reader("canned_response")
