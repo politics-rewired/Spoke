@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/politics-rewired/spoke/compare/v2.7.1...v2.8.0) (2020-08-25)
+
+
+### Features
+
+* allow hiding of campaign tags on archived campaigns via env var ([#713](https://github.com/politics-rewired/spoke/issues/713)) ([9de5caa](https://github.com/politics-rewired/spoke/commit/9de5caae55be19fbb47723886eb4d9e82462df93))
+
+
+### Bug Fixes
+
+* **message-review:** filter out empty messages ([#718](https://github.com/politics-rewired/spoke/issues/718)) ([0da7f0a](https://github.com/politics-rewired/spoke/commit/0da7f0a6dac71ab1655083a5c155d2f69891192a))
+* **script-preview:** exclude soft-deleted interaction steps ([#719](https://github.com/politics-rewired/spoke/issues/719)) ([2314f0c](https://github.com/politics-rewired/spoke/commit/2314f0ce68c8fdae5d05584ac153927569259af4))
+* export progress ([#712](https://github.com/politics-rewired/spoke/issues/712)) ([668b04f](https://github.com/politics-rewired/spoke/commit/668b04f437b9b21a7c21bd91084ec817b4d1e1c8))
+
 ### [2.7.1](https://github.com/politics-rewired/spoke/compare/v2.7.0...v2.7.1) (2020-08-18)
 
 
