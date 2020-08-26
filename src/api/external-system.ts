@@ -2,6 +2,7 @@ import { RelayPaginatedResponse } from "./pagination";
 import { ExternalList } from "./external-list";
 import { ExternalSurveyQuestion } from "./external-survey-question";
 import { ExternalActivistCode } from "./external-activist-code";
+import { ExternalResultCode } from "./external-result-code";
 
 export enum ExternalSystemType {
   VAN = "VAN"
@@ -20,6 +21,7 @@ export interface ExternalSystem {
   lists: RelayPaginatedResponse<ExternalList>;
   surveyQuestions: RelayPaginatedResponse<ExternalSurveyQuestion>;
   activistCodes: RelayPaginatedResponse<ExternalActivistCode>;
+  resultCodes: RelayPaginatedResponse<ExternalResultCode>;
 }
 
 export interface ExternalSystemInput {
@@ -60,6 +62,7 @@ export const schema = `
     lists(after: Cursor, first: Int): ExternalListPage!
     surveyQuestions(after: Cursor, first: Int): ExternalSurveyQuestionPage!
     activistCodes(after: Cursor, first: Int): ExternalActivistCodePage!
+    resultCodes(after: Cursor, first: Int): ExternalResultCodePage!
   }
 
   type ExternalSystemEdge {

@@ -36,5 +36,8 @@ export const refreshExternalSystem = (systemId: string) =>
     ]),
     r.knex.raw("select * from public.queue_refresh_van_activist_codes(?)", [
       systemId
+    ]),
+    r.knex.raw("select * from public.queue_refresh_van_result_codes(?)", [
+      systemId
     ])
   ]);

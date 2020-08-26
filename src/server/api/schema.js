@@ -87,6 +87,7 @@ import { resolvers as externalSystemResolvers } from "./external-system";
 import { resolvers as externalSurveyQuestionResolvers } from "./external-survey-question";
 import { resolvers as externalResponseOptionResolvers } from "./external-survey-question-response-option";
 import { resolvers as externalActivistCodeResolvers } from "./external-activist-code";
+import { resolvers as externalResultCodeResolvers } from "./external-result-code";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -3567,6 +3568,7 @@ export const resolvers = {
   ...externalSurveyQuestionResolvers,
   ...externalResponseOptionResolvers,
   ...externalActivistCodeResolvers,
+  ...externalResultCodeResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },
