@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/politics-rewired/spoke/compare/v2.8.0...v2.9.0) (2020-08-26)
+
+
+### Features
+
+* **message-review:** add 'end conversation' button ([46958d9](https://github.com/politics-rewired/spoke/commit/46958d936882598d5b1d9b9bf0a2bbbe1b71e805))
+
+
+### Bug Fixes
+
+* **admin:** fix escalated conversation count ([3e022b2](https://github.com/politics-rewired/spoke/commit/3e022b2ea5ca985a9738e65abce6623eefdedb88))
+
 ## [2.8.0](https://github.com/politics-rewired/spoke/compare/v2.7.1...v2.8.0) (2020-08-25)
 
 
