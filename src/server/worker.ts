@@ -9,6 +9,7 @@ import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 import fetchVANSurveyQuestions from "./tasks/fetch-van-survey-questions";
+import fetchVANActivistCodes from "./tasks/fetch-van-activist-codes";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -40,6 +41,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["release-stale-replies"] = releaseStaleReplies;
   m.taskList!["handle-delivery-report"] = handleDeliveryReport;
   m.taskList!["van-get-survey-questions"] = fetchVANSurveyQuestions;
+  m.taskList!["van-get-activist-codes"] = fetchVANActivistCodes;
 
   m.cronJobs!.push({
     name: "release-stale-replies",

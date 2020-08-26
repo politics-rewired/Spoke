@@ -23,6 +23,7 @@ import { schema as externalSystemSchema } from "./external-system";
 import { schema as externalListSchema } from "./external-list";
 import { schema as externalSurveyQuestionSchema } from "./external-survey-question";
 import { schema as externalResponseOptionSchema } from "./external-survey-question-response-option";
+import { schema as externalActivistCodeSchema } from "./external-activist-code";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -358,5 +359,6 @@ export const schema = [
   externalSystemSchema,
   externalListSchema,
   externalSurveyQuestionSchema,
-  externalResponseOptionSchema
+  externalResponseOptionSchema,
+  externalActivistCodeSchema
 ];

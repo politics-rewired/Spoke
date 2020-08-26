@@ -45,6 +45,15 @@ export const resolvers = {
         .reader("external_survey_question")
         .where({ system_id: system.id });
       return formatPage(query, { after, first, primaryColumn: "created_at" });
+    },
+    activistCodes: async (
+      system: ExternalSystem,
+      { after, first }: RelayPageArgs
+    ) => {
+      const query = r
+        .reader("external_activist_code")
+        .where({ system_id: system.id });
+      return formatPage(query, { after, first, primaryColumn: "created_at" });
     }
   }
 };
