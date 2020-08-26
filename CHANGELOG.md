@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.1](https://github.com/politics-rewired/spoke/compare/v2.9.0...v2.9.1) (2020-08-26)
+
+
+### Bug Fixes
+
+* **message-review:** exclude archived and opted-out from escalated count ([dc36b2c](https://github.com/politics-rewired/spoke/commit/dc36b2c45fb00d43019ebaee548b66ed12422b78))
+
 ## [2.9.0](https://github.com/politics-rewired/spoke/compare/v2.8.0...v2.9.0) (2020-08-26)
 
 
