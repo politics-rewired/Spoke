@@ -33,8 +33,16 @@ exports.up = function(knex) {
       short_name text,
       script_question text,
       status external_question_type,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
       primary key (external_id, system_id)
     );
+
+    create trigger _500_external_survey_question_updated_at
+      before update
+      on public.external_survey_question
+      for each row
+      execute procedure universal_updated_at();
 
     create table public.external_survey_question_response_option (
       system_id uuid not null references external_system(id),
@@ -43,9 +51,17 @@ exports.up = function(knex) {
       name text,
       medium_name text,
       short_name text,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
       primary key (external_id, external_survey_question_id, system_id),
       foreign key (external_survey_question_id, system_id) references external_survey_question(external_id, system_id)
     );
+
+    create trigger _500_external_survey_question_response_option_updated_at
+      before update
+      on public.external_survey_question_response_option
+      for each row
+      execute procedure universal_updated_at();
 
     create function public.insert_van_survey_questions(payload json, result json, context json) returns void as $$
     begin
