@@ -1,23 +1,4 @@
 exports.up = function(knex) {
-  // Using internal IDs may be preferable to composite primary keys
-
-  // return knex.schema.raw(`
-  //   create table public.external_survey_question (
-  //     id uuid not null default uuid_generate_v1mc(),
-  //     system_id uuid not null references external_system(id),
-  //     external_id integer nul null,
-  //     primary key (id),
-  //     unique (system_id, external_id)
-  //   );
-
-  //   create table public.external_survey_question_response_option (
-  //     id uuid not null default uuid_generate_v1mc(),
-  //     external_survey_question_id uuid not null references external_survey_question(id),
-  //     system_id uuid not null references external_s,
-  //     primary key (id),
-  //   )
-  // `);
-
   return knex.schema.raw(`
     create type external_question_type as enum ('active', 'archived', 'inactive');
 
