@@ -1,5 +1,6 @@
 import { RelayPaginatedResponse } from "./pagination";
 import { ExternalList } from "./external-list";
+import { ExternalSurveyQuestion } from "./external-survey-question";
 
 export enum ExternalSystemType {
   VAN = "VAN"
@@ -16,6 +17,7 @@ export interface ExternalSystem {
   updatedAt: string;
   syncedAt?: string;
   lists: RelayPaginatedResponse<ExternalList>;
+  surveyQuestions: RelayPaginatedResponse<ExternalSurveyQuestion>;
 }
 
 export interface ExternalSystemInput {
@@ -48,6 +50,7 @@ export const schema = `
     updatedAt: String!
     syncedAt: String
     lists(after: Cursor, first: Int): ExternalListPage!
+    surveyQuestions(after: Cursor, first: Int): ExternalSurveyQuestionPage!
   }
 
   type ExternalSystemEdge {

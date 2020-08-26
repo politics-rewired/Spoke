@@ -21,6 +21,8 @@ import { schema as paginationSchema } from "./pagination";
 import { schema as membershipSchema } from "./organization-membership";
 import { schema as externalSystemSchema } from "./external-system";
 import { schema as externalListSchema } from "./external-list";
+import { schema as externalSurveyQuestionSchema } from "./external-survey-question";
+import { schema as externalResponseOptionSchema } from "./external-survey-question-response-option";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -354,5 +356,7 @@ export const schema = [
   teamSchema,
   trollbotSchema,
   externalSystemSchema,
-  externalListSchema
+  externalListSchema,
+  externalSurveyQuestionSchema,
+  externalResponseOptionSchema
 ];

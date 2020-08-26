@@ -36,6 +36,15 @@ export const resolvers = {
     lists: async (system: ExternalSystem, { after, first }: RelayPageArgs) => {
       const query = r.reader("external_list").where({ system_id: system.id });
       return formatPage(query, { after, first, primaryColumn: "created_at" });
+    },
+    surveyQuestions: async (
+      system: ExternalSystem,
+      { after, first }: RelayPageArgs
+    ) => {
+      const query = r
+        .reader("external_survey_question")
+        .where({ system_id: system.id });
+      return formatPage(query, { after, first, primaryColumn: "created_at" });
     }
   }
 };

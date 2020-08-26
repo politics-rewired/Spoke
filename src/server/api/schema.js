@@ -84,6 +84,8 @@ import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
 import { resolvers as externalListResolvers } from "./external-list";
 import { resolvers as externalSystemResolvers } from "./external-system";
+import { resolvers as externalSurveyQuestionResolvers } from "./external-survey-question";
+import { resolvers as externalResponseOptionResolvers } from "./external-survey-question-response-option";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -3561,6 +3563,8 @@ export const resolvers = {
   ...trollbotResolvers,
   ...externalListResolvers,
   ...externalSystemResolvers,
+  ...externalSurveyQuestionResolvers,
+  ...externalResponseOptionResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },
