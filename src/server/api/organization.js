@@ -262,6 +262,10 @@ export const resolvers = {
       const countQuery = r
         .reader("campaign_contact")
         .whereNull("assignment_id")
+        .where({
+          archived: false,
+          is_opted_out: false
+        })
         .whereNot({ message_status: "closed" })
         .whereExists(function() {
           this.select("campaign_contact_tag.campaign_contact_id")
