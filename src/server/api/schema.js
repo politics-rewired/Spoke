@@ -19,6 +19,7 @@ import { TextRequestType } from "../../api/organization";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
+import { refreshExternalSystem } from "../lib/external-systems";
 import {
   assignTexters,
   exportCampaign,
@@ -3171,9 +3172,7 @@ const rootMutations = {
         .returning("*");
 
       // Kick off initial list load
-      await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
-        created.id
-      ]);
+      await refreshExternalSystem(externalSystemId);
 
       return created;
     },
@@ -3224,9 +3223,7 @@ const rootMutations = {
       // Completely refresh external lists after auth credentials change to make sure we're
       // not caching lists the new credentials do not have access to
       if (authDidChange) {
-        await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
-          savedSystem.id
-        ]);
+        await refreshExternalSystem(externalSystemId);
       }
 
       return updated;
@@ -3239,9 +3236,7 @@ const rootMutations = {
 
       await accessRequired(user, externalSystem.organization_id, "ADMIN");
 
-      await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
-        externalSystemId
-      ]);
+      await refreshExternalSystem(externalSystemId);
 
       return true;
     }
