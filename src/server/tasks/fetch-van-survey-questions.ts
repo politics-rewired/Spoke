@@ -1,40 +1,22 @@
 import { Task } from "pg-compose";
-import { SuperAgentRequest, get } from "superagent";
+import { get } from "superagent";
 
-import { config } from "../../config";
-
-interface VanAuthPayload {
-  username: string;
-  api_key: string;
-}
+import {
+  PaginatedVanResponse,
+  VanAuthPayload,
+  VANDataCollectionStatus,
+  withVan
+} from "../lib/external-systems";
 
 interface GetSurveyQuestionsPayload extends VanAuthPayload {
   van_system_id: string;
 }
-
-interface PaginatedVanResponse<T> {
-  items: T[];
-  count: number;
-  nextPageLink: string;
-}
-
-const withVan = (van: VanAuthPayload) => (request: SuperAgentRequest) => {
-  request.auth(van.username, `${van.api_key}|0`, { type: "basic" });
-  request.url = `${config.VAN_BASE_URL}${request.url}`;
-  return request;
-};
 
 export interface VANSurveyQuestionResponseOption {
   surveyResponseId: number;
   name: string;
   mediumName: string;
   shortName: string;
-}
-
-export enum VANSurveyQuestionStatus {
-  Active = "Active",
-  Archived = "Archived",
-  Inactive = "Inactive"
 }
 
 export interface VANSurveyQuestion {
@@ -45,7 +27,7 @@ export interface VANSurveyQuestion {
   mediumName: string;
   shortName: string;
   scriptQuestion: string;
-  status: VANSurveyQuestionStatus;
+  status: VANDataCollectionStatus;
   responses: VANSurveyQuestionResponseOption[];
 }
 

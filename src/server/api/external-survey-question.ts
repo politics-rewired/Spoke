@@ -1,13 +1,7 @@
 import { sqlResolvers } from "./lib/utils";
 import { formatPage } from "./lib/pagination";
 import { r } from "../models";
-import { RelayPageArgs } from "./types";
-
-export enum ExternalSurveyQuestionStatus {
-  Active = "active",
-  Archived = "archived",
-  Inactive = "inactive"
-}
+import { RelayPageArgs, ExternalDataCollectionStatus } from "./types";
 
 export interface ExternalSurveyQuestion {
   system_id: string;
@@ -18,7 +12,7 @@ export interface ExternalSurveyQuestion {
   medium_name: string;
   short_name: string;
   script_question: string;
-  status: ExternalSurveyQuestionStatus;
+  status: ExternalDataCollectionStatus;
   created_at: string;
   updated_at: string;
 }

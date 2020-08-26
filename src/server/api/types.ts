@@ -15,6 +15,12 @@ export type RequestHandlerFactory = () => RequestHandler;
 // Database record types
 // ------------------------------------
 
+export enum ExternalDataCollectionStatus {
+  Active = "active",
+  Archived = "archived",
+  Inactive = "inactive"
+}
+
 export interface MessagingServiceRecord {
   messaging_service_sid: string;
   organization_id: number;

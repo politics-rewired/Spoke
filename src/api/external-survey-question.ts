@@ -1,11 +1,6 @@
+import { ExternalDataCollectionStatus } from "./types";
 import { RelayPaginatedResponse } from "./pagination";
 import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
-
-export enum ExternalSurveyQuestionStatus {
-  ACTIVE = "ACTIVE",
-  ARCHIVED = "ARCHIVED",
-  INACTIVE = "INACTIVE"
-}
 
 export interface ExternalSurveyQuestion {
   id: string;
@@ -17,19 +12,13 @@ export interface ExternalSurveyQuestion {
   mediumName: string;
   shortName: string;
   scriptQuestion: string;
-  status: ExternalSurveyQuestionStatus;
+  status: ExternalDataCollectionStatus;
   createdAt: string;
   updatedAt: string;
   responses: RelayPaginatedResponse<ExternalSurveyQuestionResponseOption>;
 }
 
 export const schema = `
-  enum ExternalSurveyQuestionStatus {
-    ACTIVE
-    ARCHIVED
-    INACTIVE
-  }
-
   type ExternalSurveyQuestion {
     id: String!
     systemId: String!
@@ -40,7 +29,7 @@ export const schema = `
     mediumName: String!
     shortName: String!
     scriptQuestion: String!
-    status: ExternalSurveyQuestionStatus!
+    status: ExternalDataCollectionStatus!
     createdAt: String!
     updatedAt: String!
     responseOptions(after: Cursor, first: Int): ExternalSurveyQuestionResponseOptionPage!

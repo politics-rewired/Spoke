@@ -31,6 +31,12 @@ export const schema = `
   enum ExternalSystemType {
     VAN
   }
+
+  enum ExternalDataCollectionStatus {
+    ACTIVE
+    ARCHIVED
+    INACTIVE
+  }
   
   input ExternalSystemInput {
     name: String!
