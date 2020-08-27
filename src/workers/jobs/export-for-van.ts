@@ -66,7 +66,7 @@ export const exportForVan = async (job: JobRequestRecord) => {
           limit ?
         )
         select
-          distinct on (cc.VAN_ID) VAN_ID,
+          cc.VAN_ID,
           cc.id as campaign_contact_id,
           cc.cell,
           cc.first_name,
@@ -78,6 +78,7 @@ export const exportForVan = async (job: JobRequestRecord) => {
           to_char(aqr.created_at,'MM-DD-YYYY') as date
         from campaign_contact_ids cc
         left join all_question_response aqr on cc.id = aqr.campaign_contact_id
+        order by cc.id asc
       `,
       [job.campaign_id, lastContactId, CHUNK_SIZE]
     );
