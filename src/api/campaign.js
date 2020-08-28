@@ -66,6 +66,7 @@ export const schema = `
     createdAt: Date
     previewUrl: String
     landlinesFiltered: Boolean!
+    externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
   }
 
   type CampaignsList {

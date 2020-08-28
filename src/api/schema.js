@@ -25,6 +25,7 @@ import { schema as externalSurveyQuestionSchema } from "./external-survey-questi
 import { schema as externalResponseOptionSchema } from "./external-survey-question-response-option";
 import { schema as externalActivistCodeSchema } from "./external-activist-code";
 import { schema as externalResultCodeSchema } from "./external-result-code";
+import { schema as externalSyncConfigSchema } from "./external-sync-config";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -362,5 +363,6 @@ export const schema = [
   externalSurveyQuestionSchema,
   externalResponseOptionSchema,
   externalActivistCodeSchema,
-  externalResultCodeSchema
+  externalResultCodeSchema,
+  externalSyncConfigSchema
 ];

@@ -1,5 +1,6 @@
 import { config } from "../../config";
 import { sqlResolvers } from "./lib/utils";
+import { formatPage } from "./lib/pagination";
 import { r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
@@ -463,6 +464,12 @@ export const resolvers = {
       await accessRequired(user, organizaitonId, "ADMIN");
       const token = symmetricEncrypt(`${campaign.id}`);
       return token;
+    },
+    externalSyncConfigurations: async (campaign, { after, first }) => {
+      const query = r
+        .reader("external_sync_question_response_configuration")
+        .where({ campaign_id: campaign.id });
+      return formatPage(query, { after, first, primaryColumn: "compound_id" });
     }
   }
 };
