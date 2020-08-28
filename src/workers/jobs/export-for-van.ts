@@ -72,7 +72,7 @@ export const exportForVan = async (job: JobRequestRecord) => {
            cc.first_name,
            cc.last_name,
            coalesce(result_values.value, 'canvassed, no response') as value,
-           to_char(result_values.created_at,'MM-DD-YYYY') as date
+           to_char(cc.created_at,'MM-DD-YYYY') as date
          from campaign_contact_ids cc
          left join (
            select campaign_contact_id, value, created_at
