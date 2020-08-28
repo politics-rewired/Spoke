@@ -66,19 +66,25 @@ export const exportForVan = async (job: JobRequestRecord) => {
           limit ?
         )
         select
-          cc.VAN_ID,
-          cc.id as campaign_contact_id,
-          cc.cell,
-          cc.first_name,
-          cc.last_name,
-          (case
-            when aqr.value is null then 'canvassed, no response'
-            else aqr.value
-          end) as value,
-          to_char(aqr.created_at,'MM-DD-YYYY') as date
-        from campaign_contact_ids cc
-        left join all_question_response aqr on cc.id = aqr.campaign_contact_id
-        order by cc.id asc
+           cc.VAN_ID,
+           cc.id as campaign_contact_id,
+           cc.cell,
+           cc.first_name,
+           cc.last_name,
+           coalesce(result_values.value, 'canvassed, no response') as value,
+           to_char(result_values.created_at,'MM-DD-YYYY') as date
+         from campaign_contact_ids cc
+         left join all_question_response aqr on cc.id = aqr.campaign_contact_id
+         left join (
+           select campaign_contact_id, value, created_at
+           from all_question_response
+           union
+           select campaign_contact_id, title as value, cct.created_at
+           from campaign_contact_tag cct
+           join tag on cct.tag_id = tag.id
+         ) result_values on result_values.campaign_contact_id = cc.id
+         group by 1, 2, 3, 4, 5, 6, 7
+         order by cc.id asc;
       `,
       [job.campaign_id, lastContactId, CHUNK_SIZE]
     );
