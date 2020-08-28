@@ -204,6 +204,7 @@ const makeQueries = (jobTypes: string[]) => ({
             id
             basics
             textingHours
+            integration
             contacts
             autoassign
           }

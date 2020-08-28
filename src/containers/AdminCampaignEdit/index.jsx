@@ -31,6 +31,7 @@ import CampaignCannedResponsesForm from "./sections/CampaignCannedResponsesForm"
 import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
 import CampaignAutoassignModeForm from "./sections/CampaignAutoassignModeForm";
 import CampaignTeamsForm from "./sections/CampaignTeamsForm";
+import CampaignIntegrationForm from "./sections/CampaignIntegrationForm";
 
 const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
 
@@ -362,6 +363,16 @@ class AdminCampaignEdit extends React.Component {
         content: CampaignTextingHoursForm,
         isStandalone: true,
         keys: ["textingHoursStart", "textingHoursEnd", "timezone"],
+        checkCompleted: () => true,
+        blocksStarting: false,
+        expandAfterCampaignStarts: true,
+        expandableBySuperVolunteers: false
+      },
+      {
+        title: "Integration",
+        content: CampaignIntegrationForm,
+        isStandalone: true,
+        keys: ["externalSystem"],
         checkCompleted: () => true,
         blocksStarting: false,
         expandAfterCampaignStarts: true,

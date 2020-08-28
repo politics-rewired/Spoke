@@ -180,6 +180,7 @@ export const resolvers = {
       campaign.textingHoursStart !== null &&
       campaign.textingHoursEnd !== null &&
       campaign.timezone !== null,
+    integration: () => true,
     contacts: campaign =>
       r
         .reader("campaign_contact")

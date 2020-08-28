@@ -94,6 +94,7 @@ const rootSchema = `
     logoImageUrl: String
     primaryColor: String
     introHtml: String
+    externalSystemId: String
     useDynamicAssignment: Boolean
     contacts: [CampaignContactInput]
     contactsFile: Upload
@@ -255,6 +256,7 @@ const rootSchema = `
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
     trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
     trollTokens(organizationId: String!): [TrollTrigger]
+    externalSystem(systemId: String!): ExternalSystem!
     externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!
     externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
   }

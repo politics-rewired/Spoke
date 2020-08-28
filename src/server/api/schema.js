@@ -188,7 +188,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     textingHoursEnd,
     isAutoassignEnabled,
     repliesStaleAfter,
-    timezone
+    timezone,
+    externalSystemId
   } = campaign;
 
   const organizationId = origCampaignRecord.organization_id;
@@ -207,7 +208,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_end: textingHoursEnd,
     is_autoassign_enabled: isAutoassignEnabled,
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
-    timezone
+    timezone,
+    external_system_id: externalSystemId
   };
 
   Object.keys(campaignUpdates).forEach(key => {
@@ -3519,6 +3521,16 @@ const rootResolvers = {
         token: t.token,
         organizationId
       }));
+    },
+    externalSystem: async (_, { systemId }, { user }) => {
+      const system = await r
+        .reader("external_system")
+        .where({ id: systemId })
+        .first();
+
+      await accessRequired(user, system.organization_id, "ADMIN");
+
+      return system;
     },
     externalSystems: async (_, { organizationId, after, first }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");

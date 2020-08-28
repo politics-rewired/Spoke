@@ -30,6 +30,7 @@ export const schema = `
     id: ID!
     basics: Boolean!
     textingHours: Boolean!
+    integration: Boolean!
     contacts: Boolean!
     autoassign: Boolean!
   }
