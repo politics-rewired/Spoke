@@ -56,7 +56,8 @@ export const exportForVan = async (job: JobRequestRecord) => {
             cell,
             first_name,
             last_name,
-            ${vanIdSelector} as VAN_ID
+            ${vanIdSelector} as VAN_ID,
+            created_at
           from campaign_contact cc
           where
             campaign_id = ?
@@ -66,18 +67,30 @@ export const exportForVan = async (job: JobRequestRecord) => {
           limit ?
         )
         select
-          distinct on (cc.VAN_ID) VAN_ID,
-          cc.id as campaign_contact_id,
-          cc.cell,
-          cc.first_name,
-          cc.last_name,
-          (case
-            when aqr.value is null then 'canvassed, no response'
-            else aqr.value
-          end) as value,
-          to_char(aqr.created_at,'MM-DD-YYYY') as date
-        from campaign_contact_ids cc
-        left join all_question_response aqr on cc.id = aqr.campaign_contact_id
+           cc.VAN_ID,
+           cc.id as campaign_contact_id,
+           cc.cell,
+           cc.first_name,
+           cc.last_name,
+           coalesce(result_values.value, 'canvassed, no response') as value,
+           to_char(cc.created_at,'MM-DD-YYYY') as date
+         from campaign_contact_ids cc
+         left join (
+           select
+            question_response.campaign_contact_id,
+            interaction_step.question || ': ' || question_response.value as value
+           from question_response
+           join interaction_step on 
+             question_response.interaction_step_id = interaction_step.id
+           union
+           select
+            campaign_contact_id,
+            title as value
+           from campaign_contact_tag cct
+           join tag on cct.tag_id = tag.id
+         ) result_values on result_values.campaign_contact_id = cc.id
+         group by 1, 2, 3, 4, 5, 6, 7
+         order by cc.id asc;
       `,
       [job.campaign_id, lastContactId, CHUNK_SIZE]
     );
