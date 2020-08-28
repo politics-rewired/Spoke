@@ -76,10 +76,16 @@ export const exportForVan = async (job: JobRequestRecord) => {
            to_char(cc.created_at,'MM-DD-YYYY') as date
          from campaign_contact_ids cc
          left join (
-           select campaign_contact_id, value, created_at
+           select
+            question_response.campaign_contact_id,
+            interaction_step.question || ': ' || question_response.value
            from question_response
+           join interaction_step on 
+             question_response.interaction_step_id = interaction_step.id
            union
-           select campaign_contact_id, title as value, cct.created_at
+           select
+            campaign_contact_id,
+            title as value
            from campaign_contact_tag cct
            join tag on cct.tag_id = tag.id
          ) result_values on result_values.campaign_contact_id = cc.id
