@@ -7,6 +7,8 @@ import { getUsers } from "./user";
 import { memoizer, cacheOpts } from "../memoredis";
 import { accessRequired } from "./errors";
 import { symmetricEncrypt } from "./lib/crypto";
+import { emptyRelayPage } from "../../api/pagination";
+import { ExternalSyncReadinessState } from "../../api/campaign";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -465,7 +467,31 @@ export const resolvers = {
       const token = symmetricEncrypt(`${campaign.id}`);
       return token;
     },
+    externalSystem: async campaign =>
+      campaign.external_system_id
+        ? r
+            .reader("external_system")
+            .where({ id: campaign.external_system_id })
+            .first()
+        : null,
+    syncReadiness: async campaign => {
+      if (!campaign.external_system_id)
+        return ExternalSyncReadinessState.MISSING_SYSTEM;
+
+      const [{ count }] = await r
+        .reader("external_sync_question_response_configuration")
+        .where({
+          campaign_id: campaign.id,
+          is_missing: true,
+          is_required: true
+        });
+      return count > 0
+        ? ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING
+        : ExternalSyncReadinessState.READY;
+    },
     externalSyncConfigurations: async (campaign, { after, first }) => {
+      if (!campaign.external_system_id) return emptyRelayPage();
+
       const query = r
         .reader("external_sync_question_response_configuration")
         .where({ campaign_id: campaign.id });

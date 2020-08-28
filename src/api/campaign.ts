@@ -1,3 +1,9 @@
+export enum ExternalSyncReadinessState {
+  READY = "READY",
+  MISSING_SYSTEM = "MISSING_SYSTEM",
+  MISSING_REQUIRED_MAPPING = "MISSING_REQUIRED_MAPPING"
+}
+
 export const schema = `
   input CampaignsFilter {
     isArchived: Boolean
@@ -26,6 +32,12 @@ export const schema = `
     textingHours: Boolean!
     contacts: Boolean!
     autoassign: Boolean!
+  }
+
+  enum ExternalSyncReadinessState {
+    READY
+    MISSING_SYSTEM
+    MISSING_REQUIRED_MAPPING
   }
 
   type Campaign {
@@ -66,6 +78,8 @@ export const schema = `
     createdAt: Date
     previewUrl: String
     landlinesFiltered: Boolean!
+    externalSystem: ExternalSystem
+    syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
   }
 

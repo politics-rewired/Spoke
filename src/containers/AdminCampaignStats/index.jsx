@@ -18,6 +18,7 @@ import TopLineStats from "./TopLineStats";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import TexterStats from "./TexterStats";
 import VanExportModal from "./VanExportModal";
+import VanSyncModal from "./VanSyncModal";
 
 const styles = StyleSheet.create({
   container: {
@@ -61,6 +62,7 @@ class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
     exportVanOpen: false,
+    syncVanOpen: false,
     disableExportButton: false,
     disableVanExportButton: false,
     copyingCampaign: false,
@@ -91,6 +93,9 @@ class AdminCampaignStats extends React.Component {
       exportMessageOpen: true,
       disableVanExportButton: true
     });
+
+  handleOnClickVanSync = () => this.setState({ syncVanOpen: true });
+  handleDismissVanSync = () => this.setState({ syncVanOpen: false });
 
   render() {
     const { disableExportButton, disableVanExportButton } = this.state;
@@ -169,6 +174,13 @@ class AdminCampaignStats extends React.Component {
                           label={vanExportLabel}
                           disabled={isVanExportDisabled}
                           onClick={this.handleOnClickVanExport}
+                        />,
+                        // Sync to VAN
+                        <RaisedButton
+                          key="van-sync"
+                          label={"Sync to VAN"}
+                          disabled={false}
+                          onClick={this.handleOnClickVanSync}
                         />,
                         // unarchive
                         campaign.isArchived ? (
@@ -276,6 +288,12 @@ class AdminCampaignStats extends React.Component {
           open={this.state.exportVanOpen}
           onRequestClose={this.handleDismissVanExport}
           onComplete={this.handleCompleteVanExport}
+        />
+        <VanSyncModal
+          campaignId={campaignId}
+          open={this.state.syncVanOpen}
+          onRequestClose={this.handleDismissVanSync}
+          onComplete={this.handleCompleteVanSync}
         />
       </div>
     );
