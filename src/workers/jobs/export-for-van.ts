@@ -77,7 +77,7 @@ export const exportForVan = async (job: JobRequestRecord) => {
          left join all_question_response aqr on cc.id = aqr.campaign_contact_id
          left join (
            select campaign_contact_id, value, created_at
-           from all_question_response
+           from question_response
            union
            select campaign_contact_id, title as value, cct.created_at
            from campaign_contact_tag cct
