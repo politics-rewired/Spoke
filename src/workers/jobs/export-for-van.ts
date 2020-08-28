@@ -78,7 +78,7 @@ export const exportForVan = async (job: JobRequestRecord) => {
          left join (
            select
             question_response.campaign_contact_id,
-            interaction_step.question || ': ' || question_response.value
+            interaction_step.question || ': ' || question_response.value as value
            from question_response
            join interaction_step on 
              question_response.interaction_step_id = interaction_step.id
