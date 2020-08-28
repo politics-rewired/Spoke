@@ -56,7 +56,8 @@ export const exportForVan = async (job: JobRequestRecord) => {
             cell,
             first_name,
             last_name,
-            ${vanIdSelector} as VAN_ID
+            ${vanIdSelector} as VAN_ID,
+            created_at
           from campaign_contact cc
           where
             campaign_id = ?
