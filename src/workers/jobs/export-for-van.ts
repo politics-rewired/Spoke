@@ -74,7 +74,6 @@ export const exportForVan = async (job: JobRequestRecord) => {
            coalesce(result_values.value, 'canvassed, no response') as value,
            to_char(result_values.created_at,'MM-DD-YYYY') as date
          from campaign_contact_ids cc
-         left join all_question_response aqr on cc.id = aqr.campaign_contact_id
          left join (
            select campaign_contact_id, value, created_at
            from question_response
