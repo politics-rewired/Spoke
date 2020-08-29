@@ -15,7 +15,7 @@ export interface ExternalSurveyQuestion {
   status: ExternalDataCollectionStatus;
   createdAt: string;
   updatedAt: string;
-  responses: RelayPaginatedResponse<ExternalSurveyQuestionResponseOption>;
+  responseOptions: RelayPaginatedResponse<ExternalSurveyQuestionResponseOption>;
 }
 
 export const schema = `
