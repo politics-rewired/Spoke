@@ -99,10 +99,14 @@ exports.up = function(knex) {
 
     create view public.external_sync_config_question_response_targets as
       select
+        'response_option' as target_type,
+        qrro.question_response_value || '|' || qrro.interaction_step_id || '|' || qrro.campaign_id as config_id,
+        ro.system_id || '|' || ro.external_id as target_id,
         qrro.campaign_id,
         qrro.interaction_step_id,
         qrro.question_response_value,
         ro.external_survey_question_id,
+        ro.system_id,
         ro.external_id,
         null as type,
         ro.name,
@@ -120,10 +124,14 @@ exports.up = function(knex) {
           and qrro.response_option_system_id = ro.system_id
       union
       select
+        'activist_code' as target_type,
+        qrac.question_response_value || '|' || qrac.interaction_step_id || '|' || qrac.campaign_id as config_id,
+        ac.system_id || '|' || ac.external_id as target_id,
         qrac.campaign_id,
         qrac.interaction_step_id,
         qrac.question_response_value,
         null as external_survey_question_id,
+        ac.system_id,
         ac.external_id,
         ac.type,
         ac.name,
@@ -140,10 +148,14 @@ exports.up = function(knex) {
           and qrac.activist_code_system_id = ac.system_id
       union
       select
+        'result_code' as target_type,
+        qrrc.question_response_value || '|' || qrrc.interaction_step_id || '|' || qrrc.campaign_id as config_id,
+        rc.system_id || '|' || rc.external_id as target_id,
         qrrc.campaign_id,
         qrrc.interaction_step_id,
         qrrc.question_response_value,
         null as external_survey_question_id,
+        rc.system_id,
         rc.external_id,
         null as type,
         rc.name,
@@ -278,6 +290,7 @@ exports.up = function(knex) {
 
     create view public.external_sync_config_tag_targets as
       select
+        tro.tag_id || '|' || tro.system_id as compound_id,
         tro.system_id,
         tro.tag_id,
         ro.external_survey_question_id,
@@ -298,6 +311,7 @@ exports.up = function(knex) {
           and tro.system_id = ro.system_id
       union
       select
+        tac.tag_id || '|' || tac.system_id as compound_id,
         tac.system_id,
         tac.tag_id,
         null as external_survey_question_id,
@@ -317,6 +331,7 @@ exports.up = function(knex) {
           and tac.system_id = ac.system_id
       union
       select
+        trc.tag_id || '|' || trc.system_id as compound_id,
         trc.system_id,
         trc.tag_id,
         null as external_survey_question_id,

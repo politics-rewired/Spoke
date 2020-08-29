@@ -1,11 +1,45 @@
 import { r } from "../models";
 import { sqlResolvers } from "./lib/utils";
-import {
-  ExternalSyncConfigTarget,
-  isResultCode,
-  isActivistCode,
-  isResponseOption
-} from "../../api/external-sync-config";
+import { formatPage } from "./lib/pagination";
+import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
+import { ExternalActivistCode } from "./external-activist-code";
+import { ExternalResultCode } from "./external-result-code";
+
+interface ExternalSyncTargetType {
+  target_type: "response_option" | "activist_code" | "result_code";
+}
+
+export type ExternalSyncConfigTarget =
+  | ExternalResultCode
+  | ExternalActivistCode
+  | ExternalSurveyQuestionResponseOption;
+
+export function isActivistCode(
+  obj: ExternalSyncConfigTarget
+): obj is ExternalActivistCode {
+  return (
+    (obj as ExternalSyncConfigTarget & ExternalSyncTargetType).target_type ===
+    "activist_code"
+  );
+}
+
+export function isResponseOption(
+  obj: ExternalSyncConfigTarget
+): obj is ExternalSurveyQuestionResponseOption {
+  return (
+    (obj as ExternalSyncConfigTarget & ExternalSyncTargetType).target_type ===
+    "response_option"
+  );
+}
+
+export function isResultCode(
+  obj: ExternalSyncConfigTarget
+): obj is ExternalResultCode {
+  return (
+    (obj as ExternalSyncConfigTarget & ExternalSyncTargetType).target_type ===
+    "result_code"
+  );
+}
 
 export interface ExternalSyncQuestionResponseConfig {
   campaign_id: number;
@@ -31,15 +65,14 @@ export interface ExternalSyncTagConfig {
 export const resolvers = {
   ExternalSyncConfigTarget: {
     __resolveType(obj: ExternalSyncConfigTarget) {
+      if (isResultCode(obj)) {
+        return "ExternalResultCode";
+      }
       if (isActivistCode(obj)) {
         return "ExternalActivistCode";
       }
       if (isResponseOption(obj)) {
         return "ExternalSurveyQuestionResponseOption";
-      }
-      // This must come last because isResultCode() is broken
-      if (isResultCode(obj)) {
-        return "ExternalResultCode";
       }
 
       return null;

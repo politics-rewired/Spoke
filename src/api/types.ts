@@ -1,3 +1,7 @@
+export interface GraphQLType {
+  __typename: string;
+}
+
 export enum CampaignExportType {
   SPOKE = "SPOKE",
   VAN = "VAN"

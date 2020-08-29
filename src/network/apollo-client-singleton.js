@@ -3,10 +3,15 @@ import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
 import { createUploadLink } from "apollo-upload-client";
 import { onError } from "apollo-link-error";
-import { InMemoryCache, defaultDataIdFromObject } from "apollo-cache-inmemory";
+import {
+  InMemoryCache,
+  IntrospectionFragmentMatcher,
+  defaultDataIdFromObject
+} from "apollo-cache-inmemory";
 import { getMainDefinition } from "apollo-utilities";
 import omitDeep from "omit-deep-lodash";
 
+import unions from "./unions.json";
 import { eventBus, EventTypes } from "../client/events";
 
 const uploadLink = createUploadLink({
@@ -54,8 +59,13 @@ const link = cleanTypenameLink
   .concat(errorLink)
   .concat(uploadLink);
 
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData: unions
+});
+
 const cache = new InMemoryCache({
   addTypename: true,
+  fragmentMatcher,
   dataIdFromObject: object => {
     switch (object.__typename) {
       case "ExternalList":

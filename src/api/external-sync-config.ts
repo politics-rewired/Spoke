@@ -1,3 +1,4 @@
+import { GraphQLType } from "./types";
 import { ExternalResultCode } from "./external-result-code";
 import { ExternalActivistCode } from "./external-activist-code";
 import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
@@ -10,27 +11,27 @@ export type ExternalSyncConfigTarget =
 export function isActivistCode(
   obj: ExternalSyncConfigTarget
 ): obj is ExternalActivistCode {
-  return (obj as ExternalActivistCode).scriptQuestion !== undefined;
+  return (
+    (obj as ExternalActivistCode & GraphQLType).__typename ===
+    "ExternalActivistCode"
+  );
 }
 
 export function isResponseOption(
   obj: ExternalSyncConfigTarget
 ): obj is ExternalSurveyQuestionResponseOption {
   return (
-    (obj as ExternalSurveyQuestionResponseOption).externalSurveyQuestionId !==
-    undefined
+    (obj as ExternalSurveyQuestionResponseOption & GraphQLType).__typename ===
+    "ExternalSurveyQuestionResponseOption"
   );
 }
 
-// TODO: debug why this doesn't work as a standalone type predicate
 export function isResultCode(
   obj: ExternalSyncConfigTarget
 ): obj is ExternalResultCode {
   return (
-    (obj as ExternalActivistCode).scriptQuestion === undefined &&
-    (obj as ExternalSurveyQuestionResponseOption).externalSurveyQuestionId ===
-      undefined &&
-    (obj as ExternalResultCode).externalId !== undefined
+    (obj as ExternalResultCode & GraphQLType).__typename ===
+    "ExternalResultCode"
   );
 }
 
