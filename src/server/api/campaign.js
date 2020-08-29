@@ -485,7 +485,9 @@ export const resolvers = {
           campaign_id: campaign.id,
           is_missing: true,
           is_required: true
-        });
+        })
+        .count();
+
       return count > 0
         ? ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING
         : ExternalSyncReadinessState.READY;
