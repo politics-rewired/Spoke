@@ -1,3 +1,5 @@
+import gql from "graphql-tag";
+
 import { GraphQLType } from "./types";
 import { RelayPaginatedResponse } from "./pagination";
 import { ExternalResultCode } from "./external-result-code";
@@ -116,5 +118,47 @@ export const schema = `
   type ExternalSyncTagConfigPage {
     edges: [ExternalSyncTagConfigEdge!]!
     pageInfo: RelayPageInfo!
+  }
+`;
+
+export const FullListRefreshFragment = gql`
+  fragment FullListRefresh on ExternalSyncQuestionResponseConfig {
+    id
+    campaignId
+    interactionStepId
+    questionResponseValue
+    isMissing
+    isRequired
+    createdAt
+    updatedAt
+    interactionStep {
+      id
+      scriptOptions
+      questionText
+      answerOption
+      parentInteractionId
+    }
+    targets {
+      edges {
+        node {
+          ... on ExternalResultCode {
+            id
+            name
+          }
+          ... on ExternalActivistCode {
+            id
+            name
+            description
+            scriptQuestion
+            status
+          }
+          ... on ExternalSurveyQuestionResponseOption {
+            id
+            name
+            externalSurveyQuestionId
+          }
+        }
+      }
+    }
   }
 `;

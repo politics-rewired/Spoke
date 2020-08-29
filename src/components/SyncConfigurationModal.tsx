@@ -8,7 +8,10 @@ import FlatButton from "material-ui/FlatButton";
 import { loadData } from "../containers/hoc/with-operations";
 import { RelayPaginatedResponse } from "../api/pagination";
 import { ExternalSystem } from "../api/external-system";
-import { ExternalSyncQuestionResponseConfig } from "../api/external-sync-config";
+import {
+  ExternalSyncQuestionResponseConfig,
+  FullListRefreshFragment
+} from "../api/external-sync-config";
 import QuestionResponseConfig from "./QuestionResponseConfig";
 
 interface HocProps {
@@ -103,48 +106,13 @@ const queries = {
           externalSyncConfigurations {
             edges {
               node {
-                id
-                campaignId
-                interactionStepId
-                questionResponseValue
-                isMissing
-                isRequired
-                createdAt
-                updatedAt
-                interactionStep {
-                  id
-                  scriptOptions
-                  questionText
-                  answerOption
-                  parentInteractionId
-                }
-                targets {
-                  edges {
-                    node {
-                      ... on ExternalResultCode {
-                        id
-                        name
-                      }
-                      ... on ExternalActivistCode {
-                        id
-                        name
-                        description
-                        scriptQuestion
-                        status
-                      }
-                      ... on ExternalSurveyQuestionResponseOption {
-                        id
-                        name
-                        externalSurveyQuestionId
-                      }
-                    }
-                  }
-                }
+                ...FullListRefresh
               }
             }
           }
         }
       }
+      ${FullListRefreshFragment}
     `,
     options: (ownProps: OuterProps) => ({
       variables: {

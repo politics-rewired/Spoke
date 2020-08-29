@@ -25,6 +25,7 @@ import {
 import { RelayPaginatedResponse } from "../../api/pagination";
 import {
   ExternalSyncQuestionResponseConfig,
+  FullListRefreshFragment,
   isActivistCode,
   isResponseOption,
   isResultCode
@@ -208,40 +209,10 @@ const mutations = {
         $input: QuestionResponseSyncConfigInput!
       ) {
         createQuestionResponseSyncConfig(input: $input) {
-          id
-          campaignId
-          interactionStepId
-          questionResponseValue
-          isMissing
-          isRequired
-          createdAt
-          updatedAt
-          interactionStep {
-            id
-            scriptOptions
-            questionText
-            answerOption
-          }
-          targets {
-            edges {
-              node {
-                ... on ExternalResultCode {
-                  id
-                  name
-                }
-                ... on ExternalActivistCode {
-                  id
-                  name
-                }
-                ... on ExternalSurveyQuestionResponseOption {
-                  id
-                  name
-                }
-              }
-            }
-          }
+          ...FullListRefresh
         }
       }
+      ${FullListRefreshFragment}
     `,
     variables: {
       input: {
