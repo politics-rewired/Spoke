@@ -9,6 +9,7 @@ import { ExternalResultCode } from "../../../api/external-result-code";
 
 interface Props {
   resultCode: ExternalResultCode;
+  onClickDelete(): void;
 }
 
 export const ResultCodeMapping: React.SFC<Props> = props => {
@@ -17,7 +18,7 @@ export const ResultCodeMapping: React.SFC<Props> = props => {
       primaryText={props.resultCode.name}
       leftIcon={<InputIcon />}
       rightIconButton={
-        <IconButton>
+        <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />
         </IconButton>
       }

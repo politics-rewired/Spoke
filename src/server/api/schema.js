@@ -3272,6 +3272,34 @@ const rootMutations = {
         })
         .first();
     },
+    deleteQuestionResponseSyncConfig: async (_, { input }, { user }) => {
+      const { id } = input;
+      const [responseValue, iStepId, campaignId] = id.split("|");
+
+      const { organization_id } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first("organization_id");
+      await accessRequired(user, organization_id, "ADMIN");
+
+      await r
+        .knex("all_external_sync_question_response_configuration")
+        .where({
+          campaign_id: campaignId,
+          interaction_step_id: iStepId,
+          question_response_value: responseValue
+        })
+        .del();
+
+      return r
+        .knex("external_sync_question_response_configuration")
+        .where({
+          campaign_id: campaignId,
+          interaction_step_id: iStepId,
+          question_response_value: responseValue
+        })
+        .first();
+    },
     createQuestionResponseSyncTarget: async (_, { input }, { user }) => {
       const { configId, ...targets } = input;
       const [responseValue, iStepId, campaignId] = configId.split("|");
@@ -3328,6 +3356,76 @@ const rootMutations = {
             result_code_system_id: systemId,
             result_code_external_id: externalId
           });
+      }
+
+      return r
+        .knex("external_sync_question_response_configuration")
+        .where({
+          campaign_id: campaignId,
+          interaction_step_id: iStepId,
+          question_response_value: responseValue
+        })
+        .first();
+    },
+    deleteQuestionResponseSyncTarget: async (_, { input }, { user }) => {
+      const { configId, ...targets } = input;
+      const [responseValue, iStepId, campaignId] = configId.split("|");
+
+      const validKeys = [
+        "responseOptionId",
+        "activistCodeId",
+        "resultCodeId"
+      ].filter(key => targets[key] !== null && targets[key] !== undefined);
+
+      if (validKeys.length !== 1) {
+        throw new Error(
+          `Expected 1 valid sync target but got ${validKeys.length}`
+        );
+      }
+      const validKey = validKeys[0];
+
+      if (validKey === "responseOptionId") {
+        const [systemId, questionId, responseOptionId] = targets[
+          validKey
+        ].split("|");
+        await r
+          .knex("public.external_sync_config_question_response_response_option")
+          .where({
+            campaign_id: campaignId,
+            interaction_step_id: iStepId,
+            question_response_value: responseValue,
+            response_option_system_id: systemId,
+            response_option_question_id: questionId,
+            response_option_external_id: responseOptionId
+          })
+          .del();
+      }
+      if (validKey === "activistCodeId") {
+        const [systemId, externalId] = targets[validKey].split("|");
+        // console.log("we out here", system_id, external_id);
+        await r
+          .knex("public.external_sync_config_question_response_activist_code")
+          .where({
+            campaign_id: campaignId,
+            interaction_step_id: iStepId,
+            question_response_value: responseValue,
+            activist_code_system_id: systemId,
+            activist_code_external_id: externalId
+          })
+          .del();
+      }
+      if (validKey === "resultCodeId") {
+        const [systemId, externalId] = targets[validKey].split("|");
+        await r
+          .knex("public.external_sync_config_question_response_result_code")
+          .where({
+            campaign_id: campaignId,
+            interaction_step_id: iStepId,
+            question_response_value: responseValue,
+            result_code_system_id: systemId,
+            result_code_external_id: externalId
+          })
+          .del();
       }
 
       return r

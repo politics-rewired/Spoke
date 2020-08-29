@@ -337,7 +337,9 @@ const rootSchema = `
     editExternalSystem(id: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
     refreshExternalSystem(externalSystemId: String!): Boolean!
     createQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
+    deleteQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
     createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncQuestionResponseConfig!
+    deleteQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncQuestionResponseConfig!
   }
 
   schema {

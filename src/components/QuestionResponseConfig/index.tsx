@@ -23,6 +23,7 @@ import {
 } from "material-ui/styles/colors";
 
 import { RelayPaginatedResponse } from "../../api/pagination";
+import { QuestionResponseSyncTargetInput } from "../../api/types";
 import {
   ExternalSyncQuestionResponseConfig,
   FullListRefreshFragment,
@@ -43,6 +44,10 @@ interface HocProps {
   data: {};
   mutations: {
     createConfig(): ApolloQueryResult<any>;
+    deleteConfig(): ApolloQueryResult<any>;
+    deleteTarget(
+      payload: Omit<QuestionResponseSyncTargetInput, "configId">
+    ): ApolloQueryResult<any>;
   };
 }
 
@@ -73,7 +78,28 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
       console.error(err);
     }
   };
-  handleOnClickDeleteConfig = () => console.log("Delete the config");
+  handleOnClickDeleteConfig = async () => {
+    try {
+      const response = await this.props.mutations.deleteConfig();
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  makeHandleOnClickDeleteTarget = (
+    targetId: string,
+    type: keyof Omit<QuestionResponseSyncTargetInput, "configId">
+  ) => async () => {
+    try {
+      const response = await this.props.mutations.deleteTarget({
+        [type]: targetId
+      });
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   handleOnClickAddMapping = () => this.setState({ isAddMappingOpen: true });
   handleOnDismissAddMapping = () => this.setState({ isAddMappingOpen: false });
@@ -151,6 +177,10 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                           key={target.id}
                           responseOption={target}
                           surveyQuestions={surveyQuestions}
+                          onClickDelete={this.makeHandleOnClickDeleteTarget(
+                            target.id,
+                            "responseOptionId"
+                          )}
                         />
                       );
                     } else if (isActivistCode(target)) {
@@ -158,6 +188,10 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                         <ActivistCodeMapping
                           key={target.id}
                           activistCode={target}
+                          onClickDelete={this.makeHandleOnClickDeleteTarget(
+                            target.id,
+                            "activistCodeId"
+                          )}
                         />
                       );
                     } else if (isResultCode(target)) {
@@ -165,6 +199,10 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                         <ResultCodeMapping
                           key={target.id}
                           resultCode={target}
+                          onClickDelete={this.makeHandleOnClickDeleteTarget(
+                            target.id,
+                            "resultCodeId"
+                          )}
                         />
                       );
                     }
@@ -217,6 +255,43 @@ const mutations = {
     variables: {
       input: {
         id: ownProps.config.id
+      }
+    }
+  }),
+  deleteConfig: (ownProps: InnerProps) => () => ({
+    mutation: gql`
+      mutation deleteQuestionResponseSyncConfig(
+        $input: QuestionResponseSyncConfigInput!
+      ) {
+        deleteQuestionResponseSyncConfig(input: $input) {
+          ...FullListRefresh
+        }
+      }
+      ${FullListRefreshFragment}
+    `,
+    variables: {
+      input: {
+        id: ownProps.config.id
+      }
+    }
+  }),
+  deleteTarget: (ownProps: InnerProps) => (
+    input: Omit<QuestionResponseSyncTargetInput, "configId">
+  ) => ({
+    mutation: gql`
+      mutation deleteQuestionResponseSyncTarget(
+        $input: QuestionResponseSyncTargetInput!
+      ) {
+        deleteQuestionResponseSyncTarget(input: $input) {
+          ...FullListRefresh
+        }
+      }
+      ${FullListRefreshFragment}
+    `,
+    variables: {
+      input: {
+        configId: ownProps.config.id,
+        ...input
       }
     }
   })

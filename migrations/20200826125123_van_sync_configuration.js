@@ -61,9 +61,9 @@ exports.up = function(knex) {
 
       primary key (question_response_value, interaction_step_id, campaign_id),
       constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
-        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id),
+        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
       constraint result_code_fk foreign key (result_code_external_id, result_code_system_id)
-        references public.external_result_code(external_id, system_id)
+        references public.external_result_code(external_id, system_id) on delete cascade
     );
 
     create table public.external_sync_config_question_response_activist_code (
@@ -75,9 +75,9 @@ exports.up = function(knex) {
 
       primary key (question_response_value, interaction_step_id, campaign_id),
       constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
-        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id),
+        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
       constraint activist_code_fk foreign key (activist_code_external_id, activist_code_system_id)
-        references public.external_activist_code(external_id, system_id)
+        references public.external_activist_code(external_id, system_id) on delete cascade
     );
 
     create table public.external_sync_config_question_response_response_option (
@@ -90,9 +90,9 @@ exports.up = function(knex) {
 
       primary key (question_response_value, interaction_step_id, campaign_id),
       constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
-        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id),
+        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
       constraint activist_code_fk foreign key (response_option_external_id, response_option_question_id, response_option_system_id)
-        references public.external_survey_question_response_option(external_id, external_survey_question_id, system_id)
+        references public.external_survey_question_response_option(external_id, external_survey_question_id, system_id) on delete cascade
     );
 
     create view public.external_sync_config_question_response_targets as

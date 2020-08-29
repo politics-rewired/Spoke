@@ -9,6 +9,7 @@ import { ExternalActivistCode } from "../../../api/external-activist-code";
 
 interface Props {
   activistCode: ExternalActivistCode;
+  onClickDelete(): void;
 }
 
 export const ActivistCodeMapping: React.SFC<Props> = props => {
@@ -18,7 +19,7 @@ export const ActivistCodeMapping: React.SFC<Props> = props => {
       secondaryText={props.activistCode.type}
       leftIcon={<LocalActivityIcon />}
       rightIconButton={
-        <IconButton>
+        <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />
         </IconButton>
       }

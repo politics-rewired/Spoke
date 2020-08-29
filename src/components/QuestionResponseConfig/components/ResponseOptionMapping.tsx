@@ -12,6 +12,7 @@ import { ExternalSurveyQuestion } from "../../../api/external-survey-question";
 interface Props {
   responseOption: ExternalSurveyQuestionResponseOption;
   surveyQuestions: RelayPaginatedResponse<ExternalSurveyQuestion>;
+  onClickDelete(): void;
 }
 
 export const ResponseOptionMapping: React.SFC<Props> = props => {
@@ -25,7 +26,7 @@ export const ResponseOptionMapping: React.SFC<Props> = props => {
       secondaryText={question && question.node.scriptQuestion}
       leftIcon={<PollIcon />}
       rightIconButton={
-        <IconButton>
+        <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />
         </IconButton>
       }
