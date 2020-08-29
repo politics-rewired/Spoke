@@ -1,12 +1,17 @@
 import React from "react";
+import { History } from "history";
+import { withRouter } from "react-router";
+import { compose } from "recompose";
 import gql from "graphql-tag";
 
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
 import { red500, green300 } from "material-ui/styles/colors";
 
-import { loadData } from "../hoc/with-operations";
 import { ExternalSyncReadinessState } from "../../api/campaign";
+import { loadData } from "../hoc/with-operations";
+import SyncConfigurationModal from "../../components/SyncConfigurationModal";
 
 interface HocProps {
   data: {
@@ -15,11 +20,13 @@ interface HocProps {
       syncReadiness: ExternalSyncReadinessState;
     };
   };
+  history: History;
   mutations: {};
 }
 
 interface OuterProps {
   open: boolean;
+  organizationId: string;
   campaignId: string;
   onRequestClose(): void;
   onComplete(): void;
@@ -28,32 +35,34 @@ interface OuterProps {
 interface InnerProps extends OuterProps, HocProps {}
 
 interface State {
-  // TODO: stub
+  isMappingOpen: boolean;
 }
 
 class VanSyncModal extends React.Component<InnerProps, State> {
-  state: State = {};
+  state: State = {
+    isMappingOpen: false
+  };
 
-  handleOnConfirm = async () => {
+  handleOnClickSetIntegration = async () => {
+    const { history, organizationId, campaignId } = this.props;
+    this.props.onComplete();
+    history.push(`/admin/${organizationId}/campaigns/${campaignId}/edit`);
+  };
+
+  handleOnClickConfigureMapping = async () =>
+    this.setState({ isMappingOpen: true });
+  handleOnDismissConfigureMapping = async () =>
+    this.setState({ isMappingOpen: false });
+
+  handleOnConfirmSync = async () => {
     const {} = this.state;
     console.log("kick off sync mutation");
     this.props.onComplete();
   };
 
-  handleOnChangeVanIdField = (
-    event: React.SyntheticEvent<{}>,
-    index: number,
-    vanIdField: string
-  ) => this.setState({ vanIdField });
-
-  handleOnToggleIncludeUnmessages = (
-    event: React.MouseEvent<{}>,
-    includeUnmessaged: boolean
-  ) => this.setState({ includeUnmessaged });
-
   render() {
-    const {} = this.state;
-    const { open, data } = this.props;
+    const { isMappingOpen } = this.state;
+    const { open, organizationId, campaignId, data } = this.props;
     const {
       campaign: { syncReadiness }
     } = data;
@@ -64,7 +73,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
         label="Sync"
         primary={true}
         disabled={syncReadiness !== ExternalSyncReadinessState.READY}
-        onClick={this.handleOnConfirm}
+        onClick={this.handleOnConfirmSync}
       />
     ];
 
@@ -101,7 +110,30 @@ class VanSyncModal extends React.Component<InnerProps, State> {
             </span>
           )}
         </p>
-        <br />
+        {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && [
+          <p key="1">Edit the Integration section of the campaign.</p>,
+          <RaisedButton
+            key="2"
+            label="Edit Campaign"
+            primary={true}
+            onClick={this.handleOnClickSetIntegration}
+          />
+        ]}
+        {syncReadiness !== ExternalSyncReadinessState.MISSING_SYSTEM && (
+          <RaisedButton
+            label="Configure Mapping"
+            primary={true}
+            onClick={this.handleOnClickConfigureMapping}
+          />
+        )}
+        {isMappingOpen && (
+          <SyncConfigurationModal
+            organizationId={organizationId}
+            campaignId={campaignId}
+            onRequestClose={this.handleOnDismissConfigureMapping}
+            onComplete={console.log}
+          />
+        )}
       </Dialog>
     );
   }
@@ -110,7 +142,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
 const queries = {
   data: {
     query: gql`
-      query getCampaignCustomFields($campaignId: String!) {
+      query getCampaignSyncReadiness($campaignId: String!) {
         campaign(id: $campaignId) {
           id
           syncReadiness
@@ -127,4 +159,7 @@ const queries = {
 
 const mutations = {};
 
-export default loadData({ queries, mutations })(VanSyncModal);
+export default compose<InnerProps, OuterProps>(
+  withRouter,
+  loadData({ queries, mutations })
+)(VanSyncModal);
