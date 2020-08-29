@@ -35,7 +35,6 @@ interface OuterProps {
   organizationId: string;
   campaignId: string;
   onRequestClose(): void;
-  onComplete(): void;
 }
 
 interface InnerProps extends OuterProps, HocProps {}
@@ -64,8 +63,11 @@ class SyncConfigurationModal extends React.Component<InnerProps> {
     // const optionalMappings = responseMappings.filter(mapping => mapping.isMissing && !mapping.isRequired);
 
     const actions = [
-      <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
-      <FlatButton label="Ok" primary={true} />
+      <FlatButton
+        label="Ok"
+        primary={true}
+        onClick={this.props.onRequestClose}
+      />
     ];
 
     return (
@@ -114,6 +116,7 @@ const queries = {
                   scriptOptions
                   questionText
                   answerOption
+                  parentInteractionId
                 }
                 targets {
                   edges {

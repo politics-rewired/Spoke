@@ -131,7 +131,6 @@ class VanSyncModal extends React.Component<InnerProps, State> {
             organizationId={organizationId}
             campaignId={campaignId}
             onRequestClose={this.handleOnDismissConfigureMapping}
-            onComplete={console.log}
           />
         )}
       </Dialog>

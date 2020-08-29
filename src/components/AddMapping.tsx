@@ -9,7 +9,13 @@ import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 
 import { RelayPaginatedResponse } from "../api/pagination";
-import { ExternalSyncQuestionResponseConfig } from "../api/external-sync-config";
+import {
+  ExternalSyncQuestionResponseConfig,
+  ExternalSyncConfigTarget,
+  isActivistCode,
+  isResponseOption,
+  isResultCode
+} from "../api/external-sync-config";
 import { ExternalSurveyQuestion } from "../api/external-survey-question";
 import { ExternalActivistCode } from "../api/external-activist-code";
 import { ExternalResultCode } from "../api/external-result-code";
@@ -35,6 +41,7 @@ interface OuterProps {
   surveyQuestions: RelayPaginatedResponse<ExternalSurveyQuestion>;
   activistCodes: RelayPaginatedResponse<ExternalActivistCode>;
   resultCodes: RelayPaginatedResponse<ExternalResultCode>;
+  existingTargets: ExternalSyncConfigTarget[];
   onRequestClose(): void;
 }
 
@@ -106,6 +113,13 @@ class AddMapping extends React.Component<InnerProps, State> {
     try {
       const response = await this.props.mutations.createTarget(validTarget);
       if (response.errors) throw response.errors;
+      this.setState({
+        type: null,
+        activistCodeId: null,
+        resultCodeId: null,
+        surveyQuestionId: null,
+        responseOptionId: null
+      });
       this.props.onRequestClose();
     } catch (err) {
       this.setState({ errorMessage: err.message });
@@ -140,7 +154,7 @@ class AddMapping extends React.Component<InnerProps, State> {
   };
 
   render() {
-    const { config } = this.props;
+    const { config, existingTargets } = this.props;
 
     const activeQuestionMaybe = this.props.surveyQuestions.edges.find(
       ({ node }) => node.id === this.state.surveyQuestionId
@@ -149,12 +163,25 @@ class AddMapping extends React.Component<InnerProps, State> {
 
     const validTarget = this.getValidTarget();
 
+    const responseOptionExists =
+      existingTargets.find(target => isResponseOption(target)) !== undefined;
+    const activistCodeExists =
+      existingTargets.find(target => isActivistCode(target)) !== undefined;
+    const resultCodeExists =
+      existingTargets.find(target => isResultCode(target)) !== undefined;
+    const isRootAnswer =
+      config && config.interactionStep.parentInteractionId === null;
+    const canMakeChanges =
+      !responseOptionExists ||
+      !activistCodeExists ||
+      !(resultCodeExists || !isRootAnswer);
+
     const actions = [
       <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
       <FlatButton
         label="Add"
         primary={true}
-        disabled={validTarget === undefined}
+        disabled={validTarget === undefined || !canMakeChanges}
         onClick={this.handleOnAddMapping}
       />
     ];
@@ -172,29 +199,42 @@ class AddMapping extends React.Component<InnerProps, State> {
           <div>
             <SelectField
               floatingLabelText="Mapping Type"
-              value={this.state.type}
+              value={canMakeChanges ? this.state.type : null}
+              autoWidth={true}
               onChange={this.handleOnChangeMappingType}
             >
               <MenuItem
                 value={MappingType.ResponseOption}
-                primaryText="Survey Response"
+                primaryText={`Survey Response${
+                  responseOptionExists ? " (already configured)" : ""
+                }`}
+                disabled={responseOptionExists}
               />
               <MenuItem
                 value={MappingType.ActivistCode}
-                primaryText="Activist Code"
+                primaryText={`Activist Code${
+                  activistCodeExists ? " (already configured)" : ""
+                }`}
+                disabled={activistCodeExists}
               />
-              {config.interactionStep.id && (
-                <MenuItem
-                  value={MappingType.ResultCode}
-                  primaryText="Result Code"
-                />
-              )}
+              <MenuItem
+                value={MappingType.ResultCode}
+                primaryText={`Result Code${
+                  resultCodeExists
+                    ? " (already configured)"
+                    : !isRootAnswer
+                      ? " (not top-level question)"
+                      : ""
+                }`}
+                disabled={resultCodeExists || !isRootAnswer}
+              />
             </SelectField>
             <br />
             {this.state.type === MappingType.ActivistCode && (
               <SelectField
                 floatingLabelText="Activist Code"
                 value={this.state.activistCodeId}
+                autoWidth={true}
                 onChange={this.handleOnChangeActivistCode}
               >
                 {this.props.activistCodes.edges.map(({ node }) => (
@@ -210,6 +250,7 @@ class AddMapping extends React.Component<InnerProps, State> {
               <SelectField
                 floatingLabelText="Result Code"
                 value={this.state.resultCodeId}
+                autoWidth={true}
                 onChange={this.handleOnChangeResultCode}
               >
                 {this.props.resultCodes.edges.map(({ node }) => (
@@ -226,6 +267,7 @@ class AddMapping extends React.Component<InnerProps, State> {
                 <SelectField
                   floatingLabelText="Survey Question"
                   value={this.state.surveyQuestionId}
+                  autoWidth={true}
                   onChange={this.handleOnChangeSurveyQuestion}
                 >
                   {this.props.surveyQuestions.edges.map(({ node }) => (
@@ -241,6 +283,7 @@ class AddMapping extends React.Component<InnerProps, State> {
                   <SelectField
                     floatingLabelText="Response Option"
                     value={this.state.responseOptionId}
+                    autoWidth={true}
                     onChange={this.handleOnChangeResponseOption}
                   >
                     {activeQuestion.responseOptions.edges.map(({ node }) => (

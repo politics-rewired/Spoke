@@ -43,7 +43,11 @@ export interface ExternalSyncQuestionResponseConfig {
   questionResponseValue: string;
   isMissing: boolean;
   isRequired: boolean;
-  interactionStep: { id: string; questionText: string };
+  interactionStep: {
+    id: string;
+    questionText: string;
+    parentInteractionId: string | null;
+  };
   targets: RelayPaginatedResponse<ExternalSyncConfigTarget> | null;
 }
 

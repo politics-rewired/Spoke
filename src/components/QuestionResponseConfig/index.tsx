@@ -92,9 +92,12 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
       questionResponseValue,
       isMissing,
       isRequired,
-      interactionStep: { questionText },
-      targets
+      interactionStep: { questionText }
     } = config;
+
+    const targets = config.targets
+      ? config.targets.edges.map(({ node }) => node)
+      : null;
 
     const avatar = isRequired ? (
       <Avatar
@@ -104,7 +107,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
       />
     ) : isMissing ? (
       <Avatar icon={<InfoIcon />} color={darkBlack} backgroundColor={grey400} />
-    ) : targets && targets.edges.length === 0 ? (
+    ) : targets && targets.length === 0 ? (
       <Avatar
         icon={<NotificationPausedIcon />}
         color={darkBlack}
@@ -138,27 +141,30 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
         {!isMissing &&
           targets !== null && (
             <CardText>
-              {targets.edges.length > 0 && (
+              {targets.length > 0 && (
                 <List>
-                  {targets.edges.map(({ node }) => {
-                    if (isResponseOption(node)) {
+                  {targets.map(target => {
+                    if (isResponseOption(target)) {
                       return (
                         <ResponseOptionMapping
-                          key={node.id}
-                          responseOption={node}
+                          key={target.id}
+                          responseOption={target}
                           surveyQuestions={surveyQuestions}
                         />
                       );
-                    } else if (isActivistCode(node)) {
+                    } else if (isActivistCode(target)) {
                       return (
                         <ActivistCodeMapping
-                          key={node.id}
-                          activistCode={node}
+                          key={target.id}
+                          activistCode={target}
                         />
                       );
-                    } else if (isResultCode(node)) {
+                    } else if (isResultCode(target)) {
                       return (
-                        <ResultCodeMapping key={node.id} resultCode={node} />
+                        <ResultCodeMapping
+                          key={target.id}
+                          resultCode={target}
+                        />
                       );
                     }
 
@@ -166,7 +172,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                   })}
                 </List>
               )}
-              {targets.edges.length === 0 && (
+              {targets.length === 0 && (
                 <p>
                   This is an explicitly empty mapping that will be skipped
                   during sync.
@@ -175,6 +181,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
               <RaisedButton
                 label="Add Mapping"
                 primary={true}
+                disabled={targets.length === 3}
                 onClick={this.handleOnClickAddMapping}
               />
             </CardText>
@@ -184,6 +191,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
           surveyQuestions={surveyQuestions}
           activistCodes={activistCodes}
           resultCodes={resultCodes}
+          existingTargets={targets || []}
           onRequestClose={this.handleOnDismissAddMapping}
         />
       </Card>
