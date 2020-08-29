@@ -1,4 +1,5 @@
 import { GraphQLType } from "./types";
+import { RelayPaginatedResponse } from "./pagination";
 import { ExternalResultCode } from "./external-result-code";
 import { ExternalActivistCode } from "./external-activist-code";
 import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
@@ -42,7 +43,8 @@ export interface ExternalSyncQuestionResponseConfig {
   questionResponseValue: string;
   isMissing: boolean;
   isRequired: boolean;
-  targets: ExternalSyncConfigTarget[] | null;
+  interactionStep: { id: string; questionText: string };
+  targets: RelayPaginatedResponse<ExternalSyncConfigTarget> | null;
 }
 
 export interface ExternalSyncTagConfig {
@@ -51,7 +53,7 @@ export interface ExternalSyncTagConfig {
   tagId: string;
   isMissing: boolean;
   isRequired: boolean;
-  targets: ExternalSyncConfigTarget[] | null;
+  targets: RelayPaginatedResponse<ExternalSyncConfigTarget> | null;
 }
 
 export const schema = `
@@ -77,7 +79,7 @@ export const schema = `
     createdAt: String
     updatedAt: String
     interactionStep: InteractionStep!
-    targets: ExternalSyncConfigTargetPage
+    targets(after: Cursor, first: Int): ExternalSyncConfigTargetPage
   }
 
   type ExternalSyncQuestionResponseConfigEdge {
@@ -99,7 +101,7 @@ export const schema = `
     createdAt: String
     updatedAt: String
     tag: Tag!
-    targets: ExternalSyncConfigTargetPage
+    targets(after: Cursor, first: Int): ExternalSyncConfigTargetPage
   }
 
   type ExternalSyncTagConfigEdge {

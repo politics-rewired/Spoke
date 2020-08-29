@@ -98,17 +98,24 @@ export const resolvers = {
     },
     interactionStep: async (qrConfig: ExternalSyncQuestionResponseConfig) =>
       r
-        .reader("interaction_step")
+        .knex("interaction_step")
         .where({ id: qrConfig.interaction_step_id })
         .first(),
-    targets: (qrConfig: ExternalSyncQuestionResponseConfig) =>
-      qrConfig.is_missing
-        ? null
-        : r.reader("external_sync_config_question_response_targets").where({
-            campaign_id: qrConfig.campaign_id,
-            interaction_step_id: qrConfig.interaction_step_id,
-            question_response_value: qrConfig.question_response_value
-          })
+    targets: async (
+      qrConfig: ExternalSyncQuestionResponseConfig,
+      { after, first }: { after: string; first: number }
+    ) => {
+      if (qrConfig.is_missing) return null;
+
+      const query = r
+        .knex("external_sync_config_question_response_targets")
+        .where({
+          campaign_id: qrConfig.campaign_id,
+          interaction_step_id: qrConfig.interaction_step_id,
+          question_response_value: qrConfig.question_response_value
+        });
+      return formatPage(query, { after, first, primaryColumn: "config_id" });
+    }
   },
   ExternalSyncTagConfig: {
     ...sqlResolvers([
@@ -126,12 +133,17 @@ export const resolvers = {
         .reader("all_tag")
         .where({ id: tagConfig.tag_id })
         .first(),
-    targets: (tagConfig: ExternalSyncTagConfig) =>
-      tagConfig.is_missing
-        ? null
-        : r.reader("external_sync_config_tag_targets").where({
-            system_id: tagConfig.system_id,
-            tag_id: tagConfig.tag_id
-          })
+    targets: (
+      tagConfig: ExternalSyncTagConfig,
+      { after, first }: { after: string; first: number }
+    ) => {
+      if (tagConfig.is_missing) return null;
+
+      const query = r.knex("external_sync_config_tag_targets").where({
+        system_id: tagConfig.system_id,
+        tag_id: tagConfig.tag_id
+      });
+      return formatPage(query, { after, first, primaryColumn: "compound_id" });
+    }
   }
 };
