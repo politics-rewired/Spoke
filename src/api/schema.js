@@ -238,6 +238,17 @@ const rootSchema = `
     vanOptions: ExportForVanInput
   }
 
+  input QuestionResponseSyncConfigInput {
+    id: String!
+  }
+
+  input QuestionResponseSyncTargetInput {
+    configId: String!
+    responseOptionId: String
+    activistCodeId: String
+    resultCodeId: String
+  }
+
   type RootQuery {
     currentUser: User
     organization(id:String!, utc:String): Organization
@@ -325,6 +336,8 @@ const rootSchema = `
     createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
     editExternalSystem(id: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
     refreshExternalSystem(externalSystemId: String!): Boolean!
+    createQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
+    createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncQuestionResponseConfig!
   }
 
   schema {

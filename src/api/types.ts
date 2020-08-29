@@ -12,3 +12,10 @@ export enum ExternalDataCollectionStatus {
   ARCHIVED = "ARCHIVED",
   INACTIVE = "INACTIVE"
 }
+
+export interface QuestionResponseSyncTargetInput {
+  configId: string;
+  responseOptionId?: string;
+  activistCodeId?: string;
+  resultCodeId?: string;
+}
