@@ -106,11 +106,11 @@ class AddMapping extends React.Component<InnerProps, State> {
     try {
       const response = await this.props.mutations.createTarget(validTarget);
       if (response.errors) throw response.errors;
+      this.props.onRequestClose();
     } catch (err) {
       this.setState({ errorMessage: err.message });
     } finally {
       this.setState({ isWorking: false });
-      this.props.onRequestClose();
     }
   };
 
