@@ -38,13 +38,11 @@ exports.up = function(knex) {
     -- Question Responses
     create table public.all_external_sync_question_response_configuration (
       campaign_id integer not null references public.campaign(id),
-      interaction_step_id integer not null,
+      interaction_step_id integer not null references public.interaction_step(id),
       question_response_value text not null,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      
-      constraint interaction_step_value_fk foreign key (question_response_value, interaction_step_id)
-        references public.all_question_response(value, interaction_step_id),
+
       primary key (question_response_value, interaction_step_id, campaign_id)
     );
 

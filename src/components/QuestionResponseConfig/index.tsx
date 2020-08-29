@@ -64,7 +64,14 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
     isAddMappingOpen: false
   };
 
-  handleOnClickCreateConfig = () => this.props.mutations.createConfig();
+  handleOnClickCreateConfig = async () => {
+    try {
+      const response = await this.props.mutations.createConfig();
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      console.error(err);
+    }
+  };
   handleOnClickDeleteConfig = () => console.log("Delete the config");
 
   handleOnClickAddMapping = () => this.setState({ isAddMappingOpen: true });
