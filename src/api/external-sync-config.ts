@@ -114,21 +114,3 @@ export const schema = `
     pageInfo: RelayPageInfo!
   }
 `;
-
-// export type ExternalSyncConfig =
-//   | ExternalSyncTagConfig
-//   | ExternalSyncQuestionResponseConfig;
-
-// const maybe = `
-//   union ExternalSyncConfig = ExternalSyncTagConfig | ExternalSyncQuestionResponseConfig
-
-//   type ExternalSyncConfigEdge {
-//     cursor: Cursor!
-//     node: ExternalSyncConfig!
-//   }
-
-//   type ExternalSyncConfigPage {
-//     edges: [ExternalSyncConfigEdge!]!
-//     pageInfo: RelayPageInfo!
-//   }
-// `;
