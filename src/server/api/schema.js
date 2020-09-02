@@ -1124,7 +1124,7 @@ const rootMutations = {
         /* allowSuperadmin=*/ true
       );
 
-      memoizer.invalidate(cacheOpts.CampaignsList.key, {
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
       });
 
