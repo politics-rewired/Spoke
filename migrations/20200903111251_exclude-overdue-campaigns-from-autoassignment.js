@@ -1,7 +1,7 @@
 
 exports.up = function(knex) {
   return knex.schema.raw(`
-    create view assignable_campaigns_with_needs_message as (
+    create or replace view assignable_campaigns_with_needs_message as (
       select *
       from assignable_campaigns
       where
@@ -22,7 +22,7 @@ exports.up = function(knex) {
 
 exports.down = function(knex) {
   return knex.schema.raw(`
-    create view assignable_campaigns_with_needs_message as (
+    create or replace view assignable_campaigns_with_needs_message as (
       select *
       from assignable_campaigns
       where exists (
