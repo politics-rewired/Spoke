@@ -70,6 +70,46 @@ export async function assignmentRequired(user, assignmentId) {
   }
 }
 
+export async function assignmentRequiredOrHasOrgRoleForCampaign(
+  user,
+  assignmentId,
+  campaignId,
+  role
+) {
+  authRequired(user);
+
+  if (user.is_superadmin) {
+    return;
+  }
+
+  const [assignment] = await r
+    .reader("assignment")
+    .where({
+      user_id: user.id,
+      id: assignmentId
+    })
+    .limit(1);
+
+  if (typeof assignment === "undefined") {
+    const [campaign] = await r
+      .reader("campaign")
+      .where({ id: campaignId })
+      .select("organization_id");
+
+    const userRole = await getUserRole({
+      userId: user.id,
+      organizationId: campaign.organization_id
+    });
+
+    const hasRole =
+      accessHierarchy.indexOf(userRole) >= accessHierarchy.indexOf(role);
+
+    if (!hasRole) {
+      throw new GraphQLError("You are not authorized to access that resource.");
+    }
+  }
+}
+
 export function superAdminRequired(user) {
   authRequired(user);
 

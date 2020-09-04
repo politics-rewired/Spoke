@@ -49,7 +49,8 @@ import {
   accessRequired,
   assignmentRequired,
   authRequired,
-  superAdminRequired
+  superAdminRequired,
+  assignmentRequiredOrHasOrgRoleForCampaign
 } from "./errors";
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
@@ -1589,7 +1590,9 @@ const rootMutations = {
       { loaders, user }
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
-      await assignmentRequired(user, contact.assignment_id);
+
+      await assignmentRequiredOrHasOrgRoleForCampaign(user, contact.assignment_id, contact.campaign_id, 'SUPERVOLUNTEER');
+
       const [campaign] = await r
         .knex("campaign_contact")
         .update({ message_status: messageStatus })
