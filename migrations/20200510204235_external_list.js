@@ -62,7 +62,7 @@ exports.up = function(knex) {
       r ->> 'cell'
     from json_array_elements(record_list) as r
      $$ language sql volatile SECURITY definer SET search_path = "public";
-    CREATE FUNCTION "public".mark_loading_job_done(payload json, result json, context json) RETURNS void as $$ select 1
+    CREATE FUNCTION "public".mark_loading_job_done(payload json, result json, context json) RETURNS void as $$
      $$ language sql volatile SECURITY definer SET search_path = "public";
     CREATE FUNCTION "public".queue_load_list_into_campaign(campaign_id integer, list_external_id integer) RETURNS void as $$ select fetch_saved_list(
       list_external_id,
