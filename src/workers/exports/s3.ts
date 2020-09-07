@@ -3,6 +3,7 @@ import stream from "stream";
 
 import { StorageBackend } from "./types";
 import { config } from "../../config";
+import logger from "../../logger";
 
 const { AWS_ENDPOINT: awsEndpoint } = config;
 
@@ -70,7 +71,12 @@ const getUploadStream = async (
     Key: key,
     Body: passThrough
   };
-  s3Client.upload(uploadParams);
+
+  // Either callback or .promise() is required to begin upload.
+  s3Client
+    .upload(uploadParams)
+    .promise()
+    .catch(err => logger.error("Error uploading to S3: ", err));
 
   return passThrough;
 };
