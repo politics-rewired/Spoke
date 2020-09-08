@@ -1,4 +1,5 @@
 import Knex from 'knex';
+import isEmpty from "lodash/isEmpty";
 
 import { config } from "../../../config";
 import logger from "../../../logger";
@@ -58,8 +59,8 @@ interface NumbersDeliveryReportPayload {
   profileId: string;
   sendingLocationId: string;
   extra?: {
-    num_segments: number;
-    num_media: number;
+    num_segments?: number;
+    num_media?: number;
   }
  };
 
@@ -243,17 +244,23 @@ export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPay
 
     // Update segment counts
     if (extra) {
-      await trx("message")
-        .update({
-          num_segments: extra.num_segments,
-          num_media: extra.num_media,
-        })
-        .where({ service_id: messageId })
-        .where((builder) =>
-          builder
-            .whereNull('num_segments')
-            .orWhereNull('num_media')
-        );
+      const payload = {};
+
+      if (extra.num_segments && extra.num_media) {
+        payload.num_segments = extra.num_segments;
+        payload.num_media = extra.num_media;
+      }
+
+      if (!isEmpty(payload)) {
+        await trx("message")
+          .update(payload)
+          .where({ service_id: messageId })
+          .where((builder) =>
+            builder
+              .whereNull('num_segments')
+              .orWhereNull('num_media')
+          );
+      }
     }
   });
 };
