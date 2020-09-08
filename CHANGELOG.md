@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.3](https://github.com/politics-rewired/spoke/compare/v2.9.2...v2.9.3) (2020-09-08)
+
+
+### Bug Fixes
+
+* skip empty delivery report updates ([5a1cb59](https://github.com/politics-rewired/spoke/commit/5a1cb59fb9f131a59dd4cf8078ecd82dde492851))
+
 ### [2.9.2](https://github.com/politics-rewired/spoke/compare/v2.9.1...v2.9.2) (2020-09-07)
 
 
