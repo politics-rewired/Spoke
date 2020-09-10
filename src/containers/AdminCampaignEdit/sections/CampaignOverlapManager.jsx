@@ -328,7 +328,7 @@ class StateWrapper extends React.Component {
     return (
       <div>
         <Toggle
-          label={"Archived Campaigns"}
+          label={"Include archived campaigns"}
           onToggle={this.handleAutoReleaseToggle}
           toggled={includeArchived}
         />
