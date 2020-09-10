@@ -6,6 +6,7 @@ import DataTable from "material-ui-datatables";
 import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
+import Toggle from "material-ui/Toggle";
 
 import { loadData } from "../../hoc/with-operations";
 import LoadingIndicator from "../../../components/LoadingIndicator";
@@ -263,14 +264,8 @@ class CampaignOverlapManager extends React.Component {
 const queries = {
   fetchCampaignOverlaps: {
     query: gql`
-      query fetchCampaignOverlaps(
-        $organizationId: String!
-        $campaignId: String!
-      ) {
-        fetchCampaignOverlaps(
-          organizationId: $organizationId
-          campaignId: $campaignId
-        ) {
+      query fetchCampaignOverlaps($input: FetchCampaignOverlapInput!) {
+        fetchCampaignOverlaps(input: $input) {
           campaign {
             id
             title
@@ -282,8 +277,10 @@ const queries = {
     `,
     options: ownProps => ({
       variables: {
-        campaignId: ownProps.campaignId,
-        organizationId: ownProps.organizationId
+        input: {
+          targetCampaignId: ownProps.campaignId,
+          includeArchived: ownProps.includeArchived
+        }
       }
     })
   }
@@ -313,7 +310,35 @@ const mutations = {
   })
 };
 
-export default loadData({
+const WrappedCampaignOverlapManager = loadData({
   queries,
   mutations
 })(CampaignOverlapManager);
+
+class StateWrapper extends React.Component {
+  state = {
+    includeArchived: false
+  }
+
+  handleAutoReleaseToggle = (_e, includeArchived) =>
+    this.setState({ includeArchived });
+
+  render() {
+    const { includeArchived } = this.state;
+    return (
+      <div>
+        <Toggle
+          label={"Archived Campaigns"}
+          onToggle={this.handleAutoReleaseToggle}
+          toggled={includeArchived}
+        />
+        <WrappedCampaignOverlapManager
+          {...this.props}
+          includeArchived={includeArchived}
+        />
+      </div>
+    );
+  }
+}
+
+export default StateWrapper;

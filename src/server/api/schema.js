@@ -3399,14 +3399,20 @@ const rootResolvers = {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
       return getUsersById(userIds);
     },
-    fetchCampaignOverlaps: async (
-      _,
-      { organizationId, campaignId },
-      { user }
-    ) => {
+    fetchCampaignOverlaps: async (_, { input }, { user }) => {
+      const { targetCampaignId: campaignId, includeArchived } = input;
+      const { organization_id: organizationId } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first(["organization_id"]);
+
       await accessRequired(user, organizationId, "ADMIN");
 
-      const { rows } = await queryCampaignOverlaps(campaignId, organizationId);
+      const { rows } = await queryCampaignOverlaps({
+        organizationId,
+        campaignId,
+        includeArchived
+      });
 
       const toReturn = rows.map(
         ({ campaign_id, count, campaign_title, last_activity }) => ({

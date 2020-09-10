@@ -7,10 +7,11 @@ import { r } from "../models";
  * @param {Knex=} knexObject - Optional Knex instance to execute query with (for use within transaction).
  */
 export const queryCampaignOverlaps = async (
-  campaignId,
-  organizationId,
+  options,
   knexObject = undefined
 ) => {
+  const { campaignId, organizationId, includeArchived } = options;
+
   if (knexObject === undefined) knexObject = r.knex;
 
   const result = await knexObject.raw(
@@ -18,7 +19,9 @@ export const queryCampaignOverlaps = async (
     with campaign_ids_in_organization as (
       select id
       from campaign
-      where organization_id = ?
+      where
+        organization_id = ?
+        ${includeArchived ? "" : "and is_archived = false"}
     )
     select
       overlapping_cc.campaign_id,

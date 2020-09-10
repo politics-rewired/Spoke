@@ -176,6 +176,11 @@ const rootSchema = `
     found: Boolean
   }
 
+  input FetchCampaignOverlapInput {
+    targetCampaignId: String!
+    includeArchived: Boolean!
+  }
+
   type FetchCampaignOverlapResult {
     campaign: Campaign!,
     overlapCount: Int!
@@ -241,7 +246,7 @@ const rootSchema = `
     campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
     people(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
     peopleByUserIds(userIds:[String], organizationId:String!): UsersList
-    fetchCampaignOverlaps(organizationId: String!, campaignId: String!): [FetchCampaignOverlapResult]!
+    fetchCampaignOverlaps(input: FetchCampaignOverlapInput!): [FetchCampaignOverlapResult]!
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
     trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
     trollTokens(organizationId: String!): [TrollTrigger]
