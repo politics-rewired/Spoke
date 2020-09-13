@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/politics-rewired/spoke/compare/v2.9.3...v2.10.0) (2020-09-13)
+
+
+### Features
+
+* allow filtering campaign overlaps by archived state ([#727](https://github.com/politics-rewired/spoke/issues/727)) ([f0b32b9](https://github.com/politics-rewired/spoke/commit/f0b32b9273c9c90efe9a920e58be958d326a54c6))
+
 ### [2.9.3](https://github.com/politics-rewired/spoke/compare/v2.9.2...v2.9.3) (2020-09-08)
 
 
