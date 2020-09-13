@@ -1,4 +1,3 @@
-
 exports.up = function(knex) {
   return knex.schema.raw(`
     create or replace view assignable_campaigns_with_needs_message as (
@@ -17,7 +16,7 @@ exports.up = function(knex) {
             and now() > date_trunc('day', (due_by + interval '24 hours') at time zone campaign.timezone)
         )
     );
-  `)
+  `);
 };
 
 exports.down = function(knex) {
@@ -31,5 +30,5 @@ exports.down = function(knex) {
         where campaign_id = assignable_campaigns.id
       )
     );
-  `)
+  `);
 };
