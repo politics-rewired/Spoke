@@ -1,6 +1,7 @@
 exports.up = function(knex) {
   return knex.schema.raw(`
     create table public.external_activist_code (
+      id uuid not null default uuid_generate_v1mc(),
       system_id uuid not null references external_system(id),
       external_id integer not null,
       type text,
@@ -12,7 +13,8 @@ exports.up = function(knex) {
       status text check (status in ('active', 'archived', 'inactive')),
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      primary key (external_id, system_id)
+      primary key (id),
+      unique (external_id, system_id)
     );
 
     create trigger _500_external_activist_code_updated_at
@@ -21,30 +23,39 @@ exports.up = function(knex) {
       for each row
       execute procedure universal_updated_at();
 
+    -- Upsert in order to preserve existing IDs and their config mappings
     create function public.insert_van_activist_codes(payload json, result json, context json) returns void as $$
     begin
-      insert into external_activist_code
-        (system_id, external_id, type, name, medium_name, short_name, description, script_question, status)
-      select
-        (j->>'van_system_id')::uuid,
-        (j->>'activist_code_id')::integer,
-        j->>'type',
-        j->>'name',
-        j->>'medium_name',
-        j->>'short_name',
-        j->>'description',
-        j->>'script_question',
-        (j->>'status')
-      from json_array_elements(result) as j
-      on conflict (system_id, external_id)
-      do update set
-        type = EXCLUDED.type,
-        name = EXCLUDED.name,
-        medium_name = EXCLUDED.medium_name,
-        short_name = EXCLUDED.short_name,
-        description = EXCLUDED.description,
-        script_question = EXCLUDED.script_question,
-        status = EXCLUDED.status
+      with activist_code_insert_results as (
+        insert into external_activist_code
+          (system_id, external_id, type, name, medium_name, short_name, description, script_question, status)
+        select
+          (j->>'van_system_id')::uuid,
+          (j->>'activist_code_id')::integer,
+          j->>'type',
+          j->>'name',
+          j->>'medium_name',
+          j->>'short_name',
+          j->>'description',
+          j->>'script_question',
+          (j->>'status')
+        from json_array_elements(result) as j
+        on conflict (system_id, external_id)
+        do update set
+          type = EXCLUDED.type,
+          name = EXCLUDED.name,
+          medium_name = EXCLUDED.medium_name,
+          short_name = EXCLUDED.short_name,
+          description = EXCLUDED.description,
+          script_question = EXCLUDED.script_question,
+          status = EXCLUDED.status
+        returning id, system_id
+      )
+      -- Delete archived activist codes
+      delete from external_activist_code
+      where
+        system_id = (select system_id from activist_code_insert_results limit 1)
+        and id not in (select id from activist_code_insert_results)
       ;
     end;
     $$ language plpgsql volatile security definer set search_path = "public";

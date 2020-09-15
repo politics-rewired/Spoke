@@ -1,6 +1,7 @@
 exports.up = function(knex) {
   return knex.schema.raw(`
     create table public.external_result_code (
+      id uuid not null default uuid_generate_v1mc(),
       system_id uuid not null references external_system(id),
       external_id integer not null,
       name text,
@@ -8,7 +9,8 @@ exports.up = function(knex) {
       short_name text,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      primary key (external_id, system_id)
+      primary key (id),
+      unique (external_id, system_id)
     );
 
     create trigger _500_external_result_code_updated_at
@@ -17,22 +19,31 @@ exports.up = function(knex) {
       for each row
       execute procedure universal_updated_at();
 
+    -- Upsert in order to preserve existing IDs and their config mappings
     create function public.insert_van_result_codes(payload json, result json, context json) returns void as $$
     begin
-      insert into external_result_code
-        (system_id, external_id, name, medium_name, short_name)
-      select
-        (j->>'van_system_id')::uuid,
-        (j->>'result_code_id')::integer,
-        j->>'name',
-        j->>'medium_name',
-        j->>'short_name'
-      from json_array_elements(result) as j
-      on conflict (system_id, external_id)
-      do update set
-        name = EXCLUDED.name,
-        medium_name = EXCLUDED.medium_name,
-        short_name = EXCLUDED.short_name
+      with result_code_insert_results as (
+        insert into external_result_code
+          (system_id, external_id, name, medium_name, short_name)
+        select
+          (j->>'van_system_id')::uuid,
+          (j->>'result_code_id')::integer,
+          j->>'name',
+          j->>'medium_name',
+          j->>'short_name'
+        from json_array_elements(result) as j
+        on conflict (system_id, external_id)
+        do update set
+          name = EXCLUDED.name,
+          medium_name = EXCLUDED.medium_name,
+          short_name = EXCLUDED.short_name
+        returning id, system_id
+      )
+      -- Delete archived result codes
+      delete from external_result_code
+      where
+        system_id = (select system_id from result_code_insert_results limit 1)
+        and id not in (select id from result_code_insert_results)
       ;
     end;
     $$ language plpgsql volatile security definer set search_path = "public";
