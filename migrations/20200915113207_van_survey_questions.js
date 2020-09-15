@@ -1,7 +1,5 @@
 exports.up = function(knex) {
   return knex.schema.raw(`
-    create type van_data_collection_status as enum ('active', 'archived', 'inactive');
-
     alter table public.external_system add constraint external_system_pkey primary key (id);
 
     create table public.external_survey_question (
@@ -13,7 +11,7 @@ exports.up = function(knex) {
       medium_name text,
       short_name text,
       script_question text,
-      status van_data_collection_status,
+      status text check (status in ('active', 'archived', 'inactive')),
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
       primary key (external_id, system_id)
@@ -57,7 +55,7 @@ exports.up = function(knex) {
         j->>'medium_name',
         j->>'short_name',
         j->>'script_question',
-        (j->>'status')::van_data_collection_status
+        (j->>'status')
       from json_array_elements(result) as j
       on conflict (system_id, external_id) 
       do update set
@@ -129,6 +127,5 @@ exports.down = function(knex) {
     drop table public.external_survey_question_response_option;
     drop table public.external_survey_question;
     alter table public.external_system drop constraint external_system_pkey;
-    drop type van_data_collection_status;
   `);
 };

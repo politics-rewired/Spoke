@@ -9,7 +9,7 @@ exports.up = function(knex) {
       short_name text,
       description text,
       script_question text,
-      status van_data_collection_status,
+      status text check (status in ('active', 'archived', 'inactive')),
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
       primary key (external_id, system_id)
@@ -34,7 +34,7 @@ exports.up = function(knex) {
         j->>'short_name',
         j->>'description',
         j->>'script_question',
-        (j->>'status')::van_data_collection_status
+        (j->>'status')
       from json_array_elements(result) as j
       on conflict (system_id, external_id)
       do update set
