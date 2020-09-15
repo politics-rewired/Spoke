@@ -40,7 +40,6 @@ export const resolvers = {
       { after, first }: RelayPageArgs
     ) => {
       const query = r.reader("external_survey_question_response_option").where({
-        system_id: surveyQuestion.system_id,
         external_survey_question_id: surveyQuestion.external_id
       });
       return formatPage(query, { after, first, primaryColumn: "created_at" });

@@ -88,8 +88,8 @@ exports.up = function(knex) {
       primary key (question_response_value, interaction_step_id, campaign_id),
       constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
         references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
-      constraint activist_code_fk foreign key (response_option_external_id, response_option_question_id, response_option_system_id)
-        references public.external_survey_question_response_option(external_id, external_survey_question_id, system_id) on delete cascade
+      constraint activist_code_fk foreign key (response_option_external_id, response_option_question_id)
+        references public.external_survey_question_response_option(external_id, external_survey_question_id) on delete cascade
     );
 
     create view public.external_sync_config_question_response_targets as
@@ -116,7 +116,6 @@ exports.up = function(knex) {
       join public.external_survey_question_response_option ro
         on qrro.response_option_external_id = ro.external_id
           and qrro.response_option_question_id = ro.external_survey_question_id
-          and qrro.response_option_system_id = ro.system_id
       union
       select
         'activist_code' as target_type,
@@ -279,8 +278,8 @@ exports.up = function(knex) {
       primary key (tag_id, system_id),
       constraint sync_config_fk foreign key (tag_id, system_id)
         references public.all_external_sync_tag_configuration(tag_id, system_id),
-      constraint response_option_system_fk foreign key (response_option_external_id, response_option_question_id, system_id)
-        references public.external_survey_question_response_option(external_id, external_survey_question_id, system_id)
+      constraint response_option_system_fk foreign key (response_option_external_id, response_option_question_id)
+        references public.external_survey_question_response_option(external_id, external_survey_question_id)
     );
 
     create view public.external_sync_config_tag_targets as
@@ -303,7 +302,6 @@ exports.up = function(knex) {
       join public.external_survey_question_response_option ro
         on tro.response_option_external_id = ro.external_id
           and tro.response_option_question_id = ro.external_survey_question_id
-          and tro.system_id = ro.system_id
       union
       select
         tac.tag_id || '|' || tac.system_id as compound_id,

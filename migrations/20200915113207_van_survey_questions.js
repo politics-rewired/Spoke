@@ -32,7 +32,7 @@ exports.up = function(knex) {
       short_name text,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      primary key (external_id, external_survey_question_id, system_id),
+      primary key (external_id, external_survey_question_id),
       foreign key (external_survey_question_id, system_id) references external_survey_question(external_id, system_id)
     );
 
@@ -84,7 +84,7 @@ exports.up = function(knex) {
           json_array_elements(inner_json->'responses') as j
         from json_array_elements(result) as inner_json
       ) survey_questions
-      on conflict (system_id, external_survey_question_id, external_id)
+      on conflict (external_survey_question_id, external_id)
       do update set
         name = EXCLUDED.name,
         medium_name = EXCLUDED.medium_name,
