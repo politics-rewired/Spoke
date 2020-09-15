@@ -14,7 +14,9 @@ exports.up = function(knex) {
 };
 
 exports.down = function(knex) {
-  return knex.schema.alterTable("user_organization", table => {
-    table.dropColumn("request_status");
-  });
+  return knex.schema
+    .alterTable("user_organization", table => {
+      table.dropColumn("request_status");
+    })
+    .then(() => knex.schema.raw(`drop type texter_status`));
 };
