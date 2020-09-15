@@ -238,6 +238,15 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("contacts") && campaign.contacts) {
     await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+    // Uploading contacts from a CSV invalidates external system configuration
+    await r
+      .knex("campaign")
+      .update({
+        external_system_id: null
+      })
+      .where({ id });
+
     const contactsToSave = campaign.contacts.map(datum => {
       const modelData = {
         campaign_id: datum.campaignId,
