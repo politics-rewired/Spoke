@@ -29,9 +29,6 @@ exports.up = function(knex) {
       before insert or update on campaign 
       for each row execute procedure tg_campaign_check_exteral_system_id();
 
-    alter table public.all_question_response
-      add constraint interaction_step_id_fk foreign key(interaction_step_id) references public.interaction_step(id);
-
     create unique index all_question_response_value_interaction_step_idx
       on public.all_question_response(value, interaction_step_id);
 
@@ -424,7 +421,6 @@ exports.down = function(knex) {
     drop table public.external_sync_config_question_response_result_code;
     drop table public.all_external_sync_question_response_configuration;
 
-    alter table public.all_question_response drop constraint interaction_step_id_fk;
     drop index all_question_response_value_interaction_step_idx;
 
     drop function tg_campaign_check_exteral_system_id() cascade;
