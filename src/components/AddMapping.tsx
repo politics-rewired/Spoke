@@ -163,6 +163,7 @@ class AddMapping extends React.Component<InnerProps, State> {
 
     const validTarget = this.getValidTarget();
 
+    // This is a client-side-only check
     const responseOptionExists =
       existingTargets.find(target => isResponseOption(target)) !== undefined;
     const activistCodeExists =

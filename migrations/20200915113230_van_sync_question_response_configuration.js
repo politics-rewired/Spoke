@@ -50,34 +50,43 @@ exports.up = function(knex) {
       execute procedure universal_updated_at();
 
     create table public.external_sync_config_question_response_result_code (
+      id uuid not null default uuid_generate_v1mc(),
       campaign_id integer not null,
       interaction_step_id integer not null,
       question_response_value text not null,
       result_code_system_id uuid not null,
       result_code_external_id integer not null,
 
-      primary key (question_response_value, interaction_step_id, campaign_id),
+      primary key (id),
       constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
         references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
       constraint result_code_fk foreign key (result_code_external_id, result_code_system_id)
         references public.external_result_code(external_id, system_id) on delete cascade
     );
 
+    create index sync_config_qr_rc_idx
+      on public.external_sync_config_question_response_result_code(question_response_value, interaction_step_id, campaign_id);
+
     create table public.external_sync_config_question_response_activist_code (
+      id uuid not null default uuid_generate_v1mc(),
       campaign_id integer not null,
       interaction_step_id integer not null,
       question_response_value text not null,
       activist_code_system_id uuid not null,
       activist_code_external_id integer not null,
 
-      primary key (question_response_value, interaction_step_id, campaign_id),
+      primary key (id),
       constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
         references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
       constraint activist_code_fk foreign key (activist_code_external_id, activist_code_system_id)
         references public.external_activist_code(external_id, system_id) on delete cascade
     );
 
+    create index sync_config_qr_ac_idx
+      on public.external_sync_config_question_response_activist_code(question_response_value, interaction_step_id, campaign_id);
+
     create table public.external_sync_config_question_response_response_option (
+      id uuid not null default uuid_generate_v1mc(),
       campaign_id integer not null,
       interaction_step_id integer not null,
       question_response_value text not null,
@@ -85,12 +94,15 @@ exports.up = function(knex) {
       response_option_question_id integer not null,
       response_option_external_id integer not null,
 
-      primary key (question_response_value, interaction_step_id, campaign_id),
+      primary key (id),
       constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
         references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
       constraint activist_code_fk foreign key (response_option_external_id, response_option_question_id)
         references public.external_survey_question_response_option(external_id, external_survey_question_id) on delete cascade
     );
+
+    create index sync_config_qr_ro_idx
+      on public.external_sync_config_question_response_response_option(question_response_value, interaction_step_id, campaign_id);
 
     create view public.external_sync_config_question_response_targets as
       select
