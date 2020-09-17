@@ -1,40 +1,54 @@
 import gql from "graphql-tag";
 
 import { GraphQLType } from "./types";
-import { RelayPaginatedResponse } from "./pagination";
 import { ExternalResultCode } from "./external-result-code";
 import { ExternalActivistCode } from "./external-activist-code";
 import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
 
+export interface ExternalResultCodeTarget {
+  id: string;
+  resultCode: ExternalResultCode;
+}
+
+export interface ExternalActivistCodeTarget {
+  id: string;
+  activistCode: ExternalActivistCode;
+}
+
+export interface ExternalSurveyQuestionResponseOptionTarget {
+  id: string;
+  responseOption: ExternalSurveyQuestionResponseOption;
+}
+
 export type ExternalSyncConfigTarget =
-  | ExternalResultCode
-  | ExternalActivistCode
-  | ExternalSurveyQuestionResponseOption;
+  | ExternalResultCodeTarget
+  | ExternalActivistCodeTarget
+  | ExternalSurveyQuestionResponseOptionTarget;
 
 export function isActivistCode(
   obj: ExternalSyncConfigTarget
-): obj is ExternalActivistCode {
+): obj is ExternalActivistCodeTarget {
   return (
-    (obj as ExternalActivistCode & GraphQLType).__typename ===
-    "ExternalActivistCode"
+    (obj as ExternalActivistCodeTarget & GraphQLType).__typename ===
+    "ExternalActivistCodeTarget"
   );
 }
 
 export function isResponseOption(
   obj: ExternalSyncConfigTarget
-): obj is ExternalSurveyQuestionResponseOption {
+): obj is ExternalSurveyQuestionResponseOptionTarget {
   return (
-    (obj as ExternalSurveyQuestionResponseOption & GraphQLType).__typename ===
-    "ExternalSurveyQuestionResponseOption"
+    (obj as ExternalSurveyQuestionResponseOptionTarget & GraphQLType)
+      .__typename === "ExternalSurveyQuestionResponseOptionTarget"
   );
 }
 
 export function isResultCode(
   obj: ExternalSyncConfigTarget
-): obj is ExternalResultCode {
+): obj is ExternalResultCodeTarget {
   return (
-    (obj as ExternalResultCode & GraphQLType).__typename ===
-    "ExternalResultCode"
+    (obj as ExternalResultCodeTarget & GraphQLType).__typename ===
+    "ExternalResultCodeTarget"
   );
 }
 
@@ -50,7 +64,7 @@ export interface ExternalSyncQuestionResponseConfig {
     questionText: string;
     parentInteractionId: string | null;
   };
-  targets: RelayPaginatedResponse<ExternalSyncConfigTarget> | null;
+  targets: ExternalSyncConfigTarget[] | null;
 }
 
 export interface ExternalSyncTagConfig {
@@ -59,11 +73,26 @@ export interface ExternalSyncTagConfig {
   tagId: string;
   isMissing: boolean;
   isRequired: boolean;
-  targets: RelayPaginatedResponse<ExternalSyncConfigTarget> | null;
+  targets: ExternalSyncConfigTarget[] | null;
 }
 
 export const schema = `
-  union ExternalSyncConfigTarget = ExternalResultCode | ExternalActivistCode | ExternalSurveyQuestionResponseOption
+  type ExternalResultCodeTarget {
+    id: String!
+    resultCode: ExternalResultCode!
+  }
+
+  type ExternalActivistCodeTarget {
+    id: String!
+    activistCode: ExternalActivistCode!
+  }
+
+  type ExternalSurveyQuestionResponseOptionTarget {
+    id: String!
+    responseOption: ExternalSurveyQuestionResponseOption!
+  }
+
+  union ExternalSyncConfigTarget = ExternalResultCodeTarget | ExternalActivistCodeTarget | ExternalSurveyQuestionResponseOptionTarget
 
   type ExternalSyncConfigTargetEdge {
     cursor: Cursor!
@@ -85,7 +114,7 @@ export const schema = `
     createdAt: String
     updatedAt: String
     interactionStep: InteractionStep!
-    targets(after: Cursor, first: Int): ExternalSyncConfigTargetPage
+    targets(after: Cursor, first: Int): [ExternalSyncConfigTarget]
   }
 
   type ExternalSyncQuestionResponseConfigEdge {
@@ -139,24 +168,29 @@ export const FullListRefreshFragment = gql`
       parentInteractionId
     }
     targets {
-      edges {
-        node {
-          ... on ExternalResultCode {
-            id
-            name
-          }
-          ... on ExternalActivistCode {
-            id
-            name
-            description
-            scriptQuestion
-            status
-          }
-          ... on ExternalSurveyQuestionResponseOption {
-            id
-            name
-            externalSurveyQuestionId
-          }
+      ... on ExternalResultCodeTarget {
+        id
+        resultCode {
+          id
+          name
+        }
+      }
+      ... on ExternalActivistCodeTarget {
+        id
+        activistCode {
+          id
+          name
+          description
+          scriptQuestion
+          status
+        }
+      }
+      ... on ExternalSurveyQuestionResponseOptionTarget {
+        id
+        responseOption {
+          id
+          name
+          externalSurveyQuestionId
         }
       }
     }

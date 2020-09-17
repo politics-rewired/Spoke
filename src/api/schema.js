@@ -338,8 +338,8 @@ const rootSchema = `
     refreshExternalSystem(externalSystemId: String!): Boolean!
     createQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
     deleteQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
-    createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncQuestionResponseConfig!
-    deleteQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncQuestionResponseConfig!
+    createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncConfigTarget!
+    deleteQuestionResponseSyncTarget(targetId: String!): String!
   }
 
   schema {

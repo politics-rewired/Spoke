@@ -34,13 +34,15 @@ exports.up = function(knex) {
 
     -- Question Responses
     create table public.all_external_sync_question_response_configuration (
+      id uuid not null default uuid_generate_v1mc(),
       campaign_id integer not null references public.campaign(id),
       interaction_step_id integer not null references public.interaction_step(id),
       question_response_value text not null,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
 
-      primary key (question_response_value, interaction_step_id, campaign_id)
+      primary key (id),
+      unique (question_response_value, interaction_step_id, campaign_id)
     );
 
     create trigger _500_external_sync_question_response_configuration_updated_at
@@ -51,132 +53,51 @@ exports.up = function(knex) {
 
     create table public.external_sync_config_question_response_result_code (
       id uuid not null default uuid_generate_v1mc(),
-      campaign_id integer not null,
-      interaction_step_id integer not null,
-      question_response_value text not null,
-      result_code_system_id uuid not null,
-      result_code_external_id integer not null,
+      question_response_config_id uuid not null
+        references public.all_external_sync_question_response_configuration(id) on delete cascade,
+      external_result_code_id uuid not null
+        references public.external_result_code(id) on delete cascade,
 
-      primary key (id),
-      constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
-        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
-      constraint result_code_fk foreign key (result_code_external_id, result_code_system_id)
-        references public.external_result_code(external_id, system_id) on delete cascade
+      primary key (id)
     );
 
     create index sync_config_qr_rc_idx
-      on public.external_sync_config_question_response_result_code(question_response_value, interaction_step_id, campaign_id);
+      on public.external_sync_config_question_response_result_code(question_response_config_id);
+
+    create index sync_config_qr_rc_ext_idx
+      on public.external_sync_config_question_response_result_code(external_result_code_id);
 
     create table public.external_sync_config_question_response_activist_code (
       id uuid not null default uuid_generate_v1mc(),
-      campaign_id integer not null,
-      interaction_step_id integer not null,
-      question_response_value text not null,
-      activist_code_system_id uuid not null,
-      activist_code_external_id integer not null,
+      question_response_config_id uuid not null
+        references public.all_external_sync_question_response_configuration(id) on delete cascade,
+      external_activist_code_id uuid not null
+        references public.external_survey_question_response_option(id) on delete cascade,
 
-      primary key (id),
-      constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
-        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
-      constraint activist_code_fk foreign key (activist_code_external_id, activist_code_system_id)
-        references public.external_activist_code(external_id, system_id) on delete cascade
+      primary key (id)
     );
 
     create index sync_config_qr_ac_idx
-      on public.external_sync_config_question_response_activist_code(question_response_value, interaction_step_id, campaign_id);
+      on public.external_sync_config_question_response_activist_code(question_response_config_id);
+
+    create index sync_config_qr_ac_ext_idx
+      on public.external_sync_config_question_response_activist_code(external_activist_code_id);
 
     create table public.external_sync_config_question_response_response_option (
       id uuid not null default uuid_generate_v1mc(),
-      campaign_id integer not null,
-      interaction_step_id integer not null,
-      question_response_value text not null,
-      response_option_system_id uuid not null,
-      response_option_question_id integer not null,
-      response_option_external_id integer not null,
+      question_response_config_id uuid not null
+        references public.all_external_sync_question_response_configuration(id) on delete cascade,
+      external_response_option_id uuid not null
+        references public.external_activist_code(id) on delete cascade,
 
-      primary key (id),
-      constraint sync_config_fk foreign key (question_response_value, interaction_step_id, campaign_id)
-        references public.all_external_sync_question_response_configuration(question_response_value, interaction_step_id, campaign_id) on delete cascade,
-      constraint activist_code_fk foreign key (response_option_external_id, response_option_question_id)
-        references public.external_survey_question_response_option(external_id, external_survey_question_id) on delete cascade
+      primary key (id)
     );
 
     create index sync_config_qr_ro_idx
-      on public.external_sync_config_question_response_response_option(question_response_value, interaction_step_id, campaign_id);
+      on public.external_sync_config_question_response_response_option(question_response_config_id);
 
-    create view public.external_sync_config_question_response_targets as
-      select
-        'response_option' as target_type,
-        qrro.question_response_value || '|' || qrro.interaction_step_id || '|' || qrro.campaign_id as config_id,
-        ro.system_id || '|' || ro.external_id as target_id,
-        qrro.campaign_id,
-        qrro.interaction_step_id,
-        qrro.question_response_value,
-        ro.external_survey_question_id,
-        ro.system_id,
-        ro.external_id,
-        null as type,
-        ro.name,
-        ro.medium_name,
-        ro.short_name,
-        null as description,
-        null as script_question,
-        null as status,
-        ro.created_at,
-        ro.updated_at
-      from public.external_sync_config_question_response_response_option qrro
-      join public.external_survey_question_response_option ro
-        on qrro.response_option_external_id = ro.external_id
-          and qrro.response_option_question_id = ro.external_survey_question_id
-      union
-      select
-        'activist_code' as target_type,
-        qrac.question_response_value || '|' || qrac.interaction_step_id || '|' || qrac.campaign_id as config_id,
-        ac.system_id || '|' || ac.external_id as target_id,
-        qrac.campaign_id,
-        qrac.interaction_step_id,
-        qrac.question_response_value,
-        null as external_survey_question_id,
-        ac.system_id,
-        ac.external_id,
-        ac.type,
-        ac.name,
-        ac.medium_name,
-        ac.short_name,
-        ac.description,
-        ac.script_question,
-        ac.status,
-        ac.created_at,
-        ac.updated_at
-      from public.external_sync_config_question_response_activist_code qrac
-      join public.external_activist_code ac
-        on qrac.activist_code_external_id = ac.external_id
-          and qrac.activist_code_system_id = ac.system_id
-      union
-      select
-        'result_code' as target_type,
-        qrrc.question_response_value || '|' || qrrc.interaction_step_id || '|' || qrrc.campaign_id as config_id,
-        rc.system_id || '|' || rc.external_id as target_id,
-        qrrc.campaign_id,
-        qrrc.interaction_step_id,
-        qrrc.question_response_value,
-        null as external_survey_question_id,
-        rc.system_id,
-        rc.external_id,
-        null as type,
-        rc.name,
-        rc.medium_name,
-        rc.short_name,
-        null as description,
-        null as script_question,
-        null as status,
-        rc.created_at,
-        rc.updated_at
-      from public.external_sync_config_question_response_result_code qrrc
-      join public.external_result_code rc
-        on qrrc.result_code_external_id = rc.external_id
-          and qrrc.result_code_system_id = rc.system_id
-      ;
+    create index sync_config_qr_ro_ext_idx
+      on public.external_sync_config_question_response_response_option(external_response_option_id);
 
     create view public.missing_external_sync_question_response_configuration as
       select *
@@ -215,14 +136,21 @@ exports.up = function(knex) {
 
     create view public.external_sync_question_response_configuration as
       select
-        aqrc.question_response_value || '|' || aqrc.interaction_step_id || '|' || aqrc.campaign_id as compound_id,
-        aqrc.*,
+        aqrc.id::text as compound_id,
+        aqrc.campaign_id,
+        aqrc.interaction_step_id,
+        aqrc.question_response_value,
+        aqrc.created_at,
+        aqrc.updated_at,
         not exists (
-          select 1 from public.external_sync_config_question_response_targets qrt
-          where
-            qrt.campaign_id = aqrc.campaign_id
-            and qrt.interaction_step_id = aqrc.interaction_step_id
-            and qrt.question_response_value = aqrc.question_response_value
+          select 1 from public.external_sync_config_question_response_response_option qrro
+          where qrro.question_response_config_id = aqrc.id
+          union
+          select 1 from public.external_sync_config_question_response_activist_code qrac
+          where qrac.question_response_config_id = aqrc.id
+          union
+          select 1 from public.external_sync_config_question_response_result_code qrrc
+          where qrrc.question_response_config_id = aqrc.id
         ) as is_empty,
         false as is_missing,
         false as is_required
@@ -247,7 +175,6 @@ exports.down = function(knex) {
   return knex.raw(`
     drop view public.external_sync_question_response_configuration;
     drop view public.missing_external_sync_question_response_configuration;
-    drop view public.external_sync_config_question_response_targets;
     drop table public.external_sync_config_question_response_response_option;
     drop table public.external_sync_config_question_response_activist_code;
     drop table public.external_sync_config_question_response_result_code;

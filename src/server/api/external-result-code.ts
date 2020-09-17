@@ -1,6 +1,7 @@
 import { sqlResolvers } from "./lib/utils";
 
 export interface ExternalResultCode {
+  id: string;
   system_id: string;
   external_id: number;
   name: string;
@@ -13,6 +14,7 @@ export interface ExternalResultCode {
 export const resolvers = {
   ExternalResultCode: {
     ...sqlResolvers([
+      "id",
       "systemId",
       "externalId",
       "name",
@@ -20,8 +22,6 @@ export const resolvers = {
       "shortName",
       "createdAt",
       "updatedAt"
-    ]),
-    id: (activistCode: ExternalResultCode) =>
-      `${activistCode.system_id}|${activistCode.external_id}`
+    ])
   }
 };

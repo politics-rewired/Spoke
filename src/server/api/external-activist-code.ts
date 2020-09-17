@@ -2,6 +2,7 @@ import { sqlResolvers } from "./lib/utils";
 import { ExternalDataCollectionStatus } from "./types";
 
 export interface ExternalActivistCode {
+  id: string;
   system_id: string;
   external_id: number;
   type: string;
@@ -18,6 +19,7 @@ export interface ExternalActivistCode {
 export const resolvers = {
   ExternalActivistCode: {
     ...sqlResolvers([
+      "id",
       "systemId",
       "externalId",
       "type",
@@ -29,8 +31,6 @@ export const resolvers = {
       "createdAt",
       "updatedAt"
     ]),
-    id: (activistCode: ExternalActivistCode) =>
-      `${activistCode.system_id}|${activistCode.external_id}`,
     status: (activistCode: ExternalActivistCode) =>
       activistCode.status.toUpperCase()
   }

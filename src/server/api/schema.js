@@ -1,7 +1,3 @@
-import { config } from "../../config";
-import logger from "../../logger";
-import { errToObj } from "../utils";
-import { eventBus, EventType } from "../event-bus";
 import escapeRegExp from "lodash/escapeRegExp";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
@@ -10,6 +6,11 @@ import { GraphQLError } from "graphql/error";
 import request from "superagent";
 import _ from "lodash";
 import moment from "moment-timezone";
+import groupBy from "lodash/groupBy";
+import { config } from "../../config";
+import logger from "../../logger";
+import { errToObj } from "../utils";
+import { eventBus, EventType } from "../event-bus";
 
 import { CampaignExportType } from "../../api/types";
 import { getWorker } from "../worker";
@@ -98,7 +99,6 @@ import { notifyOnTagConversation, notifyAssignmentCreated } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
-import groupBy from "lodash/groupBy";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -3283,35 +3283,45 @@ const rootMutations = {
     },
     deleteQuestionResponseSyncConfig: async (_, { input }, { user }) => {
       const { id } = input;
-      const [responseValue, iStepId, campaignId] = id.split("|");
 
-      const { organization_id } = await r
+      const {
+        organization_id,
+        campaign_id,
+        interaction_step_id,
+        question_response_value
+      } = await r
         .knex("campaign")
-        .where({ id: campaignId })
-        .first("organization_id");
+        .join(
+          "all_external_sync_question_response_configuration",
+          "all_external_sync_question_response_configuration.campaign_id",
+          "campaign.id"
+        )
+        .where({ "all_external_sync_question_response_configuration.id": id })
+        .first([
+          "organization_id",
+          "campaign_id",
+          "interaction_step_id",
+          "question_response_value"
+        ]);
+
       await accessRequired(user, organization_id, "ADMIN");
 
       await r
         .knex("all_external_sync_question_response_configuration")
-        .where({
-          campaign_id: campaignId,
-          interaction_step_id: iStepId,
-          question_response_value: responseValue
-        })
+        .where({ id })
         .del();
 
       return r
         .knex("external_sync_question_response_configuration")
         .where({
-          campaign_id: campaignId,
-          interaction_step_id: iStepId,
-          question_response_value: responseValue
+          campaign_id,
+          interaction_step_id,
+          question_response_value
         })
         .first();
     },
     createQuestionResponseSyncTarget: async (_, { input }, { user }) => {
       const { configId, ...targets } = input;
-      const [responseValue, iStepId, campaignId] = configId.split("|");
 
       const validKeys = [
         "responseOptionId",
@@ -3325,126 +3335,56 @@ const rootMutations = {
         );
       }
       const validKey = validKeys[0];
+      const targetId = targets[validKey];
 
       if (validKey === "responseOptionId") {
-        const [systemId, questionId, responseOptionId] = targets[
-          validKey
-        ].split("|");
-        await r
+        return r
           .knex("public.external_sync_config_question_response_response_option")
           .insert({
-            campaign_id: campaignId,
-            interaction_step_id: iStepId,
-            question_response_value: responseValue,
-            response_option_system_id: systemId,
-            response_option_question_id: questionId,
-            response_option_external_id: responseOptionId
-          });
+            question_response_config_id: configId,
+            external_response_option_id: targetId
+          })
+          .returning("*")
+          .then(([row]) => ({ ...row, target_type: "response_option" }));
       }
       if (validKey === "activistCodeId") {
-        const [systemId, externalId] = targets[validKey].split("|");
-        // console.log("we out here", system_id, external_id);
-        await r
+        return r
           .knex("public.external_sync_config_question_response_activist_code")
           .insert({
-            campaign_id: campaignId,
-            interaction_step_id: iStepId,
-            question_response_value: responseValue,
-            activist_code_system_id: systemId,
-            activist_code_external_id: externalId
-          });
+            question_response_config_id: configId,
+            external_activist_code_id: targetId
+          })
+          .returning("*")
+          .then(([row]) => ({ ...row, target_type: "activist_code" }));
       }
       if (validKey === "resultCodeId") {
-        const [systemId, externalId] = targets[validKey].split("|");
-        await r
+        return r
           .knex("public.external_sync_config_question_response_result_code")
           .insert({
-            campaign_id: campaignId,
-            interaction_step_id: iStepId,
-            question_response_value: responseValue,
-            result_code_system_id: systemId,
-            result_code_external_id: externalId
-          });
+            question_response_config_id: configId,
+            external_result_code_id: targetId
+          })
+          .returning("*")
+          .then(([row]) => ({ ...row, target_type: "result_code" }));
       }
 
-      return r
-        .knex("external_sync_question_response_configuration")
-        .where({
-          campaign_id: campaignId,
-          interaction_step_id: iStepId,
-          question_response_value: responseValue
-        })
-        .first();
+      throw new Error(`Unknown key type ${validKey}`);
     },
-    deleteQuestionResponseSyncTarget: async (_, { input }, { user }) => {
-      const { configId, ...targets } = input;
-      const [responseValue, iStepId, campaignId] = configId.split("|");
+    deleteQuestionResponseSyncTarget: async (_, { targetId }, { user }) => {
+      await r
+        .knex("public.external_sync_config_question_response_response_option")
+        .where({ id: targetId })
+        .del();
+      await r
+        .knex("public.external_sync_config_question_response_activist_code")
+        .where({ id: targetId })
+        .del();
+      await r
+        .knex("public.external_sync_config_question_response_result_code")
+        .where({ id: targetId })
+        .del();
 
-      const validKeys = [
-        "responseOptionId",
-        "activistCodeId",
-        "resultCodeId"
-      ].filter(key => targets[key] !== null && targets[key] !== undefined);
-
-      if (validKeys.length !== 1) {
-        throw new Error(
-          `Expected 1 valid sync target but got ${validKeys.length}`
-        );
-      }
-      const validKey = validKeys[0];
-
-      if (validKey === "responseOptionId") {
-        const [systemId, questionId, responseOptionId] = targets[
-          validKey
-        ].split("|");
-        await r
-          .knex("public.external_sync_config_question_response_response_option")
-          .where({
-            campaign_id: campaignId,
-            interaction_step_id: iStepId,
-            question_response_value: responseValue,
-            response_option_system_id: systemId,
-            response_option_question_id: questionId,
-            response_option_external_id: responseOptionId
-          })
-          .del();
-      }
-      if (validKey === "activistCodeId") {
-        const [systemId, externalId] = targets[validKey].split("|");
-        // console.log("we out here", system_id, external_id);
-        await r
-          .knex("public.external_sync_config_question_response_activist_code")
-          .where({
-            campaign_id: campaignId,
-            interaction_step_id: iStepId,
-            question_response_value: responseValue,
-            activist_code_system_id: systemId,
-            activist_code_external_id: externalId
-          })
-          .del();
-      }
-      if (validKey === "resultCodeId") {
-        const [systemId, externalId] = targets[validKey].split("|");
-        await r
-          .knex("public.external_sync_config_question_response_result_code")
-          .where({
-            campaign_id: campaignId,
-            interaction_step_id: iStepId,
-            question_response_value: responseValue,
-            result_code_system_id: systemId,
-            result_code_external_id: externalId
-          })
-          .del();
-      }
-
-      return r
-        .knex("external_sync_question_response_configuration")
-        .where({
-          campaign_id: campaignId,
-          interaction_step_id: iStepId,
-          question_response_value: responseValue
-        })
-        .first();
+      return targetId;
     }
   }
 };

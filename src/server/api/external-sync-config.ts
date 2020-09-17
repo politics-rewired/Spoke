@@ -1,40 +1,57 @@
 import { r } from "../models";
 import { sqlResolvers } from "./lib/utils";
 import { formatPage } from "./lib/pagination";
-import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
-import { ExternalActivistCode } from "./external-activist-code";
-import { ExternalResultCode } from "./external-result-code";
+
+type ExternalSyncTarget = "response_option" | "activist_code" | "result_code";
 
 interface ExternalSyncTargetType {
-  target_type: "response_option" | "activist_code" | "result_code";
+  target_type: ExternalSyncTarget;
+}
+
+export interface ExternalResultCodeTarget {
+  id: string;
+  question_response_config_id: string;
+  external_result_code_id: string;
+}
+
+export interface ExternalActivistCodeTarget {
+  id: string;
+  question_response_config_id: string;
+  external_activist_code_id: string;
+}
+
+export interface ExternalSurveyQuestionResponseOptionTarget {
+  id: string;
+  question_response_config_id: string;
+  external_response_option_id: string;
 }
 
 export type ExternalSyncConfigTarget =
-  | ExternalResultCode
-  | ExternalActivistCode
-  | ExternalSurveyQuestionResponseOption;
+  | ExternalResultCodeTarget
+  | ExternalActivistCodeTarget
+  | ExternalSurveyQuestionResponseOptionTarget;
 
-export function isActivistCode(
+export function isActivistCodeTarget(
   obj: ExternalSyncConfigTarget
-): obj is ExternalActivistCode {
+): obj is ExternalActivistCodeTarget {
   return (
     (obj as ExternalSyncConfigTarget & ExternalSyncTargetType).target_type ===
     "activist_code"
   );
 }
 
-export function isResponseOption(
+export function isResponseOptionTarget(
   obj: ExternalSyncConfigTarget
-): obj is ExternalSurveyQuestionResponseOption {
+): obj is ExternalSurveyQuestionResponseOptionTarget {
   return (
     (obj as ExternalSyncConfigTarget & ExternalSyncTargetType).target_type ===
     "response_option"
   );
 }
 
-export function isResultCode(
+export function isResultCodeTarget(
   obj: ExternalSyncConfigTarget
-): obj is ExternalResultCode {
+): obj is ExternalResultCodeTarget {
   return (
     (obj as ExternalSyncConfigTarget & ExternalSyncTargetType).target_type ===
     "result_code"
@@ -42,6 +59,7 @@ export function isResultCode(
 }
 
 export interface ExternalSyncQuestionResponseConfig {
+  compound_id: string;
   campaign_id: number;
   interaction_step_id: number;
   question_response_value: string;
@@ -65,18 +83,44 @@ export interface ExternalSyncTagConfig {
 export const resolvers = {
   ExternalSyncConfigTarget: {
     __resolveType(obj: ExternalSyncConfigTarget) {
-      if (isResultCode(obj)) {
-        return "ExternalResultCode";
+      if (isResultCodeTarget(obj)) {
+        return "ExternalResultCodeTarget";
       }
-      if (isActivistCode(obj)) {
-        return "ExternalActivistCode";
+      if (isActivistCodeTarget(obj)) {
+        return "ExternalActivistCodeTarget";
       }
-      if (isResponseOption(obj)) {
-        return "ExternalSurveyQuestionResponseOption";
+      if (isResponseOptionTarget(obj)) {
+        return "ExternalSurveyQuestionResponseOptionTarget";
       }
 
       return null;
     }
+  },
+  ExternalResultCodeTarget: {
+    ...sqlResolvers(["id"]),
+    resultCode: async (target: ExternalResultCodeTarget) =>
+      r
+        .knex("external_result_code")
+        .where({ id: target.external_result_code_id })
+        .first()
+  },
+  ExternalActivistCodeTarget: {
+    ...sqlResolvers(["id"]),
+    activistCode: async (target: ExternalActivistCodeTarget) =>
+      r
+        .knex("external_activist_code")
+        .where({ id: target.external_activist_code_id })
+        .first()
+  },
+  ExternalSurveyQuestionResponseOptionTarget: {
+    ...sqlResolvers(["id"]),
+    responseOption: async (
+      target: ExternalSurveyQuestionResponseOptionTarget
+    ) =>
+      r
+        .knex("external_survey_question_response_option")
+        .where({ id: target.external_response_option_id })
+        .first()
   },
   ExternalSyncQuestionResponseConfig: {
     ...sqlResolvers([
@@ -88,14 +132,7 @@ export const resolvers = {
       "createdAt",
       "updatedAt"
     ]),
-    id: (qrConfig: ExternalSyncQuestionResponseConfig) => {
-      const {
-        question_response_value: responseValue,
-        interaction_step_id: iStepId,
-        campaign_id: campaignId
-      } = qrConfig;
-      return `${responseValue}|${iStepId}|${campaignId}`;
-    },
+    id: (qrConfig: ExternalSyncQuestionResponseConfig) => qrConfig.compound_id,
     interactionStep: async (qrConfig: ExternalSyncQuestionResponseConfig) =>
       r
         .knex("interaction_step")
@@ -107,14 +144,22 @@ export const resolvers = {
     ) => {
       if (qrConfig.is_missing) return null;
 
-      const query = r
-        .knex("external_sync_config_question_response_targets")
-        .where({
-          campaign_id: qrConfig.campaign_id,
-          interaction_step_id: qrConfig.interaction_step_id,
-          question_response_value: qrConfig.question_response_value
-        });
-      return formatPage(query, { after, first, primaryColumn: "config_id" });
+      const responseOptions = await r
+        .knex("external_sync_config_question_response_response_option")
+        .where({ question_response_config_id: qrConfig.compound_id })
+        .select([r.knex.raw(`'response_option' as target_type`), "*"]);
+
+      const activistCodes = await r
+        .knex("external_sync_config_question_response_activist_code")
+        .where({ question_response_config_id: qrConfig.compound_id })
+        .select([r.knex.raw(`'activist_code' as target_type`), "*"]);
+
+      const resultCodes = await r
+        .knex("external_sync_config_question_response_result_code")
+        .where({ question_response_config_id: qrConfig.compound_id })
+        .select([r.knex.raw(`'result_code' as target_type`), "*"]);
+
+      return [...responseOptions, ...activistCodes, ...resultCodes];
     }
   },
   ExternalSyncTagConfig: {

@@ -2,11 +2,11 @@ import React from "react";
 import { compose } from "recompose";
 import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
+import cloneDeep from "lodash/cloneDeep";
 
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import { List } from "material-ui/List";
 import Avatar from "material-ui/Avatar";
-import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
@@ -23,18 +23,18 @@ import {
 } from "material-ui/styles/colors";
 
 import { RelayPaginatedResponse } from "../../api/pagination";
-import { QuestionResponseSyncTargetInput } from "../../api/types";
 import {
   ExternalSyncQuestionResponseConfig,
-  FullListRefreshFragment,
   isActivistCode,
   isResponseOption,
   isResultCode
 } from "../../api/external-sync-config";
+import { GET_SYNC_CONFIGS } from "../SyncConfigurationModal/queries";
 import { ExternalSurveyQuestion } from "../../api/external-survey-question";
 import { ExternalActivistCode } from "../../api/external-activist-code";
 import { ExternalResultCode } from "../../api/external-result-code";
 import { loadData } from "../../containers/hoc/with-operations";
+import { MutationMap } from "../../network/types";
 import { ActivistCodeMapping } from "./components/ActivistCodeMapping";
 import { ResponseOptionMapping } from "./components/ResponseOptionMapping";
 import { ResultCodeMapping } from "./components/ResultCodeMapping";
@@ -43,20 +43,19 @@ import AddMapping from "../AddMapping";
 interface HocProps {
   data: {};
   mutations: {
-    createConfig(): ApolloQueryResult<any>;
-    deleteConfig(): ApolloQueryResult<any>;
-    deleteTarget(
-      payload: Omit<QuestionResponseSyncTargetInput, "configId">
-    ): ApolloQueryResult<any>;
+    deleteTarget(targetId: string): ApolloQueryResult<string>;
   };
 }
 
 interface OuterProps {
+  campaignId: string;
   config: ExternalSyncQuestionResponseConfig;
   surveyQuestions: RelayPaginatedResponse<ExternalSurveyQuestion>;
   activistCodes: RelayPaginatedResponse<ExternalActivistCode>;
   resultCodes: RelayPaginatedResponse<ExternalResultCode>;
   style?: React.CSSProperties;
+  createConfig(): void;
+  deleteConfig(): void;
 }
 
 interface InnerProps extends OuterProps, HocProps {}
@@ -70,31 +69,9 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
     isAddMappingOpen: false
   };
 
-  handleOnClickCreateConfig = async () => {
+  makeHandleOnClickDeleteTarget = (targetId: string) => async () => {
     try {
-      const response = await this.props.mutations.createConfig();
-      if (response.errors) throw response.errors;
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  handleOnClickDeleteConfig = async () => {
-    try {
-      const response = await this.props.mutations.deleteConfig();
-      if (response.errors) throw response.errors;
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  makeHandleOnClickDeleteTarget = (
-    targetId: string,
-    type: keyof Omit<QuestionResponseSyncTargetInput, "configId">
-  ) => async () => {
-    try {
-      const response = await this.props.mutations.deleteTarget({
-        [type]: targetId
-      });
+      const response = await this.props.mutations.deleteTarget(targetId);
       if (response.errors) throw response.errors;
     } catch (err) {
       console.error(err);
@@ -113,18 +90,13 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
       style
     } = this.props;
     const {
-      id,
-      campaignId,
-      interactionStepId,
       questionResponseValue,
       isMissing,
       isRequired,
       interactionStep: { questionText }
     } = config;
 
-    const targets = config.targets
-      ? config.targets.edges.map(({ node }) => node)
-      : null;
+    const targets = config.targets;
 
     const avatar = isRequired ? (
       <Avatar
@@ -152,9 +124,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
       <Card
         expanded={false}
         onExpandChange={
-          isMissing
-            ? this.handleOnClickCreateConfig
-            : this.handleOnClickDeleteConfig
+          isMissing ? this.props.createConfig : this.props.deleteConfig
         }
         style={style}
       >
@@ -175,11 +145,10 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                       return (
                         <ResponseOptionMapping
                           key={target.id}
-                          responseOption={target}
+                          responseOption={target.responseOption}
                           surveyQuestions={surveyQuestions}
                           onClickDelete={this.makeHandleOnClickDeleteTarget(
-                            target.id,
-                            "responseOptionId"
+                            target.id
                           )}
                         />
                       );
@@ -187,10 +156,9 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                       return (
                         <ActivistCodeMapping
                           key={target.id}
-                          activistCode={target}
+                          activistCode={target.activistCode}
                           onClickDelete={this.makeHandleOnClickDeleteTarget(
-                            target.id,
-                            "activistCodeId"
+                            target.id
                           )}
                         />
                       );
@@ -198,10 +166,9 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                       return (
                         <ResultCodeMapping
                           key={target.id}
-                          resultCode={target}
+                          resultCode={target.resultCode}
                           onClickDelete={this.makeHandleOnClickDeleteTarget(
-                            target.id,
-                            "resultCodeId"
+                            target.id
                           )}
                         />
                       );
@@ -238,65 +205,41 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
   }
 }
 
-const queries = {};
+const mutations: MutationMap<InnerProps> = {
+  deleteTarget: ownProps => (targetId: string) => ({
+    mutation: gql`
+      mutation deleteQuestionResponseSyncTarget($targetId: String!) {
+        deleteQuestionResponseSyncTarget(targetId: $targetId)
+      }
+    `,
+    variables: {
+      targetId
+    },
+    update: store => {
+      const variables = { campaignId: ownProps.campaignId };
+      const data: any = cloneDeep(
+        store.readQuery({
+          query: GET_SYNC_CONFIGS,
+          variables
+        })
+      );
 
-const mutations = {
-  createConfig: (ownProps: InnerProps) => () => ({
-    mutation: gql`
-      mutation createQuestionResponseSyncConfig(
-        $input: QuestionResponseSyncConfigInput!
-      ) {
-        createQuestionResponseSyncConfig(input: $input) {
-          ...FullListRefresh
-        }
-      }
-      ${FullListRefreshFragment}
-    `,
-    variables: {
-      input: {
-        id: ownProps.config.id
-      }
-    }
-  }),
-  deleteConfig: (ownProps: InnerProps) => () => ({
-    mutation: gql`
-      mutation deleteQuestionResponseSyncConfig(
-        $input: QuestionResponseSyncConfigInput!
-      ) {
-        deleteQuestionResponseSyncConfig(input: $input) {
-          ...FullListRefresh
-        }
-      }
-      ${FullListRefreshFragment}
-    `,
-    variables: {
-      input: {
-        id: ownProps.config.id
-      }
-    }
-  }),
-  deleteTarget: (ownProps: InnerProps) => (
-    input: Omit<QuestionResponseSyncTargetInput, "configId">
-  ) => ({
-    mutation: gql`
-      mutation deleteQuestionResponseSyncTarget(
-        $input: QuestionResponseSyncTargetInput!
-      ) {
-        deleteQuestionResponseSyncTarget(input: $input) {
-          ...FullListRefresh
-        }
-      }
-      ${FullListRefreshFragment}
-    `,
-    variables: {
-      input: {
-        configId: ownProps.config.id,
-        ...input
-      }
+      const configId = ownProps.config.id;
+      const { edges } = data.campaign.externalSyncConfigurations;
+      const index = edges.findIndex(({ node }) => node.id === configId);
+      edges[index].node.targets = edges[index].node.targets.filter(
+        target => target.id !== targetId
+      );
+
+      store.writeQuery({
+        query: GET_SYNC_CONFIGS,
+        variables,
+        data
+      });
     }
   })
 };
 
-export default compose<InnerProps, OuterProps>(
-  loadData({ queries, mutations })
-)(QuestionResponseConfig);
+export default compose<InnerProps, OuterProps>(loadData({ mutations }))(
+  QuestionResponseConfig
+);

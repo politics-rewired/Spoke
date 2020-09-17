@@ -2,6 +2,7 @@ import React from "react";
 import { compose } from "recompose";
 import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
+import cloneDeep from "lodash/cloneDeep";
 
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
@@ -20,7 +21,9 @@ import { ExternalSurveyQuestion } from "../api/external-survey-question";
 import { ExternalActivistCode } from "../api/external-activist-code";
 import { ExternalResultCode } from "../api/external-result-code";
 import { QuestionResponseSyncTargetInput } from "../api/types";
+import { GET_SYNC_CONFIGS } from "./SyncConfigurationModal/queries";
 import { loadData } from "../containers/hoc/with-operations";
+import { MutationMap } from "../network/types";
 
 enum MappingType {
   ResponseOption,
@@ -308,47 +311,36 @@ class AddMapping extends React.Component<InnerProps, State> {
   }
 }
 
-const queries = {};
-
-const mutations = {
-  createTarget: (ownProps: InnerProps) => (input: {
-    [key: string]: string;
-  }) => ({
+const mutations: MutationMap<InnerProps> = {
+  createTarget: ownProps => (input: { [key: string]: string }) => ({
     mutation: gql`
       mutation createQuestionResponseSyncTarget(
         $input: QuestionResponseSyncTargetInput!
       ) {
         createQuestionResponseSyncTarget(input: $input) {
-          id
-          campaignId
-          interactionStepId
-          questionResponseValue
-          isMissing
-          isRequired
-          createdAt
-          updatedAt
-          interactionStep {
+          ... on ExternalResultCodeTarget {
             id
-            scriptOptions
-            questionText
-            answerOption
+            resultCode {
+              id
+              name
+            }
           }
-          targets {
-            edges {
-              node {
-                ... on ExternalResultCode {
-                  id
-                  name
-                }
-                ... on ExternalActivistCode {
-                  id
-                  name
-                }
-                ... on ExternalSurveyQuestionResponseOption {
-                  id
-                  name
-                }
-              }
+          ... on ExternalActivistCodeTarget {
+            id
+            activistCode {
+              id
+              name
+              description
+              scriptQuestion
+              status
+            }
+          }
+          ... on ExternalSurveyQuestionResponseOptionTarget {
+            id
+            responseOption {
+              id
+              name
+              externalSurveyQuestionId
             }
           }
         }
@@ -359,10 +351,30 @@ const mutations = {
         configId: (ownProps.config || {}).id,
         ...input
       }
+    },
+    update: (store, { data: { createQuestionResponseSyncTarget: newTarget} }) => {
+      const variables = { campaignId: ownProps.config?.campaignId };
+      const data: any = cloneDeep(
+        store.readQuery({
+          query: GET_SYNC_CONFIGS,
+          variables
+        })
+      );
+
+      const configId = ownProps.config?.id;
+      const { edges } = data.campaign.externalSyncConfigurations;
+      const index = edges.findIndex(({ node }) => node.id === configId);
+      edges[index].node.targets.push(newTarget);
+
+      store.writeQuery({
+        query: GET_SYNC_CONFIGS,
+        variables,
+        data
+      });
     }
   })
 };
 
 export default compose<InnerProps, OuterProps>(
-  loadData({ queries, mutations })
+  loadData({ mutations })
 )(AddMapping);

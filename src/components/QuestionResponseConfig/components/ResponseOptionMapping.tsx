@@ -18,7 +18,7 @@ interface Props {
 export const ResponseOptionMapping: React.SFC<Props> = props => {
   const question = props.surveyQuestions.edges.find(
     ({ node }) =>
-      node.externalId === props.responseOption.externalSurveyQuestionId
+      node.id === props.responseOption.externalSurveyQuestionId
   );
   return (
     <ListItem

@@ -1,6 +1,5 @@
 export interface ExternalSurveyQuestionResponseOption {
   id: string;
-  systemId: string;
   externalSurveyQuestionId: string;
   externalId: string;
   name: string;
@@ -13,7 +12,6 @@ export interface ExternalSurveyQuestionResponseOption {
 export const schema = `
   type ExternalSurveyQuestionResponseOption {
     id: String!
-    systemId: String!
     externalSurveyQuestionId: String!
     externalId: String!
     name: String!

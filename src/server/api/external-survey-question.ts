@@ -4,6 +4,7 @@ import { r } from "../models";
 import { RelayPageArgs, ExternalDataCollectionStatus } from "./types";
 
 export interface ExternalSurveyQuestion {
+  id: string;
   system_id: string;
   external_id: number;
   type: string;
@@ -20,6 +21,7 @@ export interface ExternalSurveyQuestion {
 export const resolvers = {
   ExternalSurveyQuestion: {
     ...sqlResolvers([
+      "id",
       "systemId",
       "externalId",
       "type",
@@ -31,8 +33,6 @@ export const resolvers = {
       "createdAt",
       "updatedAt"
     ]),
-    id: (surveyQuestion: ExternalSurveyQuestion) =>
-      `${surveyQuestion.system_id}|${surveyQuestion.external_id}`,
     status: (surveyQuestion: ExternalSurveyQuestion) =>
       surveyQuestion.status.toUpperCase(),
     responseOptions: async (
@@ -40,7 +40,7 @@ export const resolvers = {
       { after, first }: RelayPageArgs
     ) => {
       const query = r.reader("external_survey_question_response_option").where({
-        external_survey_question_id: surveyQuestion.external_id
+        external_survey_question_id: surveyQuestion.id
       });
       return formatPage(query, { after, first, primaryColumn: "created_at" });
     }

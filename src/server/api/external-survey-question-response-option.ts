@@ -1,7 +1,7 @@
 import { sqlResolvers } from "./lib/utils";
 
 export interface ExternalSurveyQuestionResponseOption {
-  system_id: string;
+  id: string;
   external_survey_question_id: number;
   external_id: number;
   name: string;
@@ -14,7 +14,7 @@ export interface ExternalSurveyQuestionResponseOption {
 export const resolvers = {
   ExternalSurveyQuestionResponseOption: {
     ...sqlResolvers([
-      "systemId",
+      "id",
       "externalSurveyQuestionId",
       "externalId",
       "name",
@@ -22,14 +22,6 @@ export const resolvers = {
       "shortName",
       "createdAt",
       "updatedAt"
-    ]),
-    id: (responseOption: ExternalSurveyQuestionResponseOption) => {
-      const {
-        system_id: systemId,
-        external_survey_question_id: questionId,
-        external_id: responseOptionId
-      } = responseOption;
-      return `${systemId}|${questionId}|${responseOptionId}`;
-    }
+    ])
   }
 };
