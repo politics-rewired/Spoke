@@ -249,6 +249,10 @@ const rootSchema = `
     resultCodeId: String
   }
 
+  input SyncCampaignToSystemInput {
+    campaignId: String!
+  }
+
   type RootQuery {
     currentUser: User
     organization(id:String!, utc:String): Organization
@@ -340,6 +344,7 @@ const rootSchema = `
     deleteQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
     createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncConfigTarget!
     deleteQuestionResponseSyncTarget(targetId: String!): String!
+    syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
   }
 
   schema {

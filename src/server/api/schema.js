@@ -3385,6 +3385,22 @@ const rootMutations = {
         .del();
 
       return targetId;
+    },
+    syncCampaignToSystem: async (_, { input }, { user }) => {
+      const campaignId = parseInt(input.campaignId, 10);
+
+      const { organization_id } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first(["organization_id"]);
+
+      await accessRequired(user, organization_id, "ADMIN");
+
+      await r.knex.raw("select * from public.queue_sync_campaign_to_van(?)", [
+        campaignId
+      ]);
+
+      return true;
     }
   }
 };

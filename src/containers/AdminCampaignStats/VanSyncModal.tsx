@@ -3,6 +3,7 @@ import { History } from "history";
 import { withRouter } from "react-router";
 import { compose } from "recompose";
 import gql from "graphql-tag";
+import { ApolloQueryResult } from "apollo-client";
 
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
@@ -11,6 +12,7 @@ import { red500, green300 } from "material-ui/styles/colors";
 
 import { ExternalSyncReadinessState } from "../../api/campaign";
 import { loadData } from "../hoc/with-operations";
+import { MutationMap } from "../../network/types";
 import SyncConfigurationModal from "../../components/SyncConfigurationModal";
 
 interface HocProps {
@@ -21,7 +23,9 @@ interface HocProps {
     };
   };
   history: History;
-  mutations: {};
+  mutations: {
+    syncCampaign(): ApolloQueryResult<boolean>;
+  };
 }
 
 interface OuterProps {
@@ -36,11 +40,13 @@ interface InnerProps extends OuterProps, HocProps {}
 
 interface State {
   isMappingOpen: boolean;
+  isWorking: boolean;
 }
 
 class VanSyncModal extends React.Component<InnerProps, State> {
   state: State = {
-    isMappingOpen: false
+    isMappingOpen: false,
+    isWorking: false
   };
 
   handleOnClickSetIntegration = async () => {
@@ -55,24 +61,34 @@ class VanSyncModal extends React.Component<InnerProps, State> {
     this.setState({ isMappingOpen: false });
 
   handleOnConfirmSync = async () => {
-    const {} = this.state;
-    console.log("kick off sync mutation");
-    this.props.onComplete();
+    this.setState({ isWorking: true });
+    try {
+      const response = await this.props.mutations.syncCampaign();
+      if (response.errors) throw response.errors;
+      this.props.onComplete();
+    } catch (err) {
+      console.error("error syncing campaign", err);
+    } finally {
+      this.setState({ isWorking: false });
+    }
   };
 
   render() {
-    const { isMappingOpen } = this.state;
+    const { isMappingOpen, isWorking } = this.state;
     const { open, organizationId, campaignId, data } = this.props;
     const {
       campaign: { syncReadiness }
     } = data;
+
+    const isSyncDisabled =
+      isWorking || syncReadiness !== ExternalSyncReadinessState.READY;
 
     const actions = [
       <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
       <FlatButton
         label="Sync"
         primary={true}
-        disabled={syncReadiness !== ExternalSyncReadinessState.READY}
+        disabled={isSyncDisabled}
         onClick={this.handleOnConfirmSync}
       />
     ];
@@ -156,7 +172,20 @@ const queries = {
   }
 };
 
-const mutations = {};
+const mutations: MutationMap<InnerProps> = {
+  syncCampaign: ownProps => () => ({
+    mutation: gql`
+      mutation syncCampaignToSystem($input: SyncCampaignToSystemInput!) {
+        syncCampaignToSystem(input: $input)
+      }
+    `,
+    variables: {
+      input: {
+        campaignId: ownProps.campaignId
+      }
+    }
+  })
+};
 
 export default compose<InnerProps, OuterProps>(
   withRouter,
