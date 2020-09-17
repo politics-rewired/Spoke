@@ -72,7 +72,7 @@ exports.up = function(knex) {
       question_response_config_id uuid not null
         references public.all_external_sync_question_response_configuration(id) on delete cascade,
       external_activist_code_id uuid not null
-        references public.external_survey_question_response_option(id) on delete cascade,
+        references public.external_activist_code(id) on delete cascade,
 
       primary key (id)
     );
@@ -88,7 +88,7 @@ exports.up = function(knex) {
       question_response_config_id uuid not null
         references public.all_external_sync_question_response_configuration(id) on delete cascade,
       external_response_option_id uuid not null
-        references public.external_activist_code(id) on delete cascade,
+        references public.external_survey_question_response_option(id) on delete cascade,
 
       primary key (id)
     );
@@ -108,7 +108,7 @@ exports.up = function(knex) {
           istep.answer_option as value,
           exists (
             select 1
-            from public.all_question_response as istep_qr
+            from public.question_response as istep_qr
             where
               istep_qr.interaction_step_id = istep.parent_interaction_id
               and istep_qr.value = istep.answer_option
@@ -121,7 +121,7 @@ exports.up = function(knex) {
           qr.interaction_step_id,
           qr.value,
           true as is_required
-        from public.all_question_response as qr
+        from public.question_response as qr
         join public.interaction_step qr_istep on qr_istep.id = qr.interaction_step_id
       ) all_values
       where
