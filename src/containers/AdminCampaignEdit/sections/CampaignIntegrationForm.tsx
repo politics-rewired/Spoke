@@ -139,7 +139,7 @@ class CampaignIntegrationForm extends React.Component<InnerProps, State> {
 const queries = {
   data: {
     query: gql`
-      query getCampaignBasics($campaignId: String!) {
+      query getCampaignExternalSystem($campaignId: String!) {
         campaign(id: $campaignId) {
           id
           externalSystem {
@@ -193,6 +193,7 @@ const mutations = {
             id
           }
           isStarted
+          syncReadiness
           readiness {
             id
             integration

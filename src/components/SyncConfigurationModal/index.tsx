@@ -163,6 +163,7 @@ const mutations: MutationMap<OuterProps> = {
         id
       }
     },
+    refetchQueries: ["getCampaignSyncReadiness"],
     update: (
       store,
       { data: { createQuestionResponseSyncConfig: newConfig } }
@@ -202,6 +203,7 @@ const mutations: MutationMap<OuterProps> = {
         id
       }
     },
+    refetchQueries: ["getCampaignSyncReadiness"],
     update: (
       store,
       { data: { deleteQuestionResponseSyncConfig: missingConfig } }
