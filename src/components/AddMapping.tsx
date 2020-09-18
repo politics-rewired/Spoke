@@ -20,6 +20,7 @@ import {
 import { ExternalSurveyQuestion } from "../api/external-survey-question";
 import { ExternalActivistCode } from "../api/external-activist-code";
 import { ExternalResultCode } from "../api/external-result-code";
+import { ExternalDataCollectionStatus } from "../api/types";
 import { QuestionResponseSyncTargetInput } from "../api/types";
 import { GET_SYNC_CONFIGS } from "./SyncConfigurationModal/queries";
 import { loadData } from "../containers/hoc/with-operations";
@@ -159,6 +160,13 @@ class AddMapping extends React.Component<InnerProps, State> {
   render() {
     const { config, existingTargets } = this.props;
 
+    const activeActivistCodes = this.props.activistCodes.edges.filter(
+      ({ node }) => node.status === ExternalDataCollectionStatus.ACTIVE
+    );
+    const activeSurveyQuestions = this.props.surveyQuestions.edges.filter(
+      ({ node }) => node.status === ExternalDataCollectionStatus.ACTIVE
+    );
+
     const activeQuestionMaybe = this.props.surveyQuestions.edges.find(
       ({ node }) => node.id === this.state.surveyQuestionId
     );
@@ -210,16 +218,16 @@ class AddMapping extends React.Component<InnerProps, State> {
               <MenuItem
                 value={MappingType.ResponseOption}
                 primaryText={`Survey Response${
-                  responseOptionExists ? " (already configured)" : ""
+                  responseOptionExists ? " (already configured)" : activeSurveyQuestions.length === 0 ? " (none active)" : ""
                 }`}
-                disabled={responseOptionExists}
+                disabled={responseOptionExists || activeSurveyQuestions.length === 0}
               />
               <MenuItem
                 value={MappingType.ActivistCode}
                 primaryText={`Activist Code${
-                  activistCodeExists ? " (already configured)" : ""
+                  activistCodeExists ? " (already configured)" : activeActivistCodes.length === 0 ? " (none active)" : ""
                 }`}
-                disabled={activistCodeExists}
+                disabled={activistCodeExists || activeActivistCodes.length === 0}
               />
               <MenuItem
                 value={MappingType.ResultCode}
@@ -241,7 +249,7 @@ class AddMapping extends React.Component<InnerProps, State> {
                 autoWidth={true}
                 onChange={this.handleOnChangeActivistCode}
               >
-                {this.props.activistCodes.edges.map(({ node }) => (
+                {activeActivistCodes.map(({ node }) => (
                   <MenuItem
                     key={node.id}
                     value={node.id}
@@ -274,7 +282,7 @@ class AddMapping extends React.Component<InnerProps, State> {
                   autoWidth={true}
                   onChange={this.handleOnChangeSurveyQuestion}
                 >
-                  {this.props.surveyQuestions.edges.map(({ node }) => (
+                  {activeSurveyQuestions.map(({ node }) => (
                     <MenuItem
                       key={node.id}
                       value={node.id}

@@ -16,6 +16,12 @@ interface ExternalSystem {
   api_key_ref: string;
 }
 
+interface StatusFilterArgs {
+  filter: {
+    status: string | null;
+  } | null;
+}
+
 export const resolvers = {
   ExternalSystem: {
     ...sqlResolvers([
@@ -39,20 +45,26 @@ export const resolvers = {
     },
     surveyQuestions: async (
       system: ExternalSystem,
-      { after, first }: RelayPageArgs
+      { filter, after, first }: RelayPageArgs & StatusFilterArgs
     ) => {
+      const { status } = filter || {};
+      const queryFilter = status ? { status: status.toLowerCase() } : {};
+
       const query = r
         .reader("external_survey_question")
-        .where({ system_id: system.id });
+        .where({ system_id: system.id, ...queryFilter });
       return formatPage(query, { after, first, primaryColumn: "created_at" });
     },
     activistCodes: async (
       system: ExternalSystem,
-      { after, first }: RelayPageArgs
+      { filter, after, first }: RelayPageArgs & StatusFilterArgs
     ) => {
+      const { status } = filter || {};
+      const queryFilter = status ? { status: status.toLowerCase() } : {};
+
       const query = r
         .reader("external_activist_code")
-        .where({ system_id: system.id });
+        .where({ system_id: system.id, ...queryFilter });
       return formatPage(query, { after, first, primaryColumn: "created_at" });
     },
     resultCodes: async (

@@ -39,8 +39,6 @@ exports.up = function(knex) {
       v_job_request_id integer;
       v_contact_count integer;
     begin
-      raise notice 'jello';
-
       select external_system_id
       from campaign where id = queue_sync_campaign_to_van.campaign_id
       into v_system_id;

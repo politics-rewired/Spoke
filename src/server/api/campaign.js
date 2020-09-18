@@ -479,18 +479,25 @@ export const resolvers = {
       if (!campaign.external_system_id)
         return ExternalSyncReadinessState.MISSING_SYSTEM;
 
-      const [{ count }] = await r
-        .reader("external_sync_question_response_configuration")
-        .where({
-          campaign_id: campaign.id,
-          is_missing: true,
-          is_required: true
-        })
-        .count();
+      const {
+        rows: [{ missing_and_required, includes_not_active }]
+      } = await r.reader.raw(
+        `
+          select
+            count(*) filter (where is_missing and is_required) as missing_and_required,
+            count(*) filter (where includes_not_active) as includes_not_active
+          from public.external_sync_question_response_configuration
+          where
+            campaign_id = ?
+        `,
+        [campaign.id]
+      );
 
-      return count > 0
+      return missing_and_required > 0
         ? ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING
-        : ExternalSyncReadinessState.READY;
+        : includes_not_active > 0
+          ? ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS
+          : ExternalSyncReadinessState.READY;
     },
     externalSyncConfigurations: async (campaign, { after, first }) => {
       if (!campaign.external_system_id) return emptyRelayPage();

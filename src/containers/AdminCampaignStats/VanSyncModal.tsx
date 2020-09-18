@@ -120,6 +120,13 @@ class VanSyncModal extends React.Component<InnerProps, State> {
               Your campaign is missing a required sync mapping!
             </span>
           )}
+          {syncReadiness ===
+            ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS && (
+            <span style={{ color: red500 }}>
+              Your campaign includes mappings to inactive or archived VAN
+              options!
+            </span>
+          )}
           {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && (
             <span style={{ color: red500 }}>
               No integration has been set for this campaign!

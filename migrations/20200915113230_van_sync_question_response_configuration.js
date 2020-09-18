@@ -152,6 +152,25 @@ exports.up = function(knex) {
           select 1 from public.external_sync_config_question_response_result_code qrrc
           where qrrc.question_response_config_id = aqrc.id
         ) as is_empty,
+        exists (
+          select 1 from public.external_sync_config_question_response_response_option qrro
+          join external_survey_question_response_option
+            on external_survey_question_response_option.id = qrro.external_response_option_id
+          join external_survey_question
+            on external_survey_question.id = external_survey_question_response_option.external_survey_question_id
+          where
+            qrro.question_response_config_id = aqrc.id
+            and external_survey_question.status <> 'active'
+
+          union
+
+          select 1 from public.external_sync_config_question_response_activist_code qrac
+          join external_activist_code
+            on external_activist_code.id = qrac.external_activist_code_id
+          where
+            qrac.question_response_config_id = aqrc.id
+            and external_activist_code.status <> 'active'
+        ) as includes_not_active,
         false as is_missing,
         false as is_required
       from public.all_external_sync_question_response_configuration aqrc
@@ -164,6 +183,7 @@ exports.up = function(knex) {
         null as created_at,
         null as updated_at,
         true as is_empty,
+        false as includes_not_active,
         true as is_missing,
         missing.is_required
       from public.missing_external_sync_question_response_configuration missing

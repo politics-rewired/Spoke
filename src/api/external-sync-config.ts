@@ -57,6 +57,7 @@ export interface ExternalSyncQuestionResponseConfig {
   campaignId: string;
   interactionStepId: string;
   questionResponseValue: string;
+  includesNotActive: boolean;
   isMissing: boolean;
   isRequired: boolean;
   interactionStep: {
@@ -71,6 +72,7 @@ export interface ExternalSyncTagConfig {
   id: string;
   systemId: string;
   tagId: string;
+  includesNotActive: boolean;
   isMissing: boolean;
   isRequired: boolean;
   targets: ExternalSyncConfigTarget[] | null;
@@ -109,6 +111,7 @@ export const schema = `
     campaignId: String!
     interactionStepId: String!
     questionResponseValue: String!
+    includesNotActive: Boolean!
     isMissing: Boolean!
     isRequired: Boolean!
     createdAt: String
@@ -131,6 +134,7 @@ export const schema = `
     id: String!
     systemId: String!
     tagId: String!
+    includesNotActive: Boolean!
     isMissing: Boolean!
     isRequired: Boolean!
     createdAt: String
@@ -156,6 +160,7 @@ export const FullListRefreshFragment = gql`
     campaignId
     interactionStepId
     questionResponseValue
+    includesNotActive
     isMissing
     isRequired
     createdAt

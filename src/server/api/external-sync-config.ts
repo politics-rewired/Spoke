@@ -127,6 +127,7 @@ export const resolvers = {
       "campaignId",
       "interactionStepId",
       "questionResponseValue",
+      "includesNotActive",
       "isMissing",
       "isRequired",
       "createdAt",

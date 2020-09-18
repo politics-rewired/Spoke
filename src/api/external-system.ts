@@ -49,6 +49,14 @@ export const schema = `
     apiKey: String!
   }
 
+  input ExternalSurveyQuestionFilter {
+    status: ExternalDataCollectionStatus
+  }
+
+  input ExternalActivistCodeFilter {
+    status: ExternalDataCollectionStatus
+  }
+
   type ExternalSystem {
     id: String!
     name: String!
@@ -60,8 +68,8 @@ export const schema = `
     updatedAt: String!
     syncedAt: String
     lists(after: Cursor, first: Int): ExternalListPage!
-    surveyQuestions(after: Cursor, first: Int): ExternalSurveyQuestionPage!
-    activistCodes(after: Cursor, first: Int): ExternalActivistCodePage!
+    surveyQuestions(filter: ExternalSurveyQuestionFilter, after: Cursor, first: Int): ExternalSurveyQuestionPage!
+    activistCodes(filter: ExternalActivistCodeFilter, after: Cursor, first: Int): ExternalActivistCodePage!
     resultCodes(after: Cursor, first: Int): ExternalResultCodePage!
   }
 

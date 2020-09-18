@@ -12,6 +12,7 @@ import DoneIcon from "material-ui/svg-icons/action/done";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 import AddBoxIcon from "material-ui/svg-icons/content/add-box";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
+import BrokenIcon from "material-ui/svg-icons/image/broken-image";
 import InfoIcon from "material-ui/svg-icons/action/info";
 import NotificationPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 import {
@@ -91,6 +92,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
     } = this.props;
     const {
       questionResponseValue,
+      includesNotActive,
       isMissing,
       isRequired,
       interactionStep: { questionText }
@@ -98,7 +100,13 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
 
     const targets = config.targets;
 
-    const avatar = isRequired ? (
+    const avatar = includesNotActive ? (
+      <Avatar
+        icon={<BrokenIcon />}
+        color={darkBlack}
+        backgroundColor={orange200}
+      />
+    ) : isRequired ? (
       <Avatar
         icon={<WarningIcon />}
         color={darkBlack}
