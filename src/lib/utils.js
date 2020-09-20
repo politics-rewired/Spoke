@@ -1,6 +1,7 @@
 import transform from "lodash/transform";
 import isEqual from "lodash/isEqual";
 import isObject from "lodash/isObject";
+import { URL } from "url";
 
 export const sleep = (ms = 0) =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -24,3 +25,12 @@ export function difference(object, base) {
   }
   return changes(object, base);
 }
+
+export const stringIsAValidUrl = s => {
+  try {
+    new URL(s);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
