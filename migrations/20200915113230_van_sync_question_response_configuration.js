@@ -29,8 +29,8 @@ exports.up = function(knex) {
       before insert or update on campaign 
       for each row execute procedure tg_campaign_check_exteral_system_id();
 
-    create unique index all_question_response_value_interaction_step_idx
-      on public.all_question_response(value, interaction_step_id);
+    create unique index question_response_interaction_step_campaign_contact_id_idx
+      on public.all_question_response(interaction_step_id, campaign_contact_id) where (is_deleted = false);
 
     -- Question Responses
     create table public.all_external_sync_question_response_configuration (
@@ -200,7 +200,7 @@ exports.down = function(knex) {
     drop table public.external_sync_config_question_response_result_code;
     drop table public.all_external_sync_question_response_configuration;
 
-    drop index all_question_response_value_interaction_step_idx;
+    drop index question_response_interaction_step_campaign_contact_id_idx;
 
     drop function tg_campaign_check_exteral_system_id() cascade;
     alter table public.campaign drop column external_system_id cascade;
