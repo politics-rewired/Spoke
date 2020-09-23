@@ -80,7 +80,8 @@ exports.up = function(knex) {
           'api_key', json_build_object('__secret', v_api_key_ref),
           'van_system_id', queue_refresh_van_activist_codes.van_system_id,
           '__after', 'insert_van_activist_codes'
-        )
+        ),
+        'van-api'
       );
     end;
     $$ language plpgsql volatile security definer set search_path = "public";

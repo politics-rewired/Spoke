@@ -111,7 +111,8 @@ exports.up = function(knex) {
               'job_request_id', v_job_request_id,
               'contact_count', v_contact_count
             )
-          )
+          ),
+          'van-api'
         )
       from public.campaign_contact cc
       where
