@@ -68,6 +68,7 @@ interface CanvassResultRow {
 export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
   system_id: string;
   contact_id: string;
+  cc_created_at: string;
   external_id: string;
   phone_id: number;
 }
@@ -78,6 +79,7 @@ export const syncCampaignContactToVAN: Task = async (
   const {
     system_id: systemId,
     contact_id: contactId,
+    // canvassed_at: dateCanvassed,
     external_id: vanId,
     phone_id: phoneId
   } = payload;
@@ -172,7 +174,7 @@ export const syncCampaignContactToVAN: Task = async (
   for (const canvassResult of canvasResultsRaw) {
     chain = chain.then(async () => {
       const {
-        canvassed_at,
+        canvassed_at: dateCanvassed,
         response_options,
         activist_codes,
         result_codes
@@ -201,7 +203,7 @@ export const syncCampaignContactToVAN: Task = async (
       const canvassResponse: VANCanvassResponse = {
         canvassContext: {
           phoneId,
-          dateCanvassed: canvassed_at
+          dateCanvassed
         },
         resultCodeId,
         responses: [...surveyResponses, ...activistCodes]

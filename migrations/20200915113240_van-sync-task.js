@@ -86,6 +86,7 @@ exports.up = function(knex) {
             'username', v_username,
             'api_key', json_build_object('__secret', v_api_key_ref),
             'system_id', v_system_id,
+            'cc_created_at', cc.created_at,
             'campaign_id', cc.campaign_id,
             'contact_id', cc.id,
             'external_id', cc.external_id,
