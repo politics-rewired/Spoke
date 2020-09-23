@@ -336,6 +336,23 @@ class AssignmentTexter extends React.Component {
     }
   };
 
+  // payload.tag = {addedTagIds: ["4"]
+  // removedTagIds: []}
+  addTagToContact = (contact_id, payload) => {
+    console.log(
+      "addTagToContact runs contactId",
+      contact_id,
+      "payload",
+      payload
+    );
+    // const promise = [];
+    // promise.push(
+    //   this.props.mutations.tagContact(contact_id, payload.tag).then(catchError)
+    // );
+    // Promise.all(promise);
+    this.props.mutations.tagContact(contact_id, payload).then(catchError);
+  };
+
   goBackToTodos = () => {
     const { campaign } = this.props.assignment;
     this.props.history.push(`/app/${campaign.organization.id}/todos`);
@@ -392,6 +409,7 @@ class AssignmentTexter extends React.Component {
     }
 
     const navigationToolbarChildren = this.renderNavigationToolbarChildren();
+
     return (
       <AssignmentTexterContact
         key={contact.id}
@@ -409,9 +427,11 @@ class AssignmentTexter extends React.Component {
         mutations={{
           editCampaignContactMessageStatus: this.props.mutations
             .editCampaignContactMessageStatus,
-          bulkSendMessages: this.props.mutations.bulkSendMessages
+          bulkSendMessages: this.props.mutations.bulkSendMessages,
+          tagContact: this.props.mutations.tagContact
         }}
         sendMessage={this.sendMessage}
+        addTagToContact={this.addTagToContact}
       />
     );
   };
@@ -522,23 +542,26 @@ const mutations = {
       campaignContactId
     }
   }),
-  tagContact: ownProps => (campaignContactId, tag) => ({
-    mutation: gql`
-      mutation tagConversation(
-        $campaignContactId: String!
-        $tag: ContactTagActionInput!
-      ) {
-        tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
-          id
-          assignmentId
+  tagContact: ownProps => (campaignContactId, tag) => {
+    console.log("tag contact runs", campaignContactId, tag, ownProps);
+    return {
+      mutation: gql`
+        mutation tagConversation(
+          $campaignContactId: String!
+          $tag: ContactTagActionInput!
+        ) {
+          tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
+            id
+            assignmentId
+          }
         }
+      `,
+      variables: {
+        campaignContactId,
+        tag
       }
-    `,
-    variables: {
-      campaignContactId,
-      tag
-    }
-  }),
+    };
+  },
   editCampaignContactMessageStatus: ownProps => (
     messageStatus,
     campaignContactId
