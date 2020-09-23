@@ -201,13 +201,16 @@ export const syncCampaignContactToVAN: Task = async (
         ? result_codes[0].result_code_id
         : null;
 
+      const responses = [...surveyResponses, ...activistCodes];
+      const hasResponses = responses.length > 0;
+
       const canvassResponse: VANCanvassResponse = {
         canvassContext: {
           phoneId,
           dateCanvassed
         },
-        resultCodeId,
-        responses: [...surveyResponses, ...activistCodes]
+        resultCodeId: hasResponses ? null : resultCodeId,
+        responses: hasResponses ? responses : null
       };
 
       const response = await post(`/people/${vanId}/canvassResponses`)
