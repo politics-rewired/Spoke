@@ -334,7 +334,6 @@ export class AssignmentTexterContact extends React.Component {
 
   gatherSurveyChanges = () => {
     const { contact } = this.props;
-    const { addedTags, removedTags } = this.state;
 
     const changes = {};
 
@@ -363,15 +362,6 @@ export class AssignmentTexterContact extends React.Component {
     if (questionResponseObjects.length)
       changes.questionResponseObjects = questionResponseObjects;
     if (deletionIds.length) changes.deletionIds = deletionIds;
-
-    const tag = {
-      addedTagIds: addedTags.map(tag => tag.id),
-      removedTagIds: removedTags.map(tag => tag.id)
-    };
-
-    if (tag.addedTagIds.length > 0 || tag.removedTagIds.length > 0) {
-      changes.tag = tag;
-    }
 
     // Return aggregate changes
     return changes;
@@ -837,8 +827,6 @@ export class AssignmentTexterContact extends React.Component {
       contact.messageStatus === "needsResponse"
         ? "rgba(83, 180, 119, 0.25)"
         : "";
-
-    console.log("index mounts", this.props);
 
     return (
       <div className={css(styles.fullSize)}>

@@ -319,14 +319,6 @@ class AssignmentTexter extends React.Component {
       );
     }
 
-    if (payload.tag) {
-      promises.push(
-        this.props.mutations
-          .tagContact(contact_id, payload.tag)
-          .then(catchError)
-      );
-    }
-
     Promise.all(promises).then(_ => {
       if (isLastOne) this.handleFinishContact();
     });
@@ -336,21 +328,14 @@ class AssignmentTexter extends React.Component {
     }
   };
 
-  // payload.tag = {addedTagIds: ["4"]
-  // removedTagIds: []}
-  addTagToContact = (contact_id, payload) => {
-    console.log(
-      "addTagToContact runs contactId",
-      contact_id,
-      "payload",
-      payload
-    );
-    // const promise = [];
-    // promise.push(
-    //   this.props.mutations.tagContact(contact_id, payload.tag).then(catchError)
-    // );
-    // Promise.all(promise);
-    this.props.mutations.tagContact(contact_id, payload).then(catchError);
+  addTagToContact = (contact_id, tag) => {
+    const catchError = response => {
+      if (response.errors) {
+        throw new Error(response.errors);
+      }
+      return response;
+    };
+    this.props.mutations.tagContact(contact_id, tag).then(catchError);
   };
 
   goBackToTodos = () => {
