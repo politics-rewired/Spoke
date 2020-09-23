@@ -23,6 +23,7 @@ export const GET_SYNC_TARGETS = gql`
     campaign(id: $campaignId) {
       id
       externalSystem {
+        id
         surveyQuestions {
           edges {
             node {

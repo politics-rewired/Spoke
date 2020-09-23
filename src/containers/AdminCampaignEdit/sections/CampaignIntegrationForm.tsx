@@ -9,8 +9,13 @@ import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 
 import { loadData } from "../../hoc/with-operations";
+import { QueryMap, MutationMap } from "../../../network/types";
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import { ExternalSystem } from "../../../api/external-system";
+import {
+  GET_SYNC_CONFIGS,
+  GET_SYNC_TARGETS
+} from "../../../components/SyncConfigurationModal/queries";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import {
   asSection,
@@ -136,7 +141,7 @@ class CampaignIntegrationForm extends React.Component<InnerProps, State> {
   }
 }
 
-const queries = {
+const queries: QueryMap<InnerProps> = {
   data: {
     query: gql`
       query getCampaignExternalSystem($campaignId: String!) {
@@ -149,7 +154,7 @@ const queries = {
         }
       }
     `,
-    options: (ownProps: InnerProps) => ({
+    options: ownProps => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -172,7 +177,7 @@ const queries = {
         }
       }
     `,
-    options: (ownProps: InnerProps) => ({
+    options: ownProps => ({
       variables: {
         organizationId: ownProps.organizationId
       }
@@ -180,8 +185,8 @@ const queries = {
   }
 };
 
-const mutations = {
-  editCampaign: (ownProps: InnerProps) => (payload: IntegrationValues) => ({
+const mutations: MutationMap<InnerProps> = {
+  editCampaign: ownProps => (payload: IntegrationValues) => ({
     mutation: gql`
       mutation editCampaignBasics(
         $campaignId: String!
@@ -204,7 +209,17 @@ const mutations = {
     variables: {
       campaignId: ownProps.campaignId,
       payload
-    }
+    },
+    refetchQueries: [
+      {
+        query: GET_SYNC_CONFIGS,
+        variables: { campaignId: ownProps.campaignId }
+      },
+      {
+        query: GET_SYNC_TARGETS,
+        variables: { campaignId: ownProps.campaignId }
+      }
+    ]
   })
 };
 
