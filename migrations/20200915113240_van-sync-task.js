@@ -4,28 +4,43 @@ exports.up = function(knex) {
     create function public.mark_van_sync_job_done(payload json, result json, context json)
       returns void as $$
     declare
+      v_job_request_id integer;
+      v_contact_count integer;
       v_remaining_syncs integer;
+      v_result_message text;
     begin
-      select count(*)
-      from graphile_worker.jobs jobs
-      where (jobs.payload->'__context'->>'job_request_id')::integer = (context->>'campaign_id')::integer
+      select
+        (context->>'job_request_id')::integer,
+        (context->>'contact_count')::integer
+      into v_job_request_id, v_contact_count;
+
+      with locked_rows as (
+        select 1
+        from graphile_worker.jobs jobs
+        where (jobs.payload->'__context'->>'job_request_id')::integer = v_job_request_id
+        for update
+      )
+      -- Exclude the current job that is finishing from the remaining count
+      select count(*) - 1
+      from locked_rows
       into v_remaining_syncs;
 
-      -- "Mark as done" (delete) job_request record if job completed
+      -- "Mark as done" (delete) job_request record if we are the last component job
       if v_remaining_syncs = 0 then
-        delete from public.job_request
-        where id = (context->>'job_request_id')::integer;
-        return;
+        -- delete from public.job_request
+        -- where id = v_job_request_id;
+        -- return;
+
+        select 'Synced ' || v_contact_count || ' contacts to VAN'
+        into v_result_message;
       end if;
 
       -- Otherwise update the job progress
       update public.job_request
       set
-        status = greatest(
-          status,
-          ((context->'contact_count')::integer - v_remaining_syncs) / (context->'contact_count')::numeric * 100
-        )
-      where id = (context->>'job_request_id')::integer;
+        status = (v_contact_count - v_remaining_syncs) / v_contact_count::numeric * 100,
+        result_message = v_result_message
+      where id = v_job_request_id;
     end;
     $$ language plpgsql volatile security definer set search_path = "public";
 
@@ -66,7 +81,7 @@ exports.up = function(knex) {
       into v_missing_configs;
 
       if v_missing_configs > 0 then
-        raise 'Campaign % is missing % required configs', queue_sync_campaign_to_van, v_missing_configs;
+        raise 'Campaign % is missing % required configs', queue_sync_campaign_to_van.campaign_id, v_missing_configs;
       end if;
 
       insert into public.job_request (campaign_id, payload, queue_name, job_type, status)
@@ -103,7 +118,7 @@ exports.up = function(knex) {
         cc.campaign_id = queue_sync_campaign_to_van.campaign_id
       ;
     end;
-    $$ language plpgsql;
+    $$ language plpgsql volatile security definer set search_path = "public";
   `);
 };
 
