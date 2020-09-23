@@ -431,6 +431,8 @@ export class AssignmentTexterContact extends React.Component {
       }
     });
 
+    this.tagContact(addedTags, removedTags);
+
     if (callback) {
       this.setState(
         { addedTags, removedTags, pendingNewTags, isTagEditorOpen: false },
@@ -443,7 +445,6 @@ export class AssignmentTexterContact extends React.Component {
         pendingNewTags,
         isTagEditorOpen: false
       });
-      this.tagContact();
     }
 
     if (!callback && addedTags.length > 0) {
@@ -454,7 +455,6 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleApplyTagsAndMoveOn = addedTags => {
-    // change gathersurveyandtagchanges fn
     this.handleApplyTags(addedTags, removedTags, async () => {
       const { contact } = this.props;
       const payload = this.gatherSurveyChanges();
@@ -463,17 +463,13 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   // run mutation with addedTags
-  tagContact = () => {
-    const { contact } = props;
-    const { addedTags, removedTags } = this.state;
-    const changes = {};
+  tagContact = (addedTags, removedTags) => {
+    const { contact } = this.props;
     const tag = {
       addedTagIds: addedTags.map(tag => tag.id),
       removedTagIds: removedTags.map(tag => tag.id)
     };
-    if (tag.addedTagIds.length > 0 || tag.removedTagIds.length > 0) {
-      changes.tag = tag;
-    }
+
     this.props.addTagToContact(contact.id, tag);
   };
 
