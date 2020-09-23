@@ -209,7 +209,13 @@ export const syncCampaignContactToVAN: Task = async (
         responses: [...surveyResponses, ...activistCodes]
       };
 
-      console.log("would have sent payload to van", { canvassResponse });
+      console.log(
+        `would have sent payload to van\n${JSON.stringify(
+          canvassResponse,
+          null,
+          2
+        )}`
+      );
 
       // const response = await post(`/people/${vanId}/canvassResponses`)
       //   .use(withVan(payload))
