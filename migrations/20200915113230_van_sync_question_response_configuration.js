@@ -35,6 +35,7 @@ exports.up = function(knex) {
     -- Question Responses
     create table public.all_external_sync_question_response_configuration (
       id uuid not null default uuid_generate_v1mc(),
+      system_id uuid not null references public.external_system(id),
       campaign_id integer not null references public.campaign(id),
       interaction_step_id integer not null references public.interaction_step(id),
       question_response_value text not null,
@@ -42,7 +43,7 @@ exports.up = function(knex) {
       updated_at timestamptz not null default now(),
 
       primary key (id),
-      unique (question_response_value, interaction_step_id, campaign_id)
+      unique (question_response_value, interaction_step_id, campaign_id, system_id)
     );
 
     create trigger _500_external_sync_question_response_configuration_updated_at
@@ -100,7 +101,9 @@ exports.up = function(knex) {
       on public.external_sync_config_question_response_response_option(external_response_option_id);
 
     create view public.missing_external_sync_question_response_configuration as
-      select *
+      select
+        all_values.*,
+        external_system.id as system_id
       from (
         select
           istep.campaign_id,
@@ -124,12 +127,16 @@ exports.up = function(knex) {
         from public.question_response as qr
         join public.interaction_step qr_istep on qr_istep.id = qr.interaction_step_id
       ) all_values
+      join campaign on campaign.id = all_values.campaign_id
+      join external_system
+        on external_system.organization_id = campaign.organization_id
       where
         not exists (
           select 1
           from public.all_external_sync_question_response_configuration aqrc
           where
             all_values.campaign_id = aqrc.campaign_id
+            and external_system.id = aqrc.system_id
             and all_values.interaction_step_id = aqrc.interaction_step_id
             and all_values.value = aqrc.question_response_value
         );
@@ -138,6 +145,7 @@ exports.up = function(knex) {
       select
         aqrc.id::text as compound_id,
         aqrc.campaign_id,
+        aqrc.system_id,
         aqrc.interaction_step_id,
         aqrc.question_response_value,
         aqrc.created_at,
@@ -178,6 +186,7 @@ exports.up = function(knex) {
       select
         missing.value || '|' || missing.interaction_step_id || '|' || missing.campaign_id as compound_id,
         missing.campaign_id,
+        missing.system_id as system_id,
         missing.interaction_step_id,
         missing.value as question_response_value,
         null as created_at,

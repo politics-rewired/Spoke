@@ -489,8 +489,9 @@ export const resolvers = {
           from public.external_sync_question_response_configuration
           where
             campaign_id = ?
+            and system_id = ?
         `,
-        [campaign.id]
+        [campaign.id, campaign.external_system_id]
       );
 
       return missing_and_required > 0
@@ -504,7 +505,10 @@ export const resolvers = {
 
       const query = r
         .reader("external_sync_question_response_configuration")
-        .where({ campaign_id: campaign.id });
+        .where({
+          campaign_id: campaign.id,
+          system_id: campaign.external_system_id
+        });
       return formatPage(query, { after, first, primaryColumn: "compound_id" });
     }
   }

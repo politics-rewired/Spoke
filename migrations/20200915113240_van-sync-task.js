@@ -60,6 +60,7 @@ exports.up = function(knex) {
       from external_sync_question_response_configuration qrc
       where
         qrc.campaign_id = queue_sync_campaign_to_van.campaign_id
+        and qrc.system_id = v_system_id
         and is_missing = true
         and is_required = true
       into v_missing_configs;
@@ -84,6 +85,7 @@ exports.up = function(knex) {
           json_build_object(
             'username', v_username,
             'api_key', json_build_object('__secret', v_api_key_ref),
+            'system_id', v_system_id,
             'campaign_id', cc.campaign_id,
             'contact_id', cc.id,
             'external_id', cc.external_id,

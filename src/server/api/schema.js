@@ -3260,13 +3260,14 @@ const rootMutations = {
       const { id } = input;
       const [responseValue, iStepId, campaignId] = id.split("|");
 
-      const { organization_id } = await r
+      const { organization_id, external_system_id } = await r
         .knex("campaign")
         .where({ id: campaignId })
-        .first("organization_id");
+        .first(["organization_id", "external_system_id"]);
       await accessRequired(user, organization_id, "ADMIN");
 
       await r.knex("all_external_sync_question_response_configuration").insert({
+        system_id: external_system_id,
         campaign_id: campaignId,
         interaction_step_id: iStepId,
         question_response_value: responseValue
@@ -3286,6 +3287,7 @@ const rootMutations = {
 
       const {
         organization_id,
+        system_id,
         campaign_id,
         interaction_step_id,
         question_response_value
@@ -3299,6 +3301,7 @@ const rootMutations = {
         .where({ "all_external_sync_question_response_configuration.id": id })
         .first([
           "organization_id",
+          "system_id",
           "campaign_id",
           "interaction_step_id",
           "question_response_value"
@@ -3314,6 +3317,7 @@ const rootMutations = {
       return r
         .knex("external_sync_question_response_configuration")
         .where({
+          system_id,
           campaign_id,
           interaction_step_id,
           question_response_value

@@ -55,12 +55,6 @@ export interface VANCanvassResponse {
   responses: VANScriptResponse[] | null;
 }
 
-export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
-  contact_id: string;
-  external_id: string;
-  phone_id: number;
-}
-
 interface CanvassResultRow {
   canvassed_at: string;
   result_codes: { result_code_id: number }[];
@@ -71,10 +65,18 @@ interface CanvassResultRow {
   }[];
 }
 
+export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
+  system_id: string;
+  contact_id: string;
+  external_id: string;
+  phone_id: number;
+}
+
 export const syncCampaignContactToVAN: Task = async (
   payload: SyncCampaignContactToVANPayload
 ) => {
   const {
+    system_id: systemId,
     contact_id: contactId,
     external_id: vanId,
     phone_id: phoneId
@@ -96,6 +98,7 @@ export const syncCampaignContactToVAN: Task = async (
             and question_response.interaction_step_id = qrc.interaction_step_id
           where
             campaign_contact_id = ?
+            and system_id = ?
         ),
         points as (
           -- Result Codes
@@ -159,7 +162,7 @@ export const syncCampaignContactToVAN: Task = async (
         from points
         group by 1
       `,
-      [contactId]
+      [contactId, systemId]
     )
     .then(({ rows }: { rows: CanvassResultRow[] }) => rows);
 
