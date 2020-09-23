@@ -3466,14 +3466,6 @@ const rootResolvers = {
 
       let query = r
         .reader("troll_alarm")
-        .join("message", "message.id", "=", "troll_alarm.message_id")
-        .join(
-          "campaign_contact",
-          "campaign_contact.id",
-          "=",
-          "message.campaign_contact_id"
-        )
-        .join("campaign", "campaign.id", "=", "campaign_contact.campaign_id")
         .where({ dismissed, organization_id: organizationId });
 
       if (token !== null) {
@@ -3483,6 +3475,7 @@ const rootResolvers = {
       const countQuery = query.clone();
       const [{ count: totalCount }] = await countQuery.count();
       const alarms = await query
+        .join("message", "message.id", "=", "troll_alarm.message_id")
         .join("user", "user.id", "message.user_id")
         .select(
           "message_id",
