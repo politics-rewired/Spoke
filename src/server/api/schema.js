@@ -3276,6 +3276,7 @@ const rootMutations = {
       return r
         .knex("external_sync_question_response_configuration")
         .where({
+          system_id: external_system_id,
           campaign_id: campaignId,
           interaction_step_id: iStepId,
           question_response_value: responseValue
