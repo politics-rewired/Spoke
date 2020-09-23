@@ -5,6 +5,22 @@ export enum ExternalSyncReadinessState {
   INCLUDES_NOT_ACTIVE_TARGETS = "INCLUDES_NOT_ACTIVE_TARGETS"
 }
 
+export interface JobRequest {
+  id: string;
+  jobType: string;
+  assigned: boolean;
+  status: number;
+  resultMessage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Campaign {
+  id: string;
+  syncReadiness: ExternalSyncReadinessState;
+  pendingJobs: JobRequest[];
+}
+
 export const schema = `
   input CampaignsFilter {
     isArchived: Boolean
@@ -20,11 +36,13 @@ export const schema = `
   }
 
   type JobRequest {
-    id: String
-    jobType: String
+    id: String!
+    jobType: String!
     assigned: Boolean
     status: Int
     resultMessage: String
+    createdAt: String!
+    updatedAt: String!
   }
 
   type CampaignReadiness {

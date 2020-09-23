@@ -102,7 +102,15 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
 
 export const resolvers = {
   JobRequest: {
-    ...sqlResolvers(["id", "assigned", "status", "jobType", "resultMessage"])
+    ...sqlResolvers([
+      "id",
+      "assigned",
+      "status",
+      "jobType",
+      "resultMessage",
+      "createdAt",
+      "updatedAt"
+    ])
   },
   CampaignStats: {
     sentMessagesCount: async campaign => {
