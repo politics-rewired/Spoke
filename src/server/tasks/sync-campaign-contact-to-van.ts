@@ -2,6 +2,7 @@ import { Task } from "pg-compose";
 import { post } from "superagent";
 
 import { r } from "../models";
+import logger from "../../logger";
 
 import { VanAuthPayload, withVan } from "../lib/external-systems";
 
@@ -209,26 +210,19 @@ export const syncCampaignContactToVAN: Task = async (
         responses: [...surveyResponses, ...activistCodes]
       };
 
-      console.log(
-        `would have sent payload to van\n${JSON.stringify(
-          canvassResponse,
-          null,
-          2
-        )}`
-      );
+      const response = await post(`/people/${vanId}/canvassResponses`)
+        .use(withVan(payload))
+        .send(canvassResponse);
 
-      // const response = await post(`/people/${vanId}/canvassResponses`)
-      //   .use(withVan(payload))
-      //   .send(canvassResponse);
-      // if (response.status !== 204) {
-      //   logger.error(`sync_campaign_to_van__incorrect_response_code`, {
-      //     response: {
-      //       status: response.status,
-      //       body: response.body
-      //     }
-      //   });
-      //   throw new VANSyncError(response.status, response.body);
-      // }
+      if (response.status !== 204) {
+        logger.error(`sync_campaign_to_van__incorrect_response_code`, {
+          response: {
+            status: response.status,
+            body: response.body
+          }
+        });
+        throw new VANSyncError(response.status, response.body);
+      }
     });
   }
 
