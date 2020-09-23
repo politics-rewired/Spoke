@@ -103,9 +103,13 @@ class VanSyncModal extends React.Component<InnerProps, State> {
         <p>
           This will sync question responses and tags to VAN. For more
           information see{" "}
-          <a href="https://docs.spokerewired.com/" target="_blank">
-            TODO
-          </a>.
+          <a
+            href="https://docs.spokerewired.com/article/93-van-list-loading"
+            target="_blank"
+          >
+            VAN Integration
+          </a>
+          .
         </p>
         <p>
           Status:{" "}

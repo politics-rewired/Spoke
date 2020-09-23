@@ -108,7 +108,16 @@ class SyncConfigurationModal extends React.Component<InnerProps> {
         autoScrollBodyContent={true}
         onRequestClose={this.props.onRequestClose}
       >
-        <p>TODO: write preamble.</p>
+        <p>
+          For instructions on configuring mappings, please see the{" "}
+          <a
+            href="https://docs.spokerewired.com/article/93-van-list-loading"
+            target="_blank"
+          >
+            VAN Integration
+          </a>{" "}
+          page.
+        </p>
         {responseMappings.map(responseMapping => (
           <QuestionResponseConfig
             key={responseMapping.id}
