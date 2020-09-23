@@ -29,7 +29,7 @@ export const fetchVANActivistCodes: Task = async (
 ) => {
   const limit = 50;
   let offset = 0;
-  let returnCount = 0;
+  let hasNextPage = false;
   let surveyQuestions: VANActivistCode[] = [];
   do {
     const response = await get("/activistCodes")
@@ -39,10 +39,10 @@ export const fetchVANActivistCodes: Task = async (
       })
       .use(withVan(payload));
     const body: PaginatedVanResponse<VANActivistCode> = response.body;
-    returnCount = body.items.length;
+    hasNextPage = body.nextPageLink !== null;
     offset += limit;
     surveyQuestions = surveyQuestions.concat(body.items);
-  } while (returnCount > 0);
+  } while (hasNextPage);
 
   return surveyQuestions.map(sq => ({
     van_system_id: payload.van_system_id,
