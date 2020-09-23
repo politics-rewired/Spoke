@@ -41,7 +41,13 @@ exports.up = function(knex) {
             )[1]
           ) as trigger_token
         from message
-        where message.created_at > now() - get_trollbot_matches.troll_interval
+        join campaign_contact
+          on campaign_contact.id = message.campaign_contact_id
+        join campaign
+          on campaign.id = campaign_contact.campaign_id
+        where
+          organization_id = get_trollbot_matches.organization_id
+          and message.created_at > now() - get_trollbot_matches.troll_interval
           and is_from_contact = false
           and to_tsvector(text) @@ v_troll_trigger;
     end;
