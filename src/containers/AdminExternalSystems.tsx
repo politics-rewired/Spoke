@@ -156,7 +156,7 @@ class AdminExternalSystems extends Component<Props, State> {
             <TableRow>
               <TableHeaderColumn>Name</TableHeaderColumn>
               <TableHeaderColumn>Type</TableHeaderColumn>
-              <TableHeaderColumn>Resources Last Fetched</TableHeaderColumn>
+              <TableHeaderColumn>Sync Options Last Fetched</TableHeaderColumn>
               <TableHeaderColumn>Actions</TableHeaderColumn>
             </TableRow>
           </TableHeader>
