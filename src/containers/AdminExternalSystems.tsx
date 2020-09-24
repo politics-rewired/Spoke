@@ -180,7 +180,7 @@ class AdminExternalSystems extends Component<Props, State> {
                     onClick={this.makeStartEditExternalSystem(system.id)}
                   />
                   <RaisedButton
-                    label="Get Resources"
+                    label="Refresh Sync Options"
                     labelPosition="before"
                     icon={<SyncIcon />}
                     style={{ marginRight: 10 }}
