@@ -112,7 +112,8 @@ exports.up = function(knex) {
               'contact_count', v_contact_count
             )
           ),
-          'van-api'
+          'van-api',
+          priority => 10
         )
       from public.campaign_contact cc
       where

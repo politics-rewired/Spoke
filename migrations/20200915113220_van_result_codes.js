@@ -69,7 +69,8 @@ exports.up = function(knex) {
           'van_system_id', queue_refresh_van_result_codes.van_system_id,
           '__after', 'insert_van_result_codes'
         ),
-        'van-api'
+        'van-api',
+        priority => 0
       );
     end;
     $$ language plpgsql volatile security definer set search_path = "public";
