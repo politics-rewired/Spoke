@@ -129,11 +129,13 @@ exports.up = function(knex) {
 
 exports.down = function(knex) {
   return knex.schema.raw(`
-    DROP TABLE "public"."external_system" ();
-    DROP TABLE "public"."external_list" ();
+    DROP TABLE "public"."external_system";
+    DROP TABLE "public"."external_list";
 
+    DROP FUNCTION "public".fetch_saved_list;
     DROP FUNCTION "public".insert_van_contact_batch_to_campaign_contact;
     DROP FUNCTION "public".queue_load_list_into_campaign;
+    DROP FUNCTION "public".mark_loading_job_done;
     DROP FUNCTION "public".insert_saved_lists;
     DROP FUNCTION "public".queue_refresh_saved_lists;
     DROP FUNCTION "public".get_api_key_ref_from_van_system_with_id;

@@ -312,6 +312,11 @@ const validators = {
     default: false,
     isClient: true
   }),
+  TROLL_ALERT_PERIOD_MINUTES: num({
+    desc:
+      "The interval length in minutes that each troll patrol sweep will examine messages within.",
+    default: 6
+  }),
   DISABLE_TEXTER_NOTIFICATIONS: bool({
     desc:
       "Whether to disable texter notifications – if true, should be implemented externally.",

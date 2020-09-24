@@ -17,11 +17,15 @@ const styles = StyleSheet.create({
 
 class MessageList extends Component {
   componentDidMount() {
-    this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight);
+    if (this.refs.messageWindow) {
+      this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight);
+    }
   }
 
   componentDidUpdate() {
-    this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight);
+    if (this.refs.messageWindow) {
+      this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight);
+    }
   }
 
   render() {
