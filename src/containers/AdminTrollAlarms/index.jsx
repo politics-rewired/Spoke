@@ -157,7 +157,7 @@ class AdminTrollAlarms extends React.Component {
           />
           <Toggle
             label="Dismissed Alarms"
-            style={styles.controlsColumn}
+            style={{ ...styles.controlsColumn, width: "0px" }}
             onToggle={this.handleToggleDismissed}
             toggled={dismissed}
           />

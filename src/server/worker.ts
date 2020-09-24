@@ -8,6 +8,7 @@ import logger from "../logger";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
+import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -38,6 +39,8 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
   m.taskList!["release-stale-replies"] = releaseStaleReplies;
   m.taskList!["handle-delivery-report"] = handleDeliveryReport;
+  m.taskList!["troll-patrol"] = trollPatrol;
+  m.taskList!["troll-patrol-for-org"] = trollPatrolForOrganization;
 
   m.cronJobs!.push({
     name: "release-stale-replies",
@@ -45,6 +48,16 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
     pattern: "*/5 * * * *",
     time_zone: config.TZ
   });
+
+  if (config.ENABLE_TROLLBOT) {
+    const jobInterval = config.TROLL_ALERT_PERIOD_MINUTES - 1;
+    m.cronJobs!.push({
+      name: "troll-patrol",
+      task_name: "troll-patrol",
+      pattern: `*/${jobInterval} * * * *`,
+      time_zone: config.TZ
+    });
+  }
 
   if (!worker) {
     workerSemaphore = true;
