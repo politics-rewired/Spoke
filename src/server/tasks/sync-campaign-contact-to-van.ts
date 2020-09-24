@@ -171,65 +171,60 @@ export const syncCampaignContactToVAN: Task = async (
 
   if (canvasResultsRaw.length === 0) return;
 
-  let chain = Promise.resolve();
   for (const canvassResult of canvasResultsRaw) {
-    chain = chain.then(async () => {
-      const {
-        canvassed_at: dateCanvassed,
-        response_options,
-        activist_codes,
-        result_codes
-      } = canvassResult;
+    const {
+      canvassed_at: dateCanvassed,
+      response_options,
+      activist_codes,
+      result_codes
+    } = canvassResult;
 
-      const surveyResponses: VANSurveyResponse[] = response_options.map(
-        option => ({
-          type: "SurveyResponse",
-          surveyQuestionId: option.survey_question_id,
-          surveyResponseId: option.response_option_id
-        })
-      );
+    const surveyResponses: VANSurveyResponse[] = response_options.map(
+      option => ({
+        type: "SurveyResponse",
+        surveyQuestionId: option.survey_question_id,
+        surveyResponseId: option.response_option_id
+      })
+    );
 
-      const activistCodes: VANActivistCodeResponse[] = activist_codes.map(
-        code => ({
-          type: "ActivistCode",
-          activistCodeId: code.activist_code_id,
-          action: "Apply"
-        })
-      );
+    const activistCodes: VANActivistCodeResponse[] = activist_codes.map(
+      code => ({
+        type: "ActivistCode",
+        activistCodeId: code.activist_code_id,
+        action: "Apply"
+      })
+    );
 
-      const resultCodeId = result_codes[0]
-        ? result_codes[0].result_code_id
-        : null;
+    const resultCodeId = result_codes[0]
+      ? result_codes[0].result_code_id
+      : null;
 
-      const responses = [...surveyResponses, ...activistCodes];
-      const hasResponses = responses.length > 0;
+    const responses = [...surveyResponses, ...activistCodes];
+    const hasResponses = responses.length > 0;
 
-      const canvassResponse: VANCanvassResponse = {
-        canvassContext: {
-          phoneId,
-          dateCanvassed
-        },
-        resultCodeId: hasResponses ? null : resultCodeId,
-        responses: hasResponses ? responses : null
-      };
+    const canvassResponse: VANCanvassResponse = {
+      canvassContext: {
+        phoneId,
+        dateCanvassed
+      },
+      resultCodeId: hasResponses ? null : resultCodeId,
+      responses: hasResponses ? responses : null
+    };
 
-      const response = await post(`/people/${vanId}/canvassResponses`)
-        .use(withVan(payload))
-        .send(canvassResponse);
+    const response = await post(`/people/${vanId}/canvassResponses`)
+      .use(withVan(payload))
+      .send(canvassResponse);
 
-      if (response.status !== 204) {
-        logger.error(`sync_campaign_to_van__incorrect_response_code`, {
-          response: {
-            status: response.status,
-            body: response.body
-          }
-        });
-        throw new VANSyncError(response.status, response.body);
-      }
-    });
+    if (response.status !== 204) {
+      logger.error(`sync_campaign_to_van__incorrect_response_code`, {
+        response: {
+          status: response.status,
+          body: response.body
+        }
+      });
+      throw new VANSyncError(response.status, response.body);
+    }
   }
-
-  await chain;
 };
 
 export default syncCampaignContactToVAN;
