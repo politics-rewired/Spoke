@@ -462,7 +462,7 @@ export class AssignmentTexterContact extends React.Component {
     });
   };
 
-  // run mutation with addedTags
+  // run mutation with added and removed tags
   tagContact = (addedTags, removedTags) => {
     const { contact } = this.props;
     const tag = {

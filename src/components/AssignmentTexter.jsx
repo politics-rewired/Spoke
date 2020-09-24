@@ -16,6 +16,7 @@ import { loadData } from "../containers/hoc/with-operations";
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
 import Empty from "../components/Empty";
 import LoadingIndicator from "../components/LoadingIndicator";
+import { catchError } from "../network/utils";
 
 const SEND_DELAY = 100;
 
@@ -278,13 +279,6 @@ class AssignmentTexter extends React.Component {
 
     const promises = [];
 
-    const catchError = response => {
-      if (response.errors) {
-        throw new Error(response.errors);
-      }
-      return response;
-    };
-
     if (payload.message)
       promises.push(
         this.props.mutations
@@ -329,12 +323,6 @@ class AssignmentTexter extends React.Component {
   };
 
   addTagToContact = (contact_id, tag) => {
-    const catchError = response => {
-      if (response.errors) {
-        throw new Error(response.errors);
-      }
-      return response;
-    };
     this.props.mutations.tagContact(contact_id, tag).then(catchError);
   };
 
@@ -527,26 +515,23 @@ const mutations = {
       campaignContactId
     }
   }),
-  tagContact: ownProps => (campaignContactId, tag) => {
-    console.log("tag contact runs", campaignContactId, tag, ownProps);
-    return {
-      mutation: gql`
-        mutation tagConversation(
-          $campaignContactId: String!
-          $tag: ContactTagActionInput!
-        ) {
-          tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
-            id
-            assignmentId
-          }
+  tagContact: ownProps => (campaignContactId, tag) => ({
+    mutation: gql`
+      mutation tagConversation(
+        $campaignContactId: String!
+        $tag: ContactTagActionInput!
+      ) {
+        tagConversation(campaignContactId: $campaignContactId, tag: $tag) {
+          id
+          assignmentId
         }
-      `,
-      variables: {
-        campaignContactId,
-        tag
       }
-    };
-  },
+    `,
+    variables: {
+      campaignContactId,
+      tag
+    }
+  }),
   editCampaignContactMessageStatus: ownProps => (
     messageStatus,
     campaignContactId
