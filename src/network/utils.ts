@@ -1,6 +1,6 @@
-export const catchError = (response: Response) => {
-  if (!response.ok) {
-    throw new Error(response.statusText);
+export const catchError = (response: any) => {
+  if (response.errors) {
+    throw new Error(response.errors);
   }
   return response;
 };
