@@ -46,7 +46,7 @@ exports.up = function(knex) {
 
 exports.down = function(knex) {
   return knex.schema.raw(`
-    drop view assignable_campaign_contacts_with_escalation_tags;
     drop view assignable_needs_reply_with_escalation_tags;
+    drop view assignable_campaign_contacts_with_escalation_tags;
   `);
 };

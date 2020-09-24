@@ -9,9 +9,12 @@ exports.up = function(knex) {
 
 exports.down = function(knex) {
   return knex.schema.alterTable("campaign_contact_tag", table => {
-    table.dropIndex("campaign_contact_tag_tag_idx");
-    // drop index concurrently campaign_contact_tag_tag_idx
-    table.dropIndex("campaign_contact_tag_contact_idx");
+    table.dropIndex(
+      ["campaign_contact_id"],
+      "campaign_contact_tag_contact_idx"
+    );
     // drop index concurrently campaign_contact_tag_contact_idx
+    table.dropIndex(["tag_id"], "campaign_contact_tag_tag_idx");
+    // drop index concurrently campaign_contact_tag_tag_idx
   });
 };
