@@ -13,8 +13,41 @@ import { red500, green300 } from "material-ui/styles/colors";
 import { ExternalSyncReadinessState } from "../../api/campaign";
 import { loadData } from "../hoc/with-operations";
 import { QueryMap, MutationMap } from "../../network/types";
-import { Campaign } from "../../api/campaign";
+import { Campaign, JobRequest } from "../../api/campaign";
 import SyncConfigurationModal from "../../components/SyncConfigurationModal";
+
+interface JobRequestResult {
+  message: string;
+  error_counts?: {
+    [key: string]: number;
+  };
+}
+
+const messageFromJobRquest = (job: JobRequest) => {
+  try {
+    const result: JobRequestResult = JSON.parse(job.resultMessage);
+    return result.message;
+  } catch {
+    return `Error: could not parse result for job_request ${job.id}`;
+  }
+};
+
+const errorListFromJobRequest = (job: JobRequest) => {
+  let result: JobRequestResult;
+  try {
+    result = JSON.parse(job.resultMessage);
+  } catch {
+    return [`Error: could not parse result for job_request ${job.id}`];
+  }
+
+  if (result.error_counts) {
+    return Object.entries(result.error_counts).map(
+      ([error, error_count]) => `${error_count} - ${error}`
+    );
+  }
+
+  return [];
+};
 
 interface HocProps {
   data: {
@@ -97,6 +130,9 @@ class VanSyncModal extends React.Component<InnerProps, State> {
     const latestSyncAttempt = this.props.syncJobs.campaign.pendingJobs[0];
     const isSyncing: boolean =
       latestSyncAttempt && latestSyncAttempt.status !== 100;
+    const syncErrors = latestSyncAttempt
+      ? errorListFromJobRequest(latestSyncAttempt)
+      : [];
 
     const isSyncDisabled =
       isWorking ||
@@ -132,16 +168,20 @@ class VanSyncModal extends React.Component<InnerProps, State> {
           .
         </p>
         {isSyncing ? (
-          [
-            <p>Syncing campaign: {latestSyncAttempt.status}%</p>,
+          <div>
+            <p>Syncing campaign: {latestSyncAttempt.status}%</p>
+            {syncErrors.length > 0 && [
+              <p>Encountered the following errors</p>,
+              <ul>{syncErrors.map(error => <li key={error}>{error}</li>)}</ul>
+            ]}
             <RaisedButton
               label="Cancel Sync"
               primary={true}
               onClick={this.handleOnCancelSync(latestSyncAttempt.id)}
-            />,
-            <br />,
+            />
             <br />
-          ]
+            <br />
+          </div>
         ) : (
           <p>
             Status:{" "}
@@ -200,7 +240,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
             <p>
               Last sync:<br />
               {new Date(latestSyncAttempt.updatedAt).toLocaleString()} -{" "}
-              {latestSyncAttempt.resultMessage}
+              {messageFromJobRquest(latestSyncAttempt)}
             </p>
           )}
       </Dialog>
