@@ -12,7 +12,10 @@ import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
 import fetchVANSurveyQuestions from "./tasks/fetch-van-survey-questions";
 import fetchVANActivistCodes from "./tasks/fetch-van-activist-codes";
 import fetchVANResultCodes from "./tasks/fetch-van-result-codes";
-import syncCampaignContactToVAN from "./tasks/sync-campaign-contact-to-van";
+import {
+  syncCampaignContactToVAN,
+  updateVanSyncStatuses
+} from "./tasks/sync-campaign-contact-to-van";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -49,11 +52,19 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["van-get-activist-codes"] = fetchVANActivistCodes;
   m.taskList!["van-get-result-codes"] = fetchVANResultCodes;
   m.taskList!["van-sync-campaign-contact"] = syncCampaignContactToVAN;
+  m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
 
   m.cronJobs!.push({
     name: "release-stale-replies",
     task_name: "release-stale-replies",
     pattern: "*/5 * * * *",
+    time_zone: config.TZ
+  });
+
+  m.cronJobs!.push({
+    name: "update-van-sync-statuses",
+    task_name: "update-van-sync-statuses",
+    pattern: "* * * * *",
     time_zone: config.TZ
   });
 

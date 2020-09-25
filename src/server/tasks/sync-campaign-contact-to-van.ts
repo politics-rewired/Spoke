@@ -227,4 +227,8 @@ export const syncCampaignContactToVAN: Task = async (
   }
 };
 
-export default syncCampaignContactToVAN;
+export const updateVanSyncStatuses: Task = async (_payload, helpers) => {
+  await helpers.query(
+    `select * from public.update_van_sync_job_request_status()`
+  );
+};
