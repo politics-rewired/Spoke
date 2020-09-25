@@ -9,6 +9,7 @@ import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
+import syncSlackTeamMembers from "./tasks/sync-slack-team-members";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -41,6 +42,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["handle-delivery-report"] = handleDeliveryReport;
   m.taskList!["troll-patrol"] = trollPatrol;
   m.taskList!["troll-patrol-for-org"] = trollPatrolForOrganization;
+  m.taskList!["sync-slack-team-members"] = syncSlackTeamMembers;
 
   m.cronJobs!.push({
     name: "release-stale-replies",
@@ -48,6 +50,21 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
     pattern: "*/5 * * * *",
     time_zone: config.TZ
   });
+
+  if (config.SLACK_SYNC_CHANNELS) {
+    if (config.SLACK_TOKEN) {
+      m.cronJobs!.push({
+        name: "sync-slack-team-members",
+        task_name: "sync-slack-team-members",
+        pattern: `*/1 * * * *`,
+        time_zone: config.TZ
+      });
+    } else {
+      logger.error(
+        "Could not enable slack channel sync. No SLACK_TOKEN present."
+      );
+    }
+  }
 
   if (config.ENABLE_TROLLBOT) {
     const jobInterval = config.TROLL_ALERT_PERIOD_MINUTES - 1;

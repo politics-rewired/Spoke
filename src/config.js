@@ -1,5 +1,6 @@
 const envalid = require("envalid");
 const pickBy = require("lodash/pickBy");
+
 const { str, bool, num, email, url, host, port } = envalid;
 
 const validators = {
@@ -632,6 +633,11 @@ const validators = {
     desc:
       "If set, then on post-install (often from deploying) a message will be posted to a slack channel's #spoke channel",
     default: undefined
+  }),
+  SLACK_SYNC_CHANNELS: bool({
+    desc:
+      "If true, Spoke team membership will be synced with matching Slack channel membership",
+    default: false
   }),
   STATIC_BASE_URL: str({
     desc: "Alternate static base url",
