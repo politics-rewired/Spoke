@@ -24,19 +24,19 @@ exports.up = function(knex) {
         select
           id,
           contact_count,
-          count(job_id) as jobs_remaining,
+          sum(jobs_remaining) as jobs_remaining,
           jsonb_object_agg(last_error, error_count) filter (where last_error is not null) as errors
         from (
           select
             pending_sync_jobs.id,
             pending_sync_jobs.contact_count,
-            jobs.id as job_id,
-            count(*) as error_count,
+            count(jobs.id) as jobs_remaining,
+            count(jobs.last_error) as error_count,
             jobs.last_error
           from pending_sync_jobs
           left join graphile_worker.jobs jobs
             on (jobs.payload->'__context'->>'job_request_id')::integer = pending_sync_jobs.id
-          group by 1, 2, 3, 5
+          group by 1, 2, 5
         ) inner_grouping
         group by 1, 2
       )
