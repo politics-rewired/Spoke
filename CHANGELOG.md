@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.10.2](https://github.com/politics-rewired/spoke/compare/v2.10.1...v2.10.2) (2020-09-25)
+
+
+### Bug Fixes
+
+* fix get_trollbot_matches function ([c6b83fd](https://github.com/politics-rewired/spoke/commit/c6b83fd9cf190172474687869244f38f43354fa0))
+
+### [2.10.1](https://github.com/politics-rewired/spoke/compare/v2.10.0...v2.10.1) (2020-09-25)
+
+
+### Bug Fixes
+
+* add tag to contacts on save ([#733](https://github.com/politics-rewired/spoke/issues/733)) ([03fc124](https://github.com/politics-rewired/spoke/commit/03fc1241997a2c6b8f1bb12c47f62782bd0c5ebd))
+* **assignment:** dont delete assignments, breaks opt out foreign keys ([#734](https://github.com/politics-rewired/spoke/issues/734)) ([999b404](https://github.com/politics-rewired/spoke/commit/999b40498ba3b0c73e32c363943c6f77bf0e6f86))
+* fix up/down migrations ([#728](https://github.com/politics-rewired/spoke/issues/728)) ([c16aabf](https://github.com/politics-rewired/spoke/commit/c16aabfe8800c8b7e18f8a05fe6e46a93c2efa33))
+* invoke scrollTo only if conversation has messages ([#732](https://github.com/politics-rewired/spoke/issues/732)) ([aea6597](https://github.com/politics-rewired/spoke/commit/aea659727e7f8d461b1039f05ec2001af1abbd7a))
+* **trollbot:** do not escape the token ([f77c8a9](https://github.com/politics-rewired/spoke/commit/f77c8a999e3b0486cb8f8051e9786649260e01f9))
+
 ## [2.10.0](https://github.com/politics-rewired/spoke/compare/v2.9.3...v2.10.0) (2020-09-13)
 
 

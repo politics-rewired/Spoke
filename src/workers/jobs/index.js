@@ -1118,10 +1118,6 @@ export async function assignTexters(job) {
           .groupBy("assignment.id")
           .havingRaw("COUNT(campaign_contact.id) = 0")
           .map(result => result.id);
-
-        await trx("assignment")
-          .delete()
-          .whereIn("id", assignmentIds);
       }
 
       if (job.id) {
