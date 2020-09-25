@@ -16,6 +16,7 @@ import { loadData } from "../containers/hoc/with-operations";
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
 import Empty from "../components/Empty";
 import LoadingIndicator from "../components/LoadingIndicator";
+import { catchError } from "../network/utils";
 
 const SEND_DELAY = 100;
 
@@ -278,13 +279,6 @@ class AssignmentTexter extends React.Component {
 
     const promises = [];
 
-    const catchError = response => {
-      if (response.errors) {
-        throw new Error(response.errors);
-      }
-      return response;
-    };
-
     if (payload.message)
       promises.push(
         this.props.mutations
@@ -319,14 +313,6 @@ class AssignmentTexter extends React.Component {
       );
     }
 
-    if (payload.tag) {
-      promises.push(
-        this.props.mutations
-          .tagContact(contact_id, payload.tag)
-          .then(catchError)
-      );
-    }
-
     Promise.all(promises).then(_ => {
       if (isLastOne) this.handleFinishContact();
     });
@@ -334,6 +320,10 @@ class AssignmentTexter extends React.Component {
     if (!isLastOne) {
       setTimeout(() => this.handleFinishContact(), SEND_DELAY);
     }
+  };
+
+  addTagToContact = (contact_id, tag) => {
+    this.props.mutations.tagContact(contact_id, tag).then(catchError);
   };
 
   goBackToTodos = () => {
@@ -392,6 +382,7 @@ class AssignmentTexter extends React.Component {
     }
 
     const navigationToolbarChildren = this.renderNavigationToolbarChildren();
+
     return (
       <AssignmentTexterContact
         key={contact.id}
@@ -409,9 +400,11 @@ class AssignmentTexter extends React.Component {
         mutations={{
           editCampaignContactMessageStatus: this.props.mutations
             .editCampaignContactMessageStatus,
-          bulkSendMessages: this.props.mutations.bulkSendMessages
+          bulkSendMessages: this.props.mutations.bulkSendMessages,
+          tagContact: this.props.mutations.tagContact
         }}
         sendMessage={this.sendMessage}
+        addTagToContact={this.addTagToContact}
       />
     );
   };

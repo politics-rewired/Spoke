@@ -327,14 +327,13 @@ export class AssignmentTexterContact extends React.Component {
   submitAction = async messageText => {
     const { contact } = this.props;
     const message = this.createMessageToContact(messageText);
-    const changes = this.gatherSurveyAndTagChanges();
+    const changes = this.gatherSurveyChanges();
     const payload = Object.assign({ message }, changes);
     this.props.sendMessage(contact.id, payload);
   };
 
-  gatherSurveyAndTagChanges = () => {
+  gatherSurveyChanges = () => {
     const { contact } = this.props;
-    const { addedTags, removedTags } = this.state;
 
     const changes = {};
 
@@ -364,16 +363,6 @@ export class AssignmentTexterContact extends React.Component {
       changes.questionResponseObjects = questionResponseObjects;
     if (deletionIds.length) changes.deletionIds = deletionIds;
 
-    // Gather tag changes
-    const tag = {
-      addedTagIds: addedTags.map(tag => tag.id),
-      removedTagIds: removedTags.map(tag => tag.id)
-    };
-
-    if (tag.addedTagIds.length > 0 || tag.removedTagIds.length > 0) {
-      changes.tag = tag;
-    }
-
     // Return aggregate changes
     return changes;
   };
@@ -381,7 +370,7 @@ export class AssignmentTexterContact extends React.Component {
   handleClickCloseContactButton = async () => {
     const { contact } = this.props;
     await this.handleEditMessageStatus("closed");
-    const payload = this.gatherSurveyAndTagChanges();
+    const payload = this.gatherSurveyChanges();
     await this.props.sendMessage(contact.id, payload);
   };
 
@@ -411,11 +400,7 @@ export class AssignmentTexterContact extends React.Component {
       optOut.message = message;
     }
 
-    const payload = Object.assign(
-      {},
-      { optOut },
-      this.gatherSurveyAndTagChanges()
-    );
+    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges());
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -446,6 +431,8 @@ export class AssignmentTexterContact extends React.Component {
       }
     });
 
+    this.tagContact(addedTags, removedTags);
+
     if (callback) {
       this.setState(
         { addedTags, removedTags, pendingNewTags, isTagEditorOpen: false },
@@ -470,9 +457,20 @@ export class AssignmentTexterContact extends React.Component {
   handleApplyTagsAndMoveOn = (addedTags, removedTags) => {
     this.handleApplyTags(addedTags, removedTags, async () => {
       const { contact } = this.props;
-      const payload = this.gatherSurveyAndTagChanges();
+      const payload = this.gatherSurveyChanges();
       await this.props.sendMessage(contact.id, payload);
     });
+  };
+
+  // run mutation with added and removed tags
+  tagContact = (addedTags, removedTags) => {
+    const { contact } = this.props;
+    const tag = {
+      addedTagIds: addedTags.map(tag => tag.id),
+      removedTagIds: removedTags.map(tag => tag.id)
+    };
+
+    this.props.addTagToContact(contact.id, tag);
   };
 
   handleCloseDialog = () => {
