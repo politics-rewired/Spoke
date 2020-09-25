@@ -126,7 +126,7 @@
     "passport-local-authenticate": "^1.2.0",
     "pg": "^6.4.2",
     "pg-compose": "^0.0.21",
-    "pgc-ngp-van": "0.0.11",
+    "pgc-ngp-van": "^0.0.12",
     "prop-types": "^15.6.0",
     "query-string": "^6.9.0",
     "react": "^15.6.1",

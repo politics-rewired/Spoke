@@ -3,6 +3,8 @@ import { SuperAgentRequest } from "superagent";
 import { r } from "../models";
 import { config } from "../../config";
 
+const DEFAULT_MODE = "0"; // VoterFile mode
+
 export interface VanAuthPayload {
   username: string;
   api_key: string;
@@ -23,7 +25,9 @@ export interface PaginatedVanResponse<T> {
 export const withVan = (van: VanAuthPayload) => (
   request: SuperAgentRequest
 ) => {
-  request.auth(van.username, `${van.api_key}|0`, { type: "basic" });
+  const [apiKey, existingMode] = van.api_key.split("|");
+  const mode = existingMode ? existingMode : DEFAULT_MODE;
+  request.auth(van.username, `${apiKey}|${mode}`, { type: "basic" });
   request.url = `${config.VAN_BASE_URL}${request.url}`;
   return request;
 };

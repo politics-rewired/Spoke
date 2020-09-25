@@ -4450,12 +4450,7 @@ caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
   resolved "https://registry.yarnpkg.com/caniuse-db/-/caniuse-db-1.0.30001023.tgz#f856f71af16a5a44e81f1fcefc1673912a43da72"
   integrity sha512-EnlshvE6oAum+wWwKmJNVaoqJMjIc0bLUy4Dj77VVnz1o6bzSPr1Ze9iPy6g5ycg1xD6jGU6vBmo7pLEz2MbCQ==
 
-caniuse-lite@^1.0.30000748, caniuse-lite@^1.0.30000792:
-  version "1.0.30001135"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001135.tgz"
-  integrity sha512-ziNcheTGTHlu9g34EVoHQdIu5g4foc8EsxMGC7Xkokmvw0dqNtX8BS8RgCgFBaAiSp2IdjvBxNdh0ssib28eVQ==
-
-caniuse-lite@^1.0.30001035:
+caniuse-lite@^1.0.30000748, caniuse-lite@^1.0.30000792, caniuse-lite@^1.0.30001035:
   version "1.0.30001135"
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001135.tgz"
   integrity sha512-ziNcheTGTHlu9g34EVoHQdIu5g4foc8EsxMGC7Xkokmvw0dqNtX8BS8RgCgFBaAiSp2IdjvBxNdh0ssib28eVQ==
@@ -13564,10 +13559,10 @@ pg@^6.4.2:
     pgpass "1.*"
     semver "4.3.2"
 
-pgc-ngp-van@0.0.11:
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-0.0.11.tgz#35fa228ff44817cfe07693d101a0f379b7f378a5"
-  integrity sha512-5fwcah7j5L9yYLCFRhxRyQI93L+uwo46fok/zExeLHqvZQh1cc3Hy2Rei6MSk+StenBBCZ1N8mXan/199firVg==
+pgc-ngp-van@^0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-0.0.12.tgz#1f578bdcbec40ae25e3e7fe548e2f354150734d0"
+  integrity sha512-UThVmwW4xEKIaRc/DR1WSMqQJVgYZU1eK2TxffdP+7y1f5SVx14rF7VFaGaZsj7nNp0H3ya6ghdGqSU/E4y5Dw==
   dependencies:
     copy "^0.3.2"
     fast-csv "^4.3.0"
