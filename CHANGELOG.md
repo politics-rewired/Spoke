@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.11.0](https://github.com/politics-rewired/spoke/compare/v2.10.2...v2.11.0) (2020-09-28)
+
+
+### Features
+
+* sync slack channels as graphile job ([#736](https://github.com/politics-rewired/spoke/issues/736)) ([2c019e7](https://github.com/politics-rewired/spoke/commit/2c019e74ac63d356fbede4fa563df1da9781db14))
+
 ### [2.10.2](https://github.com/politics-rewired/spoke/compare/v2.10.1...v2.10.2) (2020-09-25)
 
 
