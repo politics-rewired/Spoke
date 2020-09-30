@@ -774,7 +774,7 @@ const rootMutations = {
       const { campaignId, exportType, vanOptions } = options;
 
       if (exportType === CampaignExportType.VAN && !vanOptions) {
-        throw new Error("Input must include vanOptions when exposting as VAN!");
+        throw new Error("Input must include vanOptions when exporting as VAN!");
       }
 
       const campaign = await loaders.campaign.load(campaignId);
@@ -787,7 +787,7 @@ const rootMutations = {
 
       let payload = {};
       if (exportType === CampaignExportType.SPOKE) {
-        payload = { id: campaignId, requester: user.id };
+        payload = { job: { id: campaignId, requester: user.id } };
       } else if (exportType === CampaignExportType.VAN) {
         payload = { ...vanOptions, requesterId: user.id };
       }
@@ -1608,7 +1608,12 @@ const rootMutations = {
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
 
-      await assignmentRequiredOrHasOrgRoleForCampaign(user, contact.assignment_id, contact.campaign_id, 'SUPERVOLUNTEER');
+      await assignmentRequiredOrHasOrgRoleForCampaign(
+        user,
+        contact.assignment_id,
+        contact.campaign_id,
+        "SUPERVOLUNTEER"
+      );
 
       const [campaign] = await r
         .knex("campaign_contact")

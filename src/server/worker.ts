@@ -17,6 +17,7 @@ import {
   syncCampaignContactToVAN,
   updateVanSyncStatuses
 } from "./tasks/sync-campaign-contact-to-van";
+import exportCampaign from "./tasks/export-campaign";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -55,6 +56,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["van-get-result-codes"] = fetchVANResultCodes;
   m.taskList!["van-sync-campaign-contact"] = syncCampaignContactToVAN;
   m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
+  m.taskList!["export-campaign"] = exportCampaign;
 
   m.cronJobs!.push({
     name: "release-stale-replies",
