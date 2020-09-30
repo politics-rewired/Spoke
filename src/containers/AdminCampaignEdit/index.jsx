@@ -375,7 +375,7 @@ class AdminCampaignEdit extends React.Component {
         keys: ["externalSystem"],
         checkCompleted: () => true,
         blocksStarting: false,
-        expandAfterCampaignStarts: true,
+        expandAfterCampaignStarts: false,
         expandableBySuperVolunteers: false
       },
       {
