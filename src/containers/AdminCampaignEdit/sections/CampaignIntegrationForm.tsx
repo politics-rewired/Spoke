@@ -228,8 +228,8 @@ export default compose<InnerProps, RequiredComponentProps>(
     title: "Integration",
     readinessName: "integration",
     jobQueueNames: [],
-    expandAfterCampaignStarts: true,
-    expandableBySuperVolunteers: true
+    expandAfterCampaignStarts: false,
+    expandableBySuperVolunteers: false
   }),
   loadData({
     queries,
