@@ -1137,52 +1137,52 @@ export async function assignTexters(job) {
   });
 }
 
-/**
- * Fetch necessary job data from database.
- * @param {object} job The export job object to fetch data for. Must have payload, campaign_id, and requester properties.
- */
-const fetchExportData = async job => {
-  const { campaign_id: campaignId, payload: rawPayload } = job;
-  const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
-    rawPayload
-  );
-  const { title: campaignTitle } = await r
-    .reader("campaign")
-    .first("title")
-    .where({ id: campaignId });
+// /**
+//  * Fetch necessary job data from database.
+//  * @param {object} job The export job object to fetch data for. Must have payload, campaign_id, and requester properties.
+//  */
+// const fetchExportData = async job => {
+//   const { campaign_id: campaignId, payload: rawPayload } = job;
+//   const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
+//     rawPayload
+//   );
+//   const { title: campaignTitle } = await r
+//     .reader("campaign")
+//     .first("title")
+//     .where({ id: campaignId });
 
-  const { email: notificationEmail } = await r
-    .reader("user")
-    .first("email")
-    .where({ id: requesterId });
+//   const { email: notificationEmail } = await r
+//     .reader("user")
+//     .first("email")
+//     .where({ id: requesterId });
 
-  const interactionSteps = await r
-    .reader("interaction_step")
-    .select("*")
-    .where({ campaign_id: campaignId });
+//   const interactionSteps = await r
+//     .reader("interaction_step")
+//     .select("*")
+//     .where({ campaign_id: campaignId });
 
-  const assignments = await r
-    .reader("assignment")
-    .where("campaign_id", campaignId)
-    .join("user", "user_id", "user.id")
-    .select(
-      "assignment.id as id",
-      "user.first_name",
-      "user.last_name",
-      "user.email",
-      "user.cell",
-      "user.assigned_cell"
-    );
+//   const assignments = await r
+//     .reader("assignment")
+//     .where("campaign_id", campaignId)
+//     .join("user", "user_id", "user.id")
+//     .select(
+//       "assignment.id as id",
+//       "user.first_name",
+//       "user.last_name",
+//       "user.email",
+//       "user.cell",
+//       "user.assigned_cell"
+//     );
 
-  return {
-    campaignId,
-    campaignTitle,
-    notificationEmail,
-    interactionSteps,
-    assignments,
-    isAutomatedExport
-  };
-};
+//   return {
+//     campaignId,
+//     campaignTitle,
+//     notificationEmail,
+//     interactionSteps,
+//     assignments,
+//     isAutomatedExport
+//   };
+// };
 
 const stepHasQuestion = step => step.question && step.question.trim() !== "";
 
@@ -1392,192 +1392,192 @@ export const deleteJob = async (jobId, retries = 0) => {
   }
 };
 
-export async function exportCampaign(job) {
-  let campaignId = undefined,
-    campaignTitle = undefined,
-    notificationEmail = undefined,
-    interactionSteps = undefined,
-    assignments = undefined,
-    isAutomatedExport = undefined;
+// export async function exportCampaign(job) {
+//   let campaignId = undefined,
+//     campaignTitle = undefined,
+//     notificationEmail = undefined,
+//     interactionSteps = undefined,
+//     assignments = undefined,
+//     isAutomatedExport = undefined;
 
-  try {
-    ({
-      campaignId,
-      campaignTitle,
-      notificationEmail,
-      interactionSteps,
-      assignments,
-      isAutomatedExport
-    } = await fetchExportData(job));
-  } catch (exc) {
-    logger.error("Error fetching export data: ", exc);
-    return;
-  }
+//   try {
+//     ({
+//       campaignId,
+//       campaignTitle,
+//       notificationEmail,
+//       interactionSteps,
+//       assignments,
+//       isAutomatedExport
+//     } = await fetchExportData(job));
+//   } catch (exc) {
+//     logger.error("Error fetching export data: ", exc);
+//     return;
+//   }
 
-  const countQueryResult = await r
-    .reader("campaign_contact")
-    .count("*")
-    .where({ campaign_id: campaignId });
-  const contactsCount = countQueryResult[0].count;
+//   const countQueryResult = await r
+//     .reader("campaign_contact")
+//     .count("*")
+//     .where({ campaign_id: campaignId });
+//   const contactsCount = countQueryResult[0].count;
 
-  const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
+//   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
-  // Attempt upload to cloud storage
-  let campaignContactsKey = campaignTitle
-    .replace(/ /g, "_")
-    .replace(/\//g, "_");
+//   // Attempt upload to cloud storage
+//   let campaignContactsKey = campaignTitle
+//     .replace(/ /g, "_")
+//     .replace(/\//g, "_");
 
-  if (!isAutomatedExport) {
-    const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
-    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
-  }
-  const messagesKey = `${campaignContactsKey}-messages`;
+//   if (!isAutomatedExport) {
+//     const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
+//     campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
+//   }
+//   const messagesKey = `${campaignContactsKey}-messages`;
 
-  const campaignContactsUploadStream = await getUploadStream(
-    `${campaignContactsKey}.csv`
-  );
-  const campaignContactsWriteStream = format({
-    headers: true,
-    writeHeaders: true
-  });
+//   const campaignContactsUploadStream = await getUploadStream(
+//     `${campaignContactsKey}.csv`
+//   );
+//   const campaignContactsWriteStream = format({
+//     headers: true,
+//     writeHeaders: true
+//   });
 
-  campaignContactsUploadStream.on("error", err => {
-    logger.error("error in campaignContactsUploadStream: ", err);
-  });
-  campaignContactsWriteStream.on("error", err => {
-    logger.error("error in campaignContactsWriteStream: ", err);
-  });
+//   campaignContactsUploadStream.on("error", err => {
+//     logger.error("error in campaignContactsUploadStream: ", err);
+//   });
+//   campaignContactsWriteStream.on("error", err => {
+//     logger.error("error in campaignContactsWriteStream: ", err);
+//   });
 
-  const campaignContactsUploadPromise = new Promise((resolve, reject) =>
-    campaignContactsUploadStream.on("finish", resolve)
-  );
+//   const campaignContactsUploadPromise = new Promise((resolve, reject) =>
+//     campaignContactsUploadStream.on("finish", resolve)
+//   );
 
-  campaignContactsWriteStream.pipe(campaignContactsUploadStream);
+//   campaignContactsWriteStream.pipe(campaignContactsUploadStream);
 
-  const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
-  const messagesWriteStream = format({ headers: true, writeHeaders: true });
+//   const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
+//   const messagesWriteStream = format({ headers: true, writeHeaders: true });
 
-  messagesUploadStream.on("error", err => {
-    logger.error("error in messagesUploadStream: ", err);
-  });
-  messagesWriteStream.on("error", err => {
-    logger.error("error in messagesWriteStream: ", err);
-  });
+//   messagesUploadStream.on("error", err => {
+//     logger.error("error in messagesUploadStream: ", err);
+//   });
+//   messagesWriteStream.on("error", err => {
+//     logger.error("error in messagesWriteStream: ", err);
+//   });
 
-  const messagesUploadPromise = new Promise((resolve, reject) =>
-    messagesUploadStream.on("finish", resolve)
-  );
+//   const messagesUploadPromise = new Promise((resolve, reject) =>
+//     messagesUploadStream.on("finish", resolve)
+//   );
 
-  messagesWriteStream.pipe(messagesUploadStream);
+//   messagesWriteStream.pipe(messagesUploadStream);
 
-  // Message rows
-  let lastContactId;
-  let processed = 0;
-  try {
-    let chunkMessageResult = undefined;
-    lastContactId = 0;
-    while (
-      (chunkMessageResult = await processMessagesChunk(
-        campaignId,
-        lastContactId
-      ))
-    ) {
-      lastContactId = chunkMessageResult.lastContactId;
-      logger.debug(
-        `Processing message export for ${campaignId} chunk part ${lastContactId}`
-      );
-      processed += CHUNK_SIZE;
-      await r
-        .knex("job_request")
-        .where({ id: job.id })
-        .update({ status: Math.round((processed / contactsCount / 2) * 100) });
-      for (const m of chunkMessageResult.messages) {
-        messagesWriteStream.write(m);
-      }
-    }
-  } catch (exc) {
-    logger.error("Error building message rows: ", exc);
-  }
+//   // Message rows
+//   let lastContactId;
+//   let processed = 0;
+//   try {
+//     let chunkMessageResult = undefined;
+//     lastContactId = 0;
+//     while (
+//       (chunkMessageResult = await processMessagesChunk(
+//         campaignId,
+//         lastContactId
+//       ))
+//     ) {
+//       lastContactId = chunkMessageResult.lastContactId;
+//       logger.debug(
+//         `Processing message export for ${campaignId} chunk part ${lastContactId}`
+//       );
+//       processed += CHUNK_SIZE;
+//       await r
+//         .knex("job_request")
+//         .where({ id: job.id })
+//         .update({ status: Math.round((processed / contactsCount / 2) * 100) });
+//       for (const m of chunkMessageResult.messages) {
+//         messagesWriteStream.write(m);
+//       }
+//     }
+//   } catch (exc) {
+//     logger.error("Error building message rows: ", exc);
+//   }
 
-  messagesWriteStream.end();
+//   messagesWriteStream.end();
 
-  // Contact rows
-  try {
-    let chunkContactResult = undefined;
-    lastContactId = 0;
-    processed = 0;
-    while (
-      (chunkContactResult = await processContactsChunk(
-        campaignId,
-        campaignTitle,
-        uniqueQuestionsByStepId,
-        lastContactId
-      ))
-    ) {
-      lastContactId = chunkContactResult.lastContactId;
-      logger.debug(
-        `Processing contact export for ${campaignId} chunk part ${lastContactId}`
-      );
-      processed += CHUNK_SIZE;
-      await r
-        .knex("job_request")
-        .where({ id: job.id })
-        .update({
-          status: Math.round((processed / contactsCount / 2) * 100) + 50
-        });
-      for (const c of chunkContactResult.contacts) {
-        campaignContactsWriteStream.write(c);
-      }
-    }
-  } catch (exc) {
-    logger.error("Error building campaign contact rows: ", exc);
-  }
+//   // Contact rows
+//   try {
+//     let chunkContactResult = undefined;
+//     lastContactId = 0;
+//     processed = 0;
+//     while (
+//       (chunkContactResult = await processContactsChunk(
+//         campaignId,
+//         campaignTitle,
+//         uniqueQuestionsByStepId,
+//         lastContactId
+//       ))
+//     ) {
+//       lastContactId = chunkContactResult.lastContactId;
+//       logger.debug(
+//         `Processing contact export for ${campaignId} chunk part ${lastContactId}`
+//       );
+//       processed += CHUNK_SIZE;
+//       await r
+//         .knex("job_request")
+//         .where({ id: job.id })
+//         .update({
+//           status: Math.round((processed / contactsCount / 2) * 100) + 50
+//         });
+//       for (const c of chunkContactResult.contacts) {
+//         campaignContactsWriteStream.write(c);
+//       }
+//     }
+//   } catch (exc) {
+//     logger.error("Error building campaign contact rows: ", exc);
+//   }
 
-  campaignContactsWriteStream.end();
+//   campaignContactsWriteStream.end();
 
-  logger.debug("Waiting for streams to finish");
-  await Promise.all([campaignContactsUploadPromise, messagesUploadPromise]);
+//   logger.debug("Waiting for streams to finish");
+//   await Promise.all([campaignContactsUploadPromise, messagesUploadPromise]);
 
-  try {
-    const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
-      getDownloadUrl(`${campaignContactsKey}.csv`),
-      getDownloadUrl(`${messagesKey}.csv`)
-    ]);
-    if (!isAutomatedExport) {
-      await sendEmail({
-        to: notificationEmail,
-        subject: `Export ready for ${campaignTitle}`,
-        text:
-          `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
-          `\n\nCampaign export:\n${campaignExportUrl}` +
-          `\n\nMessage export:\n${campaignMessagesExportUrl}`
-      }).catch(err => {
-        logger.error("Error sending export email: ", err);
-        logger.info(`Campaign Export URL - ${campaignExportUrl}`);
-        logger.info(
-          `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
-        );
-      });
-    }
-    logger.info(`Successfully exported ${campaignId}`);
-  } catch (err) {
-    logger.error("Error uploading export to cloud storage: ", err);
+//   try {
+//     const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
+//       getDownloadUrl(`${campaignContactsKey}.csv`),
+//       getDownloadUrl(`${messagesKey}.csv`)
+//     ]);
+//     if (!isAutomatedExport) {
+//       await sendEmail({
+//         to: notificationEmail,
+//         subject: `Export ready for ${campaignTitle}`,
+//         text:
+//           `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
+//           `\n\nCampaign export:\n${campaignExportUrl}` +
+//           `\n\nMessage export:\n${campaignMessagesExportUrl}`
+//       }).catch(err => {
+//         logger.error("Error sending export email: ", err);
+//         logger.info(`Campaign Export URL - ${campaignExportUrl}`);
+//         logger.info(
+//           `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
+//         );
+//       });
+//     }
+//     logger.info(`Successfully exported ${campaignId}`);
+//   } catch (err) {
+//     logger.error("Error uploading export to cloud storage: ", err);
 
-    await sendEmail({
-      to: notificationEmail,
-      subject: `Export failed for ${campaignTitle}`,
-      text: `Your Spoke exports failed... please try again later.
-        Error: ${err.message}`
-    });
-  }
+//     await sendEmail({
+//       to: notificationEmail,
+//       subject: `Export failed for ${campaignTitle}`,
+//       text: `Your Spoke exports failed... please try again later.
+//         Error: ${err.message}`
+//     });
+//   }
 
-  // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
-  if (job.id) {
-    await deleteJob(job.id);
-  } else {
-    logger.debug(job);
-  }
-}
+//   // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
+//   if (job.id) {
+//     await deleteJob(job.id);
+//   } else {
+//     logger.debug(job);
+//   }
+// }
 
 // add an in-memory guard that the same messages are being sent again and again
 // not related to stale filter
