@@ -1,7 +1,3 @@
-import { config } from "../../config";
-import logger from "../../logger";
-import { errToObj } from "../utils";
-import { eventBus, EventType } from "../event-bus";
 import escapeRegExp from "lodash/escapeRegExp";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
@@ -10,6 +6,11 @@ import { GraphQLError } from "graphql/error";
 import request from "superagent";
 import _ from "lodash";
 import moment from "moment-timezone";
+import groupBy from "lodash/groupBy";
+import { config } from "../../config";
+import logger from "../../logger";
+import { errToObj } from "../utils";
+import { eventBus, EventType } from "../event-bus";
 
 import { CampaignExportType } from "../../api/types";
 import { getWorker } from "../worker";
@@ -19,6 +20,7 @@ import { TextRequestType } from "../../api/organization";
 import { gzip, makeTree } from "../../lib";
 import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
+import { refreshExternalSystem } from "../lib/external-systems";
 import {
   assignTexters,
   exportCampaign,
@@ -83,6 +85,11 @@ import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
 import { resolvers as externalListResolvers } from "./external-list";
 import { resolvers as externalSystemResolvers } from "./external-system";
+import { resolvers as externalSurveyQuestionResolvers } from "./external-survey-question";
+import { resolvers as externalResponseOptionResolvers } from "./external-survey-question-response-option";
+import { resolvers as externalActivistCodeResolvers } from "./external-activist-code";
+import { resolvers as externalResultCodeResolvers } from "./external-result-code";
+import { resolvers as externalSyncConfigResolvers } from "./external-sync-config";
 import {
   queryCampaignOverlaps,
   queryCampaignOverlapCount
@@ -92,7 +99,6 @@ import { notifyOnTagConversation, notifyAssignmentCreated } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
-import groupBy from "lodash/groupBy";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -182,7 +188,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     textingHoursEnd,
     isAutoassignEnabled,
     repliesStaleAfter,
-    timezone
+    timezone,
+    externalSystemId
   } = campaign;
 
   const organizationId = origCampaignRecord.organization_id;
@@ -201,7 +208,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_end: textingHoursEnd,
     is_autoassign_enabled: isAutoassignEnabled,
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
-    timezone
+    timezone,
+    external_system_id: externalSystemId
   };
 
   Object.keys(campaignUpdates).forEach(key => {
@@ -230,6 +238,15 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("contacts") && campaign.contacts) {
     await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+
+    // Uploading contacts from a CSV invalidates external system configuration
+    await r
+      .knex("campaign")
+      .update({
+        external_system_id: null
+      })
+      .where({ id });
+
     const contactsToSave = campaign.contacts.map(datum => {
       const modelData = {
         campaign_id: datum.campaignId,
@@ -3171,9 +3188,7 @@ const rootMutations = {
         .returning("*");
 
       // Kick off initial list load
-      await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
-        created.id
-      ]);
+      await refreshExternalSystem(externalSystemId);
 
       return created;
     },
@@ -3224,9 +3239,7 @@ const rootMutations = {
       // Completely refresh external lists after auth credentials change to make sure we're
       // not caching lists the new credentials do not have access to
       if (authDidChange) {
-        await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
-          savedSystem.id
-        ]);
+        await refreshExternalSystem(externalSystemId);
       }
 
       return updated;
@@ -3239,8 +3252,157 @@ const rootMutations = {
 
       await accessRequired(user, externalSystem.organization_id, "ADMIN");
 
-      await r.knex.raw("select * from public.queue_refresh_saved_lists(?)", [
-        externalSystemId
+      await refreshExternalSystem(externalSystemId);
+
+      return true;
+    },
+    createQuestionResponseSyncConfig: async (_, { input }, { user }) => {
+      const { id } = input;
+      const [responseValue, iStepId, campaignId] = id.split("|");
+
+      const { organization_id, external_system_id } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first(["organization_id", "external_system_id"]);
+      await accessRequired(user, organization_id, "ADMIN");
+
+      await r.knex("all_external_sync_question_response_configuration").insert({
+        system_id: external_system_id,
+        campaign_id: campaignId,
+        interaction_step_id: iStepId,
+        question_response_value: responseValue
+      });
+
+      return r
+        .knex("external_sync_question_response_configuration")
+        .where({
+          system_id: external_system_id,
+          campaign_id: campaignId,
+          interaction_step_id: iStepId,
+          question_response_value: responseValue
+        })
+        .first();
+    },
+    deleteQuestionResponseSyncConfig: async (_, { input }, { user }) => {
+      const { id } = input;
+
+      const {
+        organization_id,
+        system_id,
+        campaign_id,
+        interaction_step_id,
+        question_response_value
+      } = await r
+        .knex("campaign")
+        .join(
+          "all_external_sync_question_response_configuration",
+          "all_external_sync_question_response_configuration.campaign_id",
+          "campaign.id"
+        )
+        .where({ "all_external_sync_question_response_configuration.id": id })
+        .first([
+          "organization_id",
+          "system_id",
+          "campaign_id",
+          "interaction_step_id",
+          "question_response_value"
+        ]);
+
+      await accessRequired(user, organization_id, "ADMIN");
+
+      await r
+        .knex("all_external_sync_question_response_configuration")
+        .where({ id })
+        .del();
+
+      return r
+        .knex("external_sync_question_response_configuration")
+        .where({
+          system_id,
+          campaign_id,
+          interaction_step_id,
+          question_response_value
+        })
+        .first();
+    },
+    createQuestionResponseSyncTarget: async (_, { input }, { user }) => {
+      const { configId, ...targets } = input;
+
+      const validKeys = [
+        "responseOptionId",
+        "activistCodeId",
+        "resultCodeId"
+      ].filter(key => targets[key] !== null && targets[key] !== undefined);
+
+      if (validKeys.length !== 1) {
+        throw new Error(
+          `Expected 1 valid sync target but got ${validKeys.length}`
+        );
+      }
+      const validKey = validKeys[0];
+      const targetId = targets[validKey];
+
+      if (validKey === "responseOptionId") {
+        return r
+          .knex("public.external_sync_config_question_response_response_option")
+          .insert({
+            question_response_config_id: configId,
+            external_response_option_id: targetId
+          })
+          .returning("*")
+          .then(([row]) => ({ ...row, target_type: "response_option" }));
+      }
+      if (validKey === "activistCodeId") {
+        return r
+          .knex("public.external_sync_config_question_response_activist_code")
+          .insert({
+            question_response_config_id: configId,
+            external_activist_code_id: targetId
+          })
+          .returning("*")
+          .then(([row]) => ({ ...row, target_type: "activist_code" }));
+      }
+      if (validKey === "resultCodeId") {
+        return r
+          .knex("public.external_sync_config_question_response_result_code")
+          .insert({
+            question_response_config_id: configId,
+            external_result_code_id: targetId
+          })
+          .returning("*")
+          .then(([row]) => ({ ...row, target_type: "result_code" }));
+      }
+
+      throw new Error(`Unknown key type ${validKey}`);
+    },
+    deleteQuestionResponseSyncTarget: async (_, { targetId }, { user }) => {
+      await r
+        .knex("public.external_sync_config_question_response_response_option")
+        .where({ id: targetId })
+        .del();
+      await r
+        .knex("public.external_sync_config_question_response_activist_code")
+        .where({ id: targetId })
+        .del();
+      await r
+        .knex("public.external_sync_config_question_response_result_code")
+        .where({ id: targetId })
+        .del();
+
+      return targetId;
+    },
+    syncCampaignToSystem: async (_, { input }, { user }) => {
+      const campaignId = parseInt(input.campaignId, 10);
+
+      const { organization_id } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first(["organization_id"]);
+
+      await accessRequired(user, organization_id, "ADMIN");
+
+      await r.knex.raw("select * from public.queue_sync_campaign_to_van(?)", [
+        campaignId
       ]);
 
       return true;
@@ -3513,6 +3675,16 @@ const rootResolvers = {
         organizationId
       }));
     },
+    externalSystem: async (_, { systemId }, { user }) => {
+      const system = await r
+        .reader("external_system")
+        .where({ id: systemId })
+        .first();
+
+      await accessRequired(user, system.organization_id, "ADMIN");
+
+      return system;
+    },
     externalSystems: async (_, { organizationId, after, first }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
@@ -3559,6 +3731,11 @@ export const resolvers = {
   ...trollbotResolvers,
   ...externalListResolvers,
   ...externalSystemResolvers,
+  ...externalSurveyQuestionResolvers,
+  ...externalResponseOptionResolvers,
+  ...externalActivistCodeResolvers,
+  ...externalResultCodeResolvers,
+  ...externalSyncConfigResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },

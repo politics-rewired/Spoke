@@ -1,3 +1,24 @@
+import { RelayPaginatedResponse } from "./pagination";
+import { ExternalSyncTagConfig } from "./external-sync-config";
+
+export interface Tag {
+  id: string;
+  title: string;
+  description: string;
+  textColor: string;
+  backgroundColor: string;
+  author: any | null;
+  confirmationSteps: string[][];
+  onApplyScript: string;
+  webhookUrl: string;
+  isAssignable: boolean;
+  isSystem: boolean;
+  createdAt: string;
+
+  contacts: any[];
+  externalSyncConfigurations: RelayPaginatedResponse<ExternalSyncTagConfig>;
+}
+
 export const schema = `
   type Tag {
     id: ID!
@@ -14,6 +35,7 @@ export const schema = `
     createdAt: Date!
 
     contacts(campaignId: String): [CampaignContact]!
+    externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncTagConfigPage!
   }
 
   input TagInput {

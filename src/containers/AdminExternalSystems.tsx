@@ -21,7 +21,7 @@ import Snackbar from "material-ui/Snackbar";
 import ContentAdd from "material-ui/svg-icons/content/add";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
-import SyncIcon from "material-ui/svg-icons/notification/sync";
+import SyncIcon from "material-ui/svg-icons/file/cloud-download";
 
 import { loadData } from "./hoc/with-operations";
 import {
@@ -156,7 +156,7 @@ class AdminExternalSystems extends Component<Props, State> {
             <TableRow>
               <TableHeaderColumn>Name</TableHeaderColumn>
               <TableHeaderColumn>Type</TableHeaderColumn>
-              <TableHeaderColumn>Last Synced</TableHeaderColumn>
+              <TableHeaderColumn>Sync Options Last Fetched</TableHeaderColumn>
               <TableHeaderColumn>Actions</TableHeaderColumn>
             </TableRow>
           </TableHeader>
@@ -180,7 +180,7 @@ class AdminExternalSystems extends Component<Props, State> {
                     onClick={this.makeStartEditExternalSystem(system.id)}
                   />
                   <RaisedButton
-                    label="Pull lists"
+                    label="Refresh Sync Options"
                     labelPosition="before"
                     icon={<SyncIcon />}
                     style={{ marginRight: 10 }}

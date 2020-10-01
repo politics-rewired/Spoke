@@ -1,3 +1,26 @@
+export enum ExternalSyncReadinessState {
+  READY = "READY",
+  MISSING_SYSTEM = "MISSING_SYSTEM",
+  MISSING_REQUIRED_MAPPING = "MISSING_REQUIRED_MAPPING",
+  INCLUDES_NOT_ACTIVE_TARGETS = "INCLUDES_NOT_ACTIVE_TARGETS"
+}
+
+export interface JobRequest {
+  id: string;
+  jobType: string;
+  assigned: boolean;
+  status: number;
+  resultMessage: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Campaign {
+  id: string;
+  syncReadiness: ExternalSyncReadinessState;
+  pendingJobs: JobRequest[];
+}
+
 export const schema = `
   input CampaignsFilter {
     isArchived: Boolean
@@ -13,19 +36,29 @@ export const schema = `
   }
 
   type JobRequest {
-    id: String
-    jobType: String
+    id: String!
+    jobType: String!
     assigned: Boolean
     status: Int
     resultMessage: String
+    createdAt: String!
+    updatedAt: String!
   }
 
   type CampaignReadiness {
     id: ID!
     basics: Boolean!
     textingHours: Boolean!
+    integration: Boolean!
     contacts: Boolean!
     autoassign: Boolean!
+  }
+
+  enum ExternalSyncReadinessState {
+    READY
+    MISSING_SYSTEM
+    MISSING_REQUIRED_MAPPING
+    INCLUDES_NOT_ACTIVE_TARGETS
   }
 
   type Campaign {
@@ -66,6 +99,9 @@ export const schema = `
     createdAt: Date
     previewUrl: String
     landlinesFiltered: Boolean!
+    externalSystem: ExternalSystem
+    syncReadiness: ExternalSyncReadinessState!
+    externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
   }
 
   type CampaignsList {

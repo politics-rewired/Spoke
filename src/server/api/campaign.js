@@ -1,11 +1,14 @@
 import { config } from "../../config";
 import { sqlResolvers } from "./lib/utils";
+import { formatPage } from "./lib/pagination";
 import { r, cacheableData } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { getUsers } from "./user";
 import { memoizer, cacheOpts } from "../memoredis";
 import { accessRequired } from "./errors";
 import { symmetricEncrypt } from "./lib/crypto";
+import { emptyRelayPage } from "../../api/pagination";
+import { ExternalSyncReadinessState } from "../../api/campaign";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -99,7 +102,15 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
 
 export const resolvers = {
   JobRequest: {
-    ...sqlResolvers(["id", "assigned", "status", "jobType", "resultMessage"])
+    ...sqlResolvers([
+      "id",
+      "assigned",
+      "status",
+      "jobType",
+      "resultMessage",
+      "createdAt",
+      "updatedAt"
+    ])
   },
   CampaignStats: {
     sentMessagesCount: async campaign => {
@@ -177,6 +188,7 @@ export const resolvers = {
       campaign.textingHoursStart !== null &&
       campaign.textingHoursEnd !== null &&
       campaign.timezone !== null,
+    integration: () => true,
     contacts: campaign =>
       r
         .reader("campaign_contact")
@@ -463,6 +475,49 @@ export const resolvers = {
       await accessRequired(user, organizaitonId, "ADMIN");
       const token = symmetricEncrypt(`${campaign.id}`);
       return token;
+    },
+    externalSystem: async campaign =>
+      campaign.external_system_id
+        ? r
+            .reader("external_system")
+            .where({ id: campaign.external_system_id })
+            .first()
+        : null,
+    syncReadiness: async campaign => {
+      if (!campaign.external_system_id)
+        return ExternalSyncReadinessState.MISSING_SYSTEM;
+
+      const {
+        rows: [{ missing_and_required, includes_not_active }]
+      } = await r.reader.raw(
+        `
+          select
+            count(*) filter (where is_missing and is_required) as missing_and_required,
+            count(*) filter (where includes_not_active) as includes_not_active
+          from public.external_sync_question_response_configuration
+          where
+            campaign_id = ?
+            and system_id = ?
+        `,
+        [campaign.id, campaign.external_system_id]
+      );
+
+      return missing_and_required > 0
+        ? ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING
+        : includes_not_active > 0
+          ? ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS
+          : ExternalSyncReadinessState.READY;
+    },
+    externalSyncConfigurations: async (campaign, { after, first }) => {
+      if (!campaign.external_system_id) return emptyRelayPage();
+
+      const query = r
+        .reader("external_sync_question_response_configuration")
+        .where({
+          campaign_id: campaign.id,
+          system_id: campaign.external_system_id
+        });
+      return formatPage(query, { after, first, primaryColumn: "compound_id" });
     }
   }
 };

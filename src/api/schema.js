@@ -21,6 +21,11 @@ import { schema as paginationSchema } from "./pagination";
 import { schema as membershipSchema } from "./organization-membership";
 import { schema as externalSystemSchema } from "./external-system";
 import { schema as externalListSchema } from "./external-list";
+import { schema as externalSurveyQuestionSchema } from "./external-survey-question";
+import { schema as externalResponseOptionSchema } from "./external-survey-question-response-option";
+import { schema as externalActivistCodeSchema } from "./external-activist-code";
+import { schema as externalResultCodeSchema } from "./external-result-code";
+import { schema as externalSyncConfigSchema } from "./external-sync-config";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -89,6 +94,7 @@ const rootSchema = `
     logoImageUrl: String
     primaryColor: String
     introHtml: String
+    externalSystemId: String
     useDynamicAssignment: Boolean
     contacts: [CampaignContactInput]
     contactsFile: Upload
@@ -232,6 +238,21 @@ const rootSchema = `
     vanOptions: ExportForVanInput
   }
 
+  input QuestionResponseSyncConfigInput {
+    id: String!
+  }
+
+  input QuestionResponseSyncTargetInput {
+    configId: String!
+    responseOptionId: String
+    activistCodeId: String
+    resultCodeId: String
+  }
+
+  input SyncCampaignToSystemInput {
+    campaignId: String!
+  }
+
   type RootQuery {
     currentUser: User
     organization(id:String!, utc:String): Organization
@@ -250,6 +271,7 @@ const rootSchema = `
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
     trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
     trollTokens(organizationId: String!): [TrollTrigger]
+    externalSystem(systemId: String!): ExternalSystem!
     externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!
     externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
   }
@@ -318,6 +340,11 @@ const rootSchema = `
     createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
     editExternalSystem(id: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
     refreshExternalSystem(externalSystemId: String!): Boolean!
+    createQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
+    deleteQuestionResponseSyncConfig(input: QuestionResponseSyncConfigInput!): ExternalSyncQuestionResponseConfig!
+    createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncConfigTarget!
+    deleteQuestionResponseSyncTarget(targetId: String!): String!
+    syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
   }
 
   schema {
@@ -354,5 +381,10 @@ export const schema = [
   teamSchema,
   trollbotSchema,
   externalSystemSchema,
-  externalListSchema
+  externalListSchema,
+  externalSurveyQuestionSchema,
+  externalResponseOptionSchema,
+  externalActivistCodeSchema,
+  externalResultCodeSchema,
+  externalSyncConfigSchema
 ];

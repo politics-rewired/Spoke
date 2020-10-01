@@ -16,7 +16,7 @@ export interface RelayPaginatedResponse<T> {
   edges: RelayEdge<T>[];
 }
 
-export const emptyRelayPage: RelayPaginatedResponse<any> = {
+export const emptyRelayPage = <T>(): RelayPaginatedResponse<T> => ({
   pageInfo: {
     totalCount: 0,
     hasNextPage: false,
@@ -25,7 +25,7 @@ export const emptyRelayPage: RelayPaginatedResponse<any> = {
     endCursor: null
   },
   edges: []
-};
+});
 
 export const schema = `
   scalar Cursor

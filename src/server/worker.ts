@@ -10,6 +10,13 @@ import handleDeliveryReport from "./tasks/handle-delivery-report";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
 import syncSlackTeamMembers from "./tasks/sync-slack-team-members";
+import fetchVANSurveyQuestions from "./tasks/fetch-van-survey-questions";
+import fetchVANActivistCodes from "./tasks/fetch-van-activist-codes";
+import fetchVANResultCodes from "./tasks/fetch-van-result-codes";
+import {
+  syncCampaignContactToVAN,
+  updateVanSyncStatuses
+} from "./tasks/sync-campaign-contact-to-van";
 
 const logFactory: LogFunctionFactory = scope => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -43,11 +50,23 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["troll-patrol"] = trollPatrol;
   m.taskList!["troll-patrol-for-org"] = trollPatrolForOrganization;
   m.taskList!["sync-slack-team-members"] = syncSlackTeamMembers;
+  m.taskList!["van-get-survey-questions"] = fetchVANSurveyQuestions;
+  m.taskList!["van-get-activist-codes"] = fetchVANActivistCodes;
+  m.taskList!["van-get-result-codes"] = fetchVANResultCodes;
+  m.taskList!["van-sync-campaign-contact"] = syncCampaignContactToVAN;
+  m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
 
   m.cronJobs!.push({
     name: "release-stale-replies",
     task_name: "release-stale-replies",
     pattern: "*/5 * * * *",
+    time_zone: config.TZ
+  });
+
+  m.cronJobs!.push({
+    name: "update-van-sync-statuses",
+    task_name: "update-van-sync-statuses",
+    pattern: "* * * * *",
     time_zone: config.TZ
   });
 

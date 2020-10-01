@@ -38,13 +38,14 @@ interface ContactsCampaign {
   id: string;
   customFields: string[];
   contactsCount: number;
+  externalSystem: { id: string } | null;
   datawarehouseAvailable: boolean;
 }
 
 interface ContactsOrganization {
   id: string;
   numbersApiKey: string;
-  externalSystems: RelayPaginatedResponse<{ id: string }>;
+  externalSystems: Pick<RelayPaginatedResponse<never>, "pageInfo">;
   campaigns: {
     campaigns: {
       id: string;
@@ -176,6 +177,7 @@ class CampaignContactsForm extends React.Component<
     const {
       customFields,
       contactsCount,
+      externalSystem,
       datawarehouseAvailable
     } = campaignData.campaign;
 
@@ -191,12 +193,16 @@ class CampaignContactsForm extends React.Component<
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
     // Configure contact sources
-    const sourceOptions = [ContactSourceType.CSV];
-    if (externalSystems.edges.length > 0) {
-      sourceOptions.push(ContactSourceType.ExternalSystem);
+    const sourceOptions = [{ source: ContactSourceType.CSV, disabled: false }];
+    if (externalSystems.pageInfo.totalCount > 0) {
+      const disabled = externalSystem === null;
+      sourceOptions.push({
+        source: ContactSourceType.ExternalSystem,
+        disabled
+      });
     }
     if (datawarehouseAvailable) {
-      sourceOptions.push(ContactSourceType.SQL);
+      sourceOptions.push({ source: ContactSourceType.SQL, disabled: false });
     }
 
     return (
@@ -213,11 +219,16 @@ class CampaignContactsForm extends React.Component<
           fullWidth={true}
           onChange={this.handleOnChangeSource}
         >
-          {sourceOptions.map(sourceOption => (
+          {sourceOptions.map(({ source, disabled }) => (
             <MenuItem
-              key={sourceOption}
-              value={sourceOption}
-              primaryText={sourceOption}
+              key={source}
+              value={source}
+              primaryText={
+                disabled
+                  ? `${source} (not configured for this campaign)`
+                  : source
+              }
+              disabled={disabled}
             />
           ))}
         </SelectField>
@@ -229,13 +240,14 @@ class CampaignContactsForm extends React.Component<
             onContactsFileChange={this.handleOnContactsFileChange}
           />
         )}
-        {source === ContactSourceType.ExternalSystem && (
-          <ExternalSystemsSource
-            organizationId={organizationId}
-            selectedListId={externalListId}
-            onChangeExternalList={this.handleOnExternalListChange}
-          />
-        )}
+        {source === ContactSourceType.ExternalSystem &&
+          externalSystem && (
+            <ExternalSystemsSource
+              systemId={externalSystem.id}
+              selectedListId={externalListId}
+              onChangeExternalList={this.handleOnExternalListChange}
+            />
+          )}
         {source === ContactSourceType.SQL && (
           <ContactsSqlForm
             style={{ marginTop: "20px" }}
@@ -266,6 +278,9 @@ const queries = {
           id
           customFields
           contactsCount
+          externalSystem {
+            id
+          }
           datawarehouseAvailable
         }
       }
@@ -283,10 +298,8 @@ const queries = {
           id
           numbersApiKey
           externalSystems {
-            edges {
-              node {
-                id
-              }
+            pageInfo {
+              totalCount
             }
           }
           campaigns(cursor: { offset: 0, limit: 5000 }) {

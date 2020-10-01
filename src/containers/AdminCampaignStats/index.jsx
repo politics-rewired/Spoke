@@ -18,6 +18,7 @@ import TopLineStats from "./TopLineStats";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import TexterStats from "./TexterStats";
 import VanExportModal from "./VanExportModal";
+import VanSyncModal from "./VanSyncModal";
 
 const styles = StyleSheet.create({
   container: {
@@ -61,8 +62,10 @@ class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
     exportVanOpen: false,
+    syncVanOpen: false,
     disableExportButton: false,
     disableVanExportButton: false,
+    disableVanSyncButton: false,
     copyingCampaign: false,
     campaignJustCopied: false,
     copiedCampaignId: undefined,
@@ -92,8 +95,20 @@ class AdminCampaignStats extends React.Component {
       disableVanExportButton: true
     });
 
+  handleOnClickVanSync = () => this.setState({ syncVanOpen: true });
+  handleDismissVanSync = () => this.setState({ syncVanOpen: false });
+  handleCompleteVanSync = () =>
+    this.setState({
+      syncVanOpen: false,
+      disableVanSyncButton: true
+    });
+
   render() {
-    const { disableExportButton, disableVanExportButton } = this.state;
+    const {
+      disableExportButton,
+      disableVanExportButton,
+      disableVanSyncButton
+    } = this.state;
     const { data, match, adminPerms } = this.props;
     const { organizationId, campaignId } = match.params;
     const campaign = data.campaign;
@@ -116,6 +131,12 @@ class AdminCampaignStats extends React.Component {
     const vanExportLabel = vanExportJob
       ? `Exporting for VAN (${vanExportJob.status}%)`
       : "Export for VAN";
+
+    const vansyncJob = pendingJobs.find(job => job.jobType === "van-sync");
+    const isVanSyncDisabled = disableVanSyncButton || vansyncJob !== undefined;
+    const vanSyncLabel = vansyncJob
+      ? `Syncing to VAN (${vanSyncJob.status}%)`
+      : "Sync to VAN";
 
     const dueFormatted = moment(campaign.dueBy).format("MMM D, YYYY");
     const isOverdue = moment().isSameOrAfter(campaign.dueBy);
@@ -169,6 +190,13 @@ class AdminCampaignStats extends React.Component {
                           label={vanExportLabel}
                           disabled={isVanExportDisabled}
                           onClick={this.handleOnClickVanExport}
+                        />,
+                        // Sync to VAN
+                        <RaisedButton
+                          key="van-sync"
+                          label={vanSyncLabel}
+                          disabled={isVanSyncDisabled}
+                          onClick={this.handleOnClickVanSync}
                         />,
                         // unarchive
                         campaign.isArchived ? (
@@ -276,6 +304,13 @@ class AdminCampaignStats extends React.Component {
           open={this.state.exportVanOpen}
           onRequestClose={this.handleDismissVanExport}
           onComplete={this.handleCompleteVanExport}
+        />
+        <VanSyncModal
+          organizationId={organizationId}
+          campaignId={campaignId}
+          open={this.state.syncVanOpen}
+          onRequestClose={this.handleDismissVanSync}
+          onComplete={this.handleCompleteVanSync}
         />
       </div>
     );

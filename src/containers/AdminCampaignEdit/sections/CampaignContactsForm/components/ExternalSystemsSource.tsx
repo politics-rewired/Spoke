@@ -1,219 +1,112 @@
 import React from "react";
 import gql from "graphql-tag";
 import moment from "moment";
-import { ApolloQueryResult } from "apollo-client";
 
 import Avatar from "material-ui/Avatar";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import RaisedButton from "material-ui/RaisedButton";
-import Snackbar from "material-ui/Snackbar";
-import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
-import SyncIcon from "material-ui/svg-icons/notification/sync";
-import { green50, green500, grey200, grey500 } from "material-ui/styles/colors";
+import { green500, grey500 } from "material-ui/styles/colors";
 
 import { loadData } from "../../../../hoc/with-operations";
 import { ExternalSystem } from "../../../../../api/external-system";
-import { RelayPaginatedResponse } from "../../../../../api/pagination";
 
 interface Props {
-  organizationId: string;
+  systemId: string;
   selectedListId?: string;
   onChangeExternalList(listId?: string): void;
 
   // HOC props
   externalLists: {
-    organization: {
-      id: string;
-      externalSystems: RelayPaginatedResponse<ExternalSystem>;
-    };
-    refetch(): void;
-  };
-  mutations: {
-    refreshSystem(externalSystemId: string): ApolloQueryResult<{}>;
+    externalSystem: ExternalSystem;
   };
 }
 
-interface State {
-  syncInitiatedForId?: string;
-}
-
-export class ExternalSystemsSource extends React.Component<Props, State> {
-  state: State = {
-    syncInitiatedForId: undefined
-  };
-
-  handleSyncSystem = (systemId: string) => async () => {
-    if (this.state.syncInitiatedForId === systemId) return;
-
-    const { refreshSystem } = this.props.mutations;
-    try {
-      const response = await refreshSystem(systemId);
-      if (response.errors) throw response.errors;
-      this.setState({ syncInitiatedForId: systemId });
-    } catch {
-      // Stub
-    } finally {
-      // Stub
-    }
-  };
-
-  handleDismissSyncSnackbar = (systemId: string) => async () =>
-    this.setState({ syncInitiatedForId: undefined });
-
-  handleSelectList = (
+export const ExternalSystemsSource: React.SFC<Props> = props => {
+  const handleSelectList = (
     _event: React.SyntheticEvent<{}>,
     _index: number,
     listId: string
   ) => {
-    const { selectedListId } = this.props;
-    this.props.onChangeExternalList(
-      selectedListId === listId ? undefined : listId
-    );
+    const { selectedListId } = props;
+    props.onChangeExternalList(selectedListId === listId ? undefined : listId);
   };
 
-  handleRefreshSystems = () => this.props.externalLists.refetch();
+  const {
+    selectedListId,
+    externalLists: { externalSystem }
+  } = props;
 
-  render() {
-    const {
-      selectedListId,
-      externalLists: {
-        organization: { externalSystems }
-      }
-    } = this.props;
-    const { syncInitiatedForId } = this.state;
-
-    if (externalSystems.edges.length === 0) {
-      return <p>No external systems.</p>;
-    }
-
-    const { edges } = this.props.externalLists.organization.externalSystems;
-    const syncingEdge = edges.find(edge => edge.node.id === syncInitiatedForId);
-    const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
-
-    const selectedEdge = edges.find(
-      ({ node: system }) =>
-        system.lists.edges.find(
-          ({ node: list }) => list.externalId === selectedListId
-        ) !== undefined
-    );
-    const selectedSystemId = selectedEdge ? selectedEdge.node.id : undefined;
-
-    return (
-      <div>
-        <h4>Integrations</h4>
-        <RaisedButton
-          label="Refresh"
-          labelPosition="before"
-          icon={<RefreshIcon />}
-          onClick={this.handleRefreshSystems}
-        />
-        {externalSystems.edges.map(({ node: system }) => (
-          <Card
-            key={system.id}
-            style={{
-              marginTop: "10px",
-              backgroundColor:
-                selectedSystemId === system.id ? green50 : undefined
-            }}
-            expanded={false}
-            onExpandChange={this.handleSyncSystem(system.id)}
+  return (
+    <Card expandable={false} expanded={false}>
+      <CardHeader
+        title={externalSystem.name}
+        subtitle={`Lists last pulled: ${
+          externalSystem.syncedAt
+            ? moment(externalSystem.syncedAt).fromNow()
+            : "never"
+        }`}
+        avatar={
+          <Avatar
+            backgroundColor={
+              externalSystem.lists.edges.length > 0 ? green500 : grey500
+            }
           >
-            <CardHeader
-              title={system.name}
-              subtitle={`Lists last pulled: ${
-                system.syncedAt ? moment(system.syncedAt).fromNow() : "never"
-              }`}
-              avatar={
-                <Avatar
-                  backgroundColor={
-                    system.lists.edges.length > 0 ? green500 : grey500
-                  }
-                >
-                  {system.lists.edges.length > 9
-                    ? "9+"
-                    : system.lists.edges.length}
-                </Avatar>
-              }
-              showExpandableButton={true}
-              closeIcon={
-                <SyncIcon
-                  color={syncInitiatedForId === system.id ? grey200 : undefined}
-                />
-              }
-            />
+            {externalSystem.lists.edges.length > 9
+              ? "9+"
+              : externalSystem.lists.edges.length}
+          </Avatar>
+        }
+        showExpandableButton={false}
+      />
 
-            {system.lists.edges.length > 0 && (
-              <CardText>
-                Choose a list:<br />
-                <DropDownMenu
-                  value={selectedListId}
-                  onChange={this.handleSelectList}
-                  style={{ width: "50%" }}
-                >
-                  {system.lists.edges.map(({ node: list }) => (
-                    <MenuItem
-                      key={list.externalId}
-                      value={list.externalId}
-                      primaryText={`${list.name} (${list.listCount} contacts)`}
-                    />
-                  ))}
-                </DropDownMenu>
-              </CardText>
-            )}
-          </Card>
-        ))}
-        <Snackbar
-          open={syncingSystem !== undefined}
-          message={
-            syncingSystem
-              ? `Sync started for ${
-                  syncingSystem.name
-                }. Please refresh systems to see updated lists.`
-              : ""
-          }
-          autoHideDuration={4000}
-          onRequestClose={
-            syncingSystem
-              ? this.handleDismissSyncSnackbar(syncingSystem.id)
-              : undefined
-          }
-        />
-      </div>
-    );
-  }
-}
+      {externalSystem.lists.pageInfo.totalCount > 0 && (
+        <CardText>
+          Choose a list:<br />
+          <DropDownMenu
+            value={selectedListId}
+            onChange={handleSelectList}
+            style={{ width: "50%" }}
+          >
+            {externalSystem.lists.edges.map(({ node: list }) => (
+              <MenuItem
+                key={list.externalId}
+                value={list.externalId}
+                primaryText={`${list.name} (${list.listCount} contacts)`}
+              />
+            ))}
+          </DropDownMenu>
+        </CardText>
+      )}
+    </Card>
+  );
+};
 
 const queries = {
   externalLists: {
     query: gql`
-      query getExternalLists($organizationId: String!) {
-        organization(id: $organizationId) {
+      query getExternalLists($systemId: String!) {
+        externalSystem(systemId: $systemId) {
           id
-          externalSystems {
+          name
+          type
+          apiKey
+          createdAt
+          updatedAt
+          syncedAt
+          lists {
+            pageInfo {
+              totalCount
+            }
             edges {
               node {
-                id
+                externalId
                 name
-                type
-                apiKey
+                description
+                listCount
+                doorCount
                 createdAt
                 updatedAt
-                syncedAt
-                lists {
-                  edges {
-                    node {
-                      externalId
-                      name
-                      description
-                      listCount
-                      doorCount
-                      createdAt
-                      updatedAt
-                    }
-                  }
-                }
               }
             }
           }
@@ -222,26 +115,12 @@ const queries = {
     `,
     options: (ownProps: Props) => ({
       variables: {
-        organizationId: ownProps.organizationId
+        systemId: ownProps.systemId
       }
     })
   }
 };
 
-const mutations = {
-  refreshSystem: (ownProps: Props) => (externalSystemId: string) => ({
-    mutation: gql`
-      mutation refreshExternalSystem($externalSystemId: String!) {
-        refreshExternalSystem(externalSystemId: $externalSystemId)
-      }
-    `,
-    variables: {
-      externalSystemId
-    }
-  })
-};
-
 export default loadData({
-  queries,
-  mutations
+  queries
 })(ExternalSystemsSource);
