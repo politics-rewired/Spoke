@@ -83,7 +83,7 @@ exports.up = function(knex) {
 
         create index todos_partial_idx on campaign_contact (campaign_id, assignment_id, message_status, is_opted_out) where (archived = false);
         drop index campaign_contact_get_current_assignment_index;
-        drop index campaign_contact_campaign_id_assignment_id;
+        drop index campaign_contact_campaign_id_assignment_id_index;
       `);
     });
 };
@@ -93,7 +93,7 @@ exports.down = function(knex) {
   return knex.schema
     .raw(
       `
-      create index campaign_contact_campaign_id_assignment_id on campaign_contact (campaign_id, assignment_id);
+      create index campaign_contact_campaign_id_assignment_id_index on campaign_contact (campaign_id, assignment_id);
       create index campaign_contact_get_current_assignment_index on campaign_contact (campaign_id, assignment_id, message_status, is_opted_out);
       drop index todos_partial_idx;
     `
