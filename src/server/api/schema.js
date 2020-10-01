@@ -22,8 +22,8 @@ import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
 import { refreshExternalSystem } from "../lib/external-systems";
 import {
+  // exportCampaign,
   assignTexters,
-  exportCampaign,
   loadContactsFromDataWarehouse,
   uploadContacts,
   filterLandlines
@@ -99,6 +99,8 @@ import { notifyOnTagConversation, notifyAssignmentCreated } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
+
+import exportCampaign from "../tasks/export-campaign";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -787,7 +789,7 @@ const rootMutations = {
 
       let payload = {};
       if (exportType === CampaignExportType.SPOKE) {
-        payload = { job: { id: campaignId, requester: user.id } };
+        payload = { campaign_id: campaignId, requester: user.id };
       } else if (exportType === CampaignExportType.VAN) {
         payload = { ...vanOptions, requesterId: user.id };
       }
