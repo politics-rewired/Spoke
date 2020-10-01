@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/politics-rewired/spoke/compare/v2.11.1...v3.0.0) (2020-10-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **van:** VAN integration is a major feature release
+
+### Features
+
+* **van:** two-way van sync ([#722](https://github.com/politics-rewired/spoke/issues/722)) ([c213636](https://github.com/politics-rewired/spoke/commit/c21363685d432e03ddb3e5c62cfccc57037d5ddd)), closes [#477](https://github.com/politics-rewired/spoke/issues/477)
+
 ### [2.11.1](https://github.com/politics-rewired/spoke/compare/v2.11.0...v2.11.1) (2020-09-30)
 
 
