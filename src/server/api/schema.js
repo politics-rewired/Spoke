@@ -775,6 +775,8 @@ const rootMutations = {
     exportCampaign: async (_, { options }, { user, loaders }) => {
       const { campaignId, exportType, vanOptions } = options;
 
+      logger.info("exportCampaign schema options", options, "loaders", loaders);
+
       if (exportType === CampaignExportType.VAN && !vanOptions) {
         throw new Error("Input must include vanOptions when exporting as VAN!");
       }
@@ -794,6 +796,10 @@ const rootMutations = {
         payload = { ...vanOptions, requesterId: user.id };
       }
 
+      const worker = await getWorker();
+
+      logger.info("schema worker", worker);
+
       const [newJob] = await r
         .knex("job_request")
         .insert({
@@ -807,12 +813,15 @@ const rootMutations = {
         .returning("*");
       if (JOBS_SAME_PROCESS) {
         if (exportType === CampaignExportType.SPOKE) {
-          exportCampaign(newJob);
+          await worker.addJob("export-campaign", newJob);
         } else if (exportType === CampaignExportType.VAN) {
           exportForVan(newJob);
         }
       }
-      return newJob;
+      // return newJob;
+      await worker.addJob("export-campaign", newJob);
+
+      return "Job Created";
     },
 
     editOrganizationMembership: async (
