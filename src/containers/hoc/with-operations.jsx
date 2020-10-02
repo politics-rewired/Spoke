@@ -67,14 +67,21 @@ export const withOperations = options => {
   );
 };
 
-const PrettyErrors = ({ errors }) => (
-  <Card style={{ margin: "10px" }}>
-    <CardHeader title="Encountered errors" />
-    <CardText>
-      <ul>{errors.map((err, index) => <li key={index}>{err.message}</li>)}</ul>
-    </CardText>
-  </Card>
-);
+const PrettyErrors = ({ errors }) => {
+  return (
+    <Card style={{ margin: "10px" }}>
+      <CardHeader title="Encountered errors" />
+      <CardText>
+        <ul>
+          {errors.map((err, index) => {
+            const errMessageWithoutGraphQlPrefix = err.message.substring(14);
+            return <li key={index}>{errMessageWithoutGraphQlPrefix}</li>;
+          })}
+        </ul>
+      </CardText>
+    </Card>
+  );
+};
 
 /**
  * Similar to {@link withOperations}, but shows a loading indicator if any of the queries are loading.
