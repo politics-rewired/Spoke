@@ -5,18 +5,17 @@ import { format } from "fast-csv";
 import { getUploadStream, getDownloadUrl } from "../../workers/exports/upload";
 import { sendEmail } from "../../server/mail";
 import { deleteJob } from "../../workers/jobs";
+import _ from "lodash";
 
 const CHUNK_SIZE = 1000;
 
 export const exportCampaign = async (payload: any, _helpers: any) => {
-  const { campaign_id, job } = payload;
-
-  let campaignId = campaign_id,
-    campaignTitle = undefined,
-    notificationEmail = undefined,
-    interactionSteps = undefined,
-    assignments = undefined,
-    isAutomatedExport = undefined;
+  let campaignId,
+    campaignTitle,
+    notificationEmail,
+    interactionSteps,
+    assignments,
+    isAutomatedExport;
 
   try {
     ({
@@ -26,7 +25,7 @@ export const exportCampaign = async (payload: any, _helpers: any) => {
       interactionSteps,
       assignments,
       isAutomatedExport
-    } = await fetchExportData(job));
+    } = await fetchExportData(payload));
   } catch (exc) {
     logger.error("Error fetching export data: ", exc);
     return;
@@ -215,6 +214,8 @@ export const fetchExportData = async job => {
   const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
     rawPayload
   );
+
+  logger.info("fetchExportData job", job);
   const { title: campaignTitle } = await r
     .reader("campaign")
     .first("title")
