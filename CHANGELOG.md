@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/politics-rewired/spoke/compare/v3.0.0...v3.1.0) (2020-10-02)
+
+
+### Features
+
+* **van:** add integration tag to campaign list ([9697881](https://github.com/politics-rewired/spoke/commit/96978819c5ddd59b07d7dc710e7a0c70a6024511))
+
+
+### Bug Fixes
+
+* **van:** disable csv source when using integration ([c8b50a2](https://github.com/politics-rewired/spoke/commit/c8b50a2cba63e33f139d340f1f4f7eee4f556408))
+* **van:** insert initial result message ([dc2b8f7](https://github.com/politics-rewired/spoke/commit/dc2b8f7f51324557412515b9128b6199aec27add))
+* **van:** show question in add mapping modal ([db5ec23](https://github.com/politics-rewired/spoke/commit/db5ec2323deb09f691491f76b3abaa5f55f0eae4))
+
 ## [3.0.0](https://github.com/politics-rewired/spoke/compare/v2.11.1...v3.0.0) (2020-10-01)
 
 
