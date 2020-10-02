@@ -8,6 +8,7 @@ import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
+import { blueGrey800 } from "material-ui/styles/colors";
 
 import { RelayPaginatedResponse } from "../api/pagination";
 import {
@@ -209,6 +210,16 @@ class AddMapping extends React.Component<InnerProps, State> {
       >
         {config !== undefined && (
           <div>
+            <table>
+              <tr>
+                <td style={{ color: blueGrey800 }}>Question</td>
+                <td>{config.interactionStep.questionText}</td>
+              </tr>
+              <tr>
+                <td style={{ color: blueGrey800 }}>Answer</td>
+                <td>{config.questionResponseValue}</td>
+              </tr>
+            </table>
             <SelectField
               floatingLabelText="Mapping Type"
               value={canMakeChanges ? this.state.type : null}
