@@ -22,13 +22,11 @@ import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
 import { refreshExternalSystem } from "../lib/external-systems";
 import {
-  // exportCampaign,
   assignTexters,
   loadContactsFromDataWarehouse,
   uploadContacts,
   filterLandlines
 } from "../../workers/jobs";
-import { exportForVan } from "../../workers/jobs/export-for-van";
 import { datawarehouse, r, cacheableData } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
 import {
@@ -99,8 +97,6 @@ import { notifyOnTagConversation, notifyAssignmentCreated } from "./lib/alerts";
 
 import { isNowBetween } from "../../lib/timezones";
 import { memoizer, cacheOpts } from "../memoredis";
-
-import exportCampaign from "../tasks/export-campaign";
 
 const uuidv4 = require("uuid").v4;
 const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
@@ -775,8 +771,6 @@ const rootMutations = {
     exportCampaign: async (_, { options }, { user, loaders }) => {
       const { campaignId, exportType, vanOptions } = options;
 
-      logger.info("exportCampaign schema options", options, "loaders", loaders);
-
       if (exportType === CampaignExportType.VAN && !vanOptions) {
         throw new Error("Input must include vanOptions when exporting as VAN!");
       }
@@ -798,8 +792,6 @@ const rootMutations = {
 
       const worker = await getWorker();
 
-      logger.info("schema worker", worker);
-
       const [newJob] = await r
         .knex("job_request")
         .insert({
@@ -814,13 +806,17 @@ const rootMutations = {
       if (JOBS_SAME_PROCESS) {
         if (exportType === CampaignExportType.SPOKE) {
           await worker.addJob("export-campaign", newJob);
+          return "Job Created";
         } else if (exportType === CampaignExportType.VAN) {
-          exportForVan(newJob);
+          await worker.addJob("export-campaign-for-van", newJob);
+          return "Job Created";
         }
       }
-      // return newJob;
-      await worker.addJob("export-campaign", newJob);
 
+      /* I'm not sure if this is right, but here I'm following the old pattern,
+         adding the job to the worker instead of return newJob */
+
+      await worker.addJob("export-campaign", newJob);
       return "Job Created";
     },
 
