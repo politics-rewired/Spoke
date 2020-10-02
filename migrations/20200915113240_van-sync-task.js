@@ -102,10 +102,11 @@ exports.up = function(knex) {
       where campaign_contact.campaign_id = queue_sync_campaign_to_van.campaign_id
       into v_contact_count;
 
-      insert into public.job_request (campaign_id, payload, queue_name, job_type, status)
+      insert into public.job_request (campaign_id, payload, result_message, queue_name, job_type, status)
       values (
         campaign_id,
         json_build_object('contact_count', v_contact_count)::text,
+        json_build_object('message', 'Synced 0 of ' || v_contact_count || ' contacts to VAN')::text,
         campaign_id::text || ':sync_campaign',
         'sync_van_campaign',
         0
