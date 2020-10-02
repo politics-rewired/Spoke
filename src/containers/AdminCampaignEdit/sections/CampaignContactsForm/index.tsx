@@ -177,7 +177,7 @@ class CampaignContactsForm extends React.Component<
     const sourceOptions = [];
 
     // CSV
-    const csvDisabled = externalSystem !== undefined;
+    const csvDisabled = externalSystem !== null;
     sourceOptions.push({
       source: ContactSourceType.CSV,
       disabled: csvDisabled,
