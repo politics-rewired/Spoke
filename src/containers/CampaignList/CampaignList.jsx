@@ -13,7 +13,7 @@ import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ArchiveIcon from "material-ui/svg-icons/content/archive";
 import UnarchiveIcon from "material-ui/svg-icons/content/unarchive";
-import { red300, grey900 } from "material-ui/styles/colors";
+import { red300, grey900, blue300 } from "material-ui/styles/colors";
 
 import theme from "../../styles/theme";
 import Empty from "../../components/Empty";
@@ -119,7 +119,8 @@ export class CampaignList extends React.Component {
       hasUnassignedContacts,
       hasUnsentInitialMessages,
       hasUnhandledMessages,
-      teams
+      teams,
+      externalSystem
     } = campaign;
 
     let listItemStyle = {};
@@ -140,6 +141,11 @@ export class CampaignList extends React.Component {
     let tags = [];
     if (moment().isSameOrAfter(moment(dueBy))) {
       tags.push({ title: "Overdue", color: grey900, backgroundColor: red300 });
+    }
+
+    if (externalSystem) {
+      const title = `${externalSystem.type}: ${externalSystem.name}`;
+      tags.push({ title, backgroundColor: blue300 });
     }
 
     if (!isStarted) {

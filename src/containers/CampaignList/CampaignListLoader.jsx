@@ -98,6 +98,11 @@ const queries = {
                 id
                 title
               }
+              externalSystem {
+                id
+                type
+                name
+              }
             }
             pageInfo {
               total
