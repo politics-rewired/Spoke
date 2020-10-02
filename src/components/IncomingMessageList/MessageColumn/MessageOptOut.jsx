@@ -11,7 +11,6 @@ import {
   PrettyErrors,
   withOperations
 } from "../../../containers/hoc/with-operations";
-import { formatError } from "graphql";
 
 class MessageOptOut extends Component {
   constructor(props) {
