@@ -7,9 +7,8 @@ interface NumbersClientOptions {
   endpointBaseUrl?: string;
 }
 
-export const makeNumbersClient = (apiKey: string) => {
-  const options: NumbersClientOptions = { apiKey };
-  if (config.SWITCHBOARD_BASE_URL) {
+export const makeNumbersClient = (options: NumbersClientOptions) => {
+  if (!options.endpointBaseUrl && config.SWITCHBOARD_BASE_URL) {
     options.endpointBaseUrl = config.SWITCHBOARD_BASE_URL;
   }
   return new NumbersClient(options);
