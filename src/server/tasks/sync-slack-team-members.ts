@@ -23,6 +23,7 @@ const PARAMS = { token: config.SLACK_TOKEN };
 
 interface SpokeTeamRow {
   id: string;
+  organization_id: string;
   title: string;
 }
 
@@ -185,14 +186,27 @@ const syncTeam = async (options: SyncTeamOptions) => {
       ]);
       await client.query(
         `
-          insert into user_team (team_id, user_id)
+          with user_ids_to_add as (
+            select id as user_id
+            from public.user
+            where ${whereField} in (${wrappedValues})
+          ),
+          org_memberships as (
+            insert into user_organization (user_id, organization_id, role)
+            select
+              user_id,
+              $1 as organization_id,
+              'TEXTER' as role
+            from user_ids_to_add
+            on conflict (user_id, organization_id) do nothing
+          )
+          insert into user_team (user_id, team_id)
           select
-            $1 as team_id,
-            id as user_id
-          from public.user
-          where ${whereField} in (${wrappedValues})
+            user_id,
+            $2 as team_id
+          from user_ids_to_add
         `,
-        [spokeTeam.id]
+        [spokeTeam.organization_id, spokeTeam.id]
       );
     })
   );
@@ -203,7 +217,7 @@ export const syncSlackTeamMembers: Task = async (_payload, helpers) => {
   const userEmailMap = syncOnEmail ? await fetchUserList() : {};
 
   const { rows: allTeams } = await helpers.query<SpokeTeamRow>(
-    `select id, title from team`
+    `select id, organization_id, title from team`
   );
   const allChannels = await fetchAllChannels();
 
