@@ -1,7 +1,23 @@
 import { Task, JobHelpers } from "pg-compose";
 import { PoolClient } from "pg";
 import Slack from "slack";
+import promiseRetry from "promise-retry";
+
 import { config } from "../../config";
+import { sleep } from "../../lib/utils";
+
+const retrySlack = async <T extends unknown>(
+  fn: () => Promise<T>
+): Promise<T> =>
+  promiseRetry(retry =>
+    fn().catch(err => {
+      if (err.message === "ratelimited") {
+        const retryS = (err.retry && parseInt(err.retry, 10)) || 0;
+        return sleep(retryS * 1000).then(retry);
+      }
+      throw err;
+    })
+  );
 
 interface SpokeTeamRow {
   id: string;
@@ -34,7 +50,7 @@ const fetchAllChannels = async (
     limit: 1000,
     ...(next_cursor === "" ? {} : { cursor: next_cursor })
   };
-  const response = await bot.conversations.list(params);
+  const response = await retrySlack<any>(() => bot.conversations.list(params));
   const { channels, response_metadata } = response;
   const strippedChannels: SlackChannelRecord = channels.map(
     ({ id, name, name_normalized }: SlackChannelRecord) => ({
@@ -64,7 +80,7 @@ const fetchUserList = async (
     limit: 1000,
     ...(next_cursor === "" ? {} : { cursor: next_cursor })
   };
-  const response = await bot.users.list(params);
+  const response = await retrySlack<any>(() => bot.users.list(params));
   const { members, response_metadata } = response;
   const strippedMembers = members.map(({ id, profile: { email } }) => ({
     id,
@@ -98,7 +114,9 @@ const fetchChannelMembers = async (
     limit: 1000,
     ...(next_cursor === "" ? {} : { cursor: next_cursor })
   };
-  const response = await bot.conversations.members(params);
+  const response = await retrySlack<any>(() =>
+    bot.conversations.members(params)
+  );
   const { members, response_metadata } = response;
   const strippedMembers = members;
 
