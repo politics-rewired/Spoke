@@ -1,6 +1,6 @@
 import { Task, JobHelpers } from "pg-compose";
 import { PoolClient } from "pg";
-import Slack from "slack";
+import bot from "slack";
 import promiseRetry from "promise-retry";
 
 import { config } from "../../config";
@@ -18,6 +18,8 @@ const retrySlack = async <T extends unknown>(
       throw err;
     })
   );
+
+const PARAMS = { token: config.SLACK_TOKEN };
 
 interface SpokeTeamRow {
   id: string;
@@ -37,8 +39,6 @@ interface SlackPagination<T> {
 
 type UserEmailMap = { [key: string]: string };
 
-const bot = new Slack({ token: config.SLACK_TOKEN });
-
 interface FetchAllChannelsOptions extends SlackPagination<SlackChannelRecord> {}
 
 const fetchAllChannels = async (
@@ -46,11 +46,12 @@ const fetchAllChannels = async (
 ): Promise<SlackChannelRecord[]> => {
   const { acc = [], next_cursor } = options;
   const params = {
+    ...PARAMS,
     types: "public_channel,private_channel",
     limit: 1000,
     ...(next_cursor === "" ? {} : { cursor: next_cursor })
   };
-  const response = await retrySlack<any>(() => bot.conversations.list(params));
+  const response = await retrySlack(() => bot.conversations.list(params));
   const { channels, response_metadata } = response;
   const strippedChannels: SlackChannelRecord = channels.map(
     ({ id, name, name_normalized }: SlackChannelRecord) => ({
@@ -77,10 +78,11 @@ const fetchUserList = async (
 ): Promise<UserEmailMap> => {
   const { acc = [], next_cursor } = options;
   const params = {
+    ...PARAMS,
     limit: 1000,
     ...(next_cursor === "" ? {} : { cursor: next_cursor })
   };
-  const response = await retrySlack<any>(() => bot.users.list(params));
+  const response = await retrySlack(() => bot.users.list(params));
   const { members, response_metadata } = response;
   const strippedMembers = members.map(({ id, profile: { email } }) => ({
     id,
@@ -110,13 +112,12 @@ const fetchChannelMembers = async (
   const { channelId, acc = [], next_cursor } = options;
 
   const params = {
+    ...PARAMS,
     channel: channelId,
     limit: 1000,
     ...(next_cursor === "" ? {} : { cursor: next_cursor })
   };
-  const response = await retrySlack<any>(() =>
-    bot.conversations.members(params)
-  );
+  const response = await retrySlack(() => bot.conversations.members(params));
   const { members, response_metadata } = response;
   const strippedMembers = members;
 
