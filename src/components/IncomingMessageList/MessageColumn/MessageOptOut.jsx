@@ -6,7 +6,10 @@ import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Dialog from "material-ui/Dialog";
 
-import { withOperations } from "../../../containers/hoc/with-operations";
+import {
+  formatErrorMessage,
+  withOperations
+} from "../../../containers/hoc/with-operations";
 
 class MessageOptOut extends Component {
   constructor(props) {
@@ -75,7 +78,7 @@ class MessageOptOut extends Component {
       ];
       this.setState({
         dialogTitle: "Error Submitting",
-        dialogText: error.message,
+        dialogText: formatErrorMessage(error.message),
         dialogActions
       });
     } finally {
@@ -110,7 +113,7 @@ class MessageOptOut extends Component {
       ];
       this.setState({
         dialogTitle: "Error Opting Out",
-        dialogText: error.message,
+        dialogText: formatErrorMessage(error.message),
         dialogActions
       });
     } finally {

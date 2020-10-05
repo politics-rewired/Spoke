@@ -10,7 +10,7 @@ import Toggle from "material-ui/Toggle";
 import FlatButton from "material-ui/FlatButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 
-import { withOperations } from "../hoc/with-operations";
+import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import TagEditorList from "./TagEditorList";
 import theme from "../../styles/theme";
@@ -65,7 +65,7 @@ class AdminTagEditor extends Component {
       const result = await this.props.mutations.saveTag(tag);
       if (result.errors) throw new Error(result.errors);
     } catch (error) {
-      this.setState({ error: error.message });
+      this.setState({ error: formatErrorMessage(error.message) });
     } finally {
       this.setState({ isWorking: false });
       this.handleCancelEditTag();
@@ -78,7 +78,7 @@ class AdminTagEditor extends Component {
       const result = await this.props.mutations.deleteTag(tagId);
       if (result.errors) throw new Error(result.errors);
     } catch (error) {
-      this.setState({ error: error.message });
+      this.setState({ error: formatErrorMessage(error.message) });
     } finally {
       this.setState({ isWorking: false });
     }
@@ -95,7 +95,9 @@ class AdminTagEditor extends Component {
     const { editingTag, isWorking, error } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
-    if (organizationTags.errors) return <p>{organizationTags.errors}</p>;
+    if (organizationTags.errors) {
+      return <PrettyErrors errors={organizationTags.errors} />;
+    }
 
     const { tagList } = organizationTags.organization;
 
