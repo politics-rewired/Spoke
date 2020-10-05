@@ -32,9 +32,7 @@ class AdminShortLinkDomains extends Component {
         domainId,
         isManuallyDisabled
       );
-      if (response.errors) {
-        throw response.errors;
-      }
+      if (response.errors) throw new Error(response.errors);
     } catch (exc) {
       this.setState({ webRequestError: exc });
     } finally {
@@ -59,9 +57,7 @@ class AdminShortLinkDomains extends Component {
         domain,
         maxUsageCount
       );
-      if (response.errors) {
-        throw response.errors;
-      }
+      if (response.errors) throw new Error(response.errors);
       await this.props.shortLinkDomains.refetch();
     } catch (exc) {
       this.setState({ webRequestError: exc });
@@ -83,9 +79,7 @@ class AdminShortLinkDomains extends Component {
     });
     try {
       const response = await this.props.mutations.deleteLinkDomain(domainId);
-      if (response.errors) {
-        throw response.errors;
-      }
+      if (response.errors) throw new Error(response.errors);
       await this.props.shortLinkDomains.refetch();
     } catch (exc) {
       this.setState({ webRequestError: exc });

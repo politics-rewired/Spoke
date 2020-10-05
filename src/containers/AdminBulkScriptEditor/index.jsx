@@ -94,9 +94,7 @@ class AdminBulkScriptEditor extends Component {
       const response = await this.props.mutations.bulkUpdateScript(
         findAndReplace
       );
-      if (response.errors) {
-        throw response.errors;
-      }
+      if (response.errors) throw response.errors;
       this.setState({ result: response.data.bulkUpdateScript });
     } catch (error) {
       this.setState({ error: formatErrorMessage(error.message) });
