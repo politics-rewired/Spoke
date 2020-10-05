@@ -8,7 +8,6 @@ import Dialog from "material-ui/Dialog";
 
 import {
   formatErrorMessage,
-  PrettyErrors,
   withOperations
 } from "../../../containers/hoc/with-operations";
 
@@ -65,7 +64,7 @@ class MessageOptOut extends Component {
     try {
       const response = await this.props.mutations.removeOptOut(cell);
       if (response.errors) {
-        return <PrettyErrors errors={response.errors} />;
+        throw response.errors;
       }
       this.props.optOutChanged(false);
       this.handleCloseAlert();

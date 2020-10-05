@@ -63,9 +63,7 @@ class AdminTagEditor extends Component {
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.saveTag(tag);
-      if (result.errors) {
-        return <PrettyErrors errors={result.errors} />;
-      }
+      if (result.errors) throw new Error(result.errors);
     } catch (error) {
       this.setState({ error: formatErrorMessage(error.message) });
     } finally {
@@ -97,7 +95,9 @@ class AdminTagEditor extends Component {
     const { editingTag, isWorking, error } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
-    if (organizationTags.errors) return <p>{organizationTags.errors}</p>;
+    if (organizationTags.errors) {
+      return <PrettyErrors errors={organizationTags.errors} />;
+    }
 
     const { tagList } = organizationTags.organization;
 

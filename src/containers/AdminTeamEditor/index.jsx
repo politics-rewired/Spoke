@@ -9,7 +9,11 @@ import TextField from "material-ui/TextField";
 import FlatButton from "material-ui/FlatButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 
-import { formatErrorMessage, withOperations } from "../hoc/with-operations";
+import {
+  formatErrorMessage,
+  PrettyErrors,
+  withOperations
+} from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import TeamEditorList from "./TeamEditorList";
 import theme from "../../styles/theme";
@@ -57,9 +61,7 @@ class AdminTeamEditor extends Component {
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.saveTeams([team]);
-      if (result.errors) {
-        return <PrettyErrors errors={result.errors} />;
-      }
+      if (result.errors) throw new Error(result.errors);
     } catch (error) {
       this.setState({ error: formatErrorMessage(error.message) });
     } finally {
@@ -72,9 +74,7 @@ class AdminTeamEditor extends Component {
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.deleteTeam(teamId);
-      if (result.errors) {
-        return <PrettyErrors errors={result.errors} />;
-      }
+      if (result.errors) throw new Error(result.errors);
     } catch (error) {
       this.setState({ error: formatErrorMessage(error.message) });
     } finally {
@@ -98,7 +98,9 @@ class AdminTeamEditor extends Component {
     const { editingTeam, isWorking, error } = this.state;
 
     if (organizationTeams.loading) return <LoadingIndicator />;
-    if (organizationTeams.errors) return <p>{organizationTeams.errors}</p>;
+    if (organizationTeams.errors) {
+      return <PrettyErrors errors={organizationTeams.errors} />;
+    }
 
     const { teams } = organizationTeams.organization;
 

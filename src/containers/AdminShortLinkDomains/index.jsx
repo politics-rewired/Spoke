@@ -9,7 +9,6 @@ import RaisedButton from "material-ui/RaisedButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 import CloudUploadIcon from "material-ui/svg-icons/file/cloud-upload";
 
-import { PrettyErrors, withOperations } from "../hoc/with-operations";
 import theme from "../../styles/theme";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import ShortLinkDomainList from "./ShortLinkDomainList";
@@ -34,7 +33,7 @@ class AdminShortLinkDomains extends Component {
         isManuallyDisabled
       );
       if (response.errors) {
-        return <PrettyErrors errors={response.errors} />;
+        throw response.errors;
       }
     } catch (exc) {
       this.setState({ webRequestError: exc });
@@ -61,7 +60,7 @@ class AdminShortLinkDomains extends Component {
         maxUsageCount
       );
       if (response.errors) {
-        return <PrettyErrors errors={response.errors} />;
+        throw response.errors;
       }
       await this.props.shortLinkDomains.refetch();
     } catch (exc) {
@@ -85,7 +84,7 @@ class AdminShortLinkDomains extends Component {
     try {
       const response = await this.props.mutations.deleteLinkDomain(domainId);
       if (response.errors) {
-        return <PrettyErrors errors={response.errors} />;
+        throw response.errors;
       }
       await this.props.shortLinkDomains.refetch();
     } catch (exc) {
@@ -114,7 +113,7 @@ class AdminShortLinkDomains extends Component {
     }
 
     if (shortLinkDomains.errors) {
-      return <p>{shortLinkDomains.errors}</p>;
+      return <PrettyErrors errors={shortLinkDomains.errors} />;
     }
 
     const { linkDomains } = shortLinkDomains.organization;

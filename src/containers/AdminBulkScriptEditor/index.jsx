@@ -9,11 +9,7 @@ import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 
-import {
-  formatErrorMessage,
-  PrettyErrors,
-  withOperations
-} from "../hoc/with-operations";
+import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import CampaignPrefixSelector from "./CampaignPrefixSelector";
 
 const PROTECTED_CHARACTERS = ["/"];
@@ -99,7 +95,7 @@ class AdminBulkScriptEditor extends Component {
         findAndReplace
       );
       if (response.errors) {
-        return <PrettyErrors errors={response.errors} />;
+        throw response.errors;
       }
       this.setState({ result: response.data.bulkUpdateScript });
     } catch (error) {
