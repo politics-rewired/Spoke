@@ -69,7 +69,7 @@ export const withOperations = options => {
 
 // remove 'GraphQL Error:' from error messages, per client request
 export const formatErrorMessage = error => {
-  return error.message.substring(14);
+  return error.message.replaceAll("GraphQL Error:", "").trim();
 };
 
 export const PrettyErrors = ({ errors }) => {
