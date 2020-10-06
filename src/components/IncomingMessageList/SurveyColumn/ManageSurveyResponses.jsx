@@ -7,7 +7,11 @@ import MenuItem from "material-ui/MenuItem";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 
-import { withOperations } from "../../../containers/hoc/with-operations";
+import {
+  formatErrorMessage,
+  PrettyErrors,
+  withOperations
+} from "../../../containers/hoc/with-operations";
 import LoadingIndicator from "../../LoadingIndicator";
 
 class ManageSurveyResponses extends Component {
@@ -83,7 +87,7 @@ class ManageSurveyResponses extends Component {
           questionResponses[iStepId] = value;
         }
       } catch (error) {
-        this.setState({ requestError: error.message });
+        this.setState({ requestError: formatErrorMessage(error) });
       } finally {
         this.setState({
           isMakingRequest: false,
@@ -168,7 +172,9 @@ const ManageSurveyResponsesWrapper = props => {
     <div>
       <h4>Survey Responses</h4>
       {surveyQuestions.loading && <LoadingIndicator />}
-      {surveyQuestions.errors && <p>{surveyQuestions.errors.message}</p>}
+      {surveyQuestions.errors && (
+        <PrettyErrors errors={surveyQuestions.errors} />
+      )}
       {surveyQuestions.campaign && (
         <ManageSurveyResponses
           campaign={surveyQuestions.campaign}

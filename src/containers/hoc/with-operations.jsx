@@ -67,14 +67,25 @@ export const withOperations = options => {
   );
 };
 
-const PrettyErrors = ({ errors }) => (
-  <Card style={{ margin: "10px" }}>
-    <CardHeader title="Encountered errors" />
-    <CardText>
-      <ul>{errors.map((err, index) => <li key={index}>{err.message}</li>)}</ul>
-    </CardText>
-  </Card>
-);
+// remove 'GraphQL Error:' from error messages, per client request
+export const formatErrorMessage = error => {
+  return error.message.replaceAll("GraphQL Error:", "").trim();
+};
+
+export const PrettyErrors = ({ errors }) => {
+  return (
+    <Card style={{ margin: "10px" }}>
+      <CardHeader title="Encountered errors" />
+      <CardText>
+        <ul>
+          {errors.map((err, index) => {
+            return <li key={index}>{formatErrorMessage(err.message)}</li>;
+          })}
+        </ul>
+      </CardText>
+    </Card>
+  );
+};
 
 /**
  * Similar to {@link withOperations}, but shows a loading indicator if any of the queries are loading.
