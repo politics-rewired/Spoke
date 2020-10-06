@@ -16,6 +16,7 @@ import {
 } from "../api/types";
 import { sendEmail } from "../mail";
 import { r } from "../models";
+import { addProgressJob } from "./utils";
 
 const CHUNK_SIZE = 1000;
 
@@ -311,6 +312,7 @@ export const exportCampaign: Task = async (
   payload: JobRequestRecord,
   _helpers
 ) => {
+  await addProgressJob("export-campaign", payload);
   const {
     campaignId,
     campaignTitle,
