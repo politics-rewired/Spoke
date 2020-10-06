@@ -6,30 +6,19 @@ import { getUploadStream, getDownloadUrl } from "../../workers/exports/upload";
 import { sendEmail } from "../../server/mail";
 import { deleteJob } from "../../workers/jobs";
 import _ from "lodash";
+import { Task } from "pg-compose";
 
 const CHUNK_SIZE = 1000;
 
-export const exportCampaign = async (payload: any, _helpers: any) => {
-  let campaignId,
+export const exportCampaign: Task = async (payload: any, _helpers: any) => {
+  const {
+    campaignId,
     campaignTitle,
     notificationEmail,
     interactionSteps,
     assignments,
-    isAutomatedExport;
-
-  try {
-    ({
-      campaignId,
-      campaignTitle,
-      notificationEmail,
-      interactionSteps,
-      assignments,
-      isAutomatedExport
-    } = await fetchExportData(payload));
-  } catch (exc) {
-    logger.error("Error fetching export data: ", exc);
-    return;
-  }
+    isAutomatedExport
+  } = await fetchExportData(payload);
 
   const countQueryResult = await r
     .reader("campaign_contact")
@@ -119,9 +108,9 @@ export const exportCampaign = async (payload: any, _helpers: any) => {
     }
   } catch (exc) {
     logger.error("Error building message rows: ", exc);
+  } finally {
+    messagesWriteStream.end();
   }
-
-  messagesWriteStream.end();
 
   // Contact rows
   try {
@@ -153,9 +142,9 @@ export const exportCampaign = async (payload: any, _helpers: any) => {
     }
   } catch (exc) {
     logger.error("Error building campaign contact rows: ", exc);
+  } finally {
+    campaignContactsWriteStream.end();
   }
-
-  campaignContactsWriteStream.end();
 
   logger.debug("Waiting for streams to finish");
   await Promise.all([campaignContactsUploadPromise, messagesUploadPromise]);

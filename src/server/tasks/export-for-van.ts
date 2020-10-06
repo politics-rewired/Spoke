@@ -10,6 +10,7 @@ import logger from "../../logger";
 import { errToObj } from "../utils";
 import { deleteJob } from "../../workers/jobs";
 import { uploadToCloud } from "../../workers/exports/upload";
+import { Task } from "pg-compose";
 
 export interface ExportForVANOptions {
   requesterId: number;
@@ -30,7 +31,10 @@ interface VanExportRow {
 const CHUNK_SIZE = 1000;
 const FILTER_MESSAGED_FRAGMENT = `and exists ( select 1 from message where campaign_contact_id = cc.id)`;
 
-export const exportForVan = async (job: JobRequestRecord, _helpers: any) => {
+export const exportForVan: Task = async (
+  job: JobRequestRecord,
+  _helpers: any
+) => {
   const reader: Knex = r.reader;
   const payload: ExportForVANOptions = JSON.parse(job.payload);
   const { requesterId, includeUnmessaged, vanIdField } = payload;
