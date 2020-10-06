@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.2](https://github.com/politics-rewired/spoke/compare/v3.1.1...v3.1.2) (2020-10-03)
+
+
+### Bug Fixes
+
+* **slack:** decrease sync rate to fix rate limiting ([#739](https://github.com/politics-rewired/spoke/issues/739)) ([4a57309](https://github.com/politics-rewired/spoke/commit/4a57309a423c63d2a213051512d65bd75ecaf6c8))
+
 ### [3.1.1](https://github.com/politics-rewired/spoke/compare/v3.1.0...v3.1.1) (2020-10-02)
 
 

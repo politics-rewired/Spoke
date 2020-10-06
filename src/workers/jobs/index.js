@@ -359,7 +359,7 @@ export async function filterLandlines(job) {
     throw new Error("Cannot filter landlines - no numbers api key configured");
   }
 
-  const numbersClient = makeNumbersClient(numbersApiKey);
+  const numbersClient = makeNumbersClient({ apiKey: numbersApiKey });
   const numbersRequest = await numbersClient.lookup.createRequest();
 
   let highestId = 0;

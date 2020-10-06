@@ -4,6 +4,7 @@ import isEmpty from "lodash/isEmpty";
 import { config } from "../../../config";
 import logger from "../../../logger";
 import { errToObj } from "../../utils";
+import { stringIsAValidUrl } from "../../../lib/utils";
 import { r } from "../../models";
 import { SendMessagePayload } from './types';
 import { MessagingServiceType, MessagingServiceRecord, RequestHandlerFactory } from "../types";
@@ -70,9 +71,16 @@ interface NumbersDeliveryReportPayload {
  * @returns Assemble Numbers JS client
  */
 export const numbersClient = async (service: MessagingServiceRecord) => {
-  const encryptedApiKey = service.encrypted_auth_token;
+  const {
+    account_sid: endpointBaseUrlMaybe,
+    encrypted_auth_token: encryptedApiKey
+  } = service;
+  const endpointBaseUrl =
+    stringIsAValidUrl(endpointBaseUrlMaybe)
+      ? endpointBaseUrlMaybe
+      : undefined;
   const apiKey = symmetricDecrypt(encryptedApiKey);
-  const client = makeNumbersClient(apiKey);
+  const client = makeNumbersClient({ apiKey, endpointBaseUrl });
   return client;
 };
 
