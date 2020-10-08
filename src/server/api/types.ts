@@ -43,3 +43,29 @@ export interface JobRequestRecord {
   updated_at: string;
   created_at: string;
 }
+
+export interface UserRecord {
+  id: number;
+  auth0_id: string;
+  first_name: string;
+  last_name: string;
+  cell: string;
+  email: string;
+  created_at: string;
+  assigned_cell: string | null;
+  is_superadmin: boolean | null;
+  terms: boolean;
+  updated_at: string;
+}
+
+export interface OrganizationRecord {
+  id: number;
+  uuid: string | null;
+  name: string;
+  created_at: string;
+  features: string;
+  texting_hours_enforced: boolean;
+  texting_hours_start: number;
+  texting_hours_end: number;
+  updated_at: string;
+}

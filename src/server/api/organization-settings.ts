@@ -1,6 +1,7 @@
 import { r } from "../models";
 import { organizationCache } from "../models/cacheable_queries/organization";
 import { config } from "../../config";
+import { stringIsAValidUrl } from "../../lib/utils";
 import { accessRequired } from "./errors";
 import { RequestAutoApproveType } from "../../api/organization-membership";
 
@@ -8,6 +9,7 @@ interface IOrganizationSettings {
   defaulTexterApprovalStatus: string;
   optOutMessage: string;
   numbersApiKey?: string;
+  trollbotWebhookUrl?: string;
   showContactLastName: boolean;
   showContactCell: boolean;
 }
@@ -16,6 +18,7 @@ const SETTINGS_PERMISSIONS: { [key in keyof IOrganizationSettings]: string } = {
   defaulTexterApprovalStatus: "OWNER",
   optOutMessage: "OWNER",
   numbersApiKey: "OWNER",
+  trollbotWebhookUrl: "OWNER",
   showContactLastName: "TEXTER",
   showContactCell: "TEXTER"
 };
@@ -44,6 +47,11 @@ const SETTINGS_VALIDATORS: {
     // User probably made a mistake - no API key will have a *
     if (value.includes("*")) {
       throw new Error("Numbers API Key cannot have character: *");
+    }
+  },
+  trollbotWebhookUrl: (value: string) => {
+    if (!stringIsAValidUrl(value)) {
+      throw new Error("TrollBot webhook URL must be a valid URL");
     }
   }
 };
@@ -96,6 +104,7 @@ export const resolvers = {
       "defaulTexterApprovalStatus",
       "optOutMessage",
       "numbersApiKey",
+      "trollbotWebhookUrl",
       "showContactLastName",
       "showContactCell"
     ])
