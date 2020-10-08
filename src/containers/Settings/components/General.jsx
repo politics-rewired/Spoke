@@ -62,6 +62,7 @@ class Settings extends React.Component {
     textingHoursDialogOpen: false,
     hasNumbersApiKeyChanged: false,
     numbersApiKey: undefined,
+    trollbotWebhookUrl: undefined,
     approvalLevel: undefined,
     isWorking: false,
     error: undefined
@@ -106,7 +107,7 @@ class Settings extends React.Component {
   handleSaveApprovalLevel = async () => {
     const { approvalLevel } = this.state;
     const payload = { defaulTexterApprovalStatus: approvalLevel };
-    const success = await this.editSettings("Numbers API Key", payload);
+    const success = await this.editSettings("Approval Level", payload);
     if (!success) {
       this.setState({ approvalLevel: undefined });
     }
@@ -128,6 +129,9 @@ class Settings extends React.Component {
 
   handleEditOptOutMessage = ({ optOutMessage }) =>
     this.editSettings("Opt Out Messasge", { optOutMessage });
+
+  handleEditTrollBotUrl = ({ trollbotWebhookUrl }) =>
+    this.editSettings("TrollBot Webhook URL", { trollbotWebhookUrl });
 
   handleEditShowContactLastName = async (event, isToggled) =>
     this.editSettings("Show Contact Last Name", {
@@ -202,6 +206,7 @@ class Settings extends React.Component {
     const {
       optOutMessage,
       numbersApiKey,
+      trollbotWebhookUrl,
       defaulTexterApprovalStatus,
       showContactLastName,
       showContactCell
@@ -213,6 +218,10 @@ class Settings extends React.Component {
 
     const numbersApiKeySchema = yup.object({
       numbersApiKey: yup.string().nullable()
+    });
+
+    const trollbotSettingsSchema = yup.object({
+      trollbotWebhookUrl: yup.string()
     });
 
     const approvalLevel =
@@ -375,6 +384,35 @@ class Settings extends React.Component {
           </CardText>
         </Card>
 
+        {window.ENABLE_TROLLBOT && (
+          <Card className={css(styles.sectionCard)}>
+            <GSForm
+              schema={trollbotSettingsSchema}
+              onSubmit={this.handleEditTrollBotUrl}
+              defaultValue={{ trollbotWebhookUrl }}
+            >
+              <CardHeader title="TrollBot" />
+              <CardText>
+                If set, a payload will be sent to this URL for every TrollBot
+                alarm.
+                <Form.Field
+                  label="Webhook URL"
+                  name="trollbotWebhookUrl"
+                  fullWidth
+                />
+              </CardText>
+              <CardActions>
+                <Form.Button
+                  label={this.props.saveLabel || "Save TrollBot Settings"}
+                  type="submit"
+                  component={RaisedButton}
+                  disabled={isWorking}
+                />
+              </CardActions>
+            </GSForm>
+          </Card>
+        )}
+
         <Dialog
           title="Error Saving Settings"
           open={error !== undefined}
@@ -452,6 +490,7 @@ const mutations = {
           id
           optOutMessage
           numbersApiKey
+          trollbotWebhookUrl
           defaulTexterApprovalStatus
           showContactLastName
           showContactCell
@@ -479,6 +518,7 @@ const queries = {
             id
             optOutMessage
             numbersApiKey
+            trollbotWebhookUrl
             defaulTexterApprovalStatus
             showContactLastName
             showContactCell
