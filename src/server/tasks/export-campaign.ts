@@ -204,7 +204,6 @@ export const fetchExportData = async job => {
     rawPayload
   );
 
-  logger.info("fetchExportData job", job);
   const { title: campaignTitle } = await r
     .reader("campaign")
     .first("title")
