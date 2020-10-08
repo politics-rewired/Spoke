@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/politics-rewired/spoke/compare/v3.2.0...v3.3.0) (2020-10-08)
+
+
+### Features
+
+* **trollbot:** support webhooks for trollbot alarms ([#742](https://github.com/politics-rewired/spoke/issues/742)) ([2ffb28a](https://github.com/politics-rewired/spoke/commit/2ffb28a98262102aacb96369b3d232e2b42ffeac))
+
 ## [3.2.0](https://github.com/politics-rewired/spoke/compare/v3.1.2...v3.2.0) (2020-10-08)
 
 
