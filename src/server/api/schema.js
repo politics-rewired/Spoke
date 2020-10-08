@@ -806,10 +806,10 @@ const rootMutations = {
       if (JOBS_SAME_PROCESS) {
         if (exportType === CampaignExportType.SPOKE) {
           await worker.addJob("export-campaign", newJob);
-          return "Job Created";
+          return newJob;
         } else if (exportType === CampaignExportType.VAN) {
           await worker.addJob("export-campaign-for-van", newJob);
-          return "Job Created";
+          return newJob;
         }
       }
 
@@ -817,7 +817,7 @@ const rootMutations = {
          adding the job to the worker instead of return newJob */
 
       await worker.addJob("export-campaign", newJob);
-      return "Job Created";
+      return newJob;
     },
 
     editOrganizationMembership: async (
