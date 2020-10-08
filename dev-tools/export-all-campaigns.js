@@ -2,7 +2,7 @@ require("dotenv").config();
 
 import chunk from "lodash/chunk";
 import { r } from "../src/server/models";
-import { exportCampaign } from "../src/workers/jobs";
+import exportCampaign from "../src/server/tasks/export-campaign";
 
 const ARCHIVED_CAMPAIGN_AGE_DAYS = 14;
 const CAMPAIGN_FETCH_CHUNK_SIZE = 1000;
