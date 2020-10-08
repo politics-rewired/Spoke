@@ -23,12 +23,10 @@ import { hasRole } from "../../lib/permissions";
 import { refreshExternalSystem } from "../lib/external-systems";
 import {
   assignTexters,
-  exportCampaign,
   loadContactsFromDataWarehouse,
   uploadContacts,
   filterLandlines
 } from "../../workers/jobs";
-import { exportForVan } from "../../workers/jobs/export-for-van";
 import { datawarehouse, r, cacheableData } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
 import {
@@ -774,7 +772,7 @@ const rootMutations = {
       const { campaignId, exportType, vanOptions } = options;
 
       if (exportType === CampaignExportType.VAN && !vanOptions) {
-        throw new Error("Input must include vanOptions when exposting as VAN!");
+        throw new Error("Input must include vanOptions when exporting as VAN!");
       }
 
       const campaign = await loaders.campaign.load(campaignId);
@@ -787,10 +785,12 @@ const rootMutations = {
 
       let payload = {};
       if (exportType === CampaignExportType.SPOKE) {
-        payload = { id: campaignId, requester: user.id };
+        payload = { campaign_id: campaignId, requester: user.id };
       } else if (exportType === CampaignExportType.VAN) {
         payload = { ...vanOptions, requesterId: user.id };
       }
+
+      const worker = await getWorker();
 
       const [newJob] = await r
         .knex("job_request")
@@ -805,11 +805,18 @@ const rootMutations = {
         .returning("*");
       if (JOBS_SAME_PROCESS) {
         if (exportType === CampaignExportType.SPOKE) {
-          exportCampaign(newJob);
+          await worker.addJob("export-campaign", newJob);
+          return newJob;
         } else if (exportType === CampaignExportType.VAN) {
-          exportForVan(newJob);
+          await worker.addJob("export-campaign-for-van", newJob);
+          return newJob;
         }
       }
+
+      /* I'm not sure if this is right, but here I'm following the old pattern,
+         adding the job to the worker instead of return newJob */
+
+      await worker.addJob("export-campaign", newJob);
       return newJob;
     },
 
@@ -1608,7 +1615,12 @@ const rootMutations = {
     ) => {
       const contact = await loaders.campaignContact.load(campaignContactId);
 
-      await assignmentRequiredOrHasOrgRoleForCampaign(user, contact.assignment_id, contact.campaign_id, 'SUPERVOLUNTEER');
+      await assignmentRequiredOrHasOrgRoleForCampaign(
+        user,
+        contact.assignment_id,
+        contact.campaign_id,
+        "SUPERVOLUNTEER"
+      );
 
       const [campaign] = await r
         .knex("campaign_contact")

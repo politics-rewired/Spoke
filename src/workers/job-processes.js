@@ -4,7 +4,6 @@ import { r } from "../server/models";
 import { getNextJob } from "./lib";
 import { sleep } from "../lib/utils";
 import {
-  exportCampaign,
   processSqsMessages,
   uploadContacts,
   loadContactsFromDataWarehouse,
@@ -15,6 +14,7 @@ import {
   fixOrgless,
   clearOldJobs
 } from "./jobs";
+import { exportCampaign } from "../server/tasks/export-campaign";
 import { setupUserNotificationObservers } from "../server/notifications";
 
 /* Two process models are supported in this file.
@@ -27,7 +27,6 @@ import { setupUserNotificationObservers } from "../server/notifications";
  */
 
 const jobMap = {
-  export: exportCampaign,
   upload_contacts: uploadContacts,
   upload_contacts_sql: loadContactsFromDataWarehouse,
   assign_texters: assignTexters
