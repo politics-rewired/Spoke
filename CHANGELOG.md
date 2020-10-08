@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/politics-rewired/spoke/compare/v3.1.2...v3.2.0) (2020-10-08)
+
+
+### Features
+
+* **exports:** move export to graphile worker ([#738](https://github.com/politics-rewired/spoke/issues/738)) ([89bd9ac](https://github.com/politics-rewired/spoke/commit/89bd9acf379d439b945869b09fa44958fecd25b0))
+* remove 'GraphQl Error:' from error messages ([#737](https://github.com/politics-rewired/spoke/issues/737)) ([33de981](https://github.com/politics-rewired/spoke/commit/33de981965f49a0f406d4b84ee085623668fbce0))
+
+
+### Bug Fixes
+
+* restore missing import ([6808317](https://github.com/politics-rewired/spoke/commit/6808317c023d7c64d8aaa25da2a9dd8ad3a053d5))
+* **trollbot:** make primary key compound ([#741](https://github.com/politics-rewired/spoke/issues/741)) ([99ef5ec](https://github.com/politics-rewired/spoke/commit/99ef5ecf36df6213cc589803fe6d39ecb6632ba8))
+* handle slack rate limits ([#740](https://github.com/politics-rewired/spoke/issues/740)) ([53c6d1c](https://github.com/politics-rewired/spoke/commit/53c6d1ceabc64a1f43b9de3ca13761b386c33e72))
+
 ### [3.1.2](https://github.com/politics-rewired/spoke/compare/v3.1.1...v3.1.2) (2020-10-03)
 
 
