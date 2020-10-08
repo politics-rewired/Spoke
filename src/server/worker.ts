@@ -61,7 +61,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["export-campaign"] = wrappedProgressTask(exportCampaign, {
     removeOnComplete: true
   });
-  m.taskList!["export-campaign"] = wrappedProgressTask(exportForVan, {
+  m.taskList!["export-for-van"] = wrappedProgressTask(exportForVan, {
     removeOnComplete: true
   });
 

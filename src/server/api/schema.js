@@ -29,6 +29,8 @@ import { change } from "../local-auth-helpers";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, datawarehouse, r } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
+import { exportCampaign } from "../tasks/export-campaign";
+import { addProgressJob } from "../tasks/utils";
 import { errToObj } from "../utils";
 import { getWorker } from "../worker";
 import {
@@ -788,41 +790,18 @@ const rootMutations = {
       jobTypes[CampaignExportType.VAN] = "van-export";
 
       let payload = {};
+      let jobResult;
       if (exportType === CampaignExportType.SPOKE) {
         payload = { campaign_id: campaignId, requester: user.id };
+        // jobResult = await addProgressJob("export-campaign", payload);
+        jobResult = exportCampaign(payload);
       } else if (exportType === CampaignExportType.VAN) {
         payload = { ...vanOptions, requesterId: user.id };
+        jobResult = await addProgressJob("export-for-van", payload);
       }
 
-      const worker = await getWorker();
-
-      const [newJob] = await r
-        .knex("job_request")
-        .insert({
-          queue_name: `${campaignId}:export`,
-          job_type: jobTypes[exportType],
-          locks_queue: false,
-          assigned: JOBS_SAME_PROCESS, // can get called immediately, below
-          campaign_id: campaignId,
-          payload: JSON.stringify(payload)
-        })
-        .returning("*");
-      if (JOBS_SAME_PROCESS) {
-        if (exportType === CampaignExportType.SPOKE) {
-          await worker.addJob("export-campaign", newJob);
-          return newJob;
-        }
-        if (exportType === CampaignExportType.VAN) {
-          await worker.addJob("export-campaign-for-van", newJob);
-          return newJob;
-        }
-      }
-
-      /* I'm not sure if this is right, but here I'm following the old pattern,
-         adding the job to the worker instead of return newJob */
-
-      await worker.addJob("export-campaign", newJob);
-      return newJob;
+      // this should return a jobRequest object
+      return jobResult;
     },
 
     editOrganizationMembership: async (

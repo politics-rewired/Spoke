@@ -1,6 +1,7 @@
 import { Task } from "graphile-worker/dist/interfaces";
 import { getWorker } from "../worker";
-import { r } from "../server/models";
+import { r } from "../models";
+import logger from "../../../src/logger";
 
 export const addProgressJob = async (
   identifier: string,
@@ -19,6 +20,9 @@ export const addProgressJob = async (
     .returning("*");
 
   const wrappedPayload = { ...payload, _jobRequestId: jobResult.id };
+
+  logger.info("addProgressJob wrappedPayload", wrappedPayload);
+
   const worker = await getWorker();
   worker.addJob(identifier, wrappedPayload);
   return jobResult;
