@@ -21,6 +21,9 @@ export interface TrollPatrolWebhookRecord {
   texter_email: string;
   campaign_id: number;
   campaign_title: string;
+  campaign_contact_id: number;
+  campaign_contact_name: string;
+  campaign_contact_cell: string;
 }
 
 export const trollPatrol: Task = async (_payload, helpers) => {
@@ -31,7 +34,9 @@ export const trollPatrolForOrganization: Task = async (payload, helpers) => {
   const { organization_id } = payload as TrollPatrolForOrganizationPayload;
   const mins = config.TROLL_ALERT_PERIOD_MINUTES;
 
-  const { rows: alarms } = await helpers.query<Pick<TrollAlarmRecord, "message_id">>(
+  const { rows: alarms } = await helpers.query<
+    Pick<TrollAlarmRecord, "message_id">
+  >(
     `select message_id from public.raise_trollbot_alarms ($1, '${mins} minute'::interval)`,
     [organization_id]
   );
@@ -57,6 +62,9 @@ export const trollPatrolForOrganization: Task = async (payload, helpers) => {
           texter.id as texter_id,
           texter.first_name || ' ' || texter.last_name as texter_name,
           texter.email as texter_email,
+          campaign_contact.id as campaign_contact_id,
+          campaign_contact.first_name || ' ' || campaign_contact.last_name as campaign_contact_name,
+          campaign_contact.cell as campaign_contact_cell,
           campaign.id as campaign_id,
           campaign.title as campaign_title
         from troll_alarm as alarm
