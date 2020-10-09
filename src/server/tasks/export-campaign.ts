@@ -98,7 +98,7 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
       processed += CHUNK_SIZE;
       await r
         .knex("job_request")
-        .where({ id: job.id })
+        .where({ id: payload.id })
         .update({
           status: Math.round((processed / contactsCount / 2) * 100)
         });
