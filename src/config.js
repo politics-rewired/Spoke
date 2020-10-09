@@ -55,10 +55,6 @@ const validators = {
     desc: "Webhook URL to notify when a texter assignment is requested.",
     default: undefined
   }),
-  ASSIGNMENT_REQUESTED_ALL_STRINGS: bool({
-    desc: "If true, all payload values will be converted to strings.",
-    default: false
-  }),
   ASSIGNMENT_REQUESTED_URL_REQUIRED: bool({
     desc:
       "Require successful assignment requested webhook to persist assignment request in Spoke.",
@@ -769,6 +765,10 @@ const validators = {
   WAREHOUSE_DB_LAMBDA_ITERATION: bool({
     desc:
       "If the WAREHOUSE_DB connection/feature is enabled, then on AWS Lambda, queries that take longer than 5min can expire. This will enable incrementing through queries on new lambda invocations to avoid timeouts.",
+    default: false
+  }),
+  WEBHOOK_PAYLOAD_ALL_STRINGS: bool({
+    desc: "If true, all payload values will be converted to strings.",
     default: false
   }),
   WORKER_CONCURRENCY: num({

@@ -28,7 +28,7 @@ const notifyAssignmentCreated = async options => {
     payload.externalUserId = externalUserId;
   }
 
-  if (config.ASSIGNMENT_REQUESTED_ALL_STRINGS) {
+  if (config.WEBHOOK_PAYLOAD_ALL_STRINGS) {
     payload = Object.fromEntries(
       Object.entries(payload).map(([key, value]) => [key, `${value}`])
     );
