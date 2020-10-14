@@ -116,10 +116,7 @@ class ApplyTagDialog extends Component {
           title="More Actions"
           open={open}
           actions={selectTagActions}
-          contentStyle={{
-            width: "100%",
-            maxWidth: "none"
-          }}
+          contentStyle={{ width: "100%", maxWidth: "none" }}
           onRequestClose={this.props.onRequestClose}
         >
           {!!escalateTag && (

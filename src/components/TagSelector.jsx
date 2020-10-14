@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import ChipInput from "material-ui-chip-input";
+import SelectField from "material-ui/SelectField";
+import MenuItem from "material-ui/MenuItem";
 
 import ApplyTagConfirmationDialog from "./ApplyTagConfirmationDialog";
 
@@ -53,6 +55,26 @@ class TagSelector extends Component {
     }
   };
 
+  handleSelectTags = (_e, _key, tagsArray) => {
+    // tagsArray is an array of tag ids currently selected in dropdownMenu
+    const { dataSource, value } = this.props;
+
+    // determine new tags
+    const valuesIds = value.map(tag => tag.id);
+    const newTagIds = tagsArray.filter(tagId => !valuesIds.includes(tagId));
+
+    // when a new tag is selected
+    newTagIds.forEach(tagId => {
+      const newTag = dataSource.find(t => t.id === tagId);
+      console.log("newTag", newTag, "dataSource", dataSource);
+      if (newTag.confirmationSteps.length > 0) {
+        return this.setState({ pendingTag: newTag });
+      }
+
+      this.addTag(newTag);
+    });
+  };
+
   render() {
     const { pendingTag } = this.state;
     const { dataSource, value } = this.props;
@@ -72,6 +94,18 @@ class TagSelector extends Component {
           onRequestAdd={this.handleRequestAddTag}
           onRequestDelete={this.handleRemoveTag}
         />
+        <SelectField
+          hintText="Or find them via dropdown"
+          style={{ width: "100%", maxWidth: "none" }}
+          multiple
+          autoWidth={false}
+          maxHeight={300}
+          onChange={this.handleSelectTags}
+        >
+          {dataSource.map(tag => (
+            <MenuItem key={tag.id} value={tag.id} primaryText={tag.title} />
+          ))}
+        </SelectField>
         <ApplyTagConfirmationDialog
           pendingTag={pendingTag}
           onCancel={this.handleCancelConfirmTag}
