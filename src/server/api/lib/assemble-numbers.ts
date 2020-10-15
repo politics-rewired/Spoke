@@ -37,6 +37,7 @@ interface NumbersOutboundMessagePayload {
   body: string;
   mediaUrls?: any; // client lib has incorrect type [string]
   contactZipCode?: string;
+  sendBefore: string;
 }
 
 interface NumbersInboundMessagePayload {
@@ -153,7 +154,8 @@ export const sendMessage = async (message: SendMessagePayload, organizationId: n
     id: spokeMessageId,
     campaign_contact_id: campaignContactId,
     contact_number: to,
-    text: messageText
+    text: messageText,
+    send_before: sendBefore
   } = message;
   const service = await getContactMessagingService(
     campaignContactId,
@@ -173,6 +175,7 @@ export const sendMessage = async (message: SendMessagePayload, organizationId: n
     to,
     body,
     mediaUrls,
+    sendBefore,
     contactZipCode: contactZipCode === "" ? null : contactZipCode
   };
   try {
