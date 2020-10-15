@@ -9,19 +9,25 @@ export const addProgressJob = async (
   initialResult: any = {},
   context: any = {}
 ) => {
+  const { jobRequestRecord, requester } = payload;
+  const { campaign_id, queue_name, locks_queue, assigned } = jobRequestRecord;
+  const jobPayload = { campaign_id, requester };
+
   const [jobResult] = await r
     .knex("job_request")
     .insert({
       job_type: identifier,
       status: 0,
-      payload: JSON.stringify(context),
+      campaign_id,
+      queue_name,
+      locks_queue,
+      assigned,
+      payload: JSON.stringify(jobPayload),
       result_message: JSON.stringify(initialResult)
     })
     .returning("*");
 
   const wrappedPayload = { ...payload, _jobRequestId: jobResult.id };
-
-  logger.info("addProgressJob wrappedPayload", wrappedPayload);
 
   const worker = await getWorker();
   worker.addJob(identifier, wrappedPayload);
@@ -64,7 +70,7 @@ export const wrappedProgressTask = (
 
   try {
     await task(payload, progressHelpers);
-
+    logger.info("wrappedProgress runs payload", payload);
     if (options.removeOnComplete) {
       await r
         .knex("job_request")

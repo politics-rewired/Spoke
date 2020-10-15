@@ -50,14 +50,14 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
   m.taskList!["release-stale-replies"] = releaseStaleReplies;
   m.taskList!["handle-delivery-report"] = handleDeliveryReport;
-  m.taskList!["troll-patrol"] = trollPatrol;
-  m.taskList!["troll-patrol-for-org"] = trollPatrolForOrganization;
-  m.taskList!["sync-slack-team-members"] = syncSlackTeamMembers;
-  m.taskList!["van-get-survey-questions"] = fetchVANSurveyQuestions;
-  m.taskList!["van-get-activist-codes"] = fetchVANActivistCodes;
-  m.taskList!["van-get-result-codes"] = fetchVANResultCodes;
-  m.taskList!["van-sync-campaign-contact"] = syncCampaignContactToVAN;
-  m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
+  // m.taskList!["troll-patrol"] = trollPatrol;
+  // m.taskList!["troll-patrol-for-org"] = trollPatrolForOrganization;
+  // m.taskList!["sync-slack-team-members"] = syncSlackTeamMembers;
+  // m.taskList!["van-get-survey-questions"] = fetchVANSurveyQuestions;
+  // m.taskList!["van-get-activist-codes"] = fetchVANActivistCodes;
+  // m.taskList!["van-get-result-codes"] = fetchVANResultCodes;
+  // m.taskList!["van-sync-campaign-contact"] = syncCampaignContactToVAN;
+  // m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
   m.taskList!["export-campaign"] = wrappedProgressTask(exportCampaign, {
     removeOnComplete: true
   });

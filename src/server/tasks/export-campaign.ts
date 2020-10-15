@@ -70,12 +70,12 @@ export const getUniqueQuestionsByStepId = (
  * @param {object} job The export job object to fetch data for.
  *                     Must have payload, campaign_id, and requester properties.
  */
-export const fetchExportData = async (job: JobRequestRecord) => {
-  const { campaign_id: campaignId, payload: rawPayload } = job;
-  const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
-    rawPayload
-  );
 
+export const fetchExportData = async (
+  campaignId: number,
+  requesterId: string,
+  isAutomatedExport = false
+) => {
   const { title: campaignTitle } = await r
     .reader("campaign")
     .first("title")
@@ -312,6 +312,8 @@ export const exportCampaign: Task = async (
   payload: JobRequestRecord,
   _helpers
 ) => {
+  const { payload: context, campaign_id, requester } = payload;
+
   await addProgressJob("export-campaign", payload);
   const {
     campaignId,
@@ -320,7 +322,7 @@ export const exportCampaign: Task = async (
     interactionSteps,
     assignments: _assignments,
     isAutomatedExport
-  } = await fetchExportData(payload);
+  } = await fetchExportData(campaign_id, requester);
 
   const countQueryResult = await r
     .reader("campaign_contact")

@@ -30,6 +30,7 @@ import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, datawarehouse, r } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
 import { exportCampaign } from "../tasks/export-campaign";
+import { exportForVan } from "../tasks/export-for-van";
 import { addProgressJob } from "../tasks/utils";
 import { errToObj } from "../utils";
 import { getWorker } from "../worker";
@@ -789,19 +790,33 @@ const rootMutations = {
       jobTypes[CampaignExportType.SPOKE] = "export";
       jobTypes[CampaignExportType.VAN] = "van-export";
 
+      const jobRequestRecord = {
+        queue_name: `${campaignId}:export`,
+        job_type: jobTypes[exportType],
+        locks_queue: false,
+        assigned: JOBS_SAME_PROCESS,
+        campaign_id: campaignId,
+        payload: JSON.stringify(payload)
+      };
+
       let payload = {};
-      let jobResult;
+      let jobRequest;
       if (exportType === CampaignExportType.SPOKE) {
-        payload = { campaign_id: campaignId, requester: user.id };
+        payload = {
+          campaign_id: campaignId,
+          requester: user.id
+        };
         // jobResult = await addProgressJob("export-campaign", payload);
-        jobResult = exportCampaign(payload);
+        logger.info("schema jobRequestRecord", jobRequestRecord);
+        jobRequest = exportCampaign(jobRequestRecord);
       } else if (exportType === CampaignExportType.VAN) {
         payload = { ...vanOptions, requesterId: user.id };
-        jobResult = await addProgressJob("export-for-van", payload);
+        // jobRequest = await addProgressJob("export-for-van", payload);
+        jobRequest = exportForVan(jobRequestRecord);
       }
 
       // this should return a jobRequest object
-      return jobResult;
+      return jobRequest;
     },
 
     editOrganizationMembership: async (
