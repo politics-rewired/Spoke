@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-import ChipInput from "material-ui-chip-input";
-import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
+import Select, { components } from "react-select";
 
-import ApplyTagConfirmationDialog from "./ApplyTagConfirmationDialog";
+import MenuPortal from "./MenuPortal";
+import ApplyTagConfirmationDialog from "../ApplyTagConfirmationDialog";
 
 class TagSelector extends Component {
   state = {
@@ -28,11 +27,13 @@ class TagSelector extends Component {
     this.addTag(newTag);
   };
 
-  handleRemoveTag = deleteTagId => {
+  // remove a tag
+  handleRemoveTag = tagsArray => {
     const { value, onChange } = this.props;
-    const newTags = value.filter(tag => tag.id !== deleteTagId);
-    if (newTags.length < value.length) {
-      onChange(newTags);
+    const preservedTagIds = tagsArray.map(tag => tag.value);
+    const preservedTags = value.filter(tag => preservedTagIds.includes(tag.id));
+    if (preservedTags.length < value.length) {
+      onChange(preservedTags);
     }
   };
 
@@ -55,57 +56,49 @@ class TagSelector extends Component {
     }
   };
 
-  handleSelectTags = (_e, _key, tagsArray) => {
-    // tagsArray is an array of tag ids currently selected in dropdownMenu
-    const { dataSource, value } = this.props;
+  // differentiate select and clear tag actions
+  handleSelectChange = (
+    tagsArray,
+    { action: selectAction, option: selectedTag }
+  ) => {
+    if (selectAction === "select-option") {
+      this.handleSelectTag(selectedTag);
+    }
+    if (selectAction === "remove-value") {
+      this.handleRemoveTag(tagsArray);
+    }
+  };
 
-    // determine new tags
-    const valuesIds = value.map(tag => tag.id);
-    const newTagIds = tagsArray.filter(tagId => !valuesIds.includes(tagId));
-
-    // when a new tag is selected
-    newTagIds.forEach(tagId => {
-      const newTag = dataSource.find(t => t.id === tagId);
-      console.log("newTag", newTag, "dataSource", dataSource);
-      if (newTag.confirmationSteps.length > 0) {
-        return this.setState({ pendingTag: newTag });
-      }
-
-      this.addTag(newTag);
-    });
+  // select a tag
+  handleSelectTag = selectedTag => {
+    const { dataSource } = this.props;
+    const { value: newTagId } = selectedTag;
+    const newTag = dataSource.find(t => t.id === newTagId);
+    this.addTag(newTag);
   };
 
   render() {
     const { pendingTag } = this.state;
     const { dataSource, value } = this.props;
+    const menuOptions = dataSource.map(tag => ({
+      label: tag.title,
+      value: tag.id
+    }));
+    const menuValues = value.map(tag => ({ value: tag.id, label: tag.title }));
 
     return (
       <div>
         <p>Apply tags:</p>
-        <ChipInput
-          value={value}
-          dataSourceConfig={{ text: "title", value: "id" }}
-          placeholder="Type to search tags"
-          maxHeight={200}
-          dataSource={dataSource}
-          fullWidth={true}
-          // openOnFocus={true}
-          onBeforeRequestAdd={this.handleBeforeRequestAdd}
-          onRequestAdd={this.handleRequestAddTag}
-          onRequestDelete={this.handleRemoveTag}
+        <Select
+          isMulti
+          isSearchable
+          value={menuValues}
+          components={{ MenuPortal }}
+          options={menuOptions}
+          menuPortalTarget={document.body}
+          onChange={this.handleSelectChange}
         />
-        <SelectField
-          hintText="Or find them via dropdown"
-          style={{ width: "100%", maxWidth: "none" }}
-          multiple
-          autoWidth={false}
-          maxHeight={300}
-          onChange={this.handleSelectTags}
-        >
-          {dataSource.map(tag => (
-            <MenuItem key={tag.id} value={tag.id} primaryText={tag.title} />
-          ))}
-        </SelectField>
+
         <ApplyTagConfirmationDialog
           pendingTag={pendingTag}
           onCancel={this.handleCancelConfirmTag}
@@ -115,12 +108,6 @@ class TagSelector extends Component {
     );
   }
 }
-
-TagSelector.defaultProps = {
-  dataSource: [],
-  value: [],
-  onChange: () => {}
-};
 
 TagSelector.propTypes = {
   dataSource: PropTypes.arrayOf(

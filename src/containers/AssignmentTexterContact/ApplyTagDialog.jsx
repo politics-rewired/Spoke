@@ -111,7 +111,7 @@ class ApplyTagDialog extends Component {
     ]);
 
     return (
-      <div>
+      <div id="applyTagDialog">
         <Dialog
           title="More Actions"
           open={open}
