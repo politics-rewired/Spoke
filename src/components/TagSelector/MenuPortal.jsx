@@ -21,29 +21,31 @@ const menuPortalCSS = ({
     containerTop = top - offsetTop;
   }
 
-  // get coordinates for dialog modal
-  const rect = controlElement.getBoundingClientRect();
+  console.log("containerTop".containerTop);
+
+  // get dimensions of dialog modal
+  const rectangle = controlElement.getBoundingClientRect();
 
   // calculate position for dropdownMenu
-  const r = {
-    left: rect.left - containerLeft,
+  const dropdownPosition = {
+    left: rectangle.left - containerLeft,
     position,
-    top: rect.top + rect.height,
-    width: rect.width,
-    zIndex: 999999
+    top: rectangle.top + rectangle.height,
+    width: rectangle.width,
+    zIndex: 99999
   };
 
   if (isFixed) {
     return {
-      ...r,
+      ...dropdownPosition,
       top: rect[placement]
     };
   }
 
-  return r;
+  return dropdownPosition;
 };
 
-export default class MenuPortal extends PureComponent {
+class MenuPortal extends PureComponent {
   static propTypes = {
     menuPlacement: PropTypes.oneOf(["auto", "bottom", "top"]),
     appendTo: PropTypes.instanceOf(Element),
@@ -61,11 +63,11 @@ export default class MenuPortal extends PureComponent {
     return { getPortalPlacement: this.getPortalPlacement };
   };
 
-  // callback for occassions where the menu must "flip"
+  // callback in case menu needs to flip
   getPortalPlacement = ({ placement }) => {
     const initialPlacement = coercePlacement(this.props.menuPlacement);
 
-    // avoid re-renders if the placement has not changed
+    // avoid re-renders if placement hasnt changed
     if (placement !== initialPlacement) {
       this.setState({ placement });
     }
@@ -80,7 +82,7 @@ export default class MenuPortal extends PureComponent {
     } = this.props;
     const isFixed = position === "fixed";
 
-    // bail early if required elements aren't present
+    // guard against missing elements
     if ((!appendTo && !isFixed) || !controlElement) {
       return null;
     }
@@ -97,11 +99,11 @@ export default class MenuPortal extends PureComponent {
 
     // override createPortal
     const createPortal = child => {
-      const node = document.getElementById("portalRoot");
-
-      return <Portal node={node}>{child}</Portal>;
+      return <Portal>{child}</Portal>;
     };
 
-    return appendTo ? createPortal(menuWrapper, appendTo) : menuWrapper;
+    return appendTo ? createPortal(menuWrapper) : menuWrapper;
   }
 }
+
+export default MenuPortal;
