@@ -21,8 +21,6 @@ const menuPortalCSS = ({
     containerTop = top - offsetTop;
   }
 
-  console.log("containerTop".containerTop);
-
   // get dimensions of dialog modal
   const rectangle = controlElement.getBoundingClientRect();
 
