@@ -77,19 +77,21 @@ export const exportForVan: Task = async (
            cc.first_name,
            cc.last_name,
            coalesce(result_values.value, 'canvassed, no response') as value,
-           to_char(cc.created_at,'MM-DD-YYYY') as date
+           to_char(result_values.canvassed_at,'MM-DD-YYYY') as date
          from campaign_contact_ids cc
          left join (
            select
             question_response.campaign_contact_id,
-            interaction_step.question || ': ' || question_response.value as value
+            interaction_step.question || ': ' || question_response.value as value,
+            question_response.created_at as canvassed_at
            from question_response
            join interaction_step on 
              question_response.interaction_step_id = interaction_step.id
            union
            select
             campaign_contact_id,
-            title as value
+            title as value,
+            cct.created_at as canvassed_at
            from campaign_contact_tag cct
            join tag on cct.tag_id = tag.id
          ) result_values on result_values.campaign_contact_id = cc.id
