@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.5.1](https://github.com/politics-rewired/spoke/compare/v3.5.0...v3.5.1) (2020-10-21)
+
+
+### Bug Fixes
+
+* **van-export:** fix canvassed date ([#750](https://github.com/politics-rewired/spoke/issues/750)) ([2352f48](https://github.com/politics-rewired/spoke/commit/2352f48905ef79eb2ef5befbd8e0b5b08cf24a65))
+
 ## [3.5.0](https://github.com/politics-rewired/spoke/compare/v3.4.0...v3.5.0) (2020-10-21)
 
 
