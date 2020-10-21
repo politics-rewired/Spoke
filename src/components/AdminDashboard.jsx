@@ -62,83 +62,42 @@ class AdminDashboard extends React.Component {
     const { roles } = this.props.data.currentUser;
     const { escalatedConversationCount, pendingAssignmentRequestCount } =
       (this.props.badgeCounts || {}).organization || {};
+    const { totalCount: trollCount } =
+      (this.props.trollAlarmsCount || {}).trollAlarmsCount || {};
 
     const sections = [
-      {
-        name: "Campaigns",
-        path: "campaigns",
-        role: "ADMIN"
-      },
-      {
-        name: "People",
-        path: "people",
-        role: "ADMIN"
-      },
-      {
-        name: "Teams",
-        path: "teams",
-        role: "ADMIN"
-      },
-      {
-        name: "Assignment Control",
-        path: "assignment-control",
-        role: "ADMIN"
-      },
-      {
-        name: "Tags",
-        path: "tag-editor",
-        role: "ADMIN"
-      },
-      {
-        name: "Message Review",
-        path: "incoming",
-        role: "SUPERVOLUNTEER"
-      },
+      { name: "Campaigns", path: "campaigns", role: "ADMIN" },
+      { name: "People", path: "people", role: "ADMIN" },
+      { name: "Teams", path: "teams", role: "ADMIN" },
+      { name: "Assignment Control", path: "assignment-control", role: "ADMIN" },
+      { name: "Tags", path: "tag-editor", role: "ADMIN" },
+      { name: "Message Review", path: "incoming", role: "SUPERVOLUNTEER" },
       {
         name: "Escalated Convos",
         path: "escalated",
         role: "ADMIN",
         badge: window.DISABLE_SIDEBAR_BADGES
           ? undefined
-          : {
-              count: escalatedConversationCount
-            }
+          : { count: escalatedConversationCount }
       },
-      {
-        name: "Bulk Script Editor",
-        path: "bulk-script-editor",
-        role: "OWNER"
-      },
-      {
-        name: "Short Link Domains",
-        path: "short-link-domains",
-        role: "OWNER"
-      },
+      { name: "Bulk Script Editor", path: "bulk-script-editor", role: "OWNER" },
+      { name: "Short Link Domains", path: "short-link-domains", role: "OWNER" },
       {
         name: "Assignment Requests",
         path: "assignment-requests",
         role: "SUPERVOLUNTEER",
         badge: window.DISABLE_SIDEBAR_BADGES
           ? undefined
-          : {
-              count: pendingAssignmentRequestCount
-            }
+          : { count: pendingAssignmentRequestCount }
       },
       {
         name: "Troll Alarms",
         path: "trollalarms",
-        role: "SUPERVOLUNTEER"
+        role: "SUPERVOLUNTEER",
+        badge: window.DISABLE_SIDEBAR_BADGES ? undefined : { count: trollCount }
       },
-      {
-        name: "Integrations",
-        path: "integrations",
-        role: "OWNER"
-      },
-      {
-        name: "Settings",
-        path: "settings",
-        role: "OWNER"
-      }
+      { name: "Integrations", path: "integrations", role: "OWNER" },
+      { name: "Settings", path: "settings", role: "OWNER" }
     ];
 
     if (window.DISABLE_ASSIGNMENT_PAGE) {
@@ -185,7 +144,8 @@ AdminDashboard.propTypes = {
   history: PropTypes.object.isRequired,
   data: PropTypes.object.isRequired,
   badgeCounts: PropTypes.object,
-  children: PropTypes.object
+  children: PropTypes.object,
+  trollAlarmsCount: PropTypes.object
 };
 
 const queries = {
@@ -203,11 +163,8 @@ const queries = {
         organizationId: match.params.organizationId
       }
     })
-  }
-};
-
-if (!window.DISABLE_SIDEBAR_BADGES) {
-  queries.badgeCounts = {
+  },
+  badgeCounts: {
     query: gql`
       query getBadgeCounts($organizationId: String!) {
         organization(id: $organizationId) {
@@ -217,13 +174,36 @@ if (!window.DISABLE_SIDEBAR_BADGES) {
         }
       }
     `,
+    skip: window.DISABLE_SIDEBAR_BADGES,
     options: ({ match }) => ({
       variables: {
         organizationId: match.params.organizationId
       }
     })
-  };
-}
+  },
+  trollAlarmsCount: {
+    query: gql`
+      query getTrollAlarmsCount(
+        $organizationId: String!
+        $dismissed: Boolean!
+      ) {
+        trollAlarmsCount(
+          organizationId: $organizationId
+          dismissed: $dismissed
+        ) {
+          totalCount
+        }
+      }
+    `,
+    skip: window.DISABLE_SIDEBAR_BADGES || !window.ENABLE_TROLLBOT,
+    options: ({ match }) => ({
+      variables: {
+        organizationId: match.params.organizationId,
+        dismissed: false
+      }
+    })
+  }
+};
 
 export default compose(
   withRouter,

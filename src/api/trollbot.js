@@ -18,4 +18,8 @@ export const schema = `
     token: String!
     organizationId: String!
   }
+
+  type TrollAlarmCount {
+    totalCount: Int!
+  }
 `;
