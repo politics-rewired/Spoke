@@ -62,9 +62,8 @@ class AdminDashboard extends React.Component {
     const { roles } = this.props.data.currentUser;
     const { escalatedConversationCount, pendingAssignmentRequestCount } =
       (this.props.badgeCounts || {}).organization || {};
-    const {
-      totalCount: trollCount
-    } = this.props.trollAlarmsCount.trollAlarmsCount;
+    const { totalCount: trollCount } =
+      (this.props.trollAlarmsCount || {}).trollAlarmsCount || {};
 
     const sections = [
       { name: "Campaigns", path: "campaigns", role: "ADMIN" },
@@ -164,11 +163,8 @@ const queries = {
         organizationId: match.params.organizationId
       }
     })
-  }
-};
-
-if (!window.DISABLE_SIDEBAR_BADGES) {
-  queries.badgeCounts = {
+  },
+  badgeCounts: {
     query: gql`
       query getBadgeCounts($organizationId: String!) {
         organization(id: $organizationId) {
@@ -178,16 +174,14 @@ if (!window.DISABLE_SIDEBAR_BADGES) {
         }
       }
     `,
+    skip: window.DISABLE_SIDEBAR_BADGES,
     options: ({ match }) => ({
       variables: {
         organizationId: match.params.organizationId
       }
     })
-  };
-}
-
-if (!window.DISABLE_SIDEBAR_BADGES && window.ENABLE_TROLLBOT) {
-  queries.trollAlarmsCount = {
+  },
+  trollAlarmsCount: {
     query: gql`
       query getTrollAlarmsCount(
         $organizationId: String!
@@ -201,14 +195,15 @@ if (!window.DISABLE_SIDEBAR_BADGES && window.ENABLE_TROLLBOT) {
         }
       }
     `,
+    skip: window.DISABLE_SIDEBAR_BADGES || !window.ENABLE_TROLLBOT,
     options: ({ match }) => ({
       variables: {
         organizationId: match.params.organizationId,
         dismissed: false
       }
     })
-  };
-}
+  }
+};
 
 export default compose(
   withRouter,

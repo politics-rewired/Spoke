@@ -3682,8 +3682,7 @@ const rootResolvers = {
         .reader("troll_alarm")
         .where({ dismissed, organization_id: organizationId });
 
-      const countQuery = query.clone();
-      const [{ count: totalCount }] = await countQuery.count();
+      const [{ count: totalCount }] = await query.count();
 
       return { totalCount };
     },
