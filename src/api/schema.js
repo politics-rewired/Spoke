@@ -270,6 +270,7 @@ const rootSchema = `
     fetchCampaignOverlaps(input: FetchCampaignOverlapInput!): [FetchCampaignOverlapResult]!
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
     trollAlarms(organizationId: String!, limit: Int!, offset: Int!, token: String, dismissed: Boolean!): TrollAlarmPage!
+    trollAlarmsCount(organizationId: String!, dismissed: Boolean!): TrollAlarmCount!,
     trollTokens(organizationId: String!): [TrollTrigger]
     externalSystem(systemId: String!): ExternalSystem!
     externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!

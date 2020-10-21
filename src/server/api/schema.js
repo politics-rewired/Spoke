@@ -3674,6 +3674,19 @@ const rootResolvers = {
 
       return { alarms, totalCount };
     },
+    trollAlarmsCount: async (_, { dismissed, organizationId }, { user }) => {
+      organizationId = parseInt(organizationId);
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      let query = r
+        .reader("troll_alarm")
+        .where({ dismissed, organization_id: organizationId });
+
+      const countQuery = query.clone();
+      const [{ count: totalCount }] = await countQuery.count();
+
+      return { totalCount };
+    },
     trollTokens: async (_, { organizationId }, { user }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
