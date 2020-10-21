@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.5.0](https://github.com/politics-rewired/spoke/compare/v3.4.0...v3.5.0) (2020-10-21)
+
+
+### Features
+
+* add troll alarm count to admin dashboard ([#749](https://github.com/politics-rewired/spoke/issues/749)) ([fe14d4b](https://github.com/politics-rewired/spoke/commit/fe14d4b718d84e4f594e2dfc48c02ca66abc8ace))
+* populate tags in dropdown ([#746](https://github.com/politics-rewired/spoke/issues/746)) ([3ea96bc](https://github.com/politics-rewired/spoke/commit/3ea96bcb8575facfb61367c14130421905d0b9f3))
+
+
+### Bug Fixes
+
+* **assemble:sendmessage:** add sendBefore support for assemble ([#747](https://github.com/politics-rewired/spoke/issues/747)) ([57b5aa0](https://github.com/politics-rewired/spoke/commit/57b5aa0925dbc35765a26477369c1aa3d55f3049))
+
 ## [3.4.0](https://github.com/politics-rewired/spoke/compare/v3.3.0...v3.4.0) (2020-10-09)
 
 
