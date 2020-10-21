@@ -16,6 +16,10 @@ import {
 import fetchVANActivistCodes from "./tasks/fetch-van-activist-codes";
 import fetchVANResultCodes from "./tasks/fetch-van-result-codes";
 import fetchVANSurveyQuestions from "./tasks/fetch-van-survey-questions";
+import {
+  filterLandlines,
+  TASK_IDENTIFIER as filterLandlinesIdentifier
+} from "./tasks/filter-landlines";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
@@ -69,6 +73,9 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   });
   m.taskList![exportForVanIdentifier] = wrapProgressTask(exportForVan, {
     removeOnComplete: true
+  });
+  m.taskList![filterLandlinesIdentifier] = wrapProgressTask(filterLandlines, {
+    removeOnComplete: false
   });
 
   m.cronJobs!.push({

@@ -19,7 +19,6 @@ import { isNowBetween } from "../../lib/timezones";
 import logger from "../../logger";
 import {
   assignTexters,
-  filterLandlines,
   loadContactsFromDataWarehouse,
   uploadContacts
 } from "../../workers/jobs";
@@ -31,6 +30,7 @@ import { cacheableData, datawarehouse, r } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
 import { addExportCampaign } from "../tasks/export-campaign";
 import { addExportForVan } from "../tasks/export-for-van";
+import { addFilterLandlines } from "../tasks/filter-landlines";
 import { errToObj } from "../utils";
 import { getWorker } from "../worker";
 import {
@@ -1344,21 +1344,7 @@ const rootMutations = {
         );
       }
 
-      const [job] = await r
-        .knex("job_request")
-        .insert({
-          queue_name: `${id}:edit_campaign`,
-          job_type: "filter_landlines",
-          locks_queue: true,
-          assigned: JOBS_SAME_PROCESS, // can get called immediately, below
-          campaign_id: id,
-          payload: ""
-        })
-        .returning("*");
-
-      if (JOBS_SAME_PROCESS) {
-        filterLandlines(job);
-      }
+      await addFilterLandlines({ campaignId: campaign.id });
 
       return loaders.campaign.load(id);
     },

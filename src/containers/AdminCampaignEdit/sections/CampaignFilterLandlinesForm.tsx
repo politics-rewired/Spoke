@@ -2,6 +2,8 @@ import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import RaisedButton from "material-ui/RaisedButton";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
+import ErrorIcon from "material-ui/svg-icons/alert/error";
+import NotificationIcon from "material-ui/svg-icons/alert/warning";
 import React from "react";
 import { compose } from "recompose";
 
@@ -10,8 +12,23 @@ import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading
 import {
   asSection,
   FullComponentProps,
+  PendingJobType,
   RequiredComponentProps
 } from "../components/SectionWrapper";
+
+const parseJobResultMessage = (
+  job?: PendingJobType
+): { message?: string; error?: string; unknown?: string } => {
+  if (job === undefined) return { unknown: "No job!" };
+
+  if (job.jobType === "filter_landlines") {
+    return { unknown: job.resultMessage };
+  }
+
+  const { message, error } = JSON.parse(job.resultMessage);
+
+  return { message, error };
+};
 
 interface FilterLandlinesValues {
   campaignId: string;
@@ -66,6 +83,7 @@ class FilterLandlinesForm extends React.Component<Props, State> {
     const { isWorking } = this.state;
     const { landlinesFiltered } = this.props.campaignData.campaign;
     const filterJob = this.props.pendingJob;
+    const { message, error, unknown } = parseJobResultMessage(filterJob);
 
     return (
       <div>
@@ -88,16 +106,29 @@ class FilterLandlinesForm extends React.Component<Props, State> {
             )
           }
         />
-        {!landlinesFiltered ? (
+        {!landlinesFiltered && (
           <RaisedButton
             label="Filter Landlines"
             onClick={this.filterLandlines}
             disabled={isWorking}
           />
-        ) : (
+        )}
+        {landlinesFiltered && message && (
           <div style={{ display: "flex", alignItems: "center" }}>
             <CheckIcon style={{ marginRight: 10 }} />
-            <span> {filterJob?.resultMessage} </span>
+            <span>{message}</span>
+          </div>
+        )}
+        {landlinesFiltered && error && (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <ErrorIcon style={{ marginRight: 10 }} />
+            <span>{error}</span>
+          </div>
+        )}
+        {landlinesFiltered && unknown && (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <NotificationIcon style={{ marginRight: 10 }} />
+            <span>{unknown}</span>
           </div>
         )}
       </div>
@@ -158,7 +189,7 @@ export default compose<Props, RequiredComponentProps>(
   asSection({
     title: "Filter Landlines",
     readinessName: "contacts",
-    jobQueueNames: ["filter_landlines"],
+    jobQueueNames: ["filter-landlines", "filter_landlines"],
     expandAfterCampaignStarts: false,
     expandableBySuperVolunteers: false
   }),
