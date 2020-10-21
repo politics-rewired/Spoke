@@ -137,6 +137,7 @@
     "react-file-drop": "^0.2.8",
     "react-formal": "^0.18.9",
     "react-markdown": "^4.1.0",
+    "react-portal": "^4.2.1",
     "react-router-dom": "^5.1.2",
     "react-select": "^2.0.0",
     "react-tap-event-plugin": "^2.0.0",
