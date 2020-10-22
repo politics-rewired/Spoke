@@ -1,19 +1,29 @@
 import React from "react";
+import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import * as yup from "yup";
-import Form from "react-formal";
+import { compose } from "recompose";
 import { StyleSheet, css } from "aphrodite";
+import isEqual from "lodash/isEqual";
 
 import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
 import CreateIcon from "material-ui/svg-icons/content/create";
 
 import { CannedResponse } from "../../../../api/canned-response";
+import { loadData } from "../../../hoc/with-operations";
+import { QueryMap, MutationMap } from "../../../../network/types";
 import { dataTest } from "../../../../lib/attributes";
 import theme from "../../../../styles/theme";
-import GSForm from "../../../../components/forms/GSForm";
 import { LargeList } from "../../../../components/LargeList";
 import CreateCannedResponseForm from "./components/CreateCannedResponseForm";
 import CannedResponseRow from "./components/CannedResponseRow";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
+import {
+  asSection,
+  FullComponentProps,
+  RequiredComponentProps
+} from "../../components/SectionWrapper";
 
 const styles = StyleSheet.create({
   formContainer: {
@@ -41,66 +51,118 @@ const formSchema = yup.object({
   )
 });
 
-interface Props {
-  saveLabel: string;
-  saveDisabled: boolean;
-  onSubmit(...args: any[]): void;
-  onChange(payload: { cannedResponses: CannedResponse[] }): void;
-  formValues: { cannedResponses: CannedResponse[] };
-  customFields: string[];
+interface Values {
+  cannedResponses: CannedResponse[];
 }
 
+interface HocProps {
+  mutations: {
+    editCampaign(payload: Values): ApolloQueryResult<any>;
+  };
+  data: {
+    campaign: {
+      id: string;
+      cannedResponses: CannedResponse[];
+      isStarted: boolean;
+      customFields: string[];
+    };
+  };
+}
+
+interface InnerProps extends FullComponentProps, HocProps {}
+
 interface State {
+  cannedResponsesToAdd: CannedResponse[];
+  cannedResponseIdsToDelete: string[];
+  isWorking: boolean;
   showForm: boolean;
 }
 
-export default class CampaignCannedResponsesForm extends React.Component<
-  Props,
-  State
-> {
+class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
   state: State = {
+    cannedResponsesToAdd: [],
+    cannedResponseIdsToDelete: [],
+    isWorking: false,
     showForm: false
   };
 
+  pendingCannedResponses = () => {
+    const { cannedResponsesToAdd, cannedResponseIdsToDelete } = this.state;
+    const { cannedResponses } = this.props.data.campaign;
+    const newCannedResponses = cannedResponses
+      .filter(response => !cannedResponseIdsToDelete.includes(response.id))
+      .concat(cannedResponsesToAdd);
+    const didChange = !isEqual(cannedResponses, newCannedResponses);
+    return { cannedResponses: newCannedResponses, didChange };
+  };
+
+  handleSubmit = async () => {
+    const { editCampaign } = this.props.mutations;
+    const { cannedResponses, didChange } = this.pendingCannedResponses();
+
+    if (!didChange) return;
+
+    this.setState({ isWorking: true });
+    try {
+      const response = await editCampaign({ cannedResponses });
+      if (response.errors) throw response.errors;
+      this.setState({
+        cannedResponsesToAdd: [],
+        cannedResponseIdsToDelete: []
+      });
+    } catch (err) {
+      this.props.onError(err.message);
+    } finally {
+      this.setState({ isWorking: false });
+    }
+  };
+
+  handleOnShowCreateForm = () => this.setState({ showForm: true });
   handleOnCancelCreateForm = () => this.setState({ showForm: false });
 
   handleOnSaveResponse = (response: CannedResponse) => {
-    const newVals = this.props.formValues.cannedResponses.slice(0);
-    const newEle: CannedResponse = {
-      ...response
-    };
-    newEle.id = Math.random()
+    const newId = Math.random()
       .toString(36)
       .replace(/[^a-zA-Z1-9]+/g, "");
-    newVals.push(newEle);
-    this.props.onChange({
-      cannedResponses: newVals
+    const cannedResponsesToAdd = this.state.cannedResponsesToAdd.concat({
+      ...response,
+      id: newId
     });
-    this.setState({ showForm: false });
+    this.setState({ cannedResponsesToAdd, showForm: false });
+  };
+
+  createHandleOnDelete = (responseId: string) => () => {
+    const cannedResponsesToAdd = this.state.cannedResponsesToAdd.filter(
+      response => response.id !== responseId
+    );
+    const cannedResponseIdsToDelete = [
+      ...new Set(this.state.cannedResponseIdsToDelete).add(responseId)
+    ];
+    this.setState({
+      cannedResponsesToAdd,
+      cannedResponseIdsToDelete
+    });
   };
 
   render() {
-    const { showForm } = this.state;
-    const { formValues, customFields } = this.props;
-    const cannedResponses = formValues.cannedResponses;
+    const { isWorking, showForm } = this.state;
+    const {
+      data: {
+        campaign: { customFields }
+      },
+      isNew,
+      saveLabel
+    } = this.props;
 
-    const createHandleOnDelete = (responseId: string) => () => {
-      const newVals = this.props.formValues.cannedResponses.filter(
-        response => response.id !== responseId
-      );
-
-      this.props.onChange({
-        cannedResponses: newVals
-      });
-    };
+    const {
+      cannedResponses,
+      didChange: hasPendingChanges
+    } = this.pendingCannedResponses();
+    const isSaveDisabled = isWorking || (!isNew && !hasPendingChanges);
+    const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
     return (
-      <GSForm
-        schema={formSchema}
-        value={formValues}
-        onChange={this.props.onChange}
-        onSubmit={this.props.onSubmit}
-      >
+      <div>
         <CampaignFormSectionHeading
           title="Canned responses for texters"
           subtitle="Save some scripts for your texters to use to answer additional FAQs that may come up outside of the survey questions and scripts you already set up."
@@ -109,8 +171,9 @@ export default class CampaignCannedResponsesForm extends React.Component<
           <LargeList>
             {cannedResponses.map(cannedResponse => (
               <CannedResponseRow
+                key={cannedResponse.id}
                 cannedResponse={cannedResponse}
-                onDelete={createHandleOnDelete(cannedResponse.id)}
+                onDelete={this.createHandleOnDelete(cannedResponse.id)}
               />
             ))}
           </LargeList>
@@ -134,15 +197,84 @@ export default class CampaignCannedResponsesForm extends React.Component<
             secondary
             label="Add new canned response"
             icon={<CreateIcon />}
-            onTouchTap={() => this.setState({ showForm: true })}
+            onClick={this.handleOnShowCreateForm}
           />
         )}
-        <Form.Button
-          type="submit"
-          disabled={this.props.saveDisabled}
-          label={this.props.saveLabel}
+        <br />
+        <RaisedButton
+          label={finalSaveLabel}
+          disabled={isSaveDisabled}
+          onClick={this.handleSubmit}
         />
-      </GSForm>
+      </div>
     );
   }
 }
+
+const queries: QueryMap<InnerProps> = {
+  data: {
+    query: gql`
+      query getCampaignBasics($campaignId: String!) {
+        campaign(id: $campaignId) {
+          id
+          cannedResponses {
+            id
+            title
+            text
+          }
+          isStarted
+          customFields
+        }
+      }
+    `,
+    options: ownProps => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+    })
+  }
+};
+
+const mutations: MutationMap<InnerProps> = {
+  editCampaign: ownProps => (payload: Values) => ({
+    mutation: gql`
+      mutation editCampaignBasics(
+        $campaignId: String!
+        $payload: CampaignInput!
+      ) {
+        editCampaign(id: $campaignId, campaign: $payload) {
+          id
+          cannedResponses {
+            id
+            title
+            text
+          }
+          isStarted
+          customFields
+          readiness {
+            id
+            basics
+          }
+        }
+      }
+    `,
+    variables: {
+      campaignId: ownProps.campaignId,
+      payload
+    }
+  })
+};
+
+export default compose<InnerProps, RequiredComponentProps>(
+  asSection({
+    title: "Canned Responses",
+    readinessName: "cannedResponses",
+    jobQueueNames: [],
+    expandAfterCampaignStarts: true,
+    expandableBySuperVolunteers: true
+  }),
+  loadData({
+    queries,
+    mutations
+  })
+)(CampaignCannedResponsesForm);
