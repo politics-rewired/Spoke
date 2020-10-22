@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import * as yup from "yup";
+import Form from "react-formal";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
@@ -15,10 +17,14 @@ import LoadingIndicator from "../../components/LoadingIndicator";
 import TagEditorList from "./TagEditorList";
 import theme from "../../styles/theme";
 
+import { dataTest } from "../../lib/attributes";
+import GSForm from "../../components/forms/GSForm";
+
 class AdminTagEditor extends Component {
   state = {
     editingTag: undefined,
     isWorking: false,
+    isEditingScript: false,
     error: undefined
   };
 
@@ -90,9 +96,17 @@ class AdminTagEditor extends Component {
     this.setState({ editingTag });
   };
 
+  handleSetEditingScript = () => {
+    this.setState({ isEditingScript: !this.state.isEditingScript });
+  };
+
+  handleSaveScript = formValues => {
+    console.log("save script formValues", formValues);
+  };
+
   render() {
     const { organizationTags } = this.props;
-    const { editingTag, isWorking, error } = this.state;
+    const { editingTag, isWorking, error, isEditingScript } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
     if (organizationTags.errors) {
@@ -108,10 +122,15 @@ class AdminTagEditor extends Component {
       <FlatButton label={tagVerb} primary={true} onClick={this.handleSaveTag} />
     ];
 
+    const editScriptSchema = yup.object({
+      text: yup.string().required()
+    });
+
     const errorActions = [
       <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
     ];
 
+    console.log("admin tag editor state", this.state, "tags", organizationTags);
     return (
       <div>
         <TagEditorList
@@ -148,6 +167,30 @@ class AdminTagEditor extends Component {
               value={editingTag.description || ""}
               onChange={this.createTagEditorHandle}
             />
+            <br />
+            <TextField
+              name="onApplyScript"
+              floatingLabelText="Tag script"
+              multiLine={true}
+              value={editingTag.onApplyScript || ""}
+              onClick={this.handleSetEditingScript}
+            />
+            {isEditingScript && (
+              <GSForm
+                ref="form"
+                schema={editScriptSchema}
+                onSubmit={this.handleSaveScript}
+              >
+                <Form.Field
+                  {...dataTest("editorResponse")} // customFields={customFields}
+                  name="text"
+                  type="script"
+                  label="Script"
+                  multiLine
+                  fullWidth
+                />
+              </GSForm>
+            )}
             <br />
             <br />
             <Toggle
@@ -189,6 +232,7 @@ const queries = {
             description
             isSystem
             isAssignable
+            onApplyScript
             createdAt
           }
         }
