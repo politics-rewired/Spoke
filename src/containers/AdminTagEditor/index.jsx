@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import * as yup from "yup";
+import Form from "react-formal";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
@@ -22,6 +24,7 @@ class AdminTagEditor extends Component {
   state = {
     editingTag: undefined,
     isWorking: false,
+    isEditingScript: false,
     error: undefined
   };
 
@@ -125,7 +128,7 @@ class AdminTagEditor extends Component {
 
   render() {
     const { organizationTags } = this.props;
-    const { editingTag, isWorking, error } = this.state;
+    const { editingTag, isWorking, error, isEditingScript } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
     if (organizationTags.errors) {
@@ -149,6 +152,7 @@ class AdminTagEditor extends Component {
       <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
     ];
 
+    console.log("admin tag editor state", this.state, "tags", organizationTags);
     return (
       <div>
         <TagEditorList
