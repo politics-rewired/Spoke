@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.6.0](https://github.com/politics-rewired/spoke/compare/v3.5.1...v3.6.0) (2020-10-23)
+
+
+### Features
+
+* log express errors with winston logger ([#754](https://github.com/politics-rewired/spoke/issues/754)) ([dfced8e](https://github.com/politics-rewired/spoke/commit/dfced8e67efa20bb3f65c1d4a7e4ab5fb3439091))
+
+
+### Bug Fixes
+
+* fetch myAssignmentTargets only if logged in ([#753](https://github.com/politics-rewired/spoke/issues/753)) ([83aa1c1](https://github.com/politics-rewired/spoke/commit/83aa1c12b3253b3ea22df81a7217cac575856df9))
+
 ### [3.5.1](https://github.com/politics-rewired/spoke/compare/v3.5.0...v3.5.1) (2020-10-21)
 
 
