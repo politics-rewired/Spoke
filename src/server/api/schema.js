@@ -617,7 +617,8 @@ async function sendMessage(
     .tz(timezone)
     .startOf("day")
     .hour(endHour)
-    .utc();
+    .utc()
+    .toISOString();
 
   const { contactNumber, text } = message;
 
