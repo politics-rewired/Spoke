@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.1](https://github.com/politics-rewired/spoke/compare/v3.6.0...v3.6.1) (2020-10-24)
+
+
+### Bug Fixes
+
+* format sendBefore as string ([#756](https://github.com/politics-rewired/spoke/issues/756)) ([b09ef9b](https://github.com/politics-rewired/spoke/commit/b09ef9bc7d6dd4d618f2e535118d81cbe01f4c7e))
+
 ## [3.6.0](https://github.com/politics-rewired/spoke/compare/v3.5.1...v3.6.0) (2020-10-23)
 
 
