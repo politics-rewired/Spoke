@@ -2876,6 +2876,8 @@ const rootMutations = {
     saveTag: async (_, { organizationId, tag }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
+      logger.info("tag", tag);
+
       // Update existing tag
       if (tag.id) {
         const [updatedTag] = await r
@@ -2883,7 +2885,8 @@ const rootMutations = {
           .update({
             title: tag.title,
             description: tag.description,
-            is_assignable: tag.isAssignable
+            is_assignable: tag.isAssignable,
+            on_apply_script: tag.onApplyScript
           })
           .where({
             id: tag.id,
@@ -2903,7 +2906,8 @@ const rootMutations = {
           author_id: user.id,
           title: tag.title,
           description: tag.description,
-          is_assignable: tag.isAssignable
+          is_assignable: tag.isAssignable,
+          on_apply_script: tag.onApplyScript
         })
         .returning("*");
 

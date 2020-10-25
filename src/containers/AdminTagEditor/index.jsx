@@ -19,12 +19,12 @@ import theme from "../../styles/theme";
 
 import { dataTest } from "../../lib/attributes";
 import GSForm from "../../components/forms/GSForm";
+import GSScriptField from "../../components/forms/GSScriptField";
 
 class AdminTagEditor extends Component {
   state = {
     editingTag: undefined,
     isWorking: false,
-    isEditingScript: false,
     error: undefined
   };
 
@@ -51,7 +51,8 @@ class AdminTagEditor extends Component {
 
   handleEditTag = tagId => this.setState({ editingTag: this.getTag(tagId) });
 
-  handleCancelEditTag = () => this.setState({ editingTag: undefined });
+  handleCancelEditTag = () =>
+    this.setState({ editingTag: undefined, isEditingScript: false });
 
   handleSaveTag = async () => {
     const { editingTag } = this.state;
@@ -100,13 +101,15 @@ class AdminTagEditor extends Component {
     this.setState({ isEditingScript: !this.state.isEditingScript });
   };
 
-  handleSaveScript = formValues => {
-    console.log("save script formValues", formValues);
+  handleEditTagScript = values => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, onApplyScript: values }
+    });
   };
 
   render() {
     const { organizationTags } = this.props;
-    const { editingTag, isWorking, error, isEditingScript } = this.state;
+    const { editingTag, isWorking, error } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
     if (organizationTags.errors) {
@@ -122,15 +125,13 @@ class AdminTagEditor extends Component {
       <FlatButton label={tagVerb} primary={true} onClick={this.handleSaveTag} />
     ];
 
-    const editScriptSchema = yup.object({
-      text: yup.string().required()
-    });
+    // required in GSScriptField
+    const customFields = [""];
 
     const errorActions = [
       <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
     ];
 
-    console.log("admin tag editor state", this.state, "tags", organizationTags);
     return (
       <div>
         <TagEditorList
@@ -168,29 +169,15 @@ class AdminTagEditor extends Component {
               onChange={this.createTagEditorHandle}
             />
             <br />
-            <TextField
-              name="onApplyScript"
-              floatingLabelText="Tag script"
-              multiLine={true}
+            <GSScriptField
+              name="Script"
+              label="Tag Script"
+              context="tagEditor"
+              customFields={customFields}
               value={editingTag.onApplyScript || ""}
+              onChange={this.handleEditTagScript}
               onClick={this.handleSetEditingScript}
             />
-            {isEditingScript && (
-              <GSForm
-                ref="form"
-                schema={editScriptSchema}
-                onSubmit={this.handleSaveScript}
-              >
-                <Form.Field
-                  {...dataTest("editorResponse")} // customFields={customFields}
-                  name="text"
-                  type="script"
-                  label="Script"
-                  multiLine
-                  fullWidth
-                />
-              </GSForm>
-            )}
             <br />
             <br />
             <Toggle
