@@ -24,7 +24,6 @@ class AdminTagEditor extends Component {
   state = {
     editingTag: undefined,
     isWorking: false,
-    isEditingScript: false,
     error: undefined
   };
 
@@ -128,7 +127,7 @@ class AdminTagEditor extends Component {
 
   render() {
     const { organizationTags } = this.props;
-    const { editingTag, isWorking, error, isEditingScript } = this.state;
+    const { editingTag, isWorking, error } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
     if (organizationTags.errors) {
@@ -152,7 +151,6 @@ class AdminTagEditor extends Component {
       <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
     ];
 
-    console.log("admin tag editor state", this.state, "tags", organizationTags);
     return (
       <div>
         <TagEditorList
