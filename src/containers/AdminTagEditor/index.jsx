@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-import * as yup from "yup";
-import Form from "react-formal";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import pick from "lodash/pick";

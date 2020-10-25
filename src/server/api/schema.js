@@ -2877,8 +2877,6 @@ const rootMutations = {
     saveTag: async (_, { organizationId, tag }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      logger.info("tag", tag);
-
       // Update existing tag
       if (tag.id) {
         const [updatedTag] = await r
