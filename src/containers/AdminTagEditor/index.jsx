@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-import * as yup from "yup";
-import Form from "react-formal";
 import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
@@ -17,8 +15,6 @@ import LoadingIndicator from "../../components/LoadingIndicator";
 import TagEditorList from "./TagEditorList";
 import theme from "../../styles/theme";
 
-import { dataTest } from "../../lib/attributes";
-import GSForm from "../../components/forms/GSForm";
 import GSScriptField from "../../components/forms/GSScriptField";
 
 class AdminTagEditor extends Component {
