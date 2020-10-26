@@ -10,6 +10,7 @@ import { JobRequestRecord } from "../api/types";
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
+import { addProgressJob } from "./utils";
 
 export interface ExportForVANOptions {
   requesterId: number;
@@ -34,15 +35,19 @@ export const exportForVan: Task = async (
   job: JobRequestRecord,
   _helpers: any
 ) => {
+  const { campaign_id } = job;
+  const exportJob = await addProgressJob("export-for-van", job);
   const { reader } = r;
-  const payload: ExportForVANOptions = JSON.parse(job.payload);
+  const payload: ExportForVANOptions = JSON.parse(exportJob.payload);
   const { requesterId, includeUnmessaged, vanIdField } = payload;
+
+  logger.info("exportJob", exportJob);
 
   const { email } = await reader("user")
     .where({ id: requesterId })
     .first(["email"]);
   const { title } = await reader("campaign")
-    .where({ id: job.campaign_id })
+    .where({ id: campaign_id })
     .first(["title"]);
 
   const vanIdSelector =

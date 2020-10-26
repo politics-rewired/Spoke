@@ -312,9 +312,9 @@ export const exportCampaign: Task = async (
   payload: JobRequestRecord,
   _helpers
 ) => {
-  const { payload: context, campaign_id, requester } = payload;
+  const { campaign_id, requester } = payload;
+  const job = await addProgressJob("export-campaign", payload);
 
-  await addProgressJob("export-campaign", payload);
   const {
     campaignId,
     campaignTitle,
@@ -469,12 +469,7 @@ export const exportCampaign: Task = async (
     logger.info("Finishing export process");
   }
 
-  // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
-  if (payload.id) {
-    await deleteJob(payload.id);
-  } else {
-    logger.debug(payload);
-  }
+  await deleteJob(job.id);
 };
 
 export default exportCampaign;

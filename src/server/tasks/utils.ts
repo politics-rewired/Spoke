@@ -6,12 +6,13 @@ import logger from "../../../src/logger";
 export const addProgressJob = async (
   identifier: string,
   payload: any,
-  initialResult: any = {},
-  context: any = {}
+  initialResult: any = {}
 ) => {
   const { jobRequestRecord, requester } = payload;
   const { campaign_id, queue_name, locks_queue, assigned } = jobRequestRecord;
-  const jobPayload = { campaign_id, requester };
+  const jobRequestPayload = { campaign_id, requester };
+
+  logger.info("addprogressjob payload", payload);
 
   const [jobResult] = await r
     .knex("job_request")
@@ -22,7 +23,7 @@ export const addProgressJob = async (
       queue_name,
       locks_queue,
       assigned,
-      payload: JSON.stringify(jobPayload),
+      payload: JSON.stringify(jobRequestPayload),
       result_message: JSON.stringify(initialResult)
     })
     .returning("*");

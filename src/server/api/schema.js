@@ -790,6 +790,9 @@ const rootMutations = {
       jobTypes[CampaignExportType.SPOKE] = "export";
       jobTypes[CampaignExportType.VAN] = "van-export";
 
+      let payload = {};
+      let jobRequest;
+
       const jobRequestRecord = {
         queue_name: `${campaignId}:export`,
         job_type: jobTypes[exportType],
@@ -799,19 +802,14 @@ const rootMutations = {
         payload: JSON.stringify(payload)
       };
 
-      let payload = {};
-      let jobRequest;
       if (exportType === CampaignExportType.SPOKE) {
         payload = {
           campaign_id: campaignId,
           requester: user.id
         };
-        // jobResult = await addProgressJob("export-campaign", payload);
-        logger.info("schema jobRequestRecord", jobRequestRecord);
         jobRequest = exportCampaign(jobRequestRecord);
       } else if (exportType === CampaignExportType.VAN) {
         payload = { ...vanOptions, requesterId: user.id };
-        // jobRequest = await addProgressJob("export-for-van", payload);
         jobRequest = exportForVan(jobRequestRecord);
       }
 
