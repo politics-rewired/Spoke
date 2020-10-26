@@ -175,7 +175,7 @@ class AdminTagEditor extends Component {
               style={{
                 display: "flex",
                 flexDirection: "row",
-                justifyContent: "space-evenly"
+                justifyContent: "space-between"
               }}
             >
               <div>
@@ -183,13 +183,6 @@ class AdminTagEditor extends Component {
                   name="title"
                   floatingLabelText="Tag title"
                   value={editingTag.title || ""}
-                  onChange={this.createTagEditorHandle}
-                />
-                <TextField
-                  name="description"
-                  floatingLabelText="Tag description"
-                  multiLine={true}
-                  value={editingTag.description || ""}
                   onChange={this.createTagEditorHandle}
                 />
                 <GSScriptField
@@ -210,6 +203,13 @@ class AdminTagEditor extends Component {
                 />
               </div>
               <div>
+                <TextField
+                  name="description"
+                  floatingLabelText="Tag description"
+                  multiLine={true}
+                  value={editingTag.description || ""}
+                  onChange={this.createTagEditorHandle}
+                />
                 <ColorPicker
                   name="Text Color"
                   floatingLabelText="Text color"
@@ -224,14 +224,16 @@ class AdminTagEditor extends Component {
                   value={editingTag.backgroundColor || ""}
                   onChange={this.handleEditBackgroundColor}
                 />
-                <TextField
-                  name="webhookUrl"
-                  floatingLabelText="Webhook url"
-                  value={editingTag.webhookUrl || ""}
-                  onChange={this.createTagEditorHandle}
-                />
               </div>
             </div>
+            <TextField
+              name="webhookUrl"
+              floatingLabelText="Webhook url"
+              hintText="If set, a request will be sent to this URL whenever this tag is applied."
+              value={editingTag.webhookUrl || ""}
+              onChange={this.createTagEditorHandle}
+              fullWidth
+            />
           </Dialog>
         )}
         <Dialog
