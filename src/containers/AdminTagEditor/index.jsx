@@ -93,13 +93,14 @@ class AdminTagEditor extends Component {
     this.setState({ editingTag });
   };
 
-  handleSetEditingScript = () => {
+  handleOpenScriptEditor = () => {
     this.setState({ isEditingScript: !this.state.isEditingScript });
   };
 
   handleEditTagScript = values => {
     this.setState({
-      editingTag: { ...this.state.editingTag, onApplyScript: values }
+      editingTag: { ...this.state.editingTag, onApplyScript: values },
+      isEditingScript: false
     });
   };
 
@@ -121,7 +122,8 @@ class AdminTagEditor extends Component {
       <FlatButton label={tagVerb} primary={true} onClick={this.handleSaveTag} />
     ];
 
-    // required in GSScriptField
+    // Custom fields are campaign-specific and thus cannot be used in Tag scripts.
+    // However, this is a required prop for GSScriptField
     const customFields = [""];
 
     const errorActions = [
@@ -172,7 +174,7 @@ class AdminTagEditor extends Component {
               customFields={customFields}
               value={editingTag.onApplyScript || ""}
               onChange={this.handleEditTagScript}
-              onClick={this.handleSetEditingScript}
+              onClick={this.handleOpenScriptEditor}
             />
             <br />
             <br />
