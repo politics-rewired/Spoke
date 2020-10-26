@@ -224,12 +224,6 @@ class AdminTagEditor extends Component {
                   value={editingTag.backgroundColor || ""}
                   onChange={this.handleEditBackgroundColor}
                 />
-                <TextField
-                  name="webhookUrl"
-                  floatingLabelText="Webhook url"
-                  value={editingTag.webhookUrl || ""}
-                  onChange={this.createTagEditorHandle}
-                />
               </div>
             </div>
             <TextField
