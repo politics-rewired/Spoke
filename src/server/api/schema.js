@@ -2886,7 +2886,8 @@ const rootMutations = {
             is_assignable: tag.isAssignable,
             on_apply_script: tag.onApplyScript,
             text_color: tag.textColor,
-            background_color: tag.backgroundColor
+            background_color: tag.backgroundColor,
+            webhook_url: tag.webhookUrl
           })
           .where({
             id: tag.id,
@@ -2909,7 +2910,8 @@ const rootMutations = {
           is_assignable: tag.isAssignable,
           on_apply_script: tag.onApplyScript,
           text_color: tag.textColor,
-          background_color: tag.backgroundColor
+          background_color: tag.backgroundColor,
+          webhook_url: tag.webhookUrl
         })
         .returning("*");
 

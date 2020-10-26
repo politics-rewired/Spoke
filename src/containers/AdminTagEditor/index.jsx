@@ -98,9 +98,9 @@ class AdminTagEditor extends Component {
     this.setState({ isEditingScript: !this.state.isEditingScript });
   };
 
-  handleEditTagScript = values => {
+  handleEditTagScript = script => {
     this.setState({
-      editingTag: { ...this.state.editingTag, onApplyScript: values },
+      editingTag: { ...this.state.editingTag, onApplyScript: script },
       isEditingScript: false
     });
   };
@@ -114,6 +114,12 @@ class AdminTagEditor extends Component {
   handleEditBackgroundColor = color => {
     this.setState({
       editingTag: { ...this.state.editingTag, backgroundColor: color }
+    });
+  };
+
+  handleEditWebhookUrl = url => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, webhookUrl: url }
     });
   };
 
@@ -179,7 +185,6 @@ class AdminTagEditor extends Component {
                   value={editingTag.title || ""}
                   onChange={this.createTagEditorHandle}
                 />
-                <br />
                 <TextField
                   name="description"
                   floatingLabelText="Tag description"
@@ -187,7 +192,6 @@ class AdminTagEditor extends Component {
                   value={editingTag.description || ""}
                   onChange={this.createTagEditorHandle}
                 />
-                <br />
                 <GSScriptField
                   name="Script"
                   label="Tag script"
@@ -197,7 +201,6 @@ class AdminTagEditor extends Component {
                   onChange={this.handleEditTagScript}
                   onClick={this.handleOpenScriptEditor}
                 />
-                <br />
               </div>
               <div>
                 <ColorPicker
@@ -207,13 +210,18 @@ class AdminTagEditor extends Component {
                   value={editingTag.textColor || ""}
                   onChange={this.handleEditTextColor}
                 />
-                <br />
                 <ColorPicker
                   name="Background Color"
                   floatingLabelText="Background color"
                   defaultValue={editingTag.backgroundColor}
                   value={editingTag.backgroundColor || ""}
                   onChange={this.handleEditBackgroundColor}
+                />
+                <TextField
+                  name="webhookUrl"
+                  floatingLabelText="Webhook url"
+                  value={editingTag.webhookUrl || ""}
+                  onChange={this.createTagEditorHandle}
                 />
               </div>
             </div>
@@ -261,6 +269,7 @@ const queries = {
             onApplyScript
             textColor
             backgroundColor
+            webhookUrl
             createdAt
           }
         }
