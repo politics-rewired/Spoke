@@ -201,6 +201,13 @@ class AdminTagEditor extends Component {
                   onChange={this.handleEditTagScript}
                   onClick={this.handleOpenScriptEditor}
                 />
+                <br />
+                <Toggle
+                  name="isAssignable"
+                  label="Allow assignment?"
+                  toggled={editingTag.isAssignable}
+                  onToggle={this.createTagEditorHandle}
+                />
               </div>
               <div>
                 <ColorPicker
@@ -225,14 +232,6 @@ class AdminTagEditor extends Component {
                 />
               </div>
             </div>
-            <br />
-            <br />
-            <Toggle
-              name="isAssignable"
-              label="Allow assignment?"
-              toggled={editingTag.isAssignable}
-              onToggle={this.createTagEditorHandle}
-            />
           </Dialog>
         )}
         <Dialog
