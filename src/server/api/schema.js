@@ -2884,7 +2884,9 @@ const rootMutations = {
             title: tag.title,
             description: tag.description,
             is_assignable: tag.isAssignable,
-            on_apply_script: tag.onApplyScript
+            on_apply_script: tag.onApplyScript,
+            text_color: tag.textColor,
+            background_color: tag.backgroundColor
           })
           .where({
             id: tag.id,
@@ -2905,7 +2907,9 @@ const rootMutations = {
           title: tag.title,
           description: tag.description,
           is_assignable: tag.isAssignable,
-          on_apply_script: tag.onApplyScript
+          on_apply_script: tag.onApplyScript,
+          text_color: tag.textColor,
+          background_color: tag.backgroundColor
         })
         .returning("*");
 

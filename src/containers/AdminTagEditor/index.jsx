@@ -9,6 +9,7 @@ import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import FlatButton from "material-ui/FlatButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
+import ColorPicker from "material-ui-color-picker";
 
 import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
@@ -104,6 +105,18 @@ class AdminTagEditor extends Component {
     });
   };
 
+  handleEditTextColor = color => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, textColor: color }
+    });
+  };
+
+  handleEditBackgroundColor = color => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, backgroundColor: color }
+    });
+  };
+
   render() {
     const { organizationTags } = this.props;
     const { editingTag, isWorking, error } = this.state;
@@ -152,30 +165,58 @@ class AdminTagEditor extends Component {
             open={true}
             onRequestClose={this.handleCancelEditTag}
           >
-            <TextField
-              name="title"
-              floatingLabelText="Tag title"
-              value={editingTag.title || ""}
-              onChange={this.createTagEditorHandle}
-            />
-            <br />
-            <TextField
-              name="description"
-              floatingLabelText="Tag description"
-              multiLine={true}
-              value={editingTag.description || ""}
-              onChange={this.createTagEditorHandle}
-            />
-            <br />
-            <GSScriptField
-              name="Script"
-              label="Tag Script"
-              context="tagEditor"
-              customFields={customFields}
-              value={editingTag.onApplyScript || ""}
-              onChange={this.handleEditTagScript}
-              onClick={this.handleOpenScriptEditor}
-            />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-evenly"
+              }}
+            >
+              <div>
+                <TextField
+                  name="title"
+                  floatingLabelText="Tag title"
+                  value={editingTag.title || ""}
+                  onChange={this.createTagEditorHandle}
+                />
+                <br />
+                <TextField
+                  name="description"
+                  floatingLabelText="Tag description"
+                  multiLine={true}
+                  value={editingTag.description || ""}
+                  onChange={this.createTagEditorHandle}
+                />
+                <br />
+                <GSScriptField
+                  name="Script"
+                  label="Tag script"
+                  context="tagEditor"
+                  customFields={customFields}
+                  value={editingTag.onApplyScript || ""}
+                  onChange={this.handleEditTagScript}
+                  onClick={this.handleOpenScriptEditor}
+                />
+                <br />
+              </div>
+              <div>
+                <ColorPicker
+                  name="Text Color"
+                  floatingLabelText="Text color"
+                  defaultValue={editingTag.textColor}
+                  value={editingTag.textColor || ""}
+                  onChange={this.handleEditTextColor}
+                />
+                <br />
+                <ColorPicker
+                  name="Background Color"
+                  floatingLabelText="Background color"
+                  defaultValue={editingTag.backgroundColor}
+                  value={editingTag.backgroundColor || ""}
+                  onChange={this.handleEditBackgroundColor}
+                />
+              </div>
+            </div>
             <br />
             <br />
             <Toggle
@@ -218,6 +259,8 @@ const queries = {
             isSystem
             isAssignable
             onApplyScript
+            textColor
+            backgroundColor
             createdAt
           }
         }

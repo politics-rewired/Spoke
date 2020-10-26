@@ -41,7 +41,10 @@ class TagEditorList extends Component {
         {tags.map(tag => (
           <Paper key={tag.id} style={styles.card}>
             <div style={{ display: "flex" }}>
-              <Chip backgroundColor={"#DDEEEE"} style={styles.chip}>
+              <Chip
+                backgroundColor={tag.backgroundColor || "#DDEEEE"}
+                style={styles.chip}
+              >
                 {tag.title}
               </Chip>
             </div>
