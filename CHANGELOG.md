@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.7.0](https://github.com/politics-rewired/spoke/compare/v3.6.1...v3.7.0) (2020-10-27)
+
+
+### Features
+
+* **tags:** expose script, color and webhook url editing in tag editor ([#757](https://github.com/politics-rewired/spoke/issues/757)) ([2db5ff0](https://github.com/politics-rewired/spoke/commit/2db5ff011899b86e279a3eedc67da961cbff51b9))
+
 ### [3.6.1](https://github.com/politics-rewired/spoke/compare/v3.6.0...v3.6.1) (2020-10-24)
 
 
