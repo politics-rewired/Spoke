@@ -9,11 +9,14 @@ import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import FlatButton from "material-ui/FlatButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
+import ColorPicker from "material-ui-color-picker";
 
 import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import TagEditorList from "./TagEditorList";
 import theme from "../../styles/theme";
+
+import GSScriptField from "../../components/forms/GSScriptField";
 
 class AdminTagEditor extends Component {
   state = {
@@ -45,7 +48,8 @@ class AdminTagEditor extends Component {
 
   handleEditTag = tagId => this.setState({ editingTag: this.getTag(tagId) });
 
-  handleCancelEditTag = () => this.setState({ editingTag: undefined });
+  handleCancelEditTag = () =>
+    this.setState({ editingTag: undefined, isEditingScript: false });
 
   handleSaveTag = async () => {
     const { editingTag } = this.state;
@@ -90,6 +94,35 @@ class AdminTagEditor extends Component {
     this.setState({ editingTag });
   };
 
+  handleOpenScriptEditor = () => {
+    this.setState({ isEditingScript: !this.state.isEditingScript });
+  };
+
+  handleEditTagScript = script => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, onApplyScript: script },
+      isEditingScript: false
+    });
+  };
+
+  handleEditTextColor = color => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, textColor: color }
+    });
+  };
+
+  handleEditBackgroundColor = color => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, backgroundColor: color }
+    });
+  };
+
+  handleEditWebhookUrl = url => {
+    this.setState({
+      editingTag: { ...this.state.editingTag, webhookUrl: url }
+    });
+  };
+
   render() {
     const { organizationTags } = this.props;
     const { editingTag, isWorking, error } = this.state;
@@ -107,6 +140,10 @@ class AdminTagEditor extends Component {
       <FlatButton label="Cancel" onClick={this.handleCancelEditTag} />,
       <FlatButton label={tagVerb} primary={true} onClick={this.handleSaveTag} />
     ];
+
+    // Custom fields are campaign-specific and thus cannot be used in Tag scripts.
+    // However, this is a required prop for GSScriptField
+    const customFields = [""];
 
     const errorActions = [
       <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
@@ -134,27 +171,68 @@ class AdminTagEditor extends Component {
             open={true}
             onRequestClose={this.handleCancelEditTag}
           >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between"
+              }}
+            >
+              <div>
+                <TextField
+                  name="title"
+                  floatingLabelText="Tag title"
+                  value={editingTag.title || ""}
+                  onChange={this.createTagEditorHandle}
+                />
+                <GSScriptField
+                  name="Script"
+                  label="Tag script"
+                  context="tagEditor"
+                  customFields={customFields}
+                  value={editingTag.onApplyScript || ""}
+                  onChange={this.handleEditTagScript}
+                  onClick={this.handleOpenScriptEditor}
+                />
+                <br />
+                <Toggle
+                  name="isAssignable"
+                  label="Allow assignment?"
+                  toggled={editingTag.isAssignable}
+                  onToggle={this.createTagEditorHandle}
+                />
+              </div>
+              <div>
+                <TextField
+                  name="description"
+                  floatingLabelText="Tag description"
+                  multiLine={true}
+                  value={editingTag.description || ""}
+                  onChange={this.createTagEditorHandle}
+                />
+                <ColorPicker
+                  name="Text Color"
+                  floatingLabelText="Text color"
+                  defaultValue={editingTag.textColor}
+                  value={editingTag.textColor || ""}
+                  onChange={this.handleEditTextColor}
+                />
+                <ColorPicker
+                  name="Background Color"
+                  floatingLabelText="Background color"
+                  defaultValue={editingTag.backgroundColor}
+                  value={editingTag.backgroundColor || ""}
+                  onChange={this.handleEditBackgroundColor}
+                />
+              </div>
+            </div>
             <TextField
-              name="title"
-              floatingLabelText="Tag title"
-              value={editingTag.title || ""}
+              name="webhookUrl"
+              floatingLabelText="Webhook url"
+              hintText="If set, a request will be sent to this URL whenever this tag is applied."
+              value={editingTag.webhookUrl || ""}
               onChange={this.createTagEditorHandle}
-            />
-            <br />
-            <TextField
-              name="description"
-              floatingLabelText="Tag description"
-              multiLine={true}
-              value={editingTag.description || ""}
-              onChange={this.createTagEditorHandle}
-            />
-            <br />
-            <br />
-            <Toggle
-              name="isAssignable"
-              label="Allow assignment?"
-              toggled={editingTag.isAssignable}
-              onToggle={this.createTagEditorHandle}
+              fullWidth
             />
           </Dialog>
         )}
@@ -189,6 +267,10 @@ const queries = {
             description
             isSystem
             isAssignable
+            onApplyScript
+            textColor
+            backgroundColor
+            webhookUrl
             createdAt
           }
         }

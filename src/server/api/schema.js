@@ -2884,7 +2884,11 @@ const rootMutations = {
           .update({
             title: tag.title,
             description: tag.description,
-            is_assignable: tag.isAssignable
+            is_assignable: tag.isAssignable,
+            on_apply_script: tag.onApplyScript,
+            text_color: tag.textColor,
+            background_color: tag.backgroundColor,
+            webhook_url: tag.webhookUrl
           })
           .where({
             id: tag.id,
@@ -2904,7 +2908,11 @@ const rootMutations = {
           author_id: user.id,
           title: tag.title,
           description: tag.description,
-          is_assignable: tag.isAssignable
+          is_assignable: tag.isAssignable,
+          on_apply_script: tag.onApplyScript,
+          text_color: tag.textColor,
+          background_color: tag.backgroundColor,
+          webhook_url: tag.webhookUrl
         })
         .returning("*");
 
