@@ -5,7 +5,24 @@ import Select from "react-select";
 
 import MenuPortal from "./MenuPortal";
 
-const customStyles = { menu: base => ({ ...base, backGround: "red" }) };
+const tagStyles = {
+  option: (styles, { data }) => ({
+    ...styles,
+    color: data.textColor
+  }),
+  multiValue: (styles, { data }) => ({
+    ...styles,
+    background: data.backgroundColor
+  }),
+  multiValueLabel: (styles, { data }) => ({
+    ...styles,
+    color: data.textColor
+  }),
+  multiValueRemove: (styles, { data }) => ({
+    ...styles,
+    color: data.textColor
+  })
+};
 
 class TagSelector extends Component {
   state = {
@@ -28,9 +45,16 @@ class TagSelector extends Component {
     const { dataSource, value } = this.props;
     const menuOptions = dataSource.map(tag => ({
       label: tag.title,
-      value: tag.id
+      value: tag.id,
+      textColor: tag.textColor,
+      backgroundColor: tag.backgroundColor
     }));
-    const menuValues = value.map(tag => ({ value: tag.id, label: tag.title }));
+    const menuValues = value.map(tag => ({
+      value: tag.id,
+      label: tag.title,
+      textColor: tag.textColor,
+      backgroundColor: tag.backgroundColor
+    }));
 
     return (
       <div>
@@ -43,7 +67,7 @@ class TagSelector extends Component {
           options={menuOptions}
           menuPortalTarget={document.body}
           onChange={this.handleSelectChange}
-          styles={customStyles}
+          styles={tagStyles}
         />
       </div>
     );
@@ -56,7 +80,9 @@ TagSelector.propTypes = {
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
       confirmationSteps: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
-        .isRequired
+        .isRequired,
+      textColor: PropTypes.string.isRequired,
+      backgroundColor: PropTypes.string.isRequired
     })
   ),
   value: PropTypes.arrayOf(
@@ -64,7 +90,9 @@ TagSelector.propTypes = {
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
       confirmationSteps: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
-        .isRequired
+        .isRequired,
+      textColor: PropTypes.string.isRequired,
+      backgroundColor: PropTypes.string.isRequired
     })
   ),
   onChange: PropTypes.func
