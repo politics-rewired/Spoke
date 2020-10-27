@@ -481,6 +481,8 @@ const queries = {
             isSystem
             isAssignable
             createdAt
+            textColor
+            backgroundColor
           }
         }
       }
