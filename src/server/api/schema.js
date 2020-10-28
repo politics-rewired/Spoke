@@ -2877,21 +2877,32 @@ const rootMutations = {
     saveTag: async (_, { organizationId, tag }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
+      const {
+        id,
+        title,
+        description,
+        isAssignable,
+        onApplyScript,
+        textColor,
+        backgroundColor,
+        webhookUrl
+      } = tag;
+
       // Update existing tag
-      if (tag.id) {
+      if (id) {
         const [updatedTag] = await r
           .knex("tag")
           .update({
-            title: tag.title,
-            description: tag.description,
-            is_assignable: tag.isAssignable,
-            on_apply_script: tag.onApplyScript,
-            text_color: tag.textColor,
-            background_color: tag.backgroundColor,
-            webhook_url: tag.webhookUrl
+            title,
+            description,
+            is_assignable: isAssignable,
+            on_apply_script: onApplyScript,
+            text_color: textColor,
+            background_color: backgroundColor,
+            webhook_url: webhookUrl
           })
           .where({
-            id: tag.id,
+            id,
             organization_id: organizationId,
             is_system: false
           })
@@ -2901,20 +2912,26 @@ const rootMutations = {
       }
 
       // Create new tag
-      const [newTag] = await r
-        .knex("tag")
-        .insert({
-          organization_id: organizationId,
-          author_id: user.id,
-          title: tag.title,
-          description: tag.description,
-          is_assignable: tag.isAssignable,
-          on_apply_script: tag.onApplyScript,
-          text_color: tag.textColor,
-          background_color: tag.backgroundColor,
-          webhook_url: tag.webhookUrl
-        })
-        .returning("*");
+      const {
+        rows: [newTag]
+      } = await r.knex.raw(
+        `
+          insert into all_tag (organization_id, author_id, title, description, is_assignable, on_apply_script, text_color, background_color, webhook_url)
+          values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          returning *
+          ;`,
+        [
+          organizationId,
+          user.id,
+          title,
+          description,
+          isAssignable,
+          onApplyScript,
+          textColor,
+          backgroundColor,
+          webhookUrl
+        ]
+      );
 
       memoizer.invalidate(cacheOpts.OrganizationTagList.key, {
         organizationId
