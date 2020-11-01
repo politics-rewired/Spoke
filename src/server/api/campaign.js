@@ -196,7 +196,8 @@ export const resolvers = {
         .where({ campaign_id: campaign.id })
         .limit(1)
         .then(records => records.length > 0),
-    autoassign: () => true
+    autoassign: () => true,
+    cannedResponses: () => true
   },
   CampaignsReturn: {
     __resolveType(obj, context, _) {
