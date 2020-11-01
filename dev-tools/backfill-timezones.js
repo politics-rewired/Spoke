@@ -40,7 +40,7 @@ async function doBatch() {
     await Promise.all(
       zips.map(async zip => {
         const timezone = zipCodeToTimeZone.lookup(zip);
-        console.log(timezone)
+        console.log(timezone);
         const updateCount = await db("campaign_contact")
           .update({ timezone })
           .where({ zip });

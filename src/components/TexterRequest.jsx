@@ -127,10 +127,7 @@ class TexterRequest extends React.Component {
         <Paper>
           <div style={{ padding: "20px" }}>
             <h3> No texts available right now </h3>
-            <p>
-              {" "}
-              Watch out for an announcement when new texts are available!{" "}
-            </p>
+            <p> Watch out for an announcement when new texts are available! </p>
           </div>
         </Paper>
       );

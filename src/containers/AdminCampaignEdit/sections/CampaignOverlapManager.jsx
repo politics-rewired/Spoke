@@ -318,7 +318,7 @@ const WrappedCampaignOverlapManager = loadData({
 class StateWrapper extends React.Component {
   state = {
     includeArchived: false
-  }
+  };
 
   handleAutoReleaseToggle = (_e, includeArchived) =>
     this.setState({ includeArchived });
