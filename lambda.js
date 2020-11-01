@@ -1,4 +1,4 @@
-/* eslint-disable global-require */
+/* eslint-disable global-require,import/no-unresolved */
 const AWS = require("aws-sdk");
 const awsServerlessExpress = require("aws-serverless-express");
 
