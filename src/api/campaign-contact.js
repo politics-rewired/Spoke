@@ -39,3 +39,5 @@ export const schema = `
     contactTags: [Tag]
   }
 `;
+
+export default schema;

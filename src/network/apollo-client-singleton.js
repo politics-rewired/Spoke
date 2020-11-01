@@ -8,7 +8,7 @@ import { ApolloLink } from "apollo-link";
 import { onError } from "apollo-link-error";
 import { createUploadLink } from "apollo-upload-client";
 import { getMainDefinition } from "apollo-utilities";
-import fetch from "isomorphic-fetch"; // TODO - remove?
+import _fetch from "isomorphic-fetch"; // TODO - remove?
 import omitDeep from "omit-deep-lodash";
 
 import { eventBus, EventTypes } from "../client/events";
@@ -19,15 +19,17 @@ const uploadLink = createUploadLink({
   credentials: "same-origin"
 });
 
-const errorLink = onError(({ networkError = {}, graphQLErrors }) => {
-  if (networkError.statusCode === 401) {
-    window.location = `/login?nextUrl=${window.location.pathname}`;
-  } else if (networkError.statusCode === 403) {
-    window.location = "/";
-  } else if (networkError.statusCode === 404) {
-    window.location = "/404";
+const errorLink = onError(
+  ({ networkError = {}, graphQLErrors: _gqlErrors }) => {
+    if (networkError.statusCode === 401) {
+      window.location = `/login?nextUrl=${window.location.pathname}`;
+    } else if (networkError.statusCode === 403) {
+      window.location = "/";
+    } else if (networkError.statusCode === 404) {
+      window.location = "/404";
+    }
   }
-});
+);
 
 const checkVersionLink = new ApolloLink((operation, forward) => {
   return forward(operation).map(data => {

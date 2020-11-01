@@ -16,3 +16,5 @@ export const schema = `
     pageInfo: PageInfo
   }
 `;
+
+export default schema;

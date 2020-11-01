@@ -340,7 +340,8 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
   campaignsFilter,
   assignmentsFilter,
   tagsFilter,
-  contactsFilter
+  contactsFilter,
+  contactNameFilter
 ) {
   let query = r.reader.select(
     "campaign_contact.id as cc_id",
@@ -369,10 +370,10 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
   const campaignIdContactIdsMap = new Map();
   const campaignIdMessagesIdsMap = new Map();
 
-  const ccId;
+  let ccId;
   for (const conversationRow of conversationRows) {
     if (ccId !== conversationRow.cc_id) {
-      const ccId = conversationRow.cc_id;
+      ccId = conversationRow.cc_id;
       campaignIdContactIdsMap[conversationRow.cmp_id] = ccId;
 
       if (!campaignIdContactIdsMap.has(conversationRow.cmp_id)) {
@@ -509,7 +510,7 @@ export async function reassignConversations(
 ) {
   // ensure existence of assignments
   const campaignIdAssignmentIdMap = new Map();
-  for (const [campaignId, _] of campaignIdContactIdsMap) {
+  for (const [campaignId, _ignore] of campaignIdContactIdsMap) {
     let assignment = await r
       .knex("assignment")
       .where({
@@ -573,9 +574,8 @@ export const resolvers = {
     pageInfo: queryResult => {
       if ("pageInfo" in queryResult) {
         return queryResult.pageInfo;
-      } 
-        return null;
-      
+      }
+      return null;
     }
   },
   Conversation: {

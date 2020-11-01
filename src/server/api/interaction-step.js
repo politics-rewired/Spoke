@@ -29,3 +29,5 @@ export const resolvers = {
         .then(qr => qr || null)
   }
 };
+
+export default resolvers;

@@ -5,3 +5,5 @@ export const resolvers = {
     ...sqlResolvers(["id", "isValid", "hash"])
   }
 };
+
+export default resolvers;

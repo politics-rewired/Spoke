@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export const schema = `
   type LinkDomain {
     id: ID!
@@ -18,3 +17,5 @@ export const schema = `
     healthyAgainAt: Date
   }
 `;
+
+export default schema;

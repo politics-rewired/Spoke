@@ -1,9 +1,9 @@
 import gql from "graphql-tag";
 
-import { GraphQLType } from "./types";
-import { ExternalResultCode } from "./external-result-code";
 import { ExternalActivistCode } from "./external-activist-code";
+import { ExternalResultCode } from "./external-result-code";
 import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
+import { GraphQLType } from "./types";
 
 export interface ExternalResultCodeTarget {
   id: string;

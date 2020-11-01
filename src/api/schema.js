@@ -389,3 +389,5 @@ export const schema = [
   externalResultCodeSchema,
   externalSyncConfigSchema
 ];
+
+export default rootSchema;

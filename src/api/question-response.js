@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export const schema = `
   type QuestionResponse {
     id: String
@@ -6,3 +5,5 @@ export const schema = `
     question: Question
   }
 `;
+
+export default schema;

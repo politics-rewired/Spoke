@@ -1,5 +1,3 @@
-import request from "request";
-
 import { r } from "../models";
 
 // What the user sees as the option
@@ -16,7 +14,7 @@ export const instructions = () =>
 // either in environment variables or organization.features json data
 // Besides this returning true, "test-action" will also need to be added to
 // process.env.ACTION_HANDLERS
-export async function available(organizationId) {
+export async function available(_organizationId) {
   return true;
 }
 

@@ -7,3 +7,5 @@ export const resolvers = {
       loaders.question.load(question.id)
   }
 };
+
+export default resolvers;

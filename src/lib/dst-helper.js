@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { DateFunctions, DateTime, zone } from "timezonecomplete";
 
 class TimezoneOffsetAndDst {
@@ -76,3 +77,5 @@ export class DstHelper {
     return DstHelper.isOffsetDst(date.offset(), timezone);
   }
 }
+
+export default DstHelper;

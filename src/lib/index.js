@@ -2,10 +2,12 @@ import _ from "lodash";
 import Papa from "papaparse";
 import zlib from "zlib";
 
-import { getFormattedPhoneNumber, getFormattedZip } from ".";
+import { getDisplayPhoneNumber, getFormattedPhoneNumber } from "./phone-format";
 import { sleep } from "./utils";
+import { getFormattedZip } from "./zip-format";
 
-export { getFormattedPhoneNumber, getDisplayPhoneNumber } from "./phone-format";
+export { getFormattedPhoneNumber, getDisplayPhoneNumber };
+
 export {
   getFormattedZip,
   zipToTimeZone,
@@ -64,7 +66,7 @@ const getValidatedData = (data, optOuts) => {
   let result;
   // For some reason destructuring is not working here
   result = _.partition(data, row => !!row.cell);
-  validatedData = result[0];
+  [validatedData] = result;
   const missingCellRows = result[1];
 
   validatedData = _.map(validatedData, row =>
@@ -76,7 +78,7 @@ const getValidatedData = (data, optOuts) => {
   result = _.partition(validatedData, row =>
     /^\+1[0-9]{10}$/.test(row.cell || "")
   );
-  validatedData = result[0];
+  [validatedData] = result;
   const invalidCellRows = result[1];
 
   const count = validatedData.length;
@@ -87,7 +89,7 @@ const getValidatedData = (data, optOuts) => {
     validatedData,
     row => optOutCells.indexOf(row.cell) === -1
   );
-  validatedData = result[0];
+  [validatedData] = result;
   const optOutRows = result[1];
 
   validatedData = _.map(validatedData, row =>
@@ -130,18 +132,6 @@ export const gunzip = buf =>
       }
     });
   });
-
-export const parseCSV = (file, optOuts, callback) => {
-  Papa.parse(file, {
-    // worker: true,
-    header: true,
-    // eslint-disable-next-line no-shadow, no-unused-vars
-    complete: ({ data, meta, errors }, file) => {
-      const result = validateCsv({ data, meta });
-      callback(result);
-    }
-  });
-};
 
 export const validateCsv = ({ data, meta }) => {
   const { fields } = meta;
@@ -190,4 +180,16 @@ export const validateCsv = ({ data, meta }) => {
       contacts: validatedData
     };
   }
+};
+
+export const parseCSV = (file, optOuts, callback) => {
+  Papa.parse(file, {
+    // worker: true,
+    header: true,
+    // eslint-disable-next-line no-shadow, no-unused-vars
+    complete: ({ data, meta, errors: _errors }, _file) => {
+      const result = validateCsv({ data, meta });
+      callback(result);
+    }
+  });
 };

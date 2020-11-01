@@ -7,3 +7,5 @@ export const resolvers = {
       loaders.assignment.load(optOut.assignment_id)
   }
 };
+
+export default resolvers;

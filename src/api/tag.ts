@@ -1,5 +1,5 @@
-import { RelayPaginatedResponse } from "./pagination";
 import { ExternalSyncTagConfig } from "./external-sync-config";
+import { RelayPaginatedResponse } from "./pagination";
 
 export interface Tag {
   id: string;

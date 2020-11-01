@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export const schema = `
   type Message {
     id: ID
@@ -13,3 +12,5 @@ export const schema = `
     sendStatus: String
   }
 `;
+
+export default schema;

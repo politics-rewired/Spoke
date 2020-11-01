@@ -41,7 +41,7 @@ export async function available(organizationId) {
   return !!needed.length;
 }
 
-export const akidGenerate = function(ak_secret, cleartext) {
+export const akidGenerate = (ak_secret, cleartext) => {
   const shaHash = crypto.createHash("sha256");
   shaHash.write(`${ak_secret}.${cleartext}`);
   const shortHash = shaHash.digest("base64").slice(0, 6);
@@ -66,7 +66,7 @@ export async function processAction(
     );
   const contact = contactRes.length ? contactRes[0] : {};
 
-  if (contact.external_id && contact.custom_fields != "{}") {
+  if (contact.external_id && contact.custom_fields !== "{}") {
     try {
       const customFields = JSON.parse(contact.custom_fields || "{}");
       const features = JSON.parse(contact.features || "{}");
@@ -101,7 +101,7 @@ export async function processAction(
             url: `${actionkitBaseUrl}/act/`,
             form: userData
           },
-          async function(err, httpResponse, body) {
+          async (err, httpResponse, body) => {
             // TODO: should we save the action id somewhere?
             if (err || (body && body.error)) {
               logger.error(
@@ -117,6 +117,7 @@ export async function processAction(
                 );
                 if (actionId) {
                   // save the action id of the rsvp back to the contact record
+                  // eslint-disable-next-line prefer-destructuring
                   customFields.processed_event_action = actionId[1];
                   await r
                     .knex("campaign_contact")

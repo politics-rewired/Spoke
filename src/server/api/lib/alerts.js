@@ -80,7 +80,7 @@ async function checkForBadDeliverability() {
   for (const domain of Object.keys(byDomain)) {
     const fetchCountBySendStatus = status => {
       for (const foundStatus of byDomain[domain]) {
-        if (foundStatus.send_status == status) {
+        if (foundStatus.send_status === status) {
           return foundStatus.count;
         }
       }
@@ -112,7 +112,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
       const message = await r
         .reader("message")
         .where({
-          campaign_contact_id: parseInt(campaignContactId),
+          campaign_contact_id: parseInt(campaignContactId, 10),
           is_from_contact: true
         })
         .orderBy("created_at", "desc")
@@ -123,7 +123,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     taggingUser: (async () => {
       const user = await r
         .reader("user")
-        .where({ id: parseInt(userId) })
+        .where({ id: parseInt(userId, 10) })
         .first("*");
 
       return user;
@@ -131,7 +131,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     taggedContact: (async () => {
       const contact = await r
         .reader("campaign_contact")
-        .where({ id: parseInt(campaignContactId) })
+        .where({ id: parseInt(campaignContactId, 10) })
         .first("*");
 
       return contact;

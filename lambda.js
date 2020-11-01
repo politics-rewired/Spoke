@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 const AWS = require("aws-sdk");
 const awsServerlessExpress = require("aws-serverless-express");
 
@@ -21,8 +22,10 @@ try {
 }
 
 // NOTE: the downside of loading above is environment variables are initially loaded immediately,
-//       so changing them means that the code must test environment variable inline (rather than use a const set on-load)
-// We should NOT load app and server inside the handler, or all connection pools and state are re-instantiated per-request:
+//       so changing them means that the code must test environment variable inline (rather than
+//       use a const set on-load)
+// We should NOT load app and server inside the handler, or all connection pools and state are
+// re-instantiated per-request:
 // See: http://docs.aws.amazon.com/lambda/latest/dg/best-practices.html#function-code
 // "Separate the Lambda handler (entry point) from your core logic"
 
@@ -89,7 +92,7 @@ exports.handler = (event, context, handleCallback) => {
             InvocationType: "Event", // asynchronous
             Payload: JSON.stringify(dataToSend)
           },
-          function(err, dataReceived) {
+          (err, dataReceived) => {
             if (err) {
               console.error("Failed to invoke Lambda job: ", err);
             }

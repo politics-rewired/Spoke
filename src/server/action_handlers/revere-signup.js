@@ -41,7 +41,7 @@ const actionKitSignup = (cell, contact) => {
       sms_subscribed: true,
       action_mobilesubscribe: true,
       suppress_subscribe: true,
-      phone: [contactCell],
+      phone: [cell],
       phone_type: "mobile",
       source: "spoke-signup"
     };
@@ -67,13 +67,14 @@ const actionKitSignup = (cell, contact) => {
               },
               form: {
                 user: httpResponse.headers.location,
-                phone: contactCell,
+                phone: cell,
                 type: "mobile"
               }
             },
             (lastError, lastResponse) => {
               if (lastError) throw new Error(lastError);
               if (lastResponse.statusCode === 201) {
+                // Sub
               }
             }
           );
@@ -145,7 +146,7 @@ export async function processAction(
       json: true
     };
 
-    return request(options, (error, response) => {
+    return request(options, (error, _response) => {
       if (error) throw new Error(error);
     });
   }

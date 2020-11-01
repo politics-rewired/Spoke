@@ -19,3 +19,5 @@ export const resolvers = {
     ...sqlResolvers(["id", "domain", "createdAt", "healthyAgainAt"])
   }
 };
+
+export default resolvers;

@@ -6,3 +6,5 @@ export const resolvers = {
     isUserCreated: cannedResponse => cannedResponse.user_id !== ""
   }
 };
+
+export default resolvers;

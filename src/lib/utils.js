@@ -13,8 +13,9 @@ export const sleep = (ms = 0) =>
  * @return {Object}        Return a new object who represent the diff
  */
 export function difference(object, base) {
+  // eslint-disable-next-line no-shadow
   function changes(object, base) {
-    return transform(object, function(result, value, key) {
+    return transform(object, (result, value, key) => {
       if (!isEqual(value, base[key])) {
         result[key] =
           isObject(value) && isObject(base[key])
@@ -28,6 +29,7 @@ export function difference(object, base) {
 
 export const stringIsAValidUrl = s => {
   try {
+    // eslint-disable-next-line no-new
     new URL(s);
     return true;
   } catch (err) {

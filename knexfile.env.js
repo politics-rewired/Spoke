@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 require("dotenv").config();
 
 // Environment variables will be populated from above, and influence the knex-connect import

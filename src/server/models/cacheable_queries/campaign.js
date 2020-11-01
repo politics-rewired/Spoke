@@ -101,7 +101,7 @@ export const campaignCache = {
         return campaign;
       }
     }
-    return await r
+    return r
       .reader("campaign")
       .where({ id })
       .first();
@@ -110,3 +110,5 @@ export const campaignCache = {
   dbCustomFields,
   dbInteractionSteps
 };
+
+export default campaignCache;

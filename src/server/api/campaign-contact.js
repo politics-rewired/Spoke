@@ -1,10 +1,9 @@
 import { config } from "../../config";
-import { getTopMostParent, zipToTimeZone } from "../../lib";
 import logger from "../../logger";
 import { cacheableData, r } from "../models";
 import { errToObj } from "../utils";
 import { accessRequired } from "./errors";
-import { getTzOffset, sqlResolvers } from "./lib/utils";
+import { sqlResolvers } from "./lib/utils";
 
 const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
 
@@ -57,7 +56,7 @@ export const resolvers = {
 
       return updatedAt;
     },
-    messageStatus: async (campaignContact, _, { loaders }) => {
+    messageStatus: async campaignContact => {
       if (campaignContact.message_status) {
         return campaignContact.message_status;
       }
@@ -68,7 +67,7 @@ export const resolvers = {
     // To get that result to look like what the original code returned
     // without using the outgoing answer_options array field, try this:
     //
-    questionResponseValues: async (campaignContact, _, { loaders }) => {
+    questionResponseValues: async campaignContact => {
       if ("questionResponseValues" in campaignContact) {
         return campaignContact.questionResponseValues;
       }
@@ -100,7 +99,7 @@ export const resolvers = {
         return { ...qr_result, question };
       });
     },
-    questionResponses: async (campaignContact, _, { loaders }) => {
+    questionResponses: async campaignContact => {
       const results = await r
         .reader("question_response as qres")
         .where("qres.campaign_contact_id", campaignContact.id)
@@ -253,3 +252,5 @@ export const resolvers = {
     }
   }
 };
+
+export default resolvers;

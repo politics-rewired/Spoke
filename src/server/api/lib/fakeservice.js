@@ -1,4 +1,5 @@
 import { r } from "../../models";
+// eslint-disable-next-line import/named
 import { getLastMessage } from "./message-sending";
 
 // This 'fakeservice' allows for fake-sending messages
@@ -6,7 +7,7 @@ import { getLastMessage } from "./message-sending";
 // queries for the reception (rather than a real service)
 
 async function sendMessage(message, _organizationId, _trx) {
-  return await r
+  return r
     .knex("message")
     .update({
       send_status: "SENT",

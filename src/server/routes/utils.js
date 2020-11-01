@@ -2,6 +2,7 @@ import express from "express";
 import googleLibPhoneNumber from "google-libphonenumber";
 
 import { config } from "../../config";
+import logger from "../../logger";
 import { r } from "../models";
 
 const router = express.Router();

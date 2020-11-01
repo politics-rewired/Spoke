@@ -53,7 +53,7 @@ export const processContactsFile = async file => {
         }
         return header;
       },
-      step: ({ data, meta, errors }, parser) => {
+      step: ({ data, meta, errors: _errors }, parser) => {
         // Exit early on bad header
         if (resultMeta === undefined) {
           resultMeta = meta;
@@ -77,3 +77,5 @@ export const processContactsFile = async file => {
     });
   });
 };
+
+export default processContactsFile;
