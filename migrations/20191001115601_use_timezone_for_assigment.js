@@ -22,7 +22,7 @@ exports.up = function up(knex) {
   `
     )
     .then(() => {
-      return knex.schema.alterTable("campaign_contact", table => {
+      return knex.schema.alterTable("campaign_contact", (table) => {
         table.dropColumn("timezone_offset");
       });
     });
@@ -30,7 +30,7 @@ exports.up = function up(knex) {
 
 exports.down = function down(knex) {
   return knex.schema
-    .alterTable("campaign_contact", table => {
+    .alterTable("campaign_contact", (table) => {
       table.text("timezone_offset").defaultTo("");
       table.index(
         ["assignment_id", "timezone_offset"],

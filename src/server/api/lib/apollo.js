@@ -9,7 +9,7 @@ export const nodeHasQueryPath = (node, path) => {
   // Can we traverse further?
   if (!node.selectionSet.selections) return false;
   const { selections } = node.selectionSet;
-  const nextNode = selections.find(s => s.name.value === pathComponents[0]);
+  const nextNode = selections.find((s) => s.name.value === pathComponents[0]);
   if (!nextNode) return false;
 
   const nextPath = pathComponents.join(".");

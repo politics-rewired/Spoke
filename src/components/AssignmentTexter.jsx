@@ -124,7 +124,7 @@ class AssignmentTexter extends React.Component {
     ) {
       getIds = contactIds
         .slice(newIndex, newIndex + BATCH_GET)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter((cId) => !force || !this.state.contactCache[cId]);
     }
     // if we DO have current data, but don't have data base BATCH_FORWARD...
     if (
@@ -134,7 +134,7 @@ class AssignmentTexter extends React.Component {
     ) {
       getIds = contactIds
         .slice(newIndex + BATCH_FORWARD, newIndex + BATCH_FORWARD + BATCH_GET)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter((cId) => !force || !this.state.contactCache[cId]);
     }
 
     if (getIds.length) {
@@ -142,14 +142,14 @@ class AssignmentTexter extends React.Component {
 
       await this.props
         .loadContacts(getIds)
-        .then(response => {
+        .then((response) => {
           if (response.errors) throw new Error(response.errors);
           const { getAssignmentContacts } = response.data;
           if (!getAssignmentContacts)
             throw new Error("No assignment contacts returned!");
           return getAssignmentContacts;
         })
-        .then(getAssignmentContacts => {
+        .then((getAssignmentContacts) => {
           const foldIn = (contactCache, newContact) => {
             contactCache[newContact.id] = newContact;
             return contactCache;
@@ -166,13 +166,13 @@ class AssignmentTexter extends React.Component {
     }
   };
 
-  incrementCurrentContactIndex = increment => {
+  incrementCurrentContactIndex = (increment) => {
     let newIndex = this.state.currentContactIndex;
     newIndex = newIndex + increment;
     this.updateCurrentContactIndex(newIndex);
   };
 
-  updateCurrentContactIndex = newIndex => {
+  updateCurrentContactIndex = (newIndex) => {
     this.setState({
       currentContactIndex: newIndex
     });
@@ -211,12 +211,12 @@ class AssignmentTexter extends React.Component {
     this.incrementCurrentContactIndex(-1);
   };
 
-  handleCannedResponseChange = script => {
+  handleCannedResponseChange = (script) => {
     this.handleScriptChange(script);
     this.handleClosePopover();
   };
 
-  handleScriptChange = script => {
+  handleScriptChange = (script) => {
     this.setState({ script });
   };
 
@@ -284,7 +284,7 @@ class AssignmentTexter extends React.Component {
         this.props.mutations
           .sendMessage(payload.message, contact_id)
           .then(catchError)
-          .then(response => {
+          .then((response) => {
             const { id, messages } = response.data.sendMessage;
             this.state.contactCache[id].messages = messages;
           })
@@ -313,7 +313,7 @@ class AssignmentTexter extends React.Component {
       );
     }
 
-    Promise.all(promises).then(_ => {
+    Promise.all(promises).then((_) => {
       if (isLastOne) this.handleFinishContact();
     });
 
@@ -331,7 +331,7 @@ class AssignmentTexter extends React.Component {
     this.props.history.push(`/app/${campaign.organization.id}/todos`);
   };
 
-  handleSendMessageError = contact_id => e => {
+  handleSendMessageError = (contact_id) => (e) => {
     let error = { id: contact_id };
 
     if (e.status === 402) {
@@ -362,7 +362,7 @@ class AssignmentTexter extends React.Component {
 
       setTimeout(() => {
         this.setState({
-          errors: this.state.errors.filter(e => e.id !== contact_id)
+          errors: this.state.errors.filter((e) => e.id !== contact_id)
         });
       }, 2000);
 
@@ -461,7 +461,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       }
@@ -487,7 +487,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },
@@ -497,7 +497,7 @@ const queries = {
 };
 
 const mutations = {
-  createOptOut: ownProps => (optOut, campaignContactId) => ({
+  createOptOut: (ownProps) => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -517,7 +517,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  tagContact: ownProps => (campaignContactId, tag) => ({
+  tagContact: (ownProps) => (campaignContactId, tag) => ({
     mutation: gql`
       mutation tagConversation(
         $campaignContactId: String!
@@ -534,7 +534,7 @@ const mutations = {
       tag
     }
   }),
-  editCampaignContactMessageStatus: ownProps => (
+  editCampaignContactMessageStatus: (ownProps) => (
     messageStatus,
     campaignContactId
   ) => ({
@@ -557,7 +557,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  deleteQuestionResponses: ownProps => (
+  deleteQuestionResponses: (ownProps) => (
     interactionStepIds,
     campaignContactId
   ) => ({
@@ -579,7 +579,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  updateQuestionResponses: ownProps => (
+  updateQuestionResponses: (ownProps) => (
     questionResponses,
     campaignContactId
   ) => ({
@@ -601,7 +601,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  sendMessage: ownProps => (message, campaignContactId) => ({
+  sendMessage: (ownProps) => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!
@@ -624,7 +624,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  bulkSendMessages: ownProps => assignmentId => ({
+  bulkSendMessages: (ownProps) => (assignmentId) => ({
     mutation: gql`
       mutation bulkSendMessages($assignmentId: Int!) {
         bulkSendMessages(assignmentId: $assignmentId) {

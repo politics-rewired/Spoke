@@ -47,10 +47,10 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
     writeHeaders: true
   });
 
-  campaignContactsUploadStream.on("error", err => {
+  campaignContactsUploadStream.on("error", (err) => {
     logger.error("error in campaignContactsUploadStream: ", err);
   });
-  campaignContactsWriteStream.on("error", err => {
+  campaignContactsWriteStream.on("error", (err) => {
     logger.error("error in campaignContactsWriteStream: ", err);
   });
 
@@ -66,10 +66,10 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
     writeHeaders: true
   });
 
-  messagesUploadStream.on("error", err => {
+  messagesUploadStream.on("error", (err) => {
     logger.error("error in messagesUploadStream: ", err);
   });
-  messagesWriteStream.on("error", err => {
+  messagesWriteStream.on("error", (err) => {
     logger.error("error in messagesWriteStream: ", err);
   });
 
@@ -162,7 +162,7 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
           `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
           `\n\nCampaign export:\n${campaignExportUrl}` +
           `\n\nMessage export:\n${campaignMessagesExportUrl}`
-      }).catch(err => {
+      }).catch((err) => {
         logger.error("Error sending export email: ", err);
         logger.info(`Campaign Export URL - ${campaignExportUrl}`);
         logger.info(
@@ -198,7 +198,7 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
  * Fetch necessary job data from database.
  * @param {object} job The export job object to fetch data for. Must have payload, campaign_id, and requester properties.
  */
-export const fetchExportData = async job => {
+export const fetchExportData = async (job) => {
   const { campaign_id: campaignId, payload: rawPayload } = job;
   const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
     rawPayload
@@ -242,15 +242,15 @@ export const fetchExportData = async job => {
   };
 };
 
-const stepHasQuestion = step => step.question && step.question.trim() !== "";
+const stepHasQuestion = (step) => step.question && step.question.trim() !== "";
 
 /**
  * Returns map from interaction step ID --> question text (deduped where appropriate).
  * @param {object[]} interactionSteps Array of interaction steps to work on.
  */
-export const getUniqueQuestionsByStepId = interactionSteps => {
+export const getUniqueQuestionsByStepId = (interactionSteps) => {
   const questionSteps = interactionSteps.filter(stepHasQuestion);
-  const duplicateQuestions = _.groupBy(questionSteps, step => step.question);
+  const duplicateQuestions = _.groupBy(questionSteps, (step) => step.question);
 
   return Object.keys(duplicateQuestions).reduce(
     (allQuestions, questionText) => {
@@ -322,8 +322,8 @@ export const processContactsChunk = async (
 
   lastContactId = rows[rows.length - 1].id;
 
-  const rowsByContactId = _.groupBy(rows, row => row.id);
-  const contacts = Object.keys(rowsByContactId).map(contactId => {
+  const rowsByContactId = _.groupBy(rows, (row) => row.id);
+  const contacts = Object.keys(rowsByContactId).map((contactId) => {
     // Use the first row for all the common campaign contact fields
     const contact = rowsByContactId[contactId][0];
     const contactRow = {
@@ -342,15 +342,15 @@ export const processContactsChunk = async (
 
     // Append columns for custom fields
     const customFields = JSON.parse(contact.custom_fields);
-    Object.keys(customFields).forEach(fieldName => {
+    Object.keys(customFields).forEach((fieldName) => {
       contactRow[`contact[${fieldName}]`] = customFields[fieldName];
     });
 
     // Append columns for question responses
-    Object.keys(questionsById).forEach(stepId => {
+    Object.keys(questionsById).forEach((stepId) => {
       const questionText = questionsById[stepId];
       const response = rowsByContactId[contactId].find(
-        response => parseInt(response.interaction_step_id) == parseInt(stepId)
+        (response) => parseInt(response.interaction_step_id) == parseInt(stepId)
       );
 
       const responseValue = response ? response.value : "";
@@ -414,7 +414,7 @@ export const processMessagesChunk = async (campaignId, lastContactId = 0) => {
 
   lastContactId = rows[rows.length - 1].campaign_contact_id;
 
-  const messages = rows.map(message => ({
+  const messages = rows.map((message) => ({
     assignmentId: message.assignment_id,
     userNumber: message.user_number,
     contactNumber: message.contact_number,

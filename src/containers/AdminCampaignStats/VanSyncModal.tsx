@@ -172,7 +172,11 @@ class VanSyncModal extends React.Component<InnerProps, State> {
             <p>Syncing campaign: {latestSyncAttempt.status}%</p>
             {syncErrors.length > 0 && [
               <p>Encountered the following errors</p>,
-              <ul>{syncErrors.map(error => <li key={error}>{error}</li>)}</ul>
+              <ul>
+                {syncErrors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
             ]}
             <RaisedButton
               label="Cancel Sync"
@@ -235,14 +239,14 @@ class VanSyncModal extends React.Component<InnerProps, State> {
             onRequestClose={this.handleOnDismissConfigureMapping}
           />
         )}
-        {latestSyncAttempt &&
-          latestSyncAttempt.status === 100 && (
-            <p>
-              Last sync:<br />
-              {new Date(latestSyncAttempt.updatedAt).toLocaleString()} -{" "}
-              {messageFromJobRquest(latestSyncAttempt)}
-            </p>
-          )}
+        {latestSyncAttempt && latestSyncAttempt.status === 100 && (
+          <p>
+            Last sync:
+            <br />
+            {new Date(latestSyncAttempt.updatedAt).toLocaleString()} -{" "}
+            {messageFromJobRquest(latestSyncAttempt)}
+          </p>
+        )}
       </Dialog>
     );
   }
@@ -274,7 +278,7 @@ const queries: QueryMap<InnerProps> = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -282,7 +286,7 @@ const queries: QueryMap<InnerProps> = {
   },
   syncJobs: {
     query: GET_CAMPAIGN_SYNC_JOBS,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId,
         jobTypes: ["sync_van_campaign"]
@@ -293,7 +297,7 @@ const queries: QueryMap<InnerProps> = {
 };
 
 const mutations: MutationMap<InnerProps> = {
-  syncCampaign: ownProps => () => ({
+  syncCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation syncCampaignToSystem($input: SyncCampaignToSystemInput!) {
         syncCampaignToSystem(input: $input)
@@ -305,7 +309,7 @@ const mutations: MutationMap<InnerProps> = {
       }
     }
   }),
-  cancelSync: ownProps => (jobId: string) => ({
+  cancelSync: (ownProps) => (jobId: string) => ({
     mutation: gql`
       mutation cancelCampaignVanSync($campaignId: String!, $jobId: String!) {
         deleteJob(campaignId: $campaignId, id: $jobId) {

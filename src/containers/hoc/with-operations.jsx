@@ -11,8 +11,8 @@ import LoadingIndicator from "../../components/LoadingIndicator";
  * queries are loading.
  * @param {string[]} queryNames The names of the queries to check loading state
  */
-const isLoading = queryNames =>
-  withProps(parentProps => {
+const isLoading = (queryNames) =>
+  withProps((parentProps) => {
     const loadingReducer = (loadingAcc, queryName) =>
       loadingAcc || (parentProps[queryName] || {}).loading;
     const loading = queryNames.reduce(loadingReducer, false);
@@ -27,21 +27,19 @@ const isLoading = queryNames =>
   });
 
 export const withQueries = (queries = {}) => {
-  const enhancers = Object.entries(queries).map(
-    ([name, { query: queryGql, ...config }]) =>
-      graphql(queryGql, { ...config, name })
+  const enhancers = Object.entries(
+    queries
+  ).map(([name, { query: queryGql, ...config }]) =>
+    graphql(queryGql, { ...config, name })
   );
 
-  return compose(
-    ...enhancers,
-    isLoading(Object.keys(queries))
-  );
+  return compose(...enhancers, isLoading(Object.keys(queries)));
 };
 
 export const withMutations = (mutations = {}) =>
   compose(
     withApollo,
-    withProps(parentProps => {
+    withProps((parentProps) => {
       const reducer = (propsAcc, [name, constructor]) => {
         propsAcc[name] = async (...args) => {
           const options = constructor(parentProps)(...args);
@@ -59,16 +57,13 @@ export const withMutations = (mutations = {}) =>
  * Takes multiple GraphQL queriy and/or mutation definitions and wraps Component in appropriate
  * graphql() calls.
  */
-export const withOperations = options => {
+export const withOperations = (options) => {
   const { queries = {}, mutations = {} } = options;
-  return compose(
-    withQueries(queries),
-    withMutations(mutations)
-  );
+  return compose(withQueries(queries), withMutations(mutations));
 };
 
 // remove 'GraphQL Error:' from error messages, per client request
-export const formatErrorMessage = error => {
+export const formatErrorMessage = (error) => {
   return error.message.replaceAll("GraphQL Error:", "").trim();
 };
 
@@ -93,7 +88,7 @@ export const PrettyErrors = ({ errors }) => {
  * @param {Object} options
  * @see withOperations
  */
-export const loadData = options =>
+export const loadData = (options) =>
   compose(
     withOperations(options),
     branch(({ loading }) => loading, renderComponent(LoadingIndicator)),

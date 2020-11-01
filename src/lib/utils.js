@@ -4,7 +4,7 @@ import transform from "lodash/transform";
 import { URL } from "url";
 
 export const sleep = (ms = 0) =>
-  new Promise(resolve => setTimeout(resolve, ms));
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Deep diff between two object, using lodash
@@ -27,7 +27,7 @@ export function difference(object, base) {
   return changes(object, base);
 }
 
-export const stringIsAValidUrl = s => {
+export const stringIsAValidUrl = (s) => {
   try {
     // eslint-disable-next-line no-new
     new URL(s);

@@ -44,10 +44,10 @@ const knexConfig = {
     reapIntervalMillis: config.DB_REAP_INTERVAL_MS
   },
   log: {
-    warn: message => logger.warn(`knex error: ${message}`),
-    error: message => logger.error(`knex error: ${message}`),
-    deprecate: message => logger.info(`knex error: ${message}`),
-    debug: message => logger.debug(`knex error: ${message}`)
+    warn: (message) => logger.warn(`knex error: ${message}`),
+    error: (message) => logger.error(`knex error: ${message}`),
+    deprecate: (message) => logger.info(`knex error: ${message}`),
+    debug: (message) => logger.debug(`knex error: ${message}`)
   }
 };
 

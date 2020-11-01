@@ -97,14 +97,15 @@ class VanExportModal extends React.Component<InnerProps, State> {
           target="_blank"
         >
           Export for Upload to VAN
-        </a>.
+        </a>
+        .
         <br />
         <SelectField
           floatingLabelText="VAN ID field"
           value={vanIdField}
           onChange={this.handleOnChangeVanIdField}
         >
-          {selections.map(selection => (
+          {selections.map((selection) => (
             <MenuItem
               key={selection}
               value={selection}

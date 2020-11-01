@@ -37,12 +37,7 @@ const main = async () => {
         .update({
           request_status: TEXTER_STATUS_MAP[rank]
         })
-        .whereIn(
-          "user_id",
-          spokeDb("user")
-            .select("id")
-            .where({ email })
-        );
+        .whereIn("user_id", spokeDb("user").select("id").where({ email }));
 
       console.log(`Updated rank for ${email} to ${rank}`);
     }
@@ -50,11 +45,11 @@ const main = async () => {
 };
 
 main()
-  .then(result => {
+  .then((result) => {
     console.log(result);
     process.exit(0);
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Update texter status failed", err);
     process.exit(1);
   });

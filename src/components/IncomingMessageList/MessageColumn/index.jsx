@@ -25,11 +25,11 @@ class MessageColumn extends Component {
     };
   }
 
-  messagesChanged = messages => {
+  messagesChanged = (messages) => {
     this.setState({ messages });
   };
 
-  optOutChanged = isOptedOut => {
+  optOutChanged = (isOptedOut) => {
     this.setState({ isOptedOut });
   };
 

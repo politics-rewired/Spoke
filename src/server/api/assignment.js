@@ -492,7 +492,7 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
       [myTeamIds, myTeamIds, myEscalationTags, organizationId]
     );
 
-    const results = teamToCampaigns.map(ttc =>
+    const results = teamToCampaigns.map((ttc) =>
       Object.assign(ttc, {
         type: ttc.assignment_type,
         campaign: { id: ttc.id, title: ttc.title },
@@ -729,7 +729,7 @@ export async function myCurrentAssignmentTargets(
     [organizationId, userId, userId, organizationId]
   );
 
-  const results = teamToCampaigns.map(ttc =>
+  const results = teamToCampaigns.map((ttc) =>
     Object.assign(ttc, {
       type: ttc.assignment_type,
       campaign: { id: ttc.id, title: ttc.title },
@@ -761,7 +761,7 @@ async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
 
   if (config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
     const assignmentTargets = await allCurrentAssignmentTargets(organizationId);
-    const existingTeamIds = assignmentTargets.map(cat => cat.team_id);
+    const existingTeamIds = assignmentTargets.map((cat) => cat.team_id);
 
     const isEmptiedTeam = ([id, _title]) => !existingTeamIds.includes(id);
     let emptiedTeams = [...teamsAssignedTo.entries()].filter(isEmptiedTeam);
@@ -801,7 +801,7 @@ export async function assignLoop(
   }
 
   const preferredAssignment = assignmentOptions.find(
-    assignment => assignment.team_id === preferredTeamId
+    (assignment) => assignment.team_id === preferredTeamId
   );
 
   const assignmentInfo = preferredAssignment || assignmentOptions[0];
@@ -814,9 +814,7 @@ export async function assignLoop(
   );
 
   logger.info(
-    `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${
-      assignmentInfo.type
-    }`
+    `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${assignmentInfo.type}`
   );
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
@@ -950,7 +948,7 @@ export async function giveUserMoreTexts(
   }
 
   const preferredAssignment = assignmentOptions.find(
-    assignment => assignment.team_id === preferredTeamId
+    (assignment) => assignment.team_id === preferredTeamId
   );
 
   const assignmentInfo = preferredAssignment || assignmentOptions[0];
@@ -966,7 +964,7 @@ export async function giveUserMoreTexts(
   let countUpdated = 0;
   let countLeftToUpdate = Math.min(count, assignmentInfo.max_request_count);
 
-  const updated_result = await parentTrx.transaction(async trx => {
+  const updated_result = await parentTrx.transaction(async (trx) => {
     while (countLeftToUpdate > 0) {
       const { count: countUpdatedInLoop, team } = await assignLoop(
         user,
@@ -1003,7 +1001,7 @@ export async function giveUserMoreTexts(
     // No need to await the notify result as giveUserMoreTexts doesn't depend on it
     sleep(15000)
       .then(() => notifyIfAllAssigned(organizationId, teamsAssignedTo))
-      .catch(err =>
+      .catch((err) =>
         logger.error("Encountered error notifying assignment complete: ", err)
       );
   }
@@ -1012,10 +1010,7 @@ export async function giveUserMoreTexts(
 }
 
 export async function fulfillPendingRequestFor(auth0Id) {
-  const user = await r
-    .knex("user")
-    .first("id")
-    .where({ auth0_id: auth0Id });
+  const user = await r.knex("user").first("id").where({ auth0_id: auth0Id });
 
   if (!user) {
     throw new AutoassignError(`No user found with id ${auth0Id}`);
@@ -1034,7 +1029,7 @@ export async function fulfillPendingRequestFor(auth0Id) {
 
   const doAssignment = memoizer.memoize(
     async ({ pendingAssignmentRequestId: _ignore }) => {
-      const numberAssigned = await r.knex.transaction(async trx => {
+      const numberAssigned = await r.knex.transaction(async (trx) => {
         try {
           const result = await giveUserMoreTexts(
             pendingAssignmentRequest.user_id,
@@ -1182,12 +1177,9 @@ export const resolvers = {
       assignment.texter
         ? assignment.texter
         : loaders.user.load(assignment.user_id),
-    campaign: async assignment => {
+    campaign: async (assignment) => {
       const getCampaign = memoizer.memoize(async ({ campaignId }) => {
-        return r
-          .reader("campaign")
-          .where({ id: campaignId })
-          .first("*");
+        return r.reader("campaign").where({ id: campaignId }).first("*");
       }, cacheOpts.CampaignOne);
 
       return getCampaign({ campaignId: assignment.campaign_id });
@@ -1225,7 +1217,7 @@ export const resolvers = {
         .first();
       return getContacts(assignment, contactsFilter, organization, campaign);
     },
-    campaignCannedResponses: async assignment => {
+    campaignCannedResponses: async (assignment) => {
       const getCannedResponses = memoizer.memoize(
         async ({ campaignId, userId }) => {
           return cacheableData.cannedResponse.query({
@@ -1238,7 +1230,7 @@ export const resolvers = {
 
       return getCannedResponses({ campaignId: assignment.campaign_id });
     },
-    userCannedResponses: async _assignment => {
+    userCannedResponses: async (_assignment) => {
       return [];
     }
   }

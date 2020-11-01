@@ -97,7 +97,7 @@ const uuidv4 = require("uuid").v4;
 const { JOBS_SAME_PROCESS } = config;
 const { JOBS_SYNC } = config;
 
-const replaceCurlyApostrophes = rawText =>
+const replaceCurlyApostrophes = (rawText) =>
   rawText.replace(/[\u2018\u2019]/g, "'");
 
 const replaceAll = (str, find, replace) =>
@@ -177,7 +177,7 @@ const persistInteractionStepTree = async (
 ) => {
   // Perform updates in a transaction if one is not present
   if (!knexTrx) {
-    return r.knex.transaction(async trx => {
+    return r.knex.transaction(async (trx) => {
       await persistInteractionStepTree(
         campaignId,
         rootInteractionStep,
@@ -241,7 +241,7 @@ const persistInteractionStepTree = async (
 
   // Persist child interaction steps
   await Promise.all(
-    rootInteractionStep.interactionSteps.map(async childStep => {
+    rootInteractionStep.interactionSteps.map(async (childStep) => {
       await persistInteractionStepTree(
         campaignId,
         childStep,
@@ -290,7 +290,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     external_system_id: externalSystemId
   };
 
-  Object.keys(campaignUpdates).forEach(key => {
+  Object.keys(campaignUpdates).forEach((key) => {
     if (typeof campaignUpdates[key] === "undefined") {
       delete campaignUpdates[key];
     }
@@ -300,10 +300,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     Object.prototype.hasOwnProperty.call(campaign, "externalListId") &&
     campaign.externalListId
   ) {
-    await r
-      .knex("campaign_contact")
-      .where({ campaign_id: id })
-      .del();
+    await r.knex("campaign_contact").where({ campaign_id: id }).del();
     await r.knex.raw(
       `select * from public.queue_load_list_into_campaign(?, ?)`,
       [id, parseInt(campaign.externalListId, 10)]
@@ -334,7 +331,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       })
       .where({ id });
 
-    const contactsToSave = campaign.contacts.map(datum => {
+    const contactsToSave = campaign.contacts.map((datum) => {
       const modelData = {
         campaign_id: datum.campaignId,
         first_name: datum.firstName,
@@ -404,13 +401,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       .where({ id });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "teamIds")) {
-    await r.knex.transaction(async trx => {
+    await r.knex.transaction(async (trx) => {
       // Remove all existing team memberships and then add everything again
-      await trx("campaign_team")
-        .where({ campaign_id: id })
-        .del();
+      await trx("campaign_team").where({ campaign_id: id }).del();
       await trx("campaign_team").insert(
-        campaign.teamIds.map(team_id => ({ team_id, campaign_id: id }))
+        campaign.teamIds.map((team_id) => ({ team_id, campaign_id: id }))
       );
     });
     memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
@@ -473,7 +468,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       })
     );
 
-    await r.knex.transaction(async trx => {
+    await r.knex.transaction(async (trx) => {
       await trx("canned_response")
         .where({ campaign_id: id })
         .whereNull("user_id")
@@ -908,15 +903,12 @@ const rootMutations = {
         return null;
       }
       if (userData) {
-        const userRes = await r
-          .knex("user")
-          .where("id", userId)
-          .update({
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            email: userData.email,
-            cell: userData.cell
-          });
+        const userRes = await r.knex("user").where("id", userId).update({
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          email: userData.email,
+          cell: userData.cell
+        });
 
         memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
         memoizer.invalidate(cacheOpts.GetUser.key, {
@@ -950,12 +942,9 @@ const rootMutations = {
       const passwordResetHash = uuidv4();
       const auth0_id = `reset|${passwordResetHash}|${Date.now()}`;
 
-      await r
-        .knex("user")
-        .where("id", userId)
-        .update({
-          auth0_id
-        });
+      await r.knex("user").where("id", userId).update({
+        auth0_id
+      });
       return passwordResetHash;
     },
 
@@ -1083,10 +1072,7 @@ const rootMutations = {
         .where({ id: organizationId });
       cacheableData.organization.clear(organizationId);
 
-      return r
-        .knex("organization")
-        .where({ id: organizationId })
-        .first();
+      return r.knex("organization").where({ id: organizationId }).first();
     },
 
     updateTextingHoursEnforcement: async (
@@ -1194,7 +1180,7 @@ const rootMutations = {
       const campaign = await loaders.campaign.load(id);
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
-      const result = await r.knex.transaction(async trx => {
+      const result = await r.knex.transaction(async (trx) => {
         const [newCampaign] = await trx("campaign")
           .insert({
             organization_id: campaign.organization_id,
@@ -1336,10 +1322,7 @@ const rootMutations = {
       { id, campaign: campaignEdits },
       { user, loaders }
     ) => {
-      const origCampaign = await r
-        .knex("campaign")
-        .where({ id })
-        .first();
+      const origCampaign = await r.knex("campaign").where({ id }).first();
 
       // Sometimes, campaign was coming through as having
       // a "null prototype", which caused .hasOwnProperty calls
@@ -1369,10 +1352,7 @@ const rootMutations = {
     },
 
     filterLandlines: async (_root, { id }, { user, loaders }) => {
-      const campaign = await r
-        .knex("campaign")
-        .where({ id })
-        .first();
+      const campaign = await r.knex("campaign").where({ id }).first();
 
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
@@ -1414,7 +1394,7 @@ const rootMutations = {
     ) => {
       await accessRequired(user, organizationId, "OWNER");
 
-      const scriptUpdatesResult = await r.knex.transaction(async trx => {
+      const scriptUpdatesResult = await r.knex.transaction(async (trx) => {
         const {
           searchString,
           replaceString,
@@ -1452,7 +1432,7 @@ const rootMutations = {
 
         const scriptUpdates = [];
         for (const step of interactionStepsToChange) {
-          const script_options = step.script_options.map(scriptOption => {
+          const script_options = step.script_options.map((scriptOption) => {
             const newValue = replaceAll(
               scriptOption,
               searchString,
@@ -1487,7 +1467,7 @@ const rootMutations = {
         .where({ id: campaignId })
         .first();
       await accessRequired(user, campaign.organization_id, "ADMIN");
-      await r.knex.transaction(async trx => {
+      await r.knex.transaction(async (trx) => {
         await trx("job_request")
           .where({
             id,
@@ -1539,7 +1519,7 @@ const rootMutations = {
 
       const { payload = {} } = invite;
 
-      return r.knex.transaction(async trx => {
+      return r.knex.transaction(async (trx) => {
         const orgFeatures = {
           textRequestFormEnabled: false,
           textRequestType: TextRequestType.UNSENT,
@@ -1569,7 +1549,7 @@ const rootMutations = {
         const ownerIds = new Set(superadminIds.concat([parseInt(userId, 10)]));
 
         await trx("user_organization").insert(
-          [...ownerIds].map(ownerId => ({
+          [...ownerIds].map((ownerId) => ({
             role: "OWNER",
             user_id: ownerId,
             organization_id: newOrganization.id
@@ -1596,7 +1576,7 @@ const rootMutations = {
 
         if (payload.messaging_services) {
           await trx("messaging_service").insert(
-            payload.messaging_services.map(service => ({
+            payload.messaging_services.map((service) => ({
               messaging_service_sid: service.messaging_service_sid,
               organization_id: newOrganization.id,
               account_sid: service.account_sid,
@@ -1657,10 +1637,13 @@ const rootMutations = {
         .whereIn("campaign_contact_id", contactIds)
         .orderBy("created_at", "asc");
 
-      const messagesByContactId = groupBy(messages, x => x.campaign_contact_id);
+      const messagesByContactId = groupBy(
+        messages,
+        (x) => x.campaign_contact_id
+      );
 
       const shouldFetchTagsAndQuestionResponses =
-        contacts.filter(c => c.message_status !== "needsMessage").length > 0;
+        contacts.filter((c) => c.message_status !== "needsMessage").length > 0;
 
       const tags = shouldFetchTagsAndQuestionResponses
         ? await r
@@ -1676,7 +1659,7 @@ const rootMutations = {
             .whereIn("campaign_contact_tag.campaign_contact_id", contactIds)
         : [];
 
-      const tagsByContactId = groupBy(tags, x => x.campaign_contact_id);
+      const tagsByContactId = groupBy(tags, (x) => x.campaign_contact_id);
 
       const questionResponses = shouldFetchTagsAndQuestionResponses
         ? await r
@@ -1698,7 +1681,7 @@ const rootMutations = {
 
       const questionResponsesByContactId = groupBy(
         questionResponses,
-        x => x.campaign_contact_id
+        (x) => x.campaign_contact_id
       );
 
       const contactsById = contacts.reduce(
@@ -1710,7 +1693,7 @@ const rootMutations = {
               contactTags: tagsByContactId[c.id] || [],
               questionResponseValues: (
                 questionResponsesByContactId[c.id] || []
-              ).map(qr => ({
+              ).map((qr) => ({
                 value: qr.value,
                 interaction_step_id: qr.interaction_step_id,
                 id: qr.interaction_step_id,
@@ -1721,7 +1704,7 @@ const rootMutations = {
         {}
       );
 
-      return contactIds.map(cid => contactsById[cid]);
+      return contactIds.map((cid) => contactsById[cid]);
     },
 
     findNewCampaignContact: async (
@@ -1814,7 +1797,7 @@ const rootMutations = {
       }
 
       const { addedTagIds, removedTagIds } = tag;
-      const tagsToInsert = addedTagIds.map(tagId => ({
+      const tagsToInsert = addedTagIds.map((tagId) => ({
         campaign_contact_id: campaignContactId,
         tag_id: tagId,
         tagger_id: user.id
@@ -1860,7 +1843,7 @@ const rootMutations = {
         .knex("tag")
         .whereIn("id", addedTagIds)
         .pluck("webhook_url")
-        .then(urls => urls.filter(url => url.length > 0));
+        .then((urls) => urls.filter((url) => url.length > 0));
 
       await notifyOnTagConversation(campaignContactId, user.id, webhookUrls);
 
@@ -1948,7 +1931,7 @@ const rootMutations = {
         .knex("user_organization")
         .where({ user_id: user.id })
         .select("role");
-      userRoles = userRoles.map(role => role.role);
+      userRoles = userRoles.map((role) => role.role);
       userRoles = Array.from(new Set(userRoles));
       const isAdmin = hasRole("SUPERVOLUNTEER", userRoles);
       if (!isAdmin) {
@@ -1957,7 +1940,7 @@ const rootMutations = {
         );
       }
 
-      const contactIds = await r.knex.transaction(async trx => {
+      const contactIds = await r.knex.transaction(async (trx) => {
         // Remove all references in the opt out table
         const optOuts = r
           .knex("opt_out")
@@ -1976,7 +1959,7 @@ const rootMutations = {
             "campaign.is_archived": false
           })
           .pluck("campaign_contact.id")
-          .then(contactIdsRes => {
+          .then((contactIdsRes) => {
             return (
               r
                 .knex("campaign_contact")
@@ -1984,7 +1967,7 @@ const rootMutations = {
                 .whereIn("id", contactIdsRes)
                 .update({ is_opted_out: false })
                 // Return updated contactIds from Promise chain
-                .then(_ignore => contactIdsRes)
+                .then((_ignore) => contactIdsRes)
             );
           });
 
@@ -1998,7 +1981,7 @@ const rootMutations = {
       // We don't care about Redis
       // await cacheableData.optOut.clearCache(...)
 
-      return contactIds.map(contactId => ({
+      return contactIds.map((contactId) => ({
         id: contactId,
         is_opted_out: false
       }));
@@ -2035,14 +2018,11 @@ const rootMutations = {
         .limit(config.BULK_SEND_CHUNK_SIZE);
 
       const texter = camelCaseKeys(
-        await r
-          .knex("user")
-          .where({ id: assignment.user_id })
-          .first()
+        await r.knex("user").where({ id: assignment.user_id }).first()
       );
       const customFields = Object.keys(JSON.parse(contacts[0].custom_fields));
 
-      const _contactMessages = await contacts.map(async contact => {
+      const _contactMessages = await contacts.map(async (contact) => {
         const script = await campaignContactResolvers.CampaignContact.currentInteractionStepScript(
           contact
         );
@@ -2414,7 +2394,7 @@ const rootMutations = {
 
       if (newTexterUserIds == null) {
         const campaignContactIdsToUnassign = campaignIdsContactIds.map(
-          cc => cc.campaignContactId
+          (cc) => cc.campaignContactId
         );
 
         await r
@@ -2428,7 +2408,7 @@ const rootMutations = {
       // group contactIds by campaign
       // group messages by campaign
       const aggregated = {};
-      campaignIdsContactIds.forEach(campaignIdContactId => {
+      campaignIdsContactIds.forEach((campaignIdContactId) => {
         aggregated[campaignIdContactId.campaignContactId] = {
           campaign_id: campaignIdContactId.campaignId,
           messages: campaignIdContactId.messageIds
@@ -2443,21 +2423,23 @@ const rootMutations = {
       const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter);
 
       for (const [idx, chunk] of chunks.entries()) {
-        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id);
+        const byCampaignId = _.groupBy(chunk, (x) => x[1].campaign_id);
         const campaignIdContactIdsMap = new Map();
         const campaignIdMessageIdsMap = new Map();
 
-        Object.keys(byCampaignId).forEach(campaign_id => {
-          chunk.filter(x => x[1].campaign_id === campaign_id).forEach(x => {
-            if (!campaignIdContactIdsMap.has(campaign_id))
-              campaignIdContactIdsMap.set(campaign_id, []);
-            if (!campaignIdMessageIdsMap.has(campaign_id))
-              campaignIdMessageIdsMap.set(campaign_id, []);
-            campaignIdContactIdsMap.get(campaign_id).push(x[0]);
-            x[1].messages.forEach(message_id => {
-              campaignIdMessageIdsMap.get(campaign_id).push(message_id);
+        Object.keys(byCampaignId).forEach((campaign_id) => {
+          chunk
+            .filter((x) => x[1].campaign_id === campaign_id)
+            .forEach((x) => {
+              if (!campaignIdContactIdsMap.has(campaign_id))
+                campaignIdContactIdsMap.set(campaign_id, []);
+              if (!campaignIdMessageIdsMap.has(campaign_id))
+                campaignIdMessageIdsMap.set(campaign_id, []);
+              campaignIdContactIdsMap.get(campaign_id).push(x[0]);
+              x[1].messages.forEach((message_id) => {
+                campaignIdMessageIdsMap.get(campaign_id).push(message_id);
+              });
             });
-          });
         });
 
         await reassignConversations(
@@ -2521,20 +2503,20 @@ const rootMutations = {
         numberOfCampaignContactsPerNextTexter
       );
       for (const [idx, chunk] of chunks.entries()) {
-        const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id);
+        const byCampaignId = _.groupBy(chunk, (x) => x[1].campaign_id);
         const campaignIdContactIdsMap = new Map();
         const campaignIdMessageIdsMap = new Map();
 
-        Object.keys(byCampaignId).forEach(campaign_id => {
+        Object.keys(byCampaignId).forEach((campaign_id) => {
           chunk
-            .filter(x => x[1].campaign_id === parseInt(campaign_id, 10))
-            .forEach(x => {
+            .filter((x) => x[1].campaign_id === parseInt(campaign_id, 10))
+            .forEach((x) => {
               if (!campaignIdContactIdsMap.has(campaign_id))
                 campaignIdContactIdsMap.set(campaign_id, []);
               if (!campaignIdMessageIdsMap.has(campaign_id))
                 campaignIdMessageIdsMap.set(campaign_id, []);
               campaignIdContactIdsMap.get(campaign_id).push(x[0]);
-              x[1].messages.forEach(message_id => {
+              x[1].messages.forEach((message_id) => {
                 campaignIdMessageIdsMap.get(campaign_id).push(message_id);
               });
             });
@@ -2564,7 +2546,7 @@ const rootMutations = {
         return "No texts available at the moment";
       }
 
-      return r.knex.transaction(async trx => {
+      return r.knex.transaction(async (trx) => {
         const [pendingAssignmentRequest] = await trx("assignment_request")
           .insert({
             user_id: user.id,
@@ -2587,7 +2569,7 @@ const rootMutations = {
             userId: user.id,
             organizationId,
             count
-          }).catch(err => {
+          }).catch((err) => {
             logger.error("Error submitting external assignment request: ", err);
 
             if (config.ASSIGNMENT_REQUESTED_URL_REQUIRED) {
@@ -2640,7 +2622,7 @@ const rootMutations = {
         .where({ id: campaignId })
         .first(["organization_id", "is_archived"]);
 
-      const updatedCount = await r.knex.transaction(async trx => {
+      const updatedCount = await r.knex.transaction(async (trx) => {
         const queryArgs = [parseInt(campaignId, 10), messageStatus];
         if (ageInHours) queryArgs.push(ageInHoursAgo);
 
@@ -2779,7 +2761,7 @@ const rootMutations = {
       );
 
       const { deletedRowCount, remainingCount } = await r.knex.transaction(
-        async trx => {
+        async (trx) => {
           // Get total count, including second pass contacts, locking for subsequent delete
           let remainingCountRes = await queryCampaignOverlapCount(
             campaignId,
@@ -2880,7 +2862,7 @@ const rootMutations = {
         roleRequired
       );
 
-      const numberAssigned = await r.knex.transaction(async trx => {
+      const numberAssigned = await r.knex.transaction(async (trx) => {
         if (autoApproveLevel) {
           await trx("user_organization")
             .where({
@@ -3015,16 +2997,16 @@ const rootMutations = {
     saveTeams: async (_root, { organizationId, teams }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      const stripUndefined = obj => {
+      const stripUndefined = (obj) => {
         const result = { ...obj };
         Object.keys(result).forEach(
-          key => result[key] === undefined && delete result[key]
+          (key) => result[key] === undefined && delete result[key]
         );
         return result;
       };
 
-      const updatedTeams = await r.knex.transaction(async trx => {
-        const isTeamOrg = team => team.id && team.id === "general";
+      const updatedTeams = await r.knex.transaction(async (trx) => {
+        const isTeamOrg = (team) => team.id && team.id === "general";
         const orgTeam = teams.find(isTeamOrg);
 
         if (orgTeam) {
@@ -3049,10 +3031,10 @@ const rootMutations = {
             .where({ id: organizationId });
         }
 
-        const nonOrgTeams = teams.filter(team => !isTeamOrg(team));
+        const nonOrgTeams = teams.filter((team) => !isTeamOrg(team));
 
         return Promise.all(
-          nonOrgTeams.map(async team => {
+          nonOrgTeams.map(async (team) => {
             const payload = stripUndefined({
               title: team.title,
               description: team.description,
@@ -3102,7 +3084,7 @@ const rootMutations = {
 
               teamToReturn.escalationTags = await trx("team_escalation_tags")
                 .insert(
-                  team.escalationTagIds.map(tagId => ({
+                  team.escalationTagIds.map((tagId) => ({
                     team_id: teamToReturn.id,
                     tag_id: tagId
                   }))
@@ -3157,7 +3139,7 @@ const rootMutations = {
         throw new Error(
           "Tried adding user to team in organization they are not part of!"
         );
-      const payload = userIds.map(userId => ({
+      const payload = userIds.map((userId) => ({
         user_id: userId,
         team_id: teamId
       }));
@@ -3260,7 +3242,7 @@ const rootMutations = {
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
       const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
 
-      await getWorker().then(worker =>
+      await getWorker().then((worker) =>
         worker.setSecret(apiKeyRef, externalSystem.apiKey)
       );
 
@@ -3312,7 +3294,7 @@ const rootMutations = {
           .knex("graphile_secrets.secrets")
           .where({ ref: savedSystem.api_key_ref })
           .del();
-        await getWorker().then(worker =>
+        await getWorker().then((worker) =>
           worker.setSecret(apiKeyRef, externalSystem.apiKey)
         );
         payload.api_key_ref = apiKeyRef;
@@ -3424,7 +3406,7 @@ const rootMutations = {
         "responseOptionId",
         "activistCodeId",
         "resultCodeId"
-      ].filter(key => targets[key] !== null && targets[key] !== undefined);
+      ].filter((key) => targets[key] !== null && targets[key] !== undefined);
 
       if (validKeys.length !== 1) {
         throw new Error(
@@ -3508,12 +3490,12 @@ const rootMutations = {
 
 const rootResolvers = {
   Action: {
-    name: o => o.name,
-    display_name: o => o.display_name,
-    instructions: o => o.instructions
+    name: (o) => o.name,
+    display_name: (o) => o.display_name,
+    instructions: (o) => o.instructions
   },
   FoundContact: {
-    found: o => o.found
+    found: (o) => o.found
   },
   RootQuery: {
     campaign: async (_root, { id }, { loaders, user }) => {
@@ -3553,10 +3535,7 @@ const rootResolvers = {
       return getOrganization({ organizationId: id });
     },
     team: async (_root, { id }, { user }) => {
-      const team = await r
-        .knex("team")
-        .where({ id })
-        .first();
+      const team = await r.knex("team").where({ id }).first();
       await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
       return team;
     },
@@ -3594,16 +3573,16 @@ const rootResolvers = {
       const allHandlers = config.ACTION_HANDLERS.split(",");
 
       const availableHandlers = allHandlers
-        .map(handler => {
+        .map((handler) => {
           return {
             name: handler,
             // eslint-disable-next-line global-require,import/no-dynamic-require
             handler: require(`../action_handlers/${handler}.js`)
           };
         })
-        .filter(async h => h && h.handler.available(organizationId));
+        .filter(async (h) => h && h.handler.available(organizationId));
 
-      const availableHandlerObjects = availableHandlers.map(handler => {
+      const availableHandlerObjects = availableHandlers.map((handler) => {
         return {
           name: handler.name,
           display_name: handler.handler.displayName(),
@@ -3703,7 +3682,7 @@ const rootResolvers = {
       }
 
       const assignmentRequests = await query;
-      const result = assignmentRequests.map(ar => {
+      const result = assignmentRequests.map((ar) => {
         ar.user = {
           id: ar.user_id,
           first_name: ar.first_name,
@@ -3789,7 +3768,7 @@ const rootResolvers = {
         .reader("troll_trigger")
         .where({ organization_id: parseInt(organizationId, 10) });
 
-      return tokens.map(t => ({
+      return tokens.map((t) => ({
         id: t.token,
         token: t.token,
         organizationId

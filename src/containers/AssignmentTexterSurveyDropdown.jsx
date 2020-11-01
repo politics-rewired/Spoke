@@ -51,7 +51,7 @@ class AssignmentTexterSurveyDropdown extends Component {
 
   renderAnswers() {
     const { step } = this.props;
-    const menuItems = step.question.answerOptions.map(answerOption => (
+    const menuItems = step.question.answerOptions.map((answerOption) => (
       <MenuItem
         key={answerOption.value}
         value={answerOption.value}
@@ -111,7 +111,7 @@ AssignmentTexterSurveyDropdown.propTypes = {
 };
 
 const mutations = {
-  editQuestionResponse: ownProps => questionResponse => ({
+  editQuestionResponse: (ownProps) => (questionResponse) => ({
     mutation: gql`
       mutation editQuestionResponse($questionResponse: QuestionResponseInput!) {
         editQuestionResponse(questionResponse: $questionResponse) {

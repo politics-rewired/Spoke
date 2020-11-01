@@ -172,7 +172,7 @@ const queries = {
 };
 
 const mutations = {
-  userAgreeTerms: ownProps => userId => ({
+  userAgreeTerms: (ownProps) => (userId) => ({
     mutation: gql`
       mutation userAgreeTerms($userId: String!) {
         userAgreeTerms(userId: $userId) {

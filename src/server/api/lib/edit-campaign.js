@@ -10,7 +10,7 @@ import {
   validateCsv
 } from "../../../lib";
 
-const missingHeaderFields = fields =>
+const missingHeaderFields = (fields) =>
   requiredUploadFields.reduce((missingFields, requiredField) => {
     return fields.includes(requiredField)
       ? missingFields
@@ -21,7 +21,7 @@ const isTopLevelEntry = ([field, _]) => topLevelUploadFields.includes(field);
 const trimEntry = ([key, value]) => [key, value.trim()];
 const FIELD_DEFAULTS = { external_id: "", zip: "" };
 
-const sanitizeRawContact = rawContact => {
+const sanitizeRawContact = (rawContact) => {
   const allFields = Object.entries({ ...FIELD_DEFAULTS, ...rawContact });
   const [contactEntries, customFieldEntries] = partition(
     allFields,
@@ -32,7 +32,7 @@ const sanitizeRawContact = rawContact => {
   return { ...contact, customFields };
 };
 
-export const processContactsFile = async file => {
+export const processContactsFile = async (file) => {
   const { createReadStream } = await file;
   const stream = createReadStream()
     .pipe(new AutoDetectDecoderStream())
@@ -45,7 +45,7 @@ export const processContactsFile = async file => {
 
     Papa.parse(stream, {
       header: true,
-      transformHeader: header => {
+      transformHeader: (header) => {
         for (const [field, aliases] of Object.entries(fieldAliases)) {
           if (aliases.includes(header)) {
             return field;
@@ -73,7 +73,7 @@ export const processContactsFile = async file => {
         });
         return resolve({ contacts, validationStats });
       },
-      error: err => reject(err)
+      error: (err) => reject(err)
     });
   });
 };

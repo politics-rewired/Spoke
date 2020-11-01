@@ -25,7 +25,7 @@ class GSScriptField extends GSFormField {
     };
   }
 
-  handleOpenDialog = event => {
+  handleOpenDialog = (event) => {
     event.stopPropagation();
     event.preventDefault();
     this.setState(
@@ -82,7 +82,7 @@ class GSScriptField extends GSFormField {
           scriptText={this.state.script}
           scriptFields={scriptFields}
           expandable={true}
-          onChange={val => this.setState({ script: val })}
+          onChange={(val) => this.setState({ script: val })}
         />
       </Dialog>
     );

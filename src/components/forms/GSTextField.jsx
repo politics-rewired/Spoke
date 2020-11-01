@@ -14,10 +14,10 @@ export default class GSTextField extends GSFormField {
         floatingLabelStyle={{
           zIndex: 0
         }}
-        onFocus={event => event.target.select()}
+        onFocus={(event) => event.target.select()}
         {...safeProps}
         value={value || ""}
-        onChange={event => {
+        onChange={(event) => {
           this.props.onChange(event.target.value);
         }}
         type="text"

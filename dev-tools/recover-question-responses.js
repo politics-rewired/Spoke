@@ -98,6 +98,4 @@ async function updateRow({ id, campaign_id, text }) {
   }
 }
 
-main()
-  .then(console.log)
-  .catch(console.error);
+main().then(console.log).catch(console.error);

@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
   count: { whiteSpace: "nowrap", marginLeft: "10px" }
 });
 
-const AssignmentHUD = props => {
+const AssignmentHUD = (props) => {
   const { assignmentTargets } = props;
 
   return (
@@ -27,7 +27,7 @@ const AssignmentHUD = props => {
         showExpandableButton={true}
       />
       <CardText expandable={true}>
-        {assignmentTargets.map(target => (
+        {assignmentTargets.map((target) => (
           <div key={target.teamTitle} className={css(styles.row)}>
             {!target.enabled && (
               <Chip className={css(styles.disabledChip)}>Disabled</Chip>

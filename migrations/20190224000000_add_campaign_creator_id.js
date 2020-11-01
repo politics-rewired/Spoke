@@ -1,6 +1,6 @@
 // Add creator_id column to campaign
 exports.up = function up(knex) {
-  return knex.schema.alterTable("campaign", table => {
+  return knex.schema.alterTable("campaign", (table) => {
     table
       .integer("creator_id")
       .unsigned()
@@ -14,7 +14,7 @@ exports.up = function up(knex) {
 
 // Drop creator_id column from campaign
 exports.down = function down(knex) {
-  return knex.schema.alterTable("campaign", table => {
+  return knex.schema.alterTable("campaign", (table) => {
     table.dropForeign("creator_id");
     table.dropColumn("creator_id");
   });

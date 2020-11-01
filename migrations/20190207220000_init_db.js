@@ -1,18 +1,16 @@
-const initialize = async knex => {
+const initialize = async (knex) => {
   // This object's keys are table names and each key's value is a function that defines that table's schema.
   const buildTableSchema = [
     {
       tableName: "user",
-      create: t => {
+      create: (t) => {
         t.increments("id").primary();
         t.text("auth0_id").notNullable();
         t.text("first_name").notNullable();
         t.text("last_name").notNullable();
         t.text("cell").notNullable();
         t.text("email").notNullable();
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
         t.text("assigned_cell");
         t.boolean("is_superadmin");
         t.boolean("terms").defaultTo(false);
@@ -20,19 +18,15 @@ const initialize = async knex => {
     },
     {
       tableName: "pending_message_part",
-      create: t => {
+      create: (t) => {
         t.increments("id").primary();
         t.text("service").notNullable();
         t.text("service_id").notNullable();
         t.text("parent_id").defaultTo("");
         t.text("service_message").notNullable();
-        t.text("user_number")
-          .notNullable()
-          .defaultTo("");
+        t.text("user_number").notNullable().defaultTo("");
         t.text("contact_number").notNullable();
-        t.timestamp("created_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
+        t.timestamp("created_at").defaultTo(knex.fn.now()).notNullable();
 
         t.index("parent_id");
         t.index("service");
@@ -40,13 +34,11 @@ const initialize = async knex => {
     },
     {
       tableName: "organization",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.text("uuid");
         t.text("name").notNullable();
-        t.timestamp("created_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
+        t.timestamp("created_at").defaultTo(knex.fn.now()).notNullable();
         t.text("features").defaultTo("");
         t.boolean("texting_hours_enforced").defaultTo(false);
         t.integer("texting_hours_start").defaultTo(9);
@@ -55,20 +47,14 @@ const initialize = async knex => {
     },
     {
       tableName: "campaign",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("organization_id").notNullable();
-        t.text("title")
-          .notNullable()
-          .defaultTo("");
-        t.text("description")
-          .notNullable()
-          .defaultTo("");
+        t.text("title").notNullable().defaultTo("");
+        t.text("description").notNullable().defaultTo("");
         t.boolean("is_started");
         t.timestamp("due_by").defaultTo(null);
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
         t.boolean("is_archived");
         t.boolean("use_dynamic_assignment");
         t.text("logo_image_url");
@@ -86,13 +72,11 @@ const initialize = async knex => {
     },
     {
       tableName: "assignment",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("user_id").notNullable();
         t.integer("campaign_id").notNullable();
-        t.timestamp("created_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
+        t.timestamp("created_at").defaultTo(knex.fn.now()).notNullable();
         t.integer("max_contacts");
 
         t.index("user_id");
@@ -103,32 +87,18 @@ const initialize = async knex => {
     },
     {
       tableName: "campaign_contact",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("campaign_id").notNullable();
         t.integer("assignment_id");
-        t.text("external_id")
-          .notNullable()
-          .defaultTo("");
-        t.text("first_name")
-          .notNullable()
-          .defaultTo("");
-        t.text("last_name")
-          .notNullable()
-          .defaultTo("");
+        t.text("external_id").notNullable().defaultTo("");
+        t.text("first_name").notNullable().defaultTo("");
+        t.text("last_name").notNullable().defaultTo("");
         t.text("cell").notNullable();
-        t.text("zip")
-          .defaultTo("")
-          .notNullable();
-        t.text("custom_fields")
-          .notNullable()
-          .defaultTo("{}");
-        t.timestamp("created_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
-        t.timestamp("updated_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
+        t.text("zip").defaultTo("").notNullable();
+        t.text("custom_fields").notNullable().defaultTo("{}");
+        t.timestamp("created_at").defaultTo(knex.fn.now()).notNullable();
+        t.timestamp("updated_at").defaultTo(knex.fn.now()).notNullable();
         t.enu("message_status", [
           "needsMessage",
           "needsResponse",
@@ -159,30 +129,18 @@ const initialize = async knex => {
     },
     {
       tableName: "interaction_step",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("campaign_id").notNullable();
-        t.text("question")
-          .notNullable()
-          .defaultTo("");
-        t.text("script")
-          .notNullable()
-          .defaultTo("");
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.text("question").notNullable().defaultTo("");
+        t.text("script").notNullable().defaultTo("");
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
 
         // FIELDS FOR SUB-INTERACTIONS (only):
         t.integer("parent_interaction_id");
-        t.text("answer_option")
-          .notNullable()
-          .defaultTo("");
-        t.text("answer_actions")
-          .notNullable()
-          .defaultTo("");
-        t.boolean("is_deleted")
-          .defaultTo(false)
-          .notNullable();
+        t.text("answer_option").notNullable().defaultTo("");
+        t.text("answer_actions").notNullable().defaultTo("");
+        t.boolean("is_deleted").defaultTo(false).notNullable();
 
         t.index("parent_interaction_id");
         t.foreign("parent_interaction_id").references("interaction_step.id");
@@ -192,14 +150,12 @@ const initialize = async knex => {
     },
     {
       tableName: "question_response",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("campaign_contact_id").notNullable();
         t.integer("interaction_step_id").notNullable();
         t.text("value").notNullable();
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
 
         t.index("campaign_contact_id");
         t.foreign("campaign_contact_id").references("campaign_contact.id");
@@ -209,17 +165,13 @@ const initialize = async knex => {
     },
     {
       tableName: "opt_out",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.text("cell").notNullable();
         t.integer("assignment_id").notNullable();
         t.integer("organization_id").notNullable();
-        t.text("reason_code")
-          .notNullable()
-          .defaultTo("");
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.text("reason_code").notNullable().defaultTo("");
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
 
         t.index("cell");
         t.index("assignment_id");
@@ -231,7 +183,7 @@ const initialize = async knex => {
     // The migrations table appears at this position in the list, but Knex manages that table itself, so it's ommitted from the schema builder
     {
       tableName: "job_request",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("campaign_id").notNullable();
         t.text("payload").notNullable();
@@ -241,12 +193,8 @@ const initialize = async knex => {
         t.boolean("locks_queue").defaultTo(false);
         t.boolean("assigned").defaultTo(false);
         t.integer("status").defaultTo(0);
-        t.timestamp("updated_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.timestamp("updated_at").notNullable().defaultTo(knex.fn.now());
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
 
         t.index("queue_name");
         t.foreign("campaign_id").references("campaign.id");
@@ -254,28 +202,24 @@ const initialize = async knex => {
     },
     {
       tableName: "invite",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.boolean("is_valid").notNullable();
         t.text("hash");
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
 
         t.index("is_valid");
       }
     },
     {
       tableName: "canned_response",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("campaign_id").notNullable();
         t.text("text").notNullable();
         t.text("title").notNullable();
         t.integer("user_id");
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
 
         t.index("campaign_id");
         t.foreign("campaign_id").references("campaign.id");
@@ -285,7 +229,7 @@ const initialize = async knex => {
     },
     {
       tableName: "user_organization",
-      create: t => {
+      create: (t) => {
         t.increments("id");
         t.integer("user_id").notNullable();
         t.integer("organization_id").notNullable();
@@ -309,7 +253,7 @@ const initialize = async knex => {
     },
     {
       tableName: "user_cell",
-      create: t => {
+      create: (t) => {
         t.increments("id").primary();
         t.text("cell").notNullable();
         t.integer("user_id").notNullable();
@@ -321,27 +265,17 @@ const initialize = async knex => {
     },
     {
       tableName: "message",
-      create: t => {
+      create: (t) => {
         t.increments("id").primary();
-        t.text("user_number")
-          .notNullable()
-          .defaultTo("");
+        t.text("user_number").notNullable().defaultTo("");
         t.integer("user_id");
         t.text("contact_number").notNullable();
         t.boolean("is_from_contact").notNullable();
-        t.text("text")
-          .notNullable()
-          .defaultTo("");
-        t.text("service_response")
-          .notNullable()
-          .defaultTo("");
+        t.text("text").notNullable().defaultTo("");
+        t.text("service_response").notNullable().defaultTo("");
         t.integer("assignment_id").notNullable();
-        t.text("service")
-          .notNullable()
-          .defaultTo("");
-        t.text("service_id")
-          .notNullable()
-          .defaultTo("");
+        t.text("service").notNullable().defaultTo("");
+        t.text("service_id").notNullable().defaultTo("");
         t.enu("send_status", [
           "QUEUED",
           "SENDING",
@@ -351,21 +285,13 @@ const initialize = async knex => {
           "PAUSED",
           "NOT_ATTEMPTED"
         ]).notNullable();
-        t.timestamp("created_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
-        t.timestamp("queued_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
-        t.timestamp("sent_at")
-          .defaultTo(knex.fn.now())
-          .notNullable();
+        t.timestamp("created_at").defaultTo(knex.fn.now()).notNullable();
+        t.timestamp("queued_at").defaultTo(knex.fn.now()).notNullable();
+        t.timestamp("sent_at").defaultTo(knex.fn.now()).notNullable();
         t.timestamp("service_response_at")
           .defaultTo(knex.fn.now())
           .notNullable();
-        t.timestamp("send_before")
-          .defaultTo(knex.fn.now())
-          .notNullable();
+        t.timestamp("send_before").defaultTo(knex.fn.now()).notNullable();
 
         t.index("assignment_id");
         t.foreign("assignment_id").references("assignment.id");
@@ -378,10 +304,8 @@ const initialize = async knex => {
     },
     {
       tableName: "zip_code",
-      create: t => {
-        t.text("zip")
-          .notNullable()
-          .primary();
+      create: (t) => {
+        t.text("zip").notNullable().primary();
         t.text("city").notNullable();
         t.text("state").notNullable();
         t.float("latitude").notNullable();
@@ -392,13 +316,11 @@ const initialize = async knex => {
     },
     {
       tableName: "log",
-      create: t => {
+      create: (t) => {
         t.increments("id").primary();
         t.text("message_sid").notNullable();
         t.text("body");
-        t.timestamp("created_at")
-          .notNullable()
-          .defaultTo(knex.fn.now());
+        t.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
       }
     }
   ];
@@ -418,7 +340,7 @@ const initialize = async knex => {
 
 module.exports = {
   up: initialize,
-  down: _knex => {
+  down: (_knex) => {
     // consider a rollback here that would simply drop all the tables
     Promise.resolve();
   }

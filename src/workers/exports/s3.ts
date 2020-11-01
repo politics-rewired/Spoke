@@ -76,7 +76,7 @@ const getUploadStream = async (
   s3Client
     .upload(uploadParams)
     .promise()
-    .catch(err => logger.error("Error uploading to S3: ", err));
+    .catch((err) => logger.error("Error uploading to S3: ", err));
 
   return passThrough;
 };

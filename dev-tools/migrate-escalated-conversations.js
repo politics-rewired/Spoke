@@ -33,6 +33,4 @@ async function go(organizationId, escalatedUserId) {
   );
 }
 
-go(process.argv[2], process.argv[3])
-  .then(console.log)
-  .catch(console.error);
+go(process.argv[2], process.argv[3]).then(console.log).catch(console.error);

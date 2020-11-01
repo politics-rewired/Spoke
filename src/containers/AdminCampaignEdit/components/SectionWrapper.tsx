@@ -79,7 +79,7 @@ const unpackJob = (job?: PendingJobType) => ({
   isSaving: job !== undefined && !job.resultMessage
 });
 
-const SectionWrapper: React.SFC<WrapperProps> = props => {
+const SectionWrapper: React.SFC<WrapperProps> = (props) => {
   const {
     // Required props
     active,
@@ -154,7 +154,7 @@ const SectionWrapper: React.SFC<WrapperProps> = props => {
     try {
       const response = await deleteJob(jobId);
       if (response.errors)
-        throw new Error(response.errors.map(err => `${err}`).join("\n"));
+        throw new Error(response.errors.map((err) => `${err}`).join("\n"));
     } catch (err) {
       onError(err.message);
     }
@@ -177,18 +177,17 @@ const SectionWrapper: React.SFC<WrapperProps> = props => {
         avatar={avatar}
       />
       <CardText expandable>{children}</CardText>
-      {isSaving &&
-        adminPerms && (
-          <CardActions>
-            <div>Current Status: {progressMessage}</div>
-            {jobMessage && <div>Message: {jobMessage}</div>}
-            <RaisedButton
-              label="Discard Job"
-              icon={<CancelIcon />}
-              onClick={handleDiscardJob}
-            />
-          </CardActions>
-        )}
+      {isSaving && adminPerms && (
+        <CardActions>
+          <div>Current Status: {progressMessage}</div>
+          {jobMessage && <div>Message: {jobMessage}</div>}
+          <RaisedButton
+            label="Discard Job"
+            icon={<CancelIcon />}
+            onClick={handleDiscardJob}
+          />
+        </CardActions>
+      )}
     </Card>
   );
 };
@@ -344,7 +343,7 @@ export const asSection = (options: SectionOptions) => (
 
       return { pendingJob, isExpandable, sectionIsDone, deleteJob };
     })
-  )(props => {
+  )((props) => {
     const {
       // Required props
       organizationId,

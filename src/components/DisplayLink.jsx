@@ -11,7 +11,7 @@ const DisplayLink = ({ url, textContent }) => (
       name={url}
       value={url}
       autoFocus
-      onFocus={event => event.target.select()}
+      onFocus={(event) => event.target.select()}
       fullWidth
     />
   </div>

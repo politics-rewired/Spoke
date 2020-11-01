@@ -72,7 +72,7 @@ class MessageList extends Component {
           };
 
           const sender = this.props.userNames.peopleByUserIds.users.filter(
-            user => user.id === message.userId
+            (user) => user.id === message.userId
           )[0];
           const senderName = sender ? sender.displayName : "Unknown";
 
@@ -85,12 +85,12 @@ class MessageList extends Component {
                 {message.isFromContact
                   ? `Received at ${moment(message.createdAt).fromNow()}`
                   : message.sendStatus == "ERROR"
-                    ? `Carrier rejected this message sent by ${senderName} at ${moment(
-                        message.createdAt
-                      ).fromNow()}`
-                    : `Sent by ${senderName} ${moment(
-                        message.createdAt
-                      ).fromNow()}`}
+                  ? `Carrier rejected this message sent by ${senderName} at ${moment(
+                      message.createdAt
+                    ).fromNow()}`
+                  : `Sent by ${senderName} ${moment(
+                      message.createdAt
+                    ).fromNow()}`}
               </p>
             </div>
           );
@@ -117,10 +117,12 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         userIds: [
-          ...new Set(ownProps.messages.map(m => m.userId).filter(uid => !!uid))
+          ...new Set(
+            ownProps.messages.map((m) => m.userId).filter((uid) => !!uid)
+          )
         ],
         organizationId: ownProps.organizationId
       }

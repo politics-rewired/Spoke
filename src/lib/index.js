@@ -45,7 +45,7 @@ export const topLevelUploadFields = [
 ];
 
 const notCustomFields = topLevelUploadFields
-  .map(field => fieldAliases[field] || [field])
+  .map((field) => fieldAliases[field] || [field])
   .reduce((acc, fieldWithAliases) => acc.concat(fieldWithAliases), []);
 
 export {
@@ -61,43 +61,43 @@ const PHONE_NUMBER_COUNTRY =
     : require("../config").config.PHONE_NUMBER_COUNTRY;
 
 const getValidatedData = (data, optOuts) => {
-  const optOutCells = optOuts.map(optOut => optOut.cell);
+  const optOutCells = optOuts.map((optOut) => optOut.cell);
   let validatedData;
   let result;
   // For some reason destructuring is not working here
-  result = _.partition(data, row => !!row.cell);
+  result = _.partition(data, (row) => !!row.cell);
   [validatedData] = result;
   const missingCellRows = result[1];
 
-  validatedData = _.map(validatedData, row =>
+  validatedData = _.map(validatedData, (row) =>
     _.extend(row, {
       cell: getFormattedPhoneNumber(row.cell, PHONE_NUMBER_COUNTRY)
     })
   );
   // Restrict to 10-digit US numbers
-  result = _.partition(validatedData, row =>
+  result = _.partition(validatedData, (row) =>
     /^\+1[0-9]{10}$/.test(row.cell || "")
   );
   [validatedData] = result;
   const invalidCellRows = result[1];
 
   const count = validatedData.length;
-  validatedData = _.uniqBy(validatedData, row => row.cell);
+  validatedData = _.uniqBy(validatedData, (row) => row.cell);
   const dupeCount = count - validatedData.length;
 
   result = _.partition(
     validatedData,
-    row => optOutCells.indexOf(row.cell) === -1
+    (row) => optOutCells.indexOf(row.cell) === -1
   );
   [validatedData] = result;
   const optOutRows = result[1];
 
-  validatedData = _.map(validatedData, row =>
+  validatedData = _.map(validatedData, (row) =>
     _.extend(row, {
       zip: row.zip ? getFormattedZip(row.zip) : null
     })
   );
-  const zipCount = validatedData.filter(row => !!row.zip).length;
+  const zipCount = validatedData.filter((row) => !!row.zip).length;
 
   return {
     validatedData,
@@ -111,7 +111,7 @@ const getValidatedData = (data, optOuts) => {
   };
 };
 
-export const gzip = str =>
+export const gzip = (str) =>
   new Promise((resolve, reject) => {
     zlib.gzip(str, (err, res) => {
       if (err) {
@@ -122,7 +122,7 @@ export const gzip = str =>
     });
   });
 
-export const gunzip = buf =>
+export const gunzip = (buf) =>
   new Promise((resolve, reject) => {
     zlib.gunzip(buf, (err, res) => {
       if (err) {
@@ -171,7 +171,7 @@ export const validateCsv = ({ data, meta }) => {
     const { validationStats, validatedData } = getValidatedData(data, []);
 
     const customFields = fields.filter(
-      field => !notCustomFields.includes(field)
+      (field) => !notCustomFields.includes(field)
     );
 
     return {

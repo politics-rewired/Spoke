@@ -28,12 +28,12 @@ const styles = StyleSheet.create({
   }
 });
 
-const formatTexter = texter => {
+const formatTexter = (texter) => {
   const { displayName, email, role } = texter;
   return `${displayName} (${email}) ${role}`;
 };
 
-const MenuList = props => {
+const MenuList = (props) => {
   const children = props.children;
 
   if (!children.length) {
@@ -61,7 +61,7 @@ class IncomingMessageActions extends Component {
 
   onReassignmentClicked = () => {
     const { selectedTexters } = this.state;
-    const texterIds = selectedTexters.map(texter => texter.value);
+    const texterIds = selectedTexters.map((texter) => texter.value);
     this.props.onReassignRequested(texterIds);
   };
 
@@ -77,7 +77,7 @@ class IncomingMessageActions extends Component {
     this.setState({ confirmDialogOpen: "unassign" });
   };
 
-  handleTextersChanged = selectedTexters => {
+  handleTextersChanged = (selectedTexters) => {
     this.setState({ selectedTexters });
   };
 
@@ -88,7 +88,7 @@ class IncomingMessageActions extends Component {
   handleConfirmDialogReassign = () => {
     this.setState({ confirmDialogOpen: false });
     const { selectedTexters } = this.state;
-    const texterIds = selectedTexters.map(texter => texter.value);
+    const texterIds = selectedTexters.map((texter) => texter.value);
     this.props.onReassignAllMatchingRequested(texterIds);
   };
 
@@ -99,7 +99,7 @@ class IncomingMessageActions extends Component {
 
   render() {
     let texters = this.props.people || [];
-    texters = texters.map(texter => ({
+    texters = texters.map((texter) => ({
       value: parseInt(texter.id, 10),
       label: formatTexter(texter)
     }));

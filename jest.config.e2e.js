@@ -19,7 +19,4 @@ const merges = {
   }
 };
 
-module.exports = _.chain(config)
-  .assign(overrides)
-  .merge(merges)
-  .value();
+module.exports = _.chain(config).assign(overrides).merge(merges).value();

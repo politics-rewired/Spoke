@@ -22,7 +22,7 @@ interface Props {
   };
 }
 
-export const ExternalSystemsSource: React.SFC<Props> = props => {
+export const ExternalSystemsSource: React.SFC<Props> = (props) => {
   const handleSelectList = (
     _event: React.SyntheticEvent<{}>,
     _index: number,
@@ -62,7 +62,8 @@ export const ExternalSystemsSource: React.SFC<Props> = props => {
 
       {externalSystem.lists.pageInfo.totalCount > 0 && (
         <CardText>
-          Choose a list:<br />
+          Choose a list:
+          <br />
           <DropDownMenu
             value={selectedListId}
             onChange={handleSelectList}

@@ -17,11 +17,11 @@ const main = async () => {
 };
 
 main()
-  .then(result => {
+  .then((result) => {
     logger.info("Finished migrating pg-compose", { result });
     process.exit(0);
   })
-  .catch(err => {
+  .catch((err) => {
     logger.error("Error migrating pg-compose", err);
     process.exit(1);
   });

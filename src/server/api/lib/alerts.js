@@ -7,7 +7,7 @@ import { r } from "../../models";
 
 const THRESHOLD = 0.2;
 
-const notifyAssignmentCreated = async options => {
+const notifyAssignmentCreated = async (options) => {
   const { organizationId, userId, count } = options;
 
   if (!config.ASSIGNMENT_REQUESTED_URL) return;
@@ -45,7 +45,7 @@ const notifyAssignmentCreated = async options => {
     );
   }
 
-  return webhookRequest.send(payload).catch(err => {
+  return webhookRequest.send(payload).catch((err) => {
     logger.error("Error sending assignment requested webhook: ", err);
     throw err;
   });
@@ -75,10 +75,10 @@ async function checkForBadDeliverability() {
     group by domain, link_message.send_status;
   `);
 
-  const byDomain = _.groupBy(results.rows, x => x.domain);
+  const byDomain = _.groupBy(results.rows, (x) => x.domain);
 
   for (const domain of Object.keys(byDomain)) {
-    const fetchCountBySendStatus = status => {
+    const fetchCountBySendStatus = (status) => {
       for (const foundStatus of byDomain[domain]) {
         if (foundStatus.send_status === status) {
           return foundStatus.count;
@@ -94,9 +94,7 @@ async function checkForBadDeliverability() {
     const errorPercent = errorCount / (deliveredCount + sentCount);
     if (errorPercent > THRESHOLD) {
       logger.info(
-        `Sending deliverability alert to ${
-          config.DELIVERABILITY_ALERT_ENDPOINT
-        } because ${domain} is sending at ${errorPercent}`
+        `Sending deliverability alert to ${config.DELIVERABILITY_ALERT_ENDPOINT} because ${domain} is sending at ${errorPercent}`
       );
 
       await request
@@ -154,7 +152,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     .first("*");
 
   await Promise.all(
-    webhookUrls.map(url =>
+    webhookUrls.map((url) =>
       request
         .post(url)
         .timeout(30000)
@@ -164,7 +162,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
           taggedContact,
           taggedCampaign
         })
-        .catch(err =>
+        .catch((err) =>
           logger.error("Encountered error notifying on tag assignment: ", err)
         )
     )

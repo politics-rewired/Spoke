@@ -127,7 +127,7 @@ MessageResponse.propTypes = {
 };
 
 const mutations = {
-  sendMessage: ownProps => (message, campaignContactId) => ({
+  sendMessage: (ownProps) => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!

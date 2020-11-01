@@ -130,7 +130,7 @@ export class AdminIncomingMessageList extends Component {
     return true;
   }
 
-  handleCampaignChanged = async campaignId => {
+  handleCampaignChanged = async (campaignId) => {
     const campaignsFilter = getCampaignsFilterForCampaignArchiveStatus(
       this.state.includeActiveCampaigns,
       this.state.includeArchivedCampaigns
@@ -147,7 +147,7 @@ export class AdminIncomingMessageList extends Component {
   };
 
   handleTagsChanged = (_1, _2, values) => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const newTagsFilter = Object.assign({}, prevState.tagsFilter);
       newTagsFilter.specificTagIds = values;
 
@@ -159,7 +159,7 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleTexterChanged = async texterId => {
+  handleTexterChanged = async (texterId) => {
     const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter);
     if (texterId === UNASSIGNED_TEXTER) {
       assignmentsFilter.texterId = texterId;
@@ -183,7 +183,7 @@ export class AdminIncomingMessageList extends Component {
     this.setState({ tagsFilter });
   };
 
-  handleMessageFilterChange = async messagesFilter => {
+  handleMessageFilterChange = async (messagesFilter) => {
     const contactsFilter = Object.assign(
       omit(this.state.contactsFilter, ["messageStatus"]),
       { messageStatus: messagesFilter }
@@ -206,7 +206,7 @@ export class AdminIncomingMessageList extends Component {
   closeReassignmentDialog = () =>
     this.setState({ reassignmentAlert: undefined });
 
-  handleReassignmentCommon = async fn => {
+  handleReassignmentCommon = async (fn) => {
     let newState = {
       needsRender: true,
       campaignIdsContactIds: [],
@@ -229,7 +229,7 @@ export class AdminIncomingMessageList extends Component {
     this.setState(newState);
   };
 
-  handleReassignRequested = async newTexterUserIds => {
+  handleReassignRequested = async (newTexterUserIds) => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaReassignCampaignContacts(
         this.props.match.params.organizationId,
@@ -239,7 +239,7 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleReassignAllMatchingRequested = async newTexterUserIds => {
+  handleReassignAllMatchingRequested = async (newTexterUserIds) => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaBulkReassignCampaignContacts(
         this.props.match.params.organizationId,
@@ -286,14 +286,14 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handlePageChange = async page => {
+  handlePageChange = async (page) => {
     await this.setState({
       page,
       needsRender: true
     });
   };
 
-  handlePageSizeChange = async pageSize => {
+  handlePageSizeChange = async (pageSize) => {
     await this.setState({ needsRender: true, pageSize });
   };
 
@@ -305,19 +305,19 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleCampaignsReceived = async campaigns => {
+  handleCampaignsReceived = async (campaigns) => {
     this.setState({ campaigns, needsRender: true });
   };
 
-  handleTagsReceived = async tagList => {
+  handleTagsReceived = async (tagList) => {
     this.setState({ tags: tagList });
   };
 
-  handleCampaignTextersReceived = async campaignTexters => {
+  handleCampaignTextersReceived = async (campaignTexters) => {
     this.setState({ campaignTexters, needsRender: true });
   };
 
-  handleReassignmentTextersReceived = async reassignmentTexters => {
+  handleReassignmentTextersReceived = async (reassignmentTexters) => {
     this.setState({ reassignmentTexters, needsRender: true });
   };
 
@@ -402,7 +402,7 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  conversationCountChanged = conversationCount =>
+  conversationCountChanged = (conversationCount) =>
     this.setState({ conversationCount, needsRender: true });
 
   /*
@@ -427,7 +427,7 @@ export class AdminIncomingMessageList extends Component {
     );
   };
 
-  setCampaignTextersLoadedFraction = percent => {
+  setCampaignTextersLoadedFraction = (percent) => {
     this.setState({ campaignTextersLoadedFraction: percent });
   };
 
@@ -562,7 +562,7 @@ export class AdminIncomingMessageList extends Component {
 }
 
 const mutations = {
-  megaReassignCampaignContacts: ownProps => (
+  megaReassignCampaignContacts: (ownProps) => (
     organizationId,
     campaignIdsContactIds,
     newTexterUserIds
@@ -583,7 +583,7 @@ const mutations = {
     variables: { organizationId, campaignIdsContactIds, newTexterUserIds }
   }),
 
-  markForSecondPass: ownProps => (organizationId, campaignIdsContactIds) => ({
+  markForSecondPass: (ownProps) => (organizationId, campaignIdsContactIds) => ({
     mutation: gql`
       mutation markForSecondPass(
         $organizationId: String!
@@ -600,7 +600,7 @@ const mutations = {
     variables: { organizationId, campaignIdsContactIds }
   }),
 
-  megaBulkReassignCampaignContacts: ownProps => (
+  megaBulkReassignCampaignContacts: (ownProps) => (
     organizationId,
     campaignsFilter,
     assignmentsFilter,

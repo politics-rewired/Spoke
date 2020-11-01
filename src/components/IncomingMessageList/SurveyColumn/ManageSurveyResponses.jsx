@@ -24,7 +24,7 @@ class ManageSurveyResponses extends Component {
   componentWillMount() {
     const { interactionSteps } = this.props.campaign;
     const questionResponses = interactionSteps
-      .filter(iStep => iStep.questionResponse)
+      .filter((iStep) => iStep.questionResponse)
       .reduce((collector, iStep) => {
         collector[iStep.id] = iStep.questionResponse.value;
         return collector;
@@ -32,31 +32,31 @@ class ManageSurveyResponses extends Component {
     this.state.questionResponses = questionResponses;
   }
 
-  getResponsesFrom = startingStepId => {
+  getResponsesFrom = (startingStepId) => {
     const { interactionSteps } = this.props.campaign;
     const { questionResponses } = this.state;
 
     const iSteps = [];
     let currentStep = interactionSteps.find(
-      iStep => iStep.questionText && iStep.id === startingStepId
+      (iStep) => iStep.questionText && iStep.id === startingStepId
     );
     while (currentStep) {
       const children = interactionSteps.filter(
-        iStep => iStep.parentInteractionId === currentStep.id
+        (iStep) => iStep.parentInteractionId === currentStep.id
       );
       iSteps.push(Object.assign({}, currentStep, { children }));
       const value = questionResponses[currentStep.id];
       currentStep = value
         ? // Only show actionable questions
           interactionSteps.find(
-            iStep => iStep.questionText && iStep.answerOption === value
+            (iStep) => iStep.questionText && iStep.answerOption === value
           )
         : null;
     }
     return iSteps;
   };
 
-  createHandler = iStepId => {
+  createHandler = (iStepId) => {
     const {
       updateQuestionResponses,
       deleteQuestionResponses
@@ -70,10 +70,10 @@ class ManageSurveyResponses extends Component {
       try {
         // Delete response for this and all children (unless this is a single question change)
         if (affectedSteps.length > 1 || !value) {
-          const iStepIds = affectedSteps.map(iStep => iStep.id);
+          const iStepIds = affectedSteps.map((iStep) => iStep.id);
           const response = await deleteQuestionResponses(iStepIds, contact.id);
           if (response.errors) throw response.errors;
-          iStepIds.forEach(iStepId => delete questionResponses[iStepId]);
+          iStepIds.forEach((iStepId) => delete questionResponses[iStepId]);
         }
 
         if (value) {
@@ -106,7 +106,7 @@ class ManageSurveyResponses extends Component {
     const { isMakingRequest, questionResponses } = this.state;
 
     let startingStep = interactionSteps.find(
-      iStep => iStep.parentInteractionId === null
+      (iStep) => iStep.parentInteractionId === null
     );
 
     // There may not be an interaction step, or it may not define a question
@@ -124,7 +124,7 @@ class ManageSurveyResponses extends Component {
 
     return (
       <div style={{ maxHeight: "400px", overflowY: "scroll" }}>
-        {renderSteps.map(iStep => {
+        {renderSteps.map((iStep) => {
           const responseValue = questionResponses[iStep.id];
           return (
             <SelectField
@@ -136,7 +136,7 @@ class ManageSurveyResponses extends Component {
               style={{ width: "100%" }}
             >
               <MenuItem value={null} primaryText="" />
-              {iStep.children.map(option => (
+              {iStep.children.map((option) => (
                 <MenuItem
                   key={option.answerOption}
                   value={option.answerOption}
@@ -166,7 +166,7 @@ ManageSurveyResponses.propTypes = {
   mutations: PropTypes.object.isRequired
 };
 
-const ManageSurveyResponsesWrapper = props => {
+const ManageSurveyResponsesWrapper = (props) => {
   const { surveyQuestions, mutations, contact } = props;
   return (
     <div>
@@ -214,7 +214,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaign.id,
         contactId: ownProps.contact.id
@@ -225,7 +225,7 @@ const queries = {
 };
 
 const mutations = {
-  updateQuestionResponses: ownProps => (
+  updateQuestionResponses: (ownProps) => (
     questionResponses,
     campaignContactId
   ) => ({
@@ -247,7 +247,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  deleteQuestionResponses: ownProps => (
+  deleteQuestionResponses: (ownProps) => (
     interactionStepIds,
     campaignContactId
   ) => ({

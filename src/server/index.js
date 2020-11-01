@@ -29,12 +29,12 @@ import {
 import { errToObj } from "./utils";
 import { getWorker } from "./worker";
 
-process.on("uncaughtException", ex => {
+process.on("uncaughtException", (ex) => {
   logger.error("uncaughtException: ", ex);
   process.exit(1);
 });
 
-process.on("unhandledRejection", err => {
+process.on("unhandledRejection", (err) => {
   logger.error("unhandledRejection: ", err);
   process.exit(1);
 });
@@ -172,7 +172,7 @@ const beforeShutdown = () => {
   logger.info(
     `Received kill signal, waiting ${waitMs}ms before shutting down...`
   );
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       logger.info("Done waiting");
       resolve();
@@ -193,7 +193,7 @@ const teardownKnex = async () => {
 
 const teardownGraphile = async () =>
   getWorker()
-    .then(worker => worker.stop())
+    .then((worker) => worker.stop())
     .then(() => logger.info("  - tore down Graphile runner"));
 
 const onSignal = () => {

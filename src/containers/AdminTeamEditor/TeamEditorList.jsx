@@ -22,8 +22,8 @@ const styles = {
 };
 
 class TeamEditorList extends Component {
-  createHandleEditTeam = teamId => () => this.props.oEditTeam(teamId);
-  createHandleDeleteTeam = teamId => () => this.props.onDeleteTeam(teamId);
+  createHandleEditTeam = (teamId) => () => this.props.oEditTeam(teamId);
+  createHandleDeleteTeam = (teamId) => () => this.props.onDeleteTeam(teamId);
 
   handleCellClick = (rowIndex, columnIndex) => {
     if (columnIndex === ACTIONS_COLUMN_INDEX) return;
@@ -56,7 +56,7 @@ class TeamEditorList extends Component {
           </TableRow>
         </TableHeader>
         <TableBody displayRowCheckbox={false} showRowHover={true}>
-          {teams.map(team => (
+          {teams.map((team) => (
             <TableRow key={team.id} selectable={true} style={styles.row}>
               <TableRowColumn>{team.assignmentPriority}</TableRowColumn>
               <TableRowColumn>{team.title}</TableRowColumn>

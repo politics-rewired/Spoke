@@ -39,7 +39,7 @@ class AdminShortLinkDomains extends Component {
     } finally {
       this.setState({
         disabledDomainIds: this.state.disabledDomainIds.filter(
-          disabledId => disabledId !== domainId
+          (disabledId) => disabledId !== domainId
         )
       });
     }
@@ -67,7 +67,7 @@ class AdminShortLinkDomains extends Component {
     }
   };
 
-  handleConfirmDeleteDomain = warnDeleteDomainId =>
+  handleConfirmDeleteDomain = (warnDeleteDomainId) =>
     this.setState({ warnDeleteDomainId });
   handleCancelDeleteDomain = () =>
     this.setState({ warnDeleteDomainId: undefined });
@@ -87,7 +87,7 @@ class AdminShortLinkDomains extends Component {
     } finally {
       this.setState({
         disabledDomainIds: this.state.disabledDomainIds.filter(
-          disabledId => disabledId !== domainId
+          (disabledId) => disabledId !== domainId
         )
       });
     }
@@ -114,7 +114,8 @@ class AdminShortLinkDomains extends Component {
     const { linkDomains } = shortLinkDomains.organization;
     const warnDomainName =
       warnDeleteDomainId &&
-      linkDomains.filter(domain => domain.id === warnDeleteDomainId)[0].domain;
+      linkDomains.filter((domain) => domain.id === warnDeleteDomainId)[0]
+        .domain;
 
     const deleteDomainActions = [
       <FlatButton
@@ -214,7 +215,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       },
@@ -224,7 +225,7 @@ const queries = {
 };
 
 const mutations = {
-  insertLinkDomain: ownProps => (domain, maxUsageCount) => ({
+  insertLinkDomain: (ownProps) => (domain, maxUsageCount) => ({
     mutation: gql`
       mutation insertLinkDomain(
         $organizationId: String!
@@ -253,7 +254,7 @@ const mutations = {
       maxUsageCount
     }
   }),
-  setDomainManuallyDisabled: ownProps => (domainId, isManuallyDisabled) => ({
+  setDomainManuallyDisabled: (ownProps) => (domainId, isManuallyDisabled) => ({
     mutation: gql`
       mutation setDomainManuallyDisabled(
         $organizationId: String!
@@ -278,7 +279,7 @@ const mutations = {
       }
     }
   }),
-  deleteLinkDomain: ownProps => domainId => ({
+  deleteLinkDomain: (ownProps) => (domainId) => ({
     mutation: gql`
       mutation deleteLinkDomain($organizationId: String!, $domainId: String!) {
         deleteLinkDomain(organizationId: $organizationId, domainId: $domainId)

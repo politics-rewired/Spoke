@@ -21,16 +21,16 @@ const LOADER_DEFAULTS = {
  */
 const createLoader = (tableName, options = {}) => {
   const { idKey, cacheObj } = { ...LOADER_DEFAULTS, ...options };
-  return new DataLoader(async keys => {
+  return new DataLoader(async (keys) => {
     // Try Redis cache if available (this approach does not reduce round trips)
     if (cacheObj && cacheObj.load) {
-      return keys.map(async key => cacheObj.load(key));
+      return keys.map(async (key) => cacheObj.load(key));
     }
 
     // Make batch request and return in the order requested by the loader
     const docs = await r.reader(tableName).whereIn(idKey, keys);
     const docsById = groupBy(docs, idKey);
-    return keys.map(key => docsById[key] && docsById[key][0]);
+    return keys.map((key) => docsById[key] && docsById[key][0]);
   });
 };
 

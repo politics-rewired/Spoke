@@ -66,11 +66,11 @@ class LocalLogin extends React.Component {
     };
   }
 
-  handleClick = e => {
+  handleClick = (e) => {
     this.setState({ active: e.target.name });
   };
 
-  naiveVerifyInviteValid = nextUrl =>
+  naiveVerifyInviteValid = (nextUrl) =>
     /\/\w{8}-(\w{4}\-){3}\w{12}(\/|$)/.test(nextUrl) ||
     nextUrl.includes("invite");
 

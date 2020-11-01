@@ -49,7 +49,7 @@ class AdminAssignmentRequest extends Component {
   setRequestStatus = (requestId, status) => {
     const { assignmentRequests } = this.state;
     const requestIndex = assignmentRequests.findIndex(
-      request => request.id === requestId
+      (request) => request.id === requestId
     );
     if (requestIndex < 0)
       throw new Error(`Could not find request with ID ${requestId}`);
@@ -57,17 +57,17 @@ class AdminAssignmentRequest extends Component {
     this.setState({ assignmentRequests });
   };
 
-  deleteRequest = requestId => {
+  deleteRequest = (requestId) => {
     let { assignmentRequests } = this.state;
     assignmentRequests = assignmentRequests.filter(
-      request => request.id !== requestId
+      (request) => request.id !== requestId
     );
     this.setState({ assignmentRequests });
   };
 
   handleDismissAutoApproveRequest = () =>
     this.setState({ autoApproveReqId: undefined });
-  handleAutoApproveRequest = autoApproveReqId =>
+  handleAutoApproveRequest = (autoApproveReqId) =>
     this.setState({ autoApproveReqId });
   handleConfirmAutoApprove = () => {
     const { autoApproveReqId } = this.state;
@@ -75,7 +75,7 @@ class AdminAssignmentRequest extends Component {
     this.resolveRequest(autoApproveReqId, true, true);
   };
 
-  handleResolveRequest = approved => requestId =>
+  handleResolveRequest = (approved) => (requestId) =>
     this.resolveRequest(requestId, approved);
 
   resolveRequest = async (requestId, approved, autoApprove = false) => {
@@ -180,7 +180,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId,
         status: "pending"
@@ -192,7 +192,7 @@ const queries = {
 };
 
 const mutations = {
-  resolveAssignmentRequest: ownProps => (
+  resolveAssignmentRequest: (ownProps) => (
     assignmentRequestId,
     approved,
     autoApproveLevel

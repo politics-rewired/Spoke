@@ -15,10 +15,7 @@ export const resolvers = {
     user: async (membership: IOrganizationMembership) =>
       membership.user
         ? membership.user
-        : r
-            .reader("user")
-            .where({ id: membership.user_id })
-            .first(),
+        : r.reader("user").where({ id: membership.user_id }).first(),
     organization: async (membership: IOrganizationMembership) =>
       membership.organization
         ? membership.organization

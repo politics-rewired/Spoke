@@ -13,7 +13,7 @@ import { loadData } from "../../hoc/with-operations";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 
-export const TrollAlarmList = props => {
+export const TrollAlarmList = (props) => {
   const { selectedAlarmIds, dismissed, token, pageSize, page } = props;
   const { totalCount, alarms: trollAlarms } = props.trollAlarms.trollAlarms;
 
@@ -25,17 +25,17 @@ export const TrollAlarmList = props => {
 
   const selectedRows = trollAlarms
     .map(({ id }, idx) => (selectedAlarmIds.includes(id) ? idx : false))
-    .filter(idxOrFalse => idxOrFalse !== false);
-  const handleRowsSelected = rows => {
+    .filter((idxOrFalse) => idxOrFalse !== false);
+  const handleRowsSelected = (rows) => {
     // Default handles the "none" case
     let newSelection = [];
 
     if (rows === "all") {
-      newSelection = trollAlarms.map(alarm => alarm.id);
+      newSelection = trollAlarms.map((alarm) => alarm.id);
     }
 
     if (Array.isArray(rows)) {
-      newSelection = rows.map(idx => trollAlarms[idx].id);
+      newSelection = rows.map((idx) => trollAlarms[idx].id);
     }
 
     props.onAlarmSelectionChange(newSelection);
@@ -55,7 +55,7 @@ export const TrollAlarmList = props => {
     props.onPageChange(nextPage);
   };
 
-  const handleClickCopyAlarm = alarm => event => {
+  const handleClickCopyAlarm = (alarm) => (event) => {
     event.preventDefault();
     event.stopPropagation();
     props.onCopyAlarm(alarm);
@@ -92,7 +92,7 @@ export const TrollAlarmList = props => {
           <IconButton
             tooltip="Copy Texter Details"
             onClick={handleClickCopyAlarm(row)}
-            onMouseEnter={event => event.stopPropagation()}
+            onMouseEnter={(event) => event.stopPropagation()}
           >
             <SaveIcon />
           </IconButton>
@@ -190,7 +190,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId,
         offset: ownProps.page * ownProps.pageSize,

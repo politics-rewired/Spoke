@@ -19,7 +19,7 @@ export default class VersionNotifier extends React.Component {
     eventBus.removeListener(this.handleNewVersion);
   }
 
-  handleNewVersion = newServerVersion => this.setState({ newServerVersion });
+  handleNewVersion = (newServerVersion) => this.setState({ newServerVersion });
 
   handleClose = () => this.setState({ isDismissed: true });
 

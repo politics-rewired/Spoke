@@ -31,7 +31,7 @@ const { r } = thinky;
 //   - messageStatus
 
 // TODO: relocate this method elsewhere
-const getMessageServiceSid = organization => {
+const getMessageServiceSid = (organization) => {
   let orgFeatures = {};
   if (organization.features) {
     orgFeatures = JSON.parse(organization.features);
@@ -47,7 +47,7 @@ const getMessageServiceSid = organization => {
   return orgSid;
 };
 
-const cacheKey = async id => `${config.CACHE_PREFIX || ""}contact-${id}`;
+const cacheKey = async (id) => `${config.CACHE_PREFIX || ""}contact-${id}`;
 
 const saveCacheRecord = async (dbRecord, organization, messageServiceSid) => {
   if (r.redis) {
@@ -93,12 +93,12 @@ const generateCacheRecord = (dbRecord, organizationId, messageServiceSid) => ({
 });
 
 export const campaignContactCache = {
-  clear: async id => {
+  clear: async (id) => {
     if (r.redis) {
       await r.redis.delAsync(cacheKey(id));
     }
   },
-  load: async id => {
+  load: async (id) => {
     if (r.redis) {
       const cacheRecord = await r.redis.getAsync(cacheKey(id));
       if (cacheRecord) {
@@ -113,10 +113,7 @@ export const campaignContactCache = {
         return cacheData;
       }
     }
-    return r
-      .reader("campaign_contact")
-      .where({ id })
-      .first();
+    return r.reader("campaign_contact").where({ id }).first();
   },
   loadMany: async (organization, { campaign, queryFunc }) => {
     // queryFunc(query) has query input of a knex query

@@ -60,7 +60,7 @@ const MessageList = function MessageList(props) {
 
   return (
     <List>
-      {messages.map(message => {
+      {messages.map((message) => {
         const specialStyle = message.isFromContact
           ? styles.receivedBubble
           : styles.sentBubble;

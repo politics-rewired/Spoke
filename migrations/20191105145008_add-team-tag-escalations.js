@@ -1,5 +1,5 @@
 exports.up = function up(knex) {
-  return knex.schema.createTable("team_escalation_tags", table => {
+  return knex.schema.createTable("team_escalation_tags", (table) => {
     table.integer("team_id").references("team(id)");
     table.integer("tag_id").references("tag(id)");
 

@@ -13,7 +13,7 @@ interface Props {
   onClickDelete(): void;
 }
 
-export const ResultCodeMapping: React.SFC<Props> = props => {
+export const ResultCodeMapping: React.SFC<Props> = (props) => {
   return (
     <ListItem
       primaryText={props.resultCode.name}

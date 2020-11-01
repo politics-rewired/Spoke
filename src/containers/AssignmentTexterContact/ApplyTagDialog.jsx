@@ -8,9 +8,9 @@ import Dialog from "material-ui/Dialog";
 import TagSelector from "../../components/TagSelector";
 import ApplyTagConfirmationDialog from "../../components/ApplyTagConfirmationDialog";
 
-const isEscalateTag = t => t.title === "Escalated" || t.title === "Escalate";
-const isNonAssignableTagApplied = appliedTags =>
-  appliedTags.findIndex(t => !t.isAssignable) > -1;
+const isEscalateTag = (t) => t.title === "Escalated" || t.title === "Escalate";
+const isNonAssignableTagApplied = (appliedTags) =>
+  appliedTags.findIndex((t) => !t.isAssignable) > -1;
 
 class ApplyTagDialog extends Component {
   state = {
@@ -31,7 +31,7 @@ class ApplyTagDialog extends Component {
   resetTags = () =>
     this.setState({ selectedTags: this.props.contactTags.slice() });
 
-  handleOnTagChange = selectedTags => this.setState({ selectedTags });
+  handleOnTagChange = (selectedTags) => this.setState({ selectedTags });
 
   handleAddEscalatedTag = () => {
     const { allTags } = this.props;
@@ -49,9 +49,9 @@ class ApplyTagDialog extends Component {
 
   handleOnCancelEscalateTag = () => this.setState({ pendingTag: undefined });
 
-  handleOnConfirmAddEscalatedTag = escalateTag => {
+  handleOnConfirmAddEscalatedTag = (escalateTag) => {
     const selectedTags = [...this.state.selectedTags];
-    if (selectedTags.findIndex(tag => tag.id === escalateTag.id) === -1) {
+    if (selectedTags.findIndex((tag) => tag.id === escalateTag.id) === -1) {
       selectedTags.push(escalateTag);
       this.setState({ selectedTags });
     }
@@ -61,10 +61,12 @@ class ApplyTagDialog extends Component {
   handleApplyTags = () => {
     const { contactTags } = this.props;
     const { selectedTags } = this.state;
-    const contactTagIds = new Set(contactTags.map(tag => tag.id));
-    const selectedTagIds = new Set(selectedTags.map(tag => tag.id));
-    const addedTags = selectedTags.filter(tag => !contactTagIds.has(tag.id));
-    const removedTags = contactTags.filter(tag => !selectedTagIds.has(tag.id));
+    const contactTagIds = new Set(contactTags.map((tag) => tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
+    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
+    const removedTags = contactTags.filter(
+      (tag) => !selectedTagIds.has(tag.id)
+    );
 
     this.props.onApplyTag(addedTags, removedTags);
     this.handleOnCancelEscalateTag();
@@ -73,10 +75,12 @@ class ApplyTagDialog extends Component {
   handleApplyTagsAndMoveOn = () => {
     const { contactTags } = this.props;
     const { selectedTags } = this.state;
-    const contactTagIds = new Set(contactTags.map(tag => tag.id));
-    const selectedTagIds = new Set(selectedTags.map(tag => tag.id));
-    const addedTags = selectedTags.filter(tag => !contactTagIds.has(tag.id));
-    const removedTags = contactTags.filter(tag => !selectedTagIds.has(tag.id));
+    const contactTagIds = new Set(contactTags.map((tag) => tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
+    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
+    const removedTags = contactTags.filter(
+      (tag) => !selectedTagIds.has(tag.id)
+    );
 
     this.props.onApplyTagsAndMoveOn(addedTags, removedTags);
     this.handleOnCancelEscalateTag();
@@ -87,7 +91,7 @@ class ApplyTagDialog extends Component {
     const { selectedTags, pendingTag } = this.state;
 
     const escalateTag = allTags.find(isEscalateTag);
-    const tagsWithoutEscalated = allTags.filter(t => !isEscalateTag(t));
+    const tagsWithoutEscalated = allTags.filter((t) => !isEscalateTag(t));
 
     const shouldAllowUserToMoveOn = isNonAssignableTagApplied(selectedTags);
 

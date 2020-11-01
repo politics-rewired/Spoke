@@ -94,7 +94,7 @@ export class PaginatedUsersRetriever extends Component {
         campaignsFilter
       });
       const { pageInfo, edges } = results.data.organization.memberships;
-      const newUsers = edges.map(edge => ({
+      const newUsers = edges.map((edge) => ({
         ...edge.node.user,
         role: edge.node.role
       }));

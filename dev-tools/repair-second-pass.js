@@ -11,9 +11,7 @@ const config = {
 
 const db = require("knex")(config);
 
-main()
-  .then(console.log)
-  .catch(console.error);
+main().then(console.log).catch(console.error);
 
 async function main() {
   const [results, _junk] = await db.raw(`

@@ -46,7 +46,7 @@ class UserEdit extends React.Component {
     }
   }
 
-  handleSave = async formData => {
+  handleSave = async (formData) => {
     switch (this.props.authType) {
       case UserEditMode.Edit:
         const result = await this.props.mutations.editUser(formData);
@@ -99,11 +99,8 @@ class UserEdit extends React.Component {
 
   openSuccessDialog = () => this.setState({ successDialog: true });
 
-  buildFormSchema = authType => {
-    const email = yup
-      .string()
-      .email()
-      .required();
+  buildFormSchema = (authType) => {
+    const email = yup.string().email().required();
     const userFields = {
       firstName: yup.string().required(),
       lastName: yup.string().required(),
@@ -312,7 +309,7 @@ const queries = {
 };
 
 const mutations = {
-  editUser: ownProps => userData => ({
+  editUser: (ownProps) => (userData) => ({
     mutation: gql`
       mutation editUser(
         $organizationId: String!
@@ -338,7 +335,7 @@ const mutations = {
       userData
     }
   }),
-  changeUserPassword: ownProps => formData => ({
+  changeUserPassword: (ownProps) => (formData) => ({
     mutation: gql`
       mutation changeUserPassword(
         $userId: Int!

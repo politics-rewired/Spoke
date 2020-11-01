@@ -8,9 +8,7 @@ import moment from "moment-timezone";
  * @param {number} endHour Interval ending hour in 24-hour format
  */
 export const isNowBetween = (timezone, starthour, endHour) => {
-  const campaignTime = moment()
-    .tz(timezone)
-    .startOf("day");
+  const campaignTime = moment().tz(timezone).startOf("day");
 
   const startTime = campaignTime.clone().hour(starthour);
   const endTime = campaignTime.clone().hour(endHour);

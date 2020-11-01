@@ -24,7 +24,7 @@ async function getOrganizationOwner(organizationId) {
     .first("user.*");
 }
 
-const replyToForOrg = async organizationId => {
+const replyToForOrg = async (organizationId) => {
   if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
 
   const orgOwner = await getOrganizationOwner(organizationId);
@@ -45,10 +45,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .reader("organization")
     .where({ id: campaign.organization_id })
     .first();
-  const user = await r
-    .reader("user")
-    .where({ id: assignment.user_id })
-    .first();
+  const user = await r.reader("user").where({ id: assignment.user_id }).first();
 
   const replyTo = await replyToForOrg(organization.id);
 
@@ -56,16 +53,10 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
   let text;
   if (notification === Notifications.ASSIGNMENT_UPDATED) {
     subject = `[${organization.name}] Updated assignment: ${campaign.title}`;
-    text = `Your assignment changed: \n\n${config.BASE_URL}/app/${
-      campaign.organization_id
-    }/todos`;
+    text = `Your assignment changed: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
   } else if (notification === Notifications.ASSIGNMENT_CREATED) {
     subject = `[${organization.name}] New assignment: ${campaign.title}`;
-    text = `You just got a new texting assignment from ${
-      organization.name
-    }. You can start sending texts right away: \n\n${config.BASE_URL}/app/${
-      campaign.organization_id
-    }/todos`;
+    text = `You just got a new texting assignment from ${organization.name}. You can start sending texts right away: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
   }
 
   try {
@@ -80,7 +71,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
   }
 };
 
-export const sendUserNotification = async notification => {
+export const sendUserNotification = async (notification) => {
   const { type } = notification;
 
   // Fine-grained notification preferences
@@ -138,11 +129,7 @@ export const sendUserNotification = async notification => {
           to: user.email,
           replyTo,
           subject: `[${organization.name}] [${campaign.title}] New reply`,
-          text: `Someone responded to your message. See all your replies here: \n\n${
-            config.BASE_URL
-          }/app/${campaign.organization_id}/todos/${
-            notification.assignmentId
-          }/reply`
+          text: `Someone responded to your message. See all your replies here: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos/${notification.assignmentId}/reply`
         });
       } catch (err) {
         logger.error("Error sending conversation reply notification email: ", {
@@ -159,7 +146,7 @@ export const sendUserNotification = async notification => {
   }
 };
 
-const handleAssignmentCreated = assignment =>
+const handleAssignmentCreated = (assignment) =>
   sendUserNotification({
     type: Notifications.ASSIGNMENT_CREATED,
     assignment

@@ -63,7 +63,7 @@ const rollbarScript = config.ROLLBAR_ACCESS_TOKEN
   `
   : "";
 
-const windowVars = Object.keys(clientConfig).map(varName => {
+const windowVars = Object.keys(clientConfig).map((varName) => {
   const value = clientConfig[varName];
   const escapedValue = typeof value === "string" ? `"${value}"` : value;
   return `window.${varName}=${escapedValue};`;

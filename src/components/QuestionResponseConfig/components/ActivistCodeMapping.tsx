@@ -14,7 +14,7 @@ interface Props {
   onClickDelete(): void;
 }
 
-export const ActivistCodeMapping: React.SFC<Props> = props => {
+export const ActivistCodeMapping: React.SFC<Props> = (props) => {
   const isActive =
     props.activistCode.status === ExternalDataCollectionStatus.ACTIVE;
 

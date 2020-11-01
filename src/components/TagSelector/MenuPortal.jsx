@@ -2,7 +2,7 @@ import React, { PureComponent } from "react";
 import { Portal } from "react-portal";
 import PropTypes from "prop-types";
 
-const coercePlacement = p => (p === "auto" ? "bottom" : p);
+const coercePlacement = (p) => (p === "auto" ? "bottom" : p);
 
 const menuPortalCSS = ({
   position,
@@ -96,7 +96,7 @@ class MenuPortal extends PureComponent {
     );
 
     // override createPortal
-    const createPortal = child => {
+    const createPortal = (child) => {
       return <Portal>{child}</Portal>;
     };
 

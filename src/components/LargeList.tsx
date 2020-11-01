@@ -8,7 +8,7 @@ const largeListStyle: React.CSSProperties = {
   padding: 0
 };
 
-export const LargeList: React.SFC = props => {
+export const LargeList: React.SFC = (props) => {
   return <ul style={largeListStyle}>{props.children}</ul>;
 };
 
@@ -45,7 +45,7 @@ export interface LargeListItemProps {
   rightIconButton?: React.ReactNode;
 }
 
-export const LargeListItem: React.SFC<LargeListItemProps> = props => {
+export const LargeListItem: React.SFC<LargeListItemProps> = (props) => {
   const { primaryText, secondaryText, rightIconButton } = props;
 
   return (

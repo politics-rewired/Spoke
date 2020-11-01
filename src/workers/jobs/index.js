@@ -29,10 +29,7 @@ const BATCH_SIZE = Math.max(1, Math.floor(config.DB_MAX_POOL * 0.5));
 
 let warehouseConnection = null;
 function optOutsByOrgId(orgId) {
-  return r.knex
-    .select("cell")
-    .from("opt_out")
-    .where("organization_id", orgId);
+  return r.knex.select("cell").from("opt_out").where("organization_id", orgId);
 }
 
 function optOutsByInstance() {
@@ -152,10 +149,7 @@ export async function uploadContacts(job) {
   const campaignId = job.campaign_id;
   // We do this deletion in schema.js but we do it again here just in case the the queue broke and we had a backlog of
   // contact uploads for one campaign
-  const campaign = await r
-    .knex("campaign")
-    .where({ id: campaignId })
-    .first();
+  const campaign = await r.knex("campaign").where({ id: campaignId }).first();
 
   const organization = await r
     .knex("organization")
@@ -165,10 +159,7 @@ export async function uploadContacts(job) {
   const orgFeatures = JSON.parse(organization.features || "{}");
 
   await Promise.all([
-    r
-      .knex("campaign_contact")
-      .where({ campaign_id: campaignId })
-      .del(),
+    r.knex("campaign_contact").where({ campaign_id: campaignId }).del(),
     r
       .knex("campaign")
       .update({ landlines_filtered: false })
@@ -200,7 +191,7 @@ export async function uploadContacts(job) {
     }
   }
 
-  const jobMessages = await r.knex.transaction(async trx => {
+  const jobMessages = await r.knex.transaction(async (trx) => {
     const resultMessages = [];
 
     const contactChunks = _.chunk(contacts, CHUNK_SIZE);
@@ -210,7 +201,7 @@ export async function uploadContacts(job) {
     for (const chunkChunk of chunkChunks) {
       await Promise.all(
         // eslint-disable-next-line no-loop-func
-        chunkChunk.map(async chunk => {
+        chunkChunk.map(async (chunk) => {
           const percentComplete = Math.round(
             (chunksCompleted / contactChunks.length) * 100
           );
@@ -278,7 +269,7 @@ export async function uploadContacts(job) {
       throw exc;
     }
 
-    const whereInParams = excludeCampaignIds.map(_cid => "?").join(", ");
+    const whereInParams = excludeCampaignIds.map((_cid) => "?").join(", ");
     try {
       const { rowCount: exclusionCellCount } =
         excludeCampaignIds.length === 0
@@ -371,14 +362,14 @@ export async function filterLandlines(job) {
 
     if (nextBatch.length > 0) {
       highestId = nextBatch[nextBatch.length - 1].id;
-      await numbersRequest.addPhoneNumbers(nextBatch.map(cc => cc.cell));
+      await numbersRequest.addPhoneNumbers(nextBatch.map((cc) => cc.cell));
     }
   } while (nextBatch.length > 0);
 
   await numbersRequest.close();
 
   await numbersRequest.waitUntilDone({
-    onProgressUpdate: async percentComplete => {
+    onProgressUpdate: async (percentComplete) => {
       await r
         .knex("job_request")
         .where({ id: job.id })
@@ -391,12 +382,15 @@ export async function filterLandlines(job) {
 
   let landlinesFilteredOut = 0;
 
-  const deleteNumbers = async numbers => {
+  const deleteNumbers = async (numbers) => {
     landlinesFilteredOut += numbers.length;
     await r
       .knex("campaign_contact")
       .where("campaign_id", campaign_id)
-      .whereIn("cell", numbers.map(n => n.phoneNumber))
+      .whereIn(
+        "cell",
+        numbers.map((n) => n.phoneNumber)
+      )
       .delete();
   };
 
@@ -476,7 +470,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     zip: 1,
     external_id: 1
   };
-  knexResult.fields.forEach(f => {
+  knexResult.fields.forEach((f) => {
     fields[f.name] = 1;
     if (!(f.name in contactFields)) {
       customFields[f.name] = 1;
@@ -497,7 +491,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
   }
 
   const savePortion = await Promise.all(
-    knexResult.rows.map(async row => {
+    knexResult.rows.map(async (row) => {
       const formatCell = getFormattedPhoneNumber(
         row.cell,
         config.PHONE_NUMBER_COUNTRY
@@ -513,7 +507,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         message_status: "needsMessage"
       };
       const contactCustomFields = {};
-      Object.keys(customFields).forEach(f => {
+      Object.keys(customFields).forEach((f) => {
         contactCustomFields[f] = row[f];
       });
       contact.custom_fields = JSON.stringify(contactCustomFields);
@@ -567,7 +561,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         .whereIn("cell", getOptOutSubQuery(jobEvent.organizationId))
         .where("campaign_id", jobEvent.campaignId)
         .delete()
-        .then(result => {
+        .then((result) => {
           logger.error(
             "loadContactsFromDataWarehouseFragment # of contacts opted out removed from DW query",
             {
@@ -584,7 +578,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         .whereRaw("length(cell) != 12")
         .andWhere("campaign_id", jobEvent.campaignId)
         .delete()
-        .then(result => {
+        .then((result) => {
           logger.error(
             "loadContactsFromDataWarehouseFragment # of contacts with invalid cells removed from DW query",
             {
@@ -612,7 +606,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
             .whereNotNull("c2.id")
         )
         .delete()
-        .then(result => {
+        .then((result) => {
           logger.error(
             "loadContactsFromDataWarehouseFragment # of contacts with duplicate cells removed from DW query",
             {
@@ -623,10 +617,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
           validationStats.duplicateCellCount = result;
         });
     }
-    await r
-      .knex("job_request")
-      .where({ id: jobEvent.jobId })
-      .del();
+    await r.knex("job_request").where({ id: jobEvent.jobId }).del();
     await cacheableData.campaign.reload(jobEvent.campaignId);
     return { completed: 1, validationStats };
   } else if (jobEvent.part < jobEvent.totalParts - 1) {
@@ -842,9 +833,9 @@ export async function assignTexters(job) {
 
   // detect changed assignments
   currentAssignments
-    .map(assignment => {
+    .map((assignment) => {
       const texter = texters.filter(
-        user => parseInt(user.id, 10) === assignment.user_id
+        (user) => parseInt(user.id, 10) === assignment.user_id
       )[0];
       if (texter) {
         const unchangedMaxContacts =
@@ -887,10 +878,10 @@ export async function assignTexters(job) {
       demotedTexters[assignment.id] = assignment.needs_message_count;
       return assignment;
     })
-    .filter(ele => ele !== null);
+    .filter((ele) => ele !== null);
 
   // We are now performing writes
-  r.knex.transaction(trx => {
+  r.knex.transaction((trx) => {
     const execute = async () => {
       const demotedAssignmentIds = Object.keys(demotedTexters);
       const demotedChunks = _.chunk(demotedAssignmentIds, CHUNK_SIZE);
@@ -953,7 +944,7 @@ export async function assignTexters(job) {
 
         availableContacts -= contactsToAssign;
         const existingAssignment = currentAssignments.find(
-          ele => ele.user_id === texterId
+          (ele) => ele.user_id === texterId
         );
         if (existingAssignment) {
           const { id, user_id } = existingAssignment;
@@ -990,11 +981,9 @@ export async function assignTexters(job) {
 
       // Update dynamic assignments
       await Promise.all(
-        dynamicAssignments.map(async assignment => {
+        dynamicAssignments.map(async (assignment) => {
           const { id, max_contacts } = assignment;
-          await trx("assignment")
-            .where({ id })
-            .update({ max_contacts });
+          await trx("assignment").where({ id }).update({ max_contacts });
         })
       );
 
@@ -1002,7 +991,7 @@ export async function assignTexters(job) {
        * Using SQL injection to avoid passing archived as a binding
        * Should help with guaranteeing partial index usage
        */
-      const assignContacts = async directive => {
+      const assignContacts = async (directive) => {
         const {
           assignment: { id: assignment_id, campaign_id },
           contactsToAssign
@@ -1032,7 +1021,7 @@ export async function assignTexters(job) {
 
       // Assign contacts for updated existing assignments and notify users
       await Promise.all(
-        existingAssignments.map(async directive => {
+        existingAssignments.map(async (directive) => {
           await assignContacts(directive);
           // Wait to send notification until all contacts have been updated
           // We can't rely on an observer because nothing about the actual assignment object changes
@@ -1049,10 +1038,10 @@ export async function assignTexters(job) {
       // Create new assignments, assign contacts, and notify users
       const newAssignmentChunks = _.chunk(newAssignments, CHUNK_SIZE);
       await Promise.all(
-        newAssignmentChunks.map(async chunk => {
+        newAssignmentChunks.map(async (chunk) => {
           // TODO - MySQL Specific. Must not do a bulk insert in order to be MySQL compatible
           const assignmentIds = await Promise.all(
-            chunk.map(async directive => {
+            chunk.map(async (directive) => {
               const [newAssignment] = await trx("assignment")
                 .insert(directive.assignment)
                 .returning("*");
@@ -1088,7 +1077,7 @@ export async function assignTexters(job) {
 
             // Wait to send notification until all contacts have been updated
             await Promise.all(
-              updatedChunk.map(async directive => {
+              updatedChunk.map(async (directive) => {
                 const { assignment } = directive;
                 await sendUserNotification({
                   type: Notifications.ASSIGNMENT_CREATED,
@@ -1118,20 +1107,17 @@ export async function assignTexters(job) {
           )
           .groupBy("assignment.id")
           .havingRaw("COUNT(campaign_contact.id) = 0")
-          .map(result => result.id);
+          .map((result) => result.id);
       }
 
       if (job.id) {
-        await r
-          .knex("job_request")
-          .delete()
-          .where({ id: job.id });
+        await r.knex("job_request").delete().where({ id: job.id });
       }
     };
 
     execute()
       .then(trx.commit)
-      .catch(error => {
+      .catch((error) => {
         logger.error("Error assigning texters. Rolling back! ", error);
         trx.rollback(error);
       });
@@ -1140,10 +1126,7 @@ export async function assignTexters(job) {
 
 export const deleteJob = async (jobId, retries = 0) => {
   try {
-    await r
-      .knex("job_request")
-      .where({ id: jobId })
-      .del();
+    await r.knex("job_request").where({ id: jobId }).del();
   } catch (err) {
     if (retries < 5) {
       await deleteJob(jobId, retries + 1);
@@ -1159,7 +1142,7 @@ let pastMessages = [];
 
 export async function sendMessages(queryFunc, defaultStatus) {
   try {
-    await r.knex.transaction(async trx => {
+    await r.knex.transaction(async (trx) => {
       let messages = [];
       try {
         let messageQuery = trx("message")
@@ -1183,18 +1166,16 @@ export async function sendMessages(queryFunc, defaultStatus) {
           const message = messages[index];
           if (pastMessages.indexOf(message.id) !== -1) {
             throw new Error(
-              `${"Encountered send message request of the same message." +
-                " This is scary!  If ok, just restart process. Message ID: "}${
-                message.id
-              }`
+              `${
+                "Encountered send message request of the same message." +
+                " This is scary!  If ok, just restart process. Message ID: "
+              }${message.id}`
             );
           }
           message.service = message.service || config.DEFAULT_SERVICE;
           const service = serviceMap[message.service];
           logger.info(
-            `Sending (${message.service}): ${message.user_number} -> ${
-              message.contact_number
-            }\nMessage: ${message.text}`
+            `Sending (${message.service}): ${message.user_number} -> ${message.contact_number}\nMessage: ${message.text}`
           );
           await service.sendMessage(message, trx);
           pastMessages.push(message.id);
@@ -1218,7 +1199,7 @@ export async function handleIncomingMessageParts() {
     .select("*")
     .limit(100);
   const messagePartsByService = {};
-  messageParts.forEach(m => {
+  messageParts.forEach((m) => {
     if (m.service in serviceMap) {
       if (!(m.service in messagePartsByService)) {
         messagePartsByService[m.service] = [];
@@ -1232,7 +1213,7 @@ export async function handleIncomingMessageParts() {
     if (service.syncMessagePartProcessing) {
       // filter for anything older than ten minutes ago
       const tenMinutesAgo = new Date(new Date() - 1000 * 60 * 10);
-      allParts = allParts.filter(part => part.created_at < tenMinutesAgo);
+      allParts = allParts.filter((part) => part.created_at < tenMinutesAgo);
     }
     const allPartsCount = allParts.length;
     if (allPartsCount === 0) {
@@ -1247,33 +1228,26 @@ export async function handleIncomingMessageParts() {
       const part = allParts[i];
       const serviceMessageId = part.service_id;
       const savedCount = await r.parseCount(
-        r
-          .reader("message")
-          .where({ service_id: serviceMessageId })
-          .count()
+        r.reader("message").where({ service_id: serviceMessageId }).count()
       );
       const lastMessage = await getLastMessage({
         contactNumber: part.contact_number,
         service: serviceKey
       });
       const duplicateMessageToSaveExists = !!messagesToSave.find(
-        message => message.service_id === serviceMessageId
+        (message) => message.service_id === serviceMessageId
       );
       if (!lastMessage) {
         logger.info("Received message part with no thread to attach to", part);
         messagePartsToDelete.push(part);
       } else if (savedCount > 0) {
         logger.info(
-          `Found already saved message matching part service message ID ${
-            part.service_id
-          }`
+          `Found already saved message matching part service message ID ${part.service_id}`
         );
         messagePartsToDelete.push(part);
       } else if (duplicateMessageToSaveExists) {
         logger.info(
-          `Found duplicate message to be saved matching part service message ID ${
-            part.service_id
-          }`
+          `Found duplicate message to be saved matching part service message ID ${part.service_id}`
         );
         messagePartsToDelete.push(part);
       } else {
@@ -1310,7 +1284,7 @@ export async function handleIncomingMessageParts() {
       const groupKey = keys[i];
       const keysMessageParts = concatMessageParts[groupKey];
 
-      if (keysMessageParts.filter(part => part === null).length === 0) {
+      if (keysMessageParts.filter((part) => part === null).length === 0) {
         messagePartsToDelete = messagePartsToDelete.concat(keysMessageParts);
         const message = await convertMessageParts(keysMessageParts);
         messagesToSave.push(message);
@@ -1326,7 +1300,7 @@ export async function handleIncomingMessageParts() {
       await saveNewIncomingMessage(messagesToSave[i]);
     }
 
-    const messageIdsToDelete = messagePartsToDelete.map(m => m.id);
+    const messageIdsToDelete = messagePartsToDelete.map((m) => m.id);
     logger.info("Deleting message parts", messageIdsToDelete);
     await r
       .knex("pending_message_part")
@@ -1345,7 +1319,7 @@ export async function fixOrgless() {
       .from("user")
       .leftJoin("user_organization", "user.id", "user_organization.user_id")
       .whereNull("user_organization.id");
-    orgless.forEach(async orglessUser => {
+    orgless.forEach(async (orglessUser) => {
       try {
         await r.knex.insert({
           user_id: orglessUser.id.toString(),
@@ -1353,9 +1327,7 @@ export async function fixOrgless() {
           role: "TEXTER"
         });
         logger.info(
-          `added orgless user ${orglessUser.id} to organization ${
-            config.DEFAULT_ORG
-          }`
+          `added orgless user ${orglessUser.id} to organization ${config.DEFAULT_ORG}`
         );
       } catch (err) {
         logger.error("error on userOrganization save in orgless: ", err);

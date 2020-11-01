@@ -5,7 +5,7 @@ export const delimiters = {
   endDelimiter: "}"
 };
 
-export const delimit = text => {
+export const delimit = (text) => {
   const { startDelimiter, endDelimiter } = delimiters;
   return `${startDelimiter}${text}${endDelimiter}`;
 };
@@ -32,10 +32,10 @@ const CAPITALIZE_FIELDS = [
 const LOWERCASE_FIRST_NAMES = ["friend", "there"];
 
 // TODO: This will include zipCode even if you ddin't upload it
-export const allScriptFields = customFields =>
+export const allScriptFields = (customFields) =>
   TOP_LEVEL_UPLOAD_FIELDS.concat(TEXTER_SCRIPT_FIELDS).concat(customFields);
 
-const capitalize = str => {
+const capitalize = (str) => {
   const strTrimmed = str.trim();
   return strTrimmed.charAt(0).toUpperCase() + strTrimmed.slice(1).toLowerCase();
 };

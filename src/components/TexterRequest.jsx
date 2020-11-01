@@ -87,7 +87,7 @@ class TexterRequest extends React.Component {
       : [];
 
     const selection = myCurrentAssignmentTargets.find(
-      at => at.teamId === teamId
+      (at) => at.teamId === teamId
     );
 
     this.setState({
@@ -161,7 +161,7 @@ class TexterRequest extends React.Component {
       );
     }
 
-    const makeOptionText = at =>
+    const makeOptionText = (at) =>
       `${at.teamTitle}: ${at.maxRequestCount} ${
         at.type === "UNSENT" ? "Initials" : "Replies"
       }`;
@@ -178,7 +178,7 @@ class TexterRequest extends React.Component {
               fullWidth
             >
               {this.props.data.organization.myCurrentAssignmentTargets.map(
-                at => (
+                (at) => (
                   <MenuItem
                     key={at.teamId}
                     value={at.teamId}
@@ -203,7 +203,7 @@ class TexterRequest extends React.Component {
             label="Count"
             type="number"
             value={count}
-            onChange={e => {
+            onChange={(e) => {
               const formVal = parseInt(e.target.value, 10) || 0;
               let count =
                 maxRequestCount > 0
@@ -256,7 +256,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },
@@ -267,7 +267,7 @@ const queries = {
 };
 
 const mutations = {
-  requestTexts: ownProps => ({ count, email, preferredTeamId }) => ({
+  requestTexts: (ownProps) => ({ count, email, preferredTeamId }) => ({
     mutation: gql`
       mutation requestTexts(
         $count: Int!

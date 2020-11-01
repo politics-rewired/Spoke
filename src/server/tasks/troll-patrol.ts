@@ -81,7 +81,7 @@ export const trollPatrolForOrganization: Task = async (payload, helpers) => {
       [messageIds]
     );
     await Promise.all(
-      fullAlarms.map(alarm => {
+      fullAlarms.map((alarm) => {
         const payload = config.WEBHOOK_PAYLOAD_ALL_STRINGS
           ? Object.fromEntries(
               Object.entries(alarm).map(([key, value]) => [key, `${value}`])

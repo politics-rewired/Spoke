@@ -36,7 +36,7 @@ const getCredentialScope = () => {
   return [date, location, service, urlType].join("/");
 };
 
-const encodeForwardSlashes = str => str.replace(/\//g, "%2F");
+const encodeForwardSlashes = (str) => str.replace(/\//g, "%2F");
 
 // https://cloud.google.com/storage/docs/authentication/canonical-requests#about-query-strings
 const queryStringParameters = () => ({
@@ -53,7 +53,7 @@ const getCanonicalQueryString = () => {
   const canonicalQueryStringParams = queryStringParameters();
   const canonicalQueryString = Object.keys(canonicalQueryStringParams)
     .sort()
-    .map(key => `${key}=${canonicalQueryStringParams[key]}`)
+    .map((key) => `${key}=${canonicalQueryStringParams[key]}`)
     .join("&");
   return canonicalQueryString;
 };

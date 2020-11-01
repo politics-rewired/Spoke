@@ -17,7 +17,7 @@ interface Props {
   onClickDelete(): void;
 }
 
-export const ResponseOptionMapping: React.SFC<Props> = props => {
+export const ResponseOptionMapping: React.SFC<Props> = (props) => {
   const question = props.surveyQuestions.edges.find(
     ({ node }) => node.id === props.responseOption.externalSurveyQuestionId
   );

@@ -25,9 +25,12 @@ class AdminTeamEditor extends Component {
     error: undefined
   };
 
-  getTeam = teamId => {
+  getTeam = (teamId) => {
     const { teams = [] } = this.props.organizationTeams.organization || {};
-    return Object.assign({}, teams.find(team => team.id === teamId));
+    return Object.assign(
+      {},
+      teams.find((team) => team.id === teamId)
+    );
   };
 
   handleCancelError = () => this.setState({ error: undefined });
@@ -43,7 +46,7 @@ class AdminTeamEditor extends Component {
       }
     });
 
-  handleEditTeam = teamId =>
+  handleEditTeam = (teamId) =>
     this.setState({ editingTeam: this.getTeam(teamId) });
 
   handleCancelEditTeam = () => this.setState({ editingTeam: undefined });
@@ -70,7 +73,7 @@ class AdminTeamEditor extends Component {
     }
   };
 
-  handleDeleteTeam = async teamId => {
+  handleDeleteTeam = async (teamId) => {
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.deleteTeam(teamId);
@@ -201,7 +204,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -210,7 +213,7 @@ const queries = {
 };
 
 const mutations = {
-  saveTeams: ownProps => teams => ({
+  saveTeams: (ownProps) => (teams) => ({
     mutation: gql`
       mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
         saveTeams(organizationId: $organizationId, teams: $teams) {
@@ -224,7 +227,7 @@ const mutations = {
     },
     refetchQueries: ["getOrganizationTeams"]
   }),
-  deleteTeam: ownProps => teamId => ({
+  deleteTeam: (ownProps) => (teamId) => ({
     mutation: gql`
       mutation deleteTeam($organizationId: String!, $teamId: String!) {
         deleteTeam(organizationId: $organizationId, teamId: $teamId)

@@ -109,7 +109,10 @@ export const exportForVan: Task = async (
   do {
     const rows = await fetchChunk(lastContactId);
     exportRows = exportRows.concat(
-      sortBy(rows.map(({ campaign_contact_id, ...rest }) => rest), ["cell"])
+      sortBy(
+        rows.map(({ campaign_contact_id, ...rest }) => rest),
+        ["cell"]
+      )
     );
 
     lastContactId =

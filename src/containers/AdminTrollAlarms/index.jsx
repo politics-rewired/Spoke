@@ -46,7 +46,7 @@ class AdminTrollAlarms extends React.Component {
   // Query conditions
   handleFocusTokenSearch = () =>
     this.setState({ tokenSearchText: "", token: null });
-  handleTokenSearchTextChange = tokenSearchText =>
+  handleTokenSearchTextChange = (tokenSearchText) =>
     this.setState({ tokenSearchText });
   handleTokenSelected = (selection, index) => {
     let token = null;
@@ -91,7 +91,7 @@ class AdminTrollAlarms extends React.Component {
   };
 
   handleDismissCopyAlarm = () => this.setState({ copiedAlarmID: undefined });
-  handleCopyAlarm = alarm => {
+  handleCopyAlarm = (alarm) => {
     const clipboardContents = [
       `Triggered Token: ${alarm.token}`,
       `Message ID: ${alarm.messageId}`,
@@ -110,12 +110,12 @@ class AdminTrollAlarms extends React.Component {
   };
 
   // Table selection
-  handleAlarmSelectionChange = selectedAlarmIds =>
+  handleAlarmSelectionChange = (selectedAlarmIds) =>
     this.setState({ selectedAlarmIds });
 
   // Pagination
-  handlePageSizeChange = pageSize => this.setState({ pageSize });
-  handlePageChange = page => this.setState({ page });
+  handlePageSizeChange = (pageSize) => this.setState({ pageSize });
+  handlePageChange = (page) => this.setState({ page });
 
   render() {
     const { tokenSearchText, copiedAlarmID } = this.state;
@@ -228,7 +228,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -237,7 +237,7 @@ const queries = {
 };
 
 const mutations = {
-  dismissAlarms: ownProps => alarmIds => ({
+  dismissAlarms: (ownProps) => (alarmIds) => ({
     mutation: gql`
       mutation dismissSelectedTrollBotAlarms(
         $organizationId: String!
@@ -252,7 +252,7 @@ const mutations = {
     },
     refetchQueries: ["getTrollAlarmsForOrg"]
   }),
-  dismissMatchingAlarms: ownProps => token => ({
+  dismissMatchingAlarms: (ownProps) => (token) => ({
     mutation: gql`
       mutation dismissMatchingTrollBotAlarms(
         $organizationId: String!

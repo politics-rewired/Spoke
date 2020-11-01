@@ -62,7 +62,7 @@ class AdminReplySender extends React.Component {
           {`${contact.firstName} ${contact.lastName}: ${contact.cell}`}
         </div>
         <div className={css(styles.subtitle)}>
-          {contact.messages.map(message => (
+          {contact.messages.map((message) => (
             <div
               className={
                 message.isFromContact
@@ -77,7 +77,7 @@ class AdminReplySender extends React.Component {
         <div className={css(styles.formContainer)}>
           <GSForm
             schema={this.formSchema}
-            onSubmit={async formValues => {
+            onSubmit={async (formValues) => {
               await this.props.mutations.sendReply(
                 contact.id,
                 formValues.message
@@ -109,7 +109,7 @@ class AdminReplySender extends React.Component {
     const { data } = this.props;
     return (
       <div>
-        {data.campaign.contacts.map(contact => {
+        {data.campaign.contacts.map((contact) => {
           if (
             contact.messageStatus === "messaged" ||
             contact.messageStatus === "convo"
@@ -148,7 +148,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
       }
@@ -157,7 +157,7 @@ const queries = {
 };
 
 const mutations = {
-  sendReply: ownProps => (contactId, message) => ({
+  sendReply: (ownProps) => (contactId, message) => ({
     mutation: gql`
       mutation sendReply($contactId: String!, $message: String!) {
         sendReply(id: $contactId, message: $message) {

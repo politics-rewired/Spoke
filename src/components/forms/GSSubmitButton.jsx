@@ -10,7 +10,7 @@ const styles = {
   }
 };
 
-const GSSubmitButton = props => {
+const GSSubmitButton = (props) => {
   let icon = "";
   const extraProps = {};
   if (props.isSubmitting) {

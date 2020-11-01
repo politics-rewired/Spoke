@@ -34,18 +34,18 @@ class ManageTags extends Component {
 
   handleCloseTagManager = () => this.setState({ isTagEditorOpen: false });
 
-  handleOnChangeTags = selectedTags => this.setState({ selectedTags });
+  handleOnChangeTags = (selectedTags) => this.setState({ selectedTags });
 
   handleSaveTags = async () => {
     const { tags } = this.props.contactTags.contact;
     const { selectedTags } = this.state;
-    const contactTagIds = new Set(tags.map(tag => tag.id));
-    const selectedTagIds = new Set(selectedTags.map(tag => tag.id));
-    const addedTags = selectedTags.filter(tag => !contactTagIds.has(tag.id));
-    const removedTags = tags.filter(tag => !selectedTagIds.has(tag.id));
+    const contactTagIds = new Set(tags.map((tag) => tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
+    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
+    const removedTags = tags.filter((tag) => !selectedTagIds.has(tag.id));
     const tagPayload = {
-      addedTagIds: addedTags.map(tag => tag.id),
-      removedTagIds: removedTags.map(tag => tag.id)
+      addedTagIds: addedTags.map((tag) => tag.id),
+      removedTagIds: removedTags.map((tag) => tag.id)
     };
 
     this.setState({ isWorking: true });
@@ -148,7 +148,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },
@@ -173,7 +173,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         contactId: ownProps.contactId
       },
@@ -183,7 +183,7 @@ const queries = {
 };
 
 const mutations = {
-  tagContact: ownProps => tagPayload => ({
+  tagContact: (ownProps) => (tagPayload) => ({
     mutation: gql`
       mutation tagConversation(
         $contactId: String!

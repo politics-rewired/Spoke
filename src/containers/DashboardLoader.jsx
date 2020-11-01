@@ -46,7 +46,4 @@ const queries = {
   }
 };
 
-export default compose(
-  withRouter,
-  loadData({ queries })
-)(DashboardLoader);
+export default compose(withRouter, loadData({ queries }))(DashboardLoader);

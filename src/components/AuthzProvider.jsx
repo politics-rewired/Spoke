@@ -36,10 +36,10 @@ export class AuthzProvider extends React.Component {
       `,
       variables: { organizationId }
     })
-      .then(result => hasRole("ADMIN", result.data.currentUser.roles))
-      .then(adminPerms => this.setState({ adminPerms }))
+      .then((result) => hasRole("ADMIN", result.data.currentUser.roles))
+      .then((adminPerms) => this.setState({ adminPerms }))
       // We can't use replace(...) here because /login is not a react-router path
-      .catch(_err => (window.location = loginUrl));
+      .catch((_err) => (window.location = loginUrl));
   };
 
   render() {
@@ -61,8 +61,8 @@ AuthzProvider.propTypes = {
   organizationId: PropTypes.string.isRequired
 };
 
-export const withAuthzContext = Component => props => (
+export const withAuthzContext = (Component) => (props) => (
   <AuthzContext.Consumer>
-    {adminPerms => <Component {...props} adminPerms={adminPerms} />}
+    {(adminPerms) => <Component {...props} adminPerms={adminPerms} />}
   </AuthzContext.Consumer>
 );

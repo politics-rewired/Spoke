@@ -72,7 +72,7 @@ ConversationPreviewBody.propTypes = {
   organizationId: PropTypes.string.isRequired
 };
 
-const ConversationPreviewModal = props => {
+const ConversationPreviewModal = (props) => {
   const {
       conversation,
       navigation,
@@ -94,7 +94,7 @@ const ConversationPreviewModal = props => {
         left: "20px",
         zIndex: "1000"
       }}
-      onClick={e => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
       <ConversationPreviewHeader
         campaignTitle={conversation && conversation.campaign.title}

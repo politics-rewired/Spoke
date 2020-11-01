@@ -16,10 +16,7 @@ const styles = StyleSheet.create({
 });
 
 const formSchema = yup.object({
-  email: yup
-    .string()
-    .email()
-    .required(),
+  email: yup.string().email().required(),
   password: yup.string().required(),
   passwordConfirm: yup
     .string()
@@ -33,7 +30,7 @@ class UserPasswordReset extends React.Component {
     error: undefined
   };
 
-  handleOnSubmit = async formData => {
+  handleOnSubmit = async (formData) => {
     this.setState({ working: true, error: undefined });
     const response = await fetch("/login-callback", {
       method: "POST",

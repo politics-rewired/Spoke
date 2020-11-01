@@ -27,7 +27,7 @@ const validateSql = (sql: string) => {
     );
   }
   const requiredFields = ["first_name", "last_name", "cell"];
-  requiredFields.forEach(f => {
+  requiredFields.forEach((f) => {
     if (sql.indexOf(f) === -1) {
       errors.push('"' + f + '" is a required column');
     }

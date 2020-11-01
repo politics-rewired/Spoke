@@ -44,7 +44,7 @@ export const fetchVANActivistCodes: Task = async (
     surveyQuestions = surveyQuestions.concat(body.items);
   } while (hasNextPage);
 
-  return surveyQuestions.map(sq => ({
+  return surveyQuestions.map((sq) => ({
     van_system_id: payload.van_system_id,
     activist_code_id: sq.activistCodeId,
     type: sq.type,

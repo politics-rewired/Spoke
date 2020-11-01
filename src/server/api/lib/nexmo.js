@@ -20,11 +20,11 @@ async function convertMessagePartsToMessage(messageParts) {
   const firstPart = messageParts[0];
   const userNumber = firstPart.user_number;
   const contactNumber = firstPart.contact_number;
-  const serviceMessages = messageParts.map(part =>
+  const serviceMessages = messageParts.map((part) =>
     JSON.parse(part.service_message)
   );
   const text = serviceMessages
-    .map(serviceMessage => serviceMessage.text)
+    .map((serviceMessage) => serviceMessage.text)
     .join("");
 
   const lastMessage = await getLastMessage({
@@ -115,7 +115,7 @@ async function sendMessage(message, trx = r.knex) {
           hasError = true;
         }
         if (response) {
-          response.messages.forEach(serviceMessages => {
+          response.messages.forEach((serviceMessages) => {
             if (serviceMessages.status !== "0") {
               hasError = true;
             }
@@ -177,10 +177,7 @@ async function handleDeliveryReport(report) {
       message.send_status = "ERROR";
     }
     const { id: messageId, ...messagePayload } = message;
-    await r
-      .knex("message")
-      .update(messagePayload)
-      .where({ id: messageId });
+    await r.knex("message").update(messagePayload).where({ id: messageId });
   }
 }
 
@@ -202,11 +199,7 @@ async function handleIncomingMessage(message) {
   let parentId = "";
   if (isConcat) {
     logger.info(
-      `Incoming message part (${message["concat-part"]} of ${
-        message["concat-total"]
-      } for ref ${
-        message["concat-ref"]
-      }) from ${contactNumber} to ${userNumber}`
+      `Incoming message part (${message["concat-part"]} of ${message["concat-total"]} for ref ${message["concat-ref"]}) from ${contactNumber} to ${userNumber}`
     );
     parentId = message["concat-ref"];
   } else {

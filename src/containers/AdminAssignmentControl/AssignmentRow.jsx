@@ -11,7 +11,7 @@ import ChipInput from "material-ui-chip-input";
 
 import { TextRequestType } from "../../api/organization";
 
-const AssignmentRow = props => {
+const AssignmentRow = (props) => {
   const { assignmentPool, isRowDisabled, onChange, escalationTagList } = props;
   const {
     id,
@@ -32,13 +32,16 @@ const AssignmentRow = props => {
   const handleChangeMaxCount = (_event, maxRequestCount) =>
     onChange({ maxRequestCount: parseInt(maxRequestCount, 10) });
 
-  const handleAddEscalationTag = newTag => {
-    const newEscalationTags = uniqBy(escalationTags.concat(newTag), t => t.id);
+  const handleAddEscalationTag = (newTag) => {
+    const newEscalationTags = uniqBy(
+      escalationTags.concat(newTag),
+      (t) => t.id
+    );
     onChange({ escalationTags: newEscalationTags });
   };
 
-  const handleRemoveEscalationTag = oldTagId => {
-    const newEscalationTags = escalationTags.filter(t => t.id !== oldTagId);
+  const handleRemoveEscalationTag = (oldTagId) => {
+    const newEscalationTags = escalationTags.filter((t) => t.id !== oldTagId);
     onChange({ escalationTags: newEscalationTags });
   };
 

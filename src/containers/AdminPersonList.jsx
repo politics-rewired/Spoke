@@ -62,7 +62,7 @@ class AdminPersonList extends React.Component {
 
   handleDismissSaveError = () => this.setState({ saveError: undefined });
 
-  handleRoleChange = membershipId => async (_event, _index, role) => {
+  handleRoleChange = (membershipId) => async (_event, _index, role) => {
     const { editOrganizationMembership } = this.props.mutations;
     this.setState({ isWorking: true, saveError: undefined });
     try {
@@ -77,7 +77,7 @@ class AdminPersonList extends React.Component {
     }
   };
 
-  handleOnChangeAutoApprovalLevel = membershipId => async (
+  handleOnChangeAutoApprovalLevel = (membershipId) => async (
     _event,
     _index,
     level
@@ -98,7 +98,7 @@ class AdminPersonList extends React.Component {
     }
   };
 
-  editUser = userId => this.setState({ userEdit: userId });
+  editUser = (userId) => this.setState({ userEdit: userId });
 
   updateUser = () => {
     this.setState({ userEdit: false });
@@ -153,7 +153,7 @@ class AdminPersonList extends React.Component {
     return (
       <DropDownMenu value={campaignId} onChange={this.handleCampaignChange}>
         <MenuItem primaryText="All Campaigns" />
-        {campaigns.campaigns.map(campaign => (
+        {campaigns.campaigns.map((campaign) => (
           <MenuItem
             value={campaign.id}
             primaryText={campaign.title}
@@ -182,7 +182,7 @@ class AdminPersonList extends React.Component {
     return (
       <Table selectable={false}>
         <TableBody displayRowCheckbox={false} showRowHover>
-          {people.map(person => (
+          {people.map((person) => (
             <TableRow key={person.id}>
               <TableRowColumn>{person.displayName}</TableRowColumn>
               <TableRowColumn>{person.email}</TableRowColumn>
@@ -198,7 +198,7 @@ class AdminPersonList extends React.Component {
                     person.memberships.edges[0].node.id
                   )}
                 >
-                  {Object.keys(UserRoleType).map(option => (
+                  {Object.keys(UserRoleType).map((option) => (
                     <MenuItem
                       key={`${person.id}_${option}`}
                       value={option}
@@ -224,7 +224,7 @@ class AdminPersonList extends React.Component {
                     person.memberships.edges[0].node.id
                   )}
                 >
-                  {Object.keys(RequestAutoApproveType).map(option => (
+                  {Object.keys(RequestAutoApproveType).map((option) => (
                     <MenuItem
                       key={`${person.id}_${option}`}
                       value={option}
@@ -379,7 +379,7 @@ const organizationFragment = `
 `;
 
 const mutations = {
-  editOrganizationMembership: ownProps => (
+  editOrganizationMembership: (ownProps) => (
     membershipId,
     { level = null, role = null }
   ) => ({
@@ -406,7 +406,7 @@ const mutations = {
       role
     }
   }),
-  resetUserPassword: ownProps => (organizationId, userId) => ({
+  resetUserPassword: (ownProps) => (organizationId, userId) => ({
     mutation: gql`
       mutation resetUserPassword($organizationId: String!, $userId: Int!) {
         resetUserPassword(organizationId: $organizationId, userId: $userId)
@@ -426,7 +426,7 @@ const queries = {
         ${organizationFragment}
       }
     }`,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId,
         campaignId: queryString.parse(ownProps.location.search).campaignId,
@@ -454,7 +454,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -478,7 +478,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }

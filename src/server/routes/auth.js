@@ -48,7 +48,7 @@ router.post(
 
     if (user) {
       const passportUser = sessionUserMap[config.PASSPORT_STRATEGY](user);
-      return req.login(passportUser, err => {
+      return req.login(passportUser, (err) => {
         if (err) return next(err);
 
         return res.status(200).send({ message: "Success" });

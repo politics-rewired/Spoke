@@ -73,17 +73,18 @@ async function go() {
     await reassignContacts(contactsToReassign, assignment_id),
     await reassignMessages(messagesMatchingContacts, assignment_id)
   ]);
-  console.log(`Reassigned ${contactsToReassign.map(c => c.id)}`);
+  console.log(`Reassigned ${contactsToReassign.map((c) => c.id)}`);
   return contactsToReassign.length;
 }
 
-go()
-  .then(console.log)
-  .catch(console.error);
+go().then(console.log).catch(console.error);
 
 async function reassignContacts(contactsToReassign, assignment_id) {
   return await db("campaign_contact")
-    .whereIn("id", contactsToReassign.map(c => c.id))
+    .whereIn(
+      "id",
+      contactsToReassign.map((c) => c.id)
+    )
     .update({
       assignment_id
     });
@@ -91,7 +92,10 @@ async function reassignContacts(contactsToReassign, assignment_id) {
 
 async function reassignMessages(messagesToReassign, assignment_id) {
   return await db("message")
-    .whereIn("id", messagesToReassign.map(m => m.id))
+    .whereIn(
+      "id",
+      messagesToReassign.map((m) => m.id)
+    )
     .update({
       assignment_id
     });
@@ -151,7 +155,10 @@ async function getOldRepliesGroupedByCampaign(numberOfCampaigns) {
     .limit(numberOfCampaigns);
 
   const campaignContacts = await db("campaign_contact")
-    .whereIn("campaign_contact.campaign_id", result.map(row => row.campaign_id))
+    .whereIn(
+      "campaign_contact.campaign_id",
+      result.map((row) => row.campaign_id)
+    )
     .select("id", "campaign_id", "message_status");
 
   return _;

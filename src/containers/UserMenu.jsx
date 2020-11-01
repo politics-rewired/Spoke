@@ -18,7 +18,7 @@ import { hasRole } from "../lib/permissions";
 
 const avatarSize = 28;
 
-const OrganizationItemInner = props => {
+const OrganizationItemInner = (props) => {
   const { organization, data, history } = props;
   const { loading, currentUser } = data;
   const path =
@@ -26,7 +26,7 @@ const OrganizationItemInner = props => {
       ? `/admin/${organization.id}`
       : `/app/${organization.id}`;
 
-  const handleClick = event => {
+  const handleClick = (event) => {
     event.preventDefault();
     history.push(path);
   };
@@ -51,7 +51,7 @@ const orgRoleQueries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organization.id
       }
@@ -70,7 +70,7 @@ class UserMenu extends Component {
     anchorEl: null
   };
 
-  handleTouchTap = event => {
+  handleTouchTap = (event) => {
     // This prevents ghost click.
     event.preventDefault();
 
@@ -161,7 +161,7 @@ class UserMenu extends Component {
             </MenuItem>
             <Divider />
             <Subheader>Teams</Subheader>
-            {currentUser.organizations.map(organization => (
+            {currentUser.organizations.map((organization) => (
               <OrganizationItem
                 key={organization.id}
                 organization={organization}
@@ -210,7 +210,4 @@ const queries = {
   }
 };
 
-export default compose(
-  withRouter,
-  withOperations({ queries })
-)(UserMenu);
+export default compose(withRouter, withOperations({ queries }))(UserMenu);

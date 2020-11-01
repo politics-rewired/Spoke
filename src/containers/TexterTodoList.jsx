@@ -30,7 +30,7 @@ class TexterTodoList extends React.Component {
     const { organizationId } = this.props.match.params;
     return assignments
       .sort()
-      .map(assignment => {
+      .map((assignment) => {
         if (
           assignment.unmessagedCount > 0 ||
           assignment.unrepliedCount > 0 ||
@@ -55,7 +55,7 @@ class TexterTodoList extends React.Component {
         }
         return null;
       })
-      .filter(ele => ele !== null);
+      .filter((ele) => ele !== null);
   }
   componentDidMount() {
     this.props.data.refetch();
@@ -80,7 +80,7 @@ class TexterTodoList extends React.Component {
       .then(() => {
         this.setState({ releasingReplies: false, releasedReplies: true });
       })
-      .catch(error => {
+      .catch((error) => {
         this.setState({ releasingReplies: false, releasedRepliesError: error });
       });
   };
@@ -214,7 +214,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId,
         needsMessageFilter: {
@@ -255,7 +255,7 @@ const queries = {
 };
 
 const mutations = {
-  releaseMyReplies: ownProps => organizationId => ({
+  releaseMyReplies: (ownProps) => (organizationId) => ({
     mutation: gql`
       mutation releaseMyReplies($organizationId: String!) {
         releaseMyReplies(organizationId: $organizationId)

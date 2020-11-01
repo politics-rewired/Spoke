@@ -27,7 +27,7 @@ class MessageTextField extends Component {
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
-  onEnterDown = event => {
+  onEnterDown = (event) => {
     const keyCode = event.keyCode || event.which;
     if (keyCode === 13 && !event.shiftKey) {
       event.preventDefault();

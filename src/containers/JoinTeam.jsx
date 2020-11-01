@@ -26,9 +26,7 @@ class JoinTeam extends React.Component {
       if (organization.errors) throw organization.errors;
     } catch (ex) {
       this.setState({
-        errors: `Something went wrong trying to join this organization. Please contact your administrator.\n\n${
-          ex.message
-        }`
+        errors: `Something went wrong trying to join this organization. Please contact your administrator.\n\n${ex.message}`
       });
       return;
     }
@@ -39,9 +37,7 @@ class JoinTeam extends React.Component {
         if (campaign.errors) throw campaign.errors;
       } catch (ex) {
         this.setState({
-          errors: `Something went wrong trying to join this campaign. Please contact your administrator.\n\n${
-            ex.message
-          }`
+          errors: `Something went wrong trying to join this campaign. Please contact your administrator.\n\n${ex.message}`
         });
         return;
       }
@@ -56,7 +52,9 @@ class JoinTeam extends React.Component {
     if (this.state.errors) {
       return (
         <div className={css(styles.greenBox)}>
-          {this.state.errors.split("\n").map(part => <p>{part}</p>)}
+          {this.state.errors.split("\n").map((part) => (
+            <p>{part}</p>
+          ))}
         </div>
       );
     }
@@ -75,7 +73,7 @@ JoinTeam.propTypes = {
 };
 
 const mutations = {
-  joinOrganization: ownProps => () => ({
+  joinOrganization: (ownProps) => () => ({
     mutation: gql`
       mutation joinOrganization($organizationUuid: String!) {
         joinOrganization(organizationUuid: $organizationUuid) {
@@ -85,7 +83,7 @@ const mutations = {
     `,
     variables: { organizationUuid: ownProps.match.params.organizationUuid }
   }),
-  assignUserToCampaign: ownProps => () => ({
+  assignUserToCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation assignUserToCampaign(
         $organizationUuid: String!
@@ -106,7 +104,4 @@ const mutations = {
   })
 };
 
-export default compose(
-  withRouter,
-  loadData({ mutations })
-)(JoinTeam);
+export default compose(withRouter, loadData({ mutations }))(JoinTeam);

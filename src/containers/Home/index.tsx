@@ -61,7 +61,7 @@ interface HomeProps {
   history: History;
 }
 
-const Home: React.SFC<HomeProps> = props => {
+const Home: React.SFC<HomeProps> = (props) => {
   // not sure if we need this anymore -- only for new organizations
   const handleOrgInviteClick = async (
     e: React.MouseEvent<HTMLAnchorElement>
@@ -145,7 +145,4 @@ const mutations = {
   })
 };
 
-export default compose(
-  loadData({ queries, mutations }),
-  withRouter
-)(Home);
+export default compose(loadData({ queries, mutations }), withRouter)(Home);

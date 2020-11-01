@@ -68,7 +68,7 @@ class SyncConfigurationModal extends React.Component<InnerProps> {
     } = this.props;
 
     const responseMappings = campaign.externalSyncConfigurations.edges.map(
-      edge => edge.node
+      (edge) => edge.node
     );
     // const validMappings = responseMappings.filter(mapping => !mapping.isMissing);
     // const requiredMappings = responseMappings.filter(mapping => mapping.isMissing && mapping.isRequired);
@@ -118,7 +118,7 @@ class SyncConfigurationModal extends React.Component<InnerProps> {
           </a>{" "}
           page.
         </p>
-        {responseMappings.map(responseMapping => (
+        {responseMappings.map((responseMapping) => (
           <QuestionResponseConfig
             key={responseMapping.id}
             campaignId={campaignId}
@@ -139,7 +139,7 @@ class SyncConfigurationModal extends React.Component<InnerProps> {
 const queries: QueryMap<OuterProps> = {
   configs: {
     query: GET_SYNC_CONFIGS,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -147,7 +147,7 @@ const queries: QueryMap<OuterProps> = {
   },
   targets: {
     query: GET_SYNC_TARGETS,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -156,7 +156,7 @@ const queries: QueryMap<OuterProps> = {
 };
 
 const mutations: MutationMap<OuterProps> = {
-  createConfig: ownProps => (id: string) => ({
+  createConfig: (ownProps) => (id: string) => ({
     mutation: gql`
       mutation createQuestionResponseSyncConfig(
         $input: QuestionResponseSyncConfigInput!
@@ -196,7 +196,7 @@ const mutations: MutationMap<OuterProps> = {
       });
     }
   }),
-  deleteConfig: ownProps => (id: string) => ({
+  deleteConfig: (ownProps) => (id: string) => ({
     mutation: gql`
       mutation deleteQuestionResponseSyncConfig(
         $input: QuestionResponseSyncConfigInput!

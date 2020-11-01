@@ -36,19 +36,17 @@ const ContactToolbar = function ContactToolbar(props) {
     : `${firstName}`;
 
   const timezone = contactTimezone || campaign.timezone;
-  const localTime = moment()
-    .tz(timezone)
-    .format("LT"); // format('h:mm a')
+  const localTime = moment().tz(timezone).format("LT"); // format('h:mm a')
 
   const location = [city, state]
-    .filter(item => !!item)
+    .filter((item) => !!item)
     .join(", ")
     .trim();
 
   const cell = contactSettings.showContactCell
     ? campaignContact.cell
     : undefined;
-  const detailComponents = [location, localTime, cell].filter(item => !!item);
+  const detailComponents = [location, localTime, cell].filter((item) => !!item);
 
   const contactDetailText = (
     <span>

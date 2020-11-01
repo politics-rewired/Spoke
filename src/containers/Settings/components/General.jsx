@@ -55,7 +55,7 @@ const inlineStyles = {
   }
 };
 
-const formatTextingHours = hour => moment(hour, "H").format("h a");
+const formatTextingHours = (hour) => moment(hour, "H").format("h a");
 
 class Settings extends React.Component {
   state = {
@@ -113,7 +113,7 @@ class Settings extends React.Component {
     }
   };
 
-  handleEditNumbersApiKey = async payload => {
+  handleEditNumbersApiKey = async (payload) => {
     let { numbersApiKey } = this.state;
     numbersApiKey = numbersApiKey !== "" ? numbersApiKey : null;
     const input = { numbersApiKey };
@@ -153,7 +153,7 @@ class Settings extends React.Component {
       textingHoursEnd: yup.number().required()
     });
 
-    const hourChoices = [...Array(25).keys()].map(hour => ({
+    const hourChoices = [...Array(25).keys()].map((hour) => ({
       value: hour,
       label: formatTextingHours(hour)
     }));
@@ -245,7 +245,7 @@ class Settings extends React.Component {
               value={approvalLevel}
               onChange={this.handleChangeApprovalLevel}
             >
-              {Object.keys(RequestAutoApproveType).map(level => (
+              {Object.keys(RequestAutoApproveType).map((level) => (
                 <MenuItem
                   key={level}
                   value={level}
@@ -433,7 +433,7 @@ Settings.propTypes = {
 };
 
 const mutations = {
-  updateTextingHours: ownProps => (textingHoursStart, textingHoursEnd) => ({
+  updateTextingHours: (ownProps) => (textingHoursStart, textingHoursEnd) => ({
     mutation: gql`
       mutation updateTextingHours(
         $textingHoursStart: Int!
@@ -458,7 +458,7 @@ const mutations = {
       textingHoursEnd
     }
   }),
-  updateTextingHoursEnforcement: ownProps => textingHoursEnforced => ({
+  updateTextingHoursEnforcement: (ownProps) => (textingHoursEnforced) => ({
     mutation: gql`
       mutation updateTextingHoursEnforcement(
         $textingHoursEnforced: Boolean!
@@ -480,7 +480,7 @@ const mutations = {
       textingHoursEnforced
     }
   }),
-  editSettings: ownProps => input => ({
+  editSettings: (ownProps) => (input) => ({
     mutation: gql`
       mutation editOrganizationSettings(
         $id: String!
@@ -526,7 +526,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }

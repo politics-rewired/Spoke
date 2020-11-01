@@ -2,7 +2,7 @@ import React from "react";
 
 import AdminIncomingMessageList from ".";
 
-const EscalatedConversationList = props => {
+const EscalatedConversationList = (props) => {
   return <AdminIncomingMessageList escalatedConvosOnly={true} {...props} />;
 };
 

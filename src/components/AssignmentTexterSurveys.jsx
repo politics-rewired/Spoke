@@ -43,7 +43,7 @@ class AssignmentTexterSurveys extends Component {
     return null;
   }
 
-  handleExpandChange = newExpandedState => {
+  handleExpandChange = (newExpandedState) => {
     this.setState({ showAllQuestions: newExpandedState });
   };
 
@@ -79,7 +79,7 @@ class AssignmentTexterSurveys extends Component {
   };
 
   renderAnswers(step) {
-    const menuItems = step.question.answerOptions.map(answerOption => (
+    const menuItems = step.question.answerOptions.map((answerOption) => (
       <MenuItem
         key={answerOption.value}
         value={answerOption.value}
@@ -144,7 +144,7 @@ class AssignmentTexterSurveys extends Component {
             : this.renderStep(currentInteractionStep, true)}
         </CardText>
         <CardText style={styles.cardText} expandable>
-          {interactionSteps.map(step =>
+          {interactionSteps.map((step) =>
             this.renderStep(step, step.id === currentInteractionStep.id)
           )}
         </CardText>

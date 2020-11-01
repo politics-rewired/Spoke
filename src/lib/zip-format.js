@@ -73,27 +73,27 @@ function getCommonZipRanges() {
   return commonZipRanges;
 }
 
-const zipToTimeZone = zip => {
+const zipToTimeZone = (zip) => {
   // will search common zip ranges -- won't necessarily find something
   // so fallback on looking it up in db
   if (typeof zip === "number" || zip.length >= 5) {
     zip = parseInt(zip, 10);
-    return getCommonZipRanges().find(g => zip >= g[0] && zip < g[1]);
+    return getCommonZipRanges().find((g) => zip >= g[0] && zip < g[1]);
   }
 };
 
 // lperson 2018.02.10 this is dead code
-const findZipRanges = async r => {
+const findZipRanges = async (r) => {
   const zipchanges = [];
   await r
     .knex("zip_code")
     .select("zip", "timezone_offset", "has_dst")
     .orderBy("zip")
-    .then(zips => {
+    .then((zips) => {
       let front = -1;
       let curTz = -4;
       let curHasDst = -1;
-      zips.forEach(zipRec => {
+      zips.forEach((zipRec) => {
         if (zipRec.timezone_offset !== curTz || zipRec.has_dst !== curHasDst) {
           zipchanges.push([
             front,

@@ -94,8 +94,8 @@ exports.up = function up(knex) {
     )
     .then(() =>
       Promise.all(
-        TABLES_THAT_DONT_HAVE_UPDATED_AT.map(tableName =>
-          knex.schema.alterTable(tableName, table => {
+        TABLES_THAT_DONT_HAVE_UPDATED_AT.map((tableName) =>
+          knex.schema.alterTable(tableName, (table) => {
             table.timestamp("updated_at").default(knex.fn.now());
           })
         )
@@ -104,7 +104,7 @@ exports.up = function up(knex) {
     .then(() =>
       knex.raw(`
         ${TABLES_THAT_CAN_USE_CREATED_AT.map(
-          table => `update public.${table} set updated_at = created_at;`
+          (table) => `update public.${table} set updated_at = created_at;`
         ).join("\n")}
 
         ${OTHER_INITIALIZATION_OPTIONS.map(
@@ -119,7 +119,7 @@ exports.up = function up(knex) {
       Promise.all(
         TABLES_THAT_HAVE_UPDATED_AT_VIA_CODE.concat(
           TABLES_THAT_DONT_HAVE_UPDATED_AT
-        ).map(tableName =>
+        ).map((tableName) =>
           knex.schema.raw(`
           create trigger _500_${tableName}_updated_at
             before update
@@ -140,7 +140,7 @@ exports.down = function down(knex) {
     .raw("drop function universal_updated_at cascade")
     .then(
       Promise.all(
-        TABLES_THAT_DONT_HAVE_UPDATED_AT.map(tableName =>
+        TABLES_THAT_DONT_HAVE_UPDATED_AT.map((tableName) =>
           knex.schema.raw(
             `alter table public.${tableName} drop column updated_at cascade;`
           )

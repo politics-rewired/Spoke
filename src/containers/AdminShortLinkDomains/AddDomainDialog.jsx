@@ -12,8 +12,8 @@ class AddDomainDialog extends Component {
     maxUsageCount: 100
   };
 
-  handleDomainChange = event => this.setState({ domain: event.target.value });
-  handleMaxUsageCountChange = event =>
+  handleDomainChange = (event) => this.setState({ domain: event.target.value });
+  handleMaxUsageCountChange = (event) =>
     this.setState({ maxUsageCount: parseInt(event.target.value, 10) });
 
   handleAddDomainClick = () => {

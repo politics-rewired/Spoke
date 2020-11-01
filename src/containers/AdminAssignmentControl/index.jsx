@@ -20,7 +20,7 @@ class AdminAssignmentControl extends Component {
   assignmentPoolsWithChanges = () => {
     const { changes } = this.state;
     let assignmentPools = this.assignmentPoolsFromProps();
-    assignmentPools = assignmentPools.map(pool => {
+    assignmentPools = assignmentPools.map((pool) => {
       const poolChanges = changes[pool.id] || {};
       return Object.assign(pool, poolChanges);
     });
@@ -49,7 +49,7 @@ class AdminAssignmentControl extends Component {
     return assignmentPools;
   };
 
-  createHandleChangeAssignment = poolId => payload => {
+  createHandleChangeAssignment = (poolId) => (payload) => {
     const { changes } = this.state;
     const poolChanges = this.state.changes[poolId] || {};
     changes[poolId] = Object.assign(poolChanges, payload);
@@ -58,12 +58,12 @@ class AdminAssignmentControl extends Component {
 
   handleSaveAssignmentControls = async () => {
     const { changes } = this.state;
-    const payloads = Object.keys(changes).map(key => {
+    const payloads = Object.keys(changes).map((key) => {
       const teamPayload = Object.assign({}, changes[key], { id: key });
 
       if (teamPayload.escalationTags) {
         teamPayload.escalationTagIds = teamPayload.escalationTags.map(
-          t => t.id
+          (t) => t.id
         );
         delete teamPayload.escalationTags;
       }
@@ -107,7 +107,7 @@ class AdminAssignmentControl extends Component {
       <Card className={className} containerStyle={containerStyle} style={style}>
         <CardHeader title="Assignment Request Controls" />
         <CardText>
-          {assignmentPools.map(assignmentPool => (
+          {assignmentPools.map((assignmentPool) => (
             <AssignmentRow
               key={assignmentPool.id}
               assignmentPool={assignmentPool}
@@ -168,7 +168,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -177,7 +177,7 @@ const queries = {
 };
 
 const mutations = {
-  saveTeams: ownProps => teams => ({
+  saveTeams: (ownProps) => (teams) => ({
     mutation: gql`
       mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
         saveTeams(organizationId: $organizationId, teams: $teams) {

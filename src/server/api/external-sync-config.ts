@@ -175,10 +175,7 @@ export const resolvers = {
     id: (tagConfig: ExternalSyncTagConfig) =>
       `${tagConfig.system_id}|${tagConfig.tag_id}`,
     tag: (tagConfig: ExternalSyncTagConfig) =>
-      r
-        .reader("all_tag")
-        .where({ id: tagConfig.tag_id })
-        .first(),
+      r.reader("all_tag").where({ id: tagConfig.tag_id }).first(),
     targets: (
       tagConfig: ExternalSyncTagConfig,
       { after, first }: { after: string; first: number }

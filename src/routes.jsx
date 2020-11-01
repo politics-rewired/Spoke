@@ -52,9 +52,9 @@ class ProtectedInner extends React.Component {
         }
       `
     })
-      .then(result => result.data.currentUser.id)
+      .then((result) => result.data.currentUser.id)
       .then(() => this.setState({ isAuthed: true }))
-      .catch(_err => history.push(loginUrl));
+      .catch((_err) => history.push(loginUrl));
   }
 
   render() {
@@ -67,7 +67,7 @@ const Protected = withRouter(ProtectedInner);
 const AuthenticatedRoute = ({ component: Component, ...rest }) => (
   <Route
     {...rest}
-    render={routeProps => (
+    render={(routeProps) => (
       <Protected>
         <Component {...routeProps} />
       </Protected>
@@ -75,7 +75,7 @@ const AuthenticatedRoute = ({ component: Component, ...rest }) => (
   />
 );
 
-const AdminCampaignRoutes = props => {
+const AdminCampaignRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignPath = "/admin/:organizationId/campaigns/:campaignId";
   return (
@@ -91,7 +91,7 @@ const AdminCampaignRoutes = props => {
   );
 };
 
-const AdminCampaignListRoutes = props => {
+const AdminCampaignListRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignsPath = "/admin/:organizationId/campaigns";
   return (
@@ -106,7 +106,7 @@ const AdminCampaignListRoutes = props => {
   );
 };
 
-const AdminTeamRoutes = props => {
+const AdminTeamRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const teamsPath = "/admin/:organizationId/teams";
   return (
@@ -118,7 +118,7 @@ const AdminTeamRoutes = props => {
   );
 };
 
-const AdminOrganizationRoutes = props => {
+const AdminOrganizationRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const organizationPath = "/admin/:organizationId";
   const { organizationId } = props.match.params;
@@ -199,7 +199,7 @@ const AdminRoutes = ({ match }) => (
     <Route
       path={match.path}
       exact={true}
-      render={indexProps => (
+      render={(indexProps) => (
         <DashboardLoader path={match.path} {...indexProps} />
       )}
     />
@@ -211,12 +211,12 @@ const AdminRoutes = ({ match }) => (
   </Switch>
 );
 
-const TexterDashboardRoute = props => {
+const TexterDashboardRoute = (props) => {
   const { children, main, topNav, fullScreen, ...rest } = props;
   return (
     <Route
       {...rest}
-      render={routeProps => (
+      render={(routeProps) => (
         <TexterDashboard
           main={main}
           topNav={topNav}
@@ -230,41 +230,41 @@ const TexterDashboardRoute = props => {
   );
 };
 
-const TexterAssignmentRoutes = props => {
+const TexterAssignmentRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const assignmentPath = "/app/:organizationId/todos/:assignmentId";
   return (
     <Switch>
       <TexterDashboardRoute
         path={`${assignmentPath}/text`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsMessage" {...routeProups} />
         )}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/reply`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsResponse" {...routeProups} />
         )}
         topNav={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/stale`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="convo" {...routeProups} />
         )}
         topNav={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/skipped`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="closed" {...routeProups} />
         )}
         topNav={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/all`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsMessageOrResponse" {...routeProups} />
         )}
         topNav={undefined}
@@ -274,7 +274,7 @@ const TexterAssignmentRoutes = props => {
   );
 };
 
-const TexterTodoRoutes = props => {
+const TexterTodoRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const todosPath = "/app/:organizationId/todos";
   return (
@@ -295,7 +295,7 @@ const TexterTodoRoutes = props => {
   );
 };
 
-const TexterOrganizationRoutes = props => {
+const TexterOrganizationRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const organizationPath = "/app/:organizationId";
   const { organizationId } = props.match.params;

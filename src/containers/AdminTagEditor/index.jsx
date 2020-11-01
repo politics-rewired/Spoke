@@ -25,9 +25,12 @@ class AdminTagEditor extends Component {
     error: undefined
   };
 
-  getTag = tagId => {
+  getTag = (tagId) => {
     const { tagList = [] } = this.props.organizationTags.organization || {};
-    return Object.assign({}, tagList.find(tag => tag.id === tagId));
+    return Object.assign(
+      {},
+      tagList.find((tag) => tag.id === tagId)
+    );
   };
 
   handleCancelError = () => this.setState({ error: undefined });
@@ -46,7 +49,7 @@ class AdminTagEditor extends Component {
       }
     });
 
-  handleEditTag = tagId => this.setState({ editingTag: this.getTag(tagId) });
+  handleEditTag = (tagId) => this.setState({ editingTag: this.getTag(tagId) });
 
   handleCancelEditTag = () =>
     this.setState({ editingTag: undefined, isEditingScript: false });
@@ -76,7 +79,7 @@ class AdminTagEditor extends Component {
     }
   };
 
-  handleDeleteTag = async tagId => {
+  handleDeleteTag = async (tagId) => {
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.deleteTag(tagId);
@@ -98,26 +101,26 @@ class AdminTagEditor extends Component {
     this.setState({ isEditingScript: !this.state.isEditingScript });
   };
 
-  handleEditTagScript = script => {
+  handleEditTagScript = (script) => {
     this.setState({
       editingTag: { ...this.state.editingTag, onApplyScript: script },
       isEditingScript: false
     });
   };
 
-  handleEditTextColor = color => {
+  handleEditTextColor = (color) => {
     this.setState({
       editingTag: { ...this.state.editingTag, textColor: color }
     });
   };
 
-  handleEditBackgroundColor = color => {
+  handleEditBackgroundColor = (color) => {
     this.setState({
       editingTag: { ...this.state.editingTag, backgroundColor: color }
     });
   };
 
-  handleEditWebhookUrl = url => {
+  handleEditWebhookUrl = (url) => {
     this.setState({
       editingTag: { ...this.state.editingTag, webhookUrl: url }
     });
@@ -276,7 +279,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -285,7 +288,7 @@ const queries = {
 };
 
 const mutations = {
-  saveTag: ownProps => tag => ({
+  saveTag: (ownProps) => (tag) => ({
     mutation: gql`
       mutation saveTag($organizationId: String!, $tag: TagInput!) {
         saveTag(organizationId: $organizationId, tag: $tag) {
@@ -299,7 +302,7 @@ const mutations = {
     },
     refetchQueries: ["getOrganizationTags"]
   }),
-  deleteTag: ownProps => tagId => ({
+  deleteTag: (ownProps) => (tagId) => ({
     mutation: gql`
       mutation deleteTag($organizationId: String!, $tagId: String!) {
         deleteTag(organizationId: $organizationId, tagId: $tagId)

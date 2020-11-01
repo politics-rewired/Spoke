@@ -8,7 +8,7 @@ const components = {
   DropdownIndicator: null
 };
 
-const createOption = label => ({
+const createOption = (label) => ({
   value: label,
   label
 });
@@ -23,11 +23,11 @@ class CampaignPrefixSelector extends Component {
     this.props.onChange(value);
   };
 
-  handleInputChange = inputValue => {
+  handleInputChange = (inputValue) => {
     this.setState({ inputValue });
   };
 
-  handleKeyDown = event => {
+  handleKeyDown = (event) => {
     const { inputValue } = this.state;
     const { value } = this.props;
     if (!inputValue) return;

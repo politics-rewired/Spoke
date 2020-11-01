@@ -21,7 +21,7 @@ const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
 const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
-const getTwilioCredentials = async messagingServiceSid => {
+const getTwilioCredentials = async (messagingServiceSid) => {
   const { account_sid: accountSid, encrypted_auth_token } = await r
     .reader("messaging_service")
     .first(["account_sid", "encrypted_auth_token"])
@@ -33,7 +33,7 @@ const getTwilioCredentials = async messagingServiceSid => {
   return { accountSid, authToken };
 };
 
-const twilioClient = async messagingServiceSid => {
+const twilioClient = async (messagingServiceSid) => {
   const { accountSid, authToken } = await getTwilioCredentials(
     messagingServiceSid
   );
@@ -67,11 +67,11 @@ const headerValidator = () => {
 
 const textIncludingMms = (text, serviceMessages) => {
   const mediaUrls = [];
-  serviceMessages.forEach(serviceMessage => {
-    const mediaUrlKeys = Object.keys(serviceMessage).filter(key =>
+  serviceMessages.forEach((serviceMessage) => {
+    const mediaUrlKeys = Object.keys(serviceMessage).filter((key) =>
       key.startsWith("MediaUrl")
     );
-    mediaUrlKeys.forEach(key => mediaUrls.push(serviceMessage[key]));
+    mediaUrlKeys.forEach((key) => mediaUrls.push(serviceMessage[key]));
   });
   if (mediaUrls.length > 0) {
     const warningText =
@@ -92,11 +92,11 @@ async function convertMessagePartsToMessage(messageParts) {
   const firstPart = messageParts[0];
   const userNumber = firstPart.user_number;
   const contactNumber = firstPart.contact_number;
-  const serviceMessages = messageParts.map(part =>
+  const serviceMessages = messageParts.map((part) =>
     JSON.parse(part.service_message)
   );
   const text = serviceMessages
-    .map(serviceMessage => serviceMessage.Body)
+    .map((serviceMessage) => serviceMessage.Body)
     .join("")
     .replace(/\0/g, ""); // strip all UTF-8 null characters (0x00)
 
@@ -296,7 +296,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
 }
 
 // Get appropriate Spoke message status from Twilio status
-const getMessageStatus = twilioStatus => {
+const getMessageStatus = (twilioStatus) => {
   if (twilioStatus === "delivered") {
     return "DELIVERED";
   }
@@ -313,14 +313,14 @@ const getMessageStatus = twilioStatus => {
 // the delivery report itself rather than updating the message. We can then "replay"
 // the delivery reports back on the message table at a later date. We still attempt
 // to update the message record status (after a slight delay).
-const handleDeliveryReport = async report =>
+const handleDeliveryReport = async (report) =>
   r.knex("log").insert({
     message_sid: report.MessageSid,
     service_type: MessagingServiceType.Twilio,
     body: JSON.stringify(report)
   });
 
-export const processDeliveryReport = async body => {
+export const processDeliveryReport = async (body) => {
   const { MessageSid: service_id, MessageStatus } = body;
 
   await r

@@ -35,6 +35,4 @@ async function main(find, replace) {
   }
 }
 
-main("b2020.me", "notme2020.us")
-  .then(console.log)
-  .catch(console.error);
+main("b2020.me", "notme2020.us").then(console.log).catch(console.error);

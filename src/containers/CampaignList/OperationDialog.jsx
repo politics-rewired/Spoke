@@ -8,7 +8,7 @@ import LoadingIndicator from "../../components/LoadingIndicator";
 
 export const operations = {
   releaseUnsentMessages: {
-    title: campaign => `Release Unsent Messages for ${campaign.title}`,
+    title: (campaign) => `Release Unsent Messages for ${campaign.title}`,
     body: () => `Releasing unsent messages for this campaign will cause unsent messages in this campaign\
       to be removed from texter's assignments. This means that these texters will no longer be able to send\
       these messages, but these messages will become available to assign via the autoassignment\
@@ -16,7 +16,7 @@ export const operations = {
     mutationName: "releaseMessages"
   },
   markForSecondPass: {
-    title: campaign =>
+    title: (campaign) =>
       `Mark Unresponded to Messages in ${campaign.title} for a Second Pass`,
     body: () => `Marking unresponded to messages for this campaign will reset the state of messages that have\
       not been responded to by the contact, causing them to show up as needing a first text, as long as the campaign\
@@ -26,7 +26,8 @@ export const operations = {
       Note: you should not run this operation if all initial messages have not yet been sent.`
   },
   releaseUnrepliedMessages: {
-    title: campaign => `Release Unreplied Conversations for ${campaign.title}`,
+    title: (campaign) =>
+      `Release Unreplied Conversations for ${campaign.title}`,
     body: () => `Releasing unreplied messages for this campaign will cause unreplied messages in this campaign\
       to be removed from texter's assignments. This means that these texters will no longer be able to respond\
       to these conversations, but these conversations will become available to assign via the autoassignment\
@@ -34,7 +35,7 @@ export const operations = {
     mutationName: "releaseMessages"
   },
   deleteNeedsMessage: {
-    title: campaign => `Delete Un-Messaged Contacts for ${campaign.title}`,
+    title: (campaign) => `Delete Un-Messaged Contacts for ${campaign.title}`,
     body: () => `Deleting unmessaged contacts for this campaign will remove contacts that have not received a message yet.\
       This operation is useful if, for one reason or another, you don't want to message any more contacts on this\
       campaign, but still want to use autoassignment to handle replies. This might be because there's a mistake in\
@@ -43,7 +44,7 @@ export const operations = {
     deletionProtection: true
   },
   unMarkForSecondPass: {
-    title: campaign => `Un-Mark ${campaign.title} for a Second Pass`,
+    title: (campaign) => `Un-Mark ${campaign.title} for a Second Pass`,
     body: () => `Un-marking this campaign for a second pass will mark contacts that have been sent a message but are marked\
       as unmessaged because of a second pass as having been messaged, effectively undoing the 'Mark for Second Pass' operation.\
       This operation is useful if, for one reason or another, you don't want to message any more contacts on this campaign,\
@@ -53,20 +54,20 @@ export const operations = {
     mutationName: "unMarkForSecondPass"
   },
   turnAutoAssignOn: {
-    title: campaign => `Turn auto-assign ON for ${campaign.title}`,
+    title: (campaign) => `Turn auto-assign ON for ${campaign.title}`,
     body: () =>
       `Turning auto-assign ON means that this campaign's contacts will be eligible to be assigned by the text request form`,
     mutationName: "turnAutoAssignOn"
   },
   turnAutoAssignOff: {
-    title: campaign => `Turn auto-assign OFF for ${campaign.title}`,
+    title: (campaign) => `Turn auto-assign OFF for ${campaign.title}`,
     body: () =>
       `Turning auto-assign OFF means that this campaign's contacts will not be assigned by the text request form`,
     mutationName: "turnAutoAssignOff"
   }
 };
 
-export const OperationDialogBody = props => {
+export const OperationDialogBody = (props) => {
   const { inProgress, finished, executing, error, setState } = props;
 
   const [operationName, campaign, operationArs] = inProgress;
@@ -96,7 +97,7 @@ export const OperationDialogBody = props => {
             defaultValue={1}
             value={ageInHours}
             onChange={(ev, val) =>
-              setState(prevState => {
+              setState((prevState) => {
                 const nextInProgress = prevState.inProgress.slice();
                 nextInProgress[2] = { ageInHours: parseInt(val) };
                 return {
@@ -120,7 +121,7 @@ export const OperationDialogBody = props => {
           label="Exclude recently texted contacts?"
           toggled={excludeRecentlyTexted}
           onToggle={(ev, val) =>
-            setState(prevState => {
+            setState((prevState) => {
               const nextInProgress = prevState.inProgress.slice();
               nextInProgress[2].excludeRecentlyTexted = val;
               return {
@@ -140,7 +141,7 @@ export const OperationDialogBody = props => {
               floatingLabelText="Number of Days"
               value={days}
               onChange={(ev, val) =>
-                setState(prevState => {
+                setState((prevState) => {
                   const nextInProgress = prevState.inProgress.slice();
                   nextInProgress[2].days = parseInt(val);
                   return {
@@ -155,7 +156,7 @@ export const OperationDialogBody = props => {
               floatingLabelText="Number of Hours"
               value={hours}
               onChange={(ev, val) =>
-                setState(prevState => {
+                setState((prevState) => {
                   const nextInProgress = prevState.inProgress.slice();
                   nextInProgress[2].hours = parseInt(val);
                   return {

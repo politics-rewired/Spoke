@@ -126,7 +126,7 @@ export default class CampaignTextersForm extends React.Component {
 
       let { contactsCount, texters } = this.formValues();
       contactsCount = Math.floor(contactsCount / texters.length);
-      const newTexters = texters.map(texter => ({
+      const newTexters = texters.map((texter) => ({
         ...texter,
         assignment: {
           ...texter.assignment,
@@ -140,7 +140,7 @@ export default class CampaignTextersForm extends React.Component {
       this.onChange(newFormValues);
     });
 
-  onChange = formValues => {
+  onChange = (formValues) => {
     const existingFormValues = this.formValues();
     const changedTexterId = this.state.focusedTexterId;
     const newFormValues = {
@@ -152,9 +152,9 @@ export default class CampaignTextersForm extends React.Component {
       newFormValues.texters.length !== existingFormValues.texters.length;
 
     // 1. map form texters to existing texters. with needsMessageCount tweaked to minimums when invalid or useless
-    newFormValues.texters = newFormValues.texters.map(newTexter => {
-      const existingTexter = existingFormValues.texters.filter(
-        texter => (texter.id === newTexter.id ? texter : null)
+    newFormValues.texters = newFormValues.texters.map((newTexter) => {
+      const existingTexter = existingFormValues.texters.filter((texter) =>
+        texter.id === newTexter.id ? texter : null
       )[0];
       let messagedCount = 0;
       if (existingTexter) {
@@ -213,7 +213,7 @@ export default class CampaignTextersForm extends React.Component {
     if (extraTexterCapacity > 0) {
       // 2. If extraTexterCapacity > 0, reduce the user's input to the number of contacts available
       // for assignment
-      newFormValues.texters = newFormValues.texters.map(newTexter => {
+      newFormValues.texters = newFormValues.texters.map((newTexter) => {
         if (newTexter.id === changedTexterId) {
           const returnTexter = newTexter;
           returnTexter.assignment.needsMessageCount -= extraTexterCapacity;
@@ -222,7 +222,7 @@ export default class CampaignTextersForm extends React.Component {
         }
         return newTexter;
       });
-      const focusedTexter = newFormValues.texters.find(texter => {
+      const focusedTexter = newFormValues.texters.find((texter) => {
         return texter.id === changedTexterId;
       });
       this.setState({
@@ -303,8 +303,10 @@ export default class CampaignTextersForm extends React.Component {
     const { texters } = this.formValues();
 
     const dataSource = orgTexters
-      .filter(orgTexter => !texters.find(texter => texter.id === orgTexter.id))
-      .map(orgTexter => dataSourceItem(orgTexter.displayName, orgTexter.id));
+      .filter(
+        (orgTexter) => !texters.find((texter) => texter.id === orgTexter.id)
+      )
+      .map((orgTexter) => dataSourceItem(orgTexter.displayName, orgTexter.id));
 
     const filter = (searchText, key) =>
       key === "allTexters"
@@ -317,18 +319,18 @@ export default class CampaignTextersForm extends React.Component {
         style={inlineStyles.autocomplete}
         autoFocus
         onFocus={() => this.setState({ searchText: "" })}
-        onUpdateInput={searchText => this.setState({ searchText })}
+        onUpdateInput={(searchText) => this.setState({ searchText })}
         searchText={this.state.searchText}
         filter={filter}
         hintText="Search for texters to assign"
         dataSource={dataSource}
-        onNewRequest={value => {
+        onNewRequest={(value) => {
           // If you're searching but get no match, value is a string
           // representing your search term, but we only want to handle matches
           if (typeof value === "object") {
             const texterId = value.value.key;
             const newTexter = this.props.orgTexters.find(
-              texter => texter.id === texterId
+              (texter) => texter.id === texterId
             );
             this.onChange({
               texters: [
@@ -354,7 +356,7 @@ export default class CampaignTextersForm extends React.Component {
   addAllTexters() {
     const { orgTexters } = this.props;
 
-    const textersToAdd = orgTexters.map(orgTexter => {
+    const textersToAdd = orgTexters.map((orgTexter) => {
       const id = orgTexter.id;
       const firstName = orgTexter.firstName;
       return {
@@ -373,7 +375,7 @@ export default class CampaignTextersForm extends React.Component {
   removeEmptyTexters() {
     this.onChange({
       texters: this.props.formValues.texters.filter(
-        t =>
+        (t) =>
           t.assignment.contactsCount !== 0 ||
           t.assignment.needsMessageCount !== 0
       )
@@ -381,7 +383,7 @@ export default class CampaignTextersForm extends React.Component {
   }
 
   getDisplayName(texterId) {
-    let texterObj = this.props.orgTexters.find(o => o.id === texterId);
+    let texterObj = this.props.orgTexters.find((o) => o.id === texterId);
     return texterObj.displayName;
   }
 
@@ -551,8 +553,9 @@ export default class CampaignTextersForm extends React.Component {
               >
                 {`Assigned contacts: ${assignedContacts}/${
                   this.formValues().contactsCount
-                }. Left unassigned: ${this.formValues().contactsCount -
-                  assignedContacts}`}
+                }. Left unassigned: ${
+                  this.formValues().contactsCount - assignedContacts
+                }`}
               </div>
               <div className={css(styles.splitToggle)}>
                 <Toggle

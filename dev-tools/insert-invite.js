@@ -6,20 +6,20 @@ require("dotenv").config();
 const main = async () => {
   const inviteArgs = Object.values(process.argv);
 
-  const scriptIndex = inviteArgs.findIndex(arg =>
+  const scriptIndex = inviteArgs.findIndex((arg) =>
     arg.includes("insert-invite.js")
   );
   inviteArgs.splice(0, scriptIndex + 1);
 
   let isHelp = false;
-  const helpIndex = inviteArgs.findIndex(arg => arg.includes("help"));
+  const helpIndex = inviteArgs.findIndex((arg) => arg.includes("help"));
   if (helpIndex >= 0) {
     isHelp = true;
     inviteArgs.splice(helpIndex, 1);
   }
 
   let includeEnv = false;
-  const envIndex = inviteArgs.findIndex(arg => arg === "--include-env");
+  const envIndex = inviteArgs.findIndex((arg) => arg === "--include-env");
   if (envIndex >= 0) {
     includeEnv = true;
     inviteArgs.splice(envIndex, 1);
@@ -68,10 +68,7 @@ Usage: insert-invite HASH [--include-env]
     }
   }
 
-  const existingRecord = await r
-    .knex("invite")
-    .where({ hash })
-    .first("id");
+  const existingRecord = await r.knex("invite").where({ hash }).first("id");
 
   if (existingRecord) {
     console.info(`Invite with hash '${hash}' already exists!`);
@@ -90,7 +87,7 @@ main()
     console.log("Success");
     process.exit(0);
   })
-  .catch(error => {
+  .catch((error) => {
     console.error(`Error: ${error.message}`);
     process.exit(1);
   });

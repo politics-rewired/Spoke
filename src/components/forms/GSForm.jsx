@@ -46,7 +46,7 @@ export default class GSForm extends React.Component {
   };
 
   renderChildren(children) {
-    return React.Children.map(children, child => {
+    return React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) {
         return child;
       } else if (areComponentsEqual(child.type, Form.Field)) {
@@ -95,17 +95,17 @@ export default class GSForm extends React.Component {
       <Form
         ref="form"
         value={this.props.value || this.state.model || this.props.defaultValue}
-        onChange={model => {
+        onChange={(model) => {
           this.setState({ model });
           if (this.props.onChange) {
             this.props.onChange(model);
           }
         }}
-        onError={errors => {
+        onError={(errors) => {
           this.setState({ formErrors: errors });
         }}
         {...this.props}
-        onSubmit={async formValues => {
+        onSubmit={async (formValues) => {
           this.setState({
             isSubmitting: true,
             globalErrorMessage: null

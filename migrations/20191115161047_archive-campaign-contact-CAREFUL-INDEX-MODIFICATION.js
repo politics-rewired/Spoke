@@ -6,7 +6,7 @@
 
 exports.up = function up(knex) {
   return knex.schema
-    .alterTable("campaign_contact", table => {
+    .alterTable("campaign_contact", (table) => {
       table.boolean("archived").default(false);
     })
     .then(() => {
@@ -148,7 +148,7 @@ exports.down = function down(knex) {
       `);
     })
     .then(() => {
-      return knex.schema.alterTable("campaign_contact", table => {
+      return knex.schema.alterTable("campaign_contact", (table) => {
         table.dropColumn("archived");
       });
     });

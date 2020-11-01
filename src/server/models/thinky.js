@@ -17,7 +17,7 @@ thinkyConn.r.reader = knexConfig.useReader
   ? knex(knexConfig.readerConfig)
   : thinkyConn.r.knex;
 
-thinkyConn.r.getCount = async query => {
+thinkyConn.r.getCount = async (query) => {
   // helper method to get a count result
   // with fewer bugs.  Using knex's .count()
   // results in a 'count' key on postgres, but a 'count(*)' key
@@ -31,7 +31,7 @@ thinkyConn.r.getCount = async query => {
 /**
  * Helper method to parse the result of a knex `count` query (see above).
  */
-thinkyConn.r.parseCount = async query => {
+thinkyConn.r.parseCount = async (query) => {
   if (Array.isArray(query)) {
     return query.length;
   }

@@ -21,11 +21,11 @@ class CampaignTeamsForm extends React.Component {
     this.props.onChange({ isAssignmentLimitedToTeams });
   };
 
-  addTeam = team => {
+  addTeam = (team) => {
     const { teams } = this.props.formValues;
 
     const teanAlreadySelected =
-      teams.filter(existingTeam => existingTeam.id === team.id).length > 0;
+      teams.filter((existingTeam) => existingTeam.id === team.id).length > 0;
 
     if (!teanAlreadySelected) {
       teams.push(team);
@@ -41,14 +41,14 @@ class CampaignTeamsForm extends React.Component {
   handleAddTeam = ({ id: teamId }) => {
     const { orgTeams } = this.props;
 
-    const team = orgTeams.find(team => team.id === teamId);
+    const team = orgTeams.find((team) => team.id === teamId);
 
     this.addTeam(team);
   };
 
-  handleRemoveTeam = deleteTeamId => {
+  handleRemoveTeam = (deleteTeamId) => {
     const teams = this.props.formValues.teams.filter(
-      team => team.id !== deleteTeamId
+      (team) => team.id !== deleteTeamId
     );
     this.props.onChange({ teams });
   };

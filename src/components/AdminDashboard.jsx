@@ -101,16 +101,16 @@ class AdminDashboard extends React.Component {
     ];
 
     if (window.DISABLE_ASSIGNMENT_PAGE) {
-      const index = sections.findIndex(s => s.name === "Assignment Requests");
+      const index = sections.findIndex((s) => s.name === "Assignment Requests");
       sections.splice(index, 1);
     }
 
     if (!window.ENABLE_TROLLBOT) {
-      const index = sections.findIndex(s => s.name === "Troll Alarms");
+      const index = sections.findIndex((s) => s.name === "Troll Alarms");
       sections.splice(index, 1);
     }
 
-    let currentSection = sections.filter(section =>
+    let currentSection = sections.filter((section) =>
       location.pathname.match(`/${section.path}`)
     );
 
@@ -130,7 +130,9 @@ class AdminDashboard extends React.Component {
           orgId={match.params.organizationId}
         />
         <div className={css(styles.container)}>
-          {this.renderNavigation(sections.filter(s => hasRole(s.role, roles)))}
+          {this.renderNavigation(
+            sections.filter((s) => hasRole(s.role, roles))
+          )}
           <div className={css(styles.content)}>{children}</div>
         </div>
       </div>
@@ -205,7 +207,4 @@ const queries = {
   }
 };
 
-export default compose(
-  withRouter,
-  loadData({ queries })
-)(AdminDashboard);
+export default compose(withRouter, loadData({ queries }))(AdminDashboard);

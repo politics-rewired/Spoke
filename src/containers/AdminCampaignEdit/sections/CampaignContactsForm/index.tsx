@@ -108,7 +108,7 @@ class CampaignContactsForm extends React.Component<
     super(props);
 
     const options = this.getSourceOptions();
-    this.state.source = options.find(op => !op.disabledReason)!.source;
+    this.state.source = options.find((op) => !op.disabledReason)!.source;
   }
 
   handleOnChangeValidSql = (contactsSql: string | null) =>
@@ -271,14 +271,13 @@ class CampaignContactsForm extends React.Component<
             onContactsFileChange={this.handleOnContactsFileChange}
           />
         )}
-        {source === ContactSourceType.ExternalSystem &&
-          externalSystem && (
-            <ExternalSystemsSource
-              systemId={externalSystem.id}
-              selectedListId={externalListId}
-              onChangeExternalList={this.handleOnExternalListChange}
-            />
-          )}
+        {source === ContactSourceType.ExternalSystem && externalSystem && (
+          <ExternalSystemsSource
+            systemId={externalSystem.id}
+            selectedListId={externalListId}
+            onChangeExternalList={this.handleOnExternalListChange}
+          />
+        )}
         {source === ContactSourceType.SQL && (
           <ContactsSqlForm
             style={{ marginTop: "20px" }}

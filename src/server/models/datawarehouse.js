@@ -18,4 +18,4 @@ if (config.WAREHOUSE_DB_TYPE) {
   };
 }
 
-export default (config.WAREHOUSE_DB_TYPE ? () => r(warehouseConfig) : null);
+export default config.WAREHOUSE_DB_TYPE ? () => r(warehouseConfig) : null;

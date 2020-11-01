@@ -29,7 +29,7 @@ async function doBatch() {
     [BATCH_SIZE]
   );
 
-  const zips = someZipCodesToFill.rows.map(r => r.zip);
+  const zips = someZipCodesToFill.rows.map((r) => r.zip);
   console.log(`Found ${zips.length} zips`);
 
   let totalUpdateCount = 0;
@@ -38,7 +38,7 @@ async function doBatch() {
   const zipChunks = _.chunk(zips, 50);
   for (const zips of zipChunks) {
     await Promise.all(
-      zips.map(async zip => {
+      zips.map(async (zip) => {
         const timezone = zipCodeToTimeZone.lookup(zip);
         console.log(timezone);
         const updateCount = await db("campaign_contact")
@@ -63,6 +63,4 @@ async function main() {
   }
 }
 
-main()
-  .then(console.log)
-  .catch(console.error);
+main().then(console.log).catch(console.error);

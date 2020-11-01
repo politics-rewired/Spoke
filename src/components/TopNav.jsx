@@ -90,7 +90,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         id: ownProps.orgId
       }

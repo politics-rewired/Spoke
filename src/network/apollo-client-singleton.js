@@ -32,7 +32,7 @@ const errorLink = onError(
 );
 
 const checkVersionLink = new ApolloLink((operation, forward) => {
-  return forward(operation).map(data => {
+  return forward(operation).map((data) => {
     const clientVersion = window.SPOKE_VERSION;
     const { response } = operation.getContext();
     const serverVersion = response.headers.get("x-spoke-version");
@@ -68,7 +68,7 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 const cache = new InMemoryCache({
   addTypename: true,
   fragmentMatcher,
-  dataIdFromObject: object => {
+  dataIdFromObject: (object) => {
     switch (object.__typename) {
       case "ExternalList":
         return `${object.systemId}:${object.externalId}`;

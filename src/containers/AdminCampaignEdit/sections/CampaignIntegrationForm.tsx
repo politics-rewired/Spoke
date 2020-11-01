@@ -97,7 +97,7 @@ class CampaignIntegrationForm extends React.Component<InnerProps, State> {
       isNew,
       saveLabel
     } = this.props;
-    const systems = organization.externalSystems.edges.map(edge => edge.node);
+    const systems = organization.externalSystems.edges.map((edge) => edge.node);
     const externalSystemId =
       pendingChanges.externalSystemId !== undefined
         ? pendingChanges.externalSystemId
@@ -121,7 +121,7 @@ class CampaignIntegrationForm extends React.Component<InnerProps, State> {
           onChange={this.handleChange}
         >
           <MenuItem value={null} primaryText="" />
-          {systems.map(system => (
+          {systems.map((system) => (
             <MenuItem
               key={system.id}
               value={system.id}
@@ -154,7 +154,7 @@ const queries: QueryMap<InnerProps> = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -177,7 +177,7 @@ const queries: QueryMap<InnerProps> = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       }
@@ -186,7 +186,7 @@ const queries: QueryMap<InnerProps> = {
 };
 
 const mutations: MutationMap<InnerProps> = {
-  editCampaign: ownProps => (payload: IntegrationValues) => ({
+  editCampaign: (ownProps) => (payload: IntegrationValues) => ({
     mutation: gql`
       mutation editCampaignBasics(
         $campaignId: String!

@@ -11,15 +11,13 @@ const config = {
 
 const db = require("knex")(config);
 
-const prettyPrint = obj => JSON.stringify(obj, null, 2);
+const prettyPrint = (obj) => JSON.stringify(obj, null, 2);
 const BATCH_SIZE = 10000;
 
 let amountDone = 0;
 let lastId = 0;
 
-main()
-  .then(console.log)
-  .catch(console.error);
+main().then(console.log).catch(console.error);
 const IGNORE = [];
 
 async function main() {
@@ -37,7 +35,7 @@ async function main() {
   }
 
   await Promise.all(
-    messages.map(async message => {
+    messages.map(async (message) => {
       try {
         await associateMessage(message);
       } catch (ex) {
@@ -66,7 +64,7 @@ async function findMatchingCampaignContact(message) {
     cell: message.contact_number
   });
   const with_same_assignment_id = campaign_contacts.filter(
-    cc => cc.assignment_id == message.assignment_id
+    (cc) => cc.assignment_id == message.assignment_id
   );
 
   let selection;
@@ -92,7 +90,7 @@ async function selectCampaignContact(message, options, mode) {
   if (options.length == 1) {
     return options[0];
   }
-  const created_before_message = options.filter(cc => {
+  const created_before_message = options.filter((cc) => {
     const message_created_at = moment(message.created_at);
     const cc_created_at = moment(cc.created_at);
     // console.log({ message_created_at, cc_created_at })

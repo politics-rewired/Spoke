@@ -38,7 +38,7 @@ class TrollTokenSettings extends React.Component {
 
   handleOnCancelError = () => this.setState({ error: undefined });
 
-  handleDeleteToken = deleteToken => () => this.setState({ deleteToken });
+  handleDeleteToken = (deleteToken) => () => this.setState({ deleteToken });
   handleOnCancelDelete = () => this.setState({ deleteToken: undefined });
   handleConfirmDeleteToken = async () => {
     const { deleteToken } = this.state;
@@ -197,7 +197,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -206,7 +206,7 @@ const queries = {
 };
 
 const mutations = {
-  addToken: ownProps => token => ({
+  addToken: (ownProps) => (token) => ({
     mutation: gql`
       mutation addTrollBotToken($organizationId: String!, $token: String!) {
         addToken(token: $token, organizationId: $organizationId)
@@ -218,7 +218,7 @@ const mutations = {
     },
     refetchQueries: ["getTrollTokensForOrg"]
   }),
-  deleteToken: ownProps => token => ({
+  deleteToken: (ownProps) => (token) => ({
     mutation: gql`
       mutation deleteTrollBotToken($organizationId: String!, $token: String!) {
         removeToken(token: $token, organizationId: $organizationId)

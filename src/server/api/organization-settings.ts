@@ -41,7 +41,7 @@ const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
 };
 
 const SETTINGS_VALIDATORS: {
-  [key in keyof IOrganizationSettings]?: { (value: string): void }
+  [key in keyof IOrganizationSettings]?: { (value: string): void };
 } = {
   numbersApiKey: (value: string) => {
     // User probably made a mistake - no API key will have a *

@@ -59,7 +59,7 @@ const main = async () => {
   return newAlarms;
 };
 
-const raiseAlarms = async alarms => {
+const raiseAlarms = async (alarms) => {
   if (TROLL_ALERT_URL) {
     for (const alarm of alarms) {
       await request.post(TROLL_ALERT_URL).send(alarm);
@@ -68,13 +68,13 @@ const raiseAlarms = async alarms => {
 };
 
 main()
-  .catch(err => {
+  .catch((err) => {
     batchLogger.error("Error running TrollBot script: ", err);
     process.exit(1);
   })
   .then(raiseAlarms)
   .then(() => process.exit(0))
-  .catch(err => {
+  .catch((err) => {
     batchLogger.error("Error raising external troll alarms: ", err);
     process.exit(1);
   });

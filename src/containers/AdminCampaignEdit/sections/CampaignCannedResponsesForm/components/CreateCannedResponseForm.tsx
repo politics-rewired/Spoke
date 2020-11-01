@@ -25,7 +25,7 @@ interface Props {
   customFields: string[];
 }
 
-const CreateCannedResponseForm: React.SFC<Props> = props => {
+const CreateCannedResponseForm: React.SFC<Props> = (props) => {
   const handleSave = (formValues: any) =>
     props.onSaveCannedResponse(formValues);
 

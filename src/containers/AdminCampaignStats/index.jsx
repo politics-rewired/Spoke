@@ -118,21 +118,25 @@ class AdminCampaignStats extends React.Component {
       return <h1> Uh oh! Campaign {campaignId} doesn't seem to exist </h1>;
     }
 
-    const currentExportJob = pendingJobs.find(job => job.jobType === "export");
+    const currentExportJob = pendingJobs.find(
+      (job) => job.jobType === "export"
+    );
     const shouldDisableExport =
       disableExportButton || currentExportJob !== undefined;
     const exportLabel = currentExportJob
       ? `Exporting (${currentExportJob.status}%)`
       : "Export Data";
 
-    const vanExportJob = pendingJobs.find(job => job.jobType === "van-export");
+    const vanExportJob = pendingJobs.find(
+      (job) => job.jobType === "van-export"
+    );
     const isVanExportDisabled =
       disableVanExportButton || vanExportJob !== undefined;
     const vanExportLabel = vanExportJob
       ? `Exporting for VAN (${vanExportJob.status}%)`
       : "Export for VAN";
 
-    const vansyncJob = pendingJobs.find(job => job.jobType === "van-sync");
+    const vansyncJob = pendingJobs.find((job) => job.jobType === "van-sync");
     const isVanSyncDisabled = disableVanSyncButton || vansyncJob !== undefined;
     const vanSyncLabel = vansyncJob
       ? `Syncing to VAN (${vanSyncJob.status}%)`
@@ -239,7 +243,7 @@ class AdminCampaignStats extends React.Component {
 
                             this.props.mutations
                               .copyCampaign()
-                              .then(result => {
+                              .then((result) => {
                                 if (result.errors) {
                                   throw result.errors;
                                 }
@@ -250,7 +254,7 @@ class AdminCampaignStats extends React.Component {
                                   copiedCampaignId: result.data.copyCampaign.id
                                 });
                               })
-                              .catch(error =>
+                              .catch((error) =>
                                 this.setState({
                                   campaignJustCopied: true,
                                   copyingCampaign: false,
@@ -286,9 +290,7 @@ class AdminCampaignStats extends React.Component {
           message={
             this.state.copyCampaignError
               ? `Error: ${this.state.copyCampaignError}`
-              : `Campaign successfully copied to campaign ${
-                  this.state.copiedCampaignId
-                }`
+              : `Campaign successfully copied to campaign ${this.state.copiedCampaignId}`
           }
           autoHideDuration={5000}
           onRequestClose={() => {
@@ -345,7 +347,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
       }
@@ -354,7 +356,7 @@ const queries = {
 };
 
 const mutations = {
-  archiveCampaign: ownProps => () => ({
+  archiveCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation archiveCampaign($campaignId: String!) {
         archiveCampaign(id: $campaignId) {
@@ -365,7 +367,7 @@ const mutations = {
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  unarchiveCampaign: ownProps => () => ({
+  unarchiveCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
@@ -376,7 +378,7 @@ const mutations = {
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  exportCampaign: ownProps => () => ({
+  exportCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation exportCampaign($campaignId: String!) {
         exportCampaign(
@@ -388,7 +390,7 @@ const mutations = {
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  copyCampaign: ownProps => () => ({
+  copyCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation copyCampaign($campaignId: String!) {
         copyCampaign(id: $campaignId) {

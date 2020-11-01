@@ -7,11 +7,11 @@ import AlarmIcon from "material-ui/svg-icons/device/access-alarms";
 import General from "./components/General";
 import TrollTokenSettings from "./components/TrollTokenSettings";
 
-export const SettingsRouter = props => {
+export const SettingsRouter = (props) => {
   const { match, history } = props;
   const { page, organizationId } = match.params;
 
-  const handleOnChangeTab = page => {
+  const handleOnChangeTab = (page) => {
     history.push(`/admin/${organizationId}/settings/${page}`);
   };
 

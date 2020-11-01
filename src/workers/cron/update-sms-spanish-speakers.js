@@ -30,11 +30,14 @@ const main = async () => {
     .select("user.email")
     .join("user", "id", "=", "user_id")
     .where({ team_id: TEAM_ID })
-    .whereIn("email", newAssignmentUsers.map(na => na.email));
+    .whereIn(
+      "email",
+      newAssignmentUsers.map((na) => na.email)
+    );
 
   for (const member of membersOfTeam) {
     const assignmentManagerDbUser = newAssignmentUsers.find(
-      na => na.email === member.email
+      (na) => na.email === member.email
     );
 
     if (assignmentManagerDbUser.first_name.slice(0, 3) !== "SP ") {
@@ -48,11 +51,11 @@ const main = async () => {
 };
 
 main()
-  .then(result => {
+  .then((result) => {
     console.log(result);
     process.exit(0);
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Update SMS Spanish Speakers failed", err);
     process.exit(1);
   });

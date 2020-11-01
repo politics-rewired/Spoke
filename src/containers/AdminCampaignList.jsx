@@ -119,7 +119,7 @@ class AdminCampaignList extends React.Component {
         releaseOnRestricted,
         limitToCurrentlyTextableContacts
       )
-      .then(result => {
+      .then((result) => {
         if (result.errors) {
           throw result.errors;
         }
@@ -129,7 +129,7 @@ class AdminCampaignList extends React.Component {
           releasingInProgress: false
         });
       })
-      .catch(error => {
+      .catch((error) => {
         this.setState({
           releaseAllRepliesError: error,
           releasingInProgress: false
@@ -168,7 +168,7 @@ class AdminCampaignList extends React.Component {
         value={currentPageIndex}
         onChange={this.onCurrentPageChange}
       >
-        {pageArray.map(pageIndex => (
+        {pageArray.map((pageIndex) => (
           <MenuItem
             key={pageIndex}
             value={pageIndex}
@@ -225,23 +225,23 @@ class AdminCampaignList extends React.Component {
               releasingInProgress
                 ? []
                 : doneReleasingReplies
-                  ? [
-                      <RaisedButton
-                        label="Done"
-                        onClick={this.closeReleasingAllReplies}
-                      />
-                    ]
-                  : [
-                      <RaisedButton
-                        label="Cancel"
-                        onClick={this.closeReleasingAllReplies}
-                      />,
-                      <RaisedButton
-                        label="Release"
-                        onClick={this.releaseAllReplies}
-                        primary={true}
-                      />
-                    ]
+                ? [
+                    <RaisedButton
+                      label="Done"
+                      onClick={this.closeReleasingAllReplies}
+                    />
+                  ]
+                : [
+                    <RaisedButton
+                      label="Cancel"
+                      onClick={this.closeReleasingAllReplies}
+                    />,
+                    <RaisedButton
+                      label="Release"
+                      onClick={this.releaseAllReplies}
+                      primary={true}
+                    />
+                  ]
             }
           >
             {releasingInProgress ? (
@@ -295,7 +295,7 @@ class AdminCampaignList extends React.Component {
             organizationId={organizationId}
             campaignsFilter={campaignsFilter}
             pageSize={pageSize}
-            resultCountDidUpdate={totalResults =>
+            resultCountDidUpdate={(totalResults) =>
               this.setState({ totalResults })
             }
             currentPageIndex={currentPageIndex}
@@ -325,7 +325,7 @@ AdminCampaignList.propTypes = {
 };
 
 const mutations = {
-  createCampaign: ownProps => campaign => ({
+  createCampaign: (ownProps) => (campaign) => ({
     mutation: gql`
       mutation createBlankCampaign($campaign: CampaignInput!) {
         createCampaign(campaign: $campaign) {
@@ -335,7 +335,7 @@ const mutations = {
     `,
     variables: { campaign }
   }),
-  releaseAllUnhandledReplies: ownProps => (
+  releaseAllUnhandledReplies: (ownProps) => (
     organizationId,
     ageInHours,
     releaseOnRestricted,

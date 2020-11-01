@@ -95,7 +95,7 @@ class ShortLinkDomainList extends Component {
     }
   ];
 
-  createHandleDisableToggle = domainId => (event, value) => {
+  createHandleDisableToggle = (domainId) => (event, value) => {
     // These don't appear to be doing anything to stop handleCellClick being called...
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
@@ -104,7 +104,7 @@ class ShortLinkDomainList extends Component {
     this.props.onManualDisableToggle(domainId, value);
   };
 
-  createHandleDeleteClick = domainId => event => {
+  createHandleDeleteClick = (domainId) => (event) => {
     // These don't appear to be doing anything to stop handleCellClick being called...
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation();
@@ -115,7 +115,7 @@ class ShortLinkDomainList extends Component {
 
   render() {
     let { domains, disabledDomainIds } = this.props;
-    domains = domains.map(domain => {
+    domains = domains.map((domain) => {
       const isRowDisabled = disabledDomainIds.indexOf(domain.id) > -1;
       return Object.assign({}, domain, { isRowDisabled });
     });

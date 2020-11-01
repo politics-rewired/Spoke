@@ -15,7 +15,7 @@ const COOL_DOWN_PERIOD_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 const DOMAIN_ENDINGS = [".com", ".us", ".net", ".io", ".org", ".info", ".news"];
 const DOMAIN_REGEX = new RegExp(
-  `${`[^://\\s]*(`}${DOMAIN_ENDINGS.map(tld => `\\${tld}`).join("|")})`
+  `${`[^://\\s]*(`}${DOMAIN_ENDINGS.map((tld) => `\\${tld}`).join("|")})`
 );
 
 const db = require("knex")(knexConfig);
@@ -110,7 +110,7 @@ async function chunkedMain() {
     .where("created_at", ">=", period_starts_at.toISOString())
     .where("created_at", "<=", period_ends_at.toISOString());
 
-  const messageItems = messages.map(m => {
+  const messageItems = messages.map((m) => {
     const domain = extractDomain(m.text);
     const url_path = extractPath(m.text, domain);
 
@@ -122,7 +122,7 @@ async function chunkedMain() {
   });
 
   const grouped = {};
-  messageItems.forEach(mi => {
+  messageItems.forEach((mi) => {
     const key = JSON.stringify({ domain: mi.domain, url_path: mi.url_path });
 
     if (!grouped[key]) {
@@ -138,7 +138,7 @@ async function chunkedMain() {
     grouped[key][mi.send_status.toLowerCase()] += 1;
   });
 
-  const rows = Object.keys(grouped).map(key => {
+  const rows = Object.keys(grouped).map((key) => {
     const vals = JSON.parse(key);
     return {
       ...vals,
@@ -210,20 +210,20 @@ async function slidingWindowMain() {
   );
 
   const sensorDomainMessages = messages.filter(
-    message => message.is_sensor_domain
+    (message) => message.is_sensor_domain
   );
-  const [sensorSent, sensorDelivered] = sensorDomainMessages.reduce(
-    deliverabilityReducer,
-    [0, 0]
-  );
+  const [
+    sensorSent,
+    sensorDelivered
+  ] = sensorDomainMessages.reduce(deliverabilityReducer, [0, 0]);
   const sensorDeliverability = sensorDelivered / Math.max(1, sensorSent);
 
   const workHorseDomains = messages.filter(
-    message => !message.is_sensor_domain
+    (message) => !message.is_sensor_domain
   );
   const messageGroupsByDomain = groupBy(
     workHorseDomains,
-    message => message.domain
+    (message) => message.domain
   );
   const domainDeliverability = Object.keys(messageGroupsByDomain).reduce(
     (accumulator, domain) => {
@@ -239,13 +239,13 @@ async function slidingWindowMain() {
   );
 
   await Promise.all(
-    Object.keys(domainDeliverability).map(async domain => {
+    Object.keys(domainDeliverability).map(async (domain) => {
       const deliverability = domainDeliverability[domain];
       if (deliverability < sensorDeliverability - 0.3) {
         logger.warn(
-          `Domain '${domain}' deemed unhealthy with deliverability ${deliverability} over the last ${SLIDING_WINDOW_SECONDS /
-            60 /
-            60} hours`
+          `Domain '${domain}' deemed unhealthy with deliverability ${deliverability} over the last ${
+            SLIDING_WINDOW_SECONDS / 60 / 60
+          } hours`
         );
         await markDomainUnhealthy(domain);
       }
@@ -266,11 +266,11 @@ async function main() {
 }
 
 main()
-  .then(result => {
+  .then((result) => {
     logger.info(result);
     process.exit(0);
   })
-  .catch(error => {
+  .catch((error) => {
     logger.error("Error creating deliverability report: ", error);
     process.exit(1);
   });

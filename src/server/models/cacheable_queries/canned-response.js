@@ -34,7 +34,7 @@ export const cannedResponseCache = {
       })
       .orderBy("title");
     if (r.redis) {
-      const cacheData = dbResult.map(cannedRes => ({
+      const cacheData = dbResult.map((cannedRes) => ({
         id: cannedRes.id,
         title: cannedRes.title,
         text: cannedRes.text,

@@ -30,7 +30,7 @@ export const releaseStaleReplies = async (_payload, _helpers) => {
 
   for (const batch of batches) {
     await Promise.all(
-      batch.map(c =>
+      batch.map((c) =>
         releaseStaleRepliesOnCampaign(c.id, c.replies_stale_after_minutes)
       )
     );

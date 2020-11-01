@@ -143,63 +143,62 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
           showExpandableButton={true}
           closeIcon={isMissing ? <AddBoxIcon /> : <DeleteIcon color={red600} />}
         />
-        {!isMissing &&
-          targets !== null && (
-            <CardText>
-              {targets.length > 0 && (
-                <List>
-                  {targets.map(target => {
-                    if (isResponseOption(target)) {
-                      return (
-                        <ResponseOptionMapping
-                          key={target.id}
-                          responseOption={target.responseOption}
-                          surveyQuestions={surveyQuestions}
-                          onClickDelete={this.makeHandleOnClickDeleteTarget(
-                            target.id
-                          )}
-                        />
-                      );
-                    } else if (isActivistCode(target)) {
-                      return (
-                        <ActivistCodeMapping
-                          key={target.id}
-                          activistCode={target.activistCode}
-                          onClickDelete={this.makeHandleOnClickDeleteTarget(
-                            target.id
-                          )}
-                        />
-                      );
-                    } else if (isResultCode(target)) {
-                      return (
-                        <ResultCodeMapping
-                          key={target.id}
-                          resultCode={target.resultCode}
-                          onClickDelete={this.makeHandleOnClickDeleteTarget(
-                            target.id
-                          )}
-                        />
-                      );
-                    }
+        {!isMissing && targets !== null && (
+          <CardText>
+            {targets.length > 0 && (
+              <List>
+                {targets.map((target) => {
+                  if (isResponseOption(target)) {
+                    return (
+                      <ResponseOptionMapping
+                        key={target.id}
+                        responseOption={target.responseOption}
+                        surveyQuestions={surveyQuestions}
+                        onClickDelete={this.makeHandleOnClickDeleteTarget(
+                          target.id
+                        )}
+                      />
+                    );
+                  } else if (isActivistCode(target)) {
+                    return (
+                      <ActivistCodeMapping
+                        key={target.id}
+                        activistCode={target.activistCode}
+                        onClickDelete={this.makeHandleOnClickDeleteTarget(
+                          target.id
+                        )}
+                      />
+                    );
+                  } else if (isResultCode(target)) {
+                    return (
+                      <ResultCodeMapping
+                        key={target.id}
+                        resultCode={target.resultCode}
+                        onClickDelete={this.makeHandleOnClickDeleteTarget(
+                          target.id
+                        )}
+                      />
+                    );
+                  }
 
-                    return null;
-                  })}
-                </List>
-              )}
-              {targets.length === 0 && (
-                <p>
-                  This is an explicitly empty mapping that will be skipped
-                  during sync.
-                </p>
-              )}
-              <RaisedButton
-                label="Add Mapping"
-                primary={true}
-                disabled={targets.length === 3}
-                onClick={this.handleOnClickAddMapping}
-              />
-            </CardText>
-          )}
+                  return null;
+                })}
+              </List>
+            )}
+            {targets.length === 0 && (
+              <p>
+                This is an explicitly empty mapping that will be skipped during
+                sync.
+              </p>
+            )}
+            <RaisedButton
+              label="Add Mapping"
+              primary={true}
+              disabled={targets.length === 3}
+              onClick={this.handleOnClickAddMapping}
+            />
+          </CardText>
+        )}
         <AddMapping
           config={this.state.isAddMappingOpen ? config : undefined}
           surveyQuestions={surveyQuestions}
@@ -214,7 +213,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
 }
 
 const mutations: MutationMap<InnerProps> = {
-  deleteTarget: ownProps => (targetId: string) => ({
+  deleteTarget: (ownProps) => (targetId: string) => ({
     mutation: gql`
       mutation deleteQuestionResponseSyncTarget($targetId: String!) {
         deleteQuestionResponseSyncTarget(targetId: $targetId)
@@ -223,7 +222,7 @@ const mutations: MutationMap<InnerProps> = {
     variables: {
       targetId
     },
-    update: store => {
+    update: (store) => {
       const variables = { campaignId: ownProps.campaignId };
       const data: any = cloneDeep(
         store.readQuery({
@@ -236,7 +235,7 @@ const mutations: MutationMap<InnerProps> = {
       const { edges } = data.campaign.externalSyncConfigurations;
       const index = edges.findIndex(({ node }) => node.id === configId);
       edges[index].node.targets = edges[index].node.targets.filter(
-        target => target.id !== targetId
+        (target) => target.id !== targetId
       );
 
       store.writeQuery({

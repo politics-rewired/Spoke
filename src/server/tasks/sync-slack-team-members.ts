@@ -10,8 +10,8 @@ import { withTransaction } from "../utils";
 const retrySlack = async <T extends unknown>(
   fn: () => Promise<T>
 ): Promise<T> =>
-  promiseRetry({ retries: 5, maxTimeout: 1000 }, retry =>
-    fn().catch(err => {
+  promiseRetry({ retries: 5, maxTimeout: 1000 }, (retry) =>
+    fn().catch((err) => {
       if (err.message === "ratelimited") {
         const retryS = (err.retry && parseInt(err.retry, 10)) || 0;
         return sleep(retryS * 1000).then(retry);
@@ -114,7 +114,7 @@ const emailForSlackId = async (slackId: string) =>
         bot.users
           .info({ ...PARAMS, user: slackId })
           .then(({ user }) => user.profile.email)
-      ).then(email => {
+      ).then((email) => {
         slackIdEmailCache[slackId] = email;
         return email;
       });
@@ -135,13 +135,13 @@ const syncTeam = async (options: SyncTeamOptions) => {
 
   const whereField = syncOnEmail ? "email" : "auth0_id";
   const whereValues = syncOnEmail
-    ? await Promise.all(allChannelMembers.map(emailForSlackId)).then(emails =>
-        emails.filter(email => email !== undefined)
+    ? await Promise.all(allChannelMembers.map(emailForSlackId)).then((emails) =>
+        emails.filter((email) => email !== undefined)
       )
     : allChannelMembers;
 
-  const updateCount = await helpers.withPgClient(async poolClient =>
-    withTransaction(poolClient, async client => {
+  const updateCount = await helpers.withPgClient(async (poolClient) =>
+    withTransaction(poolClient, async (client) => {
       await client.query(`delete from user_team where team_id = $1`, [
         spokeTeam.id
       ]);
@@ -207,7 +207,7 @@ export const syncSlackTeamMembers: Task = async (_payload, helpers) => {
 
   for (const spokeTeam of allTeams) {
     const normalizedTeamName = spokeTeam.title.toLowerCase().replace(/ /g, "-");
-    const matchingChannel = allChannels.find(channel => {
+    const matchingChannel = allChannels.find((channel) => {
       return channel.name_normalized === normalizedTeamName;
     });
 

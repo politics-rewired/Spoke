@@ -25,7 +25,7 @@ class CampaignOverlapManager extends React.Component {
     search: ""
   };
 
-  deleteCampaigns = async campaignId => {
+  deleteCampaigns = async (campaignId) => {
     try {
       const newDeleting = new Set();
 
@@ -64,7 +64,7 @@ class CampaignOverlapManager extends React.Component {
     this.setState({ page: Math.max(this.state.page - 1, 0) });
   };
 
-  handleRowsSelected = rows => {
+  handleRowsSelected = (rows) => {
     const currentPage = this.getOverlapPage(
       this.state.page,
       this.state.pageSize,
@@ -77,7 +77,7 @@ class CampaignOverlapManager extends React.Component {
       new Array(this.state.pageSize)
         .fill(null)
         .map((_, idx) => idx)
-        .forEach(idx => {
+        .forEach((idx) => {
           if (currentPage[idx]) {
             if (!this.state.deleted.has(currentPage[idx].campaignId)) {
               newSelectedCampaignIds.add(currentPage[idx].campaignId);
@@ -90,7 +90,7 @@ class CampaignOverlapManager extends React.Component {
       new Array(this.state.pageSize)
         .fill(null)
         .map((_, idx) => idx)
-        .forEach(idx => {
+        .forEach((idx) => {
           if (currentPage[idx])
             newSelectedCampaignIds.delete(currentPage[idx].campaignId);
         });
@@ -117,28 +117,28 @@ class CampaignOverlapManager extends React.Component {
     });
   };
 
-  handleRowSizeChange = rowSizeIdx => {
+  handleRowSizeChange = (rowSizeIdx) => {
     this.setState({ pageSize: ROW_SIZE_OPTIONS[rowSizeIdx] });
   };
 
   getOverlapPage = (page, pageSize, search) =>
     (search !== ""
       ? this.props.fetchCampaignOverlaps.fetchCampaignOverlaps.filter(
-          overlap => {
+          (overlap) => {
             return overlap.campaign.title.match(search);
           }
         )
       : this.props.fetchCampaignOverlaps.fetchCampaignOverlaps
     )
       .slice(page * pageSize, (page + 1) * pageSize)
-      .map(overlap => ({
+      .map((overlap) => ({
         campaignId: overlap.campaign.id,
         campaignTitle: overlap.campaign.title,
         overlapCount: overlap.overlapCount,
         lastActivity: moment(overlap.lastActivity).fromNow()
       }));
 
-  setOverlapSearch = e => {
+  setOverlapSearch = (e) => {
     this.setState({ search: e.target.value });
   };
 
@@ -161,13 +161,12 @@ class CampaignOverlapManager extends React.Component {
 
     const currentOverlapPage = this.getOverlapPage(page, pageSize, search);
     const selectedRows = currentOverlapPage
-      .map(
-        (_, idx) =>
-          this.state.selectedCampaignIds.has(currentOverlapPage[idx].campaignId)
-            ? idx
-            : false
+      .map((_, idx) =>
+        this.state.selectedCampaignIds.has(currentOverlapPage[idx].campaignId)
+          ? idx
+          : false
       )
-      .filter(idxOrFalse => idxOrFalse !== false);
+      .filter((idxOrFalse) => idxOrFalse !== false);
 
     return (
       <div>
@@ -181,8 +180,8 @@ class CampaignOverlapManager extends React.Component {
               deleting.size > 0
                 ? "Deleting..."
                 : isDeleteAllDisabled
-                  ? "Delete Selected"
-                  : `Delete ${selectedCampaignIds.size} Selected`
+                ? "Delete Selected"
+                : `Delete ${selectedCampaignIds.size} Selected`
             }
             secondary={true}
             disabled={isDeleteAllDisabled}
@@ -275,7 +274,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         input: {
           targetCampaignId: ownProps.campaignId,
@@ -287,7 +286,7 @@ const queries = {
 };
 
 const mutations = {
-  deleteManyCampaignOverlap: ownProps => overlappingCampaignIds => ({
+  deleteManyCampaignOverlap: (ownProps) => (overlappingCampaignIds) => ({
     mutation: gql`
       mutation deleteManyCampaignOverlap(
         $organizationId: String!

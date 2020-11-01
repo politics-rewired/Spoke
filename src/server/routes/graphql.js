@@ -17,7 +17,7 @@ const executableSchema = makeExecutableSchema({
   allowUndefinedInResolve: false
 });
 
-const formatError = err => {
+const formatError = (err) => {
   // node-postgres does not use an Error subclass so we check for schema property
   if (
     Object.prototype.hasOwnProperty.call(err.originalError, "schema") &&

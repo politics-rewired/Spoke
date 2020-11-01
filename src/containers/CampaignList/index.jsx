@@ -30,14 +30,14 @@ export class CampaignList extends React.Component {
     const [operationName, campaign, variables] = this.state.inProgress;
 
     this.props.mutations[operationName](campaign.id, variables)
-      .then(resp => {
+      .then((resp) => {
         const mutationName =
           operations[operationName].mutationName || operationName;
 
         const dataKey = Object.keys(resp.data)[0];
         this.setState({ finished: resp.data[dataKey], executing: false });
       })
-      .catch(error => {
+      .catch((error) => {
         this.setState({ error, executing: false });
       });
   };
@@ -118,7 +118,7 @@ const campaignInfoFragment = `
 `;
 
 const mutations = {
-  archiveCampaign: ownProps => campaignId => ({
+  archiveCampaign: (ownProps) => (campaignId) => ({
     mutation: gql`mutation archiveCampaign($campaignId: String!) {
           archiveCampaign(id: $campaignId) {
             ${campaignInfoFragment}
@@ -126,7 +126,7 @@ const mutations = {
         }`,
     variables: { campaignId }
   }),
-  unarchiveCampaign: ownProps => campaignId => ({
+  unarchiveCampaign: (ownProps) => (campaignId) => ({
     mutation: gql`mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
           ${campaignInfoFragment}
@@ -134,7 +134,7 @@ const mutations = {
       }`,
     variables: { campaignId }
   }),
-  releaseUnsentMessages: ownProps => campaignId => ({
+  releaseUnsentMessages: (ownProps) => (campaignId) => ({
     mutation: gql`
       mutation releaseUnsentMessages(
         $campaignId: String!
@@ -148,7 +148,7 @@ const mutations = {
       campaignId
     }
   }),
-  markForSecondPass: ownProps => (
+  markForSecondPass: (ownProps) => (
     campaignId,
     { excludeRecentlyTexted, days, hours }
   ) => ({
@@ -168,7 +168,7 @@ const mutations = {
       campaignId
     }
   }),
-  releaseUnrepliedMessages: ownProps => (campaignId, { ageInHours }) => ({
+  releaseUnrepliedMessages: (ownProps) => (campaignId, { ageInHours }) => ({
     mutation: gql`
       mutation releaseUnrepliedMessages(
         $campaignId: String!
@@ -188,7 +188,7 @@ const mutations = {
       ageInHours
     }
   }),
-  deleteNeedsMessage: ownProps => (campaignId, _) => ({
+  deleteNeedsMessage: (ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation deleteNeedsMessage($campaignId: String!) {
         deleteNeedsMessage(campaignId: $campaignId)
@@ -198,7 +198,7 @@ const mutations = {
       campaignId
     }
   }),
-  unMarkForSecondPass: ownProps => (campaignId, _) => ({
+  unMarkForSecondPass: (ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation unMarkForSecondPass($campaignId: String!) {
         unMarkForSecondPass(campaignId: $campaignId)
@@ -208,7 +208,7 @@ const mutations = {
       campaignId
     }
   }),
-  turnAutoAssignOn: ownProps => (campaignId, _) => ({
+  turnAutoAssignOn: (ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation turnAutoAssignOn($campaignId: String!) {
         editCampaign(id: $campaignId, campaign: { isAutoassignEnabled: true }) {
@@ -219,7 +219,7 @@ const mutations = {
     `,
     variables: { campaignId }
   }),
-  turnAutoAssignOff: ownProps => (campaignId, _) => ({
+  turnAutoAssignOff: (ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation turnAutoAssignOff($campaignId: String!) {
         editCampaign(
@@ -255,7 +255,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },

@@ -5,7 +5,7 @@ import * as yup from "yup";
 import GSForm from "./forms/GSForm";
 
 class CannedResponseForm extends React.Component {
-  handleSave = formValues => {
+  handleSave = (formValues) => {
     const { onSaveCannedResponse } = this.props;
     onSaveCannedResponse(formValues);
   };

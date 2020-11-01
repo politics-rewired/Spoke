@@ -37,8 +37,8 @@ function redirectPostSignIn(req, res, isNewUser) {
       ? AUTOJOIN_URL
       : "/"
     : req.query.state
-      ? req.query.state
-      : "/";
+    ? req.query.state
+    : "/";
 
   return res.redirect(redirectDestionation);
 }
@@ -53,33 +53,36 @@ function setupSlackPassport() {
       : undefined
   };
 
-  const strategy = new passportSlack.Strategy(options, async (
-    accessToken,
-    scopes,
-    team,
-    // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-    { bot, incomingWebhook },
-    // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-    { user, team: teamProfile },
-    done
-  ) => {
-    // scopes is a Set
-    if (config.SLACK_TOKEN) {
-      const response = await request
-        .get(`https://slack.com/api/users.profile.get`)
-        .query({ token: config.SLACK_TOKEN, user: user.id })
-        .then(res => res.body);
-      if (!response.ok) {
-        logger.error("Error fetching Slack profile", { response });
-      } else {
-        const userProfile = response.profile;
-        const { real_name, first_name, last_name, phone } = userProfile;
-        user = { ...user, real_name, first_name, last_name, phone };
+  const strategy = new passportSlack.Strategy(
+    options,
+    async (
+      accessToken,
+      scopes,
+      team,
+      // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+      { bot, incomingWebhook },
+      // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+      { user, team: teamProfile },
+      done
+    ) => {
+      // scopes is a Set
+      if (config.SLACK_TOKEN) {
+        const response = await request
+          .get(`https://slack.com/api/users.profile.get`)
+          .query({ token: config.SLACK_TOKEN, user: user.id })
+          .then((res) => res.body);
+        if (!response.ok) {
+          logger.error("Error fetching Slack profile", { response });
+        } else {
+          const userProfile = response.profile;
+          const { real_name, first_name, last_name, phone } = userProfile;
+          user = { ...user, real_name, first_name, last_name, phone };
+        }
       }
-    }
 
-    return done(null, user);
-  });
+      return done(null, user);
+    }
+  );
 
   passport.use(strategy);
 
@@ -89,8 +92,8 @@ function setupSlackPassport() {
 
   passport.deserializeUser((slackUserId, done) =>
     userLoggedIn(slackUserId, "auth0_id")
-      .then(user => done(null, user || false))
-      .catch(error => done(error))
+      .then((user) => done(null, user || false))
+      .catch((error) => done(error))
   );
 
   const handleLogin = async (req, res) => {
@@ -104,7 +107,7 @@ function setupSlackPassport() {
       .reader("user")
       .where({ auth0_id: auth0Id })
       .first()
-      .catch(err => {
+      .catch((err) => {
         logger.error("Slack login error: could not find existing user: ", err);
         throw err;
       });
@@ -151,7 +154,7 @@ function setupSlackPassport() {
       await r
         .knex("user")
         .insert(userData)
-        .catch(err => {
+        .catch((err) => {
           logger.error("Slack login error: could not insert new user: ", err);
           throw err;
         });
@@ -202,8 +205,8 @@ function setupAuth0Passport() {
 
   passport.deserializeUser((auth0Id, done) =>
     userLoggedIn(auth0Id, "auth0_id")
-      .then(user => done(null, user || false))
-      .catch(error => done(error))
+      .then((user) => done(null, user || false))
+      .catch((error) => done(error))
   );
 
   const handleLogin = async (req, res) => {
@@ -289,8 +292,8 @@ function setupLocalAuthPassport() {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser((id, done) =>
     userLoggedIn(parseInt(id, 10))
-      .then(user => done(null, user || false))
-      .catch(error => done(error))
+      .then((user) => done(null, user || false))
+      .catch((error) => done(error))
   );
 
   const app = express();
@@ -308,7 +311,7 @@ function setupLocalAuthPassport() {
       }
 
       // Default behavior
-      req.logIn(user, logInErr => {
+      req.logIn(user, (logInErr) => {
         if (logInErr) {
           return next(logInErr);
         }
@@ -322,9 +325,9 @@ function setupLocalAuthPassport() {
 
 // Convert a Spoke user record to the type expected by passport.(de)serializeUser
 export const sessionUserMap = {
-  local: user => ({ id: user.id }),
-  auth0: user => ({ id: user.auth0_id }),
-  slack: user => ({ id: user.auth0_id })
+  local: (user) => ({ id: user.id }),
+  auth0: (user) => ({ id: user.auth0_id }),
+  slack: (user) => ({ id: user.auth0_id })
 };
 
 export default {

@@ -3,7 +3,7 @@ import ContactToolbar from "../../components/ContactToolbar";
 import NavigateHomeIcon from "material-ui/svg-icons/action/home";
 import IconButton from "material-ui/IconButton/IconButton";
 
-const TopFixedSection = props => {
+const TopFixedSection = (props) => {
   const { contactSettings, contact, campaign, onExitTexter } = props;
 
   return (

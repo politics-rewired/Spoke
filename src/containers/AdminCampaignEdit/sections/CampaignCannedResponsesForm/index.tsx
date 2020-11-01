@@ -90,7 +90,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const { cannedResponsesToAdd, cannedResponseIdsToDelete } = this.state;
     const { cannedResponses } = this.props.data.campaign;
     const newCannedResponses = cannedResponses
-      .filter(response => !cannedResponseIdsToDelete.includes(response.id))
+      .filter((response) => !cannedResponseIdsToDelete.includes(response.id))
       .concat(cannedResponsesToAdd);
     const didChange = !isEqual(cannedResponses, newCannedResponses);
     return { cannedResponses: newCannedResponses, didChange };
@@ -133,7 +133,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
 
   createHandleOnDelete = (responseId: string) => () => {
     const cannedResponsesToAdd = this.state.cannedResponsesToAdd.filter(
-      response => response.id !== responseId
+      (response) => response.id !== responseId
     );
     const cannedResponseIdsToDelete = [
       ...new Set(this.state.cannedResponseIdsToDelete).add(responseId)
@@ -169,7 +169,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         />
         {cannedResponses.length > 0 ? (
           <LargeList>
-            {cannedResponses.map(cannedResponse => (
+            {cannedResponses.map((cannedResponse) => (
               <CannedResponseRow
                 key={cannedResponse.id}
                 cannedResponse={cannedResponse}
@@ -227,7 +227,7 @@ const queries: QueryMap<InnerProps> = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -236,7 +236,7 @@ const queries: QueryMap<InnerProps> = {
 };
 
 const mutations: MutationMap<InnerProps> = {
-  editCampaign: ownProps => (payload: Values) => ({
+  editCampaign: (ownProps) => (payload: Values) => ({
     mutation: gql`
       mutation editCampaignBasics(
         $campaignId: String!

@@ -22,7 +22,7 @@ interface Props {
   pendingJob?: PendingJobType;
 }
 
-export const UploadResults: React.SFC<Props> = props => {
+export const UploadResults: React.SFC<Props> = (props) => {
   const { contactsCount, customFields, pendingJob } = props;
   return (
     <List>
@@ -38,7 +38,7 @@ export const UploadResults: React.SFC<Props> = props => {
         <ListItem
           primaryText={`${customFields.length} custom fields`}
           leftIcon={<GreenCheck />}
-          nestedItems={customFields.map(field => (
+          nestedItems={customFields.map((field) => (
             <ListItem
               key={field}
               innerDivStyle={inlineStyles.nestedItem}
@@ -51,7 +51,7 @@ export const UploadResults: React.SFC<Props> = props => {
       {pendingJob && pendingJob.resultMessage.split("\n").length > 0 ? (
         pendingJob.resultMessage
           .split("\n")
-          .map(message => <ListItem key={message} primaryText={message} />)
+          .map((message) => <ListItem key={message} primaryText={message} />)
       ) : (
         <ListItem primaryText={"No results"} />
       )}

@@ -1,9 +1,9 @@
-const encode = value => Buffer.from(`${value}`).toString("base64");
-const decode = value => Buffer.from(value, "base64").toString();
+const encode = (value) => Buffer.from(`${value}`).toString("base64");
+const decode = (value) => Buffer.from(value, "base64").toString();
 
 const defaultOptions = {
   primaryColumn: "id",
-  nodeTransformer: node => node
+  nodeTransformer: (node) => node
 };
 
 /**
@@ -41,7 +41,7 @@ export const formatPage = async (query, options) => {
 
   const [{ count: totalCount }] = await countQuery.count();
   const results = await query;
-  const edges = results.slice(0, first || undefined).map(record => ({
+  const edges = results.slice(0, first || undefined).map((record) => ({
     cursor: encode(record[cursorKey]),
     node: nodeTransformer(record)
   }));

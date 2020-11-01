@@ -20,9 +20,9 @@ const { r } = thinky;
 // * organization metadata (saved in organization.js instead)
 // * campaignCannedResponses (saved in canned-responses.js instead)
 
-const cacheKey = id => `${config.CACHE_PREFIX}campaign-${id}`;
+const cacheKey = (id) => `${config.CACHE_PREFIX}campaign-${id}`;
 
-const dbCustomFields = async id => {
+const dbCustomFields = async (id) => {
   const campaignContact = await r
     .reader("campaign_contact")
     .where({ campaign_id: id })
@@ -36,28 +36,22 @@ const dbCustomFields = async id => {
   return [];
 };
 
-const dbInteractionSteps = async id => {
-  return r
-    .reader("interaction_step")
-    .select("*")
-    .where({
-      campaign_id: id,
-      is_deleted: false
-    });
+const dbInteractionSteps = async (id) => {
+  return r.reader("interaction_step").select("*").where({
+    campaign_id: id,
+    is_deleted: false
+  });
 };
 
-const clear = async id => {
+const clear = async (id) => {
   if (r.redis) {
     await r.redis.delAsync(cacheKey(id));
   }
 };
 
-const loadDeep = async id => {
+const loadDeep = async (id) => {
   if (r.redis) {
-    const campaign = await r
-      .reader("campaign")
-      .where({ id })
-      .first();
+    const campaign = await r.reader("campaign").where({ id }).first();
     if (campaign.is_archived) {
       // do not cache archived campaigns
       await clear(id);
@@ -80,7 +74,7 @@ const loadDeep = async id => {
 
 export const campaignCache = {
   clear,
-  load: async id => {
+  load: async (id) => {
     if (r.redis) {
       let campaignData = await r.redis.getAsync(cacheKey(id));
       if (!campaignData) {
@@ -101,10 +95,7 @@ export const campaignCache = {
         return campaign;
       }
     }
-    return r
-      .reader("campaign")
-      .where({ id })
-      .first();
+    return r.reader("campaign").where({ id }).first();
   },
   reload: loadDeep,
   dbCustomFields,

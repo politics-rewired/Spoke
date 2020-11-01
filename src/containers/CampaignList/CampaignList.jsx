@@ -173,7 +173,7 @@ export class CampaignList extends React.Component {
     const primaryText = (
       <div style={inlineStyles.chipWrapper}>
         {campaign.title}
-        {tags.map(tag => (
+        {tags.map((tag) => (
           <Chip
             key={tag.title}
             labelColor={tag.color}
@@ -224,7 +224,7 @@ export class CampaignList extends React.Component {
       return <Empty title="No campaigns" icon={<SpeakerNotesIcon />} />;
     }
 
-    return <List>{campaigns.map(campaign => this.renderRow(campaign))}</List>;
+    return <List>{campaigns.map((campaign) => this.renderRow(campaign))}</List>;
   }
 }
 

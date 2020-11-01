@@ -69,11 +69,8 @@ $$ language plpgsql;
 
 exports.up = function up(knex) {
   return knex.schema
-    .alterTable("question_response", table => {
-      table
-        .boolean("is_deleted")
-        .default(false)
-        .index();
+    .alterTable("question_response", (table) => {
+      table.boolean("is_deleted").default(false).index();
 
       table.timestamp("updated_at").default(knex.fn.now());
     })

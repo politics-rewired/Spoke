@@ -63,7 +63,7 @@ class CreateOrganization extends React.Component {
           <Paper style={{ padding: 20 }}>
             <GSForm
               schema={this.formSchema}
-              onSubmit={async formValues => {
+              onSubmit={async (formValues) => {
                 const newOrganization = await this.props.mutations.createOrganization(
                   formValues.name,
                   this.props.userData.currentUser.id,
@@ -122,7 +122,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         inviteId: ownProps.match.params.inviteId
       },
@@ -137,7 +137,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({ fetchPolicy: "network-only" })
+    options: (ownProps) => ({ fetchPolicy: "network-only" })
   }
 };
 
@@ -150,7 +150,7 @@ CreateOrganization.propTypes = {
 };
 
 const mutations = {
-  createOrganization: ownProps => (name, userId, inviteId) => ({
+  createOrganization: (ownProps) => (name, userId, inviteId) => ({
     mutation: gql`
       mutation createOrganization(
         $name: String!

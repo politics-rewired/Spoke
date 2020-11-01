@@ -9,8 +9,8 @@ const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
 
 export const resolvers = {
   Location: {
-    city: zipCode => zipCode.city || "",
-    state: zipCode => zipCode.state || ""
+    city: (zipCode) => zipCode.city || "",
+    state: (zipCode) => zipCode.state || ""
   },
   CampaignContact: {
     ...sqlResolvers([
@@ -21,25 +21,25 @@ export const resolvers = {
       "messageStatus",
       "assignmentId"
     ]),
-    lastName: async campaignContact => {
+    lastName: async (campaignContact) => {
       if (contactFieldsToHide.includes("lastName")) {
         return "";
       }
       return campaignContact.last_name;
     },
-    cell: async campaignContact => {
+    cell: async (campaignContact) => {
       if (contactFieldsToHide.includes("cell")) {
         return "";
       }
       return campaignContact.cell;
     },
-    external_id: async campaignContact => {
+    external_id: async (campaignContact) => {
       if (contactFieldsToHide.includes("external_id")) {
         return "";
       }
       return campaignContact.external_id;
     },
-    updatedAt: async campaignContact => {
+    updatedAt: async (campaignContact) => {
       let updatedAt;
       if (
         campaignContact.updated_at &&
@@ -56,7 +56,7 @@ export const resolvers = {
 
       return updatedAt;
     },
-    messageStatus: async campaignContact => {
+    messageStatus: async (campaignContact) => {
       if (campaignContact.message_status) {
         return campaignContact.message_status;
       }
@@ -67,7 +67,7 @@ export const resolvers = {
     // To get that result to look like what the original code returned
     // without using the outgoing answer_options array field, try this:
     //
-    questionResponseValues: async campaignContact => {
+    questionResponseValues: async (campaignContact) => {
       if ("questionResponseValues" in campaignContact) {
         return campaignContact.questionResponseValues;
       }
@@ -91,7 +91,7 @@ export const resolvers = {
           "istep.id as istep_id"
         );
 
-      return qr_results.map(qr_result => {
+      return qr_results.map((qr_result) => {
         const question = {
           id: qr_result.istep_id,
           question: qr_result.istep_question
@@ -99,7 +99,7 @@ export const resolvers = {
         return { ...qr_result, question };
       });
     },
-    questionResponses: async campaignContact => {
+    questionResponses: async (campaignContact) => {
       const results = await r
         .reader("question_response as qres")
         .where("qres.campaign_contact_id", campaignContact.id)
@@ -127,7 +127,7 @@ export const resolvers = {
           "qres.created_at",
           "qres.interaction_step_id"
         )
-        .catch(err =>
+        .catch((err) =>
           logger.error("Error fetching question responses: ", {
             ...errToObj(err)
           })
@@ -176,7 +176,7 @@ export const resolvers = {
     },
     location: async (campaignContact, _, { loaders }) =>
       loaders.zipCode.load(campaignContact.zip.split("-")[0]),
-    messages: async campaignContact => {
+    messages: async (campaignContact) => {
       if ("messages" in campaignContact) {
         return campaignContact.messages;
       }

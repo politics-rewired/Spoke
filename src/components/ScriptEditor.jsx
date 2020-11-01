@@ -58,7 +58,7 @@ function findWithRegex(regex, contentBlock, callback) {
   }
 }
 
-const RecognizedField = props => (
+const RecognizedField = (props) => (
   <span {...props} style={styles.goodField}>
     {props.children}
   </span>
@@ -68,7 +68,7 @@ RecognizedField.propTypes = {
   children: PropTypes.arrayOf(PropTypes.element)
 };
 
-const UnrecognizedField = props => (
+const UnrecognizedField = (props) => (
   <span {...props} style={styles.badField}>
     {props.children}
   </span>
@@ -87,7 +87,7 @@ const gsmReplacements = [
   ["–", "-"]
 ];
 
-const replaceEasyGsmWins = text =>
+const replaceEasyGsmWins = (text) =>
   gsmReplacements.reduce(
     (acc, replacement) => acc.replace(replacement[0], replacement[1]),
     text
@@ -114,7 +114,7 @@ class ScriptEditor extends React.Component {
 
   focus = () => this.refs.editor.focus();
 
-  onEditorChange = editorState => {
+  onEditorChange = (editorState) => {
     this.setState({ editorState }, () => {
       const { onChange } = this.props;
       if (onChange) {
@@ -169,7 +169,7 @@ class ScriptEditor extends React.Component {
     ]);
   }
 
-  addCustomField = field => {
+  addCustomField = (field) => {
     const textToInsert = delimit(field);
     const { editorState } = this.state;
     const selection = editorState.getSelection();
@@ -191,7 +191,7 @@ class ScriptEditor extends React.Component {
     const { scriptFields } = this.props;
     return (
       <div style={styles.scriptFieldButtonSection}>
-        {scriptFields.map(field => (
+        {scriptFields.map((field) => (
           <Chip
             key={field}
             style={styles.scriptFieldButton}
@@ -234,7 +234,8 @@ class ScriptEditor extends React.Component {
             target="_blank"
           >
             docs here
-          </a>.
+          </a>
+          .
         </div>
       </div>
     );

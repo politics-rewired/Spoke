@@ -17,7 +17,7 @@ const AdminOptOutList = function AdminOptOutList(props) {
         <Empty title="Yay, no one has opted out!" icon={<ProhibitedIcon />} />
       ) : (
         <List>
-          {optOuts.map(optOut => (
+          {optOuts.map((optOut) => (
             <ListItem key={optOut.id} primaryText={optOut.cell} />
           ))}
         </List>
@@ -43,7 +43,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       },

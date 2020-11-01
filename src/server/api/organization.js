@@ -16,7 +16,7 @@ import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
 import { buildUserOrganizationQuery } from "./user";
 
-export const getEscalationUserId = async organizationId => {
+export const getEscalationUserId = async (organizationId) => {
   let escalationUserId;
   try {
     const organization = await r
@@ -34,7 +34,7 @@ export const getEscalationUserId = async organizationId => {
 export const resolvers = {
   Organization: {
     ...sqlResolvers(["id", "name"]),
-    settings: organization => organization,
+    settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       return getCampaigns(organization.id, cursor, campaignsFilter);
@@ -91,7 +91,7 @@ export const resolvers = {
           "user.first_name",
           "user.last_name"
         ]);
-        pagerOptions.nodeTransformer = record => {
+        pagerOptions.nodeTransformer = (record) => {
           const {
             user_table_id,
             email,
@@ -158,18 +158,18 @@ export const resolvers = {
           .where("user_organization.organization_id", organization.id)
       );
     },
-    threeClickEnabled: organization =>
+    threeClickEnabled: (organization) =>
       organization.features.indexOf("threeClick") !== -1,
-    textingHoursEnforced: organization => organization.texting_hours_enforced,
-    optOutMessage: organization =>
+    textingHoursEnforced: (organization) => organization.texting_hours_enforced,
+    optOutMessage: (organization) =>
       (organization.features &&
       organization.features.indexOf("opt_out_message") !== -1
         ? JSON.parse(organization.features).opt_out_message
         : config.OPT_OUT_MESSAGE) ||
       "I'm opting you out of texts immediately. Have a great day.",
-    textingHoursStart: organization => organization.texting_hours_start,
-    textingHoursEnd: organization => organization.texting_hours_end,
-    textRequestFormEnabled: organization => {
+    textingHoursStart: (organization) => organization.texting_hours_start,
+    textingHoursEnd: (organization) => organization.texting_hours_end,
+    textRequestFormEnabled: (organization) => {
       try {
         const features = JSON.parse(organization.features);
         return features.textRequestFormEnabled || false;
@@ -177,7 +177,7 @@ export const resolvers = {
         return false;
       }
     },
-    textRequestType: organization => {
+    textRequestType: (organization) => {
       const defaultValue = TextRequestType.UNSENT;
       try {
         const features = JSON.parse(organization.features);
@@ -186,7 +186,7 @@ export const resolvers = {
         return defaultValue;
       }
     },
-    textRequestMaxCount: organization => {
+    textRequestMaxCount: (organization) => {
       try {
         const features = JSON.parse(organization.features);
         return parseInt(features.textRequestMaxCount, 10);
@@ -204,7 +204,7 @@ export const resolvers = {
     currentAssignmentTargets: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const cats = await allCurrentAssignmentTargets(organization.id);
-      const formatted = cats.map(cat => ({
+      const formatted = cats.map((cat) => ({
         type: cat.assignment_type,
         countLeft: parseInt(cat.count_left, 10),
         campaign: {
@@ -238,7 +238,7 @@ export const resolvers = {
           organization.id
         );
 
-        return assignmentTargets.map(at => ({
+        return assignmentTargets.map((at) => ({
           type: at.type,
           countLeft: parseInt(at.count_left, 10),
           maxRequestCount: parseInt(at.max_request_count, 10),
@@ -254,7 +254,7 @@ export const resolvers = {
         throw err;
       }
     },
-    escalatedConversationCount: async organization => {
+    escalatedConversationCount: async (organization) => {
       if (config.DISABLE_SIDEBAR_BADGES) return 0;
 
       const countQuery = r
@@ -282,7 +282,7 @@ export const resolvers = {
       const escalatedCount = await r.parseCount(countQuery);
       return escalatedCount;
     },
-    numbersApiKey: async organization => {
+    numbersApiKey: async (organization) => {
       let numbersApiKey = null;
 
       try {
@@ -294,19 +294,16 @@ export const resolvers = {
 
       return numbersApiKey;
     },
-    pendingAssignmentRequestCount: async organization =>
+    pendingAssignmentRequestCount: async (organization) =>
       config.DISABLE_SIDEBAR_BADGES
         ? 0
         : r.parseCount(
-            r
-              .reader("assignment_request")
-              .count("*")
-              .where({
-                status: "pending",
-                organization_id: organization.id
-              })
+            r.reader("assignment_request").count("*").where({
+              status: "pending",
+              organization_id: organization.id
+            })
           ),
-    linkDomains: async organization => {
+    linkDomains: async (organization) => {
       const rawResult = await r.reader.raw(
         `
         select
@@ -336,7 +333,7 @@ export const resolvers = {
       );
       return rawResult.rows;
     },
-    unhealthyLinkDomains: async _ => {
+    unhealthyLinkDomains: async (_) => {
       const rawResult = await r.knex.raw(`
         select
           distinct on (domain) *
@@ -349,7 +346,7 @@ export const resolvers = {
       `);
       return rawResult.rows;
     },
-    tagList: async organization => {
+    tagList: async (organization) => {
       const getTags = await memoizer.memoize(async ({ organizationId }) => {
         return r
           .reader("tag")
@@ -359,7 +356,7 @@ export const resolvers = {
 
       return getTags({ organizationId: organization.id });
     },
-    escalationTagList: async organization => {
+    escalationTagList: async (organization) => {
       const getEscalationTags = await memoizer.memoize(
         async ({ organizationId }) => {
           return r
@@ -373,7 +370,7 @@ export const resolvers = {
 
       return getEscalationTags({ organizationId: organization.id });
     },
-    teams: async organization =>
+    teams: async (organization) =>
       r
         .reader("team")
         .where({ organization_id: organization.id })

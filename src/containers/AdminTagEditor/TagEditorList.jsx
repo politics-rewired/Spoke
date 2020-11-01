@@ -30,15 +30,15 @@ const styles = {
 };
 
 class TagEditorList extends Component {
-  createHandleEditTag = tagId => () => this.props.oEditTag(tagId);
-  createHandleDeleteTag = tagId => () => this.props.onDeleteTag(tagId);
+  createHandleEditTag = (tagId) => () => this.props.oEditTag(tagId);
+  createHandleDeleteTag = (tagId) => () => this.props.onDeleteTag(tagId);
 
   render() {
     const { tags } = this.props;
 
     return (
       <div style={styles.wrapper}>
-        {tags.map(tag => (
+        {tags.map((tag) => (
           <Paper key={tag.id} style={styles.card}>
             <div style={{ display: "flex" }}>
               <Chip

@@ -17,7 +17,7 @@ class AdminNavigation extends React.Component {
       <Navigation
         onToggleMenu={this.props.onToggleMenu}
         showMenu={this.props.showMenu}
-        sections={sections.map(section => ({
+        sections={sections.map((section) => ({
           ...section,
           url: this.urlFromPath(section.path)
         }))}

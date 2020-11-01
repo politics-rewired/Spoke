@@ -40,7 +40,7 @@ const Navigation = function Navigation(props) {
             <FlatButton label={"Close Menu"} onClick={props.onToggleMenu} />
           </div>
           <List>
-            {sections.map(section => (
+            {sections.map((section) => (
               <ListItem
                 {...dataTest(camelCase(`nav ${section.path}`))}
                 key={section.name}

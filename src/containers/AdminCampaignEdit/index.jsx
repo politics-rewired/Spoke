@@ -119,7 +119,7 @@ class AdminCampaignEdit extends React.Component {
     const campaignDataCopy = {
       ...newProps.campaignData.campaign
     };
-    expandedKeys.forEach(key => {
+    expandedKeys.forEach((key) => {
       // contactsCount is in two sections
       // That means it won't get updated if *either* is opened
       // but we want it to update in either
@@ -140,7 +140,7 @@ class AdminCampaignEdit extends React.Component {
     // can be marked saved, but only when user is NOT editing Contacts
     if (campaignDataCopy.contactsCount > 0) {
       const specialCases = ["contacts", "contactsFile", "contactSql"];
-      specialCases.forEach(key => {
+      specialCases.forEach((key) => {
         if (expandedKeys.indexOf(key) === -1) {
           delete pushToFormValues[key];
         }
@@ -164,7 +164,7 @@ class AdminCampaignEdit extends React.Component {
 
   getSectionState(section) {
     const sectionState = {};
-    section.keys.forEach(key => {
+    section.keys.forEach((key) => {
       sectionState[key] = this.state.campaignFormValues[key];
     });
     return sectionState;
@@ -187,7 +187,7 @@ class AdminCampaignEdit extends React.Component {
     }
   }
 
-  handleChange = formValues => {
+  handleChange = (formValues) => {
     this.setState({
       campaignFormValues: {
         ...this.state.campaignFormValues,
@@ -230,7 +230,7 @@ class AdminCampaignEdit extends React.Component {
       delete newCampaign.customFields;
       delete newCampaign.contactsCount;
       if (newCampaign.hasOwnProperty("contacts") && newCampaign.contacts) {
-        const contactData = newCampaign.contacts.map(contact => {
+        const contactData = newCampaign.contacts.map((contact) => {
           const customFields = {};
           const contactInput = {
             cell: contact.cell,
@@ -239,7 +239,7 @@ class AdminCampaignEdit extends React.Component {
             zip: contact.zip || "",
             external_id: contact.external_id || ""
           };
-          Object.keys(contact).forEach(key => {
+          Object.keys(contact).forEach((key) => {
             if (!contactInput.hasOwnProperty(key)) {
               customFields[key] = contact[key].trim();
             }
@@ -253,11 +253,11 @@ class AdminCampaignEdit extends React.Component {
         newCampaign.contacts = null;
       }
       if (newCampaign.hasOwnProperty("teams")) {
-        newCampaign.teamIds = newCampaign.teams.map(team => team.id);
+        newCampaign.teamIds = newCampaign.teams.map((team) => team.id);
         delete newCampaign.teams;
       }
       if (newCampaign.hasOwnProperty("texters")) {
-        newCampaign.texters = newCampaign.texters.map(texter => ({
+        newCampaign.texters = newCampaign.texters.map((texter) => ({
           id: texter.id,
           needsMessageCount: texter.assignment.needsMessageCount,
           maxContacts: texter.assignment.maxContacts,
@@ -317,7 +317,7 @@ class AdminCampaignEdit extends React.Component {
     }
     const sectionState = {};
     const sectionProps = {};
-    section.keys.forEach(key => {
+    section.keys.forEach((key) => {
       sectionState[key] = this.state.campaignFormValues[key];
       sectionProps[key] = this.props.campaignData.campaign[key];
     });
@@ -404,14 +404,14 @@ class AdminCampaignEdit extends React.Component {
           optOuts: [], // this.props.organizationData.organization.optOuts, // <= doesn't scale
           datawarehouseAvailable: this.props.campaignData.campaign
             .datawarehouseAvailable,
-          jobResult: this.props.pendingJobsData.campaign.pendingJobs.find(job =>
-            /contacts/.test(job.jobType)
+          jobResult: this.props.pendingJobsData.campaign.pendingJobs.find(
+            (job) => /contacts/.test(job.jobType)
           ),
           canFilterLandlines:
             this.props.organizationData.organization &&
             !!this.props.organizationData.organization.numbersApiKey,
           otherCampaigns: this.props.organizationData.organization.campaigns.campaigns.filter(
-            campaign => campaign.id != this.props.match.params.campaignId
+            (campaign) => campaign.id != this.props.match.params.campaignId
           )
         }
       },
@@ -453,8 +453,8 @@ class AdminCampaignEdit extends React.Component {
           const sameIsAssignmentLimitedToTeams =
             newIsAssignmentLimitedToTeams === isAssignmentLimitedToTeams;
           const sameTeams = isEqual(
-            new Set(newTeams.map(team => team.id)),
-            new Set(teams.map(team => team.id))
+            new Set(newTeams.map((team) => team.id)),
+            new Set(teams.map((team) => team.id))
           );
           return sameIsAssignmentLimitedToTeams && sameTeams;
         },
@@ -530,9 +530,9 @@ class AdminCampaignEdit extends React.Component {
     ];
 
     return (disableTexters
-      ? sections.filter(section => section.title !== "Texters")
+      ? sections.filter((section) => section.title !== "Texters")
       : sections
-    ).filter(section => !section.exclude);
+    ).filter((section) => !section.exclude);
   }
 
   sectionSaveStatus(section) {
@@ -545,16 +545,16 @@ class AdminCampaignEdit extends React.Component {
     if (pendingJobs.length > 0) {
       if (section.title === "Contacts") {
         relatedJob = pendingJobs.filter(
-          job =>
+          (job) =>
             job.jobType === "upload_contacts" || job.jobType === "contact_sql"
         )[0];
       } else if (section.title === "Texters") {
         relatedJob = pendingJobs.filter(
-          job => job.jobType === "assign_texters"
+          (job) => job.jobType === "assign_texters"
         )[0];
       } else if (section.title === "Interactions") {
         relatedJob = pendingJobs.filter(
-          job => job.jobType === "create_interaction_steps"
+          (job) => job.jobType === "create_interaction_steps"
         )[0];
       }
     }
@@ -585,12 +585,13 @@ class AdminCampaignEdit extends React.Component {
     const { isWorking } = this.state;
     const shouldDisable =
       isWorking ||
-      (forceDisable || (!this.isNew() && this.checkSectionSaved(section)));
+      forceDisable ||
+      (!this.isNew() && this.checkSectionSaved(section));
     const saveLabel = isWorking
       ? "Working..."
       : this.isNew()
-        ? "Save and goto next section"
-        : "Save";
+      ? "Save and goto next section"
+      : "Save";
     const ContentComponent = section.content;
     const formValues = this.getSectionState(section);
     return (
@@ -669,10 +670,10 @@ class AdminCampaignEdit extends React.Component {
       return null;
     }
     let isCompleted =
-      this.props.pendingJobsData.campaign.pendingJobs.filter(job =>
+      this.props.pendingJobsData.campaign.pendingJobs.filter((job) =>
         /Error/.test(job.resultMessage || "")
       ).length === 0;
-    this.sections().forEach(section => {
+    this.sections().forEach((section) => {
       if (
         (section.blocksStarting && !this.checkSectionCompleted(section)) ||
         !this.checkSectionSaved(section)
@@ -741,8 +742,8 @@ class AdminCampaignEdit extends React.Component {
 
   handleCloseError = () => this.setState({ requestError: undefined });
 
-  handleSectionError = requestError => this.setState({ requestError });
-  handleExpandChange = sectionIndex => isExpended =>
+  handleSectionError = (requestError) => this.setState({ requestError });
+  handleExpandChange = (sectionIndex) => (isExpended) =>
     this.onExpandChange(sectionIndex, isExpended);
 
   render() {
@@ -835,7 +836,7 @@ class AdminCampaignEdit extends React.Component {
               key={section.title}
               expanded={sectionIsExpanded && sectionCanExpandOrCollapse}
               expandable={sectionCanExpandOrCollapse}
-              onExpandChange={newExpandedState =>
+              onExpandChange={(newExpandedState) =>
                 this.onExpandChange(sectionIndex, newExpandedState)
               }
               style={{
@@ -921,7 +922,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
       },
@@ -934,7 +935,7 @@ const queries = {
         ${campaignInfoFragment}
       }
     }`,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
       },
@@ -974,7 +975,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -990,7 +991,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       },
@@ -1001,7 +1002,7 @@ const queries = {
 
 // Right now we are copying the result fields instead of using a fragment because of https://github.com/apollostack/apollo-client/issues/451
 const mutations = {
-  archiveCampaign: ownProps => campaignId => ({
+  archiveCampaign: (ownProps) => (campaignId) => ({
     mutation: gql`mutation archiveCampaign($campaignId: String!) {
           archiveCampaign(id: $campaignId) {
             ${campaignInfoFragment}
@@ -1009,7 +1010,7 @@ const mutations = {
         }`,
     variables: { campaignId }
   }),
-  unarchiveCampaign: ownProps => campaignId => ({
+  unarchiveCampaign: (ownProps) => (campaignId) => ({
     mutation: gql`mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
           ${campaignInfoFragment}
@@ -1017,7 +1018,7 @@ const mutations = {
       }`,
     variables: { campaignId }
   }),
-  startCampaign: ownProps => campaignId => ({
+  startCampaign: (ownProps) => (campaignId) => ({
     mutation: gql`mutation startCampaign($campaignId: String!) {
         startCampaign(id: $campaignId) {
           ${campaignInfoFragment}
@@ -1025,7 +1026,7 @@ const mutations = {
       }`,
     variables: { campaignId }
   }),
-  editCampaign: ownProps => (campaignId, campaign) => ({
+  editCampaign: (ownProps) => (campaignId, campaign) => ({
     mutation: gql`
       mutation editCampaign($campaignId: String!, $campaign: CampaignInput!) {
         editCampaign(id: $campaignId, campaign: $campaign) {
@@ -1038,7 +1039,7 @@ const mutations = {
       campaign
     }
   }),
-  deleteJob: ownProps => jobId => ({
+  deleteJob: (ownProps) => (jobId) => ({
     mutation: gql`
       mutation deleteJob($campaignId: String!, $id: String!) {
         deleteJob(campaignId: $campaignId, id: $id) {

@@ -37,10 +37,7 @@ export const resolvers = {
       "createdAt"
     ]),
     author: async (tag: TagRecord) =>
-      r
-        .reader("user")
-        .where({ id: tag.author_id })
-        .first("*"),
+      r.reader("user").where({ id: tag.author_id }).first("*"),
 
     contacts: async (
       tag: TagRecord,

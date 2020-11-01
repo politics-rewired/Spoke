@@ -1,12 +1,12 @@
 // Add index for fetching current assignment target
 exports.up = function up(knex) {
   return Promise.all([
-    knex.schema.createTable("messaging_service", t => {
+    knex.schema.createTable("messaging_service", (t) => {
       t.text("messaging_service_sid").primary(); // if we choose not to have the foreign key on sticks, we won't need the index here
       t.integer("organization_id").references("organization(id)");
       t.index("organization_id");
     }),
-    knex.schema.createTable("messaging_service_stick", t => {
+    knex.schema.createTable("messaging_service_stick", (t) => {
       t.text("cell");
       t.index("cell");
       t.integer("organization_id").references("organization(id)");

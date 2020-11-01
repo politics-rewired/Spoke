@@ -10,8 +10,8 @@ const colors = ["#1b9e77", "#d95f02", "#7570b3"];
 
 const getInteractionStepsWithParentId = (parentId, interactionSteps) =>
   sortBy(
-    interactionSteps.filter(is => is.parent_interaction_id === parentId),
-    i => i.answer_option
+    interactionSteps.filter((is) => is.parent_interaction_id === parentId),
+    (i) => i.answer_option
   );
 
 const makeInteractionStepHtml = (
@@ -33,7 +33,7 @@ const makeInteractionStepHtml = (
     : []
   ).concat(
     interactionStep.script_options
-      .map(opt => ["p.script", ["em", `"${opt}"`]])
+      .map((opt) => ["p.script", ["em", `"${opt}"`]])
       .concat(
         interactionStep.question
           ? [
@@ -47,7 +47,7 @@ const makeInteractionStepHtml = (
       .concat([
         [
           "ul",
-          childrenInteractionSteps.map(is =>
+          childrenInteractionSteps.map((is) =>
             makeInteractionStepHtml(is, interactionSteps, depth + 1)
           )
         ]
@@ -67,10 +67,10 @@ const makeInteractionStepHtml = (
   return result;
 };
 
-const makeCannedResponsesHtml = cannedResponses => {
+const makeCannedResponsesHtml = (cannedResponses) => {
   return [
     "ul",
-    cannedResponses.map(cr => [
+    cannedResponses.map((cr) => [
       "li.canned-response",
       ["p.title", ["strong", cr.title]],
       ["p.text", ["em", `"${cr.text}"`]]
@@ -78,7 +78,7 @@ const makeCannedResponsesHtml = cannedResponses => {
   ];
 };
 
-const makeCampaignPreviewHtml = async campaignId => {
+const makeCampaignPreviewHtml = async (campaignId) => {
   const campaign = await r
     .reader("campaign")
     .where({ id: campaignId })
@@ -94,13 +94,13 @@ const makeCampaignPreviewHtml = async campaignId => {
     .where({ campaign_id: campaignId });
 
   const rootInteractionStep = interactionSteps.find(
-    is => !is.parent_interaction_id
+    (is) => !is.parent_interaction_id
   );
 
   const toc = getInteractionStepsWithParentId(
     rootInteractionStep.id,
     interactionSteps
-  ).map(secondChild => [
+  ).map((secondChild) => [
     "li",
     ["a", { href: `#id-${secondChild.id}` }, secondChild.answer_option]
   ]);

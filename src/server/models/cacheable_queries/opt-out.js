@@ -7,21 +7,21 @@ const { r } = thinky;
 // STRUCTURE
 // maybe HASH by organization, so optout-<organization_id> has a <cell> key
 
-const orgCacheKey = orgId =>
+const orgCacheKey = (orgId) =>
   config.OPTOUTS_SHARE_ALL_ORGS
     ? `${config.CACHE_PREFIX}optouts`
     : `${config.CACHE_PREFIX}optouts-${orgId}`;
 
 const sharingOptOuts = config.OPTOUTS_SHARE_ALL_ORGS;
 
-const loadMany = async organizationId => {
+const loadMany = async (organizationId) => {
   if (r.redis) {
     let dbQuery = r.reader("opt_out").select("cell");
     if (!sharingOptOuts) {
       dbQuery = dbQuery.where("organization_id", organizationId);
     }
     const dbResult = await dbQuery;
-    const cellOptOuts = dbResult.map(rec => rec.cell);
+    const cellOptOuts = dbResult.map((rec) => rec.cell);
     const hashKey = orgCacheKey(organizationId);
     // save 100 at a time
     for (
@@ -113,12 +113,9 @@ export const optOutCache = {
       .leftJoin("campaign", "campaign_contact.campaign_id", "campaign.id")
       .where(updateQueryParams)
       .pluck("campaign_contact.id");
-    await r
-      .knex("campaign_contact")
-      .whereIn("id", contactIds)
-      .update({
-        is_opted_out: true
-      });
+    await r.knex("campaign_contact").whereIn("id", contactIds).update({
+      is_opted_out: true
+    });
   },
   loadMany
 };

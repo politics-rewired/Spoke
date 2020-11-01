@@ -52,7 +52,7 @@ const timezones = [
   "America/Virgin"
 ];
 
-const timezoneChoices = timezones.map(timezone =>
+const timezoneChoices = timezones.map((timezone) =>
   dataSourceItem(timezone, timezone)
 );
 
@@ -164,7 +164,7 @@ class CampaignTextingHoursForm extends React.Component<
         // If enter was pressed, try to match current search text to an item
         let choice: DataSourceItemType | undefined = undefined;
         if (index === -1) {
-          choice = choices.find(item => item.text === selection.text);
+          choice = choices.find((item) => item.text === selection.text);
           if (!choice) return;
           selection = choice;
         }

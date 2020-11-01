@@ -70,7 +70,7 @@ export async function checkMessageQueue() {
 }
 
 const messageSenderCreator = (subQuery, defaultStatus) => {
-  return async event => {
+  return async (event) => {
     logger.info("Running a message sender");
     setupUserNotificationObservers();
     let delay = 1100;
@@ -89,13 +89,13 @@ const messageSenderCreator = (subQuery, defaultStatus) => {
   };
 };
 
-export const messageSender01 = messageSenderCreator(mQuery => {
+export const messageSender01 = messageSenderCreator((mQuery) => {
   return mQuery.where(
     r.knex.raw("(contact_number LIKE '%0' OR contact_number LIKE '%1')")
   );
 });
 
-export const messageSender234 = messageSenderCreator(mQuery => {
+export const messageSender234 = messageSenderCreator((mQuery) => {
   return mQuery.where(
     r.knex.raw(
       "(contact_number LIKE '%2' OR contact_number LIKE '%3' or contact_number LIKE '%4')"
@@ -103,13 +103,13 @@ export const messageSender234 = messageSenderCreator(mQuery => {
   );
 });
 
-export const messageSender56 = messageSenderCreator(mQuery => {
+export const messageSender56 = messageSenderCreator((mQuery) => {
   return mQuery.where(
     r.knex.raw("(contact_number LIKE '%5' OR contact_number LIKE '%6')")
   );
 });
 
-export const messageSender789 = messageSenderCreator(mQuery => {
+export const messageSender789 = messageSenderCreator((mQuery) => {
   return mQuery.where(
     r.knex.raw(
       "(contact_number LIKE '%7' OR contact_number LIKE '%8' or contact_number LIKE '%9')"
@@ -117,7 +117,7 @@ export const messageSender789 = messageSenderCreator(mQuery => {
   );
 });
 
-export const failedMessageSender = messageSenderCreator(mQuery => {
+export const failedMessageSender = messageSenderCreator((mQuery) => {
   // messages that were attempted to be sent five minutes ago in status=SENDING
   // when JOBS_SAME_PROCESS is enabled, the send attempt is done immediately.
   // However, if it's still marked SENDING, then it must have failed to go out.
@@ -128,7 +128,7 @@ export const failedMessageSender = messageSenderCreator(mQuery => {
   return mQuery.where("created_at", ">", fiveMinutesAgo);
 }, "SENDING");
 
-export const failedDayMessageSender = messageSenderCreator(mQuery => {
+export const failedDayMessageSender = messageSenderCreator((mQuery) => {
   // messages that were attempted to be sent five minutes ago in status=SENDING
   // when JOBS_SAME_PROCESS is enabled, the send attempt is done immediately.
   // However, if it's still marked SENDING, then it must have failed to go out.

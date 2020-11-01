@@ -29,7 +29,7 @@ export const RowWorkStatus = Object.freeze({
   Denied: "rejected"
 });
 
-const rowStyleForStatus = rowStatus => {
+const rowStyleForStatus = (rowStatus) => {
   const baseStyle = {
     "-webkit-transition": "opacity 2s ease-in-out",
     "-moz-transition": "opacity 2s ease-in-out",
@@ -57,7 +57,7 @@ const styles = {
   }
 };
 
-const AssignmentRequestTable = props => {
+const AssignmentRequestTable = (props) => {
   const {
     isAdmin,
     assignmentRequests,
@@ -66,10 +66,10 @@ const AssignmentRequestTable = props => {
     onDenyRequest
   } = props;
 
-  const handleAutoApproveRow = requestId => () =>
+  const handleAutoApproveRow = (requestId) => () =>
     onAutoApproveRequest(requestId);
-  const handleApproveRow = requestId => () => onApproveRequest(requestId);
-  const handleDenyRow = requestId => () => onDenyRequest(requestId);
+  const handleApproveRow = (requestId) => () => onApproveRequest(requestId);
+  const handleDenyRow = (requestId) => () => onDenyRequest(requestId);
 
   return (
     <div>
@@ -81,7 +81,7 @@ const AssignmentRequestTable = props => {
           <TableHeaderColumn>Actions</TableHeaderColumn>
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
-          {assignmentRequests.map(request => {
+          {assignmentRequests.map((request) => {
             const { user, createdAt, id: requestId, status } = request;
             const showActions =
               status === RowWorkStatus.Inactive ||
@@ -116,16 +116,15 @@ const AssignmentRequestTable = props => {
                         <CheckCircleIcon color={green300} />
                       </IconButton>
                     )}
-                    {showActions &&
-                      isAdmin && (
-                        <FlatButton
-                          label="AutoApprove"
-                          labelPosition="before"
-                          primary={true}
-                          icon={<AssignmentTurnedInIcon color={green300} />}
-                          onClick={handleAutoApproveRow(requestId)}
-                        />
-                      )}
+                    {showActions && isAdmin && (
+                      <FlatButton
+                        label="AutoApprove"
+                        labelPosition="before"
+                        primary={true}
+                        icon={<AssignmentTurnedInIcon color={green300} />}
+                        onClick={handleAutoApproveRow(requestId)}
+                      />
+                    )}
                     {status === RowWorkStatus.Working && (
                       <CircularProgress size={25} />
                     )}

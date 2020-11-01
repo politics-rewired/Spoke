@@ -92,7 +92,7 @@ export const assignMessagingServiceSID = async (cell, organizationId) => {
  * @param {string} messagingServiceId The messaging service ID
  * @returns {object} The messaging service record if found, or undefined;
  */
-export const getMessagingServiceById = async messagingServiceId =>
+export const getMessagingServiceById = async (messagingServiceId) =>
   r
     .reader("messaging_service")
     .where({ messaging_service_sid: messagingServiceId })
@@ -185,7 +185,7 @@ export const assignMissingMessagingServices = async (
 
   if (rows.length === 0) return;
 
-  const cellsByServiceType = groupBy(rows, row => row.service_type);
+  const cellsByServiceType = groupBy(rows, (row) => row.service_type);
   const messagingServiceCandidatesByServiceType = {};
 
   for (const serviceType of Object.keys(cellsByServiceType)) {
@@ -231,7 +231,7 @@ const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
  *     `body` is the input text stripped of media markdown.
  *     `mediaUrl` is the extracted media URL, if present.
  */
-export const messageComponents = messageText => {
+export const messageComponents = (messageText) => {
   const params = {
     body: messageText.replace(mediaExtractor, "")
   };

@@ -83,10 +83,10 @@ class IncomingMessageFilter extends Component {
   onMessageFilterSelectChanged = (event, index, values) => {
     this.setState({ messageFilter: values });
     const messageStatuses = new Set();
-    values.forEach(value => {
+    values.forEach((value) => {
       const children = MESSAGE_STATUSES[value].children;
       if (children.length > 0) {
-        children.forEach(child => messageStatuses.add(child));
+        children.forEach((child) => messageStatuses.add(child));
       } else {
         messageStatuses.add(value);
       }
@@ -99,7 +99,7 @@ class IncomingMessageFilter extends Component {
   onCampaignSelected = (selection, index) => {
     let campaignId = undefined;
     if (index === -1) {
-      const campaign = this.props.texters.find(campaign => {
+      const campaign = this.props.texters.find((campaign) => {
         return campaign.title === selection;
       });
       if (campaign) {
@@ -116,7 +116,7 @@ class IncomingMessageFilter extends Component {
   onTexterSelected = (selection, index) => {
     let texterUserId = undefined;
     if (index === -1) {
-      const texter = this.props.texters.find(texter => {
+      const texter = this.props.texters.find((texter) => {
         return texter.displayName === selection;
       });
       if (texter) {
@@ -130,7 +130,7 @@ class IncomingMessageFilter extends Component {
     }
   };
 
-  onContactNameChanged = ev => {
+  onContactNameChanged = (ev) => {
     const name = ev.target.value;
     const { firstName, lastName } = nameComponents(name);
     this.state.firstName = firstName;
@@ -148,12 +148,12 @@ class IncomingMessageFilter extends Component {
   };
 
   render() {
-    const texterNodes = TEXTER_FILTERS.map(texterFilter =>
+    const texterNodes = TEXTER_FILTERS.map((texterFilter) =>
       dataSourceItem(texterFilter[1], texterFilter[0])
     ).concat(
       !this.props.texters
         ? []
-        : this.props.texters.map(user => {
+        : this.props.texters.map((user) => {
             const userId = parseInt(user.id, 10);
             return dataSourceItem(user.displayName, userId);
           })
@@ -162,12 +162,12 @@ class IncomingMessageFilter extends Component {
       return left.text.localeCompare(right.text, "en", { sensitivity: "base" });
     });
 
-    const campaignNodes = CAMPAIGN_TYPE_FILTERS.map(campaignTypeFilter =>
+    const campaignNodes = CAMPAIGN_TYPE_FILTERS.map((campaignTypeFilter) =>
       dataSourceItem(campaignTypeFilter[1], campaignTypeFilter[0])
     ).concat(
       !this.props.campaigns
         ? []
-        : this.props.campaigns.map(campaign => {
+        : this.props.campaigns.map((campaign) => {
             const campaignId = parseInt(campaign.id, 10);
             const campaignDisplay = `${campaignId}: ${campaign.title}`;
             return dataSourceItem(campaignDisplay, campaignId);
@@ -236,7 +236,7 @@ class IncomingMessageFilter extends Component {
                 floatingLabelFixed
                 onChange={this.onMessageFilterSelectChanged}
               >
-                {Object.keys(MESSAGE_STATUSES).map(messageStatus => {
+                {Object.keys(MESSAGE_STATUSES).map((messageStatus) => {
                   const displayText = MESSAGE_STATUSES[messageStatus].name;
                   const isChecked =
                     this.state.messageFilter &&
@@ -259,7 +259,7 @@ class IncomingMessageFilter extends Component {
                 filter={AutoComplete.caseInsensitiveFilter}
                 maxSearchResults={8}
                 onFocus={() => this.setState({ campaignSearchText: "" })}
-                onUpdateInput={campaignSearchText =>
+                onUpdateInput={(campaignSearchText) =>
                   this.setState({ campaignSearchText })
                 }
                 searchText={this.state.campaignSearchText}
@@ -276,7 +276,7 @@ class IncomingMessageFilter extends Component {
                   filter={AutoComplete.caseInsensitiveFilter}
                   maxSearchResults={8}
                   onFocus={() => this.setState({ texterSearchText: "" })}
-                  onUpdateInput={texterSearchText =>
+                  onUpdateInput={(texterSearchText) =>
                     this.setState({ texterSearchText })
                   }
                   searchText={this.state.texterSearchText}

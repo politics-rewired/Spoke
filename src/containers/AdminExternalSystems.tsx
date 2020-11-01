@@ -75,7 +75,7 @@ class AdminExternalSystems extends Component<Props, State> {
 
   makeStartEditExternalSystem = (systemId: string) => () => {
     const { edges } = this.props.data.externalSystems;
-    const system = edges.find(edge => edge.node.id === systemId)!.node;
+    const system = edges.find((edge) => edge.node.id === systemId)!.node;
 
     const { id: _id, syncedAt: _syncedAt, ...externalSystem } = system;
     this.setState({
@@ -118,7 +118,7 @@ class AdminExternalSystems extends Component<Props, State> {
     _: unknown,
     newVal: string
   ) =>
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
 
@@ -132,7 +132,9 @@ class AdminExternalSystems extends Component<Props, State> {
     const { name, type, username, apiKey } = externalSystem;
 
     const { edges } = this.props.data.externalSystems;
-    const syncingEdge = edges.find(edge => edge.node.id === syncInitiatedForId);
+    const syncingEdge = edges.find(
+      (edge) => edge.node.id === syncInitiatedForId
+    );
     const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
 
     return (
@@ -252,9 +254,7 @@ class AdminExternalSystems extends Component<Props, State> {
           open={syncingSystem !== undefined}
           message={
             syncingSystem
-              ? `Sync started for ${
-                  syncingSystem.name
-                }. Please refresh systems to see updated lists.`
+              ? `Sync started for ${syncingSystem.name}. Please refresh systems to see updated lists.`
               : ""
           }
           autoHideDuration={4000}

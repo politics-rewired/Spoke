@@ -192,7 +192,7 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   // Handle submission on <enter> *up* to prevent holding enter
-  onEnterUp = event => {
+  onEnterUp = (event) => {
     const keyCode = event.keyCode || event.which;
     if (keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
@@ -209,7 +209,7 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ disabled });
   };
 
-  getAvailableInteractionSteps = questionResponses => {
+  getAvailableInteractionSteps = (questionResponses) => {
     const allInteractionSteps = this.props.campaign.interactionSteps;
     const availableSteps = [];
 
@@ -220,7 +220,7 @@ export class AssignmentTexterContact extends React.Component {
       const questionResponseValue = questionResponses[step.id];
       if (questionResponseValue) {
         const matchingAnswerOption = step.question.answerOptions.find(
-          answerOption => answerOption.value === questionResponseValue
+          (answerOption) => answerOption.value === questionResponseValue
         );
         if (matchingAnswerOption && matchingAnswerOption.nextInteractionStep) {
           step = interactionStepForId(
@@ -238,16 +238,16 @@ export class AssignmentTexterContact extends React.Component {
     return availableSteps;
   };
 
-  getInitialQuestionResponses = questionResponseValues => {
+  getInitialQuestionResponses = (questionResponseValues) => {
     const questionResponses = {};
-    questionResponseValues.forEach(questionResponse => {
+    questionResponseValues.forEach((questionResponse) => {
       questionResponses[questionResponse.interactionStepId] =
         questionResponse.value;
     });
 
     return questionResponses;
   };
-  getMessageTextFromScript = script => {
+  getMessageTextFromScript = (script) => {
     const { campaign, contact, texter } = this.props;
 
     return script
@@ -271,7 +271,7 @@ export class AssignmentTexterContact extends React.Component {
     return [null, ""];
   };
 
-  handleOpenPopover = event => {
+  handleOpenPopover = (event) => {
     event.preventDefault();
     const { assignment } = this.props;
     const { userCannedResponses, campaignCannedResponses } = assignment;
@@ -291,11 +291,11 @@ export class AssignmentTexterContact extends React.Component {
     });
   };
 
-  handleCannedResponseChange = cannedResponseScript => {
+  handleCannedResponseChange = (cannedResponseScript) => {
     this.handleChangeScript(cannedResponseScript);
   };
 
-  createMessageToContact = text => {
+  createMessageToContact = (text) => {
     const { texter, assignment } = this.props;
     const { contact } = this.props;
 
@@ -324,7 +324,7 @@ export class AssignmentTexterContact extends React.Component {
     });
   };
 
-  submitAction = async messageText => {
+  submitAction = async (messageText) => {
     const { contact } = this.props;
     const message = this.createMessageToContact(messageText);
     const changes = this.gatherSurveyChanges();
@@ -374,7 +374,7 @@ export class AssignmentTexterContact extends React.Component {
     await this.props.sendMessage(contact.id, payload);
   };
 
-  handleEditMessageStatus = async messageStatus => {
+  handleEditMessageStatus = async (messageStatus) => {
     const { contact } = this.props;
     await this.props.mutations.editCampaignContactMessageStatus(
       messageStatus,
@@ -411,9 +411,9 @@ export class AssignmentTexterContact extends React.Component {
   handleApplyTags = (addedTags, removedTags, callback) => {
     const pendingNewTags = this.props.contact.contactTags || [];
 
-    addedTags.forEach(addedTag => {
+    addedTags.forEach((addedTag) => {
       const tagDoesNotExist = !pendingNewTags.find(
-        currentTag => currentTag.id === addedTag.id
+        (currentTag) => currentTag.id === addedTag.id
       );
 
       if (tagDoesNotExist) {
@@ -421,9 +421,9 @@ export class AssignmentTexterContact extends React.Component {
       }
     });
 
-    removedTags.forEach(removedTag => {
+    removedTags.forEach((removedTag) => {
       const idxOfExistingTag = pendingNewTags.findIndex(
-        currentTag => currentTag.id === removedTag.id
+        (currentTag) => currentTag.id === removedTag.id
       );
 
       if (idxOfExistingTag > -1) {
@@ -466,8 +466,8 @@ export class AssignmentTexterContact extends React.Component {
   tagContact = (addedTags, removedTags) => {
     const { contact } = this.props;
     const tag = {
-      addedTagIds: addedTags.map(tag => tag.id),
-      removedTagIds: removedTags.map(tag => tag.id)
+      addedTagIds: addedTags.map((tag) => tag.id),
+      removedTagIds: removedTags.map((tag) => tag.id)
     };
 
     this.props.addTagToContact(contact.id, tag);
@@ -477,7 +477,7 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.None });
   };
 
-  handleChangeScript = newScript => {
+  handleChangeScript = (newScript) => {
     const messageVersionHash = md5(newScript);
     const messageText = this.getMessageTextFromScript(newScript);
     this.setState({ messageText, messageVersionHash });
@@ -524,7 +524,7 @@ export class AssignmentTexterContact extends React.Component {
     this.props.onFinishContact();
   };
 
-  bulkSendMessages = async assignmentId => {
+  bulkSendMessages = async (assignmentId) => {
     await this.props.mutations.bulkSendMessages(assignmentId);
     this.props.refreshData();
   };

@@ -174,7 +174,7 @@ MessageOptOut.propTypes = {
 };
 
 const mutations = {
-  createOptOut: ownProps => (optOut, campaignContactId) => ({
+  createOptOut: (ownProps) => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -193,7 +193,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  removeOptOut: ownProps => cell => ({
+  removeOptOut: (ownProps) => (cell) => ({
     mutation: gql`
       mutation removeOptOut($cell: Phone!) {
         removeOptOut(cell: $cell) {

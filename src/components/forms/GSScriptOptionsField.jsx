@@ -28,7 +28,7 @@ class GSScriptOptionsField extends GSFormField {
     scriptDraft: ""
   };
 
-  createDialogHandler = scriptVersion => event => {
+  createDialogHandler = (scriptVersion) => (event) => {
     event.stopPropagation();
     event.preventDefault();
 
@@ -38,7 +38,7 @@ class GSScriptOptionsField extends GSFormField {
     );
   };
 
-  createDeleteHandler = scriptVersion => () => {
+  createDeleteHandler = (scriptVersion) => () => {
     const { value: scriptVersions } = this.props;
     const targetIndex = scriptVersions.indexOf(scriptVersion);
     scriptVersions.splice(targetIndex, 1);
@@ -73,7 +73,7 @@ class GSScriptOptionsField extends GSFormField {
     const scriptFields = allScriptFields(customFields);
 
     const draftVersionOccurences = scriptVersions.filter(
-      version => version === scriptDraft
+      (version) => version === scriptDraft
     ).length;
     const isDuplicate =
       scriptDraft !== scriptTarget && draftVersionOccurences > 0;
@@ -110,7 +110,7 @@ class GSScriptOptionsField extends GSFormField {
           scriptText={scriptDraft}
           scriptFields={scriptFields}
           expandable={true}
-          onChange={val => this.setState({ scriptDraft: val.trim() })}
+          onChange={(val) => this.setState({ scriptDraft: val.trim() })}
         />
         {isDuplicate && <p>A script version with this text already exists!</p>}
       </Dialog>
@@ -134,7 +134,7 @@ class GSScriptOptionsField extends GSFormField {
 
     const canDelete = scriptVersions.length > 1;
     const emptyVersionExists =
-      scriptVersions.filter(version => version.trim() === "").length > 0;
+      scriptVersions.filter((version) => version.trim() === "").length > 0;
 
     return (
       <div>

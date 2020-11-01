@@ -55,7 +55,7 @@ class ScriptList extends React.Component {
     } = this.props;
     const { dialogOpen } = this.state;
 
-    const onSaveCannedResponse = async cannedResponse => {
+    const onSaveCannedResponse = async (cannedResponse) => {
       try {
         const saveObject = {
           ...cannedResponse,
@@ -89,7 +89,7 @@ class ScriptList extends React.Component {
     // )
 
     const rightIconButton = null;
-    const listItems = scripts.map(script => (
+    const listItems = scripts.map((script) => (
       <ListItem
         value={script.text}
         onTouchTap={() => onSelectCannedResponse(script)}
@@ -160,7 +160,7 @@ ScriptList.propTypes = {
 };
 
 const mutations = {
-  createCannedResponse: ownProps => cannedResponse => ({
+  createCannedResponse: (ownProps) => (cannedResponse) => ({
     mutation: gql`
       mutation createCannedResponse($cannedResponse: CannedResponseInput!) {
         createCannedResponse(cannedResponse: $cannedResponse) {

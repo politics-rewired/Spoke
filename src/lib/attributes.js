@@ -7,7 +7,7 @@ export const dataTest = (value, disable) => {
   return attribute;
 };
 
-export const camelCase = str => {
+export const camelCase = (str) => {
   return str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => {
       return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
@@ -15,16 +15,16 @@ export const camelCase = str => {
     .replace(/\s+/g, "");
 };
 
-export const titleCase = value =>
+export const titleCase = (value) =>
   `${value.charAt(0).toUpperCase()}${value.substring(1).toLowerCase()}`;
 
-export const snakeToTitleCase = value =>
+export const snakeToTitleCase = (value) =>
   value
     .split("_")
-    .map(s => titleCase(s))
+    .map((s) => titleCase(s))
     .join(" ");
 
-export const nameComponents = name => {
+export const nameComponents = (name) => {
   let firstName;
   let lastName;
 

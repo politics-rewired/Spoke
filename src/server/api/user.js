@@ -70,10 +70,7 @@ async function doGetUsers({
 
   const countQuery = query.clone();
 
-  query
-    .orderBy("first_name")
-    .orderBy("last_name")
-    .orderBy("id");
+  query.orderBy("first_name").orderBy("last_name").orderBy("id");
 
   const { limit, offset } = cursor || {};
   if (offset !== undefined) {
@@ -139,11 +136,11 @@ export const resolvers = {
     }
   },
   UsersList: {
-    users: users => users
+    users: (users) => users
   },
   PaginatedUsers: {
-    users: queryResult => queryResult.users,
-    pageInfo: queryResult => {
+    users: (queryResult) => queryResult.users,
+    pageInfo: (queryResult) => {
       if ("pageInfo" in queryResult) {
         return queryResult.pageInfo;
       }
@@ -160,7 +157,7 @@ export const resolvers = {
       "assignedCell",
       "terms"
     ]),
-    displayName: user => `${user.first_name} ${user.last_name}`,
+    displayName: (user) => `${user.first_name} ${user.last_name}`,
     currentRequest: async (user, { organizationId }) => {
       const currentRequest = await r
         .reader("assignment_request")
@@ -178,7 +175,7 @@ export const resolvers = {
         .reader("assignment")
         .where({ user_id: user.id, campaign_id: campaignId })
         .first()
-        .then(record => record || null),
+        .then((record) => record || null),
     memberships: async (
       user,
       { organizationId, after, first },
@@ -225,7 +222,7 @@ export const resolvers = {
     },
     roles: async (user, { organizationId }) => {
       const getRoleForUserInOrganization = await memoizer.memoize(
-        async params => {
+        async (params) => {
           return r
             .reader("user_organization")
             .where({
@@ -292,7 +289,7 @@ export const resolvers = {
 
       const shadowCountsByAssignmentId = groupBy(
         todos.rows,
-        todo => todo.assignment_id
+        (todo) => todo.assignment_id
       );
 
       const assignments = await r
@@ -300,7 +297,7 @@ export const resolvers = {
         .whereIn("id", Object.keys(shadowCountsByAssignmentId))
         .orderBy("updated_at", "desc");
 
-      return assignments.map(a =>
+      return assignments.map((a) =>
         Object.assign(a, {
           shadowCounts: shadowCountsByAssignmentId[a.id] || []
         })

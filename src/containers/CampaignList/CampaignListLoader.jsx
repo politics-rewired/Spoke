@@ -111,7 +111,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId,
         campaignsFilter: ownProps.campaignsFilter,

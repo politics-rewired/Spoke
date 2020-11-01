@@ -47,7 +47,7 @@ export interface OrganizationListProps {
   history: History;
 }
 
-export const OrganizationList: React.SFC<OrganizationListProps> = props => {
+export const OrganizationList: React.SFC<OrganizationListProps> = (props) => {
   const { currentUser } = props.data;
 
   const handleSelectOrg = (membership: MembershipType) => () => {
@@ -114,9 +114,7 @@ export const OrganizationList: React.SFC<OrganizationListProps> = props => {
               ) : (
                 <NotificationsPausedIcon color={grey500} />
               )
-            ) : (
-              undefined
-            );
+            ) : undefined;
             return (
               <ListItem
                 leftIcon={leftIcon}
@@ -159,7 +157,4 @@ const queries = {
   }
 };
 
-export default compose(
-  loadData({ queries }),
-  withRouter
-)(OrganizationList);
+export default compose(loadData({ queries }), withRouter)(OrganizationList);

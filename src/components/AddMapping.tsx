@@ -177,11 +177,11 @@ class AddMapping extends React.Component<InnerProps, State> {
 
     // This is a client-side-only check
     const responseOptionExists =
-      existingTargets.find(target => isResponseOption(target)) !== undefined;
+      existingTargets.find((target) => isResponseOption(target)) !== undefined;
     const activistCodeExists =
-      existingTargets.find(target => isActivistCode(target)) !== undefined;
+      existingTargets.find((target) => isActivistCode(target)) !== undefined;
     const resultCodeExists =
-      existingTargets.find(target => isResultCode(target)) !== undefined;
+      existingTargets.find((target) => isResultCode(target)) !== undefined;
     const isRootAnswer =
       config && config.interactionStep.parentInteractionId === null;
     const canMakeChanges =
@@ -229,16 +229,28 @@ class AddMapping extends React.Component<InnerProps, State> {
               <MenuItem
                 value={MappingType.ResponseOption}
                 primaryText={`Survey Response${
-                  responseOptionExists ? " (already configured)" : activeSurveyQuestions.length === 0 ? " (none active)" : ""
+                  responseOptionExists
+                    ? " (already configured)"
+                    : activeSurveyQuestions.length === 0
+                    ? " (none active)"
+                    : ""
                 }`}
-                disabled={responseOptionExists || activeSurveyQuestions.length === 0}
+                disabled={
+                  responseOptionExists || activeSurveyQuestions.length === 0
+                }
               />
               <MenuItem
                 value={MappingType.ActivistCode}
                 primaryText={`Activist Code${
-                  activistCodeExists ? " (already configured)" : activeActivistCodes.length === 0 ? " (none active)" : ""
+                  activistCodeExists
+                    ? " (already configured)"
+                    : activeActivistCodes.length === 0
+                    ? " (none active)"
+                    : ""
                 }`}
-                disabled={activistCodeExists || activeActivistCodes.length === 0}
+                disabled={
+                  activistCodeExists || activeActivistCodes.length === 0
+                }
               />
               <MenuItem
                 value={MappingType.ResultCode}
@@ -246,8 +258,8 @@ class AddMapping extends React.Component<InnerProps, State> {
                   resultCodeExists
                     ? " (already configured)"
                     : !isRootAnswer
-                      ? " (not top-level question)"
-                      : ""
+                    ? " (not top-level question)"
+                    : ""
                 }`}
                 disabled={resultCodeExists || !isRootAnswer}
               />
@@ -331,7 +343,7 @@ class AddMapping extends React.Component<InnerProps, State> {
 }
 
 const mutations: MutationMap<InnerProps> = {
-  createTarget: ownProps => (input: { [key: string]: string }) => ({
+  createTarget: (ownProps) => (input: { [key: string]: string }) => ({
     mutation: gql`
       mutation createQuestionResponseSyncTarget(
         $input: QuestionResponseSyncTargetInput!
@@ -371,7 +383,10 @@ const mutations: MutationMap<InnerProps> = {
         ...input
       }
     },
-    update: (store, { data: { createQuestionResponseSyncTarget: newTarget} }) => {
+    update: (
+      store,
+      { data: { createQuestionResponseSyncTarget: newTarget } }
+    ) => {
       const variables = { campaignId: ownProps.config?.campaignId };
       const data: any = cloneDeep(
         store.readQuery({
@@ -394,6 +409,6 @@ const mutations: MutationMap<InnerProps> = {
   })
 };
 
-export default compose<InnerProps, OuterProps>(
-  loadData({ mutations })
-)(AddMapping);
+export default compose<InnerProps, OuterProps>(loadData({ mutations }))(
+  AddMapping
+);

@@ -11,7 +11,7 @@ export const resolvers = {
       "cycledOutAt",
       "createdAt"
     ]),
-    isHealthy: async linkDomain => {
+    isHealthy: async (linkDomain) => {
       return linkDomain.is_healthy;
     }
   },

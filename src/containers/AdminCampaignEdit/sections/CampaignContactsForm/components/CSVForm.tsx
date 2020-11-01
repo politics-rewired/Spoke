@@ -38,7 +38,7 @@ interface Props {
   onContactsFileChange(file?: File): void;
 }
 
-const CSVForm: React.SFC<Props> = props => {
+const CSVForm: React.SFC<Props> = (props) => {
   const { contactsFile } = props;
 
   const handleFileDrop = (files: FileList | null) => {
