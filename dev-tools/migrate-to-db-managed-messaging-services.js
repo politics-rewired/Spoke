@@ -62,7 +62,7 @@ function deterministicIntWithinRange(string, maxSize) {
 
 function hashStr(str) {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) {
+  for (let i = 0; i < str.length; i += 1) {
     const charCode = str.charCodeAt(i);
     hash += charCode;
   }

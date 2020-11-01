@@ -2098,7 +2098,7 @@ const rootMutations = {
       // TODO: wrap in transaction
       const count = questionResponses.length;
 
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < count; i += 1) {
         const questionResponse = questionResponses[i];
         const { interactionStepId, value } = questionResponse;
         await r

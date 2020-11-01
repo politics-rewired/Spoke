@@ -94,7 +94,7 @@ export const sendUserNotification = async notification => {
       .pluck(["user_id", "campaign_id"]);
 
     const count = assignments.length;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i += 1) {
       const assignment = assignments[i];
       await sendAssignmentUserNotification(
         assignment,

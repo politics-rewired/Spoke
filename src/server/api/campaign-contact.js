@@ -136,7 +136,7 @@ export const resolvers = {
 
       const formatted = {};
 
-      for (let i = 0; i < results.length; i++) {
+      for (let i = 0; i < results.length; i += 1) {
         const res = results[i];
 
         const responseId = res["qres.id"];

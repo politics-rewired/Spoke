@@ -151,7 +151,7 @@ export const campaignContactCache = {
     const dbResult = await query;
     // 2. cache the data
     const messageServiceSid = getMessageServiceSid(organization);
-    for (let i = 0, l = dbResult.length; i < l; i++) {
+    for (let i = 0, l = dbResult.length; i < l; i += 1) {
       const dbRecord = dbResult[i];
       await saveCacheRecord(dbRecord, organization, messageServiceSid);
     }

@@ -345,7 +345,7 @@ export class AssignmentTexterContact extends React.Component {
 
     const count = interactionStepIds.length;
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i += 1) {
       const interactionStepId = interactionStepIds[i];
       const value = this.state.questionResponses[interactionStepId];
       if (value) {
