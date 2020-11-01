@@ -63,8 +63,17 @@ module.exports = {
     semi: ["error", "always"],
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "import/extensions": ["error", "never"],
-    "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "no-unused-vars": [
+      "error",
+      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
+    ],
+    "@typescript-eslint/no-empty-function": "off",
+    "no-nested-ternary": "off",
+    "no-underscore-dangle": "off",
 
     // Rules to get linting to pass
     camelcase: ["off", { properties: "never" }],
