@@ -1493,32 +1493,21 @@ const rootMutations = {
       return { id };
     },
 
-    createCannedResponse: async (_, { cannedResponse }, { user, loaders }) => {
-      authRequired(user);
+    createCannedResponse: async (_, { cannedResponse }, { user }) => {
+      const campaignId = parseInt(cannedResponse.campaignId, 10);
+      const { organization_id } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first(["organization_id"]);
+      await accessRequired(user, organization_id, "TEXTER");
 
       await r.knex("canned_response").insert({
-        campaign_id: cannedResponse.campaignId,
+        campaign_id: campaignId,
         user_id: cannedResponse.userId,
         title: cannedResponse.title,
         text: cannedResponse.text
       });
-      // deletes duplicate created canned_responses
-      let query = r
-        .knex("canned_response")
-        .where(
-          "text",
-          "in",
-          r
-            .knex("canned_response")
-            .where({
-              text: cannedResponse.text,
-              campaign_id: cannedResponse.campaignId
-            })
-            .select("text")
-        )
-        .andWhere({ user_id: cannedResponse.userId })
-        .del();
-      await query;
+
       cacheableData.cannedResponse.clearQuery({
         campaignId: cannedResponse.campaignId,
         userId: cannedResponse.userId
