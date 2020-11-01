@@ -71,7 +71,13 @@ module.exports = {
     "no-await-in-loop": ["off"],
     "@typescript-eslint/no-var-requires": ["off"],
     "import/order": ["off"],
-    "no-console": ["off"]
+    "no-console": ["off"],
+    "prefer-promise-reject-errors": ["off"],
+    "no-restricted-syntax": ["off"],
+    "consistent-return": ["off"],
+    "no-continue": ["off"],
+    "no-param-reassign": ["off"],
+    "guard-for-in": ["off"]
   },
   overrides: [
     {

@@ -1,40 +1,32 @@
 import AWS from "aws-sdk";
-import { format } from "fast-csv";
 import _ from "lodash";
 import moment from "moment";
-import Papa from "papaparse";
 import zipCodeToTimeZone from "zipcode-to-timezone";
 
 import { config } from "../../config";
-import { convertOffsetsToStrings, gunzip, zipToTimeZone } from "../../lib";
-import { getFormattedPhoneNumber } from "../../lib/phone-format.js";
+import { gunzip } from "../../lib";
+import { getFormattedPhoneNumber } from "../../lib/phone-format";
 import logger from "../../logger";
 import {
   assignMissingMessagingServices,
+  // eslint-disable-next-line import/named
   getLastMessage,
   saveNewIncomingMessage
 } from "../../server/api/lib/message-sending";
 import serviceMap from "../../server/api/lib/services";
 import { eventBus, EventType } from "../../server/event-bus";
 import { makeNumbersClient } from "../../server/lib/assemble-numbers";
-import { sendEmail } from "../../server/mail";
 import { cacheableData, datawarehouse, r } from "../../server/models";
 import {
   Notifications,
   sendUserNotification
 } from "../../server/notifications";
 import { errToObj } from "../../server/utils";
-import {
-  getDownloadUrl,
-  getUploadStream,
-  uploadToCloud
-} from "../exports/upload";
 import { updateJob } from "../lib";
 
 const CHUNK_SIZE = 1000;
 const BATCH_SIZE = Math.max(1, Math.floor(config.DB_MAX_POOL * 0.5));
 
-const zipMemoization = {};
 let warehouseConnection = null;
 function optOutsByOrgId(orgId) {
   return r.knex
@@ -125,7 +117,7 @@ export async function processSqsMessages() {
         reject(err);
       } else if (data.Messages) {
         logger.info(data);
-        for (let i = 0; i < data.Messages.length; i++) {
+        for (let i = 0; i < data.Messages.length; i += 1) {
           const message = data.Messages[i];
           const body = message.Body;
           logger.info("processing sqs queue:", body);
@@ -158,7 +150,8 @@ export async function processSqsMessages() {
 
 export async function uploadContacts(job) {
   const campaignId = job.campaign_id;
-  // We do this deletion in schema.js but we do it again here just in case the the queue broke and we had a backlog of contact uploads for one campaign
+  // We do this deletion in schema.js but we do it again here just in case the the queue broke and we had a backlog of
+  // contact uploads for one campaign
   const campaign = await r
     .knex("campaign")
     .where({ id: campaignId })
@@ -182,12 +175,13 @@ export async function uploadContacts(job) {
       .where({ id: campaignId })
   ]);
 
-  let jobPayload = await gunzip(new Buffer(job.payload, "base64"));
+  let jobPayload = await gunzip(Buffer.from(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
-  let { contacts, excludeCampaignIds = [], validationStats } = jobPayload;
+  const { excludeCampaignIds = [], validationStats } = jobPayload;
+  let { contacts } = jobPayload;
 
   const maxContacts = parseInt(
-    orgFeatures.hasOwnProperty("maxContacts")
+    Object.prototype.hasOwnProperty.call(orgFeatures, "maxContacts")
       ? orgFeatures.maxContacts
       : config.MAX_CONTACTS,
     10
@@ -198,7 +192,7 @@ export async function uploadContacts(job) {
     contacts = contacts.slice(0, maxContacts);
   }
 
-  for (let index = 0; index < contacts.length; index++) {
+  for (let index = 0; index < contacts.length; index += 1) {
     const datum = contacts[index];
     if (datum.zip) {
       // using memoization and large ranges of homogenous zips
@@ -215,6 +209,7 @@ export async function uploadContacts(job) {
 
     for (const chunkChunk of chunkChunks) {
       await Promise.all(
+        // eslint-disable-next-line no-loop-func
         chunkChunk.map(async chunk => {
           const percentComplete = Math.round(
             (chunksCompleted / contactChunks.length) * 100
@@ -283,7 +278,7 @@ export async function uploadContacts(job) {
       throw exc;
     }
 
-    const whereInParams = excludeCampaignIds.map(_ => "?").join(", ");
+    const whereInParams = excludeCampaignIds.map(_cid => "?").join(", ");
     try {
       const { rowCount: exclusionCellCount } =
         excludeCampaignIds.length === 0
@@ -429,6 +424,7 @@ export async function filterLandlines(job) {
 }
 
 export async function loadContactsFromDataWarehouseFragment(jobEvent) {
+  const jobMessages = [];
   logger.info(
     "starting loadContactsFromDataWarehouseFragment",
     jobEvent.campaignId,
@@ -521,10 +517,19 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         contactCustomFields[f] = row[f];
       });
       contact.custom_fields = JSON.stringify(contactCustomFields);
-      if (contact.zip && !contactCustomFields.hasOwnProperty("timezone")) {
+      if (
+        contact.zip &&
+        !Object.prototype.hasOwnProperty.call(
+          // eslint-disable-next-line no-undef
+          foocontactCustomFields,
+          "timezone"
+        )
+      ) {
         contact.timezone = zipCodeToTimeZone.lookup(contact.zip);
       }
-      if (contactCustomFields.hasOwnProperty("timezone")) {
+      if (
+        Object.prototype.hasOwnProperty.call(contactCustomFields, "timezone")
+      ) {
         const zone = moment.tz.zone(contactCustomFields.timezone);
         if (zone) contact.timezone = contactCustomFields.timezone;
         else contact.timezone = zipCodeToTimeZone.lookup(contact.zip);
@@ -539,11 +544,6 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
     .where("id", jobEvent.jobId)
     .increment("status", 1);
   const validationStats = {};
-
-  logger.error("loadContactsFromDataWarehouseFragment toward end", {
-    completed,
-    jobEvent
-  });
 
   const completed = await r
     .reader("job_request")
@@ -683,7 +683,7 @@ export async function loadContactsFromDataWarehouse(job) {
 
   if (knexCountRes) {
     knexCount = knexCountRes.rows[0].count;
-    if (!knexCount || knexCount == 0) {
+    if (!knexCount || knexCount === 0) {
       jobMessages.push("Error: Data warehouse query returned zero results");
     }
   }
@@ -844,7 +844,7 @@ export async function assignTexters(job) {
   currentAssignments
     .map(assignment => {
       const texter = texters.filter(
-        texter => parseInt(texter.id, 10) === assignment.user_id
+        user => parseInt(user.id, 10) === assignment.user_id
       )[0];
       if (texter) {
         const unchangedMaxContacts =
@@ -922,16 +922,16 @@ export async function assignTexters(job) {
       const dynamicAssignments = [];
       // Do not use `async texter => ...` parallel execution here because `availableContacts`
       // needs to be synchronously updated
-      for (let index = 0; index < texters.length; index++) {
+      for (let index = 0; index < texters.length; index += 1) {
         const texter = texters[index];
         const texterId = parseInt(texter.id, 10);
         let maxContacts = null; // no limit
 
         const texterMax = parseInt(texter.maxContacts, 10);
         const envMax = config.MAX_CONTACTS_PER_TEXTER;
-        if (!isNaN(texterMax)) {
+        if (!Number.isNaN(texterMax)) {
           maxContacts = Math.min(texterMax, envMax) || texterMax;
-        } else if (!isNaN(envMax)) {
+        } else if (!Number.isNaN(envMax)) {
           maxContacts = envMax;
         }
 
@@ -1068,7 +1068,8 @@ export async function assignTexters(job) {
 
           const updatedChunk = await Promise.all(
             assignmentIds.map(async (assignmentId, index) => {
-              // TODO - MySQL Specific. We have to do this because MySQL does not support returning multiple columns from a bulk insert
+              // TODO - MySQL Specific. We have to do this because MySQL does not support returning multiple columns
+              // from a bulk insert
               const { contactsToAssign, assignment } = chunk[index];
               assignment.id = assignmentId;
               return { assignment, contactsToAssign };
@@ -1106,6 +1107,7 @@ export async function assignTexters(job) {
       // dynamic assignments, having zero initially is ok
       if (!isDynamic) {
         // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
+        // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
         const assignmentIds = await trx("assignment")
           .select("assignment.id as id")
           .where("assignment.campaign_id", cid)
@@ -1157,7 +1159,7 @@ let pastMessages = [];
 
 export async function sendMessages(queryFunc, defaultStatus) {
   try {
-    await knex.transaction(async trx => {
+    await r.knex.transaction(async trx => {
       let messages = [];
       try {
         let messageQuery = trx("message")
@@ -1177,7 +1179,7 @@ export async function sendMessages(queryFunc, defaultStatus) {
       }
 
       try {
-        for (let index = 0; index < messages.length; index++) {
+        for (let index = 0; index < messages.length; index += 1) {
           const message = messages[index];
           if (pastMessages.indexOf(message.id) !== -1) {
             throw new Error(
@@ -1241,7 +1243,7 @@ export async function handleIncomingMessageParts() {
     const messagesToSave = [];
     let messagePartsToDelete = [];
     const concatMessageParts = {};
-    for (let i = 0; i < allPartsCount; i++) {
+    for (let i = 0; i < allPartsCount; i += 1) {
       const part = allParts[i];
       const serviceMessageId = part.service_id;
       const savedCount = await r.parseCount(
@@ -1285,7 +1287,9 @@ export async function handleIncomingMessageParts() {
           }
           const groupKey = [parentId, part.contact_number, part.user_number];
           const serviceMessage = JSON.parse(part.service_message);
-          if (!concatMessageParts.hasOwnProperty(groupKey)) {
+          if (
+            !Object.prototype.hasOwnProperty.call(concatMessageParts.groupKey)
+          ) {
             const partCount = parseInt(serviceMessage["concat-total"], 10);
             concatMessageParts[groupKey] = Array(partCount).fill(null);
           }
@@ -1302,19 +1306,19 @@ export async function handleIncomingMessageParts() {
     const keys = Object.keys(concatMessageParts);
     const keyCount = keys.length;
 
-    for (let i = 0; i < keyCount; i++) {
+    for (let i = 0; i < keyCount; i += 1) {
       const groupKey = keys[i];
-      const messageParts = concatMessageParts[groupKey];
+      const keysMessageParts = concatMessageParts[groupKey];
 
-      if (messageParts.filter(part => part === null).length === 0) {
-        messagePartsToDelete = messagePartsToDelete.concat(messageParts);
-        const message = await convertMessageParts(messageParts);
+      if (keysMessageParts.filter(part => part === null).length === 0) {
+        messagePartsToDelete = messagePartsToDelete.concat(keysMessageParts);
+        const message = await convertMessageParts(keysMessageParts);
         messagesToSave.push(message);
       }
     }
 
     const messageCount = messagesToSave.length;
-    for (let i = 0; i < messageCount; i++) {
+    for (let i = 0; i < messageCount; i += 1) {
       logger.info(
         "Saving message with service message ID",
         messagesToSave[i].service_id
@@ -1349,10 +1353,12 @@ export async function fixOrgless() {
           role: "TEXTER"
         });
         logger.info(
-          `added orgless user ${user.id} to organization ${config.DEFAULT_ORG}`
+          `added orgless user ${orglessUser.id} to organization ${
+            config.DEFAULT_ORG
+          }`
         );
       } catch (err) {
-        logger.error("error on userOrganization save in orgless: ", error);
+        logger.error("error on userOrganization save in orgless: ", err);
       }
     }); // forEach
   } // if
@@ -1362,7 +1368,7 @@ export async function clearOldJobs(delay) {
   // to clear out old stuck jobs
   const twoHoursAgo = new Date(new Date() - 1000 * 60 * 60 * 2);
   delay = delay || twoHoursAgo;
-  return await r
+  return r
     .knex("job_request")
     .where({ assigned: true })
     .where("updated_at", "<", delay)
