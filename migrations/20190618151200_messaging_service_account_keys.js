@@ -1,5 +1,5 @@
 // Add Twilio account_sid and encrypted_auth_token columns
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.alterTable("messaging_service", table => {
     table
       .text("account_sid")
@@ -13,7 +13,7 @@ exports.up = function(knex) {
 };
 
 // Remove Twilio account_sid and encrypted_auth_token columns
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.alterTable("messaging_service", table => {
     table.dropColumn("account_sid");
     table.dropColumn("encrypted_auth_token");

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return Promise.all([
     knex.schema.createTable("troll_alarm", table => {
       table
@@ -24,7 +24,7 @@ exports.up = function(knex) {
   ]);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return Promise.all([
     knex.schema.dropTable("troll_alarm"),
     knex.schema.dropTable("troll_trigger")

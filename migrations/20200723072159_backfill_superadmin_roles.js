@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create or replace function public.tg__user__backfill_superadmin_membership() returns trigger as $$
     begin
@@ -24,7 +24,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop trigger _500_backfill_superadmin_membership on public.user;
 

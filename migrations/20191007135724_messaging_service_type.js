@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return Promise.all([
     // Create enum type
     knex.schema
@@ -31,7 +31,7 @@ exports.up = function(knex) {
   ]);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return Promise.all([
     // Drop column and service_type enum
     knex.schema

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     alter table troll_alarm
       add column organization_id integer not null references organization(id)
@@ -99,7 +99,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop function public.troll_patrol ();
     drop function public.raise_trollbot_alarms (integer, interval);

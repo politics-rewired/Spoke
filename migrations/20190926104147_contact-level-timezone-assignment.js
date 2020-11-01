@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(
     /**
      * This adds a a condition that the contact is within certain assignable time zones
@@ -111,7 +111,7 @@ exports.up = function(knex) {
   );
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(
     /**
      * Bring back campaign restriction

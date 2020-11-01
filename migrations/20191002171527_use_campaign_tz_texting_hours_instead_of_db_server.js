@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create or replace view assignable_needs_message as (
       select acc.id, acc.campaign_id, acc.message_status
@@ -36,7 +36,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
       create or replace view assignable_needs_message as (
         select acc.id, acc.campaign_id, acc.message_status

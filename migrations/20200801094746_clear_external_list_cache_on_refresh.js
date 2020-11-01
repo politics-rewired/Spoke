@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.raw(`
     -- Delete existing external list records before kicking off fetch
     create or replace function "public".queue_refresh_saved_lists(van_system_id uuid) returns void as $$
@@ -33,7 +33,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.raw(`
     -- Revert function
     create or replace function "public".queue_refresh_saved_lists(van_system_id uuid) returns void as $$

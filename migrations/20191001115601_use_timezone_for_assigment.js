@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema
     .raw(
       `
@@ -28,7 +28,7 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema
     .alterTable("campaign_contact", table => {
       table.text("timezone_offset").defaultTo("");

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create or replace function "public".insert_van_contact_batch_to_campaign_contact(record_list json) returns void as $$
       insert into campaign_contact (campaign_id, external_id, first_name, last_name, zip, custom_fields, cell)
@@ -25,7 +25,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     create or replace function "public".insert_van_contact_batch_to_campaign_contact(record_list json) returns void as $$
     insert into campaign_contact (campaign_id, external_id, first_name, last_name, zip, custom_fields, cell)

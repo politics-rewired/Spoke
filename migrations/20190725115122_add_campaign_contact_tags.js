@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * Must create an escalate tag for each existing organization!
  *
@@ -43,7 +44,7 @@
 
  */
 
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema
     .createTable("tag", table => {
       table.increments("id").primary();
@@ -123,7 +124,7 @@ exports.up = function(knex) {
     );
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema
     .dropTable("campaign_contact_tag")
     .then(() => knex.schema.dropTable("tag"));

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.alterTable("campaign", table => {
     // We would like to make timezone NOT NULL here, but alas:
     //   "error: cannot alter type of a column used by a view or rule"
@@ -12,7 +12,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.alterTable("campaign", table => {
     // table
     //   .text("timezone")

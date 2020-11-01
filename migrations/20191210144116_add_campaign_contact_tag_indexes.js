@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.alterTable("campaign_contact_tag", table => {
     table.index(["tag_id"], "campaign_contact_tag_tag_idx");
     // create index concurrently campaign_contact_tag_tag_idx on campaign_contact_tag (tag_id);
@@ -7,7 +7,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.alterTable("campaign_contact_tag", table => {
     table.dropIndex(
       ["campaign_contact_id"],

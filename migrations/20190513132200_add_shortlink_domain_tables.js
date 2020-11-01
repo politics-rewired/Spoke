@@ -1,5 +1,5 @@
 // Create link_domain and unhealthy_link_domain tables
-exports.up = function(knex) {
+exports.up = function up(knex) {
   const linkDomainPromise = knex.schema.createTable("link_domain", table => {
     table.increments("id").primary();
     table.integer("organization_id").notNullable();
@@ -49,7 +49,7 @@ exports.up = function(knex) {
 };
 
 // Drop link_domain and unhealthy_link_domain tables
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return Promise.all([
     knex.schema.dropTable("link_domain"),
     knex.schema.dropTable("unhealthy_link_domain")

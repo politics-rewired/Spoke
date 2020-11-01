@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.createTable("assignment_request", t => {
     t.increments("id");
     t.timestamp("created_at")
@@ -22,6 +22,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.dropTable("assignment_request");
 };

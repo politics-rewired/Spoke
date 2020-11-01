@@ -4,7 +4,7 @@
  * https://github.com/politics-rewired/Spoke/pull/289#issue-318906142
  */
 
-exports.up = function(knex) {
+exports.up = function up(knex) {
   // Add stringified empty array as default
   return knex.schema.alterTable("message", table => {
     table
@@ -14,7 +14,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   // Revert to default of empty string
   return knex.schema.alterTable("message", table => {
     table

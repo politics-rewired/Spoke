@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.alterTable("invite", table => {
     table
       .json("payload")
@@ -7,7 +7,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.alterTable("invite", table => {
     table.dropColumn("payload");
   });

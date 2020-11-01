@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     alter table public.external_system add constraint external_system_pkey primary key (id);
 
@@ -147,7 +147,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop function public.queue_refresh_van_survey_questions(uuid);
     drop function public.insert_van_survey_questions(json, json, json);

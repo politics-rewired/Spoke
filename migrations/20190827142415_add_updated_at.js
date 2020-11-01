@@ -81,7 +81,7 @@ const OTHER_INITIALIZATION_OPTIONS = [
   ["message", ["service_response_at", "sent_at", "queued_at", "created_at"]]
 ];
 
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema
     .raw(
       `
@@ -132,7 +132,7 @@ exports.up = function(knex) {
     );
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   /**
    * Drop function cascades to all triggers
    */
