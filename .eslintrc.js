@@ -30,6 +30,11 @@ module.exports = {
   settings: {
     react: {
       version: "detect"
+    },
+    "import/resolver": {
+      node: {
+        extensions: [".js", ".jsx", ".ts", ".tsx"]
+      }
     }
   },
   rules: {
@@ -58,6 +63,8 @@ module.exports = {
     semi: ["error", "always"],
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "import/extensions": ["error", "never"],
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
 
     // Rules to get linting to pass
     camelcase: ["off", { properties: "never" }],
