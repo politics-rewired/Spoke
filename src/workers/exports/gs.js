@@ -78,6 +78,7 @@ const getCanonicalRequest = (bucket, key) => {
  */
 const upload = async (bucket, key, payload) => {
   throw new Error("Unimplemented storage engine!");
+  // eslint-disable-next-line no-unreachable
   return awsUpload(bucket, key, payload, awsEndpoint);
 };
 
@@ -92,6 +93,7 @@ const getDownloadUrl = async (bucket, key) => {
   throw new Error("Unimplemented storage engine!");
 
   // See https://cloud.google.com/storage/docs/access-control/signing-urls-manually
+  // eslint-disable-next-line no-unreachable
   const currentDatetime = new Date().toISOString();
   const credentialScope = getCredentialScope();
   const canonicalRequest = getCanonicalRequest(bucket, key);

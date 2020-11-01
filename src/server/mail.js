@@ -55,3 +55,5 @@ export const sendEmail = async ({ to, subject, text, replyTo }) => {
 
   return sender.sendMail(params);
 };
+
+export default sendEmail;

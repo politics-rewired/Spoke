@@ -50,14 +50,14 @@ async function doGetUsers({
   }
 
   if (campaignsFilter.campaignId !== undefined) {
-    query.whereExists(function() {
+    query.whereExists(function subquery() {
       this.select(r.knex.raw("1"))
         .from("assignment")
         .whereRaw('"assignment"."user_id" = "user"."id"')
-        .where({ campaign_id: parseInt(campaignsFilter.campaignId) });
+        .where({ campaign_id: parseInt(campaignsFilter.campaignId, 10) });
     });
   } else if (campaignsFilter.isArchived !== undefined) {
-    query.whereExists(function() {
+    query.whereExists(function subquery() {
       this.select(r.knex.raw("1"))
         .from("assignment")
         .join("campaign", "campaign.id", "assignment.campaign_id")
@@ -110,7 +110,7 @@ export const getUsers = async (
   campaignsFilter,
   role
 ) => {
-  return await memoizedGetUsers({
+  return memoizedGetUsers({
     organizationId,
     cursor,
     campaignsFilter,
@@ -198,7 +198,7 @@ export const resolvers = {
       if (organizationId) {
         query.where({ organization_id: organizationId });
       }
-      return await formatPage(query, { after, first });
+      return formatPage(query, { after, first });
     },
     organizations: async (user, { role }) => {
       if (!user || !user.id) {
@@ -206,11 +206,11 @@ export const resolvers = {
       }
 
       const getOrganizationsForUserWithRole = memoizer.memoize(
-        async ({ userId, role }) => {
-          return r.reader("organization").whereExists(function() {
-            const whereClause = { user_id: user.id };
-            if (role) {
-              whereClause.role = role;
+        async ({ userId, role: userRole }) => {
+          return r.reader("organization").whereExists(function subquery() {
+            const whereClause = { user_id: userId };
+            if (userRole) {
+              whereClause.role = userRole;
             }
             this.select(r.reader.raw("1"))
               .from("user_organization")
@@ -221,15 +221,15 @@ export const resolvers = {
         cacheOpts.UserOrganizations
       );
 
-      return await getOrganizationsForUserWithRole({ userId: user.id, role });
+      return getOrganizationsForUserWithRole({ userId: user.id, role });
     },
     roles: async (user, { organizationId }) => {
       const getRoleForUserInOrganization = await memoizer.memoize(
         async params => {
-          return await r
+          return r
             .reader("user_organization")
             .where({
-              organization_id: parseInt(params.organizationId),
+              organization_id: parseInt(params.organizationId, 10),
               user_id: params.userId
             })
             .pluck("role");
@@ -237,7 +237,7 @@ export const resolvers = {
         cacheOpts.UserOrganizationRoles
       );
 
-      return await getRoleForUserInOrganization({
+      return getRoleForUserInOrganization({
         userId: user.id,
         organizationId
       });

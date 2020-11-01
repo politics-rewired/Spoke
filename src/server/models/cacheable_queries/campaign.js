@@ -1,6 +1,7 @@
-import { r } from "..";
 import { config } from "../../../config";
-import { organizationCache } from "./organization";
+import thinky from "../thinky";
+
+const { r } = thinky;
 
 // This should be cached data for a campaign that will not change
 // based on assignments or texter actions

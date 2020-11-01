@@ -4,6 +4,21 @@ import { r } from "../models";
 
 const CONCURRENCY = 2;
 
+const releaseStaleRepliesOnCampaign = async (campaignId, afterStaleMinutes) => {
+  await r
+    .knex("campaign_contact")
+    .update({ assignment_id: null })
+    .where({
+      campaign_id: campaignId,
+      message_status: "needsResponse"
+    })
+    .whereNotNull("assignment_id")
+    .whereRaw(
+      `campaign_contact.updated_at < now() - ('1 minute'::interval * ?)`,
+      [afterStaleMinutes]
+    );
+};
+
 export const releaseStaleReplies = async (_payload, _helpers) => {
   const campaignsToReleaseStaleRepliesFrom = await r
     .knex("campaign")
@@ -22,17 +37,4 @@ export const releaseStaleReplies = async (_payload, _helpers) => {
   }
 };
 
-const releaseStaleRepliesOnCampaign = async (campaignId, afterStaleMinutes) => {
-  await r
-    .knex("campaign_contact")
-    .update({ assignment_id: null })
-    .where({
-      campaign_id: campaignId,
-      message_status: "needsResponse"
-    })
-    .whereNotNull("assignment_id")
-    .whereRaw(
-      `campaign_contact.updated_at < now() - ('1 minute'::interval * ?)`,
-      [afterStaleMinutes]
-    );
-};
+export default releaseStaleReplies;

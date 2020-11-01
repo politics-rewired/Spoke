@@ -1,6 +1,8 @@
-import { r } from "..";
 import { config } from "../../../config";
 import logger from "../../../logger";
+import thinky from "../thinky";
+
+const { r } = thinky;
 
 // STRUCTURE
 // maybe HASH by organization, so optout-<organization_id> has a <cell> key
@@ -25,7 +27,7 @@ const loadMany = async organizationId => {
     for (
       let i100 = 0, l100 = Math.ceil(cellOptOuts.length / 100);
       i100 < l100;
-      i100++
+      i100 += 1
     ) {
       await r.redis.saddAsync(
         hashKey,
@@ -120,3 +122,5 @@ export const optOutCache = {
   },
   loadMany
 };
+
+export default optOutCache;

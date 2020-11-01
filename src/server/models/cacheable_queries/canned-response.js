@@ -1,5 +1,7 @@
-import { r } from "..";
 import { config } from "../../../config";
+import thinky from "../thinky";
+
+const { r } = thinky;
 
 // Datastructure:
 // * regular GET/SET with JSON ordered list of the objects {id,title,text}
@@ -9,7 +11,7 @@ import { config } from "../../../config";
 // * needs to get by campaignId-userId pairs
 
 const cacheKey = (campaignId, userId) =>
-  `${config.CACHE_PREFIX}canned-${campaignId}-${userId | ""}`;
+  `${config.CACHE_PREFIX}canned-${campaignId}-${userId || ""}`;
 
 export const cannedResponseCache = {
   clearQuery: async ({ campaignId, userId }) => {
@@ -27,8 +29,8 @@ export const cannedResponseCache = {
     const dbResult = await r
       .reader("canned_response")
       .where({
-        campaign_id: parseInt(campaignId),
-        user_id: parseInt(userId) || null
+        campaign_id: parseInt(campaignId, 10),
+        user_id: parseInt(userId, 10) || null
       })
       .orderBy("title");
     if (r.redis) {
@@ -47,3 +49,5 @@ export const cannedResponseCache = {
     return dbResult;
   }
 };
+
+export default cannedResponseCache;

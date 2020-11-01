@@ -1,5 +1,7 @@
 import { config } from "../../config";
-import r from "./index.js";
+import thinky from "./thinky";
+
+const { r } = thinky;
 
 let warehouseConfig;
 

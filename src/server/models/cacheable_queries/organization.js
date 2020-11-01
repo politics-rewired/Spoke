@@ -1,5 +1,7 @@
-import { r } from "..";
 import { config } from "../../../config";
+import thinky from "../thinky";
+
+const { r } = thinky;
 
 const cacheKey = orgId => `${config.CACHE_PREFIX}org-${orgId}`;
 

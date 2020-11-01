@@ -118,7 +118,7 @@ export const getContactMessagingService = async (
       select *
       from get_messaging_service_for_campaign_contact_in_organization(?, ?)
     `,
-    [campaignContactId, parseInt(organizationId)]
+    [campaignContactId, parseInt(organizationId, 10)]
   );
 
   // Return an existing match if there is one - this is the vast majority of cases
@@ -137,7 +137,7 @@ export const getContactMessagingService = async (
   // Otherwise select an appropriate messaging service and assign
   const assignedService = await assignMessagingServiceSID(
     campaignContact.cell,
-    parseInt(organizationId)
+    parseInt(organizationId, 10)
   );
 
   return assignedService;
@@ -185,7 +185,7 @@ export const assignMissingMessagingServices = async (
 
   if (rows.length === 0) return;
 
-  const cellsByServiceType = groupBy(rows, r => r.service_type);
+  const cellsByServiceType = groupBy(rows, row => row.service_type);
   const messagingServiceCandidatesByServiceType = {};
 
   for (const serviceType of Object.keys(cellsByServiceType)) {
@@ -204,8 +204,8 @@ export const assignMissingMessagingServices = async (
     const candidates = messagingServiceCandidatesByServiceType[serviceType];
 
     toInsertByType[serviceType] = cellsByServiceType[serviceType].map(
-      (r, idx) => ({
-        cell: r.cell,
+      (row, idx) => ({
+        cell: row.cell,
 
         organization_id: organizationId,
         messaging_service_sid:
@@ -219,7 +219,7 @@ export const assignMissingMessagingServices = async (
     allToInsert = allToInsert.concat(toInsertByType[serviceType]);
   }
 
-  return await trx("messaging_service_stick").insert(allToInsert);
+  return trx("messaging_service_stick").insert(allToInsert);
 };
 
 const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
@@ -239,6 +239,7 @@ export const messageComponents = messageText => {
   // Image extraction
   const results = messageText.match(mediaExtractor);
   if (results) {
+    // eslint-disable-next-line prefer-destructuring
     params.mediaUrl = results[1];
   }
 
@@ -292,7 +293,7 @@ export const messageComponents = messageText => {
     -----------------------------------
 
   - must do explain analyze
-  - both query options were pretty good – the campaign_contact.cell and message.campaign_contact_id
+  - both query options were pretty good – the campaign_contact.cell and message.campaign_contact_id
       index filters are fast enough and the result set to filter through small enough that the rest doesn't
       really matter
     - first one was much easier to plan, so going with that one
@@ -300,7 +301,7 @@ export const messageComponents = messageText => {
 
 export async function getCampaignContactAndAssignmentForIncomingMessage({
   contactNumber,
-  service,
+  _service,
   messaging_service_sid
 }) {
   const { rows } = await r.reader.raw(
@@ -385,7 +386,9 @@ export const appendServiceResponse = (responsesString, newResponse) => {
   let existingResponses = [];
   try {
     existingResponses = JSON.parse(responsesString);
-  } catch (error) {}
+  } catch (error) {
+    // stub
+  }
 
   // service_response should be an array of responses (although this is usually of length 1)
   if (!Array.isArray(existingResponses)) {

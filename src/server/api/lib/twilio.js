@@ -21,6 +21,25 @@ const MAX_SEND_ATTEMPTS = 5;
 const MESSAGE_VALIDITY_PADDING_SECONDS = 30;
 const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
+const getTwilioCredentials = async messagingServiceSid => {
+  const { account_sid: accountSid, encrypted_auth_token } = await r
+    .reader("messaging_service")
+    .first(["account_sid", "encrypted_auth_token"])
+    .where({
+      messaging_service_sid: messagingServiceSid,
+      service_type: "twilio"
+    });
+  const authToken = symmetricDecrypt(encrypted_auth_token);
+  return { accountSid, authToken };
+};
+
+const twilioClient = async messagingServiceSid => {
+  const { accountSid, authToken } = await getTwilioCredentials(
+    messagingServiceSid
+  );
+  return Twilio(accountSid, authToken);
+};
+
 const headerValidator = () => {
   const { SKIP_TWILIO_VALIDATION, TWILIO_VALIDATION_HOST, BASE_URL } = config;
   if (SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
@@ -146,25 +165,6 @@ async function rentNewCell(messagingSericeSid) {
   throw new Error("Did not find any cell");
 }
 
-const getTwilioCredentials = async messagingServiceSid => {
-  const { account_sid: accountSid, encrypted_auth_token } = await r
-    .reader("messaging_service")
-    .first(["account_sid", "encrypted_auth_token"])
-    .where({
-      messaging_service_sid: messagingServiceSid,
-      service_type: "twilio"
-    });
-  const authToken = symmetricDecrypt(encrypted_auth_token);
-  return { accountSid, authToken };
-};
-
-const twilioClient = async messagingServiceSid => {
-  const { accountSid, authToken } = await getTwilioCredentials(
-    messagingServiceSid
-  );
-  return Twilio(accountSid, authToken);
-};
-
 async function sendMessage(message, organizationId, trx = r.knex) {
   const service = await getContactMessagingService(
     message.campaign_contact_id,
@@ -187,7 +187,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
   }
 
   // TODO: refactor this -- the Twilio client supports promises now
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     if (message.service !== "twilio") {
       logger.warn("Message not marked as a twilio message", message.id);
     }
@@ -338,10 +338,10 @@ export const processDeliveryReport = async body => {
 
 async function handleIncomingMessage(message) {
   if (
-    !message.hasOwnProperty("From") ||
-    !message.hasOwnProperty("To") ||
-    !message.hasOwnProperty("Body") ||
-    !message.hasOwnProperty("MessageSid")
+    !Object.prototype.hasOwnProperty.call(message, "From") ||
+    !Object.prototype.hasOwnProperty.call(message, "To") ||
+    !Object.prototype.hasOwnProperty.call(message, "Body") ||
+    !Object.prototype.hasOwnProperty.call(message, "MessageSid")
   ) {
     logger.error("This is not an incoming message", { payload: message });
   }

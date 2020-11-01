@@ -53,34 +53,33 @@ function setupSlackPassport() {
       : undefined
   };
 
-  const strategy = new passportSlack.Strategy(
-    options,
-    async (
-      accessToken,
-      scopes,
-      team,
-      { bot, incomingWebhook },
-      { user, team: teamProfile },
-      done
-    ) => {
-      // scopes is a Set
-      if (config.SLACK_TOKEN) {
-        const response = await request
-          .get(`https://slack.com/api/users.profile.get`)
-          .query({ token: config.SLACK_TOKEN, user: user.id })
-          .then(res => res.body);
-        if (!response.ok) {
-          logger.error("Error fetching Slack profile", { response });
-        } else {
-          const userProfile = response.profile;
-          const { real_name, first_name, last_name, phone } = userProfile;
-          user = { ...user, real_name, first_name, last_name, phone };
-        }
+  const strategy = new passportSlack.Strategy(options, async (
+    accessToken,
+    scopes,
+    team,
+    // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+    { bot, incomingWebhook },
+    // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+    { user, team: teamProfile },
+    done
+  ) => {
+    // scopes is a Set
+    if (config.SLACK_TOKEN) {
+      const response = await request
+        .get(`https://slack.com/api/users.profile.get`)
+        .query({ token: config.SLACK_TOKEN, user: user.id })
+        .then(res => res.body);
+      if (!response.ok) {
+        logger.error("Error fetching Slack profile", { response });
+      } else {
+        const userProfile = response.profile;
+        const { real_name, first_name, last_name, phone } = userProfile;
+        user = { ...user, real_name, first_name, last_name, phone };
       }
-
-      return done(null, user);
     }
-  );
+
+    return done(null, user);
+  });
 
   passport.use(strategy);
 
@@ -130,14 +129,13 @@ function setupSlackPassport() {
         // Spoke was granted the 'users.profile:read' scope so use Slack-provided first/last
         first_name = user.first_name;
         last_name = user.last_name;
-      } else if (splitName.length == 1) {
-        first_name = splitName[0];
+      } else if (splitName.length === 1) {
+        [first_name] = splitName;
         last_name = "";
-      } else if (splitName.length == 2) {
-        first_name = splitName[0];
-        last_name = splitName[1];
+      } else if (splitName.length === 2) {
+        [first_name, last_name] = splitName;
       } else {
-        first_name = splitName[0];
+        [first_name] = splitName;
         last_name = splitName.slice(1, splitName.length + 1).join(" ");
       }
 
@@ -258,6 +256,7 @@ function setupLocalAuthPassport() {
     },
     async (req, username, password, done) => {
       const { nextUrl = "", authType } = req.body;
+      // eslint-disable-next-line no-useless-escape
       const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
       const lowerCaseEmail = username.toLowerCase();
       const existingUser = await r
@@ -297,7 +296,7 @@ function setupLocalAuthPassport() {
   const app = express();
   app.post("/login-callback", (req, res, next) => {
     // See: http://www.passportjs.org/docs/authenticate/#custom-callback
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err, user, _info) => {
       // Check custom property rather than using instanceof because errors are being passed as
       // objects, not classes
       if (err && err.errorType === "LocalAuthError") {
@@ -309,9 +308,9 @@ function setupLocalAuthPassport() {
       }
 
       // Default behavior
-      req.logIn(user, function(err) {
-        if (err) {
-          return next(err);
+      req.logIn(user, logInErr => {
+        if (logInErr) {
+          return next(logInErr);
         }
         return res.redirect(req.body.nextUrl || "/");
       });

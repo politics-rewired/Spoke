@@ -1,5 +1,7 @@
-import { r } from "..";
 import { cacheOpts, memoizer } from "../../memoredis";
+import thinky from "../thinky";
+
+const { r } = thinky;
 
 const getUserByAuth0Id = memoizer.memoize(async ({ auth0Id }) => {
   const userAuth = await r
@@ -21,7 +23,7 @@ const getUserById = memoizer.memoize(async ({ id }) => {
 
 export async function userLoggedIn(val, field = "id") {
   const result =
-    field == "id"
+    field === "id"
       ? await getUserById({ id: val })
       : field === "auth0_id"
         ? await getUserByAuth0Id({ auth0Id: val })

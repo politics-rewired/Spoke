@@ -1,3 +1,5 @@
+import groupBy from "lodash/groupBy";
+
 import logger from "../../logger";
 import knexConfig from "../../server/knex";
 
@@ -8,14 +10,66 @@ const COMPUTATION_DELAY = 1;
 
 const SENSOR_DOMAIN_MAX_THRESHOLD = 10;
 const SLIDING_WINDOW_SECONDS = 4 * 60 * 60; // 4 hours
+// eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 const COOL_DOWN_PERIOD_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 const DOMAIN_ENDINGS = [".com", ".us", ".net", ".io", ".org", ".info", ".news"];
 const DOMAIN_REGEX = new RegExp(
-  `${`[^://\\s]*` + "("}${DOMAIN_ENDINGS.map(tld => `\\${tld}`).join("|")})`
+  `${`[^://\\s]*(`}${DOMAIN_ENDINGS.map(tld => `\\${tld}`).join("|")})`
 );
 
 const db = require("knex")(knexConfig);
+
+async function markDomainUnhealthy(domain) {
+  // Check if domain is already marked unhealthy
+  const existingDomain = await db("unhealthy_link_domain")
+    .select("id")
+    .where({ domain })
+    .where("healthy_again_at", ">", db.fn.now())
+    .orWhereNull("healthy_again_at")
+    .first();
+
+  if (existingDomain) {
+    logger.verbose(`Found existing unhealthy record for domain ${domain}`);
+    return;
+  }
+
+  logger.warn(`Marking ${domain} as unhealthy.`);
+  await db("unhealthy_link_domain").insert({ domain });
+}
+
+async function firstMessageSentAt() {
+  const firstMessage = await db("message")
+    .select("created_at")
+    .orderBy("created_at", "asc")
+    .limit(1)
+    .first();
+
+  return firstMessage ? firstMessage.created_at : firstMessage;
+}
+
+function extractDomain(text) {
+  const matches = text.match(DOMAIN_REGEX);
+  return matches ? matches[0] : null;
+}
+
+function extractPath(text, domain) {
+  if (!domain) return null;
+
+  try {
+    const fullUrlRegex = new RegExp(`${domain}\\S*`);
+    const matches = text.match(fullUrlRegex);
+    const fullUrl = matches ? matches[0] : null;
+
+    if (!fullUrl) return null;
+
+    const splitBySlash = fullUrl.split("/");
+    const fullPath = splitBySlash.slice(1, 10000).join("/");
+    return fullPath;
+  } catch (ex) {
+    return null;
+  }
+}
 
 async function chunkedMain() {
   const results = await db.raw(`
@@ -28,7 +82,6 @@ async function chunkedMain() {
   const lastReport = results.rows[0];
 
   let period_starts_at;
-  let period_ends_at;
 
   if (lastReport) {
     period_starts_at = lastReport.period_ends_at;
@@ -37,7 +90,7 @@ async function chunkedMain() {
   }
 
   period_starts_at = moment.utc(period_starts_at);
-  period_ends_at = moment.utc(period_starts_at);
+  const period_ends_at = moment.utc(period_starts_at);
   period_ends_at.add(MINUTES_LATER, "minutes");
 
   let nMinutesAgo = moment.utc();
@@ -81,8 +134,8 @@ async function chunkedMain() {
       };
     }
 
-    grouped[key].total++;
-    grouped[key][mi.send_status.toLowerCase()]++;
+    grouped[key].total += 1;
+    grouped[key][mi.send_status.toLowerCase()] += 1;
   });
 
   const rows = Object.keys(grouped).map(key => {
@@ -99,7 +152,7 @@ async function chunkedMain() {
     };
   });
 
-  if (rows.length == 0) {
+  if (rows.length === 0) {
     rows.push({
       domain: null,
       url_path: null,
@@ -206,57 +259,6 @@ async function slidingWindowMain() {
   //   .whereRaw(`created_at < CURRENT_TIMESTAMP - INTERVAL '?? second'`, [COOL_DOWN_PERIOD_SECONDS])
 
   return "Done";
-}
-
-async function markDomainUnhealthy(domain) {
-  // Check if domain is already marked unhealthy
-  const existingDomain = await db("unhealthy_link_domain")
-    .select("id")
-    .where({ domain })
-    .where("healthy_again_at", ">", db.fn.now())
-    .orWhereNull("healthy_again_at")
-    .first();
-
-  if (existingDomain) {
-    logger.verbose(`Found existing unhealthy record for domain ${domain}`);
-    return;
-  }
-
-  logger.warn(`Marking ${domain} as unhealthy.`);
-  await db("unhealthy_link_domain").insert({ domain });
-}
-
-async function firstMessageSentAt() {
-  const firstMessage = await db("message")
-    .select("created_at")
-    .orderBy("created_at", "asc")
-    .limit(1)
-    .first();
-
-  return firstMessage ? firstMessage.created_at : firstMessage;
-}
-
-function extractDomain(text) {
-  const matches = text.match(DOMAIN_REGEX);
-  return matches ? matches[0] : null;
-}
-
-function extractPath(text, domain) {
-  if (!domain) return null;
-
-  try {
-    const fullUrlRegex = new RegExp(`${domain}\\S*`);
-    const matches = text.match(fullUrlRegex);
-    const fullUrl = matches ? matches[0] : null;
-
-    if (!fullUrl) return null;
-
-    const splitBySlash = fullUrl.split("/");
-    const fullPath = splitBySlash.slice(1, 10000).join("/");
-    return fullPath;
-  } catch (ex) {
-    return null;
-  }
 }
 
 async function main() {

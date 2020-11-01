@@ -12,15 +12,8 @@ export const Notifications = Object.freeze({
   ASSIGNMENT_UPDATED: "assignment.updated"
 });
 
-const replyToForOrg = async organizationId => {
-  if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
-
-  const orgOwner = await getOrganizationOwner(organizationId);
-  return orgOwner.email;
-};
-
 async function getOrganizationOwner(organizationId) {
-  return await r
+  return r
     .reader("user")
     .join("user_organization", "user_organization.user_id", "user.id")
     .where({
@@ -30,6 +23,14 @@ async function getOrganizationOwner(organizationId) {
     .orderBy("user.id")
     .first("user.*");
 }
+
+const replyToForOrg = async organizationId => {
+  if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
+
+  const orgOwner = await getOrganizationOwner(organizationId);
+  return orgOwner.email;
+};
+
 const sendAssignmentUserNotification = async (assignment, notification) => {
   const campaign = await r
     .reader("campaign")
@@ -152,7 +153,7 @@ export const sendUserNotification = async notification => {
   } else if (type === Notifications.ASSIGNMENT_CREATED) {
     const { assignment } = notification;
     await sendAssignmentUserNotification(assignment, type);
-  } else if (type == Notifications.ASSIGNMENT_UPDATED) {
+  } else if (type === Notifications.ASSIGNMENT_UPDATED) {
     const { assignment } = notification;
     await sendAssignmentUserNotification(assignment, type);
   }

@@ -6,8 +6,9 @@ import knexConfig from "../../server/knex";
 
 const db = knex(knexConfig);
 
-let { TROLL_ALERT_URL, TROLL_ALERT_PERIOD_MINUTES = 6 } = process.env;
-TROLL_ALERT_PERIOD_MINUTES = parseInt(TROLL_ALERT_PERIOD_MINUTES);
+const { TROLL_ALERT_URL } = process.env;
+let { TROLL_ALERT_PERIOD_MINUTES = 6 } = process.env;
+TROLL_ALERT_PERIOD_MINUTES = parseInt(TROLL_ALERT_PERIOD_MINUTES, 10);
 
 const batchLogger = logger.child({ batch_timestamp: new Date().getTime() });
 

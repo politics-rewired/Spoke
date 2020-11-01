@@ -1,7 +1,9 @@
-import { r } from "..";
 import { config } from "../../../config";
 import logger from "../../../logger";
+import thinky from "../thinky";
 import { optOutCache } from "./opt-out";
+
+const { r } = thinky;
 
 // <campaignContactId>
 //   - assignmentId
@@ -45,11 +47,12 @@ const getMessageServiceSid = organization => {
   return orgSid;
 };
 
-const cacheKey = async id => `${config.CACHE_PREFIX | ""}contact-${id}`;
+const cacheKey = async id => `${config.CACHE_PREFIX || ""}contact-${id}`;
 
 const saveCacheRecord = async (dbRecord, organization, messageServiceSid) => {
   if (r.redis) {
     // basic contact record
+    // eslint-disable-next-line no-use-before-define
     const contactCacheObj = generateCacheRecord(
       dbRecord,
       organization.id,
@@ -110,7 +113,7 @@ export const campaignContactCache = {
         return cacheData;
       }
     }
-    return await r
+    return r
       .reader("campaign_contact")
       .where({ id })
       .first();
@@ -157,3 +160,5 @@ export const campaignContactCache = {
     }
   }
 };
+
+export default campaignContactCache;

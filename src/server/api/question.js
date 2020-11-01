@@ -26,7 +26,7 @@ export const resolvers = {
         cacheOpts.InteractionStepChildren
       );
 
-      return await getAnswerOptions({ interactionStepId: interactionStep.id });
+      return getAnswerOptions({ interactionStepId: interactionStep.id });
     },
     interactionStep: async interactionStep => interactionStep
   },
@@ -36,7 +36,7 @@ export const resolvers = {
     nextInteractionStep: async answer => {
       const getInteractionStep = memoizer.memoize(
         async ({ interactionStepId }) => {
-          return await r
+          return r
             .reader("interaction_step")
             .first("*")
             .where({ id: interactionStepId });
@@ -44,7 +44,7 @@ export const resolvers = {
         cacheOpts.InteractionStepSingleton
       );
 
-      return await getInteractionStep({
+      return getInteractionStep({
         interactionStepId: answer.interaction_step_id
       });
     },
@@ -78,3 +78,5 @@ export const resolvers = {
     question: async answer => answer.parent_interaction_step
   }
 };
+
+export default resolvers;

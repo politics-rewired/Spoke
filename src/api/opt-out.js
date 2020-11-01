@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/prefer-default-export
 export const schema = `
   type OptOut {
     id: ID

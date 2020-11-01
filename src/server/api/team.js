@@ -19,7 +19,7 @@ export const resolvers = {
     maxRequestCount: async team => team.max_request_count,
     createdAt: async team => team.created_at,
 
-    users: async (team, {}, { user }) => {
+    users: async (team, _, { user }) => {
       await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
 
       return r
@@ -30,7 +30,7 @@ export const resolvers = {
           "user_team.team_id": team.id
         });
     },
-    campaigns: async (team, {}, { user }) => {
+    campaigns: async (team, _, { user }) => {
       await accessRequired(user, team.organization_id, "SUPERVOLUNTEER");
 
       return r
@@ -41,7 +41,7 @@ export const resolvers = {
           "campaign_team.team_id": team.id
         });
     },
-    escalationTags: async (team, {}, { user }) => {
+    escalationTags: async (team, _, { user: _user }) => {
       return r
         .reader("team_escalation_tags")
         .join("tag", "tag.id", "=", "team_escalation_tags.tag_id")
@@ -49,3 +49,5 @@ export const resolvers = {
     }
   }
 };
+
+export default resolvers;

@@ -1,13 +1,13 @@
-import bluebird from "bluebird";
+import fakeredis from "fakeredis";
 import knex from "knex";
 import redis from "redis";
 import dumbThinky from "rethink-knex-adapter";
 
 import { config } from "../../config";
-import knexConfig from "../knex.js";
+import knexConfig from "../knex";
 
-bluebird.promisifyAll(redis.RedisClient.prototype);
-bluebird.promisifyAll(redis.Multi.prototype);
+Promise.promisifyAll(redis.RedisClient.prototype);
+Promise.promisifyAll(redis.Multi.prototype);
 
 // Instantiate the rethink-knex-adapter using the config defined in
 // /src/server/knex.js.
@@ -51,9 +51,8 @@ thinkyConn.r.parseCount = async query => {
 if (config.REDIS_URL) {
   thinkyConn.r.redis = redis.createClient({ url: config.REDIS_URL });
 } else if (config.REDIS_FAKE) {
-  const fakeredis = require("fakeredis");
-  bluebird.promisifyAll(fakeredis.RedisClient.prototype);
-  bluebird.promisifyAll(fakeredis.Multi.prototype);
+  Promise.promisifyAll(fakeredis.RedisClient.prototype);
+  Promise.promisifyAll(fakeredis.Multi.prototype);
 
   thinkyConn.r.redis = fakeredis.createClient();
 }

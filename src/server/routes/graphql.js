@@ -19,7 +19,10 @@ const executableSchema = makeExecutableSchema({
 
 const formatError = err => {
   // node-postgres does not use an Error subclass so we check for schema property
-  if (err.originalError.hasOwnProperty("schema") && config.isProduction) {
+  if (
+    Object.prototype.hasOwnProperty.call(err.originalError, "schema") &&
+    config.isProduction
+  ) {
     logger.error("Postgres error: ", err);
     return new Error("Internal server error");
   }
@@ -44,7 +47,7 @@ const server = new ApolloServer({
   debug: !config.isProduction,
   introspection: !config.isProduction,
   playground: !config.isProduction,
-  context: ({ req, res }) => ({
+  context: ({ req, res: _res }) => ({
     loaders: createLoaders(),
     user: req.user
   })

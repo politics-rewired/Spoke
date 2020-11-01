@@ -58,3 +58,5 @@ export const formatPage = async (query, options) => {
     pageInfo
   };
 };
+
+export default formatPage;

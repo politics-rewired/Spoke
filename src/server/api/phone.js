@@ -27,3 +27,5 @@ export const GraphQLPhone = new GraphQLScalarType({
     return ast.value;
   }
 });
+
+export default GraphQLPhone;

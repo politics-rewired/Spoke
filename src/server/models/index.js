@@ -24,7 +24,7 @@ const createLoader = (tableName, options = {}) => {
   return new DataLoader(async keys => {
     // Try Redis cache if available (this approach does not reduce round trips)
     if (cacheObj && cacheObj.load) {
-      return keys.map(async key => await cacheObj.load(key));
+      return keys.map(async key => cacheObj.load(key));
     }
 
     // Make batch request and return in the order requested by the loader

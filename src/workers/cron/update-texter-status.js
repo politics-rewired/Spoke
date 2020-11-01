@@ -1,7 +1,6 @@
 import knex from "knex";
 
 import { config } from "../../config";
-import logger from "../../logger";
 import knexConfig from "../../server/knex";
 
 const spokeDb = knex(knexConfig);

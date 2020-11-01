@@ -24,7 +24,7 @@ export const getEscalationUserId = async organizationId => {
       .where({ id: organizationId })
       .first("organization.features");
     const features = JSON.parse(organization.features);
-    escalationUserId = parseInt(features.escalationUserId);
+    escalationUserId = parseInt(features.escalationUserId, 10);
   } catch (error) {
     // no-op
   }
@@ -113,16 +113,16 @@ export const resolvers = {
         query.select(["user_organization.*"]);
       }
 
-      const campaignIdInt = parseInt(campaignId);
-      if (!isNaN(campaignIdInt)) {
-        query.whereExists(function() {
+      const campaignIdInt = parseInt(campaignId, 10);
+      if (!Number.isNaN(campaignIdInt)) {
+        query.whereExists(function subquery() {
           this.select(this.client.raw("1"))
             .from("assignment")
             .whereRaw('"assignment"."user_id" = "user"."id"')
             .where({ campaign_id: campaignIdInt });
         });
       } else if (campaignArchived === true || campaignArchived === false) {
-        query.whereExists(function() {
+        query.whereExists(function subquery() {
           this.select(this.client.raw("1"))
             .from("assignment")
             .join("campaign", "campaign.id", "assignment.campaign_id")
@@ -133,7 +133,7 @@ export const resolvers = {
         });
       }
 
-      return await formatPage(query, pagerOptions);
+      return formatPage(query, pagerOptions);
     },
     people: async (organization, { role, campaignId, offset }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
@@ -189,7 +189,7 @@ export const resolvers = {
     textRequestMaxCount: organization => {
       try {
         const features = JSON.parse(organization.features);
-        return parseInt(features.textRequestMaxCount);
+        return parseInt(features.textRequestMaxCount, 10);
       } catch (ex) {
         return null;
       }
@@ -206,7 +206,7 @@ export const resolvers = {
       const cats = await allCurrentAssignmentTargets(organization.id);
       const formatted = cats.map(cat => ({
         type: cat.assignment_type,
-        countLeft: parseInt(cat.count_left),
+        countLeft: parseInt(cat.count_left, 10),
         campaign: {
           id: cat.id,
           title: cat.title
@@ -225,8 +225,8 @@ export const resolvers = {
       return assignmentTarget
         ? {
             type: assignmentTarget.type,
-            countLeft: parseInt(assignmentTarget.count_left),
-            maxRequestCount: parseInt(assignmentTarget.max_request_count),
+            countLeft: parseInt(assignmentTarget.count_left, 10),
+            maxRequestCount: parseInt(assignmentTarget.max_request_count, 10),
             teamTitle: assignmentTarget.team_title
           }
         : null;
@@ -240,8 +240,8 @@ export const resolvers = {
 
         return assignmentTargets.map(at => ({
           type: at.type,
-          countLeft: parseInt(at.count_left),
-          maxRequestCount: parseInt(at.max_request_count),
+          countLeft: parseInt(at.count_left, 10),
+          maxRequestCount: parseInt(at.max_request_count, 10),
           teamTitle: at.team_title,
           teamId: at.team_id
         }));
@@ -265,7 +265,7 @@ export const resolvers = {
           is_opted_out: false
         })
         .whereNot({ message_status: "closed" })
-        .whereExists(function() {
+        .whereExists(function subquery() {
           this.select("campaign_contact_tag.campaign_contact_id")
             .from("campaign_contact_tag")
             .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
@@ -351,27 +351,27 @@ export const resolvers = {
     },
     tagList: async organization => {
       const getTags = await memoizer.memoize(async ({ organizationId }) => {
-        return await r
+        return r
           .reader("tag")
           .where({ organization_id: organizationId })
           .orderBy(["is_system", "title"]);
       }, cacheOpts.OrganizationTagList);
 
-      return await getTags({ organizationId: organization.id });
+      return getTags({ organizationId: organization.id });
     },
     escalationTagList: async organization => {
       const getEscalationTags = await memoizer.memoize(
         async ({ organizationId }) => {
-          return await r
+          return r
             .reader("tag")
-            .where({ organization_id: organization.id, is_assignable: false })
+            .where({ organization_id: organizationId, is_assignable: false })
             .orderBy("is_system", "desc")
             .orderBy("title", "asc");
         },
         cacheOpts.OrganizationEscalatedTagList
       );
 
-      return await getEscalationTags({ organizationId: organization.id });
+      return getEscalationTags({ organizationId: organization.id });
     },
     teams: async organization =>
       r
@@ -379,7 +379,7 @@ export const resolvers = {
         .where({ organization_id: organization.id })
         .orderBy("assignment_priority", "asc"),
     externalSystems: async (organization, { after, first }, { user }) => {
-      const organizationId = parseInt(organization.id);
+      const organizationId = parseInt(organization.id, 10);
       await accessRequired(user, organizationId, "ADMIN");
 
       const query = r
