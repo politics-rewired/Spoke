@@ -1,7 +1,8 @@
-import { r } from "../../models";
+import groupBy from "lodash/groupBy";
+
 import { config } from "../../../config";
 import { eventBus, EventType } from "../../event-bus";
-import groupBy from "lodash/groupBy";
+import { r } from "../../models";
 
 export const SpokeSendStatus = Object.freeze({
   Queued: "QUEUED",
@@ -187,7 +188,7 @@ export const assignMissingMessagingServices = async (
   const cellsByServiceType = groupBy(rows, r => r.service_type);
   const messagingServiceCandidatesByServiceType = {};
 
-  for (let serviceType of Object.keys(cellsByServiceType)) {
+  for (const serviceType of Object.keys(cellsByServiceType)) {
     messagingServiceCandidatesByServiceType[
       serviceType
     ] = await getMessagingServiceCandidates(organizationId, serviceType);
@@ -199,7 +200,7 @@ export const assignMissingMessagingServices = async (
 
   const toInsertByType = {};
 
-  for (let serviceType of Object.keys(cellsByServiceType)) {
+  for (const serviceType of Object.keys(cellsByServiceType)) {
     const candidates = messagingServiceCandidatesByServiceType[serviceType];
 
     toInsertByType[serviceType] = cellsByServiceType[serviceType].map(
@@ -214,7 +215,7 @@ export const assignMissingMessagingServices = async (
   }
 
   let allToInsert = [];
-  for (let serviceType of Object.keys(toInsertByType)) {
+  for (const serviceType of Object.keys(toInsertByType)) {
     allToInsert = allToInsert.concat(toInsertByType[serviceType]);
   }
 

@@ -1,7 +1,8 @@
 import knex from "knex";
+import request from "superagent";
+
 import logger from "../../logger";
 import knexConfig from "../../server/knex";
-import request from "superagent";
 
 const db = knex(knexConfig);
 

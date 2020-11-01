@@ -1,4 +1,4 @@
-import { r } from "../../models";
+import { r } from "..";
 
 export async function hasAssignment(userId, assignmentId) {}
 

@@ -1,10 +1,10 @@
-import logger from "../../logger";
-import { r, cacheableData } from "../models";
-import { errToObj } from "../utils";
-import { sqlResolvers, getTzOffset } from "./lib/utils";
-import { getTopMostParent, zipToTimeZone } from "../../lib";
-import { accessRequired } from "./errors";
 import { config } from "../../config";
+import { getTopMostParent, zipToTimeZone } from "../../lib";
+import logger from "../../logger";
+import { cacheableData, r } from "../models";
+import { errToObj } from "../utils";
+import { accessRequired } from "./errors";
+import { getTzOffset, sqlResolvers } from "./lib/utils";
 
 const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
 
@@ -97,7 +97,7 @@ export const resolvers = {
           id: qr_result.istep_id,
           question: qr_result.istep_question
         };
-        return Object.assign({}, qr_result, { question });
+        return { ...qr_result, question };
       });
     },
     questionResponses: async (campaignContact, _, { loaders }) => {
@@ -134,7 +134,7 @@ export const resolvers = {
           })
         );
 
-      let formatted = {};
+      const formatted = {};
 
       for (let i = 0; i < results.length; i++) {
         const res = results[i];
@@ -145,14 +145,12 @@ export const resolvers = {
         const interactionStepId = res["child.id"];
 
         if (responseId in formatted) {
-          formatted[responseId]["parent_interaction_step"][
-            "answer_options"
-          ].push({
+          formatted[responseId].parent_interaction_step.answer_options.push({
             value: answerValue,
             interaction_step_id: interactionStepId
           });
           if (responseValue === answerValue) {
-            formatted[responseId]["interaction_step_id"] = interactionStepId;
+            formatted[responseId].interaction_step_id = interactionStepId;
           }
         } else {
           formatted[responseId] = {
@@ -197,34 +195,33 @@ export const resolvers = {
         return {
           cell: campaignContact.opt_out_cell
         };
-      } else {
-        let isOptedOut = false;
-        if (campaignContact.is_opted_out !== undefined) {
-          isOptedOut = Boolean(campaignContact.is_opted_out);
-        } else {
-          let organizationId = campaignContact.organization_id;
-          if (!organizationId) {
-            const campaign = await loaders.campaign.load(
-              campaignContact.campaign_id
-            );
-            organizationId = campaign.organization_id;
-          }
-
-          isOptedOut = await cacheableData.optOut.query({
-            cell: campaignContact.cell,
-            organizationId
-          });
-        }
-
-        if (isOptedOut) {
-          // fake ID so we don't need to look up existance
-          return {
-            id: "optout",
-            cell: campaignContact.cell
-          };
-        }
-        return null;
       }
+      let isOptedOut = false;
+      if (campaignContact.is_opted_out !== undefined) {
+        isOptedOut = Boolean(campaignContact.is_opted_out);
+      } else {
+        let organizationId = campaignContact.organization_id;
+        if (!organizationId) {
+          const campaign = await loaders.campaign.load(
+            campaignContact.campaign_id
+          );
+          organizationId = campaign.organization_id;
+        }
+
+        isOptedOut = await cacheableData.optOut.query({
+          cell: campaignContact.cell,
+          organizationId
+        });
+      }
+
+      if (isOptedOut) {
+        // fake ID so we don't need to look up existance
+        return {
+          id: "optout",
+          cell: campaignContact.cell
+        };
+      }
+      return null;
     },
     contactTags: async (campaignContact, _, { user }) => {
       if ("contactTags" in campaignContact) {

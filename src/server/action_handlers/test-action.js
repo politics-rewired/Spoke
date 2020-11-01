@@ -1,4 +1,5 @@
 import request from "request";
+
 import { r } from "../models";
 
 // What the user sees as the option
@@ -34,7 +35,7 @@ export async function processAction(
     .where("campaign_contact_id", campaignContactId);
   const customFields = JSON.parse(contact.custom_fields || "{}");
   if (customFields) {
-    customFields["processed_test_action"] = "completed";
+    customFields.processed_test_action = "completed";
   }
 
   await r

@@ -1,11 +1,11 @@
 import DataLoader from "dataloader";
 import groupBy from "lodash/groupBy";
 
-import thinky from "./thinky";
-import datawarehouse from "./datawarehouse";
 import { cacheableData } from "./cacheable_queries";
+import datawarehouse from "./datawarehouse";
+import thinky from "./thinky";
 
-const r = thinky.r;
+const { r } = thinky;
 
 const LOADER_DEFAULTS = {
   idKey: "id",
@@ -20,7 +20,7 @@ const LOADER_DEFAULTS = {
  * @param {object} options Additional loader options
  */
 const createLoader = (tableName, options = {}) => {
-  const { idKey, cacheObj } = Object.assign({}, LOADER_DEFAULTS, options);
+  const { idKey, cacheObj } = { ...LOADER_DEFAULTS, ...options };
   return new DataLoader(async keys => {
     // Try Redis cache if available (this approach does not reduce round trips)
     if (cacheObj && cacheObj.load) {

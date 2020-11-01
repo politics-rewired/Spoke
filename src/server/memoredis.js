@@ -1,4 +1,5 @@
 import createMemoizer from "memoredis";
+
 import { config } from "../config";
 import logger from "../logger";
 

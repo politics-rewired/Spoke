@@ -1,4 +1,4 @@
-import { DateTime, zone, DateFunctions } from "timezonecomplete";
+import { DateFunctions, DateTime, zone } from "timezonecomplete";
 
 class TimezoneOffsetAndDst {
   constructor(tzOffsetMinutes, hasDst) {
@@ -68,7 +68,7 @@ export class DstHelper {
   }
 
   static isDateDst(date, timezone) {
-    let d = new DateTime(date, DateFunctions.Get, zone(timezone));
+    const d = new DateTime(date, DateFunctions.Get, zone(timezone));
     return DstHelper.isOffsetDst(d.offset(), timezone);
   }
 

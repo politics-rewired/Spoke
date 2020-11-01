@@ -1,8 +1,9 @@
+import crypto from "crypto";
 import request from "request";
+
 import { config } from "../../config";
 import logger from "../../logger";
 import { r } from "../models";
-import crypto from "crypto";
 
 export const displayName = () => "ActionKit Event RSVP";
 
@@ -23,7 +24,7 @@ export async function available(organizationId) {
     .where("id", organizationId)
     .select("features");
   const features = JSON.parse(org.features || "{}");
-  let needed = [];
+  const needed = [];
   if (!config.AK_BASEURL && !features.AK_BASEURL) {
     needed.push("AK_BASEURL");
   }
@@ -32,9 +33,9 @@ export async function available(organizationId) {
   }
   if (needed.length) {
     logger.error(
-      "actionkit-rsvp unavailable because " +
-        needed.join(", ") +
-        " must be set (either in environment variables or json value for organization)"
+      `actionkit-rsvp unavailable because ${needed.join(
+        ", "
+      )} must be set (either in environment variables or json value for organization)`
     );
   }
   return !!needed.length;
@@ -82,14 +83,14 @@ export async function processAction(
           page: customFields.event_page,
           role: "attendee",
           status: "active",
-          akid: akidGenerate(akSecret, "." + contact.external_id),
+          akid: akidGenerate(akSecret, `.${contact.external_id}`),
           event_signup_ground_rules: "1",
           source: customFields.event_source || "spoke",
           suppress_subscribe: customFields.suppress_subscribe || "1"
         };
-        for (let field in customFields) {
+        for (const field in customFields) {
           if (field.startsWith("event_field_")) {
-            userData["event_" + field.slice("event_field_".length)] =
+            userData[`event_${field.slice("event_field_".length)}`] =
               customFields[field];
           } else if (field.startsWith("event_action_")) {
             userData[field.slice("event_".length)] = customFields[field];
@@ -116,7 +117,7 @@ export async function processAction(
                 );
                 if (actionId) {
                   // save the action id of the rsvp back to the contact record
-                  customFields["processed_event_action"] = actionId[1];
+                  customFields.processed_event_action = actionId[1];
                   await r
                     .knex("campaign_contact")
                     .where("campaign_contact.id", campaignContactId)

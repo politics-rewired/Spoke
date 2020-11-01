@@ -1,5 +1,5 @@
-import request from "superagent";
 import _ from "lodash";
+import request from "superagent";
 
 import { config } from "../../../config";
 import logger from "../../../logger";
@@ -77,9 +77,9 @@ async function checkForBadDeliverability() {
 
   const byDomain = _.groupBy(results.rows, x => x.domain);
 
-  for (let domain of Object.keys(byDomain)) {
+  for (const domain of Object.keys(byDomain)) {
     const fetchCountBySendStatus = status => {
-      for (let foundStatus of byDomain[domain]) {
+      for (const foundStatus of byDomain[domain]) {
         if (foundStatus.send_status == status) {
           return foundStatus.count;
         }

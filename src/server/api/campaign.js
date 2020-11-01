@@ -1,14 +1,14 @@
+import { ExternalSyncReadinessState } from "../../api/campaign";
+import { emptyRelayPage } from "../../api/pagination";
 import { config } from "../../config";
-import { sqlResolvers } from "./lib/utils";
-import { formatPage } from "./lib/pagination";
-import { r, cacheableData } from "../models";
+import { cacheOpts, memoizer } from "../memoredis";
+import { cacheableData, r } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
-import { getUsers } from "./user";
-import { memoizer, cacheOpts } from "../memoredis";
 import { accessRequired } from "./errors";
 import { symmetricEncrypt } from "./lib/crypto";
-import { emptyRelayPage } from "../../api/pagination";
-import { ExternalSyncReadinessState } from "../../api/campaign";
+import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
+import { getUsers } from "./user";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -89,9 +89,8 @@ const doGetCampaigns = memoizer.memoize(
         campaigns,
         pageInfo
       };
-    } else {
-      return await campaignsQuery;
     }
+    return await campaignsQuery;
   },
   cacheOpts.CampaignsList
 );
@@ -203,7 +202,8 @@ export const resolvers = {
     __resolveType(obj, context, _) {
       if (Array.isArray(obj)) {
         return "CampaignsList";
-      } else if ("campaigns" in obj && "pageInfo" in obj) {
+      }
+      if ("campaigns" in obj && "pageInfo" in obj) {
         return "PaginatedCampaigns";
       }
       return null;
@@ -311,7 +311,7 @@ export const resolvers = {
         async ({ campaignId, userId }) => {
           return await cacheableData.cannedResponse.query({
             userId: userId || "",
-            campaignId: campaignId
+            campaignId
           });
         },
         cacheOpts.CampaignCannedResponses

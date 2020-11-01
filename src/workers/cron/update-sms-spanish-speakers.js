@@ -1,6 +1,7 @@
 import knex from "knex";
-import logger from "../../logger";
+
 import { config } from "../../config";
+import logger from "../../logger";
 import knexConfig from "../../server/knex";
 
 const TEAM_ID = config.SPANISH_TEAM_ID;
@@ -31,7 +32,7 @@ const main = async () => {
     .where({ team_id: TEAM_ID })
     .whereIn("email", newAssignmentUsers.map(na => na.email));
 
-  for (let member of membersOfTeam) {
+  for (const member of membersOfTeam) {
     const assignmentManagerDbUser = newAssignmentUsers.find(
       na => na.email === member.email
     );

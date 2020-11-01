@@ -19,11 +19,10 @@ const defaultOptions = {
  * This could be used for destructuring results of a join query.
  */
 export const formatPage = async (query, options) => {
-  const { after, first, primaryColumn, nodeTransformer } = Object.assign(
-    {},
-    defaultOptions,
-    options
-  );
+  const { after, first, primaryColumn, nodeTransformer } = {
+    ...defaultOptions,
+    ...options
+  };
   // Name of the Knex result record key will not include table
   const [cursorKey] = primaryColumn.split(".").slice(-1);
 

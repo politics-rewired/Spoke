@@ -1,4 +1,10 @@
+import _ from "lodash";
+import Papa from "papaparse";
 import zlib from "zlib";
+
+import { getFormattedPhoneNumber, getFormattedZip } from ".";
+import { sleep } from "./utils";
+
 export { getFormattedPhoneNumber, getDisplayPhoneNumber } from "./phone-format";
 export {
   getFormattedZip,
@@ -9,11 +15,7 @@ export {
 export { getProcessEnvTz } from "./tz-helpers";
 export { DstHelper } from "./dst-helper";
 export { isClient } from "./is-client";
-import { sleep } from "./utils";
 export { sleep };
-import Papa from "papaparse";
-import _ from "lodash";
-import { getFormattedPhoneNumber, getFormattedZip } from "../lib";
 export {
   findParent,
   getInteractionPath,
@@ -142,7 +144,7 @@ export const parseCSV = (file, optOuts, callback) => {
 };
 
 export const validateCsv = ({ data, meta }) => {
-  const fields = meta.fields;
+  const { fields } = meta;
 
   const missingFields = [];
   const useAliases = {};

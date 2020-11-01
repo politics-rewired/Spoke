@@ -36,7 +36,7 @@ async function doBatch() {
   // Run it sequentially to avoid any too large update, which could row level lock
   // This will run 44k times, so it could probably be sped up a bit after a few runs
   const zipChunks = _.chunk(zips, 50);
-  for (let zips of zipChunks) {
+  for (const zips of zipChunks) {
     await Promise.all(
       zips.map(async zip => {
         const timezone = zipCodeToTimeZone.lookup(zip);

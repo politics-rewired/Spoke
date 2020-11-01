@@ -1,5 +1,5 @@
+import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
-import { memoizer, cacheOpts } from "../memoredis";
 
 export const resolvers = {
   Question: {

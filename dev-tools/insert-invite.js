@@ -1,9 +1,10 @@
-require("dotenv").config();
-import { r } from "../src/server/models";
 import { symmetricEncrypt } from "../src/server/api/lib/crypto";
+import { r } from "../src/server/models";
+
+require("dotenv").config();
 
 const main = async () => {
-  let inviteArgs = Object.values(process.argv);
+  const inviteArgs = Object.values(process.argv);
 
   const scriptIndex = inviteArgs.findIndex(arg =>
     arg.includes("insert-invite.js")
@@ -38,7 +39,7 @@ Usage: insert-invite HASH [--include-env]
     return;
   }
 
-  let payload = {};
+  const payload = {};
   if (includeEnv) {
     if (
       process.env.MESSAGING_SERVICE_SID &&

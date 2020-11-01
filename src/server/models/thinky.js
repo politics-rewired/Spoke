@@ -1,8 +1,9 @@
-import { config } from "../../config";
-import dumbThinky from "rethink-knex-adapter";
-import redis from "redis";
-import knex from "knex";
 import bluebird from "bluebird";
+import knex from "knex";
+import redis from "redis";
+import dumbThinky from "rethink-knex-adapter";
+
+import { config } from "../../config";
 import knexConfig from "../knex.js";
 
 bluebird.promisifyAll(redis.RedisClient.prototype);

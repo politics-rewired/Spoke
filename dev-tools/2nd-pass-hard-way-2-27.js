@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const config = {
   client: "mysql",
   connection: process.env.DATABASE_URL,
@@ -47,7 +48,7 @@ async function resetCCMessageStatus({ campaignId, assignmentId }) {
     )
   `);
 
-  for (let cc of ccs_assigned_to_ben_with_a_reply) {
+  for (const cc of ccs_assigned_to_ben_with_a_reply) {
     await properlyMarkCampaignContact(cc);
   }
 

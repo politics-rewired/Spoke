@@ -25,8 +25,8 @@ export const snakeToTitleCase = value =>
     .join(" ");
 
 export const nameComponents = name => {
-  let firstName = undefined;
-  let lastName = undefined;
+  let firstName;
+  let lastName;
 
   if (isEmpty(name)) return { firstName, lastName };
 

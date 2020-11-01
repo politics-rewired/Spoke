@@ -41,17 +41,16 @@ async function nextSuperTexter() {
   if (toReturn.id) {
     superTextersAssigned++;
     return toReturn;
-  } else {
-    try {
-      toReturn.id = await lookupByName(toReturn.name);
-      superTextersAssigned++;
-      return toReturn;
-    } catch (error) {
-      console.error(error);
-    }
-    superTextersAssigned++;
-    return await nextSuperTexter();
   }
+  try {
+    toReturn.id = await lookupByName(toReturn.name);
+    superTextersAssigned++;
+    return toReturn;
+  } catch (error) {
+    console.error(error);
+  }
+  superTextersAssigned++;
+  return await nextSuperTexter();
 }
 
 const DEFAULT_ASSIGNMENT_SIZE = 100;
@@ -86,7 +85,7 @@ async function reassignContacts(contactsToReassign, assignment_id) {
   return await db("campaign_contact")
     .whereIn("id", contactsToReassign.map(c => c.id))
     .update({
-      assignment_id: assignment_id
+      assignment_id
     });
 }
 
@@ -94,7 +93,7 @@ async function reassignMessages(messagesToReassign, assignment_id) {
   return await db("message")
     .whereIn("id", messagesToReassign.map(m => m.id))
     .update({
-      assignment_id: assignment_id
+      assignment_id
     });
 }
 
@@ -102,7 +101,7 @@ async function getNCampaignContactsToReassignFromCampaign(n, campaign_id) {
   return await db("campaign_contact")
     .where({
       message_status: "needsMessage",
-      campaign_id: campaign_id
+      campaign_id
     })
     .whereRaw(`campaign_contact.updated_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)`)
     .orderBy("campaign_contact.updated_at")
@@ -114,7 +113,7 @@ async function getMessagesForContacts(campaign_contacts) {
     campaign_contacts.map(getMessagesForContact)
   );
   let result = [];
-  for (let arr of messageArrays) {
+  for (const arr of messageArrays) {
     result = result.concat(arr);
   }
   return result;
@@ -159,7 +158,7 @@ async function getOldRepliesGroupedByCampaign(numberOfCampaigns) {
   console.log(campaignContacts);
   process.exit();
 
-  let step = _.groupBy(campaignContacts, "campaign_id");
+  const step = _.groupBy(campaignContacts, "campaign_id");
   // const final = Object.keys(step).map(campaignId => ({
   //   campaign_contact_ids: step[campaignId].map(c => c.id),
   //   id: campaignId
@@ -191,11 +190,10 @@ async function lookupByName(name) {
     .select("id");
   if (possibleMatches.length > 0) {
     return possibleMatches[0].id;
-  } else {
-    throw new Error(
-      `Not sure who ${JSON.stringify({ first_name, last_name })} is.`
-    );
   }
+  throw new Error(
+    `Not sure who ${JSON.stringify({ first_name, last_name })} is.`
+  );
 }
 
 let campaignReplies = [];
@@ -223,10 +221,9 @@ async function getNCampaignContactsToReassign(n) {
   ];
   if (bunch.length == n) {
     return result;
-  } else {
-    const otherCampaigns = getNCampaignContactsToReassign(n - bunch.length);
-    return result.concat(otherCampaigns);
   }
+  const otherCampaigns = getNCampaignContactsToReassign(n - bunch.length);
+  return result.concat(otherCampaigns);
 }
 
 // async function main() {
@@ -257,9 +254,8 @@ async function ensureAssignmentId(user_id, campaign_id) {
 
     return assignment[0];
     // console.log({ assignment, assignment_id })
-  } else {
-    return existingAssignment.id;
   }
+  return existingAssignment.id;
 }
 
 async function reassignBulk(user_id, campaign_id, campaign_contact_ids) {

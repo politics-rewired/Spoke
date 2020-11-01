@@ -1,10 +1,11 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
-const router = express.Router();
 
-import { r } from "../models";
 import { config } from "../../config";
 import authStrategies, { sessionUserMap } from "../auth-passport";
+import { r } from "../models";
+
+const router = express.Router();
 
 router.use(authStrategies[config.PASSPORT_STRATEGY]());
 

@@ -54,7 +54,7 @@ const knexConfig = {
 const useReader = !!config.DATABASE_READER_URL;
 
 const readerConfig = useReader
-  ? Object.assign({}, knexConfig, { connection: config.DATABASE_READER_URL })
+  ? { ...knexConfig, connection: config.DATABASE_READER_URL }
   : knexConfig;
 
 knexConfig.readerConfig = readerConfig;

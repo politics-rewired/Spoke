@@ -1,7 +1,8 @@
-import knexConfig from "../../server/knex";
 import logger from "../../logger";
+import knexConfig from "../../server/knex";
 
 const moment = require("moment");
+
 const MINUTES_LATER = 10;
 const COMPUTATION_DELAY = 1;
 
@@ -11,7 +12,7 @@ const COOL_DOWN_PERIOD_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 const DOMAIN_ENDINGS = [".com", ".us", ".net", ".io", ".org", ".info", ".news"];
 const DOMAIN_REGEX = new RegExp(
-  `[^://\\s]*` + "(" + DOMAIN_ENDINGS.map(tld => `\\${tld}`).join("|") + ")"
+  `${`[^://\\s]*` + "("}${DOMAIN_ENDINGS.map(tld => `\\${tld}`).join("|")})`
 );
 
 const db = require("knex")(knexConfig);
@@ -26,7 +27,8 @@ async function chunkedMain() {
 
   const lastReport = results.rows[0];
 
-  let period_starts_at, period_ends_at;
+  let period_starts_at;
+  let period_ends_at;
 
   if (lastReport) {
     period_starts_at = lastReport.period_ends_at;
@@ -61,8 +63,8 @@ async function chunkedMain() {
 
     return {
       send_status: m.send_status,
-      domain: domain,
-      url_path: url_path
+      domain,
+      url_path
     };
   });
 
@@ -118,9 +120,9 @@ async function chunkedMain() {
 
 const deliverabilityReducer = (accumulator, messageGroup) => {
   let [sent, delivered] = accumulator;
-  sent = sent + messageGroup.message_count;
+  sent += messageGroup.message_count;
   if (messageGroup.send_status.toLowerCase === "delivered")
-    delivered = delivered + messageGroup.message_count;
+    delivered += messageGroup.message_count;
   return [sent, delivered];
 };
 
@@ -243,7 +245,7 @@ function extractPath(text, domain) {
   if (!domain) return null;
 
   try {
-    const fullUrlRegex = new RegExp(domain + `\\S*`);
+    const fullUrlRegex = new RegExp(`${domain}\\S*`);
     const matches = text.match(fullUrlRegex);
     const fullUrl = matches ? matches[0] : null;
 

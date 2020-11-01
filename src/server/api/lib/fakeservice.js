@@ -1,5 +1,5 @@
-import { getLastMessage } from "./message-sending";
 import { r } from "../../models";
+import { getLastMessage } from "./message-sending";
 
 // This 'fakeservice' allows for fake-sending messages
 // that end up just in the db appropriately and then using sendReply() graphql

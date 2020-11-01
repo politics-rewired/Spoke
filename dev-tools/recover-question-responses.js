@@ -66,8 +66,8 @@ async function main() {
   rows = result[0];
   console.log(rows);
   while (rows.length > 0) {
-    operatedOn = operatedOn + rows.length;
-    for (let row of rows) {
+    operatedOn += rows.length;
+    for (const row of rows) {
       await updateRow(row);
     }
     console.log(`Operating on ${operatedOn} rows`);

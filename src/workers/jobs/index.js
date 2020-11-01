@@ -1,35 +1,35 @@
+import AWS from "aws-sdk";
+import { format } from "fast-csv";
+import _ from "lodash";
+import moment from "moment";
+import Papa from "papaparse";
+import zipCodeToTimeZone from "zipcode-to-timezone";
+
 import { config } from "../../config";
-import logger from "../../logger";
-import { errToObj } from "../../server/utils";
-import { eventBus, EventType } from "../../server/event-bus";
-import { r, datawarehouse, cacheableData } from "../../server/models";
-import { gunzip, zipToTimeZone, convertOffsetsToStrings } from "../../lib";
-import { updateJob } from "../lib";
+import { convertOffsetsToStrings, gunzip, zipToTimeZone } from "../../lib";
 import { getFormattedPhoneNumber } from "../../lib/phone-format.js";
-import serviceMap from "../../server/api/lib/services";
+import logger from "../../logger";
 import {
   assignMissingMessagingServices,
   getLastMessage,
   saveNewIncomingMessage
 } from "../../server/api/lib/message-sending";
+import serviceMap from "../../server/api/lib/services";
+import { eventBus, EventType } from "../../server/event-bus";
 import { makeNumbersClient } from "../../server/lib/assemble-numbers";
-import { format } from "fast-csv";
-
-import AWS from "aws-sdk";
-import Papa from "papaparse";
-import moment from "moment";
-import _ from "lodash";
 import { sendEmail } from "../../server/mail";
+import { cacheableData, datawarehouse, r } from "../../server/models";
 import {
   Notifications,
   sendUserNotification
 } from "../../server/notifications";
+import { errToObj } from "../../server/utils";
 import {
-  uploadToCloud,
+  getDownloadUrl,
   getUploadStream,
-  getDownloadUrl
+  uploadToCloud
 } from "../exports/upload";
-import zipCodeToTimeZone from "zipcode-to-timezone";
+import { updateJob } from "../lib";
 
 const CHUNK_SIZE = 1000;
 const BATCH_SIZE = Math.max(1, Math.floor(config.DB_MAX_POOL * 0.5));
@@ -48,7 +48,7 @@ function optOutsByInstance() {
 }
 
 function getOptOutSubQuery(orgId) {
-  return !!config.OPTOUTS_SHARE_ALL_ORGS
+  return config.OPTOUTS_SHARE_ALL_ORGS
     ? optOutsByInstance()
     : optOutsByOrgId(orgId);
 }
@@ -213,7 +213,7 @@ export async function uploadContacts(job) {
     const chunkChunks = _.chunk(contactChunks, BATCH_SIZE);
     let chunksCompleted = 0;
 
-    for (let chunkChunk of chunkChunks) {
+    for (const chunkChunk of chunkChunks) {
       await Promise.all(
         chunkChunk.map(async chunk => {
           const percentComplete = Math.round(
@@ -227,7 +227,7 @@ export async function uploadContacts(job) {
             throw exc;
           }
 
-          chunksCompleted = chunksCompleted + 1;
+          chunksCompleted += 1;
           await updateJob(job, percentComplete);
         })
       );
@@ -353,7 +353,7 @@ export async function filterLandlines(job) {
 
   const orgFeatures = JSON.parse(organization.features || "{}");
 
-  const numbersApiKey = orgFeatures.numbersApiKey;
+  const { numbersApiKey } = orgFeatures;
 
   if (!numbersApiKey) {
     throw new Error("Cannot filter landlines - no numbers api key configured");
@@ -452,10 +452,10 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
 
   let sqlQuery = jobEvent.query;
   if (jobEvent.limit) {
-    sqlQuery += " LIMIT " + jobEvent.limit;
+    sqlQuery += ` LIMIT ${jobEvent.limit}`;
   }
   if (jobEvent.offset) {
-    sqlQuery += " OFFSET " + jobEvent.offset;
+    sqlQuery += ` OFFSET ${jobEvent.offset}`;
   }
   let knexResult;
   try {
@@ -645,9 +645,8 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
       );
       await sendJobToAWSLambda(newJob);
       return { invokedAgain: 1 };
-    } else {
-      return loadContactsFromDataWarehouseFragment(newJob);
     }
+    return loadContactsFromDataWarehouseFragment(newJob);
   }
 }
 
@@ -710,7 +709,7 @@ export async function loadContactsFromDataWarehouse(job) {
   }
 
   if (job.id && jobMessages.length) {
-    let resultMessages = await r
+    const resultMessages = await r
       .knex("job_request")
       .where("id", job.id)
       .update({ result_message: jobMessages.join("\n") });
@@ -816,7 +815,7 @@ export async function assignTexters(job) {
   const payload = JSON.parse(job.payload);
   const cid = job.campaign_id;
   const campaign = (await r.reader("campaign").where({ id: cid }))[0];
-  const texters = payload.texters;
+  const { texters } = payload;
   const currentAssignments = await r
     .knex("assignment")
     .where("assignment.campaign_id", cid)
@@ -860,7 +859,8 @@ export async function assignTexters(job) {
         ) {
           unchangedTexters[assignment.user_id] = true;
           return null;
-        } else if (!dynamic) {
+        }
+        if (!dynamic) {
           // standard assignment change
           // If there is a delta between client and server, then accommodate delta (See #322)
           const clientMessagedCount =
@@ -882,11 +882,10 @@ export async function assignTexters(job) {
           }
         }
         return assignment;
-      } else {
-        // deleted texter
-        demotedTexters[assignment.id] = assignment.needs_message_count;
-        return assignment;
       }
+      // deleted texter
+      demotedTexters[assignment.id] = assignment.needs_message_count;
+      return assignment;
     })
     .filter(ele => ele !== null);
 
@@ -918,9 +917,9 @@ export async function assignTexters(job) {
           .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
       );
 
-      const newAssignments = [],
-        existingAssignments = [],
-        dynamicAssignments = [];
+      const newAssignments = [];
+      const existingAssignments = [];
+      const dynamicAssignments = [];
       // Do not use `async texter => ...` parallel execution here because `availableContacts`
       // needs to be synchronously updated
       for (let index = 0; index < texters.length; index++) {
@@ -952,7 +951,7 @@ export async function assignTexters(job) {
           continue;
         }
 
-        availableContacts = availableContacts - contactsToAssign;
+        availableContacts -= contactsToAssign;
         const existingAssignment = currentAssignments.find(
           ele => ele.user_id === texterId
         );
@@ -1070,13 +1069,13 @@ export async function assignTexters(job) {
           const updatedChunk = await Promise.all(
             assignmentIds.map(async (assignmentId, index) => {
               // TODO - MySQL Specific. We have to do this because MySQL does not support returning multiple columns from a bulk insert
-              let { contactsToAssign, assignment } = chunk[index];
+              const { contactsToAssign, assignment } = chunk[index];
               assignment.id = assignmentId;
               return { assignment, contactsToAssign };
             })
           );
           if (!dynamic) {
-            for (let directive of updatedChunk) {
+            for (const directive of updatedChunk) {
               await assignContacts(directive);
             }
             // await Promise.all(updatedChunk.map(async directive => await assignContacts(directive)))
@@ -1179,12 +1178,13 @@ export async function sendMessages(queryFunc, defaultStatus) {
 
       try {
         for (let index = 0; index < messages.length; index++) {
-          let message = messages[index];
+          const message = messages[index];
           if (pastMessages.indexOf(message.id) !== -1) {
             throw new Error(
-              "Encountered send message request of the same message." +
-                " This is scary!  If ok, just restart process. Message ID: " +
+              `${"Encountered send message request of the same message." +
+                " This is scary!  If ok, just restart process. Message ID: "}${
                 message.id
+              }`
             );
           }
           message.service = message.service || config.DEFAULT_SERVICE;
@@ -1349,10 +1349,7 @@ export async function fixOrgless() {
           role: "TEXTER"
         });
         logger.info(
-          "added orgless user " +
-            user.id +
-            " to organization " +
-            config.DEFAULT_ORG
+          `added orgless user ${user.id} to organization ${config.DEFAULT_ORG}`
         );
       } catch (err) {
         logger.error("error on userOrganization save in orgless: ", error);

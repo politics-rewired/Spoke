@@ -1,14 +1,14 @@
-import request from "superagent";
 import _ from "lodash";
+import request from "superagent";
 
-import logger from "../../logger";
 import { config } from "../../config";
-import { sqlResolvers } from "./lib/utils";
-import { sleep } from "../../lib/utils";
 import { isNowBetween } from "../../lib/timezones";
-import { r, cacheableData } from "../models";
+import { sleep } from "../../lib/utils";
+import logger from "../../logger";
 import { eventBus, EventType } from "../event-bus";
-import { memoizer, cacheOpts } from "../memoredis";
+import { cacheOpts, memoizer } from "../memoredis";
+import { cacheableData, r } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -75,7 +75,7 @@ export function getContacts(
     .whereRaw(`archived = ${campaign.is_archived}`); // partial index friendly
 
   if (contactsFilter) {
-    const validTimezone = contactsFilter.validTimezone;
+    const { validTimezone } = contactsFilter;
     if (validTimezone !== null) {
       const {
         texting_hours_start: textingHoursStart,
@@ -948,7 +948,7 @@ export async function giveUserMoreTexts(
         ? 0
         : countLeftToUpdate - countUpdatedInLoop;
 
-      countUpdated = countUpdated + countUpdatedInLoop;
+      countUpdated += countUpdatedInLoop;
       if (countUpdatedInLoop === 0) {
         if (countUpdated === 0) {
           throw new AutoassignError(
@@ -1003,8 +1003,8 @@ export async function assignLoop(
   const assignmentInfo = preferredAssignment || assignmentOptions[0];
 
   // Determine which campaign to assign to – optimize to pick winners
-  let campaignIdToAssignTo = assignmentInfo.campaign.id;
-  let countToAssign = Math.min(
+  const campaignIdToAssignTo = assignmentInfo.campaign.id;
+  const countToAssign = Math.min(
     countLeft,
     parseInt(assignmentInfo.max_request_count)
   );
@@ -1230,7 +1230,7 @@ export const resolvers = {
         async ({ campaignId, userId }) => {
           return await cacheableData.cannedResponse.query({
             userId: userId || "",
-            campaignId: campaignId
+            campaignId
           });
         },
         cacheOpts.CampaignCannedResponses

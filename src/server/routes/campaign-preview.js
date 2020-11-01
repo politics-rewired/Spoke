@@ -1,9 +1,11 @@
 import express from "express";
-const router = express.Router();
-import { symmetricDecrypt } from "../api/lib/crypto";
-import { r } from "../../server/models";
 import h from "h";
 import { sortBy } from "lodash";
+
+import { symmetricDecrypt } from "../api/lib/crypto";
+import { r } from "../models";
+
+const router = express.Router();
 
 router.get("/preview/:campaignId", async (req, res) => {
   const token = req.params.campaignId;
@@ -91,7 +93,7 @@ const makeInteractionStepHtml = (
     : []
   ).concat(
     interactionStep.script_options
-      .map(opt => ["p.script", ["em", '"' + opt + '"']])
+      .map(opt => ["p.script", ["em", `"${opt}"`]])
       .concat(
         interactionStep.question
           ? [
@@ -131,7 +133,7 @@ const makeCannedResponsesHtml = cannedResponses => {
     cannedResponses.map(cr => [
       "li.canned-response",
       ["p.title", ["strong", cr.title]],
-      ["p.text", ["em", '"' + cr.text + '"']]
+      ["p.text", ["em", `"${cr.text}"`]]
     ])
   ];
 };

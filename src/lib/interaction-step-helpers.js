@@ -8,20 +8,18 @@ export function findParent(interactionStep, allInteractionSteps, isModel) {
           answerLink: interactionStep.answer_option
         };
       }
-    } else {
-      if (isModel || (step.question && step.question.answerOptions)) {
-        step.question.answerOptions.forEach(answer => {
-          if (
-            answer.nextInteractionStep &&
-            answer.nextInteractionStep.id === interactionStep.id
-          ) {
-            parent = {
-              ...step,
-              answerLink: answer.value
-            };
-          }
-        });
-      }
+    } else if (isModel || (step.question && step.question.answerOptions)) {
+      step.question.answerOptions.forEach(answer => {
+        if (
+          answer.nextInteractionStep &&
+          answer.nextInteractionStep.id === interactionStep.id
+        ) {
+          parent = {
+            ...step,
+            answerLink: answer.value
+          };
+        }
+      });
     }
   });
   return parent;

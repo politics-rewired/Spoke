@@ -1,5 +1,5 @@
-import { r } from "../../models";
-import { memoizer, cacheOpts } from "../../memoredis";
+import { r } from "..";
+import { cacheOpts, memoizer } from "../../memoredis";
 
 const getUserByAuth0Id = memoizer.memoize(async ({ auth0Id }) => {
   const userAuth = await r

@@ -1,9 +1,10 @@
-import { config } from "../../../config";
-import logger from "../../../logger";
 import Nexmo from "nexmo";
+
+import { config } from "../../../config";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
+import logger from "../../../logger";
 import { r } from "../../models";
-import { getLastMessage, appendServiceResponse } from "./message-sending";
+import { appendServiceResponse, getLastMessage } from "./message-sending";
 
 let nexmo = null;
 const MAX_SEND_ATTEMPTS = 5;

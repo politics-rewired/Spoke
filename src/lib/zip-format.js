@@ -11,7 +11,7 @@ const getFormattedZip = (zip, country = "US") => {
     // Because of that, we should just 0 pad it
     const fourDigitRegex = /\d{4}/;
     if (zip.match(fourDigitRegex)) {
-      return "0" + zip;
+      return `0${zip}`;
     }
 
     return null;
@@ -20,7 +20,7 @@ const getFormattedZip = (zip, country = "US") => {
   throw new Error(`Do not know how to format zip for country: ${country}`);
 };
 
-var commonZipRanges = [
+const commonZipRanges = [
   // list of zip ranges. [<firstZip>, <lastZip>, <timezone>, <hasDst>, <zipCount>]
   [1001, 32401, -5, 1, 31400],
   [70000, 79821, -6, 1, 9821],
@@ -75,7 +75,7 @@ function getCommonZipRanges() {
 const zipToTimeZone = function(zip) {
   // will search common zip ranges -- won't necessarily find something
   // so fallback on looking it up in db
-  if (typeof zip == "number" || zip.length >= 5) {
+  if (typeof zip === "number" || zip.length >= 5) {
     zip = parseInt(zip);
     return getCommonZipRanges().find(g => zip >= g[0] && zip < g[1]);
   }
@@ -83,15 +83,15 @@ const zipToTimeZone = function(zip) {
 
 // lperson 2018.02.10 this is dead code
 const findZipRanges = function(r) {
-  var zipchanges = [];
+  const zipchanges = [];
   return r
     .knex("zip_code")
     .select("zip", "timezone_offset", "has_dst")
     .orderBy("zip")
     .then(function(zips) {
-      var front = -1;
-      var curTz = -4;
-      var curHasDst = -1;
+      let front = -1;
+      let curTz = -4;
+      let curHasDst = -1;
       zips.forEach(zipRec => {
         if (zipRec.timezone_offset != curTz || zipRec.has_dst != curHasDst) {
           zipchanges.push([

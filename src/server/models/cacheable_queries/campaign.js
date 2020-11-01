@@ -1,5 +1,5 @@
+import { r } from "..";
 import { config } from "../../../config";
-import { r } from "../../models";
 import { organizationCache } from "./organization";
 
 // This should be cached data for a campaign that will not change

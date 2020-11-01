@@ -1,10 +1,11 @@
 import _ from "lodash";
+
 import { config } from "../../config";
-import { r } from "../models";
+import { UNASSIGNED_TEXTER } from "../../lib/constants";
 import { eventBus, EventType } from "../event-bus";
+import { r } from "../models";
 import { addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDue } from "./assignment";
 import { buildCampaignQuery } from "./campaign";
-import { UNASSIGNED_TEXTER } from "../../lib/constants";
 
 async function getConversationsJoinsAndWhereClause(
   queryParam,
@@ -368,7 +369,7 @@ export async function getCampaignIdMessageIdsAndCampaignIdContactIdsMaps(
   const campaignIdContactIdsMap = new Map();
   const campaignIdMessagesIdsMap = new Map();
 
-  let ccId = undefined;
+  const ccId;
   for (const conversationRow of conversationRows) {
     if (ccId !== conversationRow.cc_id) {
       const ccId = conversationRow.cc_id;
@@ -572,9 +573,9 @@ export const resolvers = {
     pageInfo: queryResult => {
       if ("pageInfo" in queryResult) {
         return queryResult.pageInfo;
-      } else {
+      } 
         return null;
-      }
+      
     }
   },
   Conversation: {

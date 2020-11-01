@@ -12,7 +12,7 @@ const sourceConfig = {
   pool: {
     min: ROW_CONCURRENCY,
     max: ROW_CONCURRENCY,
-    afterCreate: function(conn, done) {
+    afterCreate(conn, done) {
       const setCollation = "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;";
       conn.query(setCollation, function(error, _results, _fields) {
         done(error, conn);
@@ -27,7 +27,7 @@ const targetConfig = {
   pool: {
     min: ROW_CONCURRENCY,
     max: ROW_CONCURRENCY,
-    afterCreate: function(conn, done) {
+    afterCreate(conn, done) {
       const setCollation = "set session_replication_role = replica";
       conn.query(setCollation, function(error, _results, _fields) {
         done(error, conn);
@@ -61,7 +61,7 @@ const TABLES = [
 const SHOULD_TRUNCATE = true;
 
 async function main() {
-  for (let table of TABLES) {
+  for (const table of TABLES) {
     if (SHOULD_TRUNCATE) await truncateTargetTable(target, table);
     await copyAll(source, target, table);
   }
@@ -174,7 +174,7 @@ async function copyBetween(
 
     if (tableMappings[table]) rowsToCopy = rowsToCopy.map(tableMappings[table]);
     // console.log(`[${table}]: Found ${rowsToCopy.length} more rows to copy`)
-    offset = offset + rowsToCopy.length;
+    offset += rowsToCopy.length;
   }
 
   async function copyBatch() {

@@ -1,22 +1,20 @@
-import { r } from "../models";
-import { memoizer, cacheOpts } from "../memoredis";
+import { TextRequestType } from "../../api/organization";
 import { config } from "../../config";
 import logger from "../../logger";
-
+import { cacheOpts, memoizer } from "../memoredis";
+import { r } from "../models";
 import { errToObj } from "../utils";
-import { sqlResolvers } from "./lib/utils";
-import { infoHasQueryPath } from "./lib/apollo";
-import { formatPage } from "./lib/pagination";
-import { accessRequired } from "./errors";
-
-import { getCampaigns } from "./campaign";
-import { buildUserOrganizationQuery } from "./user";
 import {
   allCurrentAssignmentTargets,
-  myCurrentAssignmentTarget,
-  cachedMyCurrentAssignmentTargets
+  cachedMyCurrentAssignmentTargets,
+  myCurrentAssignmentTarget
 } from "./assignment";
-import { TextRequestType } from "../../api/organization";
+import { getCampaigns } from "./campaign";
+import { accessRequired } from "./errors";
+import { infoHasQueryPath } from "./lib/apollo";
+import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
+import { buildUserOrganizationQuery } from "./user";
 
 export const getEscalationUserId = async organizationId => {
   let escalationUserId;
@@ -79,7 +77,7 @@ export const resolvers = {
         query.join("user", "user.id", "user_organization.user_id");
       }
 
-      if (!!nameSearch) {
+      if (nameSearch) {
         query.whereRaw("user.first_name || ' ' || user.last_name ilike  ?", [
           `%${nameSearch}%`
         ]);
@@ -289,7 +287,7 @@ export const resolvers = {
 
       try {
         const features = JSON.parse(organization.features);
-        numbersApiKey = features.numbersApiKey.slice(0, 4) + "****************";
+        numbersApiKey = `${features.numbersApiKey.slice(0, 4)}****************`;
       } catch (ex) {
         // no-op
       }

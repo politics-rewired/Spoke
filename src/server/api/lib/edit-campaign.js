@@ -1,13 +1,13 @@
-import iconv from "iconv-lite";
 import AutoDetectDecoderStream from "autodetect-decoder-stream";
+import iconv from "iconv-lite";
 import partition from "lodash/partition";
 import Papa from "papaparse";
 
 import {
-  validateCsv,
+  fieldAliases,
   requiredUploadFields,
   topLevelUploadFields,
-  fieldAliases
+  validateCsv
 } from "../../../lib";
 
 const missingHeaderFields = fields =>
@@ -39,8 +39,8 @@ export const processContactsFile = async file => {
     .pipe(iconv.encodeStream("utf8"));
 
   return new Promise((resolve, reject) => {
-    let missingFields = undefined;
-    let resultMeta = undefined;
+    let missingFields;
+    let resultMeta;
     const resultData = [];
 
     Papa.parse(stream, {

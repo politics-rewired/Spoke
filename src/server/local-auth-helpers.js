@@ -1,7 +1,7 @@
 import AuthHasher from "passport-local-authenticate";
 
-import { r } from "./models";
 import { capitalizeWord } from "./api/lib/utils";
+import { r } from "./models";
 
 export class LocalAuthError extends Error {
   constructor(message) {

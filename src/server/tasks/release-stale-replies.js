@@ -1,5 +1,6 @@
-import { r } from "../models";
 import { chunk } from "lodash";
+
+import { r } from "../models";
 
 const CONCURRENCY = 2;
 

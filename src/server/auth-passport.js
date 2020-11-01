@@ -1,16 +1,16 @@
+import passportSlack from "@aoberoi/passport-slack";
 import express from "express";
 import passport from "passport";
 import Auth0Strategy from "passport-auth0";
-import passportSlack from "@aoberoi/passport-slack";
 import { Strategy as LocalStrategy } from "passport-local";
 import request from "superagent";
 
 import { config } from "../config";
 import logger from "../logger";
+import { capitalizeWord } from "./api/lib/utils";
+import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
-import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
-import { capitalizeWord } from "./api/lib/utils";
 
 const {
   BASE_URL,
@@ -95,7 +95,7 @@ function setupSlackPassport() {
   );
 
   const handleLogin = async (req, res) => {
-    const user = req.user;
+    const { user } = req;
     // set slack_id to auth0Id to avoid changing the schema
     const auth0Id = user && user.id;
     if (!auth0Id) {
@@ -123,7 +123,8 @@ function setupSlackPassport() {
     }
 
     if (!existingUser) {
-      let first_name, last_name;
+      let first_name;
+      let last_name;
       const splitName = user.name ? user.name.split(" ") : ["First", "Last"];
       if (user.first_name && user.last_name) {
         // Spoke was granted the 'users.profile:read' scope so use Slack-provided first/last
@@ -301,7 +302,8 @@ function setupLocalAuthPassport() {
       // objects, not classes
       if (err && err.errorType === "LocalAuthError") {
         return res.status(400).send({ success: false, message: err.message });
-      } else if (err) {
+      }
+      if (err) {
         // System error
         return next(err);
       }

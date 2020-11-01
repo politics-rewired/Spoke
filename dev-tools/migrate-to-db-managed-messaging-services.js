@@ -37,7 +37,7 @@ const MESSAGING_SERVICE_SIDS = getMessagingServiceSIDs();
 
 const getMessageServiceSID = cell => {
   // Check for single message service
-  if (!!process.env.TWILIO_MESSAGE_SERVICE_SID) {
+  if (process.env.TWILIO_MESSAGE_SERVICE_SID) {
     return process.env.TWILIO_MESSAGE_SERVICE_SID;
   }
 
@@ -63,7 +63,7 @@ function deterministicIntWithinRange(string, maxSize) {
 function hashStr(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    let charCode = str.charCodeAt(i);
+    const charCode = str.charCodeAt(i);
     hash += charCode;
   }
   return hash;
@@ -118,11 +118,11 @@ async function main() {
   let did = 0;
   while ((did = await doBatch()) > 0) {
     console.log("Did ", did);
-    done = done + did;
+    done += did;
     console.log("Done ", done);
   }
 
-  for (let c of campaigns) {
+  for (const c of campaigns) {
     console.log("Doing campaign: ", c.id);
     await ensureAllNumbersHaveMessagingServiceSIDs(c.id, 1);
     console.log("...done");

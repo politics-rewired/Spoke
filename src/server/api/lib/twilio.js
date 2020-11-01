@@ -1,22 +1,20 @@
-import Twilio from "twilio";
 import _ from "lodash";
 import moment from "moment-timezone";
+import Twilio from "twilio";
 
 import { config } from "../../../config";
-import logger from "../../../logger";
-import { symmetricDecrypt } from "./crypto";
-import { MessagingServiceType } from "../types";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
+import logger from "../../../logger";
 import { r } from "../../models";
+import { MessagingServiceType } from "../types";
+import { symmetricDecrypt } from "./crypto";
 import {
-  getContactMessagingService,
-  appendServiceResponse
-} from "./message-sending";
-import {
-  SpokeSendStatus,
+  appendServiceResponse,
   getCampaignContactAndAssignmentForIncomingMessage,
+  getContactMessagingService,
+  messageComponents,
   saveNewIncomingMessage,
-  messageComponents
+  SpokeSendStatus
 } from "./message-sending";
 
 const MAX_SEND_ATTEMPTS = 5;
@@ -25,7 +23,7 @@ const MAX_TWILIO_MESSAGE_VALIDITY = 14400;
 
 const headerValidator = () => {
   const { SKIP_TWILIO_VALIDATION, TWILIO_VALIDATION_HOST, BASE_URL } = config;
-  if (!!SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
+  if (SKIP_TWILIO_VALIDATION) return (req, res, next) => next();
 
   return async (req, res, next) => {
     const { MessagingServiceSid } = req.body;
@@ -199,7 +197,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
       body,
       mediaUrl: mediaUrl || [],
       to: message.contact_number,
-      messagingServiceSid: messagingServiceSid,
+      messagingServiceSid,
       statusCallback: config.TWILIO_STATUS_CALLBACK_URL
     };
 
@@ -301,7 +299,8 @@ async function sendMessage(message, organizationId, trx = r.knex) {
 const getMessageStatus = twilioStatus => {
   if (twilioStatus === "delivered") {
     return "DELIVERED";
-  } else if (twilioStatus === "failed" || twilioStatus === "undelivered") {
+  }
+  if (twilioStatus === "failed" || twilioStatus === "undelivered") {
     return "ERROR";
   }
 
@@ -351,7 +350,7 @@ async function handleIncomingMessage(message) {
   const contactNumber = getFormattedPhoneNumber(From);
   const userNumber = To ? getFormattedPhoneNumber(To) : "";
 
-  let pendingMessagePart = {
+  const pendingMessagePart = {
     service: "twilio",
     service_id: MessageSid,
     parent_id: null,

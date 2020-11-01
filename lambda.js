@@ -1,7 +1,10 @@
-"use strict";
 const AWS = require("aws-sdk");
 const awsServerlessExpress = require("aws-serverless-express");
-let config, app, server, jobs;
+
+let config;
+let app;
+let server;
+let jobs;
 try {
   ({ config } = require("./build/src/config"));
   app = require("./build/src/server/index");
@@ -53,7 +56,7 @@ exports.handler = (event, context, handleCallback) => {
         ? context.getRemainingTimeInMillis()
         : 0;
       if (endTime - startTime > 3000) {
-        //3 seconds
+        // 3 seconds
         console.error(
           "SLOW_RESPONSE milliseconds:",
           endTime - startTime,
@@ -63,43 +66,42 @@ exports.handler = (event, context, handleCallback) => {
     }
 
     return webResponse;
-  } else {
-    // handle a custom command sent as an event
-    const functionName = context.functionName;
-    if (event.env) {
-      for (var a in event.env) {
-        process.env[a] = event.env[a];
-      }
+  }
+  // handle a custom command sent as an event
+  const { functionName } = context;
+  if (event.env) {
+    for (const a in event.env) {
+      process.env[a] = event.env[a];
     }
-    console.log("Running " + event.command);
-    if (event.command in jobs) {
-      const job = jobs[event.command];
-      // behavior and arguments documented here:
-      // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#invoke-property
-      job(
-        event,
-        function dispatcher(dataToSend, callback) {
-          const lambda = new AWS.Lambda();
-          return lambda.invoke(
-            {
-              FunctionName: functionName,
-              InvocationType: "Event", //asynchronous
-              Payload: JSON.stringify(dataToSend)
-            },
-            function(err, dataReceived) {
-              if (err) {
-                console.error("Failed to invoke Lambda job: ", err);
-              }
-              if (callback) {
-                callback(err, dataReceived);
-              }
+  }
+  console.log(`Running ${event.command}`);
+  if (event.command in jobs) {
+    const job = jobs[event.command];
+    // behavior and arguments documented here:
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#invoke-property
+    job(
+      event,
+      function dispatcher(dataToSend, callback) {
+        const lambda = new AWS.Lambda();
+        return lambda.invoke(
+          {
+            FunctionName: functionName,
+            InvocationType: "Event", // asynchronous
+            Payload: JSON.stringify(dataToSend)
+          },
+          function(err, dataReceived) {
+            if (err) {
+              console.error("Failed to invoke Lambda job: ", err);
             }
-          );
-        },
-        handleCallback
-      );
-    } else {
-      console.error("Unfound command sent as a Lambda event: " + event.command);
-    }
+            if (callback) {
+              callback(err, dataReceived);
+            }
+          }
+        );
+      },
+      handleCallback
+    );
+  } else {
+    console.error(`Unfound command sent as a Lambda event: ${event.command}`);
   }
 };

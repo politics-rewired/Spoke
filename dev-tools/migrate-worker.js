@@ -1,5 +1,6 @@
-import { runMigrations } from "pg-compose";
 import { Pool } from "pg";
+import { runMigrations } from "pg-compose";
+
 import { config } from "../src/config";
 import logger from "../src/logger";
 

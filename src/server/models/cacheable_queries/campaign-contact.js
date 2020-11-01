@@ -1,6 +1,6 @@
+import { r } from "..";
 import { config } from "../../../config";
 import logger from "../../../logger";
-import { r } from "../../models";
 import { optOutCache } from "./opt-out";
 
 // <campaignContactId>

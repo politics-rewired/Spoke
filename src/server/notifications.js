@@ -1,9 +1,9 @@
 import { config } from "../config";
 import logger from "../logger";
-import { errToObj } from "./utils";
 import { eventBus, EventType } from "./event-bus";
-import { r } from "./models";
 import { sendEmail } from "./mail";
+import { r } from "./models";
+import { errToObj } from "./utils";
 
 export const Notifications = Object.freeze({
   CAMPAIGN_STARTED: "campaign.started",

@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const config = {
   client: "mysql",
   connection: process.env.DATABASE_URL,
@@ -29,7 +30,7 @@ async function main() {
   console.log(results);
   console.log(results.length);
 
-  for (let { campaign_contact_id, message_count } of results) {
+  for (const { campaign_contact_id, message_count } of results) {
     await repairContactState(campaign_contact_id);
   }
 }

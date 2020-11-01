@@ -1,8 +1,9 @@
-import request from "request";
 import aws from "aws-sdk";
-import { r } from "../models";
+import request from "request";
+
 import { config } from "../../config";
 import logger from "../../logger";
+import { r } from "../models";
 
 const sqs = new aws.SQS();
 // What the user sees as the option
@@ -34,7 +35,7 @@ const actionKitSignup = (cell, contact) => {
   // we keep have a record of their phone number & attach it to a fake email.
   if (akAddUserUrl && akAddPhoneUrl) {
     const userData = {
-      email: cell + "-smssubscriber@example.com",
+      email: `${cell}-smssubscriber@example.com`,
       first_name: contact.first_name,
       last_name: contact.last_name,
       sms_subscribed: true,
@@ -73,7 +74,6 @@ const actionKitSignup = (cell, contact) => {
             (lastError, lastResponse) => {
               if (lastError) throw new Error(lastError);
               if (lastResponse.statusCode === 201) {
-                return;
               }
             }
           );

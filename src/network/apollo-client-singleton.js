@@ -1,18 +1,18 @@
-import fetch from "isomorphic-fetch"; // TODO - remove?
+import {
+  defaultDataIdFromObject,
+  InMemoryCache,
+  IntrospectionFragmentMatcher
+} from "apollo-cache-inmemory";
 import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
-import { createUploadLink } from "apollo-upload-client";
 import { onError } from "apollo-link-error";
-import {
-  InMemoryCache,
-  IntrospectionFragmentMatcher,
-  defaultDataIdFromObject
-} from "apollo-cache-inmemory";
+import { createUploadLink } from "apollo-upload-client";
 import { getMainDefinition } from "apollo-utilities";
+import fetch from "isomorphic-fetch"; // TODO - remove?
 import omitDeep from "omit-deep-lodash";
 
-import unions from "./unions.json";
 import { eventBus, EventTypes } from "../client/events";
+import unions from "./unions.json";
 
 const uploadLink = createUploadLink({
   uri: window.GRAPHQL_URL || "/graphql",

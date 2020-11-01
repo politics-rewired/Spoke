@@ -1,46 +1,53 @@
-import escapeRegExp from "lodash/escapeRegExp";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLError } from "graphql/error";
-import request from "superagent";
 import _ from "lodash";
-import moment from "moment-timezone";
+import escapeRegExp from "lodash/escapeRegExp";
 import groupBy from "lodash/groupBy";
-import { config } from "../../config";
-import logger from "../../logger";
-import { errToObj } from "../utils";
-import { eventBus, EventType } from "../event-bus";
+import moment from "moment-timezone";
+import request from "superagent";
 
-import { CampaignExportType } from "../../api/types";
-import { getWorker } from "../worker";
-import { processContactsFile } from "./lib/edit-campaign";
-import { formatPage } from "./lib/pagination";
 import { TextRequestType } from "../../api/organization";
+import { RequestAutoApproveType } from "../../api/organization-membership";
+import { CampaignExportType } from "../../api/types";
+import { config } from "../../config";
 import { gzip, makeTree } from "../../lib";
-import { applyScript } from "../../lib/scripts";
 import { hasRole } from "../../lib/permissions";
-import { refreshExternalSystem } from "../lib/external-systems";
+import { applyScript } from "../../lib/scripts";
+import { isNowBetween } from "../../lib/timezones";
+import logger from "../../logger";
 import {
   assignTexters,
+  filterLandlines,
   loadContactsFromDataWarehouse,
-  uploadContacts,
-  filterLandlines
+  uploadContacts
 } from "../../workers/jobs";
-import { datawarehouse, r, cacheableData } from "../models";
+import { eventBus, EventType } from "../event-bus";
+import { refreshExternalSystem } from "../lib/external-systems";
+import { change } from "../local-auth-helpers";
+import { cacheOpts, memoizer } from "../memoredis";
+import { cacheableData, datawarehouse, r } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
+import { errToObj } from "../utils";
+import { getWorker } from "../worker";
 import {
-  resolvers as assignmentResolvers,
   giveUserMoreTexts,
-  myCurrentAssignmentTarget
+  myCurrentAssignmentTarget,
+  resolvers as assignmentResolvers
 } from "./assignment";
+import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { getCampaigns, resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
+import {
+  queryCampaignOverlapCount,
+  queryCampaignOverlaps
+} from "./campaign-overlap";
 import { resolvers as cannedResponseResolvers } from "./canned-response";
 import {
-  getConversations,
   getCampaignIdMessageIdsAndCampaignIdContactIdsMaps,
   getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked,
+  getConversations,
   reassignContacts,
   reassignConversations,
   resolvers as conversationsResolver
@@ -48,27 +55,36 @@ import {
 import {
   accessRequired,
   assignmentRequired,
+  assignmentRequiredOrHasOrgRoleForCampaign,
   authRequired,
-  superAdminRequired,
-  assignmentRequiredOrHasOrgRoleForCampaign
+  superAdminRequired
 } from "./errors";
+import { resolvers as externalActivistCodeResolvers } from "./external-activist-code";
+import { resolvers as externalListResolvers } from "./external-list";
+import { resolvers as externalResultCodeResolvers } from "./external-result-code";
+import { resolvers as externalSurveyQuestionResolvers } from "./external-survey-question";
+import { resolvers as externalResponseOptionResolvers } from "./external-survey-question-response-option";
+import { resolvers as externalSyncConfigResolvers } from "./external-sync-config";
+import { resolvers as externalSystemResolvers } from "./external-system";
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
-import { resolvers as linkDomainResolvers } from "./link-domain";
+import { notifyAssignmentCreated, notifyOnTagConversation } from "./lib/alerts";
+import { processContactsFile } from "./lib/edit-campaign";
 import {
-  saveNewIncomingMessage,
-  getContactMessagingService
+  getContactMessagingService,
+  saveNewIncomingMessage
 } from "./lib/message-sending";
-import { graphileSecretRef } from "./lib/utils";
+import { formatPage } from "./lib/pagination";
 import serviceMap from "./lib/services";
+import { graphileSecretRef } from "./lib/utils";
+import { resolvers as linkDomainResolvers } from "./link-domain";
 import { resolvers as messageResolvers } from "./message";
 import { resolvers as optOutResolvers } from "./opt-out";
 import {
-  resolvers as organizationResolvers,
-  getEscalationUserId
+  getEscalationUserId,
+  resolvers as organizationResolvers
 } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
-import { RequestAutoApproveType } from "../../api/organization-membership";
 import {
   resolvers as settingsSchema,
   updateOrganizationSettings
@@ -76,31 +92,15 @@ import {
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
 import { resolvers as questionResponseResolvers } from "./question-response";
-import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
-import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
-import { resolvers as externalListResolvers } from "./external-list";
-import { resolvers as externalSystemResolvers } from "./external-system";
-import { resolvers as externalSurveyQuestionResolvers } from "./external-survey-question";
-import { resolvers as externalResponseOptionResolvers } from "./external-survey-question-response-option";
-import { resolvers as externalActivistCodeResolvers } from "./external-activist-code";
-import { resolvers as externalResultCodeResolvers } from "./external-result-code";
-import { resolvers as externalSyncConfigResolvers } from "./external-sync-config";
-import {
-  queryCampaignOverlaps,
-  queryCampaignOverlapCount
-} from "./campaign-overlap";
-import { change } from "../local-auth-helpers";
-import { notifyOnTagConversation, notifyAssignmentCreated } from "./lib/alerts";
-
-import { isNowBetween } from "../../lib/timezones";
-import { memoizer, cacheOpts } from "../memoredis";
+import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 
 const uuidv4 = require("uuid").v4;
-const JOBS_SAME_PROCESS = config.JOBS_SAME_PROCESS;
-const JOBS_SYNC = config.JOBS_SYNC;
+
+const { JOBS_SAME_PROCESS } = config;
+const { JOBS_SYNC } = config;
 
 const replaceCurlyApostrophes = rawText =>
   rawText.replace(/[\u2018\u2019]/g, "'");
@@ -167,7 +167,7 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
   const replacerReducer = (text, domain) => {
     const safeDomain = escapeRegExp(domain);
     const domainRegex = RegExp(`(https?://)${safeDomain}(:*)`, "g");
-    return text.replace(domainRegex, "$1" + targetDomain + "$2");
+    return text.replace(domainRegex, `$1${targetDomain}$2`);
   };
   const finalMessageText = domains.reduce(replacerReducer, messageText);
   return finalMessageText;
@@ -235,7 +235,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
 
   if (campaign.hasOwnProperty("contacts") && campaign.contacts) {
-    await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+    await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
 
     // Uploading contacts from a CSV invalidates external system configuration
     await r
@@ -288,7 +288,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     datawarehouse &&
     user.is_superadmin
   ) {
-    await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+    await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
     const [job] = await r
       .knex("job_request")
       .insert({
@@ -359,7 +359,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         user,
         organizationId,
         "SUPERVOLUNTEER",
-        /* superadmin*/ true
+        /* superadmin */ true
       );
       await persistInteractionStepTree(
         id,
@@ -810,7 +810,8 @@ const rootMutations = {
         if (exportType === CampaignExportType.SPOKE) {
           await worker.addJob("export-campaign", newJob);
           return newJob;
-        } else if (exportType === CampaignExportType.VAN) {
+        }
+        if (exportType === CampaignExportType.VAN) {
           await worker.addJob("export-campaign-for-van", newJob);
           return newJob;
         }
@@ -895,36 +896,35 @@ const rootMutations = {
         .limit(1);
       if (!userRes || !userRes.length) {
         return null;
-      } else {
-        const member = userRes[0];
-        if (userData) {
-          const userRes = await r
-            .knex("user")
-            .where("id", userId)
-            .update({
-              first_name: userData.firstName,
-              last_name: userData.lastName,
-              email: userData.email,
-              cell: userData.cell
-            });
-
-          memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
-          memoizer.invalidate(cacheOpts.GetUser.key, {
-            auth0Id: userRes.auth0_id
-          });
-
-          userData = {
-            id: userId,
+      }
+      const member = userRes[0];
+      if (userData) {
+        const userRes = await r
+          .knex("user")
+          .where("id", userId)
+          .update({
             first_name: userData.firstName,
             last_name: userData.lastName,
             email: userData.email,
             cell: userData.cell
-          };
-        } else {
-          userData = member;
-        }
-        return userData;
+          });
+
+        memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
+        memoizer.invalidate(cacheOpts.GetUser.key, {
+          auth0Id: userRes.auth0_id
+        });
+
+        userData = {
+          id: userId,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          email: userData.email,
+          cell: userData.cell
+        };
+      } else {
+        userData = member;
       }
+      return userData;
     },
 
     resetUserPassword: async (_, { organizationId, userId }, { user }) => {
@@ -1120,7 +1120,7 @@ const rootMutations = {
         textRequestType,
         textRequestMaxCount
       };
-      nextFeatures = Object.assign({}, currentFeatures, nextFeatures);
+      nextFeatures = { ...currentFeatures, ...nextFeatures };
       await r
         .knex("organization")
         .update({
@@ -1149,7 +1149,7 @@ const rootMutations = {
         user,
         campaign.organizationId,
         "ADMIN",
-        /* allowSuperadmin=*/ true
+        /* allowSuperadmin= */ true
       );
 
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
@@ -1187,7 +1187,7 @@ const rootMutations = {
           .insert({
             organization_id: campaign.organization_id,
             creator_id: user.id,
-            title: "COPY - " + campaign.title,
+            title: `COPY - ${campaign.title}`,
             description: campaign.description,
             due_by: campaign.dueBy,
             timezone: campaign.timezone,
@@ -1198,27 +1198,27 @@ const rootMutations = {
         const newCampaignId = newCampaign.id;
         const oldCampaignId = campaign.id;
 
-        let interactions = await trx("interaction_step").where({
+        const interactions = await trx("interaction_step").where({
           campaign_id: oldCampaignId
         });
 
         const interactionsArr = [];
         interactions.forEach((interaction, index) => {
           if (interaction.parent_interaction_id) {
-            let is = {
-              id: "new" + interaction.id,
+            const is = {
+              id: `new${interaction.id}`,
               questionText: interaction.question,
               scriptOptions: interaction.script_options,
               answerOption: interaction.answer_option,
               answerActions: interaction.answer_actions,
               isDeleted: interaction.is_deleted,
               campaign_id: newCampaignId,
-              parentInteractionId: "new" + interaction.parent_interaction_id
+              parentInteractionId: `new${interaction.parent_interaction_id}`
             };
             interactionsArr.push(is);
           } else if (!interaction.parent_interaction_id) {
-            let is = {
-              id: "new" + interaction.id,
+            const is = {
+              id: `new${interaction.id}`,
               questionText: interaction.question,
               scriptOptions: interaction.script_options,
               answerOption: interaction.answer_option,
@@ -1332,7 +1332,7 @@ const rootMutations = {
       // Sometimes, campaign was coming through as having
       // a "null prototype", which caused .hasOwnProperty calls
       // to fail – this fixes it by ensuring its a proper object
-      const campaign = Object.assign({}, campaignEdits);
+      const campaign = { ...campaignEdits };
 
       await accessRequired(user, origCampaign.organization_id, "ADMIN");
 
@@ -1439,7 +1439,7 @@ const rootMutations = {
           .whereIn("campaign_id", campaignIds);
 
         const scriptUpdates = [];
-        for (let step of interactionStepsToChange) {
+        for (const step of interactionStepsToChange) {
           const script_options = step.script_options.map(scriptOption => {
             const newValue = replaceAll(
               scriptOption,
@@ -1787,9 +1787,8 @@ const rootMutations = {
 
       if (updateResult > 0) {
         return { found: true };
-      } else {
-        return { found: false };
       }
+      return { found: false };
     },
     tagConversation: async (_, { campaignContactId, tag }, { user }) => {
       const campaignContact = await r
@@ -2315,7 +2314,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "OWNER",
+        /* superadmin */ true
+      );
 
       const insertResult = await r
         .knex("link_domain")
@@ -2335,7 +2339,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "OWNER",
+        /* superadmin */ true
+      );
 
       const { maxUsageCount, isManuallyDisabled } = payload;
       if (maxUsageCount === undefined && isManuallyDisabled === undefined)
@@ -2363,7 +2372,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "OWNER", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "OWNER",
+        /* superadmin */ true
+      );
 
       await r
         .knex("link_domain")
@@ -2382,7 +2396,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "ADMIN",
+        /* superadmin */ true
+      );
 
       if (newTexterUserIds == null) {
         const campaignContactIdsToUnassign = campaignIdsContactIds.map(
@@ -2414,7 +2433,7 @@ const rootMutations = {
       );
       const chunks = _.chunk(result, numberOfCampaignContactsPerNextTexter);
 
-      for (let [idx, chunk] of chunks.entries()) {
+      for (const [idx, chunk] of chunks.entries()) {
         const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id);
         const campaignIdContactIdsMap = new Map();
         const campaignIdMessageIdsMap = new Map();
@@ -2455,7 +2474,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "ADMIN",
+        /* superadmin */ true
+      );
 
       const campaignContactIdsToMessageIds = await getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked(
         organizationId,
@@ -2487,7 +2511,7 @@ const rootMutations = {
         campaignContactIdsToMessageIds,
         numberOfCampaignContactsPerNextTexter
       );
-      for (let [idx, chunk] of chunks.entries()) {
+      for (const [idx, chunk] of chunks.entries()) {
         const byCampaignId = _.groupBy(chunk, x => x[1].campaign_id);
         const campaignIdContactIdsMap = new Map();
         const campaignIdMessageIdsMap = new Map();
@@ -2596,7 +2620,7 @@ const rootMutations = {
       }
 
       let ageInHoursAgo;
-      if (!!ageInHours) {
+      if (ageInHours) {
         ageInHoursAgo = new Date();
         ageInHoursAgo.setHours(new Date().getHours() - ageInHours);
         ageInHoursAgo = ageInHoursAgo.toISOString();
@@ -2738,7 +2762,12 @@ const rootMutations = {
       { organizationId, campaignId, overlappingCampaignId },
       { user }
     ) => {
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "ADMIN",
+        /* superadmin */ true
+      );
 
       const { deletedRowCount, remainingCount } = await r.knex.transaction(
         async trx => {
@@ -2770,7 +2799,7 @@ const rootMutations = {
             [campaignId, overlappingCampaignId]
           );
 
-          remainingCount = remainingCount - deletedRowCount;
+          remainingCount -= deletedRowCount;
 
           return { deletedRowCount, remainingCount };
         }
@@ -2787,7 +2816,12 @@ const rootMutations = {
       { organizationId, campaignId, overlappingCampaignIds },
       { user }
     ) => {
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "ADMIN",
+        /* superadmin */ true
+      );
 
       // Delete, excluding second pass contacts that have already been messaged
       const { rowCount: deletedRowCount } = await r.knex.raw(
@@ -2997,7 +3031,7 @@ const rootMutations = {
             textRequestType: orgTeam.assignmentType,
             textRequestMaxCount: orgTeam.maxRequestCount
           });
-          nextFeatures = Object.assign({}, currentFeatures, nextFeatures);
+          nextFeatures = { ...currentFeatures, ...nextFeatures };
           await trx("organization")
             .update({ features: JSON.stringify(nextFeatures) })
             .where({ id: organizationId });
@@ -3207,7 +3241,7 @@ const rootMutations = {
     ) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+      const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
       const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
 
       await getWorker().then(worker =>
@@ -3253,7 +3287,7 @@ const rootMutations = {
 
       if (!externalSystem.apiKey.includes("*")) {
         authDidChange = true;
-        const truncatedKey = externalSystem.apiKey.slice(0, 5) + "********";
+        const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
         const apiKeyRef = graphileSecretRef(
           savedSystem.organization_id,
           truncatedKey
@@ -3475,14 +3509,14 @@ const rootResolvers = {
           user,
           campaign.organization_id,
           "TEXTER",
-          /* allowSuperadmin=*/ true
+          /* allowSuperadmin= */ true
         );
       } else {
         await accessRequired(
           user,
           campaign.organization_id,
           "SUPERVOLUNTEER",
-          /* allowSuperadmin=*/ true
+          /* allowSuperadmin= */ true
         );
       }
       return assignment;
@@ -3510,9 +3544,8 @@ const rootResolvers = {
     currentUser: async (_, { id }, { user }) => {
       if (!user) {
         return null;
-      } else {
-        return user;
       }
+      return user;
     },
     contact: async (_, { id }, { loaders, user }) => {
       authRequired(user);
@@ -3522,7 +3555,7 @@ const rootResolvers = {
         user,
         campaign.organization_id,
         "TEXTER",
-        /* allowSuperadmin=*/ true
+        /* allowSuperadmin= */ true
       );
       return contact;
     },
@@ -3704,7 +3737,7 @@ const rootResolvers = {
       organizationId = parseInt(organizationId);
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
-      let query = r
+      const query = r
         .reader("troll_alarm")
         .where({ dismissed, organization_id: organizationId });
 

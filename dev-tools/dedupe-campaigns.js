@@ -60,7 +60,7 @@ async function deleteCampaignContacts(toDelete) {
   // return true
   try {
     const updatedToDelete = [];
-    for (let cc of toDelete) {
+    for (const cc of toDelete) {
       if (!badIds.includes(cc.id)) {
         updatedToDelete.push(cc.id);
       }
@@ -87,7 +87,7 @@ async function deleteCampaignContacts(toDelete) {
 const BATCH_SIZE = 1000;
 let done = 1;
 async function main() {
-  let listOfDuplicates = await getNDuplicates(BATCH_SIZE);
+  const listOfDuplicates = await getNDuplicates(BATCH_SIZE);
   // console.log(listOfDuplicates)
   // for (let phone of Object.keys(listOfDuplicates)) {
 

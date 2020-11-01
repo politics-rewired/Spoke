@@ -4,8 +4,8 @@ import knexConfig from "../../server/knex";
 const db = require("knex")(knexConfig);
 
 async function main() {
-  let oneHourAgo = new Date(),
-    oneWeekAgo = new Date();
+  const oneHourAgo = new Date();
+  const oneWeekAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 

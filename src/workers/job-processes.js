@@ -1,21 +1,21 @@
 import { config } from "../config";
+import { sleep } from "../lib/utils";
 import logger from "../logger";
 import { r } from "../server/models";
-import { getNextJob } from "./lib";
-import { sleep } from "../lib/utils";
+import { setupUserNotificationObservers } from "../server/notifications";
+import { exportCampaign } from "../server/tasks/export-campaign";
 import {
-  processSqsMessages,
-  uploadContacts,
+  assignTexters,
+  clearOldJobs,
+  fixOrgless,
+  handleIncomingMessageParts,
   loadContactsFromDataWarehouse,
   loadContactsFromDataWarehouseFragment,
-  assignTexters,
+  processSqsMessages,
   sendMessages,
-  handleIncomingMessageParts,
-  fixOrgless,
-  clearOldJobs
+  uploadContacts
 } from "./jobs";
-import { exportCampaign } from "../server/tasks/export-campaign";
-import { setupUserNotificationObservers } from "../server/notifications";
+import { getNextJob } from "./lib";
 
 /* Two process models are supported in this file.
    The main in both cases is to process jobs and send/receive messages
@@ -221,7 +221,7 @@ const syncProcessMap = {
 export async function dispatchProcesses(event, dispatcher, eventCallback) {
   const toDispatch =
     event.processes || (config.JOBS_SAME_PROCESS ? syncProcessMap : processMap);
-  for (let p in toDispatch) {
+  for (const p in toDispatch) {
     if (p in processMap) {
       // / not using dispatcher, but another interesting model would be
       // / to dispatch processes to other lambda invocations

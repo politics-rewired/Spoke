@@ -1,6 +1,6 @@
+import { r } from "..";
 import { config } from "../../../config";
 import logger from "../../../logger";
-import { r } from "../../models";
 
 // STRUCTURE
 // maybe HASH by organization, so optout-<organization_id> has a <cell> key
@@ -67,11 +67,10 @@ export const optOutCache = {
         .execAsync();
       if (exists) {
         return isMember;
-      } else {
-        // note NOT awaiting this -- it should run in background
-        // ideally not blocking the rest of the request
-        loadMany(organizationId);
       }
+      // note NOT awaiting this -- it should run in background
+      // ideally not blocking the rest of the request
+      loadMany(organizationId);
     }
     const dbResult = await r
       .reader("opt_out")

@@ -1,10 +1,11 @@
 import { GraphQLError } from "graphql/error";
-import { sqlResolvers } from "./lib/utils";
+import groupBy from "lodash/groupBy";
+
+import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 import { accessRequired } from "./errors";
-import groupBy from "lodash/groupBy";
-import { memoizer, cacheOpts } from "../memoredis";
 import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
 
 export function buildUserOrganizationQuery(
   queryParam,
@@ -27,7 +28,7 @@ export function buildUserOrganizationQuery(
       .innerJoin("assignment", "assignment.user_id", "user.id")
       .where({ "assignment.campaign_id": campaignId });
   }
-  if (typeof offset == "number") {
+  if (typeof offset === "number") {
     queryParam.offset(offset);
   }
   return queryParam;
@@ -97,9 +98,8 @@ async function doGetUsers({
       users,
       pageInfo
     };
-  } else {
-    return users;
   }
+  return users;
 }
 
 const memoizedGetUsers = memoizer.memoize(doGetUsers, cacheOpts.GetUsers);
@@ -119,7 +119,7 @@ export const getUsers = async (
 };
 
 export async function getUsersById(userIds) {
-  let usersQuery = r
+  const usersQuery = r
     .reader("user")
     .select("id", "first_name", "last_name")
     .whereIn("id", userIds);
@@ -131,7 +131,8 @@ export const resolvers = {
     __resolveType(obj) {
       if (Array.isArray(obj)) {
         return "UsersList";
-      } else if ("users" in obj && "pageInfo" in obj) {
+      }
+      if ("users" in obj && "pageInfo" in obj) {
         return "PaginatedUsers";
       }
       return null;
@@ -209,7 +210,7 @@ export const resolvers = {
           return r.reader("organization").whereExists(function() {
             const whereClause = { user_id: user.id };
             if (role) {
-              whereClause["role"] = role;
+              whereClause.role = role;
             }
             this.select(r.reader.raw("1"))
               .from("user_organization")

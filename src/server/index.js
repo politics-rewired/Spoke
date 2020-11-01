@@ -1,33 +1,33 @@
+import { createTerminus } from "@godaddy/terminus";
+import bodyParser from "body-parser";
+import connectDatadog from "connect-datadog-graphql";
+import cookieSession from "cookie-session";
+import express from "express";
+import basicAuth from "express-basic-auth";
+import hotShots from "hot-shots";
 import http from "http";
 import cron from "node-cron";
-import express from "express";
-import bodyParser from "body-parser";
-import cookieSession from "cookie-session";
-import basicAuth from "express-basic-auth";
 import passport from "passport";
-import { createTerminus } from "@godaddy/terminus";
-import connectDatadog from "connect-datadog-graphql";
-import hotShots from "hot-shots";
 
 import { config } from "../config";
-import logger from "../logger";
-import appRenderer from "./middleware/app-renderer";
-import { setupUserNotificationObservers } from "./notifications";
-import { fulfillPendingRequestFor } from "./api/assignment";
 import requestLogging from "../lib/request-logging";
+import logger from "../logger";
+import { fulfillPendingRequestFor } from "./api/assignment";
 import { checkForBadDeliverability } from "./api/lib/alerts";
+import appRenderer from "./middleware/app-renderer";
+import { r } from "./models";
+import { setupUserNotificationObservers } from "./notifications";
 import {
+  assembleRouter,
   authRouter,
   graphqlRouter,
   nexmoRouter,
+  previewRouter,
   twilioRouter,
-  assembleRouter,
-  utilsRouter,
-  previewRouter
+  utilsRouter
 } from "./routes";
-import { r } from "./models";
-import { getWorker } from "./worker";
 import { errToObj } from "./utils";
+import { getWorker } from "./worker";
 
 process.on("uncaughtException", ex => {
   logger.error("uncaughtException: ", ex);
@@ -182,7 +182,7 @@ const beforeShutdown = () => {
 
 const teardownKnex = async () => {
   logger.info("Starting cleanup of Postgres pools.");
-  const readerPromise = !!config.DATABASE_READER_URL
+  const readerPromise = config.DATABASE_READER_URL
     ? r.reader.destroy().then(() => logger.info("  - tore down Knex reader"))
     : Promise.resolve();
   return Promise.all([
