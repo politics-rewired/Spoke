@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.8.0](https://github.com/politics-rewired/spoke/compare/v3.7.0...v3.8.0) (2020-11-01)
+
+
+### Features
+
+* **tags:** display tag colors in tag selector ([#758](https://github.com/politics-rewired/spoke/issues/758)) ([9defafc](https://github.com/politics-rewired/spoke/commit/9defafc662de7ea4953b7ea2fb26867546f99b05))
+* **tags:** restore soft delete ([#759](https://github.com/politics-rewired/spoke/issues/759)) ([f56f88d](https://github.com/politics-rewired/spoke/commit/f56f88d66d7ae02426ebc83eab4e5a9a6a1734f2))
+
 ## [3.7.0](https://github.com/politics-rewired/spoke/compare/v3.6.1...v3.7.0) (2020-10-27)
 
 
