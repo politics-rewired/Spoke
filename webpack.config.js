@@ -13,6 +13,7 @@ const basePlugins = [
   }),
   // See: https://github.com/spiritit/timezonecomplete#webpack
   new webpack.ContextReplacementPlugin(
+    // eslint-disable-next-line no-useless-escape
     /[\/\\]node_modules[\/\\]timezonecomplete[\/\\]/,
     path.resolve("tz-database-context"),
     {
