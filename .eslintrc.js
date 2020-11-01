@@ -7,7 +7,7 @@ module.exports = {
       jsx: true
     }
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "simple-import-sort"],
   extends: [
     "eslint:recommended",
     "airbnb",
@@ -33,6 +33,7 @@ module.exports = {
     }
   },
   rules: {
+    "simple-import-sort/sort": "error",
     "prettier/prettier": ["error", {}, { usePrettierrc: true }],
     "jsx-a11y/href-no-hash": ["off"],
     "react/jsx-filename-extension": ["warn", { extensions: [".js", ".jsx"] }],
