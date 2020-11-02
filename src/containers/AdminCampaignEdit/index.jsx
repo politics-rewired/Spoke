@@ -84,6 +84,11 @@ const campaignInfoFragment = `
     parentInteractionId
     isDeleted
   }
+  cannedResponses {
+    id
+    title
+    text
+  }
   editors
 `;
 
@@ -507,7 +512,6 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Canned Responses",
         content: CampaignCannedResponsesForm,
-        isStandalone: true,
         keys: ["cannedResponses"],
         checkCompleted: () => true,
         blocksStarting: true,

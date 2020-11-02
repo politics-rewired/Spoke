@@ -207,7 +207,6 @@ const makeQueries = (jobTypes: string[]) => ({
             integration
             contacts
             autoassign
-            cannedResponses
           }
         }
       }

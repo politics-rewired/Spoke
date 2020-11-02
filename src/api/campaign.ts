@@ -52,7 +52,6 @@ export const schema = `
     integration: Boolean!
     contacts: Boolean!
     autoassign: Boolean!
-    cannedResponses: Boolean!
   }
 
   enum ExternalSyncReadinessState {

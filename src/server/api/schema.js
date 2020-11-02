@@ -382,14 +382,12 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       })
     );
 
-    await r.knex.transaction(async trx => {
-      await trx("canned_response")
-        .where({ campaign_id: id })
-        .whereNull("user_id")
-        .del();
-      await trx("canned_response").insert(convertedResponses);
-    });
-
+    await r
+      .knex("canned_response")
+      .where({ campaign_id: id })
+      .whereNull("user_id")
+      .del();
+    await r.knex("canned_response").insert(convertedResponses);
     await cacheableData.cannedResponse.clearQuery({
       userId: "",
       campaignId: id
