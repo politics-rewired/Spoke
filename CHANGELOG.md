@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.8.1](https://github.com/politics-rewired/spoke/compare/v3.8.0...v3.8.1) (2020-11-02)
+
+
+### Bug Fixes
+
+* **edit-campaign:** revert extract canned responses section ([#751](https://github.com/politics-rewired/spoke/issues/751)) ([3adf21c](https://github.com/politics-rewired/spoke/commit/3adf21c390ddd2c0e860af3a46bd4df86bae51ea))
+
 ## [3.8.0](https://github.com/politics-rewired/spoke/compare/v3.7.0...v3.8.0) (2020-11-01)
 
 
