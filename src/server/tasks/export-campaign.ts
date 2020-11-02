@@ -106,8 +106,6 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
         messagesWriteStream.write(m);
       }
     }
-  } catch (exc) {
-    logger.error("Error building message rows: ", exc);
   } finally {
     messagesWriteStream.end();
   }
@@ -140,8 +138,6 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
         campaignContactsWriteStream.write(c);
       }
     }
-  } catch (exc) {
-    logger.error("Error building campaign contact rows: ", exc);
   } finally {
     campaignContactsWriteStream.end();
   }
@@ -162,24 +158,11 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
           `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
           `\n\nCampaign export:\n${campaignExportUrl}` +
           `\n\nMessage export:\n${campaignMessagesExportUrl}`
-      }).catch(err => {
-        logger.error("Error sending export email: ", err);
-        logger.info(`Campaign Export URL - ${campaignExportUrl}`);
-        logger.info(
-          `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
-        );
       });
     }
     logger.info(`Successfully exported ${campaignId}`);
-  } catch (err) {
-    logger.error("Error uploading export to cloud storage: ", err);
-
-    await sendEmail({
-      to: notificationEmail,
-      subject: `Export failed for ${campaignTitle}`,
-      text: `Your Spoke exports failed... please try again later.
-        Error: ${err.message}`
-    });
+  } finally {
+    logger.info('Finishing export process')
   }
 
   // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
