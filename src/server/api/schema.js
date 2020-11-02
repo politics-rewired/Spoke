@@ -2885,7 +2885,8 @@ const rootMutations = {
         onApplyScript,
         textColor,
         backgroundColor,
-        webhookUrl
+        webhookUrl,
+        confirmationSteps
       } = tag;
 
       // Update existing tag
@@ -2899,7 +2900,8 @@ const rootMutations = {
             on_apply_script: onApplyScript,
             text_color: textColor,
             background_color: backgroundColor,
-            webhook_url: webhookUrl
+            webhook_url: webhookUrl,
+            confirmation_steps: confirmationSteps
           })
           .where({
             id,
@@ -2916,8 +2918,8 @@ const rootMutations = {
         rows: [newTag]
       } = await r.knex.raw(
         `
-          insert into all_tag (organization_id, author_id, title, description, is_assignable, on_apply_script, text_color, background_color, webhook_url)
-          values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          insert into all_tag (organization_id, author_id, title, description, is_assignable, on_apply_script, text_color, background_color, webhook_url, confirmation_steps)
+          values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           on conflict on constraint tag_title_organization_id_unique do update set 
             deleted_at = null,
             author_id = EXCLUDED.author_id,
@@ -2926,7 +2928,8 @@ const rootMutations = {
             on_apply_script = EXCLUDED.on_apply_script,
             text_color = EXCLUDED.text_color,
             background_color = EXCLUDED.background_color,
-            webhook_url = EXCLUDED.webhook_url
+            webhook_url = EXCLUDED.webhook_url, 
+            confirmation_steps = EXCLUDED.confirmation_steps
           returning *
           ;`,
         [
@@ -2938,7 +2941,8 @@ const rootMutations = {
           onApplyScript,
           textColor,
           backgroundColor,
-          webhookUrl
+          webhookUrl, 
+          confirmationSteps
         ]
       );
 

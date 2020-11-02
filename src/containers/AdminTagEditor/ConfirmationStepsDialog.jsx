@@ -19,9 +19,9 @@ class ConfirmationStepsDialog extends Component {
       <FlatButton label="Save" primary onClick={handleSaveSteps} />
     ];
 
-    const confirmationBodyText = confirmationSteps[0] ? confirmationSteps[0][0] : "";
-    const confirmButtonText = confirmationSteps[1] ? confirmationSteps[1][0] : "";
-    const cancelButtonText = confirmationSteps[2] ? confirmationSteps[2][0] : "";
+    const confirmationBodyText =  confirmationSteps[0] || "";
+    const confirmButtonText =  confirmationSteps[1] || "";
+    const cancelButtonText =  confirmationSteps[2] || "";
 
     return (
       <Dialog
@@ -37,19 +37,19 @@ class ConfirmationStepsDialog extends Component {
             name="confirmationBodyText"
             floatingLabelText="Confirmation body text"
             multiLine
-            value={confirmationBodyText || ""}
+            value={confirmationBodyText}
             onChange={setConfirmationSteps}
           />
           <TextField
             name="confirmButtonText"
             floatingLabelText="Confirm button text"
-            value={confirmButtonText || ""}
+            value={confirmButtonText}
             onChange={setConfirmationSteps}
           />
           <TextField
             name="cancelButtonText"
             floatingLabelText="Cancel button text"
-            value={cancelButtonText || ""}
+            value={cancelButtonText}
             onChange={setConfirmationSteps}
           />
         </div>
@@ -59,7 +59,7 @@ class ConfirmationStepsDialog extends Component {
 }
 
 ConfirmationStepsDialog.propTypes = {
-  confirmationSteps: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
+  confirmationSteps: PropTypes.arrayOf(PropTypes.string)
     .isRequired,
   setConfirmationSteps: PropTypes.func.isRequired,
   handleSaveSteps: PropTypes.func.isRequired,

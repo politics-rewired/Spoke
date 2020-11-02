@@ -55,6 +55,7 @@ class AdminTagEditor extends Component {
 
   handleSaveTag = async () => {
     const { editingTag } = this.state;
+    console.log('save tag', editingTag)
     const tag = pick(editingTag, [
       "id",
       "title",
@@ -136,7 +137,7 @@ class AdminTagEditor extends Component {
         editingTag: {
           ...this.state.editingTag,
           confirmationSteps: [
-            [value],
+            value,
             this.state.editingTag.confirmationSteps[1],
             this.state.editingTag.confirmationSteps[2]
           ]
@@ -149,7 +150,7 @@ class AdminTagEditor extends Component {
           ...this.state.editingTag,
           confirmationSteps: [
             this.state.editingTag.confirmationSteps[0],
-            [value],
+            value,
             this.state.editingTag.confirmationSteps[2]
           ]
         }
@@ -162,7 +163,7 @@ class AdminTagEditor extends Component {
           confirmationSteps: [
             this.state.editingTag.confirmationSteps[0],
             this.state.editingTag.confirmationSteps[1],
-            [value]
+            value
           ]
         }
       });
@@ -200,6 +201,7 @@ class AdminTagEditor extends Component {
       <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
     ];
 
+    console.log('editing tag', editingTag)
     return (
       <div>
         <TagEditorList
