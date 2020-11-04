@@ -15,7 +15,7 @@ import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import TagEditorList from "./TagEditorList";
 import theme from "../../styles/theme";
-import ConfirmationStepsDialog from "./ConfirmationStepsDialog";
+import ConfirmationStepsEditor from "./ConfirmationStepsEditor";
 import GSScriptField from "../../components/forms/GSScriptField";
 
 class AdminTagEditor extends Component {
@@ -41,7 +41,7 @@ class AdminTagEditor extends Component {
         description: "",
         textColor: "",
         backgroundColor: "",
-        confirmationSteps: [[]],
+        confirmationSteps: [],
         onApplyScript: "",
         webhookUrl: "",
         isAssignable: true
@@ -130,49 +130,35 @@ class AdminTagEditor extends Component {
     this.setState({ isEditingSteps: !this.state.isEditingSteps });
   };
 
-  setConfirmationSteps = (event, value) => {
-    console.log("state", this.state);
-    if (event.target.name === "confirmationBodyText") {
-      this.setState({
-        editingTag: {
-          ...this.state.editingTag,
-          confirmationSteps: [
-            value,
-            this.state.editingTag.confirmationSteps[1],
-            this.state.editingTag.confirmationSteps[2]
-          ]
-        }
-      });
-    }
-    if (event.target.name === "confirmButtonText") {
-      this.setState({
-        editingTag: {
-          ...this.state.editingTag,
-          confirmationSteps: [
-            this.state.editingTag.confirmationSteps[0],
-            value,
-            this.state.editingTag.confirmationSteps[2]
-          ]
-        }
-      });
-    }
-    if (event.target.name === "cancelButtonText") {
-      this.setState({
-        editingTag: {
-          ...this.state.editingTag,
-          confirmationSteps: [
-            this.state.editingTag.confirmationSteps[0],
-            this.state.editingTag.confirmationSteps[1],
-            value
-          ]
-        }
-      });
-    }
-  };
+  handleSaveConfirmationSteps = newStep => {
+    // new step is an array
+    let { editingTag } = this.state
+    const isNewTag = editingTag && !editingTag.id;
+
+    this.setState({ 
+      editingTag: {
+        ...this.state.editingTag,
+        ...this.state.editingTag.confirmationSteps.push(newStep)
+      }
+    })
+    
+
+
+    console.log('save steps runs new step', newStep, 'editingTag', editingTag)
+
+  }
+
+  handleDeleteConfirmationStep = stepIndex => {
+    this.setState({
+      editingTag: {
+        ...this.state.editingTag,
+        ...this.state.editingTag.confirmationSteps.splice(stepIndex, 1)
+      }
+    })
+  }
 
   handleCancelEditSteps = () => {
-    let { editingTag } = this.state;
-    this.setState({ editingTag, isEditingSteps: false });
+    this.setState({ isEditingSteps: false });
   };
 
   render() {
@@ -201,7 +187,6 @@ class AdminTagEditor extends Component {
       <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
     ];
 
-    console.log('editing tag', editingTag)
     return (
       <div>
         <TagEditorList
@@ -280,12 +265,19 @@ class AdminTagEditor extends Component {
                   />
                 </div>
               </div>
-              <TextField
-                name="confirmationSteps"
-                floatingLabelText="Confirmation steps"
-                value={editingTag.confirmationSteps || ""}
-                onClick={this.handleOpenStepsEditor}
-              />
+              <div >
+                <TextField
+                  name="confirmationSteps"
+                  floatingLabelText="Number of Confirmation steps"
+                  value={editingTag.confirmationSteps.length}
+                />
+                <FlatButton
+                  label="Manage confirmation steps"
+                  onClick={this.handleOpenStepsEditor}
+                  primary
+                  style={{ marginLeft: 8}}
+                />
+              </div>
               <TextField
                 name="webhookUrl"
                 floatingLabelText="Webhook url"
@@ -295,13 +287,14 @@ class AdminTagEditor extends Component {
                 fullWidth
               />
             </Dialog>
-            <ConfirmationStepsDialog
-              confirmationSteps={editingTag.confirmationSteps || []}
-              setConfirmationSteps={this.setConfirmationSteps}
-              handleSaveSteps={this.handleOpenStepsEditor}
-              handleCancelEditSteps={this.handleCancelEditSteps}
+            <ConfirmationStepsEditor
+              confirmationSteps={editingTag.confirmationSteps}
+              handleSaveSteps={this.handleSaveConfirmationSteps}
+              handleDeleteStep={this.handleDeleteConfirmationStep}
+              handleOpenStepsEditor={this.handleOpenStepsEditor}
               open={isEditingSteps}
             />
+            
           </div>
         )}
         <Dialog
