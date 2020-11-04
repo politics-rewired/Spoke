@@ -55,7 +55,7 @@ class AdminTagEditor extends Component {
 
   handleSaveTag = async () => {
     const { editingTag } = this.state;
-    console.log('save tag', editingTag)
+    console.log("save tag", editingTag);
     const tag = pick(editingTag, [
       "id",
       "title",
@@ -131,22 +131,15 @@ class AdminTagEditor extends Component {
   };
 
   handleSaveConfirmationSteps = newStep => {
-    // new step is an array
-    let { editingTag } = this.state
-    const isNewTag = editingTag && !editingTag.id;
+    let { editingTag } = this.state;
 
-    this.setState({ 
+    this.setState({
       editingTag: {
         ...this.state.editingTag,
         ...this.state.editingTag.confirmationSteps.push(newStep)
       }
-    })
-    
-
-
-    console.log('save steps runs new step', newStep, 'editingTag', editingTag)
-
-  }
+    });
+  };
 
   handleDeleteConfirmationStep = stepIndex => {
     this.setState({
@@ -154,8 +147,8 @@ class AdminTagEditor extends Component {
         ...this.state.editingTag,
         ...this.state.editingTag.confirmationSteps.splice(stepIndex, 1)
       }
-    })
-  }
+    });
+  };
 
   handleCancelEditSteps = () => {
     this.setState({ isEditingSteps: false });
@@ -265,7 +258,7 @@ class AdminTagEditor extends Component {
                   />
                 </div>
               </div>
-              <div >
+              <div>
                 <TextField
                   name="confirmationSteps"
                   floatingLabelText="Number of Confirmation steps"
@@ -275,7 +268,7 @@ class AdminTagEditor extends Component {
                   label="Manage confirmation steps"
                   onClick={this.handleOpenStepsEditor}
                   primary
-                  style={{ marginLeft: 8}}
+                  style={{ marginLeft: 8 }}
                 />
               </div>
               <TextField
@@ -294,7 +287,6 @@ class AdminTagEditor extends Component {
               handleOpenStepsEditor={this.handleOpenStepsEditor}
               open={isEditingSteps}
             />
-            
           </div>
         )}
         <Dialog
