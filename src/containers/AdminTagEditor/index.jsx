@@ -22,7 +22,6 @@ class AdminTagEditor extends Component {
   state = {
     editingTag: undefined,
     isWorking: false,
-    isEditingScript: false,
     isEditingSteps: false,
     error: undefined
   };
@@ -55,7 +54,6 @@ class AdminTagEditor extends Component {
 
   handleSaveTag = async () => {
     const { editingTag } = this.state;
-    console.log("save tag", editingTag);
     const tag = pick(editingTag, [
       "id",
       "title",
@@ -126,32 +124,27 @@ class AdminTagEditor extends Component {
     });
   };
 
-  handleOpenStepsEditor = () => {
+  handleToggleStepsEditorOpen = () => {
     this.setState({ isEditingSteps: !this.state.isEditingSteps });
   };
 
-  handleSaveConfirmationSteps = newStep => {
-    let { editingTag } = this.state;
-
+  handleSaveConfirmationStep = pendingStep => {
     this.setState({
       editingTag: {
         ...this.state.editingTag,
-        ...this.state.editingTag.confirmationSteps.push(newStep)
+        ...this.state.editingTag.confirmationSteps.push(pendingStep)
       }
     });
   };
 
+  // deliver filtered stepAndPendingArray and setState with
   handleDeleteConfirmationStep = stepIndex => {
+    let { editingTag } = this.state;
+    const removedStep = editingTag.confirmationSteps.splice(stepIndex, 1)
     this.setState({
-      editingTag: {
         ...this.state.editingTag,
         ...this.state.editingTag.confirmationSteps.splice(stepIndex, 1)
-      }
     });
-  };
-
-  handleCancelEditSteps = () => {
-    this.setState({ isEditingSteps: false });
   };
 
   render() {
@@ -258,15 +251,11 @@ class AdminTagEditor extends Component {
                   />
                 </div>
               </div>
-              <div>
-                <TextField
-                  name="confirmationSteps"
-                  floatingLabelText="Number of Confirmation steps"
-                  value={editingTag.confirmationSteps.length}
-                />
+              <div style={{ display: 'flex', alignItems: 'center'}}>
+                <span>Tag confirmation steps: {editingTag.confirmationSteps.length}</span>
                 <FlatButton
-                  label="Manage confirmation steps"
-                  onClick={this.handleOpenStepsEditor}
+                  label="Manage steps"
+                  onClick={this.handleToggleStepsEditorOpen}
                   primary
                   style={{ marginLeft: 8 }}
                 />
@@ -282,9 +271,9 @@ class AdminTagEditor extends Component {
             </Dialog>
             <ConfirmationStepsEditor
               confirmationSteps={editingTag.confirmationSteps}
-              handleSaveSteps={this.handleSaveConfirmationSteps}
+              handleSaveStep={this.handleSaveConfirmationStep}
               handleDeleteStep={this.handleDeleteConfirmationStep}
-              handleOpenStepsEditor={this.handleOpenStepsEditor}
+              handleToggleStepsEditorOpen={this.handleToggleStepsEditorOpen}
               open={isEditingSteps}
             />
           </div>

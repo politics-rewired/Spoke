@@ -11,32 +11,31 @@ class ConfirmationStepsEditor extends Component {
     isCreatingStep: false
   };
 
-  handleOpenStepCreator = () => {
+  handleToggleStepCreatorOpen = () => {
     this.setState({ isCreatingStep: !this.state.isCreatingStep });
   };
 
   render() {
     const {
       confirmationSteps,
-      handleSaveSteps,
+      handleSaveStep,
       handleDeleteStep,
-      handleOpenStepsEditor,
+      handleToggleStepsEditorOpen,
       open
     } = this.props;
+    
+    const { isCreatingStep } = this.state 
 
     const actions = [
-      <FlatButton label="Cancel" onClick={handleOpenStepsEditor} />,
-      <FlatButton label="Save" primary onClick={handleOpenStepsEditor} />
+      <FlatButton label="Close Step Editor" onClick={handleToggleStepsEditorOpen} />,
     ];
-
-    const { isCreatingStep } = this.state;
 
     return (
       <div>
         {isCreatingStep ? (
           <CreateConfirmationStepForm
-            handleOpenStepCreator={this.handleOpenStepCreator}
-            handleSaveStep={handleSaveSteps}
+            handleToggleStepCreatorOpen={this.handleToggleStepCreatorOpen}
+            handleSaveStep={handleSaveStep}
             open={isCreatingStep}
           />
         ) : (
@@ -45,13 +44,13 @@ class ConfirmationStepsEditor extends Component {
             open={open}
             modal={false}
             actions={actions}
-            onRequestClose={handleOpenStepsEditor}
-            style={{ zIndex: 999999 }}
+            onRequestClose={handleToggleStepsEditorOpen}
           >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <div style={{display: "flex", flexDirection: 'row' }}>
               {confirmationSteps.map((stepArray, stepArrayIdx) => (
                 <Chip
+                  key={stepArrayIdx}
                   onRequestDelete={() =>
                     handleDeleteStep(stepArrayIdx)
                   }
@@ -63,7 +62,7 @@ class ConfirmationStepsEditor extends Component {
               </div>
               <FlatButton
                 label="Add New Step"
-                onClick={this.handleOpenStepCreator}
+                onClick={this.handleToggleStepCreatorOpen}
               />
             </div>
           </Dialog>
@@ -74,10 +73,10 @@ class ConfirmationStepsEditor extends Component {
 }
 
 ConfirmationStepsEditor.propTypes = {
-  confirmationSteps: PropTypes.arrayOf(PropTypes.string).isRequired,
-  handleSaveSteps: PropTypes.func.isRequired,
+  confirmationSteps: PropTypes.arrayOf(PropTypes.array).isRequired,
+  handleSaveStep: PropTypes.func.isRequired,
   handleDeleteStep: PropTypes.func.isRequired,
-  handleOpenStepsEditor: PropTypes.func.isRequired,
+  handleToggleStepsEditorOpen: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired
 };
 

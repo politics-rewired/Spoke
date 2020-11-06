@@ -27,14 +27,14 @@ const formSchema = yup.object({
 });
 
 const CreateConfirmationStepForm = props => {
-  const { handleSaveStep, handleOpenStepCreator, open } = props;
+  const { handleSaveStep, handleToggleStepCreatorOpen, open } = props;
 
   const handleSubmit = formValues => {
     const newStep = [];
     const formKeys = Object.keys(formValues);
     formKeys.forEach(key => newStep.push(formValues[key]));
     handleSaveStep(newStep);
-    handleOpenStepCreator();
+    handleToggleStepCreatorOpen();
   };
 
   return (
@@ -42,8 +42,7 @@ const CreateConfirmationStepForm = props => {
       title="New confirmation step"
       open={open}
       modal={false}
-      onRequestClose={handleOpenStepCreator}
-      style={{ zIndex: 999999 }}
+      onRequestClose={handleToggleStepCreatorOpen}
     >
       <GSForm schema={formSchema} onSubmit={handleSubmit}>
         <div className={css(styles.formFields)}>
@@ -56,7 +55,7 @@ const CreateConfirmationStepForm = props => {
         </div>
 
         <div className={css(styles.buttons)}>
-          <Form.Button label="Cancel" onClick={handleOpenStepCreator} />
+          <Form.Button label="Cancel" onClick={handleToggleStepCreatorOpen} />
           <Form.Button type="submit" label="Save New Confirmation Step" />
         </div>
       </GSForm>
@@ -65,7 +64,7 @@ const CreateConfirmationStepForm = props => {
 };
 
 CreateConfirmationStepForm.propTypes = {
-  handleOpenStepCreator: PropTypes.func.isRequired,
+  handleToggleStepCreatorOpen: PropTypes.func.isRequired,
   handleSaveStep: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired
 };
