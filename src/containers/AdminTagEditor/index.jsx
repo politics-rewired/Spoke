@@ -128,22 +128,27 @@ class AdminTagEditor extends Component {
     this.setState({ isEditingSteps: !this.state.isEditingSteps });
   };
 
-  handleSaveConfirmationStep = pendingStep => {
+  handleSaveConfirmationStep = newStep => {
+    let { editingTag } = this.state;
+    let newConfirmationSteps = [...editingTag.confirmationSteps];
+    newConfirmationSteps.push(newStep);
     this.setState({
       editingTag: {
         ...this.state.editingTag,
-        ...this.state.editingTag.confirmationSteps.push(pendingStep)
+        confirmationSteps: newConfirmationSteps
       }
     });
   };
 
-  // deliver filtered stepAndPendingArray and setState with
   handleDeleteConfirmationStep = stepIndex => {
     let { editingTag } = this.state;
-    const removedStep = editingTag.confirmationSteps.splice(stepIndex, 1)
+    let newConfirmationSteps = [...editingTag.confirmationSteps];
+    newConfirmationSteps.splice(stepIndex, 1);
     this.setState({
+      editingTag: {
         ...this.state.editingTag,
-        ...this.state.editingTag.confirmationSteps.splice(stepIndex, 1)
+        confirmationSteps: newConfirmationSteps
+      }
     });
   };
 

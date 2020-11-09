@@ -23,7 +23,7 @@ class ConfirmationStepsEditor extends Component {
       handleToggleStepsEditorOpen,
       open
     } = this.props;
-    
+
     const { isCreatingStep } = this.state 
 
     const actions = [
