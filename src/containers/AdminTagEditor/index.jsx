@@ -129,9 +129,8 @@ class AdminTagEditor extends Component {
   };
 
   handleSaveConfirmationStep = newStep => {
-    let { editingTag } = this.state;
-    let newConfirmationSteps = [...editingTag.confirmationSteps];
-    newConfirmationSteps.push(newStep);
+    const { editingTag } = this.state;
+    const newConfirmationSteps = [...editingTag.confirmationSteps, newStep];
     this.setState({
       editingTag: {
         ...this.state.editingTag,
@@ -141,7 +140,7 @@ class AdminTagEditor extends Component {
   };
 
   handleDeleteConfirmationStep = stepIndex => {
-    let { editingTag } = this.state;
+    const { editingTag } = this.state;
     let newConfirmationSteps = [...editingTag.confirmationSteps];
     newConfirmationSteps.splice(stepIndex, 1);
     this.setState({
