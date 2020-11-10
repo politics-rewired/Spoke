@@ -15,13 +15,14 @@ import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import TagEditorList from "./TagEditorList";
 import theme from "../../styles/theme";
-
+import ConfirmationStepsEditor from "./ConfirmationStepsEditor";
 import GSScriptField from "../../components/forms/GSScriptField";
 
 class AdminTagEditor extends Component {
   state = {
     editingTag: undefined,
     isWorking: false,
+    isEditingSteps: false,
     error: undefined
   };
 
@@ -39,7 +40,7 @@ class AdminTagEditor extends Component {
         description: "",
         textColor: "",
         backgroundColor: "",
-        confirmationSteps: [[]],
+        confirmationSteps: [],
         onApplyScript: "",
         webhookUrl: "",
         isAssignable: true
@@ -123,9 +124,36 @@ class AdminTagEditor extends Component {
     });
   };
 
+  handleToggleStepsEditorOpen = () => {
+    this.setState({ isEditingSteps: !this.state.isEditingSteps });
+  };
+
+  handleSaveConfirmationStep = newStep => {
+    const { editingTag } = this.state;
+    const newConfirmationSteps = [...editingTag.confirmationSteps, newStep];
+    this.setState({
+      editingTag: {
+        ...this.state.editingTag,
+        confirmationSteps: newConfirmationSteps
+      }
+    });
+  };
+
+  handleDeleteConfirmationStep = stepIndex => {
+    const { editingTag } = this.state;
+    let newConfirmationSteps = [...editingTag.confirmationSteps];
+    newConfirmationSteps.splice(stepIndex, 1);
+    this.setState({
+      editingTag: {
+        ...this.state.editingTag,
+        confirmationSteps: newConfirmationSteps
+      }
+    });
+  };
+
   render() {
     const { organizationTags } = this.props;
-    const { editingTag, isWorking, error } = this.state;
+    const { editingTag, isWorking, error, isEditingSteps } = this.state;
 
     if (organizationTags.loading) return <LoadingIndicator />;
     if (organizationTags.errors) {
@@ -164,77 +192,95 @@ class AdminTagEditor extends Component {
           <ContentAddIcon />
         </FloatingActionButton>
         {editingTag && (
-          <Dialog
-            title={`${tagVerb} Tag`}
-            actions={actions}
-            modal={false}
-            open={true}
-            onRequestClose={this.handleCancelEditTag}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between"
-              }}
+          <div>
+            <Dialog
+              title={`${tagVerb} Tag`}
+              actions={actions}
+              modal={false}
+              open={true}
+              onRequestClose={this.handleCancelEditTag}
             >
-              <div>
-                <TextField
-                  name="title"
-                  floatingLabelText="Tag title"
-                  value={editingTag.title || ""}
-                  onChange={this.createTagEditorHandle}
-                />
-                <GSScriptField
-                  name="Script"
-                  label="Tag script"
-                  context="tagEditor"
-                  customFields={customFields}
-                  value={editingTag.onApplyScript || ""}
-                  onChange={this.handleEditTagScript}
-                  onClick={this.handleOpenScriptEditor}
-                />
-                <br />
-                <Toggle
-                  name="isAssignable"
-                  label="Allow assignment?"
-                  toggled={editingTag.isAssignable}
-                  onToggle={this.createTagEditorHandle}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between"
+                }}
+              >
+                <div>
+                  <TextField
+                    name="title"
+                    floatingLabelText="Tag title"
+                    value={editingTag.title || ""}
+                    onChange={this.createTagEditorHandle}
+                  />
+                  <GSScriptField
+                    name="Script"
+                    label="Tag script"
+                    context="tagEditor"
+                    customFields={customFields}
+                    value={editingTag.onApplyScript || ""}
+                    onChange={this.handleEditTagScript}
+                    onClick={this.handleOpenScriptEditor}
+                  />
+                  <br />
+                  <Toggle
+                    name="isAssignable"
+                    label="Allow assignment?"
+                    toggled={editingTag.isAssignable}
+                    onToggle={this.createTagEditorHandle}
+                  />
+                </div>
+                <div>
+                  <TextField
+                    name="description"
+                    floatingLabelText="Tag description"
+                    multiLine={true}
+                    value={editingTag.description || ""}
+                    onChange={this.createTagEditorHandle}
+                  />
+                  <ColorPicker
+                    name="Text Color"
+                    floatingLabelText="Text color"
+                    defaultValue={editingTag.textColor}
+                    value={editingTag.textColor || ""}
+                    onChange={this.handleEditTextColor}
+                  />
+                  <ColorPicker
+                    name="Background Color"
+                    floatingLabelText="Background color"
+                    defaultValue={editingTag.backgroundColor}
+                    value={editingTag.backgroundColor || ""}
+                    onChange={this.handleEditBackgroundColor}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center'}}>
+                <span>Tag confirmation steps: {editingTag.confirmationSteps.length}</span>
+                <FlatButton
+                  label="Manage steps"
+                  onClick={this.handleToggleStepsEditorOpen}
+                  primary
+                  style={{ marginLeft: 8 }}
                 />
               </div>
-              <div>
-                <TextField
-                  name="description"
-                  floatingLabelText="Tag description"
-                  multiLine={true}
-                  value={editingTag.description || ""}
-                  onChange={this.createTagEditorHandle}
-                />
-                <ColorPicker
-                  name="Text Color"
-                  floatingLabelText="Text color"
-                  defaultValue={editingTag.textColor}
-                  value={editingTag.textColor || ""}
-                  onChange={this.handleEditTextColor}
-                />
-                <ColorPicker
-                  name="Background Color"
-                  floatingLabelText="Background color"
-                  defaultValue={editingTag.backgroundColor}
-                  value={editingTag.backgroundColor || ""}
-                  onChange={this.handleEditBackgroundColor}
-                />
-              </div>
-            </div>
-            <TextField
-              name="webhookUrl"
-              floatingLabelText="Webhook url"
-              hintText="If set, a request will be sent to this URL whenever this tag is applied."
-              value={editingTag.webhookUrl || ""}
-              onChange={this.createTagEditorHandle}
-              fullWidth
+              <TextField
+                name="webhookUrl"
+                floatingLabelText="Webhook url"
+                hintText="If set, a request will be sent to this URL whenever this tag is applied."
+                value={editingTag.webhookUrl || ""}
+                onChange={this.createTagEditorHandle}
+                fullWidth
+              />
+            </Dialog>
+            <ConfirmationStepsEditor
+              confirmationSteps={editingTag.confirmationSteps}
+              handleSaveStep={this.handleSaveConfirmationStep}
+              handleDeleteStep={this.handleDeleteConfirmationStep}
+              handleToggleStepsEditorOpen={this.handleToggleStepsEditorOpen}
+              open={isEditingSteps}
             />
-          </Dialog>
+          </div>
         )}
         <Dialog
           title="Error"
@@ -271,6 +317,7 @@ const queries = {
             textColor
             backgroundColor
             webhookUrl
+            confirmationSteps
             createdAt
           }
         }
