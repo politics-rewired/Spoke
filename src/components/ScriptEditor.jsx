@@ -222,6 +222,7 @@ class ScriptEditor extends React.Component {
         </div>
         {this.renderCustomFields()}
         <div>
+          <br />
           Estimated Segments: {info.msgCount} <br />
           Characters left in current segment:{" "}
           {info.msgCount * info.charsPerSegment - info.charCount}
@@ -234,6 +235,14 @@ class ScriptEditor extends React.Component {
             target="_blank"
           >
             docs here
+          </a>.
+          <br />
+          Sending a message with a short link? Read our {" "}
+          <a
+            href="https://https://docs.spokerewired.com/article/70-short-link-domains"
+            target="_blank"
+          >
+            advice here
           </a>.
         </div>
       </div>
