@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.9.0](https://github.com/politics-rewired/spoke/compare/v3.8.1...v3.9.0) (2020-11-16)
+
+
+### Features
+
+* **tags:** add confirmation steps  ([#764](https://github.com/politics-rewired/spoke/issues/764)) ([c1fc977](https://github.com/politics-rewired/spoke/commit/c1fc97714107074ce9671ec1634c60fff9e223d8))
+* configurable send delay ([#763](https://github.com/politics-rewired/spoke/issues/763)) ([8ed5779](https://github.com/politics-rewired/spoke/commit/8ed577939c21228120347f3502af3430fba7ae9b))
+
+
+### Bug Fixes
+
+* **canned responses:** remove ref from functional component ([#762](https://github.com/politics-rewired/spoke/issues/762)) ([e49a96a](https://github.com/politics-rewired/spoke/commit/e49a96ae8c56e91a09667a5ae26a6f626008cda9))
+* **exports:** rm catches in helper fns ([#761](https://github.com/politics-rewired/spoke/issues/761)) ([2a85b74](https://github.com/politics-rewired/spoke/commit/2a85b74d2267a172c614f753421619c213e47a62))
+
 ### [3.8.1](https://github.com/politics-rewired/spoke/compare/v3.8.0...v3.8.1) (2020-11-02)
 
 
