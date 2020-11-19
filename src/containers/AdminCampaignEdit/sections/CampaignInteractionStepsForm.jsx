@@ -153,7 +153,10 @@ class CampaignInteractionStepsForm extends React.Component {
       });
 
       this.setState({
-        interactionSteps: this.state.interactionSteps.concat(mappedBlocks)
+        interactionSteps:
+          parentInteractionId === null
+            ? mappedBlocks
+            : this.state.interactionSteps.concat(mappedBlocks)
       });
     });
   };
@@ -249,6 +252,12 @@ class CampaignInteractionStepsForm extends React.Component {
             <RaisedButton onClick={() => this.copyBlock(interactionStep)}>
               Copy Block
             </RaisedButton>
+            {this.state.hasBlockCopied && (
+              <RaisedButton
+                label="+ Paste Block"
+                onTouchTap={this.createPasteBlockHandler(null)}
+              />
+            )}
           </CardActions>
           <CardText>
             <GSForm
