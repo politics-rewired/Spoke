@@ -404,8 +404,9 @@ class CampaignInteractionStepsForm extends React.Component {
             />
           ]}
         >
-          Pasting over the initial message will overwrite the whole script. Are
-          you sure you want to continue?
+          Pasting over the initial message will overwrite the whole script and
+          you may need to change your sync configuration. Are you sure you want
+          to continue?
         </Dialog>
         <CampaignFormSectionHeading
           title="What do you want to discuss?"
