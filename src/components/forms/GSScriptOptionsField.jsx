@@ -28,7 +28,7 @@ class GSScriptOptionsField extends GSFormField {
     scriptTarget: undefined,
     scriptDraft: "",
     scriptHasGenericLink: false,
-    scriptHasShortLink: true
+    scriptHasShortLink: false
   };
 
   createDialogHandler = scriptVersion => event => {
