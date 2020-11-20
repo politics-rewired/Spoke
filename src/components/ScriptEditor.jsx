@@ -236,14 +236,6 @@ class ScriptEditor extends React.Component {
           >
             docs here
           </a>.
-          <br />
-          Sending a message with a short link? Read our {" "}
-          <a
-            href="https://https://docs.spokerewired.com/article/70-short-link-domains"
-            target="_blank"
-          >
-            advice here
-          </a>.
         </div>
       </div>
     );

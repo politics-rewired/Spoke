@@ -55,7 +55,7 @@ class GSScriptField extends GSFormField {
     const { name, customFields } = this.props;
     const { open } = this.state;
     const scriptFields = allScriptFields(customFields);
-
+    
     return (
       <Dialog
         style={styles.dialog}
@@ -102,7 +102,7 @@ class GSScriptField extends GSFormField {
       "onBlur",
       "onChange"
     ]);
-
+    
     return (
       <div>
         <TextField
