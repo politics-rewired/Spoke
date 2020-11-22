@@ -314,6 +314,11 @@ const validators = {
       "The interval length in minutes that each troll patrol sweep will examine messages within.",
     default: 6
   }),
+  ENABLE_SHORTLINK_DOMAINS: bool({
+    desc: "Whether to enable shortlink domains",
+    default: false,
+    isClient: true
+  }),
   DISABLE_TEXTER_NOTIFICATIONS: bool({
     desc:
       "Whether to disable texter notifications – if true, should be implemented externally.",
