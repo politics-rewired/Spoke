@@ -14,7 +14,7 @@ export const SHORTLINK_DOMAINS: string[] = [
   'tiny.cc',
   'tinyurl.com',
   'x.co'
-]
+];
 
 export const GENERIC_DOMAINS: string[] = [
   'http://',
@@ -28,4 +28,4 @@ export const GENERIC_DOMAINS: string[] = [
   '.org',
   '.gov',
   '.edu'
-]
+];

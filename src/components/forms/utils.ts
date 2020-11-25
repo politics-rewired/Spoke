@@ -20,4 +20,4 @@ export const getWarningContextForScript = (script: string): void => {
   })
 
   return warningContext
-};  
+};
