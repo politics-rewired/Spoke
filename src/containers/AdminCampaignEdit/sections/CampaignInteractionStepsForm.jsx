@@ -4,6 +4,7 @@ import * as yup from "yup";
 import Form from "react-formal";
 
 import RaisedButton from "material-ui/RaisedButton";
+import FlatButton from "material-ui/FlatButton";
 import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
 import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
@@ -14,6 +15,7 @@ import { dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
 import GSForm from "../../../components/forms/GSForm";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
+import { Dialog } from "material-ui";
 
 const styles = {
   pullRight: {
@@ -73,6 +75,7 @@ class CampaignInteractionStepsForm extends React.Component {
   state = {
     focusedField: null,
     hasBlockCopied: false,
+    confirmingRootPaste: false,
     interactionSteps: this.props.formValues.interactionSteps[0]
       ? this.props.formValues.interactionSteps
       : [
@@ -133,6 +136,15 @@ class CampaignInteractionStepsForm extends React.Component {
       .toString(36)
       .replace(/[^a-zA-Z1-9]+/g, "")}`;
 
+  onRequestRootPaste = () => {
+    this.setState({ confirmingRootPaste: true });
+  };
+
+  confirmRootPaste = () => {
+    this.setState({ confirmingRootPaste: false });
+    this.createPasteBlockHandler(null)();
+  };
+
   createPasteBlockHandler = parentInteractionId => () => {
     navigator.clipboard.readText().then(text => {
       const idMap = {};
@@ -153,7 +165,10 @@ class CampaignInteractionStepsForm extends React.Component {
       });
 
       this.setState({
-        interactionSteps: this.state.interactionSteps.concat(mappedBlocks)
+        interactionSteps:
+          parentInteractionId === null
+            ? mappedBlocks
+            : this.state.interactionSteps.concat(mappedBlocks)
       });
     });
   };
@@ -249,6 +264,12 @@ class CampaignInteractionStepsForm extends React.Component {
             <RaisedButton onClick={() => this.copyBlock(interactionStep)}>
               Copy Block
             </RaisedButton>
+            {this.state.hasBlockCopied && (
+              <RaisedButton
+                label="+ Paste Block"
+                onTouchTap={this.onRequestRootPaste}
+              />
+            )}
           </CardActions>
           <CardText>
             <GSForm
@@ -368,6 +389,25 @@ class CampaignInteractionStepsForm extends React.Component {
         onFocus={this.updateClipboardHasBlock}
         onClick={this.updateClipboardHasBlock}
       >
+        <Dialog
+          open={this.state.confirmingRootPaste}
+          actions={[
+            <FlatButton
+              label="Cancel"
+              primary={true}
+              onClick={() => this.setState({ confirmingRootPaste: false })}
+            />,
+            <FlatButton
+              label="Paste"
+              primary={true}
+              onClick={this.confirmRootPaste}
+            />
+          ]}
+        >
+          Pasting over the initial message will overwrite the whole script and
+          you may need to change your sync configuration. Are you sure you want
+          to continue?
+        </Dialog>
         <CampaignFormSectionHeading
           title="What do you want to discuss?"
           subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
