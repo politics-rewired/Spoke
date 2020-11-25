@@ -2,19 +2,26 @@ import React from "react";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 
+const styles = {
+  dialog: {
+    zIndex: 10002
+  }
+};
+
 export enum ScriptWarningContext {
   GenericLink = "generic-link",
-  ShortLink = "short-link"
+  ShortLink = "short-link", 
 }
 
 interface WarningProps {
+  open: boolean;
   warningContext: ScriptWarningContext;
   handleConfirm: () => void;
   handleClose: () => void;
 }
 
 const ScriptLinkWarningDialog = (props: WarningProps) => {
-  const { warningContext, handleClose, handleConfirm } = props;
+  const { warningContext, handleClose, handleConfirm, open } = props;
 
   const title = warningContext === ScriptWarningContext.GenericLink && 'Confirm Script' 
     || warningContext === ScriptWarningContext.ShortLink && 'Short Link Warning'
@@ -25,7 +32,7 @@ const ScriptLinkWarningDialog = (props: WarningProps) => {
   ];
 
   return (
-    <Dialog open={true} actions={actions} title={title} style={{ zIndex: 9999999}}>
+    <Dialog open={open} actions={actions} title={title} style={styles.dialog} >
       <DialogContent warningContext={warningContext} />
     </Dialog>
   );
@@ -79,11 +86,14 @@ const DialogContent = (props: ContentProps) => {
     </div>
   )
 
-  const warningContent = 
-     warningContext === ScriptWarningContext.GenericLink && genericLinkContent 
-    || ScriptWarningContext.ShortLink && shortLinkContent
-          
-  return warningContent
+  switch(warningContext) {
+    case ScriptWarningContext.GenericLink:
+      return genericLinkContent;
+    case ScriptWarningContext.ShortLink:
+      return shortLinkContent;
+    default:
+      return <p>Error: unknown context</p>
+  }
 }
 
 export default ScriptLinkWarningDialog;

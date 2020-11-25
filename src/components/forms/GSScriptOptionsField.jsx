@@ -16,6 +16,7 @@ import { allScriptFields } from "../../lib/scripts";
 import GSFormField from "./GSFormField";
 import ScriptEditor from "../ScriptEditor";
 import ScriptLinkWarningDialog, { ScriptWarningContext } from '../ScriptLinkWarningDialog';
+import { getWarningContextForScript } from './utils'
 
 const styles = {
   dialog: {
@@ -27,8 +28,7 @@ class GSScriptOptionsField extends GSFormField {
   state = {
     scriptTarget: undefined,
     scriptDraft: "",
-    scriptHasGenericLink: false,
-    scriptHasShortLink: false
+    scriptWarningOpen: false
   };
 
   createDialogHandler = scriptVersion => event => {
@@ -57,16 +57,12 @@ class GSScriptOptionsField extends GSFormField {
   // save script if no link warning is needed
   handleSaveScript = () => {
     const { value: scriptVersions } = this.props;
-    const { scriptTarget, scriptDraft, scriptHasGenericLink, scriptHasShortLink } = this.state;
-    const shouldAllowSave = !scriptHasGenericLink && !scriptHasShortLink;
+    const { scriptTarget, scriptDraft } = this.state;
+    const targetIndex = scriptVersions.indexOf(scriptTarget);
+    scriptVersions[targetIndex] = scriptDraft.trim();
 
-    if (shouldAllowSave) { 
-      const targetIndex = scriptVersions.indexOf(scriptTarget);
-      scriptVersions[targetIndex] = scriptDraft.trim();
-
-      this.props.onChange(scriptVersions);
-      this.handleCancelDialog();
-    }
+    this.props.onChange(scriptVersions);
+    this.handleCancelDialog();
   };
 
   handleAddScriptVersion = () => {
@@ -75,45 +71,31 @@ class GSScriptOptionsField extends GSFormField {
     this.props.onChange(scriptVersions);
   };
 
-  handleCheckDraftScript = (script) => {
-    const scriptArray = script.split(' ')
-
-    // filter media attachments by excluding array entries that start with '['
-    const filteredScripts = scriptArray.filter(word => !word.startsWith('['))
-    filteredScripts.forEach(word => {
-      const wordHasGenericLink = word.includes('http://') || word.includes('https://')
-      const wordHasLinkShortener = word.includes('bit.ly') || word.includes('tinyur') || word.includes('goo.gl')
-      if (wordHasGenericLink) {
-        this.setState({ scriptHasGenericLink: true })
-      }
-      if (wordHasLinkShortener) {
-        this.setState({ scriptHasShortLink: true })
-      }
-    })
-  }
-
   // check draftScript for links, then save
   wrapSaveScript = () => {
     const { scriptDraft } = this.state;
-    const checkScript = new Promise(resolve => {
-      resolve(this.handleCheckDraftScript(scriptDraft))
-    })
-    checkScript.then(() => this.handleSaveScript())
+    const warningContext = getWarningContextForScript(scriptDraft);
+    
+    if (warningContext) {
+      this.setState({ scriptWarningOpen: true });
+    } else {
+      this.handleSaveScript();
+    }
   }
 
   // confirm draft with links, save script and close editor
   handleConfirmLinkWarning = () => {
-    this.setState({ scriptHasGenericLink: false, scriptHasShortLink: false }, () => this.handleSaveScript())
+    this.setState({ scriptWarningOpen: false }, () => this.handleSaveScript())
   }
 
   // cancel draft with links, reset script draft
   handleCloseLinkWarning = () => {
-    this.setState({ scriptHasGenericLink: false, scriptHasShortLink: false })
+    this.setState({ scriptWarningOpen: false })
   }
 
   renderDialog() {
     const { name, customFields, value: scriptVersions } = this.props;
-    const { scriptTarget, scriptDraft, scriptHasGenericLink, scriptHasShortLink } = this.state;
+    const { scriptTarget, scriptDraft, scriptWarningOpen } = this.state;
     const scriptFields = allScriptFields(customFields);
 
     const draftVersionOccurences = scriptVersions.filter(
@@ -125,8 +107,7 @@ class GSScriptOptionsField extends GSFormField {
     // Script target could be "" which is falsey, so make explicit check against undefined
     const isDialogOpen = scriptTarget !== undefined;
 
-    const scriptHasLink = scriptHasGenericLink || scriptHasShortLink
-    const warningContext = scriptHasShortLink && ScriptWarningContext.ShortLink || scriptHasGenericLink && ScriptWarningContext.GenericLink
+    const warningContext = getWarningContextForScript(scriptDraft)
 
     const actions = [
       <FlatButton
@@ -160,13 +141,12 @@ class GSScriptOptionsField extends GSFormField {
           onChange={val => this.setState({ scriptDraft: val.trim() })}
         />
         {isDuplicate && <p>A script version with this text already exists!</p>}
-        {scriptHasLink && 
-          <ScriptLinkWarningDialog  
-            warningContext={warningContext} 
-            handleConfirm={this.handleConfirmLinkWarning} 
-            handleClose={this.handleCloseLinkWarning}
-          /> 
-        }
+        <ScriptLinkWarningDialog
+          open={scriptWarningOpen}  
+          warningContext={warningContext} 
+          handleConfirm={this.handleConfirmLinkWarning} 
+          handleClose={this.handleCloseLinkWarning}
+        /> 
       </Dialog>
     );
   }
