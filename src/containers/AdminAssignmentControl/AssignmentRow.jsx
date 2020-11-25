@@ -42,6 +42,20 @@ const AssignmentRow = props => {
     onChange({ escalationTags: newEscalationTags });
   };
 
+  const handleCheckEscalationTag = newTag => {
+    // when a tag is added by search, newTag will be a string,
+    // not the tag object within escalationTagList -
+    // here we trim possible whitespace, then find and verify the tag
+    // before calling handleAddEscalationTag
+    const trimmedTag = newTag.id ? newTag : newTag.trim();
+    const foundTag = escalationTagList.find(
+      tag => tag.title === trimmedTag || tag.title === trimmedTag.title
+    );
+    if (foundTag) {
+      handleAddEscalationTag(foundTag);
+    }
+  };
+
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <div style={{ minWidth: "200px" }}>
@@ -96,6 +110,7 @@ const AssignmentRow = props => {
         dataSource={escalationTagList}
         value={escalationTags}
         openOnFocus={true}
+        onBeforeRequestAdd={handleCheckEscalationTag}
         onRequestAdd={handleAddEscalationTag}
         onRequestDelete={handleRemoveEscalationTag}
         dataSourceConfig={{ text: "title", value: "id" }}
