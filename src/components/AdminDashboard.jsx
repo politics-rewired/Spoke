@@ -110,6 +110,11 @@ class AdminDashboard extends React.Component {
       sections.splice(index, 1);
     }
 
+    if (!window.ENABLE_SHORTLINK_DOMAINS) {
+      const index = sections.findIndex(s => s.name === "Short Link Domains");
+      sections.splice(index, 1);
+    }
+
     let currentSection = sections.filter(section =>
       location.pathname.match(`/${section.path}`)
     );
