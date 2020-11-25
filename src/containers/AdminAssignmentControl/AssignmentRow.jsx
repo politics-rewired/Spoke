@@ -33,7 +33,11 @@ const AssignmentRow = props => {
     onChange({ maxRequestCount: parseInt(maxRequestCount, 10) });
 
   const handleAddEscalationTag = newTag => {
-    const newEscalationTags = uniqBy(escalationTags.concat(newTag), t => t.id);
+    // when a tag is added by search, ChipInput coerces it to an object -
+    // we want to find the tag within escalationTagList that matches
+    // newTag object's title, not add the new object to escalationTags
+    const foundTag = escalationTagList.find(tag => tag.title === newTag.title);
+    const newEscalationTags = uniqBy(escalationTags.concat(foundTag), t => t.id);
     onChange({ escalationTags: newEscalationTags });
   };
 
@@ -45,15 +49,12 @@ const AssignmentRow = props => {
   const handleCheckEscalationTag = newTag => {
     // when a tag is added by search, newTag will be a string,
     // not the tag object within escalationTagList -
-    // here we trim possible whitespace, then find and verify the tag
-    // before calling handleAddEscalationTag
-    const trimmedTag = newTag.id ? newTag : newTag.trim();
-    const foundTag = escalationTagList.find(
-      tag => tag.title === trimmedTag || tag.title === trimmedTag.title
-    );
-    if (foundTag) {
-      handleAddEscalationTag(foundTag);
-    }
+    // here we trim possible whitespace, then verify the tag
+    const formattedTag = newTag.id ? newTag.title : newTag.trim();
+    const tagNames = escalationTagList.map(tag => tag.title);
+    const tagExists = tagNames.includes(formattedTag);
+
+    return tagExists;
   };
 
   return (
