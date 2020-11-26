@@ -3,7 +3,7 @@ import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import AdminNavigation from "../containers/AdminNavigation";
 import { loadData } from "../containers/hoc/with-operations";
@@ -31,10 +31,10 @@ class AdminDashboard extends React.Component {
     showMenu: true
   };
 
-  urlFromPath(path) {
+  urlFromPath = (path) => {
     const { organizationId } = this.props.match.params;
     return `/admin/${organizationId}/${path}`;
-  }
+  };
 
   handleToggleMenu = () => this.setState({ showMenu: !this.state.showMenu });
 
@@ -101,21 +101,21 @@ class AdminDashboard extends React.Component {
     ];
 
     if (window.DISABLE_ASSIGNMENT_PAGE) {
-      const index = sections.findIndex(s => s.name === "Assignment Requests");
+      const index = sections.findIndex((s) => s.name === "Assignment Requests");
       sections.splice(index, 1);
     }
 
     if (!window.ENABLE_TROLLBOT) {
-      const index = sections.findIndex(s => s.name === "Troll Alarms");
+      const index = sections.findIndex((s) => s.name === "Troll Alarms");
       sections.splice(index, 1);
     }
 
     if (!window.ENABLE_SHORTLINK_DOMAINS) {
-      const index = sections.findIndex(s => s.name === "Short Link Domains");
+      const index = sections.findIndex((s) => s.name === "Short Link Domains");
       sections.splice(index, 1);
     }
 
-    let currentSection = sections.filter(section =>
+    let currentSection = sections.filter((section) =>
       location.pathname.match(`/${section.path}`)
     );
 
@@ -135,7 +135,9 @@ class AdminDashboard extends React.Component {
           orgId={match.params.organizationId}
         />
         <div className={css(styles.container)}>
-          {this.renderNavigation(sections.filter(s => hasRole(s.role, roles)))}
+          {this.renderNavigation(
+            sections.filter((s) => hasRole(s.role, roles))
+          )}
           <div className={css(styles.content)}>{children}</div>
         </div>
       </div>
@@ -146,11 +148,9 @@ class AdminDashboard extends React.Component {
 AdminDashboard.propTypes = {
   match: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
   data: PropTypes.object.isRequired,
-  badgeCounts: PropTypes.object,
-  children: PropTypes.object,
-  trollAlarmsCount: PropTypes.object
+  badgeCounts: PropTypes.object.isRequired,
+  trollAlarmsCount: PropTypes.object.isRequired
 };
 
 const queries = {
@@ -210,7 +210,4 @@ const queries = {
   }
 };
 
-export default compose(
-  withRouter,
-  loadData({ queries })
-)(AdminDashboard);
+export default compose(withRouter, loadData({ queries }))(AdminDashboard);

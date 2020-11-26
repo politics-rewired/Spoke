@@ -24,10 +24,13 @@ class ConfirmationStepsEditor extends Component {
       open
     } = this.props;
 
-    const { isCreatingStep } = this.state 
+    const { isCreatingStep } = this.state;
 
     const actions = [
-      <FlatButton label="Close Step Editor" onClick={handleToggleStepsEditorOpen} />,
+      <FlatButton
+        label="Close Step Editor"
+        onClick={handleToggleStepsEditorOpen}
+      />
     ];
 
     return (
@@ -47,18 +50,16 @@ class ConfirmationStepsEditor extends Component {
             onRequestClose={handleToggleStepsEditorOpen}
           >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div style={{display: "flex", flexDirection: 'row' }}>
-              {confirmationSteps.map((stepArray, stepArrayIdx) => (
-                <Chip
-                  key={stepArrayIdx}
-                  onRequestDelete={() =>
-                    handleDeleteStep(stepArrayIdx)
-                  }
-                  style={{ margin: 4}}
-                >
-                  {stepArray[0]}
-                </Chip>
-              ))}
+              <div style={{ display: "flex", flexDirection: "row" }}>
+                {confirmationSteps.map((stepArray, stepArrayIdx) => (
+                  <Chip
+                    key={stepArrayIdx}
+                    onRequestDelete={() => handleDeleteStep(stepArrayIdx)}
+                    style={{ margin: 4 }}
+                  >
+                    {stepArray[0]}
+                  </Chip>
+                ))}
               </div>
               <FlatButton
                 label="Add New Step"

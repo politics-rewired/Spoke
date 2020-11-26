@@ -26,13 +26,13 @@ const formSchema = yup.object({
   cancelButtonText: yup.string().required()
 });
 
-const CreateConfirmationStepForm = props => {
+const CreateConfirmationStepForm = (props) => {
   const { handleSaveStep, handleToggleStepCreatorOpen, open } = props;
 
-  const handleSubmit = formValues => {
+  const handleSubmit = (formValues) => {
     const newStep = [];
     const formKeys = Object.keys(formValues);
-    formKeys.forEach(key => newStep.push(formValues[key]));
+    formKeys.forEach((key) => newStep.push(formValues[key]));
     handleSaveStep(newStep);
     handleToggleStepCreatorOpen();
   };

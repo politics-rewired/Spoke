@@ -1,4 +1,4 @@
-import { LogFunctionFactory, Logger, Runner } from "graphile-worker";
+import { LogFunctionFactory, Logger } from "graphile-worker";
 import { Pool } from "pg";
 import { loadYaml, PgComposeWorker, run } from "pg-compose";
 import url from "url";

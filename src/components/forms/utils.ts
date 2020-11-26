@@ -1,15 +1,21 @@
 import { ScriptWarningContext } from "../ScriptLinkWarningDialog";
-import { SHORTLINK_DOMAINS, GENERIC_DOMAINS } from './lib'
+import { SHORTLINK_DOMAINS, GENERIC_DOMAINS } from "./lib";
 
 export const getWarningContextForScript = (script: string): void => {
-    let warningContext;
-    const scriptArray = script.split(' ')
+  let warningContext;
+  const scriptArray = script.split(" ");
 
-    // filter media attachments by excluding array entries that start with '['
-    const filteredScripts = scriptArray.filter(word => !word.startsWith('['))
-    filteredScripts.forEach(word => {
-      const wordHasGenericLink = GENERIC_DOMAINS.reduce((acc: boolean, domain: string) => acc || word.includes(domain), false);
-      const wordHasLinkShortener = SHORTLINK_DOMAINS.reduce((acc: boolean, domain: string) => acc || word.includes(domain), false);
+  // filter media attachments by excluding array entries that start with '['
+  const filteredScripts = scriptArray.filter((word) => !word.startsWith("["));
+  filteredScripts.forEach((word) => {
+    const wordHasGenericLink = GENERIC_DOMAINS.reduce(
+      (acc: boolean, domain: string) => acc || word.includes(domain),
+      false
+    );
+    const wordHasLinkShortener = SHORTLINK_DOMAINS.reduce(
+      (acc: boolean, domain: string) => acc || word.includes(domain),
+      false
+    );
 
     if (wordHasGenericLink) {
       warningContext = ScriptWarningContext.GenericLink;
@@ -17,7 +23,7 @@ export const getWarningContextForScript = (script: string): void => {
     if (wordHasLinkShortener) {
       warningContext = ScriptWarningContext.ShortLink;
     }
-  })
+  });
 
-  return warningContext
+  return warningContext;
 };
