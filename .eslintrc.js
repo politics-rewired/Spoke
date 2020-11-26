@@ -94,6 +94,8 @@ module.exports = {
       // enable the rule specifically for TypeScript files
       files: ["*.ts", "*.tsx"],
       rules: {
+        "no-shadow": "off", // JS `no-shadow` rule doesn't handle enums correctly
+        "@typescript-eslint/no-shadow": "error",
         "@typescript-eslint/explicit-module-boundary-types": ["error"]
       }
     }
