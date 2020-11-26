@@ -1,6 +1,6 @@
-import React from "react";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import React from "react";
 
 const styles = {
   dialog: {
@@ -29,11 +29,7 @@ const ScriptLinkWarningDialog = (props: WarningProps) => {
 
   const actions = [
     <FlatButton label="Close" primary={false} onClick={handleClose} />,
-    <FlatButton
-      label="Confirm and Save"
-      primary={true}
-      onClick={handleConfirm}
-    />
+    <FlatButton label="Confirm and Save" primary onClick={handleConfirm} />
   ];
 
   return (

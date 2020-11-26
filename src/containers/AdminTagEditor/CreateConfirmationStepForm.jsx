@@ -1,10 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
-import * as yup from "yup";
-import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
-
+import { css, StyleSheet } from "aphrodite";
 import { Dialog } from "material-ui";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
 

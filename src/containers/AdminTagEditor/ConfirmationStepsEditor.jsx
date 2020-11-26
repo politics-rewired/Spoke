@@ -1,10 +1,10 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-
+import { Chip } from "material-ui";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+
 import CreateConfirmationStepForm from "./CreateConfirmationStepForm";
-import { Chip } from "material-ui";
 
 class ConfirmationStepsEditor extends Component {
   state = {

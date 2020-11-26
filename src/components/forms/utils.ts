@@ -1,5 +1,5 @@
 import { ScriptWarningContext } from "../ScriptLinkWarningDialog";
-import { SHORTLINK_DOMAINS, GENERIC_DOMAINS } from "./lib";
+import { GENERIC_DOMAINS, SHORTLINK_DOMAINS } from "./lib";
 
 export const getWarningContextForScript = (script: string): void => {
   let warningContext;
