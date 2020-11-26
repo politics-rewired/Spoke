@@ -25,7 +25,7 @@ Install Node dependencies:
 yarn install
 ```
 
-Copy the example environment. THe only change you may need to make is updating the database connection string.
+Copy the example environment. The only change you may need to make is updating the database connection string.
 
 ```sh
 cp .env.example .env
