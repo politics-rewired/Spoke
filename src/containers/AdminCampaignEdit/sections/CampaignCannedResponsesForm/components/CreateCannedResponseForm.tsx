@@ -31,7 +31,7 @@ const CreateCannedResponseForm: React.SFC<Props> = (props) => {
 
   const { customFields } = props;
   return (
-    <GSForm ref="form" schema={modelSchema} onSubmit={handleSave}>
+    <GSForm schema={modelSchema} onSubmit={handleSave}>
       <Form.Field
         {...dataTest("title")}
         name="title"

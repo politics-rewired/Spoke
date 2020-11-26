@@ -1,16 +1,32 @@
-import { r } from "../../server/models";
-import logger from "../../../src/logger";
+import { Task } from "pg-compose";
 import moment from "moment";
 import { format } from "fast-csv";
+import _ from "lodash";
+
+import logger from "../../../src/logger";
+import { r } from "../../server/models";
 import { getUploadStream, getDownloadUrl } from "../../workers/exports/upload";
 import { sendEmail } from "../../server/mail";
 import { deleteJob } from "../../workers/jobs";
-import _ from "lodash";
-import { Task } from "pg-compose";
+
+import {
+  CampaignContactRecord,
+  InteractionStepRecord,
+  JobRequestRecord,
+  MessageRecord,
+  UserRecord
+} from "../api/types";
 
 const CHUNK_SIZE = 1000;
 
-export const exportCampaign: Task = async (payload: any, _helpers: any) => {
+interface ExportChunk {
+  lastContactId: number;
+}
+
+export const exportCampaign: Task = async (
+  payload: JobRequestRecord,
+  _helpers
+) => {
   const {
     campaignId,
     campaignTitle,
@@ -47,10 +63,10 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
     writeHeaders: true
   });
 
-  campaignContactsUploadStream.on("error", (err) => {
+  campaignContactsUploadStream.on("error", err => {
     logger.error("error in campaignContactsUploadStream: ", err);
   });
-  campaignContactsWriteStream.on("error", (err) => {
+  campaignContactsWriteStream.on("error", err => {
     logger.error("error in campaignContactsWriteStream: ", err);
   });
 
@@ -66,10 +82,10 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
     writeHeaders: true
   });
 
-  messagesUploadStream.on("error", (err) => {
+  messagesUploadStream.on("error", err => {
     logger.error("error in messagesUploadStream: ", err);
   });
-  messagesWriteStream.on("error", (err) => {
+  messagesWriteStream.on("error", err => {
     logger.error("error in messagesWriteStream: ", err);
   });
 
@@ -83,7 +99,7 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
   let lastContactId;
   let processed = 0;
   try {
-    let chunkMessageResult = undefined;
+    let chunkMessageResult: MessagesChunk | false;
     lastContactId = 0;
     while (
       (chunkMessageResult = await processMessagesChunk(
@@ -106,15 +122,13 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
         messagesWriteStream.write(m);
       }
     }
-  } catch (exc) {
-    logger.error("Error building message rows: ", exc);
   } finally {
     messagesWriteStream.end();
   }
 
   // Contact rows
   try {
-    let chunkContactResult = undefined;
+    let chunkContactResult: ContactsChunk | false;
     lastContactId = 0;
     processed = 0;
     while (
@@ -140,8 +154,6 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
         campaignContactsWriteStream.write(c);
       }
     }
-  } catch (exc) {
-    logger.error("Error building campaign contact rows: ", exc);
   } finally {
     campaignContactsWriteStream.end();
   }
@@ -162,24 +174,11 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
           `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
           `\n\nCampaign export:\n${campaignExportUrl}` +
           `\n\nMessage export:\n${campaignMessagesExportUrl}`
-      }).catch((err) => {
-        logger.error("Error sending export email: ", err);
-        logger.info(`Campaign Export URL - ${campaignExportUrl}`);
-        logger.info(
-          `Campaign Messages Export URL - ${campaignMessagesExportUrl}`
-        );
       });
     }
     logger.info(`Successfully exported ${campaignId}`);
-  } catch (err) {
-    logger.error("Error uploading export to cloud storage: ", err);
-
-    await sendEmail({
-      to: notificationEmail,
-      subject: `Export failed for ${campaignTitle}`,
-      text: `Your Spoke exports failed... please try again later.
-        Error: ${err.message}`
-    });
+  } finally {
+    logger.info("Finishing export process");
   }
 
   // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
@@ -198,7 +197,7 @@ export const exportCampaign: Task = async (payload: any, _helpers: any) => {
  * Fetch necessary job data from database.
  * @param {object} job The export job object to fetch data for. Must have payload, campaign_id, and requester properties.
  */
-export const fetchExportData = async (job) => {
+export const fetchExportData = async (job: JobRequestRecord) => {
   const { campaign_id: campaignId, payload: rawPayload } = job;
   const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
     rawPayload
@@ -242,15 +241,18 @@ export const fetchExportData = async (job) => {
   };
 };
 
-const stepHasQuestion = (step) => step.question && step.question.trim() !== "";
+const stepHasQuestion = (step: InteractionStepRecord) =>
+  step.question && step.question.trim() !== "";
 
 /**
  * Returns map from interaction step ID --> question text (deduped where appropriate).
  * @param {object[]} interactionSteps Array of interaction steps to work on.
  */
-export const getUniqueQuestionsByStepId = (interactionSteps) => {
+export const getUniqueQuestionsByStepId = (
+  interactionSteps: InteractionStepRecord[]
+) => {
   const questionSteps = interactionSteps.filter(stepHasQuestion);
-  const duplicateQuestions = _.groupBy(questionSteps, (step) => step.question);
+  const duplicateQuestions = _.groupBy(questionSteps, step => step.question);
 
   return Object.keys(duplicateQuestions).reduce(
     (allQuestions, questionText) => {
@@ -272,13 +274,25 @@ export const getUniqueQuestionsByStepId = (interactionSteps) => {
   );
 };
 
+interface ContactExportRow extends CampaignContactRecord {
+  city: string;
+  state: string;
+  interaction_step_id: number;
+  value: string;
+  tag_titles: string;
+}
+
+interface ContactsChunk extends ExportChunk {
+  contacts: { [key: string]: string }[];
+}
+
 export const processContactsChunk = async (
-  campaignId,
-  campaignTitle,
-  questionsById,
+  campaignId: number,
+  campaignTitle: string,
+  questionsById: { [key: string]: string },
   lastContactId = 0
-) => {
-  const { rows } = await r.reader.raw(
+): Promise<ContactsChunk | false> => {
+  const { rows }: { rows: ContactExportRow[] } = await r.reader.raw(
     `
       with campaign_contacts as (
         select *
@@ -322,11 +336,11 @@ export const processContactsChunk = async (
 
   lastContactId = rows[rows.length - 1].id;
 
-  const rowsByContactId = _.groupBy(rows, (row) => row.id);
-  const contacts = Object.keys(rowsByContactId).map((contactId) => {
+  const rowsByContactId = _.groupBy(rows, row => row.id);
+  const contacts = Object.keys(rowsByContactId).map(contactId => {
     // Use the first row for all the common campaign contact fields
     const contact = rowsByContactId[contactId][0];
-    const contactRow = {
+    const contactRow: { [key: string]: any } = {
       campaignId,
       campaign: campaignTitle,
       "contact[firstName]": contact.first_name,
@@ -342,15 +356,16 @@ export const processContactsChunk = async (
 
     // Append columns for custom fields
     const customFields = JSON.parse(contact.custom_fields);
-    Object.keys(customFields).forEach((fieldName) => {
+    Object.keys(customFields).forEach(fieldName => {
       contactRow[`contact[${fieldName}]`] = customFields[fieldName];
     });
 
     // Append columns for question responses
-    Object.keys(questionsById).forEach((stepId) => {
+    Object.keys(questionsById).forEach(stepId => {
       const questionText = questionsById[stepId];
       const response = rowsByContactId[contactId].find(
-        (response) => parseInt(response.interaction_step_id) == parseInt(stepId)
+        response =>
+          parseInt(`${response.interaction_step_id}`) == parseInt(stepId)
       );
 
       const responseValue = response ? response.value : "";
@@ -365,8 +380,34 @@ export const processContactsChunk = async (
   return { lastContactId, contacts };
 };
 
-export const processMessagesChunk = async (campaignId, lastContactId = 0) => {
-  const { rows } = await r.reader.raw(
+interface MessageExportRow
+  extends Pick<
+      MessageRecord,
+      | "campaign_contact_id"
+      | "assignment_id"
+      | "user_number"
+      | "contact_number"
+      | "is_from_contact"
+      | "text"
+      | "send_status"
+      | "created_at"
+      | "num_segments"
+      | "num_media"
+    >,
+    Pick<UserRecord, "first_name" | "last_name" | "email"> {
+  error_codes: string;
+  user_cell: string;
+}
+
+interface MessagesChunk extends ExportChunk {
+  messages: { [key: string]: any }[];
+}
+
+export const processMessagesChunk = async (
+  campaignId: number,
+  lastContactId = 0
+): Promise<MessagesChunk | false> => {
+  const { rows }: { rows: MessageExportRow[] } = await r.reader.raw(
     `
       select
         message.campaign_contact_id,
@@ -414,7 +455,7 @@ export const processMessagesChunk = async (campaignId, lastContactId = 0) => {
 
   lastContactId = rows[rows.length - 1].campaign_contact_id;
 
-  const messages = rows.map((message) => ({
+  const messages = rows.map(message => ({
     assignmentId: message.assignment_id,
     userNumber: message.user_number,
     contactNumber: message.contact_number,

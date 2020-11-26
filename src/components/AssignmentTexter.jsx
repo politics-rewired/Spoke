@@ -18,7 +18,7 @@ import Empty from "../components/Empty";
 import LoadingIndicator from "../components/LoadingIndicator";
 import { catchError } from "../network/utils";
 
-const SEND_DELAY = 100;
+const SEND_DELAY = window.SEND_DELAY ? parseInt(window.SEND_DELAY, 10) : 100;
 
 const styles = StyleSheet.create({
   container: {

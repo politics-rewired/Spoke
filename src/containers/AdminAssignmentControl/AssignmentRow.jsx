@@ -11,7 +11,7 @@ import ChipInput from "material-ui-chip-input";
 
 import { TextRequestType } from "../../api/organization";
 
-const AssignmentRow = (props) => {
+const AssignmentRow = props => {
   const { assignmentPool, isRowDisabled, onChange, escalationTagList } = props;
   const {
     id,
@@ -32,17 +32,32 @@ const AssignmentRow = (props) => {
   const handleChangeMaxCount = (_event, maxRequestCount) =>
     onChange({ maxRequestCount: parseInt(maxRequestCount, 10) });
 
-  const handleAddEscalationTag = (newTag) => {
+  const handleAddEscalationTag = newTag => {
+    // when a tag is added by search, ChipInput coerces it to an object -
+    // we want to find the tag within escalationTagList that matches
+    // newTag object's title, not add the new object to escalationTags
+    const foundTag = escalationTagList.find(tag => tag.title === newTag.title);
     const newEscalationTags = uniqBy(
-      escalationTags.concat(newTag),
-      (t) => t.id
+      escalationTags.concat(foundTag),
+      t => t.id
     );
     onChange({ escalationTags: newEscalationTags });
   };
 
-  const handleRemoveEscalationTag = (oldTagId) => {
-    const newEscalationTags = escalationTags.filter((t) => t.id !== oldTagId);
+  const handleRemoveEscalationTag = oldTagId => {
+    const newEscalationTags = escalationTags.filter(t => t.id !== oldTagId);
     onChange({ escalationTags: newEscalationTags });
+  };
+
+  const handleCheckEscalationTag = newTag => {
+    // when a tag is added by search, newTag will be a string,
+    // not the tag object within escalationTagList -
+    // here we trim possible whitespace, then verify the tag
+    const formattedTag = newTag.id ? newTag.title : newTag.trim();
+    const tagNames = escalationTagList.map(tag => tag.title);
+    const tagExists = tagNames.includes(formattedTag);
+
+    return tagExists;
   };
 
   return (
@@ -99,6 +114,7 @@ const AssignmentRow = (props) => {
         dataSource={escalationTagList}
         value={escalationTags}
         openOnFocus={true}
+        onBeforeRequestAdd={handleCheckEscalationTag}
         onRequestAdd={handleAddEscalationTag}
         onRequestDelete={handleRemoveEscalationTag}
         dataSourceConfig={{ text: "title", value: "id" }}

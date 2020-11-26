@@ -11,7 +11,7 @@ interface TagRecord {
   text_color: string;
   background_color: string;
   author_id: number | null;
-  confirmation_steps: string[];
+  confirmation_steps: string[][];
   on_apply_script: string;
   webhook_url: string;
   is_assignable: boolean;
