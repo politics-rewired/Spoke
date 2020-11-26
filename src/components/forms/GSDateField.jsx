@@ -8,9 +8,9 @@ export default class GCDateField extends GSFormField {
   render() {
     const {
       value: momentVal,
-      type,
+      type: _type,
       utcOffset,
-      errorText,
+      errorText: _errorText,
       onChange,
       ...childProps
     } = this.props;

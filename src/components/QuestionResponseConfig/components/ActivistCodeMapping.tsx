@@ -30,3 +30,5 @@ export const ActivistCodeMapping: React.SFC<Props> = (props) => {
     />
   );
 };
+
+export default ActivistCodeMapping;

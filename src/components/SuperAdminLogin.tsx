@@ -46,12 +46,12 @@ class SuperAdminLogin extends React.Component<
   handleRequestClose = () => this.setState({ isOpen: false });
 
   handleOnChangeSecret = (
-    _event: React.FormEvent<{}>,
+    _event: React.FormEvent<unknown>,
     superAdminToken: string
   ) => this.setState({ superAdminToken });
 
   handleOnChangeOrgId = (
-    _event: React.FormEvent<{}>,
+    _event: React.FormEvent<unknown>,
     superAdminOrgId: string
   ) => this.setState({ superAdminOrgId });
 
@@ -92,6 +92,7 @@ class SuperAdminLogin extends React.Component<
 
     const actions = [
       <FlatButton
+        key="go"
         label="Go"
         primary
         disabled={isWorking || !hasText}

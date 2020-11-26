@@ -5,7 +5,7 @@ import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import { loadData } from "../../containers/hoc/with-operations";
 import { MESSAGE_STATUSES } from "../IncomingMessageFilter";
@@ -65,7 +65,7 @@ export class IncomingMessageList extends Component {
     const { total = 0 } = this.props.conversations.conversations.pageInfo;
 
     if (prevTotal !== total) {
-      this.props.onConversationCountChanged(pageInfo.total);
+      this.props.onConversationCountChanged(total);
     }
   }
 

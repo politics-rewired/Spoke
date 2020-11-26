@@ -54,12 +54,12 @@ class CampaignAutoassignModeForm extends React.Component<
   };
 
   handleDidToggle = (
-    _event: React.MouseEvent<{}>,
+    _event: React.MouseEvent<unknown>,
     isAutoassignEnabled: boolean
   ) => this.setState({ isAutoassignEnabled });
 
   handleAutoReleaseToggle = (
-    _event: React.MouseEvent<{}>,
+    _event: React.MouseEvent<unknown>,
     isAutoReleaseEnabled: boolean
   ) =>
     this.setState({
@@ -69,11 +69,11 @@ class CampaignAutoassignModeForm extends React.Component<
     });
 
   handleReleaseStaleRepliesAfterChange = (
-    _event: React.FormEvent<{}>,
+    _event: React.FormEvent<unknown>,
     newVal: string
   ) =>
     this.setState({
-      repliesStaleAfter: parseInt(newVal)
+      repliesStaleAfter: parseInt(newVal, 10)
     });
 
   handleDidSubmit = async () => {

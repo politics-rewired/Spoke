@@ -28,6 +28,7 @@ import {
   ExternalSystemType
 } from "../api/external-system";
 import { RelayPaginatedResponse } from "../api/pagination";
+import { MutationMap, QueryMap } from "../network/types";
 import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";
 
@@ -88,7 +89,7 @@ class AdminExternalSystems extends Component<Props, State> {
     this.setState({ syncInitiatedForId: systemId });
   };
 
-  handleDismissSyncSnackbar = (systemId: string) => async () =>
+  handleDismissSyncSnackbar = (_systemId: string) => async () =>
     this.setState({ syncInitiatedForId: undefined });
 
   handleRefreshSystems = () => this.props.data.refetch();
@@ -99,18 +100,20 @@ class AdminExternalSystems extends Component<Props, State> {
   saveExternalSystem = () => {
     const handleError = console.error;
 
-    this.state.editingExternalSystem === "new"
-      ? this.props.mutations
-          .createExternalSystem(this.state.externalSystem)
-          .then(this.cancelEditingExternalSystem)
-          .catch(handleError)
-      : this.props.mutations
-          .editExternalSystem(
-            this.state.editingExternalSystem!,
-            this.state.externalSystem
-          )
-          .then(this.cancelEditingExternalSystem)
-          .catch(handleError);
+    if (this.state.editingExternalSystem === "new") {
+      this.props.mutations
+        .createExternalSystem(this.state.externalSystem)
+        .then(this.cancelEditingExternalSystem)
+        .catch(handleError);
+    } else {
+      this.props.mutations
+        .editExternalSystem(
+          this.state.editingExternalSystem!,
+          this.state.externalSystem
+        )
+        .then(this.cancelEditingExternalSystem)
+        .catch(handleError);
+    }
   };
 
   editExternalSystemProp = (prop: keyof ExternalSystemInput) => (
@@ -204,10 +207,12 @@ class AdminExternalSystems extends Component<Props, State> {
           onRequestClose={this.cancelEditingExternalSystem}
           actions={[
             <FlatButton
+              key="cancel"
               label="Cancel"
               onClick={this.cancelEditingExternalSystem}
             />,
             <FlatButton
+              key="save"
               label="Save"
               primary
               onClick={this.saveExternalSystem}
@@ -264,7 +269,7 @@ class AdminExternalSystems extends Component<Props, State> {
   }
 }
 
-const queries = {
+const queries: QueryMap<Props> = {
   data: {
     query: gql`
       query getExternalSystems($organizationId: String!) {
@@ -282,7 +287,7 @@ const queries = {
         }
       }
     `,
-    options: (ownProps: Props) => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -290,8 +295,8 @@ const queries = {
   }
 };
 
-const mutations = {
-  createExternalSystem: (ownProps: Props) => (
+const mutations: MutationMap<Props> = {
+  createExternalSystem: (ownProps) => (
     externalSystem: ExternalSystemInput
   ) => ({
     mutation: gql`
@@ -319,7 +324,7 @@ const mutations = {
     },
     refetchQueries: ["getExternalSystems"]
   }),
-  editExternalSystem: (ownProps: Props) => (
+  editExternalSystem: (_ownProps) => (
     id: string,
     externalSystem: ExternalSystemInput
   ) => ({
@@ -342,7 +347,7 @@ const mutations = {
       externalSystem
     }
   }),
-  refreshSystem: (ownProps: Props) => (externalSystemId: string) => ({
+  refreshSystem: (_ownProps) => (externalSystemId: string) => ({
     mutation: gql`
       mutation refreshExternalSystem($externalSystemId: String!) {
         refreshExternalSystem(externalSystemId: $externalSystemId)

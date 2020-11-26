@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file,react/no-unused-state */
 import gql from "graphql-tag";
 import DataTable from "material-ui-datatables";
 import CircularProgress from "material-ui/CircularProgress";
@@ -25,6 +26,7 @@ class CampaignOverlapManager extends React.Component {
   };
 
   deleteCampaigns = async (campaignId) => {
+    const { errored } = this.state;
     try {
       const newDeleting = new Set();
 

@@ -54,13 +54,13 @@ class VanExportModal extends React.Component<InnerProps, State> {
   };
 
   handleOnChangeVanIdField = (
-    event: React.SyntheticEvent<{}>,
+    event: React.SyntheticEvent<unknown>,
     index: number,
     vanIdField: string
   ) => this.setState({ vanIdField });
 
   handleOnToggleIncludeUnmessages = (
-    event: React.MouseEvent<{}>,
+    event: React.MouseEvent<unknown>,
     includeUnmessaged: boolean
   ) => this.setState({ includeUnmessaged });
 
@@ -74,8 +74,17 @@ class VanExportModal extends React.Component<InnerProps, State> {
     const selections = ["external_id"].concat(customFields);
 
     const actions = [
-      <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
-      <FlatButton label="Export" primary onClick={this.handleOnConfirm} />
+      <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.props.onRequestClose}
+      />,
+      <FlatButton
+        key="export"
+        label="Export"
+        primary
+        onClick={this.handleOnConfirm}
+      />
     ];
 
     return (
@@ -90,6 +99,7 @@ class VanExportModal extends React.Component<InnerProps, State> {
         <a
           href="https://docs.spokerewired.com/article/97-export-for-upload-to-van"
           target="_blank"
+          rel="noopener noreferrer"
         >
           Export for Upload to VAN
         </a>

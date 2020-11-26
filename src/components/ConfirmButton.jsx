@@ -32,8 +32,13 @@ export default class ConfirmButton extends Component {
 
   render() {
     const actions = [
-      <FlatButton label="No" primary onClick={this.toggleConfirmationDialog} />,
-      <FlatButton label="Yes" primary onClick={this.handleConfirm} />
+      <FlatButton
+        key="no"
+        label="No"
+        primary
+        onClick={this.toggleConfirmationDialog}
+      />,
+      <FlatButton key="yes" label="Yes" primary onClick={this.handleConfirm} />
     ];
 
     return (
@@ -56,6 +61,6 @@ export default class ConfirmButton extends Component {
 }
 
 ConfirmButton.propTypes = {
-  onConfirm: PropTypes.function,
+  onConfirm: PropTypes.func,
   label: PropTypes.string
 };

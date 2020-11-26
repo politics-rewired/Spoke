@@ -55,7 +55,7 @@ class ContactsSqlForm extends React.Component<
     sqlError: undefined
   };
 
-  handleSqlTextChange = (_ev: React.FormEvent<{}>, pendingSql: string) => {
+  handleSqlTextChange = (_ev: React.FormEvent<unknown>, pendingSql: string) => {
     this.setState({ pendingSql });
     const errors = validateSql(pendingSql);
 

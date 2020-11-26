@@ -7,7 +7,6 @@ import type from "prop-types";
 import React, { Component } from "react";
 import Select, { createFilter } from "react-select";
 
-import { getHighestRole } from "../lib/permissions";
 import theme from "../styles/theme";
 
 const styles = StyleSheet.create({
@@ -43,11 +42,11 @@ const MenuList = (props) => {
   return (
     <div>
       {children.length &&
-        children.slice(0, 5).map((key, i) => {
+        children.slice(0, 5).map((key) => {
           delete key.props.innerProps.onMouseMove; // FIX LAG!!
           delete key.props.innerProps.onMouseOver; // FIX LAG!!
 
-          return <div key={i}>{key}</div>;
+          return <div key={key}>{key}</div>;
         })}
     </div>
   );
@@ -106,11 +105,13 @@ class IncomingMessageActions extends Component {
 
     const confirmDialogActions = (actionVerb, confirmAction) => [
       <FlatButton
+        key="cancel"
         label="Cancel"
         primary
         onClick={this.handleConfirmDialogCancel}
       />,
       <FlatButton
+        key="verb"
         label={actionVerb || "Reassign"}
         primary
         onClick={confirmAction}
@@ -163,7 +164,7 @@ class IncomingMessageActions extends Component {
                     "Reassign",
                     this.handleConfirmDialogReassign
                   )}
-                  open={this.state.confirmDialogOpen == "reassign"}
+                  open={this.state.confirmDialogOpen === "reassign"}
                   modal
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
@@ -192,7 +193,7 @@ class IncomingMessageActions extends Component {
                     "Unassign",
                     this.handleConfirmDialogUnassign
                   )}
-                  open={this.state.confirmDialogOpen == "unassign"}
+                  open={this.state.confirmDialogOpen === "unassign"}
                   modal
                   onRequestClose={this.handleConfirmDialogCancel}
                 >

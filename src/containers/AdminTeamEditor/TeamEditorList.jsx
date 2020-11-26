@@ -12,7 +12,7 @@ import {
 } from "material-ui/Table";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 const ACTIONS_COLUMN_INDEX = 3;
 

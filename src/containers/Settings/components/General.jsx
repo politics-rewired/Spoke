@@ -61,7 +61,6 @@ class Settings extends React.Component {
     textingHoursDialogOpen: false,
     hasNumbersApiKeyChanged: false,
     numbersApiKey: undefined,
-    trollbotWebhookUrl: undefined,
     approvalLevel: undefined,
     isWorking: false,
     error: undefined
@@ -112,7 +111,7 @@ class Settings extends React.Component {
     }
   };
 
-  handleEditNumbersApiKey = async (payload) => {
+  handleEditNumbersApiKey = async (_payload) => {
     let { numbersApiKey } = this.state;
     numbersApiKey = numbersApiKey !== "" ? numbersApiKey : null;
     const input = { numbersApiKey };
@@ -228,7 +227,12 @@ class Settings extends React.Component {
     const noApprovalChange = approvalLevel === defaulTexterApprovalStatus;
 
     const errorActions = [
-      <FlatButton label="OK" primary onClick={this.handleDismissError} />
+      <FlatButton
+        key="ok"
+        label="OK"
+        primary
+        onClick={this.handleDismissError}
+      />
     ];
 
     return (
@@ -293,10 +297,8 @@ class Settings extends React.Component {
             <Toggle
               toggled={organization.textingHoursEnforced}
               label="Enforce texting hours?"
-              onToggle={async (event, isToggled) =>
-                await this.props.mutations.updateTextingHoursEnforcement(
-                  isToggled
-                )
+              onToggle={(event, isToggled) =>
+                this.props.mutations.updateTextingHoursEnforcement(isToggled)
               }
             />
 
@@ -427,7 +429,6 @@ class Settings extends React.Component {
 
 Settings.propTypes = {
   data: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
   mutations: PropTypes.object.isRequired
 };
 

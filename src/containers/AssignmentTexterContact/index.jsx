@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
 import sortBy from "lodash/sortBy";
@@ -15,7 +16,7 @@ import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import md5 from "md5";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 import * as yup from "yup";
 
 import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
@@ -104,6 +105,18 @@ const inlineStyles = {
 };
 
 export class AssignmentTexterContact extends React.Component {
+  optOutSchema = yup.object({
+    optOutMessageText: yup.string()
+  });
+
+  messageSchema = yup.object({
+    messageText: yup
+      .string()
+      .trim()
+      .required("Can't send empty message")
+      .max(window.MAX_MESSAGE_LENGTH)
+  });
+
   constructor(props) {
     super(props);
 
@@ -180,14 +193,15 @@ export class AssignmentTexterContact extends React.Component {
     document.body.addEventListener("keyup", this.onEnterUp);
   }
 
-  componentWillUnmount() {
-    document.body.removeEventListener("keyup", this.onEnterUp);
-  }
-
   componentWillReceiveProps(nextProps) {
     if (this.props.errors.length !== nextProps.length) {
+      // eslint-disable-next-line react/no-direct-mutation-state
       this.state.disabled = false;
     }
+  }
+
+  componentWillUnmount() {
+    document.body.removeEventListener("keyup", this.onEnterUp);
   }
 
   // Handle submission on <enter> *up* to prevent holding enter
@@ -466,8 +480,8 @@ export class AssignmentTexterContact extends React.Component {
   tagContact = (addedTags, removedTags) => {
     const { contact } = this.props;
     const tag = {
-      addedTagIds: addedTags.map((tag) => tag.id),
-      removedTagIds: removedTags.map((tag) => tag.id)
+      addedTagIds: addedTags.map(({ id }) => id),
+      removedTagIds: removedTags.map(({ id }) => id)
     };
 
     this.props.addTagToContact(contact.id, tag);
@@ -516,10 +530,6 @@ export class AssignmentTexterContact extends React.Component {
     }
   };
 
-  optOutSchema = yup.object({
-    optOutMessageText: yup.string()
-  });
-
   skipContact = () => {
     this.props.onFinishContact();
   };
@@ -528,14 +538,6 @@ export class AssignmentTexterContact extends React.Component {
     await this.props.mutations.bulkSendMessages(assignmentId);
     this.props.refreshData();
   };
-
-  messageSchema = yup.object({
-    messageText: yup
-      .string()
-      .trim()
-      .required("Can't send empty message")
-      .max(window.MAX_MESSAGE_LENGTH)
-  });
 
   handleMessageFormChange = ({ messageText }) => {
     const { messageStatus } = this.props.contact;
@@ -805,8 +807,8 @@ export class AssignmentTexterContact extends React.Component {
             submitTitle={
               this.state.optOutMessageText ? "Send" : "Opt Out without Text"
             }
-            onChange={({ messageText }) =>
-              this.setState({ optOutMessageText: messageText })
+            onChange={({ messageText: optOutMessageText }) =>
+              this.setState({ optOutMessageText })
             }
             onSubmit={this.handleOptOut}
             handleCloseDialog={this.handleCloseDialog}
@@ -820,11 +822,6 @@ export class AssignmentTexterContact extends React.Component {
   render() {
     const { disabled } = this.state;
     const { campaign, contact, contactSettings, onExitTexter } = this.props;
-
-    const backgroundColor =
-      contact.messageStatus === "needsResponse"
-        ? "rgba(83, 180, 119, 0.25)"
-        : "";
 
     return (
       <div className={css(styles.fullSize)}>

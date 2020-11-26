@@ -54,7 +54,7 @@ class MessageList extends Component {
 
     return (
       <div ref="messageWindow" style={messageContainerStyle}>
-        {this.props.messages.map((message, index) => {
+        {this.props.messages.map((message) => {
           const { isFromContact } = message;
           const containerStyle = {
             marginLeft: isFromContact ? undefined : "60px",
@@ -77,14 +77,14 @@ class MessageList extends Component {
           const senderName = sender ? sender.displayName : "Unknown";
 
           return (
-            <div key={index} style={containerStyle}>
+            <div key={message.id} style={containerStyle}>
               <p className={css(styles.conversationRow)} style={messageStyle}>
                 {message.text}
               </p>
               <p style={senderInfoStyle}>
                 {message.isFromContact
                   ? `Received at ${moment(message.createdAt).fromNow()}`
-                  : message.sendStatus == "ERROR"
+                  : message.sendStatus === "ERROR"
                   ? `Carrier rejected this message sent by ${senderName} at ${moment(
                       message.createdAt
                     ).fromNow()}`

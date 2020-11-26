@@ -236,6 +236,10 @@ const getMessageStatus = (assembleNumbersStatus: NumbersSendStatus) => {
     case NumbersSendStatus.DeliveryFailed:
     case NumbersSendStatus.DeliveryUnconfirmed:
       return SpokeSendStatus.Error;
+    default:
+      throw new Error(
+        `Unexpected assemble numbers status ${assembleNumbersStatus}`
+      );
   }
 };
 
@@ -273,7 +277,7 @@ export const processDeliveryReport = async (
 
     // Update segment counts
     if (extra) {
-      const payload = {};
+      const payload: Record<string, unknown> = {};
 
       if (extra.num_segments && extra.num_media) {
         payload.num_segments = extra.num_segments;

@@ -123,12 +123,17 @@ class AdminBulkScriptEditor extends Component {
     const isSubmitDisabled = isSubmitting || !searchString;
 
     const flaggedCharacterActions = [
-      <FlatButton label="Cancel" onClick={this.handleClose} />,
-      <FlatButton label="Confirm" primary onClick={this.handleConfirmSubmit} />
+      <FlatButton key="cancel" label="Cancel" onClick={this.handleClose} />,
+      <FlatButton
+        key="confirm"
+        label="Confirm"
+        primary
+        onClick={this.handleConfirmSubmit}
+      />
     ];
 
     const dialogActions = [
-      <FlatButton label="OK" primary onClick={this.handleClose} />
+      <FlatButton key="ok" label="OK" primary onClick={this.handleClose} />
     ];
 
     return (
@@ -234,14 +239,13 @@ class AdminBulkScriptEditor extends Component {
             onRequestClose={this.handleClose}
           >
             <ul>
-              {this.state.result.map((replacedText, index) => (
-                <li key={index}>
-                  Campaign ID: {replacedText.campaignId}
+              {this.state.result.map(({ campaignId, found, replaced }) => (
+                <li key={`${campaignId}|${found}|${replaced}`}>
+                  Campaign ID: {campaignId}
                   <br />
-                  Found: <span style={styles.code}>{replacedText.found}</span>
+                  Found: <span style={styles.code}>{found}</span>
                   <br />
-                  Replaced with:{" "}
-                  <span style={styles.code}>{replacedText.replaced}</span>
+                  Replaced with: <span style={styles.code}>{replaced}</span>
                 </li>
               ))}
             </ul>

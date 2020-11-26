@@ -153,7 +153,7 @@ class CampaignBasicsForm extends React.Component<
           hintText="https://www.mysite.com/images/logo.png"
           fullWidth
         />
-        <label>Primary color</label>
+        <p>Primary color</p>
         <Form.Field
           name="primaryColor"
           label="Primary color"

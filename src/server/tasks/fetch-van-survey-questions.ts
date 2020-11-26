@@ -2,7 +2,6 @@ import { Task } from "pg-compose";
 import { get } from "superagent";
 
 import {
-  PaginatedVanResponse,
   VanAuthPayload,
   VANDataCollectionStatus,
   withVan

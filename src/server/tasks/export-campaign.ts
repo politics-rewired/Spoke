@@ -66,7 +66,8 @@ export const getUniqueQuestionsByStepId = (
 
 /**
  * Fetch necessary job data from database.
- * @param {object} job The export job object to fetch data for. Must have payload, campaign_id, and requester properties.
+ * @param {object} job The export job object to fetch data for.
+ *                     Must have payload, campaign_id, and requester properties.
  */
 export const fetchExportData = async (job: JobRequestRecord) => {
   const { campaign_id: campaignId, payload: rawPayload } = job;

@@ -75,7 +75,7 @@ const AuthenticatedRoute = ({ component: Component, ...rest }) => (
   />
 );
 
-const AdminCampaignRoutes = (props) => {
+const AdminCampaignRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignPath = "/admin/:organizationId/campaigns/:campaignId";
   return (
@@ -91,7 +91,7 @@ const AdminCampaignRoutes = (props) => {
   );
 };
 
-const AdminCampaignListRoutes = (props) => {
+const AdminCampaignListRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignsPath = "/admin/:organizationId/campaigns";
   return (
@@ -106,7 +106,7 @@ const AdminCampaignListRoutes = (props) => {
   );
 };
 
-const AdminTeamRoutes = (props) => {
+const AdminTeamRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const teamsPath = "/admin/:organizationId/teams";
   return (
@@ -230,7 +230,7 @@ const TexterDashboardRoute = (props) => {
   );
 };
 
-const TexterAssignmentRoutes = (props) => {
+const TexterAssignmentRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const assignmentPath = "/app/:organizationId/todos/:assignmentId";
   return (
@@ -274,7 +274,7 @@ const TexterAssignmentRoutes = (props) => {
   );
 };
 
-const TexterTodoRoutes = (props) => {
+const TexterTodoRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const todosPath = "/app/:organizationId/todos";
   return (

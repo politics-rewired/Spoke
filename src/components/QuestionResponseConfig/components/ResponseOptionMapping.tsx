@@ -41,3 +41,5 @@ export const ResponseOptionMapping: React.SFC<Props> = (props) => {
     />
   );
 };
+
+export default ResponseOptionMapping;

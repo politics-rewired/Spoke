@@ -5,8 +5,8 @@ interface IOrganizationMembership {
   user_id: number;
   organization_id: number;
   request_status: string;
-  user?: {};
-  organization?: {};
+  user?: Record<string, unknown>;
+  organization?: Record<string, unknown>;
 }
 
 export const resolvers = {
@@ -27,3 +27,5 @@ export const resolvers = {
       membership.request_status.toUpperCase()
   }
 };
+
+export default resolvers;

@@ -9,7 +9,7 @@ import Subheader from "material-ui/Subheader";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import { dataTest } from "../lib/attributes";
 import { hasRole } from "../lib/permissions";
@@ -107,7 +107,7 @@ class UserMenu extends Component {
     }
   };
 
-  renderAvatar(user, size) {
+  renderAvatar = (user, size) => {
     // Material-UI seems to not be handling this correctly when doing serverside rendering
     const inlineStyles = {
       lineHeight: "1.25",
@@ -120,7 +120,7 @@ class UserMenu extends Component {
         {user.displayName.charAt(0)}
       </Avatar>
     );
-  }
+  };
 
   render() {
     const { orgId, data } = this.props;

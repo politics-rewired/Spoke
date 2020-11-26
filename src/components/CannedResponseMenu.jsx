@@ -13,13 +13,6 @@ const styles = {
 };
 
 class CannedResponseMenu extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      popoverOpen: false
-    };
-  }
-
   handleSelectCannedResponse = (cannedResponse) => {
     const { onSelectCannedResponse, onRequestClose } = this.props;
     onSelectCannedResponse(cannedResponse.text);
@@ -45,7 +38,6 @@ class CannedResponseMenu extends React.Component {
 
   render() {
     const {
-      userCannedResponses,
       campaignCannedResponses,
       open,
       onRequestClose,
@@ -55,13 +47,13 @@ class CannedResponseMenu extends React.Component {
     return (
       <div>
         <Popover
-          style={styles.popover}
           open={open}
           anchorEl={anchorEl}
           anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
           targetOrigin={{ horizontal: "left", vertical: "bottom" }}
           onRequestClose={onRequestClose}
           style={{
+            ...styles.popover,
             overflowY: "scroll",
             width: "75%"
           }}

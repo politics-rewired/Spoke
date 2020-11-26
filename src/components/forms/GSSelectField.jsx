@@ -14,13 +14,14 @@ export default class GSSelectField extends GSFormField {
   render() {
     return (
       <SelectField
-        children={this.createMenuItems()}
         floatingLabelText={this.props.label}
         {...this.props}
         onChange={(event, index, value) => {
           this.props.onChange(value);
         }}
-      />
+      >
+        {this.createMenuItems()}
+      </SelectField>
     );
   }
 }

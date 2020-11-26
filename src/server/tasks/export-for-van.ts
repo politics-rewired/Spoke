@@ -1,4 +1,3 @@
-import Knex from "knex";
 import sortBy from "lodash/sortBy";
 import moment from "moment";
 import Papa from "papaparse";
@@ -52,7 +51,7 @@ export const exportForVan: Task = async (
       : `(cc.custom_fields::json)->>'${vanIdField}'`;
 
   const fetchChunk = async (lastContactId: number) => {
-    const { rows } = await reader.raw<{ rows: VanExportRow[] }>(
+    const { rows }: { rows: VanExportRow[] } = await reader.raw(
       `
         with campaign_contact_ids as (
           select
@@ -110,7 +109,7 @@ export const exportForVan: Task = async (
     const rows = await fetchChunk(lastContactId);
     exportRows = exportRows.concat(
       sortBy(
-        rows.map(({ campaign_contact_id, ...rest }) => rest),
+        rows.map(({ campaign_contact_id: _id, ...rest }) => rest),
         ["cell"]
       )
     );

@@ -8,11 +8,16 @@ import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import { loadData } from "./hoc/with-operations";
 
 class Terms extends React.Component {
+  state = {
+    finished: false,
+    stepIndex: 0
+  };
+
   handleTermsAgree = async () => {
     const { data, history, mutations, location } = this.props;
     const userData = await mutations.userAgreeTerms(data.currentUser.id);
@@ -20,11 +25,6 @@ class Terms extends React.Component {
       const { next } = queryString.parse(location.search);
       history.push(next);
     }
-  };
-
-  state = {
-    finished: false,
-    stepIndex: 0
   };
 
   handleNext = () => {
@@ -171,7 +171,7 @@ const queries = {
 };
 
 const mutations = {
-  userAgreeTerms: (ownProps) => (userId) => ({
+  userAgreeTerms: (_ownProps) => (userId) => ({
     mutation: gql`
       mutation userAgreeTerms($userId: String!) {
         userAgreeTerms(userId: $userId) {

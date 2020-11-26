@@ -41,7 +41,7 @@ import { ResponseOptionMapping } from "./components/ResponseOptionMapping";
 import { ResultCodeMapping } from "./components/ResultCodeMapping";
 
 interface HocProps {
-  data: {};
+  data: Record<string, unknown>;
   mutations: {
     deleteTarget(targetId: string): ApolloQueryResult<string>;
   };
@@ -234,10 +234,12 @@ const mutations: MutationMap<InnerProps> = {
       );
 
       const configId = ownProps.config.id;
-      const { edges } = data.campaign.externalSyncConfigurations;
+      const {
+        edges
+      }: { edges: any[] } = data.campaign.externalSyncConfigurations;
       const index = edges.findIndex(({ node }) => node.id === configId);
       edges[index].node.targets = edges[index].node.targets.filter(
-        (target) => target.id !== targetId
+        (target: { id: string }) => target.id !== targetId
       );
 
       store.writeQuery({

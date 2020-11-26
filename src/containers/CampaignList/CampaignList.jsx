@@ -12,7 +12,7 @@ import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import Empty from "../../components/Empty";
 import { dataTest } from "../../lib/attributes";

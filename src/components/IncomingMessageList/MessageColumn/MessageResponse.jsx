@@ -17,7 +17,7 @@ class MessageResponse extends Component {
     sendError: ""
   };
 
-  createMessageToContact(text) {
+  createMessageToContact = (text) => {
     const { contact, texter } = this.props.conversation;
 
     return {
@@ -26,7 +26,7 @@ class MessageResponse extends Component {
       userId: texter.id,
       text
     };
-  }
+  };
 
   handleMessageFormChange = ({ messageText }) => this.setState({ messageText });
 
@@ -70,7 +70,12 @@ class MessageResponse extends Component {
     const isSendDisabled = isSending || messageText.trim() === "";
 
     const errorActions = [
-      <FlatButton label="OK" primary onClick={this.handleCloseErrorDialog} />
+      <FlatButton
+        key="ok"
+        label="OK"
+        primary
+        onClick={this.handleCloseErrorDialog}
+      />
     ];
 
     return (
@@ -122,7 +127,7 @@ MessageResponse.propTypes = {
 };
 
 const mutations = {
-  sendMessage: (ownProps) => (message, campaignContactId) => ({
+  sendMessage: () => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!

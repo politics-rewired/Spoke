@@ -31,8 +31,14 @@ class AddDomainDialog extends Component {
     const isSubmitDisabled = !isDomainValid || !isMaxUsageCountValid;
 
     const actions = [
-      <FlatButton label="Close" primary={false} onClick={onRequestClose} />,
+      <FlatButton
+        key="close"
+        label="Close"
+        primary={false}
+        onClick={onRequestClose}
+      />,
       <RaisedButton
+        key="add"
         label="Add"
         primary
         disabled={isSubmitDisabled}

@@ -1,7 +1,6 @@
 import CircularProgress from "material-ui/CircularProgress";
 import FlatButton from "material-ui/FlatButton";
 import IconButton from "material-ui/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
 import { green300, red500 } from "material-ui/styles/colors";
 import AssignmentTurnedInIcon from "material-ui/svg-icons/action/assignment-turned-in";
 import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";

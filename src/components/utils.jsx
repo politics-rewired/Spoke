@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 import { MenuItem } from "material-ui/Menu";
 import React from "react";
 

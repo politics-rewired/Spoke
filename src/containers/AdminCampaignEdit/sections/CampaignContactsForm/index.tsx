@@ -151,7 +151,7 @@ class CampaignContactsForm extends React.Component<
   };
 
   handleOnChangeSource = (
-    _e: React.SyntheticEvent<{}>,
+    _e: React.SyntheticEvent<unknown>,
     _index: number,
     source: any
   ) => {
@@ -229,7 +229,9 @@ class CampaignContactsForm extends React.Component<
       campaigns: { campaigns: allCampaigns }
     } = organizationData.organization;
 
-    const allOtherCampaigns = allCampaigns.filter(({ id }) => id != campaignId);
+    const allOtherCampaigns = allCampaigns.filter(
+      ({ id }) => id !== campaignId
+    );
 
     const isSaveDisabled =
       isWorking || (!isNew && !contactsFile && !contactsSql && !externalListId);
@@ -251,12 +253,14 @@ class CampaignContactsForm extends React.Component<
           fullWidth
           onChange={this.handleOnChangeSource}
         >
-          {sourceOptions.map(({ source, disabledReason }) => (
+          {sourceOptions.map(({ source: contactSource, disabledReason }) => (
             <MenuItem
-              key={source}
-              value={source}
+              key={contactSource}
+              value={contactSource}
               primaryText={
-                disabledReason ? `${source} (${disabledReason})` : source
+                disabledReason
+                  ? `${contactSource} (${disabledReason})`
+                  : contactSource
               }
               disabled={disabledReason !== undefined}
             />

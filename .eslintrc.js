@@ -41,7 +41,7 @@ module.exports = {
     "simple-import-sort/sort": "error",
     "prettier/prettier": ["error", {}, { usePrettierrc: true }],
     "jsx-a11y/href-no-hash": ["off"],
-    "react/jsx-filename-extension": ["warn", { extensions: [".js", ".jsx"] }],
+    "react/jsx-filename-extension": ["warn", { extensions: [".jsx", ".tsx"] }],
     "max-len": [
       "warn",
       {
@@ -101,7 +101,12 @@ module.exports = {
     "@typescript-eslint/explicit-module-boundary-types": ["off"],
     "react/forbid-prop-types": ["off"],
     "jsx-a11y/click-events-have-key-events": ["off"],
-    "jsx-a11y/no-static-element-interactions": ["off"]
+    "jsx-a11y/no-static-element-interactions": ["off"],
+    "import/no-named-as-default": ["off"],
+    "react/require-default-props": ["off"],
+    "react/no-unescaped-entities": ["off"],
+    "jsx-a11y/alt-text": ["off"],
+    "react/no-unused-prop-types": ["off"]
   },
   overrides: [
     {

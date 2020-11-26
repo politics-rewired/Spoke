@@ -7,7 +7,7 @@ import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import IncomingMessageActions from "../../components/IncomingMessageActions";
 import IncomingMessageFilter from "../../components/IncomingMessageFilter";
@@ -407,7 +407,7 @@ export class AdminIncomingMessageList extends Component {
     this.setState({ conversationCount, needsRender: true });
 
   /*
-    Shallow comparison here done intentionally – we want to know if its changed, not if it's different,
+    Shallow comparison here done intentionally – we want to know if its changed, not if it's different,
     since we want to allow the user to make the same query as the default one, but we don't want to
     pre-emptively run the default (and most expensive) one
   */
@@ -438,7 +438,6 @@ export class AdminIncomingMessageList extends Component {
       page,
       pageSize,
       reassignmentAlert,
-      assignmentsFilter,
       tagsFilter
     } = this.state;
     const areContactsSelected =
@@ -546,6 +545,7 @@ export class AdminIncomingMessageList extends Component {
           title={reassignmentAlert && reassignmentAlert.title}
           actions={[
             <FlatButton
+              key="ok"
               label="Ok"
               primary
               onClick={this.closeReassignmentDialog}
@@ -563,7 +563,7 @@ export class AdminIncomingMessageList extends Component {
 }
 
 const mutations = {
-  megaReassignCampaignContacts: (ownProps) => (
+  megaReassignCampaignContacts: (_ownProps) => (
     organizationId,
     campaignIdsContactIds,
     newTexterUserIds
@@ -584,7 +584,10 @@ const mutations = {
     variables: { organizationId, campaignIdsContactIds, newTexterUserIds }
   }),
 
-  markForSecondPass: (ownProps) => (organizationId, campaignIdsContactIds) => ({
+  markForSecondPass: (_ownProps) => (
+    organizationId,
+    campaignIdsContactIds
+  ) => ({
     mutation: gql`
       mutation markForSecondPass(
         $organizationId: String!
@@ -601,7 +604,7 @@ const mutations = {
     variables: { organizationId, campaignIdsContactIds }
   }),
 
-  megaBulkReassignCampaignContacts: (ownProps) => (
+  megaBulkReassignCampaignContacts: (_ownProps) => (
     organizationId,
     campaignsFilter,
     assignmentsFilter,

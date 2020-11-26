@@ -39,8 +39,6 @@ interface SlackPagination<T> {
   next_cursor?: string;
 }
 
-type UserEmailMap = { [key: string]: string };
-
 type FetchAllChannelsOptions = SlackPagination<SlackChannelRecord>;
 
 const fetchAllChannels = async (
@@ -65,7 +63,7 @@ const fetchAllChannels = async (
   );
 
   if (response_metadata.next_cursor) {
-    return await fetchAllChannels({
+    return fetchAllChannels({
       acc: acc.concat(strippedChannels),
       next_cursor: response_metadata.next_cursor
     });
@@ -93,7 +91,7 @@ const fetchChannelMembers = async (
   const strippedMembers = members;
 
   if (response_metadata.next_cursor) {
-    return await fetchChannelMembers({
+    return fetchChannelMembers({
       channelId,
       acc: acc.concat(strippedMembers),
       next_cursor: response_metadata.next_cursor

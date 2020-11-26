@@ -48,23 +48,26 @@ class UserEdit extends React.Component {
 
   handleSave = async (formData) => {
     switch (this.props.authType) {
-      case UserEditMode.Edit:
+      case UserEditMode.Edit: {
         const result = await this.props.mutations.editUser(formData);
         this.setState({ user: result.data.editUser });
         if (this.props.onRequestClose) {
           this.props.onRequestClose();
         }
         break;
+      }
       case UserEditMode.Change:
-        const changeRes = await this.props.mutations.changeUserPassword(
-          formData
-        );
-        if (changeRes.errors) {
-          throw new Error(changeRes.errors.graphQLErrors[0].message);
+        {
+          const changeRes = await this.props.mutations.changeUserPassword(
+            formData
+          );
+          if (changeRes.errors) {
+            throw new Error(changeRes.errors.graphQLErrors[0].message);
+          }
         }
         break;
 
-      default:
+      default: {
         // log in, sign up, or reset
         const allData = {
           nextUrl: this.props.nextUrl || "/",
@@ -89,6 +92,7 @@ class UserEdit extends React.Component {
           throw new Error(`Unknown error:\n\n${body}`);
         }
         break;
+      }
     }
   };
 
@@ -148,6 +152,7 @@ class UserEdit extends React.Component {
           newPassword: yup.string().required(),
           passwordConfirm: passwordConfirm("newPassword")
         });
+      // no default
     }
   };
 

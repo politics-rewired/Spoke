@@ -2,6 +2,7 @@ import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
 import Form from "react-formal";
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { areComponentsEqual } from "react-hot-loader";
 
 import theme from "../../styles/theme";
@@ -16,6 +17,7 @@ const styles = StyleSheet.create({
   }
 });
 export default class GSForm extends React.Component {
+  // eslint-disable-next-line react/static-property-placement
   static propTypes = {
     value: PropTypes.object,
     defaultValue: PropTypes.object,
@@ -30,7 +32,7 @@ export default class GSForm extends React.Component {
     globalErrorMessage: null
   };
 
-  handleFormError(err) {
+  handleFormError = (err) => {
     if (err.message) {
       this.setState({ globalErrorMessage: err.message });
     } else {
@@ -40,7 +42,7 @@ export default class GSForm extends React.Component {
           "Oops! Your form submission did not work. Contact your administrator."
       });
     }
-  }
+  };
 
   submit = () => {
     this.refs.form.submit();

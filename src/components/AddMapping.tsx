@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
@@ -75,7 +76,7 @@ class AddMapping extends React.Component<InnerProps, State> {
   };
 
   handleOnChangeMappingType = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     type: MappingType
   ) =>
@@ -88,25 +89,25 @@ class AddMapping extends React.Component<InnerProps, State> {
     });
 
   handleOnChangeSurveyQuestion = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     surveyQuestionId: string
   ) => this.setState({ surveyQuestionId, responseOptionId: null });
 
   handleOnChangeResponseOption = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     responseOptionId: string
   ) => this.setState({ responseOptionId });
 
   handleOnChangeActivistCode = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     activistCodeId: string
   ) => this.setState({ activistCodeId });
 
   handleOnChangeResultCode = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     resultCodeId: string
   ) => this.setState({ resultCodeId });
@@ -142,9 +143,9 @@ class AddMapping extends React.Component<InnerProps, State> {
     if (!this.props.config || type === null) return undefined;
 
     const base = {
-      responseOptionId: null,
-      activistCodeId: null,
-      resultCodeId: null
+      responseOptionId: undefined,
+      activistCodeId: undefined,
+      resultCodeId: undefined
     };
     if (type === MappingType.ResponseOption && responseOptionId !== null) {
       return { ...base, responseOptionId };
@@ -191,8 +192,13 @@ class AddMapping extends React.Component<InnerProps, State> {
       !(resultCodeExists || !isRootAnswer);
 
     const actions = [
-      <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
       <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.props.onRequestClose}
+      />,
+      <FlatButton
+        key="add"
         label="Add"
         primary
         disabled={validTarget === undefined || !canMakeChanges}
@@ -397,7 +403,9 @@ const mutations: MutationMap<InnerProps> = {
       );
 
       const configId = ownProps.config?.id;
-      const { edges } = data.campaign.externalSyncConfigurations;
+      const {
+        edges
+      }: { edges: any[] } = data.campaign.externalSyncConfigurations;
       const index = edges.findIndex(({ node }) => node.id === configId);
       edges[index].node.targets.push(newTarget);
 

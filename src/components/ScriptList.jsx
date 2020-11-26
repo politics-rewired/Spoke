@@ -125,11 +125,16 @@ class ScriptList extends React.Component {
             style={styles.dialog}
             open={dialogOpen}
             actions={[
-              <FlatButton label="Cancel" onTouchTap={this.handleCloseDialog} />,
+              <FlatButton
+                key="cancel"
+                label="Cancel"
+                onTouchTap={this.handleCloseDialog}
+              />,
               <Form.Button
-                type="submit"
-                component={GSSubmitButton}
+                key="save"
                 label="Save"
+                component={GSSubmitButton}
+                type="submit"
               />
             ]}
             onRequestClose={this.handleCloseDialog}
@@ -159,7 +164,7 @@ ScriptList.propTypes = {
 };
 
 const mutations = {
-  createCannedResponse: (ownProps) => (cannedResponse) => ({
+  createCannedResponse: () => (cannedResponse) => ({
     mutation: gql`
       mutation createCannedResponse($cannedResponse: CannedResponseInput!) {
         createCannedResponse(cannedResponse: $cannedResponse) {

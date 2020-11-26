@@ -141,7 +141,7 @@ export const resolvers = {
         .first(),
     targets: async (
       qrConfig: ExternalSyncQuestionResponseConfig,
-      { after, first }: { after: string; first: number }
+      { after: _after, first: _first }: { after: string; first: number }
     ) => {
       if (qrConfig.is_missing) return null;
 

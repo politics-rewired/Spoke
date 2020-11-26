@@ -21,6 +21,7 @@ class ManageTags extends Component {
     const { tags: oldTags } = this.props.contactTags.contact;
     const { tags: newTags } = nextProps.contactTags.contact;
     if (!isEqual(oldTags, newTags)) {
+      // eslint-disable-next-line react/no-direct-mutation-state
       this.state.selectedTags = [...newTags];
     }
   }
@@ -68,16 +69,22 @@ class ManageTags extends Component {
 
     const actions = [
       <RaisedButton
+        key="save"
         label="Save"
         primary
         disabled={isWorking}
         onClick={this.handleSaveTags}
       />,
-      <FlatButton label="Cancel" onClick={this.handleCloseTagManager} />
+      <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.handleCloseTagManager}
+      />
     ];
 
     const errorActions = [
       <RaisedButton
+        key="ok"
         label="OK"
         primary
         disabled={isWorking}

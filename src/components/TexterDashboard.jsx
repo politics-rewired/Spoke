@@ -1,7 +1,7 @@
 import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import theme from "../styles/theme";
 
@@ -17,30 +17,28 @@ const styles = StyleSheet.create({
   }
 });
 
-class TexterDashboard extends React.Component {
-  render() {
-    const {
-      main: MainComponent,
-      topNav: TopNavComponent,
-      fullScreen: FullScreenComponent,
-      ...rest
-    } = this.props;
+const TexterDashboard = (props) => {
+  const {
+    main: MainComponent,
+    topNav: TopNavComponent,
+    fullScreen: FullScreenComponent,
+    ...rest
+  } = props;
 
-    if (FullScreenComponent) {
-      return <FullScreenComponent {...rest} />;
-    }
-    return (
-      <div>
-        {TopNavComponent && <TopNavComponent {...rest} />}
-        <div className={css(styles.container)}>
-          <div className={css(styles.content)}>
-            <MainComponent {...rest} />
-          </div>
+  if (FullScreenComponent) {
+    return <FullScreenComponent {...rest} />;
+  }
+  return (
+    <div>
+      {TopNavComponent && <TopNavComponent {...rest} />}
+      <div className={css(styles.container)}>
+        <div className={css(styles.content)}>
+          <MainComponent {...rest} />
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 TexterDashboard.propTypes = {
   history: PropTypes.object.isRequired,

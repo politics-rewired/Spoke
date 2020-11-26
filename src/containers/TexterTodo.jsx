@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import AssignmentTexter from "../components/AssignmentTexter";
 import { loadData } from "./hoc/with-operations";
@@ -75,7 +75,7 @@ class TexterTodo extends React.Component {
   };
 
   loadContacts = async (contactIds) =>
-    await this.props.mutations.getAssignmentContacts(contactIds);
+    this.props.mutations.getAssignmentContacts(contactIds);
 
   refreshData = () => {
     this.props.data.refetch();
@@ -103,8 +103,6 @@ class TexterTodo extends React.Component {
 }
 
 TexterTodo.propTypes = {
-  contactsFilter: PropTypes.string,
-  messageStatus: PropTypes.string,
   match: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   data: PropTypes.object,
@@ -205,7 +203,10 @@ const queries = {
 };
 
 const mutations = {
-  findNewCampaignContact: (ownProps) => (assignmentId, numberContacts = 1) => ({
+  findNewCampaignContact: (_ownProps) => (
+    assignmentId,
+    numberContacts = 1
+  ) => ({
     mutation: gql`
       mutation findNewCampaignContact(
         $assignmentId: String!

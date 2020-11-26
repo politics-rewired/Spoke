@@ -25,3 +25,5 @@ export const ResultCodeMapping: React.SFC<Props> = (props) => {
     />
   );
 };
+
+export default ResultCodeMapping;

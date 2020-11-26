@@ -59,7 +59,7 @@ class ShortLinkDomainList extends Component {
       key: "isHealthy",
       label: "Health",
       tooltip: "Health of the domain based on text delivery report summaries.",
-      render: (value, row) => {
+      render: (value) => {
         return value ? (
           <ThumbUpIcon color={green500} />
         ) : (
@@ -71,12 +71,12 @@ class ShortLinkDomainList extends Component {
       key: "cycledOutAt",
       label: "Last Cycled Out",
       tooltip: "The last time this domain was cycled out of rotation.",
-      render: (value, row) => moment(value).fromNow()
+      render: (value) => moment(value).fromNow()
     },
     {
       key: "createdAt",
       label: "Created",
-      render: (value, row) => new Date(value).toLocaleString()
+      render: (value) => new Date(value).toLocaleString()
     },
     {
       label: "",
@@ -113,7 +113,8 @@ class ShortLinkDomainList extends Component {
   };
 
   render() {
-    let { domains, disabledDomainIds } = this.props;
+    const { disabledDomainIds } = this.props;
+    let { domains } = this.props;
     domains = domains.map((domain) => {
       const isRowDisabled = disabledDomainIds.indexOf(domain.id) > -1;
       return { ...domain, isRowDisabled };

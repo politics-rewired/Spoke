@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 import { ScriptWarningContext } from "../ScriptLinkWarningDialog";
 import { GENERIC_DOMAINS, SHORTLINK_DOMAINS } from "./lib";
 

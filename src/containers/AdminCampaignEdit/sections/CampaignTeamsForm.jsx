@@ -35,12 +35,12 @@ class CampaignTeamsForm extends React.Component {
 
   // Prevent user-defined teams
   handleBeforeRequestAdd = ({ id: tagId, title }) =>
-    !isNaN(tagId) && tagId !== title;
+    !Math.isNaN(tagId) && tagId !== title;
 
   handleAddTeam = ({ id: teamId }) => {
     const { orgTeams } = this.props;
 
-    const team = orgTeams.find((team) => team.id === teamId);
+    const team = orgTeams.find((orgTeam) => orgTeam.id === teamId);
 
     this.addTeam(team);
   };

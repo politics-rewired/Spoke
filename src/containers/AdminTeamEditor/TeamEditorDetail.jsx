@@ -91,7 +91,7 @@ class TeamEditorDetail extends React.Component {
     const nonMembers = people.filter(({ id }) => !teamMemberIds.has(id));
 
     const errorActions = [
-      <RaisedButton label="OK" onClick={this.handleCloseErrorDialog} />
+      <RaisedButton key="ok" label="OK" onClick={this.handleCloseErrorDialog} />
     ];
 
     return (

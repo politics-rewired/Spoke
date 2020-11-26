@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import gql from "graphql-tag";
 import DataTable from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
@@ -40,8 +41,8 @@ export const TrollAlarmList = (props) => {
     props.onAlarmSelectionChange(newSelection);
   };
 
-  const handleRowSizeChange = (_index, pageSize) =>
-    props.onPageSizeChange(pageSize);
+  const handleRowSizeChange = (_index, newPageSize) =>
+    props.onPageSizeChange(newPageSize);
 
   const handlePreviousPageClick = () => {
     const nextPage = Math.max(0, page - 1);
@@ -65,8 +66,8 @@ export const TrollAlarmList = (props) => {
       key: "dismissed",
       label: "Status",
       style: { width: 40 },
-      render: (dismissed, _row) =>
-        dismissed ? <AlarmOffIcon /> : <AlarmIcon color={red500} />
+      render: (isRowDismissed, _row) =>
+        isRowDismissed ? <AlarmOffIcon /> : <AlarmIcon color={red500} />
     },
     {
       key: "token",
@@ -127,6 +128,7 @@ TrollAlarmList.propTypes = {
   selectedAlarmIds: PropTypes.arrayOf(PropTypes.string).isRequired,
 
   // Query params
+  // eslint-disable-next-line react/no-unused-prop-types
   organizationId: PropTypes.string.isRequired,
   pageSize: PropTypes.number.isRequired,
   page: PropTypes.number.isRequired,

@@ -28,6 +28,7 @@ class ManageSurveyResponses extends Component {
         collector[iStep.id] = iStep.questionResponse.value;
         return collector;
       }, {});
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.questionResponses = questionResponses;
   }
 
@@ -41,6 +42,7 @@ class ManageSurveyResponses extends Component {
     );
     while (currentStep) {
       const children = interactionSteps.filter(
+        // eslint-disable-next-line no-loop-func
         (iStep) => iStep.parentInteractionId === currentStep.id
       );
       iSteps.push({ ...currentStep, children });
@@ -72,7 +74,7 @@ class ManageSurveyResponses extends Component {
           const iStepIds = affectedSteps.map((iStep) => iStep.id);
           const response = await deleteQuestionResponses(iStepIds, contact.id);
           if (response.errors) throw response.errors;
-          iStepIds.forEach((iStepId) => delete questionResponses[iStepId]);
+          iStepIds.forEach((stepId) => delete questionResponses[stepId]);
         }
 
         if (value) {
@@ -118,7 +120,7 @@ class ManageSurveyResponses extends Component {
     }
 
     const errorActions = [
-      <FlatButton label="OK" primary onClick={this.handleCloseError} />
+      <FlatButton key="ok" label="OK" primary onClick={this.handleCloseError} />
     ];
 
     return (
@@ -224,10 +226,7 @@ const queries = {
 };
 
 const mutations = {
-  updateQuestionResponses: (ownProps) => (
-    questionResponses,
-    campaignContactId
-  ) => ({
+  updateQuestionResponses: () => (questionResponses, campaignContactId) => ({
     mutation: gql`
       mutation updateQuestionResponses(
         $questionResponses: [QuestionResponseInput]
@@ -246,10 +245,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  deleteQuestionResponses: (ownProps) => (
-    interactionStepIds,
-    campaignContactId
-  ) => ({
+  deleteQuestionResponses: () => (interactionStepIds, campaignContactId) => ({
     mutation: gql`
       mutation deleteQuestionResponses(
         $interactionStepIds: [String]

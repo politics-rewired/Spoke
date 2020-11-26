@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import IconButton from "material-ui/IconButton/IconButton";
@@ -9,7 +10,7 @@ import { ToolbarTitle } from "material-ui/Toolbar";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
 import { loadData } from "../containers/hoc/with-operations";
@@ -285,6 +286,7 @@ class AssignmentTexter extends React.Component {
           .then(catchError)
           .then((response) => {
             const { id, messages } = response.data.sendMessage;
+            // eslint-disable-next-line react/no-direct-mutation-state
             this.state.contactCache[id].messages = messages;
           })
           .catch(this.handleSendMessageError(contact_id))
@@ -361,7 +363,7 @@ class AssignmentTexter extends React.Component {
 
       setTimeout(() => {
         this.setState({
-          errors: this.state.errors.filter((e) => e.id !== contact_id)
+          errors: this.state.errors.filter((err) => err.id !== contact_id)
         });
       }, 2000);
 
@@ -497,7 +499,7 @@ const queries = {
 };
 
 const mutations = {
-  createOptOut: (ownProps) => (optOut, campaignContactId) => ({
+  createOptOut: () => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -517,7 +519,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  tagContact: (ownProps) => (campaignContactId, tag) => ({
+  tagContact: () => (campaignContactId, tag) => ({
     mutation: gql`
       mutation tagConversation(
         $campaignContactId: String!
@@ -534,7 +536,7 @@ const mutations = {
       tag
     }
   }),
-  editCampaignContactMessageStatus: (ownProps) => (
+  editCampaignContactMessageStatus: () => (
     messageStatus,
     campaignContactId
   ) => ({
@@ -557,10 +559,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  deleteQuestionResponses: (ownProps) => (
-    interactionStepIds,
-    campaignContactId
-  ) => ({
+  deleteQuestionResponses: () => (interactionStepIds, campaignContactId) => ({
     mutation: gql`
       mutation deleteQuestionResponses(
         $interactionStepIds: [String]
@@ -579,10 +578,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  updateQuestionResponses: (ownProps) => (
-    questionResponses,
-    campaignContactId
-  ) => ({
+  updateQuestionResponses: () => (questionResponses, campaignContactId) => ({
     mutation: gql`
       mutation updateQuestionResponses(
         $questionResponses: [QuestionResponseInput]
@@ -601,7 +597,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  sendMessage: (ownProps) => (message, campaignContactId) => ({
+  sendMessage: () => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!
@@ -624,7 +620,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  bulkSendMessages: (ownProps) => (assignmentId) => ({
+  bulkSendMessages: () => (assignmentId) => ({
     mutation: gql`
       mutation bulkSendMessages($assignmentId: Int!) {
         bulkSendMessages(assignmentId: $assignmentId) {

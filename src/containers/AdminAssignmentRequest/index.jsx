@@ -19,15 +19,15 @@ class AdminAssignmentRequest extends Component {
     autoApproveReqId: undefined
   };
 
-  componentWillUpdate(nextProps) {
-    this.updateAssignmentRequestStateWithNewProps(this.props, nextProps);
-  }
-
   componentWillMount() {
     this.updateAssignmentRequestStateWithNewProps(null, this.props);
   }
 
-  updateAssignmentRequestStateWithNewProps(lastProps, nextProps) {
+  componentWillUpdate(nextProps) {
+    this.updateAssignmentRequestStateWithNewProps(this.props, nextProps);
+  }
+
+  updateAssignmentRequestStateWithNewProps = (lastProps, nextProps) => {
     if (
       lastProps &&
       lastProps.pendingAssignmentRequests.assignmentRequests &&
@@ -42,8 +42,9 @@ class AdminAssignmentRequest extends Component {
     }
 
     const { assignmentRequests } = nextProps.pendingAssignmentRequests;
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.assignmentRequests = assignmentRequests;
-  }
+  };
 
   setRequestStatus = (requestId, status) => {
     const { assignmentRequests } = this.state;
@@ -114,8 +115,13 @@ class AdminAssignmentRequest extends Component {
       assignmentRequests.find(({ id }) => id === autoApproveReqId);
 
     const autoApproveActions = [
-      <FlatButton label="Confirm" onClick={this.handleConfirmAutoApprove} />,
       <FlatButton
+        key="confirm"
+        label="Confirm"
+        onClick={this.handleConfirmAutoApprove}
+      />,
+      <FlatButton
+        key="cancel"
         label="Cancel"
         primary
         onClick={this.handleDismissAutoApproveRequest}
@@ -193,7 +199,7 @@ const queries = {
 };
 
 const mutations = {
-  resolveAssignmentRequest: (ownProps) => (
+  resolveAssignmentRequest: () => (
     assignmentRequestId,
     approved,
     autoApproveLevel

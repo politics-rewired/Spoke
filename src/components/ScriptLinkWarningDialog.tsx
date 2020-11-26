@@ -13,32 +13,6 @@ export enum ScriptWarningContext {
   ShortLink = "short-link"
 }
 
-interface WarningProps {
-  open: boolean;
-  warningContext: ScriptWarningContext;
-  handleConfirm: () => void;
-  handleClose: () => void;
-}
-
-const ScriptLinkWarningDialog = (props: WarningProps) => {
-  const { warningContext, handleClose, handleConfirm, open } = props;
-
-  const title =
-    (warningContext === ScriptWarningContext.GenericLink && "Confirm Script") ||
-    (warningContext === ScriptWarningContext.ShortLink && "Short Link Warning");
-
-  const actions = [
-    <FlatButton label="Close" primary={false} onClick={handleClose} />,
-    <FlatButton label="Confirm and Save" primary onClick={handleConfirm} />
-  ];
-
-  return (
-    <Dialog open={open} actions={actions} title={title} style={styles.dialog}>
-      <DialogContent warningContext={warningContext} />
-    </Dialog>
-  );
-};
-
 interface ContentProps {
   warningContext: ScriptWarningContext;
 }
@@ -55,6 +29,7 @@ const DialogContent = (props: ContentProps) => {
         <a
           href="https://docs.spokerewired.com/article/70-short-link-domains"
           target="_blank"
+          rel="noopener noreferrer"
         >
           here
         </a>
@@ -79,6 +54,7 @@ const DialogContent = (props: ContentProps) => {
         <a
           href="https://docs.spokerewired.com/article/70-short-link-domains"
           target="_blank"
+          rel="noopener noreferrer"
         >
           here
         </a>
@@ -95,6 +71,42 @@ const DialogContent = (props: ContentProps) => {
     default:
       return <p>Error: unknown context</p>;
   }
+};
+
+interface WarningProps {
+  open: boolean;
+  warningContext: ScriptWarningContext;
+  handleConfirm: () => void;
+  handleClose: () => void;
+}
+
+const ScriptLinkWarningDialog = (props: WarningProps) => {
+  const { warningContext, handleClose, handleConfirm, open } = props;
+
+  const title =
+    (warningContext === ScriptWarningContext.GenericLink && "Confirm Script") ||
+    (warningContext === ScriptWarningContext.ShortLink && "Short Link Warning");
+
+  const actions = [
+    <FlatButton
+      key="close"
+      label="Close"
+      primary={false}
+      onClick={handleClose}
+    />,
+    <FlatButton
+      key="save"
+      label="Confirm and Save"
+      primary
+      onClick={handleConfirm}
+    />
+  ];
+
+  return (
+    <Dialog open={open} actions={actions} title={title} style={styles.dialog}>
+      <DialogContent warningContext={warningContext} />
+    </Dialog>
+  );
 };
 
 export default ScriptLinkWarningDialog;

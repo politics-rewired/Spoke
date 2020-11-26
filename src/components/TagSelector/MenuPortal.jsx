@@ -12,6 +12,7 @@ const menuPortalCSS = ({
   isFixed
 }) => {
   let containerLeft = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
   let containerTop = 0;
 
   if (appendTo) {
@@ -36,7 +37,7 @@ const menuPortalCSS = ({
   if (isFixed) {
     return {
       ...dropdownPosition,
-      top: rect[placement]
+      top: rectangle[placement]
     };
   }
 
@@ -44,6 +45,7 @@ const menuPortalCSS = ({
 };
 
 class MenuPortal extends PureComponent {
+  // eslint-disable-next-line react/static-property-placement
   static propTypes = {
     menuPlacement: PropTypes.oneOf(["auto", "bottom", "top"]),
     appendTo: PropTypes.instanceOf(Element),
@@ -51,6 +53,7 @@ class MenuPortal extends PureComponent {
     menuPosition: PropTypes.oneOf(["absolute", "fixed"])
   };
 
+  // eslint-disable-next-line react/static-property-placement
   static childContextTypes = {
     getPortalPlacement: PropTypes.func
   };

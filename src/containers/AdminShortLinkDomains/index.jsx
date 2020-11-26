@@ -10,7 +10,7 @@ import React, { Component } from "react";
 
 import LoadingIndicator from "../../components/LoadingIndicator";
 import theme from "../../styles/theme";
-import { withOperations } from "../hoc/with-operations";
+import { PrettyErrors, withOperations } from "../hoc/with-operations";
 import AddDomainDialog from "./AddDomainDialog";
 import ShortLinkDomainList from "./ShortLinkDomainList";
 
@@ -120,15 +120,26 @@ class AdminShortLinkDomains extends Component {
 
     const deleteDomainActions = [
       <FlatButton
+        key="cancel"
         label="Cancel"
         primary={false}
         onClick={this.handleCancelDeleteDomain}
       />,
-      <RaisedButton label="Delete" primary onClick={this.handleDeleteDomain} />
+      <RaisedButton
+        key="delete"
+        label="Delete"
+        primary
+        onClick={this.handleDeleteDomain}
+      />
     ];
 
     const errorActions = [
-      <FlatButton label="Close" primary onClick={this.handleErrorDialogClose} />
+      <FlatButton
+        key="close"
+        label="Close"
+        primary
+        onClick={this.handleErrorDialogClose}
+      />
     ];
 
     return (

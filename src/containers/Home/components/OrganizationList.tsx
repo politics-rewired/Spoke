@@ -9,7 +9,7 @@ import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
 import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 import React from "react";
 import { compose } from "react-apollo";
-import { Redirect, withRouter } from "react-router";
+import { Redirect, withRouter } from "react-router-dom";
 
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import theme from "../../../styles/theme";

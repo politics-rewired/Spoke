@@ -7,7 +7,7 @@ import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";
@@ -139,9 +139,9 @@ class AdminCampaignStats extends React.Component {
       ? `Exporting for VAN (${vanExportJob.status}%)`
       : "Export for VAN";
 
-    const vansyncJob = pendingJobs.find((job) => job.jobType === "van-sync");
-    const isVanSyncDisabled = disableVanSyncButton || vansyncJob !== undefined;
-    const vanSyncLabel = vansyncJob
+    const vanSyncJob = pendingJobs.find((job) => job.jobType === "van-sync");
+    const isVanSyncDisabled = disableVanSyncButton || vanSyncJob !== undefined;
+    const vanSyncLabel = vanSyncJob
       ? `Syncing to VAN (${vanSyncJob.status}%)`
       : "Sync to VAN";
 
@@ -209,8 +209,8 @@ class AdminCampaignStats extends React.Component {
                         campaign.isArchived ? (
                           <RaisedButton
                             key="unarchive"
-                            onTouchTap={async () =>
-                              await this.props.mutations.unarchiveCampaign()
+                            onTouchTap={() =>
+                              this.props.mutations.unarchiveCampaign()
                             }
                             label="Unarchive"
                           />
@@ -218,8 +218,8 @@ class AdminCampaignStats extends React.Component {
                         !campaign.isArchived ? (
                           <RaisedButton
                             key="archive"
-                            onTouchTap={async () =>
-                              await this.props.mutations.archiveCampaign()
+                            onTouchTap={() =>
+                              this.props.mutations.archiveCampaign()
                             }
                             label="Archive"
                           />

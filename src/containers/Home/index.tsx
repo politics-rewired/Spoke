@@ -4,9 +4,10 @@ import gql from "graphql-tag";
 import { History } from "history";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import SuperAdminLogin from "../../components/SuperAdminLogin";
+import { MutationMap, QueryMap } from "../../network/types";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import OrganizationList from "./components/OrganizationList";
@@ -72,6 +73,7 @@ const Home: React.SFC<HomeProps> = (props) => {
         is_valid: true
       });
       if (newInvite.errors) {
+        // eslint-disable-next-line no-alert
         alert("There was an error creating your invite");
         throw newInvite.errors;
       } else {
@@ -120,7 +122,7 @@ const Home: React.SFC<HomeProps> = (props) => {
   );
 };
 
-const queries = {
+const queries: QueryMap<HomeProps> = {
   data: {
     query: gql`
       query getCurrentUser {
@@ -132,8 +134,8 @@ const queries = {
   }
 };
 
-const mutations = {
-  createInvite: (ownProps: HomeProps) => (invite: InviteInput) => ({
+const mutations: MutationMap<HomeProps> = {
+  createInvite: (_ownProps) => (invite: InviteInput) => ({
     mutation: gql`
       mutation createInvite($invite: InviteInput!) {
         createInvite(invite: $invite) {

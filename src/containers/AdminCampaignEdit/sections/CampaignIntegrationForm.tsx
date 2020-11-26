@@ -60,7 +60,7 @@ class CampaignIntegrationForm extends React.Component<InnerProps, State> {
   };
 
   handleChange = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     value: string
   ) => {

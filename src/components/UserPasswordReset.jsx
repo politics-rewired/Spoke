@@ -43,7 +43,7 @@ class UserPasswordReset extends React.Component {
     });
     this.setState({ working: false });
 
-    const { redirected, headers, status, url } = response;
+    const { redirected, headers, status } = response;
     if (redirected && status === 200) {
       this.props.history.push("/");
     } else if (status === 401) {

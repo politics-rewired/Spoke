@@ -49,27 +49,6 @@ const getMessageServiceSid = (organization) => {
 
 const cacheKey = async (id) => `${config.CACHE_PREFIX || ""}contact-${id}`;
 
-const saveCacheRecord = async (dbRecord, organization, messageServiceSid) => {
-  if (r.redis) {
-    // basic contact record
-    // eslint-disable-next-line no-use-before-define
-    const contactCacheObj = generateCacheRecord(
-      dbRecord,
-      organization.id,
-      messageServiceSid
-    );
-    await r.redis.setAsync(
-      cacheKey(dbRecord.id),
-      JSON.stringify(contactCacheObj)
-    );
-    // TODO:
-    //   messageStatus-<cell>
-  }
-  // NOT INCLUDED:
-  // - messages <cell><message_service_sid>
-  // - questionResponseValues <contact_id>
-};
-
 const generateCacheRecord = (dbRecord, organizationId, messageServiceSid) => ({
   // This should be contactinfo that
   // never needs to be updated by an action of the texter or contact
@@ -91,6 +70,27 @@ const generateCacheRecord = (dbRecord, organizationId, messageServiceSid) => ({
   city: dbRecord.city,
   state: dbRecord.state
 });
+
+const saveCacheRecord = async (dbRecord, organization, messageServiceSid) => {
+  if (r.redis) {
+    // basic contact record
+    // eslint-disable-next-line no-use-before-define
+    const contactCacheObj = generateCacheRecord(
+      dbRecord,
+      organization.id,
+      messageServiceSid
+    );
+    await r.redis.setAsync(
+      cacheKey(dbRecord.id),
+      JSON.stringify(contactCacheObj)
+    );
+    // TODO:
+    //   messageStatus-<cell>
+  }
+  // NOT INCLUDED:
+  // - messages <cell><message_service_sid>
+  // - questionResponseValues <contact_id>
+};
 
 export const campaignContactCache = {
   clear: async (id) => {

@@ -23,7 +23,7 @@ interface Props {
 
 export const ExternalSystemsSource: React.SFC<Props> = (props) => {
   const handleSelectList = (
-    _event: React.SyntheticEvent<{}>,
+    _event: React.SyntheticEvent<unknown>,
     _index: number,
     listId: string
   ) => {

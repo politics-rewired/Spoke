@@ -108,12 +108,26 @@ class AdminTeamEditor extends Component {
     const isNewTeam = (editingTeam || {}).id === undefined;
     const teamVerb = isNewTeam ? "Create" : "Edit";
     const actions = [
-      <FlatButton label="Cancel" onClick={this.handleCancelEditTeam} />,
-      <FlatButton label={teamVerb} primary onClick={this.handleSaveTeam} />
+      <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.handleCancelEditTeam}
+      />,
+      <FlatButton
+        key={teamVerb}
+        label={teamVerb}
+        primary
+        onClick={this.handleSaveTeam}
+      />
     ];
 
     const errorActions = [
-      <FlatButton label="Ok" primary onClick={this.handleCancelError} />
+      <FlatButton
+        key="ok"
+        label="Ok"
+        primary
+        onClick={this.handleCancelError}
+      />
     ];
 
     return (

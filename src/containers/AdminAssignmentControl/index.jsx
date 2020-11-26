@@ -95,7 +95,12 @@ class AdminAssignmentControl extends Component {
       : [];
 
     const dialogActions = [
-      <FlatButton label="Close" primary onClick={this.handleCloseDialog} />
+      <FlatButton
+        key="close"
+        label="Close"
+        primary
+        onClick={this.handleCloseDialog}
+      />
     ];
 
     return (

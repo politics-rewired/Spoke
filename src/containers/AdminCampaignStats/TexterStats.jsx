@@ -6,7 +6,7 @@ import React from "react";
 import { loadData } from "../hoc/with-operations";
 
 class TexterStats extends React.Component {
-  renderAssignment(assignment) {
+  renderAssignment = (assignment) => {
     const { contactsCount, unmessagedCount, texter, id } = assignment;
     if (contactsCount === 0) {
       return <div key={id} />;
@@ -23,9 +23,9 @@ class TexterStats extends React.Component {
         <LinearProgress mode="determinate" value={percentComplete} />
       </div>
     );
-  }
+  };
 
-  renderAssignmentDynamic(assignment) {
+  renderAssignmentDynamic = (assignment) => {
     const { contactsCount, unmessagedCount, texter, id } = assignment;
     if (contactsCount === 0) {
       return <div key={id} />;
@@ -37,7 +37,7 @@ class TexterStats extends React.Component {
         <div>{contactsCount - unmessagedCount} initial messages sent</div>
       </div>
     );
-  }
+  };
 
   render() {
     const { campaign } = this.props.data;

@@ -10,8 +10,8 @@ export const SettingsRouter = (props) => {
   const { match, history } = props;
   const { page, organizationId } = match.params;
 
-  const handleOnChangeTab = (page) => {
-    history.push(`/admin/${organizationId}/settings/${page}`);
+  const handleOnChangeTab = (newTab) => {
+    history.push(`/admin/${organizationId}/settings/${newTab}`);
   };
 
   return (

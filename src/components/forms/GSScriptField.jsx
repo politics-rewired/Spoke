@@ -61,11 +61,13 @@ class GSScriptField extends GSFormField {
         style={styles.dialog}
         actions={[
           <FlatButton
+            key="cancel"
             {...dataTest("scriptCancel")}
             label="Cancel"
             onTouchTap={this.handleCancelDialog}
           />,
           <RaisedButton
+            key="done"
             {...dataTest("scriptDone")}
             label="Done"
             onTouchTap={this.handleSaveScript}

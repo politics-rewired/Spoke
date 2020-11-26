@@ -36,6 +36,11 @@ class TexterRequest extends React.Component {
     };
   }
 
+  componentWillMount() {
+    // eslint-disable-next-line react/no-direct-mutation-state
+    this.state.email = this.props.user.email;
+  }
+
   componentDidMount() {
     this.props.data.refetch();
   }
@@ -75,10 +80,6 @@ class TexterRequest extends React.Component {
       this.setState({ submitting: false });
     }
   };
-
-  componentWillMount() {
-    this.state.email = this.props.user.email;
-  }
 
   setSelectedAssignment = (_1, _2, teamId) => {
     const myCurrentAssignmentTargets = this.props.data.organization
@@ -149,7 +150,7 @@ class TexterRequest extends React.Component {
     if (finished) {
       return (
         <div>
-          <h3> Submitted Successfully – Thank you! </h3>
+          <h3> Submitted Successfully – Thank you! </h3>
           <p>
             {" "}
             Give us a few minutes to assign your texts. You'll receive an email
@@ -196,22 +197,25 @@ class TexterRequest extends React.Component {
           value={{ email, count }}
           onSubmit={this.submit}
         >
-          <label htmlFor="count"> Count: </label>
-          <TextField
-            name="count"
-            label="Count"
-            type="number"
-            value={count}
-            onChange={(e) => {
-              const formVal = parseInt(e.target.value, 10) || 0;
-              let count =
-                maxRequestCount > 0
-                  ? Math.min(maxRequestCount, formVal)
-                  : formVal;
-              count = Math.max(count, 0);
-              this.setState({ count });
-            }}
-          />
+          <label htmlFor="count">
+            {" "}
+            Count:
+            <TextField
+              name="count"
+              label="Count"
+              type="number"
+              value={count}
+              onChange={(e) => {
+                const formVal = parseInt(e.target.value, 10) || 0;
+                let newCount =
+                  maxRequestCount > 0
+                    ? Math.min(maxRequestCount, formVal)
+                    : formVal;
+                newCount = Math.max(newCount, 0);
+                this.setState({ count: newCount });
+              }}
+            />
+          </label>
           <br />
           <RaisedButton
             primary

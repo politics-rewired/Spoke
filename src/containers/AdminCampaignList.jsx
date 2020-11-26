@@ -9,7 +9,7 @@ import ContentAdd from "material-ui/svg-icons/content/add";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import { withAuthzContext } from "../components/AuthzProvider";
 import LoadingIndicator from "../components/LoadingIndicator";
@@ -227,16 +227,19 @@ class AdminCampaignList extends React.Component {
                 : doneReleasingReplies
                 ? [
                     <RaisedButton
+                      key="done"
                       label="Done"
                       onClick={this.closeReleasingAllReplies}
                     />
                   ]
                 : [
                     <RaisedButton
+                      key="cancel"
                       label="Cancel"
                       onClick={this.closeReleasingAllReplies}
                     />,
                     <RaisedButton
+                      key="release"
                       label="Release"
                       onClick={this.releaseAllReplies}
                       primary
@@ -322,7 +325,7 @@ AdminCampaignList.propTypes = {
 };
 
 const mutations = {
-  createCampaign: (ownProps) => (campaign) => ({
+  createCampaign: (_ownProps) => (campaign) => ({
     mutation: gql`
       mutation createBlankCampaign($campaign: CampaignInput!) {
         createCampaign(campaign: $campaign) {
@@ -332,7 +335,7 @@ const mutations = {
     `,
     variables: { campaign }
   }),
-  releaseAllUnhandledReplies: (ownProps) => (
+  releaseAllUnhandledReplies: (_ownProps) => (
     organizationId,
     ageInHours,
     releaseOnRestricted,

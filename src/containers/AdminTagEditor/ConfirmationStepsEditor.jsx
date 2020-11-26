@@ -28,6 +28,7 @@ class ConfirmationStepsEditor extends Component {
 
     const actions = [
       <FlatButton
+        key="close"
         label="Close Step Editor"
         onClick={handleToggleStepsEditorOpen}
       />
@@ -53,7 +54,7 @@ class ConfirmationStepsEditor extends Component {
               <div style={{ display: "flex", flexDirection: "row" }}>
                 {confirmationSteps.map((stepArray, stepArrayIdx) => (
                   <Chip
-                    key={stepArrayIdx}
+                    key={stepArray[0]}
                     onRequestDelete={() => handleDeleteStep(stepArrayIdx)}
                     style={{ margin: 4 }}
                   >

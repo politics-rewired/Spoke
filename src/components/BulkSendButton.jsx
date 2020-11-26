@@ -1,6 +1,4 @@
 import { css, StyleSheet } from "aphrodite";
-import Dialog from "material-ui/Dialog";
-import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -48,7 +46,7 @@ export default class BulkSendButton extends Component {
 
 BulkSendButton.propTypes = {
   assignment: PropTypes.object,
-  onFinishContact: PropTypes.function,
-  bulkSendMessages: PropTypes.function,
-  setDisabled: PropTypes.function
+  onFinishContact: PropTypes.func,
+  bulkSendMessages: PropTypes.func,
+  setDisabled: PropTypes.func
 };

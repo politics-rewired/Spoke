@@ -97,9 +97,9 @@ class IncomingMessageFilter extends Component {
   onCampaignSelected = (selection, index) => {
     let campaignId;
     if (index === -1) {
-      const campaign = this.props.texters.find((campaign) => {
-        return campaign.title === selection;
-      });
+      const campaign = this.props.texters.find(
+        ({ title }) => title === selection
+      );
       if (campaign) {
         campaignId = campaign.id;
       }
@@ -114,9 +114,9 @@ class IncomingMessageFilter extends Component {
   onTexterSelected = (selection, index) => {
     let texterUserId;
     if (index === -1) {
-      const texter = this.props.texters.find((texter) => {
-        return texter.displayName === selection;
-      });
+      const texter = this.props.texters.find(
+        ({ displayName }) => displayName === selection
+      );
       if (texter) {
         texterUserId = texter.id;
       }
@@ -131,7 +131,9 @@ class IncomingMessageFilter extends Component {
   onContactNameChanged = (ev) => {
     const name = ev.target.value;
     const { firstName, lastName } = nameComponents(name);
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.firstName = firstName;
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.lastName = lastName;
     clearTimeout(this.submitNameUpdateTimeout);
     this.submitNameUpdateTimeout = setTimeout(
@@ -338,11 +340,6 @@ class IncomingMessageFilter extends Component {
     );
   }
 }
-
-IncomingMessageFilter.defaultProps = {
-  isTexterFilterable: true,
-  isIncludeEscalatedFilterable: true
-};
 
 IncomingMessageFilter.propTypes = {
   isTexterFilterable: type.bool.isRequired,

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 import gql from "graphql-tag";
 import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
@@ -12,7 +13,7 @@ import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import {
   RequestAutoApproveType,
@@ -103,23 +104,24 @@ class AdminPersonList extends React.Component {
     this.props.personData.refetch();
   };
 
-  renderOffsetList() {
+  renderOffsetList = () => {
     const LIMIT = 200;
     const {
       personData: { organization }
     } = this.props;
     if (organization.peopleCount > LIMIT) {
-      const offsetList = Array.apply(null, {
-        length: Math.ceil(organization.peopleCount / LIMIT)
-      });
+      const offsetList = [
+        ...Array(Math.ceil(organization.peopleCount / LIMIT))
+      ];
       const { offset } = queryString.parse(this.props.location.search);
       return (
         <DropDownMenu
-          value={offset == "all" ? "all" : Number(offset || 0)}
+          value={offset === "all" ? "all" : Number(offset || 0)}
           onChange={this.handleOffsetChange}
         >
           {[<MenuItem value="all" primaryText="All" key="all" />].concat(
             offsetList.map((x, i) => (
+              // eslint-disable-next-line react/no-array-index-key
               <MenuItem value={i} primaryText={`Page ${i + 1}`} key={i + 1} />
             ))
           )}
@@ -127,9 +129,9 @@ class AdminPersonList extends React.Component {
       );
     }
     return null;
-  }
+  };
 
-  async resetPassword(userId) {
+  resetPassword = async (userId) => {
     const { organizationId } = this.props.match.params;
     const { currentUser } = this.props.userData;
     if (currentUser.id !== userId) {
@@ -140,7 +142,7 @@ class AdminPersonList extends React.Component {
       const { resetUserPassword } = res.data;
       this.setState({ passwordResetHash: resetUserPassword });
     }
-  }
+  };
 
   renderCampaignList() {
     const {
@@ -298,6 +300,7 @@ class AdminPersonList extends React.Component {
               title="Invite new texters"
               actions={[
                 <FlatButton
+                  key="ok"
                   {...dataTest("inviteOk")}
                   label="OK"
                   primary
@@ -316,6 +319,7 @@ class AdminPersonList extends React.Component {
               title="Reset user password"
               actions={[
                 <FlatButton
+                  key="ok"
                   {...dataTest("passResetOK")}
                   label="OK"
                   primary
@@ -377,7 +381,7 @@ const organizationFragment = `
 `;
 
 const mutations = {
-  editOrganizationMembership: (ownProps) => (
+  editOrganizationMembership: (_ownProps) => (
     membershipId,
     { level = null, role = null }
   ) => ({
@@ -404,7 +408,7 @@ const mutations = {
       role
     }
   }),
-  resetUserPassword: (ownProps) => (organizationId, userId) => ({
+  resetUserPassword: (_ownProps) => (organizationId, userId) => ({
     mutation: gql`
       mutation resetUserPassword($organizationId: String!, $userId: Int!) {
         resetUserPassword(organizationId: $organizationId, userId: $userId)

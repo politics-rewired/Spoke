@@ -6,7 +6,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import moment from "moment";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import { dataTest } from "../lib/attributes";
 
@@ -47,10 +47,6 @@ const styles = StyleSheet.create({
 });
 
 export class AssignmentSummary extends Component {
-  state = {
-    badTimezoneTooltipOpen: false
-  };
-
   goToTodos(contactsFilter, assignmentId) {
     const { organizationId, history } = this.props;
 
@@ -110,7 +106,6 @@ export class AssignmentSummary extends Component {
       unmessagedCount,
       unrepliedCount,
       badTimezoneCount,
-      totalMessagedCount,
       pastMessagesCount,
       skippedMessagesCount
     } = this.props;
@@ -132,14 +127,11 @@ export class AssignmentSummary extends Component {
             title={title}
             subtitle={`${description} - ${moment(dueBy).format("MMM D YYYY")}`}
             style={{ backgroundColor: primaryColor }}
-            children={
-              logoImageUrl ? (
-                <img src={logoImageUrl} className={css(styles.image)} />
-              ) : (
-                ""
-              )
-            }
-          />
+          >
+            {logoImageUrl && (
+              <img src={logoImageUrl} className={css(styles.image)} />
+            )}
+          </CardTitle>
           <Divider />
           <div style={{ margin: "20px" }}>
             <div dangerouslySetInnerHTML={{ __html: introHtml }} />
@@ -156,7 +148,7 @@ export class AssignmentSummary extends Component {
                   disabled:
                     (useDynamicAssignment &&
                       !hasUnassignedContacts &&
-                      unmessagedCount == 0) ||
+                      unmessagedCount === 0) ||
                     (useDynamicAssignment && maxContacts === 0),
                   contactsFilter: "text",
                   hideIfZero: !useDynamicAssignment

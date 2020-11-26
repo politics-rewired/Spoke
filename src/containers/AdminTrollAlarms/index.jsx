@@ -55,7 +55,9 @@ class AdminTrollAlarms extends React.Component {
       token = selection.value.key;
     } else {
       const { trollTokens } = this.props.trollTokens;
-      token = trollTokens.find(({ token }) => token === selection);
+      token = trollTokens.find(
+        ({ token: trollToken }) => trollToken === selection
+      );
     }
     if (token) {
       this.setState({ token, selectedAlarmIds: [] });
@@ -128,15 +130,20 @@ class AdminTrollAlarms extends React.Component {
     const { match } = this.props;
 
     const { trollTokens } = this.props.trollTokens;
-    const dataSource = trollTokens.map(({ token }) =>
-      dataSourceItem(token, token)
+    const dataSource = trollTokens.map(({ token: trollToken }) =>
+      dataSourceItem(trollToken, trollToken)
     );
 
     const deleteAllSuffix = token ? `"${token}"` : "Token";
     const isDeleteSelectedDisabled = selectedAlarmIds.length === 0 || isWorking;
 
     const errorActions = [
-      <FlatButton label="Close" primary onClick={this.handleOnCancelError} />
+      <FlatButton
+        key="close"
+        label="Close"
+        primary
+        onClick={this.handleOnCancelError}
+      />
     ];
 
     return (

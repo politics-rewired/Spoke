@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 import uniqBy from "lodash/uniqBy";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -33,6 +34,7 @@ class CampaignPrefixSelector extends Component {
     switch (event.key) {
       case "Enter":
       case "Tab":
+        // eslint-disable-next-line no-case-declarations
         let newValue = [...value, createOption(inputValue)];
         newValue = uniqBy(newValue, "value");
         this.setState({
@@ -40,6 +42,7 @@ class CampaignPrefixSelector extends Component {
         });
         this.props.onChange(newValue);
         event.preventDefault();
+      // no default
     }
   };
 

@@ -4,19 +4,12 @@ import Check from "material-ui/svg-icons/action/check-circle";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import AssignmentSummary from "../components/AssignmentSummary";
 import Empty from "../components/Empty";
 import TexterRequest from "../components/TexterRequest";
 import { loadData } from "./hoc/with-operations";
-
-const dueBySortFn = (x, y) => (x.dueBy > y.dueBy ? -1 : 1);
-const needSortFn = (x, y) =>
-  x.unmessagedCount + x.unrepliedCount > y.unmessagedCount + y.unrepliedCount
-    ? -1
-    : 1;
-const SORT_METHOD = dueBySortFn;
 
 class TexterTodoList extends React.Component {
   state = {
@@ -24,6 +17,34 @@ class TexterTodoList extends React.Component {
     releasedReplies: false,
     releasedRepliesError: undefined
   };
+
+  componentDidMount() {
+    this.props.data.refetch();
+    // re-asserts polling after manual refresh
+    // this.props.data.startPolling(5000)
+  }
+
+  releaseMyReplies = () => {
+    this.setState({
+      releasingReplies: true
+    });
+
+    this.props.mutations
+      .releaseMyReplies(this.props.match.params.organizationId)
+      .then(() => {
+        this.setState({ releasingReplies: false, releasedReplies: true });
+      })
+      .catch((error) => {
+        this.setState({ releasingReplies: false, releasedRepliesError: error });
+      });
+  };
+
+  termsAgreed() {
+    const { data, history } = this.props;
+    if (window.TERMS_REQUIRE && !data.currentUser.terms) {
+      history.push(`/terms?next=${this.props.location.pathname}`);
+    }
+  }
 
   renderTodoList(assignments) {
     const { organizationId } = this.props.match.params;
@@ -56,34 +77,6 @@ class TexterTodoList extends React.Component {
       })
       .filter((ele) => ele !== null);
   }
-
-  componentDidMount() {
-    this.props.data.refetch();
-    // re-asserts polling after manual refresh
-    // this.props.data.startPolling(5000)
-  }
-
-  termsAgreed() {
-    const { data, history } = this.props;
-    if (window.TERMS_REQUIRE && !data.currentUser.terms) {
-      history.push(`/terms?next=${this.props.location.pathname}`);
-    }
-  }
-
-  releaseMyReplies = () => {
-    this.setState({
-      releasingReplies: true
-    });
-
-    this.props.mutations
-      .releaseMyReplies(this.props.match.params.organizationId)
-      .then(() => {
-        this.setState({ releasingReplies: false, releasedReplies: true });
-      })
-      .catch((error) => {
-        this.setState({ releasingReplies: false, releasedRepliesError: error });
-      });
-  };
 
   render() {
     this.termsAgreed();
@@ -134,7 +127,10 @@ class TexterTodoList extends React.Component {
             {this.state.releasedReplies ? (
               <h1> All gone! </h1>
             ) : this.state.releasedRepliesError ? (
-              <p> Error releasing replies: {error} </p>
+              <p>
+                {" "}
+                Error releasing replies: {this.state.releasedRepliesError}{" "}
+              </p>
             ) : (
               [
                 <h1 key={1}> Done for the day? </h1>,
@@ -255,7 +251,7 @@ const queries = {
 };
 
 const mutations = {
-  releaseMyReplies: (ownProps) => (organizationId) => ({
+  releaseMyReplies: (_ownProps) => (organizationId) => ({
     mutation: gql`
       mutation releaseMyReplies($organizationId: String!) {
         releaseMyReplies(organizationId: $organizationId)

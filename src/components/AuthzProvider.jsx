@@ -39,7 +39,9 @@ export class AuthzProvider extends React.Component {
       .then((result) => hasRole("ADMIN", result.data.currentUser.roles))
       .then((adminPerms) => this.setState({ adminPerms }))
       // We can't use replace(...) here because /login is not a react-router path
-      .catch((_err) => (window.location = loginUrl));
+      .catch((_err) => {
+        window.location = loginUrl;
+      });
   };
 
   render() {

@@ -6,7 +6,7 @@ import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { green300, red500 } from "material-ui/styles/colors";
 import React from "react";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import {
@@ -143,8 +143,13 @@ class VanSyncModal extends React.Component<InnerProps, State> {
       isSyncing;
 
     const actions = [
-      <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
       <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.props.onRequestClose}
+      />,
+      <FlatButton
+        key="sync"
         label="Sync"
         primary
         disabled={isSyncDisabled}
@@ -165,6 +170,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
           <a
             href="https://docs.spokerewired.com/article/93-van-list-loading"
             target="_blank"
+            rel="noopener noreferrer"
           >
             VAN Integration
           </a>
@@ -174,8 +180,8 @@ class VanSyncModal extends React.Component<InnerProps, State> {
           <div>
             <p>Syncing campaign: {latestSyncAttempt.status}%</p>
             {syncErrors.length > 0 && [
-              <p>Encountered the following errors</p>,
-              <ul>
+              <p key="p">Encountered the following errors</p>,
+              <ul key="ul">
                 {syncErrors.map((error) => (
                   <li key={error}>{error}</li>
                 ))}

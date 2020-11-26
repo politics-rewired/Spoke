@@ -11,8 +11,10 @@ const styles = StyleSheet.create({
   }
 });
 
-export default () => (
+export const LoadingIndicator = () => (
   <div className={css(styles.loader)}>
     <CircularProgress />
   </div>
 );
+
+export default LoadingIndicator;

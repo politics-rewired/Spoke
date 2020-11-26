@@ -113,8 +113,6 @@ class ScriptEditor extends React.Component {
     // this.setState({ editorState: this.getEditorState() })
   }
 
-  focus = () => this.refs.editor.focus();
-
   onEditorChange = (editorState) => {
     this.setState({ editorState }, () => {
       const { onChange } = this.props;
@@ -146,10 +144,10 @@ class ScriptEditor extends React.Component {
     return replaceEasyGsmWins(editorState.getCurrentContent().getPlainText());
   }
 
-  getCompositeDecorator(scriptFields) {
+  getCompositeDecorator = (scriptFields) => {
     const recognizedFieldStrategy = (contentBlock, callback) => {
       const regex = new RegExp(
-        `\{(${scriptFields.map(escapeRegExp).join("|")})\}`,
+        `{(${scriptFields.map(escapeRegExp).join("|")})}`,
         "g"
       );
       return findWithRegex(regex, contentBlock, callback);
@@ -168,7 +166,9 @@ class ScriptEditor extends React.Component {
         component: UnrecognizedField
       }
     ]);
-  }
+  };
+
+  focus = () => this.refs.editor.focus();
 
   addCustomField = (field) => {
     const textToInsert = delimit(field);
@@ -234,6 +234,7 @@ class ScriptEditor extends React.Component {
           <a
             href="https://docs.spokerewired.com/article/89-segments-and-encodings"
             target="_blank"
+            rel="noopener noreferrer"
           >
             docs here
           </a>

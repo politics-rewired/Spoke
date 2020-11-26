@@ -49,15 +49,8 @@ export class CampaignListLoader extends React.Component {
   }
 }
 
-CampaignListLoader.defaultProps = {
-  offset: 0
-};
-
 CampaignListLoader.propTypes = {
   organizationId: PropTypes.string.isRequired,
-  campaignsFilter: PropTypes.object,
-  offset: PropTypes.number,
-  limit: PropTypes.number.isRequired,
   adminPerms: PropTypes.bool.isRequired,
   resultCountDidUpdate: PropTypes.func.isRequired,
   startOperation: PropTypes.func.isRequired,

@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import TextField from "material-ui/TextField";
@@ -99,7 +100,7 @@ export const OperationDialogBody = (props) => {
             onChange={(ev, val) =>
               setState((prevState) => {
                 const nextInProgress = prevState.inProgress.slice();
-                nextInProgress[2] = { ageInHours: parseInt(val) };
+                nextInProgress[2] = { ageInHours: parseInt(val, 10) };
                 return {
                   inProgress: nextInProgress
                 };
@@ -143,7 +144,7 @@ export const OperationDialogBody = (props) => {
               onChange={(ev, val) =>
                 setState((prevState) => {
                   const nextInProgress = prevState.inProgress.slice();
-                  nextInProgress[2].days = parseInt(val);
+                  nextInProgress[2].days = parseInt(val, 10);
                   return {
                     inProgress: nextInProgress
                   };
@@ -158,7 +159,7 @@ export const OperationDialogBody = (props) => {
               onChange={(ev, val) =>
                 setState((prevState) => {
                   const nextInProgress = prevState.inProgress.slice();
-                  nextInProgress[2].hours = parseInt(val);
+                  nextInProgress[2].hours = parseInt(val, 10);
                   return {
                     inProgress: nextInProgress
                   };
@@ -206,15 +207,24 @@ export class OperationDialog extends React.Component {
       this.state.deletionProtectionCheckText === DELETION_PROTECTION_TEXT;
 
     const actions = finished
-      ? [<FlatButton label="Done" primary onClick={clearInProgress} />]
+      ? [
+          <FlatButton
+            key="done"
+            label="Done"
+            primary
+            onClick={clearInProgress}
+          />
+        ]
       : [
           <FlatButton
+            key="cancel"
             label="Cancel"
             primary
             disabled={executing}
             onClick={clearInProgress}
           />,
           <FlatButton
+            key="execute"
             label="Execute Operation"
             primary
             disabled={

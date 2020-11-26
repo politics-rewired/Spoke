@@ -103,14 +103,13 @@ class AssignmentTexterSurveyDropdown extends Component {
 
 AssignmentTexterSurveyDropdown.propTypes = {
   step: PropTypes.object,
-  answerValue: PropTypes.object,
-  isCurrentStep: PropTypes.boolean,
+  isCurrentStep: PropTypes.bool,
   campaignContactId: PropTypes.number,
   mutations: PropTypes.object
 };
 
 const mutations = {
-  editQuestionResponse: (ownProps) => (questionResponse) => ({
+  editQuestionResponse: (_ownProps) => (questionResponse) => ({
     mutation: gql`
       mutation editQuestionResponse($questionResponse: QuestionResponseInput!) {
         editQuestionResponse(questionResponse: $questionResponse) {

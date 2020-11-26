@@ -35,8 +35,14 @@ class MessageOptOut extends Component {
       "Are you sure you would like to opt this contact back in? " +
       "This will mean they can receive texts from all campaigns.";
     const dialogActions = [
-      <FlatButton label="Cancel" primary onClick={this.handleCloseAlert} />,
       <FlatButton
+        key="cancel"
+        label="Cancel"
+        primary
+        onClick={this.handleCloseAlert}
+      />,
+      <FlatButton
+        key="submit"
         label="Submit"
         primary
         keyboardFocused
@@ -65,7 +71,12 @@ class MessageOptOut extends Component {
       this.handleCloseAlert();
     } catch (error) {
       const dialogActions = [
-        <FlatButton label="Close" primary onClick={this.handleCloseAlert} />
+        <FlatButton
+          key="close"
+          label="Close"
+          primary
+          onClick={this.handleCloseAlert}
+        />
       ];
       this.setState({
         dialogTitle: "Error Submitting",
@@ -96,7 +107,12 @@ class MessageOptOut extends Component {
       this.props.optOutChanged(true);
     } catch (error) {
       const dialogActions = [
-        <FlatButton label="Close" primary onClick={this.handleCloseAlert} />
+        <FlatButton
+          key="close"
+          label="Close"
+          primary
+          onClick={this.handleCloseAlert}
+        />
       ];
       this.setState({
         dialogTitle: "Error Opting Out",
@@ -161,7 +177,7 @@ MessageOptOut.propTypes = {
 };
 
 const mutations = {
-  createOptOut: (ownProps) => (optOut, campaignContactId) => ({
+  createOptOut: () => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -180,7 +196,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  removeOptOut: (ownProps) => (cell) => ({
+  removeOptOut: () => (cell) => ({
     mutation: gql`
       mutation removeOptOut($cell: Phone!) {
         removeOptOut(cell: $cell) {

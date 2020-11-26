@@ -79,8 +79,13 @@ class TrollTokenSettings extends React.Component {
     const sortedTokens = sortBy(trollTokens, "token");
 
     const addActions = [
-      <FlatButton label="Confirm" onClick={this.handleOnConfirmAddToken} />,
       <FlatButton
+        key="confirm"
+        label="Confirm"
+        onClick={this.handleOnConfirmAddToken}
+      />,
+      <FlatButton
+        key="cancel"
         label="Cancel"
         primary
         onClick={this.handleOnCancelAddToken}
@@ -88,12 +93,26 @@ class TrollTokenSettings extends React.Component {
     ];
 
     const deleteActions = [
-      <FlatButton label="Confirm" onClick={this.handleConfirmDeleteToken} />,
-      <FlatButton label="Cancel" primary onClick={this.handleOnCancelDelete} />
+      <FlatButton
+        key="confirm"
+        label="Confirm"
+        onClick={this.handleConfirmDeleteToken}
+      />,
+      <FlatButton
+        key="cancel"
+        label="Cancel"
+        primary
+        onClick={this.handleOnCancelDelete}
+      />
     ];
 
     const errorActions = [
-      <FlatButton label="Ok" primary onClick={this.handleOnCancelError} />
+      <FlatButton
+        key="ok"
+        label="Ok"
+        primary
+        onClick={this.handleOnCancelError}
+      />
     ];
 
     return (
@@ -173,7 +192,6 @@ class TrollTokenSettings extends React.Component {
 }
 
 TrollTokenSettings.propTypes = {
-  match: PropTypes.object.isRequired,
   isActive: PropTypes.bool.isRequired,
   trollTokens: PropTypes.shape({
     trollTokens: PropTypes.arrayOf(

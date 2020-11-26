@@ -3,7 +3,7 @@ import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";
@@ -54,7 +54,7 @@ class JoinTeam extends React.Component {
       return (
         <div className={css(styles.greenBox)}>
           {this.state.errors.split("\n").map((part) => (
-            <p>{part}</p>
+            <p key={part}>{part}</p>
           ))}
         </div>
       );

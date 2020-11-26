@@ -24,10 +24,6 @@ const tagStyles = {
 };
 
 class TagSelector extends Component {
-  state = {
-    pendingTag: undefined
-  };
-
   // differentiate select and clear tag actions
   handleSelectChange = (tagsArray) => {
     const { dataSource, onChange } = this.props;

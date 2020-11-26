@@ -64,6 +64,7 @@ class AdminReplySender extends React.Component {
         <div className={css(styles.subtitle)}>
           {contact.messages.map((message) => (
             <div
+              key={message.id}
               className={
                 message.isFromContact
                   ? css(styles.fromContactMessage)
@@ -141,6 +142,7 @@ const queries = {
             cell
             messageStatus
             messages {
+              id
               text
               isFromContact
             }
@@ -157,12 +159,13 @@ const queries = {
 };
 
 const mutations = {
-  sendReply: (ownProps) => (contactId, message) => ({
+  sendReply: (_ownProps) => (contactId, message) => ({
     mutation: gql`
       mutation sendReply($contactId: String!, $message: String!) {
         sendReply(id: $contactId, message: $message) {
           id
           messages {
+            id
             text
             isFromContact
           }

@@ -18,6 +18,7 @@ class ApplyTagDialog extends Component {
   };
 
   componentWillMount() {
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.selectedTags = this.props.pendingNewTags;
   }
 
@@ -97,20 +98,34 @@ class ApplyTagDialog extends Component {
     const saveActions = shouldAllowUserToMoveOn
       ? [
           <FlatButton
+            key="save-with-message"
             label="Save and Type Message"
             primary
             onClick={this.handleApplyTags}
           />,
           <FlatButton
+            key="save-without-message"
             label="Save and Move On Without a Message"
             primary
             onClick={this.handleApplyTagsAndMoveOn}
           />
         ]
-      : [<FlatButton label="Save" primary onClick={this.handleApplyTags} />];
+      : [
+          <FlatButton
+            key="save"
+            label="Save"
+            primary
+            onClick={this.handleApplyTags}
+          />
+        ];
 
     const selectTagActions = saveActions.concat([
-      <FlatButton label="Cancel" primary onClick={this.props.onRequestClose} />
+      <FlatButton
+        key="save"
+        label="Cancel"
+        primary
+        onClick={this.props.onRequestClose}
+      />
     ]);
 
     return (

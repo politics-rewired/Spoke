@@ -29,8 +29,14 @@ export default class VersionNotifier extends React.Component {
     const isOpen = !isDismissed && newServerVersion !== undefined;
 
     const actions = [
-      <FlatButton label="Refresh Later" primary onClick={this.handleClose} />,
       <FlatButton
+        key="later"
+        label="Refresh Later"
+        primary
+        onClick={this.handleClose}
+      />,
+      <FlatButton
+        key="now"
         label="Refresh Now"
         primary
         keyboardFocused

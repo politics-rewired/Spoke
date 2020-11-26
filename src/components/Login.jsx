@@ -2,7 +2,7 @@ import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 
 import UserEdit, { UserEditMode } from "../containers/UserEdit";
 import theme from "../styles/theme";
@@ -58,7 +58,7 @@ class LocalLogin extends React.Component {
   constructor(props) {
     super(props);
 
-    const nextUrl = queryString.parse(location.search).nextUrl || "/";
+    const nextUrl = queryString.parse(window.location.search).nextUrl || "/";
     this.state = {
       active: nextUrl.includes("reset")
         ? UserEditMode.Reset
@@ -71,7 +71,7 @@ class LocalLogin extends React.Component {
   };
 
   naiveVerifyInviteValid = (nextUrl) =>
-    /\/\w{8}-(\w{4}\-){3}\w{12}(\/|$)/.test(nextUrl) ||
+    /\/\w{8}-(\w{4}-){3}\w{12}(\/|$)/.test(nextUrl) ||
     nextUrl.includes("invite");
 
   render() {
@@ -155,10 +155,11 @@ const Login = ({ location, history }) => {
     case "local":
       return <LocalLoginWrapper location={location} history={history} />;
 
-    default:
-      const { nextUrl } = queryString.parse(location.search);
+    default: {
+      const { nextUrl } = queryString.parse(window.location.search);
       window.AuthService.login(nextUrl);
       return <div />;
+    }
   }
 };
 

@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
 import Form from "react-formal";
-import { withRouter } from "react-router";
+import { withRouter } from "react-router-dom";
 import * as yup from "yup";
 
 import GSForm from "../components/forms/GSForm";
@@ -45,13 +45,11 @@ class CreateOrganization extends React.Component {
     name: yup.string().required()
   });
 
-  renderInvalid() {
-    return (
-      <div>
-        That invite is no longer valid. This probably means it already got used!
-      </div>
-    );
-  }
+  renderInvalid = () => (
+    <div>
+      That invite is no longer valid. This probably means it already got used!
+    </div>
+  );
 
   renderForm() {
     return (
@@ -137,7 +135,7 @@ const queries = {
         }
       }
     `,
-    options: (ownProps) => ({ fetchPolicy: "network-only" })
+    options: (_ownProps) => ({ fetchPolicy: "network-only" })
   }
 };
 
@@ -150,7 +148,7 @@ CreateOrganization.propTypes = {
 };
 
 const mutations = {
-  createOrganization: (ownProps) => (name, userId, inviteId) => ({
+  createOrganization: (_ownProps) => (name, userId, inviteId) => ({
     mutation: gql`
       mutation createOrganization(
         $name: String!

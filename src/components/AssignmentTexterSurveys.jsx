@@ -31,7 +31,7 @@ class AssignmentTexterSurveys extends Component {
     };
   }
 
-  getNextScript({ interactionStep, answerIndex }) {
+  getNextScript = ({ interactionStep, answerIndex }) => {
     const answerOption = interactionStep.question.answerOptions[answerIndex];
 
     const { nextInteractionStep } = answerOption;
@@ -40,7 +40,7 @@ class AssignmentTexterSurveys extends Component {
       return sample(scriptOptions);
     }
     return null;
-  }
+  };
 
   handleExpandChange = (newExpandedState) => {
     this.setState({ showAllQuestions: newExpandedState });
@@ -77,7 +77,7 @@ class AssignmentTexterSurveys extends Component {
     });
   };
 
-  renderAnswers(step) {
+  renderAnswers = (step) => {
     const menuItems = step.question.answerOptions.map((answerOption) => (
       <MenuItem
         key={answerOption.value}
@@ -96,7 +96,7 @@ class AssignmentTexterSurveys extends Component {
     );
 
     return menuItems;
-  }
+  };
 
   renderStep(step, isCurrentStep) {
     const { questionResponses } = this.props;

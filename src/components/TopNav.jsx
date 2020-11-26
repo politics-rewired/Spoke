@@ -42,38 +42,36 @@ const styles = StyleSheet.create({
   }
 });
 
-class TopNav extends React.Component {
-  render() {
-    const { backToURL, orgId, title } = this.props;
-    return (
-      <div className={css(styles.container)}>
-        <div className={css(styles.flexColumn)}>
-          <div className={css(styles.inline)}>
-            {backToURL && (
-              <Link to={backToURL}>
-                <IconButton>
-                  <ArrowBackIcon
-                    style={{ fill: "white" }}
-                    color={theme.colors.white}
-                  />
-                </IconButton>
-              </Link>
-            )}
-          </div>
-          <div className={css(styles.inline, styles.header)}>
-            {this.props.data && this.props.data.organization
-              ? `${this.props.data.organization.name} - `
-              : ""}
-            {title}
-          </div>
+const TopNav = (props) => {
+  const { backToURL, orgId, title } = props;
+  return (
+    <div className={css(styles.container)}>
+      <div className={css(styles.flexColumn)}>
+        <div className={css(styles.inline)}>
+          {backToURL && (
+            <Link to={backToURL}>
+              <IconButton>
+                <ArrowBackIcon
+                  style={{ fill: "white" }}
+                  color={theme.colors.white}
+                />
+              </IconButton>
+            </Link>
+          )}
         </div>
-        <div className={css(styles.userMenu)}>
-          <UserMenu orgId={orgId} />
+        <div className={css(styles.inline, styles.header)}>
+          {props.data && props.data.organization
+            ? `${props.data.organization.name} - `
+            : ""}
+          {title}
         </div>
       </div>
-    );
-  }
-}
+      <div className={css(styles.userMenu)}>
+        <UserMenu orgId={orgId} />
+      </div>
+    </div>
+  );
+};
 
 TopNav.propTypes = {
   backToURL: PropTypes.string,

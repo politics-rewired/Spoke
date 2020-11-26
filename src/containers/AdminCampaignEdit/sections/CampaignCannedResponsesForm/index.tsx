@@ -7,7 +7,6 @@ import RaisedButton from "material-ui/RaisedButton";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import React from "react";
 import { compose } from "recompose";
-import * as yup from "yup";
 
 import { CannedResponse } from "../../../../api/canned-response";
 import { LargeList } from "../../../../components/LargeList";
@@ -39,15 +38,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
     padding: 10
   }
-});
-
-const formSchema = yup.object({
-  cannedResponses: yup.array().of(
-    yup.object({
-      title: yup.string(),
-      text: yup.string()
-    })
-  )
 });
 
 interface Values {

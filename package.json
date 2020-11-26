@@ -103,6 +103,7 @@
     "graphql-tools": "^2.8.0",
     "graphql-type-json": "^0.1.4",
     "h": "^1.0.0",
+    "history": "^5.0.0",
     "hot-shots": "^6.3.0",
     "humps": "^1.1.0",
     "iconv-lite": "^0.5.1",

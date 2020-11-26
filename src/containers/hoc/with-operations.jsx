@@ -42,7 +42,7 @@ export const withMutations = (mutations = {}) =>
       const reducer = (propsAcc, [name, constructor]) => {
         propsAcc[name] = async (...args) => {
           const options = constructor(parentProps)(...args);
-          return await parentProps.client.mutate(options);
+          return parentProps.client.mutate(options);
         };
         return propsAcc;
       };
@@ -72,8 +72,8 @@ export const PrettyErrors = ({ errors }) => {
       <CardHeader title="Encountered errors" />
       <CardText>
         <ul>
-          {errors.map((err, index) => {
-            return <li key={index}>{formatErrorMessage(err.message)}</li>;
+          {errors.map((err) => {
+            return <li key={err.message}>{formatErrorMessage(err.message)}</li>;
           })}
         </ul>
       </CardText>

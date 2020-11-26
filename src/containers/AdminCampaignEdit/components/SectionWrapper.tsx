@@ -142,6 +142,7 @@ const SectionWrapper: React.SFC<WrapperProps> = (props) => {
   const handleDiscardJob = async () => {
     if (!jobId) return;
 
+    // eslint-disable-next-line no-alert,no-restricted-globals
     const didConfirm = confirm(
       "Discarding the job will not necessarily stop it from running." +
         " However, if the job failed, discarding will let you try again." +
@@ -326,11 +327,14 @@ export const asSection = (options: SectionOptions) => (
       const {
         expandableBySuperVolunteers,
         expandAfterCampaignStarts,
-        readinessName,
-        jobQueueNames
+        readinessName
       } = options;
-      const { status, jobs, adminPerms, mutations } = ownerProps;
-      const { deleteJob } = mutations;
+      const {
+        status,
+        jobs,
+        adminPerms,
+        mutations: { deleteJob }
+      } = ownerProps;
       const { isStarted, readiness } = status.campaign;
       const pendingJob = jobs ? jobs.campaign.pendingJobs[0] : undefined;
 

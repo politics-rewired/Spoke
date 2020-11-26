@@ -37,8 +37,10 @@ export const SelectExcludeCampaigns: React.SFC<SelectExcludeCampaignsProps> = (
     if (!Array.isArray(selectedOptions)) {
       return props.onChangeExcludedCamapignIds([]);
     }
-    const selectedCampaignIds = selectedOptions.map((option) => option.value);
-    props.onChangeExcludedCamapignIds(selectedCampaignIds);
+    const newSelectedCampaignIds = selectedOptions.map(
+      (option) => option.value
+    );
+    props.onChangeExcludedCamapignIds(newSelectedCampaignIds);
   };
 
   return (

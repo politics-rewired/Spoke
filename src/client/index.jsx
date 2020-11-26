@@ -1,4 +1,5 @@
 // Must be first imports
+// eslint-disable-next-line import/no-extraneous-dependencies
 import "react-hot-loader";
 
 import { StyleSheet } from "aphrodite";
