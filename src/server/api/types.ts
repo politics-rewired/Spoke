@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import { boolean, string } from "yup";
 
 export interface RelayPageArgs {
   after: string | null;
