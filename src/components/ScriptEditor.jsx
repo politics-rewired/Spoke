@@ -222,6 +222,7 @@ class ScriptEditor extends React.Component {
         </div>
         {this.renderCustomFields()}
         <div>
+          <br />
           Estimated Segments: {info.msgCount} <br />
           Characters left in current segment:{" "}
           {info.msgCount * info.charsPerSegment - info.charCount}

@@ -15,6 +15,8 @@ import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
 import GSFormField from "./GSFormField";
 import ScriptEditor from "../ScriptEditor";
+import ScriptLinkWarningDialog, { ScriptWarningContext } from '../ScriptLinkWarningDialog';
+import { getWarningContextForScript } from './utils'
 
 const styles = {
   dialog: {
@@ -25,7 +27,8 @@ const styles = {
 class GSScriptOptionsField extends GSFormField {
   state = {
     scriptTarget: undefined,
-    scriptDraft: ""
+    scriptDraft: "",
+    scriptWarningOpen: false
   };
 
   createDialogHandler = scriptVersion => event => {
@@ -51,6 +54,7 @@ class GSScriptOptionsField extends GSFormField {
       scriptDraft: ""
     });
 
+  // save script if no link warning is needed
   handleSaveScript = () => {
     const { value: scriptVersions } = this.props;
     const { scriptTarget, scriptDraft } = this.state;
@@ -67,9 +71,31 @@ class GSScriptOptionsField extends GSFormField {
     this.props.onChange(scriptVersions);
   };
 
+  // check draftScript for links, then save
+  wrapSaveScript = () => {
+    const { scriptDraft } = this.state;
+    const warningContext = getWarningContextForScript(scriptDraft);
+    
+    if (warningContext) {
+      this.setState({ scriptWarningOpen: true });
+    } else {
+      this.handleSaveScript();
+    }
+  }
+
+  // confirm draft with links, save script and close editor
+  handleConfirmLinkWarning = () => {
+    this.setState({ scriptWarningOpen: false }, () => this.handleSaveScript())
+  }
+
+  // cancel draft with links, reset script draft
+  handleCloseLinkWarning = () => {
+    this.setState({ scriptWarningOpen: false })
+  }
+
   renderDialog() {
     const { name, customFields, value: scriptVersions } = this.props;
-    const { scriptTarget, scriptDraft } = this.state;
+    const { scriptTarget, scriptDraft, scriptWarningOpen } = this.state;
     const scriptFields = allScriptFields(customFields);
 
     const draftVersionOccurences = scriptVersions.filter(
@@ -81,6 +107,8 @@ class GSScriptOptionsField extends GSFormField {
     // Script target could be "" which is falsey, so make explicit check against undefined
     const isDialogOpen = scriptTarget !== undefined;
 
+    const warningContext = getWarningContextForScript(scriptDraft)
+
     const actions = [
       <FlatButton
         {...dataTest("scriptCancel")}
@@ -90,7 +118,7 @@ class GSScriptOptionsField extends GSFormField {
       <RaisedButton
         {...dataTest("scriptDone")}
         label="Done"
-        onTouchTap={this.handleSaveScript}
+        onTouchTap={this.wrapSaveScript}
         primary={true}
         disabled={isDuplicate}
       />
@@ -113,6 +141,12 @@ class GSScriptOptionsField extends GSFormField {
           onChange={val => this.setState({ scriptDraft: val.trim() })}
         />
         {isDuplicate && <p>A script version with this text already exists!</p>}
+        <ScriptLinkWarningDialog
+          open={scriptWarningOpen}  
+          warningContext={warningContext} 
+          handleConfirm={this.handleConfirmLinkWarning} 
+          handleClose={this.handleCloseLinkWarning}
+        /> 
       </Dialog>
     );
   }
