@@ -11,43 +11,8 @@
 
 ## Instructions for Auth0 configuration variable setup
 
-- Create an Auth0 account - click [here to visit Auth0's website to signup](https://auth0.com/signup)
-- After logging in to account, click on `Clients`
-- Click on `+Create Client`
-- Create a name and click on click on `Single Page App` - click create
-- If it asks for `What technology are you using?` - click React
-- Click on `Settings` in the tabs
-- You should see 3 variables at the top you need for your Heroku app.
-
-  - `Domain name` will be the value to put into the value for `AUTH0_DOMAIN` in Heroku
-  - `Client ID` will be the value to put into the value for `AUTH0_CLIENT_ID` in Heroku
-  - `Client Secret` will be the value to put into the value for `AUTH0_CLIENT_SECRET` in Heroku
-
-- Scroll to `Allowed Callback URLs` section and update it with your HEROKU_APP_URL:
-
-  - `https://<YOUR_HEROKU_APP_URL>/login-callback, http://<YOUR_HEROKU_APP_URL>/login-callback`
-
-- Scroll to `Allowed Logout URLs` section and update it with (your HEROKU_APP_URL):
-
-  - `https://<YOUR_HEROKU_APP_URL>/logout-callback, http://<YOUR_HEROKU_APP_URL>/logout-callback`
-
-- Scroll to `Allowed Origin (CORS)` add:
-  - `http://*.<YOUR_HEROKU_APP_URL>.com`, `https://*.<YOUR_HEROKU_APP_URL>.com`
-- Scroll to `Allowed Web Origins` add:
-  - `http://<YOUR_HEROKU_APP_URL>.com`, `https://<YOUR_HEROKU_APP_URL>.com`
-- Scroll to bottom and click on `Advanced Settings`
-  - Click on `OAuth` - make sure `OIDC Conformant` is turned off
-- Then create a rule in Auth0:
-  - Click [here](https://manage.auth0.com/#/rules/create) to navigate to rule creation tab when logged into Auth0
-  - Note: name of rule can be anything
-  - Paste the following code in the box where it says `function`:
-    ```javascript
-    function (user, context, callback) {
-      context.idToken["https://spoke/user_metadata"] = user.user_metadata;
-      callback(null, user, context);
-    }
-    ```
-  - Now, it should only say the pasted code in the box. Click save.
+- Follow the instructions at [Auth0 for authentication](HOWTO-configure-auth0.md)
+  - Where the instructions mention `yourspoke.example.com`, replace it with `<YOUR SPOKE APP>.herokuapp.com` (or in production, possibly the domain you aliased to it in your DNS config)
 
 ## Notes about Twilio configuration variable setup
 
@@ -68,12 +33,12 @@ previous data. If you have existing data, please refer to Heroku docs on [how to
 If you have not used the app, after you've created the instance (filled out the variables, and 'deployed' it)
 follow these steps:
 
-1. Go to the 'Resources' tab for your app and scroll to the bottom
-2. Under 'Add-ons' to the right end of the "Heroku Postgres::Database" line, click the little up-down carrot
-3. Choose 'Remove' and follow the procedure for removal
-4. Then, in the 'Add-ons' search box (where it says 'Quickly add add-ons from Elements'), type "postgres"
-5. Choose the "Heroku Postgres" option and then choose the tier you desire (see Heroku Postgres tier documentation for details)
-6. At the very top of the page for your app, in the upper right click the 'More' button and choose 'Restart all dynos'
+1.  Go to the 'Resources' tab for your app and scroll to the bottom
+2.  Under 'Add-ons' to the right end of the "Heroku Postgres::Database" line, click the little up-down carrot
+3.  Choose 'Remove' and follow the procedure for removal
+4.  Then, in the 'Add-ons' search box (where it says 'Quickly add add-ons from Elements'), type "postgres"
+5.  Choose the "Heroku Postgres" option and then choose the tier you desire (see Heroku Postgres tier documentation for details)
+6.  At the very top of the page for your app, in the upper right click the 'More' button and choose 'Restart all dynos'
 
 ## Non-Twilio Processes/Dynos
 
