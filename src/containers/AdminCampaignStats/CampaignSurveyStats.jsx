@@ -1,12 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
 
-import { loadData } from "../hoc/with-operations";
 import Chart from "../../components/Chart";
-import CampaignStat from "./CampaignStat";
 import theme from "../../styles/theme";
+import { loadData } from "../hoc/with-operations";
+import CampaignStat from "./CampaignStat";
 
 const styles = StyleSheet.create({
   container: {

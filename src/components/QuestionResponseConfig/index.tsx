@@ -1,45 +1,44 @@
-import React from "react";
-import { compose } from "recompose";
-import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
-
+import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import { List } from "material-ui/List";
-import Avatar from "material-ui/Avatar";
 import RaisedButton from "material-ui/RaisedButton";
-import DoneIcon from "material-ui/svg-icons/action/done";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import AddBoxIcon from "material-ui/svg-icons/content/add-box";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
-import BrokenIcon from "material-ui/svg-icons/image/broken-image";
-import InfoIcon from "material-ui/svg-icons/action/info";
-import NotificationPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 import {
+  darkBlack,
   green200,
-  orange200,
   grey400,
-  red600,
-  darkBlack
+  orange200,
+  red600
 } from "material-ui/styles/colors";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
+import DoneIcon from "material-ui/svg-icons/action/done";
+import InfoIcon from "material-ui/svg-icons/action/info";
+import WarningIcon from "material-ui/svg-icons/alert/warning";
+import AddBoxIcon from "material-ui/svg-icons/content/add-box";
+import BrokenIcon from "material-ui/svg-icons/image/broken-image";
+import NotificationPausedIcon from "material-ui/svg-icons/social/notifications-paused";
+import React from "react";
+import { compose } from "recompose";
 
-import { RelayPaginatedResponse } from "../../api/pagination";
+import { ExternalActivistCode } from "../../api/external-activist-code";
+import { ExternalResultCode } from "../../api/external-result-code";
+import { ExternalSurveyQuestion } from "../../api/external-survey-question";
 import {
   ExternalSyncQuestionResponseConfig,
   isActivistCode,
   isResponseOption,
   isResultCode
 } from "../../api/external-sync-config";
-import { GET_SYNC_CONFIGS } from "../SyncConfigurationModal/queries";
-import { ExternalSurveyQuestion } from "../../api/external-survey-question";
-import { ExternalActivistCode } from "../../api/external-activist-code";
-import { ExternalResultCode } from "../../api/external-result-code";
+import { RelayPaginatedResponse } from "../../api/pagination";
 import { loadData } from "../../containers/hoc/with-operations";
 import { MutationMap } from "../../network/types";
+import AddMapping from "../AddMapping";
+import { GET_SYNC_CONFIGS } from "../SyncConfigurationModal/queries";
 import { ActivistCodeMapping } from "./components/ActivistCodeMapping";
 import { ResponseOptionMapping } from "./components/ResponseOptionMapping";
 import { ResultCodeMapping } from "./components/ResultCodeMapping";
-import AddMapping from "../AddMapping";
 
 interface HocProps {
   data: {};
@@ -80,6 +79,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
   };
 
   handleOnClickAddMapping = () => this.setState({ isAddMappingOpen: true });
+
   handleOnDismissAddMapping = () => this.setState({ isAddMappingOpen: false });
 
   render() {
@@ -98,7 +98,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
       interactionStep: { questionText }
     } = config;
 
-    const targets = config.targets;
+    const { targets } = config;
 
     const avatar = includesNotActive ? (
       <Avatar
@@ -140,7 +140,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
           title={questionResponseValue}
           subtitle={questionText}
           avatar={avatar}
-          showExpandableButton={true}
+          showExpandableButton
           closeIcon={isMissing ? <AddBoxIcon /> : <DeleteIcon color={red600} />}
         />
         {!isMissing && targets !== null && (
@@ -159,7 +159,8 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                         )}
                       />
                     );
-                  } else if (isActivistCode(target)) {
+                  }
+                  if (isActivistCode(target)) {
                     return (
                       <ActivistCodeMapping
                         key={target.id}
@@ -169,7 +170,8 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                         )}
                       />
                     );
-                  } else if (isResultCode(target)) {
+                  }
+                  if (isResultCode(target)) {
                     return (
                       <ResultCodeMapping
                         key={target.id}
@@ -193,7 +195,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
             )}
             <RaisedButton
               label="Add Mapping"
-              primary={true}
+              primary
               disabled={targets.length === 3}
               onClick={this.handleOnClickAddMapping}
             />

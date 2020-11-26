@@ -1,13 +1,12 @@
-import React, { Component } from "react";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
-
-import Paper from "material-ui/Paper";
-import TextField from "material-ui/TextField";
-import Toggle from "material-ui/Toggle";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
+import TextField from "material-ui/TextField";
+import Toggle from "material-ui/Toggle";
+import React, { Component } from "react";
 
 import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import CampaignPrefixSelector from "./CampaignPrefixSelector";
@@ -125,15 +124,11 @@ class AdminBulkScriptEditor extends Component {
 
     const flaggedCharacterActions = [
       <FlatButton label="Cancel" onClick={this.handleClose} />,
-      <FlatButton
-        label="Confirm"
-        primary={true}
-        onClick={this.handleConfirmSubmit}
-      />
+      <FlatButton label="Confirm" primary onClick={this.handleConfirmSubmit} />
     ];
 
     const dialogActions = [
-      <FlatButton label="OK" primary={true} onClick={this.handleClose} />
+      <FlatButton label="OK" primary onClick={this.handleClose} />
     ];
 
     return (
@@ -191,7 +186,7 @@ class AdminBulkScriptEditor extends Component {
         </Paper>
         <RaisedButton
           label={isSubmitting ? "Working..." : "Find & replace"}
-          primary={true}
+          primary
           disabled={isSubmitDisabled}
           onClick={this.handleSubmitJob}
         />

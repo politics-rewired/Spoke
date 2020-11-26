@@ -1,6 +1,6 @@
+import { css, StyleSheet } from "aphrodite";
 import React, { Component } from "react";
 import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
 
 const styles = StyleSheet.create({
   textField: {

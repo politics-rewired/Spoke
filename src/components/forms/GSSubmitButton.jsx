@@ -1,7 +1,7 @@
+import CircularProgress from "material-ui/CircularProgress";
+import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React from "react";
-import RaisedButton from "material-ui/RaisedButton";
-import CircularProgress from "material-ui/CircularProgress";
 
 const styles = {
   button: {

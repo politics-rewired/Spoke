@@ -1,8 +1,8 @@
-import { RelayPaginatedResponse } from "./pagination";
-import { ExternalList } from "./external-list";
-import { ExternalSurveyQuestion } from "./external-survey-question";
 import { ExternalActivistCode } from "./external-activist-code";
+import { ExternalList } from "./external-list";
 import { ExternalResultCode } from "./external-result-code";
+import { ExternalSurveyQuestion } from "./external-survey-question";
+import { RelayPaginatedResponse } from "./pagination";
 
 export enum ExternalSystemType {
   VAN = "VAN"

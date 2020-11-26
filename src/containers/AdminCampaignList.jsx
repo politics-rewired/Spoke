@@ -1,23 +1,22 @@
-import PropTypes from "prop-types";
-import React from "react";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
 import gql from "graphql-tag";
-
+import { TextField, Toggle } from "material-ui";
+import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
+import FloatingActionButton from "material-ui/FloatingActionButton";
 import { MenuItem } from "material-ui/Menu";
 import RaisedButton from "material-ui/RaisedButton";
-import Dialog from "material-ui/Dialog";
-import { TextField, Toggle } from "material-ui";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import ContentAdd from "material-ui/svg-icons/content/add";
+import PropTypes from "prop-types";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 
-import { loadData } from "./hoc/with-operations";
-import { dataTest } from "../lib/attributes";
 import { withAuthzContext } from "../components/AuthzProvider";
 import LoadingIndicator from "../components/LoadingIndicator";
-import CampaignList from "./CampaignList";
+import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
+import CampaignList from "./CampaignList";
+import { loadData } from "./hoc/with-operations";
 
 const styles = {
   flexContainer: {
@@ -190,6 +189,7 @@ class AdminCampaignList extends React.Component {
       </DropDownMenu>
     );
   }
+
   render() {
     const {
       pageSize,
@@ -211,7 +211,7 @@ class AdminCampaignList extends React.Component {
           Page Size:
           {this.renderPageSizeOptions()}
           Page: {this.renderPagesDropdown()}
-          <RaisedButton onClick={this.startReleasingAllReplies} primary={true}>
+          <RaisedButton onClick={this.startReleasingAllReplies} primary>
             Release All Unhandled Replies
           </RaisedButton>
         </div>
@@ -219,7 +219,7 @@ class AdminCampaignList extends React.Component {
           <Dialog
             title="Release All Unhandled Replies"
             modal={false}
-            open={true}
+            open
             onRequestClose={this.closeReleasingAllReplies}
             actions={
               releasingInProgress
@@ -239,7 +239,7 @@ class AdminCampaignList extends React.Component {
                     <RaisedButton
                       label="Release"
                       onClick={this.releaseAllReplies}
-                      primary={true}
+                      primary
                     />
                   ]
             }
@@ -278,10 +278,7 @@ class AdminCampaignList extends React.Component {
                 contact's timezone? If unchecked, replies will be released for
                 contacts that may not be textable until later today or until
                 tomorrow.
-                <Toggle
-                  ref="limitToCurrentlyTextableContacts"
-                  defaultToggled={true}
-                />
+                <Toggle ref="limitToCurrentlyTextableContacts" defaultToggled />
               </div>
             ) : (
               <div />

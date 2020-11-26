@@ -1,6 +1,6 @@
-import React from "react";
-import SelectField from "material-ui/SelectField";
 import { MenuItem } from "material-ui/Menu";
+import SelectField from "material-ui/SelectField";
+import React from "react";
 
 import GSFormField from "./GSFormField";
 

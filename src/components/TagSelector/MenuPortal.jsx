@@ -1,6 +1,6 @@
+import PropTypes from "prop-types";
 import React, { PureComponent } from "react";
 import { Portal } from "react-portal";
-import PropTypes from "prop-types";
 
 const coercePlacement = (p) => (p === "auto" ? "bottom" : p);
 
@@ -11,8 +11,8 @@ const menuPortalCSS = ({
   placement,
   isFixed
 }) => {
-  let containerLeft = 0,
-    containerTop = 0;
+  let containerLeft = 0;
+  let containerTop = 0;
 
   if (appendTo) {
     const { left, top } = appendTo.getBoundingClientRect();
@@ -70,6 +70,7 @@ class MenuPortal extends PureComponent {
       this.setState({ placement });
     }
   };
+
   render() {
     const {
       appendTo,

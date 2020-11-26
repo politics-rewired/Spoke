@@ -1,23 +1,22 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import moment from "moment";
-
-import { List, ListItem } from "material-ui/List";
+import Chip from "material-ui/Chip";
 import IconButton from "material-ui/IconButton";
 import IconMenu from "material-ui/IconMenu";
+import { List, ListItem } from "material-ui/List";
 import MenuItem from "material-ui/MenuItem";
-import Chip from "material-ui/Chip";
+import { blue300, grey900, red300 } from "material-ui/styles/colors";
 import SpeakerNotesIcon from "material-ui/svg-icons/action/speaker-notes";
-import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ArchiveIcon from "material-ui/svg-icons/content/archive";
 import UnarchiveIcon from "material-ui/svg-icons/content/unarchive";
-import { red300, grey900, blue300 } from "material-ui/styles/colors";
+import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
+import { withRouter } from "react-router";
 
-import theme from "../../styles/theme";
 import Empty from "../../components/Empty";
 import { dataTest } from "../../lib/attributes";
+import theme from "../../styles/theme";
 
 const inlineStyles = {
   chipWrapper: {
@@ -124,7 +123,7 @@ export class CampaignList extends React.Component {
     } = campaign;
 
     let listItemStyle = {};
-    let leftIcon = undefined;
+    let leftIcon;
     if (isArchived) {
       listItemStyle = inlineStyles.past;
     } else if (!isStarted || hasUnassignedContacts) {

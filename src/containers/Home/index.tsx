@@ -1,14 +1,14 @@
-import React from "react";
-import { History } from "history";
-import { withRouter } from "react-router";
+import { css, StyleSheet } from "aphrodite";
 import { ApolloQueryResult } from "apollo-client";
-import { compose } from "react-apollo";
 import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
+import { History } from "history";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 
-import { loadData } from "../hoc/with-operations";
-import theme from "../../styles/theme";
 import SuperAdminLogin from "../../components/SuperAdminLogin";
+import theme from "../../styles/theme";
+import { loadData } from "../hoc/with-operations";
 import OrganizationList from "./components/OrganizationList";
 
 const styles = StyleSheet.create({

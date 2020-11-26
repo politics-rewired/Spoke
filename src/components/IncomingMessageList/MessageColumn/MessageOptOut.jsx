@@ -1,10 +1,9 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
+import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import Dialog from "material-ui/Dialog";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import {
   formatErrorMessage,
@@ -36,15 +35,11 @@ class MessageOptOut extends Component {
       "Are you sure you would like to opt this contact back in? " +
       "This will mean they can receive texts from all campaigns.";
     const dialogActions = [
-      <FlatButton
-        label="Cancel"
-        primary={true}
-        onClick={this.handleCloseAlert}
-      />,
+      <FlatButton label="Cancel" primary onClick={this.handleCloseAlert} />,
       <FlatButton
         label="Submit"
-        primary={true}
-        keyboardFocused={true}
+        primary
+        keyboardFocused
         onClick={this.handleClickOptIn}
       />
     ];
@@ -56,8 +51,8 @@ class MessageOptOut extends Component {
   };
 
   handleClickOptIn = async () => {
-    const { contact } = this.props,
-      { cell } = contact;
+    const { contact } = this.props;
+    const { cell } = contact;
 
     this.setState({ isMakingRequest: true });
 
@@ -70,11 +65,7 @@ class MessageOptOut extends Component {
       this.handleCloseAlert();
     } catch (error) {
       const dialogActions = [
-        <FlatButton
-          label="Close"
-          primary={true}
-          onClick={this.handleCloseAlert}
-        />
+        <FlatButton label="Close" primary onClick={this.handleCloseAlert} />
       ];
       this.setState({
         dialogTitle: "Error Submitting",
@@ -105,11 +96,7 @@ class MessageOptOut extends Component {
       this.props.optOutChanged(true);
     } catch (error) {
       const dialogActions = [
-        <FlatButton
-          label="Close"
-          primary={true}
-          onClick={this.handleCloseAlert}
-        />
+        <FlatButton label="Close" primary onClick={this.handleCloseAlert} />
       ];
       this.setState({
         dialogTitle: "Error Opting Out",
@@ -146,7 +133,7 @@ class MessageOptOut extends Component {
             {!isOptedOut && (
               <RaisedButton
                 label="Opt-Out"
-                secondary={true}
+                secondary
                 disabled={this.state.isMakingRequest}
                 onClick={this.handleClickOptOut}
               />

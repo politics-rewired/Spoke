@@ -1,12 +1,11 @@
-import React from "react";
-import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
 import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import Toggle from "material-ui/Toggle";
-import MenuItem from "material-ui/MenuItem";
-import FlatButton from "material-ui/FlatButton";
+import React from "react";
 
 import { loadData } from "../hoc/with-operations";
 
@@ -76,11 +75,7 @@ class VanExportModal extends React.Component<InnerProps, State> {
 
     const actions = [
       <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
-      <FlatButton
-        label="Export"
-        primary={true}
-        onClick={this.handleOnConfirm}
-      />
+      <FlatButton label="Export" primary onClick={this.handleOnConfirm} />
     ];
 
     return (

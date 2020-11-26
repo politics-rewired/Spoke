@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+
 import DisplayLink from "./DisplayLink";
 
 const OrganizationJoinLink = ({ organizationUuid, campaignId }) => {

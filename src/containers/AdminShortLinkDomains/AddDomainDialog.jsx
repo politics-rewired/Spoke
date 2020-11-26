@@ -1,10 +1,9 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 class AddDomainDialog extends Component {
   state = {
@@ -13,6 +12,7 @@ class AddDomainDialog extends Component {
   };
 
   handleDomainChange = (event) => this.setState({ domain: event.target.value });
+
   handleMaxUsageCountChange = (event) =>
     this.setState({ maxUsageCount: parseInt(event.target.value, 10) });
 
@@ -34,7 +34,7 @@ class AddDomainDialog extends Component {
       <FlatButton label="Close" primary={false} onClick={onRequestClose} />,
       <RaisedButton
         label="Add"
-        primary={true}
+        primary
         disabled={isSubmitDisabled}
         onClick={this.handleAddDomainClick}
       />

@@ -1,11 +1,10 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
-import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import MenuItem from "material-ui/MenuItem";
+import SelectField from "material-ui/SelectField";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import {
   formatErrorMessage,
@@ -44,7 +43,7 @@ class ManageSurveyResponses extends Component {
       const children = interactionSteps.filter(
         (iStep) => iStep.parentInteractionId === currentStep.id
       );
-      iSteps.push(Object.assign({}, currentStep, { children }));
+      iSteps.push({ ...currentStep, children });
       const value = questionResponses[currentStep.id];
       currentStep = value
         ? // Only show actionable questions
@@ -64,7 +63,7 @@ class ManageSurveyResponses extends Component {
     return async (event, index, value) => {
       this.setState({ isMakingRequest: true });
       const { contact } = this.props;
-      let { questionResponses } = this.state;
+      const { questionResponses } = this.state;
       const affectedSteps = this.getResponsesFrom(iStepId);
 
       try {
@@ -105,7 +104,7 @@ class ManageSurveyResponses extends Component {
     const { interactionSteps } = this.props.campaign;
     const { isMakingRequest, questionResponses } = this.state;
 
-    let startingStep = interactionSteps.find(
+    const startingStep = interactionSteps.find(
       (iStep) => iStep.parentInteractionId === null
     );
 
@@ -119,7 +118,7 @@ class ManageSurveyResponses extends Component {
     }
 
     const errorActions = [
-      <FlatButton label="OK" primary={true} onClick={this.handleCloseError} />
+      <FlatButton label="OK" primary onClick={this.handleCloseError} />
     ];
 
     return (

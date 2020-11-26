@@ -1,12 +1,11 @@
+import sample from "lodash/sample";
+import { Card, CardHeader, CardText } from "material-ui/Card";
+import Divider from "material-ui/Divider";
+import MenuItem from "material-ui/MenuItem";
+import SelectField from "material-ui/SelectField";
+import { grey50 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import sample from "lodash/sample";
-
-import { grey50 } from "material-ui/styles/colors";
-import { Card, CardHeader, CardText } from "material-ui/Card";
-import MenuItem from "material-ui/MenuItem";
-import Divider from "material-ui/Divider";
-import SelectField from "material-ui/SelectField";
 
 const styles = {
   root: {},
@@ -87,7 +86,7 @@ class AssignmentTexterSurveys extends Component {
       />
     ));
 
-    menuItems.push(<Divider key={"divider"} />);
+    menuItems.push(<Divider key="divider" />);
     menuItems.push(
       <MenuItem
         key="clear"

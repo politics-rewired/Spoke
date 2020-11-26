@@ -1,12 +1,11 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
 import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import TagSelector from "../../components/TagSelector";
 import ApplyTagConfirmationDialog from "../../components/ApplyTagConfirmationDialog";
+import TagSelector from "../../components/TagSelector";
 
 const isEscalateTag = (t) => t.title === "Escalated" || t.title === "Escalate";
 const isNonAssignableTagApplied = (appliedTags) =>
@@ -126,7 +125,7 @@ class ApplyTagDialog extends Component {
           {!!escalateTag && (
             <RaisedButton
               buttonStyle={{ paddingLeft: 20, paddingRight: 20 }}
-              secondary={true}
+              secondary
               onClick={this.handleAddEscalatedTag}
             >
               Escalate Conversation

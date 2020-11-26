@@ -1,9 +1,10 @@
 import express from "express";
-const router = express.Router();
 
 import logger from "../../logger";
-import { errToObj } from "../utils";
 import assembleNumbers from "../api/lib/assemble-numbers";
+import { errToObj } from "../utils";
+
+const router = express.Router();
 
 router.post(
   "/assemble-numbers",

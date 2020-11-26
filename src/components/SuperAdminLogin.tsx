@@ -1,9 +1,8 @@
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import TextField from "material-ui/TextField";
 import React from "react";
 import request from "superagent";
-
-import Dialog from "material-ui/Dialog";
-import TextField from "material-ui/TextField";
-import FlatButton from "material-ui/FlatButton";
 
 interface SuperAdminLoginProps {
   onLoginComplete(): void;
@@ -94,7 +93,7 @@ class SuperAdminLogin extends React.Component<
     const actions = [
       <FlatButton
         label="Go"
-        primary={true}
+        primary
         disabled={isWorking || !hasText}
         onClick={this.handleSubmit}
       />
@@ -112,7 +111,7 @@ class SuperAdminLogin extends React.Component<
           errorText={error}
           type="password"
           value={superAdminToken}
-          fullWidth={true}
+          fullWidth
           onChange={this.handleOnChangeSecret}
         />
         <TextField

@@ -1,7 +1,7 @@
 import { config } from "../../config";
 import logger from "../../logger";
-import s3 from "./s3";
 import gsJson from "./gs-json";
+import s3 from "./s3";
 import { StorageBackend } from "./types";
 
 const validAwsCredentials =
@@ -15,7 +15,7 @@ const validGcpConfig =
   config.EXPORT_DRIVER === "gs-json" && valudGcpCredentials;
 
 const exporters: { [key: string]: StorageBackend } = {
-  s3: s3,
+  s3,
   "gs-json": gsJson
 };
 

@@ -1,7 +1,6 @@
-import React from "react";
-import { StyleSheet, css } from "aphrodite";
-
+import { css, StyleSheet } from "aphrodite";
 import TextField from "material-ui/TextField";
+import React from "react";
 
 import theme from "../../../../../styles/theme";
 
@@ -29,7 +28,7 @@ const validateSql = (sql: string) => {
   const requiredFields = ["first_name", "last_name", "cell"];
   requiredFields.forEach((f) => {
     if (sql.indexOf(f) === -1) {
-      errors.push('"' + f + '" is a required column');
+      errors.push(`"${f}" is a required column`);
     }
   });
   if (sql.indexOf(";") >= 0) {
@@ -103,8 +102,8 @@ class ContactsSqlForm extends React.Component<
           hintText="Enter your query here"
           errorText={sqlError}
           value={pendingSql}
-          fullWidth={true}
-          multiLine={true}
+          fullWidth
+          multiLine
           rows={5}
           onChange={this.handleSqlTextChange}
         />

@@ -1,10 +1,9 @@
+import gql from "graphql-tag";
+import Divider from "material-ui/Divider";
+import MenuItem from "material-ui/MenuItem";
+import SelectField from "material-ui/SelectField";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import gql from "graphql-tag";
-
-import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
-import Divider from "material-ui/Divider";
 
 import { loadData } from "./hoc/with-operations";
 

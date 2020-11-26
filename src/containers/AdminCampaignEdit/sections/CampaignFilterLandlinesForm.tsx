@@ -1,10 +1,9 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
 import RaisedButton from "material-ui/RaisedButton";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
+import React from "react";
+import { compose } from "recompose";
 
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -91,7 +90,7 @@ class FilterLandlinesForm extends React.Component<Props, State> {
         />
         {!landlinesFiltered ? (
           <RaisedButton
-            label={"Filter Landlines"}
+            label="Filter Landlines"
             onClick={this.filterLandlines}
             disabled={isWorking}
           />

@@ -1,6 +1,6 @@
-import React from "react";
+import { Card, CardText, CardTitle } from "material-ui/Card";
 import PropTypes from "prop-types";
-import { Card, CardTitle, CardText } from "material-ui/Card";
+import React from "react";
 
 const TexterFaqs = ({ faqs }) => {
   return (

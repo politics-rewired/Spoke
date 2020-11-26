@@ -1,6 +1,6 @@
-import { MessagingServiceType } from "../api/types";
 import { processDeliveryReport as processAssembleDeliveryReport } from "../api/lib/assemble-numbers";
 import { processDeliveryReport as processTwilioDeliveryReport } from "../api/lib/twilio";
+import { MessagingServiceType } from "../api/types";
 
 export const handleDeliveryReport = async (payload: any, _helpers: any) => {
   const { service_type, body: stringBody } = payload;

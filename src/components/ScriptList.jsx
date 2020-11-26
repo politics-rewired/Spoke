@@ -1,14 +1,13 @@
-import PropTypes from "prop-types";
-import React from "react";
 import gql from "graphql-tag";
-import Form from "react-formal";
-
+import Dialog from "material-ui/Dialog";
+import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import { List, ListItem } from "material-ui/List";
 import Subheader from "material-ui/Subheader";
-import Divider from "material-ui/Divider";
-import Dialog from "material-ui/Dialog";
 import CreateIcon from "material-ui/svg-icons/content/create";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
 
 import { withOperations } from "../containers/hoc/with-operations";
 import CannedResponseForm from "./CannedResponseForm";

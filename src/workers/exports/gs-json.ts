@@ -1,7 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 
-import { StorageBackend } from "./types";
 import { config } from "../../config";
+import { StorageBackend } from "./types";
 
 const fetchKeys = () => {
   const keysEnvVar = config.GOOGLE_APPLICATION_CREDENTIALS;
@@ -14,7 +14,7 @@ const fetchKeys = () => {
   return keys;
 };
 
-let _storage: Storage | undefined = undefined;
+let _storage: Storage | undefined;
 const storage = (): Storage => {
   if (_storage === undefined) {
     const keys = fetchKeys();

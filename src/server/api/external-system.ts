@@ -1,6 +1,6 @@
-import { sqlResolvers } from "./lib/utils";
-import { formatPage } from "./lib/pagination";
 import { r } from "../models";
+import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
 import { RelayPageArgs } from "./types";
 
 export enum ExternalSystemType {

@@ -1,7 +1,6 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import uniqBy from "lodash/uniqBy";
-
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 import CreatableSelect from "react-select/lib/Creatable";
 
 const components = {

@@ -1,12 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import gql from "graphql-tag";
-import { withRouter } from "react-router";
 import { compose } from "react-apollo";
-import { StyleSheet, css } from "aphrodite";
+import { withRouter } from "react-router";
 
-import { loadData } from "./hoc/with-operations";
 import theme from "../styles/theme";
+import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({
   greenBox: {
@@ -18,6 +18,7 @@ class JoinTeam extends React.Component {
   state = {
     errors: null
   };
+
   async componentWillMount() {
     let organization = null;
     let campaign = null;

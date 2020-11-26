@@ -1,15 +1,14 @@
-import React from "react";
 import gql from "graphql-tag";
-import moment from "moment";
-
 import DataTable from "material-ui-datatables";
 import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
+import moment from "moment";
+import React from "react";
 
-import { loadData } from "../../hoc/with-operations";
 import LoadingIndicator from "../../../components/LoadingIndicator";
+import { loadData } from "../../hoc/with-operations";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100];
 
@@ -183,7 +182,7 @@ class CampaignOverlapManager extends React.Component {
                 ? "Delete Selected"
                 : `Delete ${selectedCampaignIds.size} Selected`
             }
-            secondary={true}
+            secondary
             disabled={isDeleteAllDisabled}
             onClick={this.handleDeleteAllSelected}
           />
@@ -327,7 +326,7 @@ class StateWrapper extends React.Component {
     return (
       <div>
         <Toggle
-          label={"Include archived campaigns"}
+          label="Include archived campaigns"
           onToggle={this.handleAutoReleaseToggle}
           toggled={includeArchived}
         />

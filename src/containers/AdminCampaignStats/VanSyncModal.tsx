@@ -1,20 +1,22 @@
-import React from "react";
-import { History } from "history";
-import { withRouter } from "react-router";
-import { compose } from "recompose";
-import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
+import { History } from "history";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import { red500, green300 } from "material-ui/styles/colors";
+import { green300, red500 } from "material-ui/styles/colors";
+import React from "react";
+import { withRouter } from "react-router";
+import { compose } from "recompose";
 
-import { ExternalSyncReadinessState } from "../../api/campaign";
-import { loadData } from "../hoc/with-operations";
-import { QueryMap, MutationMap } from "../../network/types";
-import { Campaign, JobRequest } from "../../api/campaign";
+import {
+  Campaign,
+  ExternalSyncReadinessState,
+  JobRequest
+} from "../../api/campaign";
 import SyncConfigurationModal from "../../components/SyncConfigurationModal";
+import { MutationMap, QueryMap } from "../../network/types";
+import { loadData } from "../hoc/with-operations";
 
 interface JobRequestResult {
   message: string;
@@ -92,6 +94,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
 
   handleOnClickConfigureMapping = async () =>
     this.setState({ isMappingOpen: true });
+
   handleOnDismissConfigureMapping = async () =>
     this.setState({ isMappingOpen: false });
 
@@ -143,7 +146,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
       <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
       <FlatButton
         label="Sync"
-        primary={true}
+        primary
         disabled={isSyncDisabled}
         onClick={this.handleOnConfirmSync}
       />
@@ -180,7 +183,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
             ]}
             <RaisedButton
               label="Cancel Sync"
-              primary={true}
+              primary
               onClick={this.handleOnCancelSync(latestSyncAttempt.id)}
             />
             <br />
@@ -219,7 +222,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
           <RaisedButton
             key="2"
             label="Edit Campaign"
-            primary={true}
+            primary
             disabled={isSyncing}
             onClick={this.handleOnClickSetIntegration}
           />
@@ -227,7 +230,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
         {syncReadiness !== ExternalSyncReadinessState.MISSING_SYSTEM && (
           <RaisedButton
             label="Configure Mapping"
-            primary={true}
+            primary
             disabled={isSyncing}
             onClick={this.handleOnClickConfigureMapping}
           />

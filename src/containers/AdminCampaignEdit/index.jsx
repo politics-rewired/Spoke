@@ -1,37 +1,36 @@
+import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
+import Avatar from "material-ui/Avatar";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
+import CircularProgress from "material-ui/CircularProgress";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import { red600 } from "material-ui/styles/colors";
+import DoneIcon from "material-ui/svg-icons/action/done";
+import WarningIcon from "material-ui/svg-icons/alert/warning";
+import CancelIcon from "material-ui/svg-icons/navigation/cancel";
+import moment from "moment";
 import PropTypes from "prop-types";
+import queryString from "query-string";
 import React from "react";
 import { compose } from "react-apollo";
-import gql from "graphql-tag";
-import queryString from "query-string";
-import isEqual from "lodash/isEqual";
-import moment from "moment";
-
-import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
-import Dialog from "material-ui/Dialog";
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import Avatar from "material-ui/Avatar";
-import CircularProgress from "material-ui/CircularProgress";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
-import DoneIcon from "material-ui/svg-icons/action/done";
-import CancelIcon from "material-ui/svg-icons/navigation/cancel";
-import { red600 } from "material-ui/styles/colors";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
-import { loadData } from "../hoc/with-operations";
-import { dataTest, camelCase } from "../../lib/attributes";
+import { camelCase, dataTest } from "../../lib/attributes";
 import theme from "../../styles/theme";
+import { loadData } from "../hoc/with-operations";
+import CampaignAutoassignModeForm from "./sections/CampaignAutoassignModeForm";
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
+import CampaignCannedResponsesForm from "./sections/CampaignCannedResponsesForm";
 import CampaignContactsForm from "./sections/CampaignContactsForm";
 import CampaignFilterLandlinesForm from "./sections/CampaignFilterLandlinesForm";
-import CampaignTextersForm from "./sections/CampaignTextersForm";
-import CampaignOverlapManager from "./sections/CampaignOverlapManager";
-import CampaignInteractionStepsForm from "./sections/CampaignInteractionStepsForm";
-import CampaignCannedResponsesForm from "./sections/CampaignCannedResponsesForm";
-import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
-import CampaignAutoassignModeForm from "./sections/CampaignAutoassignModeForm";
-import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 import CampaignIntegrationForm from "./sections/CampaignIntegrationForm";
+import CampaignInteractionStepsForm from "./sections/CampaignInteractionStepsForm";
+import CampaignOverlapManager from "./sections/CampaignOverlapManager";
+import CampaignTeamsForm from "./sections/CampaignTeamsForm";
+import CampaignTextersForm from "./sections/CampaignTextersForm";
+import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
 
 const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
 
@@ -93,7 +92,7 @@ class AdminCampaignEdit extends React.Component {
     const isNew = queryString.parse(props.location.search).new;
     this.state = {
       expandedSection: isNew ? 0 : null,
-      campaignFormValues: Object.assign({}, props.campaignData.campaign),
+      campaignFormValues: { ...props.campaignData.campaign },
       startingCampaign: false,
       isWorking: false,
       requestError: undefined
@@ -148,7 +147,7 @@ class AdminCampaignEdit extends React.Component {
     }
 
     this.setState({
-      campaignFormValues: Object.assign({}, pushToFormValues)
+      campaignFormValues: { ...pushToFormValues }
     });
   }
 
@@ -265,10 +264,9 @@ class AdminCampaignEdit extends React.Component {
         }));
       }
       if (newCampaign.hasOwnProperty("interactionSteps")) {
-        newCampaign.interactionSteps = Object.assign(
-          {},
-          newCampaign.interactionSteps
-        );
+        newCampaign.interactionSteps = {
+          ...newCampaign.interactionSteps
+        };
       }
 
       this.setState({ isWorking: true });
@@ -536,7 +534,7 @@ class AdminCampaignEdit extends React.Component {
   }
 
   sectionSaveStatus(section) {
-    const pendingJobs = this.props.pendingJobsData.campaign.pendingJobs;
+    const { pendingJobs } = this.props.pendingJobsData.campaign;
     let sectionIsSaving = false;
     let relatedJob = null;
     let savePercent = 0;
@@ -743,6 +741,7 @@ class AdminCampaignEdit extends React.Component {
   handleCloseError = () => this.setState({ requestError: undefined });
 
   handleSectionError = (requestError) => this.setState({ requestError });
+
   handleExpandChange = (sectionIndex) => (isExpended) =>
     this.onExpandChange(sectionIndex, isExpended);
 
@@ -755,7 +754,7 @@ class AdminCampaignEdit extends React.Component {
     const saveLabel = isNew ? "Save and goto next section" : "Save";
 
     const errorActions = [
-      <FlatButton label="Ok" primary={true} onClick={this.handleCloseError} />
+      <FlatButton label="Ok" primary onClick={this.handleCloseError} />
     ];
 
     return (
@@ -890,9 +889,8 @@ class AdminCampaignEdit extends React.Component {
 function extractStageAndStatus(percentComplete) {
   if (percentComplete > 100) {
     return `Filtering out landlines. ${percentComplete - 100}% complete`;
-  } else {
-    return `Uploading. ${percentComplete}% complete`;
   }
+  return `Uploading. ${percentComplete}% complete`;
 }
 
 AdminCampaignEdit.propTypes = {

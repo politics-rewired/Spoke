@@ -1,19 +1,18 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import FloatingActionButton from "material-ui/FloatingActionButton";
 import RaisedButton from "material-ui/RaisedButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 import CloudUploadIcon from "material-ui/svg-icons/file/cloud-upload";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import { withOperations } from "../hoc/with-operations";
-import theme from "../../styles/theme";
 import LoadingIndicator from "../../components/LoadingIndicator";
-import ShortLinkDomainList from "./ShortLinkDomainList";
+import theme from "../../styles/theme";
+import { withOperations } from "../hoc/with-operations";
 import AddDomainDialog from "./AddDomainDialog";
+import ShortLinkDomainList from "./ShortLinkDomainList";
 
 class AdminShortLinkDomains extends Component {
   state = {
@@ -48,6 +47,7 @@ class AdminShortLinkDomains extends Component {
   handleErrorDialogClose = () => this.setState({ webRequestError: undefined });
 
   handleAddDomainClick = () => this.setState({ showAddDomainDialog: true });
+
   handleAddDomainDialogClose = () =>
     this.setState({ showAddDomainDialog: false });
 
@@ -69,6 +69,7 @@ class AdminShortLinkDomains extends Component {
 
   handleConfirmDeleteDomain = (warnDeleteDomainId) =>
     this.setState({ warnDeleteDomainId });
+
   handleCancelDeleteDomain = () =>
     this.setState({ warnDeleteDomainId: undefined });
 
@@ -123,19 +124,11 @@ class AdminShortLinkDomains extends Component {
         primary={false}
         onClick={this.handleCancelDeleteDomain}
       />,
-      <RaisedButton
-        label="Delete"
-        primary={true}
-        onClick={this.handleDeleteDomain}
-      />
+      <RaisedButton label="Delete" primary onClick={this.handleDeleteDomain} />
     ];
 
     const errorActions = [
-      <FlatButton
-        label="Close"
-        primary={true}
-        onClick={this.handleErrorDialogClose}
-      />
+      <FlatButton label="Close" primary onClick={this.handleErrorDialogClose} />
     ];
 
     return (
@@ -163,7 +156,7 @@ class AdminShortLinkDomains extends Component {
             title="Confirm Delete Domain"
             actions={deleteDomainActions}
             modal={false}
-            open={true}
+            open
             onRequestClose={this.handleCancelDeleteDomain}
           >
             Are you sure you want to delete the short link domain{" "}
@@ -175,7 +168,7 @@ class AdminShortLinkDomains extends Component {
             title="Error Completing Request"
             actions={errorActions}
             modal={false}
-            open={true}
+            open
             onRequestClose={this.handleErrorDialogClose}
           >
             {webRequestError.message}

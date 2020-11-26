@@ -1,7 +1,6 @@
-import React from "react";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import React from "react";
 
 import { eventBus, EventTypes } from "./events";
 
@@ -30,15 +29,11 @@ export default class VersionNotifier extends React.Component {
     const isOpen = !isDismissed && newServerVersion !== undefined;
 
     const actions = [
-      <FlatButton
-        label="Refresh Later"
-        primary={true}
-        onClick={this.handleClose}
-      />,
+      <FlatButton label="Refresh Later" primary onClick={this.handleClose} />,
       <FlatButton
         label="Refresh Now"
-        primary={true}
-        keyboardFocused={true}
+        primary
+        keyboardFocused
         onClick={this.handleRefreshNow}
       />
     ];
@@ -47,7 +42,7 @@ export default class VersionNotifier extends React.Component {
       <Dialog
         title="New Spoke Version Available"
         actions={actions}
-        modal={true}
+        modal
         open={isOpen}
         onRequestClose={this.handleClose}
       >

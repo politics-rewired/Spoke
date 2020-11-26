@@ -1,14 +1,14 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import * as yup from "yup";
 import Form from "react-formal";
-import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
+import * as yup from "yup";
 
-import { loadData } from "./hoc/with-operations";
+import GSForm from "../components/forms/GSForm";
 import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
-import GSForm from "../components/forms/GSForm";
+import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({
   infoContainer: {

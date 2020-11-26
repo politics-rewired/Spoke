@@ -1,9 +1,9 @@
-import React from "react";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
+import React from "react";
+
 import LoadingIndicator from "../../components/LoadingIndicator";
 
 export const operations = {
@@ -206,17 +206,17 @@ export class OperationDialog extends React.Component {
       this.state.deletionProtectionCheckText === DELETION_PROTECTION_TEXT;
 
     const actions = finished
-      ? [<FlatButton label="Done" primary={true} onClick={clearInProgress} />]
+      ? [<FlatButton label="Done" primary onClick={clearInProgress} />]
       : [
           <FlatButton
             label="Cancel"
-            primary={true}
+            primary
             disabled={executing}
             onClick={clearInProgress}
           />,
           <FlatButton
             label="Execute Operation"
-            primary={true}
+            primary
             disabled={
               this.state.pendingDeletionProtectionCheck &&
               !deletionProtectionChallengeCompleted
@@ -235,7 +235,7 @@ export class OperationDialog extends React.Component {
       <Dialog
         title={operationDefinition.title(campaign)}
         onRequestClose={clearInProgress}
-        open={true}
+        open
         actions={actions}
       >
         <OperationDialogBody {...this.props} />
@@ -243,7 +243,7 @@ export class OperationDialog extends React.Component {
           this.state.pendingDeletionProtectionCheck && (
             <TextField
               floatingLabelText={`To continue, type ${DELETION_PROTECTION_TEXT}`}
-              fullWidth={true}
+              fullWidth
               onChange={this.setDeletionProtectionCheckText}
               value={this.state.deletionProtectionCheckText}
             />

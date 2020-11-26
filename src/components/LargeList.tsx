@@ -1,6 +1,5 @@
+import { grey600, grey900 } from "material-ui/styles/colors";
 import React from "react";
-
-import { grey900, grey600 } from "material-ui/styles/colors";
 
 const largeListStyle: React.CSSProperties = {
   listStyleType: "none",

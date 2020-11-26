@@ -1,23 +1,22 @@
+import { css, StyleSheet } from "aphrodite";
+import orderBy from "lodash/orderBy";
+import AutoComplete from "material-ui/AutoComplete";
+import IconButton from "material-ui/IconButton";
+import RaisedButton from "material-ui/RaisedButton";
+import Snackbar from "material-ui/Snackbar";
+import { red600 } from "material-ui/styles/colors";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
+import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
-import * as yup from "yup";
 import Form from "react-formal";
-import orderBy from "lodash/orderBy";
-import { StyleSheet, css } from "aphrodite";
+import * as yup from "yup";
 
-import AutoComplete from "material-ui/AutoComplete";
-import Snackbar from "material-ui/Snackbar";
-import RaisedButton from "material-ui/RaisedButton";
-import IconButton from "material-ui/IconButton";
-import Toggle from "material-ui/Toggle";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import { red600 } from "material-ui/styles/colors";
-
-import { dataTest } from "../../../lib/attributes";
-import { dataSourceItem } from "../../../components/utils";
-import theme from "../../../styles/theme";
 import GSForm from "../../../components/forms/GSForm";
 import Slider from "../../../components/Slider";
+import { dataSourceItem } from "../../../components/utils";
+import { dataTest } from "../../../lib/attributes";
+import theme from "../../../styles/theme";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const styles = StyleSheet.create({
@@ -168,7 +167,7 @@ export default class CampaignTextersForm extends React.Component {
         newTexter.assignment.needsMessageCount,
         10
       );
-      let convertedMaxContacts = !!newTexter.assignment.maxContacts
+      const convertedMaxContacts = newTexter.assignment.maxContacts
         ? parseInt(newTexter.assignment.maxContacts)
         : null;
 
@@ -191,7 +190,7 @@ export default class CampaignTextersForm extends React.Component {
         convertedNeedsMessageCount = 0;
       }
 
-      totalNeedsMessage = totalNeedsMessage + convertedNeedsMessageCount;
+      totalNeedsMessage += convertedNeedsMessageCount;
 
       return {
         ...newTexter,
@@ -235,7 +234,7 @@ export default class CampaignTextersForm extends React.Component {
       // 3. if we don't have extraTexterCapacity and auto-split is on, then fill the texters with assignments
       const factor = 1;
       let index = 0;
-      let skipsByIndex = new Array(newFormValues.texters.length).fill(0);
+      const skipsByIndex = new Array(newFormValues.texters.length).fill(0);
       if (newFormValues.texters.length === 1) {
         const messagedCount =
           newFormValues.texters[0].assignment.contactsCount -
@@ -252,18 +251,16 @@ export default class CampaignTextersForm extends React.Component {
               texter.assignment.needsMessageCount
           ) {
             skipsByIndex[index]++;
-          } else {
-            if (!changedTexterId || texter.id !== changedTexterId) {
-              if (texter.assignment.needsMessageCount + factor >= 0) {
-                texter.assignment.needsMessageCount =
-                  texter.assignment.needsMessageCount + factor;
-                texter.assignment.contactsCount =
-                  texter.assignment.contactsCount + factor;
-                extraTexterCapacity = extraTexterCapacity + factor;
-              }
+          } else if (!changedTexterId || texter.id !== changedTexterId) {
+            if (texter.assignment.needsMessageCount + factor >= 0) {
+              texter.assignment.needsMessageCount =
+                texter.assignment.needsMessageCount + factor;
+              texter.assignment.contactsCount =
+                texter.assignment.contactsCount + factor;
+              extraTexterCapacity += factor;
             }
           }
-          index = index + 1;
+          index += 1;
           if (index >= newFormValues.texters.length) {
             index = 0;
           }
@@ -357,8 +354,8 @@ export default class CampaignTextersForm extends React.Component {
     const { orgTexters } = this.props;
 
     const textersToAdd = orgTexters.map((orgTexter) => {
-      const id = orgTexter.id;
-      const firstName = orgTexter.firstName;
+      const { id } = orgTexter;
+      const { firstName } = orgTexter;
       return {
         id,
         firstName,
@@ -383,7 +380,7 @@ export default class CampaignTextersForm extends React.Component {
   }
 
   getDisplayName(texterId) {
-    let texterObj = this.props.orgTexters.find((o) => o.id === texterId);
+    const texterObj = this.props.orgTexters.find((o) => o.id === texterId);
     return texterObj.displayName;
   }
 

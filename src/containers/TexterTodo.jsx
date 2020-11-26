@@ -1,11 +1,11 @@
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router";
 import { compose } from "react-apollo";
-import gql from "graphql-tag";
+import { withRouter } from "react-router";
 
-import { loadData } from "./hoc/with-operations";
 import AssignmentTexter from "../components/AssignmentTexter";
+import { loadData } from "./hoc/with-operations";
 
 // TODO: use Fragment
 const contactDataFragment = `

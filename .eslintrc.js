@@ -72,6 +72,7 @@ module.exports = {
       { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
     ],
     "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
     "no-nested-ternary": "off",
     "no-underscore-dangle": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
@@ -80,6 +81,7 @@ module.exports = {
     camelcase: ["off", { properties: "never" }],
     "no-await-in-loop": ["off"],
     "@typescript-eslint/no-var-requires": ["off"],
+    "@typescript-eslint/no-explicit-any": ["off"],
     "import/order": ["off"],
     "no-console": ["off"],
     "prefer-promise-reject-errors": ["off"],
@@ -87,7 +89,17 @@ module.exports = {
     "consistent-return": ["off"],
     "no-continue": ["off"],
     "no-param-reassign": ["off"],
-    "guard-for-in": ["off"]
+    "guard-for-in": ["off"],
+    "react/jsx-props-no-spreading": ["off"],
+    "react/no-string-refs": ["off"],
+    "react/prop-types": ["off"],
+    "react/state-in-constructor": ["off"],
+    "react/destructuring-assignment": ["off"],
+    "react/no-access-state-in-setstate": ["off"],
+    "@typescript-eslint/explicit-module-boundary-types": ["off"],
+    "react/forbid-prop-types": ["off"],
+    "jsx-a11y/click-events-have-key-events": ["off"],
+    "jsx-a11y/no-static-element-interactions": ["off"]
   },
   overrides: [
     {
@@ -95,8 +107,7 @@ module.exports = {
       files: ["*.ts", "*.tsx"],
       rules: {
         "no-shadow": "off", // JS `no-shadow` rule doesn't handle enums correctly
-        "@typescript-eslint/no-shadow": "error",
-        "@typescript-eslint/explicit-module-boundary-types": ["error"]
+        "@typescript-eslint/no-shadow": "error"
       }
     }
   ]

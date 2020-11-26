@@ -1,20 +1,19 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
 import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
-import isEqual from "lodash/isEqual";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 
-import { loadData } from "../hoc/with-operations";
-import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../../lib/constants";
 import IncomingMessageActions from "../../components/IncomingMessageActions";
 import IncomingMessageFilter from "../../components/IncomingMessageFilter";
 import IncomingMessageList from "../../components/IncomingMessageList";
+import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../lib/constants";
+import { loadData } from "../hoc/with-operations";
 import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
 import PaginatedUsersRetriever from "../PaginatedUsersRetriever";
 
@@ -22,7 +21,7 @@ function getCampaignsFilterForCampaignArchiveStatus(
   includeActiveCampaigns,
   includeArchivedCampaigns
 ) {
-  let isArchived = undefined;
+  let isArchived;
   if (!includeActiveCampaigns && includeArchivedCampaigns) {
     isArchived = true;
   } else if (
@@ -43,7 +42,7 @@ function getContactsFilterForConversationOptOutStatus(
   includeNotOptedOutConversations,
   includeOptedOutConversations
 ) {
-  let isOptedOut = undefined;
+  let isOptedOut;
   if (!includeNotOptedOutConversations && includeOptedOutConversations) {
     isOptedOut = true;
   } else if (
@@ -75,30 +74,32 @@ export class AdminIncomingMessageList extends Component {
     super(props);
 
     const tagsFilter = props.escalatedConvosOnly
-      ? Object.assign({}, initialTagsFilter, {
+      ? {
+          ...initialTagsFilter,
           excludeEscalated: false,
           escalatedConvosOnly: true
-        })
+        }
       : initialTagsFilter;
 
     const contactsFilter = props.escalatedConvosOnly
-      ? Object.assign({}, initialContactsFilter, {
+      ? {
+          ...initialContactsFilter,
           messageStatus: [
             "needsResponse",
             "needsMessage",
             "convo",
             "messaged"
           ].join(",")
-        })
+        }
       : initialContactsFilter;
 
     this.state = {
       page: 0,
       pageSize: 10,
       campaignsFilter: initialCampaignsFilter,
-      contactsFilter: contactsFilter,
+      contactsFilter,
       assignmentsFilter: initialAssignmentsFilter,
-      tagsFilter: tagsFilter,
+      tagsFilter,
       contactNameFilter: undefined,
       needsRender: false,
       campaigns: [],
@@ -148,7 +149,7 @@ export class AdminIncomingMessageList extends Component {
 
   handleTagsChanged = (_1, _2, values) => {
     this.setState((prevState) => {
-      const newTagsFilter = Object.assign({}, prevState.tagsFilter);
+      const newTagsFilter = { ...prevState.tagsFilter };
       newTagsFilter.specificTagIds = values;
 
       return {
@@ -160,7 +161,7 @@ export class AdminIncomingMessageList extends Component {
   };
 
   handleTexterChanged = async (texterId) => {
-    const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter);
+    const assignmentsFilter = { ...this.state.assignmentsFilter };
     if (texterId === UNASSIGNED_TEXTER) {
       assignmentsFilter.texterId = texterId;
     } else if (texterId === ALL_TEXTERS) {
@@ -176,7 +177,7 @@ export class AdminIncomingMessageList extends Component {
   };
 
   handleIncludeEscalatedToggled = () => {
-    const tagsFilter = Object.assign({}, this.state.tagsFilter);
+    const tagsFilter = { ...this.state.tagsFilter };
     tagsFilter.excludeEscalated = !(
       tagsFilter && !!tagsFilter.excludeEscalated
     );
@@ -207,7 +208,7 @@ export class AdminIncomingMessageList extends Component {
     this.setState({ reassignmentAlert: undefined });
 
   handleReassignmentCommon = async (fn) => {
-    let newState = {
+    const newState = {
       needsRender: true,
       campaignIdsContactIds: [],
       reassignmentAlert: {
@@ -546,7 +547,7 @@ export class AdminIncomingMessageList extends Component {
           actions={[
             <FlatButton
               label="Ok"
-              primary={true}
+              primary
               onClick={this.closeReassignmentDialog}
             />
           ]}

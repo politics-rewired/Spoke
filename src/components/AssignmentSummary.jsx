@@ -1,13 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
+import Badge from "material-ui/Badge";
+import { Card, CardActions, CardTitle } from "material-ui/Card";
+import Divider from "material-ui/Divider";
+import RaisedButton from "material-ui/RaisedButton";
+import moment from "moment";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { withRouter } from "react-router";
-import { StyleSheet, css } from "aphrodite";
-import moment from "moment";
-
-import { Card, CardActions, CardTitle } from "material-ui/Card";
-import RaisedButton from "material-ui/RaisedButton";
-import Badge from "material-ui/Badge";
-import Divider from "material-ui/Divider";
 
 import { dataTest } from "../lib/attributes";
 
@@ -86,24 +85,23 @@ export class AssignmentSummary extends Component {
           onClick={() => this.goToTodos(contactsFilter, assignment.id)}
         />
       );
-    } else {
-      return (
-        <Badge
-          key={title}
-          badgeStyle={style || inlineStyles.badge}
-          badgeContent={count || ""}
-          primary={primary && !disabled}
-          secondary={!primary && !disabled}
-        >
-          <RaisedButton
-            {...dataTest(dataTestText)}
-            disabled={disabled}
-            label={title}
-            onClick={() => this.goToTodos(contactsFilter, assignment.id)}
-          />
-        </Badge>
-      );
     }
+    return (
+      <Badge
+        key={title}
+        badgeStyle={style || inlineStyles.badge}
+        badgeContent={count || ""}
+        primary={primary && !disabled}
+        secondary={!primary && !disabled}
+      >
+        <RaisedButton
+          {...dataTest(dataTestText)}
+          disabled={disabled}
+          label={title}
+          onClick={() => this.goToTodos(contactsFilter, assignment.id)}
+        />
+      </Badge>
+    );
   }
 
   render() {
@@ -126,7 +124,7 @@ export class AssignmentSummary extends Component {
       introHtml,
       useDynamicAssignment
     } = assignment.campaign;
-    const maxContacts = assignment.maxContacts;
+    const { maxContacts } = assignment;
     return (
       <div className={css(styles.container)}>
         <Card key={assignment.id}>

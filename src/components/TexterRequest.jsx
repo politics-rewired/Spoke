@@ -1,12 +1,11 @@
-import React from "react";
 import gql from "graphql-tag";
-import * as yup from "yup";
-
-import RaisedButton from "material-ui/RaisedButton";
-import TextField from "material-ui/TextField";
-import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import Paper from "material-ui/Paper";
+import RaisedButton from "material-ui/RaisedButton";
+import SelectField from "material-ui/SelectField";
+import TextField from "material-ui/TextField";
+import React from "react";
+import * as yup from "yup";
 
 import { loadData } from "../containers/hoc/with-operations";
 import GSForm from "./forms/GSForm";
@@ -29,7 +28,7 @@ class TexterRequest extends React.Component {
     this.state = {
       selectedAssignment: firstTeamId,
       count: maxRequestCount,
-      maxRequestCount: maxRequestCount,
+      maxRequestCount,
       email: undefined,
       submitting: false,
       error: undefined,
@@ -215,7 +214,7 @@ class TexterRequest extends React.Component {
           />
           <br />
           <RaisedButton
-            primary={true}
+            primary
             onClick={this.submit}
             disabled={submitting}
             fullWidth

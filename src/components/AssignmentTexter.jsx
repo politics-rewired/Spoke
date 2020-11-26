@@ -1,22 +1,21 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-
-import { StyleSheet, css } from "aphrodite";
 import IconButton from "material-ui/IconButton/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
-import { ToolbarTitle } from "material-ui/Toolbar";
+import Check from "material-ui/svg-icons/action/check-circle";
 import NavigateBeforeIcon from "material-ui/svg-icons/image/navigate-before";
 import NavigateNextIcon from "material-ui/svg-icons/image/navigate-next";
-import Check from "material-ui/svg-icons/action/check-circle";
+import { ToolbarTitle } from "material-ui/Toolbar";
+import PropTypes from "prop-types";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 
-import { loadData } from "../containers/hoc/with-operations";
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
-import Empty from "../components/Empty";
-import LoadingIndicator from "../components/LoadingIndicator";
+import { loadData } from "../containers/hoc/with-operations";
 import { catchError } from "../network/utils";
+import Empty from "./Empty";
+import LoadingIndicator from "./LoadingIndicator";
 
 const SEND_DELAY = window.SEND_DELAY ? parseInt(window.SEND_DELAY, 10) : 100;
 
@@ -154,7 +153,7 @@ class AssignmentTexter extends React.Component {
             contactCache[newContact.id] = newContact;
             return contactCache;
           };
-          const oldCache = Object.assign({}, this.state.contactCache);
+          const oldCache = { ...this.state.contactCache };
           const contactCache = getAssignmentContacts.reduce(foldIn, oldCache);
 
           this.setState({
@@ -168,7 +167,7 @@ class AssignmentTexter extends React.Component {
 
   incrementCurrentContactIndex = (increment) => {
     let newIndex = this.state.currentContactIndex;
-    newIndex = newIndex + increment;
+    newIndex += increment;
     this.updateCurrentContactIndex(newIndex);
   };
 
@@ -192,7 +191,7 @@ class AssignmentTexter extends React.Component {
       this.handleNavigateNext();
     } else {
       // Will look async and then redirect to todo page if not
-      this.props.assignContactsIfNeeded(/* checkServer*/ true);
+      this.props.assignContactsIfNeeded(/* checkServer */ true);
     }
   };
 
@@ -221,7 +220,7 @@ class AssignmentTexter extends React.Component {
   };
 
   handleExitTexter = () => {
-    this.props.history.push("/app/" + (this.props.organizationId || ""));
+    this.props.history.push(`/app/${this.props.organizationId || ""}`);
   };
 
   contactCount = () => {
@@ -332,7 +331,7 @@ class AssignmentTexter extends React.Component {
   };
 
   handleSendMessageError = (contact_id) => (e) => {
-    let error = { id: contact_id };
+    const error = { id: contact_id };
 
     if (e.status === 402) {
       this.goBackToTodos();
@@ -408,6 +407,7 @@ class AssignmentTexter extends React.Component {
       />
     );
   };
+
   renderEmpty = () => {
     return (
       <div>

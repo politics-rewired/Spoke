@@ -1,7 +1,7 @@
+import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
 import { Pie } from "react-chartjs";
-import { StyleSheet, css } from "aphrodite";
 
 const styles = StyleSheet.create({
   label: {

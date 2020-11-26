@@ -1,29 +1,28 @@
-import React from "react";
+import { css, StyleSheet } from "aphrodite";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import * as yup from "yup";
-import { compose } from "recompose";
-import { StyleSheet, css } from "aphrodite";
 import isEqual from "lodash/isEqual";
-
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import CreateIcon from "material-ui/svg-icons/content/create";
+import React from "react";
+import { compose } from "recompose";
+import * as yup from "yup";
 
 import { CannedResponse } from "../../../../api/canned-response";
-import { loadData } from "../../../hoc/with-operations";
-import { QueryMap, MutationMap } from "../../../../network/types";
-import { dataTest } from "../../../../lib/attributes";
-import theme from "../../../../styles/theme";
 import { LargeList } from "../../../../components/LargeList";
-import CreateCannedResponseForm from "./components/CreateCannedResponseForm";
-import CannedResponseRow from "./components/CannedResponseRow";
+import { dataTest } from "../../../../lib/attributes";
+import { MutationMap, QueryMap } from "../../../../network/types";
+import theme from "../../../../styles/theme";
+import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
   asSection,
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import CannedResponseRow from "./components/CannedResponseRow";
+import CreateCannedResponseForm from "./components/CreateCannedResponseForm";
 
 const styles = StyleSheet.create({
   formContainer: {
@@ -118,6 +117,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
   };
 
   handleOnShowCreateForm = () => this.setState({ showForm: true });
+
   handleOnCancelCreateForm = () => this.setState({ showForm: false });
 
   handleOnSaveResponse = (response: CannedResponse) => {

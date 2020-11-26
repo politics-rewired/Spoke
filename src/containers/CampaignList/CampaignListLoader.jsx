@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
+import { withOperations } from "../hoc/with-operations";
 import CampaignList from "./CampaignList";
 
 export class CampaignListLoader extends React.Component {

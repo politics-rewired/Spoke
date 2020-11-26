@@ -1,5 +1,5 @@
-import { OperationOption } from "react-apollo";
 import { MutationOptions } from "apollo-client";
+import { OperationOption } from "react-apollo";
 
 export interface QueryMap<OuterProps> {
   [key: string]: { query: any } & OperationOption<OuterProps, any, any, any>;

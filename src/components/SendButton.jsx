@@ -1,7 +1,8 @@
+import { css, StyleSheet } from "aphrodite";
+import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import RaisedButton from "material-ui/RaisedButton";
-import { StyleSheet, css } from "aphrodite";
+
 import { dataTest } from "../lib/attributes";
 
 // This is because the Toolbar from material-ui seems to only apply the correct margins if the

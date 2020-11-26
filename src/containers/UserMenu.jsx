@@ -1,20 +1,19 @@
+import gql from "graphql-tag";
+import Avatar from "material-ui/Avatar";
+import Divider from "material-ui/Divider";
+import IconButton from "material-ui/IconButton";
+import Menu from "material-ui/Menu";
+import MenuItem from "material-ui/MenuItem";
+import Popover from "material-ui/Popover";
+import Subheader from "material-ui/Subheader";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { compose } from "react-apollo";
 import { withRouter } from "react-router";
-import gql from "graphql-tag";
 
-import Popover from "material-ui/Popover";
-import Menu from "material-ui/Menu";
-import MenuItem from "material-ui/MenuItem";
-import Divider from "material-ui/Divider";
-import Subheader from "material-ui/Subheader";
-import IconButton from "material-ui/IconButton";
-import Avatar from "material-ui/Avatar";
-
-import { withOperations } from "../containers/hoc/with-operations";
 import { dataTest } from "../lib/attributes";
 import { hasRole } from "../lib/permissions";
+import { withOperations } from "./hoc/with-operations";
 
 const avatarSize = 28;
 
@@ -155,7 +154,7 @@ class UserMenu extends Component {
               primaryText={currentUser.displayName}
               leftIcon={this.renderAvatar(currentUser, 40)}
               disabled={!orgId}
-              value={"account"}
+              value="account"
             >
               {currentUser.email}
             </MenuItem>

@@ -1,21 +1,20 @@
-import React from "react";
-import PropTypes from "prop-types";
-import * as yup from "yup";
-import Form from "react-formal";
-
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
-import IconButton from "material-ui/IconButton";
-import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-
-import { makeTree } from "../../../lib/interaction-step-helpers";
-import { dataTest } from "../../../lib/attributes";
-import theme from "../../../styles/theme";
-import GSForm from "../../../components/forms/GSForm";
-import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import { Dialog } from "material-ui";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
+import FlatButton from "material-ui/FlatButton";
+import IconButton from "material-ui/IconButton";
+import RaisedButton from "material-ui/RaisedButton";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
+import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
+
+import GSForm from "../../../components/forms/GSForm";
+import { dataTest } from "../../../lib/attributes";
+import { makeTree } from "../../../lib/interaction-step-helpers";
+import theme from "../../../styles/theme";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const styles = {
   pullRight: {
@@ -55,14 +54,14 @@ const interactionStepSchema = yup.object({
  * @param {string[]} interactionSteps The list of interaction steps to work on.
  */
 const markDeleted = (stepId, interactionSteps) => {
-  interactionSteps = interactionSteps.map(step => {
+  interactionSteps = interactionSteps.map((step) => {
     const updates = {};
     if (step.id === stepId) updates.isDeleted = true;
     return Object.assign(step, updates);
   });
 
   const childSteps = interactionSteps.filter(
-    step => step.parentInteractionId === stepId
+    (step) => step.parentInteractionId === stepId
   );
   for (const childStep of childSteps) {
     interactionSteps = markDeleted(childStep.id, interactionSteps);
@@ -73,7 +72,6 @@ const markDeleted = (stepId, interactionSteps) => {
 
 class CampaignInteractionStepsForm extends React.Component {
   state = {
-    focusedField: null,
     hasBlockCopied: false,
     confirmingRootPaste: false,
     interactionSteps: this.props.formValues.interactionSteps[0]
@@ -97,9 +95,9 @@ class CampaignInteractionStepsForm extends React.Component {
 
   onSave = async () => {
     // Strip all empty script versions. "Save" should be disabled in this case, but just in case...
-    const interactionSteps = this.state.interactionSteps.map(step => {
+    const interactionSteps = this.state.interactionSteps.map((step) => {
       const scriptOptions = step.scriptOptions.filter(
-        scriptOption => scriptOption.trim() !== ""
+        (scriptOption) => scriptOption.trim() !== ""
       );
       return Object.assign(step, { scriptOptions });
     });
@@ -110,7 +108,7 @@ class CampaignInteractionStepsForm extends React.Component {
     this.props.onSubmit();
   };
 
-  createAddStepHandler = parentInteractionId => () => {
+  createAddStepHandler = (parentInteractionId) => () => {
     const randSuffix = Math.random()
       .toString(36)
       .replace(/[^a-zA-Z1-9]+/g, "");
@@ -145,23 +143,24 @@ class CampaignInteractionStepsForm extends React.Component {
     this.createPasteBlockHandler(null)();
   };
 
-  createPasteBlockHandler = parentInteractionId => () => {
-    navigator.clipboard.readText().then(text => {
+  createPasteBlockHandler = (parentInteractionId) => () => {
+    navigator.clipboard.readText().then((text) => {
       const idMap = {};
 
       const newBlocks = JSON.parse(text);
 
-      newBlocks.forEach(interactionStep => {
+      newBlocks.forEach((interactionStep) => {
         idMap[interactionStep.id] = this.generateId();
       });
 
-      const mappedBlocks = newBlocks.map(interactionStep => {
+      const mappedBlocks = newBlocks.map((interactionStep) => {
         // Prepend new to force it to create a new one, even if it was already new
-        return Object.assign({}, interactionStep, {
+        return {
+          ...interactionStep,
           id: idMap[interactionStep.id],
           parentInteractionId:
             idMap[interactionStep.parentInteractionId] || parentInteractionId
-        });
+        };
       });
 
       this.setState({
@@ -173,24 +172,25 @@ class CampaignInteractionStepsForm extends React.Component {
     });
   };
 
-  createDeleteStepHandler = id => () => {
+  createDeleteStepHandler = (id) => () => {
     const interactionSteps = markDeleted(id, this.state.interactionSteps);
     this.setState({ interactionSteps });
   };
 
-  handleFormChange = event => {
-    const updatedEvent = Object.assign({}, event, {
-      interactionSteps: undefined
-    });
-    const interactionSteps = this.state.interactionSteps.map(
-      step => (step.id === updatedEvent.id ? updatedEvent : step)
+  handleFormChange = (event) => {
+    const updatedEvent = { ...event, interactionSteps: undefined };
+    const interactionSteps = this.state.interactionSteps.map((step) =>
+      step.id === updatedEvent.id ? updatedEvent : step
     );
     this.setState({ interactionSteps });
   };
 
-  copyBlock = interactionStep => {
+  copyBlock = (interactionStep) => {
     const interactionStepsInBlock = new Set([interactionStep.id]);
-    const { parentInteractionId, ...orphanedInteractionStep } = interactionStep;
+    const {
+      parentInteractionId: _id,
+      ...orphanedInteractionStep
+    } = interactionStep;
     const block = [orphanedInteractionStep];
 
     let interactionStepsAdded = 1;
@@ -205,7 +205,7 @@ class CampaignInteractionStepsForm extends React.Component {
         ) {
           block.push(is);
           interactionStepsInBlock.add(is.id);
-          interactionStepsAdded++;
+          interactionStepsAdded += 1;
         }
       }
     }
@@ -215,7 +215,7 @@ class CampaignInteractionStepsForm extends React.Component {
   };
 
   updateClipboardHasBlock = () => {
-    navigator.clipboard.readText().then(text => {
+    navigator.clipboard.readText().then((text) => {
       try {
         const _newBlock = JSON.parse(text);
         if (!this.state.hasBlockCopied) this.setState({ hasBlockCopied: true });
@@ -227,8 +227,6 @@ class CampaignInteractionStepsForm extends React.Component {
 
   renderInteractionStep(interactionStep, title = "Start") {
     const { availableActions, customFields } = this.props;
-    const displayActions =
-      parentInteractionId && availableActions && availableActions.length;
 
     const {
       scriptOptions,
@@ -238,6 +236,10 @@ class CampaignInteractionStepsForm extends React.Component {
       answerActions,
       interactionSteps: childSteps
     } = interactionStep;
+
+    const displayActions =
+      parentInteractionId && availableActions && availableActions.length;
+
     const stepHasScript = scriptOptions.length > 0;
     const stepHasQuestion = questionText;
     const stepCanHaveChildren = !parentInteractionId || answerOption;
@@ -304,7 +306,7 @@ class CampaignInteractionStepsForm extends React.Component {
                     default=""
                     choices={[
                       { value: "", label: "Action..." },
-                      ...availableActions.map(action => ({
+                      ...availableActions.map((action) => ({
                         value: action.name,
                         label: action.display_name
                       }))
@@ -315,8 +317,9 @@ class CampaignInteractionStepsForm extends React.Component {
                   </IconButton>
                   <div>
                     {answerActions &&
-                      availableActions.filter(a => a.name === answerActions)[0]
-                        .instructions}
+                      availableActions.filter(
+                        (a) => a.name === answerActions
+                      )[0].instructions}
                   </div>
                 </div>
               )}
@@ -344,6 +347,7 @@ class CampaignInteractionStepsForm extends React.Component {
           {isAbleToAddResponse &&
             [
               <RaisedButton
+                key="add"
                 {...dataTest("addResponse")}
                 label="+ Add a response"
                 onTouchTap={this.createAddStepHandler(interactionStep.id)}
@@ -353,6 +357,7 @@ class CampaignInteractionStepsForm extends React.Component {
               this.state.hasBlockCopied
                 ? [
                     <RaisedButton
+                      key="paste"
                       label="+ Paste Block"
                       onTouchTap={this.createPasteBlockHandler(
                         interactionStep.id
@@ -363,8 +368,8 @@ class CampaignInteractionStepsForm extends React.Component {
                 : []
             )}
           {childSteps
-            .filter(is => !is.isDeleted)
-            .map(childStep =>
+            .filter((is) => !is.isDeleted)
+            .map((childStep) =>
               this.renderInteractionStep(childStep, `Question: ${questionText}`)
             )}
         </div>
@@ -375,10 +380,11 @@ class CampaignInteractionStepsForm extends React.Component {
   render() {
     const tree = makeTree(this.state.interactionSteps);
 
-    const emptyScriptSteps = this.state.interactionSteps.filter(step => {
+    const emptyScriptSteps = this.state.interactionSteps.filter((step) => {
       const hasNoOptions = step.scriptOptions.length === 0;
       const hasEmptyScripts =
-        step.scriptOptions.filter(version => version.trim() === "").length > 0;
+        step.scriptOptions.filter((version) => version.trim() === "").length >
+        0;
       return hasNoOptions || hasEmptyScripts;
     });
 
@@ -393,13 +399,15 @@ class CampaignInteractionStepsForm extends React.Component {
           open={this.state.confirmingRootPaste}
           actions={[
             <FlatButton
+              key="cancel"
               label="Cancel"
-              primary={true}
+              primary
               onClick={() => this.setState({ confirmingRootPaste: false })}
             />,
             <FlatButton
+              key="paste"
               label="Paste"
-              primary={true}
+              primary
               onClick={this.confirmRootPaste}
             />
           ]}

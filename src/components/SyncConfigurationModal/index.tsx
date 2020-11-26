@@ -1,22 +1,20 @@
-import React from "react";
-import { compose } from "recompose";
-import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import React from "react";
+import { compose } from "recompose";
 
-import { loadData } from "../../containers/hoc/with-operations";
-import { QueryMap, MutationMap } from "../../network/types";
-import { RelayPaginatedResponse } from "../../api/pagination";
-import { ExternalSystem } from "../../api/external-system";
 import {
   ExternalSyncQuestionResponseConfig,
   FullListRefreshFragment
 } from "../../api/external-sync-config";
+import { ExternalSystem } from "../../api/external-system";
+import { RelayPaginatedResponse } from "../../api/pagination";
+import { loadData } from "../../containers/hoc/with-operations";
+import { MutationMap, QueryMap } from "../../network/types";
 import QuestionResponseConfig from "../QuestionResponseConfig";
-
 import { GET_SYNC_CONFIGS, GET_SYNC_TARGETS } from "./queries";
 
 interface HocProps {
@@ -75,11 +73,7 @@ class SyncConfigurationModal extends React.Component<InnerProps> {
     // const optionalMappings = responseMappings.filter(mapping => mapping.isMissing && !mapping.isRequired);
 
     const actions = [
-      <FlatButton
-        label="Ok"
-        primary={true}
-        onClick={this.props.onRequestClose}
-      />
+      <FlatButton label="Ok" primary onClick={this.props.onRequestClose} />
     ];
 
     const makeOnCreateConfig = (id: string) => async () => {
@@ -102,10 +96,10 @@ class SyncConfigurationModal extends React.Component<InnerProps> {
 
     return (
       <Dialog
-        open={true}
+        open
         title="Configure Mapping"
         actions={actions}
-        autoScrollBodyContent={true}
+        autoScrollBodyContent
         onRequestClose={this.props.onRequestClose}
       >
         <p>

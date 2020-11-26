@@ -1,18 +1,17 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
+import Paper from "material-ui/Paper";
 import PropTypes from "prop-types";
 import React from "react";
-import gql from "graphql-tag";
-import { withRouter } from "react-router";
 import { compose } from "react-apollo";
-import * as yup from "yup";
 import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
+import { withRouter } from "react-router";
+import * as yup from "yup";
 
-import Paper from "material-ui/Paper";
-
-import { loadData } from "./hoc/with-operations";
+import GSForm from "../components/forms/GSForm";
 import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
-import GSForm from "../components/forms/GSForm";
+import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({
   container: {
@@ -45,6 +44,7 @@ class CreateOrganization extends React.Component {
   formSchema = yup.object({
     name: yup.string().required()
   });
+
   renderInvalid() {
     return (
       <div>

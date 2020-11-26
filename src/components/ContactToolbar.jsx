@@ -1,9 +1,8 @@
+import { grey100 } from "material-ui/styles/colors";
+import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
+import moment from "moment-timezone";
 import PropTypes from "prop-types";
 import React from "react";
-import moment from "moment-timezone";
-
-import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
-import { grey100 } from "material-ui/styles/colors";
 
 const inlineStyles = {
   toolbar: {

@@ -1,6 +1,5 @@
-import React from "react";
 import sortBy from "lodash/sortBy";
-
+import React from "react";
 import Select from "react-select";
 import { ValueType } from "react-select/lib/types";
 

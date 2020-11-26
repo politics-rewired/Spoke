@@ -1,16 +1,15 @@
-import PropTypes from "prop-types";
-import React from "react";
 import gql from "graphql-tag";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
-
 import { RaisedButton } from "material-ui";
 import Check from "material-ui/svg-icons/action/check-circle";
+import PropTypes from "prop-types";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 
-import { loadData } from "./hoc/with-operations";
+import AssignmentSummary from "../components/AssignmentSummary";
 import Empty from "../components/Empty";
 import TexterRequest from "../components/TexterRequest";
-import AssignmentSummary from "../components/AssignmentSummary";
+import { loadData } from "./hoc/with-operations";
 
 const dueBySortFn = (x, y) => (x.dueBy > y.dueBy ? -1 : 1);
 const needSortFn = (x, y) =>
@@ -57,6 +56,7 @@ class TexterTodoList extends React.Component {
       })
       .filter((ele) => ele !== null);
   }
+
   componentDidMount() {
     this.props.data.refetch();
     // re-asserts polling after manual refresh
@@ -87,7 +87,7 @@ class TexterTodoList extends React.Component {
 
   render() {
     this.termsAgreed();
-    const todos = this.props.data.currentUser.todos;
+    const { todos } = this.props.data.currentUser;
     const renderedTodos = this.renderTodoList(todos);
 
     const empty = (
@@ -145,7 +145,7 @@ class TexterTodoList extends React.Component {
               ]
             )}
             <RaisedButton
-              primary={true}
+              primary
               fullWidth
               disabled={
                 this.state.releasingReplies || this.state.releasedReplies

@@ -1,12 +1,12 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
+import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
+import React from "react";
+import { compose } from "recompose";
 
+import { RelayPaginatedResponse } from "../../../../api/pagination";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
@@ -14,12 +14,11 @@ import {
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import ContactsSqlForm from "./components/ContactsSqlForm";
 import CSVForm from "./components/CSVForm";
 import ExternalSystemsSource from "./components/ExternalSystemsSource";
 import SelectExcludeCampaigns from "./components/SelectExcludeCampaigns";
-import ContactsSqlForm from "./components/ContactsSqlForm";
 import UploadResults from "./components/UploadResults";
-import { RelayPaginatedResponse } from "../../../../api/pagination";
 
 enum ContactSourceType {
   CSV = "CSV",
@@ -249,7 +248,7 @@ class CampaignContactsForm extends React.Component<
         <SelectField
           floatingLabelText="Contact source"
           value={source}
-          fullWidth={true}
+          fullWidth
           onChange={this.handleOnChangeSource}
         >
           {sourceOptions.map(({ source, disabledReason }) => (

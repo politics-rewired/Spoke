@@ -1,22 +1,21 @@
-import React from "react";
-import PropTypes from "prop-types";
 import pick from "lodash/pick";
-
 import Dialog from "material-ui/Dialog";
-import TextField from "material-ui/TextField";
 import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import IconButton from "material-ui/IconButton";
+import RaisedButton from "material-ui/RaisedButton";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
 import InfoIcon from "material-ui/svg-icons/action/info";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
+import TextField from "material-ui/TextField";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
-import GSFormField from "./GSFormField";
 import ScriptEditor from "../ScriptEditor";
-import ScriptLinkWarningDialog, { ScriptWarningContext } from '../ScriptLinkWarningDialog';
-import { getWarningContextForScript } from './utils'
+import ScriptLinkWarningDialog from "../ScriptLinkWarningDialog";
+import GSFormField from "./GSFormField";
+import { getWarningContextForScript } from "./utils";
 
 const styles = {
   dialog: {
@@ -75,23 +74,23 @@ class GSScriptOptionsField extends GSFormField {
   wrapSaveScript = () => {
     const { scriptDraft } = this.state;
     const warningContext = getWarningContextForScript(scriptDraft);
-    
+
     if (warningContext) {
       this.setState({ scriptWarningOpen: true });
     } else {
       this.handleSaveScript();
     }
-  }
+  };
 
   // confirm draft with links, save script and close editor
   handleConfirmLinkWarning = () => {
-    this.setState({ scriptWarningOpen: false }, () => this.handleSaveScript())
-  }
+    this.setState({ scriptWarningOpen: false }, () => this.handleSaveScript());
+  };
 
   // cancel draft with links, reset script draft
   handleCloseLinkWarning = () => {
-    this.setState({ scriptWarningOpen: false })
-  }
+    this.setState({ scriptWarningOpen: false });
+  };
 
   renderDialog() {
     const { name, customFields, value: scriptVersions } = this.props;
@@ -107,19 +106,21 @@ class GSScriptOptionsField extends GSFormField {
     // Script target could be "" which is falsey, so make explicit check against undefined
     const isDialogOpen = scriptTarget !== undefined;
 
-    const warningContext = getWarningContextForScript(scriptDraft)
+    const warningContext = getWarningContextForScript(scriptDraft);
 
     const actions = [
       <FlatButton
+        key="cancel"
         {...dataTest("scriptCancel")}
         label="Cancel"
         onTouchTap={this.handleCancelDialog}
       />,
       <RaisedButton
+        key="done"
         {...dataTest("scriptDone")}
         label="Done"
         onTouchTap={this.wrapSaveScript}
-        primary={true}
+        primary
         disabled={isDuplicate}
       />
     ];
@@ -137,16 +138,16 @@ class GSScriptOptionsField extends GSFormField {
           name={name}
           scriptText={scriptDraft}
           scriptFields={scriptFields}
-          expandable={true}
+          expandable
           onChange={(val) => this.setState({ scriptDraft: val.trim() })}
         />
         {isDuplicate && <p>A script version with this text already exists!</p>}
         <ScriptLinkWarningDialog
-          open={scriptWarningOpen}  
-          warningContext={warningContext} 
-          handleConfirm={this.handleConfirmLinkWarning} 
+          open={scriptWarningOpen}
+          warningContext={warningContext}
+          handleConfirm={this.handleConfirmLinkWarning}
           handleClose={this.handleCloseLinkWarning}
-        /> 
+        />
       </Dialog>
     );
   }
@@ -183,7 +184,10 @@ class GSScriptOptionsField extends GSFormField {
           <InfoIcon />
         </IconButton>
         {scriptVersions.map((scriptVersion, index) => (
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div
+            key={scriptVersion}
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <TextField
               key={scriptVersion}
               value={scriptVersion}
@@ -194,7 +198,7 @@ class GSScriptOptionsField extends GSFormField {
                   ? "Script cannot be empty"
                   : undefined
               }
-              multiLine={true}
+              multiLine
               onClick={this.createDialogHandler(scriptVersion)}
               {...passThroughProps}
             />
@@ -214,7 +218,7 @@ class GSScriptOptionsField extends GSFormField {
         <FlatButton
           label="Add script version"
           labelPosition="before"
-          primary={true}
+          primary
           icon={<CreateIcon />}
           disabled={emptyVersionExists}
           onClick={this.handleAddScriptVersion}

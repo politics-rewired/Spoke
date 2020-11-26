@@ -1,43 +1,42 @@
-import React from "react";
-import PropTypes from "prop-types";
+import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
-import { withRouter } from "react-router";
-import * as yup from "yup";
 import sortBy from "lodash/sortBy";
-import md5 from "md5";
-
-import { StyleSheet, css } from "aphrodite";
-import RaisedButton from "material-ui/RaisedButton";
+import CircularProgress from "material-ui/CircularProgress";
 import IconButton from "material-ui/IconButton";
-import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
-import CircularProgress from "material-ui/CircularProgress";
+import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
-import { grey100, blueGrey100 } from "material-ui/styles/colors";
+import { blueGrey100, grey100 } from "material-ui/styles/colors";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import LocalOfferIcon from "material-ui/svg-icons/maps/local-offer";
+import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
+import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
+import md5 from "md5";
+import PropTypes from "prop-types";
+import React from "react";
+import { withRouter } from "react-router";
+import * as yup from "yup";
 
-import { isContactNowWithinCampaignHours } from "../../lib/timezones";
+import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
+import BulkSendButton from "../../components/BulkSendButton";
+import CannedResponseMenu from "../../components/CannedResponseMenu";
+import Empty from "../../components/Empty";
+import GSForm from "../../components/forms/GSForm";
+import MessageList from "../../components/MessageList";
+import SendButton from "../../components/SendButton";
+import SendButtonArrow from "../../components/SendButtonArrow";
+import { dataTest } from "../../lib/attributes";
 import {
   getChildren,
   getTopMostParent,
   interactionStepForId
 } from "../../lib/interaction-step-helpers";
 import { applyScript } from "../../lib/scripts";
-import { dataTest } from "../../lib/attributes";
-import MessageList from "../../components/MessageList";
-import CannedResponseMenu from "../../components/CannedResponseMenu";
-import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
-import Empty from "../../components/Empty";
-import GSForm from "../../components/forms/GSForm";
-import SendButton from "../../components/SendButton";
-import BulkSendButton from "../../components/BulkSendButton";
-import SendButtonArrow from "../../components/SendButtonArrow";
+import { isContactNowWithinCampaignHours } from "../../lib/timezones";
+import ApplyTagDialog from "./ApplyTagDialog";
 import ContactActionDialog from "./ContactActionDialog";
 import MessageTextField from "./MessageTextField";
-import ApplyTagDialog from "./ApplyTagDialog";
 import TopFixedSection from "./TopFixedSection";
 
 const TexterDialogType = Object.freeze({
@@ -247,6 +246,7 @@ export class AssignmentTexterContact extends React.Component {
 
     return questionResponses;
   };
+
   getMessageTextFromScript = (script) => {
     const { campaign, contact, texter } = this.props;
 
@@ -328,7 +328,7 @@ export class AssignmentTexterContact extends React.Component {
     const { contact } = this.props;
     const message = this.createMessageToContact(messageText);
     const changes = this.gatherSurveyChanges();
-    const payload = Object.assign({ message }, changes);
+    const payload = { message, ...changes };
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -400,7 +400,7 @@ export class AssignmentTexterContact extends React.Component {
       optOut.message = message;
     }
 
-    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges());
+    const payload = { optOut, ...this.gatherSurveyChanges() };
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -633,7 +633,8 @@ export class AssignmentTexterContact extends React.Component {
           </Toolbar>
         </div>
       );
-    } else if (size < 450) {
+    }
+    if (size < 450) {
       // for needsResponse or messaged or convo
       return (
         <div
@@ -680,7 +681,8 @@ export class AssignmentTexterContact extends React.Component {
           </IconMenu>
         </div>
       );
-    } else if (size >= 768) {
+    }
+    if (size >= 768) {
       // for needsResponse or messaged
       return (
         <div>
@@ -872,11 +874,8 @@ export class AssignmentTexterContact extends React.Component {
         {this.props.errors.map((err, idx) => (
           <Snackbar
             key={err.id}
-            style={Object.assign({}, inlineStyles.snackbar, {
-              bottom: idx * 50,
-              width: 700
-            })}
-            open={true}
+            style={{ ...inlineStyles.snackbar, bottom: idx * 50, width: 700 }}
+            open
             message={err.snackbarError || ""}
             action={err.snackbarActionTitle}
             onActionClick={err.snackbarOnTouchTap}

@@ -1,8 +1,7 @@
-import React from "react";
-
-import { Tabs, Tab } from "material-ui/Tabs";
 import SettingsIcon from "material-ui/svg-icons/action/settings";
 import AlarmIcon from "material-ui/svg-icons/device/access-alarms";
+import { Tab, Tabs } from "material-ui/Tabs";
+import React from "react";
 
 import General from "./components/General";
 import TrollTokenSettings from "./components/TrollTokenSettings";
@@ -17,7 +16,7 @@ export const SettingsRouter = (props) => {
 
   return (
     <Tabs value={page} onChange={handleOnChangeTab}>
-      <Tab icon={<SettingsIcon />} label="General" value={"general"}>
+      <Tab icon={<SettingsIcon />} label="General" value="general">
         <br />
         <General match={match} />
       </Tab>
@@ -25,7 +24,7 @@ export const SettingsRouter = (props) => {
         <Tab
           icon={<AlarmIcon />}
           label="TrollBot Trigger Tokens"
-          value={"trolltokens"}
+          value="trolltokens"
         >
           <TrollTokenSettings match={match} isActive={page === "trolltokens"} />
         </Tab>

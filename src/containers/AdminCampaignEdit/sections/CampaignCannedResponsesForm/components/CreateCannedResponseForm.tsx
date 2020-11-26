@@ -1,12 +1,11 @@
-import React from "react";
-import * as yup from "yup";
-import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
-
+import { css, StyleSheet } from "aphrodite";
 import FlatButton from "material-ui/FlatButton";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
-import { dataTest } from "../../../../../lib/attributes";
 import GSForm from "../../../../../components/forms/GSForm";
+import { dataTest } from "../../../../../lib/attributes";
 
 const styles = StyleSheet.create({
   buttonRow: {

@@ -2,27 +2,27 @@ import Knex from "knex";
 import isEmpty from "lodash/isEmpty";
 
 import { config } from "../../../config";
-import logger from "../../../logger";
-import { errToObj } from "../../utils";
+import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { stringIsAValidUrl } from "../../../lib/utils";
+import logger from "../../../logger";
+import { makeNumbersClient } from "../../lib/assemble-numbers";
 import { r } from "../../models";
-import { SendMessagePayload } from "./types";
+import { errToObj } from "../../utils";
 import {
-  MessagingServiceType,
   MessagingServiceRecord,
+  MessagingServiceType,
   RequestHandlerFactory
 } from "../types";
-import { makeNumbersClient } from "../../lib/assemble-numbers";
-import { getFormattedPhoneNumber } from "../../../lib/phone-format";
 import { symmetricDecrypt } from "./crypto";
 import {
-  SpokeSendStatus,
-  getMessagingServiceById,
-  getContactMessagingService,
-  messageComponents,
   getCampaignContactAndAssignmentForIncomingMessage,
-  saveNewIncomingMessage
+  getContactMessagingService,
+  getMessagingServiceById,
+  messageComponents,
+  saveNewIncomingMessage,
+  SpokeSendStatus
 } from "./message-sending";
+import { SendMessagePayload } from "./types";
 
 export enum NumbersSendStatus {
   Queued = "queued",

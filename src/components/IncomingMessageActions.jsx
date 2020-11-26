@@ -1,13 +1,13 @@
-import React, { Component } from "react";
-import type from "prop-types";
-
-import Select, { createFilter } from "react-select";
-import { Card, CardHeader, CardText } from "material-ui/Card";
-import { Tabs, Tab } from "material-ui/Tabs";
-import Dialog from "material-ui/Dialog";
-import { getHighestRole } from "../lib/permissions";
-import FlatButton from "material-ui/FlatButton";
 import { css, StyleSheet } from "aphrodite";
+import { Card, CardHeader, CardText } from "material-ui/Card";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import { Tab, Tabs } from "material-ui/Tabs";
+import type from "prop-types";
+import React, { Component } from "react";
+import Select, { createFilter } from "react-select";
+
+import { getHighestRole } from "../lib/permissions";
 import theme from "../styles/theme";
 
 const styles = StyleSheet.create({
@@ -34,7 +34,7 @@ const formatTexter = (texter) => {
 };
 
 const MenuList = (props) => {
-  const children = props.children;
+  const { children } = props;
 
   if (!children.length) {
     return <div>{children}</div>;
@@ -44,8 +44,8 @@ const MenuList = (props) => {
     <div>
       {children.length &&
         children.slice(0, 5).map((key, i) => {
-          delete key.props.innerProps.onMouseMove; //FIX LAG!!
-          delete key.props.innerProps.onMouseOver; //FIX LAG!!
+          delete key.props.innerProps.onMouseMove; // FIX LAG!!
+          delete key.props.innerProps.onMouseOver; // FIX LAG!!
 
           return <div key={i}>{key}</div>;
         })}
@@ -107,12 +107,12 @@ class IncomingMessageActions extends Component {
     const confirmDialogActions = (actionVerb, confirmAction) => [
       <FlatButton
         label="Cancel"
-        primary={true}
+        primary
         onClick={this.handleConfirmDialogCancel}
       />,
       <FlatButton
         label={actionVerb || "Reassign"}
-        primary={true}
+        primary
         onClick={confirmAction}
       />
     ];
@@ -123,7 +123,7 @@ class IncomingMessageActions extends Component {
     return (
       <Card>
         <CardHeader
-          title={" Message Actions "}
+          title=" Message Actions "
           actAsExpander
           showExpandableButton
         />
@@ -146,7 +146,7 @@ class IncomingMessageActions extends Component {
               <div className={css(styles.container)}>
                 <div className={css(styles.flexColumn)}>
                   <FlatButton
-                    label={"Reassign selected"}
+                    label="Reassign selected"
                     onClick={this.onReassignmentClicked}
                     disabled={!contactsAreSelected || !hasSeletedTexters}
                   />
@@ -164,7 +164,7 @@ class IncomingMessageActions extends Component {
                     this.handleConfirmDialogReassign
                   )}
                   open={this.state.confirmDialogOpen == "reassign"}
-                  modal={true}
+                  modal
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
                   {`Reassign all ${conversationCount} matching conversations?`}
@@ -175,7 +175,7 @@ class IncomingMessageActions extends Component {
               <div className={css(styles.container)}>
                 <div className={css(styles.flexColumn)}>
                   <FlatButton
-                    label={"Unassign selected"}
+                    label="Unassign selected"
                     onClick={this.onUnassignClicked}
                     disabled={!contactsAreSelected}
                   />
@@ -193,7 +193,7 @@ class IncomingMessageActions extends Component {
                     this.handleConfirmDialogUnassign
                   )}
                   open={this.state.confirmDialogOpen == "unassign"}
-                  modal={true}
+                  modal
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
                   {`Unassign all ${conversationCount} matching conversations?`}

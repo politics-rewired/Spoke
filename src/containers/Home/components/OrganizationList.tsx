@@ -1,20 +1,19 @@
-import React from "react";
-import { History } from "history";
-import { withRouter, Redirect } from "react-router";
-import { compose } from "react-apollo";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
+import { History } from "history";
 import sortBy from "lodash/sortBy";
-
-import Paper from "material-ui/Paper";
 import { List, ListItem } from "material-ui/List";
+import Paper from "material-ui/Paper";
 import { amber500, grey500 } from "material-ui/styles/colors";
 import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
 import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
+import React from "react";
+import { compose } from "react-apollo";
+import { Redirect, withRouter } from "react-router";
 
-import { loadData } from "../../hoc/with-operations";
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import theme from "../../../styles/theme";
+import { loadData } from "../../hoc/with-operations";
 
 const styles = StyleSheet.create({
   header: {
@@ -75,7 +74,8 @@ export const OrganizationList: React.SFC<OrganizationListProps> = (props) => {
         </div>
       </div>
     );
-  } else if (memberships.length === 1) {
+  }
+  if (memberships.length === 1) {
     const {
       role,
       organization: { id: orgId }

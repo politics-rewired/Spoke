@@ -1,13 +1,12 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
 import DataTable from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
+import { red500 } from "material-ui/styles/colors";
 import AlarmIcon from "material-ui/svg-icons/action/alarm";
 import AlarmOffIcon from "material-ui/svg-icons/action/alarm-off";
 import SaveIcon from "material-ui/svg-icons/content/save";
-import { red500 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { loadData } from "../../hoc/with-operations";
 

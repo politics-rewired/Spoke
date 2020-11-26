@@ -1,7 +1,7 @@
 import { SuperAgentRequest } from "superagent";
 
-import { r } from "../models";
 import { config } from "../../config";
+import { r } from "../models";
 
 const DEFAULT_MODE = "0"; // VoterFile mode
 
@@ -26,7 +26,7 @@ export const withVan = (van: VanAuthPayload) => (
   request: SuperAgentRequest
 ) => {
   const [apiKey, existingMode] = van.api_key.split("|");
-  const mode = existingMode ? existingMode : DEFAULT_MODE;
+  const mode = existingMode || DEFAULT_MODE;
   request.auth(van.username, `${apiKey}|${mode}`, { type: "basic" });
   request.url = `${config.VAN_BASE_URL}${request.url}`;
   return request;

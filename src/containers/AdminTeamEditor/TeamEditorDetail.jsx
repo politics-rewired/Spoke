@@ -1,7 +1,8 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
+import AutoComplete from "material-ui/AutoComplete";
+import Dialog from "material-ui/Dialog";
+import RaisedButton from "material-ui/RaisedButton";
+import PersonAddIcon from "material-ui/svg-icons/social/person-add";
 import {
   Table,
   TableBody,
@@ -10,10 +11,8 @@ import {
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
-import AutoComplete from "material-ui/AutoComplete";
-import Dialog from "material-ui/Dialog";
-import RaisedButton from "material-ui/RaisedButton";
-import PersonAddIcon from "material-ui/svg-icons/social/person-add";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { loadData } from "../hoc/with-operations";
 
@@ -106,7 +105,7 @@ class TeamEditorDetail extends React.Component {
             dataSource={nonMembers}
             dataSourceConfig={{ text: "displayName", value: "id" }}
             filter={AutoComplete.fuzzyFilter}
-            openOnFocus={true}
+            openOnFocus
             disabled={isWorking}
             onUpdateInput={this.handleUpdateNewTexterInput}
             onNewRequest={this.handleNewTexterRequest}
@@ -119,21 +118,21 @@ class TeamEditorDetail extends React.Component {
           />
         </div>
         <Table
-          selectable={true}
-          multiSelectable={true}
+          selectable
+          multiSelectable
           onRowSelection={this.handleRowSelection}
         >
           <TableHeader
             displaySelectAll={false}
             enableSelectAll={false}
-            adjustForCheckbox={true}
+            adjustForCheckbox
           >
             <TableRow>
               <TableHeaderColumn>Name</TableHeaderColumn>
               <TableHeaderColumn>Email</TableHeaderColumn>
             </TableRow>
           </TableHeader>
-          <TableBody showRowHover={true} deselectOnClickaway={false}>
+          <TableBody showRowHover deselectOnClickaway={false}>
             {users.map((user) => (
               <TableRow key={user.id} selected={this.isUserSelected(user.id)}>
                 <TableRowColumn>{user.displayName}</TableRowColumn>

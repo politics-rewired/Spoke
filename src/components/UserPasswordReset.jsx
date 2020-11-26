@@ -1,13 +1,13 @@
-import React from "react";
+import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
-import * as yup from "yup";
+import React from "react";
 import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
+import * as yup from "yup";
 
-import { dataTest } from "../lib/attributes";
-import GSForm from "../components/forms/GSForm";
-import GSSubmitButton from "../components/forms/GSSubmitButton";
 import { UserEditMode } from "../containers/UserEdit";
+import { dataTest } from "../lib/attributes";
+import GSForm from "./forms/GSForm";
+import GSSubmitButton from "./forms/GSSubmitButton";
 
 const styles = StyleSheet.create({
   buttons: {

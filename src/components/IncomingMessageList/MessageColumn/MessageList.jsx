@@ -1,8 +1,8 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import moment from "moment-timezone";
-import { StyleSheet, css } from "aphrodite";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import { loadData } from "../../../containers/hoc/with-operations";
 
@@ -55,7 +55,7 @@ class MessageList extends Component {
     return (
       <div ref="messageWindow" style={messageContainerStyle}>
         {this.props.messages.map((message, index) => {
-          const isFromContact = message.isFromContact;
+          const { isFromContact } = message;
           const containerStyle = {
             marginLeft: isFromContact ? undefined : "60px",
             marginRight: isFromContact ? "60px" : undefined

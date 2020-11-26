@@ -1,8 +1,7 @@
-import React from "react";
-import { graphql, compose, withApollo } from "react-apollo";
-import { withProps, branch, renderComponent } from "recompose";
-
 import { Card, CardHeader, CardText } from "material-ui/Card";
+import React from "react";
+import { compose, graphql, withApollo } from "react-apollo";
+import { branch, renderComponent, withProps } from "recompose";
 
 import LoadingIndicator from "../../components/LoadingIndicator";
 
@@ -18,7 +17,7 @@ const isLoading = (queryNames) =>
     const loading = queryNames.reduce(loadingReducer, false);
 
     const errorReducer = (errorAcc, queryName) => {
-      const error = (parentProps[queryName] || {}).error;
+      const { error } = parentProps[queryName] || {};
       return error ? errorAcc.concat([error]) : errorAcc;
     };
     const errors = queryNames.reduce(errorReducer, []);

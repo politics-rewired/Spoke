@@ -46,7 +46,7 @@ export const fetchVANSurveyQuestions: Task = async (
         $skip: offset
       })
       .use(withVan(payload));
-    const body: PaginatedVanResponse<VANSurveyQuestion> = response.body;
+    const { body } = response;
     hasNextPage = body.nextPageLink !== null;
     offset += limit;
     surveyQuestions = surveyQuestions.concat(body.items);

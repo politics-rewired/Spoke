@@ -1,14 +1,15 @@
-import React from "react";
-import PropTypes from "prop-types";
 import pick from "lodash/pick";
-import GSFormField from "./GSFormField";
-import { allScriptFields } from "../../lib/scripts";
-import ScriptEditor from "../ScriptEditor";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
+import PropTypes from "prop-types";
+import React from "react";
+
 import { dataTest } from "../../lib/attributes";
+import { allScriptFields } from "../../lib/scripts";
+import ScriptEditor from "../ScriptEditor";
+import GSFormField from "./GSFormField";
 
 const styles = {
   dialog: {
@@ -80,7 +81,7 @@ class GSScriptField extends GSFormField {
           name={name}
           scriptText={this.state.script}
           scriptFields={scriptFields}
-          expandable={true}
+          expandable
           onChange={(val) => this.setState({ script: val })}
         />
       </Dialog>

@@ -1,7 +1,7 @@
 import { r } from "../models";
+import { accessRequired } from "./errors";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
-import { accessRequired } from "./errors";
 
 interface TagRecord {
   id: number;

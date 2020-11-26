@@ -1,7 +1,7 @@
-import { Task, JobHelpers } from "pg-compose";
-import bot from "slack";
-import promiseRetry from "promise-retry";
 import isEmpty from "lodash/isEmpty";
+import { JobHelpers, Task } from "pg-compose";
+import promiseRetry from "promise-retry";
+import bot from "slack";
 
 import { config } from "../../config";
 import { sleep } from "../../lib/utils";
@@ -41,7 +41,7 @@ interface SlackPagination<T> {
 
 type UserEmailMap = { [key: string]: string };
 
-interface FetchAllChannelsOptions extends SlackPagination<SlackChannelRecord> {}
+type FetchAllChannelsOptions = SlackPagination<SlackChannelRecord>;
 
 const fetchAllChannels = async (
   options: FetchAllChannelsOptions = {}
@@ -69,9 +69,8 @@ const fetchAllChannels = async (
       acc: acc.concat(strippedChannels),
       next_cursor: response_metadata.next_cursor
     });
-  } else {
-    return acc.concat(strippedChannels);
   }
+  return acc.concat(strippedChannels);
 };
 
 interface FetchChannelMembersOptions extends SlackPagination<any> {
@@ -99,10 +98,9 @@ const fetchChannelMembers = async (
       acc: acc.concat(strippedMembers),
       next_cursor: response_metadata.next_cursor
     });
-  } else {
-    const allMembers = acc.concat(strippedMembers);
-    return allMembers;
   }
+  const allMembers = acc.concat(strippedMembers);
+  return allMembers;
 };
 
 let slackIdEmailCache: { [key: string]: string } = {};

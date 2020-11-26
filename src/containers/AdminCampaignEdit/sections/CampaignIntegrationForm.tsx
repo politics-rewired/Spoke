@@ -1,21 +1,20 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
-
+import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
+import React from "react";
+import { compose } from "recompose";
 
-import { loadData } from "../../hoc/with-operations";
-import { QueryMap, MutationMap } from "../../../network/types";
-import { RelayPaginatedResponse } from "../../../api/pagination";
 import { ExternalSystem } from "../../../api/external-system";
+import { RelayPaginatedResponse } from "../../../api/pagination";
 import {
   GET_SYNC_CONFIGS,
   GET_SYNC_TARGETS
 } from "../../../components/SyncConfigurationModal/queries";
+import { MutationMap, QueryMap } from "../../../network/types";
+import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import {
   asSection,

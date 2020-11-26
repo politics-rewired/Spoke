@@ -1,6 +1,5 @@
-import React, { Component } from "react";
 import PropTypes from "prop-types";
-
+import React, { Component } from "react";
 import Select from "react-select";
 
 import MenuPortal from "./MenuPortal";
@@ -33,7 +32,7 @@ class TagSelector extends Component {
   handleSelectChange = (tagsArray) => {
     const { dataSource, onChange } = this.props;
 
-    let selectedTags = [];
+    const selectedTags = [];
     tagsArray.forEach((tag) => {
       const newTag = dataSource.find((t) => t.id === tag.value);
       selectedTags.push(newTag);

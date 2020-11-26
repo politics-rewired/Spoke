@@ -1,11 +1,10 @@
-import React from "react";
-
 import IconButton from "material-ui/IconButton";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
+import React from "react";
 
 import { CannedResponse } from "../../../../../api/canned-response";
-import { dataTest } from "../../../../../lib/attributes";
 import { LargeListItem } from "../../../../../components/LargeList";
+import { dataTest } from "../../../../../lib/attributes";
 
 interface Props {
   cannedResponse: CannedResponse;

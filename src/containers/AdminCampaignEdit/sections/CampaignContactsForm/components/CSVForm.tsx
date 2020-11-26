@@ -1,13 +1,12 @@
-import React from "react";
-import { StyleSheet, css } from "aphrodite";
+import "../styles/file-drop.css";
 
-import FileDrop from "react-file-drop";
+import { css, StyleSheet } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
 import UploadIcon from "material-ui/svg-icons/file/file-upload";
+import React from "react";
+import FileDrop from "react-file-drop";
 
 import theme from "../../../../../styles/theme";
-
-import "../styles/file-drop.css";
 
 const styles = StyleSheet.create({
   csvHeader: {

@@ -1,8 +1,9 @@
+import { ListItem } from "material-ui/List";
 import PropTypes from "prop-types";
 import React from "react";
-import Navigation from "../components/Navigation";
-import { ListItem } from "material-ui/List";
 import { withRouter } from "react-router";
+
+import Navigation from "../components/Navigation";
 import { dataTest } from "../lib/attributes";
 
 class AdminNavigation extends React.Component {

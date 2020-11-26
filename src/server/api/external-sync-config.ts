@@ -1,6 +1,6 @@
 import { r } from "../models";
-import { sqlResolvers } from "./lib/utils";
 import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
 
 type ExternalSyncTarget = "response_option" | "activist_code" | "result_code";
 

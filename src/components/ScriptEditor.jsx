@@ -1,17 +1,18 @@
-import PropTypes from "prop-types";
-import React from "react";
+import { getCharCount } from "@trt2/gsm-charset-utils";
 import {
-  EditorState,
-  ContentState,
   CompositeDecorator,
+  ContentState,
   Editor,
+  EditorState,
   Modifier
 } from "draft-js";
 import escapeRegExp from "lodash/escapeRegExp";
+import { green500, green600, grey100, red400 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React from "react";
+
 import { delimit } from "../lib/scripts";
 import Chip from "./Chip";
-import { red400, green500, green600, grey100 } from "material-ui/styles/colors";
-import { getCharCount } from "@trt2/gsm-charset-utils";
 
 const styles = {
   editor: {

@@ -38,7 +38,7 @@ export const fetchVANActivistCodes: Task = async (
         $skip: offset
       })
       .use(withVan(payload));
-    const body: PaginatedVanResponse<VANActivistCode> = response.body;
+    const { body } = response;
     hasNextPage = body.nextPageLink !== null;
     offset += limit;
     surveyQuestions = surveyQuestions.concat(body.items);

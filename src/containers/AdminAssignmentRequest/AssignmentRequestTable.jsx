@@ -1,23 +1,22 @@
-import React from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
-
+import CircularProgress from "material-ui/CircularProgress";
+import FlatButton from "material-ui/FlatButton";
+import IconButton from "material-ui/IconButton";
+import RaisedButton from "material-ui/RaisedButton";
+import { green300, red500 } from "material-ui/styles/colors";
+import AssignmentTurnedInIcon from "material-ui/svg-icons/action/assignment-turned-in";
+import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
+import HighlightOffIcon from "material-ui/svg-icons/action/highlight-off";
 import {
   Table,
+  TableBody,
   TableHeader,
   TableHeaderColumn,
-  TableBody,
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
-import IconButton from "material-ui/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import CircularProgress from "material-ui/CircularProgress";
-import HighlightOffIcon from "material-ui/svg-icons/action/highlight-off";
-import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
-import AssignmentTurnedInIcon from "material-ui/svg-icons/action/assignment-turned-in";
-import { red500, green300 } from "material-ui/styles/colors";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
 
 import theme from "../../styles/theme";
 
@@ -47,7 +46,7 @@ const rowStyleForStatus = (rowStatus) => {
   } else if (rowStatus === RowWorkStatus.Denied) {
     overrideStyle = { opacity: 0, backgroundColor: theme.colors.lightRed };
   }
-  return Object.assign({}, baseStyle, overrideStyle);
+  return { ...baseStyle, ...overrideStyle };
 };
 
 const styles = {
@@ -120,7 +119,7 @@ const AssignmentRequestTable = (props) => {
                       <FlatButton
                         label="AutoApprove"
                         labelPosition="before"
-                        primary={true}
+                        primary
                         icon={<AssignmentTurnedInIcon color={green300} />}
                         onClick={handleAutoApproveRow(requestId)}
                       />

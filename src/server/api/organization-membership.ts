@@ -1,5 +1,5 @@
-import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 interface IOrganizationMembership {
   user_id: number;

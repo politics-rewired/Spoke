@@ -1,11 +1,10 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import Form from "react-formal";
-import * as yup from "yup";
 import gql from "graphql-tag";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
 import { loadData } from "../../../containers/hoc/with-operations";
 import GSForm from "../../forms/GSForm";
@@ -71,11 +70,7 @@ class MessageResponse extends Component {
     const isSendDisabled = isSending || messageText.trim() === "";
 
     const errorActions = [
-      <FlatButton
-        label="OK"
-        primary={true}
-        onClick={this.handleCloseErrorDialog}
-      />
+      <FlatButton label="OK" primary onClick={this.handleCloseErrorDialog} />
     ];
 
     return (

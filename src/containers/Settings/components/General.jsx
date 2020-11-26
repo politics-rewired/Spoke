@@ -1,24 +1,23 @@
-import React from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import * as yup from "yup";
-
-import Form from "react-formal";
-import { Card, CardText, CardActions, CardHeader } from "material-ui/Card";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
+import DropDownMenu from "material-ui/DropDownMenu";
 import FlatButton from "material-ui/FlatButton";
+import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
-import DropDownMenu from "material-ui/DropDownMenu";
-import MenuItem from "material-ui/MenuItem";
-import { StyleSheet, css } from "aphrodite";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
-import { loadData } from "../../hoc/with-operations";
-import { snakeToTitleCase } from "../../../lib/attributes";
 import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import GSSubmitButton from "../../../components/forms/GSSubmitButton";
+import { snakeToTitleCase } from "../../../lib/attributes";
+import { loadData } from "../../hoc/with-operations";
 
 const styles = StyleSheet.create({
   sectionCard: {
@@ -229,7 +228,7 @@ class Settings extends React.Component {
     const noApprovalChange = approvalLevel === defaulTexterApprovalStatus;
 
     const errorActions = [
-      <FlatButton label="OK" primary={true} onClick={this.handleDismissError} />
+      <FlatButton label="OK" primary onClick={this.handleDismissError} />
     ];
 
     return (
@@ -257,7 +256,7 @@ class Settings extends React.Component {
           <CardActions>
             <RaisedButton
               label="Save Default Level"
-              primary={true}
+              primary
               disabled={isWorking || noApprovalChange}
               onClick={this.handleSaveApprovalLevel}
             />
@@ -355,7 +354,7 @@ class Settings extends React.Component {
             </CardText>
             <CardActions>
               <Form.Button
-                label={"Save"}
+                label="Save"
                 type="submit"
                 component={RaisedButton}
                 disabled={isWorking || !hasNumbersApiKeyChanged}

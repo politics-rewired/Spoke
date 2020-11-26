@@ -1,8 +1,8 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import { css, StyleSheet } from "aphrodite";
 import IconButton from "material-ui/IconButton";
 import NavigationArrowForward from "material-ui/svg-icons/navigation/arrow-forward";
-import { StyleSheet, css } from "aphrodite";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 // This is because the Toolbar from material-ui seems to only apply the correct margins if the
 // immediate child is a Button or other type it recognizes. Can get rid of this if we remove material-ui

@@ -1,14 +1,13 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-
-import Paper from "material-ui/Paper";
 import Chip from "material-ui/Chip";
+import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
+import { red500 } from "material-ui/styles/colors";
 import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
+import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
 import BlockIcon from "material-ui/svg-icons/content/block";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import { red500 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 const styles = {
   wrapper: {
@@ -31,6 +30,7 @@ const styles = {
 
 class TagEditorList extends Component {
   createHandleEditTag = (tagId) => () => this.props.oEditTag(tagId);
+
   createHandleDeleteTag = (tagId) => () => this.props.onDeleteTag(tagId);
 
   render() {
@@ -61,7 +61,7 @@ class TagEditorList extends Component {
                 label="Edit"
                 labelPosition="before"
                 disabled={tag.isSystem}
-                primary={true}
+                primary
                 icon={<CreateIcon />}
                 style={{ marginRight: 10 }}
                 onClick={this.createHandleEditTag(tag.id)}

@@ -1,7 +1,6 @@
+import { Card, CardText, CardTitle } from "material-ui/Card";
 import PropTypes from "prop-types";
 import React from "react";
-
-import { Card, CardTitle, CardText } from "material-ui/Card";
 
 import LoadingIndicator from "../../components/LoadingIndicator";
 

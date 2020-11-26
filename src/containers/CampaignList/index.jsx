@@ -1,11 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { loadData } from "../hoc/with-operations";
+import AssignmentHUD from "./AssignmentHUD";
 import CampaignListLoader from "./CampaignListLoader";
 import { OperationDialog, operations } from "./OperationDialog";
-import AssignmentHUD from "./AssignmentHUD";
 
 export class CampaignList extends React.Component {
   state = {
@@ -17,6 +17,7 @@ export class CampaignList extends React.Component {
 
   start = (operation, campaign, variables) => () =>
     this.setState({ inProgress: [operation, campaign, variables] });
+
   clearInProgress = () =>
     this.setState({
       inProgress: undefined,

@@ -1,18 +1,17 @@
-import React from "react";
+import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import * as yup from "yup";
+import isEmpty from "lodash/isEmpty";
+import ColorPicker from "material-ui-color-picker";
+import moment from "moment";
+import React from "react";
 import Form from "react-formal";
 import { compose } from "recompose";
-import { ApolloQueryResult } from "apollo-client";
-import moment from "moment";
-import isEmpty from "lodash/isEmpty";
+import * as yup from "yup";
 
-import ColorPicker from "material-ui-color-picker";
-
+import GSForm from "../../../components/forms/GSForm";
+import { dataTest } from "../../../lib/attributes";
 import { difference } from "../../../lib/utils";
 import { loadData } from "../../hoc/with-operations";
-import { dataTest } from "../../../lib/attributes";
-import GSForm from "../../../components/forms/GSForm";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import {
   asSection,
@@ -107,7 +106,7 @@ class CampaignBasicsForm extends React.Component<
       saveLabel
     } = this.props;
     const { id: _id, isStarted, ...formValues } = campaign;
-    const value = Object.assign({}, formValues, pendingChanges);
+    const value = { ...formValues, ...pendingChanges };
 
     const hasPendingChanges = !isEmpty(pendingChanges);
     const isSaveDisabled = isWorking || (!isNew && !hasPendingChanges);

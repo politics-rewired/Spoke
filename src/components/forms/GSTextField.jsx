@@ -1,11 +1,12 @@
-import React from "react";
-import TextField from "material-ui/TextField";
-import GSFormField from "./GSFormField";
 import omit from "lodash/omit";
+import TextField from "material-ui/TextField";
+import React from "react";
+
+import GSFormField from "./GSFormField";
 
 export default class GSTextField extends GSFormField {
   render() {
-    let value = this.props.value;
+    const { value } = this.props;
     const safeProps = omit(this.props, "errors");
     return (
       <TextField

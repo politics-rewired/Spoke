@@ -1,16 +1,15 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
-
 import DataTables from "material-ui-datatables";
-import Toggle from "material-ui/Toggle";
 import IconButton from "material-ui/IconButton";
+import { green500, red500 } from "material-ui/styles/colors";
 import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
-import BlockIcon from "material-ui/svg-icons/content/block";
-import ThumbUpIcon from "material-ui/svg-icons/action/thumb-up";
-import ThumbDownIcon from "material-ui/svg-icons/action/thumb-down";
 import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import { red500, green500 } from "material-ui/styles/colors";
+import ThumbDownIcon from "material-ui/svg-icons/action/thumb-down";
+import ThumbUpIcon from "material-ui/svg-icons/action/thumb-up";
+import BlockIcon from "material-ui/svg-icons/content/block";
+import Toggle from "material-ui/Toggle";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 class ShortLinkDomainList extends Component {
   tableColumns = () => [
@@ -117,7 +116,7 @@ class ShortLinkDomainList extends Component {
     let { domains, disabledDomainIds } = this.props;
     domains = domains.map((domain) => {
       const isRowDisabled = disabledDomainIds.indexOf(domain.id) > -1;
-      return Object.assign({}, domain, { isRowDisabled });
+      return { ...domain, isRowDisabled };
     });
 
     return (

@@ -1,7 +1,8 @@
+import { List } from "material-ui/List";
+import Popover from "material-ui/Popover";
 import type from "prop-types";
 import React from "react";
-import Popover from "material-ui/Popover";
-import { List } from "material-ui/List";
+
 import ScriptList from "./ScriptList";
 
 const styles = {

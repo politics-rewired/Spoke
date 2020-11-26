@@ -1,6 +1,7 @@
+import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React from "react";
-import TextField from "material-ui/TextField";
+
 import { dataTest } from "../lib/attributes";
 
 const DisplayLink = ({ url, textContent }) => (

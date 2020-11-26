@@ -1,13 +1,13 @@
 import { Task } from "pg-compose";
 import { post } from "superagent";
 
-import { r } from "../models";
 import logger from "../../logger";
-
 import { VanAuthPayload, withVan } from "../lib/external-systems";
+import { r } from "../models";
 
 class VANSyncError extends Error {
   status: number;
+
   body: string;
 
   constructor(status: number, body: string) {

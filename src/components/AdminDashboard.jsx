@@ -1,15 +1,15 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router";
 import { compose } from "react-apollo";
-import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
+import { withRouter } from "react-router";
 
+import AdminNavigation from "../containers/AdminNavigation";
 import { loadData } from "../containers/hoc/with-operations";
 import { hasRole } from "../lib/permissions";
 import theme from "../styles/theme";
 import TopNav from "./TopNav";
-import AdminNavigation from "../containers/AdminNavigation";
 
 const styles = StyleSheet.create({
   container: {
@@ -32,14 +32,14 @@ class AdminDashboard extends React.Component {
   };
 
   urlFromPath(path) {
-    const organizationId = this.props.match.params.organizationId;
+    const { organizationId } = this.props.match.params;
     return `/admin/${organizationId}/${path}`;
   }
 
   handleToggleMenu = () => this.setState({ showMenu: !this.state.showMenu });
 
   renderNavigation(sections) {
-    const organizationId = this.props.match.params.organizationId;
+    const { organizationId } = this.props.match.params;
 
     if (!organizationId) {
       return "";

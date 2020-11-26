@@ -1,12 +1,11 @@
-import PropTypes from "prop-types";
-import React from "react";
 import gql from "graphql-tag";
-
 import { List, ListItem } from "material-ui/List";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { loadData } from "./hoc/with-operations";
 import Empty from "../components/Empty";
+import { loadData } from "./hoc/with-operations";
 
 const AdminOptOutList = function AdminOptOutList(props) {
   const { data } = props;

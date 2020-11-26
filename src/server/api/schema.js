@@ -2960,7 +2960,7 @@ const rootMutations = {
           onApplyScript,
           textColor,
           backgroundColor,
-          webhookUrl, 
+          webhookUrl,
           confirmationSteps
         ]
       );

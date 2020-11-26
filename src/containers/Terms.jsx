@@ -1,15 +1,14 @@
+import gql from "graphql-tag";
+import Divider from "material-ui/Divider";
+import FlatButton from "material-ui/FlatButton";
+import Paper from "material-ui/Paper";
+import RaisedButton from "material-ui/RaisedButton";
+import { Step, StepContent, StepLabel, Stepper } from "material-ui/Stepper";
 import PropTypes from "prop-types";
+import queryString from "query-string";
 import React from "react";
 import { compose } from "react-apollo";
 import { withRouter } from "react-router";
-import queryString from "query-string";
-import gql from "graphql-tag";
-
-import Paper from "material-ui/Paper";
-import { Step, Stepper, StepLabel, StepContent } from "material-ui/Stepper";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
-import Divider from "material-ui/Divider";
 
 import { loadData } from "./hoc/with-operations";
 

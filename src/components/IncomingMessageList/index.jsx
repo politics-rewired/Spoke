@@ -1,16 +1,15 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
 import gql from "graphql-tag";
-
 import DataTables from "material-ui-datatables";
 import FlatButton from "material-ui/FlatButton";
 import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 
 import { loadData } from "../../containers/hoc/with-operations";
-import LoadingIndicator from "../../components/LoadingIndicator";
-import { MESSAGE_STATUSES } from "../../components/IncomingMessageFilter";
+import { MESSAGE_STATUSES } from "../IncomingMessageFilter";
+import LoadingIndicator from "../LoadingIndicator";
 import ConversationPreviewModal from "./ConversationPreviewModal";
 
 const formatContactName = (contact) => {
@@ -199,7 +198,7 @@ export class IncomingMessageList extends Component {
   };
 
   handleRowsSelected = (rowsSelected) => {
-    const conversations = this.props.conversations.conversations.conversations;
+    const { conversations } = this.props.conversations.conversations;
     const [selection, selectedData] = prepareSelectedRowsData(
       conversations,
       rowsSelected

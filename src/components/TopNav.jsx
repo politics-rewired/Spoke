@@ -1,13 +1,14 @@
-import PropTypes from "prop-types";
-import React from "react";
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import IconButton from "material-ui/IconButton";
 import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
+import PropTypes from "prop-types";
+import React from "react";
 import { Link } from "react-router-dom";
+
+import { withOperations } from "../containers/hoc/with-operations";
 import UserMenu from "../containers/UserMenu";
 import theme from "../styles/theme";
-import { StyleSheet, css } from "aphrodite";
-import { withOperations } from "../containers/hoc/with-operations";
-import gql from "graphql-tag";
 
 const styles = StyleSheet.create({
   container: {

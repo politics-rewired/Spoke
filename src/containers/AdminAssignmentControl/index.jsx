@@ -1,13 +1,12 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
-import { Card, CardText, CardActions, CardHeader } from "material-ui/Card";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
-import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import { loadData } from "../../containers/hoc/with-operations";
+import { loadData } from "../hoc/with-operations";
 import AssignmentRow from "./AssignmentRow";
 
 class AdminAssignmentControl extends Component {
@@ -59,7 +58,7 @@ class AdminAssignmentControl extends Component {
   handleSaveAssignmentControls = async () => {
     const { changes } = this.state;
     const payloads = Object.keys(changes).map((key) => {
-      const teamPayload = Object.assign({}, changes[key], { id: key });
+      const teamPayload = { ...changes[key], id: key };
 
       if (teamPayload.escalationTags) {
         teamPayload.escalationTagIds = teamPayload.escalationTags.map(
@@ -96,11 +95,7 @@ class AdminAssignmentControl extends Component {
       : [];
 
     const dialogActions = [
-      <FlatButton
-        label="Close"
-        primary={true}
-        onClick={this.handleCloseDialog}
-      />
+      <FlatButton label="Close" primary onClick={this.handleCloseDialog} />
     ];
 
     return (
@@ -126,7 +121,7 @@ class AdminAssignmentControl extends Component {
           />
         </CardActions>
         <Dialog
-          title={"Error saving Assignment Controls"}
+          title="Error saving Assignment Controls"
           actions={dialogActions}
           modal={false}
           open={!!error}

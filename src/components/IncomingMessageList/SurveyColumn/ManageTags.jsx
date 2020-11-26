@@ -1,11 +1,10 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
-
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
 import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import { loadData } from "../../../containers/hoc/with-operations";
 import TagSelector from "../../TagSelector";
@@ -70,7 +69,7 @@ class ManageTags extends Component {
     const actions = [
       <RaisedButton
         label="Save"
-        primary={true}
+        primary
         disabled={isWorking}
         onClick={this.handleSaveTags}
       />,
@@ -80,7 +79,7 @@ class ManageTags extends Component {
     const errorActions = [
       <RaisedButton
         label="OK"
-        primary={true}
+        primary
         disabled={isWorking}
         onClick={this.handleCloseErrorDialog}
       />

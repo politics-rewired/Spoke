@@ -1,7 +1,4 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
 import AutoComplete from "material-ui/AutoComplete";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
@@ -9,9 +6,11 @@ import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { loadData } from "../hoc/with-operations";
 import { dataSourceItem } from "../../components/utils";
+import { loadData } from "../hoc/with-operations";
 import TrollAlarmList from "./components/TrollAlarmList";
 
 const styles = {
@@ -46,20 +45,23 @@ class AdminTrollAlarms extends React.Component {
   // Query conditions
   handleFocusTokenSearch = () =>
     this.setState({ tokenSearchText: "", token: null });
+
   handleTokenSearchTextChange = (tokenSearchText) =>
     this.setState({ tokenSearchText });
+
   handleTokenSelected = (selection, index) => {
     let token = null;
     if (index > -1) {
       token = selection.value.key;
     } else {
-      const trollTokens = this.props.trollTokens.trollTokens;
+      const { trollTokens } = this.props.trollTokens;
       token = trollTokens.find(({ token }) => token === selection);
     }
     if (token) {
       this.setState({ token, selectedAlarmIds: [] });
     }
   };
+
   handleToggleDismissed = (_event, dismissed) =>
     this.setState({ dismissed, selectedAlarmIds: [] });
 
@@ -91,6 +93,7 @@ class AdminTrollAlarms extends React.Component {
   };
 
   handleDismissCopyAlarm = () => this.setState({ copiedAlarmID: undefined });
+
   handleCopyAlarm = (alarm) => {
     const clipboardContents = [
       `Triggered Token: ${alarm.token}`,
@@ -115,6 +118,7 @@ class AdminTrollAlarms extends React.Component {
 
   // Pagination
   handlePageSizeChange = (pageSize) => this.setState({ pageSize });
+
   handlePageChange = (page) => this.setState({ page });
 
   render() {
@@ -123,7 +127,7 @@ class AdminTrollAlarms extends React.Component {
     const { selectedAlarmIds, isWorking, error } = this.state;
     const { match } = this.props;
 
-    const trollTokens = this.props.trollTokens.trollTokens;
+    const { trollTokens } = this.props.trollTokens;
     const dataSource = trollTokens.map(({ token }) =>
       dataSourceItem(token, token)
     );
@@ -132,21 +136,17 @@ class AdminTrollAlarms extends React.Component {
     const isDeleteSelectedDisabled = selectedAlarmIds.length === 0 || isWorking;
 
     const errorActions = [
-      <FlatButton
-        label="Close"
-        primary={true}
-        onClick={this.handleOnCancelError}
-      />
+      <FlatButton label="Close" primary onClick={this.handleOnCancelError} />
     ];
 
     return (
       <div>
         <Paper style={styles.controlsContainer}>
           <AutoComplete
-            floatingLabelText={"Token"}
-            hintText={"Search for a trigger token"}
+            floatingLabelText="Token"
+            hintText="Search for a trigger token"
             style={{ marginRight: "10px", ...styles.controlsColumn }}
-            fullWidth={true}
+            fullWidth
             maxSearchResults={8}
             searchText={tokenSearchText}
             dataSource={dataSource}
@@ -164,13 +164,13 @@ class AdminTrollAlarms extends React.Component {
           <RaisedButton
             label={`Dismiss All Matching ${deleteAllSuffix}`}
             style={{ marginRight: "10px" }}
-            secondary={true}
+            secondary
             disabled={token === null}
             onClick={this.handleDismissMatching}
           />
           <RaisedButton
             label={`Dismiss Selected (${selectedAlarmIds.length})`}
-            secondary={true}
+            secondary
             disabled={isDeleteSelectedDisabled}
             onClick={this.handleDismissSelected}
           />

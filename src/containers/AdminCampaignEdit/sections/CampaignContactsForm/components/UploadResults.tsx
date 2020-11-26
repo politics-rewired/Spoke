@@ -1,12 +1,11 @@
-import React from "react";
-
 import { List, ListItem } from "material-ui/List";
 import Subheader from "material-ui/Subheader";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
+import React from "react";
 
-import { PendingJobType } from "../../../components/SectionWrapper";
-import theme from "../../../../../styles/theme";
 import { dataTest } from "../../../../../lib/attributes";
+import theme from "../../../../../styles/theme";
+import { PendingJobType } from "../../../components/SectionWrapper";
 
 const GreenCheck = () => <CheckIcon color={theme.colors.green} />;
 
@@ -53,7 +52,7 @@ export const UploadResults: React.SFC<Props> = (props) => {
           .split("\n")
           .map((message) => <ListItem key={message} primaryText={message} />)
       ) : (
-        <ListItem primaryText={"No results"} />
+        <ListItem primaryText="No results" />
       )}
     </List>
   );

@@ -1,21 +1,20 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose, withProps } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
 import Avatar from "material-ui/Avatar";
-import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
-import RaisedButton from "material-ui/RaisedButton";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
+import RaisedButton from "material-ui/RaisedButton";
 import DoneIcon from "material-ui/svg-icons/action/done";
+import WarningIcon from "material-ui/svg-icons/alert/warning";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
+import React from "react";
+import { compose, withProps } from "recompose";
 
-import { CampaignReadinessType } from "../types";
 import { withAuthzContext } from "../../../components/AuthzProvider";
-import { loadData } from "../../hoc/with-operations";
-import { dataTest, camelCase } from "../../../lib/attributes";
+import { camelCase, dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
+import { loadData } from "../../hoc/with-operations";
+import { CampaignReadinessType } from "../types";
 
 export interface PendingJobType {
   id: string;

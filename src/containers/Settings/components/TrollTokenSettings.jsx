@@ -1,8 +1,12 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import sortBy from "lodash/sortBy";
-
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import FloatingActionButton from "material-ui/FloatingActionButton";
+import RaisedButton from "material-ui/RaisedButton";
+import { red500 } from "material-ui/styles/colors";
+import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
+import ContentAddIcon from "material-ui/svg-icons/content/add";
 import {
   Table,
   TableBody,
@@ -11,17 +15,12 @@ import {
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import Dialog from "material-ui/Dialog";
 import TextField from "material-ui/TextField";
-import FloatingActionButton from "material-ui/FloatingActionButton";
-import ContentAddIcon from "material-ui/svg-icons/content/add";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import { red500 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { loadData } from "../../hoc/with-operations";
 import theme from "../../../styles/theme";
+import { loadData } from "../../hoc/with-operations";
 
 const styles = {
   row: { cursor: "pointer" },
@@ -39,7 +38,9 @@ class TrollTokenSettings extends React.Component {
   handleOnCancelError = () => this.setState({ error: undefined });
 
   handleDeleteToken = (deleteToken) => () => this.setState({ deleteToken });
+
   handleOnCancelDelete = () => this.setState({ deleteToken: undefined });
+
   handleConfirmDeleteToken = async () => {
     const { deleteToken } = this.state;
     this.setState({ isWorking: true, error: undefined });
@@ -54,8 +55,11 @@ class TrollTokenSettings extends React.Component {
   };
 
   handleAddToken = () => this.setState({ addToken: "" });
+
   handleOnCancelAddToken = () => this.setState({ addToken: undefined });
+
   handleOnChangeAddToken = (_, addToken) => this.setState({ addToken });
+
   handleOnConfirmAddToken = async () => {
     const { addToken } = this.state;
     this.setState({ isWorking: true, error: undefined });
@@ -78,26 +82,18 @@ class TrollTokenSettings extends React.Component {
       <FlatButton label="Confirm" onClick={this.handleOnConfirmAddToken} />,
       <FlatButton
         label="Cancel"
-        primary={true}
+        primary
         onClick={this.handleOnCancelAddToken}
       />
     ];
 
     const deleteActions = [
       <FlatButton label="Confirm" onClick={this.handleConfirmDeleteToken} />,
-      <FlatButton
-        label="Cancel"
-        primary={true}
-        onClick={this.handleOnCancelDelete}
-      />
+      <FlatButton label="Cancel" primary onClick={this.handleOnCancelDelete} />
     ];
 
     const errorActions = [
-      <FlatButton
-        label="Ok"
-        primary={true}
-        onClick={this.handleOnCancelError}
-      />
+      <FlatButton label="Ok" primary onClick={this.handleOnCancelError} />
     ];
 
     return (
@@ -116,9 +112,9 @@ class TrollTokenSettings extends React.Component {
                 <TableHeaderColumn>Actions</TableHeaderColumn>
               </TableRow>
             </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover={true}>
+            <TableBody displayRowCheckbox={false} showRowHover>
               {sortedTokens.map(({ token }) => (
-                <TableRow key={token} selectable={true} style={styles.row}>
+                <TableRow key={token} selectable style={styles.row}>
                   <TableRowColumn>{token}</TableRowColumn>
                   <TableRowColumn>
                     <RaisedButton

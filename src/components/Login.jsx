@@ -1,12 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
-import React from "react";
 import queryString from "query-string";
+import React from "react";
 import { withRouter } from "react-router";
-import { StyleSheet, css } from "aphrodite";
 
-import theme from "../styles/theme";
 import UserEdit, { UserEditMode } from "../containers/UserEdit";
-import UserPasswordReset from "../components/UserPasswordReset";
+import theme from "../styles/theme";
+import UserPasswordReset from "./UserPasswordReset";
 
 const styles = StyleSheet.create({
   fieldContainer: {

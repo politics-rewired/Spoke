@@ -1,15 +1,14 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import { loadData } from "../hoc/with-operations";
 import { RequestAutoApproveType } from "../../api/organization-membership";
-import { sleep } from "../../lib/utils";
 import { hasRole } from "../../lib/permissions";
+import { sleep } from "../../lib/utils";
+import { loadData } from "../hoc/with-operations";
 import AssignmentRequestTable, {
   RowWorkStatus
 } from "./AssignmentRequestTable";
@@ -67,8 +66,10 @@ class AdminAssignmentRequest extends Component {
 
   handleDismissAutoApproveRequest = () =>
     this.setState({ autoApproveReqId: undefined });
+
   handleAutoApproveRequest = (autoApproveReqId) =>
     this.setState({ autoApproveReqId });
+
   handleConfirmAutoApprove = () => {
     const { autoApproveReqId } = this.state;
     this.setState({ autoApproveReqId: undefined });
@@ -116,7 +117,7 @@ class AdminAssignmentRequest extends Component {
       <FlatButton label="Confirm" onClick={this.handleConfirmAutoApprove} />,
       <FlatButton
         label="Cancel"
-        primary={true}
+        primary
         onClick={this.handleDismissAutoApproveRequest}
       />
     ];

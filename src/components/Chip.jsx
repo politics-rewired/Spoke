@@ -1,6 +1,6 @@
+import extend from "lodash/extend";
 import PropTypes from "prop-types";
 import React from "react";
-import extend from "lodash/extend";
 
 // Credit to materialize CSS
 // Material UI coming out with Chip

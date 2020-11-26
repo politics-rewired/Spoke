@@ -1,16 +1,16 @@
-import React from "react";
-import PropTypes from "prop-types";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import * as yup from "yup";
-import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
 import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
-import { loadData } from "./hoc/with-operations";
-import { dataTest } from "../lib/attributes";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
+import { dataTest } from "../lib/attributes";
+import { loadData } from "./hoc/with-operations";
 
 export const UserEditMode = Object.freeze({
   SignUp: "signup",

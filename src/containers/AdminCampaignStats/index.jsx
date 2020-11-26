@@ -1,22 +1,21 @@
-import PropTypes from "prop-types";
-import React from "react";
-import moment from "moment";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
-import { StyleSheet, css } from "aphrodite";
-
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
-import { loadData } from "../hoc/with-operations";
-import theme from "../../styles/theme";
 import { dataTest } from "../../lib/attributes";
-import TopLineStats from "./TopLineStats";
+import theme from "../../styles/theme";
+import { loadData } from "../hoc/with-operations";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import TexterStats from "./TexterStats";
+import TopLineStats from "./TopLineStats";
 import VanExportModal from "./VanExportModal";
 import VanSyncModal from "./VanSyncModal";
 
@@ -87,7 +86,9 @@ class AdminCampaignStats extends React.Component {
   };
 
   handleOnClickVanExport = () => this.setState({ exportVanOpen: true });
+
   handleDismissVanExport = () => this.setState({ exportVanOpen: false });
+
   handleCompleteVanExport = () =>
     this.setState({
       exportVanOpen: false,
@@ -96,7 +97,9 @@ class AdminCampaignStats extends React.Component {
     });
 
   handleOnClickVanSync = () => this.setState({ syncVanOpen: true });
+
   handleDismissVanSync = () => this.setState({ syncVanOpen: false });
+
   handleCompleteVanSync = () =>
     this.setState({
       syncVanOpen: false,
@@ -111,7 +114,7 @@ class AdminCampaignStats extends React.Component {
     } = this.state;
     const { data, match, adminPerms } = this.props;
     const { organizationId, campaignId } = match.params;
-    const campaign = data.campaign;
+    const { campaign } = data;
     const { pendingJobs } = campaign;
 
     if (!campaign) {

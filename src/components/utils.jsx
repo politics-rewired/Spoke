@@ -1,5 +1,5 @@
-import React from "react";
 import { MenuItem } from "material-ui/Menu";
+import React from "react";
 
 export function dataSourceItem(name, key) {
   return {
