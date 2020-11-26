@@ -76,6 +76,8 @@ module.exports = {
     "no-nested-ternary": "off",
     "no-underscore-dangle": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": "error",
 
     // Rules to get linting to pass
     camelcase: ["off", { properties: "never" }],
