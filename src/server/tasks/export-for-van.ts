@@ -1,18 +1,17 @@
 import sortBy from "lodash/sortBy";
 import moment from "moment";
 import Papa from "papaparse";
-import { Task } from "pg-compose";
 
-import logger from "../../logger";
 import { uploadToCloud } from "../../workers/exports/upload";
-import { deleteJob } from "../../workers/jobs";
-import { JobRequestRecord } from "../api/types";
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
-import { addProgressJob } from "./utils";
+import { addProgressJob, ProgressTask } from "./utils";
 
-export interface ExportForVANOptions {
+export const TASK_IDENTIFIER = "export-for-van";
+
+export interface ExportForVANPayload {
+  campaignId: number;
   requesterId: number;
   vanIdField: string;
   includeUnmessaged: boolean;
@@ -31,23 +30,18 @@ interface VanExportRow {
 const CHUNK_SIZE = 1000;
 const FILTER_MESSAGED_FRAGMENT = `and exists ( select 1 from message where campaign_contact_id = cc.id)`;
 
-export const exportForVan: Task = async (
-  job: JobRequestRecord,
-  _helpers: any
+export const exportForVan: ProgressTask<ExportForVANPayload> = async (
+  payload,
+  helpers
 ) => {
-  const { campaign_id } = job;
-  const exportJob = await addProgressJob("export-for-van", job);
+  const { campaignId, requesterId, vanIdField, includeUnmessaged } = payload;
   const { reader } = r;
-  const payload: ExportForVANOptions = JSON.parse(exportJob.payload);
-  const { requesterId, includeUnmessaged, vanIdField } = payload;
-
-  logger.info("exportJob", exportJob);
 
   const { email } = await reader("user")
     .where({ id: requesterId })
     .first(["email"]);
   const { title } = await reader("campaign")
-    .where({ id: campaign_id })
+    .where({ id: campaignId })
     .first(["title"]);
 
   const vanIdSelector =
@@ -102,7 +96,7 @@ export const exportForVan: Task = async (
          group by 1, 2, 3, 4, 5, 6, 7
          order by cc.id asc;
       `,
-      [job.campaign_id, lastContactId, CHUNK_SIZE]
+      [campaignId, lastContactId, CHUNK_SIZE]
     );
 
     return rows;
@@ -135,11 +129,18 @@ export const exportForVan: Task = async (
     subject: `VAN export ready for ${title}`,
     text: `Your VAN exports is ready! This URL will be valid for 24 hours.\n\n${exportUrl}`
   }).catch((err: Error) => {
-    logger.error("Error sending VAN export email", {
+    helpers.logger.error("Error sending VAN export email", {
       ...errToObj(err),
       exportUrl
     });
   });
-
-  await deleteJob(job.id);
 };
+
+export const addExportForVan = async (payload: ExportForVANPayload) =>
+  addProgressJob({
+    identifier: TASK_IDENTIFIER,
+    payload,
+    taskSpec: {
+      queueName: "export"
+    }
+  });

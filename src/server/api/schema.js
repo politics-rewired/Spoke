@@ -29,9 +29,8 @@ import { change } from "../local-auth-helpers";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, datawarehouse, r } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
-import { exportCampaign } from "../tasks/export-campaign";
-import { exportForVan } from "../tasks/export-for-van";
-import { addProgressJob } from "../tasks/utils";
+import { addExportCampaign } from "../tasks/export-campaign";
+import { addExportForVan } from "../tasks/export-for-van";
 import { errToObj } from "../utils";
 import { getWorker } from "../worker";
 import {
@@ -786,35 +785,16 @@ const rootMutations = {
       const organizationId = campaign.organization_id;
       await accessRequired(user, organizationId, "ADMIN");
 
-      const jobTypes = {};
-      jobTypes[CampaignExportType.SPOKE] = "export";
-      jobTypes[CampaignExportType.VAN] = "van-export";
-
-      let payload = {};
-      let jobRequest;
-
-      const jobRequestRecord = {
-        queue_name: `${campaignId}:export`,
-        job_type: jobTypes[exportType],
-        locks_queue: false,
-        assigned: JOBS_SAME_PROCESS,
-        campaign_id: campaignId,
-        payload: JSON.stringify(payload)
-      };
-
       if (exportType === CampaignExportType.SPOKE) {
-        payload = {
+        return addExportCampaign({
           campaign_id: campaignId,
           requester: user.id
-        };
-        jobRequest = exportCampaign(jobRequestRecord);
-      } else if (exportType === CampaignExportType.VAN) {
-        payload = { ...vanOptions, requesterId: user.id };
-        jobRequest = exportForVan(jobRequestRecord);
+        });
       }
 
-      // this should return a jobRequest object
-      return jobRequest;
+      if (exportType === CampaignExportType.VAN) {
+        return addExportForVan({ ...vanOptions, requesterId: user.id });
+      }
     },
 
     editOrganizationMembership: async (
