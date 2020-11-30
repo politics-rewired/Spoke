@@ -76,7 +76,7 @@ export const wrapProgressTask = <P extends { [key: string]: any }>(
   task: ProgressTask<P>,
   options: ProgressTaskOptions
 ) => async (payload: ProgressTaskPayload & P, helpers: JobHelpers) => {
-  const { _jobRequestId: jobId, ...taskPayload } = payload;
+  const { _jobRequestId: jobId } = payload;
 
   const jobRequest = await r.knex("job_request").where({ id: jobId }).first();
 
@@ -97,7 +97,7 @@ export const wrapProgressTask = <P extends { [key: string]: any }>(
   };
 
   try {
-    await task(taskPayload, progressHelpers);
+    await task(payload, progressHelpers);
     helpers.logger.info("wrappedProgress runs payload", payload);
     if (options.removeOnComplete) {
       await r.knex("job_request").where({ id: jobId }).del();
