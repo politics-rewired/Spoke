@@ -1439,9 +1439,15 @@ const rootMutations = {
 
         // Delete any associated Graphile Worker job
         await trx("graphile_worker.jobs")
-          .whereRaw(`(payload->'__context'->>'job_request_id')::integer = ?`, [
-            id
-          ])
+          .whereRaw(
+            `
+              (
+                ((payload->'__context'->>'job_request_id')::integer = ?)
+                or (key = ?)
+              )
+            `,
+            [id, id]
+          )
           .del();
       });
       return { id };
