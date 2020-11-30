@@ -23,8 +23,8 @@ export const addProgressJob = async <P extends ProgressJobPayload>(
     identifier,
     taskSpec = {},
     payload,
-    initialResult,
-    context
+    initialResult = {},
+    context = {}
   } = options;
   const { campaignId } = payload;
   const { queueName = `${campaignId}:${identifier}` } = taskSpec;
