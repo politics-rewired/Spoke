@@ -15380,7 +15380,7 @@ redis-commands@^1.1.0, redis-commands@^1.2.0:
   resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.5.0.tgz#80d2e20698fe688f227127ff9e5164a7dd17e785"
   integrity sha512-6KxamqpZ468MeQC3bkWmCB1fp56XL64D4Kf0zJSwDZbVLLm7KFkoIcHrgRvQ+sk8dnhySs7+yBg94yIkAK7aJg==
 
-redis-commands@^1.5.0:
+redis-commands@^1.4.0, redis-commands@^1.5.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.6.0.tgz#36d4ca42ae9ed29815cdb30ad9f97982eba1ce23"
   integrity sha512-2jnZ0IkjZxvguITjFTrGiLyzQZcTvaw8DAaCXxZq/dsHXz7KfMQ3OUJy7Tz9vnRtZRVz6VRCPDvruvU8Ts44wQ==
@@ -15411,6 +15411,14 @@ redis-parser@^3.0.0:
   integrity sha1-tm2CjNyv5rS4pCin3vTGvKwxyLQ=
   dependencies:
     redis-errors "^1.0.0"
+
+redis-promisify@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/redis-promisify/-/redis-promisify-0.1.2.tgz#61c56455bfde35e480fb32effd2400730176cadf"
+  integrity sha512-JzUWE5VfA2kFASwe7OAVpg3sZSDpG3+6DT0sBF1nIwlRdGKeG2YalcRxl98T/GEIKmTm6wpNkQecqNdAXHfK6A==
+  dependencies:
+    redis "^2.8.0"
+    redis-commands "^1.4.0"
 
 redis@2.6.0-0:
   version "2.6.0-0"

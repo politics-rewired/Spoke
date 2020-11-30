@@ -1,13 +1,10 @@
 import fakeredis from "fakeredis";
 import knex from "knex";
-import redis from "redis";
+import redis from "redis-promisify";
 import dumbThinky from "rethink-knex-adapter";
 
 import { config } from "../../config";
 import knexConfig from "../knex";
-
-Promise.promisifyAll(redis.RedisClient.prototype);
-Promise.promisifyAll(redis.Multi.prototype);
 
 // Instantiate the rethink-knex-adapter using the config defined in
 // /src/server/knex.js.
