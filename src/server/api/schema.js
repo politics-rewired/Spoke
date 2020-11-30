@@ -787,13 +787,17 @@ const rootMutations = {
 
       if (exportType === CampaignExportType.SPOKE) {
         return addExportCampaign({
-          campaign_id: campaignId,
-          requester: user.id
+          campaignId,
+          requesterId: user.id
         });
       }
 
       if (exportType === CampaignExportType.VAN) {
-        return addExportForVan({ ...vanOptions, requesterId: user.id });
+        return addExportForVan({
+          ...vanOptions,
+          campaignId,
+          requesterId: user.id
+        });
       }
     },
 
