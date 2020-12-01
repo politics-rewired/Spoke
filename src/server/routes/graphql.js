@@ -1,4 +1,4 @@
-import { ApolloServer } from "apollo-server-express";
+import { ApolloError, ApolloServer } from "apollo-server-express";
 import express from "express";
 import { addMockFunctionsToSchema, makeExecutableSchema } from "graphql-tools";
 
@@ -18,6 +18,11 @@ const executableSchema = makeExecutableSchema({
 });
 
 const formatError = (err) => {
+  // Ignore intentional ApolloErrors
+  if (err.originalError instanceof ApolloError) {
+    return err;
+  }
+
   // node-postgres does not use an Error subclass so we check for schema property
   const hasSchema = Object.prototype.hasOwnProperty.call(
     err.originalError,

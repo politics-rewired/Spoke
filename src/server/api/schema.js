@@ -3507,7 +3507,8 @@ const rootResolvers = {
       }
       return assignment;
     },
-    organization: async (_root, { id }, { loaders }) => {
+    organization: async (_root, { id }, { loaders, user }) => {
+      await accessRequired(user, id, "TEXTER", /* allowSuperadmin= */ true);
       const getOrganization = memoizer.memoize(async ({ organizationId }) => {
         return loaders.organization.load(organizationId);
       }, cacheOpts.OrganizationSingleTon);

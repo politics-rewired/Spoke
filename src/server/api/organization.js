@@ -232,6 +232,12 @@ export const resolvers = {
         : null;
     },
     myCurrentAssignmentTargets: async (organization, _, context) => {
+      await accessRequired(
+        context.user,
+        organization.id,
+        "TEXTER",
+        /* allowSuperadmin= */ true
+      );
       try {
         const assignmentTargets = await cachedMyCurrentAssignmentTargets(
           context.user.id,
