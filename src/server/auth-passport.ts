@@ -1,5 +1,5 @@
 import passportSlack from "@aoberoi/passport-slack";
-import express from "express";
+import express, { Request, Response } from "express";
 import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -8,10 +8,14 @@ import request from "superagent";
 import { config } from "../config";
 import logger from "../logger";
 import { capitalizeWord } from "./api/lib/utils";
+import { UserRecord } from "./api/types";
 import { contextForRequest } from "./contexts";
 import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
+import { SpokeRequest } from "./types";
+
+type PassportCallback = (err: Error | null, result?: any) => void;
 
 const {
   BASE_URL,
@@ -32,7 +36,7 @@ const AUTOJOIN_URL = SHOULD_AUTOJOIN_NEW_USER
   ? `${BASE_URL}/${AUTOJOIN_ORG_UUID}/join`
   : "";
 
-function redirectPostSignIn(req, res, isNewUser) {
+function redirectPostSignIn(req: Request, res: Response, isNewUser: boolean) {
   const redirectDestionation = !req.query.state
     ? SHOULD_AUTOJOIN_NEW_USER && isNewUser
       ? AUTOJOIN_URL
@@ -57,14 +61,14 @@ function setupSlackPassport() {
   const strategy = new passportSlack.Strategy(
     options,
     async (
-      accessToken,
-      scopes,
-      team,
+      accessToken: string,
+      scopes: string[],
+      team: string,
       // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-      { bot, incomingWebhook },
+      { bot, incomingWebhook }: { bot: string; incomingWebhook: string },
       // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-      { user, team: teamProfile },
-      done
+      { user, team: teamProfile }: { user: any; team: any },
+      done: PassportCallback
     ) => {
       // scopes is a Set
       if (config.SLACK_TOKEN) {
@@ -87,17 +91,18 @@ function setupSlackPassport() {
 
   passport.use(strategy);
 
-  passport.serializeUser(({ id: slackUserId }, done) =>
-    done(null, slackUserId)
+  passport.serializeUser(
+    ({ id: slackUserId }: { id: string }, done: PassportCallback) =>
+      done(null, slackUserId)
   );
 
-  passport.deserializeUser((slackUserId, done) =>
+  passport.deserializeUser((slackUserId: string, done: PassportCallback) =>
     userLoggedIn(slackUserId, "auth0_id")
-      .then((user) => done(null, user || false))
-      .catch((error) => done(error))
+      .then((user: any) => done(null, user || false))
+      .catch((error: any) => done(error))
   );
 
-  const handleLogin = async (req, res) => {
+  const handleLogin = async (req: SpokeRequest, res: Response) => {
     const { db } = contextForRequest(req);
     const { user } = req;
     // set slack_id to auth0Id to avoid changing the schema
@@ -164,7 +169,7 @@ function setupSlackPassport() {
       return redirectPostSignIn(req, res, true);
     }
 
-    return redirectPostSignIn(req, res);
+    return redirectPostSignIn(req, res, false);
   };
 
   const app = express();
@@ -192,26 +197,31 @@ function setupAuth0Passport() {
       clientSecret: AUTH0_CLIENT_SECRET,
       callbackURL: `${BASE_URL}/login-callback`
     },
-    (accessToken, refreshToken, extraParams, profile, done) =>
-      done(null, profile)
+    (
+      accessToken: string,
+      refreshToken: string,
+      extraParams: Record<string, unknown>,
+      profile: any,
+      done: PassportCallback
+    ) => done(null, profile)
   );
 
   passport.use(strategy);
 
-  passport.serializeUser((auth0User, done) => {
+  passport.serializeUser((auth0User: any, done: PassportCallback) => {
     // This is the Auth0 user object, not the db one
     // eslint-disable-next-line no-underscore-dangle
     const auth0Id = auth0User.id || auth0User._json.sub;
     done(null, auth0Id);
   });
 
-  passport.deserializeUser((auth0Id, done) =>
+  passport.deserializeUser((auth0Id: string, done: PassportCallback) =>
     userLoggedIn(auth0Id, "auth0_id")
-      .then((user) => done(null, user || false))
-      .catch((error) => done(error))
+      .then((user: any) => done(null, user || false))
+      .catch((error: any) => done(error))
   );
 
-  const handleLogin = async (req, res) => {
+  const handleLogin = async (req: SpokeRequest, res: Response) => {
     const { db } = contextForRequest(req);
     const auth0Id = req.user && (req.user.id || req.user._json.sub);
     if (!auth0Id) {
@@ -242,7 +252,7 @@ function setupAuth0Passport() {
       return redirectPostSignIn(req, res, true);
     }
 
-    return redirectPostSignIn(req, res);
+    return redirectPostSignIn(req, res, false);
   };
 
   const app = express();
@@ -260,11 +270,22 @@ function setupLocalAuthPassport() {
       usernameField: "email",
       passReqToCallback: true
     },
-    async (req, username, password, done) => {
+    async (
+      req: SpokeRequest,
+      username: string,
+      password: string,
+      done: PassportCallback
+    ) => {
       const { db } = contextForRequest(req);
-      const { nextUrl = "", authType } = req.body;
+      const {
+        nextUrl = "",
+        authType
+      }: { nextUrl: string; authType: string } = req.body;
+
       // eslint-disable-next-line no-useless-escape
       const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
+      if (!uuidMatch) return done(new LocalAuthError("Could not match uuid"));
+
       const lowerCaseEmail = username.toLowerCase();
       const existingUser = await db
         .reader("user")
@@ -278,6 +299,7 @@ function setupLocalAuthPassport() {
 
       try {
         const user = await localAuthHelpers[authType]({
+          db,
           lowerCaseEmail,
           password,
           existingUser,
@@ -293,17 +315,19 @@ function setupLocalAuthPassport() {
   );
   passport.use(strategy);
 
-  passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser((id, done) =>
+  passport.serializeUser((user: any, done: PassportCallback) =>
+    done(null, user.id)
+  );
+  passport.deserializeUser((id: string, done: PassportCallback) =>
     userLoggedIn(parseInt(id, 10))
-      .then((user) => done(null, user || false))
-      .catch((error) => done(error))
+      .then((user: any) => done(null, user || false))
+      .catch((error: any) => done(error))
   );
 
   const app = express();
   app.post("/login-callback", (req, res, next) => {
     // See: http://www.passportjs.org/docs/authenticate/#custom-callback
-    passport.authenticate("local", (err, user, _info) => {
+    passport.authenticate("local", (err: any, user: any, _info: any) => {
       // Check custom property rather than using instanceof because errors are being passed as
       // objects, not classes
       if (err && err.errorType === "LocalAuthError") {
@@ -315,7 +339,7 @@ function setupLocalAuthPassport() {
       }
 
       // Default behavior
-      req.logIn(user, (logInErr) => {
+      (<any>req).logIn(user, (logInErr: any) => {
         if (logInErr) {
           return next(logInErr);
         }
@@ -329,9 +353,9 @@ function setupLocalAuthPassport() {
 
 // Convert a Spoke user record to the type expected by passport.(de)serializeUser
 export const sessionUserMap = {
-  local: (user) => ({ id: user.id }),
-  auth0: (user) => ({ id: user.auth0_id }),
-  slack: (user) => ({ id: user.auth0_id })
+  local: (user: UserRecord) => ({ id: user.id }),
+  auth0: (user: UserRecord) => ({ id: user.auth0_id }),
+  slack: (user: UserRecord) => ({ id: user.auth0_id })
 };
 
 export default {

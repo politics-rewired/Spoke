@@ -1,12 +1,31 @@
 /* eslint-disable import/prefer-default-export */
+import { Request } from "express";
+import Knex from "knex";
 import createMemoizer from "memoredis";
 
 import { config } from "../config";
 import logger from "../logger";
 import { createLoaders } from "./models";
 import thinky from "./models/thinky";
+import { Memoizer } from "./types";
 
-const createHostMemoizer = (_host) => {
+export interface SpokeDbContext {
+  schema: string;
+  master: Knex;
+  reader: Knex;
+}
+
+export interface SpokeContext {
+  db: SpokeDbContext;
+  memoizer: Memoizer;
+}
+
+export interface SpokeRequestContext extends SpokeContext {
+  user: any;
+  loaders: any;
+}
+
+const createHostMemoizer = (_host: string): Memoizer => {
   const opts = config.MEMOREDIS_URL
     ? {
         clientOpts: config.MEMOREDIS_URL,
@@ -19,7 +38,7 @@ const createHostMemoizer = (_host) => {
   return memoizer;
 };
 
-const createContext = (host) => ({
+const createContext = (host: string): SpokeContext => ({
   db: {
     schema: "public",
     master: thinky.r.knex,
@@ -28,14 +47,17 @@ const createContext = (host) => ({
   memoizer: createHostMemoizer(host)
 });
 
-const contextByHost = {};
+const contextByHost: Record<string, SpokeContext> = {};
 
 /**
  * Create a GraphQL context for a request.
  * @param {object} req Express request
  */
-export const contextForRequest = (req) => {
+export const contextForRequest = (req: Request): SpokeRequestContext => {
   const host = req.get("host");
+
+  if (!host) throw new Error("No host set for request!");
+
   if (!contextByHost[host]) {
     logger.info(`Created context for host ${host}`);
     contextByHost[host] = createContext(host);
@@ -43,7 +65,7 @@ export const contextForRequest = (req) => {
 
   const hostContext = contextByHost[host];
   return {
-    user: req.user,
+    user: (<Request & { user: any }>req).user,
     loaders: createLoaders(hostContext),
     ...hostContext
   };

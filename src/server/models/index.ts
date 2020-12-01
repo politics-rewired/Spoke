@@ -1,13 +1,19 @@
 import DataLoader from "dataloader";
 import groupBy from "lodash/groupBy";
 
+import { SpokeContext } from "../contexts";
 import { cacheableData } from "./cacheable_queries";
 import datawarehouse from "./datawarehouse";
 import thinky from "./thinky";
 
+export interface LoadOptions {
+  idKey: string;
+  cacheObj: any;
+}
+
 const { r } = thinky;
 
-const LOADER_DEFAULTS = {
+const LOADER_DEFAULTS: LoadOptions = {
   idKey: "id",
   cacheObj: undefined
 };
@@ -19,10 +25,14 @@ const LOADER_DEFAULTS = {
  * @param {string} tableName The database table name to load from
  * @param {object} options Additional loader options
  */
-const createLoader = (context, tableName, options = {}) => {
+const createLoader = <T = unknown>(
+  context: SpokeContext,
+  tableName: string,
+  options: Partial<LoadOptions> = {}
+) => {
   const { db } = context;
   const { idKey, cacheObj } = { ...LOADER_DEFAULTS, ...options };
-  return new DataLoader(async (keys) => {
+  return new DataLoader<string, T>(async (keys) => {
     // Try Redis cache if available (this approach does not reduce round trips)
     if (cacheObj && cacheObj.load) {
       return keys.map(async (key) => cacheObj.load(key));
@@ -35,7 +45,7 @@ const createLoader = (context, tableName, options = {}) => {
   });
 };
 
-const createLoaders = (context) => ({
+const createLoaders = (context: SpokeContext) => ({
   assignment: createLoader(context, "assignment"),
   assignmentRequest: createLoader(context, "assignment_request"),
   campaign: createLoader(context, "campaign", {
