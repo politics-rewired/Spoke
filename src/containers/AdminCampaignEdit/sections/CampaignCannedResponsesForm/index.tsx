@@ -9,19 +9,19 @@ import React from "react";
 import { compose } from "recompose";
 
 import { CannedResponse } from "../../../../api/canned-response";
-import { LargeList } from "../../../../components/LargeList";
 import { dataTest } from "../../../../lib/attributes";
 import { MutationMap, QueryMap } from "../../../../network/types";
 import theme from "../../../../styles/theme";
 import { loadData } from "../../../hoc/with-operations";
+import { LargeList } from "../../../../components/LargeList";
+import CannedResponseRow from "./components/CannedResponseRow";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
   asSection,
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
-import CannedResponseRow from "./components/CannedResponseRow";
-import CreateCannedResponseForm from "./components/CreateCannedResponseForm";
+import CannedResponseDialog, { ResponseEditorContext } from "./components/CannedResponseDialog";
 
 const styles = StyleSheet.create({
   formContainer: {
@@ -64,7 +64,8 @@ interface State {
   cannedResponsesToAdd: CannedResponse[];
   cannedResponseIdsToDelete: string[];
   isWorking: boolean;
-  showForm: boolean;
+  showEditor: boolean;
+  editingResponse?: CannedResponse;
 }
 
 class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
@@ -72,7 +73,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     cannedResponsesToAdd: [],
     cannedResponseIdsToDelete: [],
     isWorking: false,
-    showForm: false
+    showEditor: false,
   };
 
   pendingCannedResponses = () => {
@@ -106,9 +107,8 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     }
   };
 
-  handleOnShowCreateForm = () => this.setState({ showForm: true });
-
-  handleOnCancelCreateForm = () => this.setState({ showForm: false });
+  // handleOnShowCreateForm = () => this.setState({ showEditor: true });
+  handleOnCancelCreateForm = () => this.setState({ showEditor: false });
 
   handleOnSaveResponse = (response: CannedResponse) => {
     const newId = Math.random()
@@ -118,7 +118,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       ...response,
       id: newId
     });
-    this.setState({ cannedResponsesToAdd, showForm: false });
+    this.setState({ cannedResponsesToAdd, showEditor: false });
   };
 
   createHandleOnDelete = (responseId: string) => () => {
@@ -134,12 +134,38 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     });
   };
 
-  render() {
-    const { isWorking, showForm } = this.state;
+  handleToggleResponseEditor = (responseId: string = "") => () => {
+    const { cannedResponses } = this.props.data.campaign;
+    const editingResponse = cannedResponses.find(res => res.id === responseId)
+    this.setState({ showEditor: true, editingResponse });
+    
+  }
+
+  renderResponseEditorDialog() {
+    const { showEditor, editingResponse } = this.state;
     const {
       data: {
         campaign: { customFields }
       },
+    } = this.props;
+
+    const context = editingResponse ? ResponseEditorContext.EditingResponse : ResponseEditorContext.CreatingResponse;
+
+    return (
+      <CannedResponseDialog
+        open={showEditor}
+        context={context}
+        customFields={customFields}
+        onCancel={this.handleOnCancelCreateForm}
+        onSaveCannedResponse={this.handleOnSaveResponse}
+        editingResponse={editingResponse}
+      />
+    )
+  }
+
+  render() {
+    const { isWorking, showEditor } = this.state;
+    const {
       isNew,
       saveLabel
     } = this.props;
@@ -164,6 +190,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
                 key={cannedResponse.id}
                 cannedResponse={cannedResponse}
                 onDelete={this.createHandleOnDelete(cannedResponse.id)}
+                onToggleResponseEditor={this.handleToggleResponseEditor(cannedResponse.id)}
               />
             ))}
           </LargeList>
@@ -171,23 +198,15 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
           <p>No canned responses</p>
         )}
         <hr />
-        {showForm ? (
-          <div className={css(styles.formContainer)}>
-            <div className={css(styles.form)}>
-              <CreateCannedResponseForm
-                customFields={customFields}
-                onCancel={this.handleOnCancelCreateForm}
-                onSaveCannedResponse={this.handleOnSaveResponse}
-              />
-            </div>
-          </div>
+        {showEditor ? (
+          this.renderResponseEditorDialog()
         ) : (
           <FlatButton
             {...dataTest("newCannedResponse")}
             secondary
             label="Add new canned response"
             icon={<CreateIcon />}
-            onClick={this.handleOnShowCreateForm}
+            onClick={this.handleToggleResponseEditor()}
           />
         )}
         <br />

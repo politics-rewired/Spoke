@@ -41,11 +41,11 @@ const largeListItemStyles: { [key: string]: React.CSSProperties } = {
 export interface LargeListItemProps {
   primaryText?: string;
   secondaryText?: string;
-  rightIconButton?: React.ReactNode;
+  rightActionMenu?: React.ReactNode;
 }
 
-export const LargeListItem: React.SFC<LargeListItemProps> = (props) => {
-  const { primaryText, secondaryText, rightIconButton } = props;
+export const LargeListItem: React.SFC<LargeListItemProps> = props => {
+  const { primaryText, secondaryText, rightActionMenu } = props;
 
   return (
     <li style={largeListItemStyles.flexContainer}>
@@ -57,8 +57,8 @@ export const LargeListItem: React.SFC<LargeListItemProps> = (props) => {
           <p style={largeListItemStyles.secondaryText}>{secondaryText}</p>
         )}
       </div>
-      {rightIconButton && (
-        <div style={largeListItemStyles.actionWrapper}>{rightIconButton}</div>
+      {rightActionMenu && (
+        <div style={largeListItemStyles.actionWrapper}>{rightActionMenu}</div>
       )}
     </li>
   );
