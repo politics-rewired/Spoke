@@ -5,9 +5,6 @@ import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../../../../components/forms/GSForm";
-import { dataTest } from "../../../../../lib/attributes";
-import { ResponseEditorContext } from "./CannedResponseDialog";
-import { CannedResponse } from "../../../../../api/canned-response";
 
 const styles = StyleSheet.create({
   buttonRow: {
@@ -20,25 +17,16 @@ const modelSchema = yup.object({
   text: yup.string().required()
 });
 
-interface Props {
+export interface CreatedCannedResponseProps {
   onCancel(): void;
   onSaveCannedResponse(...args: any[]): void;
   customFields: string[];
-  context: ResponseEditorContext;
-  editingResponse?: CannedResponse;
 }
 
-const CreateCannedResponseForm: React.SFC<Props> = props => {
-  const { context, onSaveCannedResponse, customFields, editingResponse } = props;
+const CreateCannedResponseForm: React.SFC<CreatedCannedResponseProps> = props => {
+  const { onSaveCannedResponse, customFields } = props;
   const handleSave = (formValues: any) => 
     onSaveCannedResponse(formValues);
-
-  // const responseContext = context === ResponseEditorContext.CreatingResponse && 'Add' ||
-  //   context === ResponseEditorContext.EditingResponse && 'Edit'
-
-  const responseContext = 'add'
-
-  console.log('resp form editingResponse', editingResponse)
 
   return (
     <GSForm schema={modelSchema} onSubmit={handleSave}>
@@ -62,7 +50,7 @@ const CreateCannedResponseForm: React.SFC<Props> = props => {
         <Form.Button
           {...dataTest("addResponse")}
           type="submit"
-          label={`${responseContext} Response`}
+          label="Add response"
           style={{
             display: "inline-block"
           }}

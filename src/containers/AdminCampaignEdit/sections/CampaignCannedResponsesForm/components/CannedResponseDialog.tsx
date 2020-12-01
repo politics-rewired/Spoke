@@ -3,29 +3,34 @@ import React from "react";
 import Dialog from "material-ui/Dialog";
 import CreateCannedResponseForm from "./CreateCannedResponseForm";
 import { CannedResponse } from "../../../../../api/canned-response";
+import CannedResponseEditor from "./CannedResponseEditor";
 
 export enum ResponseEditorContext {
   CreatingResponse = 'creating-response',
   EditingResponse = 'editing-response'
 }
 
-interface Props {
+export interface CannedResponseProps {
   open: boolean;
   context: ResponseEditorContext;
   onCancel(): void;
   onSaveCannedResponse(...args: any[]): void;
   customFields: string[];
-  editingResponse?: CannedResponse;
+  editedResponse?: CannedResponse;
+  onEditCannedResponse(e: any, value: string): void;
+  onSaveResponseEdit(): void;
+  onCancelResponseEdit(): void;
 }
 
-const CannedResponseDialog: React.SFC<Props> = props => {
+
+const CannedResponseDialog: React.SFC<CannedResponseProps> = props => {
   const { open, context } = props;
 
   const title = getTitleContext(context)
 
   const components = {
     [ResponseEditorContext.CreatingResponse]: <CreateCannedResponseForm {...props} />,
-    [ResponseEditorContext.EditingResponse]: <div>editing</div>
+    [ResponseEditorContext.EditingResponse]: <CannedResponseEditor {...props} />
   }
 
   const Component = components[context]
