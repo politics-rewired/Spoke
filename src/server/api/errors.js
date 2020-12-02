@@ -1,4 +1,4 @@
-import { GraphQLError } from "graphql/error";
+import { AuthenticationError, ForbiddenError } from "apollo-server-express";
 
 import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
@@ -7,10 +7,7 @@ const accessHierarchy = ["TEXTER", "SUPERVOLUNTEER", "ADMIN", "OWNER"];
 
 export function authRequired(user) {
   if (!user) {
-    throw new GraphQLError({
-      status: 401,
-      message: "You must login to access that resource."
-    });
+    throw new AuthenticationError("You must login to access that resource.");
   }
 }
 
@@ -47,7 +44,7 @@ export async function accessRequired(
     accessHierarchy.indexOf(userRole) >= accessHierarchy.indexOf(role);
 
   if (!hasRole) {
-    throw new GraphQLError("You are not authorized to access that resource.");
+    throw new ForbiddenError("You are not authorized to access that resource.");
   }
 }
 
@@ -67,7 +64,7 @@ export async function assignmentRequired(user, assignmentId) {
     .limit(1);
 
   if (typeof assignment === "undefined") {
-    throw new GraphQLError("You are not authorized to access that resource.");
+    throw new ForbiddenError("You are not authorized to access that resource.");
   }
 }
 
@@ -106,7 +103,9 @@ export async function assignmentRequiredOrHasOrgRoleForCampaign(
       accessHierarchy.indexOf(userRole) >= accessHierarchy.indexOf(role);
 
     if (!hasRole) {
-      throw new GraphQLError("You are not authorized to access that resource.");
+      throw new ForbiddenError(
+        "You are not authorized to access that resource."
+      );
     }
   }
 }
@@ -115,6 +114,6 @@ export function superAdminRequired(user) {
   authRequired(user);
 
   if (!user.is_superadmin) {
-    throw new GraphQLError("You are not authorized to access that resource.");
+    throw new ForbiddenError("You are not authorized to access that resource.");
   }
 }
