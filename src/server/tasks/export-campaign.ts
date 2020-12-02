@@ -2,20 +2,20 @@
 import { format } from "fast-csv";
 import _ from "lodash";
 import moment from "moment";
-import { Task } from "pg-compose";
 
-import logger from "../../logger";
 import { getDownloadUrl, getUploadStream } from "../../workers/exports/upload";
-import { deleteJob } from "../../workers/jobs";
 import {
   CampaignContactRecord,
   InteractionStepRecord,
-  JobRequestRecord,
   MessageRecord,
   UserRecord
 } from "../api/types";
 import { sendEmail } from "../mail";
 import { r } from "../models";
+import { errToObj } from "../utils";
+import { addProgressJob, ProgressTask } from "./utils";
+
+export const TASK_IDENTIFIER = "export-campaign";
 
 const CHUNK_SIZE = 1000;
 
@@ -69,12 +69,10 @@ export const getUniqueQuestionsByStepId = (
  * @param {object} job The export job object to fetch data for.
  *                     Must have payload, campaign_id, and requester properties.
  */
-export const fetchExportData = async (job: JobRequestRecord) => {
-  const { campaign_id: campaignId, payload: rawPayload } = job;
-  const { requester: requesterId, isAutomatedExport = false } = JSON.parse(
-    rawPayload
-  );
-
+export const fetchExportData = async (
+  campaignId: number,
+  requesterId: number
+) => {
   const { title: campaignTitle } = await r
     .reader("campaign")
     .first("title")
@@ -104,12 +102,10 @@ export const fetchExportData = async (job: JobRequestRecord) => {
     );
 
   return {
-    campaignId,
     campaignTitle,
     notificationEmail,
     interactionSteps,
-    assignments,
-    isAutomatedExport
+    assignments
   };
 };
 
@@ -307,18 +303,22 @@ export const processMessagesChunk = async (
   return { lastContactId, messages };
 };
 
-export const exportCampaign: Task = async (
-  payload: JobRequestRecord,
-  _helpers
+export interface ExportCampaignPayload {
+  campaignId: number;
+  requesterId: number;
+  isAutomatedExport?: boolean;
+}
+
+export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
+  payload,
+  helpers
 ) => {
+  const { campaignId, requesterId, isAutomatedExport = false } = payload;
   const {
-    campaignId,
     campaignTitle,
     notificationEmail,
-    interactionSteps,
-    assignments: _assignments,
-    isAutomatedExport
-  } = await fetchExportData(payload);
+    interactionSteps
+  } = await fetchExportData(campaignId, requesterId);
 
   const countQueryResult = await r
     .reader("campaign_contact")
@@ -348,10 +348,16 @@ export const exportCampaign: Task = async (
   });
 
   campaignContactsUploadStream.on("error", (err) => {
-    logger.error("error in campaignContactsUploadStream: ", err);
+    helpers.logger.error(
+      "error in campaignContactsUploadStream: ",
+      errToObj(err)
+    );
   });
   campaignContactsWriteStream.on("error", (err) => {
-    logger.error("error in campaignContactsWriteStream: ", err);
+    helpers.logger.error(
+      "error in campaignContactsWriteStream: ",
+      errToObj(err)
+    );
   });
 
   const campaignContactsUploadPromise = new Promise((resolve) =>
@@ -367,10 +373,10 @@ export const exportCampaign: Task = async (
   });
 
   messagesUploadStream.on("error", (err) => {
-    logger.error("error in messagesUploadStream: ", err);
+    helpers.logger.error("error in messagesUploadStream: ", errToObj(err));
   });
   messagesWriteStream.on("error", (err) => {
-    logger.error("error in messagesWriteStream: ", err);
+    helpers.logger.error("error in messagesWriteStream: ", errToObj(err));
   });
 
   const messagesUploadPromise = new Promise((resolve) =>
@@ -392,16 +398,13 @@ export const exportCampaign: Task = async (
       ))
     ) {
       lastContactId = chunkMessageResult.lastContactId;
-      logger.debug(
+      helpers.logger.debug(
         `Processing message export for ${campaignId} chunk part ${lastContactId}`
       );
       processed += CHUNK_SIZE;
-      await r
-        .knex("job_request")
-        .where({ id: payload.id })
-        .update({
-          status: Math.round((processed / contactsCount / 2) * 100)
-        });
+      await helpers.updateStatus(
+        Math.round((processed / contactsCount / 2) * 100)
+      );
       for (const m of chunkMessageResult.messages) {
         messagesWriteStream.write(m);
       }
@@ -424,16 +427,13 @@ export const exportCampaign: Task = async (
       ))
     ) {
       lastContactId = chunkContactResult.lastContactId;
-      logger.debug(
+      helpers.logger.debug(
         `Processing contact export for ${campaignId} chunk part ${lastContactId}`
       );
       processed += CHUNK_SIZE;
-      await r
-        .knex("job_request")
-        .where({ id: payload.id })
-        .update({
-          status: Math.round((processed / contactsCount / 2) * 100) + 50
-        });
+      await helpers.updateStatus(
+        Math.round((processed / contactsCount / 2) * 100) + 50
+      );
       for (const c of chunkContactResult.contacts) {
         campaignContactsWriteStream.write(c);
       }
@@ -442,7 +442,7 @@ export const exportCampaign: Task = async (
     campaignContactsWriteStream.end();
   }
 
-  logger.debug("Waiting for streams to finish");
+  helpers.logger.debug("Waiting for streams to finish");
   await Promise.all([campaignContactsUploadPromise, messagesUploadPromise]);
 
   try {
@@ -460,17 +460,17 @@ export const exportCampaign: Task = async (
           `\n\nMessage export:\n${campaignMessagesExportUrl}`
       });
     }
-    logger.info(`Successfully exported ${campaignId}`);
+    helpers.logger.info(`Successfully exported ${campaignId}`);
   } finally {
-    logger.info("Finishing export process");
-  }
-
-  // Attempt to delete job ("why would a job ever _not_ have an id?" - bchrobot)
-  if (payload.id) {
-    await deleteJob(payload.id);
-  } else {
-    logger.debug(payload);
+    helpers.logger.info("Finishing export process");
   }
 };
 
-export default exportCampaign;
+export const addExportCampaign = async (payload: ExportCampaignPayload) =>
+  addProgressJob({
+    identifier: TASK_IDENTIFIER,
+    payload,
+    taskSpec: {
+      queueName: "export"
+    }
+  });

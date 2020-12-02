@@ -29,6 +29,8 @@ import { change } from "../local-auth-helpers";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, datawarehouse, r } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
+import { addExportCampaign } from "../tasks/export-campaign";
+import { addExportForVan } from "../tasks/export-for-van";
 import { errToObj } from "../utils";
 import { getWorker } from "../worker";
 import {
@@ -783,46 +785,20 @@ const rootMutations = {
       const organizationId = campaign.organization_id;
       await accessRequired(user, organizationId, "ADMIN");
 
-      const jobTypes = {};
-      jobTypes[CampaignExportType.SPOKE] = "export";
-      jobTypes[CampaignExportType.VAN] = "van-export";
-
-      let payload = {};
       if (exportType === CampaignExportType.SPOKE) {
-        payload = { campaign_id: campaignId, requester: user.id };
-      } else if (exportType === CampaignExportType.VAN) {
-        payload = { ...vanOptions, requesterId: user.id };
+        return addExportCampaign({
+          campaignId,
+          requesterId: user.id
+        });
       }
 
-      const worker = await getWorker();
-
-      const [newJob] = await r
-        .knex("job_request")
-        .insert({
-          queue_name: `${campaignId}:export`,
-          job_type: jobTypes[exportType],
-          locks_queue: false,
-          assigned: JOBS_SAME_PROCESS, // can get called immediately, below
-          campaign_id: campaignId,
-          payload: JSON.stringify(payload)
-        })
-        .returning("*");
-      if (JOBS_SAME_PROCESS) {
-        if (exportType === CampaignExportType.SPOKE) {
-          await worker.addJob("export-campaign", newJob);
-          return newJob;
-        }
-        if (exportType === CampaignExportType.VAN) {
-          await worker.addJob("export-campaign-for-van", newJob);
-          return newJob;
-        }
+      if (exportType === CampaignExportType.VAN) {
+        return addExportForVan({
+          ...vanOptions,
+          campaignId,
+          requesterId: user.id
+        });
       }
-
-      /* I'm not sure if this is right, but here I'm following the old pattern,
-         adding the job to the worker instead of return newJob */
-
-      await worker.addJob("export-campaign", newJob);
-      return newJob;
     },
 
     editOrganizationMembership: async (

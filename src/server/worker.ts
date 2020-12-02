@@ -5,8 +5,14 @@ import url from "url";
 
 import { config } from "../config";
 import logger from "../logger";
-import exportCampaign from "./tasks/export-campaign";
-import { exportForVan } from "./tasks/export-for-van";
+import {
+  exportCampaign,
+  TASK_IDENTIFIER as exportCampaignIdentifier
+} from "./tasks/export-campaign";
+import {
+  exportForVan,
+  TASK_IDENTIFIER as exportForVanIdentifier
+} from "./tasks/export-for-van";
 import fetchVANActivistCodes from "./tasks/fetch-van-activist-codes";
 import fetchVANResultCodes from "./tasks/fetch-van-result-codes";
 import fetchVANSurveyQuestions from "./tasks/fetch-van-survey-questions";
@@ -19,6 +25,7 @@ import {
 } from "./tasks/sync-campaign-contact-to-van";
 import syncSlackTeamMembers from "./tasks/sync-slack-team-members";
 import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
+import { wrapProgressTask } from "./tasks/utils";
 
 const logFactory: LogFunctionFactory = (scope) => (level, message, meta) =>
   logger.log({ level, message, ...meta, ...scope });
@@ -57,8 +64,12 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["van-get-result-codes"] = fetchVANResultCodes;
   m.taskList!["van-sync-campaign-contact"] = syncCampaignContactToVAN;
   m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
-  m.taskList!["export-campaign"] = exportCampaign;
-  m.taskList!["export-campaign-for-van"] = exportForVan;
+  m.taskList![exportCampaignIdentifier] = wrapProgressTask(exportCampaign, {
+    removeOnComplete: true
+  });
+  m.taskList![exportForVanIdentifier] = wrapProgressTask(exportForVan, {
+    removeOnComplete: true
+  });
 
   m.cronJobs!.push({
     name: "release-stale-replies",
