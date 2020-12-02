@@ -206,6 +206,33 @@ export const resolvers = {
     autoassign: () => true,
     cannedResponses: () => true
   },
+  CampaignsReturn: {
+    __resolveType(obj, _context, _) {
+      if (Array.isArray(obj)) {
+        return "CampaignsList";
+      }
+      if ("campaigns" in obj && "pageInfo" in obj) {
+        return "PaginatedCampaigns";
+      }
+      return null;
+    }
+  },
+  CampaignsList: {
+    campaigns: (campaigns) => {
+      return campaigns;
+    }
+  },
+  PaginatedCampaigns: {
+    campaigns: (queryResult) => {
+      return queryResult.campaigns;
+    },
+    pageInfo: (queryResult) => {
+      if ("pageInfo" in queryResult) {
+        return queryResult.pageInfo;
+      }
+      return null;
+    }
+  },
   Campaign: {
     ...sqlResolvers([
       "id",
