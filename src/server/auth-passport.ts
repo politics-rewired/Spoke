@@ -11,7 +11,6 @@ import { capitalizeWord } from "./api/lib/utils";
 import { UserRecord } from "./api/types";
 import { contextForRequest } from "./contexts";
 import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
-import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
 import { SpokeRequest } from "./types";
 
@@ -119,8 +118,8 @@ function setupSlackPassport() {
       });
 
     if (!existingUser && SLACK_CONVERT_EXISTING) {
-      const [existingEmailUser] = await r
-        .knex("user")
+      const [existingEmailUser] = await db
+        .master("user")
         .update({ auth0_id: user.id })
         .where({ email: user.email })
         .returning("*");
