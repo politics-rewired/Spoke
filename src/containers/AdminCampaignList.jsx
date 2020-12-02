@@ -33,8 +33,6 @@ class AdminCampaignList extends React.Component {
   state = {
     isCreating: false,
     pageSize: DEFAULT_PAGE_SIZE,
-    currentPageIndex: 0,
-    totalResults: undefined,
     campaignsFilter: {
       isArchived: false
     },
@@ -71,7 +69,6 @@ class AdminCampaignList extends React.Component {
 
   handleFilterChange = (event, index, value) => {
     this.setState({
-      currentPageIndex: 0,
       pageSize: DEFAULT_PAGE_SIZE,
       campaignsFilter: {
         isArchived: value
@@ -80,14 +77,7 @@ class AdminCampaignList extends React.Component {
   };
 
   handlePageSizeChange = (event, index, pageSize) => {
-    this.setState({
-      currentPageIndex: 0,
-      pageSize
-    });
-  };
-
-  onCurrentPageChange = (event, index, currentPageIndex) => {
-    this.setState({ currentPageIndex });
+    this.setState({ pageSize });
   };
 
   startReleasingAllReplies = () => {
@@ -151,33 +141,6 @@ class AdminCampaignList extends React.Component {
     );
   }
 
-  renderPagesDropdown() {
-    const { pageSize, currentPageIndex, totalResults } = this.state;
-
-    const didFetchAll = pageSize === 0;
-    const hasResults = totalResults && totalResults > 0;
-    if (didFetchAll || !hasResults) {
-      return "N/A";
-    }
-
-    const pageCount = Math.ceil(totalResults / pageSize);
-    const pageArray = [...Array(pageCount)].map((_, i) => i);
-    return (
-      <DropDownMenu
-        value={currentPageIndex}
-        onChange={this.onCurrentPageChange}
-      >
-        {pageArray.map((pageIndex) => (
-          <MenuItem
-            key={pageIndex}
-            value={pageIndex}
-            primaryText={pageIndex + 1}
-          />
-        ))}
-      </DropDownMenu>
-    );
-  }
-
   renderFilters() {
     return (
       <DropDownMenu
@@ -193,7 +156,6 @@ class AdminCampaignList extends React.Component {
   render() {
     const {
       pageSize,
-      currentPageIndex,
       campaignsFilter,
       releasingAllReplies,
       releasingInProgress
@@ -210,7 +172,6 @@ class AdminCampaignList extends React.Component {
           {this.renderFilters()}
           Page Size:
           {this.renderPageSizeOptions()}
-          Page: {this.renderPagesDropdown()}
           <RaisedButton onClick={this.startReleasingAllReplies} primary>
             Release All Unhandled Replies
           </RaisedButton>
@@ -295,10 +256,6 @@ class AdminCampaignList extends React.Component {
             organizationId={organizationId}
             campaignsFilter={campaignsFilter}
             pageSize={pageSize}
-            resultCountDidUpdate={(totalResults) =>
-              this.setState({ totalResults })
-            }
-            currentPageIndex={currentPageIndex}
             adminPerms={adminPerms}
           />
         )}

@@ -11,6 +11,19 @@ export enum RequestAutoApproveType {
   AUTO_APPROVE = "AUTO_APPROVE"
 }
 
+export interface MembershipFilter {
+  nameSearch?: string;
+  campaignId?: string;
+  campaignArchived?: boolean;
+}
+
+export interface OrganizationMembership {
+  id: string;
+  user: any;
+  organization: any;
+  requestAutoApprove: RequestAutoApproveType;
+}
+
 export const schema = `
   enum UserRole {
     TEXTER

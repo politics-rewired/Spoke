@@ -15,6 +15,12 @@ export interface JobRequest {
   updatedAt: string;
 }
 
+export interface CampaignsFilter {
+  isArchived?: boolean;
+  organizationId?: number;
+  campaignId?: number;
+}
+
 export interface Campaign {
   id: string;
   syncReadiness: ExternalSyncReadinessState;
@@ -24,6 +30,7 @@ export interface Campaign {
 export const schema = `
   input CampaignsFilter {
     isArchived: Boolean
+    organizationId: Int
     campaignId: Int
     listSize: Int
     pageSize: Int
@@ -103,6 +110,16 @@ export const schema = `
     externalSystem: ExternalSystem
     syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
+  }
+
+  type CampaignEdge {
+    cursor: Cursor!
+    node: Campaign!
+  }
+
+  type CampaignPage {
+    edges: [CampaignEdge!]!
+    pageInfo: RelayPageInfo!
   }
 
   type CampaignsList {

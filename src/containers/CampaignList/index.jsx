@@ -47,12 +47,10 @@ export class CampaignList extends React.Component {
     const {
       organizationId,
       pageSize,
-      currentPageIndex,
       campaignsFilter,
       adminPerms,
       data,
-      mutations,
-      resultCountDidUpdate
+      mutations
     } = this.props;
     const { currentAssignmentTargets } = data.organization;
     const { archiveCampaign, unarchiveCampaign } = mutations;
@@ -74,10 +72,8 @@ export class CampaignList extends React.Component {
         <CampaignListLoader
           organizationId={organizationId}
           campaignsFilter={campaignsFilter}
-          offset={currentPageIndex * pageSize}
-          limit={pageSize}
+          pageSize={pageSize}
           adminPerms={adminPerms}
-          resultCountDidUpdate={resultCountDidUpdate}
           startOperation={this.start}
           archiveCampaign={archiveCampaign}
           unarchiveCampaign={unarchiveCampaign}
@@ -91,15 +87,9 @@ CampaignList.propTypes = {
   organizationId: PropTypes.string.isRequired,
   campaignsFilter: PropTypes.object.isRequired,
   pageSize: PropTypes.number.isRequired,
-  currentPageIndex: PropTypes.number,
   adminPerms: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
-  mutations: PropTypes.object.isRequired,
-  resultCountDidUpdate: PropTypes.func.isRequired
-};
-
-CampaignList.defaultProps = {
-  currentPageIndex: 0
+  mutations: PropTypes.object.isRequired
 };
 
 const campaignInfoFragment = `
