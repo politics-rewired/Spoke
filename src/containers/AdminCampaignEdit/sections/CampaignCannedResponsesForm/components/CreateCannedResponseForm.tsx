@@ -5,6 +5,7 @@ import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../../../../components/forms/GSForm";
+import { CreatedCannedResponseFormProps } from "../interfaces";
 
 const styles = StyleSheet.create({
   buttonRow: {
@@ -17,14 +18,8 @@ const modelSchema = yup.object({
   text: yup.string().required()
 });
 
-export interface CreatedCannedResponseProps {
-  onCancel(): void;
-  onSaveCannedResponse(...args: any[]): void;
-  customFields: string[];
-}
-
-const CreateCannedResponseForm: React.SFC<CreatedCannedResponseProps> = props => {
-  const { onSaveCannedResponse, customFields } = props;
+const CreateCannedResponseForm: React.SFC<CreatedCannedResponseFormProps> = props => {
+  const { customFields, onSaveCannedResponse, onCancel  } = props;
   const handleSave = (formValues: any) => 
     onSaveCannedResponse(formValues);
 
@@ -57,7 +52,7 @@ const CreateCannedResponseForm: React.SFC<CreatedCannedResponseProps> = props =>
         />
         <FlatButton
           label="Cancel"
-          onClick={props.onCancel}
+          onClick={onCancel}
           style={{
             marginLeft: 5,
             display: "inline-block"

@@ -4,9 +4,8 @@ import { StyleSheet, css } from "aphrodite";
 import FlatButton from "material-ui/FlatButton";
 import TextField from "material-ui/TextField";
 
-import { CannedResponse } from "../../../../../api/canned-response";
 import GSScriptField from "../../../../../components/forms/GSScriptField";
-import { CannedResponseProps, ResponseEditorContext } from "./CannedResponseDialog";
+import { CannedResponseEditorProps, ResponseEditKey } from "../interfaces";
 
 
 const styles = StyleSheet.create({
@@ -15,13 +14,8 @@ const styles = StyleSheet.create({
   }
 });
 
-export enum ResponseEditKey {
-  Title = 'title',
-  Text = 'text'
-}
-
-const CannedResponseEditor: React.SFC<CannedResponseProps> = props => {
-  const { onEditCannedResponse, customFields, editedResponse, onSaveResponseEdit, onCancelResponseEdit } = props;
+const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = props => {
+  const { customFields, editingResponse, onEditCannedResponse, onSaveResponseEdit, onCancelResponseEdit } = props;
 
   const wrapOnEditResposne = (text: string) => {
     onEditCannedResponse(ResponseEditKey.Text, text)
@@ -33,7 +27,7 @@ const CannedResponseEditor: React.SFC<CannedResponseProps> = props => {
           name="title"
           floatingLabelText="Response title"
           fullWidth
-          value={editedResponse && editedResponse.title}
+          value={editingResponse!.title}
           onChange={(e: any) => onEditCannedResponse(ResponseEditKey.Title, e.target.value)}
         />
         <GSScriptField
@@ -41,7 +35,7 @@ const CannedResponseEditor: React.SFC<CannedResponseProps> = props => {
           label="Text"
           fullWidth
           customFields={customFields}
-          value={editedResponse && editedResponse.text}
+          value={editingResponse!.text}
           onChange={wrapOnEditResposne}
         />
       <div className={css(styles.buttonRow)}>
