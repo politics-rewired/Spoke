@@ -28,7 +28,7 @@ export interface State {
   editedCannedResponses: CannedResponse[];
   editingResponse?: CannedResponse;
   isWorking: boolean;
-  showEditor: boolean;
+  shouldShowEditor: boolean;
 }
 
 export enum ResponseEditorContext {
@@ -51,7 +51,7 @@ export interface CannedResponseEditorProps {
   customFields: string[];
   onEditCannedResponse(key: ResponseEditKey, value: string): void;
   onSaveResponseEdit(): void;
-  onCancelResponseEdit(): void;
+  onCancel(): void;
 }
 
 export interface CreatedCannedResponseFormProps {

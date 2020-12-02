@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
 });
 
 const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = props => {
-  const { customFields, editingResponse, onEditCannedResponse, onSaveResponseEdit, onCancelResponseEdit } = props;
+  const { customFields, editingResponse, onEditCannedResponse, onSaveResponseEdit, onCancel } = props;
 
   const wrapOnEditResposne = (text: string) => {
     onEditCannedResponse(ResponseEditKey.Text, text)
@@ -49,7 +49,7 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = props => {
         />
         <FlatButton
           label="Cancel"
-          onClick={onCancelResponseEdit}
+          onClick={onCancel}
           style={{
             marginLeft: 5,
             display: "inline-block"

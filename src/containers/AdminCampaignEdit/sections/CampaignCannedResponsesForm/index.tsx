@@ -31,7 +31,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     cannedResponseIdsToDelete: [],
     editedCannedResponses: [],
     isWorking: false,
-    showEditor: false,
+    shouldShowEditor: false,
   };
 
   pendingCannedResponses = () => {
@@ -76,8 +76,6 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     }
   };
 
-  handleOnCancelCreateForm = () => this.setState({ showEditor: false });
-
   handleOnSaveResponse = (response: CannedResponse) => {
     const newId = Math.random()
       .toString(36)
@@ -86,7 +84,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       ...response,
       id: newId
     });
-    this.setState({ cannedResponsesToAdd, showEditor: false });
+    this.setState({ cannedResponsesToAdd, shouldShowEditor: false });
   };
 
   createHandleOnDelete = (responseId: string) => () => {
@@ -105,7 +103,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
   handleToggleResponseDialog = (responseId: string = "") => () => {
     const { cannedResponses } = this.pendingCannedResponses();
     const editingResponse = cannedResponses.find(res => res.id === responseId)
-    this.setState({ showEditor: true, editingResponse });
+    this.setState({ shouldShowEditor: true, editingResponse });
     
   }
 
@@ -120,15 +118,15 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
   handleOnSaveResponseEdit = () => {
     const { editingResponse, editedCannedResponses } = this.state;
     const newResponses = uniqBy([editingResponse, ...editedCannedResponses], response => response!.id)
-    this.setState({ editedCannedResponses: newResponses as CannedResponse[], editingResponse: undefined, showEditor: false })
+    this.setState({ editedCannedResponses: newResponses as CannedResponse[], editingResponse: undefined, shouldShowEditor: false })
   }
 
   handleOnCancelResponseEdit = () => {
-    this.setState({ editingResponse: undefined, showEditor: false})
+    this.setState({ editingResponse: undefined, shouldShowEditor: false})
   }
 
   renderCannedResponseDialog() {
-    const { showEditor, editingResponse } = this.state;
+    const { shouldShowEditor, editingResponse } = this.state;
     const {
       data: {
         campaign: { customFields }
@@ -136,29 +134,23 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     } = this.props;
 
     const context = editingResponse ? ResponseEditorContext.EditingResponse : ResponseEditorContext.CreatingResponse;
-    
-    let cannedResponse: CannedResponse;
-    if (editingResponse) {
-      cannedResponse = editingResponse
-    }
-    
+
     return (
       <CannedResponseDialog
-        open={showEditor}
+        open={shouldShowEditor}
         context={context}
         customFields={customFields}
-        editingResponse={cannedResponse!}
-        onCancel={this.handleOnCancelCreateForm}
+        editingResponse={editingResponse!}
+        onCancel={this.handleOnCancelResponseEdit}
         onSaveCannedResponse={this.handleOnSaveResponse}
         onEditCannedResponse={this.handleOnEditResponse}
         onSaveResponseEdit={this.handleOnSaveResponseEdit}
-        onCancelResponseEdit={this.handleOnCancelResponseEdit}
       />
     )
   }
 
   render() {
-    const { isWorking, showEditor } = this.state;
+    const { isWorking, shouldShowEditor } = this.state;
     const {
       isNew,
       saveLabel
@@ -192,7 +184,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
           <p>No canned responses</p>
         )}
         <hr />
-        {showEditor ? (
+        {shouldShowEditor ? (
           this.renderCannedResponseDialog()
         ) : (
           <FlatButton
