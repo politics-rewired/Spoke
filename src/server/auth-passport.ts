@@ -91,12 +91,11 @@ function setupSlackPassport() {
 
   passport.use(strategy);
 
-  passport.serializeUser(
-    ({ id: slackUserId }: { id: string }, done: PassportCallback) =>
-      done(null, slackUserId)
+  passport.serializeUser(({ id: slackUserId }, done) =>
+    done(null, slackUserId)
   );
 
-  passport.deserializeUser((slackUserId: string, done: PassportCallback) =>
+  passport.deserializeUser((slackUserId, done) =>
     userLoggedIn(slackUserId, "auth0_id")
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
@@ -172,14 +171,14 @@ function setupSlackPassport() {
     return redirectPostSignIn(req, res, false);
   };
 
+  // Cast as any to allow passing Slack options
+  const passportOptions: any = {
+    scope: SLACK_SCOPES.split(","),
+    team: SLACK_TEAM_ID
+  };
+
   const app = express();
-  app.get(
-    "/login",
-    passport.authenticate("slack", {
-      scope: SLACK_SCOPES.split(","),
-      team: SLACK_TEAM_ID
-    })
-  );
+  app.get("/login", passport.authenticate("slack", passportOptions));
 
   app.get(
     "/login-callback",
@@ -208,14 +207,14 @@ function setupAuth0Passport() {
 
   passport.use(strategy);
 
-  passport.serializeUser((auth0User: any, done: PassportCallback) => {
+  passport.serializeUser((auth0User: any, done) => {
     // This is the Auth0 user object, not the db one
     // eslint-disable-next-line no-underscore-dangle
     const auth0Id = auth0User.id || auth0User._json.sub;
     done(null, auth0Id);
   });
 
-  passport.deserializeUser((auth0Id: string, done: PassportCallback) =>
+  passport.deserializeUser((auth0Id: string, done) =>
     userLoggedIn(auth0Id, "auth0_id")
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
@@ -315,10 +314,8 @@ function setupLocalAuthPassport() {
   );
   passport.use(strategy);
 
-  passport.serializeUser((user: any, done: PassportCallback) =>
-    done(null, user.id)
-  );
-  passport.deserializeUser((id: string, done: PassportCallback) =>
+  passport.serializeUser((user: any, done) => done(null, user.id));
+  passport.deserializeUser((id: string, done) =>
     userLoggedIn(parseInt(id, 10))
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
