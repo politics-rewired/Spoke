@@ -11,7 +11,7 @@ export const resolvers = {
       "cycledOutAt",
       "createdAt"
     ]),
-    isHealthy: async linkDomain => {
+    isHealthy: async (linkDomain) => {
       return linkDomain.is_healthy;
     }
   },
@@ -19,3 +19,5 @@ export const resolvers = {
     ...sqlResolvers(["id", "domain", "createdAt", "healthyAgainAt"])
   }
 };
+
+export default resolvers;

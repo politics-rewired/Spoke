@@ -5,3 +5,5 @@ export const schema = `
     question: Question
   }
 `;
+
+export default schema;

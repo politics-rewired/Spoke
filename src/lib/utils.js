@@ -1,10 +1,10 @@
-import transform from "lodash/transform";
 import isEqual from "lodash/isEqual";
 import isObject from "lodash/isObject";
+import transform from "lodash/transform";
 import { URL } from "url";
 
 export const sleep = (ms = 0) =>
-  new Promise(resolve => setTimeout(resolve, ms));
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Deep diff between two object, using lodash
@@ -13,8 +13,9 @@ export const sleep = (ms = 0) =>
  * @return {Object}        Return a new object who represent the diff
  */
 export function difference(object, base) {
+  // eslint-disable-next-line no-shadow
   function changes(object, base) {
-    return transform(object, function(result, value, key) {
+    return transform(object, (result, value, key) => {
       if (!isEqual(value, base[key])) {
         result[key] =
           isObject(value) && isObject(base[key])
@@ -26,8 +27,9 @@ export function difference(object, base) {
   return changes(object, base);
 }
 
-export const stringIsAValidUrl = s => {
+export const stringIsAValidUrl = (s) => {
   try {
+    // eslint-disable-next-line no-new
     new URL(s);
     return true;
   } catch (err) {

@@ -1,6 +1,6 @@
+import { css, StyleSheet } from "aphrodite";
 import React, { Component } from "react";
 import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
 
 const styles = StyleSheet.create({
   textField: {
@@ -27,7 +27,7 @@ class MessageTextField extends Component {
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
-  onEnterDown = event => {
+  onEnterDown = (event) => {
     const keyCode = event.keyCode || event.which;
     if (keyCode === 13 && !event.shiftKey) {
       event.preventDefault();

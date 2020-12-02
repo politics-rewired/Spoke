@@ -1,15 +1,17 @@
 import { config } from "../../../config";
-import { r } from "../../models";
+import thinky from "../thinky";
 
-const cacheKey = orgId => `${config.CACHE_PREFIX}org-${orgId}`;
+const { r } = thinky;
+
+const cacheKey = (orgId) => `${config.CACHE_PREFIX}org-${orgId}`;
 
 export const organizationCache = {
-  clear: async id => {
+  clear: async (id) => {
     if (r.redis) {
       await r.redis.delAsync(cacheKey(id));
     }
   },
-  load: async id => {
+  load: async (id) => {
     if (r.redis) {
       const orgData = await r.redis.getAsync(cacheKey(id));
       if (orgData) {

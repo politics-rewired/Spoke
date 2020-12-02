@@ -1,26 +1,27 @@
-import { r } from "../src/server/models";
 import Papa from "papaparse";
 
-(async function() {
+import { r } from "../src/server/models";
+
+(async function () {
   try {
     const res = await r
       .table("question_response")
-      .merge(row => ({
+      .merge((row) => ({
         campaign_contact: r
           .table("campaign_contact")
           .get(row("campaign_contact_id"))
       }))
-      .merge(row => ({
+      .merge((row) => ({
         interaction_step: r
           .table("interaction_step")
           .get(row("interaction_step_id"))
       }))
-      .merge(row => ({
+      .merge((row) => ({
         campaign: r
           .table("campaign")
           .get(row("campaign_contact")("campaign_id"))
       }))
-      .merge(row => ({
+      .merge((row) => ({
         organization: r
           .table("organization")
           .get(row("campaign")("organization_id"))
@@ -28,9 +29,9 @@ import Papa from "papaparse";
       .filter({ interaction_step: null })
       .group(r.row("campaign")("id"));
     const finalResults = res
-      .map(doc =>
+      .map((doc) =>
         doc.reduction
-          .map(row => ({
+          .map((row) => ({
             organization: row.organization.name,
             "campaign[title]": row.campaign.title,
             "contact[cell]": row.campaign_contact.cell,

@@ -1,10 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
-import * as yup from "yup";
-import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
-
+import { css, StyleSheet } from "aphrodite";
 import { Dialog } from "material-ui";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
 
@@ -26,13 +25,13 @@ const formSchema = yup.object({
   cancelButtonText: yup.string().required()
 });
 
-const CreateConfirmationStepForm = props => {
+const CreateConfirmationStepForm = (props) => {
   const { handleSaveStep, handleToggleStepCreatorOpen, open } = props;
 
-  const handleSubmit = formValues => {
+  const handleSubmit = (formValues) => {
     const newStep = [];
     const formKeys = Object.keys(formValues);
-    formKeys.forEach(key => newStep.push(formValues[key]));
+    formKeys.forEach((key) => newStep.push(formValues[key]));
     handleSaveStep(newStep);
     handleToggleStepCreatorOpen();
   };

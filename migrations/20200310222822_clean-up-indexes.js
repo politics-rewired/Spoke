@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     -- Swap order of cell, campaign_id in unique constraint
     alter table campaign_contact add constraint campaign_contact_cell_campaign_id_unique unique (cell, campaign_id);
@@ -17,7 +17,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     -- Restore message <> assignment relationship
     alter table message add constraint message_assignment_id_foreign foreign key (assignment_id) references assignment (id);

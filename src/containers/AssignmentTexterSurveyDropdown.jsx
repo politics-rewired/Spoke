@@ -1,10 +1,9 @@
+import gql from "graphql-tag";
+import Divider from "material-ui/Divider";
+import MenuItem from "material-ui/MenuItem";
+import SelectField from "material-ui/SelectField";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import gql from "graphql-tag";
-
-import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
-import Divider from "material-ui/Divider";
 
 import { loadData } from "./hoc/with-operations";
 
@@ -51,7 +50,7 @@ class AssignmentTexterSurveyDropdown extends Component {
 
   renderAnswers() {
     const { step } = this.props;
-    const menuItems = step.question.answerOptions.map(answerOption => (
+    const menuItems = step.question.answerOptions.map((answerOption) => (
       <MenuItem
         key={answerOption.value}
         value={answerOption.value}
@@ -104,14 +103,13 @@ class AssignmentTexterSurveyDropdown extends Component {
 
 AssignmentTexterSurveyDropdown.propTypes = {
   step: PropTypes.object,
-  answerValue: PropTypes.object,
-  isCurrentStep: PropTypes.boolean,
+  isCurrentStep: PropTypes.bool,
   campaignContactId: PropTypes.number,
   mutations: PropTypes.object
 };
 
 const mutations = {
-  editQuestionResponse: ownProps => questionResponse => ({
+  editQuestionResponse: (_ownProps) => (questionResponse) => ({
     mutation: gql`
       mutation editQuestionResponse($questionResponse: QuestionResponseInput!) {
         editQuestionResponse(questionResponse: $questionResponse) {

@@ -11,3 +11,5 @@ export const schema = `
     questionResponse(campaignContactId: String): QuestionResponse
   }
 `;
+
+export default schema;

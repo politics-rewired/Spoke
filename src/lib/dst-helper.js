@@ -1,4 +1,5 @@
-import { DateTime, zone, DateFunctions } from "timezonecomplete";
+/* eslint-disable max-classes-per-file */
+import { DateFunctions, DateTime, zone } from "timezonecomplete";
 
 class TimezoneOffsetAndDst {
   constructor(tzOffsetMinutes, hasDst) {
@@ -68,7 +69,7 @@ export class DstHelper {
   }
 
   static isDateDst(date, timezone) {
-    let d = new DateTime(date, DateFunctions.Get, zone(timezone));
+    const d = new DateTime(date, DateFunctions.Get, zone(timezone));
     return DstHelper.isOffsetDst(d.offset(), timezone);
   }
 
@@ -76,3 +77,5 @@ export class DstHelper {
     return DstHelper.isOffsetDst(date.offset(), timezone);
   }
 }
+
+export default DstHelper;

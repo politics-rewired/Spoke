@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create table public.external_activist_code (
       id uuid not null default uuid_generate_v1mc(),
@@ -89,7 +89,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop function public.queue_refresh_van_activist_codes(uuid);
     drop function public.insert_van_activist_codes(json, json, json);

@@ -2,7 +2,7 @@ import { GraphQLScalarType } from "graphql";
 import { GraphQLError } from "graphql/error";
 import { Kind } from "graphql/language";
 
-const identity = value => value;
+const identity = (value) => value;
 
 // Regex taken from http://stackoverflow.com/questions/6478875/regular-expression-matching-e-164-formatted-phone-numbers
 const pattern = /^\+[1-9]\d{1,14}$/;
@@ -27,3 +27,5 @@ export const GraphQLPhone = new GraphQLScalarType({
     return ast.value;
   }
 });
+
+export default GraphQLPhone;

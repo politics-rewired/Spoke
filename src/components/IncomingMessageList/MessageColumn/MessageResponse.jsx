@@ -1,11 +1,10 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import Form from "react-formal";
-import * as yup from "yup";
 import gql from "graphql-tag";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
 import { loadData } from "../../../containers/hoc/with-operations";
 import GSForm from "../../forms/GSForm";
@@ -18,7 +17,7 @@ class MessageResponse extends Component {
     sendError: ""
   };
 
-  createMessageToContact(text) {
+  createMessageToContact = (text) => {
     const { contact, texter } = this.props.conversation;
 
     return {
@@ -27,7 +26,7 @@ class MessageResponse extends Component {
       userId: texter.id,
       text
     };
-  }
+  };
 
   handleMessageFormChange = ({ messageText }) => this.setState({ messageText });
 
@@ -72,8 +71,9 @@ class MessageResponse extends Component {
 
     const errorActions = [
       <FlatButton
+        key="ok"
         label="OK"
-        primary={true}
+        primary
         onClick={this.handleCloseErrorDialog}
       />
     ];
@@ -127,7 +127,7 @@ MessageResponse.propTypes = {
 };
 
 const mutations = {
-  sendMessage: ownProps => (message, campaignContactId) => ({
+  sendMessage: () => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!

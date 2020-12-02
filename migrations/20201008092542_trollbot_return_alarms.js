@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     drop function public.raise_trollbot_alarms (integer, interval);
     create function public.raise_trollbot_alarms (organization_id integer, troll_interval interval)
@@ -25,7 +25,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop function public.raise_trollbot_alarms (integer, interval);
     create function public.raise_trollbot_alarms (organization_id integer, troll_interval interval)

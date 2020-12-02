@@ -22,7 +22,13 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      - run: yarn commitlint-circle
+      - run:
+          name: Lint commits
+          command: yarn commitlint-circle
+
+      - run:
+          name: Lint codebase
+          command: yarn lint && yarn format
 
   build_image:
     docker:

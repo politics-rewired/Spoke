@@ -1,14 +1,14 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import * as yup from "yup";
 import Form from "react-formal";
-import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
+import * as yup from "yup";
 
-import { loadData } from "./hoc/with-operations";
+import GSForm from "../components/forms/GSForm";
 import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
-import GSForm from "../components/forms/GSForm";
+import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({
   infoContainer: {
@@ -62,8 +62,9 @@ class AdminReplySender extends React.Component {
           {`${contact.firstName} ${contact.lastName}: ${contact.cell}`}
         </div>
         <div className={css(styles.subtitle)}>
-          {contact.messages.map(message => (
+          {contact.messages.map((message) => (
             <div
+              key={message.id}
               className={
                 message.isFromContact
                   ? css(styles.fromContactMessage)
@@ -77,7 +78,7 @@ class AdminReplySender extends React.Component {
         <div className={css(styles.formContainer)}>
           <GSForm
             schema={this.formSchema}
-            onSubmit={async formValues => {
+            onSubmit={async (formValues) => {
               await this.props.mutations.sendReply(
                 contact.id,
                 formValues.message
@@ -109,7 +110,7 @@ class AdminReplySender extends React.Component {
     const { data } = this.props;
     return (
       <div>
-        {data.campaign.contacts.map(contact => {
+        {data.campaign.contacts.map((contact) => {
           if (
             contact.messageStatus === "messaged" ||
             contact.messageStatus === "convo"
@@ -141,6 +142,7 @@ const queries = {
             cell
             messageStatus
             messages {
+              id
               text
               isFromContact
             }
@@ -148,7 +150,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
       }
@@ -157,12 +159,13 @@ const queries = {
 };
 
 const mutations = {
-  sendReply: ownProps => (contactId, message) => ({
+  sendReply: (_ownProps) => (contactId, message) => ({
     mutation: gql`
       mutation sendReply($contactId: String!, $message: String!) {
         sendReply(id: $contactId, message: $message) {
           id
           messages {
+            id
             text
             isFromContact
           }

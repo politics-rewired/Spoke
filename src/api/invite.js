@@ -5,3 +5,5 @@ export const schema = `
     hash: String
   }
 `;
+
+export default schema;

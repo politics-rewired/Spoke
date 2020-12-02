@@ -1,31 +1,31 @@
-import { schema as userSchema } from "./user";
-import { schema as conversationSchema } from "./conversations";
-import { schema as organizationSchema } from "./organization";
-import { schema as organizationSettingsSchema } from "./organization-settings";
-import { schema as campaignSchema } from "./campaign";
 import { schema as assignmentSchema } from "./assignment";
-import { schema as interactionStepSchema } from "./interaction-step";
-import { schema as questionSchema } from "./question";
-import { schema as questionResponseSchema } from "./question-response";
-import { schema as optOutSchema } from "./opt-out";
-import { schema as messageSchema } from "./message";
+import { schema as assignmentRequestSchema } from "./assignment-request";
+import { schema as campaignSchema } from "./campaign";
 import { schema as campaignContactSchema } from "./campaign-contact";
 import { schema as cannedResponseSchema } from "./canned-response";
+import { schema as conversationSchema } from "./conversations";
+import { schema as externalActivistCodeSchema } from "./external-activist-code";
+import { schema as externalListSchema } from "./external-list";
+import { schema as externalResultCodeSchema } from "./external-result-code";
+import { schema as externalSurveyQuestionSchema } from "./external-survey-question";
+import { schema as externalResponseOptionSchema } from "./external-survey-question-response-option";
+import { schema as externalSyncConfigSchema } from "./external-sync-config";
+import { schema as externalSystemSchema } from "./external-system";
+import { schema as interactionStepSchema } from "./interaction-step";
 import { schema as inviteSchema } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
-import { schema as assignmentRequestSchema } from "./assignment-request";
+import { schema as messageSchema } from "./message";
+import { schema as optOutSchema } from "./opt-out";
+import { schema as organizationSchema } from "./organization";
+import { schema as membershipSchema } from "./organization-membership";
+import { schema as organizationSettingsSchema } from "./organization-settings";
+import { schema as paginationSchema } from "./pagination";
+import { schema as questionSchema } from "./question";
+import { schema as questionResponseSchema } from "./question-response";
 import { schema as tagSchema } from "./tag";
 import { schema as teamSchema } from "./team";
 import { schema as trollbotSchema } from "./trollbot";
-import { schema as paginationSchema } from "./pagination";
-import { schema as membershipSchema } from "./organization-membership";
-import { schema as externalSystemSchema } from "./external-system";
-import { schema as externalListSchema } from "./external-list";
-import { schema as externalSurveyQuestionSchema } from "./external-survey-question";
-import { schema as externalResponseOptionSchema } from "./external-survey-question-response-option";
-import { schema as externalActivistCodeSchema } from "./external-activist-code";
-import { schema as externalResultCodeSchema } from "./external-result-code";
-import { schema as externalSyncConfigSchema } from "./external-sync-config";
+import { schema as userSchema } from "./user";
 
 const rootSchema = `
   input CampaignContactInput {
@@ -389,3 +389,5 @@ export const schema = [
   externalResultCodeSchema,
   externalSyncConfigSchema
 ];
+
+export default rootSchema;

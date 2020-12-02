@@ -1,10 +1,10 @@
+import Divider from "material-ui/Divider";
+import { List, ListItem } from "material-ui/List";
+import { red300 } from "material-ui/styles/colors";
+import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
+import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
-import { List, ListItem } from "material-ui/List";
-import moment from "moment";
-import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
-import Divider from "material-ui/Divider";
-import { red300 } from "material-ui/styles/colors";
 
 const styles = {
   optOut: {
@@ -60,11 +60,11 @@ const MessageList = function MessageList(props) {
 
   return (
     <List>
-      {messages.map(message => {
+      {messages.map((message) => {
         const specialStyle = message.isFromContact
           ? styles.receivedBubble
           : styles.sentBubble;
-        const style = Object.assign({}, styles.bubble, specialStyle);
+        const style = { ...styles.bubble, ...specialStyle };
         return (
           <ListItem
             disabled

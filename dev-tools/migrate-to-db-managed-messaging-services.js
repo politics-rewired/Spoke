@@ -16,7 +16,7 @@ const BATCH_SIZE = 20000;
 
 const getMessagingServiceSIDs = () => {
   // Gather multiple messaging service SIDs (may be split across multiple env vars)
-  const envVarKeys = Object.keys(process.env).filter(key =>
+  const envVarKeys = Object.keys(process.env).filter((key) =>
     key.startsWith(`TWILIO_MESSAGE_SERVICE_SIDS`)
   );
   envVarKeys.sort();
@@ -26,7 +26,7 @@ const getMessagingServiceSIDs = () => {
     const envVarValue = process.env[envVarKey];
     const newServiceIds = envVarValue
       .split(",")
-      .map(serviceSid => serviceSid.trim());
+      .map((serviceSid) => serviceSid.trim());
     messagingServiceIds = messagingServiceIds.concat(newServiceIds);
   }
 
@@ -35,9 +35,9 @@ const getMessagingServiceSIDs = () => {
 
 const MESSAGING_SERVICE_SIDS = getMessagingServiceSIDs();
 
-const getMessageServiceSID = cell => {
+const getMessageServiceSID = (cell) => {
   // Check for single message service
-  if (!!process.env.TWILIO_MESSAGE_SERVICE_SID) {
+  if (process.env.TWILIO_MESSAGE_SERVICE_SID) {
     return process.env.TWILIO_MESSAGE_SERVICE_SID;
   }
 
@@ -62,8 +62,8 @@ function deterministicIntWithinRange(string, maxSize) {
 
 function hashStr(str) {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    let charCode = str.charCodeAt(i);
+  for (let i = 0; i < str.length; i += 1) {
+    const charCode = str.charCodeAt(i);
     hash += charCode;
   }
   return hash;
@@ -92,7 +92,7 @@ const doBatch = async () => {
   );
 
   // Deduping a batch of 5000 in Javascript is way faaster than adding the distinct
-  const cells = [...new Set(rows.map(r => r.cell))];
+  const cells = [...new Set(rows.map((r) => r.cell))];
 
   console.log("Doing ", cells.length);
 
@@ -100,7 +100,7 @@ const doBatch = async () => {
     return 0;
   }
 
-  const toInsert = cells.map(c => ({
+  const toInsert = cells.map((c) => ({
     cell: c,
     organization_id: 1,
     messaging_service_sid: getMessageServiceSID(c)
@@ -118,17 +118,15 @@ async function main() {
   let did = 0;
   while ((did = await doBatch()) > 0) {
     console.log("Did ", did);
-    done = done + did;
+    done += did;
     console.log("Done ", done);
   }
 
-  for (let c of campaigns) {
+  for (const c of campaigns) {
     console.log("Doing campaign: ", c.id);
     await ensureAllNumbersHaveMessagingServiceSIDs(c.id, 1);
     console.log("...done");
   }
 }
 
-main()
-  .then(console.log)
-  .catch(console.error);
+main().then(console.log).catch(console.error);

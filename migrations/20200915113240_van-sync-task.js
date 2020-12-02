@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.raw(`
     -- Update job_request status or mark as done
     create function public.update_van_sync_job_request_status()
@@ -143,7 +143,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.raw(`
     drop function public.queue_sync_campaign_to_van(integer);
     drop function public.update_van_sync_job_request_status();

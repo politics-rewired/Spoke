@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.raw(`
     alter table public.campaign
       add column external_system_id uuid references public.external_system(id);
@@ -200,7 +200,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.raw(`
     drop view public.external_sync_question_response_configuration;
     drop view public.missing_external_sync_question_response_configuration;

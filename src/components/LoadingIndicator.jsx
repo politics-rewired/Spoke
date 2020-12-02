@@ -1,6 +1,6 @@
-import React from "react";
-import { StyleSheet, css } from "aphrodite";
+import { css, StyleSheet } from "aphrodite";
 import CircularProgress from "material-ui/CircularProgress";
+import React from "react";
 
 const styles = StyleSheet.create({
   loader: {
@@ -11,8 +11,10 @@ const styles = StyleSheet.create({
   }
 });
 
-export default () => (
+export const LoadingIndicator = () => (
   <div className={css(styles.loader)}>
     <CircularProgress />
   </div>
 );
+
+export default LoadingIndicator;

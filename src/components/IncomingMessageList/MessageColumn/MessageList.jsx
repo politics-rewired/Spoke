@@ -1,8 +1,8 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import moment from "moment-timezone";
-import { StyleSheet, css } from "aphrodite";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import { loadData } from "../../../containers/hoc/with-operations";
 
@@ -54,8 +54,8 @@ class MessageList extends Component {
 
     return (
       <div ref="messageWindow" style={messageContainerStyle}>
-        {this.props.messages.map((message, index) => {
-          const isFromContact = message.isFromContact;
+        {this.props.messages.map((message) => {
+          const { isFromContact } = message;
           const containerStyle = {
             marginLeft: isFromContact ? undefined : "60px",
             marginRight: isFromContact ? "60px" : undefined
@@ -72,25 +72,25 @@ class MessageList extends Component {
           };
 
           const sender = this.props.userNames.peopleByUserIds.users.filter(
-            user => user.id === message.userId
+            (user) => user.id === message.userId
           )[0];
           const senderName = sender ? sender.displayName : "Unknown";
 
           return (
-            <div key={index} style={containerStyle}>
+            <div key={message.id} style={containerStyle}>
               <p className={css(styles.conversationRow)} style={messageStyle}>
                 {message.text}
               </p>
               <p style={senderInfoStyle}>
                 {message.isFromContact
                   ? `Received at ${moment(message.createdAt).fromNow()}`
-                  : message.sendStatus == "ERROR"
-                    ? `Carrier rejected this message sent by ${senderName} at ${moment(
-                        message.createdAt
-                      ).fromNow()}`
-                    : `Sent by ${senderName} ${moment(
-                        message.createdAt
-                      ).fromNow()}`}
+                  : message.sendStatus === "ERROR"
+                  ? `Carrier rejected this message sent by ${senderName} at ${moment(
+                      message.createdAt
+                    ).fromNow()}`
+                  : `Sent by ${senderName} ${moment(
+                      message.createdAt
+                    ).fromNow()}`}
               </p>
             </div>
           );
@@ -117,10 +117,12 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         userIds: [
-          ...new Set(ownProps.messages.map(m => m.userId).filter(uid => !!uid))
+          ...new Set(
+            ownProps.messages.map((m) => m.userId).filter((uid) => !!uid)
+          )
         ],
         organizationId: ownProps.organizationId
       }

@@ -1,10 +1,10 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
 
-import { withQueries } from "../hoc/with-operations";
 import theme from "../../styles/theme";
+import { withQueries } from "../hoc/with-operations";
 import CampaignStat from "./CampaignStat";
 
 const styles = StyleSheet.create({
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export const TopLineStats = props => {
+export const TopLineStats = (props) => {
   const {
     contactsCount,
     assignments,
@@ -105,7 +105,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -122,7 +122,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -139,7 +139,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -156,7 +156,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -173,7 +173,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }

@@ -1,31 +1,33 @@
-import React from "react";
-import { compose } from "recompose";
-import gql from "graphql-tag";
+/* eslint-disable react/no-unused-state */
 import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
-import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
+import SelectField from "material-ui/SelectField";
 import { blueGrey800 } from "material-ui/styles/colors";
+import React from "react";
+import { compose } from "recompose";
 
-import { RelayPaginatedResponse } from "../api/pagination";
+import { ExternalActivistCode } from "../api/external-activist-code";
+import { ExternalResultCode } from "../api/external-result-code";
+import { ExternalSurveyQuestion } from "../api/external-survey-question";
 import {
-  ExternalSyncQuestionResponseConfig,
   ExternalSyncConfigTarget,
+  ExternalSyncQuestionResponseConfig,
   isActivistCode,
   isResponseOption,
   isResultCode
 } from "../api/external-sync-config";
-import { ExternalSurveyQuestion } from "../api/external-survey-question";
-import { ExternalActivistCode } from "../api/external-activist-code";
-import { ExternalResultCode } from "../api/external-result-code";
-import { ExternalDataCollectionStatus } from "../api/types";
-import { QuestionResponseSyncTargetInput } from "../api/types";
-import { GET_SYNC_CONFIGS } from "./SyncConfigurationModal/queries";
+import { RelayPaginatedResponse } from "../api/pagination";
+import {
+  ExternalDataCollectionStatus,
+  QuestionResponseSyncTargetInput
+} from "../api/types";
 import { loadData } from "../containers/hoc/with-operations";
 import { MutationMap } from "../network/types";
+import { GET_SYNC_CONFIGS } from "./SyncConfigurationModal/queries";
 
 enum MappingType {
   ResponseOption,
@@ -74,7 +76,7 @@ class AddMapping extends React.Component<InnerProps, State> {
   };
 
   handleOnChangeMappingType = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     type: MappingType
   ) =>
@@ -87,25 +89,25 @@ class AddMapping extends React.Component<InnerProps, State> {
     });
 
   handleOnChangeSurveyQuestion = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     surveyQuestionId: string
   ) => this.setState({ surveyQuestionId, responseOptionId: null });
 
   handleOnChangeResponseOption = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     responseOptionId: string
   ) => this.setState({ responseOptionId });
 
   handleOnChangeActivistCode = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     activistCodeId: string
   ) => this.setState({ activistCodeId });
 
   handleOnChangeResultCode = (
-    e: React.SyntheticEvent<{}>,
+    e: React.SyntheticEvent<unknown>,
     index: number,
     resultCodeId: string
   ) => this.setState({ resultCodeId });
@@ -141,18 +143,18 @@ class AddMapping extends React.Component<InnerProps, State> {
     if (!this.props.config || type === null) return undefined;
 
     const base = {
-      responseOptionId: null,
-      activistCodeId: null,
-      resultCodeId: null
+      responseOptionId: undefined,
+      activistCodeId: undefined,
+      resultCodeId: undefined
     };
     if (type === MappingType.ResponseOption && responseOptionId !== null) {
-      return Object.assign({}, base, { responseOptionId });
+      return { ...base, responseOptionId };
     }
     if (type === MappingType.ActivistCode && activistCodeId !== null) {
-      return Object.assign({}, base, { activistCodeId });
+      return { ...base, activistCodeId };
     }
     if (type === MappingType.ResultCode && resultCodeId !== null) {
-      return Object.assign({}, base, { resultCodeId });
+      return { ...base, resultCodeId };
     }
 
     return undefined;
@@ -177,11 +179,11 @@ class AddMapping extends React.Component<InnerProps, State> {
 
     // This is a client-side-only check
     const responseOptionExists =
-      existingTargets.find(target => isResponseOption(target)) !== undefined;
+      existingTargets.find((target) => isResponseOption(target)) !== undefined;
     const activistCodeExists =
-      existingTargets.find(target => isActivistCode(target)) !== undefined;
+      existingTargets.find((target) => isActivistCode(target)) !== undefined;
     const resultCodeExists =
-      existingTargets.find(target => isResultCode(target)) !== undefined;
+      existingTargets.find((target) => isResultCode(target)) !== undefined;
     const isRootAnswer =
       config && config.interactionStep.parentInteractionId === null;
     const canMakeChanges =
@@ -190,10 +192,15 @@ class AddMapping extends React.Component<InnerProps, State> {
       !(resultCodeExists || !isRootAnswer);
 
     const actions = [
-      <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
       <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.props.onRequestClose}
+      />,
+      <FlatButton
+        key="add"
         label="Add"
-        primary={true}
+        primary
         disabled={validTarget === undefined || !canMakeChanges}
         onClick={this.handleOnAddMapping}
       />
@@ -203,9 +210,9 @@ class AddMapping extends React.Component<InnerProps, State> {
       <Dialog
         open={config !== undefined}
         title="Add Mapping"
-        modal={true}
+        modal
         actions={actions}
-        autoScrollBodyContent={true}
+        autoScrollBodyContent
         onRequestClose={this.props.onRequestClose}
       >
         {config !== undefined && (
@@ -223,22 +230,34 @@ class AddMapping extends React.Component<InnerProps, State> {
             <SelectField
               floatingLabelText="Mapping Type"
               value={canMakeChanges ? this.state.type : null}
-              autoWidth={true}
+              autoWidth
               onChange={this.handleOnChangeMappingType}
             >
               <MenuItem
                 value={MappingType.ResponseOption}
                 primaryText={`Survey Response${
-                  responseOptionExists ? " (already configured)" : activeSurveyQuestions.length === 0 ? " (none active)" : ""
+                  responseOptionExists
+                    ? " (already configured)"
+                    : activeSurveyQuestions.length === 0
+                    ? " (none active)"
+                    : ""
                 }`}
-                disabled={responseOptionExists || activeSurveyQuestions.length === 0}
+                disabled={
+                  responseOptionExists || activeSurveyQuestions.length === 0
+                }
               />
               <MenuItem
                 value={MappingType.ActivistCode}
                 primaryText={`Activist Code${
-                  activistCodeExists ? " (already configured)" : activeActivistCodes.length === 0 ? " (none active)" : ""
+                  activistCodeExists
+                    ? " (already configured)"
+                    : activeActivistCodes.length === 0
+                    ? " (none active)"
+                    : ""
                 }`}
-                disabled={activistCodeExists || activeActivistCodes.length === 0}
+                disabled={
+                  activistCodeExists || activeActivistCodes.length === 0
+                }
               />
               <MenuItem
                 value={MappingType.ResultCode}
@@ -246,8 +265,8 @@ class AddMapping extends React.Component<InnerProps, State> {
                   resultCodeExists
                     ? " (already configured)"
                     : !isRootAnswer
-                      ? " (not top-level question)"
-                      : ""
+                    ? " (not top-level question)"
+                    : ""
                 }`}
                 disabled={resultCodeExists || !isRootAnswer}
               />
@@ -257,7 +276,7 @@ class AddMapping extends React.Component<InnerProps, State> {
               <SelectField
                 floatingLabelText="Activist Code"
                 value={this.state.activistCodeId}
-                autoWidth={true}
+                autoWidth
                 onChange={this.handleOnChangeActivistCode}
               >
                 {activeActivistCodes.map(({ node }) => (
@@ -273,7 +292,7 @@ class AddMapping extends React.Component<InnerProps, State> {
               <SelectField
                 floatingLabelText="Result Code"
                 value={this.state.resultCodeId}
-                autoWidth={true}
+                autoWidth
                 onChange={this.handleOnChangeResultCode}
               >
                 {this.props.resultCodes.edges.map(({ node }) => (
@@ -290,7 +309,7 @@ class AddMapping extends React.Component<InnerProps, State> {
                 <SelectField
                   floatingLabelText="Survey Question"
                   value={this.state.surveyQuestionId}
-                  autoWidth={true}
+                  autoWidth
                   onChange={this.handleOnChangeSurveyQuestion}
                 >
                   {activeSurveyQuestions.map(({ node }) => (
@@ -306,7 +325,7 @@ class AddMapping extends React.Component<InnerProps, State> {
                   <SelectField
                     floatingLabelText="Response Option"
                     value={this.state.responseOptionId}
-                    autoWidth={true}
+                    autoWidth
                     onChange={this.handleOnChangeResponseOption}
                   >
                     {activeQuestion.responseOptions.edges.map(({ node }) => (
@@ -331,7 +350,7 @@ class AddMapping extends React.Component<InnerProps, State> {
 }
 
 const mutations: MutationMap<InnerProps> = {
-  createTarget: ownProps => (input: { [key: string]: string }) => ({
+  createTarget: (ownProps) => (input: { [key: string]: string }) => ({
     mutation: gql`
       mutation createQuestionResponseSyncTarget(
         $input: QuestionResponseSyncTargetInput!
@@ -371,7 +390,10 @@ const mutations: MutationMap<InnerProps> = {
         ...input
       }
     },
-    update: (store, { data: { createQuestionResponseSyncTarget: newTarget} }) => {
+    update: (
+      store,
+      { data: { createQuestionResponseSyncTarget: newTarget } }
+    ) => {
       const variables = { campaignId: ownProps.config?.campaignId };
       const data: any = cloneDeep(
         store.readQuery({
@@ -381,7 +403,9 @@ const mutations: MutationMap<InnerProps> = {
       );
 
       const configId = ownProps.config?.id;
-      const { edges } = data.campaign.externalSyncConfigurations;
+      const {
+        edges
+      }: { edges: any[] } = data.campaign.externalSyncConfigurations;
       const index = edges.findIndex(({ node }) => node.id === configId);
       edges[index].node.targets.push(newTarget);
 
@@ -394,6 +418,6 @@ const mutations: MutationMap<InnerProps> = {
   })
 };
 
-export default compose<InnerProps, OuterProps>(
-  loadData({ mutations })
-)(AddMapping);
+export default compose<InnerProps, OuterProps>(loadData({ mutations }))(
+  AddMapping
+);

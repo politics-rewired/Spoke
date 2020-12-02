@@ -1,16 +1,16 @@
+import passportSlack from "@aoberoi/passport-slack";
 import express from "express";
 import passport from "passport";
 import Auth0Strategy from "passport-auth0";
-import passportSlack from "@aoberoi/passport-slack";
 import { Strategy as LocalStrategy } from "passport-local";
 import request from "superagent";
 
 import { config } from "../config";
 import logger from "../logger";
+import { capitalizeWord } from "./api/lib/utils";
+import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
-import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
-import { capitalizeWord } from "./api/lib/utils";
 
 const {
   BASE_URL,
@@ -37,8 +37,8 @@ function redirectPostSignIn(req, res, isNewUser) {
       ? AUTOJOIN_URL
       : "/"
     : req.query.state
-      ? req.query.state
-      : "/";
+    ? req.query.state
+    : "/";
 
   return res.redirect(redirectDestionation);
 }
@@ -59,7 +59,9 @@ function setupSlackPassport() {
       accessToken,
       scopes,
       team,
+      // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
       { bot, incomingWebhook },
+      // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
       { user, team: teamProfile },
       done
     ) => {
@@ -68,7 +70,7 @@ function setupSlackPassport() {
         const response = await request
           .get(`https://slack.com/api/users.profile.get`)
           .query({ token: config.SLACK_TOKEN, user: user.id })
-          .then(res => res.body);
+          .then((res) => res.body);
         if (!response.ok) {
           logger.error("Error fetching Slack profile", { response });
         } else {
@@ -90,12 +92,12 @@ function setupSlackPassport() {
 
   passport.deserializeUser((slackUserId, done) =>
     userLoggedIn(slackUserId, "auth0_id")
-      .then(user => done(null, user || false))
-      .catch(error => done(error))
+      .then((user) => done(null, user || false))
+      .catch((error) => done(error))
   );
 
   const handleLogin = async (req, res) => {
-    const user = req.user;
+    const { user } = req;
     // set slack_id to auth0Id to avoid changing the schema
     const auth0Id = user && user.id;
     if (!auth0Id) {
@@ -105,7 +107,7 @@ function setupSlackPassport() {
       .reader("user")
       .where({ auth0_id: auth0Id })
       .first()
-      .catch(err => {
+      .catch((err) => {
         logger.error("Slack login error: could not find existing user: ", err);
         throw err;
       });
@@ -123,20 +125,20 @@ function setupSlackPassport() {
     }
 
     if (!existingUser) {
-      let first_name, last_name;
+      let first_name;
+      let last_name;
       const splitName = user.name ? user.name.split(" ") : ["First", "Last"];
       if (user.first_name && user.last_name) {
         // Spoke was granted the 'users.profile:read' scope so use Slack-provided first/last
         first_name = user.first_name;
         last_name = user.last_name;
-      } else if (splitName.length == 1) {
-        first_name = splitName[0];
+      } else if (splitName.length === 1) {
+        [first_name] = splitName;
         last_name = "";
-      } else if (splitName.length == 2) {
-        first_name = splitName[0];
-        last_name = splitName[1];
+      } else if (splitName.length === 2) {
+        [first_name, last_name] = splitName;
       } else {
-        first_name = splitName[0];
+        [first_name] = splitName;
         last_name = splitName.slice(1, splitName.length + 1).join(" ");
       }
 
@@ -152,7 +154,7 @@ function setupSlackPassport() {
       await r
         .knex("user")
         .insert(userData)
-        .catch(err => {
+        .catch((err) => {
           logger.error("Slack login error: could not insert new user: ", err);
           throw err;
         });
@@ -203,8 +205,8 @@ function setupAuth0Passport() {
 
   passport.deserializeUser((auth0Id, done) =>
     userLoggedIn(auth0Id, "auth0_id")
-      .then(user => done(null, user || false))
-      .catch(error => done(error))
+      .then((user) => done(null, user || false))
+      .catch((error) => done(error))
   );
 
   const handleLogin = async (req, res) => {
@@ -257,6 +259,7 @@ function setupLocalAuthPassport() {
     },
     async (req, username, password, done) => {
       const { nextUrl = "", authType } = req.body;
+      // eslint-disable-next-line no-useless-escape
       const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
       const lowerCaseEmail = username.toLowerCase();
       const existingUser = await r
@@ -289,27 +292,28 @@ function setupLocalAuthPassport() {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser((id, done) =>
     userLoggedIn(parseInt(id, 10))
-      .then(user => done(null, user || false))
-      .catch(error => done(error))
+      .then((user) => done(null, user || false))
+      .catch((error) => done(error))
   );
 
   const app = express();
   app.post("/login-callback", (req, res, next) => {
     // See: http://www.passportjs.org/docs/authenticate/#custom-callback
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err, user, _info) => {
       // Check custom property rather than using instanceof because errors are being passed as
       // objects, not classes
       if (err && err.errorType === "LocalAuthError") {
         return res.status(400).send({ success: false, message: err.message });
-      } else if (err) {
+      }
+      if (err) {
         // System error
         return next(err);
       }
 
       // Default behavior
-      req.logIn(user, function(err) {
-        if (err) {
-          return next(err);
+      req.logIn(user, (logInErr) => {
+        if (logInErr) {
+          return next(logInErr);
         }
         return res.redirect(req.body.nextUrl || "/");
       });
@@ -321,9 +325,9 @@ function setupLocalAuthPassport() {
 
 // Convert a Spoke user record to the type expected by passport.(de)serializeUser
 export const sessionUserMap = {
-  local: user => ({ id: user.id }),
-  auth0: user => ({ id: user.auth0_id }),
-  slack: user => ({ id: user.auth0_id })
+  local: (user) => ({ id: user.id }),
+  auth0: (user) => ({ id: user.auth0_id }),
+  slack: (user) => ({ id: user.auth0_id })
 };
 
 export default {

@@ -1,5 +1,7 @@
 import { config } from "../../config";
-import r from "./index.js";
+import thinky from "./thinky";
+
+const { r } = thinky;
 
 let warehouseConfig;
 
@@ -16,4 +18,4 @@ if (config.WAREHOUSE_DB_TYPE) {
   };
 }
 
-export default (config.WAREHOUSE_DB_TYPE ? () => r(warehouseConfig) : null);
+export default config.WAREHOUSE_DB_TYPE ? () => r(warehouseConfig) : null;

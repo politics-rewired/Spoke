@@ -1,12 +1,11 @@
-import PropTypes from "prop-types";
-import React from "react";
 import gql from "graphql-tag";
-
 import { List, ListItem } from "material-ui/List";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { loadData } from "./hoc/with-operations";
 import Empty from "../components/Empty";
+import { loadData } from "./hoc/with-operations";
 
 const AdminOptOutList = function AdminOptOutList(props) {
   const { data } = props;
@@ -17,7 +16,7 @@ const AdminOptOutList = function AdminOptOutList(props) {
         <Empty title="Yay, no one has opted out!" icon={<ProhibitedIcon />} />
       ) : (
         <List>
-          {optOuts.map(optOut => (
+          {optOuts.map((optOut) => (
             <ListItem key={optOut.id} primaryText={optOut.cell} />
           ))}
         </List>
@@ -43,7 +42,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       },

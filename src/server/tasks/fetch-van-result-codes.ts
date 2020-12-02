@@ -24,7 +24,7 @@ export const fetchVANResultCodes: Task = async (
   );
   const resultCodes: VANResultCode[] = response.body;
 
-  return resultCodes.map(sq => ({
+  return resultCodes.map((sq) => ({
     van_system_id: payload.van_system_id,
     result_code_id: sq.resultCodeId,
     name: sq.name,

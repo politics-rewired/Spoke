@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import apolloClient from "../network/apollo-client-singleton";
 
@@ -84,7 +84,7 @@ export class PaginatedUsersRetriever extends Component {
     this.props.setCampaignTextersLoadedFraction(0);
 
     let after = null;
-    let totalCount = undefined;
+    let totalCount;
     let users = [];
     do {
       const results = await fetchPeople({
@@ -94,7 +94,7 @@ export class PaginatedUsersRetriever extends Component {
         campaignsFilter
       });
       const { pageInfo, edges } = results.data.organization.memberships;
-      const newUsers = edges.map(edge => ({
+      const newUsers = edges.map((edge) => ({
         ...edge.node.user,
         role: edge.node.role
       }));

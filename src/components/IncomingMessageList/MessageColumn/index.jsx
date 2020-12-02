@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 
 import MessageList from "./MessageList";
-import MessageResponse from "./MessageResponse";
 import MessageOptOut from "./MessageOptOut";
+import MessageResponse from "./MessageResponse";
 
 const styles = {
   container: {
@@ -25,18 +25,18 @@ class MessageColumn extends Component {
     };
   }
 
-  messagesChanged = messages => {
+  messagesChanged = (messages) => {
     this.setState({ messages });
   };
 
-  optOutChanged = isOptedOut => {
+  optOutChanged = (isOptedOut) => {
     this.setState({ isOptedOut });
   };
 
   render() {
     const { messages, isOptedOut } = this.state;
-    const { conversation } = this.props,
-      { contact } = conversation;
+    const { conversation } = this.props;
+    const { contact } = conversation;
 
     return (
       <div style={styles.container}>

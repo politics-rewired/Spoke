@@ -1,9 +1,9 @@
 import { config } from "../config";
 import logger from "../logger";
-import { errToObj } from "./utils";
 import { eventBus, EventType } from "./event-bus";
-import { r } from "./models";
 import { sendEmail } from "./mail";
+import { r } from "./models";
+import { errToObj } from "./utils";
 
 export const Notifications = Object.freeze({
   CAMPAIGN_STARTED: "campaign.started",
@@ -12,15 +12,8 @@ export const Notifications = Object.freeze({
   ASSIGNMENT_UPDATED: "assignment.updated"
 });
 
-const replyToForOrg = async organizationId => {
-  if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
-
-  const orgOwner = await getOrganizationOwner(organizationId);
-  return orgOwner.email;
-};
-
 async function getOrganizationOwner(organizationId) {
-  return await r
+  return r
     .reader("user")
     .join("user_organization", "user_organization.user_id", "user.id")
     .where({
@@ -30,6 +23,14 @@ async function getOrganizationOwner(organizationId) {
     .orderBy("user.id")
     .first("user.*");
 }
+
+const replyToForOrg = async (organizationId) => {
+  if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
+
+  const orgOwner = await getOrganizationOwner(organizationId);
+  return orgOwner.email;
+};
+
 const sendAssignmentUserNotification = async (assignment, notification) => {
   const campaign = await r
     .reader("campaign")
@@ -44,10 +45,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .reader("organization")
     .where({ id: campaign.organization_id })
     .first();
-  const user = await r
-    .reader("user")
-    .where({ id: assignment.user_id })
-    .first();
+  const user = await r.reader("user").where({ id: assignment.user_id }).first();
 
   const replyTo = await replyToForOrg(organization.id);
 
@@ -55,16 +53,10 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
   let text;
   if (notification === Notifications.ASSIGNMENT_UPDATED) {
     subject = `[${organization.name}] Updated assignment: ${campaign.title}`;
-    text = `Your assignment changed: \n\n${config.BASE_URL}/app/${
-      campaign.organization_id
-    }/todos`;
+    text = `Your assignment changed: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
   } else if (notification === Notifications.ASSIGNMENT_CREATED) {
     subject = `[${organization.name}] New assignment: ${campaign.title}`;
-    text = `You just got a new texting assignment from ${
-      organization.name
-    }. You can start sending texts right away: \n\n${config.BASE_URL}/app/${
-      campaign.organization_id
-    }/todos`;
+    text = `You just got a new texting assignment from ${organization.name}. You can start sending texts right away: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
   }
 
   try {
@@ -79,7 +71,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
   }
 };
 
-export const sendUserNotification = async notification => {
+export const sendUserNotification = async (notification) => {
   const { type } = notification;
 
   // Fine-grained notification preferences
@@ -94,7 +86,7 @@ export const sendUserNotification = async notification => {
       .pluck(["user_id", "campaign_id"]);
 
     const count = assignments.length;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i += 1) {
       const assignment = assignments[i];
       await sendAssignmentUserNotification(
         assignment,
@@ -137,11 +129,7 @@ export const sendUserNotification = async notification => {
           to: user.email,
           replyTo,
           subject: `[${organization.name}] [${campaign.title}] New reply`,
-          text: `Someone responded to your message. See all your replies here: \n\n${
-            config.BASE_URL
-          }/app/${campaign.organization_id}/todos/${
-            notification.assignmentId
-          }/reply`
+          text: `Someone responded to your message. See all your replies here: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos/${notification.assignmentId}/reply`
         });
       } catch (err) {
         logger.error("Error sending conversation reply notification email: ", {
@@ -152,13 +140,13 @@ export const sendUserNotification = async notification => {
   } else if (type === Notifications.ASSIGNMENT_CREATED) {
     const { assignment } = notification;
     await sendAssignmentUserNotification(assignment, type);
-  } else if (type == Notifications.ASSIGNMENT_UPDATED) {
+  } else if (type === Notifications.ASSIGNMENT_UPDATED) {
     const { assignment } = notification;
     await sendAssignmentUserNotification(assignment, type);
   }
 };
 
-const handleAssignmentCreated = assignment =>
+const handleAssignmentCreated = (assignment) =>
   sendUserNotification({
     type: Notifications.ASSIGNMENT_CREATED,
     assignment

@@ -12,3 +12,5 @@ export const schema = `
     sendStatus: String
   }
 `;
+
+export default schema;

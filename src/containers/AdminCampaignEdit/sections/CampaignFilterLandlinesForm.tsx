@@ -1,10 +1,9 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
 import RaisedButton from "material-ui/RaisedButton";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
+import React from "react";
+import { compose } from "recompose";
 
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -74,24 +73,24 @@ class FilterLandlinesForm extends React.Component<Props, State> {
           title="Filtering Landlines"
           subtitle={
             !landlinesFiltered && (
-            <span>
-              <p>
-                Filtering landlines or otherwise un-textable numbers will cost
-              $.0025 (1/4 cent) per phone number, but as long as more than a
-              third of your phone numbers are likely to be invalid, it will save
-              you money.
-              </p>
+              <span>
                 <p>
-              If you're pretty sure your phone numbers are valid, skip this
-              section!
-              </p>
-            </span>
+                  Filtering landlines or otherwise un-textable numbers will cost
+                  $.0025 (1/4 cent) per phone number, but as long as more than a
+                  third of your phone numbers are likely to be invalid, it will
+                  save you money.
+                </p>
+                <p>
+                  If you're pretty sure your phone numbers are valid, skip this
+                  section!
+                </p>
+              </span>
             )
           }
         />
         {!landlinesFiltered ? (
           <RaisedButton
-            label={"Filter Landlines"}
+            label="Filter Landlines"
             onClick={this.filterLandlines}
             disabled={isWorking}
           />

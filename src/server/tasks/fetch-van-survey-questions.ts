@@ -2,7 +2,6 @@ import { Task } from "pg-compose";
 import { get } from "superagent";
 
 import {
-  PaginatedVanResponse,
   VanAuthPayload,
   VANDataCollectionStatus,
   withVan
@@ -46,13 +45,13 @@ export const fetchVANSurveyQuestions: Task = async (
         $skip: offset
       })
       .use(withVan(payload));
-    const body: PaginatedVanResponse<VANSurveyQuestion> = response.body;
+    const { body } = response;
     hasNextPage = body.nextPageLink !== null;
     offset += limit;
     surveyQuestions = surveyQuestions.concat(body.items);
   } while (hasNextPage);
 
-  return surveyQuestions.map(sq => ({
+  return surveyQuestions.map((sq) => ({
     van_system_id: payload.van_system_id,
     survey_question_id: sq.surveyQuestionId,
     type: sq.type,
@@ -62,7 +61,7 @@ export const fetchVANSurveyQuestions: Task = async (
     short_name: sq.shortName,
     script_question: sq.scriptQuestion,
     status: sq.status.toLowerCase(),
-    responses: sq.responses.map(sqro => ({
+    responses: sq.responses.map((sqro) => ({
       survey_question_response_option_id: sqro.surveyResponseId,
       name: sqro.name,
       medium_name: sqro.mediumName,

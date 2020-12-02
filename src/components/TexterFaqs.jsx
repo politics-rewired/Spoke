@@ -1,13 +1,13 @@
-import React from "react";
+import { Card, CardText, CardTitle } from "material-ui/Card";
 import PropTypes from "prop-types";
-import { Card, CardTitle, CardText } from "material-ui/Card";
+import React from "react";
 
 const TexterFaqs = ({ faqs }) => {
   return (
     <div>
       <h1>Frequently Asked Questions</h1>
       {faqs.map((faq, idx) => (
-        <Card>
+        <Card key={faq.question}>
           <CardTitle title={`${idx + 1}. ${faq.question}`} />
           <CardText>
             <p>{faq.answer}</p>

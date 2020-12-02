@@ -14,3 +14,5 @@ export const schema = `
     maxContacts: Int
   }
 `;
+
+export default schema;

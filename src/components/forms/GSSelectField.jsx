@@ -1,6 +1,6 @@
-import React from "react";
-import SelectField from "material-ui/SelectField";
 import { MenuItem } from "material-ui/Menu";
+import SelectField from "material-ui/SelectField";
+import React from "react";
 
 import GSFormField from "./GSFormField";
 
@@ -14,13 +14,14 @@ export default class GSSelectField extends GSFormField {
   render() {
     return (
       <SelectField
-        children={this.createMenuItems()}
         floatingLabelText={this.props.label}
         {...this.props}
         onChange={(event, index, value) => {
           this.props.onChange(value);
         }}
-      />
+      >
+        {this.createMenuItems()}
+      </SelectField>
     );
   }
 }

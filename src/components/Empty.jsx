@@ -1,9 +1,9 @@
+import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
-import { StyleSheet, css } from "aphrodite";
 
-import theme from "../styles/theme";
 import { dataTest } from "../lib/attributes";
+import theme from "../styles/theme";
 
 const inlineStyles = {
   icon: {

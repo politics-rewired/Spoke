@@ -23,3 +23,5 @@ export const schema = `
     totalCount: Int!
   }
 `;
+
+export default schema;

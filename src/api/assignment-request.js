@@ -9,3 +9,5 @@ export const schema = `
     status: String!
   }
 `;
+
+export default schema;

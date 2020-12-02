@@ -4,9 +4,9 @@
  * them using their concurrent versions
  */
 
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema
-    .alterTable("campaign_contact", table => {
+    .alterTable("campaign_contact", (table) => {
       table.boolean("archived").default(false);
     })
     .then(() => {
@@ -88,7 +88,7 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   // be careful with the first component here (same note as above)
   return knex.schema
     .raw(
@@ -148,7 +148,7 @@ exports.down = function(knex) {
       `);
     })
     .then(() => {
-      return knex.schema.alterTable("campaign_contact", table => {
+      return knex.schema.alterTable("campaign_contact", (table) => {
         table.dropColumn("archived");
       });
     });

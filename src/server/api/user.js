@@ -1,10 +1,11 @@
 import { GraphQLError } from "graphql/error";
-import { sqlResolvers } from "./lib/utils";
+import groupBy from "lodash/groupBy";
+
+import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 import { accessRequired } from "./errors";
-import groupBy from "lodash/groupBy";
-import { memoizer, cacheOpts } from "../memoredis";
 import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
 
 export function buildUserOrganizationQuery(
   queryParam,
@@ -27,7 +28,7 @@ export function buildUserOrganizationQuery(
       .innerJoin("assignment", "assignment.user_id", "user.id")
       .where({ "assignment.campaign_id": campaignId });
   }
-  if (typeof offset == "number") {
+  if (typeof offset === "number") {
     queryParam.offset(offset);
   }
   return queryParam;
@@ -49,14 +50,14 @@ async function doGetUsers({
   }
 
   if (campaignsFilter.campaignId !== undefined) {
-    query.whereExists(function() {
+    query.whereExists(function subquery() {
       this.select(r.knex.raw("1"))
         .from("assignment")
         .whereRaw('"assignment"."user_id" = "user"."id"')
-        .where({ campaign_id: parseInt(campaignsFilter.campaignId) });
+        .where({ campaign_id: parseInt(campaignsFilter.campaignId, 10) });
     });
   } else if (campaignsFilter.isArchived !== undefined) {
-    query.whereExists(function() {
+    query.whereExists(function subquery() {
       this.select(r.knex.raw("1"))
         .from("assignment")
         .join("campaign", "campaign.id", "assignment.campaign_id")
@@ -69,10 +70,7 @@ async function doGetUsers({
 
   const countQuery = query.clone();
 
-  query
-    .orderBy("first_name")
-    .orderBy("last_name")
-    .orderBy("id");
+  query.orderBy("first_name").orderBy("last_name").orderBy("id");
 
   const { limit, offset } = cursor || {};
   if (offset !== undefined) {
@@ -97,9 +95,8 @@ async function doGetUsers({
       users,
       pageInfo
     };
-  } else {
-    return users;
   }
+  return users;
 }
 
 const memoizedGetUsers = memoizer.memoize(doGetUsers, cacheOpts.GetUsers);
@@ -110,7 +107,7 @@ export const getUsers = async (
   campaignsFilter,
   role
 ) => {
-  return await memoizedGetUsers({
+  return memoizedGetUsers({
     organizationId,
     cursor,
     campaignsFilter,
@@ -119,7 +116,7 @@ export const getUsers = async (
 };
 
 export async function getUsersById(userIds) {
-  let usersQuery = r
+  const usersQuery = r
     .reader("user")
     .select("id", "first_name", "last_name")
     .whereIn("id", userIds);
@@ -131,18 +128,19 @@ export const resolvers = {
     __resolveType(obj) {
       if (Array.isArray(obj)) {
         return "UsersList";
-      } else if ("users" in obj && "pageInfo" in obj) {
+      }
+      if ("users" in obj && "pageInfo" in obj) {
         return "PaginatedUsers";
       }
       return null;
     }
   },
   UsersList: {
-    users: users => users
+    users: (users) => users
   },
   PaginatedUsers: {
-    users: queryResult => queryResult.users,
-    pageInfo: queryResult => {
+    users: (queryResult) => queryResult.users,
+    pageInfo: (queryResult) => {
       if ("pageInfo" in queryResult) {
         return queryResult.pageInfo;
       }
@@ -159,7 +157,7 @@ export const resolvers = {
       "assignedCell",
       "terms"
     ]),
-    displayName: user => `${user.first_name} ${user.last_name}`,
+    displayName: (user) => `${user.first_name} ${user.last_name}`,
     currentRequest: async (user, { organizationId }) => {
       const currentRequest = await r
         .reader("assignment_request")
@@ -177,7 +175,7 @@ export const resolvers = {
         .reader("assignment")
         .where({ user_id: user.id, campaign_id: campaignId })
         .first()
-        .then(record => record || null),
+        .then((record) => record || null),
     memberships: async (
       user,
       { organizationId, after, first },
@@ -197,7 +195,7 @@ export const resolvers = {
       if (organizationId) {
         query.where({ organization_id: organizationId });
       }
-      return await formatPage(query, { after, first });
+      return formatPage(query, { after, first });
     },
     organizations: async (user, { role }) => {
       if (!user || !user.id) {
@@ -205,11 +203,11 @@ export const resolvers = {
       }
 
       const getOrganizationsForUserWithRole = memoizer.memoize(
-        async ({ userId, role }) => {
-          return r.reader("organization").whereExists(function() {
-            const whereClause = { user_id: user.id };
-            if (role) {
-              whereClause["role"] = role;
+        async ({ userId, role: userRole }) => {
+          return r.reader("organization").whereExists(function subquery() {
+            const whereClause = { user_id: userId };
+            if (userRole) {
+              whereClause.role = userRole;
             }
             this.select(r.reader.raw("1"))
               .from("user_organization")
@@ -220,15 +218,15 @@ export const resolvers = {
         cacheOpts.UserOrganizations
       );
 
-      return await getOrganizationsForUserWithRole({ userId: user.id, role });
+      return getOrganizationsForUserWithRole({ userId: user.id, role });
     },
     roles: async (user, { organizationId }) => {
       const getRoleForUserInOrganization = await memoizer.memoize(
-        async params => {
-          return await r
+        async (params) => {
+          return r
             .reader("user_organization")
             .where({
-              organization_id: parseInt(params.organizationId),
+              organization_id: parseInt(params.organizationId, 10),
               user_id: params.userId
             })
             .pluck("role");
@@ -236,7 +234,7 @@ export const resolvers = {
         cacheOpts.UserOrganizationRoles
       );
 
-      return await getRoleForUserInOrganization({
+      return getRoleForUserInOrganization({
         userId: user.id,
         organizationId
       });
@@ -291,7 +289,7 @@ export const resolvers = {
 
       const shadowCountsByAssignmentId = groupBy(
         todos.rows,
-        todo => todo.assignment_id
+        (todo) => todo.assignment_id
       );
 
       const assignments = await r
@@ -299,7 +297,7 @@ export const resolvers = {
         .whereIn("id", Object.keys(shadowCountsByAssignmentId))
         .orderBy("updated_at", "desc");
 
-      return assignments.map(a =>
+      return assignments.map((a) =>
         Object.assign(a, {
           shadowCounts: shadowCountsByAssignmentId[a.id] || []
         })

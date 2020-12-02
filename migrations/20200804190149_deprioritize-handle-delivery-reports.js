@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create or replace function public.tg__log__handle_delivery_report() returns trigger as $$
     begin
@@ -14,7 +14,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     create or replace function public.tg__log__handle_delivery_report() returns trigger as $$
     begin

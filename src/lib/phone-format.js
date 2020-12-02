@@ -1,4 +1,4 @@
-import { PhoneNumberUtil, PhoneNumberFormat } from "google-libphonenumber";
+import { PhoneNumberFormat, PhoneNumberUtil } from "google-libphonenumber";
 
 export const getFormattedPhoneNumber = (cell, country = "US") => {
   const phoneUtil = PhoneNumberUtil.getInstance();

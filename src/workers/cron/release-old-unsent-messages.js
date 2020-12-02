@@ -4,8 +4,8 @@ import knexConfig from "../../server/knex";
 const db = require("knex")(knexConfig);
 
 async function main() {
-  let oneHourAgo = new Date(),
-    oneWeekAgo = new Date();
+  const oneHourAgo = new Date();
+  const oneWeekAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -21,7 +21,7 @@ async function main() {
     [oneWeekAgo, oneHourAgo]
   );
 
-  const campaignContactIdsToRelease = selectResult[0].map(rdp => rdp.id);
+  const campaignContactIdsToRelease = selectResult[0].map((rdp) => rdp.id);
 
   const updateResult = await db("campaign_contact")
     // TODO - MySQL Specific. use knex.fn.now()
@@ -35,11 +35,11 @@ async function main() {
 }
 
 main()
-  .then(result => {
+  .then((result) => {
     logger.info(result);
     process.exit(0);
   })
-  .catch(error => {
+  .catch((error) => {
     logger.error("Error releasing old unsent messages: ", error);
     process.exit(1);
   });

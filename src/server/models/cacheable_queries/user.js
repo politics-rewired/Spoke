@@ -1,31 +1,27 @@
-import { r } from "../../models";
-import { memoizer, cacheOpts } from "../../memoredis";
+import { cacheOpts, memoizer } from "../../memoredis";
+import thinky from "../thinky";
+
+const { r } = thinky;
 
 const getUserByAuth0Id = memoizer.memoize(async ({ auth0Id }) => {
-  const userAuth = await r
-    .reader("user")
-    .where("auth0_id", auth0Id)
-    .first("*");
+  const userAuth = await r.reader("user").where("auth0_id", auth0Id).first("*");
 
   return userAuth;
 }, cacheOpts.GetUser);
 
 const getUserById = memoizer.memoize(async ({ id }) => {
-  const userAuth = await r
-    .reader("user")
-    .where({ id })
-    .first("*");
+  const userAuth = await r.reader("user").where({ id }).first("*");
 
   return userAuth;
 }, cacheOpts.GetUser);
 
 export async function userLoggedIn(val, field = "id") {
   const result =
-    field == "id"
+    field === "id"
       ? await getUserById({ id: val })
       : field === "auth0_id"
-        ? await getUserByAuth0Id({ auth0Id: val })
-        : null;
+      ? await getUserByAuth0Id({ auth0Id: val })
+      : null;
 
   return result;
 }
@@ -44,7 +40,7 @@ export async function currentEditors(redis, campaign, user) {
 
   // Only get editors that were active in the last 2 mins, and exclude the
   // current user
-  editors = Object.entries(editors).filter(editor => {
+  editors = Object.entries(editors).filter((editor) => {
     const rightNow = new Date();
     return (
       rightNow - new Date(editor[1]) <= 120000 && editor[0] !== displayName
@@ -53,7 +49,7 @@ export async function currentEditors(redis, campaign, user) {
 
   // Return a list of comma-separated names
   return editors
-    .map(editor => {
+    .map((editor) => {
       return editor[0].split("~")[1];
     })
     .join(", ");

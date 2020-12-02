@@ -22,7 +22,7 @@ async function main(find, replace) {
     .where("script", "like", `%${find}%`)
     .whereIn("campaign_id", campaign_ids);
 
-  for (let step of interactionStepsToChange) {
+  for (const step of interactionStepsToChange) {
     const newText = step.script.replace(new RegExp(find, "g"), replace);
     console.log(step.script);
     console.log(newText);
@@ -35,6 +35,4 @@ async function main(find, replace) {
   }
 }
 
-main("b2020.me", "notme2020.us")
-  .then(console.log)
-  .catch(console.error);
+main("b2020.me", "notme2020.us").then(console.log).catch(console.error);

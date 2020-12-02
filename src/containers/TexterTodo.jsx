@@ -1,11 +1,11 @@
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router";
 import { compose } from "react-apollo";
-import gql from "graphql-tag";
+import { withRouter } from "react-router-dom";
 
-import { loadData } from "./hoc/with-operations";
 import AssignmentTexter from "../components/AssignmentTexter";
+import { loadData } from "./hoc/with-operations";
 
 // TODO: use Fragment
 const contactDataFragment = `
@@ -61,10 +61,9 @@ class TexterTodo extends React.Component {
     const { contacts } = this.props.contacts.assignment;
     if (contacts.length === 0 || checkServer) {
       if (assignment.campaign.useDynamicAssignment) {
-        const didAddContacts = (await this.props.mutations.findNewCampaignContact(
-          assignment.id,
-          1
-        )).data.findNewCampaignContact.found;
+        const didAddContacts = (
+          await this.props.mutations.findNewCampaignContact(assignment.id, 1)
+        ).data.findNewCampaignContact.found;
         if (didAddContacts) {
           this.props.contacts.refetch();
           return;
@@ -75,8 +74,8 @@ class TexterTodo extends React.Component {
     }
   };
 
-  loadContacts = async contactIds =>
-    await this.props.mutations.getAssignmentContacts(contactIds);
+  loadContacts = async (contactIds) =>
+    this.props.mutations.getAssignmentContacts(contactIds);
 
   refreshData = () => {
     this.props.data.refetch();
@@ -86,7 +85,7 @@ class TexterTodo extends React.Component {
     const { assignment } = this.props.data;
     const { organizationId } = this.props.match.params;
     const { contacts, allContactsCount } = this.props.contacts.assignment;
-    const contactIds = contacts.map(contact => contact.id);
+    const contactIds = contacts.map((contact) => contact.id);
 
     return (
       <AssignmentTexter
@@ -104,8 +103,6 @@ class TexterTodo extends React.Component {
 }
 
 TexterTodo.propTypes = {
-  contactsFilter: PropTypes.string,
-  messageStatus: PropTypes.string,
   match: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   data: PropTypes.object,
@@ -169,7 +166,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         assignmentId: ownProps.match.params.assignmentId
       },
@@ -191,7 +188,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         contactsFilter: {
           messageStatus: ownProps.messageStatus,
@@ -206,7 +203,10 @@ const queries = {
 };
 
 const mutations = {
-  findNewCampaignContact: ownProps => (assignmentId, numberContacts = 1) => ({
+  findNewCampaignContact: (_ownProps) => (
+    assignmentId,
+    numberContacts = 1
+  ) => ({
     mutation: gql`
       mutation findNewCampaignContact(
         $assignmentId: String!
@@ -225,7 +225,7 @@ const mutations = {
       numberContacts
     }
   }),
-  getAssignmentContacts: ownProps => (contactIds, findNew) => ({
+  getAssignmentContacts: (ownProps) => (contactIds, findNew) => ({
     mutation: gql`
       mutation getAssignmentContacts($assignmentId: String!, $contactIds: [String]!, $findNew: Boolean) {
         getAssignmentContacts(assignmentId: $assignmentId, contactIds: $contactIds, findNew: $findNew) {

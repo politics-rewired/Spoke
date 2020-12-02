@@ -1,24 +1,23 @@
+import gql from "graphql-tag";
+import Avatar from "material-ui/Avatar";
+import Divider from "material-ui/Divider";
+import IconButton from "material-ui/IconButton";
+import Menu from "material-ui/Menu";
+import MenuItem from "material-ui/MenuItem";
+import Popover from "material-ui/Popover";
+import Subheader from "material-ui/Subheader";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router";
-import gql from "graphql-tag";
+import { withRouter } from "react-router-dom";
 
-import Popover from "material-ui/Popover";
-import Menu from "material-ui/Menu";
-import MenuItem from "material-ui/MenuItem";
-import Divider from "material-ui/Divider";
-import Subheader from "material-ui/Subheader";
-import IconButton from "material-ui/IconButton";
-import Avatar from "material-ui/Avatar";
-
-import { withOperations } from "../containers/hoc/with-operations";
 import { dataTest } from "../lib/attributes";
 import { hasRole } from "../lib/permissions";
+import { withOperations } from "./hoc/with-operations";
 
 const avatarSize = 28;
 
-const OrganizationItemInner = props => {
+const OrganizationItemInner = (props) => {
   const { organization, data, history } = props;
   const { loading, currentUser } = data;
   const path =
@@ -26,7 +25,7 @@ const OrganizationItemInner = props => {
       ? `/admin/${organization.id}`
       : `/app/${organization.id}`;
 
-  const handleClick = event => {
+  const handleClick = (event) => {
     event.preventDefault();
     history.push(path);
   };
@@ -51,7 +50,7 @@ const orgRoleQueries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organization.id
       }
@@ -70,7 +69,7 @@ class UserMenu extends Component {
     anchorEl: null
   };
 
-  handleTouchTap = event => {
+  handleTouchTap = (event) => {
     // This prevents ghost click.
     event.preventDefault();
 
@@ -108,7 +107,7 @@ class UserMenu extends Component {
     }
   };
 
-  renderAvatar(user, size) {
+  renderAvatar = (user, size) => {
     // Material-UI seems to not be handling this correctly when doing serverside rendering
     const inlineStyles = {
       lineHeight: "1.25",
@@ -121,7 +120,7 @@ class UserMenu extends Component {
         {user.displayName.charAt(0)}
       </Avatar>
     );
-  }
+  };
 
   render() {
     const { orgId, data } = this.props;
@@ -155,13 +154,13 @@ class UserMenu extends Component {
               primaryText={currentUser.displayName}
               leftIcon={this.renderAvatar(currentUser, 40)}
               disabled={!orgId}
-              value={"account"}
+              value="account"
             >
               {currentUser.email}
             </MenuItem>
             <Divider />
             <Subheader>Teams</Subheader>
-            {currentUser.organizations.map(organization => (
+            {currentUser.organizations.map((organization) => (
               <OrganizationItem
                 key={organization.id}
                 organization={organization}
@@ -210,7 +209,4 @@ const queries = {
   }
 };
 
-export default compose(
-  withRouter,
-  withOperations({ queries })
-)(UserMenu);
+export default compose(withRouter, withOperations({ queries }))(UserMenu);

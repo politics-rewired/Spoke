@@ -1,6 +1,5 @@
+import { grey600, grey900 } from "material-ui/styles/colors";
 import React from "react";
-
-import { grey900, grey600 } from "material-ui/styles/colors";
 
 const largeListStyle: React.CSSProperties = {
   listStyleType: "none",
@@ -8,7 +7,7 @@ const largeListStyle: React.CSSProperties = {
   padding: 0
 };
 
-export const LargeList: React.SFC = props => {
+export const LargeList: React.SFC = (props) => {
   return <ul style={largeListStyle}>{props.children}</ul>;
 };
 
@@ -45,7 +44,7 @@ export interface LargeListItemProps {
   rightIconButton?: React.ReactNode;
 }
 
-export const LargeListItem: React.SFC<LargeListItemProps> = props => {
+export const LargeListItem: React.SFC<LargeListItemProps> = (props) => {
   const { primaryText, secondaryText, rightIconButton } = props;
 
   return (

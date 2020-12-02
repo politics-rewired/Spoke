@@ -1,7 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 
-import { StorageBackend } from "./types";
 import { config } from "../../config";
+import { StorageBackend } from "./types";
 
 const fetchKeys = () => {
   const keysEnvVar = config.GOOGLE_APPLICATION_CREDENTIALS;
@@ -14,7 +14,7 @@ const fetchKeys = () => {
   return keys;
 };
 
-let _storage: Storage | undefined = undefined;
+let _storage: Storage | undefined;
 const storage = (): Storage => {
   if (_storage === undefined) {
     const keys = fetchKeys();
@@ -27,6 +27,14 @@ const storage = (): Storage => {
   return _storage;
 };
 
+const getUploadStream = async (bucket: string, key: string) => {
+  const uploadStream = await storage()
+    .bucket(bucket)
+    .file(key)
+    .createWriteStream({ gzip: true });
+  return uploadStream;
+};
+
 /**
  * Upload a payload to Google Cloud Storage.
  *
@@ -35,25 +43,16 @@ const storage = (): Storage => {
  * @param {Buffer|Uint8Array|Blob|string|Readable} payload Payload to upload
  */
 const upload = async (bucket: string, key: string, payload: any) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const uploadStream = await getUploadStream(bucket, key);
-      uploadStream.write(payload);
-      uploadStream.end();
-      uploadStream.on("finish", resolve);
-      uploadStream.on("error", reject);
-    } catch (err) {
-      reject(err);
-    }
+  return new Promise((resolve, reject) => {
+    getUploadStream(bucket, key)
+      .then((uploadStream) => {
+        uploadStream.write(payload);
+        uploadStream.end();
+        uploadStream.on("finish", resolve);
+        uploadStream.on("error", reject);
+      })
+      .catch(reject);
   });
-};
-
-const getUploadStream = async (bucket: string, key: string) => {
-  const uploadStream = await storage()
-    .bucket(bucket)
-    .file(key)
-    .createWriteStream({ gzip: true });
-  return uploadStream;
 };
 
 /**

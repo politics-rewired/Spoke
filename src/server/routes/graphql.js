@@ -1,14 +1,15 @@
-import express from "express";
-const router = express.Router();
 import { ApolloServer } from "apollo-server-express";
-import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
+import express from "express";
+import { addMockFunctionsToSchema, makeExecutableSchema } from "graphql-tools";
 
+import { schema } from "../../api/schema";
+import { config } from "../../config";
 import logger from "../../logger";
 import mocks from "../api/mocks";
-import { createLoaders } from "../models";
-import { config } from "../../config";
 import { resolvers } from "../api/schema";
-import { schema } from "../../api/schema";
+import { createLoaders } from "../models";
+
+const router = express.Router();
 
 const executableSchema = makeExecutableSchema({
   typeDefs: schema,
@@ -16,9 +17,13 @@ const executableSchema = makeExecutableSchema({
   allowUndefinedInResolve: false
 });
 
-const formatError = err => {
+const formatError = (err) => {
   // node-postgres does not use an Error subclass so we check for schema property
-  if (err.originalError.hasOwnProperty("schema") && config.isProduction) {
+  const hasSchema = Object.prototype.hasOwnProperty.call(
+    err.originalError,
+    "schema"
+  );
+  if (hasSchema && config.isProduction) {
     logger.error("Postgres error: ", err);
     return new Error("Internal server error");
   }
@@ -43,7 +48,7 @@ const server = new ApolloServer({
   debug: !config.isProduction,
   introspection: !config.isProduction,
   playground: !config.isProduction,
-  context: ({ req, res }) => ({
+  context: ({ req, res: _res }) => ({
     loaders: createLoaders(),
     user: req.user
   })

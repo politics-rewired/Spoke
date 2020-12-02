@@ -1,14 +1,15 @@
-import React from "react";
-import { History } from "history";
-import { withRouter } from "react-router";
+import { css, StyleSheet } from "aphrodite";
 import { ApolloQueryResult } from "apollo-client";
-import { compose } from "react-apollo";
 import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
+import { History } from "history";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
-import { loadData } from "../hoc/with-operations";
-import theme from "../../styles/theme";
 import SuperAdminLogin from "../../components/SuperAdminLogin";
+import { MutationMap, QueryMap } from "../../network/types";
+import theme from "../../styles/theme";
+import { loadData } from "../hoc/with-operations";
 import OrganizationList from "./components/OrganizationList";
 
 const styles = StyleSheet.create({
@@ -61,7 +62,7 @@ interface HomeProps {
   history: History;
 }
 
-const Home: React.SFC<HomeProps> = props => {
+const Home: React.SFC<HomeProps> = (props) => {
   // not sure if we need this anymore -- only for new organizations
   const handleOrgInviteClick = async (
     e: React.MouseEvent<HTMLAnchorElement>
@@ -72,6 +73,7 @@ const Home: React.SFC<HomeProps> = props => {
         is_valid: true
       });
       if (newInvite.errors) {
+        // eslint-disable-next-line no-alert
         alert("There was an error creating your invite");
         throw newInvite.errors;
       } else {
@@ -120,7 +122,7 @@ const Home: React.SFC<HomeProps> = props => {
   );
 };
 
-const queries = {
+const queries: QueryMap<HomeProps> = {
   data: {
     query: gql`
       query getCurrentUser {
@@ -132,8 +134,8 @@ const queries = {
   }
 };
 
-const mutations = {
-  createInvite: (ownProps: HomeProps) => (invite: InviteInput) => ({
+const mutations: MutationMap<HomeProps> = {
+  createInvite: (_ownProps) => (invite: InviteInput) => ({
     mutation: gql`
       mutation createInvite($invite: InviteInput!) {
         createInvite(invite: $invite) {
@@ -145,7 +147,4 @@ const mutations = {
   })
 };
 
-export default compose(
-  loadData({ queries, mutations }),
-  withRouter
-)(Home);
+export default compose(loadData({ queries, mutations }), withRouter)(Home);

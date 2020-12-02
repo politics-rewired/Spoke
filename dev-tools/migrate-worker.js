@@ -1,5 +1,6 @@
-import { runMigrations } from "pg-compose";
 import { Pool } from "pg";
+import { runMigrations } from "pg-compose";
+
 import { config } from "../src/config";
 import logger from "../src/logger";
 
@@ -16,11 +17,11 @@ const main = async () => {
 };
 
 main()
-  .then(result => {
+  .then((result) => {
     logger.info("Finished migrating pg-compose", { result });
     process.exit(0);
   })
-  .catch(err => {
+  .catch((err) => {
     logger.error("Error migrating pg-compose", err);
     process.exit(1);
   });

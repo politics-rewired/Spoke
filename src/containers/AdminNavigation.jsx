@@ -1,8 +1,9 @@
+import { ListItem } from "material-ui/List";
 import PropTypes from "prop-types";
 import React from "react";
+import { withRouter } from "react-router-dom";
+
 import Navigation from "../components/Navigation";
-import { ListItem } from "material-ui/List";
-import { withRouter } from "react-router";
 import { dataTest } from "../lib/attributes";
 
 class AdminNavigation extends React.Component {
@@ -17,7 +18,7 @@ class AdminNavigation extends React.Component {
       <Navigation
         onToggleMenu={this.props.onToggleMenu}
         showMenu={this.props.showMenu}
-        sections={sections.map(section => ({
+        sections={sections.map((section) => ({
           ...section,
           url: this.urlFromPath(section.path)
         }))}

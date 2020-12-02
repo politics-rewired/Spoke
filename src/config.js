@@ -796,7 +796,7 @@ const config = envalid.cleanEnv(process.env, validators, {
 });
 
 const clientConfig = pickBy(
-  Object.assign({}, config),
+  { ...config },
   (value, key) => validators[key].isClient
 );
 

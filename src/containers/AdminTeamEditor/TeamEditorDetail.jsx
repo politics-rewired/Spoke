@@ -1,7 +1,8 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
+import AutoComplete from "material-ui/AutoComplete";
+import Dialog from "material-ui/Dialog";
+import RaisedButton from "material-ui/RaisedButton";
+import PersonAddIcon from "material-ui/svg-icons/social/person-add";
 import {
   Table,
   TableBody,
@@ -10,10 +11,8 @@ import {
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
-import AutoComplete from "material-ui/AutoComplete";
-import Dialog from "material-ui/Dialog";
-import RaisedButton from "material-ui/RaisedButton";
-import PersonAddIcon from "material-ui/svg-icons/social/person-add";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { loadData } from "../hoc/with-operations";
 
@@ -31,7 +30,7 @@ class TeamEditorDetail extends React.Component {
     error: undefined
   };
 
-  handleUpdateNewTexterInput = newTexterSearchText =>
+  handleUpdateNewTexterInput = (newTexterSearchText) =>
     this.setState({ newTexterSearchText });
 
   handleNewTexterRequest = async ({ id: texterId }, index) => {
@@ -51,12 +50,13 @@ class TeamEditorDetail extends React.Component {
 
   handleCloseErrorDialog = () => this.setState({ error: undefined });
 
-  isUserSelected = userId => this.state.selectedUserIds.indexOf(userId) !== -1;
+  isUserSelected = (userId) =>
+    this.state.selectedUserIds.indexOf(userId) !== -1;
 
-  handleRowSelection = async selectedRowIndexes => {
+  handleRowSelection = async (selectedRowIndexes) => {
     const { users } = this.props.team.team;
     const selectedUserIds = selectedRowIndexes.map(
-      rowIndex => users[rowIndex].id
+      (rowIndex) => users[rowIndex].id
     );
     return this.setState({ selectedUserIds });
   };
@@ -87,11 +87,11 @@ class TeamEditorDetail extends React.Component {
     const { title, users } = this.props.team.team;
     const { people } = this.props.users.organization;
 
-    const teamMemberIds = new Set(users.map(user => user.id));
+    const teamMemberIds = new Set(users.map((user) => user.id));
     const nonMembers = people.filter(({ id }) => !teamMemberIds.has(id));
 
     const errorActions = [
-      <RaisedButton label="OK" onClick={this.handleCloseErrorDialog} />
+      <RaisedButton key="ok" label="OK" onClick={this.handleCloseErrorDialog} />
     ];
 
     return (
@@ -105,7 +105,7 @@ class TeamEditorDetail extends React.Component {
             dataSource={nonMembers}
             dataSourceConfig={{ text: "displayName", value: "id" }}
             filter={AutoComplete.fuzzyFilter}
-            openOnFocus={true}
+            openOnFocus
             disabled={isWorking}
             onUpdateInput={this.handleUpdateNewTexterInput}
             onNewRequest={this.handleNewTexterRequest}
@@ -118,22 +118,22 @@ class TeamEditorDetail extends React.Component {
           />
         </div>
         <Table
-          selectable={true}
-          multiSelectable={true}
+          selectable
+          multiSelectable
           onRowSelection={this.handleRowSelection}
         >
           <TableHeader
             displaySelectAll={false}
             enableSelectAll={false}
-            adjustForCheckbox={true}
+            adjustForCheckbox
           >
             <TableRow>
               <TableHeaderColumn>Name</TableHeaderColumn>
               <TableHeaderColumn>Email</TableHeaderColumn>
             </TableRow>
           </TableHeader>
-          <TableBody showRowHover={true} deselectOnClickaway={false}>
-            {users.map(user => (
+          <TableBody showRowHover deselectOnClickaway={false}>
+            {users.map((user) => (
               <TableRow key={user.id} selected={this.isUserSelected(user.id)}>
                 <TableRowColumn>{user.displayName}</TableRowColumn>
                 <TableRowColumn>{user.email}</TableRowColumn>
@@ -192,7 +192,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         teamId: ownProps.match.params.teamId
       }
@@ -211,7 +211,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -220,7 +220,7 @@ const queries = {
 };
 
 const mutations = {
-  addTeamMebers: ownProps => userIds => ({
+  addTeamMebers: (ownProps) => (userIds) => ({
     mutation: gql`
       mutation addTeamMebers($teamId: String!, $userIds: [String]!) {
         addUsersToTeam(teamId: $teamId, userIds: $userIds)
@@ -232,7 +232,7 @@ const mutations = {
     },
     refetchQueries: ["getTeamWithMembers"]
   }),
-  removeTeamMembers: ownProps => userIds => ({
+  removeTeamMembers: (ownProps) => (userIds) => ({
     mutation: gql`
       mutation removeTeamMembers($teamId: String!, $userIds: [String]!) {
         removeUsersFromTeam(teamId: $teamId, userIds: $userIds)

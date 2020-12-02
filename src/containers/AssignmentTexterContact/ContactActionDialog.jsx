@@ -1,11 +1,11 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import * as yup from "yup";
-import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
+import { css, StyleSheet } from "aphrodite";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
 import GSSubmitButton from "../../components/forms/GSSubmitButton";
@@ -48,7 +48,7 @@ class ContactActionDialog extends Component {
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
-  onEnterDown = event => {
+  onEnterDown = (event) => {
     const keyCode = event.keyCode || event.which;
     if (keyCode === 13 && !event.shiftKey) {
       event.preventDefault();

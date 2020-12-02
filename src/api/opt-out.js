@@ -6,3 +6,5 @@ export const schema = `
     createdAt: Date
   }
 `;
+
+export default schema;

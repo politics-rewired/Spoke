@@ -1,9 +1,10 @@
-import React from "react";
-import ContactToolbar from "../../components/ContactToolbar";
-import NavigateHomeIcon from "material-ui/svg-icons/action/home";
 import IconButton from "material-ui/IconButton/IconButton";
+import NavigateHomeIcon from "material-ui/svg-icons/action/home";
+import React from "react";
 
-const TopFixedSection = props => {
+import ContactToolbar from "../../components/ContactToolbar";
+
+const TopFixedSection = (props) => {
   const { contactSettings, contact, campaign, onExitTexter } = props;
 
   return (

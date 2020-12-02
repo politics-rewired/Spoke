@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     alter table campaign_contact set (autovacuum_vacuum_scale_factor = 0, autovacuum_vacuum_threshold = 20000);
     alter table message set (autovacuum_vacuum_scale_factor = 0, autovacuum_vacuum_threshold = 20000);
@@ -11,7 +11,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     alter table campaign_contact set (autovacuum_vacuum_scale_factor = 0.2, autovacuum_vacuum_threshold = 50);
     alter table message set (autovacuum_vacuum_scale_factor = 0.2, autovacuum_vacuum_threshold = 50);

@@ -1,7 +1,8 @@
+import mailgunConstructor from "mailgun-js";
+import nodemailer from "nodemailer";
+
 import { config } from "../config";
 import logger from "../logger";
-import nodemailer from "nodemailer";
-import mailgunConstructor from "mailgun-js";
 
 const mailgun =
   config.MAILGUN_API_KEY &&
@@ -49,8 +50,10 @@ export const sendEmail = async ({ to, subject, text, replyTo }) => {
   };
 
   if (replyTo) {
-    params["replyTo"] = replyTo;
+    params.replyTo = replyTo;
   }
 
   return sender.sendMail(params);
 };
+
+export default sendEmail;

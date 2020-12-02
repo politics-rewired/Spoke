@@ -1,10 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { red200 } from "material-ui/styles/colors";
-
+import { css, StyleSheet } from "aphrodite";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import Chip from "material-ui/Chip";
-import { StyleSheet, css } from "aphrodite";
+import { red200 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React from "react";
 
 const styles = StyleSheet.create({
   row: { display: "flex", alignItems: "baseline", marginBottom: "10px" },
@@ -16,18 +15,18 @@ const styles = StyleSheet.create({
   count: { whiteSpace: "nowrap", marginLeft: "10px" }
 });
 
-const AssignmentHUD = props => {
+const AssignmentHUD = (props) => {
   const { assignmentTargets } = props;
 
   return (
-    <Card initiallyExpanded={true}>
+    <Card initiallyExpanded>
       <CardHeader
         title="Assignment Targets"
-        actAsExpander={true}
-        showExpandableButton={true}
+        actAsExpander
+        showExpandableButton
       />
-      <CardText expandable={true}>
-        {assignmentTargets.map(target => (
+      <CardText expandable>
+        {assignmentTargets.map((target) => (
           <div key={target.teamTitle} className={css(styles.row)}>
             {!target.enabled && (
               <Chip className={css(styles.disabledChip)}>Disabled</Chip>

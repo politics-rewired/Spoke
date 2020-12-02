@@ -81,13 +81,13 @@ export const trollPatrolForOrganization: Task = async (payload, helpers) => {
       [messageIds]
     );
     await Promise.all(
-      fullAlarms.map(alarm => {
-        const payload = config.WEBHOOK_PAYLOAD_ALL_STRINGS
+      fullAlarms.map((alarm) => {
+        const escapedPayload = config.WEBHOOK_PAYLOAD_ALL_STRINGS
           ? Object.fromEntries(
               Object.entries(alarm).map(([key, value]) => [key, `${value}`])
             )
           : alarm;
-        return request.post(trollbotWebhookUrl).send(payload);
+        return request.post(trollbotWebhookUrl).send(escapedPayload);
       })
     );
   }

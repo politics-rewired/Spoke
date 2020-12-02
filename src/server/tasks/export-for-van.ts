@@ -1,16 +1,15 @@
-import Knex from "knex";
-import Papa from "papaparse";
-import moment from "moment";
 import sortBy from "lodash/sortBy";
-
-import { JobRequestRecord } from "../api/types";
-import { r } from "../../server/models";
-import { sendEmail } from "../../server/mail";
-import logger from "../../logger";
-import { errToObj } from "../utils";
-import { deleteJob } from "../../workers/jobs";
-import { uploadToCloud } from "../../workers/exports/upload";
+import moment from "moment";
+import Papa from "papaparse";
 import { Task } from "pg-compose";
+
+import logger from "../../logger";
+import { uploadToCloud } from "../../workers/exports/upload";
+import { deleteJob } from "../../workers/jobs";
+import { JobRequestRecord } from "../api/types";
+import { sendEmail } from "../mail";
+import { r } from "../models";
+import { errToObj } from "../utils";
 
 export interface ExportForVANOptions {
   requesterId: number;
@@ -35,7 +34,7 @@ export const exportForVan: Task = async (
   job: JobRequestRecord,
   _helpers: any
 ) => {
-  const reader: Knex = r.reader;
+  const { reader } = r;
   const payload: ExportForVANOptions = JSON.parse(job.payload);
   const { requesterId, includeUnmessaged, vanIdField } = payload;
 
@@ -52,7 +51,7 @@ export const exportForVan: Task = async (
       : `(cc.custom_fields::json)->>'${vanIdField}'`;
 
   const fetchChunk = async (lastContactId: number) => {
-    const { rows } = await reader.raw<{ rows: VanExportRow[] }>(
+    const { rows }: { rows: VanExportRow[] } = await reader.raw(
       `
         with campaign_contact_ids as (
           select
@@ -109,7 +108,10 @@ export const exportForVan: Task = async (
   do {
     const rows = await fetchChunk(lastContactId);
     exportRows = exportRows.concat(
-      sortBy(rows.map(({ campaign_contact_id, ...rest }) => rest), ["cell"])
+      sortBy(
+        rows.map(({ campaign_contact_id: _id, ...rest }) => rest),
+        ["cell"]
+      )
     );
 
     lastContactId =

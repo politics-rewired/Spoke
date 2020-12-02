@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     alter table message add column error_codes text[];
     alter table message add column num_segments smallint;
@@ -6,7 +6,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     alter table message drop column error_codes;
     alter table message drop column num_segments;

@@ -17,3 +17,5 @@ export const schema = `
     healthyAgainAt: Date
   }
 `;
+
+export default schema;

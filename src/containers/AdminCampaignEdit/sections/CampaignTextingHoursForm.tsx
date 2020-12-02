@@ -1,26 +1,24 @@
-import React from "react";
-import gql from "graphql-tag";
-import * as yup from "yup";
-import Form from "react-formal";
-import moment from "moment";
-import isEmpty from "lodash/isEmpty";
-
-import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
+import isEmpty from "lodash/isEmpty";
 import Autocomplete from "material-ui/AutoComplete";
+import moment from "moment";
+import React from "react";
+import Form from "react-formal";
+import { compose } from "recompose";
+import * as yup from "yup";
 
+import GSForm from "../../../components/forms/GSForm";
+import { dataSourceItem } from "../../../components/utils";
+import { difference } from "../../../lib/utils";
+import { loadData } from "../../hoc/with-operations";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import {
   asSection,
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
 import { DataSourceItemType } from "../types";
-import { loadData } from "../../hoc/with-operations";
-import { difference } from "../../../lib/utils";
-import { dataSourceItem } from "../../../components/utils";
-import GSForm from "../../../components/forms/GSForm";
-import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 // Constants
 
@@ -52,7 +50,7 @@ const timezones = [
   "America/Virgin"
 ];
 
-const timezoneChoices = timezones.map(timezone =>
+const timezoneChoices = timezones.map((timezone) =>
   dataSourceItem(timezone, timezone)
 );
 
@@ -162,9 +160,9 @@ class CampaignTextingHoursForm extends React.Component<
       }}
       onNewRequest={(selection: DataSourceItemType, index: number) => {
         // If enter was pressed, try to match current search text to an item
-        let choice: DataSourceItemType | undefined = undefined;
+        let choice: DataSourceItemType | undefined;
         if (index === -1) {
-          choice = choices.find(item => item.text === selection.text);
+          choice = choices.find((item) => item.text === selection.text);
           if (!choice) return;
           selection = choice;
         }
@@ -174,7 +172,7 @@ class CampaignTextingHoursForm extends React.Component<
         // Update pendingChanges with selected value
         const { pendingChanges: existingChanges } = this.state;
         const updates = { [name]: selection.rawValue };
-        const pendingChanges = Object.assign({}, existingChanges, updates);
+        const pendingChanges = { ...existingChanges, ...updates };
         this.setState({ pendingChanges });
       }}
     />
@@ -188,7 +186,7 @@ class CampaignTextingHoursForm extends React.Component<
       data: { campaign }
     } = this.props;
     const { id: _id, ...formValues } = campaign;
-    const value = Object.assign({}, formValues, pendingChanges);
+    const value = { ...formValues, ...pendingChanges };
 
     const hasPendingChanges = !isEmpty(pendingChanges);
     const isSaveDisabled = !isNew && !hasPendingChanges;

@@ -1,15 +1,14 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import { loadData } from "../hoc/with-operations";
 import { RequestAutoApproveType } from "../../api/organization-membership";
-import { sleep } from "../../lib/utils";
 import { hasRole } from "../../lib/permissions";
+import { sleep } from "../../lib/utils";
+import { loadData } from "../hoc/with-operations";
 import AssignmentRequestTable, {
   RowWorkStatus
 } from "./AssignmentRequestTable";
@@ -20,15 +19,15 @@ class AdminAssignmentRequest extends Component {
     autoApproveReqId: undefined
   };
 
-  componentWillUpdate(nextProps) {
-    this.updateAssignmentRequestStateWithNewProps(this.props, nextProps);
-  }
-
   componentWillMount() {
     this.updateAssignmentRequestStateWithNewProps(null, this.props);
   }
 
-  updateAssignmentRequestStateWithNewProps(lastProps, nextProps) {
+  componentWillUpdate(nextProps) {
+    this.updateAssignmentRequestStateWithNewProps(this.props, nextProps);
+  }
+
+  updateAssignmentRequestStateWithNewProps = (lastProps, nextProps) => {
     if (
       lastProps &&
       lastProps.pendingAssignmentRequests.assignmentRequests &&
@@ -43,13 +42,14 @@ class AdminAssignmentRequest extends Component {
     }
 
     const { assignmentRequests } = nextProps.pendingAssignmentRequests;
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.assignmentRequests = assignmentRequests;
-  }
+  };
 
   setRequestStatus = (requestId, status) => {
     const { assignmentRequests } = this.state;
     const requestIndex = assignmentRequests.findIndex(
-      request => request.id === requestId
+      (request) => request.id === requestId
     );
     if (requestIndex < 0)
       throw new Error(`Could not find request with ID ${requestId}`);
@@ -57,25 +57,27 @@ class AdminAssignmentRequest extends Component {
     this.setState({ assignmentRequests });
   };
 
-  deleteRequest = requestId => {
+  deleteRequest = (requestId) => {
     let { assignmentRequests } = this.state;
     assignmentRequests = assignmentRequests.filter(
-      request => request.id !== requestId
+      (request) => request.id !== requestId
     );
     this.setState({ assignmentRequests });
   };
 
   handleDismissAutoApproveRequest = () =>
     this.setState({ autoApproveReqId: undefined });
-  handleAutoApproveRequest = autoApproveReqId =>
+
+  handleAutoApproveRequest = (autoApproveReqId) =>
     this.setState({ autoApproveReqId });
+
   handleConfirmAutoApprove = () => {
     const { autoApproveReqId } = this.state;
     this.setState({ autoApproveReqId: undefined });
     this.resolveRequest(autoApproveReqId, true, true);
   };
 
-  handleResolveRequest = approved => requestId =>
+  handleResolveRequest = (approved) => (requestId) =>
     this.resolveRequest(requestId, approved);
 
   resolveRequest = async (requestId, approved, autoApprove = false) => {
@@ -113,10 +115,15 @@ class AdminAssignmentRequest extends Component {
       assignmentRequests.find(({ id }) => id === autoApproveReqId);
 
     const autoApproveActions = [
-      <FlatButton label="Confirm" onClick={this.handleConfirmAutoApprove} />,
       <FlatButton
+        key="confirm"
+        label="Confirm"
+        onClick={this.handleConfirmAutoApprove}
+      />,
+      <FlatButton
+        key="cancel"
         label="Cancel"
-        primary={true}
+        primary
         onClick={this.handleDismissAutoApproveRequest}
       />
     ];
@@ -180,7 +187,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId,
         status: "pending"
@@ -192,7 +199,7 @@ const queries = {
 };
 
 const mutations = {
-  resolveAssignmentRequest: ownProps => (
+  resolveAssignmentRequest: () => (
     assignmentRequestId,
     approved,
     autoApproveLevel

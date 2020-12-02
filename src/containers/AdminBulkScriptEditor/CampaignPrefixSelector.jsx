@@ -1,14 +1,14 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+/* eslint-disable react/no-unused-state */
 import uniqBy from "lodash/uniqBy";
-
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 import CreatableSelect from "react-select/lib/Creatable";
 
 const components = {
   DropdownIndicator: null
 };
 
-const createOption = label => ({
+const createOption = (label) => ({
   value: label,
   label
 });
@@ -23,17 +23,18 @@ class CampaignPrefixSelector extends Component {
     this.props.onChange(value);
   };
 
-  handleInputChange = inputValue => {
+  handleInputChange = (inputValue) => {
     this.setState({ inputValue });
   };
 
-  handleKeyDown = event => {
+  handleKeyDown = (event) => {
     const { inputValue } = this.state;
     const { value } = this.props;
     if (!inputValue) return;
     switch (event.key) {
       case "Enter":
       case "Tab":
+        // eslint-disable-next-line no-case-declarations
         let newValue = [...value, createOption(inputValue)];
         newValue = uniqBy(newValue, "value");
         this.setState({
@@ -41,6 +42,7 @@ class CampaignPrefixSelector extends Component {
         });
         this.props.onChange(newValue);
         event.preventDefault();
+      // no default
     }
   };
 

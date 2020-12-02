@@ -1,7 +1,7 @@
 import { r } from "../models";
+import { accessRequired } from "./errors";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
-import { accessRequired } from "./errors";
 
 interface TagRecord {
   id: number;
@@ -37,10 +37,7 @@ export const resolvers = {
       "createdAt"
     ]),
     author: async (tag: TagRecord) =>
-      r
-        .reader("user")
-        .where({ id: tag.author_id })
-        .first("*"),
+      r.reader("user").where({ id: tag.author_id }).first("*"),
 
     contacts: async (
       tag: TagRecord,
@@ -75,3 +72,5 @@ export const resolvers = {
     }
   }
 };
+
+export default resolvers;

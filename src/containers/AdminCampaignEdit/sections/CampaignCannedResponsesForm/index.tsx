@@ -1,29 +1,27 @@
-import React from "react";
+import { css, StyleSheet } from "aphrodite";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import * as yup from "yup";
-import { compose } from "recompose";
-import { StyleSheet, css } from "aphrodite";
 import isEqual from "lodash/isEqual";
-
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import CreateIcon from "material-ui/svg-icons/content/create";
+import React from "react";
+import { compose } from "recompose";
 
 import { CannedResponse } from "../../../../api/canned-response";
-import { loadData } from "../../../hoc/with-operations";
-import { QueryMap, MutationMap } from "../../../../network/types";
-import { dataTest } from "../../../../lib/attributes";
-import theme from "../../../../styles/theme";
 import { LargeList } from "../../../../components/LargeList";
-import CreateCannedResponseForm from "./components/CreateCannedResponseForm";
-import CannedResponseRow from "./components/CannedResponseRow";
+import { dataTest } from "../../../../lib/attributes";
+import { MutationMap, QueryMap } from "../../../../network/types";
+import theme from "../../../../styles/theme";
+import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
   asSection,
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import CannedResponseRow from "./components/CannedResponseRow";
+import CreateCannedResponseForm from "./components/CreateCannedResponseForm";
 
 const styles = StyleSheet.create({
   formContainer: {
@@ -40,15 +38,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
     padding: 10
   }
-});
-
-const formSchema = yup.object({
-  cannedResponses: yup.array().of(
-    yup.object({
-      title: yup.string(),
-      text: yup.string()
-    })
-  )
 });
 
 interface Values {
@@ -90,7 +79,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const { cannedResponsesToAdd, cannedResponseIdsToDelete } = this.state;
     const { cannedResponses } = this.props.data.campaign;
     const newCannedResponses = cannedResponses
-      .filter(response => !cannedResponseIdsToDelete.includes(response.id))
+      .filter((response) => !cannedResponseIdsToDelete.includes(response.id))
       .concat(cannedResponsesToAdd);
     const didChange = !isEqual(cannedResponses, newCannedResponses);
     return { cannedResponses: newCannedResponses, didChange };
@@ -118,6 +107,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
   };
 
   handleOnShowCreateForm = () => this.setState({ showForm: true });
+
   handleOnCancelCreateForm = () => this.setState({ showForm: false });
 
   handleOnSaveResponse = (response: CannedResponse) => {
@@ -133,7 +123,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
 
   createHandleOnDelete = (responseId: string) => () => {
     const cannedResponsesToAdd = this.state.cannedResponsesToAdd.filter(
-      response => response.id !== responseId
+      (response) => response.id !== responseId
     );
     const cannedResponseIdsToDelete = [
       ...new Set(this.state.cannedResponseIdsToDelete).add(responseId)
@@ -169,7 +159,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         />
         {cannedResponses.length > 0 ? (
           <LargeList>
-            {cannedResponses.map(cannedResponse => (
+            {cannedResponses.map((cannedResponse) => (
               <CannedResponseRow
                 key={cannedResponse.id}
                 cannedResponse={cannedResponse}
@@ -227,7 +217,7 @@ const queries: QueryMap<InnerProps> = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -236,7 +226,7 @@ const queries: QueryMap<InnerProps> = {
 };
 
 const mutations: MutationMap<InnerProps> = {
-  editCampaign: ownProps => (payload: Values) => ({
+  editCampaign: (ownProps) => (payload: Values) => ({
     mutation: gql`
       mutation editCampaignBasics(
         $campaignId: String!

@@ -1,24 +1,84 @@
 import express from "express";
-const router = express.Router();
-import { symmetricDecrypt } from "../api/lib/crypto";
-import { r } from "../../server/models";
 import h from "h";
 import { sortBy } from "lodash";
 
-router.get("/preview/:campaignId", async (req, res) => {
-  const token = req.params.campaignId;
+import { symmetricDecrypt } from "../api/lib/crypto";
+import { r } from "../models";
 
-  let campaignId;
-  try {
-    campaignId = symmetricDecrypt(token);
-  } catch {
-    return res.status(400).send("bad token");
+const router = express.Router();
+const colors = ["#1b9e77", "#d95f02", "#7570b3"];
+
+const getInteractionStepsWithParentId = (parentId, interactionSteps) =>
+  sortBy(
+    interactionSteps.filter((is) => is.parent_interaction_id === parentId),
+    (i) => i.answer_option
+  );
+
+const makeInteractionStepHtml = (
+  interactionStep,
+  interactionSteps,
+  depth = 0
+) => {
+  if (!interactionStep) {
+    return [];
   }
-  const campaignPreviewHtml = await makeCampaignPreviewHtml(campaignId);
-  return res.send(campaignPreviewHtml);
-});
 
-const makeCampaignPreviewHtml = async campaignId => {
+  const childrenInteractionSteps = getInteractionStepsWithParentId(
+    interactionStep.id,
+    interactionSteps
+  );
+
+  const listItemChildren = (interactionStep.answer_option
+    ? [["p.answer-option", ["strong", interactionStep.answer_option]]]
+    : []
+  ).concat(
+    interactionStep.script_options
+      .map((opt) => ["p.script", ["em", `"${opt}"`]])
+      .concat(
+        interactionStep.question
+          ? [
+              [
+                "p.question",
+                ["strong", `Question: ${interactionStep.question}`]
+              ]
+            ]
+          : []
+      )
+      .concat([
+        [
+          "ul",
+          childrenInteractionSteps.map((is) =>
+            makeInteractionStepHtml(is, interactionSteps, depth + 1)
+          )
+        ]
+      ])
+  );
+
+  const result = [
+    "li",
+    {
+      id: `id-${interactionStep.id}`,
+      style: `border-left: 5px solid ${
+        colors[depth % colors.length]
+      }; padding-left: 10px;`
+    },
+    listItemChildren
+  ];
+  return result;
+};
+
+const makeCannedResponsesHtml = (cannedResponses) => {
+  return [
+    "ul",
+    cannedResponses.map((cr) => [
+      "li.canned-response",
+      ["p.title", ["strong", cr.title]],
+      ["p.text", ["em", `"${cr.text}"`]]
+    ])
+  ];
+};
+
+const makeCampaignPreviewHtml = async (campaignId) => {
   const campaign = await r
     .reader("campaign")
     .where({ id: campaignId })
@@ -34,13 +94,13 @@ const makeCampaignPreviewHtml = async campaignId => {
     .where({ campaign_id: campaignId });
 
   const rootInteractionStep = interactionSteps.find(
-    is => !is.parent_interaction_id
+    (is) => !is.parent_interaction_id
   );
 
   const toc = getInteractionStepsWithParentId(
     rootInteractionStep.id,
     interactionSteps
-  ).map(secondChild => [
+  ).map((secondChild) => [
     "li",
     ["a", { href: `#id-${secondChild.id}` }, secondChild.answer_option]
   ]);
@@ -64,76 +124,17 @@ const makeCampaignPreviewHtml = async campaignId => {
   ]);
 };
 
-const colors = ["#1b9e77", "#d95f02", "#7570b3"];
+router.get("/preview/:campaignId", async (req, res) => {
+  const token = req.params.campaignId;
 
-const getInteractionStepsWithParentId = (parentId, interactionSteps) =>
-  sortBy(
-    interactionSteps.filter(is => is.parent_interaction_id == parentId),
-    i => i.answer_option
-  );
-
-const makeInteractionStepHtml = (
-  interactionStep,
-  interactionSteps,
-  depth = 0
-) => {
-  if (!interactionStep) {
-    return [];
+  let campaignId;
+  try {
+    campaignId = symmetricDecrypt(token);
+  } catch {
+    return res.status(400).send("bad token");
   }
-
-  const childrenInteractionSteps = getInteractionStepsWithParentId(
-    interactionStep.id,
-    interactionSteps
-  );
-
-  const listItemChildren = (interactionStep.answer_option
-    ? [["p.answer-option", ["strong", interactionStep.answer_option]]]
-    : []
-  ).concat(
-    interactionStep.script_options
-      .map(opt => ["p.script", ["em", '"' + opt + '"']])
-      .concat(
-        interactionStep.question
-          ? [
-              [
-                "p.question",
-                ["strong", `Question: ${interactionStep.question}`]
-              ]
-            ]
-          : []
-      )
-      .concat([
-        [
-          "ul",
-          childrenInteractionSteps.map(is =>
-            makeInteractionStepHtml(is, interactionSteps, depth + 1)
-          )
-        ]
-      ])
-  );
-
-  const result = [
-    "li",
-    {
-      id: `id-${interactionStep.id}`,
-      style: `border-left: 5px solid ${
-        colors[depth % colors.length]
-      }; padding-left: 10px;`
-    },
-    listItemChildren
-  ];
-  return result;
-};
-
-const makeCannedResponsesHtml = cannedResponses => {
-  return [
-    "ul",
-    cannedResponses.map(cr => [
-      "li.canned-response",
-      ["p.title", ["strong", cr.title]],
-      ["p.text", ["em", '"' + cr.text + '"']]
-    ])
-  ];
-};
+  const campaignPreviewHtml = await makeCampaignPreviewHtml(campaignId);
+  return res.send(campaignPreviewHtml);
+});
 
 export default router;

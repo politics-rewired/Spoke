@@ -1,23 +1,21 @@
-import React from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
-
+import CircularProgress from "material-ui/CircularProgress";
+import FlatButton from "material-ui/FlatButton";
+import IconButton from "material-ui/IconButton";
+import { green300, red500 } from "material-ui/styles/colors";
+import AssignmentTurnedInIcon from "material-ui/svg-icons/action/assignment-turned-in";
+import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
+import HighlightOffIcon from "material-ui/svg-icons/action/highlight-off";
 import {
   Table,
+  TableBody,
   TableHeader,
   TableHeaderColumn,
-  TableBody,
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
-import IconButton from "material-ui/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import CircularProgress from "material-ui/CircularProgress";
-import HighlightOffIcon from "material-ui/svg-icons/action/highlight-off";
-import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
-import AssignmentTurnedInIcon from "material-ui/svg-icons/action/assignment-turned-in";
-import { red500, green300 } from "material-ui/styles/colors";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
 
 import theme from "../../styles/theme";
 
@@ -29,7 +27,7 @@ export const RowWorkStatus = Object.freeze({
   Denied: "rejected"
 });
 
-const rowStyleForStatus = rowStatus => {
+const rowStyleForStatus = (rowStatus) => {
   const baseStyle = {
     "-webkit-transition": "opacity 2s ease-in-out",
     "-moz-transition": "opacity 2s ease-in-out",
@@ -47,7 +45,7 @@ const rowStyleForStatus = rowStatus => {
   } else if (rowStatus === RowWorkStatus.Denied) {
     overrideStyle = { opacity: 0, backgroundColor: theme.colors.lightRed };
   }
-  return Object.assign({}, baseStyle, overrideStyle);
+  return { ...baseStyle, ...overrideStyle };
 };
 
 const styles = {
@@ -57,7 +55,7 @@ const styles = {
   }
 };
 
-const AssignmentRequestTable = props => {
+const AssignmentRequestTable = (props) => {
   const {
     isAdmin,
     assignmentRequests,
@@ -66,10 +64,10 @@ const AssignmentRequestTable = props => {
     onDenyRequest
   } = props;
 
-  const handleAutoApproveRow = requestId => () =>
+  const handleAutoApproveRow = (requestId) => () =>
     onAutoApproveRequest(requestId);
-  const handleApproveRow = requestId => () => onApproveRequest(requestId);
-  const handleDenyRow = requestId => () => onDenyRequest(requestId);
+  const handleApproveRow = (requestId) => () => onApproveRequest(requestId);
+  const handleDenyRow = (requestId) => () => onDenyRequest(requestId);
 
   return (
     <div>
@@ -81,7 +79,7 @@ const AssignmentRequestTable = props => {
           <TableHeaderColumn>Actions</TableHeaderColumn>
         </TableHeader>
         <TableBody displayRowCheckbox={false}>
-          {assignmentRequests.map(request => {
+          {assignmentRequests.map((request) => {
             const { user, createdAt, id: requestId, status } = request;
             const showActions =
               status === RowWorkStatus.Inactive ||
@@ -116,16 +114,15 @@ const AssignmentRequestTable = props => {
                         <CheckCircleIcon color={green300} />
                       </IconButton>
                     )}
-                    {showActions &&
-                      isAdmin && (
-                        <FlatButton
-                          label="AutoApprove"
-                          labelPosition="before"
-                          primary={true}
-                          icon={<AssignmentTurnedInIcon color={green300} />}
-                          onClick={handleAutoApproveRow(requestId)}
-                        />
-                      )}
+                    {showActions && isAdmin && (
+                      <FlatButton
+                        label="AutoApprove"
+                        labelPosition="before"
+                        primary
+                        icon={<AssignmentTurnedInIcon color={green300} />}
+                        onClick={handleAutoApproveRow(requestId)}
+                      />
+                    )}
                     {status === RowWorkStatus.Working && (
                       <CircularProgress size={25} />
                     )}

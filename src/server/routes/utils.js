@@ -1,9 +1,11 @@
 import express from "express";
-const router = express.Router();
 import googleLibPhoneNumber from "google-libphonenumber";
 
 import { config } from "../../config";
+import logger from "../../logger";
 import { r } from "../models";
+
+const router = express.Router();
 
 const phoneUtil = googleLibPhoneNumber.PhoneNumberUtil.getInstance();
 const PNF = googleLibPhoneNumber.PhoneNumberFormat;
@@ -18,7 +20,7 @@ router.post("/remove-number-from-campaign", async (req, res) => {
     return res.sendStatus(403);
 
   logger.info(`Removing user matching ${JSON.stringify(req.body)}`);
-  const phone = req.body.phone;
+  const { phone } = req.body;
 
   if (!phone) {
     return res.status(400).json({ error: "Missing `phone` in request body" });

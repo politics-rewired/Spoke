@@ -13,3 +13,5 @@ export const makeNumbersClient = (options: NumbersClientOptions) => {
   }
   return new NumbersClient(options);
 };
+
+export default makeNumbersClient;

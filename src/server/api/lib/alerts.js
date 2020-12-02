@@ -1,5 +1,5 @@
-import request from "superagent";
 import _ from "lodash";
+import request from "superagent";
 
 import { config } from "../../../config";
 import logger from "../../../logger";
@@ -7,7 +7,7 @@ import { r } from "../../models";
 
 const THRESHOLD = 0.2;
 
-const notifyAssignmentCreated = async options => {
+const notifyAssignmentCreated = async (options) => {
   const { organizationId, userId, count } = options;
 
   if (!config.ASSIGNMENT_REQUESTED_URL) return;
@@ -45,7 +45,7 @@ const notifyAssignmentCreated = async options => {
     );
   }
 
-  return webhookRequest.send(payload).catch(err => {
+  return webhookRequest.send(payload).catch((err) => {
     logger.error("Error sending assignment requested webhook: ", err);
     throw err;
   });
@@ -75,12 +75,12 @@ async function checkForBadDeliverability() {
     group by domain, link_message.send_status;
   `);
 
-  const byDomain = _.groupBy(results.rows, x => x.domain);
+  const byDomain = _.groupBy(results.rows, (x) => x.domain);
 
-  for (let domain of Object.keys(byDomain)) {
-    const fetchCountBySendStatus = status => {
-      for (let foundStatus of byDomain[domain]) {
-        if (foundStatus.send_status == status) {
+  for (const domain of Object.keys(byDomain)) {
+    const fetchCountBySendStatus = (status) => {
+      for (const foundStatus of byDomain[domain]) {
+        if (foundStatus.send_status === status) {
           return foundStatus.count;
         }
       }
@@ -94,9 +94,7 @@ async function checkForBadDeliverability() {
     const errorPercent = errorCount / (deliveredCount + sentCount);
     if (errorPercent > THRESHOLD) {
       logger.info(
-        `Sending deliverability alert to ${
-          config.DELIVERABILITY_ALERT_ENDPOINT
-        } because ${domain} is sending at ${errorPercent}`
+        `Sending deliverability alert to ${config.DELIVERABILITY_ALERT_ENDPOINT} because ${domain} is sending at ${errorPercent}`
       );
 
       await request
@@ -112,7 +110,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
       const message = await r
         .reader("message")
         .where({
-          campaign_contact_id: parseInt(campaignContactId),
+          campaign_contact_id: parseInt(campaignContactId, 10),
           is_from_contact: true
         })
         .orderBy("created_at", "desc")
@@ -123,7 +121,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     taggingUser: (async () => {
       const user = await r
         .reader("user")
-        .where({ id: parseInt(userId) })
+        .where({ id: parseInt(userId, 10) })
         .first("*");
 
       return user;
@@ -131,7 +129,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     taggedContact: (async () => {
       const contact = await r
         .reader("campaign_contact")
-        .where({ id: parseInt(campaignContactId) })
+        .where({ id: parseInt(campaignContactId, 10) })
         .first("*");
 
       return contact;
@@ -154,7 +152,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     .first("*");
 
   await Promise.all(
-    webhookUrls.map(url =>
+    webhookUrls.map((url) =>
       request
         .post(url)
         .timeout(30000)
@@ -164,7 +162,7 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
           taggedContact,
           taggedCampaign
         })
-        .catch(err =>
+        .catch((err) =>
           logger.error("Encountered error notifying on tag assignment: ", err)
         )
     )

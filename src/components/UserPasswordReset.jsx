@@ -1,13 +1,13 @@
-import React from "react";
+import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
-import * as yup from "yup";
+import React from "react";
 import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
+import * as yup from "yup";
 
-import { dataTest } from "../lib/attributes";
-import GSForm from "../components/forms/GSForm";
-import GSSubmitButton from "../components/forms/GSSubmitButton";
 import { UserEditMode } from "../containers/UserEdit";
+import { dataTest } from "../lib/attributes";
+import GSForm from "./forms/GSForm";
+import GSSubmitButton from "./forms/GSSubmitButton";
 
 const styles = StyleSheet.create({
   buttons: {
@@ -16,10 +16,7 @@ const styles = StyleSheet.create({
 });
 
 const formSchema = yup.object({
-  email: yup
-    .string()
-    .email()
-    .required(),
+  email: yup.string().email().required(),
   password: yup.string().required(),
   passwordConfirm: yup
     .string()
@@ -33,7 +30,7 @@ class UserPasswordReset extends React.Component {
     error: undefined
   };
 
-  handleOnSubmit = async formData => {
+  handleOnSubmit = async (formData) => {
     this.setState({ working: true, error: undefined });
     const response = await fetch("/login-callback", {
       method: "POST",
@@ -46,7 +43,7 @@ class UserPasswordReset extends React.Component {
     });
     this.setState({ working: false });
 
-    const { redirected, headers, status, url } = response;
+    const { redirected, headers, status } = response;
     if (redirected && status === 200) {
       this.props.history.push("/");
     } else if (status === 401) {

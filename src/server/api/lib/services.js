@@ -1,7 +1,7 @@
+import assembleNumers from "./assemble-numbers";
+import fakeservice from "./fakeservice";
 import nexmo from "./nexmo";
 import twilio from "./twilio";
-import fakeservice from "./fakeservice";
-import assembleNumers from "./assemble-numbers";
 
 // Each service needs the following api points:
 // async sendMessage(message, trx) -> void

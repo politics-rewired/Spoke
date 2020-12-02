@@ -1,17 +1,18 @@
-import PropTypes from "prop-types";
-import React from "react";
+import { getCharCount } from "@trt2/gsm-charset-utils";
 import {
-  EditorState,
-  ContentState,
   CompositeDecorator,
+  ContentState,
   Editor,
+  EditorState,
   Modifier
 } from "draft-js";
 import escapeRegExp from "lodash/escapeRegExp";
+import { green500, green600, grey100, red400 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React from "react";
+
 import { delimit } from "../lib/scripts";
 import Chip from "./Chip";
-import { red400, green500, green600, grey100 } from "material-ui/styles/colors";
-import { getCharCount } from "@trt2/gsm-charset-utils";
 
 const styles = {
   editor: {
@@ -58,7 +59,7 @@ function findWithRegex(regex, contentBlock, callback) {
   }
 }
 
-const RecognizedField = props => (
+const RecognizedField = (props) => (
   <span {...props} style={styles.goodField}>
     {props.children}
   </span>
@@ -68,7 +69,7 @@ RecognizedField.propTypes = {
   children: PropTypes.arrayOf(PropTypes.element)
 };
 
-const UnrecognizedField = props => (
+const UnrecognizedField = (props) => (
   <span {...props} style={styles.badField}>
     {props.children}
   </span>
@@ -87,7 +88,7 @@ const gsmReplacements = [
   ["–", "-"]
 ];
 
-const replaceEasyGsmWins = text =>
+const replaceEasyGsmWins = (text) =>
   gsmReplacements.reduce(
     (acc, replacement) => acc.replace(replacement[0], replacement[1]),
     text
@@ -112,9 +113,7 @@ class ScriptEditor extends React.Component {
     // this.setState({ editorState: this.getEditorState() })
   }
 
-  focus = () => this.refs.editor.focus();
-
-  onEditorChange = editorState => {
+  onEditorChange = (editorState) => {
     this.setState({ editorState }, () => {
       const { onChange } = this.props;
       if (onChange) {
@@ -145,10 +144,10 @@ class ScriptEditor extends React.Component {
     return replaceEasyGsmWins(editorState.getCurrentContent().getPlainText());
   }
 
-  getCompositeDecorator(scriptFields) {
+  getCompositeDecorator = (scriptFields) => {
     const recognizedFieldStrategy = (contentBlock, callback) => {
       const regex = new RegExp(
-        `\{(${scriptFields.map(escapeRegExp).join("|")})\}`,
+        `{(${scriptFields.map(escapeRegExp).join("|")})}`,
         "g"
       );
       return findWithRegex(regex, contentBlock, callback);
@@ -167,9 +166,11 @@ class ScriptEditor extends React.Component {
         component: UnrecognizedField
       }
     ]);
-  }
+  };
 
-  addCustomField = field => {
+  focus = () => this.refs.editor.focus();
+
+  addCustomField = (field) => {
     const textToInsert = delimit(field);
     const { editorState } = this.state;
     const selection = editorState.getSelection();
@@ -191,7 +192,7 @@ class ScriptEditor extends React.Component {
     const { scriptFields } = this.props;
     return (
       <div style={styles.scriptFieldButtonSection}>
-        {scriptFields.map(field => (
+        {scriptFields.map((field) => (
           <Chip
             key={field}
             style={styles.scriptFieldButton}
@@ -233,9 +234,11 @@ class ScriptEditor extends React.Component {
           <a
             href="https://docs.spokerewired.com/article/89-segments-and-encodings"
             target="_blank"
+            rel="noopener noreferrer"
           >
             docs here
-          </a>.
+          </a>
+          .
         </div>
       </div>
     );

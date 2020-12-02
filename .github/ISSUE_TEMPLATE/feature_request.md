@@ -1,10 +1,9 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 Spoke is used in many different ways by many different organizations. Before submitting a feature request please think about whether it addresses a use case specific to your organization or whether it will provide value across many different use cases.

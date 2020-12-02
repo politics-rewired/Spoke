@@ -1,11 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { loadData } from "../hoc/with-operations";
+import AssignmentHUD from "./AssignmentHUD";
 import CampaignListLoader from "./CampaignListLoader";
 import { OperationDialog, operations } from "./OperationDialog";
-import AssignmentHUD from "./AssignmentHUD";
 
 export class CampaignList extends React.Component {
   state = {
@@ -17,6 +17,7 @@ export class CampaignList extends React.Component {
 
   start = (operation, campaign, variables) => () =>
     this.setState({ inProgress: [operation, campaign, variables] });
+
   clearInProgress = () =>
     this.setState({
       inProgress: undefined,
@@ -25,19 +26,18 @@ export class CampaignList extends React.Component {
       finished: undefined
     });
 
+  boundSetState = (state, callback) => this.setState(state, callback);
+
   executeOperation = () => {
     this.setState({ executing: true });
     const [operationName, campaign, variables] = this.state.inProgress;
 
     this.props.mutations[operationName](campaign.id, variables)
-      .then(resp => {
-        const mutationName =
-          operations[operationName].mutationName || operationName;
-
+      .then((resp) => {
         const dataKey = Object.keys(resp.data)[0];
         this.setState({ finished: resp.data[dataKey], executing: false });
       })
-      .catch(error => {
+      .catch((error) => {
         this.setState({ error, executing: false });
       });
   };
@@ -65,7 +65,7 @@ export class CampaignList extends React.Component {
             error={error}
             finished={finished}
             executing={executing}
-            setState={this.setState.bind(this)}
+            setState={this.boundSetState}
             clearInProgress={this.clearInProgress}
             executeOperation={this.executeOperation}
           />
@@ -118,7 +118,7 @@ const campaignInfoFragment = `
 `;
 
 const mutations = {
-  archiveCampaign: ownProps => campaignId => ({
+  archiveCampaign: (_ownProps) => (campaignId) => ({
     mutation: gql`mutation archiveCampaign($campaignId: String!) {
           archiveCampaign(id: $campaignId) {
             ${campaignInfoFragment}
@@ -126,7 +126,7 @@ const mutations = {
         }`,
     variables: { campaignId }
   }),
-  unarchiveCampaign: ownProps => campaignId => ({
+  unarchiveCampaign: (_ownProps) => (campaignId) => ({
     mutation: gql`mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
           ${campaignInfoFragment}
@@ -134,7 +134,7 @@ const mutations = {
       }`,
     variables: { campaignId }
   }),
-  releaseUnsentMessages: ownProps => campaignId => ({
+  releaseUnsentMessages: (_ownProps) => (campaignId) => ({
     mutation: gql`
       mutation releaseUnsentMessages(
         $campaignId: String!
@@ -148,7 +148,7 @@ const mutations = {
       campaignId
     }
   }),
-  markForSecondPass: ownProps => (
+  markForSecondPass: (_ownProps) => (
     campaignId,
     { excludeRecentlyTexted, days, hours }
   ) => ({
@@ -168,7 +168,7 @@ const mutations = {
       campaignId
     }
   }),
-  releaseUnrepliedMessages: ownProps => (campaignId, { ageInHours }) => ({
+  releaseUnrepliedMessages: (_ownProps) => (campaignId, { ageInHours }) => ({
     mutation: gql`
       mutation releaseUnrepliedMessages(
         $campaignId: String!
@@ -188,7 +188,7 @@ const mutations = {
       ageInHours
     }
   }),
-  deleteNeedsMessage: ownProps => (campaignId, _) => ({
+  deleteNeedsMessage: (_ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation deleteNeedsMessage($campaignId: String!) {
         deleteNeedsMessage(campaignId: $campaignId)
@@ -198,7 +198,7 @@ const mutations = {
       campaignId
     }
   }),
-  unMarkForSecondPass: ownProps => (campaignId, _) => ({
+  unMarkForSecondPass: (_ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation unMarkForSecondPass($campaignId: String!) {
         unMarkForSecondPass(campaignId: $campaignId)
@@ -208,7 +208,7 @@ const mutations = {
       campaignId
     }
   }),
-  turnAutoAssignOn: ownProps => (campaignId, _) => ({
+  turnAutoAssignOn: (_ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation turnAutoAssignOn($campaignId: String!) {
         editCampaign(id: $campaignId, campaign: { isAutoassignEnabled: true }) {
@@ -219,7 +219,7 @@ const mutations = {
     `,
     variables: { campaignId }
   }),
-  turnAutoAssignOff: ownProps => (campaignId, _) => ({
+  turnAutoAssignOff: (_ownProps) => (campaignId, _) => ({
     mutation: gql`
       mutation turnAutoAssignOff($campaignId: String!) {
         editCampaign(
@@ -255,7 +255,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },

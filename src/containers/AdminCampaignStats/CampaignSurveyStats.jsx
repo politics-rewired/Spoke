@@ -1,12 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
 
-import { loadData } from "../hoc/with-operations";
 import Chart from "../../components/Chart";
-import CampaignStat from "./CampaignStat";
 import theme from "../../styles/theme";
+import { loadData } from "../hoc/with-operations";
+import CampaignStat from "./CampaignStat";
 
 const styles = StyleSheet.create({
   container: {
@@ -29,43 +29,45 @@ const styles = StyleSheet.create({
   }
 });
 
-const CampaignSurveyStats = props => {
+const CampaignSurveyStats = (props) => {
   const { interactionSteps } = props.data.campaign;
 
   return (
     <div>
-      {interactionSteps.filter(iStep => iStep.question !== "").map(step => {
-        const { answerOptions } = step.question;
-        const countReducer = (acc, answer) => acc + answer.responderCount;
-        const responseCount = answerOptions.reduce(countReducer, 0);
+      {interactionSteps
+        .filter((iStep) => iStep.question !== "")
+        .map((step) => {
+          const { answerOptions } = step.question;
+          const countReducer = (acc, answer) => acc + answer.responderCount;
+          const responseCount = answerOptions.reduce(countReducer, 0);
 
-        return (
-          <div key={step.id}>
-            <div className={css(styles.secondaryHeader)}>
-              {step.question.text}
-            </div>
-            {responseCount > 0 ? (
-              <div className={css(styles.container)}>
-                <div className={css(styles.flexColumn)}>
-                  <CampaignStat title="responses" count={responseCount} />
-                </div>
-                <div className={css(styles.flexColumn)}>
-                  <div className={css(styles.rightAlign)}>
-                    <Chart
-                      data={step.question.answerOptions.map(answer => [
-                        answer.value,
-                        answer.responderCount
-                      ])}
-                    />
+          return (
+            <div key={step.id}>
+              <div className={css(styles.secondaryHeader)}>
+                {step.question.text}
+              </div>
+              {responseCount > 0 ? (
+                <div className={css(styles.container)}>
+                  <div className={css(styles.flexColumn)}>
+                    <CampaignStat title="responses" count={responseCount} />
+                  </div>
+                  <div className={css(styles.flexColumn)}>
+                    <div className={css(styles.rightAlign)}>
+                      <Chart
+                        data={step.question.answerOptions.map((answer) => [
+                          answer.value,
+                          answer.responderCount
+                        ])}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              "No responses yet"
-            )}
-          </div>
-        );
-      })}
+              ) : (
+                "No responses yet"
+              )}
+            </div>
+          );
+        })}
     </div>
   );
 };
@@ -93,7 +95,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }

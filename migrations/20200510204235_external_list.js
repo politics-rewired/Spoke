@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     CREATE EXTENSION "uuid-ossp" with schema "public";
 
@@ -127,7 +127,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     DROP TABLE "public"."external_system";
     DROP TABLE "public"."external_list";

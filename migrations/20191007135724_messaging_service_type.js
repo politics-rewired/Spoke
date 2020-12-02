@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return Promise.all([
     // Create enum type
     knex.schema
@@ -7,7 +7,7 @@ exports.up = function(knex) {
       )
       .then(() =>
         // Add service_type column with default
-        knex.schema.alterTable("messaging_service", table => {
+        knex.schema.alterTable("messaging_service", (table) => {
           table
             .specificType("service_type", "messaging_service_type")
             .notNullable()
@@ -16,7 +16,7 @@ exports.up = function(knex) {
       )
       .then(() =>
         // Drop the default
-        knex.schema.alterTable("messaging_service", table => {
+        knex.schema.alterTable("messaging_service", (table) => {
           table
             .specificType("service_type", "messaging_service_type")
             .notNullable()
@@ -25,23 +25,23 @@ exports.up = function(knex) {
         })
       ),
     // Add index on messaging_service_stick.messaging_service_sid for one-to-many lookup
-    knex.schema.alterTable("messaging_service_stick", table => {
+    knex.schema.alterTable("messaging_service_stick", (table) => {
       table.index(["messaging_service_sid"]);
     })
   ]);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return Promise.all([
     // Drop column and service_type enum
     knex.schema
-      .alterTable("messaging_service", table => {
+      .alterTable("messaging_service", (table) => {
         table.dropIndex("service_type");
         table.dropColumn("service_type");
       })
       .then(() => knex.schema.raw(`drop type messaging_service_type;`)),
     // Drop index on messaging_service_stick.messaging_service_sid
-    knex.schema.alterTable("messaging_service_stick", table => {
+    knex.schema.alterTable("messaging_service_stick", (table) => {
       table.dropIndex(["messaging_service_sid"]);
     })
   ]);

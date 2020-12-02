@@ -1,36 +1,38 @@
-import fetch from "isomorphic-fetch"; // TODO - remove?
+import {
+  defaultDataIdFromObject,
+  InMemoryCache,
+  IntrospectionFragmentMatcher
+} from "apollo-cache-inmemory";
 import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
-import { createUploadLink } from "apollo-upload-client";
 import { onError } from "apollo-link-error";
-import {
-  InMemoryCache,
-  IntrospectionFragmentMatcher,
-  defaultDataIdFromObject
-} from "apollo-cache-inmemory";
+import { createUploadLink } from "apollo-upload-client";
 import { getMainDefinition } from "apollo-utilities";
+import _fetch from "isomorphic-fetch"; // TODO - remove?
 import omitDeep from "omit-deep-lodash";
 
-import unions from "./unions.json";
 import { eventBus, EventTypes } from "../client/events";
+import unions from "./unions.json";
 
 const uploadLink = createUploadLink({
   uri: window.GRAPHQL_URL || "/graphql",
   credentials: "same-origin"
 });
 
-const errorLink = onError(({ networkError = {}, graphQLErrors }) => {
-  if (networkError.statusCode === 401) {
-    window.location = `/login?nextUrl=${window.location.pathname}`;
-  } else if (networkError.statusCode === 403) {
-    window.location = "/";
-  } else if (networkError.statusCode === 404) {
-    window.location = "/404";
+const errorLink = onError(
+  ({ networkError = {}, graphQLErrors: _gqlErrors }) => {
+    if (networkError.statusCode === 401) {
+      window.location = `/login?nextUrl=${window.location.pathname}`;
+    } else if (networkError.statusCode === 403) {
+      window.location = "/";
+    } else if (networkError.statusCode === 404) {
+      window.location = "/404";
+    }
   }
-});
+);
 
 const checkVersionLink = new ApolloLink((operation, forward) => {
-  return forward(operation).map(data => {
+  return forward(operation).map((data) => {
     const clientVersion = window.SPOKE_VERSION;
     const { response } = operation.getContext();
     const serverVersion = response.headers.get("x-spoke-version");
@@ -66,7 +68,7 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 const cache = new InMemoryCache({
   addTypename: true,
   fragmentMatcher,
-  dataIdFromObject: object => {
+  dataIdFromObject: (object) => {
     switch (object.__typename) {
       case "ExternalList":
         return `${object.systemId}:${object.externalId}`;

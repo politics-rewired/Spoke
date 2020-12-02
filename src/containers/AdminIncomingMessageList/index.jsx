@@ -1,20 +1,19 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
 import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
-import isEqual from "lodash/isEqual";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
-import { loadData } from "../hoc/with-operations";
-import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../../lib/constants";
 import IncomingMessageActions from "../../components/IncomingMessageActions";
 import IncomingMessageFilter from "../../components/IncomingMessageFilter";
 import IncomingMessageList from "../../components/IncomingMessageList";
+import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../lib/constants";
+import { loadData } from "../hoc/with-operations";
 import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
 import PaginatedUsersRetriever from "../PaginatedUsersRetriever";
 
@@ -22,7 +21,7 @@ function getCampaignsFilterForCampaignArchiveStatus(
   includeActiveCampaigns,
   includeArchivedCampaigns
 ) {
-  let isArchived = undefined;
+  let isArchived;
   if (!includeActiveCampaigns && includeArchivedCampaigns) {
     isArchived = true;
   } else if (
@@ -43,7 +42,7 @@ function getContactsFilterForConversationOptOutStatus(
   includeNotOptedOutConversations,
   includeOptedOutConversations
 ) {
-  let isOptedOut = undefined;
+  let isOptedOut;
   if (!includeNotOptedOutConversations && includeOptedOutConversations) {
     isOptedOut = true;
   } else if (
@@ -75,30 +74,32 @@ export class AdminIncomingMessageList extends Component {
     super(props);
 
     const tagsFilter = props.escalatedConvosOnly
-      ? Object.assign({}, initialTagsFilter, {
+      ? {
+          ...initialTagsFilter,
           excludeEscalated: false,
           escalatedConvosOnly: true
-        })
+        }
       : initialTagsFilter;
 
     const contactsFilter = props.escalatedConvosOnly
-      ? Object.assign({}, initialContactsFilter, {
+      ? {
+          ...initialContactsFilter,
           messageStatus: [
             "needsResponse",
             "needsMessage",
             "convo",
             "messaged"
           ].join(",")
-        })
+        }
       : initialContactsFilter;
 
     this.state = {
       page: 0,
       pageSize: 10,
       campaignsFilter: initialCampaignsFilter,
-      contactsFilter: contactsFilter,
+      contactsFilter,
       assignmentsFilter: initialAssignmentsFilter,
-      tagsFilter: tagsFilter,
+      tagsFilter,
       contactNameFilter: undefined,
       needsRender: false,
       campaigns: [],
@@ -130,7 +131,7 @@ export class AdminIncomingMessageList extends Component {
     return true;
   }
 
-  handleCampaignChanged = async campaignId => {
+  handleCampaignChanged = async (campaignId) => {
     const campaignsFilter = getCampaignsFilterForCampaignArchiveStatus(
       this.state.includeActiveCampaigns,
       this.state.includeArchivedCampaigns
@@ -147,8 +148,8 @@ export class AdminIncomingMessageList extends Component {
   };
 
   handleTagsChanged = (_1, _2, values) => {
-    this.setState(prevState => {
-      const newTagsFilter = Object.assign({}, prevState.tagsFilter);
+    this.setState((prevState) => {
+      const newTagsFilter = { ...prevState.tagsFilter };
       newTagsFilter.specificTagIds = values;
 
       return {
@@ -159,8 +160,8 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleTexterChanged = async texterId => {
-    const assignmentsFilter = Object.assign({}, this.state.assignmentsFilter);
+  handleTexterChanged = async (texterId) => {
+    const assignmentsFilter = { ...this.state.assignmentsFilter };
     if (texterId === UNASSIGNED_TEXTER) {
       assignmentsFilter.texterId = texterId;
     } else if (texterId === ALL_TEXTERS) {
@@ -176,14 +177,14 @@ export class AdminIncomingMessageList extends Component {
   };
 
   handleIncludeEscalatedToggled = () => {
-    const tagsFilter = Object.assign({}, this.state.tagsFilter);
+    const tagsFilter = { ...this.state.tagsFilter };
     tagsFilter.excludeEscalated = !(
       tagsFilter && !!tagsFilter.excludeEscalated
     );
     this.setState({ tagsFilter });
   };
 
-  handleMessageFilterChange = async messagesFilter => {
+  handleMessageFilterChange = async (messagesFilter) => {
     const contactsFilter = Object.assign(
       omit(this.state.contactsFilter, ["messageStatus"]),
       { messageStatus: messagesFilter }
@@ -206,8 +207,8 @@ export class AdminIncomingMessageList extends Component {
   closeReassignmentDialog = () =>
     this.setState({ reassignmentAlert: undefined });
 
-  handleReassignmentCommon = async fn => {
-    let newState = {
+  handleReassignmentCommon = async (fn) => {
+    const newState = {
       needsRender: true,
       campaignIdsContactIds: [],
       reassignmentAlert: {
@@ -229,7 +230,7 @@ export class AdminIncomingMessageList extends Component {
     this.setState(newState);
   };
 
-  handleReassignRequested = async newTexterUserIds => {
+  handleReassignRequested = async (newTexterUserIds) => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaReassignCampaignContacts(
         this.props.match.params.organizationId,
@@ -239,7 +240,7 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleReassignAllMatchingRequested = async newTexterUserIds => {
+  handleReassignAllMatchingRequested = async (newTexterUserIds) => {
     await this.handleReassignmentCommon(async () => {
       await this.props.mutations.megaBulkReassignCampaignContacts(
         this.props.match.params.organizationId,
@@ -286,14 +287,14 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handlePageChange = async page => {
+  handlePageChange = async (page) => {
     await this.setState({
       page,
       needsRender: true
     });
   };
 
-  handlePageSizeChange = async pageSize => {
+  handlePageSizeChange = async (pageSize) => {
     await this.setState({ needsRender: true, pageSize });
   };
 
@@ -305,19 +306,19 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleCampaignsReceived = async campaigns => {
+  handleCampaignsReceived = async (campaigns) => {
     this.setState({ campaigns, needsRender: true });
   };
 
-  handleTagsReceived = async tagList => {
+  handleTagsReceived = async (tagList) => {
     this.setState({ tags: tagList });
   };
 
-  handleCampaignTextersReceived = async campaignTexters => {
+  handleCampaignTextersReceived = async (campaignTexters) => {
     this.setState({ campaignTexters, needsRender: true });
   };
 
-  handleReassignmentTextersReceived = async reassignmentTexters => {
+  handleReassignmentTextersReceived = async (reassignmentTexters) => {
     this.setState({ reassignmentTexters, needsRender: true });
   };
 
@@ -402,11 +403,11 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  conversationCountChanged = conversationCount =>
+  conversationCountChanged = (conversationCount) =>
     this.setState({ conversationCount, needsRender: true });
 
   /*
-    Shallow comparison here done intentionally – we want to know if its changed, not if it's different,
+    Shallow comparison here done intentionally – we want to know if its changed, not if it's different,
     since we want to allow the user to make the same query as the default one, but we don't want to
     pre-emptively run the default (and most expensive) one
   */
@@ -427,7 +428,7 @@ export class AdminIncomingMessageList extends Component {
     );
   };
 
-  setCampaignTextersLoadedFraction = percent => {
+  setCampaignTextersLoadedFraction = (percent) => {
     this.setState({ campaignTextersLoadedFraction: percent });
   };
 
@@ -437,7 +438,6 @@ export class AdminIncomingMessageList extends Component {
       page,
       pageSize,
       reassignmentAlert,
-      assignmentsFilter,
       tagsFilter
     } = this.state;
     const areContactsSelected =
@@ -545,8 +545,9 @@ export class AdminIncomingMessageList extends Component {
           title={reassignmentAlert && reassignmentAlert.title}
           actions={[
             <FlatButton
+              key="ok"
               label="Ok"
-              primary={true}
+              primary
               onClick={this.closeReassignmentDialog}
             />
           ]}
@@ -562,7 +563,7 @@ export class AdminIncomingMessageList extends Component {
 }
 
 const mutations = {
-  megaReassignCampaignContacts: ownProps => (
+  megaReassignCampaignContacts: (_ownProps) => (
     organizationId,
     campaignIdsContactIds,
     newTexterUserIds
@@ -583,7 +584,10 @@ const mutations = {
     variables: { organizationId, campaignIdsContactIds, newTexterUserIds }
   }),
 
-  markForSecondPass: ownProps => (organizationId, campaignIdsContactIds) => ({
+  markForSecondPass: (_ownProps) => (
+    organizationId,
+    campaignIdsContactIds
+  ) => ({
     mutation: gql`
       mutation markForSecondPass(
         $organizationId: String!
@@ -600,7 +604,7 @@ const mutations = {
     variables: { organizationId, campaignIdsContactIds }
   }),
 
-  megaBulkReassignCampaignContacts: ownProps => (
+  megaBulkReassignCampaignContacts: (_ownProps) => (
     organizationId,
     campaignsFilter,
     assignmentsFilter,

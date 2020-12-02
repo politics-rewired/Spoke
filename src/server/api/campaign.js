@@ -1,14 +1,14 @@
+import { ExternalSyncReadinessState } from "../../api/campaign";
+import { emptyRelayPage } from "../../api/pagination";
 import { config } from "../../config";
-import { sqlResolvers } from "./lib/utils";
-import { formatPage } from "./lib/pagination";
-import { r, cacheableData } from "../models";
+import { cacheOpts, memoizer } from "../memoredis";
+import { cacheableData, r } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
-import { getUsers } from "./user";
-import { memoizer, cacheOpts } from "../memoredis";
 import { accessRequired } from "./errors";
 import { symmetricEncrypt } from "./lib/crypto";
-import { emptyRelayPage } from "../../api/pagination";
-import { ExternalSyncReadinessState } from "../../api/campaign";
+import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
+import { getUsers } from "./user";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
   let query = queryParam;
@@ -89,16 +89,23 @@ const doGetCampaigns = memoizer.memoize(
         campaigns,
         pageInfo
       };
-    } else {
-      return await campaignsQuery;
     }
+    return campaignsQuery;
   },
   cacheOpts.CampaignsList
 );
 
 export async function getCampaigns(organizationId, cursor, campaignsFilter) {
-  return await doGetCampaigns({ organizationId, cursor, campaignsFilter });
+  return doGetCampaigns({ organizationId, cursor, campaignsFilter });
 }
+
+const getCampaignOrganization = memoizer.memoize(async ({ campaignId }) => {
+  const campaign = await r
+    .reader("campaign")
+    .where({ id: campaignId })
+    .first("organization_id");
+  return campaign.organization_id;
+}, cacheOpts.CampaignOrganizationId);
 
 export const resolvers = {
   JobRequest: {
@@ -113,9 +120,9 @@ export const resolvers = {
     ])
   },
   CampaignStats: {
-    sentMessagesCount: async campaign => {
+    sentMessagesCount: async (campaign) => {
       const getSentMessagesCount = memoizer.memoize(async ({ campaignId }) => {
-        return await r.parseCount(
+        return r.parseCount(
           r
             .reader("campaign_contact")
             .join(
@@ -131,12 +138,12 @@ export const resolvers = {
         );
       }, cacheOpts.CampaignSentMessagesCount);
 
-      return await getSentMessagesCount({ campaignId: campaign.id });
+      return getSentMessagesCount({ campaignId: campaign.id });
     },
-    receivedMessagesCount: async campaign => {
+    receivedMessagesCount: async (campaign) => {
       const getReceivedMessagesCount = memoizer.memoize(
         async ({ campaignId }) => {
-          return await r.parseCount(
+          return r.parseCount(
             r
               .reader("campaign_contact")
               .join(
@@ -154,12 +161,12 @@ export const resolvers = {
         cacheOpts.CampaignReceivedMessagesCount
       );
 
-      return await getReceivedMessagesCount({ campaignId: campaign.id });
+      return getReceivedMessagesCount({ campaignId: campaign.id });
     },
-    optOutsCount: async campaign => {
+    optOutsCount: async (campaign) => {
       const getOptOutsCount = memoizer.memoize(
         async ({ campaignId, archived }) => {
-          return await r.getCount(
+          return r.getCount(
             r
               .reader("campaign_contact")
               .where({
@@ -172,7 +179,7 @@ export const resolvers = {
         cacheOpts.CampaignOptOutsCount
       );
 
-      return await getOptOutsCount({
+      return getOptOutsCount({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
@@ -180,45 +187,46 @@ export const resolvers = {
   },
   CampaignReadiness: {
     id: ({ id }) => id,
-    basics: campaign =>
+    basics: (campaign) =>
       campaign.title !== "" &&
       campaign.description !== "" &&
       campaign.due_by !== null,
-    textingHours: campaign =>
+    textingHours: (campaign) =>
       campaign.textingHoursStart !== null &&
       campaign.textingHoursEnd !== null &&
       campaign.timezone !== null,
     integration: () => true,
-    contacts: campaign =>
+    contacts: (campaign) =>
       r
         .reader("campaign_contact")
         .select("campaign_contact.id")
         .where({ campaign_id: campaign.id })
         .limit(1)
-        .then(records => records.length > 0),
+        .then((records) => records.length > 0),
     autoassign: () => true,
     cannedResponses: () => true
   },
   CampaignsReturn: {
-    __resolveType(obj, context, _) {
+    __resolveType(obj, _context, _) {
       if (Array.isArray(obj)) {
         return "CampaignsList";
-      } else if ("campaigns" in obj && "pageInfo" in obj) {
+      }
+      if ("campaigns" in obj && "pageInfo" in obj) {
         return "PaginatedCampaigns";
       }
       return null;
     }
   },
   CampaignsList: {
-    campaigns: campaigns => {
+    campaigns: (campaigns) => {
       return campaigns;
     }
   },
   PaginatedCampaigns: {
-    campaigns: queryResult => {
+    campaigns: (queryResult) => {
       return queryResult.campaigns;
     },
-    pageInfo: queryResult => {
+    pageInfo: (queryResult) => {
       if ("pageInfo" in queryResult) {
         return queryResult.pageInfo;
       }
@@ -244,11 +252,12 @@ export const resolvers = {
       "createdAt",
       "landlinesFiltered"
     ]),
-    readiness: campaign => campaign,
-    repliesStaleAfter: campaign => campaign.replies_stale_after_minutes,
-    useDynamicAssignment: _ => false,
-    isAssignmentLimitedToTeams: campaign => campaign.limit_assignment_to_teams,
-    dueBy: campaign =>
+    readiness: (campaign) => campaign,
+    repliesStaleAfter: (campaign) => campaign.replies_stale_after_minutes,
+    useDynamicAssignment: (_) => false,
+    isAssignmentLimitedToTeams: (campaign) =>
+      campaign.limit_assignment_to_teams,
+    dueBy: (campaign) =>
       campaign.due_by instanceof Date || !campaign.due_by
         ? campaign.due_by || null
         : new Date(campaign.due_by),
@@ -267,20 +276,20 @@ export const resolvers = {
       }
       return query;
     },
-    teams: async campaign => {
+    teams: async (campaign) => {
       const getCampaignTeams = memoizer.memoize(async ({ campaignId }) => {
-        return await r
+        return r
           .reader("team")
           .select("team.*")
           .join("campaign_team", "campaign_team.team_id", "=", "team.id")
           .where({
-            "campaign_team.campaign_id": campaign.id
+            "campaign_team.campaign_id": campaignId
           });
       }, cacheOpts.CampaignTeams);
 
-      return await getCampaignTeams({ campaignId: campaign.id });
+      return getCampaignTeams({ campaignId: campaign.id });
     },
-    texters: async campaign =>
+    texters: async (campaign) =>
       getUsers(campaign.organization_id, null, { campaignId: campaign.id }),
     assignments: async (campaign, { assignmentsFilter = {} }) => {
       // TODO: permissions check needed
@@ -292,7 +301,7 @@ export const resolvers = {
 
       return query;
     },
-    interactionSteps: async campaign => {
+    interactionSteps: async (campaign) => {
       if (campaign.interactionSteps) {
         return campaign.interactionSteps;
       }
@@ -304,34 +313,34 @@ export const resolvers = {
         return interactionSteps;
       }, cacheOpts.CampaignInteractionSteps);
 
-      return await getInteractionSteps({ campaignId: campaign.id });
+      return getInteractionSteps({ campaignId: campaign.id });
     },
-    cannedResponses: async (campaign, { userId }) => {
+    cannedResponses: async (campaign, _, { user }) => {
       const getCannedResponses = memoizer.memoize(
         async ({ campaignId, userId }) => {
-          return await cacheableData.cannedResponse.query({
+          return cacheableData.cannedResponse.query({
             userId: userId || "",
-            campaignId: campaignId
+            campaignId
           });
         },
         cacheOpts.CampaignCannedResponses
       );
 
-      return await getCannedResponses({ campaignId: campaign.id });
+      return getCannedResponses({ campaignId: campaign.id, userId: user.id });
     },
-    contacts: async campaign =>
+    contacts: async (campaign) =>
       r
         .reader("campaign_contact")
         .where({ campaign_id: campaign.id })
         .whereRaw(`archived = ${campaign.is_archived}`), // partial index friendly
-    contactsCount: async campaign =>
-      await r.getCount(
+    contactsCount: async (campaign) =>
+      r.getCount(
         r
           .reader("campaign_contact")
           .where({ campaign_id: campaign.id })
           .whereRaw(`archived = ${campaign.is_archived}`) // partial index friendly
       ),
-    hasUnassignedContacts: async campaign => {
+    hasUnassignedContacts: async (campaign) => {
       if (config.BAD_BENS_DISABLE_HAS_UNASSIGNED_CONTACTS) {
         return false;
       }
@@ -373,12 +382,12 @@ export const resolvers = {
         cacheOpts.CampaignHasUnassignedContacts
       );
 
-      return await getHasUnassignedContacts({
+      return getHasUnassignedContacts({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
     },
-    hasUnsentInitialMessages: async campaign => {
+    hasUnsentInitialMessages: async (campaign) => {
       if (
         config.HIDE_CAMPAIGN_STATE_VARS_ON_ARCHIVED_CAMPAIGNS &&
         campaign.is_archived
@@ -403,12 +412,12 @@ export const resolvers = {
         cacheOpts.CampaignHasUnsentInitialMessages
       );
 
-      return await getHasUnsentInitialMessages({
+      return getHasUnsentInitialMessages({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
     },
-    hasUnhandledMessages: async campaign => {
+    hasUnhandledMessages: async (campaign) => {
       if (
         config.HIDE_CAMPAIGN_STATE_VARS_ON_ARCHIVED_CAMPAIGNS &&
         campaign.is_archived
@@ -451,16 +460,16 @@ export const resolvers = {
         cacheOpts.CampaignHasUnhandledMessages
       );
 
-      return await getHasUnhandledMessages({
+      return getHasUnhandledMessages({
         campaignId: campaign.id,
         archived: campaign.is_archived,
         organizationId: campaign.organization_id
       });
     },
-    customFields: async campaign =>
+    customFields: async (campaign) =>
       campaign.customFields ||
       cacheableData.campaign.dbCustomFields(campaign.id),
-    stats: async campaign => campaign,
+    stats: async (campaign) => campaign,
     editors: async (campaign, _, { user }) => {
       if (r.redis) {
         return currentEditors(r.redis, campaign, user);
@@ -477,14 +486,14 @@ export const resolvers = {
       const token = symmetricEncrypt(`${campaign.id}`);
       return token;
     },
-    externalSystem: async campaign =>
+    externalSystem: async (campaign) =>
       campaign.external_system_id
         ? r
             .reader("external_system")
             .where({ id: campaign.external_system_id })
             .first()
         : null,
-    syncReadiness: async campaign => {
+    syncReadiness: async (campaign) => {
       if (!campaign.external_system_id)
         return ExternalSyncReadinessState.MISSING_SYSTEM;
 
@@ -506,8 +515,8 @@ export const resolvers = {
       return missing_and_required > 0
         ? ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING
         : includes_not_active > 0
-          ? ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS
-          : ExternalSyncReadinessState.READY;
+        ? ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS
+        : ExternalSyncReadinessState.READY;
     },
     externalSyncConfigurations: async (campaign, { after, first }) => {
       if (!campaign.external_system_id) return emptyRelayPage();
@@ -522,11 +531,3 @@ export const resolvers = {
     }
   }
 };
-
-const getCampaignOrganization = memoizer.memoize(async ({ campaignId }) => {
-  const campaign = await r
-    .reader("campaign")
-    .where({ id: campaignId })
-    .first("organization_id");
-  return campaign.organization_id;
-}, cacheOpts.CampaignOrganizationId);

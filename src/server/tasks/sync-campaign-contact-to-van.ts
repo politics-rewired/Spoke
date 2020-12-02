@@ -1,13 +1,13 @@
 import { Task } from "pg-compose";
 import { post } from "superagent";
 
-import { r } from "../models";
 import logger from "../../logger";
-
 import { VanAuthPayload, withVan } from "../lib/external-systems";
+import { r } from "../models";
 
 class VANSyncError extends Error {
   status: number;
+
   body: string;
 
   constructor(status: number, body: string) {
@@ -180,7 +180,7 @@ export const syncCampaignContactToVAN: Task = async (
     } = canvassResult;
 
     const surveyResponses: VANSurveyResponse[] = response_options.map(
-      option => ({
+      (option) => ({
         type: "SurveyResponse",
         surveyQuestionId: option.survey_question_id,
         surveyResponseId: option.response_option_id
@@ -188,7 +188,7 @@ export const syncCampaignContactToVAN: Task = async (
     );
 
     const activistCodes: VANActivistCodeResponse[] = activist_codes.map(
-      code => ({
+      (code) => ({
         type: "ActivistCode",
         activistCodeId: code.activist_code_id,
         action: "Apply"

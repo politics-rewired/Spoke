@@ -1,13 +1,13 @@
 import fs from "fs";
 import path from "path";
 
-import { config, clientConfig } from "../../config";
+import { clientConfig, config } from "../../config";
 
 // -----------------------------------------
 // Asset Map
 // -----------------------------------------
 
-let assetMap = {
+const assetMap = {
   "bundle.js": "/assets/bundle.js"
 };
 
@@ -29,7 +29,7 @@ if (config.isProduction) {
     )
   );
   const staticBase = config.STATIC_BASE_URL;
-  for (var a in assetMapData) {
+  for (const a in assetMapData) {
     assetMap[a] = staticBase + assetMapData[a];
   }
 }
@@ -63,7 +63,7 @@ const rollbarScript = config.ROLLBAR_ACCESS_TOKEN
   `
   : "";
 
-const windowVars = Object.keys(clientConfig).map(varName => {
+const windowVars = Object.keys(clientConfig).map((varName) => {
   const value = clientConfig[varName];
   const escapedValue = typeof value === "string" ? `"${value}"` : value;
   return `window.${varName}=${escapedValue};`;

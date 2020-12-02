@@ -1,14 +1,15 @@
+import { css, StyleSheet } from "aphrodite";
+import camelCase from "lodash/camelCase";
+import { FlatButton } from "material-ui";
+import Avatar from "material-ui/Avatar";
+import Divider from "material-ui/Divider";
+import { List, ListItem } from "material-ui/List";
+import Paper from "material-ui/Paper";
 import PropTypes from "prop-types";
 import React from "react";
-import Paper from "material-ui/Paper";
-import { List, ListItem } from "material-ui/List";
-import Divider from "material-ui/Divider";
-import Avatar from "material-ui/Avatar";
-import { withRouter } from "react-router";
-import camelCase from "lodash/camelCase";
+import { withRouter } from "react-router-dom";
+
 import { dataTest } from "../lib/attributes";
-import { FlatButton } from "material-ui";
-import { StyleSheet, css } from "aphrodite";
 
 const styles = StyleSheet.create({
   sideBarWithMenu: {
@@ -37,10 +38,10 @@ const Navigation = function Navigation(props) {
           }}
         >
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <FlatButton label={"Close Menu"} onClick={props.onToggleMenu} />
+            <FlatButton label="Close Menu" onClick={props.onToggleMenu} />
           </div>
           <List>
-            {sections.map(section => (
+            {sections.map((section) => (
               <ListItem
                 {...dataTest(camelCase(`nav ${section.path}`))}
                 key={section.name}
@@ -61,16 +62,15 @@ const Navigation = function Navigation(props) {
         </Paper>
       </div>
     );
-  } else {
-    return (
-      <div
-        className={css(styles.sideBarWithoutMenu)}
-        onClick={props.onToggleMenu}
-      >
-        <span style={{ cursor: "pointer" }}>SHOW MENU</span>
-      </div>
-    );
   }
+  return (
+    <div
+      className={css(styles.sideBarWithoutMenu)}
+      onClick={props.onToggleMenu}
+    >
+      <span style={{ cursor: "pointer" }}>SHOW MENU</span>
+    </div>
+  );
 };
 
 Navigation.defaultProps = {

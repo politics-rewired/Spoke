@@ -12,9 +12,9 @@ const sourceConfig = {
   pool: {
     min: ROW_CONCURRENCY,
     max: ROW_CONCURRENCY,
-    afterCreate: function(conn, done) {
+    afterCreate(conn, done) {
       const setCollation = "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;";
-      conn.query(setCollation, function(error, _results, _fields) {
+      conn.query(setCollation, function (error, _results, _fields) {
         done(error, conn);
       });
     }
@@ -27,9 +27,9 @@ const targetConfig = {
   pool: {
     min: ROW_CONCURRENCY,
     max: ROW_CONCURRENCY,
-    afterCreate: function(conn, done) {
+    afterCreate(conn, done) {
       const setCollation = "set session_replication_role = replica";
-      conn.query(setCollation, function(error, _results, _fields) {
+      conn.query(setCollation, function (error, _results, _fields) {
         done(error, conn);
       });
     }
@@ -61,7 +61,7 @@ const TABLES = [
 const SHOULD_TRUNCATE = true;
 
 async function main() {
-  for (let table of TABLES) {
+  for (const table of TABLES) {
     if (SHOULD_TRUNCATE) await truncateTargetTable(target, table);
     await copyAll(source, target, table);
   }
@@ -69,9 +69,7 @@ async function main() {
   process.exit();
 }
 
-main()
-  .then(console.log)
-  .catch(console.error);
+main().then(console.log).catch(console.error);
 
 async function truncateTargetTable(target, table) {
   const countToDelete = await target(table).count("id");
@@ -91,9 +89,7 @@ async function copyAll(source, target, table) {
   console.log(`[${table}]: Syncing since `, greatestTargetId);
 
   const countToTransfer = Object.values(
-    (await source(table)
-      .count("id")
-      .where("id", ">", greatestTargetId))[0]
+    (await source(table).count("id").where("id", ">", greatestTargetId))[0]
   )[0];
 
   console.log(`[${table}]: To transfer `, countToTransfer);
@@ -132,7 +128,7 @@ async function copyAll(source, target, table) {
           greatestTargetId,
           batch.offset,
           batch.limit
-        ).then(rowsCopied => {
+        ).then((rowsCopied) => {
           console.log(
             `[${table}] Did ${batch.batch} / ${batchCount}:`,
             lastBatchQueued * INSERT_BATCH_SIZE
@@ -174,7 +170,7 @@ async function copyBetween(
 
     if (tableMappings[table]) rowsToCopy = rowsToCopy.map(tableMappings[table]);
     // console.log(`[${table}]: Found ${rowsToCopy.length} more rows to copy`)
-    offset = offset + rowsToCopy.length;
+    offset += rowsToCopy.length;
   }
 
   async function copyBatch() {
@@ -203,7 +199,7 @@ async function copyBetween(
 }
 
 const tableMappings = {
-  message: row => {
+  message: (row) => {
     const result = Object.assign(row, { text: row.text.replace(/\0/g, "") });
     return result;
   }

@@ -1,7 +1,9 @@
 import { config } from "../../../config";
 import logger from "../../../logger";
-import { r } from "../../models";
+import thinky from "../thinky";
 import { optOutCache } from "./opt-out";
+
+const { r } = thinky;
 
 // <campaignContactId>
 //   - assignmentId
@@ -29,7 +31,7 @@ import { optOutCache } from "./opt-out";
 //   - messageStatus
 
 // TODO: relocate this method elsewhere
-const getMessageServiceSid = organization => {
+const getMessageServiceSid = (organization) => {
   let orgFeatures = {};
   if (organization.features) {
     orgFeatures = JSON.parse(organization.features);
@@ -45,27 +47,7 @@ const getMessageServiceSid = organization => {
   return orgSid;
 };
 
-const cacheKey = async id => `${config.CACHE_PREFIX | ""}contact-${id}`;
-
-const saveCacheRecord = async (dbRecord, organization, messageServiceSid) => {
-  if (r.redis) {
-    // basic contact record
-    const contactCacheObj = generateCacheRecord(
-      dbRecord,
-      organization.id,
-      messageServiceSid
-    );
-    await r.redis.setAsync(
-      cacheKey(dbRecord.id),
-      JSON.stringify(contactCacheObj)
-    );
-    // TODO:
-    //   messageStatus-<cell>
-  }
-  // NOT INCLUDED:
-  // - messages <cell><message_service_sid>
-  // - questionResponseValues <contact_id>
-};
+const cacheKey = async (id) => `${config.CACHE_PREFIX || ""}contact-${id}`;
 
 const generateCacheRecord = (dbRecord, organizationId, messageServiceSid) => ({
   // This should be contactinfo that
@@ -89,13 +71,34 @@ const generateCacheRecord = (dbRecord, organizationId, messageServiceSid) => ({
   state: dbRecord.state
 });
 
+const saveCacheRecord = async (dbRecord, organization, messageServiceSid) => {
+  if (r.redis) {
+    // basic contact record
+    // eslint-disable-next-line no-use-before-define
+    const contactCacheObj = generateCacheRecord(
+      dbRecord,
+      organization.id,
+      messageServiceSid
+    );
+    await r.redis.setAsync(
+      cacheKey(dbRecord.id),
+      JSON.stringify(contactCacheObj)
+    );
+    // TODO:
+    //   messageStatus-<cell>
+  }
+  // NOT INCLUDED:
+  // - messages <cell><message_service_sid>
+  // - questionResponseValues <contact_id>
+};
+
 export const campaignContactCache = {
-  clear: async id => {
+  clear: async (id) => {
     if (r.redis) {
       await r.redis.delAsync(cacheKey(id));
     }
   },
-  load: async id => {
+  load: async (id) => {
     if (r.redis) {
       const cacheRecord = await r.redis.getAsync(cacheKey(id));
       if (cacheRecord) {
@@ -110,10 +113,7 @@ export const campaignContactCache = {
         return cacheData;
       }
     }
-    return await r
-      .reader("campaign_contact")
-      .where({ id })
-      .first();
+    return r.reader("campaign_contact").where({ id }).first();
   },
   loadMany: async (organization, { campaign, queryFunc }) => {
     // queryFunc(query) has query input of a knex query
@@ -151,9 +151,11 @@ export const campaignContactCache = {
     const dbResult = await query;
     // 2. cache the data
     const messageServiceSid = getMessageServiceSid(organization);
-    for (let i = 0, l = dbResult.length; i < l; i++) {
+    for (let i = 0, l = dbResult.length; i < l; i += 1) {
       const dbRecord = dbResult[i];
       await saveCacheRecord(dbRecord, organization, messageServiceSid);
     }
   }
 };
+
+export default campaignContactCache;

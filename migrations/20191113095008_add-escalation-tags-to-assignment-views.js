@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create or replace view assignable_campaign_contacts_with_escalation_tags as (
       select
@@ -44,7 +44,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop view assignable_needs_reply_with_escalation_tags;
     drop view assignable_campaign_contacts_with_escalation_tags;

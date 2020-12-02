@@ -1,22 +1,22 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
+/* eslint-disable react/no-unused-state */
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-
-import { StyleSheet, css } from "aphrodite";
 import IconButton from "material-ui/IconButton/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
-import { ToolbarTitle } from "material-ui/Toolbar";
+import Check from "material-ui/svg-icons/action/check-circle";
 import NavigateBeforeIcon from "material-ui/svg-icons/image/navigate-before";
 import NavigateNextIcon from "material-ui/svg-icons/image/navigate-next";
-import Check from "material-ui/svg-icons/action/check-circle";
+import { ToolbarTitle } from "material-ui/Toolbar";
+import PropTypes from "prop-types";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
-import { loadData } from "../containers/hoc/with-operations";
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
-import Empty from "../components/Empty";
-import LoadingIndicator from "../components/LoadingIndicator";
+import { loadData } from "../containers/hoc/with-operations";
 import { catchError } from "../network/utils";
+import Empty from "./Empty";
+import LoadingIndicator from "./LoadingIndicator";
 
 const SEND_DELAY = window.SEND_DELAY ? parseInt(window.SEND_DELAY, 10) : 100;
 
@@ -124,7 +124,7 @@ class AssignmentTexter extends React.Component {
     ) {
       getIds = contactIds
         .slice(newIndex, newIndex + BATCH_GET)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter((cId) => !force || !this.state.contactCache[cId]);
     }
     // if we DO have current data, but don't have data base BATCH_FORWARD...
     if (
@@ -134,7 +134,7 @@ class AssignmentTexter extends React.Component {
     ) {
       getIds = contactIds
         .slice(newIndex + BATCH_FORWARD, newIndex + BATCH_FORWARD + BATCH_GET)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter((cId) => !force || !this.state.contactCache[cId]);
     }
 
     if (getIds.length) {
@@ -142,19 +142,19 @@ class AssignmentTexter extends React.Component {
 
       await this.props
         .loadContacts(getIds)
-        .then(response => {
+        .then((response) => {
           if (response.errors) throw new Error(response.errors);
           const { getAssignmentContacts } = response.data;
           if (!getAssignmentContacts)
             throw new Error("No assignment contacts returned!");
           return getAssignmentContacts;
         })
-        .then(getAssignmentContacts => {
+        .then((getAssignmentContacts) => {
           const foldIn = (contactCache, newContact) => {
             contactCache[newContact.id] = newContact;
             return contactCache;
           };
-          const oldCache = Object.assign({}, this.state.contactCache);
+          const oldCache = { ...this.state.contactCache };
           const contactCache = getAssignmentContacts.reduce(foldIn, oldCache);
 
           this.setState({
@@ -166,13 +166,13 @@ class AssignmentTexter extends React.Component {
     }
   };
 
-  incrementCurrentContactIndex = increment => {
+  incrementCurrentContactIndex = (increment) => {
     let newIndex = this.state.currentContactIndex;
-    newIndex = newIndex + increment;
+    newIndex += increment;
     this.updateCurrentContactIndex(newIndex);
   };
 
-  updateCurrentContactIndex = newIndex => {
+  updateCurrentContactIndex = (newIndex) => {
     this.setState({
       currentContactIndex: newIndex
     });
@@ -192,7 +192,7 @@ class AssignmentTexter extends React.Component {
       this.handleNavigateNext();
     } else {
       // Will look async and then redirect to todo page if not
-      this.props.assignContactsIfNeeded(/* checkServer*/ true);
+      this.props.assignContactsIfNeeded(/* checkServer */ true);
     }
   };
 
@@ -211,17 +211,17 @@ class AssignmentTexter extends React.Component {
     this.incrementCurrentContactIndex(-1);
   };
 
-  handleCannedResponseChange = script => {
+  handleCannedResponseChange = (script) => {
     this.handleScriptChange(script);
     this.handleClosePopover();
   };
 
-  handleScriptChange = script => {
+  handleScriptChange = (script) => {
     this.setState({ script });
   };
 
   handleExitTexter = () => {
-    this.props.history.push("/app/" + (this.props.organizationId || ""));
+    this.props.history.push(`/app/${this.props.organizationId || ""}`);
   };
 
   contactCount = () => {
@@ -284,8 +284,9 @@ class AssignmentTexter extends React.Component {
         this.props.mutations
           .sendMessage(payload.message, contact_id)
           .then(catchError)
-          .then(response => {
+          .then((response) => {
             const { id, messages } = response.data.sendMessage;
+            // eslint-disable-next-line react/no-direct-mutation-state
             this.state.contactCache[id].messages = messages;
           })
           .catch(this.handleSendMessageError(contact_id))
@@ -313,7 +314,7 @@ class AssignmentTexter extends React.Component {
       );
     }
 
-    Promise.all(promises).then(_ => {
+    Promise.all(promises).then((_) => {
       if (isLastOne) this.handleFinishContact();
     });
 
@@ -331,8 +332,8 @@ class AssignmentTexter extends React.Component {
     this.props.history.push(`/app/${campaign.organization.id}/todos`);
   };
 
-  handleSendMessageError = contact_id => e => {
-    let error = { id: contact_id };
+  handleSendMessageError = (contact_id) => (e) => {
+    const error = { id: contact_id };
 
     if (e.status === 402) {
       this.goBackToTodos();
@@ -362,7 +363,7 @@ class AssignmentTexter extends React.Component {
 
       setTimeout(() => {
         this.setState({
-          errors: this.state.errors.filter(e => e.id !== contact_id)
+          errors: this.state.errors.filter((err) => err.id !== contact_id)
         });
       }, 2000);
 
@@ -408,6 +409,7 @@ class AssignmentTexter extends React.Component {
       />
     );
   };
+
   renderEmpty = () => {
     return (
       <div>
@@ -461,7 +463,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       }
@@ -487,7 +489,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },
@@ -497,7 +499,7 @@ const queries = {
 };
 
 const mutations = {
-  createOptOut: ownProps => (optOut, campaignContactId) => ({
+  createOptOut: () => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -517,7 +519,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  tagContact: ownProps => (campaignContactId, tag) => ({
+  tagContact: () => (campaignContactId, tag) => ({
     mutation: gql`
       mutation tagConversation(
         $campaignContactId: String!
@@ -534,7 +536,7 @@ const mutations = {
       tag
     }
   }),
-  editCampaignContactMessageStatus: ownProps => (
+  editCampaignContactMessageStatus: () => (
     messageStatus,
     campaignContactId
   ) => ({
@@ -557,10 +559,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  deleteQuestionResponses: ownProps => (
-    interactionStepIds,
-    campaignContactId
-  ) => ({
+  deleteQuestionResponses: () => (interactionStepIds, campaignContactId) => ({
     mutation: gql`
       mutation deleteQuestionResponses(
         $interactionStepIds: [String]
@@ -579,10 +578,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  updateQuestionResponses: ownProps => (
-    questionResponses,
-    campaignContactId
-  ) => ({
+  updateQuestionResponses: () => (questionResponses, campaignContactId) => ({
     mutation: gql`
       mutation updateQuestionResponses(
         $questionResponses: [QuestionResponseInput]
@@ -601,7 +597,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  sendMessage: ownProps => (message, campaignContactId) => ({
+  sendMessage: () => (message, campaignContactId) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!
@@ -624,7 +620,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  bulkSendMessages: ownProps => assignmentId => ({
+  bulkSendMessages: () => (assignmentId) => ({
     mutation: gql`
       mutation bulkSendMessages($assignmentId: Int!) {
         bulkSendMessages(assignmentId: $assignmentId) {

@@ -1,13 +1,12 @@
-import React, { Component } from "react";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
-
-import Paper from "material-ui/Paper";
-import TextField from "material-ui/TextField";
-import Toggle from "material-ui/Toggle";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
+import TextField from "material-ui/TextField";
+import Toggle from "material-ui/Toggle";
+import React, { Component } from "react";
 
 import { formatErrorMessage, withOperations } from "../hoc/with-operations";
 import CampaignPrefixSelector from "./CampaignPrefixSelector";
@@ -48,7 +47,7 @@ class AdminBulkScriptEditor extends Component {
 
   handleChangeSearchString = (_event, searchString) => {
     const flaggedCharacters = PROTECTED_CHARACTERS.filter(
-      character => searchString.indexOf(character) > -1
+      (character) => searchString.indexOf(character) > -1
     );
     this.setState({ searchString, flaggedCharacters });
   };
@@ -61,7 +60,7 @@ class AdminBulkScriptEditor extends Component {
     this.setState({ includeArchived });
   };
 
-  handleCampaignPrefixChange = campaignTitlePrefixes => {
+  handleCampaignPrefixChange = (campaignTitlePrefixes) => {
     this.setState({ campaignTitlePrefixes });
   };
 
@@ -88,7 +87,7 @@ class AdminBulkScriptEditor extends Component {
       "campaignTitlePrefixes"
     ]);
     findAndReplace.campaignTitlePrefixes = findAndReplace.campaignTitlePrefixes.map(
-      prefix => prefix.value
+      (prefix) => prefix.value
     );
     try {
       const response = await this.props.mutations.bulkUpdateScript(
@@ -124,16 +123,17 @@ class AdminBulkScriptEditor extends Component {
     const isSubmitDisabled = isSubmitting || !searchString;
 
     const flaggedCharacterActions = [
-      <FlatButton label="Cancel" onClick={this.handleClose} />,
+      <FlatButton key="cancel" label="Cancel" onClick={this.handleClose} />,
       <FlatButton
+        key="confirm"
         label="Confirm"
-        primary={true}
+        primary
         onClick={this.handleConfirmSubmit}
       />
     ];
 
     const dialogActions = [
-      <FlatButton label="OK" primary={true} onClick={this.handleClose} />
+      <FlatButton key="ok" label="OK" primary onClick={this.handleClose} />
     ];
 
     return (
@@ -152,7 +152,7 @@ class AdminBulkScriptEditor extends Component {
             <p style={{ color: "#FFAA00" }}>
               Warning: Your search text contains the following special
               characters:{" "}
-              {flaggedCharacters.map(char => (
+              {flaggedCharacters.map((char) => (
                 <span key={char} style={styles.code}>
                   {char}
                 </span>
@@ -191,7 +191,7 @@ class AdminBulkScriptEditor extends Component {
         </Paper>
         <RaisedButton
           label={isSubmitting ? "Working..." : "Find & replace"}
-          primary={true}
+          primary
           disabled={isSubmitDisabled}
           onClick={this.handleSubmitJob}
         />
@@ -239,14 +239,13 @@ class AdminBulkScriptEditor extends Component {
             onRequestClose={this.handleClose}
           >
             <ul>
-              {this.state.result.map((replacedText, index) => (
-                <li key={index}>
-                  Campaign ID: {replacedText.campaignId}
+              {this.state.result.map(({ campaignId, found, replaced }) => (
+                <li key={`${campaignId}|${found}|${replaced}`}>
+                  Campaign ID: {campaignId}
                   <br />
-                  Found: <span style={styles.code}>{replacedText.found}</span>
+                  Found: <span style={styles.code}>{found}</span>
                   <br />
-                  Replaced with:{" "}
-                  <span style={styles.code}>{replacedText.replaced}</span>
+                  Replaced with: <span style={styles.code}>{replaced}</span>
                 </li>
               ))}
             </ul>
@@ -264,7 +263,7 @@ class AdminBulkScriptEditor extends Component {
 }
 
 const mutations = {
-  bulkUpdateScript: ownProps => findAndReplace => ({
+  bulkUpdateScript: (ownProps) => (findAndReplace) => ({
     mutation: gql`
       mutation bulkUpdateScript(
         $organizationId: String!

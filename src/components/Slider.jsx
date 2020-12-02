@@ -1,5 +1,6 @@
 import type from "prop-types";
 import React from "react";
+
 import theme from "../styles/theme";
 
 const Slider = ({ maxValue, value, color, direction }) => {

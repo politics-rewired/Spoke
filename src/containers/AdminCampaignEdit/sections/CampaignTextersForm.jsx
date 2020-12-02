@@ -1,23 +1,22 @@
+import { css, StyleSheet } from "aphrodite";
+import orderBy from "lodash/orderBy";
+import AutoComplete from "material-ui/AutoComplete";
+import IconButton from "material-ui/IconButton";
+import RaisedButton from "material-ui/RaisedButton";
+import Snackbar from "material-ui/Snackbar";
+import { red600 } from "material-ui/styles/colors";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
+import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
-import * as yup from "yup";
 import Form from "react-formal";
-import orderBy from "lodash/orderBy";
-import { StyleSheet, css } from "aphrodite";
+import * as yup from "yup";
 
-import AutoComplete from "material-ui/AutoComplete";
-import Snackbar from "material-ui/Snackbar";
-import RaisedButton from "material-ui/RaisedButton";
-import IconButton from "material-ui/IconButton";
-import Toggle from "material-ui/Toggle";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import { red600 } from "material-ui/styles/colors";
-
-import { dataTest } from "../../../lib/attributes";
-import { dataSourceItem } from "../../../components/utils";
-import theme from "../../../styles/theme";
 import GSForm from "../../../components/forms/GSForm";
 import Slider from "../../../components/Slider";
+import { dataSourceItem } from "../../../components/utils";
+import { dataTest } from "../../../lib/attributes";
+import theme from "../../../styles/theme";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const styles = StyleSheet.create({
@@ -117,6 +116,18 @@ export default class CampaignTextersForm extends React.Component {
     snackbarMessage: ""
   };
 
+  formSchema = yup.object({
+    texters: yup.array().of(
+      yup.object({
+        id: yup.string(),
+        assignment: yup.object({
+          needsMessageCount: yup.string(),
+          maxContacts: yup.string().nullable()
+        })
+      })
+    )
+  });
+
   handleDynamicAssignmentToggle = (_ev, toggled) =>
     this.props.onChange({ useDynamicAssignment: toggled });
 
@@ -124,9 +135,11 @@ export default class CampaignTextersForm extends React.Component {
     this.setState({ autoSplit: toggled }, () => {
       if (!this.state.autoSplit) return;
 
-      let { contactsCount, texters } = this.formValues();
+      const values = this.formValues();
+      const { texters } = values;
+      let { contactsCount } = values;
       contactsCount = Math.floor(contactsCount / texters.length);
-      const newTexters = texters.map(texter => ({
+      const newTexters = texters.map((texter) => ({
         ...texter,
         assignment: {
           ...texter.assignment,
@@ -140,7 +153,7 @@ export default class CampaignTextersForm extends React.Component {
       this.onChange(newFormValues);
     });
 
-  onChange = formValues => {
+  onChange = (formValues) => {
     const existingFormValues = this.formValues();
     const changedTexterId = this.state.focusedTexterId;
     const newFormValues = {
@@ -152,9 +165,9 @@ export default class CampaignTextersForm extends React.Component {
       newFormValues.texters.length !== existingFormValues.texters.length;
 
     // 1. map form texters to existing texters. with needsMessageCount tweaked to minimums when invalid or useless
-    newFormValues.texters = newFormValues.texters.map(newTexter => {
-      const existingTexter = existingFormValues.texters.filter(
-        texter => (texter.id === newTexter.id ? texter : null)
+    newFormValues.texters = newFormValues.texters.map((newTexter) => {
+      const existingTexter = existingFormValues.texters.filter((texter) =>
+        texter.id === newTexter.id ? texter : null
       )[0];
       let messagedCount = 0;
       if (existingTexter) {
@@ -168,11 +181,11 @@ export default class CampaignTextersForm extends React.Component {
         newTexter.assignment.needsMessageCount,
         10
       );
-      let convertedMaxContacts = !!newTexter.assignment.maxContacts
-        ? parseInt(newTexter.assignment.maxContacts)
+      const convertedMaxContacts = newTexter.assignment.maxContacts
+        ? parseInt(newTexter.assignment.maxContacts, 10)
         : null;
 
-      if (isNaN(convertedNeedsMessageCount)) {
+      if (Math.isNaN(convertedNeedsMessageCount)) {
         convertedNeedsMessageCount = 0;
       }
       if (
@@ -191,7 +204,7 @@ export default class CampaignTextersForm extends React.Component {
         convertedNeedsMessageCount = 0;
       }
 
-      totalNeedsMessage = totalNeedsMessage + convertedNeedsMessageCount;
+      totalNeedsMessage += convertedNeedsMessageCount;
 
       return {
         ...newTexter,
@@ -213,7 +226,7 @@ export default class CampaignTextersForm extends React.Component {
     if (extraTexterCapacity > 0) {
       // 2. If extraTexterCapacity > 0, reduce the user's input to the number of contacts available
       // for assignment
-      newFormValues.texters = newFormValues.texters.map(newTexter => {
+      newFormValues.texters = newFormValues.texters.map((newTexter) => {
         if (newTexter.id === changedTexterId) {
           const returnTexter = newTexter;
           returnTexter.assignment.needsMessageCount -= extraTexterCapacity;
@@ -222,7 +235,7 @@ export default class CampaignTextersForm extends React.Component {
         }
         return newTexter;
       });
-      const focusedTexter = newFormValues.texters.find(texter => {
+      const focusedTexter = newFormValues.texters.find((texter) => {
         return texter.id === changedTexterId;
       });
       this.setState({
@@ -235,7 +248,7 @@ export default class CampaignTextersForm extends React.Component {
       // 3. if we don't have extraTexterCapacity and auto-split is on, then fill the texters with assignments
       const factor = 1;
       let index = 0;
-      let skipsByIndex = new Array(newFormValues.texters.length).fill(0);
+      const skipsByIndex = new Array(newFormValues.texters.length).fill(0);
       if (newFormValues.texters.length === 1) {
         const messagedCount =
           newFormValues.texters[0].assignment.contactsCount -
@@ -251,19 +264,15 @@ export default class CampaignTextersForm extends React.Component {
             texter.assignment.contactsCount -
               texter.assignment.needsMessageCount
           ) {
-            skipsByIndex[index]++;
-          } else {
-            if (!changedTexterId || texter.id !== changedTexterId) {
-              if (texter.assignment.needsMessageCount + factor >= 0) {
-                texter.assignment.needsMessageCount =
-                  texter.assignment.needsMessageCount + factor;
-                texter.assignment.contactsCount =
-                  texter.assignment.contactsCount + factor;
-                extraTexterCapacity = extraTexterCapacity + factor;
-              }
+            skipsByIndex[index] += 1;
+          } else if (!changedTexterId || texter.id !== changedTexterId) {
+            if (texter.assignment.needsMessageCount + factor >= 0) {
+              texter.assignment.needsMessageCount += factor;
+              texter.assignment.contactsCount += factor;
+              extraTexterCapacity += factor;
             }
           }
-          index = index + 1;
+          index += 1;
           if (index >= newFormValues.texters.length) {
             index = 0;
           }
@@ -274,19 +283,7 @@ export default class CampaignTextersForm extends React.Component {
     this.props.onChange(newFormValues);
   };
 
-  formSchema = yup.object({
-    texters: yup.array().of(
-      yup.object({
-        id: yup.string(),
-        assignment: yup.object({
-          needsMessageCount: yup.string(),
-          maxContacts: yup.string().nullable()
-        })
-      })
-    )
-  });
-
-  formValues() {
+  formValues = () => {
     const unorderedTexters = this.props.formValues.texters;
     return {
       ...this.props.formValues,
@@ -296,15 +293,17 @@ export default class CampaignTextersForm extends React.Component {
         ["asc", "asc"]
       )
     };
-  }
+  };
 
-  showSearch() {
+  showSearch = () => {
     const { orgTexters } = this.props;
     const { texters } = this.formValues();
 
     const dataSource = orgTexters
-      .filter(orgTexter => !texters.find(texter => texter.id === orgTexter.id))
-      .map(orgTexter => dataSourceItem(orgTexter.displayName, orgTexter.id));
+      .filter(
+        (orgTexter) => !texters.find((texter) => texter.id === orgTexter.id)
+      )
+      .map((orgTexter) => dataSourceItem(orgTexter.displayName, orgTexter.id));
 
     const filter = (searchText, key) =>
       key === "allTexters"
@@ -317,18 +316,18 @@ export default class CampaignTextersForm extends React.Component {
         style={inlineStyles.autocomplete}
         autoFocus
         onFocus={() => this.setState({ searchText: "" })}
-        onUpdateInput={searchText => this.setState({ searchText })}
+        onUpdateInput={(searchText) => this.setState({ searchText })}
         searchText={this.state.searchText}
         filter={filter}
         hintText="Search for texters to assign"
         dataSource={dataSource}
-        onNewRequest={value => {
+        onNewRequest={(value) => {
           // If you're searching but get no match, value is a string
           // representing your search term, but we only want to handle matches
           if (typeof value === "object") {
             const texterId = value.value.key;
             const newTexter = this.props.orgTexters.find(
-              texter => texter.id === texterId
+              (texter) => texter.id === texterId
             );
             this.onChange({
               texters: [
@@ -349,14 +348,14 @@ export default class CampaignTextersForm extends React.Component {
     );
 
     return <div>{orgTexters.length > 0 ? autocomplete : ""}</div>;
-  }
+  };
 
-  addAllTexters() {
+  addAllTexters = () => {
     const { orgTexters } = this.props;
 
-    const textersToAdd = orgTexters.map(orgTexter => {
-      const id = orgTexter.id;
-      const firstName = orgTexter.firstName;
+    const textersToAdd = orgTexters.map((orgTexter) => {
+      const { id } = orgTexter;
+      const { firstName } = orgTexter;
       return {
         id,
         firstName,
@@ -368,24 +367,24 @@ export default class CampaignTextersForm extends React.Component {
     });
 
     this.onChange({ texters: textersToAdd });
-  }
+  };
 
-  removeEmptyTexters() {
+  removeEmptyTexters = () => {
     this.onChange({
       texters: this.props.formValues.texters.filter(
-        t =>
+        (t) =>
           t.assignment.contactsCount !== 0 ||
           t.assignment.needsMessageCount !== 0
       )
     });
-  }
+  };
 
-  getDisplayName(texterId) {
-    let texterObj = this.props.orgTexters.find(o => o.id === texterId);
+  getDisplayName = (texterId) => {
+    const texterObj = this.props.orgTexters.find((o) => o.id === texterId);
     return texterObj.displayName;
-  }
+  };
 
-  showTexters() {
+  showTexters = () => {
     return this.formValues().texters.map((texter, index) => {
       const messagedCount =
         texter.assignment.contactsCount - texter.assignment.needsMessageCount;
@@ -474,13 +473,13 @@ export default class CampaignTextersForm extends React.Component {
         </div>
       );
     });
-  }
+  };
 
   handleSnackbarClose = () =>
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
 
   render() {
-    const { organizationUuid, campaignId, isOverdue } = this.props;
+    const { isOverdue } = this.props;
 
     const assignedContacts = this.formValues().texters.reduce(
       (prev, texter) => prev + texter.assignment.contactsCount,
@@ -551,8 +550,9 @@ export default class CampaignTextersForm extends React.Component {
               >
                 {`Assigned contacts: ${assignedContacts}/${
                   this.formValues().contactsCount
-                }. Left unassigned: ${this.formValues().contactsCount -
-                  assignedContacts}`}
+                }. Left unassigned: ${
+                  this.formValues().contactsCount - assignedContacts
+                }`}
               </div>
               <div className={css(styles.splitToggle)}>
                 <Toggle

@@ -1,16 +1,16 @@
-import React from "react";
-import PropTypes from "prop-types";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import * as yup from "yup";
-import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
 import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
-import { loadData } from "./hoc/with-operations";
-import { dataTest } from "../lib/attributes";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
+import { dataTest } from "../lib/attributes";
+import { loadData } from "./hoc/with-operations";
 
 export const UserEditMode = Object.freeze({
   SignUp: "signup",
@@ -46,25 +46,28 @@ class UserEdit extends React.Component {
     }
   }
 
-  handleSave = async formData => {
+  handleSave = async (formData) => {
     switch (this.props.authType) {
-      case UserEditMode.Edit:
+      case UserEditMode.Edit: {
         const result = await this.props.mutations.editUser(formData);
         this.setState({ user: result.data.editUser });
         if (this.props.onRequestClose) {
           this.props.onRequestClose();
         }
         break;
+      }
       case UserEditMode.Change:
-        const changeRes = await this.props.mutations.changeUserPassword(
-          formData
-        );
-        if (changeRes.errors) {
-          throw new Error(changeRes.errors.graphQLErrors[0].message);
+        {
+          const changeRes = await this.props.mutations.changeUserPassword(
+            formData
+          );
+          if (changeRes.errors) {
+            throw new Error(changeRes.errors.graphQLErrors[0].message);
+          }
         }
         break;
 
-      default:
+      default: {
         // log in, sign up, or reset
         const allData = {
           nextUrl: this.props.nextUrl || "/",
@@ -89,6 +92,7 @@ class UserEdit extends React.Component {
           throw new Error(`Unknown error:\n\n${body}`);
         }
         break;
+      }
     }
   };
 
@@ -99,11 +103,8 @@ class UserEdit extends React.Component {
 
   openSuccessDialog = () => this.setState({ successDialog: true });
 
-  buildFormSchema = authType => {
-    const email = yup
-      .string()
-      .email()
-      .required();
+  buildFormSchema = (authType) => {
+    const email = yup.string().email().required();
     const userFields = {
       firstName: yup.string().required(),
       lastName: yup.string().required(),
@@ -151,6 +152,7 @@ class UserEdit extends React.Component {
           newPassword: yup.string().required(),
           passwordConfirm: passwordConfirm("newPassword")
         });
+      // no default
     }
   };
 
@@ -312,7 +314,7 @@ const queries = {
 };
 
 const mutations = {
-  editUser: ownProps => userData => ({
+  editUser: (ownProps) => (userData) => ({
     mutation: gql`
       mutation editUser(
         $organizationId: String!
@@ -338,7 +340,7 @@ const mutations = {
       userData
     }
   }),
-  changeUserPassword: ownProps => formData => ({
+  changeUserPassword: (ownProps) => (formData) => ({
     mutation: gql`
       mutation changeUserPassword(
         $userId: Int!

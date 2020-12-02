@@ -1,5 +1,5 @@
-import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 export const resolvers = {
   InteractionStep: {
@@ -10,14 +10,14 @@ export const resolvers = {
       "parentInteractionId",
       "isDeleted"
     ]),
-    scriptOptions: async interactionStep => {
+    scriptOptions: async (interactionStep) => {
       const { script, script_options } = interactionStep;
       return script_options || [script];
     },
-    questionText: async interactionStep => {
+    questionText: async (interactionStep) => {
       return interactionStep.question;
     },
-    question: async interactionStep => interactionStep,
+    question: async (interactionStep) => interactionStep,
     questionResponse: async (interactionStep, { campaignContactId }) =>
       r
         .reader("question_response")
@@ -26,6 +26,8 @@ export const resolvers = {
           interaction_step_id: interactionStep.id
         })
         .first()
-        .then(qr => qr || null)
+        .then((qr) => qr || null)
   }
 };
+
+export default resolvers;

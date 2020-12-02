@@ -1,9 +1,8 @@
-import React, { Component } from "react";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
+import React, { Component } from "react";
 
 import { loadData } from "../../../containers/hoc/with-operations";
 import ManageSurveyResponses from "./ManageSurveyResponses";
@@ -75,7 +74,7 @@ class SurveyColumn extends Component<Props & HocProps, State> {
         </div>
         <Snackbar
           open={errorMessage !== undefined}
-          message={errorMessage ? errorMessage : ""}
+          message={errorMessage || ""}
           onRequestClose={this.handleDismissError}
           autoHideDuration={4000}
         />

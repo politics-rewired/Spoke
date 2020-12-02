@@ -1,41 +1,41 @@
-import React from "react";
-import { Switch, Route, Redirect, withRouter } from "react-router-dom";
 import gql from "graphql-tag";
+import React from "react";
+import { Redirect, Route, Switch, withRouter } from "react-router-dom";
 
-import ApolloClientSingleton from "./network/apollo-client-singleton";
-import { AuthzProvider } from "./components/AuthzProvider";
 import AdminDashboard from "./components/AdminDashboard";
+import { AuthzProvider } from "./components/AuthzProvider";
+import Login from "./components/Login";
+import TexterDashboard from "./components/TexterDashboard";
+import TexterFaqs from "./components/TexterFaqs";
+import TopNav from "./components/TopNav";
+import AdminAssignmentControl from "./containers/AdminAssignmentControl";
+import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
+import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
+import AdminCampaignEdit from "./containers/AdminCampaignEdit";
 import AdminCampaignList from "./containers/AdminCampaignList";
 import AdminCampaignStats from "./containers/AdminCampaignStats";
-import AdminPersonList from "./containers/AdminPersonList";
-import AdminTeamEditor from "./containers/AdminTeamEditor";
-import TeamEditorDetail from "./containers/AdminTeamEditor/TeamEditorDetail";
-import AdminAssignmentControl from "./containers/AdminAssignmentControl";
-import AdminTagEditor from "./containers/AdminTagEditor";
-import AdminOptOutList from "./containers/AdminOptOutList";
-import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
-import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
-import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
-import AdminTrollAlarms from "./containers/AdminTrollAlarms";
+import AdminExternalSystems from "./containers/AdminExternalSystems";
 import AdminIncomingMessageList from "./containers/AdminIncomingMessageList";
 import EscalatedConversationList from "./containers/AdminIncomingMessageList/EscalatedConversationList";
-import AdminCampaignEdit from "./containers/AdminCampaignEdit";
+import AdminOptOutList from "./containers/AdminOptOutList";
+import AdminPersonList from "./containers/AdminPersonList";
 import AdminReplySender from "./containers/AdminReplySender";
-import TexterDashboard from "./components/TexterDashboard";
-import TopNav from "./components/TopNav";
-import DashboardLoader from "./containers/DashboardLoader";
-import TexterTodoList from "./containers/TexterTodoList";
-import TexterTodo from "./containers/TexterTodo";
-import Login from "./components/Login";
-import Terms from "./containers/Terms";
+import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
+import AdminTagEditor from "./containers/AdminTagEditor";
+import AdminTeamEditor from "./containers/AdminTeamEditor";
+import TeamEditorDetail from "./containers/AdminTeamEditor/TeamEditorDetail";
+import AdminTrollAlarms from "./containers/AdminTrollAlarms";
 import CreateOrganization from "./containers/CreateOrganization";
-import JoinTeam from "./containers/JoinTeam";
+import DashboardLoader from "./containers/DashboardLoader";
 import Home from "./containers/Home";
+import JoinTeam from "./containers/JoinTeam";
 import SettingsRouter from "./containers/Settings";
-import AdminExternalSystems from "./containers/AdminExternalSystems";
+import Terms from "./containers/Terms";
+import TexterTodo from "./containers/TexterTodo";
+import TexterTodoList from "./containers/TexterTodoList";
 import UserEdit from "./containers/UserEdit";
-import TexterFaqs from "./components/TexterFaqs";
 import FAQs from "./lib/faqs";
+import ApolloClientSingleton from "./network/apollo-client-singleton";
 
 class ProtectedInner extends React.Component {
   state = { isAuthed: false };
@@ -52,9 +52,9 @@ class ProtectedInner extends React.Component {
         }
       `
     })
-      .then(result => result.data.currentUser.id)
+      .then((result) => result.data.currentUser.id)
       .then(() => this.setState({ isAuthed: true }))
-      .catch(_err => history.push(loginUrl));
+      .catch((_err) => history.push(loginUrl));
   }
 
   render() {
@@ -67,7 +67,7 @@ const Protected = withRouter(ProtectedInner);
 const AuthenticatedRoute = ({ component: Component, ...rest }) => (
   <Route
     {...rest}
-    render={routeProps => (
+    render={(routeProps) => (
       <Protected>
         <Component {...routeProps} />
       </Protected>
@@ -75,12 +75,12 @@ const AuthenticatedRoute = ({ component: Component, ...rest }) => (
   />
 );
 
-const AdminCampaignRoutes = props => {
+const AdminCampaignRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignPath = "/admin/:organizationId/campaigns/:campaignId";
   return (
     <Switch>
-      <Route path={campaignPath} exact={true} component={AdminCampaignStats} />
+      <Route path={campaignPath} exact component={AdminCampaignStats} />
       <Route path={`${campaignPath}/edit`} component={AdminCampaignEdit} />
       <Route
         path={`${campaignPath}/send-replies`}
@@ -91,12 +91,12 @@ const AdminCampaignRoutes = props => {
   );
 };
 
-const AdminCampaignListRoutes = props => {
+const AdminCampaignListRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignsPath = "/admin/:organizationId/campaigns";
   return (
     <Switch>
-      <Route path={campaignsPath} exact={true} component={AdminCampaignList} />
+      <Route path={campaignsPath} exact component={AdminCampaignList} />
       <Route
         path={`${campaignsPath}/:campaignId`}
         component={AdminCampaignRoutes}
@@ -106,19 +106,19 @@ const AdminCampaignListRoutes = props => {
   );
 };
 
-const AdminTeamRoutes = props => {
+const AdminTeamRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const teamsPath = "/admin/:organizationId/teams";
   return (
     <Switch>
-      <Route path={teamsPath} exact={true} component={AdminTeamEditor} />
+      <Route path={teamsPath} exact component={AdminTeamEditor} />
       <Route path={`${teamsPath}/:teamId`} component={TeamEditorDetail} />
       <Redirect to={teamsPath} />
     </Switch>
   );
 };
 
-const AdminOrganizationRoutes = props => {
+const AdminOrganizationRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const organizationPath = "/admin/:organizationId";
   const { organizationId } = props.match.params;
@@ -179,7 +179,7 @@ const AdminOrganizationRoutes = props => {
             component={AdminExternalSystems}
           />
           <Redirect
-            exact={true}
+            exact
             path={`${organizationPath}/settings`}
             to={`${organizationPath}/settings/general`}
           />
@@ -198,8 +198,8 @@ const AdminRoutes = ({ match }) => (
   <Switch>
     <Route
       path={match.path}
-      exact={true}
-      render={indexProps => (
+      exact
+      render={(indexProps) => (
         <DashboardLoader path={match.path} {...indexProps} />
       )}
     />
@@ -211,12 +211,12 @@ const AdminRoutes = ({ match }) => (
   </Switch>
 );
 
-const TexterDashboardRoute = props => {
+const TexterDashboardRoute = (props) => {
   const { children, main, topNav, fullScreen, ...rest } = props;
   return (
     <Route
       {...rest}
-      render={routeProps => (
+      render={(routeProps) => (
         <TexterDashboard
           main={main}
           topNav={topNav}
@@ -230,41 +230,41 @@ const TexterDashboardRoute = props => {
   );
 };
 
-const TexterAssignmentRoutes = props => {
+const TexterAssignmentRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const assignmentPath = "/app/:organizationId/todos/:assignmentId";
   return (
     <Switch>
       <TexterDashboardRoute
         path={`${assignmentPath}/text`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsMessage" {...routeProups} />
         )}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/reply`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsResponse" {...routeProups} />
         )}
         topNav={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/stale`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="convo" {...routeProups} />
         )}
         topNav={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/skipped`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="closed" {...routeProups} />
         )}
         topNav={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/all`}
-        fullScreen={routeProups => (
+        fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsMessageOrResponse" {...routeProups} />
         )}
         topNav={undefined}
@@ -274,14 +274,14 @@ const TexterAssignmentRoutes = props => {
   );
 };
 
-const TexterTodoRoutes = props => {
+const TexterTodoRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const todosPath = "/app/:organizationId/todos";
   return (
     <Switch>
       <TexterDashboardRoute
         path={todosPath}
-        exact={true}
+        exact
         main={TexterTodoList}
         topNav={({ match }) => (
           <TopNav title="Texting" orgId={match.params.organizationId} />
@@ -295,7 +295,7 @@ const TexterTodoRoutes = props => {
   );
 };
 
-const TexterOrganizationRoutes = props => {
+const TexterOrganizationRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const organizationPath = "/app/:organizationId";
   const { organizationId } = props.match.params;
@@ -337,7 +337,7 @@ const TexterRoutes = ({ match }) => (
   <Switch>
     <Route
       path={match.path}
-      exact={true}
+      exact
       render={() => <DashboardLoader path={match.path} />}
     />
     <Route
@@ -350,7 +350,7 @@ const TexterRoutes = ({ match }) => (
 
 const AppRoutes = () => (
   <Switch>
-    <Route path="/" exact={true} component={Home} />
+    <Route path="/" exact component={Home} />
     <Route path="/login" component={Login} />
     <Route path="/terms" component={Terms} />
     <Route
@@ -367,7 +367,7 @@ const AppRoutes = () => (
     />
     <AuthenticatedRoute
       path="/:organizationUuid/join"
-      exact={true}
+      exact
       component={JoinTeam}
     />
     <AuthenticatedRoute

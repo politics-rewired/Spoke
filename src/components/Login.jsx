@@ -1,12 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
-import React from "react";
 import queryString from "query-string";
-import { withRouter } from "react-router";
-import { StyleSheet, css } from "aphrodite";
+import React from "react";
+import { withRouter } from "react-router-dom";
 
-import theme from "../styles/theme";
 import UserEdit, { UserEditMode } from "../containers/UserEdit";
-import UserPasswordReset from "../components/UserPasswordReset";
+import theme from "../styles/theme";
+import UserPasswordReset from "./UserPasswordReset";
 
 const styles = StyleSheet.create({
   fieldContainer: {
@@ -58,7 +58,7 @@ class LocalLogin extends React.Component {
   constructor(props) {
     super(props);
 
-    const nextUrl = queryString.parse(location.search).nextUrl || "/";
+    const nextUrl = queryString.parse(window.location.search).nextUrl || "/";
     this.state = {
       active: nextUrl.includes("reset")
         ? UserEditMode.Reset
@@ -66,12 +66,12 @@ class LocalLogin extends React.Component {
     };
   }
 
-  handleClick = e => {
+  handleClick = (e) => {
     this.setState({ active: e.target.name });
   };
 
-  naiveVerifyInviteValid = nextUrl =>
-    /\/\w{8}-(\w{4}\-){3}\w{12}(\/|$)/.test(nextUrl) ||
+  naiveVerifyInviteValid = (nextUrl) =>
+    /\/\w{8}-(\w{4}-){3}\w{12}(\/|$)/.test(nextUrl) ||
     nextUrl.includes("invite");
 
   render() {
@@ -155,10 +155,11 @@ const Login = ({ location, history }) => {
     case "local":
       return <LocalLoginWrapper location={location} history={history} />;
 
-    default:
-      const { nextUrl } = queryString.parse(location.search);
+    default: {
+      const { nextUrl } = queryString.parse(window.location.search);
       window.AuthService.login(nextUrl);
       return <div />;
+    }
   }
 };
 

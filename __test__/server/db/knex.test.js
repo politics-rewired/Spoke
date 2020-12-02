@@ -13,7 +13,7 @@ describe('The knex initial migration', async () => {
     await r.k.destroy()
   })
   // Test the schema for each table
-  for (let i = 0; i < tables.length; i++) {
+  for (let i = 0; i < tables.length; i += 1) {
     const t = tables[i]
     it(`generates the correct ${t} table schema`, async () => {
       // eslint-disable-next-line global-require
@@ -115,7 +115,7 @@ expect.extend({
     }
     // at this point, the originalIndexes array will be empty. Check for any remaining items in newIndexes, and output appropriate errors if they exist (since they're extraneous).
     if (newIndexes.length > 0) {
-      for (let i = 0; i < newIndexes.length; i++) {
+      for (let i = 0; i < newIndexes.length; i += 1) {
         const { conname, table_from } = newIndexes[i]
         const scopedconname = `${table_from}.${conname}`
         errors.push(`Received unexpected index ${printReceived(scopedconname)}`)

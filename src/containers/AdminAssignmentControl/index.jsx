@@ -1,13 +1,12 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
-import { Card, CardText, CardActions, CardHeader } from "material-ui/Card";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
-import RaisedButton from "material-ui/RaisedButton";
 import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import { loadData } from "../../containers/hoc/with-operations";
+import { loadData } from "../hoc/with-operations";
 import AssignmentRow from "./AssignmentRow";
 
 class AdminAssignmentControl extends Component {
@@ -20,7 +19,7 @@ class AdminAssignmentControl extends Component {
   assignmentPoolsWithChanges = () => {
     const { changes } = this.state;
     let assignmentPools = this.assignmentPoolsFromProps();
-    assignmentPools = assignmentPools.map(pool => {
+    assignmentPools = assignmentPools.map((pool) => {
       const poolChanges = changes[pool.id] || {};
       return Object.assign(pool, poolChanges);
     });
@@ -49,7 +48,7 @@ class AdminAssignmentControl extends Component {
     return assignmentPools;
   };
 
-  createHandleChangeAssignment = poolId => payload => {
+  createHandleChangeAssignment = (poolId) => (payload) => {
     const { changes } = this.state;
     const poolChanges = this.state.changes[poolId] || {};
     changes[poolId] = Object.assign(poolChanges, payload);
@@ -58,12 +57,12 @@ class AdminAssignmentControl extends Component {
 
   handleSaveAssignmentControls = async () => {
     const { changes } = this.state;
-    const payloads = Object.keys(changes).map(key => {
-      const teamPayload = Object.assign({}, changes[key], { id: key });
+    const payloads = Object.keys(changes).map((key) => {
+      const teamPayload = { ...changes[key], id: key };
 
       if (teamPayload.escalationTags) {
         teamPayload.escalationTagIds = teamPayload.escalationTags.map(
-          t => t.id
+          (t) => t.id
         );
         delete teamPayload.escalationTags;
       }
@@ -97,8 +96,9 @@ class AdminAssignmentControl extends Component {
 
     const dialogActions = [
       <FlatButton
+        key="close"
         label="Close"
-        primary={true}
+        primary
         onClick={this.handleCloseDialog}
       />
     ];
@@ -107,7 +107,7 @@ class AdminAssignmentControl extends Component {
       <Card className={className} containerStyle={containerStyle} style={style}>
         <CardHeader title="Assignment Request Controls" />
         <CardText>
-          {assignmentPools.map(assignmentPool => (
+          {assignmentPools.map((assignmentPool) => (
             <AssignmentRow
               key={assignmentPool.id}
               assignmentPool={assignmentPool}
@@ -126,7 +126,7 @@ class AdminAssignmentControl extends Component {
           />
         </CardActions>
         <Dialog
-          title={"Error saving Assignment Controls"}
+          title="Error saving Assignment Controls"
           actions={dialogActions}
           modal={false}
           open={!!error}
@@ -168,7 +168,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -177,7 +177,7 @@ const queries = {
 };
 
 const mutations = {
-  saveTeams: ownProps => teams => ({
+  saveTeams: (ownProps) => (teams) => ({
     mutation: gql`
       mutation saveTeams($organizationId: String!, $teams: [TeamInput]!) {
         saveTeams(organizationId: $organizationId, teams: $teams) {

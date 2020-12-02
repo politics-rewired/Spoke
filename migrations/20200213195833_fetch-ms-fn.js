@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create function get_messaging_service_for_campaign_contact_in_organization(campaign_contact_id integer, organization_id integer)
     returns messaging_service
@@ -21,7 +21,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(
     `drop function get_messaging_service_for_campaign_contact_in_organization`
   );

@@ -1,10 +1,10 @@
+import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
-import { memoizer, cacheOpts } from "../memoredis";
 
 export const resolvers = {
   Question: {
-    text: async interactionStep => interactionStep.question,
-    answerOptions: async interactionStep => {
+    text: async (interactionStep) => interactionStep.question,
+    answerOptions: async (interactionStep) => {
       const getAnswerOptions = memoizer.memoize(
         async ({ interactionStepId }) => {
           const answerOptions = await r
@@ -16,7 +16,7 @@ export const resolvers = {
             })
             .orderBy("answer_option");
 
-          return answerOptions.map(answerOption => ({
+          return answerOptions.map((answerOption) => ({
             value: answerOption.answer_option,
             action: answerOption.answer_actions,
             interaction_step_id: answerOption.id,
@@ -26,17 +26,17 @@ export const resolvers = {
         cacheOpts.InteractionStepChildren
       );
 
-      return await getAnswerOptions({ interactionStepId: interactionStep.id });
+      return getAnswerOptions({ interactionStepId: interactionStep.id });
     },
-    interactionStep: async interactionStep => interactionStep
+    interactionStep: async (interactionStep) => interactionStep
   },
   AnswerOption: {
-    value: answer => answer.value,
-    interactionStepId: answer => answer.interaction_step_id,
-    nextInteractionStep: async answer => {
+    value: (answer) => answer.value,
+    interactionStepId: (answer) => answer.interaction_step_id,
+    nextInteractionStep: async (answer) => {
       const getInteractionStep = memoizer.memoize(
         async ({ interactionStepId }) => {
-          return await r
+          return r
             .reader("interaction_step")
             .first("*")
             .where({ id: interactionStepId });
@@ -44,11 +44,11 @@ export const resolvers = {
         cacheOpts.InteractionStepSingleton
       );
 
-      return await getInteractionStep({
+      return getInteractionStep({
         interactionStepId: answer.interaction_step_id
       });
     },
-    responders: async answer =>
+    responders: async (answer) =>
       r
         .reader("question_response")
         .join(
@@ -60,7 +60,7 @@ export const resolvers = {
           interaction_step_id: answer.parent_interaction_step,
           value: answer.value
         }),
-    responderCount: async answer =>
+    responderCount: async (answer) =>
       r.parseCount(
         r
           .reader("question_response")
@@ -75,6 +75,8 @@ export const resolvers = {
           })
           .count()
       ),
-    question: async answer => answer.parent_interaction_step
+    question: async (answer) => answer.parent_interaction_step
   }
 };
+
+export default resolvers;

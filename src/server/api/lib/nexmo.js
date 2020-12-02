@@ -1,9 +1,11 @@
-import { config } from "../../../config";
-import logger from "../../../logger";
 import Nexmo from "nexmo";
+
+import { config } from "../../../config";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
+import logger from "../../../logger";
 import { r } from "../../models";
-import { getLastMessage, appendServiceResponse } from "./message-sending";
+// eslint-disable-next-line import/named
+import { appendServiceResponse, getLastMessage } from "./message-sending";
 
 let nexmo = null;
 const MAX_SEND_ATTEMPTS = 5;
@@ -18,11 +20,11 @@ async function convertMessagePartsToMessage(messageParts) {
   const firstPart = messageParts[0];
   const userNumber = firstPart.user_number;
   const contactNumber = firstPart.contact_number;
-  const serviceMessages = messageParts.map(part =>
+  const serviceMessages = messageParts.map((part) =>
     JSON.parse(part.service_message)
   );
   const text = serviceMessages
-    .map(serviceMessage => serviceMessage.text)
+    .map((serviceMessage) => serviceMessage.text)
     .join("");
 
   const lastMessage = await getLastMessage({
@@ -72,15 +74,13 @@ async function rentNewCell() {
       nexmo.number.buy("US", newCell.numbers[0].msisdn, (err, response) => {
         if (err) {
           reject(err);
-        } else {
+        } else if (response["error-code"] !== "200") {
           // It appears we need to check error-code in the response even if response is returned.
           // This library returns responses that look like { error-code: 401, error-label: 'not authenticated'}
           // or the bizarrely-named { error-code: 200 } even in the case of success
-          if (response["error-code"] !== "200") {
-            reject(new Error(response["error-code-label"]));
-          } else {
-            resolve(newCell.numbers[0].msisdn);
-          }
+          reject(new Error(response["error-code-label"]));
+        } else {
+          resolve(newCell.numbers[0].msisdn);
         }
       });
     });
@@ -115,7 +115,7 @@ async function sendMessage(message, trx = r.knex) {
           hasError = true;
         }
         if (response) {
-          response.messages.forEach(serviceMessages => {
+          response.messages.forEach((serviceMessages) => {
             if (serviceMessages.status !== "0") {
               hasError = true;
             }
@@ -158,7 +158,7 @@ async function sendMessage(message, trx = r.knex) {
 }
 
 async function handleDeliveryReport(report) {
-  if (report.hasOwnProperty("client-ref")) {
+  if (Object.prototype.hasOwnProperty.call(report, "client-ref")) {
     const message = await r
       .knex("message")
       .where({ id: report["client-ref"] })
@@ -177,19 +177,16 @@ async function handleDeliveryReport(report) {
       message.send_status = "ERROR";
     }
     const { id: messageId, ...messagePayload } = message;
-    await r
-      .knex("message")
-      .update(messagePayload)
-      .where({ id: messageId });
+    await r.knex("message").update(messagePayload).where({ id: messageId });
   }
 }
 
 async function handleIncomingMessage(message) {
   if (
-    !message.hasOwnProperty("to") ||
-    !message.hasOwnProperty("msisdn") ||
-    !message.hasOwnProperty("text") ||
-    !message.hasOwnProperty("messageId")
+    !Object.prototype.hasOwnProperty.call(message, "to") ||
+    !Object.prototype.hasOwnProperty.call(message, "msisdn") ||
+    !Object.prototype.hasOwnProperty.call(message, "text") ||
+    !Object.prototype.hasOwnProperty.call(message, "messageId")
   ) {
     logger.error("This is not an incoming message", { payload: message });
   }
@@ -202,11 +199,7 @@ async function handleIncomingMessage(message) {
   let parentId = "";
   if (isConcat) {
     logger.info(
-      `Incoming message part (${message["concat-part"]} of ${
-        message["concat-total"]
-      } for ref ${
-        message["concat-ref"]
-      }) from ${contactNumber} to ${userNumber}`
+      `Incoming message part (${message["concat-part"]} of ${message["concat-total"]} for ref ${message["concat-ref"]}) from ${contactNumber} to ${userNumber}`
     );
     parentId = message["concat-ref"];
   } else {

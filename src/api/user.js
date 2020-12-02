@@ -28,3 +28,5 @@ type PaginatedUsers {
 
 union UsersReturn = PaginatedUsers | UsersList
 `;
+
+export default schema;

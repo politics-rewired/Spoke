@@ -1,22 +1,20 @@
-import React from "react";
-import { compose } from "recompose";
-import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
-
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import React from "react";
+import { compose } from "recompose";
 
-import { loadData } from "../../containers/hoc/with-operations";
-import { QueryMap, MutationMap } from "../../network/types";
-import { RelayPaginatedResponse } from "../../api/pagination";
-import { ExternalSystem } from "../../api/external-system";
 import {
   ExternalSyncQuestionResponseConfig,
   FullListRefreshFragment
 } from "../../api/external-sync-config";
+import { ExternalSystem } from "../../api/external-system";
+import { RelayPaginatedResponse } from "../../api/pagination";
+import { loadData } from "../../containers/hoc/with-operations";
+import { MutationMap, QueryMap } from "../../network/types";
 import QuestionResponseConfig from "../QuestionResponseConfig";
-
 import { GET_SYNC_CONFIGS, GET_SYNC_TARGETS } from "./queries";
 
 interface HocProps {
@@ -50,96 +48,83 @@ interface OuterProps {
 
 interface InnerProps extends OuterProps, HocProps {}
 
-// interface State {
-//   isMappingOpen: boolean;
-// }
-
-class SyncConfigurationModal extends React.Component<InnerProps> {
-  render() {
-    // const {} = this.state;
-    const {
-      campaignId,
-      configs: { campaign },
-      targets: {
-        campaign: {
-          externalSystem: { surveyQuestions, activistCodes, resultCodes }
-        }
+const SyncConfigurationModal: React.SFC<InnerProps> = (props) => {
+  const {
+    campaignId,
+    configs: { campaign },
+    targets: {
+      campaign: {
+        externalSystem: { surveyQuestions, activistCodes, resultCodes }
       }
-    } = this.props;
+    }
+  } = props;
 
-    const responseMappings = campaign.externalSyncConfigurations.edges.map(
-      edge => edge.node
-    );
-    // const validMappings = responseMappings.filter(mapping => !mapping.isMissing);
-    // const requiredMappings = responseMappings.filter(mapping => mapping.isMissing && mapping.isRequired);
-    // const optionalMappings = responseMappings.filter(mapping => mapping.isMissing && !mapping.isRequired);
+  const responseMappings = campaign.externalSyncConfigurations.edges.map(
+    (edge) => edge.node
+  );
 
-    const actions = [
-      <FlatButton
-        label="Ok"
-        primary={true}
-        onClick={this.props.onRequestClose}
-      />
-    ];
+  const actions = [
+    <FlatButton key="ok" label="Ok" primary onClick={props.onRequestClose} />
+  ];
 
-    const makeOnCreateConfig = (id: string) => async () => {
-      try {
-        const response = await this.props.mutations.createConfig(id);
-        if (response.errors) throw response.errors;
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  const makeOnCreateConfig = (id: string) => async () => {
+    try {
+      const response = await props.mutations.createConfig(id);
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    const makeOnDeleteConfig = (id: string) => async () => {
-      try {
-        const response = await this.props.mutations.deleteConfig(id);
-        if (response.errors) throw response.errors;
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  const makeOnDeleteConfig = (id: string) => async () => {
+    try {
+      const response = await props.mutations.deleteConfig(id);
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    return (
-      <Dialog
-        open={true}
-        title="Configure Mapping"
-        actions={actions}
-        autoScrollBodyContent={true}
-        onRequestClose={this.props.onRequestClose}
-      >
-        <p>
-          For instructions on configuring mappings, please see the{" "}
-          <a
-            href="https://docs.spokerewired.com/article/93-van-list-loading"
-            target="_blank"
-          >
-            VAN Integration
-          </a>{" "}
-          page.
-        </p>
-        {responseMappings.map(responseMapping => (
-          <QuestionResponseConfig
-            key={responseMapping.id}
-            campaignId={campaignId}
-            config={responseMapping}
-            surveyQuestions={surveyQuestions}
-            activistCodes={activistCodes}
-            resultCodes={resultCodes}
-            style={{ marginTop: "10px" }}
-            createConfig={makeOnCreateConfig(responseMapping.id)}
-            deleteConfig={makeOnDeleteConfig(responseMapping.id)}
-          />
-        ))}
-      </Dialog>
-    );
-  }
-}
+  return (
+    <Dialog
+      open
+      title="Configure Mapping"
+      actions={actions}
+      autoScrollBodyContent
+      onRequestClose={props.onRequestClose}
+    >
+      <p>
+        For instructions on configuring mappings, please see the{" "}
+        <a
+          href="https://docs.spokerewired.com/article/93-van-list-loading"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          VAN Integration
+        </a>{" "}
+        page.
+      </p>
+      {responseMappings.map((responseMapping) => (
+        <QuestionResponseConfig
+          key={responseMapping.id}
+          campaignId={campaignId}
+          config={responseMapping}
+          surveyQuestions={surveyQuestions}
+          activistCodes={activistCodes}
+          resultCodes={resultCodes}
+          style={{ marginTop: "10px" }}
+          createConfig={makeOnCreateConfig(responseMapping.id)}
+          deleteConfig={makeOnDeleteConfig(responseMapping.id)}
+        />
+      ))}
+    </Dialog>
+  );
+};
 
 const queries: QueryMap<OuterProps> = {
   configs: {
     query: GET_SYNC_CONFIGS,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -147,7 +132,7 @@ const queries: QueryMap<OuterProps> = {
   },
   targets: {
     query: GET_SYNC_TARGETS,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
       }
@@ -156,7 +141,7 @@ const queries: QueryMap<OuterProps> = {
 };
 
 const mutations: MutationMap<OuterProps> = {
-  createConfig: ownProps => (id: string) => ({
+  createConfig: (ownProps) => (id: string) => ({
     mutation: gql`
       mutation createQuestionResponseSyncConfig(
         $input: QuestionResponseSyncConfigInput!
@@ -185,7 +170,9 @@ const mutations: MutationMap<OuterProps> = {
         })
       );
 
-      const { edges } = data.campaign.externalSyncConfigurations;
+      const {
+        edges
+      }: { edges: any[] } = data.campaign.externalSyncConfigurations;
       const index = edges.findIndex(({ node }) => node.id === id);
       edges[index].node = { ...newConfig };
 
@@ -196,7 +183,7 @@ const mutations: MutationMap<OuterProps> = {
       });
     }
   }),
-  deleteConfig: ownProps => (id: string) => ({
+  deleteConfig: (ownProps) => (id: string) => ({
     mutation: gql`
       mutation deleteQuestionResponseSyncConfig(
         $input: QuestionResponseSyncConfigInput!
@@ -225,7 +212,9 @@ const mutations: MutationMap<OuterProps> = {
         })
       );
 
-      const { edges } = data.campaign.externalSyncConfigurations;
+      const {
+        edges
+      }: { edges: any[] } = data.campaign.externalSyncConfigurations;
       const index = edges.findIndex(({ node }) => node.id === id);
       edges[index].node = { ...missingConfig };
 

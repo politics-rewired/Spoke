@@ -1,24 +1,28 @@
-import Knex from 'knex';
+import Knex from "knex";
 import isEmpty from "lodash/isEmpty";
 
 import { config } from "../../../config";
-import logger from "../../../logger";
-import { errToObj } from "../../utils";
-import { stringIsAValidUrl } from "../../../lib/utils";
-import { r } from "../../models";
-import { SendMessagePayload } from './types';
-import { MessagingServiceType, MessagingServiceRecord, RequestHandlerFactory } from "../types";
-import { makeNumbersClient } from "../../lib/assemble-numbers";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
+import { stringIsAValidUrl } from "../../../lib/utils";
+import logger from "../../../logger";
+import { makeNumbersClient } from "../../lib/assemble-numbers";
+import { r } from "../../models";
+import { errToObj } from "../../utils";
+import {
+  MessagingServiceRecord,
+  MessagingServiceType,
+  RequestHandlerFactory
+} from "../types";
 import { symmetricDecrypt } from "./crypto";
 import {
-  SpokeSendStatus,
-  getMessagingServiceById,
-  getContactMessagingService,
-  messageComponents,
   getCampaignContactAndAssignmentForIncomingMessage,
-  saveNewIncomingMessage
+  getContactMessagingService,
+  getMessagingServiceById,
+  messageComponents,
+  saveNewIncomingMessage,
+  SpokeSendStatus
 } from "./message-sending";
+import { SendMessagePayload } from "./types";
 
 export enum NumbersSendStatus {
   Queued = "queued",
@@ -28,7 +32,7 @@ export enum NumbersSendStatus {
   SendingFailed = "sending_failed",
   DeliveryFailed = "delivery_failed",
   DeliveryUnconfirmed = "delivery_unconfirmed"
-};
+}
 
 // client lib does not export this, so we recreate
 interface NumbersOutboundMessagePayload {
@@ -54,8 +58,8 @@ interface NumbersInboundMessagePayload {
 }
 
 interface NumbersDeliveryReportPayload {
-  errorCodes: string[],
-  eventType: NumbersSendStatus,
+  errorCodes: string[];
+  eventType: NumbersSendStatus;
   generatedAt: string;
   messageId: string;
   profileId: string;
@@ -63,8 +67,8 @@ interface NumbersDeliveryReportPayload {
   extra?: {
     num_segments?: number;
     num_media?: number;
-  }
- };
+  };
+}
 
 /**
  * Create an Assemble Numbers client
@@ -76,10 +80,9 @@ export const numbersClient = async (service: MessagingServiceRecord) => {
     account_sid: endpointBaseUrlMaybe,
     encrypted_auth_token: encryptedApiKey
   } = service;
-  const endpointBaseUrl =
-    stringIsAValidUrl(endpointBaseUrlMaybe)
-      ? endpointBaseUrlMaybe
-      : undefined;
+  const endpointBaseUrl = stringIsAValidUrl(endpointBaseUrlMaybe)
+    ? endpointBaseUrlMaybe
+    : undefined;
   const apiKey = symmetricDecrypt(encryptedApiKey);
   const client = makeNumbersClient({ apiKey, endpointBaseUrl });
   return client;
@@ -117,7 +120,11 @@ export const inboundMessageValidator: RequestHandlerFactory = () => async (
   }
 };
 
-export const deliveryReportValidator: RequestHandlerFactory = () => async (req, res, next) => {
+export const deliveryReportValidator: RequestHandlerFactory = () => async (
+  req,
+  res,
+  next
+) => {
   // Check if the 'x-assemble-signature' header exists or not
   if (!req.header("x-assemble-signature")) {
     return res
@@ -149,7 +156,11 @@ export const deliveryReportValidator: RequestHandlerFactory = () => async (req, 
   }
 };
 
-export const sendMessage = async (message: SendMessagePayload, organizationId: number, _trx: Knex) => {
+export const sendMessage = async (
+  message: SendMessagePayload,
+  organizationId: number,
+  _trx: Knex
+) => {
   const {
     id: spokeMessageId,
     campaign_contact_id: campaignContactId,
@@ -225,6 +236,10 @@ const getMessageStatus = (assembleNumbersStatus: NumbersSendStatus) => {
     case NumbersSendStatus.DeliveryFailed:
     case NumbersSendStatus.DeliveryUnconfirmed:
       return SpokeSendStatus.Error;
+    default:
+      throw new Error(
+        `Unexpected assemble numbers status ${assembleNumbersStatus}`
+      );
   }
 };
 
@@ -232,14 +247,18 @@ const getMessageStatus = (assembleNumbersStatus: NumbersSendStatus) => {
  * Process an Assemble Numbers delivery report
  * @param {object} reportBody Assemble Numbers delivery report
  */
-export const handleDeliveryReport = async (reportBody: NumbersDeliveryReportPayload) =>
+export const handleDeliveryReport = async (
+  reportBody: NumbersDeliveryReportPayload
+) =>
   r.knex("log").insert({
     message_sid: reportBody.messageId,
     service_type: MessagingServiceType.AssembleNumbers,
     body: JSON.stringify(reportBody)
   });
 
-export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPayload) => {
+export const processDeliveryReport = async (
+  reportBody: NumbersDeliveryReportPayload
+) => {
   const { eventType, messageId, errorCodes, extra } = reportBody;
 
   await r.knex.transaction(async (trx: Knex.Transaction) => {
@@ -248,14 +267,17 @@ export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPay
       .update({
         service_response_at: r.knex.fn.now(),
         send_status: getMessageStatus(eventType),
-        error_codes: errorCodes,
+        error_codes: errorCodes
       })
       .where({ service_id: messageId })
-      .whereNotIn('send_status', [SpokeSendStatus.Delivered, SpokeSendStatus.Error]);
+      .whereNotIn("send_status", [
+        SpokeSendStatus.Delivered,
+        SpokeSendStatus.Error
+      ]);
 
     // Update segment counts
     if (extra) {
-      const payload = {};
+      const payload: Record<string, unknown> = {};
 
       if (extra.num_segments && extra.num_media) {
         payload.num_segments = extra.num_segments;
@@ -267,9 +289,7 @@ export const processDeliveryReport = async (reportBody: NumbersDeliveryReportPay
           .update(payload)
           .where({ service_id: messageId })
           .where((builder) =>
-            builder
-              .whereNull('num_segments')
-              .orWhereNull('num_media')
+            builder.whereNull("num_segments").orWhereNull("num_media")
           );
       }
     }
@@ -298,7 +318,9 @@ const formatInboundBody = (body: string, numMedia: number) => {
  * @param {object} assembleMessage The Assemble Numbers message object
  * @returns Spoke message object
  */
-const convertInboundMessage = async (assembleMessage: NumbersInboundMessagePayload) => {
+const convertInboundMessage = async (
+  assembleMessage: NumbersInboundMessagePayload
+) => {
   const {
     id: serviceId,
     body,
@@ -337,7 +359,7 @@ const convertInboundMessage = async (assembleMessage: NumbersInboundMessagePaylo
     service: "assemble-numbers",
     send_status: SpokeSendStatus.Delivered,
     num_segments: numSegments,
-    num_media: numMedia,
+    num_media: numMedia
   };
 
   return spokeMessage;
@@ -355,7 +377,9 @@ export const convertMessagePartsToMessage = async (messageParts: any[]) =>
  * Process an inbound Assemble Numbers message.
  * @param {object} message Inbound Assemble Numbers message object
  */
-export const handleIncomingMessage = async (message: NumbersInboundMessagePayload) => {
+export const handleIncomingMessage = async (
+  message: NumbersInboundMessagePayload
+) => {
   if (config.JOBS_SAME_PROCESS) {
     const inboundMessage = await convertInboundMessage(message);
     // Only persist the message if it was matched to an existing conversation

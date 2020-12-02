@@ -1,6 +1,7 @@
 import { GraphQLError } from "graphql/error";
+
+import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
-import { memoizer, cacheOpts } from "../memoredis";
 
 const accessHierarchy = ["TEXTER", "SUPERVOLUNTEER", "ADMIN", "OWNER"];
 

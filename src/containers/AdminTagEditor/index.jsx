@@ -1,22 +1,25 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
-
-import FloatingActionButton from "material-ui/FloatingActionButton";
+import ColorPicker from "material-ui-color-picker";
 import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import FloatingActionButton from "material-ui/FloatingActionButton";
+import ContentAddIcon from "material-ui/svg-icons/content/add";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
-import FlatButton from "material-ui/FlatButton";
-import ContentAddIcon from "material-ui/svg-icons/content/add";
-import ColorPicker from "material-ui-color-picker";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import { formatErrorMessage, withOperations } from "../hoc/with-operations";
-import LoadingIndicator from "../../components/LoadingIndicator";
-import TagEditorList from "./TagEditorList";
-import theme from "../../styles/theme";
-import ConfirmationStepsEditor from "./ConfirmationStepsEditor";
 import GSScriptField from "../../components/forms/GSScriptField";
+import LoadingIndicator from "../../components/LoadingIndicator";
+import theme from "../../styles/theme";
+import {
+  formatErrorMessage,
+  PrettyErrors,
+  withOperations
+} from "../hoc/with-operations";
+import ConfirmationStepsEditor from "./ConfirmationStepsEditor";
+import TagEditorList from "./TagEditorList";
 
 class AdminTagEditor extends Component {
   state = {
@@ -26,9 +29,11 @@ class AdminTagEditor extends Component {
     error: undefined
   };
 
-  getTag = tagId => {
+  getTag = (tagId) => {
     const { tagList = [] } = this.props.organizationTags.organization || {};
-    return Object.assign({}, tagList.find(tag => tag.id === tagId));
+    return {
+      ...tagList.find((tag) => tag.id === tagId)
+    };
   };
 
   handleCancelError = () => this.setState({ error: undefined });
@@ -47,7 +52,7 @@ class AdminTagEditor extends Component {
       }
     });
 
-  handleEditTag = tagId => this.setState({ editingTag: this.getTag(tagId) });
+  handleEditTag = (tagId) => this.setState({ editingTag: this.getTag(tagId) });
 
   handleCancelEditTag = () =>
     this.setState({ editingTag: undefined, isEditingScript: false });
@@ -77,7 +82,7 @@ class AdminTagEditor extends Component {
     }
   };
 
-  handleDeleteTag = async tagId => {
+  handleDeleteTag = async (tagId) => {
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.deleteTag(tagId);
@@ -99,26 +104,26 @@ class AdminTagEditor extends Component {
     this.setState({ isEditingScript: !this.state.isEditingScript });
   };
 
-  handleEditTagScript = script => {
+  handleEditTagScript = (script) => {
     this.setState({
       editingTag: { ...this.state.editingTag, onApplyScript: script },
       isEditingScript: false
     });
   };
 
-  handleEditTextColor = color => {
+  handleEditTextColor = (color) => {
     this.setState({
       editingTag: { ...this.state.editingTag, textColor: color }
     });
   };
 
-  handleEditBackgroundColor = color => {
+  handleEditBackgroundColor = (color) => {
     this.setState({
       editingTag: { ...this.state.editingTag, backgroundColor: color }
     });
   };
 
-  handleEditWebhookUrl = url => {
+  handleEditWebhookUrl = (url) => {
     this.setState({
       editingTag: { ...this.state.editingTag, webhookUrl: url }
     });
@@ -128,7 +133,7 @@ class AdminTagEditor extends Component {
     this.setState({ isEditingSteps: !this.state.isEditingSteps });
   };
 
-  handleSaveConfirmationStep = newStep => {
+  handleSaveConfirmationStep = (newStep) => {
     const { editingTag } = this.state;
     const newConfirmationSteps = [...editingTag.confirmationSteps, newStep];
     this.setState({
@@ -139,9 +144,9 @@ class AdminTagEditor extends Component {
     });
   };
 
-  handleDeleteConfirmationStep = stepIndex => {
+  handleDeleteConfirmationStep = (stepIndex) => {
     const { editingTag } = this.state;
-    let newConfirmationSteps = [...editingTag.confirmationSteps];
+    const newConfirmationSteps = [...editingTag.confirmationSteps];
     newConfirmationSteps.splice(stepIndex, 1);
     this.setState({
       editingTag: {
@@ -165,8 +170,17 @@ class AdminTagEditor extends Component {
     const isNewTag = (editingTag || {}).id === undefined;
     const tagVerb = isNewTag ? "Create" : "Edit";
     const actions = [
-      <FlatButton label="Cancel" onClick={this.handleCancelEditTag} />,
-      <FlatButton label={tagVerb} primary={true} onClick={this.handleSaveTag} />
+      <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.handleCancelEditTag}
+      />,
+      <FlatButton
+        key="verb"
+        label={tagVerb}
+        primary
+        onClick={this.handleSaveTag}
+      />
     ];
 
     // Custom fields are campaign-specific and thus cannot be used in Tag scripts.
@@ -174,7 +188,12 @@ class AdminTagEditor extends Component {
     const customFields = [""];
 
     const errorActions = [
-      <FlatButton label="Ok" primary={true} onClick={this.handleCancelError} />
+      <FlatButton
+        key="ok"
+        label="Ok"
+        primary
+        onClick={this.handleCancelError}
+      />
     ];
 
     return (
@@ -197,7 +216,7 @@ class AdminTagEditor extends Component {
               title={`${tagVerb} Tag`}
               actions={actions}
               modal={false}
-              open={true}
+              open
               onRequestClose={this.handleCancelEditTag}
             >
               <div
@@ -235,7 +254,7 @@ class AdminTagEditor extends Component {
                   <TextField
                     name="description"
                     floatingLabelText="Tag description"
-                    multiLine={true}
+                    multiLine
                     value={editingTag.description || ""}
                     onChange={this.createTagEditorHandle}
                   />
@@ -255,8 +274,10 @@ class AdminTagEditor extends Component {
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center'}}>
-                <span>Tag confirmation steps: {editingTag.confirmationSteps.length}</span>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span>
+                  Tag confirmation steps: {editingTag.confirmationSteps.length}
+                </span>
                 <FlatButton
                   label="Manage steps"
                   onClick={this.handleToggleStepsEditorOpen}
@@ -298,7 +319,11 @@ class AdminTagEditor extends Component {
 AdminTagEditor.defaultProps = {};
 
 AdminTagEditor.propTypes = {
-  match: PropTypes.object.isRequired
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      organizationId: PropTypes.string.isRequired
+    }).isRequired
+  }).isRequired
 };
 
 const queries = {
@@ -323,7 +348,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -332,7 +357,7 @@ const queries = {
 };
 
 const mutations = {
-  saveTag: ownProps => tag => ({
+  saveTag: (ownProps) => (tag) => ({
     mutation: gql`
       mutation saveTag($organizationId: String!, $tag: TagInput!) {
         saveTag(organizationId: $organizationId, tag: $tag) {
@@ -346,7 +371,7 @@ const mutations = {
     },
     refetchQueries: ["getOrganizationTags"]
   }),
-  deleteTag: ownProps => tagId => ({
+  deleteTag: (ownProps) => (tagId) => ({
     mutation: gql`
       mutation deleteTag($organizationId: String!, $tagId: String!) {
         deleteTag(organizationId: $organizationId, tagId: $tagId)

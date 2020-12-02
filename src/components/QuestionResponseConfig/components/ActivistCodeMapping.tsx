@@ -1,10 +1,9 @@
-import React from "react";
-
-import { ListItem } from "material-ui/List";
 import IconButton from "material-ui/IconButton";
-import LocalActivityIcon from "material-ui/svg-icons/maps/local-activity";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
+import { ListItem } from "material-ui/List";
 import { green200, orange200 } from "material-ui/styles/colors";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
+import LocalActivityIcon from "material-ui/svg-icons/maps/local-activity";
+import React from "react";
 
 import { ExternalActivistCode } from "../../../api/external-activist-code";
 import { ExternalDataCollectionStatus } from "../../../api/types";
@@ -14,7 +13,7 @@ interface Props {
   onClickDelete(): void;
 }
 
-export const ActivistCodeMapping: React.SFC<Props> = props => {
+export const ActivistCodeMapping: React.SFC<Props> = (props) => {
   const isActive =
     props.activistCode.status === ExternalDataCollectionStatus.ACTIVE;
 
@@ -31,3 +30,5 @@ export const ActivistCodeMapping: React.SFC<Props> = props => {
     />
   );
 };
+
+export default ActivistCodeMapping;

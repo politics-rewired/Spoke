@@ -1,7 +1,7 @@
 import auth0 from "auth0-js";
 
 export function logout() {
-  var webAuth = new auth0.WebAuth({
+  const webAuth = new auth0.WebAuth({
     domain: window.AUTH0_DOMAIN,
     clientID: window.AUTH0_CLIENT_ID
   });

@@ -1,14 +1,14 @@
-import request from "superagent";
 import _ from "lodash";
+import request from "superagent";
 
-import logger from "../../logger";
 import { config } from "../../config";
-import { sqlResolvers } from "./lib/utils";
-import { sleep } from "../../lib/utils";
 import { isNowBetween } from "../../lib/timezones";
-import { r, cacheableData } from "../models";
+import { sleep } from "../../lib/utils";
+import logger from "../../logger";
 import { eventBus, EventType } from "../event-bus";
-import { memoizer, cacheOpts } from "../memoredis";
+import { cacheOpts, memoizer } from "../memoredis";
+import { cacheableData, r } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 class AutoassignError extends Error {
   constructor(message, isFatal = false) {
@@ -75,7 +75,7 @@ export function getContacts(
     .whereRaw(`archived = ${campaign.is_archived}`); // partial index friendly
 
   if (contactsFilter) {
-    const validTimezone = contactsFilter.validTimezone;
+    const { validTimezone } = contactsFilter;
     if (validTimezone !== null) {
       const {
         texting_hours_start: textingHoursStart,
@@ -136,7 +136,7 @@ export async function getCurrentAssignmentType(organizationId) {
   const organization = await r
     .reader("organization")
     .select("features")
-    .where({ id: parseInt(organizationId) })
+    .where({ id: parseInt(organizationId, 10) })
     .first();
 
   const features = {};
@@ -356,56 +356,6 @@ export async function allCurrentAssignmentTargets(organizationId) {
   return teamToCampaigns;
 }
 
-export async function cachedMyCurrentAssignmentTargets(userId, organizationId) {
-  const {
-    assignmentType,
-    generalEnabled,
-    orgMaxRequestCount
-  } = await getCurrentAssignmentType(organizationId);
-
-  const campaignView = {
-    UNREPLIED: "assignable_campaigns_with_needs_reply",
-    UNSENT: "assignable_campaigns_with_needs_message"
-  }[assignmentType];
-
-  const contactsView = {
-    UNREPLIED: "assignable_needs_reply",
-    UNSENT: "assignable_needs_message"
-  }[assignmentType];
-
-  if (!campaignView || !contactsView) {
-    return [];
-  }
-
-  const generalEnabledBit = generalEnabled ? 1 : 0;
-
-  const myTeamIds = await r
-    .reader("team")
-    .join("user_team", "team.id", "=", "user_team.team_id")
-    .where({
-      user_id: parseInt(userId),
-      is_assignment_enabled: true,
-      organization_id: parseInt(organizationId)
-    })
-    .pluck("id");
-
-  const myEscalationTags = await r
-    .reader("team_escalation_tags")
-    .whereIn("team_id", myTeamIds)
-    .pluck("tag_id");
-
-  return await memoizedMyCurrentAssignmentTargets({
-    myTeamIds,
-    myEscalationTags,
-    generalEnabledBit,
-    campaignView,
-    contactsView,
-    orgMaxRequestCount,
-    assignmentType,
-    organizationId
-  });
-}
-
 const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
   async ({
     myTeamIds,
@@ -542,7 +492,7 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
       [myTeamIds, myTeamIds, myEscalationTags, organizationId]
     );
 
-    const results = teamToCampaigns.map(ttc =>
+    const results = teamToCampaigns.map((ttc) =>
       Object.assign(ttc, {
         type: ttc.assignment_type,
         campaign: { id: ttc.id, title: ttc.title },
@@ -554,6 +504,56 @@ const memoizedMyCurrentAssignmentTargets = memoizer.memoize(
   },
   cacheOpts.MyCurrentAssignmentTargets
 );
+
+export async function cachedMyCurrentAssignmentTargets(userId, organizationId) {
+  const {
+    assignmentType,
+    generalEnabled,
+    orgMaxRequestCount
+  } = await getCurrentAssignmentType(organizationId);
+
+  const campaignView = {
+    UNREPLIED: "assignable_campaigns_with_needs_reply",
+    UNSENT: "assignable_campaigns_with_needs_message"
+  }[assignmentType];
+
+  const contactsView = {
+    UNREPLIED: "assignable_needs_reply",
+    UNSENT: "assignable_needs_message"
+  }[assignmentType];
+
+  if (!campaignView || !contactsView) {
+    return [];
+  }
+
+  const generalEnabledBit = generalEnabled ? 1 : 0;
+
+  const myTeamIds = await r
+    .reader("team")
+    .join("user_team", "team.id", "=", "user_team.team_id")
+    .where({
+      user_id: parseInt(userId, 10),
+      is_assignment_enabled: true,
+      organization_id: parseInt(organizationId, 10)
+    })
+    .pluck("id");
+
+  const myEscalationTags = await r
+    .reader("team_escalation_tags")
+    .whereIn("team_id", myTeamIds)
+    .pluck("tag_id");
+
+  return memoizedMyCurrentAssignmentTargets({
+    myTeamIds,
+    myEscalationTags,
+    generalEnabledBit,
+    campaignView,
+    contactsView,
+    orgMaxRequestCount,
+    assignmentType,
+    organizationId
+  });
+}
 
 export async function myCurrentAssignmentTargets(
   userId,
@@ -729,7 +729,7 @@ export async function myCurrentAssignmentTargets(
     [organizationId, userId, userId, organizationId]
   );
 
-  const results = teamToCampaigns.map(ttc =>
+  const results = teamToCampaigns.map((ttc) =>
     Object.assign(ttc, {
       type: ttc.assignment_type,
       campaign: { id: ttc.id, title: ttc.title },
@@ -761,7 +761,7 @@ async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
 
   if (config.ASSIGNMENT_COMPLETE_NOTIFICATION_URL) {
     const assignmentTargets = await allCurrentAssignmentTargets(organizationId);
-    const existingTeamIds = assignmentTargets.map(cat => cat.team_id);
+    const existingTeamIds = assignmentTargets.map((cat) => cat.team_id);
 
     const isEmptiedTeam = ([id, _title]) => !existingTeamIds.includes(id);
     let emptiedTeams = [...teamsAssignedTo.entries()].filter(isEmptiedTeam);
@@ -783,202 +783,6 @@ async function notifyIfAllAssigned(organizationId, teamsAssignedTo) {
   }
 }
 
-export async function fulfillPendingRequestFor(auth0Id) {
-  const user = await r
-    .knex("user")
-    .first("id")
-    .where({ auth0_id: auth0Id });
-
-  if (!user) {
-    throw new AutoassignError(`No user found with id ${auth0Id}`);
-  }
-
-  // External assignment service may not be organization-aware so we default to the highest organization ID
-  const pendingAssignmentRequest = await r
-    .knex("assignment_request")
-    .where({ status: "pending", user_id: user.id })
-    .orderBy("organization_id", "desc")
-    .first("*");
-
-  if (!pendingAssignmentRequest) {
-    throw new AutoassignError(`No pending request exists for ${auth0Id}`);
-  }
-
-  const doAssignment = memoizer.memoize(
-    async ({ pendingAssignmentRequestId: _ignore }) => {
-      const numberAssigned = await r.knex.transaction(async trx => {
-        try {
-          const numberAssigned = await giveUserMoreTexts(
-            pendingAssignmentRequest.user_id,
-            pendingAssignmentRequest.amount,
-            pendingAssignmentRequest.organization_id,
-            pendingAssignmentRequest.preferred_team_id,
-            trx
-          );
-
-          await trx("assignment_request")
-            .update({
-              status: "approved"
-            })
-            .where({ id: pendingAssignmentRequest.id });
-
-          return numberAssigned;
-        } catch (err) {
-          logger.info(
-            `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
-            err
-          );
-
-          // Mark as rejected outside the transaction so it is unaffected by the rollback
-          await r
-            .knex("assignment_request")
-            .update({
-              status: "rejected"
-            })
-            .where({ id: pendingAssignmentRequest.id });
-
-          const isFatal = err.isFatal !== undefined ? err.isFatal : true;
-          throw new AutoassignError(err.message, isFatal);
-        }
-      });
-
-      return numberAssigned;
-    },
-    cacheOpts.FullfillAssignmentLock
-  );
-
-  return await doAssignment({
-    pendingAssignmentRequestId: pendingAssignmentRequest.id
-  });
-}
-
-export async function autoHandleRequest(pendingAssignmentRequest) {
-  // check texter status of pendingAssignmentRequest
-  const user_organization = await r
-    .knex("user_organization")
-    .where({
-      user_id: pendingAssignmentRequest.user_id,
-      organization_id: pendingAssignmentRequest.organization_id
-    })
-    .first("*");
-
-  if (user_organization) {
-    if (user_organization.request_status === "auto_approve") {
-      // Even if the assignment fails, we still want to approve their request
-      // to let them request again if possible
-      try {
-        await giveUserMoreTexts(
-          pendingAssignmentRequest.user_id,
-          pendingAssignmentRequest.amount,
-          pendingAssignmentRequest.organization_id,
-          pendingAssignmentRequest.preferred_team_id
-        );
-      } catch (ex) {
-        logger.error("Error assigning: ", ex);
-      } finally {
-        await r
-          .knex("assignment_request")
-          .update({ status: "approved" })
-          .where({ id: pendingAssignmentRequest.id });
-      }
-    }
-
-    if (user_organization.request_status === "do_not_approve") {
-      await r
-        .knex("assignment_request")
-        .update({ status: "rejected" })
-        .where({ id: pendingAssignmentRequest.id });
-    }
-  }
-}
-
-export async function giveUserMoreTexts(
-  userId,
-  count,
-  organizationId,
-  preferredTeamId,
-  parentTrx = r.knex
-) {
-  logger.verbose(`Starting to give ${userId} ${count} texts`);
-
-  const matchingUsers = await r.knex("user").where({ id: userId });
-  const user = matchingUsers[0];
-  if (!user) {
-    throw new AutoassignError(`No user found with id ${userId}`);
-  }
-
-  const assignmentOptions = await myCurrentAssignmentTargets(
-    user.id,
-    organizationId,
-    parentTrx
-  );
-
-  if (assignmentOptions.length === 0) {
-    return 0;
-  }
-
-  const preferredAssignment = assignmentOptions.find(
-    assignment => assignment.team_id === preferredTeamId
-  );
-
-  const assignmentInfo = preferredAssignment || assignmentOptions[0];
-
-  if (!assignmentInfo) {
-    throw new AutoassignError(
-      "Could not find a suitable campaign to assign to."
-    );
-  }
-
-  // Use a Map to de-duplicate and support integer-type keys
-  const teamsAssignedTo = new Map();
-  let countUpdated = 0;
-  let countLeftToUpdate = Math.min(count, assignmentInfo.max_request_count);
-
-  const updated_result = await parentTrx.transaction(async trx => {
-    while (countLeftToUpdate > 0) {
-      const { count: countUpdatedInLoop, team } = await assignLoop(
-        user,
-        organizationId,
-        countLeftToUpdate,
-        preferredTeamId,
-        trx
-      );
-
-      countLeftToUpdate = config.DISABLE_ASSIGNMENT_CASCADE
-        ? 0
-        : countLeftToUpdate - countUpdatedInLoop;
-
-      countUpdated = countUpdated + countUpdatedInLoop;
-      if (countUpdatedInLoop === 0) {
-        if (countUpdated === 0) {
-          throw new AutoassignError(
-            "Could not find a suitable campaign to assign to."
-          );
-        } else {
-          return countUpdated;
-        }
-      }
-
-      const { teamId, teamTitle } = team;
-      teamsAssignedTo.set(teamId, teamTitle);
-    }
-
-    return countUpdated;
-  });
-
-  if (teamsAssignedTo.size > 0) {
-    // Hold off notifying until the current transaction has commited and propagated to any readers
-    // No need to await the notify result as giveUserMoreTexts doesn't depend on it
-    sleep(15000)
-      .then(() => notifyIfAllAssigned(organizationId, teamsAssignedTo))
-      .catch(err =>
-        logger.error("Encountered error notifying assignment complete: ", err)
-      );
-  }
-
-  return updated_result;
-}
-
 export async function assignLoop(
   user,
   organizationId,
@@ -997,22 +801,20 @@ export async function assignLoop(
   }
 
   const preferredAssignment = assignmentOptions.find(
-    assignment => assignment.team_id === preferredTeamId
+    (assignment) => assignment.team_id === preferredTeamId
   );
 
   const assignmentInfo = preferredAssignment || assignmentOptions[0];
 
-  // Determine which campaign to assign to – optimize to pick winners
-  let campaignIdToAssignTo = assignmentInfo.campaign.id;
-  let countToAssign = Math.min(
+  // Determine which campaign to assign to – optimize to pick winners
+  const campaignIdToAssignTo = assignmentInfo.campaign.id;
+  const countToAssign = Math.min(
     countLeft,
-    parseInt(assignmentInfo.max_request_count)
+    parseInt(assignmentInfo.max_request_count, 10)
   );
 
   logger.info(
-    `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${
-      assignmentInfo.type
-    }`
+    `Assigning ${countToAssign} on campaign ${campaignIdToAssignTo} of type ${assignmentInfo.type}`
   );
 
   // Assign a max of `count` contacts in `campaignIdToAssignTo` to `user`
@@ -1048,9 +850,9 @@ export async function assignLoop(
         .select("team.id")
         .join("user_team", "team.id", "=", "user_team.team_id")
         .where({
-          user_id: parseInt(user.id),
+          user_id: parseInt(user.id, 10),
           is_assignment_enabled: true,
-          organization_id: parseInt(organizationId)
+          organization_id: parseInt(organizationId, 10)
         })
     )
     .pluck("tag_id");
@@ -1120,6 +922,199 @@ export async function assignLoop(
   return { count: ccUpdateCount, team };
 }
 
+export async function giveUserMoreTexts(
+  userId,
+  count,
+  organizationId,
+  preferredTeamId,
+  parentTrx = r.knex
+) {
+  logger.verbose(`Starting to give ${userId} ${count} texts`);
+
+  const matchingUsers = await r.knex("user").where({ id: userId });
+  const user = matchingUsers[0];
+  if (!user) {
+    throw new AutoassignError(`No user found with id ${userId}`);
+  }
+
+  const assignmentOptions = await myCurrentAssignmentTargets(
+    user.id,
+    organizationId,
+    parentTrx
+  );
+
+  if (assignmentOptions.length === 0) {
+    return 0;
+  }
+
+  const preferredAssignment = assignmentOptions.find(
+    (assignment) => assignment.team_id === preferredTeamId
+  );
+
+  const assignmentInfo = preferredAssignment || assignmentOptions[0];
+
+  if (!assignmentInfo) {
+    throw new AutoassignError(
+      "Could not find a suitable campaign to assign to."
+    );
+  }
+
+  // Use a Map to de-duplicate and support integer-type keys
+  const teamsAssignedTo = new Map();
+  let countUpdated = 0;
+  let countLeftToUpdate = Math.min(count, assignmentInfo.max_request_count);
+
+  const updated_result = await parentTrx.transaction(async (trx) => {
+    while (countLeftToUpdate > 0) {
+      const { count: countUpdatedInLoop, team } = await assignLoop(
+        user,
+        organizationId,
+        countLeftToUpdate,
+        preferredTeamId,
+        trx
+      );
+
+      countLeftToUpdate = config.DISABLE_ASSIGNMENT_CASCADE
+        ? 0
+        : countLeftToUpdate - countUpdatedInLoop;
+
+      countUpdated += countUpdatedInLoop;
+      if (countUpdatedInLoop === 0) {
+        if (countUpdated === 0) {
+          throw new AutoassignError(
+            "Could not find a suitable campaign to assign to."
+          );
+        } else {
+          return countUpdated;
+        }
+      }
+
+      const { teamId, teamTitle } = team;
+      teamsAssignedTo.set(teamId, teamTitle);
+    }
+
+    return countUpdated;
+  });
+
+  if (teamsAssignedTo.size > 0) {
+    // Hold off notifying until the current transaction has commited and propagated to any readers
+    // No need to await the notify result as giveUserMoreTexts doesn't depend on it
+    sleep(15000)
+      .then(() => notifyIfAllAssigned(organizationId, teamsAssignedTo))
+      .catch((err) =>
+        logger.error("Encountered error notifying assignment complete: ", err)
+      );
+  }
+
+  return updated_result;
+}
+
+export async function fulfillPendingRequestFor(auth0Id) {
+  const user = await r.knex("user").first("id").where({ auth0_id: auth0Id });
+
+  if (!user) {
+    throw new AutoassignError(`No user found with id ${auth0Id}`);
+  }
+
+  // External assignment service may not be organization-aware so we default to the highest organization ID
+  const pendingAssignmentRequest = await r
+    .knex("assignment_request")
+    .where({ status: "pending", user_id: user.id })
+    .orderBy("organization_id", "desc")
+    .first("*");
+
+  if (!pendingAssignmentRequest) {
+    throw new AutoassignError(`No pending request exists for ${auth0Id}`);
+  }
+
+  const doAssignment = memoizer.memoize(
+    async ({ pendingAssignmentRequestId: _ignore }) => {
+      const numberAssigned = await r.knex.transaction(async (trx) => {
+        try {
+          const result = await giveUserMoreTexts(
+            pendingAssignmentRequest.user_id,
+            pendingAssignmentRequest.amount,
+            pendingAssignmentRequest.organization_id,
+            pendingAssignmentRequest.preferred_team_id,
+            trx
+          );
+
+          await trx("assignment_request")
+            .update({
+              status: "approved"
+            })
+            .where({ id: pendingAssignmentRequest.id });
+
+          return result;
+        } catch (err) {
+          logger.info(
+            `Failed to give user ${auth0Id} more texts. Marking their request as rejected. `,
+            err
+          );
+
+          // Mark as rejected outside the transaction so it is unaffected by the rollback
+          await r
+            .knex("assignment_request")
+            .update({
+              status: "rejected"
+            })
+            .where({ id: pendingAssignmentRequest.id });
+
+          const isFatal = err.isFatal !== undefined ? err.isFatal : true;
+          throw new AutoassignError(err.message, isFatal);
+        }
+      });
+
+      return numberAssigned;
+    },
+    cacheOpts.FullfillAssignmentLock
+  );
+
+  return doAssignment({
+    pendingAssignmentRequestId: pendingAssignmentRequest.id
+  });
+}
+
+export async function autoHandleRequest(pendingAssignmentRequest) {
+  // check texter status of pendingAssignmentRequest
+  const user_organization = await r
+    .knex("user_organization")
+    .where({
+      user_id: pendingAssignmentRequest.user_id,
+      organization_id: pendingAssignmentRequest.organization_id
+    })
+    .first("*");
+
+  if (user_organization) {
+    if (user_organization.request_status === "auto_approve") {
+      // Even if the assignment fails, we still want to approve their request
+      // to let them request again if possible
+      try {
+        await giveUserMoreTexts(
+          pendingAssignmentRequest.user_id,
+          pendingAssignmentRequest.amount,
+          pendingAssignmentRequest.organization_id,
+          pendingAssignmentRequest.preferred_team_id
+        );
+      } catch (ex) {
+        logger.error("Error assigning: ", ex);
+      } finally {
+        await r
+          .knex("assignment_request")
+          .update({ status: "approved" })
+          .where({ id: pendingAssignmentRequest.id });
+      }
+    }
+
+    if (user_organization.request_status === "do_not_approve") {
+      await r
+        .knex("assignment_request")
+        .update({ status: "rejected" })
+        .where({ id: pendingAssignmentRequest.id });
+    }
+  }
+}
+
 const getContactsCountFromShadowCounts = (shadowCounts, contactsFilter) => {
   const countsPassingContactsFilter = shadowCounts.filter(
     ({ message_status, is_opted_out, contact_is_textable_now }) => {
@@ -1170,7 +1165,7 @@ const getContactsCountFromShadowCounts = (shadowCounts, contactsFilter) => {
   );
 
   return countsPassingContactsFilter.reduce(
-    (acc, c) => acc + parseInt(c.count),
+    (acc, c) => acc + parseInt(c.count, 10),
     0
   );
 };
@@ -1178,19 +1173,16 @@ const getContactsCountFromShadowCounts = (shadowCounts, contactsFilter) => {
 export const resolvers = {
   Assignment: {
     ...sqlResolvers(["id", "maxContacts"]),
-    texter: async (assignment, _, { loaders }) =>
+    texter: async (assignment, _ignore, { loaders }) =>
       assignment.texter
         ? assignment.texter
         : loaders.user.load(assignment.user_id),
-    campaign: async (assignment, _, { loaders }) => {
+    campaign: async (assignment) => {
       const getCampaign = memoizer.memoize(async ({ campaignId }) => {
-        return await r
-          .reader("campaign")
-          .where({ id: campaignId })
-          .first("*");
+        return r.reader("campaign").where({ id: campaignId }).first("*");
       }, cacheOpts.CampaignOne);
 
-      return await getCampaign({ campaignId: assignment.campaign_id });
+      return getCampaign({ campaignId: assignment.campaign_id });
     },
     contactsCount: async (assignment, { contactsFilter }) => {
       if ("shadowCounts" in assignment) {
@@ -1209,7 +1201,7 @@ export const resolvers = {
         .where({ id: campaign.organization_id })
         .first();
 
-      return await r.getCount(
+      return r.getCount(
         getContacts(assignment, contactsFilter, organization, campaign, true)
       );
     },
@@ -1225,20 +1217,20 @@ export const resolvers = {
         .first();
       return getContacts(assignment, contactsFilter, organization, campaign);
     },
-    campaignCannedResponses: async assignment => {
+    campaignCannedResponses: async (assignment) => {
       const getCannedResponses = memoizer.memoize(
         async ({ campaignId, userId }) => {
-          return await cacheableData.cannedResponse.query({
+          return cacheableData.cannedResponse.query({
             userId: userId || "",
-            campaignId: campaignId
+            campaignId
           });
         },
         cacheOpts.CampaignCannedResponses
       );
 
-      return await getCannedResponses({ campaignId: assignment.campaign_id });
+      return getCannedResponses({ campaignId: assignment.campaign_id });
     },
-    userCannedResponses: async assignment => {
+    userCannedResponses: async (_assignment) => {
       return [];
     }
   }

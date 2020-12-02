@@ -1,12 +1,11 @@
-import React from "react";
 import gql from "graphql-tag";
-import * as yup from "yup";
-
-import RaisedButton from "material-ui/RaisedButton";
-import TextField from "material-ui/TextField";
-import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import Paper from "material-ui/Paper";
+import RaisedButton from "material-ui/RaisedButton";
+import SelectField from "material-ui/SelectField";
+import TextField from "material-ui/TextField";
+import React from "react";
+import * as yup from "yup";
 
 import { loadData } from "../containers/hoc/with-operations";
 import GSForm from "./forms/GSForm";
@@ -29,12 +28,17 @@ class TexterRequest extends React.Component {
     this.state = {
       selectedAssignment: firstTeamId,
       count: maxRequestCount,
-      maxRequestCount: maxRequestCount,
+      maxRequestCount,
       email: undefined,
       submitting: false,
       error: undefined,
       finished: false
     };
+  }
+
+  componentWillMount() {
+    // eslint-disable-next-line react/no-direct-mutation-state
+    this.state.email = this.props.user.email;
   }
 
   componentDidMount() {
@@ -77,17 +81,13 @@ class TexterRequest extends React.Component {
     }
   };
 
-  componentWillMount() {
-    this.state.email = this.props.user.email;
-  }
-
   setSelectedAssignment = (_1, _2, teamId) => {
     const myCurrentAssignmentTargets = this.props.data.organization
       ? this.props.data.organization.myCurrentAssignmentTargets
       : [];
 
     const selection = myCurrentAssignmentTargets.find(
-      at => at.teamId === teamId
+      (at) => at.teamId === teamId
     );
 
     this.setState({
@@ -127,10 +127,7 @@ class TexterRequest extends React.Component {
         <Paper>
           <div style={{ padding: "20px" }}>
             <h3> No texts available right now </h3>
-            <p>
-              {" "}
-              Watch out for an announcement when new texts are available!{" "}
-            </p>
+            <p> Watch out for an announcement when new texts are available! </p>
           </div>
         </Paper>
       );
@@ -153,7 +150,7 @@ class TexterRequest extends React.Component {
     if (finished) {
       return (
         <div>
-          <h3> Submitted Successfully – Thank you! </h3>
+          <h3> Submitted Successfully – Thank you! </h3>
           <p>
             {" "}
             Give us a few minutes to assign your texts. You'll receive an email
@@ -164,7 +161,7 @@ class TexterRequest extends React.Component {
       );
     }
 
-    const makeOptionText = at =>
+    const makeOptionText = (at) =>
       `${at.teamTitle}: ${at.maxRequestCount} ${
         at.type === "UNSENT" ? "Initials" : "Replies"
       }`;
@@ -181,7 +178,7 @@ class TexterRequest extends React.Component {
               fullWidth
             >
               {this.props.data.organization.myCurrentAssignmentTargets.map(
-                at => (
+                (at) => (
                   <MenuItem
                     key={at.teamId}
                     value={at.teamId}
@@ -200,25 +197,28 @@ class TexterRequest extends React.Component {
           value={{ email, count }}
           onSubmit={this.submit}
         >
-          <label htmlFor="count"> Count: </label>
-          <TextField
-            name="count"
-            label="Count"
-            type="number"
-            value={count}
-            onChange={e => {
-              const formVal = parseInt(e.target.value, 10) || 0;
-              let count =
-                maxRequestCount > 0
-                  ? Math.min(maxRequestCount, formVal)
-                  : formVal;
-              count = Math.max(count, 0);
-              this.setState({ count });
-            }}
-          />
+          <label htmlFor="count">
+            {" "}
+            Count:
+            <TextField
+              name="count"
+              label="Count"
+              type="number"
+              value={count}
+              onChange={(e) => {
+                const formVal = parseInt(e.target.value, 10) || 0;
+                let newCount =
+                  maxRequestCount > 0
+                    ? Math.min(maxRequestCount, formVal)
+                    : formVal;
+                newCount = Math.max(newCount, 0);
+                this.setState({ count: newCount });
+              }}
+            />
+          </label>
           <br />
           <RaisedButton
-            primary={true}
+            primary
             onClick={this.submit}
             disabled={submitting}
             fullWidth
@@ -259,7 +259,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },
@@ -270,7 +270,7 @@ const queries = {
 };
 
 const mutations = {
-  requestTexts: ownProps => ({ count, email, preferredTeamId }) => ({
+  requestTexts: (ownProps) => ({ count, email, preferredTeamId }) => ({
     mutation: gql`
       mutation requestTexts(
         $count: Int!

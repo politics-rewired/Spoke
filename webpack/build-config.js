@@ -1,4 +1,5 @@
 const envalid = require("envalid");
+
 const { str, port, host, num } = envalid;
 
 const validators = {

@@ -1,19 +1,19 @@
-import React from "react";
-import PropTypes from "prop-types";
+/* eslint-disable react/display-name */
 import gql from "graphql-tag";
-
 import DataTable from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
+import { red500 } from "material-ui/styles/colors";
 import AlarmIcon from "material-ui/svg-icons/action/alarm";
 import AlarmOffIcon from "material-ui/svg-icons/action/alarm-off";
 import SaveIcon from "material-ui/svg-icons/content/save";
-import { red500 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { loadData } from "../../hoc/with-operations";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 
-export const TrollAlarmList = props => {
+export const TrollAlarmList = (props) => {
   const { selectedAlarmIds, dismissed, token, pageSize, page } = props;
   const { totalCount, alarms: trollAlarms } = props.trollAlarms.trollAlarms;
 
@@ -25,24 +25,24 @@ export const TrollAlarmList = props => {
 
   const selectedRows = trollAlarms
     .map(({ id }, idx) => (selectedAlarmIds.includes(id) ? idx : false))
-    .filter(idxOrFalse => idxOrFalse !== false);
-  const handleRowsSelected = rows => {
+    .filter((idxOrFalse) => idxOrFalse !== false);
+  const handleRowsSelected = (rows) => {
     // Default handles the "none" case
     let newSelection = [];
 
     if (rows === "all") {
-      newSelection = trollAlarms.map(alarm => alarm.id);
+      newSelection = trollAlarms.map((alarm) => alarm.id);
     }
 
     if (Array.isArray(rows)) {
-      newSelection = rows.map(idx => trollAlarms[idx].id);
+      newSelection = rows.map((idx) => trollAlarms[idx].id);
     }
 
     props.onAlarmSelectionChange(newSelection);
   };
 
-  const handleRowSizeChange = (_index, pageSize) =>
-    props.onPageSizeChange(pageSize);
+  const handleRowSizeChange = (_index, newPageSize) =>
+    props.onPageSizeChange(newPageSize);
 
   const handlePreviousPageClick = () => {
     const nextPage = Math.max(0, page - 1);
@@ -55,7 +55,7 @@ export const TrollAlarmList = props => {
     props.onPageChange(nextPage);
   };
 
-  const handleClickCopyAlarm = alarm => event => {
+  const handleClickCopyAlarm = (alarm) => (event) => {
     event.preventDefault();
     event.stopPropagation();
     props.onCopyAlarm(alarm);
@@ -66,8 +66,8 @@ export const TrollAlarmList = props => {
       key: "dismissed",
       label: "Status",
       style: { width: 40 },
-      render: (dismissed, _row) =>
-        dismissed ? <AlarmOffIcon /> : <AlarmIcon color={red500} />
+      render: (isRowDismissed, _row) =>
+        isRowDismissed ? <AlarmOffIcon /> : <AlarmIcon color={red500} />
     },
     {
       key: "token",
@@ -92,7 +92,7 @@ export const TrollAlarmList = props => {
           <IconButton
             tooltip="Copy Texter Details"
             onClick={handleClickCopyAlarm(row)}
-            onMouseEnter={event => event.stopPropagation()}
+            onMouseEnter={(event) => event.stopPropagation()}
           >
             <SaveIcon />
           </IconButton>
@@ -128,6 +128,7 @@ TrollAlarmList.propTypes = {
   selectedAlarmIds: PropTypes.arrayOf(PropTypes.string).isRequired,
 
   // Query params
+  // eslint-disable-next-line react/no-unused-prop-types
   organizationId: PropTypes.string.isRequired,
   pageSize: PropTypes.number.isRequired,
   page: PropTypes.number.isRequired,
@@ -190,7 +191,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId,
         offset: ownProps.page * ownProps.pageSize,

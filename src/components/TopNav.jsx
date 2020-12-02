@@ -1,13 +1,14 @@
-import PropTypes from "prop-types";
-import React from "react";
+import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import IconButton from "material-ui/IconButton";
 import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
+import PropTypes from "prop-types";
+import React from "react";
 import { Link } from "react-router-dom";
+
+import { withOperations } from "../containers/hoc/with-operations";
 import UserMenu from "../containers/UserMenu";
 import theme from "../styles/theme";
-import { StyleSheet, css } from "aphrodite";
-import { withOperations } from "../containers/hoc/with-operations";
-import gql from "graphql-tag";
 
 const styles = StyleSheet.create({
   container: {
@@ -41,38 +42,36 @@ const styles = StyleSheet.create({
   }
 });
 
-class TopNav extends React.Component {
-  render() {
-    const { backToURL, orgId, title } = this.props;
-    return (
-      <div className={css(styles.container)}>
-        <div className={css(styles.flexColumn)}>
-          <div className={css(styles.inline)}>
-            {backToURL && (
-              <Link to={backToURL}>
-                <IconButton>
-                  <ArrowBackIcon
-                    style={{ fill: "white" }}
-                    color={theme.colors.white}
-                  />
-                </IconButton>
-              </Link>
-            )}
-          </div>
-          <div className={css(styles.inline, styles.header)}>
-            {this.props.data && this.props.data.organization
-              ? `${this.props.data.organization.name} - `
-              : ""}
-            {title}
-          </div>
+const TopNav = (props) => {
+  const { backToURL, orgId, title } = props;
+  return (
+    <div className={css(styles.container)}>
+      <div className={css(styles.flexColumn)}>
+        <div className={css(styles.inline)}>
+          {backToURL && (
+            <Link to={backToURL}>
+              <IconButton>
+                <ArrowBackIcon
+                  style={{ fill: "white" }}
+                  color={theme.colors.white}
+                />
+              </IconButton>
+            </Link>
+          )}
         </div>
-        <div className={css(styles.userMenu)}>
-          <UserMenu orgId={orgId} />
+        <div className={css(styles.inline, styles.header)}>
+          {props.data && props.data.organization
+            ? `${props.data.organization.name} - `
+            : ""}
+          {title}
         </div>
       </div>
-    );
-  }
-}
+      <div className={css(styles.userMenu)}>
+        <UserMenu orgId={orgId} />
+      </div>
+    </div>
+  );
+};
 
 TopNav.propTypes = {
   backToURL: PropTypes.string,
@@ -90,7 +89,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         id: ownProps.orgId
       }

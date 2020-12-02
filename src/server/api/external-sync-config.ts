@@ -1,6 +1,6 @@
 import { r } from "../models";
-import { sqlResolvers } from "./lib/utils";
 import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
 
 type ExternalSyncTarget = "response_option" | "activist_code" | "result_code";
 
@@ -141,7 +141,7 @@ export const resolvers = {
         .first(),
     targets: async (
       qrConfig: ExternalSyncQuestionResponseConfig,
-      { after, first }: { after: string; first: number }
+      { after: _after, first: _first }: { after: string; first: number }
     ) => {
       if (qrConfig.is_missing) return null;
 
@@ -175,10 +175,7 @@ export const resolvers = {
     id: (tagConfig: ExternalSyncTagConfig) =>
       `${tagConfig.system_id}|${tagConfig.tag_id}`,
     tag: (tagConfig: ExternalSyncTagConfig) =>
-      r
-        .reader("all_tag")
-        .where({ id: tagConfig.tag_id })
-        .first(),
+      r.reader("all_tag").where({ id: tagConfig.tag_id }).first(),
     targets: (
       tagConfig: ExternalSyncTagConfig,
       { after, first }: { after: string; first: number }

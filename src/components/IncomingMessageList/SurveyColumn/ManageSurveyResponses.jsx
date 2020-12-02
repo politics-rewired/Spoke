@@ -1,11 +1,10 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
-import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import MenuItem from "material-ui/MenuItem";
+import SelectField from "material-ui/SelectField";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import {
   formatErrorMessage,
@@ -24,39 +23,41 @@ class ManageSurveyResponses extends Component {
   componentWillMount() {
     const { interactionSteps } = this.props.campaign;
     const questionResponses = interactionSteps
-      .filter(iStep => iStep.questionResponse)
+      .filter((iStep) => iStep.questionResponse)
       .reduce((collector, iStep) => {
         collector[iStep.id] = iStep.questionResponse.value;
         return collector;
       }, {});
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.questionResponses = questionResponses;
   }
 
-  getResponsesFrom = startingStepId => {
+  getResponsesFrom = (startingStepId) => {
     const { interactionSteps } = this.props.campaign;
     const { questionResponses } = this.state;
 
     const iSteps = [];
     let currentStep = interactionSteps.find(
-      iStep => iStep.questionText && iStep.id === startingStepId
+      (iStep) => iStep.questionText && iStep.id === startingStepId
     );
     while (currentStep) {
       const children = interactionSteps.filter(
-        iStep => iStep.parentInteractionId === currentStep.id
+        // eslint-disable-next-line no-loop-func
+        (iStep) => iStep.parentInteractionId === currentStep.id
       );
-      iSteps.push(Object.assign({}, currentStep, { children }));
+      iSteps.push({ ...currentStep, children });
       const value = questionResponses[currentStep.id];
       currentStep = value
         ? // Only show actionable questions
           interactionSteps.find(
-            iStep => iStep.questionText && iStep.answerOption === value
+            (iStep) => iStep.questionText && iStep.answerOption === value
           )
         : null;
     }
     return iSteps;
   };
 
-  createHandler = iStepId => {
+  createHandler = (iStepId) => {
     const {
       updateQuestionResponses,
       deleteQuestionResponses
@@ -64,16 +65,16 @@ class ManageSurveyResponses extends Component {
     return async (event, index, value) => {
       this.setState({ isMakingRequest: true });
       const { contact } = this.props;
-      let { questionResponses } = this.state;
+      const { questionResponses } = this.state;
       const affectedSteps = this.getResponsesFrom(iStepId);
 
       try {
         // Delete response for this and all children (unless this is a single question change)
         if (affectedSteps.length > 1 || !value) {
-          const iStepIds = affectedSteps.map(iStep => iStep.id);
+          const iStepIds = affectedSteps.map((iStep) => iStep.id);
           const response = await deleteQuestionResponses(iStepIds, contact.id);
           if (response.errors) throw response.errors;
-          iStepIds.forEach(iStepId => delete questionResponses[iStepId]);
+          iStepIds.forEach((stepId) => delete questionResponses[stepId]);
         }
 
         if (value) {
@@ -105,8 +106,8 @@ class ManageSurveyResponses extends Component {
     const { interactionSteps } = this.props.campaign;
     const { isMakingRequest, questionResponses } = this.state;
 
-    let startingStep = interactionSteps.find(
-      iStep => iStep.parentInteractionId === null
+    const startingStep = interactionSteps.find(
+      (iStep) => iStep.parentInteractionId === null
     );
 
     // There may not be an interaction step, or it may not define a question
@@ -119,12 +120,12 @@ class ManageSurveyResponses extends Component {
     }
 
     const errorActions = [
-      <FlatButton label="OK" primary={true} onClick={this.handleCloseError} />
+      <FlatButton key="ok" label="OK" primary onClick={this.handleCloseError} />
     ];
 
     return (
       <div style={{ maxHeight: "400px", overflowY: "scroll" }}>
-        {renderSteps.map(iStep => {
+        {renderSteps.map((iStep) => {
           const responseValue = questionResponses[iStep.id];
           return (
             <SelectField
@@ -136,7 +137,7 @@ class ManageSurveyResponses extends Component {
               style={{ width: "100%" }}
             >
               <MenuItem value={null} primaryText="" />
-              {iStep.children.map(option => (
+              {iStep.children.map((option) => (
                 <MenuItem
                   key={option.answerOption}
                   value={option.answerOption}
@@ -166,7 +167,7 @@ ManageSurveyResponses.propTypes = {
   mutations: PropTypes.object.isRequired
 };
 
-const ManageSurveyResponsesWrapper = props => {
+const ManageSurveyResponsesWrapper = (props) => {
   const { surveyQuestions, mutations, contact } = props;
   return (
     <div>
@@ -214,7 +215,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaign.id,
         contactId: ownProps.contact.id
@@ -225,10 +226,7 @@ const queries = {
 };
 
 const mutations = {
-  updateQuestionResponses: ownProps => (
-    questionResponses,
-    campaignContactId
-  ) => ({
+  updateQuestionResponses: () => (questionResponses, campaignContactId) => ({
     mutation: gql`
       mutation updateQuestionResponses(
         $questionResponses: [QuestionResponseInput]
@@ -247,10 +245,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  deleteQuestionResponses: ownProps => (
-    interactionStepIds,
-    campaignContactId
-  ) => ({
+  deleteQuestionResponses: () => (interactionStepIds, campaignContactId) => ({
     mutation: gql`
       mutation deleteQuestionResponses(
         $interactionStepIds: [String]

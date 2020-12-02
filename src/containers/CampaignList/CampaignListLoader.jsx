@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { withOperations } from "../hoc/with-operations";
 import LoadingIndicator from "../../components/LoadingIndicator";
+import { withOperations } from "../hoc/with-operations";
 import CampaignList from "./CampaignList";
 
 export class CampaignListLoader extends React.Component {
@@ -49,15 +49,8 @@ export class CampaignListLoader extends React.Component {
   }
 }
 
-CampaignListLoader.defaultProps = {
-  offset: 0
-};
-
 CampaignListLoader.propTypes = {
   organizationId: PropTypes.string.isRequired,
-  campaignsFilter: PropTypes.object,
-  offset: PropTypes.number,
-  limit: PropTypes.number.isRequired,
   adminPerms: PropTypes.bool.isRequired,
   resultCountDidUpdate: PropTypes.func.isRequired,
   startOperation: PropTypes.func.isRequired,
@@ -111,7 +104,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId,
         campaignsFilter: ownProps.campaignsFilter,

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     alter table public.external_system add column username text not null default '';
     alter table public.external_system add column created_at timestamptz not null default now();
@@ -180,7 +180,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     -- Restore function versions from 20200510204235_external_list
 

@@ -1,10 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
-import { areComponentsEqual } from "react-hot-loader";
 import Form from "react-formal";
-import GSSubmitButton from "./GSSubmitButton";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { areComponentsEqual } from "react-hot-loader";
+
 import theme from "../../styles/theme";
-import { StyleSheet, css } from "aphrodite";
+import GSSubmitButton from "./GSSubmitButton";
 
 const styles = StyleSheet.create({
   errorMessage: {
@@ -15,6 +17,7 @@ const styles = StyleSheet.create({
   }
 });
 export default class GSForm extends React.Component {
+  // eslint-disable-next-line react/static-property-placement
   static propTypes = {
     value: PropTypes.object,
     defaultValue: PropTypes.object,
@@ -29,7 +32,7 @@ export default class GSForm extends React.Component {
     globalErrorMessage: null
   };
 
-  handleFormError(err) {
+  handleFormError = (err) => {
     if (err.message) {
       this.setState({ globalErrorMessage: err.message });
     } else {
@@ -39,18 +42,19 @@ export default class GSForm extends React.Component {
           "Oops! Your form submission did not work. Contact your administrator."
       });
     }
-  }
+  };
 
   submit = () => {
     this.refs.form.submit();
   };
 
   renderChildren(children) {
-    return React.Children.map(children, child => {
+    return React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) {
         return child;
-      } else if (areComponentsEqual(child.type, Form.Field)) {
-        const name = child.props.name;
+      }
+      if (areComponentsEqual(child.type, Form.Field)) {
+        const { name } = child.props;
         let error = this.state.formErrors ? this.state.formErrors[name] : null;
         let clonedElement = child;
         if (error) {
@@ -64,12 +68,14 @@ export default class GSForm extends React.Component {
         return React.cloneElement(clonedElement, {
           events: ["onBlur"]
         });
-      } else if (areComponentsEqual(child.type, Form.Button)) {
+      }
+      if (areComponentsEqual(child.type, Form.Button)) {
         return React.cloneElement(child, {
           component: GSSubmitButton,
           isSubmitting: this.state.isSubmitting
         });
-      } else if (child.props && child.props.children) {
+      }
+      if (child.props && child.props.children) {
         return React.cloneElement(child, {
           children: this.renderChildren(child.props.children)
         });
@@ -95,17 +101,17 @@ export default class GSForm extends React.Component {
       <Form
         ref="form"
         value={this.props.value || this.state.model || this.props.defaultValue}
-        onChange={model => {
+        onChange={(model) => {
           this.setState({ model });
           if (this.props.onChange) {
             this.props.onChange(model);
           }
         }}
-        onError={errors => {
+        onError={(errors) => {
           this.setState({ formErrors: errors });
         }}
         {...this.props}
-        onSubmit={async formValues => {
+        onSubmit={async (formValues) => {
           this.setState({
             isSubmitting: true,
             globalErrorMessage: null

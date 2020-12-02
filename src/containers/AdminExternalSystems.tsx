@@ -1,36 +1,36 @@
-import React, { Component } from "react";
-import moment from "moment";
 import gql from "graphql-tag";
-
-import {
-  Table,
-  TableHeader,
-  TableHeaderColumn,
-  TableBody,
-  TableRow,
-  TableRowColumn
-} from "material-ui/Table";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
-import SelectField from "material-ui/SelectField";
 import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import Dialog from "material-ui/Dialog";
-import TextField from "material-ui/TextField";
+import SelectField from "material-ui/SelectField";
 import Snackbar from "material-ui/Snackbar";
 import ContentAdd from "material-ui/svg-icons/content/add";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import SyncIcon from "material-ui/svg-icons/file/cloud-download";
-
-import { loadData } from "./hoc/with-operations";
+import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import {
-  ExternalSystemType,
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn
+} from "material-ui/Table";
+import TextField from "material-ui/TextField";
+import moment from "moment";
+import React, { Component } from "react";
+
+import {
   ExternalSystem,
-  ExternalSystemInput
+  ExternalSystemInput,
+  ExternalSystemType
 } from "../api/external-system";
 import { RelayPaginatedResponse } from "../api/pagination";
+import { MutationMap, QueryMap } from "../network/types";
 import theme from "../styles/theme";
+import { loadData } from "./hoc/with-operations";
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
 
@@ -44,7 +44,7 @@ interface Props {
       id: string,
       input: ExternalSystemInput
     ) => Promise<{ data: { editExternalSystem: ExternalSystem } }>;
-    refreshSystem: (externalSystemId: string) => Promise<{ data: Boolean }>;
+    refreshSystem: (externalSystemId: string) => Promise<{ data: boolean }>;
   };
   data: {
     externalSystems: RelayPaginatedResponse<ExternalSystem>;
@@ -75,7 +75,7 @@ class AdminExternalSystems extends Component<Props, State> {
 
   makeStartEditExternalSystem = (systemId: string) => () => {
     const { edges } = this.props.data.externalSystems;
-    const system = edges.find(edge => edge.node.id === systemId)!.node;
+    const system = edges.find((edge) => edge.node.id === systemId)!.node;
 
     const { id: _id, syncedAt: _syncedAt, ...externalSystem } = system;
     this.setState({
@@ -89,7 +89,7 @@ class AdminExternalSystems extends Component<Props, State> {
     this.setState({ syncInitiatedForId: systemId });
   };
 
-  handleDismissSyncSnackbar = (systemId: string) => async () =>
+  handleDismissSyncSnackbar = (_systemId: string) => async () =>
     this.setState({ syncInitiatedForId: undefined });
 
   handleRefreshSystems = () => this.props.data.refetch();
@@ -100,25 +100,27 @@ class AdminExternalSystems extends Component<Props, State> {
   saveExternalSystem = () => {
     const handleError = console.error;
 
-    this.state.editingExternalSystem === "new"
-      ? this.props.mutations
-          .createExternalSystem(this.state.externalSystem)
-          .then(this.cancelEditingExternalSystem)
-          .catch(handleError)
-      : this.props.mutations
-          .editExternalSystem(
-            this.state.editingExternalSystem!,
-            this.state.externalSystem
-          )
-          .then(this.cancelEditingExternalSystem)
-          .catch(handleError);
+    if (this.state.editingExternalSystem === "new") {
+      this.props.mutations
+        .createExternalSystem(this.state.externalSystem)
+        .then(this.cancelEditingExternalSystem)
+        .catch(handleError);
+    } else {
+      this.props.mutations
+        .editExternalSystem(
+          this.state.editingExternalSystem!,
+          this.state.externalSystem
+        )
+        .then(this.cancelEditingExternalSystem)
+        .catch(handleError);
+    }
   };
 
   editExternalSystemProp = (prop: keyof ExternalSystemInput) => (
     _: unknown,
     newVal: string
   ) =>
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
 
@@ -132,7 +134,9 @@ class AdminExternalSystems extends Component<Props, State> {
     const { name, type, username, apiKey } = externalSystem;
 
     const { edges } = this.props.data.externalSystems;
-    const syncingEdge = edges.find(edge => edge.node.id === syncInitiatedForId);
+    const syncingEdge = edges.find(
+      (edge) => edge.node.id === syncInitiatedForId
+    );
     const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
 
     return (
@@ -174,7 +178,7 @@ class AdminExternalSystems extends Component<Props, State> {
                   <RaisedButton
                     label="Edit"
                     labelPosition="before"
-                    primary={true}
+                    primary
                     icon={<CreateIcon />}
                     style={{ marginRight: 10 }}
                     onClick={this.makeStartEditExternalSystem(system.id)}
@@ -203,12 +207,14 @@ class AdminExternalSystems extends Component<Props, State> {
           onRequestClose={this.cancelEditingExternalSystem}
           actions={[
             <FlatButton
+              key="cancel"
               label="Cancel"
               onClick={this.cancelEditingExternalSystem}
             />,
             <FlatButton
+              key="save"
               label="Save"
-              primary={true}
+              primary
               onClick={this.saveExternalSystem}
             />
           ]}
@@ -216,16 +222,12 @@ class AdminExternalSystems extends Component<Props, State> {
           <TextField
             name="name"
             floatingLabelText="Integration Name"
-            fullWidth={true}
+            fullWidth
             value={name}
             onChange={this.editExternalSystemProp("name")}
           />
           <br />
-          <SelectField
-            floatingLabelText="System Type"
-            value={type}
-            fullWidth={true}
-          >
+          <SelectField floatingLabelText="System Type" value={type} fullWidth>
             {EXTERNAL_SYSTEM_OPTS.map(([display, val]) => (
               <MenuItem key={val} value={val} primaryText={display} />
             ))}
@@ -234,7 +236,7 @@ class AdminExternalSystems extends Component<Props, State> {
           <TextField
             name="username"
             floatingLabelText="Username"
-            fullWidth={true}
+            fullWidth
             value={username}
             onChange={this.editExternalSystemProp("username")}
           />
@@ -242,7 +244,7 @@ class AdminExternalSystems extends Component<Props, State> {
           <TextField
             name="apiKey"
             floatingLabelText="API Key"
-            fullWidth={true}
+            fullWidth
             value={apiKey}
             onChange={this.editExternalSystemProp("apiKey")}
           />
@@ -252,9 +254,7 @@ class AdminExternalSystems extends Component<Props, State> {
           open={syncingSystem !== undefined}
           message={
             syncingSystem
-              ? `Sync started for ${
-                  syncingSystem.name
-                }. Please refresh systems to see updated lists.`
+              ? `Sync started for ${syncingSystem.name}. Please refresh systems to see updated lists.`
               : ""
           }
           autoHideDuration={4000}
@@ -269,7 +269,7 @@ class AdminExternalSystems extends Component<Props, State> {
   }
 }
 
-const queries = {
+const queries: QueryMap<Props> = {
   data: {
     query: gql`
       query getExternalSystems($organizationId: String!) {
@@ -287,7 +287,7 @@ const queries = {
         }
       }
     `,
-    options: (ownProps: Props) => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -295,8 +295,8 @@ const queries = {
   }
 };
 
-const mutations = {
-  createExternalSystem: (ownProps: Props) => (
+const mutations: MutationMap<Props> = {
+  createExternalSystem: (ownProps) => (
     externalSystem: ExternalSystemInput
   ) => ({
     mutation: gql`
@@ -324,7 +324,7 @@ const mutations = {
     },
     refetchQueries: ["getExternalSystems"]
   }),
-  editExternalSystem: (ownProps: Props) => (
+  editExternalSystem: (_ownProps) => (
     id: string,
     externalSystem: ExternalSystemInput
   ) => ({
@@ -343,11 +343,11 @@ const mutations = {
       }
     `,
     variables: {
-      id: id,
+      id,
       externalSystem
     }
   }),
-  refreshSystem: (ownProps: Props) => (externalSystemId: string) => ({
+  refreshSystem: (_ownProps) => (externalSystemId: string) => ({
     mutation: gql`
       mutation refreshExternalSystem($externalSystemId: String!) {
         refreshExternalSystem(externalSystemId: $externalSystemId)

@@ -1,9 +1,8 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-
-import ReactMarkdown from "react-markdown";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import ReactMarkdown from "react-markdown";
 
 class ApplyTagConfirmationDialog extends Component {
   state = {
@@ -16,6 +15,7 @@ class ApplyTagConfirmationDialog extends Component {
     const isNewTag = lastTag === undefined && nextTag !== undefined;
     const isDifferentTag = lastTag && nextTag && lastTag.id !== nextTag.id;
     if (isNewTag || isDifferentTag) {
+      // eslint-disable-next-line react/no-direct-mutation-state
       this.state.confirmStepIndex = 0;
     }
   }
@@ -42,13 +42,23 @@ class ApplyTagConfirmationDialog extends Component {
     confirmStepIndex = Math.min(confirmStepIndex, confirmationSteps.length - 1);
     const [content, confirm, cancel] = confirmationSteps[confirmStepIndex];
     const confrimTagActions = [
-      <FlatButton label={confirm} primary onClick={this.handleConfirmStep} />,
-      <FlatButton label={cancel} primary onClick={this.handleRequestClose} />
+      <FlatButton
+        key="confirm"
+        label={confirm}
+        primary
+        onClick={this.handleConfirmStep}
+      />,
+      <FlatButton
+        key="cancel"
+        label={cancel}
+        primary
+        onClick={this.handleRequestClose}
+      />
     ];
 
     return (
       <Dialog
-        title={"Confirm Add Tag"}
+        title="Confirm Add Tag"
         open={pendingTag !== undefined}
         actions={confrimTagActions}
         onRequestClose={this.handleRequestClose}

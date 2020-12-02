@@ -1,21 +1,20 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose, withProps } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
 import Avatar from "material-ui/Avatar";
-import { Card, CardHeader, CardText, CardActions } from "material-ui/Card";
-import RaisedButton from "material-ui/RaisedButton";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
+import RaisedButton from "material-ui/RaisedButton";
 import DoneIcon from "material-ui/svg-icons/action/done";
+import WarningIcon from "material-ui/svg-icons/alert/warning";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
+import React from "react";
+import { compose, withProps } from "recompose";
 
-import { CampaignReadinessType } from "../types";
 import { withAuthzContext } from "../../../components/AuthzProvider";
-import { loadData } from "../../hoc/with-operations";
-import { dataTest, camelCase } from "../../../lib/attributes";
+import { camelCase, dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
+import { loadData } from "../../hoc/with-operations";
+import { CampaignReadinessType } from "../types";
 
 export interface PendingJobType {
   id: string;
@@ -79,7 +78,7 @@ const unpackJob = (job?: PendingJobType) => ({
   isSaving: job !== undefined && !job.resultMessage
 });
 
-const SectionWrapper: React.SFC<WrapperProps> = props => {
+const SectionWrapper: React.SFC<WrapperProps> = (props) => {
   const {
     // Required props
     active,
@@ -143,6 +142,7 @@ const SectionWrapper: React.SFC<WrapperProps> = props => {
   const handleDiscardJob = async () => {
     if (!jobId) return;
 
+    // eslint-disable-next-line no-alert,no-restricted-globals
     const didConfirm = confirm(
       "Discarding the job will not necessarily stop it from running." +
         " However, if the job failed, discarding will let you try again." +
@@ -154,7 +154,7 @@ const SectionWrapper: React.SFC<WrapperProps> = props => {
     try {
       const response = await deleteJob(jobId);
       if (response.errors)
-        throw new Error(response.errors.map(err => `${err}`).join("\n"));
+        throw new Error(response.errors.map((err) => `${err}`).join("\n"));
     } catch (err) {
       onError(err.message);
     }
@@ -177,18 +177,17 @@ const SectionWrapper: React.SFC<WrapperProps> = props => {
         avatar={avatar}
       />
       <CardText expandable>{children}</CardText>
-      {isSaving &&
-        adminPerms && (
-          <CardActions>
-            <div>Current Status: {progressMessage}</div>
-            {jobMessage && <div>Message: {jobMessage}</div>}
-            <RaisedButton
-              label="Discard Job"
-              icon={<CancelIcon />}
-              onClick={handleDiscardJob}
-            />
-          </CardActions>
-        )}
+      {isSaving && adminPerms && (
+        <CardActions>
+          <div>Current Status: {progressMessage}</div>
+          {jobMessage && <div>Message: {jobMessage}</div>}
+          <RaisedButton
+            label="Discard Job"
+            icon={<CancelIcon />}
+            onClick={handleDiscardJob}
+          />
+        </CardActions>
+      )}
     </Card>
   );
 };
@@ -328,11 +327,14 @@ export const asSection = (options: SectionOptions) => (
       const {
         expandableBySuperVolunteers,
         expandAfterCampaignStarts,
-        readinessName,
-        jobQueueNames
+        readinessName
       } = options;
-      const { status, jobs, adminPerms, mutations } = ownerProps;
-      const { deleteJob } = mutations;
+      const {
+        status,
+        jobs,
+        adminPerms,
+        mutations: { deleteJob }
+      } = ownerProps;
       const { isStarted, readiness } = status.campaign;
       const pendingJob = jobs ? jobs.campaign.pendingJobs[0] : undefined;
 
@@ -344,7 +346,7 @@ export const asSection = (options: SectionOptions) => (
 
       return { pendingJob, isExpandable, sectionIsDone, deleteJob };
     })
-  )(props => {
+  )((props) => {
     const {
       // Required props
       organizationId,

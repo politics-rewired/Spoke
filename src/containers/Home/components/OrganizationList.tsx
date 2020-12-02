@@ -1,20 +1,19 @@
-import React from "react";
-import { History } from "history";
-import { withRouter, Redirect } from "react-router";
-import { compose } from "react-apollo";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { StyleSheet, css } from "aphrodite";
+import { History } from "history";
 import sortBy from "lodash/sortBy";
-
-import Paper from "material-ui/Paper";
 import { List, ListItem } from "material-ui/List";
+import Paper from "material-ui/Paper";
 import { amber500, grey500 } from "material-ui/styles/colors";
 import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
 import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
+import React from "react";
+import { compose } from "react-apollo";
+import { Redirect, withRouter } from "react-router-dom";
 
-import { loadData } from "../../hoc/with-operations";
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import theme from "../../../styles/theme";
+import { loadData } from "../../hoc/with-operations";
 
 const styles = StyleSheet.create({
   header: {
@@ -47,7 +46,7 @@ export interface OrganizationListProps {
   history: History;
 }
 
-export const OrganizationList: React.SFC<OrganizationListProps> = props => {
+export const OrganizationList: React.SFC<OrganizationListProps> = (props) => {
   const { currentUser } = props.data;
 
   const handleSelectOrg = (membership: MembershipType) => () => {
@@ -75,7 +74,8 @@ export const OrganizationList: React.SFC<OrganizationListProps> = props => {
         </div>
       </div>
     );
-  } else if (memberships.length === 1) {
+  }
+  if (memberships.length === 1) {
     const {
       role,
       organization: { id: orgId }
@@ -114,9 +114,7 @@ export const OrganizationList: React.SFC<OrganizationListProps> = props => {
               ) : (
                 <NotificationsPausedIcon color={grey500} />
               )
-            ) : (
-              undefined
-            );
+            ) : undefined;
             return (
               <ListItem
                 leftIcon={leftIcon}
@@ -159,7 +157,4 @@ const queries = {
   }
 };
 
-export default compose(
-  loadData({ queries }),
-  withRouter
-)(OrganizationList);
+export default compose(loadData({ queries }), withRouter)(OrganizationList);

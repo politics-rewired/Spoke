@@ -60,8 +60,8 @@ async function go() {
   console.log(rows[0]);
 
   const chunks = _.chunk(rows, 1);
-  for (let chunk of chunks) {
-    chunk.forEach(r => {
+  for (const chunk of chunks) {
+    chunk.forEach((r) => {
       if (previously_seen.has(r.message_id)) {
         throw new Error(`Duplicate!!! ${r.message_id}`);
       }
@@ -77,7 +77,7 @@ async function go() {
 
 async function main(rows) {
   const chunks = _.chunk(rows, 100);
-  for (let chunk of chunks) {
+  for (const chunk of chunks) {
     // chunk.forEach(r => {
     // 	if (previously_seen.has(r.message_id)) {
     // 		throw new Error(`Duplicate!!! ${r.message_id}`)
@@ -92,6 +92,4 @@ async function main(rows) {
   // }
 }
 
-main(rows)
-  .then(console.log)
-  .catch(console.error);
+main(rows).then(console.log).catch(console.error);

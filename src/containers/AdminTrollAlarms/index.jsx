@@ -1,7 +1,4 @@
-import React from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
 import AutoComplete from "material-ui/AutoComplete";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
@@ -9,9 +6,11 @@ import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { loadData } from "../hoc/with-operations";
 import { dataSourceItem } from "../../components/utils";
+import { loadData } from "../hoc/with-operations";
 import TrollAlarmList from "./components/TrollAlarmList";
 
 const styles = {
@@ -46,20 +45,25 @@ class AdminTrollAlarms extends React.Component {
   // Query conditions
   handleFocusTokenSearch = () =>
     this.setState({ tokenSearchText: "", token: null });
-  handleTokenSearchTextChange = tokenSearchText =>
+
+  handleTokenSearchTextChange = (tokenSearchText) =>
     this.setState({ tokenSearchText });
+
   handleTokenSelected = (selection, index) => {
     let token = null;
     if (index > -1) {
       token = selection.value.key;
     } else {
-      const trollTokens = this.props.trollTokens.trollTokens;
-      token = trollTokens.find(({ token }) => token === selection);
+      const { trollTokens } = this.props.trollTokens;
+      token = trollTokens.find(
+        ({ token: trollToken }) => trollToken === selection
+      );
     }
     if (token) {
       this.setState({ token, selectedAlarmIds: [] });
     }
   };
+
   handleToggleDismissed = (_event, dismissed) =>
     this.setState({ dismissed, selectedAlarmIds: [] });
 
@@ -91,7 +95,8 @@ class AdminTrollAlarms extends React.Component {
   };
 
   handleDismissCopyAlarm = () => this.setState({ copiedAlarmID: undefined });
-  handleCopyAlarm = alarm => {
+
+  handleCopyAlarm = (alarm) => {
     const clipboardContents = [
       `Triggered Token: ${alarm.token}`,
       `Message ID: ${alarm.messageId}`,
@@ -110,12 +115,13 @@ class AdminTrollAlarms extends React.Component {
   };
 
   // Table selection
-  handleAlarmSelectionChange = selectedAlarmIds =>
+  handleAlarmSelectionChange = (selectedAlarmIds) =>
     this.setState({ selectedAlarmIds });
 
   // Pagination
-  handlePageSizeChange = pageSize => this.setState({ pageSize });
-  handlePageChange = page => this.setState({ page });
+  handlePageSizeChange = (pageSize) => this.setState({ pageSize });
+
+  handlePageChange = (page) => this.setState({ page });
 
   render() {
     const { tokenSearchText, copiedAlarmID } = this.state;
@@ -123,9 +129,9 @@ class AdminTrollAlarms extends React.Component {
     const { selectedAlarmIds, isWorking, error } = this.state;
     const { match } = this.props;
 
-    const trollTokens = this.props.trollTokens.trollTokens;
-    const dataSource = trollTokens.map(({ token }) =>
-      dataSourceItem(token, token)
+    const { trollTokens } = this.props.trollTokens;
+    const dataSource = trollTokens.map(({ token: trollToken }) =>
+      dataSourceItem(trollToken, trollToken)
     );
 
     const deleteAllSuffix = token ? `"${token}"` : "Token";
@@ -133,8 +139,9 @@ class AdminTrollAlarms extends React.Component {
 
     const errorActions = [
       <FlatButton
+        key="close"
         label="Close"
-        primary={true}
+        primary
         onClick={this.handleOnCancelError}
       />
     ];
@@ -143,10 +150,10 @@ class AdminTrollAlarms extends React.Component {
       <div>
         <Paper style={styles.controlsContainer}>
           <AutoComplete
-            floatingLabelText={"Token"}
-            hintText={"Search for a trigger token"}
+            floatingLabelText="Token"
+            hintText="Search for a trigger token"
             style={{ marginRight: "10px", ...styles.controlsColumn }}
-            fullWidth={true}
+            fullWidth
             maxSearchResults={8}
             searchText={tokenSearchText}
             dataSource={dataSource}
@@ -164,13 +171,13 @@ class AdminTrollAlarms extends React.Component {
           <RaisedButton
             label={`Dismiss All Matching ${deleteAllSuffix}`}
             style={{ marginRight: "10px" }}
-            secondary={true}
+            secondary
             disabled={token === null}
             onClick={this.handleDismissMatching}
           />
           <RaisedButton
             label={`Dismiss Selected (${selectedAlarmIds.length})`}
-            secondary={true}
+            secondary
             disabled={isDeleteSelectedDisabled}
             onClick={this.handleDismissSelected}
           />
@@ -228,7 +235,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -237,7 +244,7 @@ const queries = {
 };
 
 const mutations = {
-  dismissAlarms: ownProps => alarmIds => ({
+  dismissAlarms: (ownProps) => (alarmIds) => ({
     mutation: gql`
       mutation dismissSelectedTrollBotAlarms(
         $organizationId: String!
@@ -252,7 +259,7 @@ const mutations = {
     },
     refetchQueries: ["getTrollAlarmsForOrg"]
   }),
-  dismissMatchingAlarms: ownProps => token => ({
+  dismissMatchingAlarms: (ownProps) => (token) => ({
     mutation: gql`
       mutation dismissMatchingTrollBotAlarms(
         $organizationId: String!

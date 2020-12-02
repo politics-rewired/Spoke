@@ -1,10 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
-import * as yup from "yup";
-import Form from "react-formal";
-
 import ChipInput from "material-ui-chip-input";
 import Toggle from "material-ui/Toggle";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -21,11 +20,11 @@ class CampaignTeamsForm extends React.Component {
     this.props.onChange({ isAssignmentLimitedToTeams });
   };
 
-  addTeam = team => {
+  addTeam = (team) => {
     const { teams } = this.props.formValues;
 
     const teanAlreadySelected =
-      teams.filter(existingTeam => existingTeam.id === team.id).length > 0;
+      teams.filter((existingTeam) => existingTeam.id === team.id).length > 0;
 
     if (!teanAlreadySelected) {
       teams.push(team);
@@ -36,19 +35,19 @@ class CampaignTeamsForm extends React.Component {
 
   // Prevent user-defined teams
   handleBeforeRequestAdd = ({ id: tagId, title }) =>
-    !isNaN(tagId) && tagId !== title;
+    !Math.isNaN(tagId) && tagId !== title;
 
   handleAddTeam = ({ id: teamId }) => {
     const { orgTeams } = this.props;
 
-    const team = orgTeams.find(team => team.id === teamId);
+    const team = orgTeams.find((orgTeam) => orgTeam.id === teamId);
 
     this.addTeam(team);
   };
 
-  handleRemoveTeam = deleteTeamId => {
+  handleRemoveTeam = (deleteTeamId) => {
     const teams = this.props.formValues.teams.filter(
-      team => team.id !== deleteTeamId
+      (team) => team.id !== deleteTeamId
     );
     this.props.onChange({ teams });
   };
@@ -80,8 +79,8 @@ class CampaignTeamsForm extends React.Component {
           dataSourceConfig={{ text: "title", value: "id" }}
           dataSource={orgTeams}
           placeholder="Select teams"
-          fullWidth={true}
-          openOnFocus={true}
+          fullWidth
+          openOnFocus
           onBeforeRequestAdd={this.handleBeforeRequestAdd}
           onRequestAdd={this.handleAddTeam}
           onRequestDelete={this.handleRemoveTeam}
@@ -90,10 +89,10 @@ class CampaignTeamsForm extends React.Component {
         <br />
 
         <Form.Field
-          name={"isAssignmentLimitedToTeams"}
+          name="isAssignmentLimitedToTeams"
           type={Toggle}
-          toggled={formValues["isAssignmentLimitedToTeams"]}
-          label={"Restrict assignment solely to members of these teams?"}
+          toggled={formValues.isAssignmentLimitedToTeams}
+          label="Restrict assignment solely to members of these teams?"
           onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
         />
 

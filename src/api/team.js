@@ -30,3 +30,5 @@ export const schema = `
     escalationTagIds: [Int]
   }
 `;
+
+export default schema;

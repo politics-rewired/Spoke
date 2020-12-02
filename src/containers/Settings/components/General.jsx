@@ -1,24 +1,23 @@
-import React from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import * as yup from "yup";
-
-import Form from "react-formal";
-import { Card, CardText, CardActions, CardHeader } from "material-ui/Card";
+import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
+import DropDownMenu from "material-ui/DropDownMenu";
 import FlatButton from "material-ui/FlatButton";
+import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
-import DropDownMenu from "material-ui/DropDownMenu";
-import MenuItem from "material-ui/MenuItem";
-import { StyleSheet, css } from "aphrodite";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
-import { loadData } from "../../hoc/with-operations";
-import { snakeToTitleCase } from "../../../lib/attributes";
 import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import GSSubmitButton from "../../../components/forms/GSSubmitButton";
+import { snakeToTitleCase } from "../../../lib/attributes";
+import { loadData } from "../../hoc/with-operations";
 
 const styles = StyleSheet.create({
   sectionCard: {
@@ -55,14 +54,13 @@ const inlineStyles = {
   }
 };
 
-const formatTextingHours = hour => moment(hour, "H").format("h a");
+const formatTextingHours = (hour) => moment(hour, "H").format("h a");
 
 class Settings extends React.Component {
   state = {
     textingHoursDialogOpen: false,
     hasNumbersApiKeyChanged: false,
     numbersApiKey: undefined,
-    trollbotWebhookUrl: undefined,
     approvalLevel: undefined,
     isWorking: false,
     error: undefined
@@ -113,7 +111,7 @@ class Settings extends React.Component {
     }
   };
 
-  handleEditNumbersApiKey = async payload => {
+  handleEditNumbersApiKey = async (_payload) => {
     let { numbersApiKey } = this.state;
     numbersApiKey = numbersApiKey !== "" ? numbersApiKey : null;
     const input = { numbersApiKey };
@@ -153,7 +151,7 @@ class Settings extends React.Component {
       textingHoursEnd: yup.number().required()
     });
 
-    const hourChoices = [...Array(25).keys()].map(hour => ({
+    const hourChoices = [...Array(25).keys()].map((hour) => ({
       value: hour,
       label: formatTextingHours(hour)
     }));
@@ -229,7 +227,12 @@ class Settings extends React.Component {
     const noApprovalChange = approvalLevel === defaulTexterApprovalStatus;
 
     const errorActions = [
-      <FlatButton label="OK" primary={true} onClick={this.handleDismissError} />
+      <FlatButton
+        key="ok"
+        label="OK"
+        primary
+        onClick={this.handleDismissError}
+      />
     ];
 
     return (
@@ -245,7 +248,7 @@ class Settings extends React.Component {
               value={approvalLevel}
               onChange={this.handleChangeApprovalLevel}
             >
-              {Object.keys(RequestAutoApproveType).map(level => (
+              {Object.keys(RequestAutoApproveType).map((level) => (
                 <MenuItem
                   key={level}
                   value={level}
@@ -257,7 +260,7 @@ class Settings extends React.Component {
           <CardActions>
             <RaisedButton
               label="Save Default Level"
-              primary={true}
+              primary
               disabled={isWorking || noApprovalChange}
               onClick={this.handleSaveApprovalLevel}
             />
@@ -294,10 +297,8 @@ class Settings extends React.Component {
             <Toggle
               toggled={organization.textingHoursEnforced}
               label="Enforce texting hours?"
-              onToggle={async (event, isToggled) =>
-                await this.props.mutations.updateTextingHoursEnforcement(
-                  isToggled
-                )
+              onToggle={(event, isToggled) =>
+                this.props.mutations.updateTextingHoursEnforcement(isToggled)
               }
             />
 
@@ -355,7 +356,7 @@ class Settings extends React.Component {
             </CardText>
             <CardActions>
               <Form.Button
-                label={"Save"}
+                label="Save"
                 type="submit"
                 component={RaisedButton}
                 disabled={isWorking || !hasNumbersApiKeyChanged}
@@ -428,12 +429,11 @@ class Settings extends React.Component {
 
 Settings.propTypes = {
   data: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
   mutations: PropTypes.object.isRequired
 };
 
 const mutations = {
-  updateTextingHours: ownProps => (textingHoursStart, textingHoursEnd) => ({
+  updateTextingHours: (ownProps) => (textingHoursStart, textingHoursEnd) => ({
     mutation: gql`
       mutation updateTextingHours(
         $textingHoursStart: Int!
@@ -458,7 +458,7 @@ const mutations = {
       textingHoursEnd
     }
   }),
-  updateTextingHoursEnforcement: ownProps => textingHoursEnforced => ({
+  updateTextingHoursEnforcement: (ownProps) => (textingHoursEnforced) => ({
     mutation: gql`
       mutation updateTextingHoursEnforcement(
         $textingHoursEnforced: Boolean!
@@ -480,7 +480,7 @@ const mutations = {
       textingHoursEnforced
     }
   }),
-  editSettings: ownProps => input => ({
+  editSettings: (ownProps) => (input) => ({
     mutation: gql`
       mutation editOrganizationSettings(
         $id: String!
@@ -526,7 +526,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }

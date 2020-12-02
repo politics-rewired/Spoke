@@ -1,19 +1,17 @@
-import React, { Component } from "react";
-import type from "prop-types";
-import Toggle from "material-ui/Toggle";
-
-import { Card, CardHeader, CardText } from "material-ui/Card";
+import { css, StyleSheet } from "aphrodite";
 import AutoComplete from "material-ui/AutoComplete";
+import { Card, CardHeader, CardText } from "material-ui/Card";
+import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import TextField from "material-ui/TextField";
-import MenuItem from "material-ui/MenuItem";
-import theme from "../styles/theme";
-import { dataSourceItem } from "./utils";
+import Toggle from "material-ui/Toggle";
+import type from "prop-types";
+import React, { Component } from "react";
 
 import { nameComponents } from "../lib/attributes";
-import { UNASSIGNED_TEXTER, ALL_TEXTERS } from "../lib/constants";
-
-import { StyleSheet, css } from "aphrodite";
+import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../lib/constants";
+import theme from "../styles/theme";
+import { dataSourceItem } from "./utils";
 
 const styles = StyleSheet.create({
   container: {
@@ -83,10 +81,10 @@ class IncomingMessageFilter extends Component {
   onMessageFilterSelectChanged = (event, index, values) => {
     this.setState({ messageFilter: values });
     const messageStatuses = new Set();
-    values.forEach(value => {
-      const children = MESSAGE_STATUSES[value].children;
+    values.forEach((value) => {
+      const { children } = MESSAGE_STATUSES[value];
       if (children.length > 0) {
-        children.forEach(child => messageStatuses.add(child));
+        children.forEach((child) => messageStatuses.add(child));
       } else {
         messageStatuses.add(value);
       }
@@ -97,11 +95,11 @@ class IncomingMessageFilter extends Component {
   };
 
   onCampaignSelected = (selection, index) => {
-    let campaignId = undefined;
+    let campaignId;
     if (index === -1) {
-      const campaign = this.props.texters.find(campaign => {
-        return campaign.title === selection;
-      });
+      const campaign = this.props.texters.find(
+        ({ title }) => title === selection
+      );
       if (campaign) {
         campaignId = campaign.id;
       }
@@ -114,11 +112,11 @@ class IncomingMessageFilter extends Component {
   };
 
   onTexterSelected = (selection, index) => {
-    let texterUserId = undefined;
+    let texterUserId;
     if (index === -1) {
-      const texter = this.props.texters.find(texter => {
-        return texter.displayName === selection;
-      });
+      const texter = this.props.texters.find(
+        ({ displayName }) => displayName === selection
+      );
       if (texter) {
         texterUserId = texter.id;
       }
@@ -130,10 +128,12 @@ class IncomingMessageFilter extends Component {
     }
   };
 
-  onContactNameChanged = ev => {
+  onContactNameChanged = (ev) => {
     const name = ev.target.value;
     const { firstName, lastName } = nameComponents(name);
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.firstName = firstName;
+    // eslint-disable-next-line react/no-direct-mutation-state
     this.state.lastName = lastName;
     clearTimeout(this.submitNameUpdateTimeout);
     this.submitNameUpdateTimeout = setTimeout(
@@ -148,12 +148,12 @@ class IncomingMessageFilter extends Component {
   };
 
   render() {
-    const texterNodes = TEXTER_FILTERS.map(texterFilter =>
+    const texterNodes = TEXTER_FILTERS.map((texterFilter) =>
       dataSourceItem(texterFilter[1], texterFilter[0])
     ).concat(
       !this.props.texters
         ? []
-        : this.props.texters.map(user => {
+        : this.props.texters.map((user) => {
             const userId = parseInt(user.id, 10);
             return dataSourceItem(user.displayName, userId);
           })
@@ -162,12 +162,12 @@ class IncomingMessageFilter extends Component {
       return left.text.localeCompare(right.text, "en", { sensitivity: "base" });
     });
 
-    const campaignNodes = CAMPAIGN_TYPE_FILTERS.map(campaignTypeFilter =>
+    const campaignNodes = CAMPAIGN_TYPE_FILTERS.map((campaignTypeFilter) =>
       dataSourceItem(campaignTypeFilter[1], campaignTypeFilter[0])
     ).concat(
       !this.props.campaigns
         ? []
-        : this.props.campaigns.map(campaign => {
+        : this.props.campaigns.map((campaign) => {
             const campaignId = parseInt(campaign.id, 10);
             const campaignDisplay = `${campaignId}: ${campaign.title}`;
             return dataSourceItem(campaignDisplay, campaignId);
@@ -184,7 +184,7 @@ class IncomingMessageFilter extends Component {
           <div className={css(styles.container)}>
             <div className={css(styles.toggleFlexColumn)}>
               <Toggle
-                label={"Active Campaigns"}
+                label="Active Campaigns"
                 onToggle={this.props.onActiveCampaignsToggled}
                 toggled={
                   this.props.includeActiveCampaigns ||
@@ -193,7 +193,7 @@ class IncomingMessageFilter extends Component {
               />
               <br />
               <Toggle
-                label={"Archived Campaigns"}
+                label="Archived Campaigns"
                 onToggle={this.props.onArchivedCampaignsToggled}
                 toggled={this.props.includeArchivedCampaigns}
               />
@@ -201,7 +201,7 @@ class IncomingMessageFilter extends Component {
             <div className={css(styles.spacer)} />
             <div className={css(styles.toggleFlexColumn)}>
               <Toggle
-                label={"Not Opted Out"}
+                label="Not Opted Out"
                 onToggle={this.props.onNotOptedOutConversationsToggled}
                 toggled={
                   this.props.includeNotOptedOutConversations ||
@@ -210,7 +210,7 @@ class IncomingMessageFilter extends Component {
               />
               <br />
               <Toggle
-                label={"Opted Out"}
+                label="Opted Out"
                 onToggle={this.props.onOptedOutConversationsToggled}
                 toggled={this.props.includeOptedOutConversations}
               />
@@ -218,7 +218,7 @@ class IncomingMessageFilter extends Component {
             {this.props.isIncludeEscalatedFilterable && (
               <div className={css(styles.toggleFlexColumn)}>
                 <Toggle
-                  label={"Include Escalated"}
+                  label="Include Escalated"
                   toggled={this.props.includeEscalated}
                   onToggle={this.props.onIncludeEscalatedChanged}
                 />
@@ -231,12 +231,12 @@ class IncomingMessageFilter extends Component {
               <SelectField
                 multiple
                 value={this.state.messageFilter}
-                hintText={"Which messages?"}
-                floatingLabelText={"Contact message status"}
+                hintText="Which messages?"
+                floatingLabelText="Contact message status"
                 floatingLabelFixed
                 onChange={this.onMessageFilterSelectChanged}
               >
-                {Object.keys(MESSAGE_STATUSES).map(messageStatus => {
+                {Object.keys(MESSAGE_STATUSES).map((messageStatus) => {
                   const displayText = MESSAGE_STATUSES[messageStatus].name;
                   const isChecked =
                     this.state.messageFilter &&
@@ -259,13 +259,13 @@ class IncomingMessageFilter extends Component {
                 filter={AutoComplete.caseInsensitiveFilter}
                 maxSearchResults={8}
                 onFocus={() => this.setState({ campaignSearchText: "" })}
-                onUpdateInput={campaignSearchText =>
+                onUpdateInput={(campaignSearchText) =>
                   this.setState({ campaignSearchText })
                 }
                 searchText={this.state.campaignSearchText}
                 dataSource={campaignNodes}
-                hintText={"Search for a campaign"}
-                floatingLabelText={"Campaign"}
+                hintText="Search for a campaign"
+                floatingLabelText="Campaign"
                 onNewRequest={this.onCampaignSelected}
               />
             </div>
@@ -276,7 +276,7 @@ class IncomingMessageFilter extends Component {
                   filter={AutoComplete.caseInsensitiveFilter}
                   maxSearchResults={8}
                   onFocus={() => this.setState({ texterSearchText: "" })}
-                  onUpdateInput={texterSearchText =>
+                  onUpdateInput={(texterSearchText) =>
                     this.setState({ texterSearchText })
                   }
                   searchText={this.state.texterSearchText}
@@ -303,7 +303,7 @@ class IncomingMessageFilter extends Component {
             <div className={css(styles.spacer)} />
             <TextField
               onChange={this.onContactNameChanged}
-              fullWidth={true}
+              fullWidth
               floatingLabelText="Filter by Contact Name"
             />
           </div>
@@ -340,11 +340,6 @@ class IncomingMessageFilter extends Component {
     );
   }
 }
-
-IncomingMessageFilter.defaultProps = {
-  isTexterFilterable: true,
-  isIncludeEscalatedFilterable: true
-};
 
 IncomingMessageFilter.propTypes = {
   isTexterFilterable: type.bool.isRequired,

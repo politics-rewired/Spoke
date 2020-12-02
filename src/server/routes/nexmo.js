@@ -1,8 +1,9 @@
 import express from "express";
-const router = express.Router();
 
 import logger from "../../logger";
 import nexmo from "../api/lib/nexmo";
+
+const router = express.Router();
 
 router.post("/nexmo", async (req, res) => {
   try {
@@ -16,7 +17,7 @@ router.post("/nexmo", async (req, res) => {
 
 router.post("/nexmo-message-report", async (req, res) => {
   try {
-    const body = req.body;
+    const { body } = req;
     await nexmo.handleDeliveryReport(body);
     res.send("done");
   } catch (ex) {

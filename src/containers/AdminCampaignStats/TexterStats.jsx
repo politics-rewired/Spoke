@@ -1,13 +1,12 @@
+import gql from "graphql-tag";
+import LinearProgress from "material-ui/LinearProgress";
 import PropTypes from "prop-types";
 import React from "react";
-import gql from "graphql-tag";
-
-import LinearProgress from "material-ui/LinearProgress";
 
 import { loadData } from "../hoc/with-operations";
 
 class TexterStats extends React.Component {
-  renderAssignment(assignment) {
+  renderAssignment = (assignment) => {
     const { contactsCount, unmessagedCount, texter, id } = assignment;
     if (contactsCount === 0) {
       return <div key={id} />;
@@ -24,9 +23,9 @@ class TexterStats extends React.Component {
         <LinearProgress mode="determinate" value={percentComplete} />
       </div>
     );
-  }
+  };
 
-  renderAssignmentDynamic(assignment) {
+  renderAssignmentDynamic = (assignment) => {
     const { contactsCount, unmessagedCount, texter, id } = assignment;
     if (contactsCount === 0) {
       return <div key={id} />;
@@ -38,18 +37,17 @@ class TexterStats extends React.Component {
         <div>{contactsCount - unmessagedCount} initial messages sent</div>
       </div>
     );
-  }
+  };
 
   render() {
     const { campaign } = this.props.data;
     const { assignments } = campaign;
     return (
       <div>
-        {assignments.map(
-          assignment =>
-            campaign.useDynamicAssignment
-              ? this.renderAssignmentDynamic(assignment)
-              : this.renderAssignment(assignment)
+        {assignments.map((assignment) =>
+          campaign.useDynamicAssignment
+            ? this.renderAssignmentDynamic(assignment)
+            : this.renderAssignment(assignment)
         )}
       </div>
     );
@@ -83,7 +81,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId,
         contactsFilter: {

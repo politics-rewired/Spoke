@@ -1,17 +1,16 @@
-import logger from "../../logger";
-import { r, cacheableData } from "../models";
-import { errToObj } from "../utils";
-import { sqlResolvers, getTzOffset } from "./lib/utils";
-import { getTopMostParent, zipToTimeZone } from "../../lib";
-import { accessRequired } from "./errors";
 import { config } from "../../config";
+import logger from "../../logger";
+import { cacheableData, r } from "../models";
+import { errToObj } from "../utils";
+import { accessRequired } from "./errors";
+import { sqlResolvers } from "./lib/utils";
 
 const contactFieldsToHide = config.CONTACT_FIELDS_TO_HIDE.split(",");
 
 export const resolvers = {
   Location: {
-    city: zipCode => zipCode.city || "",
-    state: zipCode => zipCode.state || ""
+    city: (zipCode) => zipCode.city || "",
+    state: (zipCode) => zipCode.state || ""
   },
   CampaignContact: {
     ...sqlResolvers([
@@ -22,25 +21,25 @@ export const resolvers = {
       "messageStatus",
       "assignmentId"
     ]),
-    lastName: async campaignContact => {
+    lastName: async (campaignContact) => {
       if (contactFieldsToHide.includes("lastName")) {
         return "";
       }
       return campaignContact.last_name;
     },
-    cell: async campaignContact => {
+    cell: async (campaignContact) => {
       if (contactFieldsToHide.includes("cell")) {
         return "";
       }
       return campaignContact.cell;
     },
-    external_id: async campaignContact => {
+    external_id: async (campaignContact) => {
       if (contactFieldsToHide.includes("external_id")) {
         return "";
       }
       return campaignContact.external_id;
     },
-    updatedAt: async campaignContact => {
+    updatedAt: async (campaignContact) => {
       let updatedAt;
       if (
         campaignContact.updated_at &&
@@ -57,7 +56,7 @@ export const resolvers = {
 
       return updatedAt;
     },
-    messageStatus: async (campaignContact, _, { loaders }) => {
+    messageStatus: async (campaignContact) => {
       if (campaignContact.message_status) {
         return campaignContact.message_status;
       }
@@ -68,7 +67,7 @@ export const resolvers = {
     // To get that result to look like what the original code returned
     // without using the outgoing answer_options array field, try this:
     //
-    questionResponseValues: async (campaignContact, _, { loaders }) => {
+    questionResponseValues: async (campaignContact) => {
       if ("questionResponseValues" in campaignContact) {
         return campaignContact.questionResponseValues;
       }
@@ -92,15 +91,15 @@ export const resolvers = {
           "istep.id as istep_id"
         );
 
-      return qr_results.map(qr_result => {
+      return qr_results.map((qr_result) => {
         const question = {
           id: qr_result.istep_id,
           question: qr_result.istep_question
         };
-        return Object.assign({}, qr_result, { question });
+        return { ...qr_result, question };
       });
     },
-    questionResponses: async (campaignContact, _, { loaders }) => {
+    questionResponses: async (campaignContact) => {
       const results = await r
         .reader("question_response as qres")
         .where("qres.campaign_contact_id", campaignContact.id)
@@ -128,15 +127,15 @@ export const resolvers = {
           "qres.created_at",
           "qres.interaction_step_id"
         )
-        .catch(err =>
+        .catch((err) =>
           logger.error("Error fetching question responses: ", {
             ...errToObj(err)
           })
         );
 
-      let formatted = {};
+      const formatted = {};
 
-      for (let i = 0; i < results.length; i++) {
+      for (let i = 0; i < results.length; i += 1) {
         const res = results[i];
 
         const responseId = res["qres.id"];
@@ -145,14 +144,12 @@ export const resolvers = {
         const interactionStepId = res["child.id"];
 
         if (responseId in formatted) {
-          formatted[responseId]["parent_interaction_step"][
-            "answer_options"
-          ].push({
+          formatted[responseId].parent_interaction_step.answer_options.push({
             value: answerValue,
             interaction_step_id: interactionStepId
           });
           if (responseValue === answerValue) {
-            formatted[responseId]["interaction_step_id"] = interactionStepId;
+            formatted[responseId].interaction_step_id = interactionStepId;
           }
         } else {
           formatted[responseId] = {
@@ -179,7 +176,7 @@ export const resolvers = {
     },
     location: async (campaignContact, _, { loaders }) =>
       loaders.zipCode.load(campaignContact.zip.split("-")[0]),
-    messages: async campaignContact => {
+    messages: async (campaignContact) => {
       if ("messages" in campaignContact) {
         return campaignContact.messages;
       }
@@ -197,34 +194,33 @@ export const resolvers = {
         return {
           cell: campaignContact.opt_out_cell
         };
-      } else {
-        let isOptedOut = false;
-        if (campaignContact.is_opted_out !== undefined) {
-          isOptedOut = Boolean(campaignContact.is_opted_out);
-        } else {
-          let organizationId = campaignContact.organization_id;
-          if (!organizationId) {
-            const campaign = await loaders.campaign.load(
-              campaignContact.campaign_id
-            );
-            organizationId = campaign.organization_id;
-          }
-
-          isOptedOut = await cacheableData.optOut.query({
-            cell: campaignContact.cell,
-            organizationId
-          });
-        }
-
-        if (isOptedOut) {
-          // fake ID so we don't need to look up existance
-          return {
-            id: "optout",
-            cell: campaignContact.cell
-          };
-        }
-        return null;
       }
+      let isOptedOut = false;
+      if (campaignContact.is_opted_out !== undefined) {
+        isOptedOut = Boolean(campaignContact.is_opted_out);
+      } else {
+        let organizationId = campaignContact.organization_id;
+        if (!organizationId) {
+          const campaign = await loaders.campaign.load(
+            campaignContact.campaign_id
+          );
+          organizationId = campaign.organization_id;
+        }
+
+        isOptedOut = await cacheableData.optOut.query({
+          cell: campaignContact.cell,
+          organizationId
+        });
+      }
+
+      if (isOptedOut) {
+        // fake ID so we don't need to look up existance
+        return {
+          id: "optout",
+          cell: campaignContact.cell
+        };
+      }
+      return null;
     },
     contactTags: async (campaignContact, _, { user }) => {
       if ("contactTags" in campaignContact) {
@@ -256,3 +252,5 @@ export const resolvers = {
     }
   }
 };
+
+export default resolvers;

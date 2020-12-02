@@ -1,4 +1,5 @@
 const moment = require("moment");
+
 const config = {
   client: "mysql",
   connection: process.env.DATABASE_URL,
@@ -9,15 +10,14 @@ const config = {
 };
 
 const db = require("knex")(config);
-const prettyPrint = obj => JSON.stringify(obj, null, 2);
+
+const prettyPrint = (obj) => JSON.stringify(obj, null, 2);
 const BATCH_SIZE = 10000;
 
 let amountDone = 0;
 let lastId = 0;
 
-main()
-  .then(console.log)
-  .catch(console.error);
+main().then(console.log).catch(console.error);
 const IGNORE = [];
 
 async function main() {
@@ -35,7 +35,7 @@ async function main() {
   }
 
   await Promise.all(
-    messages.map(async message => {
+    messages.map(async (message) => {
       try {
         await associateMessage(message);
       } catch (ex) {
@@ -44,7 +44,7 @@ async function main() {
     })
   );
 
-  amountDone = amountDone + messages.length;
+  amountDone += messages.length;
   console.log(`Did ${amountDone}`);
 
   return main();
@@ -64,7 +64,7 @@ async function findMatchingCampaignContact(message) {
     cell: message.contact_number
   });
   const with_same_assignment_id = campaign_contacts.filter(
-    cc => cc.assignment_id == message.assignment_id
+    (cc) => cc.assignment_id == message.assignment_id
   );
 
   let selection;
@@ -89,24 +89,24 @@ async function findMatchingCampaignContact(message) {
 async function selectCampaignContact(message, options, mode) {
   if (options.length == 1) {
     return options[0];
-  } else {
-    const created_before_message = options.filter(cc => {
-      const message_created_at = moment(message.created_at);
-      const cc_created_at = moment(cc.created_at);
-      // console.log({ message_created_at, cc_created_at })
-      return cc_created_at.isBefore(message_created_at);
-    });
+  }
+  const created_before_message = options.filter((cc) => {
+    const message_created_at = moment(message.created_at);
+    const cc_created_at = moment(cc.created_at);
+    // console.log({ message_created_at, cc_created_at })
+    return cc_created_at.isBefore(message_created_at);
+  });
 
-    if (created_before_message.length == 1) {
-      return created_before_message[0];
-    } else if (created_before_message.length == 0) {
-      throw new Error(`Could not associate message with campaign contact in mode ${mode}: ${prettyPrint(
-        message
-      )}.
+  if (created_before_message.length == 1) {
+    return created_before_message[0];
+  }
+  if (created_before_message.length == 0) {
+    throw new Error(`Could not associate message with campaign contact in mode ${mode}: ${prettyPrint(
+      message
+    )}.
         Options were all too late: ${prettyPrint(options)}`);
-    } else {
-      return created_before_message[0];
-      // throw new Error(`Multiple options for associations in mode ${mode} with message ${prettyPrint(message)}: options are ${prettyPrint(created_before_message)}`)
-    }
+  } else {
+    return created_before_message[0];
+    // throw new Error(`Multiple options for associations in mode ${mode} with message ${prettyPrint(message)}: options are ${prettyPrint(created_before_message)}`)
   }
 }

@@ -1,7 +1,8 @@
+import { darkBlack, grey400, grey500 } from "material-ui/styles/colors";
 import getMuiTheme from "material-ui/styles/getMuiTheme";
-import theme from "./theme";
-import { grey400, grey500, darkBlack } from "material-ui/styles/colors";
 import { fade } from "material-ui/utils/colorManipulator";
+
+import theme from "./theme";
 
 const muiTheme = getMuiTheme(
   {

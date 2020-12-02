@@ -1,9 +1,9 @@
+import { css, StyleSheet } from "aphrodite";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
-import { StyleSheet, css } from "aphrodite";
-import Dialog from "material-ui/Dialog";
 
 // This is because the Toolbar from material-ui seems to only apply the correct margins if the
 // immediate child is a Button or other type it recognizes. Can get rid of this if we remove material-ui
@@ -32,8 +32,13 @@ export default class ConfirmButton extends Component {
 
   render() {
     const actions = [
-      <FlatButton label="No" primary onClick={this.toggleConfirmationDialog} />,
-      <FlatButton label="Yes" primary onClick={this.handleConfirm} />
+      <FlatButton
+        key="no"
+        label="No"
+        primary
+        onClick={this.toggleConfirmationDialog}
+      />,
+      <FlatButton key="yes" label="Yes" primary onClick={this.handleConfirm} />
     ];
 
     return (
@@ -56,6 +61,6 @@ export default class ConfirmButton extends Component {
 }
 
 ConfirmButton.propTypes = {
-  onConfirm: PropTypes.function,
+  onConfirm: PropTypes.func,
   label: PropTypes.string
 };

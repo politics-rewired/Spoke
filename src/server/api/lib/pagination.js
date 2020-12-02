@@ -1,9 +1,9 @@
-const encode = value => Buffer.from(`${value}`).toString("base64");
-const decode = value => Buffer.from(value, "base64").toString();
+const encode = (value) => Buffer.from(`${value}`).toString("base64");
+const decode = (value) => Buffer.from(value, "base64").toString();
 
 const defaultOptions = {
   primaryColumn: "id",
-  nodeTransformer: node => node
+  nodeTransformer: (node) => node
 };
 
 /**
@@ -19,11 +19,10 @@ const defaultOptions = {
  * This could be used for destructuring results of a join query.
  */
 export const formatPage = async (query, options) => {
-  const { after, first, primaryColumn, nodeTransformer } = Object.assign(
-    {},
-    defaultOptions,
-    options
-  );
+  const { after, first, primaryColumn, nodeTransformer } = {
+    ...defaultOptions,
+    ...options
+  };
   // Name of the Knex result record key will not include table
   const [cursorKey] = primaryColumn.split(".").slice(-1);
 
@@ -42,7 +41,7 @@ export const formatPage = async (query, options) => {
 
   const [{ count: totalCount }] = await countQuery.count();
   const results = await query;
-  const edges = results.slice(0, first || undefined).map(record => ({
+  const edges = results.slice(0, first || undefined).map((record) => ({
     cursor: encode(record[cursorKey]),
     node: nodeTransformer(record)
   }));
@@ -59,3 +58,5 @@ export const formatPage = async (query, options) => {
     pageInfo
   };
 };
+
+export default formatPage;

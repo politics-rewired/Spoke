@@ -1,16 +1,16 @@
-import iconv from "iconv-lite";
 import AutoDetectDecoderStream from "autodetect-decoder-stream";
+import iconv from "iconv-lite";
 import partition from "lodash/partition";
 import Papa from "papaparse";
 
 import {
-  validateCsv,
+  fieldAliases,
   requiredUploadFields,
   topLevelUploadFields,
-  fieldAliases
+  validateCsv
 } from "../../../lib";
 
-const missingHeaderFields = fields =>
+const missingHeaderFields = (fields) =>
   requiredUploadFields.reduce((missingFields, requiredField) => {
     return fields.includes(requiredField)
       ? missingFields
@@ -21,7 +21,7 @@ const isTopLevelEntry = ([field, _]) => topLevelUploadFields.includes(field);
 const trimEntry = ([key, value]) => [key, value.trim()];
 const FIELD_DEFAULTS = { external_id: "", zip: "" };
 
-const sanitizeRawContact = rawContact => {
+const sanitizeRawContact = (rawContact) => {
   const allFields = Object.entries({ ...FIELD_DEFAULTS, ...rawContact });
   const [contactEntries, customFieldEntries] = partition(
     allFields,
@@ -32,20 +32,20 @@ const sanitizeRawContact = rawContact => {
   return { ...contact, customFields };
 };
 
-export const processContactsFile = async file => {
+export const processContactsFile = async (file) => {
   const { createReadStream } = await file;
   const stream = createReadStream()
     .pipe(new AutoDetectDecoderStream())
     .pipe(iconv.encodeStream("utf8"));
 
   return new Promise((resolve, reject) => {
-    let missingFields = undefined;
-    let resultMeta = undefined;
+    let missingFields;
+    let resultMeta;
     const resultData = [];
 
     Papa.parse(stream, {
       header: true,
-      transformHeader: header => {
+      transformHeader: (header) => {
         for (const [field, aliases] of Object.entries(fieldAliases)) {
           if (aliases.includes(header)) {
             return field;
@@ -53,7 +53,7 @@ export const processContactsFile = async file => {
         }
         return header;
       },
-      step: ({ data, meta, errors }, parser) => {
+      step: ({ data, meta, errors: _errors }, parser) => {
         // Exit early on bad header
         if (resultMeta === undefined) {
           resultMeta = meta;
@@ -73,7 +73,9 @@ export const processContactsFile = async file => {
         });
         return resolve({ contacts, validationStats });
       },
-      error: err => reject(err)
+      error: (err) => reject(err)
     });
   });
 };
+
+export default processContactsFile;

@@ -1,4 +1,4 @@
-import { PoolClient, Client } from "pg";
+import { Client, PoolClient } from "pg";
 
 /**
  * Convert an Error instance to a plain object, including all its non-iterable properties.

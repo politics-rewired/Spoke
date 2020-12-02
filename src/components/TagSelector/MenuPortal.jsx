@@ -1,8 +1,8 @@
+import PropTypes from "prop-types";
 import React, { PureComponent } from "react";
 import { Portal } from "react-portal";
-import PropTypes from "prop-types";
 
-const coercePlacement = p => (p === "auto" ? "bottom" : p);
+const coercePlacement = (p) => (p === "auto" ? "bottom" : p);
 
 const menuPortalCSS = ({
   position,
@@ -11,8 +11,9 @@ const menuPortalCSS = ({
   placement,
   isFixed
 }) => {
-  let containerLeft = 0,
-    containerTop = 0;
+  let containerLeft = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
+  let containerTop = 0;
 
   if (appendTo) {
     const { left, top } = appendTo.getBoundingClientRect();
@@ -36,7 +37,7 @@ const menuPortalCSS = ({
   if (isFixed) {
     return {
       ...dropdownPosition,
-      top: rect[placement]
+      top: rectangle[placement]
     };
   }
 
@@ -44,6 +45,7 @@ const menuPortalCSS = ({
 };
 
 class MenuPortal extends PureComponent {
+  // eslint-disable-next-line react/static-property-placement
   static propTypes = {
     menuPlacement: PropTypes.oneOf(["auto", "bottom", "top"]),
     appendTo: PropTypes.instanceOf(Element),
@@ -51,6 +53,7 @@ class MenuPortal extends PureComponent {
     menuPosition: PropTypes.oneOf(["absolute", "fixed"])
   };
 
+  // eslint-disable-next-line react/static-property-placement
   static childContextTypes = {
     getPortalPlacement: PropTypes.func
   };
@@ -70,6 +73,7 @@ class MenuPortal extends PureComponent {
       this.setState({ placement });
     }
   };
+
   render() {
     const {
       appendTo,
@@ -96,7 +100,7 @@ class MenuPortal extends PureComponent {
     );
 
     // override createPortal
-    const createPortal = child => {
+    const createPortal = (child) => {
       return <Portal>{child}</Portal>;
     };
 

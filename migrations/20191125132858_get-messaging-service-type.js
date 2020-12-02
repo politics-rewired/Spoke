@@ -1,6 +1,6 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   /*
-   * Note – this function should be actually replaced in production
+   * Note – this function should be actually replaced in production
    * with values depending on the particular migration context
    */
   return knex.schema.raw(`
@@ -19,7 +19,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop function get_messaging_service_type;
   `);

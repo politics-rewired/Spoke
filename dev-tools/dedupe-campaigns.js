@@ -60,7 +60,7 @@ async function deleteCampaignContacts(toDelete) {
   // return true
   try {
     const updatedToDelete = [];
-    for (let cc of toDelete) {
+    for (const cc of toDelete) {
       if (!badIds.includes(cc.id)) {
         updatedToDelete.push(cc.id);
       }
@@ -87,24 +87,24 @@ async function deleteCampaignContacts(toDelete) {
 const BATCH_SIZE = 1000;
 let done = 1;
 async function main() {
-  let listOfDuplicates = await getNDuplicates(BATCH_SIZE);
+  const listOfDuplicates = await getNDuplicates(BATCH_SIZE);
   // console.log(listOfDuplicates)
   // for (let phone of Object.keys(listOfDuplicates)) {
 
   await Promise.all(
-    Object.keys(listOfDuplicates).map(async phone => {
+    Object.keys(listOfDuplicates).map(async (phone) => {
       const duplicates = listOfDuplicates[phone];
       const hasReceivedMessage =
-        duplicates.filter(cc => cc.message_status !== "needsMessage").length >
+        duplicates.filter((cc) => cc.message_status !== "needsMessage").length >
         0;
       // console.log({ hasReceivedMessage })
       if (hasReceivedMessage) {
         const toDelete = duplicates.filter(
-          cc => cc.message_status == "needsMessage"
+          (cc) => cc.message_status == "needsMessage"
         );
         await deleteCampaignContacts(toDelete);
       } else {
-        const sortedByCampaignId = _.sortBy(duplicates, cc => cc.campaign_id);
+        const sortedByCampaignId = _.sortBy(duplicates, (cc) => cc.campaign_id);
         const toKeep = sortedByCampaignId[0];
         // console.log(`Would keep: ${JSON.stringify(toKeep)}`)
         const toDelete = sortedByCampaignId.slice(1, 10000);
@@ -143,7 +143,7 @@ async function go() {
       )
   `;
   const [ids, _] = await db.raw(sql);
-  const actualIds = ids.map(elem => elem.id);
+  const actualIds = ids.map((elem) => elem.id);
   const result = await db("campaign_contact")
     .where({ campaign_id: 69 })
     .whereIn("id", actualIds)
@@ -153,7 +153,7 @@ async function go() {
 
 go()
   .then(() => process.exit(0))
-  .catch(error => {
+  .catch((error) => {
     console.error(error);
     process.exit(1);
   });

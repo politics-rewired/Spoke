@@ -1,19 +1,18 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
-import Toggle from "material-ui/Toggle";
+import gql from "graphql-tag";
+import { TextField } from "material-ui";
 import RaisedButton from "material-ui/RaisedButton";
+import Toggle from "material-ui/Toggle";
+import React from "react";
+import { compose } from "recompose";
 
 import { loadData } from "../../hoc/with-operations";
+import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import {
   asSection,
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
-import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import { TextField } from "material-ui";
 
 interface AutoassignValues {
   isAutoassignEnabled: boolean;
@@ -55,12 +54,12 @@ class CampaignAutoassignModeForm extends React.Component<
   };
 
   handleDidToggle = (
-    _event: React.MouseEvent<{}>,
+    _event: React.MouseEvent<unknown>,
     isAutoassignEnabled: boolean
   ) => this.setState({ isAutoassignEnabled });
 
   handleAutoReleaseToggle = (
-    _event: React.MouseEvent<{}>,
+    _event: React.MouseEvent<unknown>,
     isAutoReleaseEnabled: boolean
   ) =>
     this.setState({
@@ -70,11 +69,11 @@ class CampaignAutoassignModeForm extends React.Component<
     });
 
   handleReleaseStaleRepliesAfterChange = (
-    _event: React.FormEvent<{}>,
+    _event: React.FormEvent<unknown>,
     newVal: string
   ) =>
     this.setState({
-      repliesStaleAfter: parseInt(newVal)
+      repliesStaleAfter: parseInt(newVal, 10)
     });
 
   handleDidSubmit = async () => {

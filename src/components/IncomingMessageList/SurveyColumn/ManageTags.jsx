@@ -1,11 +1,10 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
-
-import RaisedButton from "material-ui/RaisedButton";
-import FlatButton from "material-ui/FlatButton";
 import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import RaisedButton from "material-ui/RaisedButton";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import { loadData } from "../../../containers/hoc/with-operations";
 import TagSelector from "../../TagSelector";
@@ -22,6 +21,7 @@ class ManageTags extends Component {
     const { tags: oldTags } = this.props.contactTags.contact;
     const { tags: newTags } = nextProps.contactTags.contact;
     if (!isEqual(oldTags, newTags)) {
+      // eslint-disable-next-line react/no-direct-mutation-state
       this.state.selectedTags = [...newTags];
     }
   }
@@ -34,18 +34,18 @@ class ManageTags extends Component {
 
   handleCloseTagManager = () => this.setState({ isTagEditorOpen: false });
 
-  handleOnChangeTags = selectedTags => this.setState({ selectedTags });
+  handleOnChangeTags = (selectedTags) => this.setState({ selectedTags });
 
   handleSaveTags = async () => {
     const { tags } = this.props.contactTags.contact;
     const { selectedTags } = this.state;
-    const contactTagIds = new Set(tags.map(tag => tag.id));
-    const selectedTagIds = new Set(selectedTags.map(tag => tag.id));
-    const addedTags = selectedTags.filter(tag => !contactTagIds.has(tag.id));
-    const removedTags = tags.filter(tag => !selectedTagIds.has(tag.id));
+    const contactTagIds = new Set(tags.map((tag) => tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
+    const addedTags = selectedTags.filter((tag) => !contactTagIds.has(tag.id));
+    const removedTags = tags.filter((tag) => !selectedTagIds.has(tag.id));
     const tagPayload = {
-      addedTagIds: addedTags.map(tag => tag.id),
-      removedTagIds: removedTags.map(tag => tag.id)
+      addedTagIds: addedTags.map((tag) => tag.id),
+      removedTagIds: removedTags.map((tag) => tag.id)
     };
 
     this.setState({ isWorking: true });
@@ -69,18 +69,24 @@ class ManageTags extends Component {
 
     const actions = [
       <RaisedButton
+        key="save"
         label="Save"
-        primary={true}
+        primary
         disabled={isWorking}
         onClick={this.handleSaveTags}
       />,
-      <FlatButton label="Cancel" onClick={this.handleCloseTagManager} />
+      <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.handleCloseTagManager}
+      />
     ];
 
     const errorActions = [
       <RaisedButton
+        key="ok"
         label="OK"
-        primary={true}
+        primary
         disabled={isWorking}
         onClick={this.handleCloseErrorDialog}
       />
@@ -148,7 +154,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
       },
@@ -173,7 +179,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         contactId: ownProps.contactId
       },
@@ -183,7 +189,7 @@ const queries = {
 };
 
 const mutations = {
-  tagContact: ownProps => tagPayload => ({
+  tagContact: (ownProps) => (tagPayload) => ({
     mutation: gql`
       mutation tagConversation(
         $contactId: String!

@@ -1,12 +1,12 @@
-import { sqlResolvers } from "./lib/utils";
 import { r } from "../models";
+import { sqlResolvers } from "./lib/utils";
 
 interface IOrganizationMembership {
   user_id: number;
   organization_id: number;
   request_status: string;
-  user?: {};
-  organization?: {};
+  user?: Record<string, unknown>;
+  organization?: Record<string, unknown>;
 }
 
 export const resolvers = {
@@ -15,10 +15,7 @@ export const resolvers = {
     user: async (membership: IOrganizationMembership) =>
       membership.user
         ? membership.user
-        : r
-            .reader("user")
-            .where({ id: membership.user_id })
-            .first(),
+        : r.reader("user").where({ id: membership.user_id }).first(),
     organization: async (membership: IOrganizationMembership) =>
       membership.organization
         ? membership.organization
@@ -30,3 +27,5 @@ export const resolvers = {
       membership.request_status.toUpperCase()
   }
 };
+
+export default resolvers;

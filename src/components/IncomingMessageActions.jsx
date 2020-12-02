@@ -1,13 +1,12 @@
-import React, { Component } from "react";
-import type from "prop-types";
-
-import Select, { createFilter } from "react-select";
-import { Card, CardHeader, CardText } from "material-ui/Card";
-import { Tabs, Tab } from "material-ui/Tabs";
-import Dialog from "material-ui/Dialog";
-import { getHighestRole } from "../lib/permissions";
-import FlatButton from "material-ui/FlatButton";
 import { css, StyleSheet } from "aphrodite";
+import { Card, CardHeader, CardText } from "material-ui/Card";
+import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import { Tab, Tabs } from "material-ui/Tabs";
+import type from "prop-types";
+import React, { Component } from "react";
+import Select, { createFilter } from "react-select";
+
 import theme from "../styles/theme";
 
 const styles = StyleSheet.create({
@@ -28,13 +27,13 @@ const styles = StyleSheet.create({
   }
 });
 
-const formatTexter = texter => {
+const formatTexter = (texter) => {
   const { displayName, email, role } = texter;
   return `${displayName} (${email}) ${role}`;
 };
 
-const MenuList = props => {
-  const children = props.children;
+const MenuList = (props) => {
+  const { children } = props;
 
   if (!children.length) {
     return <div>{children}</div>;
@@ -43,11 +42,11 @@ const MenuList = props => {
   return (
     <div>
       {children.length &&
-        children.slice(0, 5).map((key, i) => {
-          delete key.props.innerProps.onMouseMove; //FIX LAG!!
-          delete key.props.innerProps.onMouseOver; //FIX LAG!!
+        children.slice(0, 5).map((key) => {
+          delete key.props.innerProps.onMouseMove; // FIX LAG!!
+          delete key.props.innerProps.onMouseOver; // FIX LAG!!
 
-          return <div key={i}>{key}</div>;
+          return <div key={key}>{key}</div>;
         })}
     </div>
   );
@@ -61,7 +60,7 @@ class IncomingMessageActions extends Component {
 
   onReassignmentClicked = () => {
     const { selectedTexters } = this.state;
-    const texterIds = selectedTexters.map(texter => texter.value);
+    const texterIds = selectedTexters.map((texter) => texter.value);
     this.props.onReassignRequested(texterIds);
   };
 
@@ -77,7 +76,7 @@ class IncomingMessageActions extends Component {
     this.setState({ confirmDialogOpen: "unassign" });
   };
 
-  handleTextersChanged = selectedTexters => {
+  handleTextersChanged = (selectedTexters) => {
     this.setState({ selectedTexters });
   };
 
@@ -88,7 +87,7 @@ class IncomingMessageActions extends Component {
   handleConfirmDialogReassign = () => {
     this.setState({ confirmDialogOpen: false });
     const { selectedTexters } = this.state;
-    const texterIds = selectedTexters.map(texter => texter.value);
+    const texterIds = selectedTexters.map((texter) => texter.value);
     this.props.onReassignAllMatchingRequested(texterIds);
   };
 
@@ -99,20 +98,22 @@ class IncomingMessageActions extends Component {
 
   render() {
     let texters = this.props.people || [];
-    texters = texters.map(texter => ({
+    texters = texters.map((texter) => ({
       value: parseInt(texter.id, 10),
       label: formatTexter(texter)
     }));
 
     const confirmDialogActions = (actionVerb, confirmAction) => [
       <FlatButton
+        key="cancel"
         label="Cancel"
-        primary={true}
+        primary
         onClick={this.handleConfirmDialogCancel}
       />,
       <FlatButton
+        key="verb"
         label={actionVerb || "Reassign"}
-        primary={true}
+        primary
         onClick={confirmAction}
       />
     ];
@@ -123,7 +124,7 @@ class IncomingMessageActions extends Component {
     return (
       <Card>
         <CardHeader
-          title={" Message Actions "}
+          title=" Message Actions "
           actAsExpander
           showExpandableButton
         />
@@ -146,7 +147,7 @@ class IncomingMessageActions extends Component {
               <div className={css(styles.container)}>
                 <div className={css(styles.flexColumn)}>
                   <FlatButton
-                    label={"Reassign selected"}
+                    label="Reassign selected"
                     onClick={this.onReassignmentClicked}
                     disabled={!contactsAreSelected || !hasSeletedTexters}
                   />
@@ -163,8 +164,8 @@ class IncomingMessageActions extends Component {
                     "Reassign",
                     this.handleConfirmDialogReassign
                   )}
-                  open={this.state.confirmDialogOpen == "reassign"}
-                  modal={true}
+                  open={this.state.confirmDialogOpen === "reassign"}
+                  modal
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
                   {`Reassign all ${conversationCount} matching conversations?`}
@@ -175,7 +176,7 @@ class IncomingMessageActions extends Component {
               <div className={css(styles.container)}>
                 <div className={css(styles.flexColumn)}>
                   <FlatButton
-                    label={"Unassign selected"}
+                    label="Unassign selected"
                     onClick={this.onUnassignClicked}
                     disabled={!contactsAreSelected}
                   />
@@ -192,8 +193,8 @@ class IncomingMessageActions extends Component {
                     "Unassign",
                     this.handleConfirmDialogUnassign
                   )}
-                  open={this.state.confirmDialogOpen == "unassign"}
-                  modal={true}
+                  open={this.state.confirmDialogOpen === "unassign"}
+                  modal
                   onRequestClose={this.handleConfirmDialogCancel}
                 >
                   {`Unassign all ${conversationCount} matching conversations?`}

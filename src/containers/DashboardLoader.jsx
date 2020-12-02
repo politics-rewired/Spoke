@@ -1,8 +1,8 @@
+import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import gql from "graphql-tag";
-import { withRouter } from "react-router";
 import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
 import { loadData } from "./hoc/with-operations";
 
@@ -46,7 +46,4 @@ const queries = {
   }
 };
 
-export default compose(
-  withRouter,
-  loadData({ queries })
-)(DashboardLoader);
+export default compose(withRouter, loadData({ queries }))(DashboardLoader);

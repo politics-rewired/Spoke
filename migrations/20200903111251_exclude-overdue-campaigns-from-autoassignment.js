@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create or replace view assignable_campaigns_with_needs_message as (
       select *
@@ -19,7 +19,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     create or replace view assignable_campaigns_with_needs_message as (
       select *

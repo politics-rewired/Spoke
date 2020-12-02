@@ -1,14 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { StyleSheet, css } from "aphrodite";
-
+import { css, StyleSheet } from "aphrodite";
 import { CardActions } from "material-ui/Card";
-import Paper from "material-ui/Paper";
 import FlatButton from "material-ui/FlatButton";
 import IconButton from "material-ui/IconButton";
-import CloseIcon from "material-ui/svg-icons/navigation/close";
+import Paper from "material-ui/Paper";
 import ChevronLeft from "material-ui/svg-icons/navigation/chevron-left";
 import ChevronRight from "material-ui/svg-icons/navigation/chevron-right";
+import CloseIcon from "material-ui/svg-icons/navigation/close";
+import PropTypes from "prop-types";
+import React from "react";
 
 import MessageColumn from "./MessageColumn";
 import SurveyColumn from "./SurveyColumn";
@@ -72,15 +71,15 @@ ConversationPreviewBody.propTypes = {
   organizationId: PropTypes.string.isRequired
 };
 
-const ConversationPreviewModal = props => {
+const ConversationPreviewModal = (props) => {
   const {
-      conversation,
-      navigation,
-      onRequestPrevious,
-      onRequestNext,
-      onRequestClose
-    } = props,
-    isOpen = conversation !== undefined;
+    conversation,
+    navigation,
+    onRequestPrevious,
+    onRequestNext,
+    onRequestClose
+  } = props;
+  const isOpen = conversation !== undefined;
 
   return (
     <Paper
@@ -94,7 +93,7 @@ const ConversationPreviewModal = props => {
         left: "20px",
         zIndex: "1000"
       }}
-      onClick={e => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
       <ConversationPreviewHeader
         campaignTitle={conversation && conversation.campaign.title}

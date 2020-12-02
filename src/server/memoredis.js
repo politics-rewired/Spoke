@@ -1,4 +1,5 @@
 import createMemoizer from "memoredis";
+
 import { config } from "../config";
 import logger from "../logger";
 
@@ -59,7 +60,7 @@ const cacheOpts = {
   MyCurrentAssignmentTargets: ["my-current-assignment-targets", ONE_SECOND * 5]
 };
 
-Object.keys(cacheOpts).forEach(name => {
+Object.keys(cacheOpts).forEach((name) => {
   cacheOpts[name] = {
     key: cacheOpts[name][0],
     ttl: cacheOpts[name][1]

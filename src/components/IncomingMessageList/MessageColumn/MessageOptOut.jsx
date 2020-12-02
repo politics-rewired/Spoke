@@ -1,10 +1,9 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
+import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import Dialog from "material-ui/Dialog";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import {
   formatErrorMessage,
@@ -37,14 +36,16 @@ class MessageOptOut extends Component {
       "This will mean they can receive texts from all campaigns.";
     const dialogActions = [
       <FlatButton
+        key="cancel"
         label="Cancel"
-        primary={true}
+        primary
         onClick={this.handleCloseAlert}
       />,
       <FlatButton
+        key="submit"
         label="Submit"
-        primary={true}
-        keyboardFocused={true}
+        primary
+        keyboardFocused
         onClick={this.handleClickOptIn}
       />
     ];
@@ -56,8 +57,8 @@ class MessageOptOut extends Component {
   };
 
   handleClickOptIn = async () => {
-    const { contact } = this.props,
-      { cell } = contact;
+    const { contact } = this.props;
+    const { cell } = contact;
 
     this.setState({ isMakingRequest: true });
 
@@ -71,8 +72,9 @@ class MessageOptOut extends Component {
     } catch (error) {
       const dialogActions = [
         <FlatButton
+          key="close"
           label="Close"
-          primary={true}
+          primary
           onClick={this.handleCloseAlert}
         />
       ];
@@ -106,8 +108,9 @@ class MessageOptOut extends Component {
     } catch (error) {
       const dialogActions = [
         <FlatButton
+          key="close"
           label="Close"
-          primary={true}
+          primary
           onClick={this.handleCloseAlert}
         />
       ];
@@ -146,7 +149,7 @@ class MessageOptOut extends Component {
             {!isOptedOut && (
               <RaisedButton
                 label="Opt-Out"
-                secondary={true}
+                secondary
                 disabled={this.state.isMakingRequest}
                 onClick={this.handleClickOptOut}
               />
@@ -174,7 +177,7 @@ MessageOptOut.propTypes = {
 };
 
 const mutations = {
-  createOptOut: ownProps => (optOut, campaignContactId) => ({
+  createOptOut: () => (optOut, campaignContactId) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -193,7 +196,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  removeOptOut: ownProps => cell => ({
+  removeOptOut: () => (cell) => ({
     mutation: gql`
       mutation removeOptOut($cell: Phone!) {
         removeOptOut(cell: $cell) {

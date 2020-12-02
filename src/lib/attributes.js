@@ -7,38 +7,37 @@ export const dataTest = (value, disable) => {
   return attribute;
 };
 
-export const camelCase = str => {
+export const camelCase = (str) => {
   return str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => {
-      return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
+      return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
     })
     .replace(/\s+/g, "");
 };
 
-export const titleCase = value =>
+export const titleCase = (value) =>
   `${value.charAt(0).toUpperCase()}${value.substring(1).toLowerCase()}`;
 
-export const snakeToTitleCase = value =>
+export const snakeToTitleCase = (value) =>
   value
     .split("_")
-    .map(s => titleCase(s))
+    .map((s) => titleCase(s))
     .join(" ");
 
-export const nameComponents = name => {
-  let firstName = undefined;
-  let lastName = undefined;
+export const nameComponents = (name) => {
+  let firstName;
+  let lastName;
 
   if (isEmpty(name)) return { firstName, lastName };
 
   const splitName = name.split(" ");
-  if (splitName.length == 1) {
-    firstName = splitName[0];
+  if (splitName.length === 1) {
+    [firstName] = splitName;
     lastName = "";
-  } else if (splitName.length == 2) {
-    firstName = splitName[0];
-    lastName = splitName[1];
+  } else if (splitName.length === 2) {
+    [firstName, lastName] = splitName;
   } else {
-    firstName = splitName[0];
+    [firstName] = splitName;
     lastName = splitName.slice(1, splitName.length + 1).join(" ");
   }
 

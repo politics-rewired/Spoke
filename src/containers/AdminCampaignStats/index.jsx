@@ -1,22 +1,21 @@
-import PropTypes from "prop-types";
-import React from "react";
-import moment from "moment";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
-import { StyleSheet, css } from "aphrodite";
-
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
-import { loadData } from "../hoc/with-operations";
-import theme from "../../styles/theme";
 import { dataTest } from "../../lib/attributes";
-import TopLineStats from "./TopLineStats";
+import theme from "../../styles/theme";
+import { loadData } from "../hoc/with-operations";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import TexterStats from "./TexterStats";
+import TopLineStats from "./TopLineStats";
 import VanExportModal from "./VanExportModal";
 import VanSyncModal from "./VanSyncModal";
 
@@ -87,7 +86,9 @@ class AdminCampaignStats extends React.Component {
   };
 
   handleOnClickVanExport = () => this.setState({ exportVanOpen: true });
+
   handleDismissVanExport = () => this.setState({ exportVanOpen: false });
+
   handleCompleteVanExport = () =>
     this.setState({
       exportVanOpen: false,
@@ -96,7 +97,9 @@ class AdminCampaignStats extends React.Component {
     });
 
   handleOnClickVanSync = () => this.setState({ syncVanOpen: true });
+
   handleDismissVanSync = () => this.setState({ syncVanOpen: false });
+
   handleCompleteVanSync = () =>
     this.setState({
       syncVanOpen: false,
@@ -111,30 +114,34 @@ class AdminCampaignStats extends React.Component {
     } = this.state;
     const { data, match, adminPerms } = this.props;
     const { organizationId, campaignId } = match.params;
-    const campaign = data.campaign;
+    const { campaign } = data;
     const { pendingJobs } = campaign;
 
     if (!campaign) {
       return <h1> Uh oh! Campaign {campaignId} doesn't seem to exist </h1>;
     }
 
-    const currentExportJob = pendingJobs.find(job => job.jobType === "export");
+    const currentExportJob = pendingJobs.find(
+      (job) => job.jobType === "export"
+    );
     const shouldDisableExport =
       disableExportButton || currentExportJob !== undefined;
     const exportLabel = currentExportJob
       ? `Exporting (${currentExportJob.status}%)`
       : "Export Data";
 
-    const vanExportJob = pendingJobs.find(job => job.jobType === "van-export");
+    const vanExportJob = pendingJobs.find(
+      (job) => job.jobType === "van-export"
+    );
     const isVanExportDisabled =
       disableVanExportButton || vanExportJob !== undefined;
     const vanExportLabel = vanExportJob
       ? `Exporting for VAN (${vanExportJob.status}%)`
       : "Export for VAN";
 
-    const vansyncJob = pendingJobs.find(job => job.jobType === "van-sync");
-    const isVanSyncDisabled = disableVanSyncButton || vansyncJob !== undefined;
-    const vanSyncLabel = vansyncJob
+    const vanSyncJob = pendingJobs.find((job) => job.jobType === "van-sync");
+    const isVanSyncDisabled = disableVanSyncButton || vanSyncJob !== undefined;
+    const vanSyncLabel = vanSyncJob
       ? `Syncing to VAN (${vanSyncJob.status}%)`
       : "Sync to VAN";
 
@@ -202,8 +209,8 @@ class AdminCampaignStats extends React.Component {
                         campaign.isArchived ? (
                           <RaisedButton
                             key="unarchive"
-                            onTouchTap={async () =>
-                              await this.props.mutations.unarchiveCampaign()
+                            onTouchTap={() =>
+                              this.props.mutations.unarchiveCampaign()
                             }
                             label="Unarchive"
                           />
@@ -211,8 +218,8 @@ class AdminCampaignStats extends React.Component {
                         !campaign.isArchived ? (
                           <RaisedButton
                             key="archive"
-                            onTouchTap={async () =>
-                              await this.props.mutations.archiveCampaign()
+                            onTouchTap={() =>
+                              this.props.mutations.archiveCampaign()
                             }
                             label="Archive"
                           />
@@ -239,7 +246,7 @@ class AdminCampaignStats extends React.Component {
 
                             this.props.mutations
                               .copyCampaign()
-                              .then(result => {
+                              .then((result) => {
                                 if (result.errors) {
                                   throw result.errors;
                                 }
@@ -250,7 +257,7 @@ class AdminCampaignStats extends React.Component {
                                   copiedCampaignId: result.data.copyCampaign.id
                                 });
                               })
-                              .catch(error =>
+                              .catch((error) =>
                                 this.setState({
                                   campaignJustCopied: true,
                                   copyingCampaign: false,
@@ -286,9 +293,7 @@ class AdminCampaignStats extends React.Component {
           message={
             this.state.copyCampaignError
               ? `Error: ${this.state.copyCampaignError}`
-              : `Campaign successfully copied to campaign ${
-                  this.state.copiedCampaignId
-                }`
+              : `Campaign successfully copied to campaign ${this.state.copiedCampaignId}`
           }
           autoHideDuration={5000}
           onRequestClose={() => {
@@ -345,7 +350,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
       }
@@ -354,7 +359,7 @@ const queries = {
 };
 
 const mutations = {
-  archiveCampaign: ownProps => () => ({
+  archiveCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation archiveCampaign($campaignId: String!) {
         archiveCampaign(id: $campaignId) {
@@ -365,7 +370,7 @@ const mutations = {
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  unarchiveCampaign: ownProps => () => ({
+  unarchiveCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation unarchiveCampaign($campaignId: String!) {
         unarchiveCampaign(id: $campaignId) {
@@ -376,7 +381,7 @@ const mutations = {
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  exportCampaign: ownProps => () => ({
+  exportCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation exportCampaign($campaignId: String!) {
         exportCampaign(
@@ -388,7 +393,7 @@ const mutations = {
     `,
     variables: { campaignId: ownProps.match.params.campaignId }
   }),
-  copyCampaign: ownProps => () => ({
+  copyCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation copyCampaign($campaignId: String!) {
         copyCampaign(id: $campaignId) {

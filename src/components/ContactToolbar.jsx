@@ -1,9 +1,8 @@
+import { grey100 } from "material-ui/styles/colors";
+import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
+import moment from "moment-timezone";
 import PropTypes from "prop-types";
 import React from "react";
-import moment from "moment-timezone";
-
-import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
-import { grey100 } from "material-ui/styles/colors";
 
 const inlineStyles = {
   toolbar: {
@@ -36,19 +35,17 @@ const ContactToolbar = function ContactToolbar(props) {
     : `${firstName}`;
 
   const timezone = contactTimezone || campaign.timezone;
-  const localTime = moment()
-    .tz(timezone)
-    .format("LT"); // format('h:mm a')
+  const localTime = moment().tz(timezone).format("LT"); // format('h:mm a')
 
   const location = [city, state]
-    .filter(item => !!item)
+    .filter((item) => !!item)
     .join(", ")
     .trim();
 
   const cell = contactSettings.showContactCell
     ? campaignContact.cell
     : undefined;
-  const detailComponents = [location, localTime, cell].filter(item => !!item);
+  const detailComponents = [location, localTime, cell].filter((item) => !!item);
 
   const contactDetailText = (
     <span>

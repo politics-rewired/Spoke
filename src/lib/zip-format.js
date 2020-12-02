@@ -1,6 +1,7 @@
 const getFormattedZip = (zip, country = "US") => {
   if (country === "US") {
     // Matches 5 digit zip
+    // eslint-disable-next-line no-useless-escape
     const fiveDigitRegex = /(\d{5})([ \-]\d{4})?/;
     const [, first5] = zip.match(fiveDigitRegex) || [];
 
@@ -11,7 +12,7 @@ const getFormattedZip = (zip, country = "US") => {
     // Because of that, we should just 0 pad it
     const fourDigitRegex = /\d{4}/;
     if (zip.match(fourDigitRegex)) {
-      return "0" + zip;
+      return `0${zip}`;
     }
 
     return null;
@@ -20,7 +21,7 @@ const getFormattedZip = (zip, country = "US") => {
   throw new Error(`Do not know how to format zip for country: ${country}`);
 };
 
-var commonZipRanges = [
+const commonZipRanges = [
   // list of zip ranges. [<firstZip>, <lastZip>, <timezone>, <hasDst>, <zipCount>]
   [1001, 32401, -5, 1, 31400],
   [70000, 79821, -6, 1, 9821],
@@ -72,41 +73,41 @@ function getCommonZipRanges() {
   return commonZipRanges;
 }
 
-const zipToTimeZone = function(zip) {
+const zipToTimeZone = (zip) => {
   // will search common zip ranges -- won't necessarily find something
   // so fallback on looking it up in db
-  if (typeof zip == "number" || zip.length >= 5) {
-    zip = parseInt(zip);
-    return getCommonZipRanges().find(g => zip >= g[0] && zip < g[1]);
+  if (typeof zip === "number" || zip.length >= 5) {
+    zip = parseInt(zip, 10);
+    return getCommonZipRanges().find((g) => zip >= g[0] && zip < g[1]);
   }
 };
 
 // lperson 2018.02.10 this is dead code
-const findZipRanges = function(r) {
-  var zipchanges = [];
-  return r
+const findZipRanges = async (r) => {
+  const zipchanges = [];
+  await r
     .knex("zip_code")
     .select("zip", "timezone_offset", "has_dst")
     .orderBy("zip")
-    .then(function(zips) {
-      var front = -1;
-      var curTz = -4;
-      var curHasDst = -1;
-      zips.forEach(zipRec => {
-        if (zipRec.timezone_offset != curTz || zipRec.has_dst != curHasDst) {
+    .then((zips) => {
+      let front = -1;
+      let curTz = -4;
+      let curHasDst = -1;
+      zips.forEach((zipRec) => {
+        if (zipRec.timezone_offset !== curTz || zipRec.has_dst !== curHasDst) {
           zipchanges.push([
             front,
-            parseInt(zipRec.zip),
+            parseInt(zipRec.zip, 10),
             curTz,
             curHasDst,
-            parseInt(zipRec.zip) - front
+            parseInt(zipRec.zip, 10) - front
           ]);
           curTz = zipRec.timezone_offset;
           curHasDst = zipRec.has_dst;
-          front = parseInt(zipRec.zip);
+          front = parseInt(zipRec.zip, 10);
         }
       });
-      zipchanges.sort(function(a, b) {
+      zipchanges.sort((a, b) => {
         return b[4] - a[4];
       });
       console.info(zipchanges);

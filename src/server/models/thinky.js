@@ -1,12 +1,10 @@
-import { config } from "../../config";
-import dumbThinky from "rethink-knex-adapter";
-import redis from "redis";
+import fakeredis from "fakeredis";
 import knex from "knex";
-import bluebird from "bluebird";
-import knexConfig from "../knex.js";
+import redis from "redis-promisify";
+import dumbThinky from "rethink-knex-adapter";
 
-bluebird.promisifyAll(redis.RedisClient.prototype);
-bluebird.promisifyAll(redis.Multi.prototype);
+import { config } from "../../config";
+import knexConfig from "../knex";
 
 // Instantiate the rethink-knex-adapter using the config defined in
 // /src/server/knex.js.
@@ -16,7 +14,7 @@ thinkyConn.r.reader = knexConfig.useReader
   ? knex(knexConfig.readerConfig)
   : thinkyConn.r.knex;
 
-thinkyConn.r.getCount = async query => {
+thinkyConn.r.getCount = async (query) => {
   // helper method to get a count result
   // with fewer bugs.  Using knex's .count()
   // results in a 'count' key on postgres, but a 'count(*)' key
@@ -30,7 +28,7 @@ thinkyConn.r.getCount = async query => {
 /**
  * Helper method to parse the result of a knex `count` query (see above).
  */
-thinkyConn.r.parseCount = async query => {
+thinkyConn.r.parseCount = async (query) => {
   if (Array.isArray(query)) {
     return query.length;
   }
@@ -50,9 +48,8 @@ thinkyConn.r.parseCount = async query => {
 if (config.REDIS_URL) {
   thinkyConn.r.redis = redis.createClient({ url: config.REDIS_URL });
 } else if (config.REDIS_FAKE) {
-  const fakeredis = require("fakeredis");
-  bluebird.promisifyAll(fakeredis.RedisClient.prototype);
-  bluebird.promisifyAll(fakeredis.Multi.prototype);
+  Promise.promisifyAll(fakeredis.RedisClient.prototype);
+  Promise.promisifyAll(fakeredis.Multi.prototype);
 
   thinkyConn.r.redis = fakeredis.createClient();
 }

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create or replace function public.get_trollbot_matches (organization_id integer, troll_interval interval)
       returns table (
@@ -44,7 +44,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     create or replace function public.get_trollbot_matches (organization_id integer, troll_interval interval)
       returns table (

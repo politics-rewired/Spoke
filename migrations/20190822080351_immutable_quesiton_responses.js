@@ -36,7 +36,7 @@ $$ language plpgsql;
  * Since the view is simple (involving no joins), it's insert, updates, and deletes
  * are just forwarded
  *
- * This is only bound to conventional updates – not update set is_deleted = true
+ * This is only bound to conventional updates – not update set is_deleted = true
  */
 const BEFORE_UPDATE_FUNCTION = `
 create or replace function all_question_response_before_update() returns trigger as $$
@@ -67,13 +67,10 @@ end;
 $$ language plpgsql;
 `;
 
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.schema
-    .alterTable("question_response", table => {
-      table
-        .boolean("is_deleted")
-        .default(false)
-        .index();
+    .alterTable("question_response", (table) => {
+      table.boolean("is_deleted").default(false).index();
 
       table.timestamp("updated_at").default(knex.fn.now());
     })
@@ -114,7 +111,7 @@ exports.up = function(knex) {
     );
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(
     `
     drop trigger _500_question_response_insert on all_question_response; 

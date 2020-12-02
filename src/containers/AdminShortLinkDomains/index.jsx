@@ -1,19 +1,18 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
-
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
+import FloatingActionButton from "material-ui/FloatingActionButton";
 import RaisedButton from "material-ui/RaisedButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
 import CloudUploadIcon from "material-ui/svg-icons/file/cloud-upload";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
-import { withOperations } from "../hoc/with-operations";
-import theme from "../../styles/theme";
 import LoadingIndicator from "../../components/LoadingIndicator";
-import ShortLinkDomainList from "./ShortLinkDomainList";
+import theme from "../../styles/theme";
+import { PrettyErrors, withOperations } from "../hoc/with-operations";
 import AddDomainDialog from "./AddDomainDialog";
+import ShortLinkDomainList from "./ShortLinkDomainList";
 
 class AdminShortLinkDomains extends Component {
   state = {
@@ -39,7 +38,7 @@ class AdminShortLinkDomains extends Component {
     } finally {
       this.setState({
         disabledDomainIds: this.state.disabledDomainIds.filter(
-          disabledId => disabledId !== domainId
+          (disabledId) => disabledId !== domainId
         )
       });
     }
@@ -48,6 +47,7 @@ class AdminShortLinkDomains extends Component {
   handleErrorDialogClose = () => this.setState({ webRequestError: undefined });
 
   handleAddDomainClick = () => this.setState({ showAddDomainDialog: true });
+
   handleAddDomainDialogClose = () =>
     this.setState({ showAddDomainDialog: false });
 
@@ -67,8 +67,9 @@ class AdminShortLinkDomains extends Component {
     }
   };
 
-  handleConfirmDeleteDomain = warnDeleteDomainId =>
+  handleConfirmDeleteDomain = (warnDeleteDomainId) =>
     this.setState({ warnDeleteDomainId });
+
   handleCancelDeleteDomain = () =>
     this.setState({ warnDeleteDomainId: undefined });
 
@@ -87,7 +88,7 @@ class AdminShortLinkDomains extends Component {
     } finally {
       this.setState({
         disabledDomainIds: this.state.disabledDomainIds.filter(
-          disabledId => disabledId !== domainId
+          (disabledId) => disabledId !== domainId
         )
       });
     }
@@ -114,25 +115,29 @@ class AdminShortLinkDomains extends Component {
     const { linkDomains } = shortLinkDomains.organization;
     const warnDomainName =
       warnDeleteDomainId &&
-      linkDomains.filter(domain => domain.id === warnDeleteDomainId)[0].domain;
+      linkDomains.filter((domain) => domain.id === warnDeleteDomainId)[0]
+        .domain;
 
     const deleteDomainActions = [
       <FlatButton
+        key="cancel"
         label="Cancel"
         primary={false}
         onClick={this.handleCancelDeleteDomain}
       />,
       <RaisedButton
+        key="delete"
         label="Delete"
-        primary={true}
+        primary
         onClick={this.handleDeleteDomain}
       />
     ];
 
     const errorActions = [
       <FlatButton
+        key="close"
         label="Close"
-        primary={true}
+        primary
         onClick={this.handleErrorDialogClose}
       />
     ];
@@ -162,7 +167,7 @@ class AdminShortLinkDomains extends Component {
             title="Confirm Delete Domain"
             actions={deleteDomainActions}
             modal={false}
-            open={true}
+            open
             onRequestClose={this.handleCancelDeleteDomain}
           >
             Are you sure you want to delete the short link domain{" "}
@@ -174,7 +179,7 @@ class AdminShortLinkDomains extends Component {
             title="Error Completing Request"
             actions={errorActions}
             modal={false}
-            open={true}
+            open
             onRequestClose={this.handleErrorDialogClose}
           >
             {webRequestError.message}
@@ -214,7 +219,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       },
@@ -224,7 +229,7 @@ const queries = {
 };
 
 const mutations = {
-  insertLinkDomain: ownProps => (domain, maxUsageCount) => ({
+  insertLinkDomain: (ownProps) => (domain, maxUsageCount) => ({
     mutation: gql`
       mutation insertLinkDomain(
         $organizationId: String!
@@ -253,7 +258,7 @@ const mutations = {
       maxUsageCount
     }
   }),
-  setDomainManuallyDisabled: ownProps => (domainId, isManuallyDisabled) => ({
+  setDomainManuallyDisabled: (ownProps) => (domainId, isManuallyDisabled) => ({
     mutation: gql`
       mutation setDomainManuallyDisabled(
         $organizationId: String!
@@ -278,7 +283,7 @@ const mutations = {
       }
     }
   }),
-  deleteLinkDomain: ownProps => domainId => ({
+  deleteLinkDomain: (ownProps) => (domainId) => ({
     mutation: gql`
       mutation deleteLinkDomain($organizationId: String!, $domainId: String!) {
         deleteLinkDomain(organizationId: $organizationId, domainId: $domainId)

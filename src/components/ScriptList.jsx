@@ -1,14 +1,13 @@
-import PropTypes from "prop-types";
-import React from "react";
 import gql from "graphql-tag";
-import Form from "react-formal";
-
+import Dialog from "material-ui/Dialog";
+import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import { List, ListItem } from "material-ui/List";
 import Subheader from "material-ui/Subheader";
-import Divider from "material-ui/Divider";
-import Dialog from "material-ui/Dialog";
 import CreateIcon from "material-ui/svg-icons/content/create";
+import PropTypes from "prop-types";
+import React from "react";
+import Form from "react-formal";
 
 import { withOperations } from "../containers/hoc/with-operations";
 import CannedResponseForm from "./CannedResponseForm";
@@ -55,7 +54,7 @@ class ScriptList extends React.Component {
     } = this.props;
     const { dialogOpen } = this.state;
 
-    const onSaveCannedResponse = async cannedResponse => {
+    const onSaveCannedResponse = async (cannedResponse) => {
       try {
         const saveObject = {
           ...cannedResponse,
@@ -89,7 +88,7 @@ class ScriptList extends React.Component {
     // )
 
     const rightIconButton = null;
-    const listItems = scripts.map(script => (
+    const listItems = scripts.map((script) => (
       <ListItem
         value={script.text}
         onTouchTap={() => onSelectCannedResponse(script)}
@@ -126,11 +125,16 @@ class ScriptList extends React.Component {
             style={styles.dialog}
             open={dialogOpen}
             actions={[
-              <FlatButton label="Cancel" onTouchTap={this.handleCloseDialog} />,
+              <FlatButton
+                key="cancel"
+                label="Cancel"
+                onTouchTap={this.handleCloseDialog}
+              />,
               <Form.Button
-                type="submit"
-                component={GSSubmitButton}
+                key="save"
                 label="Save"
+                component={GSSubmitButton}
+                type="submit"
               />
             ]}
             onRequestClose={this.handleCloseDialog}
@@ -160,7 +164,7 @@ ScriptList.propTypes = {
 };
 
 const mutations = {
-  createCannedResponse: ownProps => cannedResponse => ({
+  createCannedResponse: () => (cannedResponse) => ({
     mutation: gql`
       mutation createCannedResponse($cannedResponse: CannedResponseInput!) {
         createCannedResponse(cannedResponse: $cannedResponse) {

@@ -1,12 +1,11 @@
-import React from "react";
-import gql from "graphql-tag";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
 import Dialog from "material-ui/Dialog";
+import FlatButton from "material-ui/FlatButton";
+import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import Toggle from "material-ui/Toggle";
-import MenuItem from "material-ui/MenuItem";
-import FlatButton from "material-ui/FlatButton";
+import React from "react";
 
 import { loadData } from "../hoc/with-operations";
 
@@ -55,13 +54,13 @@ class VanExportModal extends React.Component<InnerProps, State> {
   };
 
   handleOnChangeVanIdField = (
-    event: React.SyntheticEvent<{}>,
+    event: React.SyntheticEvent<unknown>,
     index: number,
     vanIdField: string
   ) => this.setState({ vanIdField });
 
   handleOnToggleIncludeUnmessages = (
-    event: React.MouseEvent<{}>,
+    event: React.MouseEvent<unknown>,
     includeUnmessaged: boolean
   ) => this.setState({ includeUnmessaged });
 
@@ -75,10 +74,15 @@ class VanExportModal extends React.Component<InnerProps, State> {
     const selections = ["external_id"].concat(customFields);
 
     const actions = [
-      <FlatButton label="Cancel" onClick={this.props.onRequestClose} />,
       <FlatButton
+        key="cancel"
+        label="Cancel"
+        onClick={this.props.onRequestClose}
+      />,
+      <FlatButton
+        key="export"
         label="Export"
-        primary={true}
+        primary
         onClick={this.handleOnConfirm}
       />
     ];
@@ -95,16 +99,18 @@ class VanExportModal extends React.Component<InnerProps, State> {
         <a
           href="https://docs.spokerewired.com/article/97-export-for-upload-to-van"
           target="_blank"
+          rel="noopener noreferrer"
         >
           Export for Upload to VAN
-        </a>.
+        </a>
+        .
         <br />
         <SelectField
           floatingLabelText="VAN ID field"
           value={vanIdField}
           onChange={this.handleOnChangeVanIdField}
         >
-          {selections.map(selection => (
+          {selections.map((selection) => (
             <MenuItem
               key={selection}
               value={selection}

@@ -1,13 +1,12 @@
+import { css, StyleSheet } from "aphrodite";
+import Badge from "material-ui/Badge";
+import { Card, CardActions, CardTitle } from "material-ui/Card";
+import Divider from "material-ui/Divider";
+import RaisedButton from "material-ui/RaisedButton";
+import moment from "moment";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { withRouter } from "react-router";
-import { StyleSheet, css } from "aphrodite";
-import moment from "moment";
-
-import { Card, CardActions, CardTitle } from "material-ui/Card";
-import RaisedButton from "material-ui/RaisedButton";
-import Badge from "material-ui/Badge";
-import Divider from "material-ui/Divider";
+import { withRouter } from "react-router-dom";
 
 import { dataTest } from "../lib/attributes";
 
@@ -48,10 +47,6 @@ const styles = StyleSheet.create({
 });
 
 export class AssignmentSummary extends Component {
-  state = {
-    badTimezoneTooltipOpen: false
-  };
-
   goToTodos(contactsFilter, assignmentId) {
     const { organizationId, history } = this.props;
 
@@ -86,24 +81,23 @@ export class AssignmentSummary extends Component {
           onClick={() => this.goToTodos(contactsFilter, assignment.id)}
         />
       );
-    } else {
-      return (
-        <Badge
-          key={title}
-          badgeStyle={style || inlineStyles.badge}
-          badgeContent={count || ""}
-          primary={primary && !disabled}
-          secondary={!primary && !disabled}
-        >
-          <RaisedButton
-            {...dataTest(dataTestText)}
-            disabled={disabled}
-            label={title}
-            onClick={() => this.goToTodos(contactsFilter, assignment.id)}
-          />
-        </Badge>
-      );
     }
+    return (
+      <Badge
+        key={title}
+        badgeStyle={style || inlineStyles.badge}
+        badgeContent={count || ""}
+        primary={primary && !disabled}
+        secondary={!primary && !disabled}
+      >
+        <RaisedButton
+          {...dataTest(dataTestText)}
+          disabled={disabled}
+          label={title}
+          onClick={() => this.goToTodos(contactsFilter, assignment.id)}
+        />
+      </Badge>
+    );
   }
 
   render() {
@@ -112,7 +106,6 @@ export class AssignmentSummary extends Component {
       unmessagedCount,
       unrepliedCount,
       badTimezoneCount,
-      totalMessagedCount,
       pastMessagesCount,
       skippedMessagesCount
     } = this.props;
@@ -126,7 +119,7 @@ export class AssignmentSummary extends Component {
       introHtml,
       useDynamicAssignment
     } = assignment.campaign;
-    const maxContacts = assignment.maxContacts;
+    const { maxContacts } = assignment;
     return (
       <div className={css(styles.container)}>
         <Card key={assignment.id}>
@@ -134,14 +127,11 @@ export class AssignmentSummary extends Component {
             title={title}
             subtitle={`${description} - ${moment(dueBy).format("MMM D YYYY")}`}
             style={{ backgroundColor: primaryColor }}
-            children={
-              logoImageUrl ? (
-                <img src={logoImageUrl} className={css(styles.image)} />
-              ) : (
-                ""
-              )
-            }
-          />
+          >
+            {logoImageUrl && (
+              <img src={logoImageUrl} className={css(styles.image)} />
+            )}
+          </CardTitle>
           <Divider />
           <div style={{ margin: "20px" }}>
             <div dangerouslySetInnerHTML={{ __html: introHtml }} />
@@ -158,7 +148,7 @@ export class AssignmentSummary extends Component {
                   disabled:
                     (useDynamicAssignment &&
                       !hasUnassignedContacts &&
-                      unmessagedCount == 0) ||
+                      unmessagedCount === 0) ||
                     (useDynamicAssignment && maxContacts === 0),
                   contactsFilter: "text",
                   hideIfZero: !useDynamicAssignment

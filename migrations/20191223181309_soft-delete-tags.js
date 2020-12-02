@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function up(knex) {
   return knex.raw(`
     alter table tag rename to all_tag;
     alter table all_tag add column deleted_at timestamp;
@@ -26,7 +26,7 @@ exports.up = function(knex) {
   `);
 };
 
-exports.down = function(knex) {
+exports.down = function down(knex) {
   // Note - dropping the view also drops the trigger
   return knex.raw(`
     drop view tag cascade;

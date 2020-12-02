@@ -1,43 +1,43 @@
-import React from "react";
-import PropTypes from "prop-types";
+/* eslint-disable react/no-unused-state */
+import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
-import { withRouter } from "react-router";
-import * as yup from "yup";
 import sortBy from "lodash/sortBy";
-import md5 from "md5";
-
-import { StyleSheet, css } from "aphrodite";
-import RaisedButton from "material-ui/RaisedButton";
+import CircularProgress from "material-ui/CircularProgress";
 import IconButton from "material-ui/IconButton";
-import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
-import CircularProgress from "material-ui/CircularProgress";
+import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
-import { grey100, blueGrey100 } from "material-ui/styles/colors";
+import { blueGrey100, grey100 } from "material-ui/styles/colors";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import LocalOfferIcon from "material-ui/svg-icons/maps/local-offer";
+import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
+import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
+import md5 from "md5";
+import PropTypes from "prop-types";
+import React from "react";
+import { withRouter } from "react-router-dom";
+import * as yup from "yup";
 
-import { isContactNowWithinCampaignHours } from "../../lib/timezones";
+import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
+import BulkSendButton from "../../components/BulkSendButton";
+import CannedResponseMenu from "../../components/CannedResponseMenu";
+import Empty from "../../components/Empty";
+import GSForm from "../../components/forms/GSForm";
+import MessageList from "../../components/MessageList";
+import SendButton from "../../components/SendButton";
+import SendButtonArrow from "../../components/SendButtonArrow";
+import { dataTest } from "../../lib/attributes";
 import {
   getChildren,
   getTopMostParent,
   interactionStepForId
 } from "../../lib/interaction-step-helpers";
 import { applyScript } from "../../lib/scripts";
-import { dataTest } from "../../lib/attributes";
-import MessageList from "../../components/MessageList";
-import CannedResponseMenu from "../../components/CannedResponseMenu";
-import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
-import Empty from "../../components/Empty";
-import GSForm from "../../components/forms/GSForm";
-import SendButton from "../../components/SendButton";
-import BulkSendButton from "../../components/BulkSendButton";
-import SendButtonArrow from "../../components/SendButtonArrow";
+import { isContactNowWithinCampaignHours } from "../../lib/timezones";
+import ApplyTagDialog from "./ApplyTagDialog";
 import ContactActionDialog from "./ContactActionDialog";
 import MessageTextField from "./MessageTextField";
-import ApplyTagDialog from "./ApplyTagDialog";
 import TopFixedSection from "./TopFixedSection";
 
 const TexterDialogType = Object.freeze({
@@ -105,6 +105,18 @@ const inlineStyles = {
 };
 
 export class AssignmentTexterContact extends React.Component {
+  optOutSchema = yup.object({
+    optOutMessageText: yup.string()
+  });
+
+  messageSchema = yup.object({
+    messageText: yup
+      .string()
+      .trim()
+      .required("Can't send empty message")
+      .max(window.MAX_MESSAGE_LENGTH)
+  });
+
   constructor(props) {
     super(props);
 
@@ -181,18 +193,19 @@ export class AssignmentTexterContact extends React.Component {
     document.body.addEventListener("keyup", this.onEnterUp);
   }
 
-  componentWillUnmount() {
-    document.body.removeEventListener("keyup", this.onEnterUp);
-  }
-
   componentWillReceiveProps(nextProps) {
     if (this.props.errors.length !== nextProps.length) {
+      // eslint-disable-next-line react/no-direct-mutation-state
       this.state.disabled = false;
     }
   }
 
+  componentWillUnmount() {
+    document.body.removeEventListener("keyup", this.onEnterUp);
+  }
+
   // Handle submission on <enter> *up* to prevent holding enter
-  onEnterUp = event => {
+  onEnterUp = (event) => {
     const keyCode = event.keyCode || event.which;
     if (keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
@@ -209,7 +222,7 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ disabled });
   };
 
-  getAvailableInteractionSteps = questionResponses => {
+  getAvailableInteractionSteps = (questionResponses) => {
     const allInteractionSteps = this.props.campaign.interactionSteps;
     const availableSteps = [];
 
@@ -220,7 +233,7 @@ export class AssignmentTexterContact extends React.Component {
       const questionResponseValue = questionResponses[step.id];
       if (questionResponseValue) {
         const matchingAnswerOption = step.question.answerOptions.find(
-          answerOption => answerOption.value === questionResponseValue
+          (answerOption) => answerOption.value === questionResponseValue
         );
         if (matchingAnswerOption && matchingAnswerOption.nextInteractionStep) {
           step = interactionStepForId(
@@ -238,16 +251,17 @@ export class AssignmentTexterContact extends React.Component {
     return availableSteps;
   };
 
-  getInitialQuestionResponses = questionResponseValues => {
+  getInitialQuestionResponses = (questionResponseValues) => {
     const questionResponses = {};
-    questionResponseValues.forEach(questionResponse => {
+    questionResponseValues.forEach((questionResponse) => {
       questionResponses[questionResponse.interactionStepId] =
         questionResponse.value;
     });
 
     return questionResponses;
   };
-  getMessageTextFromScript = script => {
+
+  getMessageTextFromScript = (script) => {
     const { campaign, contact, texter } = this.props;
 
     return script
@@ -271,7 +285,7 @@ export class AssignmentTexterContact extends React.Component {
     return [null, ""];
   };
 
-  handleOpenPopover = event => {
+  handleOpenPopover = (event) => {
     event.preventDefault();
     const { assignment } = this.props;
     const { userCannedResponses, campaignCannedResponses } = assignment;
@@ -291,11 +305,11 @@ export class AssignmentTexterContact extends React.Component {
     });
   };
 
-  handleCannedResponseChange = cannedResponseScript => {
+  handleCannedResponseChange = (cannedResponseScript) => {
     this.handleChangeScript(cannedResponseScript);
   };
 
-  createMessageToContact = text => {
+  createMessageToContact = (text) => {
     const { texter, assignment } = this.props;
     const { contact } = this.props;
 
@@ -324,11 +338,11 @@ export class AssignmentTexterContact extends React.Component {
     });
   };
 
-  submitAction = async messageText => {
+  submitAction = async (messageText) => {
     const { contact } = this.props;
     const message = this.createMessageToContact(messageText);
     const changes = this.gatherSurveyChanges();
-    const payload = Object.assign({ message }, changes);
+    const payload = { message, ...changes };
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -345,7 +359,7 @@ export class AssignmentTexterContact extends React.Component {
 
     const count = interactionStepIds.length;
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i += 1) {
       const interactionStepId = interactionStepIds[i];
       const value = this.state.questionResponses[interactionStepId];
       if (value) {
@@ -374,7 +388,7 @@ export class AssignmentTexterContact extends React.Component {
     await this.props.sendMessage(contact.id, payload);
   };
 
-  handleEditMessageStatus = async messageStatus => {
+  handleEditMessageStatus = async (messageStatus) => {
     const { contact } = this.props;
     await this.props.mutations.editCampaignContactMessageStatus(
       messageStatus,
@@ -400,7 +414,7 @@ export class AssignmentTexterContact extends React.Component {
       optOut.message = message;
     }
 
-    const payload = Object.assign({}, { optOut }, this.gatherSurveyChanges());
+    const payload = { optOut, ...this.gatherSurveyChanges() };
     this.props.sendMessage(contact.id, payload);
   };
 
@@ -411,9 +425,9 @@ export class AssignmentTexterContact extends React.Component {
   handleApplyTags = (addedTags, removedTags, callback) => {
     const pendingNewTags = this.props.contact.contactTags || [];
 
-    addedTags.forEach(addedTag => {
+    addedTags.forEach((addedTag) => {
       const tagDoesNotExist = !pendingNewTags.find(
-        currentTag => currentTag.id === addedTag.id
+        (currentTag) => currentTag.id === addedTag.id
       );
 
       if (tagDoesNotExist) {
@@ -421,9 +435,9 @@ export class AssignmentTexterContact extends React.Component {
       }
     });
 
-    removedTags.forEach(removedTag => {
+    removedTags.forEach((removedTag) => {
       const idxOfExistingTag = pendingNewTags.findIndex(
-        currentTag => currentTag.id === removedTag.id
+        (currentTag) => currentTag.id === removedTag.id
       );
 
       if (idxOfExistingTag > -1) {
@@ -466,8 +480,8 @@ export class AssignmentTexterContact extends React.Component {
   tagContact = (addedTags, removedTags) => {
     const { contact } = this.props;
     const tag = {
-      addedTagIds: addedTags.map(tag => tag.id),
-      removedTagIds: removedTags.map(tag => tag.id)
+      addedTagIds: addedTags.map(({ id }) => id),
+      removedTagIds: removedTags.map(({ id }) => id)
     };
 
     this.props.addTagToContact(contact.id, tag);
@@ -477,7 +491,7 @@ export class AssignmentTexterContact extends React.Component {
     this.setState({ dialogType: TexterDialogType.None });
   };
 
-  handleChangeScript = newScript => {
+  handleChangeScript = (newScript) => {
     const messageVersionHash = md5(newScript);
     const messageText = this.getMessageTextFromScript(newScript);
     this.setState({ messageText, messageVersionHash });
@@ -516,26 +530,14 @@ export class AssignmentTexterContact extends React.Component {
     }
   };
 
-  optOutSchema = yup.object({
-    optOutMessageText: yup.string()
-  });
-
   skipContact = () => {
     this.props.onFinishContact();
   };
 
-  bulkSendMessages = async assignmentId => {
+  bulkSendMessages = async (assignmentId) => {
     await this.props.mutations.bulkSendMessages(assignmentId);
     this.props.refreshData();
   };
-
-  messageSchema = yup.object({
-    messageText: yup
-      .string()
-      .trim()
-      .required("Can't send empty message")
-      .max(window.MAX_MESSAGE_LENGTH)
-  });
 
   handleMessageFormChange = ({ messageText }) => {
     const { messageStatus } = this.props.contact;
@@ -633,7 +635,8 @@ export class AssignmentTexterContact extends React.Component {
           </Toolbar>
         </div>
       );
-    } else if (size < 450) {
+    }
+    if (size < 450) {
       // for needsResponse or messaged or convo
       return (
         <div
@@ -680,7 +683,8 @@ export class AssignmentTexterContact extends React.Component {
           </IconMenu>
         </div>
       );
-    } else if (size >= 768) {
+    }
+    if (size >= 768) {
       // for needsResponse or messaged
       return (
         <div>
@@ -803,8 +807,8 @@ export class AssignmentTexterContact extends React.Component {
             submitTitle={
               this.state.optOutMessageText ? "Send" : "Opt Out without Text"
             }
-            onChange={({ messageText }) =>
-              this.setState({ optOutMessageText: messageText })
+            onChange={({ messageText: optOutMessageText }) =>
+              this.setState({ optOutMessageText })
             }
             onSubmit={this.handleOptOut}
             handleCloseDialog={this.handleCloseDialog}
@@ -818,11 +822,6 @@ export class AssignmentTexterContact extends React.Component {
   render() {
     const { disabled } = this.state;
     const { campaign, contact, contactSettings, onExitTexter } = this.props;
-
-    const backgroundColor =
-      contact.messageStatus === "needsResponse"
-        ? "rgba(83, 180, 119, 0.25)"
-        : "";
 
     return (
       <div className={css(styles.fullSize)}>
@@ -872,11 +871,8 @@ export class AssignmentTexterContact extends React.Component {
         {this.props.errors.map((err, idx) => (
           <Snackbar
             key={err.id}
-            style={Object.assign({}, inlineStyles.snackbar, {
-              bottom: idx * 50,
-              width: 700
-            })}
-            open={true}
+            style={{ ...inlineStyles.snackbar, bottom: idx * 50, width: 700 }}
+            open
             message={err.snackbarError || ""}
             action={err.snackbarActionTitle}
             onActionClick={err.snackbarOnTouchTap}

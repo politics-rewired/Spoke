@@ -1,0 +1,8 @@
+node_modules
+build
+__test__
+__mocks__
+deploy
+docs
+seeds
+dev-tools

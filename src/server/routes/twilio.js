@@ -1,9 +1,10 @@
 import express from "express";
-const router = express.Router();
 import { TwimlResponse } from "twilio";
 
 import logger from "../../logger";
 import twilio from "../api/lib/twilio";
+
+const router = express.Router();
 
 const headerValidator = twilio.headerValidator();
 

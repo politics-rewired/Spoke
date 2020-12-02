@@ -1,24 +1,22 @@
-import { r } from "../models";
-import { memoizer, cacheOpts } from "../memoredis";
+import { TextRequestType } from "../../api/organization";
 import { config } from "../../config";
 import logger from "../../logger";
-
+import { cacheOpts, memoizer } from "../memoredis";
+import { r } from "../models";
 import { errToObj } from "../utils";
-import { sqlResolvers } from "./lib/utils";
-import { infoHasQueryPath } from "./lib/apollo";
-import { formatPage } from "./lib/pagination";
-import { accessRequired } from "./errors";
-
-import { getCampaigns } from "./campaign";
-import { buildUserOrganizationQuery } from "./user";
 import {
   allCurrentAssignmentTargets,
-  myCurrentAssignmentTarget,
-  cachedMyCurrentAssignmentTargets
+  cachedMyCurrentAssignmentTargets,
+  myCurrentAssignmentTarget
 } from "./assignment";
-import { TextRequestType } from "../../api/organization";
+import { getCampaigns } from "./campaign";
+import { accessRequired } from "./errors";
+import { infoHasQueryPath } from "./lib/apollo";
+import { formatPage } from "./lib/pagination";
+import { sqlResolvers } from "./lib/utils";
+import { buildUserOrganizationQuery } from "./user";
 
-export const getEscalationUserId = async organizationId => {
+export const getEscalationUserId = async (organizationId) => {
   let escalationUserId;
   try {
     const organization = await r
@@ -26,7 +24,7 @@ export const getEscalationUserId = async organizationId => {
       .where({ id: organizationId })
       .first("organization.features");
     const features = JSON.parse(organization.features);
-    escalationUserId = parseInt(features.escalationUserId);
+    escalationUserId = parseInt(features.escalationUserId, 10);
   } catch (error) {
     // no-op
   }
@@ -36,7 +34,7 @@ export const getEscalationUserId = async organizationId => {
 export const resolvers = {
   Organization: {
     ...sqlResolvers(["id", "name"]),
-    settings: organization => organization,
+    settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       return getCampaigns(organization.id, cursor, campaignsFilter);
@@ -79,7 +77,7 @@ export const resolvers = {
         query.join("user", "user.id", "user_organization.user_id");
       }
 
-      if (!!nameSearch) {
+      if (nameSearch) {
         query.whereRaw("user.first_name || ' ' || user.last_name ilike  ?", [
           `%${nameSearch}%`
         ]);
@@ -93,7 +91,7 @@ export const resolvers = {
           "user.first_name",
           "user.last_name"
         ]);
-        pagerOptions.nodeTransformer = record => {
+        pagerOptions.nodeTransformer = (record) => {
           const {
             user_table_id,
             email,
@@ -115,16 +113,16 @@ export const resolvers = {
         query.select(["user_organization.*"]);
       }
 
-      const campaignIdInt = parseInt(campaignId);
-      if (!isNaN(campaignIdInt)) {
-        query.whereExists(function() {
+      const campaignIdInt = parseInt(campaignId, 10);
+      if (!Number.isNaN(campaignIdInt)) {
+        query.whereExists(function subquery() {
           this.select(this.client.raw("1"))
             .from("assignment")
             .whereRaw('"assignment"."user_id" = "user"."id"')
             .where({ campaign_id: campaignIdInt });
         });
       } else if (campaignArchived === true || campaignArchived === false) {
-        query.whereExists(function() {
+        query.whereExists(function subquery() {
           this.select(this.client.raw("1"))
             .from("assignment")
             .join("campaign", "campaign.id", "assignment.campaign_id")
@@ -135,7 +133,7 @@ export const resolvers = {
         });
       }
 
-      return await formatPage(query, pagerOptions);
+      return formatPage(query, pagerOptions);
     },
     people: async (organization, { role, campaignId, offset }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
@@ -160,18 +158,18 @@ export const resolvers = {
           .where("user_organization.organization_id", organization.id)
       );
     },
-    threeClickEnabled: organization =>
+    threeClickEnabled: (organization) =>
       organization.features.indexOf("threeClick") !== -1,
-    textingHoursEnforced: organization => organization.texting_hours_enforced,
-    optOutMessage: organization =>
+    textingHoursEnforced: (organization) => organization.texting_hours_enforced,
+    optOutMessage: (organization) =>
       (organization.features &&
       organization.features.indexOf("opt_out_message") !== -1
         ? JSON.parse(organization.features).opt_out_message
         : config.OPT_OUT_MESSAGE) ||
       "I'm opting you out of texts immediately. Have a great day.",
-    textingHoursStart: organization => organization.texting_hours_start,
-    textingHoursEnd: organization => organization.texting_hours_end,
-    textRequestFormEnabled: organization => {
+    textingHoursStart: (organization) => organization.texting_hours_start,
+    textingHoursEnd: (organization) => organization.texting_hours_end,
+    textRequestFormEnabled: (organization) => {
       try {
         const features = JSON.parse(organization.features);
         return features.textRequestFormEnabled || false;
@@ -179,7 +177,7 @@ export const resolvers = {
         return false;
       }
     },
-    textRequestType: organization => {
+    textRequestType: (organization) => {
       const defaultValue = TextRequestType.UNSENT;
       try {
         const features = JSON.parse(organization.features);
@@ -188,10 +186,10 @@ export const resolvers = {
         return defaultValue;
       }
     },
-    textRequestMaxCount: organization => {
+    textRequestMaxCount: (organization) => {
       try {
         const features = JSON.parse(organization.features);
-        return parseInt(features.textRequestMaxCount);
+        return parseInt(features.textRequestMaxCount, 10);
       } catch (ex) {
         return null;
       }
@@ -206,9 +204,9 @@ export const resolvers = {
     currentAssignmentTargets: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const cats = await allCurrentAssignmentTargets(organization.id);
-      const formatted = cats.map(cat => ({
+      const formatted = cats.map((cat) => ({
         type: cat.assignment_type,
-        countLeft: parseInt(cat.count_left),
+        countLeft: parseInt(cat.count_left, 10),
         campaign: {
           id: cat.id,
           title: cat.title
@@ -227,8 +225,8 @@ export const resolvers = {
       return assignmentTarget
         ? {
             type: assignmentTarget.type,
-            countLeft: parseInt(assignmentTarget.count_left),
-            maxRequestCount: parseInt(assignmentTarget.max_request_count),
+            countLeft: parseInt(assignmentTarget.count_left, 10),
+            maxRequestCount: parseInt(assignmentTarget.max_request_count, 10),
             teamTitle: assignmentTarget.team_title
           }
         : null;
@@ -240,10 +238,10 @@ export const resolvers = {
           organization.id
         );
 
-        return assignmentTargets.map(at => ({
+        return assignmentTargets.map((at) => ({
           type: at.type,
-          countLeft: parseInt(at.count_left),
-          maxRequestCount: parseInt(at.max_request_count),
+          countLeft: parseInt(at.count_left, 10),
+          maxRequestCount: parseInt(at.max_request_count, 10),
           teamTitle: at.team_title,
           teamId: at.team_id
         }));
@@ -256,7 +254,7 @@ export const resolvers = {
         throw err;
       }
     },
-    escalatedConversationCount: async organization => {
+    escalatedConversationCount: async (organization) => {
       if (config.DISABLE_SIDEBAR_BADGES) return 0;
 
       const countQuery = r
@@ -267,7 +265,7 @@ export const resolvers = {
           is_opted_out: false
         })
         .whereNot({ message_status: "closed" })
-        .whereExists(function() {
+        .whereExists(function subquery() {
           this.select("campaign_contact_tag.campaign_contact_id")
             .from("campaign_contact_tag")
             .join("tag", "tag.id", "=", "campaign_contact_tag.tag_id")
@@ -284,31 +282,28 @@ export const resolvers = {
       const escalatedCount = await r.parseCount(countQuery);
       return escalatedCount;
     },
-    numbersApiKey: async organization => {
+    numbersApiKey: async (organization) => {
       let numbersApiKey = null;
 
       try {
         const features = JSON.parse(organization.features);
-        numbersApiKey = features.numbersApiKey.slice(0, 4) + "****************";
+        numbersApiKey = `${features.numbersApiKey.slice(0, 4)}****************`;
       } catch (ex) {
         // no-op
       }
 
       return numbersApiKey;
     },
-    pendingAssignmentRequestCount: async organization =>
+    pendingAssignmentRequestCount: async (organization) =>
       config.DISABLE_SIDEBAR_BADGES
         ? 0
         : r.parseCount(
-            r
-              .reader("assignment_request")
-              .count("*")
-              .where({
-                status: "pending",
-                organization_id: organization.id
-              })
+            r.reader("assignment_request").count("*").where({
+              status: "pending",
+              organization_id: organization.id
+            })
           ),
-    linkDomains: async organization => {
+    linkDomains: async (organization) => {
       const rawResult = await r.reader.raw(
         `
         select
@@ -338,7 +333,7 @@ export const resolvers = {
       );
       return rawResult.rows;
     },
-    unhealthyLinkDomains: async _ => {
+    unhealthyLinkDomains: async (_) => {
       const rawResult = await r.knex.raw(`
         select
           distinct on (domain) *
@@ -351,37 +346,37 @@ export const resolvers = {
       `);
       return rawResult.rows;
     },
-    tagList: async organization => {
+    tagList: async (organization) => {
       const getTags = await memoizer.memoize(async ({ organizationId }) => {
-        return await r
+        return r
           .reader("tag")
           .where({ organization_id: organizationId })
           .orderBy(["is_system", "title"]);
       }, cacheOpts.OrganizationTagList);
 
-      return await getTags({ organizationId: organization.id });
+      return getTags({ organizationId: organization.id });
     },
-    escalationTagList: async organization => {
+    escalationTagList: async (organization) => {
       const getEscalationTags = await memoizer.memoize(
         async ({ organizationId }) => {
-          return await r
+          return r
             .reader("tag")
-            .where({ organization_id: organization.id, is_assignable: false })
+            .where({ organization_id: organizationId, is_assignable: false })
             .orderBy("is_system", "desc")
             .orderBy("title", "asc");
         },
         cacheOpts.OrganizationEscalatedTagList
       );
 
-      return await getEscalationTags({ organizationId: organization.id });
+      return getEscalationTags({ organizationId: organization.id });
     },
-    teams: async organization =>
+    teams: async (organization) =>
       r
         .reader("team")
         .where({ organization_id: organization.id })
         .orderBy("assignment_priority", "asc"),
     externalSystems: async (organization, { after, first }, { user }) => {
-      const organizationId = parseInt(organization.id);
+      const organizationId = parseInt(organization.id, 10);
       await accessRequired(user, organizationId, "ADMIN");
 
       const query = r

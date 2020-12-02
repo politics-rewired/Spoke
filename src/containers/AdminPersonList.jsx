@@ -1,34 +1,33 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
+/* eslint-disable react/no-unused-state */
 import gql from "graphql-tag";
-import queryString from "query-string";
-
-import { Table, TableBody, TableRow, TableRowColumn } from "material-ui/Table";
+import Dialog from "material-ui/Dialog";
+import DropDownMenu from "material-ui/DropDownMenu";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
-import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
-import Dialog from "material-ui/Dialog";
 import Snackbar from "material-ui/Snackbar";
-import PeopleIcon from "material-ui/svg-icons/social/people";
 import ContentAdd from "material-ui/svg-icons/content/add";
+import PeopleIcon from "material-ui/svg-icons/social/people";
+import { Table, TableBody, TableRow, TableRowColumn } from "material-ui/Table";
+import PropTypes from "prop-types";
+import queryString from "query-string";
+import React from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
-import { hasRoleAtLeast } from "../lib/permissions";
 import {
-  UserRoleType,
-  RequestAutoApproveType
+  RequestAutoApproveType,
+  UserRoleType
 } from "../api/organization-membership";
-import { dataTest } from "../lib/attributes";
-import { snakeToTitleCase } from "../lib/attributes";
-import { loadData } from "./hoc/with-operations";
-import theme from "../styles/theme";
-import UserEdit from "./UserEdit";
 import Empty from "../components/Empty";
+import LoadingIndicator from "../components/LoadingIndicator";
 import OrganizationJoinLink from "../components/OrganizationJoinLink";
 import PasswordResetLink from "../components/PasswordResetLink";
-import LoadingIndicator from "../components/LoadingIndicator";
+import { dataTest, snakeToTitleCase } from "../lib/attributes";
+import { hasRoleAtLeast } from "../lib/permissions";
+import theme from "../styles/theme";
+import { loadData } from "./hoc/with-operations";
+import UserEdit from "./UserEdit";
 
 class AdminPersonList extends React.Component {
   state = {
@@ -40,7 +39,7 @@ class AdminPersonList extends React.Component {
   };
 
   handleFilterChange = (campaignId, offset) => {
-    let query = "?" + (campaignId ? `campaignId=${campaignId}` : "");
+    let query = `?${campaignId ? `campaignId=${campaignId}` : ""}`;
     query += offset ? `&offset=${offset}` : "";
     const { organizationId } = this.props.match.params;
     this.props.history.push(`/admin/${organizationId}/people${query}`);
@@ -62,7 +61,7 @@ class AdminPersonList extends React.Component {
 
   handleDismissSaveError = () => this.setState({ saveError: undefined });
 
-  handleRoleChange = membershipId => async (_event, _index, role) => {
+  handleRoleChange = (membershipId) => async (_event, _index, role) => {
     const { editOrganizationMembership } = this.props.mutations;
     this.setState({ isWorking: true, saveError: undefined });
     try {
@@ -77,7 +76,7 @@ class AdminPersonList extends React.Component {
     }
   };
 
-  handleOnChangeAutoApprovalLevel = membershipId => async (
+  handleOnChangeAutoApprovalLevel = (membershipId) => async (
     _event,
     _index,
     level
@@ -98,30 +97,31 @@ class AdminPersonList extends React.Component {
     }
   };
 
-  editUser = userId => this.setState({ userEdit: userId });
+  editUser = (userId) => this.setState({ userEdit: userId });
 
   updateUser = () => {
     this.setState({ userEdit: false });
     this.props.personData.refetch();
   };
 
-  renderOffsetList() {
+  renderOffsetList = () => {
     const LIMIT = 200;
     const {
       personData: { organization }
     } = this.props;
     if (organization.peopleCount > LIMIT) {
-      const offsetList = Array.apply(null, {
-        length: Math.ceil(organization.peopleCount / LIMIT)
-      });
+      const offsetList = [
+        ...Array(Math.ceil(organization.peopleCount / LIMIT))
+      ];
       const { offset } = queryString.parse(this.props.location.search);
       return (
         <DropDownMenu
-          value={offset == "all" ? "all" : Number(offset || 0)}
+          value={offset === "all" ? "all" : Number(offset || 0)}
           onChange={this.handleOffsetChange}
         >
           {[<MenuItem value="all" primaryText="All" key="all" />].concat(
             offsetList.map((x, i) => (
+              // eslint-disable-next-line react/no-array-index-key
               <MenuItem value={i} primaryText={`Page ${i + 1}`} key={i + 1} />
             ))
           )}
@@ -129,9 +129,9 @@ class AdminPersonList extends React.Component {
       );
     }
     return null;
-  }
+  };
 
-  async resetPassword(userId) {
+  resetPassword = async (userId) => {
     const { organizationId } = this.props.match.params;
     const { currentUser } = this.props.userData;
     if (currentUser.id !== userId) {
@@ -142,7 +142,7 @@ class AdminPersonList extends React.Component {
       const { resetUserPassword } = res.data;
       this.setState({ passwordResetHash: resetUserPassword });
     }
-  }
+  };
 
   renderCampaignList() {
     const {
@@ -153,7 +153,7 @@ class AdminPersonList extends React.Component {
     return (
       <DropDownMenu value={campaignId} onChange={this.handleCampaignChange}>
         <MenuItem primaryText="All Campaigns" />
-        {campaigns.campaigns.map(campaign => (
+        {campaigns.campaigns.map((campaign) => (
           <MenuItem
             value={campaign.id}
             primaryText={campaign.title}
@@ -182,7 +182,7 @@ class AdminPersonList extends React.Component {
     return (
       <Table selectable={false}>
         <TableBody displayRowCheckbox={false} showRowHover>
-          {people.map(person => (
+          {people.map((person) => (
             <TableRow key={person.id}>
               <TableRowColumn>{person.displayName}</TableRowColumn>
               <TableRowColumn>{person.email}</TableRowColumn>
@@ -198,7 +198,7 @@ class AdminPersonList extends React.Component {
                     person.memberships.edges[0].node.id
                   )}
                 >
-                  {Object.keys(UserRoleType).map(option => (
+                  {Object.keys(UserRoleType).map((option) => (
                     <MenuItem
                       key={`${person.id}_${option}`}
                       value={option}
@@ -224,7 +224,7 @@ class AdminPersonList extends React.Component {
                     person.memberships.edges[0].node.id
                   )}
                 >
-                  {Object.keys(RequestAutoApproveType).map(option => (
+                  {Object.keys(RequestAutoApproveType).map((option) => (
                     <MenuItem
                       key={`${person.id}_${option}`}
                       value={option}
@@ -300,6 +300,7 @@ class AdminPersonList extends React.Component {
               title="Invite new texters"
               actions={[
                 <FlatButton
+                  key="ok"
                   {...dataTest("inviteOk")}
                   label="OK"
                   primary
@@ -318,6 +319,7 @@ class AdminPersonList extends React.Component {
               title="Reset user password"
               actions={[
                 <FlatButton
+                  key="ok"
                   {...dataTest("passResetOK")}
                   label="OK"
                   primary
@@ -379,7 +381,7 @@ const organizationFragment = `
 `;
 
 const mutations = {
-  editOrganizationMembership: ownProps => (
+  editOrganizationMembership: (_ownProps) => (
     membershipId,
     { level = null, role = null }
   ) => ({
@@ -406,7 +408,7 @@ const mutations = {
       role
     }
   }),
-  resetUserPassword: ownProps => (organizationId, userId) => ({
+  resetUserPassword: (_ownProps) => (organizationId, userId) => ({
     mutation: gql`
       mutation resetUserPassword($organizationId: String!, $userId: Int!) {
         resetUserPassword(organizationId: $organizationId, userId: $userId)
@@ -426,7 +428,7 @@ const queries = {
         ${organizationFragment}
       }
     }`,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId,
         campaignId: queryString.parse(ownProps.location.search).campaignId,
@@ -454,7 +456,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }
@@ -478,7 +480,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
       }

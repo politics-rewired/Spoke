@@ -1,7 +1,9 @@
+/* eslint-disable max-classes-per-file */
+
 import AuthHasher from "passport-local-authenticate";
 
-import { r } from "./models";
 import { capitalizeWord } from "./api/lib/utils";
+import { r } from "./models";
 
 export class LocalAuthError extends Error {
   constructor(message) {
@@ -70,6 +72,7 @@ const validUuid = async (nextUrl, uuidMatch) => {
   if (!matchingRecord) throw new InvalidInviteError();
 };
 
+// eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
   if (!existingUser) throw new InvalidCredentialsError();
 
@@ -114,7 +117,7 @@ const signup = async ({
 
   // create the user
   return new Promise((resolve, reject) => {
-    AuthHasher.hash(password, async function(err, hashed) {
+    AuthHasher.hash(password, async (err, hashed) => {
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
@@ -161,7 +164,7 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
 
   // Save new user password to DB
   return new Promise((resolve, reject) => {
-    AuthHasher.hash(password, async function(err, hashed) {
+    AuthHasher.hash(password, async (err, hashed) => {
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
@@ -197,7 +200,7 @@ export const change = ({ user, password, newPassword, passwordConfirm }) => {
     AuthHasher.verify(password, hashedPassword, (error, verified) => {
       if (error) reject(new LocalAuthError(error.message));
       if (!verified) reject(new InvalidCredentialsError());
-      return AuthHasher.hash(newPassword, async function(err, hashed) {
+      return AuthHasher.hash(newPassword, async (err, hashed) => {
         if (err) reject(new LocalAuthError(err.message));
         const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
         const updatedUser = await r

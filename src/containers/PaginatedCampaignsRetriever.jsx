@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 
 import apolloClient from "../network/apollo-client-singleton";
 
@@ -63,7 +63,7 @@ export class PaginatedCampaignsRetriever extends Component {
     const { organizationId, campaignsFilter, pageSize } = this.props;
 
     let offset = 0;
-    let total = undefined;
+    let total;
     let campaigns = [];
     let tagList = [];
     do {

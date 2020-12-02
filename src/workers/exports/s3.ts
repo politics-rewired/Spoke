@@ -1,14 +1,14 @@
 import AWS from "aws-sdk";
 import stream from "stream";
 
-import { StorageBackend } from "./types";
 import { config } from "../../config";
 import logger from "../../logger";
+import { StorageBackend } from "./types";
 
 const { AWS_ENDPOINT: awsEndpoint } = config;
 
 const createS3 = (bucket: string, endpointUrl: string = awsEndpoint) => {
-  let endpoint: string | undefined = undefined;
+  let endpoint: string | undefined;
   if (endpointUrl) {
     endpoint = new AWS.Endpoint(endpointUrl).toString();
   }
@@ -76,7 +76,7 @@ const getUploadStream = async (
   s3Client
     .upload(uploadParams)
     .promise()
-    .catch(err => logger.error("Error uploading to S3: ", err));
+    .catch((err) => logger.error("Error uploading to S3: ", err));
 
   return passThrough;
 };

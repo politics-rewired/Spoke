@@ -1,12 +1,12 @@
-import React from "react";
-import gql from "graphql-tag";
-import { compose } from "recompose";
 import { ApolloQueryResult } from "apollo-client";
-
+import gql from "graphql-tag";
+import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
-import MenuItem from "material-ui/MenuItem";
+import React from "react";
+import { compose } from "recompose";
 
+import { RelayPaginatedResponse } from "../../../../api/pagination";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
@@ -14,12 +14,11 @@ import {
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import ContactsSqlForm from "./components/ContactsSqlForm";
 import CSVForm from "./components/CSVForm";
 import ExternalSystemsSource from "./components/ExternalSystemsSource";
 import SelectExcludeCampaigns from "./components/SelectExcludeCampaigns";
-import ContactsSqlForm from "./components/ContactsSqlForm";
 import UploadResults from "./components/UploadResults";
-import { RelayPaginatedResponse } from "../../../../api/pagination";
 
 enum ContactSourceType {
   CSV = "CSV",
@@ -108,7 +107,7 @@ class CampaignContactsForm extends React.Component<
     super(props);
 
     const options = this.getSourceOptions();
-    this.state.source = options.find(op => !op.disabledReason)!.source;
+    this.state.source = options.find((op) => !op.disabledReason)!.source;
   }
 
   handleOnChangeValidSql = (contactsSql: string | null) =>
@@ -152,7 +151,7 @@ class CampaignContactsForm extends React.Component<
   };
 
   handleOnChangeSource = (
-    _e: React.SyntheticEvent<{}>,
+    _e: React.SyntheticEvent<unknown>,
     _index: number,
     source: any
   ) => {
@@ -230,7 +229,9 @@ class CampaignContactsForm extends React.Component<
       campaigns: { campaigns: allCampaigns }
     } = organizationData.organization;
 
-    const allOtherCampaigns = allCampaigns.filter(({ id }) => id != campaignId);
+    const allOtherCampaigns = allCampaigns.filter(
+      ({ id }) => id !== campaignId
+    );
 
     const isSaveDisabled =
       isWorking || (!isNew && !contactsFile && !contactsSql && !externalListId);
@@ -249,15 +250,17 @@ class CampaignContactsForm extends React.Component<
         <SelectField
           floatingLabelText="Contact source"
           value={source}
-          fullWidth={true}
+          fullWidth
           onChange={this.handleOnChangeSource}
         >
-          {sourceOptions.map(({ source, disabledReason }) => (
+          {sourceOptions.map(({ source: contactSource, disabledReason }) => (
             <MenuItem
-              key={source}
-              value={source}
+              key={contactSource}
+              value={contactSource}
               primaryText={
-                disabledReason ? `${source} (${disabledReason})` : source
+                disabledReason
+                  ? `${contactSource} (${disabledReason})`
+                  : contactSource
               }
               disabled={disabledReason !== undefined}
             />
@@ -271,14 +274,13 @@ class CampaignContactsForm extends React.Component<
             onContactsFileChange={this.handleOnContactsFileChange}
           />
         )}
-        {source === ContactSourceType.ExternalSystem &&
-          externalSystem && (
-            <ExternalSystemsSource
-              systemId={externalSystem.id}
-              selectedListId={externalListId}
-              onChangeExternalList={this.handleOnExternalListChange}
-            />
-          )}
+        {source === ContactSourceType.ExternalSystem && externalSystem && (
+          <ExternalSystemsSource
+            systemId={externalSystem.id}
+            selectedListId={externalListId}
+            onChangeExternalList={this.handleOnExternalListChange}
+          />
+        )}
         {source === ContactSourceType.SQL && (
           <ContactsSqlForm
             style={{ marginTop: "20px" }}

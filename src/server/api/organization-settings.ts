@@ -1,9 +1,9 @@
-import { r } from "../models";
-import { organizationCache } from "../models/cacheable_queries/organization";
+import { RequestAutoApproveType } from "../../api/organization-membership";
 import { config } from "../../config";
 import { stringIsAValidUrl } from "../../lib/utils";
+import { r } from "../models";
+import { organizationCache } from "../models/cacheable_queries/organization";
 import { accessRequired } from "./errors";
-import { RequestAutoApproveType } from "../../api/organization-membership";
 
 interface IOrganizationSettings {
   defaulTexterApprovalStatus: string;
@@ -37,11 +37,11 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
 };
 
 const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
-  numbersApiKey: (value: string) => value.slice(0, 4) + "****************"
+  numbersApiKey: (value: string) => `${value.slice(0, 4)}****************`
 };
 
 const SETTINGS_VALIDATORS: {
-  [key in keyof IOrganizationSettings]?: { (value: string): void }
+  [key in keyof IOrganizationSettings]?: { (value: string): void };
 } = {
   numbersApiKey: (value: string) => {
     // User probably made a mistake - no API key will have a *

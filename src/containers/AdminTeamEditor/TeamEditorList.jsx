@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-
+import RaisedButton from "material-ui/RaisedButton";
+import { red500 } from "material-ui/styles/colors";
+import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
+import CreateIcon from "material-ui/svg-icons/content/create";
 import {
   Table,
   TableBody,
@@ -10,10 +10,9 @@ import {
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
-import RaisedButton from "material-ui/RaisedButton";
-import CreateIcon from "material-ui/svg-icons/content/create";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import { red500 } from "material-ui/styles/colors";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 
 const ACTIONS_COLUMN_INDEX = 3;
 
@@ -22,8 +21,9 @@ const styles = {
 };
 
 class TeamEditorList extends Component {
-  createHandleEditTeam = teamId => () => this.props.oEditTeam(teamId);
-  createHandleDeleteTeam = teamId => () => this.props.onDeleteTeam(teamId);
+  createHandleEditTeam = (teamId) => () => this.props.oEditTeam(teamId);
+
+  createHandleDeleteTeam = (teamId) => () => this.props.onDeleteTeam(teamId);
 
   handleCellClick = (rowIndex, columnIndex) => {
     if (columnIndex === ACTIONS_COLUMN_INDEX) return;
@@ -55,9 +55,9 @@ class TeamEditorList extends Component {
             <TableHeaderColumn>Actions</TableHeaderColumn>
           </TableRow>
         </TableHeader>
-        <TableBody displayRowCheckbox={false} showRowHover={true}>
-          {teams.map(team => (
-            <TableRow key={team.id} selectable={true} style={styles.row}>
+        <TableBody displayRowCheckbox={false} showRowHover>
+          {teams.map((team) => (
+            <TableRow key={team.id} selectable style={styles.row}>
               <TableRowColumn>{team.assignmentPriority}</TableRowColumn>
               <TableRowColumn>{team.title}</TableRowColumn>
               <TableRowColumn>{team.description}</TableRowColumn>
@@ -66,7 +66,7 @@ class TeamEditorList extends Component {
                   label="Edit"
                   labelPosition="before"
                   disabled={team.isSystem}
-                  primary={true}
+                  primary
                   icon={<CreateIcon />}
                   style={{ marginRight: 10 }}
                   onClick={this.createHandleEditTeam(team.id)}

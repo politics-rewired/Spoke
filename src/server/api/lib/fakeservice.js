@@ -1,12 +1,13 @@
-import { getLastMessage } from "./message-sending";
 import { r } from "../../models";
+// eslint-disable-next-line import/named
+import { getLastMessage } from "./message-sending";
 
 // This 'fakeservice' allows for fake-sending messages
 // that end up just in the db appropriately and then using sendReply() graphql
 // queries for the reception (rather than a real service)
 
 async function sendMessage(message, _organizationId, _trx) {
-  return await r
+  return r
     .knex("message")
     .update({
       send_status: "SENT",

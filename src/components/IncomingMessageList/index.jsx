@@ -1,25 +1,24 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import { compose } from "react-apollo";
 import gql from "graphql-tag";
-
 import DataTables from "material-ui-datatables";
 import FlatButton from "material-ui/FlatButton";
 import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
 import { loadData } from "../../containers/hoc/with-operations";
-import LoadingIndicator from "../../components/LoadingIndicator";
-import { MESSAGE_STATUSES } from "../../components/IncomingMessageFilter";
+import { MESSAGE_STATUSES } from "../IncomingMessageFilter";
+import LoadingIndicator from "../LoadingIndicator";
 import ConversationPreviewModal from "./ConversationPreviewModal";
 
-const formatContactName = contact => {
+const formatContactName = (contact) => {
   const { firstName, lastName, optOut } = contact;
   const suffix = optOut && optOut.cell ? " ⛔" : "";
   return `${firstName} ${lastName}${suffix}`;
 };
 
-const prepareDataTableData = conversations =>
+const prepareDataTableData = (conversations) =>
   conversations.map((conversation, index) => ({
     campaignTitle: conversation.campaign.title,
     texter: conversation.texter.displayName,
@@ -38,12 +37,12 @@ function prepareSelectedRowsData(conversations, rowsSelected) {
     selection = [];
   }
 
-  const selectedData = selection.map(selectedIndex => {
+  const selectedData = selection.map((selectedIndex) => {
     const conversation = conversations[selectedIndex];
     return {
       campaignId: conversation.campaign.id,
       campaignContactId: conversation.contact.id,
-      messageIds: conversation.contact.messages.map(message => message.id)
+      messageIds: conversation.contact.messages.map((message) => message.id)
     };
   });
 
@@ -66,7 +65,7 @@ export class IncomingMessageList extends Component {
     const { total = 0 } = this.props.conversations.conversations.pageInfo;
 
     if (prevTotal !== total) {
-      this.props.onConversationCountChanged(pageInfo.total);
+      this.props.onConversationCountChanged(total);
     }
   }
 
@@ -164,7 +163,7 @@ export class IncomingMessageList extends Component {
         },
         render: (columnKey, row) => (
           <FlatButton
-            onClick={event => {
+            onClick={(event) => {
               event.stopPropagation();
               this.handleOpenConversation(row.index);
             }}
@@ -198,8 +197,8 @@ export class IncomingMessageList extends Component {
     this.props.onPageSizeChanged(value);
   };
 
-  handleRowsSelected = rowsSelected => {
-    const conversations = this.props.conversations.conversations.conversations;
+  handleRowsSelected = (rowsSelected) => {
+    const { conversations } = this.props.conversations.conversations;
     const [selection, selectedData] = prepareSelectedRowsData(
       conversations,
       rowsSelected
@@ -207,11 +206,11 @@ export class IncomingMessageList extends Component {
     this.props.onConversationSelected(selection, selectedData);
   };
 
-  handleOpenConversation = index =>
+  handleOpenConversation = (index) =>
     this.setState({ activeConversationIndex: index });
 
   handleRequestPreviousConversation = () =>
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { activeConversationIndex: oldIndex } = prevState;
       const newIndex = oldIndex - 1;
       if (newIndex < 0) return;
@@ -219,7 +218,7 @@ export class IncomingMessageList extends Component {
     });
 
   handleRequestNextConversation = () =>
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { activeConversationIndex: oldIndex } = prevState;
       const { conversations } = this.props.conversations.conversations;
       const newIndex = oldIndex + 1;
@@ -351,7 +350,7 @@ const queries = {
         }
       }
     `,
-    options: ownProps => ({
+    options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId,
         cursor: ownProps.cursor,

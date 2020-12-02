@@ -1,6 +1,5 @@
-import React from "react";
 import sortBy from "lodash/sortBy";
-
+import React from "react";
 import Select from "react-select";
 import { ValueType } from "react-select/lib/types";
 
@@ -24,9 +23,9 @@ const mapOption = ({ id, title }: { id: string; title: string }) => ({
   value: id
 });
 
-export const SelectExcludeCampaigns: React.SFC<
-  SelectExcludeCampaignsProps
-> = props => {
+export const SelectExcludeCampaigns: React.SFC<SelectExcludeCampaignsProps> = (
+  props
+) => {
   const { allOtherCampaigns, selectedCampaignIds } = props;
   const value = allOtherCampaigns
     .filter(({ id }) => selectedCampaignIds.includes(id))
@@ -38,8 +37,10 @@ export const SelectExcludeCampaigns: React.SFC<
     if (!Array.isArray(selectedOptions)) {
       return props.onChangeExcludedCamapignIds([]);
     }
-    const selectedCampaignIds = selectedOptions.map(option => option.value);
-    props.onChangeExcludedCamapignIds(selectedCampaignIds);
+    const newSelectedCampaignIds = selectedOptions.map(
+      (option) => option.value
+    );
+    props.onChangeExcludedCamapignIds(newSelectedCampaignIds);
   };
 
   return (
