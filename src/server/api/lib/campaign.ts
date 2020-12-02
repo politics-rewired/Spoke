@@ -38,5 +38,5 @@ export const getCampaigns: DoGetCampaigns = memoizer.memoize(
     const pagerOptions = { first, after };
     return formatPage(query, pagerOptions);
   },
-  cacheOpts.CampaignsList
+  cacheOpts.CampaignsListRelay
 );
