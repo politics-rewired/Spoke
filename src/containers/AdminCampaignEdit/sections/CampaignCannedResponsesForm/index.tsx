@@ -41,6 +41,8 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
       .filter((response) => !cannedResponseIdsToDelete.includes(response.id))
       .concat(cannedResponsesToAdd);
     const editingResponseIds = editedCannedResponses.map(resp => resp.id)
+    
+    // merge editedResponses and newCannedResponses 
     const newResponsesWithEdits = newCannedResponses.reduce((acc: CannedResponse[], response) => {
       if (editingResponseIds.includes(response.id)) {
         const editedResponse = editedCannedResponses.find(resp => resp.id === response.id);
@@ -115,12 +117,16 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     this.setState({ editingResponse: newResponse as CannedResponse })
   }
 
+  // save edits to a canned response
   handleOnSaveResponseEdit = () => {
     const { editingResponse, editedCannedResponses } = this.state;
     const newResponses = uniqBy([editingResponse, ...editedCannedResponses], response => response!.id)
+
+    // cast as CannedRespone[] to avoid obj possibly undefined
     this.setState({ editedCannedResponses: newResponses as CannedResponse[], editingResponse: undefined, shouldShowEditor: false })
   }
 
+  // cancel editing and creating canned responses
   handleOnCancelResponseEdit = () => {
     this.setState({ editingResponse: undefined, shouldShowEditor: false})
   }

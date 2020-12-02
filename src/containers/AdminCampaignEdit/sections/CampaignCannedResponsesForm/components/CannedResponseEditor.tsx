@@ -17,7 +17,8 @@ const styles = StyleSheet.create({
 const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = props => {
   const { customFields, editingResponse, onEditCannedResponse, onSaveResponseEdit, onCancel } = props;
 
-  const wrapOnEditResposne = (text: string) => {
+  // get script value from GSScriptField component
+  const wrapOnEditResponse = (text: string) => {
     onEditCannedResponse(ResponseEditKey.Text, text)
   }
 
@@ -27,7 +28,7 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = props => {
           name="title"
           floatingLabelText="Response title"
           fullWidth
-          value={editingResponse!.title}
+          value={editingResponse.title}
           onChange={(e: any) => onEditCannedResponse(ResponseEditKey.Title, e.target.value)}
         />
         <GSScriptField
@@ -35,8 +36,8 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = props => {
           label="Text"
           fullWidth
           customFields={customFields}
-          value={editingResponse!.text}
-          onChange={wrapOnEditResposne}
+          value={editingResponse.text}
+          onChange={wrapOnEditResponse}
         />
       <div className={css(styles.buttonRow)}>
         <FlatButton
