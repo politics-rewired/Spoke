@@ -5,8 +5,7 @@ import createMemoizer from "memoredis";
 
 import { config } from "../config";
 import logger from "../logger";
-import { createLoaders } from "./models";
-import thinky from "./models/thinky";
+import { createLoaders, r } from "./models";
 import { Memoizer } from "./types";
 
 export interface SpokeDbContext {
@@ -41,8 +40,8 @@ const createHostMemoizer = (_host: string): Memoizer => {
 const createContext = (host: string): SpokeContext => ({
   db: {
     schema: "public",
-    master: thinky.r.knex,
-    reader: thinky.r.reader
+    master: r.knex,
+    reader: r.reader
   },
   memoizer: createHostMemoizer(host)
 });
