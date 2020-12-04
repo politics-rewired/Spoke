@@ -9,9 +9,9 @@ import React from "react";
 import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
+import ScriptLinkWarningDialog from "../ScriptLinkWarningDialog";
 import GSFormField from "./GSFormField";
-import ScriptLinkWarningDialog from '../ScriptLinkWarningDialog';
-import { getWarningContextForScript } from './utils'
+import { getWarningContextForScript } from "./utils";
 
 const styles = {
   dialog: {
@@ -59,29 +59,29 @@ class GSScriptField extends GSFormField {
   wrapSaveScript = () => {
     const { script } = this.state;
     const warningContext = getWarningContextForScript(script);
-    
+
     if (warningContext) {
       this.setState({ scriptWarningOpen: true });
     } else {
       this.handleSaveScript();
     }
-  }
+  };
 
   // confirm draft with links, save script and close editor
   handleConfirmLinkWarning = () => {
-    this.setState({ scriptWarningOpen: false }, () => this.handleSaveScript())
-  }
+    this.setState({ scriptWarningOpen: false }, () => this.handleSaveScript());
+  };
 
   // cancel draft with links, reset script draft
   handleCloseLinkWarning = () => {
-    this.setState({ scriptWarningOpen: false })
-  }
+    this.setState({ scriptWarningOpen: false });
+  };
 
   renderDialog() {
     const { name, customFields } = this.props;
     const { open, scriptWarningOpen, script } = this.state;
     const scriptFields = allScriptFields(customFields);
-    const warningContext = script && getWarningContextForScript(script)
+    const warningContext = script && getWarningContextForScript(script);
 
     return (
       <Dialog
@@ -114,11 +114,11 @@ class GSScriptField extends GSFormField {
           onChange={(val) => this.setState({ script: val })}
         />
         <ScriptLinkWarningDialog
-          open={scriptWarningOpen}  
-          warningContext={warningContext} 
-          handleConfirm={this.handleConfirmLinkWarning} 
+          open={scriptWarningOpen}
+          warningContext={warningContext}
+          handleConfirm={this.handleConfirmLinkWarning}
           handleClose={this.handleCloseLinkWarning}
-        /> 
+        />
       </Dialog>
     );
   }
