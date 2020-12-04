@@ -11,19 +11,6 @@ export interface CannedResponseDialogProps extends CannedResponseEditorProps {
   context: ResponseEditorContext;
 }
 
-const CannedResponseDialog: React.SFC<CannedResponseDialogProps> = (props) => {
-  const { open, context } = props;
-
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  const title = getTitleContext(context);
-
-  return (
-    <Dialog open={open} title={title}>
-      <CannedResponseEditor {...props} />
-    </Dialog>
-  );
-};
-
 const getTitleContext = (context: ResponseEditorContext) => {
   switch (context) {
     case ResponseEditorContext.CreatingResponse:
@@ -33,6 +20,18 @@ const getTitleContext = (context: ResponseEditorContext) => {
     default:
       return "Error: unknown context";
   }
+};
+
+const CannedResponseDialog: React.SFC<CannedResponseDialogProps> = (props) => {
+  const { open, context } = props;
+
+  const title = getTitleContext(context);
+
+  return (
+    <Dialog open={open} title={title}>
+      <CannedResponseEditor {...props} />
+    </Dialog>
+  );
 };
 
 export default CannedResponseDialog;
