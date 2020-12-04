@@ -11,7 +11,7 @@ class GSFormField extends React.Component {
 
 GSFormField.propTypes = {
   floatingLabelText: PropTypes.string,
-  label: PropTypes.string, 
+  label: PropTypes.string
 };
 
 export default GSFormField;
