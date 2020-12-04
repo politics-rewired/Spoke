@@ -1,15 +1,12 @@
-import React from "react";
-import * as yup from "yup";
-import Form from "react-formal";
-import { StyleSheet, css } from "aphrodite";
-
+import { css, StyleSheet } from "aphrodite";
 import FlatButton from "material-ui/FlatButton";
+import React from "react";
+import Form from "react-formal";
+import * as yup from "yup";
 
-import { dataTest } from "../../../../../lib/attributes";
-import GSForm from "../../../../../components/forms/GSForm";
-import { ResponseEditorContext } from "../interfaces";
 import { CannedResponse } from "../../../../../api/canned-response";
-
+import GSForm from "../../../../../components/forms/GSForm";
+import { dataTest } from "../../../../../lib/attributes";
 
 const styles = StyleSheet.create({
   buttonRow: {
@@ -29,14 +26,14 @@ export interface CannedResponseEditorProps {
   onCancel(): void;
 }
 
-const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = props => {
+const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
   const { customFields, editingResponse, onSave, onCancel } = props;
 
   const handleSave = (formValues: any) => {
-     onSave(formValues); 
-  }
+    onSave(formValues);
+  };
 
-  const submitLabel = editingResponse ? 'Edit Response' : 'Add Response'
+  const submitLabel = editingResponse ? "Edit Response" : "Add Response";
 
   return (
     <GSForm schema={modelSchema} onSubmit={handleSave}>

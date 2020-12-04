@@ -44,7 +44,7 @@ export interface LargeListItemProps {
   rightActionMenu?: React.ReactNode;
 }
 
-export const LargeListItem: React.SFC<LargeListItemProps> = props => {
+export const LargeListItem: React.SFC<LargeListItemProps> = (props) => {
   const { primaryText, secondaryText, rightActionMenu } = props;
 
   return (
