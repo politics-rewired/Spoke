@@ -27,12 +27,12 @@ const styles = {
   }
 };
 
-const DEFAULT_PAGE_SIZE = 50;
+// The campaign list uses infinite scrolling now so we fix the page size
+const DEFAULT_PAGE_SIZE = 10;
 
 class AdminCampaignList extends React.Component {
   state = {
     isCreating: false,
-    pageSize: DEFAULT_PAGE_SIZE,
     campaignsFilter: {
       isArchived: false
     },
@@ -69,15 +69,10 @@ class AdminCampaignList extends React.Component {
 
   handleFilterChange = (event, index, value) => {
     this.setState({
-      pageSize: DEFAULT_PAGE_SIZE,
       campaignsFilter: {
         isArchived: value
       }
     });
-  };
-
-  handlePageSizeChange = (event, index, pageSize) => {
-    this.setState({ pageSize });
   };
 
   startReleasingAllReplies = () => {
@@ -126,21 +121,6 @@ class AdminCampaignList extends React.Component {
       });
   };
 
-  renderPageSizeOptions() {
-    return (
-      <DropDownMenu
-        value={this.state.pageSize}
-        onChange={this.handlePageSizeChange}
-      >
-        <MenuItem value={10} primaryText="10" />
-        <MenuItem value={25} primaryText="25" />
-        <MenuItem value={50} primaryText="50" />
-        <MenuItem value={100} primaryText="100" />
-        <MenuItem value={0} primaryText="All" />
-      </DropDownMenu>
-    );
-  }
-
   renderFilters() {
     return (
       <DropDownMenu
@@ -155,7 +135,6 @@ class AdminCampaignList extends React.Component {
 
   render() {
     const {
-      pageSize,
       campaignsFilter,
       releasingAllReplies,
       releasingInProgress
@@ -170,8 +149,6 @@ class AdminCampaignList extends React.Component {
       <div>
         <div style={styles.flexContainer}>
           {this.renderFilters()}
-          Page Size:
-          {this.renderPageSizeOptions()}
           <RaisedButton onClick={this.startReleasingAllReplies} primary>
             Release All Unhandled Replies
           </RaisedButton>
@@ -255,7 +232,7 @@ class AdminCampaignList extends React.Component {
           <CampaignList
             organizationId={organizationId}
             campaignsFilter={campaignsFilter}
-            pageSize={pageSize}
+            pageSize={DEFAULT_PAGE_SIZE}
             adminPerms={adminPerms}
           />
         )}
