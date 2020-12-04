@@ -39,16 +39,22 @@ export default class GSForm extends React.Component {
 
     if (children) {
       let model = null;
-      children.map(child => {
-        const { context, value, name } = child.props;
-        if (context === 'responseEditor' && value) {
-          model = { ...model, [name]: value }
+      children.map((child) => {
+        if (child) {
+          const { context, value, name } = child.props;
+          if (context === "responseEditor" && value) {
+            model = { ...model, [name]: value };
+          }
         }
-      })
-      this.setState({ model })
+        return model;
+      });
+      this.setState({ model });
     }
-
   }
+
+  submit = () => {
+    this.refs.form.submit();
+  };
 
   handleFormError(err) {
     if (err.message) {
@@ -60,11 +66,7 @@ export default class GSForm extends React.Component {
           "Oops! Your form submission did not work. Contact your administrator."
       });
     }
-  };
-
-  submit = () => {
-    this.refs.form.submit();
-  };
+  }
 
   renderChildren(children) {
     return React.Children.map(children, (child) => {
