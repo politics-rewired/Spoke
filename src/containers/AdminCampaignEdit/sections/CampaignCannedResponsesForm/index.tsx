@@ -3,6 +3,8 @@ import gql from "graphql-tag";
 import { compose } from "recompose";
 import isEqual from "lodash/isEqual";
 import uniqBy from "lodash/uniqBy";
+import { ApolloQueryResult } from "apollo-client/core/types";
+
 
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
@@ -19,10 +21,40 @@ import CannedResponseRow from "./components/CannedResponseRow";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
   asSection,
+  FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
 import CannedResponseDialog from "./components/CannedResponseDialog";
-import { Values, State, InnerProps, ResponseEditorContext, ResponseEditKey } from "./interfaces";
+import { ResponseEditorContext } from "./interfaces";
+
+interface Values {
+  cannedResponses: CannedResponse[];
+}
+
+interface HocProps {
+  mutations: {
+    editCampaign(payload: Values): ApolloQueryResult<any>;
+  };
+  data: {
+    campaign: {
+      id: string;
+      cannedResponses: CannedResponse[];
+      isStarted: boolean;
+      customFields: string[];
+    };
+  };
+}
+
+interface InnerProps extends FullComponentProps, HocProps {}
+
+interface State {
+  cannedResponsesToAdd: CannedResponse[];
+  cannedResponseIdsToDelete: string[];
+  editedCannedResponses: CannedResponse[];
+  editingResponse?: CannedResponse;
+  isWorking: boolean;
+  shouldShowEditor: boolean;
+}
 
 
 class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
@@ -38,23 +70,15 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const { cannedResponsesToAdd, cannedResponseIdsToDelete, editedCannedResponses } = this.state;
     const { cannedResponses } = this.props.data.campaign;
     const newCannedResponses = cannedResponses
-      .filter((response) => !cannedResponseIdsToDelete.includes(response.id))
-      .concat(cannedResponsesToAdd);
-    const editingResponseIds = editedCannedResponses.map(resp => resp.id)
-    
-    // merge editedResponses and newCannedResponses 
-    const newResponsesWithEdits = newCannedResponses.reduce((acc: CannedResponse[], response) => {
-      if (editingResponseIds.includes(response.id)) {
-        const editedResponse = editedCannedResponses.find(resp => resp.id === response.id);
-        acc.push(editedResponse!)
-      } else {
-        acc.push(response)
-      }
-      return acc
-    }, [])
+      .filter(response => !cannedResponseIdsToDelete.includes(response.id))
+      .concat(cannedResponsesToAdd)
+      .map((response) => {
+      const editedResponse = editedCannedResponses.find(({ id }) => id === response.id);
+        return editedResponse || response;
+      });
 
-    const didChange = !isEqual(cannedResponses, newResponsesWithEdits);
-    return { cannedResponses: newResponsesWithEdits, didChange };
+    const didChange = !isEqual(cannedResponses, newCannedResponses);
+    return { cannedResponses: newCannedResponses, didChange };
   };
 
   handleSubmit = async () => {
@@ -102,28 +126,30 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     });
   };
 
-  handleToggleResponseDialog = (responseId: string = "") => () => {
+  makeHandleToggleResponseDialog = (responseId: string = "") => () => {
     const { cannedResponses } = this.pendingCannedResponses();
     const editingResponse = cannedResponses.find(res => res.id === responseId)
     this.setState({ shouldShowEditor: true, editingResponse });
     
   }
 
-  handleOnEditResponse = (key: ResponseEditKey, value: string) => {
+  handleOnEditResponse = <K extends keyof CannedResponse>(key: K, value: CannedResponse[K]) => {
     const { editingResponse } = this.state
+    if (editingResponse === undefined) return;  
     const newResponse = {...editingResponse, [key]: value}
 
-    // cast as CannedResponse to avoid {} missing properties id, text... 
-    this.setState({ editingResponse: newResponse as CannedResponse })
+    this.setState({ editingResponse: newResponse })
   }
 
   // save edits to a canned response
-  handleOnSaveResponseEdit = () => {
+  handleOnSaveResponseEdit = (formValues: any) => {
     const { editingResponse, editedCannedResponses } = this.state;
-    const newResponses = uniqBy([editingResponse, ...editedCannedResponses], response => response!.id)
+    if (editingResponse === undefined) return;  
 
-    // cast as CannedRespone[] to avoid obj possibly undefined
-    this.setState({ editedCannedResponses: newResponses as CannedResponse[], editingResponse: undefined, shouldShowEditor: false })
+    const editedResponse = {...editingResponse, ...formValues}
+    const newResponses = uniqBy([editedResponse, ...editedCannedResponses], response => response.id)
+
+    this.setState({ editedCannedResponses: newResponses, editingResponse: undefined, shouldShowEditor: false })
   }
 
   // cancel editing and creating canned responses
@@ -140,6 +166,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     } = this.props;
 
     const context = editingResponse ? ResponseEditorContext.EditingResponse : ResponseEditorContext.CreatingResponse;
+    const onSave = editingResponse ? this.handleOnSaveResponseEdit : this.handleOnSaveResponse
 
     return (
       <CannedResponseDialog
@@ -148,9 +175,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         customFields={customFields}
         editingResponse={editingResponse!}
         onCancel={this.handleOnCancelResponseEdit}
-        onSaveCannedResponse={this.handleOnSaveResponse}
-        onEditCannedResponse={this.handleOnEditResponse}
-        onSaveResponseEdit={this.handleOnSaveResponseEdit}
+        onSave={onSave}
       />
     )
   }
@@ -182,7 +207,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
                 key={cannedResponse.id}
                 cannedResponse={cannedResponse}
                 onDelete={this.createHandleOnDelete(cannedResponse.id)}
-                onToggleResponseEditor={this.handleToggleResponseDialog(cannedResponse.id)}
+                onToggleResponseEditor={this.makeHandleToggleResponseDialog(cannedResponse.id)}
               />
             ))}
           </LargeList>
@@ -190,15 +215,14 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
           <p>No canned responses</p>
         )}
         <hr />
-        {shouldShowEditor ? (
-          this.renderCannedResponseDialog()
-        ) : (
+        {this.renderCannedResponseDialog()}
+        {!shouldShowEditor && (
           <FlatButton
             {...dataTest("newCannedResponse")}
             secondary
             label="Add new canned response"
             icon={<CreateIcon />}
-            onClick={this.handleToggleResponseDialog()}
+            onClick={this.makeHandleToggleResponseDialog()}
           />
         )}
         <br />

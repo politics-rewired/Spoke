@@ -2,25 +2,22 @@ import React from "react";
 
 import Dialog from "material-ui/Dialog";
 
-import CreateCannedResponseForm from "./CreateCannedResponseForm";
-import CannedResponseEditor from "./CannedResponseEditor";
-import { ResponseEditorContext, CannedResponseDialogProps  } from "../interfaces";
+import CannedResponseEditor, { CannedResponseEditorProps } from "./CannedResponseEditor";
+import { ResponseEditorContext  } from "../interfaces";
+
+export interface CannedResponseDialogProps extends CannedResponseEditorProps {
+  open: boolean;
+  context: ResponseEditorContext;
+}
 
 const CannedResponseDialog: React.SFC<CannedResponseDialogProps> = props => {
   const { open, context } = props;
 
   const title = getTitleContext(context)
 
-  const components = {
-    [ResponseEditorContext.CreatingResponse]: <CreateCannedResponseForm {...props} />,
-    [ResponseEditorContext.EditingResponse]: <CannedResponseEditor {...props} />
-  }
-
-  const Component = components[context]
-
   return (
     <Dialog open={open} title={title} >
-      {Component}
+      <CannedResponseEditor {...props} />
     </Dialog>
   )
 };
@@ -32,7 +29,7 @@ const getTitleContext = (context: ResponseEditorContext) => {
     case ResponseEditorContext.EditingResponse:
       return 'Edit Canned Response';
     default:
-      return <p>Error: unknown context</p>
+      return "Error: unknown context"
   }
 } 
 

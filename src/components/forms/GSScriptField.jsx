@@ -56,6 +56,7 @@ class GSScriptField extends GSFormField {
     const { name, customFields } = this.props;
     const { open } = this.state;
     const scriptFields = allScriptFields(customFields);
+
     return (
       <Dialog
         style={styles.dialog}
@@ -102,8 +103,10 @@ class GSScriptField extends GSFormField {
       "value",
       "data-test",
       "onBlur",
-      "onChange"
+      "onChange",
+      "context"
     ]);
+
     return (
       <div>
         <TextField
@@ -128,6 +131,7 @@ GSScriptField.propTypes = {
   className: PropTypes.string,
   hintText: PropTypes.string,
   label: PropTypes.string,
+  context: PropTypes.string,
   multiLine: PropTypes.bool,
   fullWidth: PropTypes.bool,
   onChange: PropTypes.func.isRequired,

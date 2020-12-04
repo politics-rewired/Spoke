@@ -32,7 +32,25 @@ export default class GSForm extends React.Component {
     globalErrorMessage: null
   };
 
-  handleFormError = (err) => {
+  // to display title and script as default values in CannedResponseEditor,
+  // state.model must be mapped to children.props.values on mount
+  componentWillMount() {
+    const { children } = this.props;
+
+    if (children) {
+      let model = null;
+      children.map(child => {
+        const { context, value, name } = child.props;
+        if (context === 'responseEditor' && value) {
+          model = { ...model, [name]: value }
+        }
+      })
+      this.setState({ model })
+    }
+
+  }
+
+  handleFormError(err) {
     if (err.message) {
       this.setState({ globalErrorMessage: err.message });
     } else {
