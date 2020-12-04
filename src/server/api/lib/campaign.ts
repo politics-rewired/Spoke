@@ -1,4 +1,6 @@
 /* eslint-disable import/prefer-default-export */
+import isNil from "lodash/isNil";
+
 import { Campaign, CampaignsFilter } from "../../../api/campaign";
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import { cacheOpts, memoizer } from "../../memoredis";
@@ -31,8 +33,8 @@ export const getCampaigns: DoGetCampaigns = memoizer.memoize(
       query.where({ id: campaignId });
     }
 
-    if (isArchived) {
-      query.where({ is_archived: true });
+    if (!isNil(isArchived)) {
+      query.where({ is_archived: isArchived });
     }
 
     const pagerOptions = { first, after };
