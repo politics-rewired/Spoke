@@ -4,6 +4,7 @@ import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
 
+import { CannedResponse } from "../../../../../api/canned-response";
 import GSForm from "../../../../../components/forms/GSForm";
 import { dataTest } from "../../../../../lib/attributes";
 
@@ -18,47 +19,55 @@ const modelSchema = yup.object({
   text: yup.string().required()
 });
 
-interface Props {
-  onCancel(): void;
-  onSaveCannedResponse(...args: any[]): void;
+export interface CannedResponseEditorProps {
+  editingResponse: CannedResponse;
   customFields: string[];
+  onSave(...args: any[]): void;
+  onCancel(): void;
 }
 
-const CreateCannedResponseForm: React.SFC<Props> = (props) => {
-  const handleSave = (formValues: any) =>
-    props.onSaveCannedResponse(formValues);
+const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
+  const { customFields, editingResponse, onSave, onCancel } = props;
 
-  const { customFields } = props;
+  const handleSave = (formValues: any) => {
+    onSave(formValues);
+  };
+
+  const submitLabel = editingResponse ? "Edit Response" : "Add Response";
+
   return (
     <GSForm schema={modelSchema} onSubmit={handleSave}>
       <Form.Field
         {...dataTest("title")}
         name="title"
-        autoFocus
+        context="responseEditor"
         fullWidth
         label="Title"
+        value={editingResponse?.title}
       />
       <Form.Field
         {...dataTest("editorResponse")}
         customFields={customFields}
         name="text"
+        context="responseEditor"
         type="script"
         label="Script"
         multiLine
         fullWidth
+        value={editingResponse?.text}
       />
       <div className={css(styles.buttonRow)}>
         <Form.Button
           {...dataTest("addResponse")}
           type="submit"
-          label="Add Response"
+          label={submitLabel}
           style={{
             display: "inline-block"
           }}
         />
         <FlatButton
           label="Cancel"
-          onClick={props.onCancel}
+          onClick={onCancel}
           style={{
             marginLeft: 5,
             display: "inline-block"
@@ -69,4 +78,4 @@ const CreateCannedResponseForm: React.SFC<Props> = (props) => {
   );
 };
 
-export default CreateCannedResponseForm;
+export default CannedResponseEditor;

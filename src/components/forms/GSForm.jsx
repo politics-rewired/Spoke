@@ -32,7 +32,31 @@ export default class GSForm extends React.Component {
     globalErrorMessage: null
   };
 
-  handleFormError = (err) => {
+  // to display title and script as default values in CannedResponseEditor,
+  // state.model must be mapped to children.props.values on mount
+  componentWillMount() {
+    const { children } = this.props;
+
+    if (children) {
+      let model = null;
+      children.map((child) => {
+        if (child) {
+          const { context, value, name } = child.props;
+          if (context === "responseEditor" && value) {
+            model = { ...model, [name]: value };
+          }
+        }
+        return model;
+      });
+      this.setState({ model });
+    }
+  }
+
+  submit = () => {
+    this.refs.form.submit();
+  };
+
+  handleFormError(err) {
     if (err.message) {
       this.setState({ globalErrorMessage: err.message });
     } else {
@@ -42,11 +66,7 @@ export default class GSForm extends React.Component {
           "Oops! Your form submission did not work. Contact your administrator."
       });
     }
-  };
-
-  submit = () => {
-    this.refs.form.submit();
-  };
+  }
 
   renderChildren(children) {
     return React.Children.map(children, (child) => {
