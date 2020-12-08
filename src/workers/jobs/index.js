@@ -15,7 +15,6 @@ import {
 } from "../../server/api/lib/message-sending";
 import serviceMap from "../../server/api/lib/services";
 import { eventBus, EventType } from "../../server/event-bus";
-import { makeNumbersClient } from "../../server/lib/assemble-numbers";
 import { cacheableData, datawarehouse, r } from "../../server/models";
 import {
   Notifications,
@@ -324,97 +323,6 @@ export async function uploadContacts(job) {
   }
 
   await cacheableData.campaign.reload(campaignId);
-}
-
-export async function filterLandlines(job) {
-  const LRN_BATCH_SIZE = 1000;
-
-  const { campaign_id } = job;
-
-  const organization = await r
-    .knex("organization")
-    .join("campaign", "campaign.organization_id", "=", "organization.id")
-    .where({ "campaign.id": job.campaign_id })
-    .first("features");
-
-  const orgFeatures = JSON.parse(organization.features || "{}");
-
-  const { numbersApiKey } = orgFeatures;
-
-  if (!numbersApiKey) {
-    throw new Error("Cannot filter landlines - no numbers api key configured");
-  }
-
-  const numbersClient = makeNumbersClient({ apiKey: numbersApiKey });
-  const numbersRequest = await numbersClient.lookup.createRequest();
-
-  let highestId = 0;
-  let nextBatch = [];
-
-  do {
-    nextBatch = await r
-      .knex("campaign_contact")
-      .where({ campaign_id })
-      .where("id", ">", highestId)
-      .orderBy("id", "asc")
-      .select("id", "cell")
-      .limit(LRN_BATCH_SIZE);
-
-    if (nextBatch.length > 0) {
-      highestId = nextBatch[nextBatch.length - 1].id;
-      await numbersRequest.addPhoneNumbers(nextBatch.map((cc) => cc.cell));
-    }
-  } while (nextBatch.length > 0);
-
-  await numbersRequest.close();
-
-  await numbersRequest.waitUntilDone({
-    onProgressUpdate: async (percentComplete) => {
-      await r
-        .knex("job_request")
-        .where({ id: job.id })
-        .update({
-          status: Math.round(percentComplete * 100),
-          updated_at: r.knex.fn.now()
-        });
-    }
-  });
-
-  let landlinesFilteredOut = 0;
-
-  const deleteNumbers = async (numbers) => {
-    landlinesFilteredOut += numbers.length;
-    await r
-      .knex("campaign_contact")
-      .where("campaign_id", campaign_id)
-      .whereIn(
-        "cell",
-        numbers.map((n) => n.phoneNumber)
-      )
-      .delete();
-  };
-
-  await numbersRequest.landlines.eachPage({
-    onPage: deleteNumbers
-  });
-
-  await numbersRequest.invalids.eachPage({
-    onPage: deleteNumbers
-  });
-
-  // Setting result_message marks the job as complete
-  await Promise.all([
-    r
-      .knex("job_request")
-      .where({ id: job.id })
-      .update({
-        result_message: `${landlinesFilteredOut} contacts removed because they were landlines or invalid`
-      }),
-    r
-      .knex("campaign")
-      .update({ landlines_filtered: true })
-      .where({ id: campaign_id })
-  ]);
 }
 
 export async function loadContactsFromDataWarehouseFragment(jobEvent) {
