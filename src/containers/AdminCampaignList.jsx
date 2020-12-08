@@ -27,14 +27,12 @@ const styles = {
   }
 };
 
-const DEFAULT_PAGE_SIZE = 50;
+// The campaign list uses infinite scrolling now so we fix the page size
+const DEFAULT_PAGE_SIZE = 10;
 
 class AdminCampaignList extends React.Component {
   state = {
     isCreating: false,
-    pageSize: DEFAULT_PAGE_SIZE,
-    currentPageIndex: 0,
-    totalResults: undefined,
     campaignsFilter: {
       isArchived: false
     },
@@ -71,23 +69,10 @@ class AdminCampaignList extends React.Component {
 
   handleFilterChange = (event, index, value) => {
     this.setState({
-      currentPageIndex: 0,
-      pageSize: DEFAULT_PAGE_SIZE,
       campaignsFilter: {
         isArchived: value
       }
     });
-  };
-
-  handlePageSizeChange = (event, index, pageSize) => {
-    this.setState({
-      currentPageIndex: 0,
-      pageSize
-    });
-  };
-
-  onCurrentPageChange = (event, index, currentPageIndex) => {
-    this.setState({ currentPageIndex });
   };
 
   startReleasingAllReplies = () => {
@@ -136,48 +121,6 @@ class AdminCampaignList extends React.Component {
       });
   };
 
-  renderPageSizeOptions() {
-    return (
-      <DropDownMenu
-        value={this.state.pageSize}
-        onChange={this.handlePageSizeChange}
-      >
-        <MenuItem value={10} primaryText="10" />
-        <MenuItem value={25} primaryText="25" />
-        <MenuItem value={50} primaryText="50" />
-        <MenuItem value={100} primaryText="100" />
-        <MenuItem value={0} primaryText="All" />
-      </DropDownMenu>
-    );
-  }
-
-  renderPagesDropdown() {
-    const { pageSize, currentPageIndex, totalResults } = this.state;
-
-    const didFetchAll = pageSize === 0;
-    const hasResults = totalResults && totalResults > 0;
-    if (didFetchAll || !hasResults) {
-      return "N/A";
-    }
-
-    const pageCount = Math.ceil(totalResults / pageSize);
-    const pageArray = [...Array(pageCount)].map((_, i) => i);
-    return (
-      <DropDownMenu
-        value={currentPageIndex}
-        onChange={this.onCurrentPageChange}
-      >
-        {pageArray.map((pageIndex) => (
-          <MenuItem
-            key={pageIndex}
-            value={pageIndex}
-            primaryText={pageIndex + 1}
-          />
-        ))}
-      </DropDownMenu>
-    );
-  }
-
   renderFilters() {
     return (
       <DropDownMenu
@@ -192,8 +135,6 @@ class AdminCampaignList extends React.Component {
 
   render() {
     const {
-      pageSize,
-      currentPageIndex,
       campaignsFilter,
       releasingAllReplies,
       releasingInProgress
@@ -208,9 +149,6 @@ class AdminCampaignList extends React.Component {
       <div>
         <div style={styles.flexContainer}>
           {this.renderFilters()}
-          Page Size:
-          {this.renderPageSizeOptions()}
-          Page: {this.renderPagesDropdown()}
           <RaisedButton onClick={this.startReleasingAllReplies} primary>
             Release All Unhandled Replies
           </RaisedButton>
@@ -294,11 +232,7 @@ class AdminCampaignList extends React.Component {
           <CampaignList
             organizationId={organizationId}
             campaignsFilter={campaignsFilter}
-            pageSize={pageSize}
-            resultCountDidUpdate={(totalResults) =>
-              this.setState({ totalResults })
-            }
-            currentPageIndex={currentPageIndex}
+            pageSize={DEFAULT_PAGE_SIZE}
             adminPerms={adminPerms}
           />
         )}

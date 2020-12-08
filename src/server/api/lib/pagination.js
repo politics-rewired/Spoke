@@ -47,7 +47,7 @@ export const formatPage = async (query, options) => {
   }));
   const pageInfo = {
     totalCount,
-    hasNextPage: first && results.length > first,
+    hasNextPage: first ? results.length > first : false,
     // Backward pagination not yet supported
     hasPreviousPage: false,
     startCursor: edges.length > 0 ? edges[0].cursor : null,

@@ -12,6 +12,7 @@ import {
 import { getCampaigns } from "./campaign";
 import { accessRequired } from "./errors";
 import { infoHasQueryPath } from "./lib/apollo";
+import { getCampaigns as getCampaignsRelay } from "./lib/campaign";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
 import { buildUserOrganizationQuery } from "./user";
@@ -38,6 +39,15 @@ export const resolvers = {
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       return getCampaigns(organization.id, cursor, campaignsFilter);
+    },
+    campaignsRelay: async (
+      organization,
+      { first, after, filter },
+      { user }
+    ) => {
+      await accessRequired(user, organization.id, "SUPERVOLUNTEER");
+      filter.organizationId = organization.id;
+      return getCampaignsRelay({ first, after, filter });
     },
     uuid: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");

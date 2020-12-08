@@ -19,17 +19,22 @@ const uploadLink = createUploadLink({
   credentials: "same-origin"
 });
 
-const errorLink = onError(
-  ({ networkError = {}, graphQLErrors: _gqlErrors }) => {
-    if (networkError.statusCode === 401) {
-      window.location = `/login?nextUrl=${window.location.pathname}`;
-    } else if (networkError.statusCode === 403) {
-      window.location = "/";
-    } else if (networkError.statusCode === 404) {
-      window.location = "/404";
+const errorLink = onError(({ networkError }) => {
+  if (networkError && "statusCode" in networkError) {
+    switch (networkError.statusCode) {
+      case 401:
+        window.location.href = `/login?nextUrl=${window.location.pathname}`;
+        break;
+      case 403:
+        window.location.href = "/";
+        break;
+      case 404:
+        window.location.href = "/404";
+        break;
+      // no default
     }
   }
-);
+});
 
 const checkVersionLink = new ApolloLink((operation, forward) => {
   return forward(operation).map((data) => {
@@ -68,7 +73,7 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 const cache = new InMemoryCache({
   addTypename: true,
   fragmentMatcher,
-  dataIdFromObject: (object) => {
+  dataIdFromObject: (object: any) => {
     switch (object.__typename) {
       case "ExternalList":
         return `${object.systemId}:${object.externalId}`;

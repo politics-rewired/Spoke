@@ -4,6 +4,8 @@ interface Window {
   ALTERNATE_LOGIN_URL?: string;
   SUPPRESS_SELF_INVITE?: boolean;
   ASSIGNMENT_SHOW_REQUESTS_AVAILABLE: boolean;
+  GRAPHQL_URL: string;
+  SPOKE_VERSION: string;
 }
 
 // This is a workaround while we are transitioning from JS to TS

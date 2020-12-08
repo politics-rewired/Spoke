@@ -43,6 +43,7 @@ const cacheOpts = {
   CampaignOptOutsCount: ["campaign-opt-outs-count", ONE_MINUTE],
   CampaignTeams: ["campaign-teams", ONE_WEEK],
   CampaignsList: ["campaigns-list", ONE_WEEK],
+  CampaignsListRelay: ["campaigns-list-relay", ONE_WEEK],
   CampaignOne: ["campaign-one", ONE_WEEK],
   CampaignInteractionSteps: ["campaign-interaction-steps", THIRTY_SECONDS],
   CampaignCannedResponses: ["campaign-canned-responses", THIRTY_SECONDS],
