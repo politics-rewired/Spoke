@@ -1,23 +1,55 @@
+import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import Form from "react-formal";
 import * as yup from "yup";
 
+import { Conversation } from "../../../api/conversations";
+import { Message } from "../../../api/message";
+import { MessageInput } from "../../../api/types";
 import { loadData } from "../../../containers/hoc/with-operations";
+import { MutationMap } from "../../../network/types";
 import GSForm from "../../forms/GSForm";
 import SendButton from "../../SendButton";
 
-class MessageResponse extends Component {
-  state = {
+interface MessageFormValue {
+  messageText: string;
+}
+
+interface InnerProps {
+  conversation: Conversation;
+  messagesChanged(messages: Message[]): Promise<void> | void;
+}
+
+interface HocProps {
+  mutations: {
+    sendMessage(
+      message: MessageInput,
+      campaignContactId: string
+    ): ApolloQueryResult<any>;
+  };
+}
+
+interface Props extends InnerProps, HocProps {}
+
+interface State {
+  messageText: string;
+  isSending: boolean;
+  sendError: string;
+}
+
+class MessageResponse extends Component<Props, State> {
+  state: State = {
     messageText: "",
     isSending: false,
     sendError: ""
   };
 
-  createMessageToContact = (text) => {
+  messageForm: HTMLFormElement | null = null;
+
+  createMessageToContact = (text: string) => {
     const { contact, texter } = this.props.conversation;
 
     return {
@@ -28,9 +60,10 @@ class MessageResponse extends Component {
     };
   };
 
-  handleMessageFormChange = ({ messageText }) => this.setState({ messageText });
+  handleMessageFormChange = ({ messageText }: MessageFormValue) =>
+    this.setState({ messageText });
 
-  handleMessageFormSubmit = async ({ messageText }) => {
+  handleMessageFormSubmit = async ({ messageText }: MessageFormValue) => {
     const { contact } = this.props.conversation;
     const message = this.createMessageToContact(messageText);
     if (this.state.isSending) {
@@ -38,7 +71,6 @@ class MessageResponse extends Component {
     }
     this.setState({ isSending: true });
 
-    const finalState = { isSending: false };
     try {
       const response = await this.props.mutations.sendMessage(
         message,
@@ -46,17 +78,21 @@ class MessageResponse extends Component {
       );
       const { messages } = response.data.sendMessage;
       this.props.messagesChanged(messages);
-      finalState.messageText = "";
+      this.setState({ messageText: "" });
     } catch (e) {
-      finalState.sendError = e.message;
+      this.setState({ sendError: e.message });
+    } finally {
+      this.setState({ isSending: false });
     }
-
-    this.setState(finalState);
   };
 
   handleCloseErrorDialog = () => this.setState({ sendError: "" });
 
-  handleClickSendMessageButton = () => this.refs.messageForm.submit();
+  handleClickSendMessageButton = () => {
+    if (this.messageForm) {
+      this.messageForm.submit();
+    }
+  };
 
   render() {
     const messageSchema = yup.object({
@@ -81,7 +117,9 @@ class MessageResponse extends Component {
     return (
       <div>
         <GSForm
-          ref="messageForm"
+          ref={(ref: HTMLFormElement) => {
+            this.messageForm = ref;
+          }}
           schema={messageSchema}
           value={{ messageText: this.state.messageText }}
           onSubmit={this.handleMessageFormSubmit}
@@ -118,16 +156,8 @@ class MessageResponse extends Component {
   }
 }
 
-MessageResponse.propTypes = {
-  conversation: PropTypes.object.isRequired,
-  messagesChanged: PropTypes.func.isRequired,
-  mutations: PropTypes.shape({
-    sendMessage: PropTypes.func.isRequired
-  }).isRequired
-};
-
-const mutations = {
-  sendMessage: () => (message, campaignContactId) => ({
+const mutations: MutationMap<InnerProps> = {
+  sendMessage: () => (message: MessageInput, campaignContactId: string) => ({
     mutation: gql`
       mutation sendMessage(
         $message: MessageInput!

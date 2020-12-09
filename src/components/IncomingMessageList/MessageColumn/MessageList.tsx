@@ -1,12 +1,13 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import moment from "moment-timezone";
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 
+import { Message } from "../../../api/message";
 import { loadData } from "../../../containers/hoc/with-operations";
+import { QueryMap } from "../../../network/types";
 
-const styles = StyleSheet.create({
+const styles: Record<string, React.CSSProperties> = StyleSheet.create({
   conversationRow: {
     color: "white",
     padding: "10px",
@@ -15,21 +16,29 @@ const styles = StyleSheet.create({
   }
 });
 
-class MessageList extends Component {
+interface Props {
+  organizationId: string;
+  userNames: any;
+  messages: Message[];
+}
+
+class MessageList extends Component<Props> {
+  messageWindow: HTMLDivElement | null = null;
+
   componentDidMount() {
-    if (this.refs.messageWindow) {
-      this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight);
+    if (this.messageWindow) {
+      this.messageWindow.scrollTo(0, this.messageWindow.scrollHeight);
     }
   }
 
   componentDidUpdate() {
-    if (this.refs.messageWindow) {
-      this.refs.messageWindow.scrollTo(0, this.refs.messageWindow.scrollHeight);
+    if (this.messageWindow) {
+      this.messageWindow.scrollTo(0, this.messageWindow.scrollHeight);
     }
   }
 
   render() {
-    const messageContainerStyle = {
+    const messageContainerStyle: React.CSSProperties = {
       flex: "1 1 auto",
       height: "0px",
       overflowY: "scroll"
@@ -53,7 +62,12 @@ class MessageList extends Component {
     }
 
     return (
-      <div ref="messageWindow" style={messageContainerStyle}>
+      <div
+        ref={(ref) => {
+          this.messageWindow = ref;
+        }}
+        style={messageContainerStyle}
+      >
         {this.props.messages.map((message) => {
           const { isFromContact } = message;
           const containerStyle = {
@@ -72,7 +86,7 @@ class MessageList extends Component {
           };
 
           const sender = this.props.userNames.peopleByUserIds.users.filter(
-            (user) => user.id === message.userId
+            (user: any) => user.id === message.userId
           )[0];
           const senderName = sender ? sender.displayName : "Unknown";
 
@@ -100,12 +114,7 @@ class MessageList extends Component {
   }
 }
 
-MessageList.propTypes = {
-  userNames: PropTypes.object.isRequired,
-  messages: PropTypes.arrayOf(PropTypes.object).isRequired
-};
-
-const queries = {
+const queries: QueryMap<Props> = {
   userNames: {
     query: gql`
       query getPeopleWithIds($userIds: [String!], $organizationId: String!) {
