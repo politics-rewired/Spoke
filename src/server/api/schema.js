@@ -1173,7 +1173,8 @@ const rootMutations = {
         const oldCampaignId = campaign.id;
 
         const interactions = await trx("interaction_step").where({
-          campaign_id: oldCampaignId
+          campaign_id: oldCampaignId,
+          is_deleted: false
         });
 
         const interactionsArr = [];
