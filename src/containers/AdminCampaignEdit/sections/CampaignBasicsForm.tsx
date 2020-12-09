@@ -2,6 +2,7 @@ import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
 import ColorPicker from "material-ui-color-picker";
+import RaisedButton from "material-ui/RaisedButton";
 import moment from "moment";
 import React from "react";
 import Form from "react-formal";
@@ -114,58 +115,59 @@ class CampaignBasicsForm extends React.Component<
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
     return (
-      <GSForm
-        schema={schemaForIsStarted(isStarted)}
-        value={value}
-        onChange={this.handleChange}
-        onSubmit={this.handleSubmit}
-      >
-        <CampaignFormSectionHeading title="What's your campaign about?" />
-        <Form.Field
-          {...dataTest("title")}
-          name="title"
-          label="Title"
-          hintText="e.g. Election Day 2016"
-          fullWidth
-        />
-        <Form.Field
-          {...dataTest("description")}
-          name="description"
-          label="Description"
-          hintText="Get out the vote"
-          fullWidth
-        />
-        <Form.Field
-          {...dataTest("dueBy")}
-          name="dueBy"
-          label="Due date"
-          type="date"
-          locale="en-US"
-          shouldDisableDate={(date: Date) => moment(date).diff(moment()) < 0}
-          autoOk
-          fullWidth
-          utcOffset={0}
-        />
-        <Form.Field name="introHtml" label="Intro HTML" multiLine fullWidth />
-        <Form.Field
-          name="logoImageUrl"
-          label="Logo Image URL"
-          hintText="https://www.mysite.com/images/logo.png"
-          fullWidth
-        />
-        <p>Primary color</p>
-        <Form.Field
-          name="primaryColor"
-          label="Primary color"
-          defaultValue={value.primaryColor || "#ffffff"}
-          type={ColorPicker}
-        />
-        <Form.Button
-          type="submit"
+      <div>
+        <GSForm
+          schema={schemaForIsStarted(isStarted)}
+          value={value}
+          onChange={this.handleChange}
+        >
+          <CampaignFormSectionHeading title="What's your campaign about?" />
+          <Form.Field
+            {...dataTest("title")}
+            name="title"
+            label="Title"
+            hintText="e.g. Election Day 2016"
+            fullWidth
+          />
+          <Form.Field
+            {...dataTest("description")}
+            name="description"
+            label="Description"
+            hintText="Get out the vote"
+            fullWidth
+          />
+          <Form.Field
+            {...dataTest("dueBy")}
+            name="dueBy"
+            label="Due date"
+            type="date"
+            locale="en-US"
+            shouldDisableDate={(date: Date) => moment(date).diff(moment()) < 0}
+            autoOk
+            fullWidth
+            utcOffset={0}
+          />
+          <Form.Field name="introHtml" label="Intro HTML" multiLine fullWidth />
+          <Form.Field
+            name="logoImageUrl"
+            label="Logo Image URL"
+            hintText="https://www.mysite.com/images/logo.png"
+            fullWidth
+          />
+          <p>Primary color</p>
+          <Form.Field
+            name="primaryColor"
+            label="Primary color"
+            defaultValue={value.primaryColor || "#ffffff"}
+            type={ColorPicker}
+          />
+        </GSForm>
+        <RaisedButton
           label={finalSaveLabel}
           disabled={isSaveDisabled}
+          onClick={this.handleSubmit}
         />
-      </GSForm>
+      </div>
     );
   }
 }

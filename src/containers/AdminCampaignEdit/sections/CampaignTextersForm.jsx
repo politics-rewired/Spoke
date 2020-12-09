@@ -105,6 +105,10 @@ const inlineStyles = {
   splitAssignmentToggle: {
     width: "auto",
     marginLeft: "auto"
+  },
+  button: {
+    display: "inline-block",
+    marginTop: 15
   }
 };
 
@@ -479,7 +483,7 @@ export default class CampaignTextersForm extends React.Component {
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
 
   render() {
-    const { isOverdue } = this.props;
+    const { isOverdue, saveLabel, saveDisabled } = this.props;
 
     const assignedContacts = this.formValues().texters.reduce(
       (prev, texter) => prev + texter.assignment.contactsCount,
@@ -522,7 +526,6 @@ export default class CampaignTextersForm extends React.Component {
           schema={this.formSchema}
           value={this.formValues()}
           onChange={this.onChange}
-          onSubmit={this.props.onSubmit}
         >
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             {this.showSearch()}
@@ -580,12 +583,13 @@ export default class CampaignTextersForm extends React.Component {
             </div>
             {this.showTexters()}
           </div>
-          <Form.Button
-            type="submit"
-            label={this.props.saveLabel}
-            disabled={this.props.saveDisabled}
-          />
         </GSForm>
+        <RaisedButton
+          label={saveLabel}
+          disabled={saveDisabled}
+          onClick={this.props.onSubmit}
+          style={inlineStyles.button}
+        />
         <Snackbar
           open={this.state.snackbarOpen}
           message={this.state.snackbarMessage}
