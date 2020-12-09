@@ -1,36 +1,39 @@
-import { Campaign, CampaignsFilter } from "./campaign";
+import { Campaign, PaginatedCampaigns } from "./campaign";
 import { ExternalSystem } from "./external-system";
-import {
-  MembershipFilter,
-  OrganizationMembership
-} from "./organization-membership";
+import { LinkDomain, UnhealthyLinkDomain } from "./link-domain";
+import { OptOut } from "./opt-out";
+import { OrganizationMembership } from "./organization-membership";
 import { OranizationSettings } from "./organization-settings";
 import { RelayPaginatedResponse } from "./pagination";
 import { Tag } from "./tag";
+import { Team } from "./team";
+import { User } from "./user";
 
 export const TextRequestType = Object.freeze({
   UNSENT: "UNSENT",
   UNREPLIED: "UNREPLIED"
 });
 
+export interface AssignmentTarget {
+  type: string;
+  campaign: Campaign;
+  countLeft: number;
+  teamTitle: string;
+  teamId: number;
+  enabled: boolean;
+  maxRequestCount: number;
+}
+
 export interface Organization {
   id: string;
   uuid: string;
   name: string;
-  campaigns(cursor: any, campaignsFilter: CampaignsFilter): any;
-  campaignsRelay(
-    after?: string,
-    first?: number,
-    filter?: CampaignsFilter
-  ): RelayPaginatedResponse<Campaign>;
-  memberships(
-    after?: string,
-    first?: number,
-    filter?: MembershipFilter
-  ): RelayPaginatedResponse<OrganizationMembership>;
-  people(role?: string, campaignId?: string, offset?: number): any[];
+  campaigns: PaginatedCampaigns;
+  campaignsRelay: RelayPaginatedResponse<Campaign>;
+  memberships: RelayPaginatedResponse<OrganizationMembership>;
+  people: User[];
   peopleCount: number;
-  optOuts: any[];
+  optOuts: OptOut[];
   threeClickEnabled: boolean;
   optOutMessage: string;
   textingHoursEnforced: boolean;
@@ -41,21 +44,18 @@ export interface Organization {
   textRequestMaxCount: number;
   textsAvailable: boolean;
   pendingAssignmentRequestCount: number;
-  currentAssignmentTargets: any[];
-  myCurrentAssignmentTarget: any[];
-  myCurrentAssignmentTargets: any[];
+  currentAssignmentTargets: AssignmentTarget[];
+  myCurrentAssignmentTarget: AssignmentTarget[];
+  myCurrentAssignmentTargets: AssignmentTarget[];
   escalatedConversationCount: number;
-  linkDomains: any[];
-  unhealthyLinkDomains: any[];
+  linkDomains: LinkDomain[];
+  unhealthyLinkDomains: UnhealthyLinkDomain[];
   numbersApiKey: string;
   settings: OranizationSettings;
   tagList: Tag[];
   escalationTagList: Tag[];
-  teams: any[];
-  externalSystems(
-    after?: string,
-    first?: number
-  ): RelayPaginatedResponse<ExternalSystem>;
+  teams: Team[];
+  externalSystems: RelayPaginatedResponse<ExternalSystem>;
 }
 
 export const schema = `

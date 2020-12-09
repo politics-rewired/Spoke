@@ -1,3 +1,5 @@
+import { PageInfo } from "./types";
+
 export enum ExternalSyncReadinessState {
   READY = "READY",
   MISSING_SYSTEM = "MISSING_SYSTEM",
@@ -25,6 +27,11 @@ export interface Campaign {
   id: string;
   syncReadiness: ExternalSyncReadinessState;
   pendingJobs: JobRequest[];
+}
+
+export interface PaginatedCampaigns {
+  campaigns: Campaign[];
+  pageInfo: PageInfo;
 }
 
 export const schema = `

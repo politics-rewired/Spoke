@@ -13,6 +13,19 @@ export enum ExternalDataCollectionStatus {
   INACTIVE = "INACTIVE"
 }
 
+export enum TextRequestType {
+  UNSENT = "UNSENT",
+  UNREPLIED = "UNREPLIED"
+}
+
+export interface PageInfo {
+  limit: number;
+  offset: number;
+  next: number;
+  previous: number;
+  total: number;
+}
+
 export interface QuestionResponseSyncTargetInput {
   configId: string;
   responseOptionId?: string;
