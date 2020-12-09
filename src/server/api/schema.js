@@ -2428,6 +2428,7 @@ const rootMutations = {
         assignmentsFilter,
         tagsFilter,
         contactsFilter,
+        contactNameFilter,
         newTexterUserIds
       },
       { user }
@@ -2445,7 +2446,8 @@ const rootMutations = {
         campaignsFilter,
         assignmentsFilter,
         tagsFilter,
-        contactsFilter
+        contactsFilter,
+        contactNameFilter
       );
 
       if (newTexterUserIds == null) {
