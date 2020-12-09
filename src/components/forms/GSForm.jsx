@@ -37,7 +37,7 @@ export default class GSForm extends React.Component {
   componentWillMount() {
     const { children } = this.props;
 
-    if (children) {
+    if (Array.isArray(children)) {
       let model = null;
       children.map((child) => {
         if (child) {
