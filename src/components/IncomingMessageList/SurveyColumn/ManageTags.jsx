@@ -149,6 +149,8 @@ const queries = {
             onApplyScript
             isSystem
             isAssignable
+            textColor
+            backgroundColor
             createdAt
           }
         }
