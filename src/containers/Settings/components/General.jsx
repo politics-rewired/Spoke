@@ -68,16 +68,6 @@ class Settings extends React.Component {
     error: undefined
   };
 
-  // // optOutMessage is controlled via defaultValue in GSForm
-  // // to track changes to optOutMessage, in order to determine whether button
-  // // should be  we initiate it in state on mount
-
-  // // initialize via props instead
-  // componentDidMount = () => {
-  //   const { optOutMessage } = this.props.data.organization.settings;
-  //   this.setState({ optOutMessage })
-  // };
-
   editSettings = async (name, input) => {
     this.setState({ isWorking: true, error: undefined });
     let success = false;

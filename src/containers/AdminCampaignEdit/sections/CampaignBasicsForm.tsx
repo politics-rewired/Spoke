@@ -121,7 +121,7 @@ class CampaignBasicsForm extends React.Component<
           value={value}
           onChange={this.handleChange}
         >
-          <CampaignFormSectionHeading title="What's your campaign about?" />
+          <CampaignFormSectionHeading title="What&#39;s your campaign about?" />
           <Form.Field
             {...dataTest("title")}
             name="title"
