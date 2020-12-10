@@ -8,7 +8,11 @@ import request from "superagent";
 import { config } from "../config";
 import logger from "../logger";
 import { capitalizeWord } from "./api/lib/utils";
-import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
+import localAuthHelpers, {
+  hashPassword,
+  LocalAuthError
+} from "./local-auth-helpers";
+import sendEmail from "./mail";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
 
@@ -251,6 +255,16 @@ function setupAuth0Passport() {
   return app;
 }
 
+// interface PasswordResetRequest {
+//   id: number;
+//   email: string;
+//   token: string;
+//   used_at: Date;
+//   created_at: Date;
+//   updated_at: Date;
+//   expires_at: Date;
+// }
+
 function setupLocalAuthPassport() {
   const strategy = new LocalStrategy(
     {
@@ -297,6 +311,7 @@ function setupLocalAuthPassport() {
   );
 
   const app = express();
+
   app.post("/login-callback", (req, res, next) => {
     // See: http://www.passportjs.org/docs/authenticate/#custom-callback
     passport.authenticate("local", (err, user, _info) => {
@@ -318,6 +333,91 @@ function setupLocalAuthPassport() {
         return res.redirect(req.body.nextUrl || "/");
       });
     })(req, res, next);
+  });
+
+  app.post("/auth/request-reset", async (req, res) => {
+    // body should look like: { email }
+    const { email } = req.body;
+    if (email === undefined || email === null || email === "") {
+      return res
+        .status(400)
+        .send("Error: no email provided with forgot password request");
+    }
+
+    const [resetRequest] = await r
+      .knex("password_reset_request")
+      .insert({ email })
+      .returning("*");
+
+    const matchingUser = await r.reader("user").where({ email }).first("email");
+
+    // If no matching user, send no email
+    if (matchingUser) {
+      // Use owner of first org for replyTo
+      const replyTo = config.EMAIL_REPLY_TO
+        ? config.EMAIL_REPLY_TO
+        : await r
+            .reader("user")
+            .join(
+              "user_organization",
+              "user_organization.user_id",
+              "=",
+              "user.id"
+            )
+            .join(
+              "organization",
+              "organization.id",
+              "=",
+              "user_organization.organization_id"
+            )
+            .where({ role: "OWNER" })
+            .orderBy("organization.created_at", "asc")
+            .first("email");
+
+      await sendEmail({
+        to: matchingUser.email,
+        replyTo,
+        subject: "Spoke Reset Password Request",
+        text: `If you requested a password reset, you can reset your password at ${config.BASE_URL}/reset-password?token=${resetRequest.token} within the next 24 hours.\n\nIf you didn't, you can ignore this email.`
+      });
+    }
+
+    return res.sendStatus(200);
+  });
+
+  app.post("/auth/claim-reset", async (req, res) => {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).send("Error: must provide token and new password");
+    }
+
+    const resetRequest = await r
+      .knex("password_reset_request")
+      .where({ token })
+      .whereNull("used_at")
+      .whereRaw(`expires_at > now()`)
+      .first("*");
+
+    if (resetRequest) {
+      const newAuth0Id = await hashPassword(password);
+
+      await r.knex.transaction(async (trx) => {
+        await trx("password_reset_request")
+          .update({ used_at: r.knex.fn.now() })
+          .where({ id: resetRequest.id });
+        await trx("user")
+          .update({ auth0_id: newAuth0Id })
+          .where({ email: resetRequest.email });
+      });
+
+      return res.sendStatus(200);
+    }
+
+    return res
+      .status(400)
+      .send(
+        "Error: invalid password reset token. It may have expired or already been used."
+      );
   });
 
   return app;

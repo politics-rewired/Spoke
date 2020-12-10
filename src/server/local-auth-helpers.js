@@ -213,4 +213,13 @@ export const change = ({ user, password, newPassword, passwordConfirm }) => {
   });
 };
 
-export default { login, signup, reset };
+export const hashPassword = async (password) => {
+  return new Promise((resolve, reject) => {
+    AuthHasher.hash(password, (err, hashed) => {
+      if (err) return reject(err);
+      return resolve(`localauth|${hashed.salt}|${hashed.hash}`);
+    });
+  });
+};
+
+export default { login, signup, reset, hashPassword };
