@@ -116,6 +116,8 @@ class LocalLogin extends React.Component {
           <h2 className={css(styles.header)}>
             {active === UserEditMode.EmailReset
               ? "Reset Your Password"
+              : active === UserEditMode.RequestReset
+              ? "Request a Password Reset Email"
               : "Welcome to Spoke"}
           </h2>
           {active === UserEditMode.Reset ? (
@@ -131,6 +133,9 @@ class LocalLogin extends React.Component {
               history={history}
               nextUrl={nextUrl}
               style={css(styles.authFields)}
+              startRequestReset={() =>
+                this.setState({ active: UserEditMode.RequestReset })
+              }
             />
           )}
         </div>
