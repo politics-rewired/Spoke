@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
+import queryString from "query-string";
 import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
@@ -17,6 +18,7 @@ export const UserEditMode = Object.freeze({
   Login: "login",
   Change: "change",
   Reset: "reset",
+  EmailReset: "email-reset",
   Edit: "edit"
 });
 
@@ -67,6 +69,26 @@ class UserEdit extends React.Component {
         }
         break;
 
+      case UserEditMode.EmailReset:
+        {
+          const body = {
+            token: queryString.parse(window.location.search).token,
+            ...formData
+          };
+          const res = await fetch(`/auth/claim-reset`, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: { "Content-Type": "application/json" }
+          });
+
+          if (res.status === 400) {
+            throw new Error(await res.text());
+          }
+
+          this.setState({ successDialog: true });
+        }
+        break;
+
       default: {
         // log in, sign up, or reset
         const allData = {
@@ -98,8 +120,12 @@ class UserEdit extends React.Component {
 
   handleClick = () => this.setState({ changePasswordDialog: true });
 
-  handleClose = () =>
+  handleClose = () => {
+    if (this.props.authType === UserEditMode.EmailReset) {
+      window.history.href = "/login";
+    }
     this.setState({ changePasswordDialog: false, successDialog: false });
+  };
 
   openSuccessDialog = () => this.setState({ successDialog: true });
 
@@ -136,6 +162,13 @@ class UserEdit extends React.Component {
         // Handled by passport at /login-callback (thus why `email` is required)
         return yup.object({
           email,
+          password,
+          passwordConfirm: passwordConfirm("password")
+        });
+      case UserEditMode.EmailReset:
+        // Handled by custom handler at /auth/claim-reset
+        return yup.object({
+          // hidden token from url path
           password,
           passwordConfirm: passwordConfirm("password")
         });
@@ -210,6 +243,7 @@ class UserEdit extends React.Component {
           {(authType === UserEditMode.Login ||
             authType === UserEditMode.SignUp ||
             authType === UserEditMode.Reset ||
+            authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
             <Form.Field label="Password" name="password" type="password" />
           )}
@@ -222,6 +256,7 @@ class UserEdit extends React.Component {
           )}
           {(authType === UserEditMode.SignUp ||
             authType === UserEditMode.Reset ||
+            authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
             <Form.Field
               label="Confirm Password"

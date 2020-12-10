@@ -62,6 +62,8 @@ class LocalLogin extends React.Component {
     this.state = {
       active: nextUrl.includes("reset")
         ? UserEditMode.Reset
+        : window.location.pathname.includes("email-reset")
+        ? UserEditMode.EmailReset
         : UserEditMode.Login
     };
   }
@@ -111,7 +113,11 @@ class LocalLogin extends React.Component {
           </section>
         )}
         <div className={css(styles.fieldContainer)}>
-          <h2 className={css(styles.header)}>Welcome to Spoke</h2>
+          <h2 className={css(styles.header)}>
+            {active === UserEditMode.EmailReset
+              ? "Reset Your Password"
+              : "Welcome to Spoke"}
+          </h2>
           {active === UserEditMode.Reset ? (
             <UserPasswordReset
               history={history}

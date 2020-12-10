@@ -378,7 +378,7 @@ function setupLocalAuthPassport() {
         to: matchingUser.email,
         replyTo,
         subject: "Spoke Reset Password Request",
-        text: `If you requested a password reset, you can reset your password at ${config.BASE_URL}/reset-password?token=${resetRequest.token} within the next 24 hours.\n\nIf you didn't, you can ignore this email.`
+        text: `If you requested a password reset, you can reset your password at ${config.BASE_URL}/email-reset?token=${resetRequest.token} within the next 24 hours.\n\nIf you didn't, you can ignore this email.`
       });
     }
 
