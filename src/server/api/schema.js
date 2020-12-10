@@ -1172,43 +1172,28 @@ const rootMutations = {
         const newCampaignId = newCampaign.id;
         const oldCampaignId = campaign.id;
 
-        const interactions = await trx("interaction_step").where({
-          campaign_id: oldCampaignId
-        });
+        // copy interactions
+        const interactions = (
+          await trx("interaction_step").where({
+            campaign_id: oldCampaignId,
+            is_deleted: false
+          })
+        ).map((interaction) => ({
+          id: `new${interaction.id}`,
+          questionText: interaction.question,
+          scriptOptions: interaction.script_options,
+          answerOption: interaction.answer_option,
+          answerActions: interaction.answer_actions,
+          isDeleted: interaction.is_deleted,
+          campaign_id: newCampaignId,
+          parentInteractionId: interaction.parent_interaction_id
+            ? `new${interaction.parent_interaction_id}`
+            : interaction.parent_interaction_id
+        }));
 
-        const interactionsArr = [];
-        interactions.forEach((interaction, _index) => {
-          if (interaction.parent_interaction_id) {
-            const is = {
-              id: `new${interaction.id}`,
-              questionText: interaction.question,
-              scriptOptions: interaction.script_options,
-              answerOption: interaction.answer_option,
-              answerActions: interaction.answer_actions,
-              isDeleted: interaction.is_deleted,
-              campaign_id: newCampaignId,
-              parentInteractionId: `new${interaction.parent_interaction_id}`
-            };
-            interactionsArr.push(is);
-          } else if (!interaction.parent_interaction_id) {
-            const is = {
-              id: `new${interaction.id}`,
-              questionText: interaction.question,
-              scriptOptions: interaction.script_options,
-              answerOption: interaction.answer_option,
-              answerActions: interaction.answer_actions,
-              isDeleted: interaction.is_deleted,
-              campaign_id: newCampaignId,
-              parentInteractionId: interaction.parent_interaction_id
-            };
-            interactionsArr.push(is);
-          }
-        });
-
-        const interactionStepTree = makeTree(interactionsArr, (id = null));
         await persistInteractionStepTree(
           newCampaignId,
-          interactionStepTree,
+          makeTree(interactions, (id = null)),
           campaign,
           trx
         );
