@@ -151,6 +151,8 @@ class Settings extends React.Component {
 
   checkUnsavedOptOutMessage = () => {
     const { optOutMessage } = this.state;
+    // if optOutMessage field is untouched,
+    // check optOutMessage against itself to return false and disable save
     const newMessage =
       optOutMessage || this.props.data.organization.settings.optOutMessage;
     const {
