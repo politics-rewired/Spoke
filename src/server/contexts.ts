@@ -10,7 +10,7 @@ import { Memoizer } from "./types";
 
 export interface SpokeDbContext {
   schema: string;
-  master: Knex;
+  primary: Knex;
   reader: Knex;
 }
 
@@ -40,7 +40,7 @@ const createHostMemoizer = (_host: string): Memoizer => {
 const createContext = (host: string): SpokeContext => ({
   db: {
     schema: "public",
-    master: r.knex,
+    primary: r.knex,
     reader: r.reader
   },
   memoizer: createHostMemoizer(host)

@@ -81,14 +81,14 @@ const validUuid = async (
   let matchingRecord;
   if (nextUrl.includes("join")) {
     matchingRecord = await db
-      .master("organization")
+      .primary("organization")
       .where({ uuid: uuidMatch[0] })
       .first("id");
   } else if (nextUrl.includes("invite")) {
     const splitUrl = nextUrl.split("/");
     const inviteHash = splitUrl[splitUrl.length - 1];
     matchingRecord = await db
-      .master("invite")
+      .primary("invite")
       .where({ hash: inviteHash })
       .first("id");
   }
@@ -149,7 +149,7 @@ const signup: AuthHelper = async (options) => {
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
       const [user] = await db
-        .master("user")
+        .primary("user")
         .insert({
           email: lowerCaseEmail,
           auth0_id: passwordToSave,
@@ -197,7 +197,7 @@ const reset: AuthHelper = (options) => {
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
       const [updatedUser] = await db
-        .master("user")
+        .primary("user")
         .update({ auth0_id: passwordToSave })
         .where({ id: existingUser.id })
         .returning("*");
@@ -246,7 +246,7 @@ export const change = (options: ChangeOptions) => {
             if (err) reject(new LocalAuthError(err.message));
             const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
             const updatedUser = await db
-              .master("user")
+              .primary("user")
               .update({ auth0_id: passwordToSave })
               .where({ id: user.id });
             resolve(updatedUser);

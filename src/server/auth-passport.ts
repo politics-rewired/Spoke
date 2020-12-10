@@ -119,7 +119,7 @@ function setupSlackPassport() {
 
     if (!existingUser && SLACK_CONVERT_EXISTING) {
       const [existingEmailUser] = await db
-        .master("user")
+        .primary("user")
         .update({ auth0_id: user.id })
         .where({ email: user.email })
         .returning("*");
@@ -157,7 +157,7 @@ function setupSlackPassport() {
       };
 
       await db
-        .master("user")
+        .primary("user")
         .insert(userData)
         .catch((err) => {
           logger.error("Slack login error: could not insert new user: ", err);
@@ -245,7 +245,7 @@ function setupAuth0Passport() {
         is_superadmin: false
       };
 
-      await db.master("user").insert(userData);
+      await db.primary("user").insert(userData);
 
       return redirectPostSignIn(req, res, true);
     }
