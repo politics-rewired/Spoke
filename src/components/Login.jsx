@@ -51,7 +51,8 @@ const styles = StyleSheet.create({
 const saveLabels = {
   [UserEditMode.SignUp]: "Sign Up",
   [UserEditMode.Login]: "Log In",
-  [UserEditMode.Reset]: "Save New Password"
+  [UserEditMode.Reset]: "Save New Password",
+  [UserEditMode.RequestReset]: "Request Reset"
 };
 
 class LocalLogin extends React.Component {
