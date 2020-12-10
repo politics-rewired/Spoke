@@ -226,7 +226,7 @@ class CampaignInteractionStepsForm extends React.Component {
     });
   };
 
-  hasUnsavedChanges = () => {
+  checkUnsavedChanges = () => {
     const { interactionSteps: pendingSteps } = this.state;
     const { interactionSteps } = this.props.formValues;
 
@@ -400,7 +400,7 @@ class CampaignInteractionStepsForm extends React.Component {
     });
 
     const hasEmptyScripts = emptyScriptSteps.length > 0;
-    const hasUnsavedSteps = this.hasUnsavedChanges();
+    const hasUnsavedSteps = this.checkUnsavedChanges();
 
     const shouldDisableSave = !hasUnsavedSteps || hasEmptyScripts;
 

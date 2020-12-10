@@ -1,5 +1,6 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
+import isEqual from "lodash/isEqual";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
@@ -60,11 +61,22 @@ class Settings extends React.Component {
   state = {
     textingHoursDialogOpen: false,
     hasNumbersApiKeyChanged: false,
+    optOutMessage: undefined,
     numbersApiKey: undefined,
     approvalLevel: undefined,
     isWorking: false,
     error: undefined
   };
+
+  // // optOutMessage is controlled via defaultValue in GSForm
+  // // to track changes to optOutMessage, in order to determine whether button
+  // // should be  we initiate it in state on mount
+
+  // // initialize via props instead
+  // componentDidMount = () => {
+  //   const { optOutMessage } = this.props.data.organization.settings;
+  //   this.setState({ optOutMessage })
+  // };
 
   editSettings = async (name, input) => {
     this.setState({ isWorking: true, error: undefined });
@@ -125,8 +137,12 @@ class Settings extends React.Component {
     }
   };
 
+  handleChangeOptOutMessage = (optOutMessage) => {
+    this.setState({ optOutMessage });
+  };
+
   handleEditOptOutMessage = ({ optOutMessage }) =>
-    this.editSettings("Opt Out Messasge", { optOutMessage });
+    this.editSettings("Opt Out Message", { optOutMessage });
 
   handleEditTrollBotUrl = ({ trollbotWebhookUrl }) =>
     this.editSettings("TrollBot Webhook URL", { trollbotWebhookUrl });
@@ -142,6 +158,19 @@ class Settings extends React.Component {
     });
 
   handleDismissError = () => this.setState({ error: undefined });
+
+  checkUnsavedOptOutMessage = () => {
+    const { optOutMessage } = this.state;
+    const newMessage =
+      optOutMessage || this.props.data.organization.settings.optOutMessage;
+    const {
+      optOutMessage: savedMessage
+    } = this.props.data.organization.settings;
+
+    const hasUnsavedMessage = !isEqual(newMessage, savedMessage);
+
+    return hasUnsavedMessage;
+  };
 
   renderTextingHoursForm() {
     const { organization } = this.props.data;
@@ -226,6 +255,9 @@ class Settings extends React.Component {
       this.state.approvalLevel || defaulTexterApprovalStatus;
     const noApprovalChange = approvalLevel === defaulTexterApprovalStatus;
 
+    const hasEditedOptOutMessage = !this.checkUnsavedOptOutMessage();
+    const disableOptOutSave = isWorking || hasEditedOptOutMessage;
+
     const errorActions = [
       <FlatButton
         key="ok"
@@ -278,6 +310,7 @@ class Settings extends React.Component {
                 label="Default Opt-Out Message"
                 name="optOutMessage"
                 fullWidth
+                onChange={this.handleChangeOptOutMessage}
               />
             </CardText>
             <CardActions>
@@ -285,7 +318,7 @@ class Settings extends React.Component {
                 label={this.props.saveLabel || "Save Opt-Out Message"}
                 type="submit"
                 component={RaisedButton}
-                disabled={isWorking}
+                disabled={disableOptOutSave}
               />
             </CardActions>
           </GSForm>
