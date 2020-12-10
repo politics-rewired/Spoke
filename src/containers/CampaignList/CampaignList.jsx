@@ -36,6 +36,9 @@ const inlineStyles = {
   },
   warnUnsent: {
     color: theme.colors.blue
+  },
+  secondaryText: {
+    whiteSpace: "pre-wrap"
   }
 };
 
@@ -185,7 +188,7 @@ export class CampaignList extends React.Component {
       </div>
     );
     const secondaryText = (
-      <span>
+      <span style={inlineStyles.secondaryText}>
         <span>
           Campaign ID: {campaign.id}
           <br />
