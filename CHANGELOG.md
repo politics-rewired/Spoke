@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.10.0](https://github.com/politics-rewired/spoke/compare/v3.9.0...v3.10.0) (2020-12-11)
+
+
+### Features
+
+* add link warning to script field ([#795](https://github.com/politics-rewired/spoke/issues/795)) ([e8a0d10](https://github.com/politics-rewired/spoke/commit/e8a0d108b3ca45259f2444d49ca3e8a3e28a36ee))
+* edit canned responses ([#793](https://github.com/politics-rewired/spoke/issues/793)) ([d7c2d19](https://github.com/politics-rewired/spoke/commit/d7c2d196ec1fd55fa894cf32db2afa0580394bf7))
+* hide shortlink domains behind envvar ([#789](https://github.com/politics-rewired/spoke/issues/789)) ([7efb76e](https://github.com/politics-rewired/spoke/commit/7efb76e677b58606536256ea280059adb808ced4))
+* host-based GraphQL context ([#560](https://github.com/politics-rewired/spoke/issues/560)) ([eacf822](https://github.com/politics-rewired/spoke/commit/eacf8224f66d1bc81b69b11674eced010afc1307))
+* **campaign-edit:** add copy block on root ([#788](https://github.com/politics-rewired/spoke/issues/788)) ([3c4c19b](https://github.com/politics-rewired/spoke/commit/3c4c19bf9c6dfe34a5417228acb22c2c7fb7120b))
+* **scripteditor:** add short link warning ([#765](https://github.com/politics-rewired/spoke/issues/765)) ([1e5195d](https://github.com/politics-rewired/spoke/commit/1e5195da81c3adbd0477d95cd96ba79f71247600))
+
+
+### Bug Fixes
+
+* add authz check to myCurrentAssignmentTargets resolver ([#792](https://github.com/politics-rewired/spoke/issues/792)) ([a2f13d7](https://github.com/politics-rewired/spoke/commit/a2f13d79df212d3435ae75f1713f520ba12479cb))
+* add missing query properties ([204d9b1](https://github.com/politics-rewired/spoke/commit/204d9b15e267d826dd76ccc5bd292b8230f8735d))
+* copy campaign deleted interactions ([#801](https://github.com/politics-rewired/spoke/issues/801)) ([60e57e2](https://github.com/politics-rewired/spoke/commit/60e57e27540ef104bf1da9e4b0ade7931cc8be66))
+* fix campaign list pagination ([#794](https://github.com/politics-rewired/spoke/issues/794)) ([a9ea0c9](https://github.com/politics-rewired/spoke/commit/a9ea0c9732e1d2eb173d16b9c47d7acfa9627b46))
+* fix issues introduced in eslint pr ([0d8765a](https://github.com/politics-rewired/spoke/commit/0d8765a7d64dbb08b924e36164e76c923fab28b2))
+* **escalationtags:** check tags in assignment row chip input component ([#790](https://github.com/politics-rewired/spoke/issues/790)) ([7e2ce7c](https://github.com/politics-rewired/spoke/commit/7e2ce7c84b4afe219fd46147942da638ec623f20))
+
 ## [3.9.0](https://github.com/politics-rewired/spoke/compare/v3.8.1...v3.9.0) (2020-11-16)
 
 
