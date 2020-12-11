@@ -38,7 +38,7 @@ const ConversationPreviewHeader = ({ campaignTitle, onRequestClose }) => (
 const columnStyles = StyleSheet.create({
   container: {
     display: "flex",
-    height: "100%"
+    flex: "1 1 auto"
   },
   column: {
     flex: 1,
@@ -99,7 +99,7 @@ const ConversationPreviewModal = (props) => {
         campaignTitle={conversation && conversation.campaign.title}
         onRequestClose={onRequestClose}
       />
-      <div style={{ flex: "1 1 auto" }}>
+      <div style={{ flex: "1 1 auto", display: "flex" }}>
         {isOpen && (
           <ConversationPreviewBody
             key={conversation.contact.id}

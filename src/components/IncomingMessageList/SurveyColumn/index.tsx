@@ -12,7 +12,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   container: {
     display: "flex",
     flexDirection: "column",
-    height: "100%"
+    flexGrow: 1
   },
   spacer: { flex: "1" }
 };
