@@ -7,9 +7,9 @@ import { config } from "../../config";
 import logger from "../../logger";
 import mocks from "../api/mocks";
 import { resolvers } from "../api/schema";
-import { createLoaders } from "../models";
+import { contextForRequest } from "../contexts";
 
-const router = express.Router();
+const router = express();
 
 const executableSchema = makeExecutableSchema({
   typeDefs: schema,
@@ -17,7 +17,7 @@ const executableSchema = makeExecutableSchema({
   allowUndefinedInResolve: false
 });
 
-const formatError = (err) => {
+const formatError = (err: any) => {
   // Ignore intentional ApolloErrors
   if (err.originalError instanceof ApolloError) {
     return err;
@@ -53,10 +53,7 @@ const server = new ApolloServer({
   debug: !config.isProduction,
   introspection: !config.isProduction,
   playground: !config.isProduction,
-  context: ({ req, res: _res }) => ({
-    loaders: createLoaders(),
-    user: req.user
-  })
+  context: ({ req, res: _res }) => contextForRequest(req)
 });
 
 server.applyMiddleware({
