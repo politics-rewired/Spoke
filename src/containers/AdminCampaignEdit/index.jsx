@@ -517,6 +517,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Interactions",
         content: CampaignInteractionStepsForm,
+        isStandalone: true,
         keys: ["interactionSteps"],
         checkCompleted: () =>
           this.state.campaignFormValues.interactionSteps.length > 0,

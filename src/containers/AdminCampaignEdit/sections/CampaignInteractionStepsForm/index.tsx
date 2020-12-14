@@ -1,16 +1,29 @@
+import { ApolloQueryResult } from "apollo-client/core/types";
+import gql from "graphql-tag";
+import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
+import { compose } from "recompose";
 
+import { Campaign } from "../../../../api/campaign";
 import {
   InteractionStep,
   InteractionStepWithChildren
 } from "../../../../api/interaction-step";
+import { Action } from "../../../../api/types";
 import { dataTest } from "../../../../lib/attributes";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
+import { MutationMap, QueryMap } from "../../../../network/types";
+import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
+import {
+  asSection,
+  FullComponentProps,
+  RequiredComponentProps
+} from "../../components/SectionWrapper";
 import InteractionStepCard from "./components/InteractionStepCard";
 
 /**
@@ -34,86 +47,127 @@ const markDeleted = (stepId: string, interactionSteps: InteractionStep[]) => {
   return interactionSteps;
 };
 
-interface Props {
-  formValues: any;
-  customFields: string[];
-  availableActions: any[];
-  ensureComplete: boolean;
-  saveLabel: string;
-  onChange(options: {
-    interactionSteps: InteractionStepWithChildren;
-  }): Promise<void> | void;
-  onSubmit(): Promise<void> | void;
+interface Values {
+  interactionSteps: InteractionStepWithChildren;
 }
+
+interface HocProps {
+  mutations: {
+    editCampaign(payload: Values): ApolloQueryResult<any>;
+  };
+  data: {
+    campaign: Pick<
+      Campaign,
+      "id" | "isStarted" | "interactionSteps" | "customFields"
+    >;
+  };
+  availableActions: {
+    availableActions: Action[];
+  };
+}
+
+interface InnerProps extends FullComponentProps, HocProps {}
 
 interface State {
   hasBlockCopied: boolean;
   confirmingRootPaste: boolean;
   interactionSteps: InteractionStep[];
+  isWorking: boolean;
 }
 
-class CampaignInteractionStepsForm extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    const { interactionSteps } = props.formValues;
-    this.state = {
-      hasBlockCopied: false,
-      confirmingRootPaste: false,
-      interactionSteps: interactionSteps[0]
-        ? interactionSteps
-        : [
-            {
-              id: "newId",
-              parentInteractionId: null,
-              questionText: "",
-              answerOption: "",
-              scriptOptions: [""],
-              answerActions: "",
-              isDeleted: false
-            }
-          ]
-    };
-  }
+class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
+  state: State = {
+    isWorking: false,
+    hasBlockCopied: false,
+    confirmingRootPaste: false,
+    interactionSteps: [
+      {
+        id: "newId",
+        parentInteractionId: null,
+        questionText: "",
+        answerOption: "",
+        scriptOptions: [""],
+        answerActions: "",
+        isDeleted: false
+      }
+    ]
+  };
 
   componentDidMount() {
     this.updateClipboardHasBlock();
+
+    const { interactionSteps } = this.props.data.campaign;
+    if (interactionSteps.length > 0) {
+      this.setState({ interactionSteps: cloneDeep(interactionSteps) });
+    }
   }
 
-  onSave = async () => {
-    // Strip all empty script versions. "Save" should be disabled in this case, but just in case...
-    const interactionSteps = this.state.interactionSteps.map((step) => {
-      const scriptOptions = step.scriptOptions.filter(
-        (scriptOption) => scriptOption.trim() !== ""
-      );
-      return Object.assign(step, { scriptOptions });
+  pendingInteractionSteps = (options: { filterEmpty: boolean }) => {
+    const oldTree: InteractionStepWithChildren = makeTree(
+      this.props.data.campaign.interactionSteps
+    );
+
+    const emptyScriptSteps = this.state.interactionSteps.filter((step) => {
+      const hasNoOptions = step.scriptOptions.length === 0;
+      const hasEmptyScripts =
+        step.scriptOptions.filter((version) => version.trim() === "").length >
+        0;
+      return hasNoOptions || hasEmptyScripts;
     });
 
-    const interactionStepTree: InteractionStepWithChildren = makeTree(
-      interactionSteps
-    );
-    await this.props.onChange({ interactionSteps: interactionStepTree });
-    this.props.onSubmit();
+    const hasEmptyScripts = emptyScriptSteps.length > 0;
+
+    // Strip all empty script versions. "Save" should be disabled in this case, but just in case...
+    const interactionSteps = !options.filterEmpty
+      ? this.state.interactionSteps
+      : this.state.interactionSteps.map((step) => {
+          const scriptOptions = step.scriptOptions.filter(
+            (scriptOption) => scriptOption.trim() !== ""
+          );
+          return { ...step, scriptOptions };
+        });
+    const newTree: InteractionStepWithChildren = makeTree(interactionSteps);
+
+    const didChange = !isEqual(oldTree, newTree);
+
+    return { interactionSteps: newTree, didChange, hasEmptyScripts };
+  };
+
+  handleSave = async () => {
+    const { interactionSteps, didChange } = this.pendingInteractionSteps({
+      filterEmpty: true
+    });
+
+    if (!didChange) return;
+
+    this.setState({ isWorking: true });
+    try {
+      const response = await this.props.mutations.editCampaign({
+        interactionSteps
+      });
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      this.props.onError(err.message);
+    } finally {
+      this.setState({ isWorking: false });
+    }
   };
 
   createAddStepHandler = (parentInteractionId: string) => () => {
-    const randSuffix = Math.random()
-      .toString(36)
-      .replace(/[^a-zA-Z1-9]+/g, "");
+    const randId = this.generateId();
+
+    const newStep = {
+      id: randId,
+      parentInteractionId,
+      questionText: "",
+      scriptOptions: [""],
+      answerOption: "",
+      answerActions: "",
+      isDeleted: false
+    };
 
     this.setState({
-      interactionSteps: [
-        ...this.state.interactionSteps,
-        {
-          id: `new${randSuffix}`,
-          parentInteractionId,
-          questionText: "",
-          scriptOptions: [""],
-          answerOption: "",
-          answerActions: "",
-          isDeleted: false
-        }
-      ]
+      interactionSteps: [...this.state.interactionSteps, newStep]
     });
   };
 
@@ -168,8 +222,8 @@ class CampaignInteractionStepsForm extends React.Component<Props, State> {
     this.setState({ interactionSteps });
   };
 
-  handleFormChange = (event: any) => {
-    const updatedEvent = { ...event, interactionSteps: undefined };
+  handleFormChange = (changedStep: InteractionStepWithChildren) => {
+    const updatedEvent = { ...changedStep, interactionSteps: undefined };
     const interactionSteps = this.state.interactionSteps.map((step) =>
       step.id === updatedEvent.id ? updatedEvent : step
     );
@@ -217,33 +271,26 @@ class CampaignInteractionStepsForm extends React.Component<Props, State> {
     });
   };
 
-  checkUnsavedChanges = () => {
-    const { interactionSteps: pendingSteps } = this.state;
-    const { interactionSteps } = this.props.formValues;
-
-    const hasUnsavedChanges = !isEqual(pendingSteps, interactionSteps);
-
-    return hasUnsavedChanges;
-  };
-
   render() {
-    const { saveLabel } = this.props;
-    const { interactionSteps } = this.state;
+    const { isWorking } = this.state;
 
-    const tree: InteractionStepWithChildren = makeTree(interactionSteps);
+    const {
+      isNew,
+      saveLabel,
+      data: {
+        campaign: { customFields }
+      },
+      availableActions: { availableActions }
+    } = this.props;
 
-    const emptyScriptSteps = interactionSteps.filter((step) => {
-      const hasNoOptions = step.scriptOptions.length === 0;
-      const hasEmptyScripts =
-        step.scriptOptions.filter((version) => version.trim() === "").length >
-        0;
-      return hasNoOptions || hasEmptyScripts;
-    });
-
-    const hasEmptyScripts = emptyScriptSteps.length > 0;
-    const hasUnsavedSteps = this.checkUnsavedChanges();
-
-    const shouldDisableSave = !hasUnsavedSteps || hasEmptyScripts;
+    const {
+      interactionSteps,
+      didChange: hasPendingChanges,
+      hasEmptyScripts
+    } = this.pendingInteractionSteps({ filterEmpty: false });
+    const isSaveDisabled =
+      isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
+    const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
     return (
       <div
@@ -276,9 +323,9 @@ class CampaignInteractionStepsForm extends React.Component<Props, State> {
           subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
         />
         <InteractionStepCard
-          interactionStep={tree}
-          customFields={this.props.customFields}
-          availableActions={this.props.availableActions}
+          interactionStep={interactionSteps}
+          customFields={customFields}
+          availableActions={availableActions}
           hasBlockCopied={this.state.hasBlockCopied}
           onFormChange={this.handleFormChange}
           onCopyBlock={this.copyBlock}
@@ -290,9 +337,9 @@ class CampaignInteractionStepsForm extends React.Component<Props, State> {
         <RaisedButton
           {...dataTest("interactionSubmit")}
           primary
-          label={saveLabel}
-          disabled={shouldDisableSave}
-          onClick={this.onSave}
+          label={finalSaveLabel}
+          disabled={isSaveDisabled}
+          onClick={this.handleSave}
         />
         {hasEmptyScripts && (
           <p style={{ color: "#DD0000" }}>
@@ -304,4 +351,95 @@ class CampaignInteractionStepsForm extends React.Component<Props, State> {
   }
 }
 
-export default CampaignInteractionStepsForm;
+const queries: QueryMap<FullComponentProps> = {
+  data: {
+    query: gql`
+      query getCampaignInteractions($campaignId: String!) {
+        campaign(id: $campaignId) {
+          id
+          isStarted
+          interactionSteps {
+            id
+            questionText
+            scriptOptions
+            answerOption
+            answerActions
+            parentInteractionId
+            isDeleted
+          }
+          customFields
+        }
+      }
+    `,
+    options: (ownProps) => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+    })
+  },
+  availableActions: {
+    query: gql`
+      query getOrganizationAvailableActions($organizationId: String!) {
+        availableActions(organizationId: $organizationId) {
+          name
+          display_name
+          instructions
+        }
+      }
+    `,
+    options: (ownProps) => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      },
+      fetchPolicy: "network-only"
+    })
+  }
+};
+
+const mutations: MutationMap<FullComponentProps> = {
+  editCampaign: (ownProps) => (payload: Values) => ({
+    mutation: gql`
+      mutation editCampaignInteractions(
+        $campaignId: String!
+        $payload: CampaignInput!
+      ) {
+        editCampaign(id: $campaignId, campaign: $payload) {
+          id
+          interactionSteps {
+            id
+            questionText
+            scriptOptions
+            answerOption
+            answerActions
+            parentInteractionId
+            isDeleted
+          }
+          isStarted
+          customFields
+          readiness {
+            id
+            interactions
+          }
+        }
+      }
+    `,
+    variables: {
+      campaignId: ownProps.campaignId,
+      payload
+    }
+  })
+};
+
+export default compose<InnerProps, RequiredComponentProps>(
+  asSection({
+    title: "Interactions",
+    readinessName: "interactions",
+    jobQueueNames: [],
+    expandAfterCampaignStarts: true,
+    expandableBySuperVolunteers: true
+  }),
+  loadData({
+    queries,
+    mutations
+  })
+)(CampaignInteractionStepsForm);
