@@ -1,6 +1,5 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import isEqual from "lodash/isEqual";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
@@ -60,10 +59,10 @@ const formatTextingHours = (hour) => moment(hour, "H").format("h a");
 class Settings extends React.Component {
   state = {
     textingHoursDialogOpen: false,
-    hasNumbersApiKeyChanged: false,
     optOutMessage: undefined,
     numbersApiKey: undefined,
     approvalLevel: undefined,
+    trollbotWebhookUrl: undefined,
     isWorking: false,
     error: undefined
   };
@@ -113,29 +112,20 @@ class Settings extends React.Component {
     }
   };
 
-  handleEditNumbersApiKey = async (_payload) => {
-    let { numbersApiKey } = this.state;
-    numbersApiKey = numbersApiKey !== "" ? numbersApiKey : null;
-    const input = { numbersApiKey };
-    const success = await this.editSettings("Numbers API Key", input);
-    if (!success) {
-      numbersApiKey = this.props.data.organization.settings.numbersApiKey;
-      this.setState({
-        hasNumbersApiKeyChanged: false,
-        numbersApiKey: undefined
-      });
-    }
+  handleSaveNumbersApiKey = () => {
+    const { numbersApiKey } = this.state;
+    this.editSettings("Numbers API Key", { numbersApiKey });
   };
 
-  handleChangeOptOutMessage = (optOutMessage) => {
-    this.setState({ optOutMessage });
-  };
-
-  handleEditOptOutMessage = ({ optOutMessage }) =>
+  handleSaveOptOutMessage = () => {
+    const { optOutMessage } = this.state;
     this.editSettings("Opt Out Message", { optOutMessage });
+  };
 
-  handleEditTrollBotUrl = ({ trollbotWebhookUrl }) =>
+  handleSaveTrollbotUrl = () => {
+    const { trollbotWebhookUrl } = this.state;
     this.editSettings("TrollBot Webhook URL", { trollbotWebhookUrl });
+  };
 
   handleEditShowContactLastName = async (event, isToggled) =>
     this.editSettings("Show Contact Last Name", {
@@ -148,21 +138,6 @@ class Settings extends React.Component {
     });
 
   handleDismissError = () => this.setState({ error: undefined });
-
-  checkUnsavedOptOutMessage = () => {
-    const { optOutMessage } = this.state;
-    // if optOutMessage field is untouched,
-    // check optOutMessage against itself to return false and disable save
-    const newMessage =
-      optOutMessage || this.props.data.organization.settings.optOutMessage;
-    const {
-      optOutMessage: savedMessage
-    } = this.props.data.organization.settings;
-
-    const hasUnsavedMessage = !isEqual(newMessage, savedMessage);
-
-    return hasUnsavedMessage;
-  };
 
   renderTextingHoursForm() {
     const { organization } = this.props.data;
@@ -205,7 +180,7 @@ class Settings extends React.Component {
             <FlatButton
               label="Cancel"
               style={inlineStyles.dialogButton}
-              onTouchTap={this.handleCloseTextingHoursDialog}
+              onClick={this.handleCloseTextingHoursDialog}
             />
             <Form.Button
               type="submit"
@@ -220,12 +195,9 @@ class Settings extends React.Component {
   }
 
   render() {
-    const { hasNumbersApiKeyChanged, isWorking, error } = this.state;
+    const { isWorking, error } = this.state;
     const { organization } = this.props.data;
     const {
-      optOutMessage,
-      numbersApiKey,
-      trollbotWebhookUrl,
       defaulTexterApprovalStatus,
       showContactLastName,
       showContactCell
@@ -247,8 +219,23 @@ class Settings extends React.Component {
       this.state.approvalLevel || defaulTexterApprovalStatus;
     const noApprovalChange = approvalLevel === defaulTexterApprovalStatus;
 
-    const hasEditedOptOutMessage = !this.checkUnsavedOptOutMessage();
-    const disableOptOutSave = isWorking || hasEditedOptOutMessage;
+    const optOutMessage =
+      this.state.optOutMessage || organization.settings.optOutMessage;
+    const noMessageChange =
+      optOutMessage === organization.settings.optOutMessage;
+    const isOptOutSaveDisabled = isWorking || noMessageChange;
+
+    const numbersApiKey =
+      this.state.numbersApiKey || organization.settings.numbersApiKey;
+    const noApiKeyChange =
+      numbersApiKey === organization.settings.numbersApiKey;
+    const isApiKeySaveDisabled = isWorking || noApiKeyChange;
+
+    const trollbotWebhookUrl =
+      this.state.trollbotWebhookUrl || organization.settings.trollbotWebhookUrl;
+    const noWebhookChange =
+      trollbotWebhookUrl === organization.settings.trollbotWebhookUrl;
+    const isTrollbotSaveDisabled = isWorking || noWebhookChange;
 
     const errorActions = [
       <FlatButton
@@ -293,8 +280,14 @@ class Settings extends React.Component {
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={formSchema}
-            onSubmit={this.handleEditOptOutMessage}
-            defaultValue={{ optOutMessage }}
+            value={{
+              optOutMessage
+            }}
+            onChange={({ optOutMessage: newValue }) =>
+              this.setState({
+                optOutMessage: newValue
+              })
+            }
           >
             <CardHeader title="Opt Out Message" />
             <CardText>
@@ -302,15 +295,14 @@ class Settings extends React.Component {
                 label="Default Opt-Out Message"
                 name="optOutMessage"
                 fullWidth
-                onChange={this.handleChangeOptOutMessage}
               />
             </CardText>
             <CardActions>
-              <Form.Button
-                label={this.props.saveLabel || "Save Opt-Out Message"}
-                type="submit"
-                component={RaisedButton}
-                disabled={disableOptOutSave}
+              <RaisedButton
+                label="Save Opt-Out Message"
+                primary
+                disabled={isOptOutSaveDisabled}
+                onClick={this.handleSaveOptOutMessage}
               />
             </CardActions>
           </GSForm>
@@ -345,7 +337,7 @@ class Settings extends React.Component {
               <RaisedButton
                 label="Change texting hours"
                 primary
-                onTouchTap={this.handleOpenTextingHoursDialog}
+                onClick={this.handleOpenTextingHoursDialog}
               />
             )}
           </CardActions>
@@ -357,16 +349,11 @@ class Settings extends React.Component {
             schema={numbersApiKeySchema}
             onChange={({ numbersApiKey: newValue }) =>
               this.setState({
-                hasNumbersApiKeyChanged: newValue !== numbersApiKey,
                 numbersApiKey: newValue
               })
             }
-            onSubmit={this.handleEditNumbersApiKey}
-            defaultValue={{
-              numbersApiKey:
-                this.state.numbersApiKey === undefined
-                  ? numbersApiKey
-                  : this.state.numbersApiKey
+            value={{
+              numbersApiKey
             }}
           >
             <CardHeader title="Assemble Numbers API Key" />
@@ -380,11 +367,11 @@ class Settings extends React.Component {
               />
             </CardText>
             <CardActions>
-              <Form.Button
-                label="Save"
-                type="submit"
-                component={RaisedButton}
-                disabled={isWorking || !hasNumbersApiKeyChanged}
+              <RaisedButton
+                label="Save Api Key"
+                primary
+                disabled={isApiKeySaveDisabled}
+                onClick={this.handleSaveNumbersApiKey}
               />
             </CardActions>
           </GSForm>
@@ -414,8 +401,13 @@ class Settings extends React.Component {
           <Card className={css(styles.sectionCard)}>
             <GSForm
               schema={trollbotSettingsSchema}
-              onSubmit={this.handleEditTrollBotUrl}
-              defaultValue={{ trollbotWebhookUrl }}
+              onSubmit={this.handleSaveTrollbotUrl}
+              value={{ trollbotWebhookUrl }}
+              onChange={({ trollbotWebhookUrl: newValue }) =>
+                this.setState({
+                  trollbotWebhookUrl: newValue
+                })
+              }
             >
               <CardHeader title="TrollBot" />
               <CardText>
@@ -428,11 +420,11 @@ class Settings extends React.Component {
                 />
               </CardText>
               <CardActions>
-                <Form.Button
-                  label={this.props.saveLabel || "Save TrollBot Settings"}
-                  type="submit"
-                  component={RaisedButton}
-                  disabled={isWorking}
+                <RaisedButton
+                  label="Save Trollbot Url"
+                  primary
+                  disabled={isTrollbotSaveDisabled}
+                  onClick={this.handleSaveTrollbotUrl}
                 />
               </CardActions>
             </GSForm>
