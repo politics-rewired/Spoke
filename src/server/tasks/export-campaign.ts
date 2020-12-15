@@ -1,7 +1,7 @@
 /* eslint-disable no-cond-assign */
 import { format } from "fast-csv";
 import _ from "lodash";
-import moment from "moment";
+import { DateTime } from "luxon";
 
 import { getDownloadUrl, getUploadStream } from "../../workers/exports/upload";
 import {
@@ -291,7 +291,7 @@ export const processMessagesChunk = async (
     numMedia: message.num_media,
     sendStatus: message.send_status,
     errorCodes: message.error_codes,
-    attemptedAt: moment(message.created_at).toISOString(),
+    attemptedAt: DateTime.fromISO(message.created_at).toISO(),
     text: message.text,
     campaignId,
     "texter[firstName]": message.first_name,
@@ -334,7 +334,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     .replace(/\//g, "_");
 
   if (!isAutomatedExport) {
-    const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
+    const timestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
     campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
   }
   const messagesKey = `${campaignContactsKey}-messages`;

@@ -1,6 +1,6 @@
+import { DateTime } from "luxon";
 import { grey100 } from "material-ui/styles/colors";
 import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
-import moment from "moment-timezone";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -35,7 +35,9 @@ const ContactToolbar = function ContactToolbar(props) {
     : `${firstName}`;
 
   const timezone = contactTimezone || campaign.timezone;
-  const localTime = moment().tz(timezone).format("LT"); // format('h:mm a')
+  const localTime = DateTime.local()
+    .setZone(timezone)
+    .toLocaleString(DateTime.TIME_SIMPLE);
 
   const location = [city, state]
     .filter((item) => !!item)

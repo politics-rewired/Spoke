@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import CircularProgress from "material-ui/CircularProgress";
 import FlatButton from "material-ui/FlatButton";
 import IconButton from "material-ui/IconButton";
@@ -13,7 +14,6 @@ import {
   TableRow,
   TableRowColumn
 } from "material-ui/Table";
-import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -90,7 +90,9 @@ const AssignmentRequestTable = (props) => {
                   {user.firstName} {user.lastName}
                 </TableRowColumn>
                 <TableRowColumn>{request.amount}</TableRowColumn>
-                <TableRowColumn>{moment(createdAt).fromNow()}</TableRowColumn>
+                <TableRowColumn>
+                  {DateTime.fromISO(createdAt).toRelative()}
+                </TableRowColumn>
                 <TableRowColumn>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     {status === RowWorkStatus.Error && (

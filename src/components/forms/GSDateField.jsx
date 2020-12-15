@@ -1,51 +1,49 @@
+import { DateTime } from "luxon";
 import DatePicker from "material-ui/DatePicker";
-import moment from "moment";
 import React from "react";
 
 import GSFormField from "./GSFormField";
 
-export default class GCDateField extends GSFormField {
+export default class GSDateField extends GSFormField {
   render() {
     const {
-      value: momentVal,
+      value: propDate,
       type: _type,
       utcOffset,
       errorText: _errorText,
       onChange,
       ...childProps
     } = this.props;
-
-    const momentDate = moment(momentVal);
-    let oldDate = null;
-    if (momentDate.isValid()) {
-      const fakeDate = momentDate
-        .add(utcOffset - moment().utcOffset(), "minutes")
-        .toDate();
-      oldDate = moment(fakeDate).toObject();
-      childProps.value = fakeDate;
-    }
+    console.log(utcOffset);
+    const oldDate = DateTime.fromISO(propDate).plus({
+      minutes: utcOffset - DateTime.local().offset
+    });
+    childProps.value = oldDate.isValid ? oldDate.toJSDate() : childProps.value;
 
     return (
       <DatePicker
         {...childProps}
         floatingLabelText={this.floatingLabelText()}
         onChange={(_, date) => {
-          let newDate = moment(date);
-          if (!newDate.isValid()) {
-            onChange(null);
-          } else {
-            newDate = newDate.toObject();
-            if (oldDate) {
-              newDate.hours = oldDate.hours;
-              newDate.minutes = oldDate.minutes;
-              newDate.seconds = oldDate.seconds;
-            }
-            newDate = moment(newDate).add(
-              moment().utcOffset() - utcOffset,
-              "minutes"
-            );
-            onChange(newDate.toDate());
-          }
+          const newDate = DateTime.fromJSDate(date);
+          onChange(
+            !newDate.isValid
+              ? null
+              : newDate
+                  .set(
+                    oldDate.isValid
+                      ? {
+                          hour: oldDate.hour,
+                          minute: oldDate.minute,
+                          second: oldDate.second
+                        }
+                      : {}
+                  )
+                  .plus({
+                    minutes: DateTime.local().offset - utcOffset
+                  })
+                  .toISO()
+          );
         }}
       />
     );

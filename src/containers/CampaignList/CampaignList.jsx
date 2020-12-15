@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import Chip from "material-ui/Chip";
 import IconButton from "material-ui/IconButton";
 import IconMenu from "material-ui/IconMenu";
@@ -9,7 +10,6 @@ import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ArchiveIcon from "material-ui/svg-icons/content/archive";
 import UnarchiveIcon from "material-ui/svg-icons/content/unarchive";
 import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
-import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -117,7 +117,6 @@ export class CampaignList extends React.Component {
       isStarted,
       isArchived,
       isAutoassignEnabled,
-      dueBy,
       hasUnassignedContacts,
       hasUnsentInitialMessages,
       hasUnhandledMessages,
@@ -137,11 +136,10 @@ export class CampaignList extends React.Component {
     } else {
       listItemStyle = inlineStyles.good;
     }
-
-    const dueByMoment = moment(campaign.dueBy);
+    const dueBy = DateTime.fromISO(campaign.dueBy);
     const creatorName = campaign.creator ? campaign.creator.displayName : null;
     let tags = [];
-    if (moment().isSameOrAfter(moment(dueBy))) {
+    if (DateTime.local() >= dueBy) {
       tags.push({ title: "Overdue", color: grey900, backgroundColor: red300 });
     }
 
@@ -195,9 +193,7 @@ export class CampaignList extends React.Component {
           {campaign.description}
           {creatorName ? <span> &mdash; Created by {creatorName}</span> : null}
           <br />
-          {dueByMoment.isValid()
-            ? dueByMoment.format("MMM D, YYYY")
-            : "No due date set"}
+          {dueBy.isValid ? dueBy.toFormat("DD") : "No due date set"}
         </span>
       </span>
     );

@@ -5,7 +5,7 @@ import { GraphQLError } from "graphql/error";
 import _ from "lodash";
 import escapeRegExp from "lodash/escapeRegExp";
 import groupBy from "lodash/groupBy";
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 import request from "superagent";
 
 import { TextRequestType } from "../../api/organization";
@@ -618,13 +618,11 @@ async function sendMessage(
     throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
-  const sendBefore = moment()
-    .tz(timezone)
+  const sendBefore = DateTime.utc()
+    .set({ hour: endHour })
+    .setZone(timezone)
     .startOf("day")
-    .hour(endHour)
-    .utc()
-    .toISOString();
-
+    .toISO();
   const { contactNumber, text } = message;
 
   if (text.length > (config.MAX_MESSAGE_LENGTH || 99999)) {
@@ -2601,7 +2599,7 @@ const rootMutations = {
             and message_status = ?
             and archived = ${campaign.is_archived}
             and not exists (
-              select 1 
+              select 1
               from campaign_contact_tag
               join tag on tag.id = campaign_contact_tag.tag_id
               where tag.is_assignable = false
@@ -2665,7 +2663,7 @@ const rootMutations = {
               and message_status = 'needsResponse'
               and archived = false
               and not exists (
-                select 1 
+                select 1
                 from campaign_contact_tag
                 join tag on tag.id = campaign_contact_tag.tag_id
                 where tag.is_assignable = false
@@ -2677,7 +2675,7 @@ const rootMutations = {
                   campaign.texting_hours_start,
                   campaign.texting_hours_end,
                   extract('hour' from current_timestamp at time zone campaign.timezone) < campaign.texting_hours_end
-                  and 
+                  and
                   extract('hour' from current_timestamp at time zone campaign.timezone) > campaign.texting_hours_start
                 )
               )
@@ -2894,15 +2892,15 @@ const rootMutations = {
         `
           insert into all_tag (organization_id, author_id, title, description, is_assignable, on_apply_script, text_color, background_color, webhook_url, confirmation_steps)
           values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          on conflict on constraint tag_title_organization_id_unique do update set 
+          on conflict on constraint tag_title_organization_id_unique do update set
             deleted_at = null,
             author_id = EXCLUDED.author_id,
             description = EXCLUDED.description,
-            is_assignable = EXCLUDED.is_assignable, 
+            is_assignable = EXCLUDED.is_assignable,
             on_apply_script = EXCLUDED.on_apply_script,
             text_color = EXCLUDED.text_color,
             background_color = EXCLUDED.background_color,
-            webhook_url = EXCLUDED.webhook_url, 
+            webhook_url = EXCLUDED.webhook_url,
             confirmation_steps = EXCLUDED.confirmation_steps
           returning *
           ;`,

@@ -1,8 +1,8 @@
+import { DateTime } from "luxon";
 import Divider from "material-ui/Divider";
 import { List, ListItem } from "material-ui/List";
 import { red300 } from "material-ui/styles/colors";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
-import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -40,8 +40,9 @@ const styles = {
 };
 
 const MessageList = function MessageList(props) {
-  const { contact } = props;
-  const { optOut, messages } = contact;
+  const {
+    contact: { optOut, messages, firstName }
+  } = props;
 
   const optOutItem = optOut ? (
     <div>
@@ -50,8 +51,8 @@ const MessageList = function MessageList(props) {
         style={styles.optOut}
         leftIcon={<ProhibitedIcon style={{ fill: red300 }} />}
         disabled
-        primaryText={`${contact.firstName} opted out of texts`}
-        secondaryText={moment(optOut.createdAt).fromNow()}
+        primaryText={`${firstName} opted out of texts`}
+        secondaryText={DateTime.fromISO(optOut.createdAt).toRelative()}
       />
     </div>
   ) : (
@@ -73,7 +74,9 @@ const MessageList = function MessageList(props) {
             primaryText={
               <span style={{ whiteSpace: "pre-wrap" }}>{message.text}</span>
             }
-            secondaryText={`${moment(message.createdAt).fromNow()}`}
+            secondaryText={`${DateTime.fromISO(
+              message.createdAt
+            ).toRelative()}`}
           />
         );
       })}

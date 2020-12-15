@@ -1,8 +1,8 @@
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
+import { DateTime } from "luxon";
 import ColorPicker from "material-ui-color-picker";
-import moment from "moment";
 import React from "react";
 import Form from "react-formal";
 import { compose } from "recompose";
@@ -141,7 +141,9 @@ class CampaignBasicsForm extends React.Component<
           label="Due date"
           type="date"
           locale="en-US"
-          shouldDisableDate={(date: Date) => moment(date).diff(moment()) < 0}
+          shouldDisableDate={(date: Date) =>
+            DateTime.fromJSDate(date) < DateTime.local()
+          }
           autoOk
           fullWidth
           utcOffset={0}

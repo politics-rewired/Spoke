@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import DataTables from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
 import { green500, red500 } from "material-ui/styles/colors";
@@ -7,7 +8,6 @@ import ThumbDownIcon from "material-ui/svg-icons/action/thumb-down";
 import ThumbUpIcon from "material-ui/svg-icons/action/thumb-up";
 import BlockIcon from "material-ui/svg-icons/content/block";
 import Toggle from "material-ui/Toggle";
-import moment from "moment";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -71,7 +71,7 @@ class ShortLinkDomainList extends Component {
       key: "cycledOutAt",
       label: "Last Cycled Out",
       tooltip: "The last time this domain was cycled out of rotation.",
-      render: (value) => moment(value).fromNow()
+      render: (value) => DateTime.fromISO(value).toRelative()
     },
     {
       key: "createdAt",

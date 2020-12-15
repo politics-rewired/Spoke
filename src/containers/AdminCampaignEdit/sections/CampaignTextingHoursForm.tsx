@@ -1,8 +1,8 @@
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
+import { DateTime } from "luxon";
 import Autocomplete from "material-ui/AutoComplete";
-import moment from "moment";
 import React from "react";
 import Form from "react-formal";
 import { compose } from "recompose";
@@ -28,7 +28,8 @@ const formSchema = yup.object({
   timezone: yup.string().required()
 });
 
-const formatHour = (hour: number) => moment(hour, "H").format("h a");
+const formatHour = (hour: number) =>
+  DateTime.local().set({ hour }).toFormat("h a");
 const hourChoices = [...Array(24)].map((_, hour) =>
   dataSourceItem(formatHour(hour), hour)
 );

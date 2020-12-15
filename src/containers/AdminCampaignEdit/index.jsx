@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
+import { DateTime } from "luxon";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
@@ -10,7 +11,6 @@ import { red600 } from "material-ui/styles/colors";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
-import moment from "moment";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
@@ -506,9 +506,9 @@ class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true,
         extraProps: {
-          isOverdue: moment().isSameOrAfter(
-            this.props.campaignData.campaign.dueBy
-          ),
+          isOverdue:
+            DateTime.local() >=
+            DateTime.fromISO(this.props.campaignData.campaign.dueBy),
           orgTexters: this.props.organizationData.organization.texters,
           organizationUuid: this.props.organizationData.organization.uuid,
           campaignId: this.props.campaignData.campaign.id
@@ -638,7 +638,7 @@ class AdminCampaignEdit extends React.Component {
       campaign: { dueBy, isStarted, title } = {}
     } = this.props.campaignData;
 
-    const isOverdue = moment().isSameOrAfter(dueBy);
+    const isOverdue = DateTime.local() >= DateTime.fromISO(dueBy);
 
     const notStarting = isStarted ? (
       <div

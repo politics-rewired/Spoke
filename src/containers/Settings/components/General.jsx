@@ -1,5 +1,6 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
+import { DateTime } from "luxon";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
@@ -7,7 +8,6 @@ import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
-import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 import Form from "react-formal";
@@ -54,7 +54,8 @@ const inlineStyles = {
   }
 };
 
-const formatTextingHours = (hour) => moment(hour, "H").format("h a");
+const formatTextingHours = (hour) =>
+  DateTime.local().set({ hour }).toFormat("h a");
 
 class Settings extends React.Component {
   state = {

@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+import { DateTime } from "luxon";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -19,7 +20,6 @@ import {
   TableRowColumn
 } from "material-ui/Table";
 import TextField from "material-ui/TextField";
-import moment from "moment";
 import React, { Component } from "react";
 
 import {
@@ -171,7 +171,7 @@ class AdminExternalSystems extends Component<Props, State> {
                 <TableRowColumn>{system.type}</TableRowColumn>
                 <TableRowColumn>
                   {system.syncedAt
-                    ? moment(system.syncedAt).fromNow()
+                    ? DateTime.fromISO(system.syncedAt).toRelative()
                     : "never"}
                 </TableRowColumn>
                 <TableRowColumn>

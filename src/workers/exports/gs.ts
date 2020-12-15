@@ -1,7 +1,9 @@
+import * as crypto from "crypto";
+
 const { config } = require("../../config");
 const { upload: awsUpload } = require("./s3");
-const crypto = require("crypto");
-const moment = require("moment");
+
+const { DateTime } = require("luxon");
 
 const {
   AWS_ENDPOINT: awsEndpoint = "https://storage.googleapis.com",
@@ -10,7 +12,9 @@ const {
 } = config;
 
 const encodeSign = (url, encoding = "hex") => {
-  const hmac = crypto.createHmac("sha256", Buffer.from(hmacSecret, "base64"));
+  const hmac = crypto.createHmac();
+
+  crypto.createHmac("sha256", Buffer.from(hmacSecret, "base64"));
   hmac.update(url);
   const signature = hmac.digest(encoding);
   return signature;
@@ -29,7 +33,8 @@ const getSignedHeaders = () => HEADERS.map(([headerName]) => headerName);
 
 // https://cloud.google.com/storage/docs/access-control/signed-urls#credential-scope
 const getCredentialScope = () => {
-  const date = moment().format("YYYYMMDD");
+  const date = DateTime.local().toFormat("YYYYMMDD");
+
   const location = "auto";
   const service = "storage";
   const urlType = "goog4_request";
@@ -44,7 +49,7 @@ const queryStringParameters = () => ({
   "X-Goog-Credential": encodeForwardSlashes(
     `${hmacKey}/${getCredentialScope()}`
   ),
-  "X-Goog-Date": moment().format("YYYYMMDD[T]HHMMSS[Z]"),
+  "X-Goog-Date": DateTime.local().toFormat("YYYYMMDD[T]HHMMSS[Z]"),
   "X-Goog-Expires": 60 * 60 * 24, // 24 hours
   "X-Goog-SignedHeaders": getSignedHeaders().join(";")
 });

@@ -1,9 +1,9 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
+import { DateTime } from "luxon";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
-import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
@@ -145,8 +145,10 @@ class AdminCampaignStats extends React.Component {
       ? `Syncing to VAN (${vanSyncJob.status}%)`
       : "Sync to VAN";
 
-    const dueFormatted = moment(campaign.dueBy).format("MMM D, YYYY");
-    const isOverdue = moment().isSameOrAfter(campaign.dueBy);
+    const dueFormatted = campaign.dueBy
+      ? DateTime.fromISO(campaign.dueBy).toFormat("DD")
+      : "No Due Date";
+    const isOverdue = DateTime.local() >= DateTime.fromISO(campaign.dueBy);
 
     return (
       <div>

@@ -1,10 +1,10 @@
 import gql from "graphql-tag";
+import { DateTime } from "luxon";
 import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
 import { green500, grey500 } from "material-ui/styles/colors";
-import moment from "moment";
 import React from "react";
 
 import { ExternalSystem } from "../../../../../api/external-system";
@@ -42,7 +42,7 @@ export const ExternalSystemsSource: React.SFC<Props> = (props) => {
         title={externalSystem.name}
         subtitle={`Lists last pulled: ${
           externalSystem.syncedAt
-            ? moment(externalSystem.syncedAt).fromNow()
+            ? DateTime.fromISO(externalSystem.syncedAt).toRelative()
             : "never"
         }`}
         avatar={
