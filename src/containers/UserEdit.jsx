@@ -143,7 +143,7 @@ class UserEdit extends React.Component {
 
   handleClose = () => {
     if (this.props.authType === UserEditMode.EmailReset) {
-      window.history.href = "/login";
+      window.location.href = "/login";
     }
     this.setState({ changePasswordDialog: false, successDialog: false });
   };
