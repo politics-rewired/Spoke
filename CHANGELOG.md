@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.10.1](https://github.com/politics-rewired/spoke/compare/v3.10.0...v3.10.1) (2020-12-15)
+
+
+### Bug Fixes
+
+* **auth:** remove incorrect local login error ([#808](https://github.com/politics-rewired/spoke/issues/808)) ([ef1b8cd](https://github.com/politics-rewired/spoke/commit/ef1b8cd0b031e2463627e8f49468e1d87d38aa88))
+* make disabled buttons unclickable ([#802](https://github.com/politics-rewired/spoke/issues/802)) ([946d82f](https://github.com/politics-rewired/spoke/commit/946d82f1fdca52561530d65def17bbddda4fb986))
+* wrap long campaign descriptions ([#803](https://github.com/politics-rewired/spoke/issues/803)) ([05fc9a7](https://github.com/politics-rewired/spoke/commit/05fc9a715aca3c991e57cb5154a6463adc467492))
+* **van:** sync messaged contacts without question responses ([#798](https://github.com/politics-rewired/spoke/issues/798)) ([8aff5d7](https://github.com/politics-rewired/spoke/commit/8aff5d7b7ac4b735c635c3617187eb21e7622da3))
+* add contact name filter to bulk assignment action filter ([#799](https://github.com/politics-rewired/spoke/issues/799)) ([cb5cd3b](https://github.com/politics-rewired/spoke/commit/cb5cd3b6d355b52a0563af02bde8ae5247d4c383)), closes [#796](https://github.com/politics-rewired/spoke/issues/796)
+* fix message review display in safari ([#800](https://github.com/politics-rewired/spoke/issues/800)) ([a1274ac](https://github.com/politics-rewired/spoke/commit/a1274ac9395f2f215e6e83301c0ae6b44484c47e))
+
 ## [3.10.0](https://github.com/politics-rewired/spoke/compare/v3.9.0...v3.10.0) (2020-12-11)
 
 
