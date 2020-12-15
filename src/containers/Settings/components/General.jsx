@@ -401,7 +401,6 @@ class Settings extends React.Component {
           <Card className={css(styles.sectionCard)}>
             <GSForm
               schema={trollbotSettingsSchema}
-              onSubmit={this.handleSaveTrollbotUrl}
               value={{ trollbotWebhookUrl }}
               onChange={({ trollbotWebhookUrl: newValue }) =>
                 this.setState({
