@@ -120,10 +120,11 @@ export class AssignmentSummary extends Component {
       useDynamicAssignment
     } = assignment.campaign;
     const { maxContacts } = assignment;
+    const dueByText = dueBy
+      ? DateTime.fromISO(dueBy).toFormat("MMM D YYYY")
+      : "No Due Date";
+    const subtitle = `${description} - ${dueByText}`;
 
-    const subtitle = `${description} - ${
-      dueBy ? DateTime.fromISO(dueBy).toFormat("MMM D YYYY") : "No Due Date"
-    }`;
     return (
       <div className={css(styles.container)}>
         <Card key={assignment.id}>

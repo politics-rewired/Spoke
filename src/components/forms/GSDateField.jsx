@@ -14,7 +14,6 @@ export default class GSDateField extends GSFormField {
       onChange,
       ...childProps
     } = this.props;
-    console.log(utcOffset);
     const oldDate = DateTime.fromISO(propDate).plus({
       minutes: utcOffset - DateTime.local().offset
     });
@@ -25,25 +24,21 @@ export default class GSDateField extends GSFormField {
         {...childProps}
         floatingLabelText={this.floatingLabelText()}
         onChange={(_, date) => {
-          const newDate = DateTime.fromJSDate(date);
-          onChange(
-            !newDate.isValid
-              ? null
-              : newDate
-                  .set(
-                    oldDate.isValid
-                      ? {
-                          hour: oldDate.hour,
-                          minute: oldDate.minute,
-                          second: oldDate.second
-                        }
-                      : {}
-                  )
-                  .plus({
-                    minutes: DateTime.local().offset - utcOffset
-                  })
-                  .toISO()
-          );
+          const newDate = DateTime.fromJSDate(date)
+            .set(
+              oldDate.isValid
+                ? {
+                    hour: oldDate.hour,
+                    minute: oldDate.minute,
+                    second: oldDate.second
+                  }
+                : {}
+            )
+            .plus({
+              minutes: DateTime.local().offset - utcOffset
+            });
+
+          onChange(newDate.isValid ? newDate.toISO() : null);
         }}
       />
     );

@@ -1,6 +1,6 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 import React, { Component } from "react";
 
 import { Message } from "../../../api/message";
@@ -97,14 +97,16 @@ class MessageList extends Component<Props> {
               </p>
               <p style={senderInfoStyle}>
                 {message.isFromContact
-                  ? `Received at ${moment(message.createdAt).fromNow()}`
+                  ? `Received at ${DateTime.fromISO(
+                      message.createdAt
+                    ).toRelative()}`
                   : message.sendStatus === "ERROR"
-                  ? `Carrier rejected this message sent by ${senderName} at ${moment(
+                  ? `Carrier rejected this message sent by ${senderName} at ${DateTime.fromISO(
                       message.createdAt
-                    ).fromNow()}`
-                  : `Sent by ${senderName} ${moment(
+                    ).toRelative()}`
+                  : `Sent by ${senderName} ${DateTime.fromISO(
                       message.createdAt
-                    ).fromNow()}`}
+                    ).toRelative()}`}
               </p>
             </div>
           );
