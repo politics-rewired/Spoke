@@ -17,7 +17,7 @@ interface AuthHelperOptions {
   password: string;
   existingUser: UserRecord;
   nextUrl: string;
-  uuidMatch: RegExpMatchArray;
+  uuidMatch: RegExpMatchArray | null;
   reqBody: any;
 }
 

@@ -282,7 +282,6 @@ function setupLocalAuthPassport() {
 
       // eslint-disable-next-line no-useless-escape
       const uuidMatch = nextUrl.match(/\w{8}-(\w{4}\-){3}\w{12}/);
-      if (!uuidMatch) return done(new LocalAuthError("Could not match uuid"));
 
       const lowerCaseEmail = username.toLowerCase();
       const existingUser = await db
