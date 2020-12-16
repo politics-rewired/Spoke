@@ -37,6 +37,8 @@ import { loadData } from "./hoc/with-operations";
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
 
+const ACTIONS_COLUMN_INDEX = 3;
+
 interface Props {
   match: any;
   history: History;
@@ -141,9 +143,8 @@ class AdminExternalSystems extends Component<Props, State> {
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
 
-  handleCellClick = (row: number, column: number) => {
-    // Ignore clicks in Actions column
-    if (column > 2) return;
+  handleCellClick = (row: number, columnIndex: number) => {
+    if (columnIndex === ACTIONS_COLUMN_INDEX) return;
 
     const systemId = this.props.data.externalSystems.edges[row].node.id;
     this.navigateToSystemDetail(systemId);
@@ -183,6 +184,7 @@ class AdminExternalSystems extends Component<Props, State> {
         <Table selectable={false} onCellClick={this.handleCellClick}>
           <TableHeader displaySelectAll={false} enableSelectAll={false}>
             <TableRow>
+              {/* Make sure to update ACTIONS_COLUMN_INDEX when changing columns! */}
               <TableHeaderColumn>Name</TableHeaderColumn>
               <TableHeaderColumn>Type</TableHeaderColumn>
               <TableHeaderColumn>Sync Options Last Fetched</TableHeaderColumn>
