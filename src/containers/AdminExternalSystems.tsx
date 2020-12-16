@@ -101,14 +101,27 @@ class AdminExternalSystems extends Component<Props, State> {
   cancelEditingExternalSystem = () =>
     this.setState({ editingExternalSystem: undefined });
 
-  saveExternalSystem = () => {
+  navigateToSystemDetail = (systemId: string) => {
+    const { organizationId } = this.props.match.params;
+    this.props.history.push(
+      `/admin/${organizationId}/integrations/${systemId}`
+    );
+  };
+
+  saveExternalSystem = async () => {
     const handleError = console.error;
 
     if (this.state.editingExternalSystem === "new") {
-      this.props.mutations
-        .createExternalSystem(this.state.externalSystem)
-        .then(this.cancelEditingExternalSystem)
-        .catch(handleError);
+      try {
+        const result = await this.props.mutations.createExternalSystem(
+          this.state.externalSystem
+        );
+        this.cancelEditingExternalSystem();
+        const systemId = result.data.createExternalSystem.id;
+        this.navigateToSystemDetail(systemId);
+      } catch (err) {
+        handleError(err);
+      }
     } else {
       this.props.mutations
         .editExternalSystem(
@@ -132,11 +145,8 @@ class AdminExternalSystems extends Component<Props, State> {
     // Ignore clicks in Actions column
     if (column > 2) return;
 
-    const { organizationId } = this.props.match.params;
     const systemId = this.props.data.externalSystems.edges[row].node.id;
-    this.props.history.push(
-      `/admin/${organizationId}/integrations/${systemId}`
-    );
+    this.navigateToSystemDetail(systemId);
   };
 
   render() {
