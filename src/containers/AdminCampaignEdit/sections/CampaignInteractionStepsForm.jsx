@@ -1,4 +1,5 @@
 import isEqual from "lodash/isEqual";
+import { DateTime } from "luxon";
 import { Dialog } from "material-ui";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import FlatButton from "material-ui/FlatButton";
@@ -124,7 +125,8 @@ class CampaignInteractionStepsForm extends React.Component {
           scriptOptions: [""],
           answerOption: "",
           answerActions: "",
-          isDeleted: false
+          isDeleted: false,
+          createdAt: DateTime.local().toISO()
         }
       ]
     });
@@ -391,13 +393,15 @@ class CampaignInteractionStepsForm extends React.Component {
     const { saveLabel } = this.props;
     const tree = makeTree(this.state.interactionSteps);
 
-    const emptyScriptSteps = this.state.interactionSteps.filter((step) => {
-      const hasNoOptions = step.scriptOptions.length === 0;
-      const hasEmptyScripts =
-        step.scriptOptions.filter((version) => version.trim() === "").length >
-        0;
-      return hasNoOptions || hasEmptyScripts;
-    });
+    const emptyScriptSteps = this.state.interactionSteps
+      .filter((step) => !step.isDeleted)
+      .filter((step) => {
+        const hasNoOptions = step.scriptOptions.length === 0;
+        const hasEmptyScripts =
+          step.scriptOptions.filter((version) => version.trim() === "").length >
+          0;
+        return hasNoOptions || hasEmptyScripts;
+      });
 
     const hasEmptyScripts = emptyScriptSteps.length > 0;
     const hasUnsavedSteps = this.checkUnsavedChanges();

@@ -110,6 +110,7 @@
     "isomorphic-fetch": "^2.2.1",
     "knex": "^0.21.1",
     "lodash": "^4.13.1",
+    "luxon": "^1.25.0",
     "mailgun-js": "^0.16.0",
     "material-ui": "^0.20.1",
     "material-ui-chip-input": "0.18.5",

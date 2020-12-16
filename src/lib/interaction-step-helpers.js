@@ -1,3 +1,6 @@
+const _ = require("lodash");
+const { DateTime } = require("luxon");
+
 export function findParent(interactionStep, allInteractionSteps, isModel) {
   let parent = null;
   allInteractionSteps.forEach((step) => {
@@ -93,13 +96,14 @@ export function makeTree(interactionSteps, id = null) {
   const root = interactionSteps.filter((is) =>
     id ? is.id === id : is.parentInteractionId === null
   )[0];
-  const children = interactionSteps.filter(
-    (is) => is.parentInteractionId === root.id
-  );
+  const sortKey = DateTime.fromISO(root.createdAt).isValid ? "createdAt" : null;
+
   return {
     ...root,
-    interactionSteps: children.map((c) => {
-      return makeTree(interactionSteps, c.id);
-    })
+    interactionSteps: _(interactionSteps)
+      .filter((is) => is.parentInteractionId === root.id)
+      .sortBy(sortKey)
+      .map((c) => makeTree(interactionSteps, c.id))
+      .value()
   };
 }
