@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
 import { History } from "history";
+import { Card, CardHeader, CardText } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
 import ArrowBack from "material-ui/svg-icons/navigation/arrow-back";
 import React from "react";
@@ -38,8 +39,17 @@ export const AdminExternalSystemsDetail: React.SFC<Props> = (props) => {
         </IconButton>
         {externalSystem.name}
       </h1>
-      <p>Integration type: {externalSystem.type}</p>
-      <p>Username: {externalSystem.username}</p>
+      <Card>
+        <CardHeader title="Integration Information" />
+        <CardText>
+          <dl>
+            <dt>Integration type</dt>
+            <dd>{externalSystem.type}</dd>
+            <dt>Username</dt>
+            <dd>{externalSystem.username}</dd>
+          </dl>
+        </CardText>
+      </Card>
     </div>
   );
 };
