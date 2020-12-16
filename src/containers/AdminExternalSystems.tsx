@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+import { History } from "history";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -21,6 +22,8 @@ import {
 import TextField from "material-ui/TextField";
 import moment from "moment";
 import React, { Component } from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
 import {
   ExternalSystem,
@@ -36,6 +39,7 @@ const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
 
 interface Props {
   match: any;
+  history: History;
   mutations: {
     createExternalSystem: (
       input: ExternalSystemInput
@@ -124,6 +128,17 @@ class AdminExternalSystems extends Component<Props, State> {
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
 
+  handleCellClick = (row: number, column: number) => {
+    // Ignore clicks in Actions column
+    if (column > 2) return;
+
+    const { organizationId } = this.props.match.params;
+    const systemId = this.props.data.externalSystems.edges[row].node.id;
+    this.props.history.push(
+      `/admin/${organizationId}/integrations/${systemId}`
+    );
+  };
+
   render() {
     const { externalSystems } = this.props.data;
     const {
@@ -155,7 +170,7 @@ class AdminExternalSystems extends Component<Props, State> {
           onClick={this.handleRefreshSystems}
         />
 
-        <Table selectable={false}>
+        <Table selectable={false} onCellClick={this.handleCellClick}>
           <TableHeader displaySelectAll={false} enableSelectAll={false}>
             <TableRow>
               <TableHeaderColumn>Name</TableHeaderColumn>
@@ -359,7 +374,10 @@ const mutations: MutationMap<Props> = {
   })
 };
 
-export default loadData({
-  queries,
-  mutations
-})(AdminExternalSystems);
+export default compose(
+  withRouter,
+  loadData({
+    queries,
+    mutations
+  })
+)(AdminExternalSystems);
