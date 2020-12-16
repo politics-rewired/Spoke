@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.11.0](https://github.com/politics-rewired/spoke/compare/v3.10.1...v3.11.0) (2020-12-16)
+
+
+### Features
+
+* add integration detail page ([#811](https://github.com/politics-rewired/spoke/issues/811)) ([1ea0628](https://github.com/politics-rewired/spoke/commit/1ea062897aa5c3fe4d37083a16a464a1957c8c54)), closes [#773](https://github.com/politics-rewired/spoke/issues/773) [#797](https://github.com/politics-rewired/spoke/issues/797)
+
+
+### Bug Fixes
+
+* revert query argument to use gql query argument ([#810](https://github.com/politics-rewired/spoke/issues/810)) ([640f50c](https://github.com/politics-rewired/spoke/commit/640f50cb9e1401bbdaa257d20b678eac49b83f7c)), closes [#726](https://github.com/politics-rewired/spoke/issues/726)
+* **integrations:** pass correct value to binding ([8c1eea4](https://github.com/politics-rewired/spoke/commit/8c1eea431335cc1f1a8e3e155e016bc416de2427))
+* **switchboard:** update client lib to support sendBefore param ([9e0914d](https://github.com/politics-rewired/spoke/commit/9e0914d0e8559170ddd5080789cc42d83f7e0360)), closes [#774](https://github.com/politics-rewired/spoke/issues/774)
+
 ### [3.10.1](https://github.com/politics-rewired/spoke/compare/v3.10.0...v3.10.1) (2020-12-15)
 
 
