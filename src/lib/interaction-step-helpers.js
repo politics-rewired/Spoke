@@ -92,18 +92,27 @@ export function getTopMostParent(interactionSteps, _isModel) {
   return interactionSteps.find((step) => step.parentInteractionId === null);
 }
 
-export function makeTree(interactionSteps, id = null) {
-  const root = interactionSteps.filter((is) =>
-    id ? is.id === id : is.parentInteractionId === null
-  )[0];
-  const sortKey = DateTime.fromISO(root.createdAt).isValid ? "createdAt" : null;
+export function makeTree(interactionSteps, id = null, indexed = null) {
+  const indexedById =
+    indexed ||
+    _(interactionSteps)
+      .map((is) => [is.id, is])
+      .fromPairs()
+      .value();
+  const root = id
+    ? indexedById[id]
+    : interactionSteps.find((is) => is.parentInteractionId === null);
 
   return {
     ...root,
     interactionSteps: _(interactionSteps)
       .filter((is) => is.parentInteractionId === root.id)
-      .sortBy(sortKey)
-      .map((c) => makeTree(interactionSteps, c.id))
+      .sortBy((is) => {
+        const asDate = DateTime.fromISO(is.createdAt);
+        return asDate.isValid ? asDate : null;
+      })
+      .reverse() // ui puts newest step at top
+      .map((c) => makeTree(interactionSteps, c.id, indexedById))
       .value()
   };
 }
