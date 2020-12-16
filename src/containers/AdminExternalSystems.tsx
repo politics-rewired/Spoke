@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+import { History } from "history";
 import { DateTime } from "luxon";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
@@ -21,6 +22,8 @@ import {
 } from "material-ui/Table";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
+import { compose } from "react-apollo";
+import { withRouter } from "react-router-dom";
 
 import {
   ExternalSystem,
@@ -34,8 +37,11 @@ import { loadData } from "./hoc/with-operations";
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
 
+const ACTIONS_COLUMN_INDEX = 3;
+
 interface Props {
   match: any;
+  history: History;
   mutations: {
     createExternalSystem: (
       input: ExternalSystemInput
@@ -97,14 +103,27 @@ class AdminExternalSystems extends Component<Props, State> {
   cancelEditingExternalSystem = () =>
     this.setState({ editingExternalSystem: undefined });
 
-  saveExternalSystem = () => {
+  navigateToSystemDetail = (systemId: string) => {
+    const { organizationId } = this.props.match.params;
+    this.props.history.push(
+      `/admin/${organizationId}/integrations/${systemId}`
+    );
+  };
+
+  saveExternalSystem = async () => {
     const handleError = console.error;
 
     if (this.state.editingExternalSystem === "new") {
-      this.props.mutations
-        .createExternalSystem(this.state.externalSystem)
-        .then(this.cancelEditingExternalSystem)
-        .catch(handleError);
+      try {
+        const result = await this.props.mutations.createExternalSystem(
+          this.state.externalSystem
+        );
+        this.cancelEditingExternalSystem();
+        const systemId = result.data.createExternalSystem.id;
+        this.navigateToSystemDetail(systemId);
+      } catch (err) {
+        handleError(err);
+      }
     } else {
       this.props.mutations
         .editExternalSystem(
@@ -123,6 +142,13 @@ class AdminExternalSystems extends Component<Props, State> {
     this.setState((prevState) => ({
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
+
+  handleCellClick = (row: number, columnIndex: number) => {
+    if (columnIndex === ACTIONS_COLUMN_INDEX) return;
+
+    const systemId = this.props.data.externalSystems.edges[row].node.id;
+    this.navigateToSystemDetail(systemId);
+  };
 
   render() {
     const { externalSystems } = this.props.data;
@@ -155,9 +181,10 @@ class AdminExternalSystems extends Component<Props, State> {
           onClick={this.handleRefreshSystems}
         />
 
-        <Table selectable={false}>
+        <Table selectable={false} onCellClick={this.handleCellClick}>
           <TableHeader displaySelectAll={false} enableSelectAll={false}>
             <TableRow>
+              {/* Make sure to update ACTIONS_COLUMN_INDEX when changing columns! */}
               <TableHeaderColumn>Name</TableHeaderColumn>
               <TableHeaderColumn>Type</TableHeaderColumn>
               <TableHeaderColumn>Sync Options Last Fetched</TableHeaderColumn>
@@ -359,7 +386,10 @@ const mutations: MutationMap<Props> = {
   })
 };
 
-export default loadData({
-  queries,
-  mutations
-})(AdminExternalSystems);
+export default compose(
+  withRouter,
+  loadData({
+    queries,
+    mutations
+  })
+)(AdminExternalSystems);

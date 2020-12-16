@@ -1,4 +1,5 @@
 import ChipInput from "material-ui-chip-input";
+import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
@@ -11,6 +12,13 @@ import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading
 const formSchema = yup.object({
   isAssignmentLimitedToTeams: yup.boolean()
 });
+
+const styles = {
+  button: {
+    display: "inline-block",
+    marginTop: 15
+  }
+};
 
 class CampaignTeamsForm extends React.Component {
   onIsAssignmentLimitedToTeamsDidToggle = (
@@ -58,46 +66,46 @@ class CampaignTeamsForm extends React.Component {
       saveDisabled,
       formValues,
       orgTeams,
-      onChange,
-      onSubmit
+      onChange
     } = this.props;
 
     return (
-      <GSForm
-        schema={formSchema}
-        value={formValues}
-        onChange={onChange}
-        onSubmit={onSubmit}
-      >
-        <CampaignFormSectionHeading
-          title="Teams for campaign"
-          subtitle="Optionally prioritize assigning texters from specific teams for this campaign by selecting them below. Restrict assignment solely to members of selected teams by using the toggle below."
+      <div>
+        <GSForm schema={formSchema} value={formValues} onChange={onChange}>
+          <CampaignFormSectionHeading
+            title="Teams for campaign"
+            subtitle="Optionally prioritize assigning texters from specific teams for this campaign by selecting them below. Restrict assignment solely to members of selected teams by using the toggle below."
+          />
+
+          <ChipInput
+            value={formValues.teams}
+            dataSourceConfig={{ text: "title", value: "id" }}
+            dataSource={orgTeams}
+            placeholder="Select teams"
+            fullWidth
+            openOnFocus
+            onBeforeRequestAdd={this.handleBeforeRequestAdd}
+            onRequestAdd={this.handleAddTeam}
+            onRequestDelete={this.handleRemoveTeam}
+          />
+
+          <br />
+
+          <Form.Field
+            name="isAssignmentLimitedToTeams"
+            type={Toggle}
+            toggled={formValues.isAssignmentLimitedToTeams}
+            label="Restrict assignment solely to members of these teams?"
+            onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
+          />
+        </GSForm>
+        <RaisedButton
+          label={saveLabel}
+          disabled={saveDisabled}
+          onClick={this.props.onSubmit}
+          style={styles.button}
         />
-
-        <ChipInput
-          value={formValues.teams}
-          dataSourceConfig={{ text: "title", value: "id" }}
-          dataSource={orgTeams}
-          placeholder="Select teams"
-          fullWidth
-          openOnFocus
-          onBeforeRequestAdd={this.handleBeforeRequestAdd}
-          onRequestAdd={this.handleAddTeam}
-          onRequestDelete={this.handleRemoveTeam}
-        />
-
-        <br />
-
-        <Form.Field
-          name="isAssignmentLimitedToTeams"
-          type={Toggle}
-          toggled={formValues.isAssignmentLimitedToTeams}
-          label="Restrict assignment solely to members of these teams?"
-          onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
-        />
-
-        <Form.Button type="submit" disabled={saveDisabled} label={saveLabel} />
-      </GSForm>
+      </div>
     );
   }
 }

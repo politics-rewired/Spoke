@@ -1,3 +1,4 @@
+import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import FlatButton from "material-ui/FlatButton";
@@ -225,6 +226,15 @@ class CampaignInteractionStepsForm extends React.Component {
     });
   };
 
+  checkUnsavedChanges = () => {
+    const { interactionSteps: pendingSteps } = this.state;
+    const { interactionSteps } = this.props.formValues;
+
+    const hasUnsavedChanges = !isEqual(pendingSteps, interactionSteps);
+
+    return hasUnsavedChanges;
+  };
+
   renderInteractionStep(interactionStep, title = "Start") {
     const { availableActions, customFields } = this.props;
 
@@ -378,6 +388,7 @@ class CampaignInteractionStepsForm extends React.Component {
   }
 
   render() {
+    const { saveLabel } = this.props;
     const tree = makeTree(this.state.interactionSteps);
 
     const emptyScriptSteps = this.state.interactionSteps.filter((step) => {
@@ -389,6 +400,9 @@ class CampaignInteractionStepsForm extends React.Component {
     });
 
     const hasEmptyScripts = emptyScriptSteps.length > 0;
+    const hasUnsavedSteps = this.checkUnsavedChanges();
+
+    const shouldDisableSave = !hasUnsavedSteps || hasEmptyScripts;
 
     return (
       <div
@@ -424,9 +438,9 @@ class CampaignInteractionStepsForm extends React.Component {
         <RaisedButton
           {...dataTest("interactionSubmit")}
           primary
-          label={this.props.saveLabel}
-          disabled={hasEmptyScripts}
-          onTouchTap={this.onSave}
+          label={saveLabel}
+          disabled={shouldDisableSave}
+          onClick={this.onSave}
         />
         {hasEmptyScripts && (
           <p style={{ color: "#DD0000" }}>

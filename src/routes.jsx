@@ -14,6 +14,7 @@ import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
 import AdminCampaignEdit from "./containers/AdminCampaignEdit";
 import AdminCampaignList from "./containers/AdminCampaignList";
 import AdminCampaignStats from "./containers/AdminCampaignStats";
+import AdminExternalSystemDetail from "./containers/AdminExternalSystemDetail";
 import AdminExternalSystems from "./containers/AdminExternalSystems";
 import AdminIncomingMessageList from "./containers/AdminIncomingMessageList";
 import EscalatedConversationList from "./containers/AdminIncomingMessageList/EscalatedConversationList";
@@ -175,8 +176,13 @@ const AdminOrganizationRoutes = (props) => {
             component={AdminTrollAlarms}
           />
           <Route
+            exact
             path={`${organizationPath}/integrations`}
             component={AdminExternalSystems}
+          />
+          <Route
+            path={`${organizationPath}/integrations/:systemId`}
+            component={AdminExternalSystemDetail}
           />
           <Redirect
             exact
