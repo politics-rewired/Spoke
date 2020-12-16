@@ -79,14 +79,6 @@ interface State {
   error: string | undefined;
 }
 
-const getVanOperationMode = (apiKey: string) => {
-  const isMyCampaignMode = apiKey.endsWith("|1");
-  if (isMyCampaignMode) {
-    return VanOperationMode.MyCampaign;
-  }
-  return VanOperationMode.Voterfile;
-};
-
 class AdminExternalSystems extends Component<Props, State> {
   state: State = {
     editingExternalSystem: undefined,
@@ -94,7 +86,8 @@ class AdminExternalSystems extends Component<Props, State> {
       name: "",
       type: ExternalSystemType.VAN,
       username: "",
-      apiKey: ""
+      apiKey: "",
+      operationMode: VanOperationMode.Voterfile
     },
     syncInitiatedForId: undefined,
     error: undefined
@@ -115,7 +108,9 @@ class AdminExternalSystems extends Component<Props, State> {
   };
 
   makeHandleRefreshExternalSystem = (systemId: string) => () => {
-    this.props.mutations.refreshSystem(systemId);
+    this.props.mutations
+      .refreshSystem(systemId)
+      .catch((error) => this.setState({ error: error.message }));
     this.setState({ syncInitiatedForId: systemId });
   };
 
@@ -138,8 +133,8 @@ class AdminExternalSystems extends Component<Props, State> {
     if (this.state.editingExternalSystem === "new") {
       this.props.mutations
         .createExternalSystem(this.state.externalSystem)
-        .then(this.cancelEditingExternalSystem)
-        .catch((error) => this.setState({ error: error.message }));
+        .catch((error) => this.setState({ error: error.message }))
+        .then(this.cancelEditingExternalSystem);
     } else {
       this.props.mutations
         .editExternalSystem(
@@ -172,21 +167,9 @@ class AdminExternalSystems extends Component<Props, State> {
     newOperationMode: VanOperationMode
   ) => {
     const { externalSystem } = this.state;
-    const { apiKey } = externalSystem;
-    const currentOperationMode = getVanOperationMode(apiKey);
-    const shouldUpdateKey = currentOperationMode !== newOperationMode;
-    if (newOperationMode === VanOperationMode.MyCampaign && shouldUpdateKey) {
-      const newApiKey = apiKey.concat("|1");
-      this.setState({
-        externalSystem: { ...externalSystem, apiKey: newApiKey }
-      });
-    }
-    if (newOperationMode === VanOperationMode.Voterfile && shouldUpdateKey) {
-      const newApiKey = apiKey.slice(0, -2);
-      this.setState({
-        externalSystem: { ...externalSystem, apiKey: newApiKey }
-      });
-    }
+    this.setState({
+      externalSystem: { ...externalSystem, operationMode: newOperationMode }
+    });
   };
 
   handleCancelError = () => {
@@ -208,7 +191,6 @@ class AdminExternalSystems extends Component<Props, State> {
       (edge) => edge.node.id === syncInitiatedForId
     );
     const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
-    const vanOperationMode = getVanOperationMode(apiKey);
 
     const errorActions = [
       <FlatButton
@@ -317,7 +299,7 @@ class AdminExternalSystems extends Component<Props, State> {
             <SelectField
               floatingLabelText="VAN Operation Mode"
               fullWidth
-              value={vanOperationMode}
+              value={externalSystem.operationMode}
               onChange={this.handleSelectOperationMode}
             >
               {VAN_OPERATION_MODE.map((mode) => (
@@ -383,6 +365,7 @@ const queries: QueryMap<Props> = {
               username
               apiKey
               syncedAt
+              operationMode
             }
           }
         }
@@ -416,6 +399,7 @@ const mutations: MutationMap<Props> = {
           apiKey
           createdAt
           updatedAt
+          operationMode
         }
       }
     `,
@@ -440,6 +424,7 @@ const mutations: MutationMap<Props> = {
           type
           username
           apiKey
+          operationMode
         }
       }
     `,

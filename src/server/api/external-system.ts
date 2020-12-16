@@ -14,6 +14,7 @@ interface ExternalSystem {
   type: ExternalSystemType;
   username: string;
   api_key_ref: string;
+  operation_mode: string;
 }
 
 interface StatusFilterArgs {
@@ -31,7 +32,8 @@ export const resolvers = {
       "username",
       "createdAt",
       "updatedAt",
-      "syncedAt"
+      "syncedAt",
+      "operationMode"
     ]),
     type: (system: ExternalSystem) => system.type.toUpperCase(),
     apiKey: async (system: ExternalSystem) => {
