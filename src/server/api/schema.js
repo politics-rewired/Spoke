@@ -3290,10 +3290,14 @@ const rootMutations = {
         if (operationMode === VanOperationMode.Voterfile) {
           apiKeyRef = apiKeyRef.concat("|0");
         }
-
+        await r
+          .knex("graphile_secrets.secrets")
+          .where({ ref: savedSystem.api_key_ref })
+          .del();
         await getWorker().then((worker) =>
           worker.setSecret(apiKeyRef, externalSystem.apiKey)
         );
+        payload.api_key_ref = apiKeyRef;
       }
 
       const [updated] = await r
