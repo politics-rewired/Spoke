@@ -9,6 +9,11 @@ export enum ExternalSystemType {
   VAN = "VAN"
 }
 
+export enum VanOperationMode {
+  Voterfile = "Voterfile",
+  MyCampaign = "MyCampaign"
+}
+
 export interface ExternalSystem {
   id: string;
   name: string;
@@ -19,6 +24,7 @@ export interface ExternalSystem {
   createdAt: string;
   updatedAt: string;
   syncedAt?: string;
+  operationMode: VanOperationMode;
   lists: RelayPaginatedResponse<ExternalList>;
   surveyQuestions: RelayPaginatedResponse<ExternalSurveyQuestion>;
   activistCodes: RelayPaginatedResponse<ExternalActivistCode>;
@@ -31,12 +37,17 @@ export interface ExternalSystemInput {
   type: ExternalSystemType;
   username: string;
   apiKey: string;
-  operationMode: string;
+  operationMode: VanOperationMode;
 }
 
 export const schema = `
   enum ExternalSystemType {
     VAN
+  }
+
+  enum VanOperationMode {
+    Voterfile
+    MyCampaign
   }
 
   enum ExternalDataCollectionStatus {
@@ -50,7 +61,7 @@ export const schema = `
     type: ExternalSystemType!
     username: String!
     apiKey: String!
-    operationMode: String!
+    operationMode: VanOperationMode!
   }
 
   input ExternalSurveyQuestionFilter {
@@ -71,7 +82,7 @@ export const schema = `
     createdAt: String!
     updatedAt: String!
     syncedAt: String
-    operationMode: String
+    operationMode: VanOperationMode!
     lists(after: Cursor, first: Int): ExternalListPage!
     surveyQuestions(filter: ExternalSurveyQuestionFilter, after: Cursor, first: Int): ExternalSurveyQuestionPage!
     activistCodes(filter: ExternalActivistCodeFilter, after: Cursor, first: Int): ExternalActivistCodePage!

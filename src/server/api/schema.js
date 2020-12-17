@@ -8,6 +8,7 @@ import groupBy from "lodash/groupBy";
 import moment from "moment-timezone";
 import request from "superagent";
 
+import { VanOperationMode } from "../../api/external-system";
 import { TextRequestType } from "../../api/organization";
 import { RequestAutoApproveType } from "../../api/organization-membership";
 import { CampaignExportType } from "../../api/types";
@@ -3198,8 +3199,17 @@ const rootMutations = {
     ) => {
       await accessRequired(user, organizationId, "ADMIN");
 
+      const { operationMode } = externalSystem;
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
-      const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
+      let apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
+
+      if (operationMode === VanOperationMode.MyCampaign) {
+        apiKeyRef = apiKeyRef.concat("|1");
+      }
+
+      if (operationMode === VanOperationMode.Voterfile) {
+        apiKeyRef = apiKeyRef.concat("|0");
+      }
 
       await getWorker().then((worker) =>
         worker.setSecret(apiKeyRef, externalSystem.apiKey)
@@ -3259,6 +3269,31 @@ const rootMutations = {
           worker.setSecret(apiKeyRef, externalSystem.apiKey)
         );
         payload.api_key_ref = apiKeyRef;
+      }
+
+      // if the operationMode changed, append the correct digit to the apiKeyRef
+      const operationModeDidChange =
+        externalSystem.operation_mode !== savedSystem.operation_mode;
+      const { operationMode } = externalSystem;
+      const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
+
+      if (operationModeDidChange) {
+        let apiKeyRef = graphileSecretRef(
+          savedSystem.organization_id,
+          truncatedKey
+        );
+
+        if (operationMode === VanOperationMode.MyCampaign) {
+          apiKeyRef = apiKeyRef.concat("|1");
+        }
+
+        if (operationMode === VanOperationMode.Voterfile) {
+          apiKeyRef = apiKeyRef.concat("|0");
+        }
+
+        await getWorker().then((worker) =>
+          worker.setSecret(apiKeyRef, externalSystem.apiKey)
+        );
       }
 
       const [updated] = await r

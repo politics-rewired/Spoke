@@ -28,17 +28,13 @@ import { withRouter } from "react-router-dom";
 import {
   ExternalSystem,
   ExternalSystemInput,
-  ExternalSystemType
+  ExternalSystemType,
+  VanOperationMode
 } from "../api/external-system";
 import { RelayPaginatedResponse } from "../api/pagination";
 import { MutationMap, QueryMap } from "../network/types";
 import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";
-
-enum VanOperationMode {
-  Voterfile = "Voterfile",
-  MyCampaign = "MyCampaign"
-}
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
 const VAN_OPERATION_MODE: [string, string] = [
@@ -110,6 +106,7 @@ class AdminExternalSystems extends Component<Props, State> {
   makeHandleRefreshExternalSystem = (systemId: string) => () => {
     this.props.mutations
       .refreshSystem(systemId)
+      .then((res) => console.log("res", res))
       .catch((error) => this.setState({ error: error.message }));
     this.setState({ syncInitiatedForId: systemId });
   };
@@ -184,7 +181,7 @@ class AdminExternalSystems extends Component<Props, State> {
       syncInitiatedForId,
       error
     } = this.state;
-    const { name, type, username, apiKey } = externalSystem;
+    const { name, type, username, apiKey, operationMode } = externalSystem;
 
     const { edges } = this.props.data.externalSystems;
     const syncingEdge = edges.find(
@@ -299,7 +296,7 @@ class AdminExternalSystems extends Component<Props, State> {
             <SelectField
               floatingLabelText="VAN Operation Mode"
               fullWidth
-              value={externalSystem.operationMode}
+              value={operationMode}
               onChange={this.handleSelectOperationMode}
             >
               {VAN_OPERATION_MODE.map((mode) => (
