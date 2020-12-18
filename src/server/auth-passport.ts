@@ -1,5 +1,6 @@
 import passportSlack from "@aoberoi/passport-slack";
 import express, { Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -10,7 +11,12 @@ import logger from "../logger";
 import { capitalizeWord } from "./api/lib/utils";
 import { UserRecord } from "./api/types";
 import { contextForRequest } from "./contexts";
-import localAuthHelpers, { LocalAuthError } from "./local-auth-helpers";
+import localAuthHelpers, {
+  hashPassword,
+  LocalAuthError
+} from "./local-auth-helpers";
+import sendEmail from "./mail";
+import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
 import { SpokeRequest } from "./types";
 
@@ -90,11 +96,11 @@ function setupSlackPassport() {
 
   passport.use(strategy);
 
-  passport.serializeUser(({ id: slackUserId }, done) =>
+  passport.serializeUser(({ id: slackUserId }: { id: string }, done: any) =>
     done(null, slackUserId)
   );
 
-  passport.deserializeUser((slackUserId, done) =>
+  passport.deserializeUser((slackUserId: any, done: any) =>
     userLoggedIn(slackUserId, "auth0_id")
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
@@ -206,14 +212,14 @@ function setupAuth0Passport() {
 
   passport.use(strategy);
 
-  passport.serializeUser((auth0User: any, done) => {
+  passport.serializeUser((auth0User: any, done: any) => {
     // This is the Auth0 user object, not the db one
     // eslint-disable-next-line no-underscore-dangle
     const auth0Id = auth0User.id || auth0User._json.sub;
     done(null, auth0Id);
   });
 
-  passport.deserializeUser((auth0Id: string, done) =>
+  passport.deserializeUser((auth0Id: string, done: any) =>
     userLoggedIn(auth0Id, "auth0_id")
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
@@ -312,14 +318,15 @@ function setupLocalAuthPassport() {
   );
   passport.use(strategy);
 
-  passport.serializeUser((user: any, done) => done(null, user.id));
-  passport.deserializeUser((id: string, done) =>
+  passport.serializeUser((user: any, done: any) => done(null, user.id));
+  passport.deserializeUser((id: string, done: any) =>
     userLoggedIn(parseInt(id, 10))
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
   );
 
   const app = express();
+
   app.post("/login-callback", (req, res, next) => {
     // See: http://www.passportjs.org/docs/authenticate/#custom-callback
     passport.authenticate("local", (err: any, user: any, _info: any) => {
@@ -341,6 +348,98 @@ function setupLocalAuthPassport() {
         return res.redirect(req.body.nextUrl || "/");
       });
     })(req, res, next);
+  });
+
+  const resetRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour window
+    max: 5,
+    skipSuccessfulRequests: true,
+    message: "Too many reset password attempts, please try again after an hour"
+  });
+
+  app.post("/auth/request-reset", resetRateLimiter, async (req, res) => {
+    // body should look like: { email }
+    const { email } = req.body;
+    if (email === undefined || email === null || email === "") {
+      return res
+        .status(400)
+        .send("Error: no email provided with forgot password request");
+    }
+
+    const matchingUser = await r.reader("user").where({ email }).first("email");
+
+    // If no matching user, send no email
+    if (matchingUser) {
+      const [resetRequest] = await r
+        .knex("password_reset_request")
+        .insert({ email })
+        .returning("*");
+
+      // Use owner of first org for replyTo
+      const replyTo = config.EMAIL_REPLY_TO
+        ? config.EMAIL_REPLY_TO
+        : await r
+            .reader("user")
+            .join(
+              "user_organization",
+              "user_organization.user_id",
+              "=",
+              "user.id"
+            )
+            .join(
+              "organization",
+              "organization.id",
+              "=",
+              "user_organization.organization_id"
+            )
+            .where({ role: "OWNER" })
+            .orderBy("organization.created_at", "asc")
+            .first("email");
+
+      await sendEmail({
+        to: matchingUser.email,
+        replyTo,
+        subject: "Spoke Reset Password Request",
+        text: `If you requested a password reset, you can reset your password at ${config.BASE_URL}/email-reset?token=${resetRequest.token} within the next 24 hours.\n\nIf you didn't, you can ignore this email.`
+      });
+    }
+
+    return res.sendStatus(200);
+  });
+
+  app.post("/auth/claim-reset", resetRateLimiter, async (req, res) => {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).send("Error: must provide token and new password");
+    }
+
+    const resetRequest = await r
+      .knex("password_reset_request")
+      .where({ token })
+      .whereNull("used_at")
+      .whereRaw(`expires_at > now()`)
+      .first("*");
+
+    if (resetRequest) {
+      const newAuth0Id = await hashPassword(password);
+
+      await r.knex.transaction(async (trx) => {
+        await trx("password_reset_request")
+          .update({ used_at: r.knex.fn.now() })
+          .where({ id: resetRequest.id });
+        await trx("user")
+          .update({ auth0_id: newAuth0Id })
+          .where({ email: resetRequest.email });
+      });
+
+      return res.sendStatus(200);
+    }
+
+    return res
+      .status(400)
+      .send(
+        "Error: invalid password reset token. It may have expired or already been used."
+      );
   });
 
   return app;

@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
+import queryString from "query-string";
 import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
@@ -17,6 +18,8 @@ export const UserEditMode = Object.freeze({
   Login: "login",
   Change: "change",
   Reset: "reset",
+  RequestReset: "request-reset",
+  EmailReset: "email-reset",
   Edit: "edit"
 });
 
@@ -35,7 +38,8 @@ class UserEdit extends React.Component {
   state = {
     user: {},
     changePasswordDialog: false,
-    successDialog: false
+    successDialog: false,
+    successMessage: undefined
   };
 
   componentDidMount() {
@@ -64,6 +68,45 @@ class UserEdit extends React.Component {
           if (changeRes.errors) {
             throw new Error(changeRes.errors.graphQLErrors[0].message);
           }
+        }
+        break;
+
+      case UserEditMode.RequestReset:
+        {
+          const res = await fetch(`/auth/request-reset`, {
+            method: "POST",
+            body: JSON.stringify(formData),
+            headers: { "Content-Type": "application/json" }
+          });
+
+          if (res.status !== 200) {
+            throw new Error(await res.text());
+          }
+
+          this.setState({
+            successDialog: true,
+            successMessage: "Check your email for a password reset link"
+          });
+        }
+        break;
+
+      case UserEditMode.EmailReset:
+        {
+          const body = {
+            token: queryString.parse(window.location.search).token,
+            ...formData
+          };
+          const res = await fetch(`/auth/claim-reset`, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: { "Content-Type": "application/json" }
+          });
+
+          if (res.status !== 200) {
+            throw new Error(await res.text());
+          }
+
+          this.setState({ successDialog: true });
         }
         break;
 
@@ -98,8 +141,12 @@ class UserEdit extends React.Component {
 
   handleClick = () => this.setState({ changePasswordDialog: true });
 
-  handleClose = () =>
+  handleClose = () => {
+    if (this.props.authType === UserEditMode.EmailReset) {
+      window.location.href = "/login";
+    }
     this.setState({ changePasswordDialog: false, successDialog: false });
+  };
 
   openSuccessDialog = () => this.setState({ successDialog: true });
 
@@ -136,6 +183,18 @@ class UserEdit extends React.Component {
         // Handled by passport at /login-callback (thus why `email` is required)
         return yup.object({
           email,
+          password,
+          passwordConfirm: passwordConfirm("password")
+        });
+      case UserEditMode.RequestReset:
+        // Handled by custom handler at /auth/request-reset
+        return yup.object({
+          email
+        });
+      case UserEditMode.EmailReset:
+        // Handled by custom handler at /auth/claim-reset
+        return yup.object({
+          // hidden token from url path
           password,
           passwordConfirm: passwordConfirm("password")
         });
@@ -179,6 +238,7 @@ class UserEdit extends React.Component {
           {(authType === UserEditMode.Login ||
             authType === UserEditMode.SignUp ||
             authType === UserEditMode.Reset ||
+            authType === UserEditMode.RequestReset ||
             authType === UserEditMode.Edit) && (
             <Form.Field
               label="Email"
@@ -210,6 +270,7 @@ class UserEdit extends React.Component {
           {(authType === UserEditMode.Login ||
             authType === UserEditMode.SignUp ||
             authType === UserEditMode.Reset ||
+            authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
             <Form.Field label="Password" name="password" type="password" />
           )}
@@ -222,6 +283,7 @@ class UserEdit extends React.Component {
           )}
           {(authType === UserEditMode.SignUp ||
             authType === UserEditMode.Reset ||
+            authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
             <Form.Field
               label="Confirm Password"
@@ -265,7 +327,9 @@ class UserEdit extends React.Component {
           </Dialog>
           <Dialog
             {...dataTest("successPasswordDialog")}
-            title="Password changed successfully!"
+            title={
+              this.state.successMessage || "Password changed successfully!"
+            }
             modal={false}
             open={this.state.successDialog}
             onRequestClose={this.handleClose}
@@ -275,6 +339,15 @@ class UserEdit extends React.Component {
             <RaisedButton onTouchTap={this.handleClose} label="OK" primary />
           </Dialog>
         </div>
+
+        {authType === UserEditMode.Login && (
+          <div
+            style={{ marginTop: 25, cursor: "pointer" }}
+            onClick={this.props.startRequestReset}
+          >
+            Forgot your password?
+          </div>
+        )}
       </div>
     );
   }
@@ -292,6 +365,7 @@ UserEdit.propTypes = {
   authType: PropTypes.string,
   style: PropTypes.string,
   onRequestClose: PropTypes.func,
+  startRequestReset: PropTypes.func,
 
   // HOC props
   data: PropTypes.object.isRequired,

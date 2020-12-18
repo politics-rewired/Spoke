@@ -365,6 +365,7 @@ const AppRoutes = () => (
         <Redirect to={`/login?nextUrl=${location.pathname}`} />
       )}
     />
+    <Route path="/email-reset" component={Login} />
     <AuthenticatedRoute path="/admin" component={AdminRoutes} />
     <AuthenticatedRoute path="/app" component={TexterRoutes} />
     <AuthenticatedRoute
