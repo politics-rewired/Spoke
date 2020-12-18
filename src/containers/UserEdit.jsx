@@ -187,7 +187,7 @@ class UserEdit extends React.Component {
           passwordConfirm: passwordConfirm("password")
         });
       case UserEditMode.RequestReset:
-        // Handlee by custom handler at /auth/request-reset
+        // Handled by custom handler at /auth/request-reset
         return yup.object({
           email
         });
