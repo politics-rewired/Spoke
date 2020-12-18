@@ -72,7 +72,7 @@
     "apollo-server-express": "^2.9.14",
     "apollo-upload-client": "^12.1.0",
     "apollo-utilities": "^1.3.4",
-    "assemble-numbers-client": "^1.2.3",
+    "assemble-numbers-client": "^1.2.4",
     "auth0-js": "^9.9.1",
     "autodetect-decoder-stream": "^1.0.3",
     "aws-sdk": "^2.6.3",

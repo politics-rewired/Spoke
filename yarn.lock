@@ -2952,10 +2952,10 @@ asn1@~0.2.3:
   dependencies:
     safer-buffer "~2.1.0"
 
-assemble-numbers-client@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/assemble-numbers-client/-/assemble-numbers-client-1.2.2.tgz#4f054b624999fca4e925e79095aa3685f8b6d04d"
-  integrity sha512-uCWLDgu6gVQ+xEWmUhTfzV4kK6dmugktzZqTGXx55plfO39oxlhes4rIZVDBPdfvOUWwSvveyBaK4wO6RvDFxQ==
+assemble-numbers-client@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/assemble-numbers-client/-/assemble-numbers-client-1.2.4.tgz#6129d06ab0746326daac2424e7685fc392dc3092"
+  integrity sha512-VadHV/Hpl9DpiY6QwrQiSCibR2pDIlzlwsqsbcINPObRK12wOhlDcJrT7v9b+kZmBy6RBAa+d6d9r4h4XV7oNg==
   dependencies:
     lodash "^4.17.14"
     sha.js "^2.4.11"
