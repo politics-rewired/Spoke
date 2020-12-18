@@ -59,7 +59,7 @@ class UserPasswordReset extends React.Component {
   };
 
   render() {
-    const { style } = this.props;
+    const { style, isEmailReset } = this.props;
     const { working, error } = this.state;
     const isLocalAuth = window.PASSPORT_STRATEGY === "local";
 
@@ -69,12 +69,14 @@ class UserPasswordReset extends React.Component {
         onSubmit={this.handleOnSubmit}
         className={style}
       >
-        <Form.Field
-          label="Email"
-          name="email"
-          disabled={!isLocalAuth}
-          {...dataTest("email")}
-        />
+        {!isEmailReset && (
+          <Form.Field
+            label="Email"
+            name="email"
+            disabled={!isLocalAuth}
+            {...dataTest("email")}
+          />
+        )}
         <Form.Field label="Password" name="password" type="password" />
         <Form.Field
           label="Confirm Password"
