@@ -1,5 +1,6 @@
 import passportSlack from "@aoberoi/passport-slack";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -255,16 +256,6 @@ function setupAuth0Passport() {
   return app;
 }
 
-// interface PasswordResetRequest {
-//   id: number;
-//   email: string;
-//   token: string;
-//   used_at: Date;
-//   created_at: Date;
-//   updated_at: Date;
-//   expires_at: Date;
-// }
-
 function setupLocalAuthPassport() {
   const strategy = new LocalStrategy(
     {
@@ -335,7 +326,14 @@ function setupLocalAuthPassport() {
     })(req, res, next);
   });
 
-  app.post("/auth/request-reset", async (req, res) => {
+  const resetRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour window
+    max: 5,
+    skipSuccessfulRequests: true,
+    message: "Too many reset password attempts, please try again after an hour"
+  });
+
+  app.post("/auth/request-reset", resetRateLimiter, async (req, res) => {
     // body should look like: { email }
     const { email } = req.body;
     if (email === undefined || email === null || email === "") {
@@ -344,15 +342,15 @@ function setupLocalAuthPassport() {
         .send("Error: no email provided with forgot password request");
     }
 
-    const [resetRequest] = await r
-      .knex("password_reset_request")
-      .insert({ email })
-      .returning("*");
-
     const matchingUser = await r.reader("user").where({ email }).first("email");
 
     // If no matching user, send no email
     if (matchingUser) {
+      const [resetRequest] = await r
+        .knex("password_reset_request")
+        .insert({ email })
+        .returning("*");
+
       // Use owner of first org for replyTo
       const replyTo = config.EMAIL_REPLY_TO
         ? config.EMAIL_REPLY_TO
@@ -385,7 +383,7 @@ function setupLocalAuthPassport() {
     return res.sendStatus(200);
   });
 
-  app.post("/auth/claim-reset", async (req, res) => {
+  app.post("/auth/claim-reset", resetRateLimiter, async (req, res) => {
     const { token, password } = req.body;
     if (!token || !password) {
       return res.status(400).send("Error: must provide token and new password");
