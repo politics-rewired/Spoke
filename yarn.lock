@@ -1274,13 +1274,12 @@
     lodash.isundefined "^3.0.1"
     lodash.uniq "^4.5.0"
 
-"@godaddy/terminus@^4.3.1":
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/@godaddy/terminus/-/terminus-4.3.1.tgz#20bc24271df373ae362b3948c9dd95d22736b5c2"
-  integrity sha512-zChILIprb4nWTGJ/pXafbGZqJA7yB6JzFQp5f8PBR5B0cJ6f9Nd40ySLFTBzko+PEZgVaJlKrJi5gUQLTI9dpw==
+"@godaddy/terminus@^4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@godaddy/terminus/-/terminus-4.5.0.tgz#618951107bb91fec68f194186f5c2c9392b8efa7"
+  integrity sha512-fARG14VkM3wgZbgT0G5rmXOmG6GLcRcPoTDS4/idaUJsaYuuuz5OqMSc22QZ94ixnMhr2V+vJ6JZQTlePDO01w==
   dependencies:
-    es6-promisify "^6.0.0"
-    stoppable "^1.0.5"
+    stoppable "^1.1.0"
 
 "@google-cloud/common@^2.1.1":
   version "2.3.0"
@@ -6910,11 +6909,6 @@ es6-promisify@^5.0.0:
   integrity sha1-UQnWLz5W6pZ8S2NQWu8IKRyKUgM=
   dependencies:
     es6-promise "^4.0.3"
-
-es6-promisify@^6.0.0:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/es6-promisify/-/es6-promisify-6.0.2.tgz#525c23725b8510f5f1f2feb5a1fbad93a93e29b4"
-  integrity sha512-eO6vFm0JvqGzjWIQA6QVKjxpmELfhWbDUWHm1rPfIbn55mhKPiAa5xpLmQWJrNa629ZIeQ8ZvMAi13kvrjK6Mg==
 
 es6-set@~0.1.5:
   version "0.1.5"
@@ -16878,7 +16872,7 @@ stealthy-require@^1.1.1:
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
   integrity sha1-NbCYdbT/SfJqd35QmzCQoyJr8ks=
 
-stoppable@^1.0.5:
+stoppable@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/stoppable/-/stoppable-1.1.0.tgz#32da568e83ea488b08e4d7ea2c3bcc9d75015d5b"
   integrity sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==
