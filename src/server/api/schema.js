@@ -2413,6 +2413,7 @@ const rootMutations = {
         assignmentsFilter,
         tagsFilter,
         contactsFilter,
+        contactNameFilter,
         newTexterUserIds
       },
       { user }
@@ -2430,7 +2431,8 @@ const rootMutations = {
         campaignsFilter,
         assignmentsFilter,
         tagsFilter,
-        contactsFilter
+        contactsFilter,
+        contactNameFilter
       );
 
       if (newTexterUserIds == null) {
@@ -3215,7 +3217,7 @@ const rootMutations = {
         .returning("*");
 
       // Kick off initial list load
-      await refreshExternalSystem(externalSystem.id);
+      await refreshExternalSystem(created.id);
 
       return created;
     },

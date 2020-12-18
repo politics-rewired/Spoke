@@ -3,10 +3,30 @@
 import AuthHasher from "passport-local-authenticate";
 
 import { capitalizeWord } from "./api/lib/utils";
-import { r } from "./models";
+import { UserRecord } from "./api/types";
+import { SpokeDbContext } from "./contexts";
+
+interface HashedPassword {
+  salt: string;
+  hash: string;
+}
+
+interface AuthHelperOptions {
+  db: SpokeDbContext;
+  lowerCaseEmail: string;
+  password: string;
+  existingUser: UserRecord;
+  nextUrl: string;
+  uuidMatch: RegExpMatchArray | null;
+  reqBody: any;
+}
+
+type AuthHelper = (options: AuthHelperOptions) => Promise<unknown>;
 
 export class LocalAuthError extends Error {
-  constructor(message) {
+  errorType: string;
+
+  constructor(message: string) {
     super(message);
     this.name = this.constructor.name;
     this.errorType = "LocalAuthError";
@@ -51,20 +71,24 @@ export class StalePasswordError extends LocalAuthError {
   }
 }
 
-const validUuid = async (nextUrl, uuidMatch) => {
+const validUuid = async (
+  db: SpokeDbContext,
+  nextUrl: string,
+  uuidMatch: RegExpMatchArray
+) => {
   if (!nextUrl) throw new InvalidInviteError();
 
   let matchingRecord;
   if (nextUrl.includes("join")) {
-    matchingRecord = await r
-      .knex("organization")
+    matchingRecord = await db
+      .primary("organization")
       .where({ uuid: uuidMatch[0] })
       .first("id");
   } else if (nextUrl.includes("invite")) {
     const splitUrl = nextUrl.split("/");
     const inviteHash = splitUrl[splitUrl.length - 1];
-    matchingRecord = await r
-      .knex("invite")
+    matchingRecord = await db
+      .primary("invite")
       .where({ hash: inviteHash })
       .first("id");
   }
@@ -73,7 +97,8 @@ const validUuid = async (nextUrl, uuidMatch) => {
 };
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
+const login: AuthHelper = async (options) => {
+  const { password, existingUser } = options;
   if (!existingUser) throw new InvalidCredentialsError();
 
   // Get salt and hash and verify user password
@@ -83,7 +108,7 @@ const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
     hash: pwFieldSplit[2] || ""
   };
   return new Promise((resolve, reject) => {
-    AuthHasher.verify(password, hashed, (err, verified) => {
+    AuthHasher.verify(password, hashed, (err: Error, verified: boolean) => {
       if (err) reject(new LocalAuthError(err.message));
       if (verified) {
         resolve(existingUser);
@@ -93,17 +118,19 @@ const login = async ({ password, existingUser, nextUrl, uuidMatch }) => {
   });
 };
 
-const signup = async ({
-  lowerCaseEmail,
-  password,
-  existingUser,
-  nextUrl,
-  uuidMatch,
-  reqBody
-}) => {
+const signup: AuthHelper = async (options) => {
+  const {
+    db,
+    lowerCaseEmail,
+    password,
+    existingUser,
+    nextUrl,
+    uuidMatch,
+    reqBody
+  } = options;
   // Verify UUID validity
   // If there is an error, it will be caught on local strategy invocation
-  await validUuid(nextUrl, uuidMatch);
+  await validUuid(db, nextUrl, uuidMatch || [""]);
 
   // Verify user doesn't already exist
   if (existingUser && existingUser.email === lowerCaseEmail) {
@@ -117,12 +144,12 @@ const signup = async ({
 
   // create the user
   return new Promise((resolve, reject) => {
-    AuthHasher.hash(password, async (err, hashed) => {
+    AuthHasher.hash(password, async (err: Error, hashed: HashedPassword) => {
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const [user] = await r
-        .knex("user")
+      const [user] = await db
+        .primary("user")
         .insert({
           email: lowerCaseEmail,
           auth0_id: passwordToSave,
@@ -137,7 +164,8 @@ const signup = async ({
   });
 };
 
-const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
+const reset: AuthHelper = (options) => {
+  const { db, password, existingUser, reqBody, uuidMatch } = options;
   if (!existingUser) {
     throw new InvalidResetHashError();
   }
@@ -147,13 +175,13 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
   const [resetHash, datetime] = [pwFieldSplit[1], pwFieldSplit[2]];
 
   // Verify hash was created in the last day
-  const isExpired = (Date.now() - datetime) / 1000 / 60 / 60 > 24;
+  const isExpired = (Date.now() - parseInt(datetime, 10)) / 1000 / 60 / 60 > 24;
   if (isExpired) {
     throw new InvalidResetHashError();
   }
 
   // Verify the UUID in request matches hash in DB
-  if (uuidMatch[0] !== resetHash) {
+  if (uuidMatch && uuidMatch[0] !== resetHash) {
     throw new InvalidResetHashError();
   }
 
@@ -164,12 +192,12 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
 
   // Save new user password to DB
   return new Promise((resolve, reject) => {
-    AuthHasher.hash(password, async (err, hashed) => {
+    AuthHasher.hash(password, async (err: Error, hashed: HashedPassword) => {
       if (err) reject(new LocalAuthError(err.message));
       // .salt and .hash
       const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-      const [updatedUser] = await r
-        .knex("user")
+      const [updatedUser] = await db
+        .primary("user")
         .update({ auth0_id: passwordToSave })
         .where({ id: existingUser.id })
         .returning("*");
@@ -178,8 +206,17 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
   });
 };
 
+interface ChangeOptions {
+  db: SpokeDbContext;
+  user: UserRecord;
+  password: string;
+  newPassword: string;
+  passwordConfirm: string;
+}
+
 // Only used in the changeUserPassword GraphQl mutation
-export const change = ({ user, password, newPassword, passwordConfirm }) => {
+export const change = (options: ChangeOptions) => {
+  const { db, user, password, newPassword, passwordConfirm } = options;
   const pwFieldSplit = user.auth0_id.split("|");
   const hashedPassword = {
     salt: pwFieldSplit[1],
@@ -197,29 +234,43 @@ export const change = ({ user, password, newPassword, passwordConfirm }) => {
   }
 
   return new Promise((resolve, reject) => {
-    AuthHasher.verify(password, hashedPassword, (error, verified) => {
-      if (error) reject(new LocalAuthError(error.message));
-      if (!verified) reject(new InvalidCredentialsError());
-      return AuthHasher.hash(newPassword, async (err, hashed) => {
-        if (err) reject(new LocalAuthError(err.message));
-        const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
-        const updatedUser = await r
-          .knex("user")
-          .update({ auth0_id: passwordToSave })
-          .where({ id: user.id });
-        resolve(updatedUser);
-      });
-    });
+    AuthHasher.verify(
+      password,
+      hashedPassword,
+      (error: Error, verified: boolean) => {
+        if (error) reject(new LocalAuthError(error.message));
+        if (!verified) reject(new InvalidCredentialsError());
+        return AuthHasher.hash(
+          newPassword,
+          async (err: Error, hashed: HashedPassword) => {
+            if (err) reject(new LocalAuthError(err.message));
+            const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
+            const updatedUser = await db
+              .primary("user")
+              .update({ auth0_id: passwordToSave })
+              .where({ id: user.id });
+            resolve(updatedUser);
+          }
+        );
+      }
+    );
   });
 };
 
-export const hashPassword = async (password) => {
+export const hashPassword = async (password: string) => {
   return new Promise((resolve, reject) => {
-    AuthHasher.hash(password, (err, hashed) => {
+    AuthHasher.hash(password, (err: any, hashed: any) => {
       if (err) return reject(err);
       return resolve(`localauth|${hashed.salt}|${hashed.hash}`);
     });
   });
 };
 
-export default { login, signup, reset, hashPassword };
+export const authHelpers: Record<string, AuthHelper | any> = {
+  login,
+  signup,
+  reset,
+  hashPassword
+};
+
+export default authHelpers;

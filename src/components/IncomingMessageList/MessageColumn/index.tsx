@@ -1,19 +1,31 @@
 import React, { Component } from "react";
 
+import { Conversation } from "../../../api/conversations";
+import { Message } from "../../../api/message";
 import MessageList from "./MessageList";
 import MessageOptOut from "./MessageOptOut";
 import MessageResponse from "./MessageResponse";
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   container: {
     display: "flex",
     flexDirection: "column",
-    height: "100%"
+    flexGrow: 1
   }
 };
 
-class MessageColumn extends Component {
-  constructor(props) {
+interface Props {
+  organizationId: string;
+  conversation: Conversation;
+}
+
+interface State {
+  isOptedOut: boolean;
+  messages: Message[];
+}
+
+class MessageColumn extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     const { conversation } = props;
@@ -25,11 +37,11 @@ class MessageColumn extends Component {
     };
   }
 
-  messagesChanged = (messages) => {
+  messagesChanged = (messages: Message[]) => {
     this.setState({ messages });
   };
 
-  optOutChanged = (isOptedOut) => {
+  optOutChanged = (isOptedOut: boolean) => {
     this.setState({ isOptedOut });
   };
 

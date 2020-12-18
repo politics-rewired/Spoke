@@ -2,6 +2,7 @@ import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
 import Autocomplete from "material-ui/AutoComplete";
+import RaisedButton from "material-ui/RaisedButton";
 import moment from "moment";
 import React from "react";
 import Form from "react-formal";
@@ -193,50 +194,46 @@ class CampaignTextingHoursForm extends React.Component<
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
     return (
-      <GSForm
-        schema={formSchema}
-        value={value}
-        onChange={this.handleChange}
-        onSubmit={this.handleSubmit}
-      >
-        <CampaignFormSectionHeading
-          title="Texting hours for campaign"
-          subtitle="Please configure texting hours for each campaign, noting the time zone of the individuals in the list you are uploading."
-        />
+      <div>
+        <GSForm schema={formSchema} value={value} onChange={this.handleChange}>
+          <CampaignFormSectionHeading
+            title="Texting hours for campaign"
+            subtitle="Please configure texting hours for each campaign, noting the time zone of the individuals in the list you are uploading."
+          />
 
-        {this.addAutocompleteFormField(
-          "textingHoursStart",
-          "textingHoursStartSearchText",
-          formatHour(value.textingHoursStart),
-          "Start time",
-          "Start typing a start time",
-          hourChoices
-        )}
+          {this.addAutocompleteFormField(
+            "textingHoursStart",
+            "textingHoursStartSearchText",
+            formatHour(value.textingHoursStart),
+            "Start time",
+            "Start typing a start time",
+            hourChoices
+          )}
 
-        {this.addAutocompleteFormField(
-          "textingHoursEnd",
-          "textingHoursEndSearchText",
-          formatHour(value.textingHoursEnd),
-          "End time",
-          "Start typing an end time",
-          hourChoices
-        )}
+          {this.addAutocompleteFormField(
+            "textingHoursEnd",
+            "textingHoursEndSearchText",
+            formatHour(value.textingHoursEnd),
+            "End time",
+            "Start typing an end time",
+            hourChoices
+          )}
 
-        {this.addAutocompleteFormField(
-          "timezone",
-          "timezoneSearchText",
-          value.timezone,
-          "Timezone to use for contacts without ZIP code and to determine daylight savings",
-          "Start typing a timezone",
-          timezoneChoices
-        )}
-
-        <Form.Button
-          type="submit"
-          disabled={isSaveDisabled}
+          {this.addAutocompleteFormField(
+            "timezone",
+            "timezoneSearchText",
+            value.timezone,
+            "Timezone to use for contacts without ZIP code and to determine daylight savings",
+            "Start typing a timezone",
+            timezoneChoices
+          )}
+        </GSForm>
+        <RaisedButton
           label={finalSaveLabel}
+          disabled={isSaveDisabled}
+          onClick={this.handleSubmit}
         />
-      </GSForm>
+      </div>
     );
   }
 }

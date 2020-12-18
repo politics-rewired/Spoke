@@ -1,17 +1,45 @@
+import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 
+import { CampaignContact } from "../../../api/campaign-contact";
+import { ContactActionInput } from "../../../api/types";
 import {
   formatErrorMessage,
   withOperations
 } from "../../../containers/hoc/with-operations";
+import { MutationMap } from "../../../network/types";
 
-class MessageOptOut extends Component {
-  constructor(props) {
+interface InnerProps {
+  contact: CampaignContact;
+  isOptedOut: boolean;
+  optOutChanged(value: boolean): void;
+}
+
+interface HocProps {
+  mutations: {
+    createOptOut(
+      optOut: ContactActionInput,
+      campaignContactId: string
+    ): ApolloQueryResult<any>;
+    removeOptOut(cell: string): ApolloQueryResult<any>;
+  };
+}
+
+interface Props extends InnerProps, HocProps {}
+
+interface State {
+  isMakingRequest: boolean;
+  dialogTitle: string;
+  dialogText: string;
+  dialogActions: React.ReactElement<any>[];
+}
+
+class MessageOptOut extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -131,12 +159,12 @@ class MessageOptOut extends Component {
     return (
       <div>
         <div style={{ display: "flex" }}>
-          <p style={{ flexGrow: "1" }}>
+          <p style={{ flexGrow: 1 }}>
             {isOptedOut
               ? "This user has been opted out. Would you like to opt them back in?"
               : ""}
           </p>
-          <div style={{ flexShrink: "1" }}>
+          <div style={{ flexShrink: 1 }}>
             {isOptedOut && (
               <RaisedButton
                 label="Opt-In"
@@ -170,14 +198,11 @@ class MessageOptOut extends Component {
   }
 }
 
-MessageOptOut.propTypes = {
-  contact: PropTypes.object,
-  isOptedOut: PropTypes.bool,
-  optOutChanged: PropTypes.func
-};
-
-const mutations = {
-  createOptOut: () => (optOut, campaignContactId) => ({
+const mutations: MutationMap<Props> = {
+  createOptOut: () => (
+    optOut: ContactActionInput,
+    campaignContactId: string
+  ) => ({
     mutation: gql`
       mutation createOptOut(
         $optOut: ContactActionInput!
@@ -196,7 +221,7 @@ const mutations = {
       campaignContactId
     }
   }),
-  removeOptOut: () => (cell) => ({
+  removeOptOut: () => (cell: string) => ({
     mutation: gql`
       mutation removeOptOut($cell: Phone!) {
         removeOptOut(cell: $cell) {

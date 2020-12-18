@@ -156,14 +156,32 @@ export const syncCampaignContactToVAN: Task = async (
             on external_survey_question.id = external_survey_question_response_option.external_survey_question_id
           where
             external_survey_question.status = 'active'
+        ),
+        first_message as (
+          select
+            date_trunc('day', created_at) as canvassed_at,
+            '[]'::json as result_codes,
+            '[]'::json as activist_codes,
+            '[]'::json as response_options
+          from message
+          where
+            campaign_contact_id = $1
+            and is_from_contact = false
+          order by id asc
+          limit 1
+        ),
+        canvass_responses as (
+          select
+            date_trunc('day', canvassed_at) as canvassed_at,
+            array_to_json(array_remove(array_agg(result_code), null)) as result_codes,
+            array_to_json(array_remove(array_agg(activist_code), null)) as activist_codes,
+            array_to_json(array_remove(array_agg(response_option), null)) as response_options
+          from points
+          group by 1
         )
-        select
-          date_trunc('day', canvassed_at) as canvassed_at,
-          array_to_json(array_remove(array_agg(result_code), null)) as result_codes,
-          array_to_json(array_remove(array_agg(activist_code), null)) as activist_codes,
-          array_to_json(array_remove(array_agg(response_option), null)) as response_options
-        from points
-        group by 1
+        select * from canvass_responses
+        union all
+        select * from first_message where not exists (select 1 from canvass_responses)
       `,
       [contactId, systemId]
     )

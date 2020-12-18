@@ -267,7 +267,7 @@ const queries: QueryMap<InnerProps> = {
 const mutations: MutationMap<InnerProps> = {
   editCampaign: (ownProps) => (payload: Values) => ({
     mutation: gql`
-      mutation editCampaignBasics(
+      mutation editCampaignCannedResponses(
         $campaignId: String!
         $payload: CampaignInput!
       ) {

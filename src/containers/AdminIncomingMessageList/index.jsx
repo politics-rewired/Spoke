@@ -248,7 +248,8 @@ export class AdminIncomingMessageList extends Component {
         this.state.assignmentsFilter || {},
         this.state.tagsFilter || {},
         this.state.contactsFilter || {},
-        newTexterUserIds
+        newTexterUserIds,
+        this.state.contactNameFilter || {}
       );
     });
   };
@@ -271,7 +272,8 @@ export class AdminIncomingMessageList extends Component {
         this.state.assignmentsFilter || {},
         this.state.tagsFilter || {},
         this.state.contactsFilter || {},
-        null
+        null,
+        this.state.contactNameFilter || {}
       );
     });
   };
@@ -610,7 +612,8 @@ const mutations = {
     assignmentsFilter,
     tagsFilter,
     contactsFilter,
-    newTexterUserIds
+    newTexterUserIds,
+    contactNameFilter
   ) => ({
     mutation: gql`
       mutation megaBulkReassignCampaignContacts(
@@ -619,6 +622,7 @@ const mutations = {
         $campaignsFilter: CampaignsFilter
         $assignmentsFilter: AssignmentsFilter
         $tagsFilter: TagsFilter
+        $contactNameFilter: ContactNameFilter
         $newTexterUserIds: [String]
       ) {
         megaBulkReassignCampaignContacts(
@@ -627,6 +631,7 @@ const mutations = {
           campaignsFilter: $campaignsFilter
           assignmentsFilter: $assignmentsFilter
           tagsFilter: $tagsFilter
+          contactNameFilter: $contactNameFilter
           newTexterUserIds: $newTexterUserIds
         )
       }
@@ -637,6 +642,7 @@ const mutations = {
       assignmentsFilter,
       tagsFilter,
       contactsFilter,
+      contactNameFilter,
       newTexterUserIds
     }
   })
