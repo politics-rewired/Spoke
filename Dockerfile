@@ -10,7 +10,7 @@ RUN jq '{ dependencies, devDependencies, resolutions }' < /tmp/package.json > /t
 
 ### Fat Build
 ### -------------------------
-FROM 14.15.2-alpine3.10 AS builder
+FROM node:12.16.1-alpine AS builder	
 
 WORKDIR /usr/Spoke
 
