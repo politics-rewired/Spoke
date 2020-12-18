@@ -1,7 +1,7 @@
 import passportSlack from "@aoberoi/passport-slack";
+import passport from "@passport-next/passport";
 import express, { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
-import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import { Strategy as LocalStrategy } from "passport-local";
 import request from "superagent";
