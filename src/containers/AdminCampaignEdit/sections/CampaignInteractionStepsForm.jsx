@@ -279,7 +279,7 @@ class CampaignInteractionStepsForm extends React.Component {
             {this.state.hasBlockCopied && (
               <RaisedButton
                 label="+ Paste Block"
-                onTouchTap={this.onRequestRootPaste}
+                onClick={this.onRequestRootPaste}
               />
             )}
           </CardActions>
@@ -300,9 +300,7 @@ class CampaignInteractionStepsForm extends React.Component {
                     hintText="Answer to the previous question"
                   />
                   <IconButton
-                    onTouchTap={this.createDeleteStepHandler(
-                      interactionStep.id
-                    )}
+                    onClick={this.createDeleteStepHandler(interactionStep.id)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -360,7 +358,7 @@ class CampaignInteractionStepsForm extends React.Component {
                 key="add"
                 {...dataTest("addResponse")}
                 label="+ Add a response"
-                onTouchTap={this.createAddStepHandler(interactionStep.id)}
+                onClick={this.createAddStepHandler(interactionStep.id)}
                 style={{ marginBottom: "10px" }}
               />
             ].concat(
@@ -369,9 +367,7 @@ class CampaignInteractionStepsForm extends React.Component {
                     <RaisedButton
                       key="paste"
                       label="+ Paste Block"
-                      onTouchTap={this.createPasteBlockHandler(
-                        interactionStep.id
-                      )}
+                      onClick={this.createPasteBlockHandler(interactionStep.id)}
                       style={{ marginBottom: "10px" }}
                     />
                   ]

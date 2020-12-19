@@ -88,7 +88,7 @@ class ContactActionDialog extends Component {
               <FlatButton
                 style={inlineStyles.dialogButton}
                 label="Cancel"
-                onTouchTap={handleCloseDialog}
+                onClick={handleCloseDialog}
               />
               <Form.Button
                 type="submit"

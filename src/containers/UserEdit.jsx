@@ -295,7 +295,7 @@ class UserEdit extends React.Component {
             {canChangePassword && (
               <div className={css(styles.container)}>
                 <RaisedButton
-                  onTouchTap={this.handleClick}
+                  onClick={this.handleClick}
                   label="Change password"
                   variant="outlined"
                 />
@@ -336,7 +336,7 @@ class UserEdit extends React.Component {
             onBackdropClick={this.handleClose}
             onEscapeKeyDown={this.handleClose}
           >
-            <RaisedButton onTouchTap={this.handleClose} label="OK" primary />
+            <RaisedButton onClick={this.handleClose} label="OK" primary />
           </Dialog>
         </div>
 

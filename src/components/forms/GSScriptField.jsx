@@ -91,13 +91,13 @@ class GSScriptField extends GSFormField {
             key="cancel"
             {...dataTest("scriptCancel")}
             label="Cancel"
-            onTouchTap={this.handleCancelDialog}
+            onClick={this.handleCancelDialog}
           />,
           <RaisedButton
             key="done"
             {...dataTest("scriptDone")}
             label="Done"
-            onTouchTap={this.wrapSaveScript}
+            onClick={this.wrapSaveScript}
             primary
           />
         ]}
