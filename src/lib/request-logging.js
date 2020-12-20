@@ -1,5 +1,3 @@
-import "winston-mongodb";
-
 import expressWinston from "express-winston";
 import winston from "winston";
 
