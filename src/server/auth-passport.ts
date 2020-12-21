@@ -1,7 +1,7 @@
 import passportSlack from "@aoberoi/passport-slack";
+import passport from "@passport-next/passport";
 import express, { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
-import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import { Strategy as LocalStrategy } from "passport-local";
 import request from "superagent";
@@ -26,7 +26,6 @@ const {
   BASE_URL,
   AUTOJOIN_ORG_UUID,
   SLACK_TEAM_NAME,
-  SLACK_TEAM_ID,
   SLACK_CLIENT_ID,
   SLACK_CLIENT_SECRET,
   SLACK_SCOPES,
@@ -178,8 +177,7 @@ function setupSlackPassport() {
 
   // Cast as any to allow passing Slack options
   const passportOptions: any = {
-    scope: SLACK_SCOPES.split(","),
-    team: SLACK_TEAM_ID
+    scope: SLACK_SCOPES.split(",")
   };
 
   const app = express();
