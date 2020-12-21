@@ -46,7 +46,7 @@ const Navigation = function Navigation(props) {
                 {...dataTest(camelCase(`nav ${section.path}`))}
                 key={section.name}
                 primaryText={section.name}
-                onTouchTap={() => props.history.push(section.url)}
+                onClick={() => props.history.push(section.url)}
                 rightAvatar={
                   section.badge && (
                     <Avatar backgroundColor="#FFAA00" size={30}>

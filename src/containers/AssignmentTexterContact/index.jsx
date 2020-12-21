@@ -572,14 +572,14 @@ export class AssignmentTexterContact extends React.Component {
     if (messageStatus === "closed") {
       button = (
         <RaisedButton
-          onTouchTap={() => this.handleEditMessageStatus("needsResponse")}
+          onClick={() => this.handleEditMessageStatus("needsResponse")}
           label="Reopen"
         />
       );
     } else if (messageStatus === "needsResponse") {
       button = (
         <RaisedButton
-          onTouchTap={this.handleClickCloseContactButton}
+          onClick={this.handleClickCloseContactButton}
           label="Skip Reply"
         />
       );
@@ -653,12 +653,12 @@ export class AssignmentTexterContact extends React.Component {
             {...dataTest("optOut")}
             secondary
             label="Opt out"
-            onTouchTap={this.handleOpenOptOutDialog}
+            onClick={this.handleOpenOptOutDialog}
             tooltip="Opt out this contact"
           />
           <RaisedButton
             label="Canned replies"
-            onTouchTap={this.handleOpenPopover}
+            onClick={this.handleOpenPopover}
             disabled={!isCannedResponseEnabled}
           />
           {this.renderNeedsResponseToggleButton(contact)}
@@ -698,14 +698,14 @@ export class AssignmentTexterContact extends React.Component {
               {this.renderNeedsResponseToggleButton(contact)}
               <RaisedButton
                 label="Canned responses"
-                onTouchTap={this.handleOpenPopover}
+                onClick={this.handleOpenPopover}
                 disabled={!isCannedResponseEnabled}
               />
               <RaisedButton
                 {...dataTest("optOut")}
                 secondary
                 label="Opt out"
-                onTouchTap={this.handleOpenOptOutDialog}
+                onClick={this.handleOpenOptOutDialog}
               />
               <RaisedButton
                 label="Manage Tags"

@@ -30,7 +30,7 @@ export default class BulkSendButton extends Component {
     return (
       <div className={css(styles.container)}>
         <RaisedButton
-          onTouchTap={this.sendMessages}
+          onClick={this.sendMessages}
           label={
             this.state.isSending
               ? "Sending..."
