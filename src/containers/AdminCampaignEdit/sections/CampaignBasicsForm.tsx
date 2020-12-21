@@ -149,7 +149,6 @@ class CampaignBasicsForm extends React.Component<
             }
             autoOk
             fullWidth
-            utcOffset={0}
           />
 
           <Form.Field name="introHtml" label="Intro HTML" multiLine fullWidth />
