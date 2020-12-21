@@ -4,7 +4,7 @@
   "description": "Spoke",
   "main": "src/server",
   "engines": {
-    "node": "^8.10.0 || ^10.13.0 || ^12.6.0"
+    "node": "^14.15.2"
   },
   "scripts": {
     "test": "jest --runInBand --forceExit",
