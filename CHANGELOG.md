@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.12.0](https://github.com/politics-rewired/spoke/compare/v3.11.0...v3.12.0) (2020-12-21)
+
+
+### Features
+
+* password reset via email ([#805](https://github.com/politics-rewired/spoke/issues/805)) ([36acb24](https://github.com/politics-rewired/spoke/commit/36acb2450bdc6a3b66004954ba957f8de159a5e9))
+* **dockerfile:** bump image ([763abd4](https://github.com/politics-rewired/spoke/commit/763abd4e7b1ca9f676ddfdfe485ccf81e2f21e55))
+
+
+### Bug Fixes
+
+* **dockerifle:** restore proper node version ([40916db](https://github.com/politics-rewired/spoke/commit/40916dbe6f2b334c322d859d3b013848a5dd7ac0))
+* **dockerifle:** restore proper node version ([a8a295c](https://github.com/politics-rewired/spoke/commit/a8a295c7841e84375ab46e7742874077500f8791))
+
 ## [3.11.0](https://github.com/politics-rewired/spoke/compare/v3.10.1...v3.11.0) (2020-12-16)
 
 
