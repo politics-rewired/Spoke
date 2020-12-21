@@ -6,30 +6,9 @@ const logger = require("../logger");
 // deprecated, a better pattern would be to instantiate knex here and export
 // that instance, for reference everywhere else in the codebase.
 
-const pg = require("pg");
-// see https://github.com/tgriesser/knex/issues/852
-pg.defaults.ssl = config.DB_USE_SSL;
-
-let connection = {};
-
-if (config.isTest) {
-  connection = config.TEST_DATABASE_URL;
-} else if (config.DATABASE_URL) {
-  connection = config.DATABASE_URL;
-} else {
-  connection = {
-    host: config.DB_HOST,
-    port: config.DB_PORT,
-    database: config.DB_NAME,
-    password: config.DB_PASSWORD,
-    user: config.DB_USER,
-    ssl: config.DB_USE_SSL
-  };
-}
-
 const knexConfig = {
   client: "pg",
-  connection,
+  connection: config.isTest ? config.TEST_DATABASE_URL : config.DATABASE_URL,
   pool: {
     min: config.DB_MAX_POOL,
     max: config.DB_MAX_POOL,
