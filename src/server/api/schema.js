@@ -3217,7 +3217,7 @@ const rootMutations = {
         .returning("*");
 
       // Kick off initial list load
-      await refreshExternalSystem(externalSystem.id);
+      await refreshExternalSystem(created.id);
 
       return created;
     },

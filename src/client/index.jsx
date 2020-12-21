@@ -6,7 +6,6 @@ import { StyleSheet } from "aphrodite";
 import React from "react";
 import ReactDOM from "react-dom";
 import Form from "react-formal";
-import injectTapEventPlugin from "react-tap-event-plugin";
 
 import GSDateField from "../components/forms/GSDateField";
 import GSPasswordField from "../components/forms/GSPasswordField";
@@ -34,8 +33,5 @@ Form.addInputTypes({
   select: GSSelectField,
   password: GSPasswordField
 });
-
-// Needed for MaterialUI
-injectTapEventPlugin();
 
 ReactDOM.render(<App />, document.getElementById("mount"));

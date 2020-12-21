@@ -75,12 +75,12 @@ class ScriptList extends React.Component {
     //     targetOrigin={{horizontal: 'left', vertical: 'bottom'}}
     //   >
     //     <MenuItem primaryText={duplicateCampaignResponses && !script.isUserCreated ? "Duplicate and edit" : "Edit"}
-    //       onTouchTap={() => this.handleEditScript(script)}
+    //       onClick={() => this.handleEditScript(script)}
     //     />
     //     {
     //       script.isUserCreated ? (
     //         <MenuItem primaryText="Delete"
-    //           onTouchTap={() => this.handleDeleteScript(script.id)}
+    //           onClick={() => this.handleDeleteScript(script.id)}
     //         />
     //       ) : ''
     //     }
@@ -91,7 +91,7 @@ class ScriptList extends React.Component {
     const listItems = scripts.map((script) => (
       <ListItem
         value={script.text}
-        onTouchTap={() => onSelectCannedResponse(script)}
+        onClick={() => onSelectCannedResponse(script)}
         key={script.id}
         primaryText={script.title}
         secondaryText={script.text}
@@ -115,7 +115,7 @@ class ScriptList extends React.Component {
           <FlatButton
             label="Add new canned response"
             icon={<CreateIcon />}
-            onTouchTap={this.handleOpenDialog}
+            onClick={this.handleOpenDialog}
           />
         ) : (
           ""
@@ -128,7 +128,7 @@ class ScriptList extends React.Component {
               <FlatButton
                 key="cancel"
                 label="Cancel"
-                onTouchTap={this.handleCloseDialog}
+                onClick={this.handleCloseDialog}
               />,
               <Form.Button
                 key="save"

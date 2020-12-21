@@ -321,18 +321,14 @@ export const resolvers = {
 
       return getInteractionSteps({ campaignId: campaign.id });
     },
-    cannedResponses: async (campaign, _, { user }) => {
+    cannedResponses: async (campaign, { userId: userIdArg }) => {
       const getCannedResponses = memoizer.memoize(
-        async ({ campaignId, userId }) => {
-          return cacheableData.cannedResponse.query({
-            userId: userId || "",
-            campaignId
-          });
-        },
+        ({ campaignId, userId }) =>
+          cacheableData.cannedResponse.query({ campaignId, userId }),
         cacheOpts.CampaignCannedResponses
       );
 
-      return getCannedResponses({ campaignId: campaign.id, userId: user.id });
+      return getCannedResponses({ campaignId: campaign.id, userId: userIdArg });
     },
     contacts: async (campaign) =>
       r

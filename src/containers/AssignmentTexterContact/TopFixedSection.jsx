@@ -14,7 +14,7 @@ const TopFixedSection = (props) => {
       contactSettings={contactSettings}
       rightToolbarIcon={
         <IconButton
-          onTouchTap={onExitTexter}
+          onClick={onExitTexter}
           tooltip="Return Home"
           tooltipPosition="bottom-center"
         >
