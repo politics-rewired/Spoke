@@ -9,5 +9,5 @@ interface Window {
   MAX_MESSAGE_LENGTH: number;
 }
 
-// This is a workaround while we are transitioning from JS to TS
-declare module "*";
+// This was a workaround while we are transitioning from JS to TS - 2020-12-21
+// declare module "*";
