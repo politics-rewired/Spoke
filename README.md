@@ -32,6 +32,14 @@ cp .env.example .env
 vi .env
 ```
 
+[Install](https://postgresql.org/download) and [start](https://postgresql.org/docs/9.1/server-start.html) Postgress
+
+Create the `spokedev` database
+
+```sh
+psql -c "create database spokedev;"
+```
+
 Run the migrations
 
 ```sh
