@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.13.0](https://github.com/politics-rewired/spoke/compare/v3.12.0...v3.13.0) (2020-12-28)
+
+
+### Features
+
+* **van:** sync opt-outs ([#812](https://github.com/politics-rewired/spoke/issues/812)) ([45622fa](https://github.com/politics-rewired/spoke/commit/45622fa315955b0eadbcd5d0d198fe24385bb416))
+
 ## [3.12.0](https://github.com/politics-rewired/spoke/compare/v3.11.0...v3.12.0) (2020-12-21)
 
 
