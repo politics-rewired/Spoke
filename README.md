@@ -12,6 +12,12 @@ that goal. See [`HOWTO_migrate-from-moveon-main.md`](./docs/HOWTO_migrate-from-m
 
 ## Getting Started
 
+Prerequisites:
+
+- Node -- See [How to Install Node](https://nodejs.dev/learn/how-to-install-nodejs)
+- Yarn -- See [Installing Yarn](https://classic.yarnpkg.com/en/docs/install)
+- Postgres -- See [install](https://postgresql.org/download) and [start](https://www.postgresql.org/docs/current/server-start.html) documentation
+
 Clone the repo:
 
 ```sh
@@ -32,9 +38,7 @@ cp .env.example .env
 vi .env
 ```
 
-[Install](https://postgresql.org/download) and [start](https://postgresql.org/docs/9.1/server-start.html) Postgress
-
-Create the `spokedev` database
+Create the `spokedev` database (if it doesn't yet exist)
 
 ```sh
 psql -c "create database spokedev;"
