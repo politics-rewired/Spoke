@@ -47,3 +47,9 @@ export interface QuestionResponseSyncTargetInput {
   activistCodeId?: string;
   resultCodeId?: string;
 }
+
+export interface Action {
+  name: string;
+  display_name: string;
+  instructions: string;
+}

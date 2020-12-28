@@ -1,3 +1,4 @@
+import { InteractionStep } from "./interaction-step";
 import { PageInfo } from "./types";
 
 export enum ExternalSyncReadinessState {
@@ -25,8 +26,12 @@ export interface CampaignsFilter {
 
 export interface Campaign {
   id: string;
+  title: string;
+  isStarted: boolean;
   syncReadiness: ExternalSyncReadinessState;
   pendingJobs: JobRequest[];
+  interactionSteps: InteractionStep[];
+  customFields: string[];
 }
 
 export interface PaginatedCampaigns {
@@ -67,6 +72,7 @@ export const schema = `
     contacts: Boolean!
     autoassign: Boolean!
     cannedResponses: Boolean!
+    interactions: Boolean!
   }
 
   enum ExternalSyncReadinessState {
