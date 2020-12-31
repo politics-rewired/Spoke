@@ -14,6 +14,7 @@ interface InfiniteRelayListProps<T> {
   toRelay: (data: any) => RelayPaginatedResponse<T>;
   cliffHanger?: (last: RelayPaginatedResponse<T>) => React.ReactElement;
   empty?: () => React.ReactElement;
+  dbLastUpdatedAt?: Date;
 }
 
 interface InfiniteRelayListState<T> {
@@ -38,14 +39,13 @@ class InfiniteRelayList<T> extends React.Component<
     await this.load();
   }
 
-  async componentDidUpdate(prevProps) {
-    console.log();
+  componentDidUpdate(prevProps: InfiniteRelayListProps<T>) {
     if (
       prevProps.query !== this.props.query ||
-      !isEqual(prevProps.queryVars, this.props.queryVars)
-      // !eq(prevProps.queryVars, this.props.queryVars)
+      !isEqual(prevProps.queryVars, this.props.queryVars) ||
+      !isEqual(prevProps.dbLastUpdatedAt, this.props.dbLastUpdatedAt)
     ) {
-      await this.load();
+      this.load();
     }
   }
 
@@ -54,7 +54,8 @@ class InfiniteRelayList<T> extends React.Component<
   ): Promise<RelayPaginatedResponse<T>> {
     const { data } = await apolloClient.query({
       query: this.props.query,
-      variables
+      variables,
+      fetchPolicy: "no-cache"
     });
     return this.props.toRelay(data);
   }

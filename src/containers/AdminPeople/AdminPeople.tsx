@@ -103,6 +103,7 @@ interface AdminPeopleState {
     message: string;
     seen: boolean;
   };
+  last: Date;
 }
 
 class AdminPeople extends React.Component<
@@ -127,7 +128,8 @@ class AdminPeople extends React.Component<
     error: {
       message: "",
       seen: true
-    }
+    },
+    last: new Date()
   };
 
   ctx(): AdminPeopleContext {
@@ -181,6 +183,7 @@ class AdminPeople extends React.Component<
           nameSearch={this.state.filter.nameSearch}
           onlyCampaignId={this.ctx().campaignFilter.onlyId}
           on={this.on()}
+          freshness={this.state.last}
         />
 
         <AddPersonButton
