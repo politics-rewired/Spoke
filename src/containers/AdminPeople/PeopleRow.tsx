@@ -55,6 +55,8 @@ const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
   return (
     <DropDownMenu
       value={row.membership.role}
+      style={{ display: "inherit" }}
+      underlineStyle={{ display: "none" }}
       disabled={disableRoleEdit}
       onChange={(_, __, newRole: UserRoleType) => onSelect(newRole)}
     >
@@ -87,6 +89,8 @@ const AutoApproveSelect: React.StatelessComponent<AutoApproveSelectProps> = ({
     <DropDownMenu
       value={row.membership.requestAutoApprove}
       disabled={!hasRoleAtLeast(viewing.role, UserRoleType.ADMIN)}
+      style={{ display: "inherit" }}
+      underlineStyle={{ display: "none" }}
       onChange={(_, __, autoApprove: RequestAutoApproveType) =>
         onChange(autoApprove)
       }
@@ -162,9 +166,8 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
   };
 
   const { row, viewing } = context;
-
   return (
-    <TableRow key={row.membership.id}>
+    <TableRow>
       <TableRowColumn>{row.user.displayName}</TableRowColumn>
       <TableRowColumn>{row.user.email}</TableRowColumn>
       <TableRowColumn>

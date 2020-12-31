@@ -22,11 +22,13 @@ export class NameSearchBar extends React.Component<
         }}
       >
         <TextField
-          id="outlined-basic"
+          underlineShow
           onChange={(_, newText) => {
             this.setState({ currentText: newText });
             this.props.onChange(newText);
           }}
+          hintStyle={{ left: 18 }}
+          hintText="Search"
         />
       </form>
     );

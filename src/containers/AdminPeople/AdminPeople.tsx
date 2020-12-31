@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/no-unused-state */
-// import { useQuery } from "@apollo/client";
+import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import { isString } from "lodash/fp";
 import { DropDownMenu, MenuItem, Snackbar } from "material-ui";
@@ -23,6 +23,17 @@ import {
 import Dialogs from "./Dialogs";
 import { NameSearchBar } from "./NameSearchBar";
 import PeopleTable from "./PeopleTable";
+
+const styles = StyleSheet.create({
+  filters: {
+    display: "flex",
+    width: 1164,
+    maxWidth: "94vw",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingLeft: 0
+  }
+});
 
 const AddPersonButton: React.StatelessComponent<{ onClick: () => void }> = ({
   onClick
@@ -158,25 +169,29 @@ class AdminPeople extends React.Component<
   render() {
     return (
       <div>
-        <CampaignSelector
-          campaigns={this.ctx().organization.campaigns.campaigns}
-          onChange={(newCampaignId) => {
-            this.props.history.push(
-              `/admin/${this.ctx().organization.id}/people?${
-                newCampaignId ? `campaignId=${newCampaignId}` : ""
-              }`
-            );
-          }}
-        />
-
-        <NameSearchBar
-          onChange={(newText) =>
-            this.setState({ filter: { nameSearch: newText } })
-          }
-          onSubmit={(newText) =>
-            this.setState({ filter: { nameSearch: newText } })
-          }
-        />
+        <div className={css(styles.filters)}>
+          <NameSearchBar
+            onChange={(newText) =>
+              this.setState({ filter: { nameSearch: newText } })
+            }
+            onSubmit={(newText) =>
+              this.setState({ filter: { nameSearch: newText } })
+            }
+          />
+          <div style={{ marginTop: -8 }}>
+            <CampaignSelector
+              selectedId={this.ctx().campaignFilter.onlyId}
+              campaigns={this.ctx().organization.campaigns.campaigns}
+              onChange={(newCampaignId) => {
+                this.props.history.push(
+                  `/admin/${this.ctx().organization.id}/people?${
+                    newCampaignId ? `campaignId=${newCampaignId}` : ""
+                  }`
+                );
+              }}
+            />
+          </div>
+        </div>
 
         <PeopleTable
           context={this.ctx()}
