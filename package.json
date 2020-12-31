@@ -64,6 +64,7 @@
     "@google-cloud/storage": "^3.0.4",
     "@passport-next/passport": "^3.1.0",
     "@trt2/gsm-charset-utils": "^1.0.13",
+    "@types/react-router-dom": "^5.1.6",
     "aphrodite": "^0.4.1",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.3",

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { InteractionStep } from "./interaction-step";
 import { PageInfo } from "./types";
 
@@ -38,6 +39,12 @@ export interface PaginatedCampaigns {
   campaigns: Campaign[];
   pageInfo: PageInfo;
 }
+
+export interface CampaignsList {
+  campaigns: Campaign[];
+}
+
+export type CampaignsReturn = PaginatedCampaigns | CampaignsList;
 
 export const schema = `
   input CampaignsFilter {
