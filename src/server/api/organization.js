@@ -88,7 +88,12 @@ export const resolvers = {
       }
       if (nameSearch) {
         query.whereRaw(
-          `"user"."first_name" || ' ' || "user"."last_name" ilike ?`,
+          `"user"."first_name"
+          || ' ' ||
+          "user"."last_name"
+          || ' ' ||
+          regexp_replace("user"."email", '@\\w+\\.\\w+', '')
+           ilike ?`,
           [`%${nameSearch}%`]
         );
       }
