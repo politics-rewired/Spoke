@@ -27,7 +27,8 @@ export interface AdminPeopleContext {
 }
 
 export interface PersonMutationHandler {
-  edit: (userId: string) => void;
-  passwordReset: (hash: string) => void;
+  startEdit: (userId: string) => void;
+  createHash: (hash: string) => void;
+  wasUpdated: (userId: string) => void;
   error: (errorMsg: string) => void;
 }

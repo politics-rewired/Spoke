@@ -159,9 +159,17 @@ class AdminPeople extends React.Component<
 
   on(): PersonMutationHandler {
     return {
-      edit: (userId) => this.setState({ userEdit: { userId, open: true } }),
-      passwordReset: (hash) =>
-        this.setState({ password: { hash, open: true } }),
+      startEdit: (userId) =>
+        this.setState((prev) => ({
+          userEdit: { ...prev.userEdit, userId, open: true }
+        })),
+      createHash: (hash) => {
+        console.log(hash);
+        this.setState({
+          password: { hash, open: true }
+        });
+      },
+      wasUpdated: () => this.setState({ last: new Date() }),
       error: (message) => this.setState({ error: { message, seen: false } })
     };
   }
@@ -214,7 +222,17 @@ class AdminPeople extends React.Component<
           open={this.state.userEdit.open}
           organizationId={this.ctx().organization.id}
           userId={this.state.userEdit.userId}
-          afterEditing={() => this.forceUpdate()}
+          afterEditing={() => {
+            this.setState({
+              userEdit: { open: false, userId: "" },
+              last: new Date()
+            });
+          }}
+        />
+        <Dialogs.ResetPassword
+          open={this.state.password.open}
+          passwordResetHash={this.state.password.hash}
+          onClose={() => this.setState({ password: { open: false, hash: "" } })}
         />
         <Snackbar
           open={this.state.error.message.length > 0 && !this.state.error.seen}

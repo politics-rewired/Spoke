@@ -173,29 +173,31 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
       <TableRowColumn>
         <RoleSelect
           context={context}
-          onSelect={(role) =>
-            editOrganizationMembership({
+          onSelect={async (role) => {
+            await editOrganizationMembership({
               role
-            })
-          }
+            });
+            on.wasUpdated(row.user.id);
+          }}
         />
       </TableRowColumn>
 
       <TableRowColumn>
         <AutoApproveSelect
           context={context}
-          onChange={(autoApprove) =>
-            editOrganizationMembership({
+          onChange={async (autoApprove) => {
+            await editOrganizationMembership({
               autoApprove
-            })
-          }
+            });
+            on.wasUpdated(row.user.id);
+          }}
         />
       </TableRowColumn>
       <TableRowColumn>
         <FlatButton
           {...dataTest("editPerson")}
           label="Edit"
-          onClick={() => on.edit(row.user.id)}
+          onClick={() => on.startEdit(row.user.id)}
         />
       </TableRowColumn>
       {get(window, "PASSPORT_STRATEGY", "") === "local" && (
@@ -207,7 +209,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
               const { data } = await resetUserPassword();
               if (data) {
                 const hash = data.resetUserPassword;
-                on.passwordReset(hash);
+                on.createHash(hash);
               }
             }}
           />
@@ -248,17 +250,22 @@ const mutations = {
       role
     }
   }),
-  resetUserPassword: (props: PeopleRowProps) => () => ({
-    mutation: gql`
-      mutation resetUserPassword($organizationId: String!, $userId: Int!) {
-        resetUserPassword(organizationId: $organizationId, userId: $userId)
+  resetUserPassword: ({
+    context: { organization },
+    membership: { user }
+  }: PeopleRowProps) => () => {
+    return {
+      mutation: gql`
+        mutation resetUserPassword($organizationId: String!, $userId: Int!) {
+          resetUserPassword(organizationId: $organizationId, userId: $userId)
+        }
+      `,
+      variables: {
+        organizationId: organization.id,
+        userId: user.id
       }
-    `,
-    variables: {
-      organizationId: props.membership.organization.id,
-      userId: props.membership.user.id
-    }
-  })
+    };
+  }
 };
 export default compose<PeopleRowExtendedProps, PeopleRowProps>(
   loadData({ mutations })
