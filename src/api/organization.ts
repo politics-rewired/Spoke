@@ -25,7 +25,7 @@ export interface AssignmentTarget {
 }
 
 export interface Organization {
-  id: number;
+  id: string;
   uuid: string;
   name: string;
   campaigns: PaginatedCampaigns;

@@ -18,7 +18,7 @@ export enum RequestAutoApproveType {
 
 export interface MembershipFilter {
   nameSearch?: string;
-  campaignId?: number;
+  campaignId?: string;
   campaignArchived?: boolean;
 }
 
