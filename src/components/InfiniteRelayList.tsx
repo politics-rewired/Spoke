@@ -4,6 +4,7 @@ import React from "react";
 
 import { emptyRelayPage, RelayPaginatedResponse } from "../api/pagination";
 import apolloClient from "../network/apollo-client-singleton";
+import Fragment from "./Fragment";
 import WhenSeen from "./WhenSeen";
 
 interface InfiniteRelayListProps<T> {
@@ -12,6 +13,7 @@ interface InfiniteRelayListProps<T> {
   nextQueryVars(cursor: string | null): Record<string, any>;
   renderNode: (node: T, idx: number) => React.ReactElement;
   toRelay: (data: any) => RelayPaginatedResponse<T>;
+  keyFunc?: (node: T, idx: number) => any;
   cliffHanger?: (last: RelayPaginatedResponse<T>) => React.ReactElement;
   empty?: () => React.ReactElement;
   dbLastUpdatedAt?: Date;
@@ -87,9 +89,14 @@ class InfiniteRelayList<T> extends React.Component<
         <div>{(this.props.empty || (() => <div>no items found</div>))()}</div>
       );
     }
+
     return (
       <div>
-        {this.state.nodes.map((item, idx) => this.props.renderNode(item, idx))}
+        {this.state.nodes.map((item, idx) => (
+          <Fragment key={(this.props.keyFunc || ((_, i) => i))(item, idx)}>
+            {this.props.renderNode(item, idx)}
+          </Fragment>
+        ))}
         <WhenSeen onSeenChange={(isSeen) => isSeen && this.load(true)}>
           {(
             this.props.cliffHanger ||
