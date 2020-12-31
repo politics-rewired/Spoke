@@ -16,13 +16,13 @@ export interface AdminPeopleContext {
     user: CurrentUser;
   };
   organization: {
-    id: number;
+    id: string;
     uuid: string;
     campaigns: CampaignsList;
   };
   campaignFilter: {
     showArchived: boolean;
-    onlyId: number | false;
+    onlyId: string | false;
   };
 }
 

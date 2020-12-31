@@ -38,8 +38,8 @@ const AddPersonButton: React.StatelessComponent<{ onClick: () => void }> = ({
 
 interface CampaignSelectorProps {
   campaigns: Campaign[];
-  selectedId?: string;
-  onChange: (newCampaignId: number | false) => void;
+  selectedId?: string | false;
+  onChange: (newCampaignId: string | false) => void;
 }
 const CampaignSelector: React.StatelessComponent<CampaignSelectorProps> = ({
   selectedId,
@@ -69,7 +69,7 @@ interface AdminPeopleExtensionProps
   extends RouteComponentProps<AdminPeopleRouteParams> {
   organizationData: {
     organization: {
-      id: number;
+      id: string;
       uuid: string;
       campaigns: CampaignsList;
     };
@@ -140,7 +140,7 @@ class AdminPeople extends React.Component<
       },
       organization: this.props.organizationData.organization,
       campaignFilter: {
-        onlyId: isString(campaignId) ? parseInt(campaignId, 10) : false,
+        onlyId: isString(campaignId) ? campaignId : false,
         showArchived: true
       }
     };

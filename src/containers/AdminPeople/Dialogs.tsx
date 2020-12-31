@@ -9,7 +9,7 @@ import UserEdit from "../UserEdit";
 interface EditPersonProps {
   open: boolean;
   afterEditing: () => void;
-  organizationId: number;
+  organizationId: string;
   userId: string;
 }
 
