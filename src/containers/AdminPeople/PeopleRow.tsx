@@ -1,6 +1,6 @@
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import { get } from "lodash/";
+import get from "lodash";
 import {
   DropDownMenu,
   FlatButton,
