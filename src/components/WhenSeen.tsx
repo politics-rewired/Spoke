@@ -6,15 +6,10 @@ import React from "react";
 interface WhenSeenProps {
   onSeenChange: (isSeen: boolean) => void;
 }
-interface WhenSeenState {
-  cliffhangerRef?: Element;
-}
-class WhenSeen extends React.Component<WhenSeenProps, WhenSeenState> {
+class WhenSeen extends React.Component<WhenSeenProps> {
   observer?: IntersectionObserver;
 
-  state: WhenSeenState = {
-    cliffhangerRef: undefined
-  };
+  cliffhangerRef?: Element = undefined;
 
   constructor(props: WhenSeenProps) {
     super(props);
@@ -25,11 +20,11 @@ class WhenSeen extends React.Component<WhenSeenProps, WhenSeenState> {
 
   onNewRef(newRef: Element | null) {
     if (!isNull(newRef) && this.observer) {
-      const oldRef = this.state.cliffhangerRef;
+      const oldRef = this.cliffhangerRef;
       if (oldRef !== newRef) {
         if (oldRef) this.observer.unobserve(oldRef);
         this.observer.observe(newRef);
-        this.setState((prev) => ({ ...prev, cliffhangerRef: newRef }));
+        this.cliffhangerRef = newRef;
       }
     }
   }
