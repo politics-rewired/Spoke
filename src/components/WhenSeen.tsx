@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-// eslint doesn't understand functions in interfaces
 import { isNull } from "lodash/fp";
 import React from "react";
 

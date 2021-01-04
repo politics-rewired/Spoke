@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import { get } from "lodash/";

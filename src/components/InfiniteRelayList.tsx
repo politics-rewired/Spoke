@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { isEqual } from "lodash";
 import React from "react";
 

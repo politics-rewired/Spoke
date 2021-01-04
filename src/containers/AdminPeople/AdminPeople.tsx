@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/no-unused-state */
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import { isString } from "lodash/fp";

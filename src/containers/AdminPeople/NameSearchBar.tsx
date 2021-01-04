@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { TextField } from "material-ui";
 import React from "react";
 
