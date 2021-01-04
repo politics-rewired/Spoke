@@ -305,6 +305,14 @@ const rootSchema = `
     editCampaignContactMessageStatus(messageStatus: String!, campaignContactId:String!): CampaignContact,
     deleteQuestionResponses(interactionStepIds:[String], campaignContactId:String!): CampaignContact,
     updateQuestionResponses(questionResponses:[QuestionResponseInput], campaignContactId:String!): CampaignContact,
+    handleConversation(
+      campaignContactId: String!, 
+      message:MessageInput,
+      questionResponses: [QuestionResponseInput],
+      interactionStepIdsForDeletedQuestionResponses: [String],
+      optOut: ContactActionInput,
+      closeConversation: Boolean
+    ): CampaignContact,
     startCampaign(id:String!): Campaign,
     archiveCampaign(id:String!): Campaign,
     unarchiveCampaign(id:String!): Campaign,

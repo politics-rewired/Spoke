@@ -277,46 +277,33 @@ class AssignmentTexter extends React.Component {
   sendMessage = (contact_id, payload) => {
     const isLastOne = !this.hasNext();
 
-    const promises = [];
+    const handleConversationPayload = {};
 
-    if (payload.message)
-      promises.push(
-        this.props.mutations
-          .sendMessage(payload.message, contact_id)
-          .then(catchError)
-          .then((response) => {
-            const { id, messages } = response.data.sendMessage;
-            // eslint-disable-next-line react/no-direct-mutation-state
-            this.state.contactCache[id].messages = messages;
-          })
-          .catch(this.handleSendMessageError(contact_id))
-      );
+    if (payload.message) handleConversationPayload.message = payload.message;
 
     if (payload.questionResponseObjects)
-      promises.push(
-        this.props.mutations
-          .updateQuestionResponses(payload.questionResponseObjects, contact_id)
-          .then(catchError)
-      );
+      handleConversationPayload.questionResponses =
+        payload.questionResponseObjects;
 
     if (payload.deletionIds)
-      promises.push(
-        this.props.mutations
-          .deleteQuestionResponses(payload.deletionIds, contact_id)
-          .then(catchError)
-      );
+      handleConversationPayload.interactionStepIdsForDeletedQuestionResponses =
+        payload.deletionIds;
 
-    if (payload.optOut) {
-      promises.push(
-        this.props.mutations
-          .createOptOut(payload.optOut, contact_id)
-          .then(catchError)
-      );
-    }
+    if (payload.optOut) handleConversationPayload.optOut = payload.optOut;
 
-    Promise.all(promises).then((_) => {
-      if (isLastOne) this.handleFinishContact();
-    });
+    this.props.mutations
+      .handleConversation(contact_id, handleConversationPayload)
+      .then(catchError)
+      .then((response) => {
+        if (payload.message) {
+          const { id, messages } = response.data.handleConversation;
+          // eslint-disable-next-line react/no-direct-mutation-state
+          this.state.contactCache[id].messages = messages;
+        }
+
+        if (isLastOne) this.handleFinishContact();
+      })
+      .catch(this.handleSendMessageError(contact_id));
 
     if (!isLastOne) {
       setTimeout(() => this.handleFinishContact(), SEND_DELAY);
@@ -620,6 +607,59 @@ const mutations = {
       campaignContactId
     }
   }),
+  handleConversation: () => (
+    campaignContactId,
+    {
+      message,
+      questionResponses,
+      interactionStepIdsForDeletedQuestionResponses,
+      optOut,
+      closeConversation
+    }
+  ) => ({
+    mutation: gql`
+      mutation handleConversation(
+        $campaignContactId: String!
+        $message: MessageInput
+        $questionResponses: [QuestionResponseInput]
+        $interactionStepIdsForDeletedQuestionResponses: [String]
+        $optOut: ContactActionInput
+        $closeConversation: Boolean
+      ) {
+        handleConversation(
+          campaignContactId: $campaignContactId
+          message: $message
+          questionResponses: $questionResponses
+          interactionStepIdsForDeletedQuestionResponses: $interactionStepIdsForDeletedQuestionResponses
+          optOut: $optOut
+          closeConversation: $closeConversation
+        ) {
+          id
+          assignmentId
+          optOut {
+            id
+            cell
+          }
+          messageStatus
+          messages {
+            id
+            createdAt
+            text
+            isFromContact
+          }
+        }
+      }
+    `,
+    variables: {
+      campaignContactId,
+      message,
+      questionResponses,
+      interactionStepIdsForDeletedQuestionResponses,
+      optOut,
+      closeConversation
+    }
+  }),
+
   bulkSendMessages: () => (assignmentId) => ({
     mutation: gql`
       mutation bulkSendMessages($assignmentId: Int!) {
