@@ -53,14 +53,14 @@ interface PeopleTableProps {
   onlyCampaignId: string | false;
   nameSearch: string;
   rowEventHandlers: PeopleRowEventHandlers;
-  freshness: Date;
+  lastMutated: Date;
 }
 const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
   context,
   nameSearch,
   onlyCampaignId,
   rowEventHandlers,
-  freshness
+  lastMutated
 }) => {
   const filter: MembershipFilter = {
     nameSearch: nameSearch === "" ? undefined : nameSearch,
@@ -77,7 +77,7 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
       <TableBody displayRowCheckbox={false} showRowHover>
         <InfiniteRelayList
           query={query}
-          dbLastUpdatedAt={freshness}
+          dbLastUpdatedAt={lastMutated}
           queryVars={{
             organizationId: context.organization.id,
             first: PAGE_SIZE,

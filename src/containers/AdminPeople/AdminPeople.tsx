@@ -114,7 +114,7 @@ interface AdminPeopleState {
     message: string;
     seen: boolean;
   };
-  last: Date;
+  lastMutated: Date;
 }
 
 class AdminPeople extends React.Component<
@@ -140,7 +140,7 @@ class AdminPeople extends React.Component<
       message: "",
       seen: true
     },
-    last: new Date()
+    lastMutated: new Date()
   };
 
   ctx(): AdminPeopleContext {
@@ -203,8 +203,8 @@ class AdminPeople extends React.Component<
           context={this.ctx()}
           nameSearch={this.state.filter.nameSearch}
           onlyCampaignId={this.ctx().campaignFilter.onlyId}
-          freshness={this.state.last}
           rowEventHandlers={this.rowEventHandlers()}
+          lastMutated={this.state.lastMutated}
         />
 
         <AddPersonButton
@@ -223,7 +223,7 @@ class AdminPeople extends React.Component<
           afterEditing={() => {
             this.setState({
               userEdit: { open: false, userId: "" },
-              last: new Date()
+              lastMutated: new Date()
             });
           }}
         />
