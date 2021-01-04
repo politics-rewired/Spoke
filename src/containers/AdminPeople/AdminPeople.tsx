@@ -13,6 +13,7 @@ import { compose } from "recompose";
 
 import { Campaign, CampaignsList } from "../../api/campaign";
 import { dataTest } from "../../lib/attributes";
+import { QueryMap } from "../../network/types";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import {
@@ -245,7 +246,7 @@ class AdminPeople extends React.Component<
   }
 }
 
-const queries = {
+const queries: QueryMap<AdminPeopleExtendedProps> = {
   userData: {
     query: gql`
       query getCurrentUserAndRoles($organizationId: String!) {

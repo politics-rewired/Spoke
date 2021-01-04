@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { FetchResult } from "apollo-link";
+import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import { get } from "lodash/";
 import {
@@ -20,6 +20,7 @@ import {
 import { User } from "../../api/user";
 import { dataTest, snakeToTitleCase, titleCase } from "../../lib/attributes";
 import { hasRoleAtLeast } from "../../lib/permissions";
+import { MutationMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
 import {
   AdminPeopleContext,
@@ -121,14 +122,14 @@ interface PeopleRowExtensionProps {
       autoApprove?: RequestAutoApproveType;
       role?: UserRoleType;
     }) => Promise<
-      FetchResult<{
+      ApolloQueryResult<{
         id: string;
         role: UserRoleType;
         requestAutoApprove: RequestAutoApproveType;
       }>
     >;
     resetUserPassword: () => Promise<
-      FetchResult<{
+      ApolloQueryResult<{
         resetUserPassword: string;
       }>
     >;
@@ -219,7 +220,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
   );
 };
 
-const mutations = {
+const mutations: MutationMap<PeopleRowProps> = {
   editOrganizationMembership: (props: PeopleRowProps) => ({
     autoApprove,
     role
