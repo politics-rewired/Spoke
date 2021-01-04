@@ -14,9 +14,12 @@ exports.up = function (knex) {
         select 
           public.user.id as user_id,
           email,
-          max(assignment.created_at) as most_recent_assignment
+          coalesce(
+            max(assignment.created_at),
+            public.user.updated_at
+          ) as most_recent_assignment
         from public.user
-        join assignment on assignment.user_id = public.user.id
+        left join assignment on assignment.user_id = public.user.id
         where email in ( select email from duplicated_users )
         group by 1, 2
       ),
