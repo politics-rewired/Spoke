@@ -1,6 +1,5 @@
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import get from "lodash";
 import {
   DropDownMenu,
   FlatButton,
@@ -200,7 +199,9 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
           onClick={() => handlers.startEdit(row.user.id)}
         />
       </TableRowColumn>
-      {get(window, "PASSPORT_STRATEGY", "") === "local" && (
+      {window.PASSPORT_STRATEGY === "local" && (
+        // (getDefault)
+        // get(window, "PASSPORT_STRATEGY", "") === "local"
         <TableRowColumn>
           <FlatButton
             label="Reset Password"
