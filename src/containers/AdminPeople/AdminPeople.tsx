@@ -26,8 +26,8 @@ import PeopleTable from "./PeopleTable";
 const styles = StyleSheet.create({
   filters: {
     display: "flex",
-    width: 1164,
-    maxWidth: "94vw",
+    width: 1245,
+    maxWidth: "92vw",
     justifyContent: "space-between",
     alignItems: "flex-start",
     paddingLeft: 0
