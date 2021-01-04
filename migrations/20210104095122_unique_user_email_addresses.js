@@ -42,7 +42,11 @@ exports.up = function (knex) {
       lockout_old as (
         update public.user u
         set auth0_id = 'lockedout|deprecation',
-            email = split_part(u.email, '@', 1) || '+deprecatedasduplicate' || split_part(u.email, '@', 2)
+            email = split_part(u.email, '@', 1) 
+            || '+deprecatedasduplicate' 
+            || u.id
+            || '@'
+            || split_part(u.email, '@', 2)
         from keep_discard_user_pairs
         where u.id = ANY(keep_discard_user_pairs.discard_user_ids)
         returning 1
@@ -51,7 +55,13 @@ exports.up = function (knex) {
         insert into user_organization (user_id, organization_id, role)
         select keep_user_id as user_id, organization_id, role
         from keep_discard_user_pairs
-        join user_organization on user_organization.user_id = ANY(keep_discard_user_pairs.discard_user_ids)
+        join user_organization on user_organization.id = (
+          select id
+          from user_organization
+          where user_organization.user_id = ANY(keep_discard_user_pairs.discard_user_ids)
+          order by updated_at asc
+          limit 1
+        )
         on conflict (user_id, organization_id)
         do update
         set role = (
