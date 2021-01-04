@@ -26,7 +26,7 @@ export interface AdminPeopleContext {
   };
 }
 
-export interface PersonMutationHandler {
+export interface PeopleRowEventHandlers {
   startEdit: (userId: string) => void;
   createHash: (hash: string) => void;
   wasUpdated: (userId: string) => void;

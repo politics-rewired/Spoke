@@ -18,7 +18,7 @@ import { loadData } from "../hoc/with-operations";
 import {
   AdminPeopleContext,
   CurrentUser,
-  PersonMutationHandler
+  PeopleRowEventHandlers
 } from "./context";
 import Dialogs from "./Dialogs";
 import { NameSearchBar } from "./NameSearchBar";
@@ -157,19 +157,17 @@ class AdminPeople extends React.Component<
     };
   }
 
-  on(): PersonMutationHandler {
+  rowEventHandlers(): PeopleRowEventHandlers {
     return {
       startEdit: (userId) =>
         this.setState((prev) => ({
           userEdit: { ...prev.userEdit, userId, open: true }
         })),
-      createHash: (hash) => {
-        console.log(hash);
+      createHash: (hash) =>
         this.setState({
           password: { hash, open: true }
-        });
-      },
-      wasUpdated: () => this.setState({ last: new Date() }),
+        }),
+      wasUpdated: () => this.setState({ lastMutated: new Date() }),
       error: (message) => this.setState({ error: { message, seen: false } })
     };
   }
@@ -205,8 +203,8 @@ class AdminPeople extends React.Component<
           context={this.ctx()}
           nameSearch={this.state.filter.nameSearch}
           onlyCampaignId={this.ctx().campaignFilter.onlyId}
-          on={this.on()}
           freshness={this.state.last}
+          rowEventHandlers={this.rowEventHandlers()}
         />
 
         <AddPersonButton

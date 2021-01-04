@@ -1,4 +1,3 @@
-// import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import { Table, TableBody } from "material-ui/Table";
@@ -10,7 +9,7 @@ import {
 } from "../../api/organization-membership";
 import Empty from "../../components/Empty";
 import InfiniteRelayList from "../../components/InfiniteRelayList";
-import { AdminPeopleContext, PersonMutationHandler } from "./context";
+import { AdminPeopleContext, PeopleRowEventHandlers } from "./context";
 import PeopleRow from "./PeopleRow";
 
 const PAGE_SIZE = 20;
@@ -53,14 +52,14 @@ interface PeopleTableProps {
   context: AdminPeopleContext;
   onlyCampaignId: string | false;
   nameSearch: string;
-  on: PersonMutationHandler;
+  rowEventHandlers: PeopleRowEventHandlers;
   freshness: Date;
 }
 const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
   context,
   nameSearch,
   onlyCampaignId,
-  on,
+  rowEventHandlers,
   freshness
 }) => {
   const filter: MembershipFilter = {
@@ -90,7 +89,11 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
           })}
           toRelay={(data) => data.organization.memberships}
           renderNode={(membership: OrganizationMembership) => (
-            <PeopleRow membership={membership} context={context} on={on} />
+            <PeopleRow
+              membership={membership}
+              context={context}
+              handlers={rowEventHandlers}
+            />
           )}
           keyFunc={(membership) => membership.user.id}
           empty={() => (

@@ -24,7 +24,7 @@ import { loadData } from "../hoc/with-operations";
 import {
   AdminPeopleContext,
   CurrentUser,
-  PersonMutationHandler
+  PeopleRowEventHandlers
 } from "./context";
 
 interface PeopleRowContext {
@@ -138,7 +138,7 @@ interface PeopleRowExtensionProps {
 interface PeopleRowProps {
   context: AdminPeopleContext;
   membership: OrganizationMembership;
-  on: PersonMutationHandler;
+  handlers: PeopleRowEventHandlers;
 }
 
 type PeopleRowExtendedProps = PeopleRowProps & PeopleRowExtensionProps;
@@ -149,7 +149,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
     viewing: { user: viewingUser }
   },
   mutations: { editOrganizationMembership, resetUserPassword },
-  on
+  handlers
 }) => {
   const context: PeopleRowContext = {
     row: {
@@ -177,7 +177,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
             await editOrganizationMembership({
               role
             });
-            on.wasUpdated(row.user.id);
+            handlers.wasUpdated(row.user.id);
           }}
         />
       </TableRowColumn>
@@ -189,7 +189,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
             await editOrganizationMembership({
               autoApprove
             });
-            on.wasUpdated(row.user.id);
+            handlers.wasUpdated(row.user.id);
           }}
         />
       </TableRowColumn>
@@ -197,7 +197,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
         <FlatButton
           {...dataTest("editPerson")}
           label="Edit"
-          onClick={() => on.startEdit(row.user.id)}
+          onClick={() => handlers.startEdit(row.user.id)}
         />
       </TableRowColumn>
       {get(window, "PASSPORT_STRATEGY", "") === "local" && (
@@ -209,7 +209,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
               const { data } = await resetUserPassword();
               if (data) {
                 const hash = data.resetUserPassword;
-                on.createHash(hash);
+                handlers.createHash(hash);
               }
             }}
           />
