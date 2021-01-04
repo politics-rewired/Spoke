@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { DateTime } from "luxon";
 import { DatePicker, DatePickerProps } from "material-ui";
 import React from "react";
