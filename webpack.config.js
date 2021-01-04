@@ -36,7 +36,7 @@ module.exports = {
     bundle: "./client/index.jsx"
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".mjs", ".js", ".jsx", ".json"]
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
   },
   module: {
     rules: [
