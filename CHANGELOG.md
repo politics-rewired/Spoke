@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.13.1](https://github.com/politics-rewired/spoke/compare/v3.13.0...v3.13.1) (2021-01-05)
+
+
+### Bug Fixes
+
+* restore tag functionality in assignment row ([#823](https://github.com/politics-rewired/spoke/issues/823)) ([1584247](https://github.com/politics-rewired/spoke/commit/15842476aa9ddd7611d3c9e66e3356395bc78237))
+
 ## [3.13.0](https://github.com/politics-rewired/spoke/compare/v3.12.0...v3.13.0) (2020-12-28)
 
 
