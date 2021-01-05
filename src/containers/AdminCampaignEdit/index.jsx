@@ -43,7 +43,6 @@ const campaignInfoFragment = `
   dueBy
   isStarted
   isArchived
-  contactsCount
   datawarehouseAvailable
   customFields
   useDynamicAssignment

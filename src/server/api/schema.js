@@ -417,6 +417,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "texters")) {
+
+    logger.info("CAMPAIGNNNNNN SCHEMAAAAAAAAA", campaign)
     const [job] = await r
       .knex("job_request")
       .insert({
@@ -439,6 +441,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         assignTexters(job);
       }
     }
+
   }
 
   if (Object.prototype.hasOwnProperty.call(campaign, "interactionSteps")) {
