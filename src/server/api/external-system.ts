@@ -1,3 +1,4 @@
+import { VanOperationMode } from "../../api/external-system";
 import { r } from "../models";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
@@ -32,8 +33,7 @@ export const resolvers = {
       "username",
       "createdAt",
       "updatedAt",
-      "syncedAt",
-      "operationMode"
+      "syncedAt"
     ]),
     type: (system: ExternalSystem) => system.type.toUpperCase(),
     apiKey: async (system: ExternalSystem) => {
@@ -83,6 +83,14 @@ export const resolvers = {
         .reader("public.external_sync_opt_out_configuration")
         .where({ system_id: system.id })
         .first()
-        .then((result) => result || null)
+        .then((result) => result || null),
+    operationMode: async (system: ExternalSystem) => {
+      const components = system.api_key_ref.split("|");
+      const operationMode = components[2];
+      if (operationMode === "1") {
+        return VanOperationMode.MYCAMPAIGN;
+      }
+      return VanOperationMode.VOTERFILE;
+    }
   }
 };

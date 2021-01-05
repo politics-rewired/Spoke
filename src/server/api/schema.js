@@ -3203,11 +3203,11 @@ const rootMutations = {
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
       let apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
 
-      if (operationMode === VanOperationMode.MyCampaign) {
+      if (operationMode === VanOperationMode.MYCAMPAIGN) {
         apiKeyRef = apiKeyRef.concat("|1");
       }
 
-      if (operationMode === VanOperationMode.Voterfile) {
+      if (operationMode === VanOperationMode.VOTERFILE) {
         apiKeyRef = apiKeyRef.concat("|0");
       }
 
@@ -3283,11 +3283,11 @@ const rootMutations = {
           truncatedKey
         );
 
-        if (operationMode === VanOperationMode.MyCampaign) {
+        if (operationMode === VanOperationMode.MYCAMPAIGN) {
           apiKeyRef = apiKeyRef.concat("|1");
         }
 
-        if (operationMode === VanOperationMode.Voterfile) {
+        if (operationMode === VanOperationMode.VOTERFILE) {
           apiKeyRef = apiKeyRef.concat("|0");
         }
         await r

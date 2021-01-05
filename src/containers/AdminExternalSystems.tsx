@@ -37,9 +37,9 @@ import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";
 
 const EXTERNAL_SYSTEM_OPTS: [string, string][] = [["Votebuilder", "VAN"]];
-const VAN_OPERATION_MODE: [string, string] = [
-  VanOperationMode.Voterfile,
-  VanOperationMode.MyCampaign
+const OPERATION_MODE_OPTS: [string, string][] = [
+  ["Voterfile", VanOperationMode.VOTERFILE],
+  ["MyCampaign", VanOperationMode.MYCAMPAIGN]
 ];
 
 const ACTIONS_COLUMN_INDEX = 3;
@@ -83,7 +83,7 @@ class AdminExternalSystems extends Component<Props, State> {
       type: ExternalSystemType.VAN,
       username: "",
       apiKey: "",
-      operationMode: VanOperationMode.Voterfile
+      operationMode: VanOperationMode.VOTERFILE
     },
     syncInitiatedForId: undefined,
     error: undefined
@@ -106,7 +106,6 @@ class AdminExternalSystems extends Component<Props, State> {
   makeHandleRefreshExternalSystem = (systemId: string) => () => {
     this.props.mutations
       .refreshSystem(systemId)
-      .then((res) => console.log("res", res))
       .catch((error) => this.setState({ error: error.message }));
     this.setState({ syncInitiatedForId: systemId });
   };
@@ -117,7 +116,16 @@ class AdminExternalSystems extends Component<Props, State> {
   handleRefreshSystems = () => this.props.data.refetch();
 
   cancelEditingExternalSystem = () =>
-    this.setState({ editingExternalSystem: undefined });
+    this.setState({
+      editingExternalSystem: undefined,
+      externalSystem: {
+        name: "",
+        type: ExternalSystemType.VAN,
+        username: "",
+        apiKey: "",
+        operationMode: VanOperationMode.VOTERFILE
+      }
+    });
 
   navigateToSystemDetail = (systemId: string) => {
     const { organizationId } = this.props.match.params;
@@ -138,8 +146,8 @@ class AdminExternalSystems extends Component<Props, State> {
           this.state.editingExternalSystem!,
           this.state.externalSystem
         )
-        .then(this.cancelEditingExternalSystem)
-        .catch((error) => this.setState({ error: error.message }));
+        .catch((error) => this.setState({ error: error.message }))
+        .then(this.cancelEditingExternalSystem);
     }
   };
 
@@ -299,8 +307,8 @@ class AdminExternalSystems extends Component<Props, State> {
               value={operationMode}
               onChange={this.handleSelectOperationMode}
             >
-              {VAN_OPERATION_MODE.map((mode) => (
-                <MenuItem key={mode} value={mode} primaryText={mode} />
+              {OPERATION_MODE_OPTS.map(([display, val]) => (
+                <MenuItem key={val} value={val} primaryText={display} />
               ))}
             </SelectField>
           )}

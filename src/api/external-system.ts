@@ -10,8 +10,8 @@ export enum ExternalSystemType {
 }
 
 export enum VanOperationMode {
-  Voterfile = "Voterfile",
-  MyCampaign = "MyCampaign"
+  VOTERFILE = "VOTERFILE",
+  MYCAMPAIGN = "MYCAMPAIGN"
 }
 
 export interface ExternalSystem {
@@ -46,8 +46,8 @@ export const schema = `
   }
 
   enum VanOperationMode {
-    Voterfile
-    MyCampaign
+    VOTERFILE
+    MYCAMPAIGN
   }
 
   enum ExternalDataCollectionStatus {
