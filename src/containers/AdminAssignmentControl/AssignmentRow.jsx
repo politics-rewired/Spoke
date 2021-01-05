@@ -58,6 +58,16 @@ const AssignmentRow = (props) => {
     onChange({ escalationTags: newEscalationTags });
   };
 
+  const handleRemoveEscalationTag = (oldTagId) => {
+    const newEscalationTags = escalationTags.filter(
+      (tag) => tag.id !== oldTagId
+    );
+    onChange({ escalationTags: newEscalationTags });
+  };
+
+  const isSaveDisabled =
+    isRowDisabled || !isAssignmentEnabled || id === "general";
+
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <div style={{ minWidth: "200px" }}>
@@ -109,10 +119,14 @@ const AssignmentRow = (props) => {
           marginLeft: "10px"
         }}
         floatingLabelText={id === "general" ? "N/A" : "Custom escalation tags"}
+        openOnFocus
         dataSource={escalationTagList}
+        dataSourceConfig={{ text: "title", value: "id" }}
         value={escalationTags}
         onBeforeRequestAdd={handleCheckEscalationTag}
         onRequestAdd={handleAddEscalationTag}
+        onRequestDelete={handleRemoveEscalationTag}
+        disabled={isSaveDisabled}
       />
     </div>
   );
