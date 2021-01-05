@@ -34,7 +34,7 @@ class AdminPersonList extends React.Component {
     open: false,
     userEdit: false,
     passwordResetHash: "",
-    superAdminConfirmOpen: false,
+    superAdminUserId: null,
     isWorking: false,
     saveError: undefined
   };
@@ -63,7 +63,13 @@ class AdminPersonList extends React.Component {
   handleDismissSaveError = () => this.setState({ saveError: undefined });
 
   handleDismissSuperAdminConfirm = () =>
-    this.setState({ superAdminConfirmOpen: false });
+    this.setState({ superAdminUserId: null });
+
+  handleConfirmSuperAdmin = () => {
+    const { superAdminUserId } = this.state;
+    this.handleRoleChange(superAdminUserId, UserRoleType.SUPERADMIN);
+    this.handleDismissSuperAdminConfirm();
+  };
 
   handleRoleChange = async (membershipId, role) => {
     const { editOrganizationMembership } = this.props.mutations;
@@ -110,7 +116,7 @@ class AdminPersonList extends React.Component {
 
   wrapHandleRoleChange = (membershipId) => async (_event, _index, role) => {
     if (role === UserRoleType.SUPERADMIN) {
-      this.setState({ superAdminConfirmOpen: true });
+      this.setState({ superAdminUserId: membershipId });
     } else {
       this.handleRoleChange(membershipId, role);
     }
@@ -358,13 +364,11 @@ class AdminPersonList extends React.Component {
                   key="confirm"
                   label="Confirm"
                   primary
-                  onClick={(person) =>
-                    this.handleRoleChange(person, UserRoleType.SUPERADMIN)
-                  }
+                  onClick={this.handleConfirmSuperAdmin}
                 />
               ]}
               modal={false}
-              open={this.state.superAdminConfirmOpen}
+              open={Boolean(this.state.superAdminUserId)}
               onRequestClose={this.handleDismissSuperAdminConfirm}
             >
               Are you sure you want to make this person a superadmin?
