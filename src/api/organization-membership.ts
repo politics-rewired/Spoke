@@ -7,6 +7,7 @@ export enum UserRoleType {
   TEXTER = "TEXTER",
   SUPERVOLUNTEER = "SUPERVOLUNTEER",
   ADMIN = "ADMIN",
+  SUPERADMIN = "SUPERADMIN",
   OWNER = "OWNER"
 }
 
@@ -44,6 +45,7 @@ export const schema = `
     TEXTER
     SUPERVOLUNTEER
     ADMIN
+    SUPERADMIN
     OWNER
   }
 
