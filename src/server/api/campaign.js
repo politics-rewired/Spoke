@@ -530,6 +530,33 @@ export const resolvers = {
           system_id: campaign.external_system_id
         });
       return formatPage(query, { after, first, primaryColumn: "compound_id" });
+    },
+    deliverabilityStats: async (campaign) => {
+      const { rows } = await r.reader.raw(
+        `
+          select count(*), send_status, error_codes
+          from message
+          join campaign_contact on campaign_contact.id = message.campaign_contact_id
+          where campaign_contact.campaign_id = ?
+            and is_from_contact = false
+          group by 2, 3
+        `,
+        [campaign.id]
+      );
+
+      const result = {
+        deliveredCount:
+          rows.find((o) => o.send_status === "DELIVERED")?.count || 0,
+        sentCount: rows.find((o) => o.send_status === "SENT")?.count || 0,
+        errorCount: rows
+          .filter((o) => o.send_status === "ERROR")
+          .reduce((a, b) => a.count + b.count, { count: 0 }),
+        specificErrors: rows
+          .filter((o) => o.send_status === "ERROR")
+          .map((o) => ({ errorCode: r.error_codes[0], count: o.count }))
+      };
+
+      return result;
     }
   }
 };

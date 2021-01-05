@@ -42,7 +42,7 @@ CampaignStat.propTypes = {
   title: PropTypes.string.isRequired,
   loading: PropTypes.bool,
   error: PropTypes.string,
-  count: PropTypes.number
+  count: PropTypes.any
 };
 
 export default CampaignStat;
