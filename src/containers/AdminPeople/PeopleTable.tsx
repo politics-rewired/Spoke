@@ -73,7 +73,7 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
     )?.title || "";
 
   return (
-    <Table selectable={false}>
+    <Table selectable={false} style={{ width: "inherit", margin: "auto" }}>
       <TableBody displayRowCheckbox={false} showRowHover>
         <InfiniteRelayList
           query={query}

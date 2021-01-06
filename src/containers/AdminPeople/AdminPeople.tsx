@@ -26,11 +26,9 @@ import PeopleTable from "./PeopleTable";
 const styles = StyleSheet.create({
   filters: {
     display: "flex",
-    width: 1245,
-    maxWidth: "92vw",
+    width: "100%",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingLeft: 0
+    alignItems: "flex-start"
   }
 });
 
