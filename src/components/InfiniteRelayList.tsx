@@ -4,7 +4,7 @@ import React from "react";
 
 import { emptyRelayPage, RelayPaginatedResponse } from "../api/pagination";
 import apolloClient from "../network/apollo-client-singleton";
-import Fragment from "./Fragment";
+import ChildOnly from "./ChildOnly";
 import WhenSeen from "./WhenSeen";
 
 interface InfiniteRelayListProps<T> {
@@ -97,9 +97,9 @@ class InfiniteRelayList<T> extends React.Component<
     return (
       <div>
         {this.state.nodes.map((item, idx) => (
-          <Fragment key={(this.props.keyFunc || ((_, i) => i))(item, idx)}>
+          <ChildOnly key={(this.props.keyFunc || ((_, i) => i))(item, idx)}>
             {this.props.renderNode(item, idx)}
-          </Fragment>
+          </ChildOnly>
         ))}
         <WhenSeen onSeenChange={(isSeen) => isSeen && this.load(true)}>
           {(
