@@ -86,7 +86,8 @@ export const resolvers = {
         .then((result) => result || null),
     operationMode: async (system: ExternalSystem) => {
       const components = system.api_key_ref.split("|");
-      const operationMode = components[2];
+      const operationMode =
+        components.length === 3 ? components[2] : components[1];
       if (operationMode === "1") {
         return VanOperationMode.MYCAMPAIGN;
       }
