@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unused-state */
 import gql from "graphql-tag";
+import Checkbox from "material-ui/Checkbox";
 import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
 import FlatButton from "material-ui/FlatButton";
@@ -35,6 +36,7 @@ class AdminPersonList extends React.Component {
     userEdit: false,
     passwordResetHash: "",
     superAdminUserId: null,
+    superAdminInvite: false,
     isWorking: false,
     saveError: undefined
   };
@@ -120,6 +122,10 @@ class AdminPersonList extends React.Component {
     } else {
       this.handleRoleChange(membershipId, role);
     }
+  };
+
+  handleSuperAdminInvite = () => {
+    this.setState({ superAdminInvite: !this.state.superAdminInvite });
   };
 
   renderOffsetList = () => {
@@ -331,6 +337,12 @@ class AdminPersonList extends React.Component {
             >
               <OrganizationJoinLink
                 organizationUuid={organizationData.organization.uuid}
+                isSuperAdmin={this.state.superAdminInvite}
+              />
+              <Checkbox
+                label="Make superadmin?"
+                checked={this.state.superAdminInvite}
+                onCheck={this.handleSuperAdminInvite}
               />
             </Dialog>
             <Dialog

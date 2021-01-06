@@ -3,7 +3,13 @@ import { AuthenticationError, ForbiddenError } from "apollo-server-express";
 import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 
-const accessHierarchy = ["TEXTER", "SUPERVOLUNTEER", "ADMIN", "OWNER"];
+const accessHierarchy = [
+  "TEXTER",
+  "SUPERVOLUNTEER",
+  "ADMIN",
+  "SUPERADMIN",
+  "OWNER"
+];
 
 export function authRequired(user) {
   if (!user) {
