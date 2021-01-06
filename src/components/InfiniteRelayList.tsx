@@ -1,3 +1,4 @@
+import { FetchPolicy } from "apollo-client";
 import { isEqual } from "lodash";
 import React from "react";
 
@@ -15,6 +16,7 @@ interface InfiniteRelayListProps<T> {
   keyFunc?: (node: T, idx: number) => any;
   cliffHanger?: (last: RelayPaginatedResponse<T>) => React.ReactElement;
   empty?: () => React.ReactElement;
+  fetchPolicy?: FetchPolicy;
   dbLastUpdatedAt?: Date;
 }
 
@@ -56,7 +58,7 @@ class InfiniteRelayList<T> extends React.Component<
     const { data } = await apolloClient.query({
       query: this.props.query,
       variables,
-      fetchPolicy: "no-cache"
+      fetchPolicy: this.props.fetchPolicy || "network-only"
     });
     return this.props.toRelay(data);
   }
