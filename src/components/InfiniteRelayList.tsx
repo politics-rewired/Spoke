@@ -14,7 +14,10 @@ interface InfiniteRelayListProps<T> {
   renderNode: (node: T, idx: number) => React.ReactElement;
   toRelay: (data: any) => RelayPaginatedResponse<T>;
   keyFunc?: (node: T, idx: number) => any;
-  cliffHanger?: (last: RelayPaginatedResponse<T>) => React.ReactElement;
+  cliffHanger?: (
+    hasMore: boolean,
+    last: RelayPaginatedResponse<T>
+  ) => React.ReactElement;
   empty?: () => React.ReactElement;
   fetchPolicy?: FetchPolicy;
   dbLastUpdatedAt?: Date;
@@ -108,7 +111,7 @@ class InfiniteRelayList<T> extends React.Component<
                 </span>
               </div>
             ))
-          )(this.state.last)}
+          )(this.state.hasMore, this.state.last)}
         </WhenSeen>
       </div>
     );

@@ -104,7 +104,8 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
               icon={<PeopleIcon />}
             />
           )}
-          cliffHanger={(last) => {
+          cliffHanger={(hasMore, last) => {
+            const loadingClause = hasMore ? "Loading more... " : "";
             const countClause = `${last.pageInfo.totalCount} ${
               last.pageInfo.totalCount === 1 ? "person" : "people"
             } found`;
@@ -117,7 +118,7 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
 
             return (
               <div style={{ paddingTop: 8 }}>
-                <span>{`${countClause} ${campaignClause} ${searchClause}.`}</span>
+                <span>{`${loadingClause}${countClause} ${campaignClause} ${searchClause}.`}</span>
               </div>
             );
           }}
