@@ -1,4 +1,9 @@
-import { filter, flow, fromPairs, map, reverse, sortBy } from "lodash/fp";
+import filter from "lodash/fp/filter";
+import flow from "lodash/fp/flow";
+import fromPairs from "lodash/fp/fromPairs";
+import map from "lodash/fp/map";
+import reverse from "lodash/fp/reverse";
+import sortBy from "lodash/fp/sortBy";
 
 const { DateTime } = require("luxon");
 
