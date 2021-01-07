@@ -23,7 +23,18 @@ class JoinTeam extends React.Component {
     let organization = null;
     let campaign = null;
     try {
-      organization = await this.props.mutations.joinOrganization();
+      // determine if the invite link is for a superadmin by splitting orgUUID by '&',
+      // and checking for presence of 'superadmin' after UUID
+      const orgIdComponents = this.props.match.params.organizationUuid.split(
+        "&"
+      );
+      const organizationUuid = orgIdComponents[0];
+      const makeSuperadmin =
+        orgIdComponents.length === 2 && orgIdComponents[1] === "superadmin";
+      organization = await this.props.mutations.joinOrganization(
+        organizationUuid,
+        makeSuperadmin
+      );
       if (organization.errors) throw organization.errors;
     } catch (ex) {
       this.setState({
@@ -74,17 +85,23 @@ JoinTeam.propTypes = {
 };
 
 const mutations = {
-  joinOrganization: (ownProps) => () => ({
+  joinOrganization: (_ownProps) => (organizationUuid, makeSuperadmin) => ({
     mutation: gql`
-      mutation joinOrganization($organizationUuid: String!) {
-        joinOrganization(organizationUuid: $organizationUuid) {
+      mutation joinOrganization(
+        $organizationUuid: String!
+        $makeSuperadmin: Boolean!
+      ) {
+        joinOrganization(
+          organizationUuid: $organizationUuid
+          makeSuperadmin: $makeSuperadmin
+        ) {
           id
         }
       }
     `,
-    variables: { organizationUuid: ownProps.match.params.organizationUuid }
+    variables: { organizationUuid, makeSuperadmin }
   }),
-  assignUserToCampaign: (ownProps) => () => ({
+  assignUserToCampaign: (ownProps) => (organizationUuid) => ({
     mutation: gql`
       mutation assignUserToCampaign(
         $organizationUuid: String!
@@ -100,7 +117,7 @@ const mutations = {
     `,
     variables: {
       campaignId: ownProps.match.params.campaignId,
-      organizationUuid: ownProps.match.params.organizationUuid
+      organizationUuid
     }
   })
 };

@@ -12,17 +12,18 @@ const OrganizationJoinLink = ({
   if (typeof window !== "undefined") {
     baseUrl = window.location.origin;
   }
+  const orgIdWithAdmin = isSuperAdmin
+    ? `${organizationUuid}&superadmin`
+    : organizationUuid;
 
   const joinUrl = campaignId
-    ? `${baseUrl}/${organizationUuid}/join/${campaignId}`
-    : `${baseUrl}/${organizationUuid}/join`;
-
-  const urlWithAdmin = isSuperAdmin ? `${joinUrl}/superadmin` : joinUrl;
+    ? `${baseUrl}/${orgIdWithAdmin}/join/${campaignId}`
+    : `${baseUrl}/${orgIdWithAdmin}/join`;
 
   const textContent =
     "Send your texting volunteers this link! Once they sign up, they'll be automatically assigned to this campaign.";
 
-  return <DisplayLink url={urlWithAdmin} textContent={textContent} />;
+  return <DisplayLink url={joinUrl} textContent={textContent} />;
 };
 
 OrganizationJoinLink.propTypes = {

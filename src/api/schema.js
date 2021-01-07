@@ -289,7 +289,7 @@ const rootSchema = `
     exportCampaign(options: CampaignExportInput!): JobRequest
     createCannedResponse(cannedResponse:CannedResponseInput!): CannedResponse
     createOrganization(name: String!, userId: String!, inviteId: String!): Organization
-    joinOrganization(organizationUuid: String!): Organization!
+    joinOrganization(organizationUuid: String!, makeSuperadmin: Boolean!): Organization!
     editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
     editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OranizationSettings!
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
