@@ -1,11 +1,11 @@
 import AWS from "aws-sdk";
 import _ from "lodash";
-import moment from "moment";
 import zipCodeToTimeZone from "zipcode-to-timezone";
 
 import { config } from "../../config";
 import { gunzip } from "../../lib";
 import { getFormattedPhoneNumber } from "../../lib/phone-format";
+import { isValidTimezone } from "../../lib/tz-helpers";
 import logger from "../../logger";
 import {
   assignMissingMessagingServices,
@@ -429,13 +429,13 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
       ) {
         contact.timezone = zipCodeToTimeZone.lookup(contact.zip);
       }
-      if (
-        Object.prototype.hasOwnProperty.call(contactCustomFields, "timezone")
-      ) {
-        const zone = moment.tz.zone(contactCustomFields.timezone);
-        if (zone) contact.timezone = contactCustomFields.timezone;
-        else contact.timezone = zipCodeToTimeZone.lookup(contact.zip);
+
+      if ("timezone" in contactCustomFields) {
+        contact.timezone = isValidTimezone(contactCustomFields.timezone)
+          ? contactCustomFields.timezone
+          : zipCodeToTimeZone.lookup(contact.zip);
       }
+
       return contact;
     })
   );

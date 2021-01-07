@@ -1,5 +1,4 @@
-const moment = require("moment");
-
+import { DateTime } from "luxon";
 const config = {
   client: "mysql",
   connection: process.env.DATABASE_URL,
@@ -91,10 +90,10 @@ async function selectCampaignContact(message, options, mode) {
     return options[0];
   }
   const created_before_message = options.filter((cc) => {
-    const message_created_at = moment(message.created_at);
-    const cc_created_at = moment(cc.created_at);
-    // console.log({ message_created_at, cc_created_at })
-    return cc_created_at.isBefore(message_created_at);
+    const message_created_at = DateTime.fromISO(message.created_at);
+
+    const cc_created_at = DateTime.fromISO(cc.created_at);
+    return cc_created_at < message_created_at;
   });
 
   if (created_before_message.length == 1) {

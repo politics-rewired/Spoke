@@ -1,5 +1,5 @@
 import _ from "lodash";
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 import Twilio from "twilio";
 
 import { config } from "../../../config";
@@ -209,7 +209,7 @@ async function sendMessage(message, organizationId, trx = r.knex) {
       // we subtract the MESSAGE_VALIDITY_PADDING_SECONDS seconds to allow time for the message to be sent by
       // a downstream service
       const messageValidityPeriod =
-        moment(message.send_before).diff(moment(), "seconds") -
+        (DateTime.fromISO(message.send_before) - DateTime.local()).seconds -
         MESSAGE_VALIDITY_PADDING_SECONDS;
       if (messageValidityPeriod < 0) {
         // this is an edge case

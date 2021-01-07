@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 import React from 'react'
-import moment from 'moment-timezone'
 import {mount} from "enzyme";
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import {StyleSheetTestUtils} from 'aphrodite'

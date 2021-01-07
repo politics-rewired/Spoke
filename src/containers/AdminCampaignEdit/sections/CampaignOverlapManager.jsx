@@ -1,11 +1,11 @@
 /* eslint-disable max-classes-per-file,react/no-unused-state */
 import gql from "graphql-tag";
+import { DateTime } from "luxon";
 import DataTable from "material-ui-datatables";
 import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
-import moment from "moment";
 import React from "react";
 
 import LoadingIndicator from "../../../components/LoadingIndicator";
@@ -136,7 +136,7 @@ class CampaignOverlapManager extends React.Component {
         campaignId: overlap.campaign.id,
         campaignTitle: overlap.campaign.title,
         overlapCount: overlap.overlapCount,
-        lastActivity: moment(overlap.lastActivity).fromNow()
+        lastActivity: DateTime.fromISO(overlap.lastActivity).toRelative()
       }));
 
   setOverlapSearch = (e) => {

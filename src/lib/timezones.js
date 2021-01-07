@@ -1,4 +1,4 @@
-import moment from "moment-timezone";
+import { DateTime, Interval } from "luxon";
 
 /**
  * Returns true if it is currently between the start and end hours in the specified timezone.
@@ -8,11 +8,12 @@ import moment from "moment-timezone";
  * @param {number} endHour Interval ending hour in 24-hour format
  */
 export const isNowBetween = (timezone, starthour, endHour) => {
-  const campaignTime = moment().tz(timezone).startOf("day");
+  const campaignTime = DateTime.local().setZone(timezone).startOf("day");
 
-  const startTime = campaignTime.clone().hour(starthour);
-  const endTime = campaignTime.clone().hour(endHour);
-  return moment().isBetween(startTime, endTime);
+  return Interval.fromDateTimes(
+    campaignTime.set({ hour: starthour }),
+    campaignTime.set({ hour: endHour })
+  ).contains(DateTime.local());
 };
 
 /**

@@ -1,9 +1,11 @@
+import knex from "knex";
+import _ from "lodash";
 import groupBy from "lodash/groupBy";
+import { DateTime, Interval } from "luxon";
 
+import { asUtc } from "../../lib/tz-helpers";
 import logger from "../../logger";
 import knexConfig from "../../server/knex";
-
-const moment = require("moment");
 
 const MINUTES_LATER = 10;
 const COMPUTATION_DELAY = 1;
@@ -18,9 +20,9 @@ const DOMAIN_REGEX = new RegExp(
   `${`[^://\\s]*(`}${DOMAIN_ENDINGS.map((tld) => `\\${tld}`).join("|")})`
 );
 
-const db = require("knex")(knexConfig);
+const db = knex(knexConfig);
 
-async function markDomainUnhealthy(domain) {
+async function markDomainUnhealthy(domain: string) {
   // Check if domain is already marked unhealthy
   const existingDomain = await db("unhealthy_link_domain")
     .select("id")
@@ -48,12 +50,12 @@ async function firstMessageSentAt() {
   return firstMessage ? firstMessage.created_at : firstMessage;
 }
 
-function extractDomain(text) {
+function extractDomain(text: string) {
   const matches = text.match(DOMAIN_REGEX);
   return matches ? matches[0] : null;
 }
 
-function extractPath(text, domain) {
+function extractPath(text: string, domain: string | null) {
   if (!domain) return null;
 
   try {
@@ -71,7 +73,7 @@ function extractPath(text, domain) {
   }
 }
 
-async function chunkedMain() {
+async function chunkedMain(): Promise<"Done"> {
   const results = await db.raw(`
     select (to_char(period_ends_at, 'YYYY-MM-DD') || 'T' || to_char(period_ends_at, 'HH24:MI:SSZ')) as period_ends_at
     from deliverability_report
@@ -81,34 +83,30 @@ async function chunkedMain() {
 
   const lastReport = results.rows[0];
 
-  let period_starts_at;
+  const period = Interval.after(
+    asUtc(lastReport ? lastReport.period_ends_at : await firstMessageSentAt()),
+    { minutes: MINUTES_LATER }
+  );
 
-  if (lastReport) {
-    period_starts_at = lastReport.period_ends_at;
-  } else {
-    period_starts_at = await firstMessageSentAt();
-  }
-
-  period_starts_at = moment.utc(period_starts_at);
-  const period_ends_at = moment.utc(period_starts_at);
-  period_ends_at.add(MINUTES_LATER, "minutes");
-
-  let nMinutesAgo = moment.utc();
-  nMinutesAgo = nMinutesAgo.subtract(MINUTES_LATER + COMPUTATION_DELAY);
-
-  if (nMinutesAgo.isBefore(period_ends_at)) {
+  if (
+    period.contains(
+      DateTime.utc().minus({
+        minutes: MINUTES_LATER + COMPUTATION_DELAY
+      })
+    )
+  ) {
     logger.verbose(
       "Too early to compute report for period ending at",
-      period_ends_at
+      period.end.toISO()
     );
-    return "Done";
+    return DONE;
   }
 
   const messages = await db("message")
     .select("text", "send_status")
     .where({ is_from_contact: false })
-    .where("created_at", ">=", period_starts_at.toISOString())
-    .where("created_at", "<=", period_ends_at.toISOString());
+    .where("created_at", ">=", period.start.toISO())
+    .where("created_at", "<=", period.end.toISO());
 
   const messageItems = messages.map((m) => {
     const domain = extractDomain(m.text);
@@ -143,8 +141,8 @@ async function chunkedMain() {
     return {
       ...vals,
       computed_at: db.fn.now(),
-      period_starts_at: period_starts_at.toISOString(),
-      period_ends_at: period_ends_at.toISOString(),
+      period_starts_at: period.start.toISO(),
+      period_ends_at: period.end.toISO(),
       count_total: grouped[key].total,
       count_delivered: grouped[key].delivered,
       count_sent: grouped[key].sent,
@@ -157,8 +155,8 @@ async function chunkedMain() {
       domain: null,
       url_path: null,
       computed_at: db.fn.now(),
-      period_starts_at: period_starts_at.toISOString(),
-      period_ends_at: period_ends_at.toISOString(),
+      period_starts_at: period.start.toISO(),
+      period_ends_at: period.end.toISO(),
       count_total: 0,
       count_delivered: 0,
       count_sent: 0,

@@ -1,9 +1,9 @@
 import { css, StyleSheet } from "aphrodite";
+import { DateTime } from "luxon";
 import Badge from "material-ui/Badge";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
 import RaisedButton from "material-ui/RaisedButton";
-import moment from "moment";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
@@ -120,12 +120,17 @@ export class AssignmentSummary extends Component {
       useDynamicAssignment
     } = assignment.campaign;
     const { maxContacts } = assignment;
+    const dueByText = dueBy
+      ? DateTime.fromISO(dueBy).toFormat("MMM D YYYY")
+      : "No Due Date";
+    const subtitle = `${description} - ${dueByText}`;
+
     return (
       <div className={css(styles.container)}>
         <Card key={assignment.id}>
           <CardTitle
             title={title}
-            subtitle={`${description} - ${moment(dueBy).format("MMM D YYYY")}`}
+            subtitle={subtitle}
             style={{ backgroundColor: primaryColor }}
           >
             {logoImageUrl && (

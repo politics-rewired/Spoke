@@ -1,5 +1,5 @@
 import sortBy from "lodash/sortBy";
-import moment from "moment";
+import { DateTime } from "luxon";
 import Papa from "papaparse";
 
 import { uploadToCloud } from "../../workers/exports/upload";
@@ -120,7 +120,8 @@ export const exportForVan: ProgressTask<ExportForVANPayload> = async (
   const exportCsv = Papa.unparse(exportRows);
 
   const safeTitle = title.replace(/ /g, "_").replace(/\//g, "_");
-  const timestamp = moment().format("YYYY-MM-DD-HH-mm-ss");
+  const timestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
+
   const vanExpostKey = `${safeTitle}-${timestamp}.csv`;
   const exportUrl = await uploadToCloud(`${vanExpostKey}.csv`, exportCsv);
 

@@ -1,5 +1,4 @@
 import humps from "humps";
-import moment from "moment-timezone";
 
 /**
  * Returns resolvers mapping GraphQL-style properties to their Postgres-style columns
@@ -17,17 +16,6 @@ export const capitalizeWord = (word?: string) => {
     return word[0].toUpperCase() + word.slice(1);
   }
   return "";
-};
-
-/**
- * Return the UTC offset in hours for a time zone.
- * @param {string} timezoneName The timezone name
- * @returns {number} UTC offset in hours
- */
-export const getTzOffset = (timezoneName: string) => {
-  // POSIX compatibility requires that the offsets are inverted
-  // See: https://momentjs.com/timezone/docs/#/zone-object/offset/
-  return moment.tz.zone(timezoneName).utcOffset(Date.now()) / -60;
 };
 
 export const graphileSecretRef = (organizationId: string, ref: string) =>

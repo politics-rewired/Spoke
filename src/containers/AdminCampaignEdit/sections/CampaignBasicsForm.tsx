@@ -1,9 +1,9 @@
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
+import { DateTime } from "luxon";
 import ColorPicker from "material-ui-color-picker";
 import RaisedButton from "material-ui/RaisedButton";
-import moment from "moment";
 import React from "react";
 import Form from "react-formal";
 import { compose } from "recompose";
@@ -122,6 +122,7 @@ class CampaignBasicsForm extends React.Component<
           onChange={this.handleChange}
         >
           <CampaignFormSectionHeading title="What&#39;s your campaign about?" />
+
           <Form.Field
             {...dataTest("title")}
             name="title"
@@ -129,6 +130,7 @@ class CampaignBasicsForm extends React.Component<
             hintText="e.g. Election Day 2016"
             fullWidth
           />
+
           <Form.Field
             {...dataTest("description")}
             name="description"
@@ -142,11 +144,13 @@ class CampaignBasicsForm extends React.Component<
             label="Due date"
             type="date"
             locale="en-US"
-            shouldDisableDate={(date: Date) => moment(date).diff(moment()) < 0}
+            shouldDisableDate={(date: Date) =>
+              DateTime.fromJSDate(date) < DateTime.local()
+            }
             autoOk
             fullWidth
-            utcOffset={0}
           />
+
           <Form.Field name="introHtml" label="Intro HTML" multiLine fullWidth />
           <Form.Field
             name="logoImageUrl"
@@ -162,6 +166,7 @@ class CampaignBasicsForm extends React.Component<
             type={ColorPicker}
           />
         </GSForm>
+
         <RaisedButton
           label={finalSaveLabel}
           disabled={isSaveDisabled}
