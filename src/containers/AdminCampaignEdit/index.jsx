@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
-import { pick } from "lodash";
 import isEqual from "lodash/isEqual";
+import pick from "lodash/pick";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";

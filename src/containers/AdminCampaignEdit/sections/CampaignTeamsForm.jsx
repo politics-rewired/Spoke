@@ -1,4 +1,4 @@
-import { differenceBy } from "lodash";
+import differenceBy from "lodash/differenceBy";
 import ChipInput from "material-ui-chip-input";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
