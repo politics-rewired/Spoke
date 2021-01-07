@@ -5,6 +5,7 @@ export interface CampaignReadinessType {
   contacts: boolean;
   autoassign: boolean;
   cannedResponses: boolean;
+  interactions: boolean;
 }
 
 export interface DataSourceItemType {

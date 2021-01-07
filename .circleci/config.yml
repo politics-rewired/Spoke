@@ -3,7 +3,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/node:12.18.3
+      - image: circleci/node:12.20.0
 
     working_directory: ~/repo
 
@@ -32,7 +32,7 @@ jobs:
 
   build_image:
     docker:
-      - image: circleci/node:12.18.3
+      - image: circleci/node:12.20.0
 
     working_directory: ~/repo
 
@@ -41,6 +41,7 @@ jobs:
 
       - setup_remote_docker:
           docker_layer_caching: true
+          version: 19.03.13
 
       - run:
           name: Configure GCR access

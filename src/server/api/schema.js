@@ -3441,6 +3441,37 @@ const rootMutations = {
       ]);
 
       return true;
+    },
+    editExternalOptOutSyncConfig: async (
+      _root,
+      { systemId, targetId },
+      { user }
+    ) => {
+      const externalSystem = await r
+        .knex("external_system")
+        .where({ id: systemId })
+        .first();
+
+      await accessRequired(user, externalSystem.organization_id, "ADMIN");
+
+      if (targetId) {
+        await r.knex.raw(
+          `
+            insert into external_sync_opt_out_configuration (system_id, external_result_code_id)
+            values (?, ?)
+            on conflict (system_id) do update
+              set external_result_code_id = EXCLUDED.external_result_code_id
+          `,
+          [externalSystem.id, targetId]
+        );
+      } else {
+        await r
+          .knex("external_sync_opt_out_configuration")
+          .where({ system_id: externalSystem.id })
+          .del();
+      }
+
+      return externalSystem;
     }
   }
 };

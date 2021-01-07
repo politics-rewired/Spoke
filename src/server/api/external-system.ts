@@ -75,6 +75,12 @@ export const resolvers = {
         .reader("external_result_code")
         .where({ system_id: system.id });
       return formatPage(query, { after, first, primaryColumn: "created_at" });
-    }
+    },
+    optOutSyncConfig: (system: ExternalSystem) =>
+      r
+        .reader("public.external_sync_opt_out_configuration")
+        .where({ system_id: system.id })
+        .first()
+        .then((result) => result || null)
   }
 };

@@ -211,7 +211,7 @@ class AdminCampaignStats extends React.Component {
                         campaign.isArchived ? (
                           <RaisedButton
                             key="unarchive"
-                            onTouchTap={() =>
+                            onClick={() =>
                               this.props.mutations.unarchiveCampaign()
                             }
                             label="Unarchive"
@@ -220,7 +220,7 @@ class AdminCampaignStats extends React.Component {
                         !campaign.isArchived ? (
                           <RaisedButton
                             key="archive"
-                            onTouchTap={() =>
+                            onClick={() =>
                               this.props.mutations.archiveCampaign()
                             }
                             label="Archive"
@@ -230,7 +230,7 @@ class AdminCampaignStats extends React.Component {
                         <RaisedButton
                           key="open-script-preview"
                           label="Open Script Preview"
-                          onTouchTap={() => {
+                          onClick={() => {
                             window.open(
                               `/preview/${campaign.previewUrl}`,
                               "_blank"
@@ -243,7 +243,7 @@ class AdminCampaignStats extends React.Component {
                           {...dataTest("copyCampaign")}
                           label="Copy Campaign"
                           disabled={this.state.copyingCampaign}
-                          onTouchTap={() => {
+                          onClick={() => {
                             this.setState({ copyingCampaign: true });
 
                             this.props.mutations

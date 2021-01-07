@@ -346,6 +346,7 @@ const rootSchema = `
     createQuestionResponseSyncTarget(input: QuestionResponseSyncTargetInput!): ExternalSyncConfigTarget!
     deleteQuestionResponseSyncTarget(targetId: String!): String!
     syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
+    editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
   }
 
   schema {

@@ -130,7 +130,7 @@ const signup: AuthHelper = async (options) => {
   } = options;
   // Verify UUID validity
   // If there is an error, it will be caught on local strategy invocation
-  await validUuid(db, nextUrl, uuidMatch);
+  await validUuid(db, nextUrl, uuidMatch || [""]);
 
   // Verify user doesn't already exist
   if (existingUser && existingUser.email === lowerCaseEmail) {
@@ -181,7 +181,7 @@ const reset: AuthHelper = (options) => {
   }
 
   // Verify the UUID in request matches hash in DB
-  if (uuidMatch[0] !== resetHash) {
+  if (uuidMatch && uuidMatch[0] !== resetHash) {
     throw new InvalidResetHashError();
   }
 
@@ -257,6 +257,20 @@ export const change = (options: ChangeOptions) => {
   });
 };
 
-export const authHelpers: Record<string, AuthHelper> = { login, signup, reset };
+export const hashPassword = async (password: string) => {
+  return new Promise((resolve, reject) => {
+    AuthHasher.hash(password, (err: any, hashed: any) => {
+      if (err) return reject(err);
+      return resolve(`localauth|${hashed.salt}|${hashed.hash}`);
+    });
+  });
+};
+
+export const authHelpers: Record<string, AuthHelper | any> = {
+  login,
+  signup,
+  reset,
+  hashPassword
+};
 
 export default authHelpers;
