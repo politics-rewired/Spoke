@@ -1,4 +1,5 @@
-const _ = require("lodash");
+import { filter, flow, fromPairs, map, reverse, sortBy } from "lodash/fp";
+
 const { DateTime } = require("luxon");
 
 export function findParent(interactionStep, allInteractionSteps, isModel) {
@@ -95,24 +96,24 @@ export function getTopMostParent(interactionSteps, _isModel) {
 export function makeTree(interactionSteps, id = null, indexed = null) {
   const indexedById =
     indexed ||
-    _(interactionSteps)
-      .map((is) => [is.id, is])
-      .fromPairs()
-      .value();
+    flow(
+      map((is) => [is.id, is]),
+      fromPairs
+    )(interactionSteps);
   const root = id
     ? indexedById[id]
     : interactionSteps.find((is) => is.parentInteractionId === null);
 
   return {
     ...root,
-    interactionSteps: _(interactionSteps)
-      .filter((is) => is.parentInteractionId === root.id)
-      .sortBy((is) => {
+    interactionSteps: flow(
+      filter((is) => is.parentInteractionId === root.id),
+      sortBy((is) => {
         const asDate = DateTime.fromISO(is.createdAt);
         return asDate.isValid ? asDate : null;
-      })
-      .reverse() // ui puts newest step at top
-      .map((c) => makeTree(interactionSteps, c.id, indexedById))
-      .value()
+      }),
+      reverse, // ui puts newest step at top
+      map((c) => makeTree(interactionSteps, c.id, indexedById))
+    )(interactionSteps)
   };
 }
