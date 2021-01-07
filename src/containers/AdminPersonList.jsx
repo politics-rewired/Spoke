@@ -36,7 +36,7 @@ class AdminPersonList extends React.Component {
     userEdit: false,
     passwordResetHash: "",
     superAdminUserId: null,
-    superAdminInvite: false,
+    makeSuperadmin: false,
     isWorking: false,
     saveError: undefined
   };
@@ -124,8 +124,8 @@ class AdminPersonList extends React.Component {
     }
   };
 
-  handleSuperAdminInvite = () => {
-    this.setState({ superAdminInvite: !this.state.superAdminInvite });
+  handleMakeSuperadminInvite = () => {
+    this.setState({ makeSuperadmin: !this.state.makeSuperadmin });
   };
 
   renderOffsetList = () => {
@@ -337,12 +337,12 @@ class AdminPersonList extends React.Component {
             >
               <OrganizationJoinLink
                 organizationUuid={organizationData.organization.uuid}
-                isSuperAdmin={this.state.superAdminInvite}
+                isSuperAdmin={this.state.makeSuperadmin}
               />
               <Checkbox
                 label="Make superadmin?"
-                checked={this.state.superAdminInvite}
-                onCheck={this.handleSuperAdminInvite}
+                checked={this.state.makeSuperadmin}
+                onCheck={this.handleMakeSuperadminInvite}
               />
             </Dialog>
             <Dialog

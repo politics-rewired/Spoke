@@ -22,15 +22,13 @@ class JoinTeam extends React.Component {
   async componentWillMount() {
     let organization = null;
     let campaign = null;
+    // determine if the invite link is for a superadmin by splitting orgUUID by '&',
+    // and checking for presence of 'superadmin' after UUID
+    const orgIdComponents = this.props.match.params.organizationUuid.split("&");
+    const organizationUuid = orgIdComponents[0];
+    const makeSuperadmin =
+      orgIdComponents.length === 2 && orgIdComponents[1] === "superadmin";
     try {
-      // determine if the invite link is for a superadmin by splitting orgUUID by '&',
-      // and checking for presence of 'superadmin' after UUID
-      const orgIdComponents = this.props.match.params.organizationUuid.split(
-        "&"
-      );
-      const organizationUuid = orgIdComponents[0];
-      const makeSuperadmin =
-        orgIdComponents.length === 2 && orgIdComponents[1] === "superadmin";
       organization = await this.props.mutations.joinOrganization(
         organizationUuid,
         makeSuperadmin
@@ -45,7 +43,9 @@ class JoinTeam extends React.Component {
 
     if (this.props.match.params.campaignId) {
       try {
-        campaign = await this.props.mutations.assignUserToCampaign();
+        campaign = await this.props.mutations.assignUserToCampaign(
+          organizationUuid
+        );
         if (campaign.errors) throw campaign.errors;
       } catch (ex) {
         this.setState({
