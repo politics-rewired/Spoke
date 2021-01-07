@@ -553,7 +553,10 @@ export const resolvers = {
           .reduce((a, b) => a.count + b.count, { count: 0 }),
         specificErrors: rows
           .filter((o) => o.send_status === "ERROR")
-          .map((o) => ({ errorCode: r.error_codes[0], count: o.count }))
+          .map((o) => ({
+            errorCode: r.error_codes ? r.error_codes[0] : null,
+            count: o.count
+          }))
       };
 
       return result;

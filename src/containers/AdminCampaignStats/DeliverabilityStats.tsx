@@ -1,13 +1,12 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
+import PropTypes from "prop-types";
 import React from "react";
 
+import { asPercentWithTotal } from "../../lib/utils";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignStat from "./CampaignStat";
-
-const asPercentWithTotal = (numerator: number, denominator: number) =>
-  `${((numerator / denominator) * 100).toString()}%(${numerator})`;
 
 const descriptions = {
   40001: "Invalid destination number",
@@ -52,10 +51,24 @@ const styles = StyleSheet.create({
   }
 });
 
-/* eslint-disable react/prefer-stateless-function */
-class DeliverabilityStats extends React.Component {
-  render() {
-    const {
+const DeliverabilityStats = (props: {
+  data: {
+    campaign: {
+      id: string;
+      deliverabilityStats: {
+        deliveredCount: number;
+        sentCount: number;
+        errorCount: number;
+        specificErrors: {
+          errorCode: string;
+          count: number;
+        }[];
+      };
+    };
+  };
+}) => {
+  const {
+    data: {
       campaign: {
         deliverabilityStats: {
           deliveredCount,
@@ -64,63 +77,54 @@ class DeliverabilityStats extends React.Component {
           specificErrors
         }
       }
-    } = (this.props as any).data as {
-      campaign: {
-        id: string;
-        deliverabilityStats: {
-          deliveredCount: number;
-          sentCount: number;
-          errorCount: number;
-          specificErrors: {
-            errorCode: string;
-            count: number;
-          }[];
-        };
-      };
-    };
+    }
+  } = props;
 
-    const total = deliveredCount + sentCount + errorCount;
+  const total = deliveredCount + sentCount + errorCount;
 
-    return (
-      <div>
-        <div className={css(styles.container)}>
-          <div className={css(styles.flexColumn, styles.spacer)}>
-            <CampaignStat
-              title="Delivered"
-              count={asPercentWithTotal(deliveredCount, total)}
-            />
-          </div>
-          <div className={css(styles.flexColumn, styles.spacer)}>
-            <CampaignStat
-              title="Sending"
-              count={asPercentWithTotal(sentCount, total)}
-            />
-          </div>
-          <div className={css(styles.flexColumn, styles.spacer)}>
-            <CampaignStat
-              title="Error"
-              count={asPercentWithTotal(errorCount, total)}
-            />
-          </div>
+  return (
+    <div>
+      <div className={css(styles.container)}>
+        <div className={css(styles.flexColumn, styles.spacer)}>
+          <CampaignStat
+            title="Delivered"
+            count={asPercentWithTotal(deliveredCount, total)}
+          />
         </div>
-
-        <div className={css(styles.secondaryHeader)}>Top errors:</div>
-        {specificErrors
-          .sort((e) => e.count)
-          .slice(0, 5)
-          .map((e) => (
-            <div key={e.errorCode}>
-              {e.errorCode}{" "}
-              {descriptions[e.errorCode]
-                ? `(${descriptions[e.errorCode]})`
-                : ""}
-              : {asPercentWithTotal(e.count, total)}
-            </div>
-          ))}
+        <div className={css(styles.flexColumn, styles.spacer)}>
+          <CampaignStat
+            title="Sending"
+            count={asPercentWithTotal(sentCount, total)}
+          />
+        </div>
+        <div className={css(styles.flexColumn, styles.spacer)}>
+          <CampaignStat
+            title="Error"
+            count={asPercentWithTotal(errorCount, total)}
+          />
+        </div>
       </div>
-    );
-  }
-}
+
+      <div className={css(styles.secondaryHeader)}>Top errors:</div>
+      {specificErrors
+        .sort((e) => e.count)
+        .slice(0, 5)
+        .map((e) => (
+          <div key={e.errorCode}>
+            {e.errorCode}{" "}
+            {descriptions[e.errorCode]
+              ? `(${descriptions[e.errorCode]})`
+              : "Unknown error"}
+            : {asPercentWithTotal(e.count, total)}
+          </div>
+        ))}
+    </div>
+  );
+};
+
+DeliverabilityStats.propTypes = {
+  campaignId: PropTypes.string.isRequired
+};
 
 const queries = {
   data: {

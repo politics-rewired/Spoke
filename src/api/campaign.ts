@@ -55,14 +55,14 @@ export const schema = `
   }
 
   type DeliverabilityErrorStat {
-    errorCode: String!
+    errorCode: String
     count: Int!
   }
 
   type CampaignDeliverabilityStats {
-    deliveredCount: Int
-    sentCount: Int
-    errorCount: Int
+    deliveredCount: Int!
+    sentCount: Int!
+    errorCount: Int!
     specificErrors: [DeliverabilityErrorStat]
   }
 
