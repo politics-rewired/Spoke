@@ -286,7 +286,13 @@ class AdminPersonList extends React.Component {
   }
 
   render() {
-    const { organizationData } = this.props;
+    const {
+      organizationData,
+      userData: { currentUser }
+    } = this.props;
+    if (!currentUser) return <LoadingIndicator />;
+
+    const currentUserRole = currentUser.memberships.edges[0].node.role;
 
     return (
       <div>
@@ -339,11 +345,13 @@ class AdminPersonList extends React.Component {
                 organizationUuid={organizationData.organization.uuid}
                 isSuperAdmin={this.state.makeSuperadmin}
               />
-              <Checkbox
-                label="Make superadmin?"
-                checked={this.state.makeSuperadmin}
-                onCheck={this.handleMakeSuperadminInvite}
-              />
+              {hasRoleAtLeast(currentUserRole, "SUPERADMIN") && (
+                <Checkbox
+                  label="Make superadmin?"
+                  checked={this.state.makeSuperadmin}
+                  onCheck={this.handleMakeSuperadminInvite}
+                />
+              )}
             </Dialog>
             <Dialog
               title="Reset user password"
