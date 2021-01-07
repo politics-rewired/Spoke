@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
+import pick from "lodash/pick";
 import { DateTime } from "luxon";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
@@ -323,20 +324,15 @@ class AdminCampaignEdit extends React.Component {
     // * Determines greyness of section button
     // * Determine if section is marked done (in green) along with checkSectionCompleted()
     // * Must be false for a section to save!!
-    // Only Contacts section implements checkSaved()
     if (Object.prototype.hasOwnProperty.call(section, "checkSaved")) {
       return section.checkSaved();
     }
-    const sectionState = {};
-    const sectionProps = {};
-    section.keys.forEach((key) => {
-      sectionState[key] = this.state.campaignFormValues[key];
-      sectionProps[key] = this.props.campaignData.campaign[key];
-    });
-    if (JSON.stringify(sectionState) !== JSON.stringify(sectionProps)) {
-      return false;
-    }
-    return true;
+
+    const [formVals, propVals] = [
+      this.state.campaignFormValues,
+      this.props.campaignData.campaign
+    ].map(pick(section.keys));
+    return isEqual(formVals, propVals);
   };
 
   checkSectionCompleted = (section) => {

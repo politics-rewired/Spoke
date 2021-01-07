@@ -1,3 +1,4 @@
+import differenceBy from "lodash/differenceBy";
 import ChipInput from "material-ui-chip-input";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
@@ -28,29 +29,19 @@ class CampaignTeamsForm extends React.Component {
     this.props.onChange({ isAssignmentLimitedToTeams });
   };
 
-  addTeam = (team) => {
-    const { teams } = this.props.formValues;
-
-    const teanAlreadySelected =
-      teams.filter((existingTeam) => existingTeam.id === team.id).length > 0;
-
-    if (!teanAlreadySelected) {
-      teams.push(team);
-    }
-
-    this.props.onChange({ teams });
-  };
-
   // Prevent user-defined teams
   handleBeforeRequestAdd = ({ id: tagId, title }) =>
     !Number.isNaN(tagId) && tagId !== title;
 
-  handleAddTeam = ({ id: teamId }) => {
+  handleAddTeam = ({ id: selectedTeamId }) => {
     const { orgTeams } = this.props;
-
-    const team = orgTeams.find((orgTeam) => orgTeam.id === teamId);
-
-    this.addTeam(team);
+    const { teams: currentTeams } = this.props.formValues;
+    const addableTeams = differenceBy(orgTeams, currentTeams, "id");
+    this.props.onChange({
+      teams: currentTeams.concat(
+        addableTeams.filter((team) => team.id === selectedTeamId)
+      )
+    });
   };
 
   handleRemoveTeam = (deleteTeamId) => {
