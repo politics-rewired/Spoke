@@ -498,6 +498,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 // as a result, we're forcing admins to think about the time zone of each campaign
 // and saving a join on this query.
 async function sendMessage(
+  trx,
   user,
   campaignContactId,
   message,
@@ -510,8 +511,7 @@ async function sendMessage(
     ? "and opt_out.organization_id = campaign.organization_id"
     : "";
 
-  const record = await r
-    .knex("campaign_contact")
+  const record = await trx("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId, 10) })
     .whereRaw("campaign_contact.archived = false")
@@ -528,7 +528,7 @@ async function sendMessage(
       "campaign.texting_hours_start as c_texting_hours_start",
       "campaign.texting_hours_end as c_texting_hours_end",
       "assignment.user_id as a_assignment_user_id",
-      r.knex.raw(
+      trx.raw(
         `exists (
           select 1
           from opt_out
@@ -548,8 +548,7 @@ async function sendMessage(
     record.assignment_id === null && message.assignmentId === null;
   if (isConversationUnassigned) {
     // Check for existing assignment
-    const assignment = await r
-      .knex("assignment")
+    const assignment = await trx("assignment")
       .where({
         user_id: user.id,
         campaign_id: record.campaign_id
@@ -559,8 +558,7 @@ async function sendMessage(
       record.assignment_id = assignment.id;
     } else {
       // Create assignment if no exisiting
-      const [newAssignment] = await r
-        .knex("assignment")
+      const [newAssignment] = await trx("assignment")
         .insert({
           user_id: user.id,
           campaign_id: record.campaign_id
@@ -584,8 +582,7 @@ async function sendMessage(
 
   // This block will only need to be evaluated if message is sent from admin Message Review
   if (record.a_assignment_user_id !== user.id) {
-    const currentRoles = await r
-      .knex("user_organization")
+    const currentRoles = await trx("user_organization")
       .where({
         user_id: user.id,
         organization_id: record.organization_id
@@ -655,16 +652,14 @@ async function sendMessage(
     script_version_hash: message.versionHash
   };
 
-  const messageSavePromise = r
-    .knex("message")
+  const messageSavePromise = trx("message")
     .insert(toInsert)
     .returning(Object.keys(toInsert).concat(["id"]));
 
   const { cc_message_status } = record;
   const contactSavePromise = (async () => {
     if (!skipUpdatingMessageStatus) {
-      await r
-        .knex("campaign_contact")
+      await trx("campaign_contact")
         .update({
           message_status:
             cc_message_status === "needsResponse" ||
@@ -675,8 +670,7 @@ async function sendMessage(
         .where({ id: record.cc_id });
     }
 
-    const contact = await r
-      .knex("campaign_contact")
+    const contact = await trx("campaign_contact")
       .select("*")
       .where({ id: record.cc_id })
       .first();
@@ -712,6 +706,178 @@ async function sendMessage(
   }
 
   return contactUpdateResult;
+}
+
+async function updateQuestionResponses(
+  trx,
+  campaignContactId,
+  questionResponses,
+  loaders
+) {
+  // TODO: wrap in transaction
+  // TODO - batch insert / delete
+  const count = questionResponses.length;
+
+  for (let i = 0; i < count; i += 1) {
+    const questionResponse = questionResponses[i];
+    const { interactionStepId, value } = questionResponse;
+    await trx("question_response")
+      .where({
+        campaign_contact_id: campaignContactId,
+        interaction_step_id: interactionStepId
+      })
+      .del();
+
+    // TODO: maybe undo action_handler if updated answer
+
+    const [qr] = await trx("question_response")
+      .insert({
+        campaign_contact_id: campaignContactId,
+        interaction_step_id: interactionStepId,
+        value
+      })
+      .returning("*");
+
+    const interactionStepResult = await trx("interaction_step")
+      // TODO: is this really parent_interaction_id or just interaction_id?
+      .where({
+        parent_interaction_id: interactionStepId,
+        answer_option: value
+      })
+      .whereNot("answer_actions", "")
+      .whereNotNull("answer_actions");
+
+    const interactionStepAction =
+      interactionStepResult.length && interactionStepResult[0].answer_actions;
+    if (interactionStepAction) {
+      // run interaction step handler
+      try {
+        // eslint-disable-next-line global-require,import/no-dynamic-require
+        const handler = require(`../action_handlers/${interactionStepAction}.js`);
+        handler.processAction(qr, interactionStepResult[0], campaignContactId);
+      } catch (err) {
+        logger.error("Handler for InteractionStep does not exist", {
+          error: errToObj(err),
+          interactionStepId,
+          interactionStepAction
+        });
+      }
+    }
+  }
+
+  const contact = loaders.campaignContact.load(campaignContactId);
+  return contact;
+}
+
+async function deleteQuestionResponses(
+  trx,
+  campaignContactId,
+  interactionStepIds,
+  loaders,
+  user
+) {
+  const contact = await loaders.campaignContact.load(campaignContactId);
+  try {
+    await assignmentRequired(user, contact.assignment_id);
+  } catch (error) {
+    const campaign = await r
+      .knex("campaign")
+      .where({ id: contact.campaign_id })
+      .first();
+    const organizationId = campaign.organization_id;
+    await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+  }
+  // TODO: maybe undo action_handler
+  await trx("question_response")
+    .where({ campaign_contact_id: campaignContactId })
+    .whereIn("interaction_step_id", interactionStepIds)
+    .del();
+
+  return contact;
+}
+
+async function createOptOut(trx, campaignContactId, optOut, loaders, user) {
+  const contact = await loaders.campaignContact.load(campaignContactId);
+  let organizationId = contact.organization_id;
+  if (!organizationId) {
+    const campaign = await loaders.campaign.load(contact.campaign_id);
+    organizationId = campaign.organization_id;
+  }
+  try {
+    await assignmentRequired(user, contact.assignment_id);
+  } catch (error) {
+    await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+  }
+
+  const { cell, message, reason } = optOut;
+  let { assignmentId } = optOut;
+  if (!assignmentId) {
+    // Check for existing assignment
+    const assignment = await trx("assignment")
+      .where({
+        user_id: user.id,
+        campaign_id: contact.campaign_id
+      })
+      .first("id");
+    if (assignment && assignment.id) {
+      assignmentId = assignment.id;
+    } else {
+      // Create assignment if no exisiting
+      const [newAssignment] = await trx("assignment")
+        .insert({
+          user_id: user.id,
+          campaign_id: contact.campaign_id
+        })
+        .returning("*");
+      eventBus.emit(EventType.AssignmentCreated, newAssignment);
+      assignmentId = newAssignment.id;
+    }
+  }
+
+  await cacheableData.optOut.save(trx, {
+    cell,
+    reason,
+    assignmentId,
+    organizationId
+  });
+
+  if (message) {
+    const checkOptOut = false;
+    try {
+      await sendMessage(trx, user, campaignContactId, message, checkOptOut);
+    } catch (error) {
+      // Log the sendMessage error, but return successful opt out creation
+      logger.error("Error sending message for opt-out", error);
+    }
+  }
+
+  // Force reload with updated `is_opted_out` status
+  loaders.campaignContact.clear(campaignContactId);
+  return loaders.campaignContact.load(campaignContactId);
+}
+
+async function editCampaignContactMessageStatus(
+  trx,
+  campaignContactId,
+  messageStatus,
+  loaders,
+  user
+) {
+  const contact = await loaders.campaignContact.load(campaignContactId);
+
+  await assignmentRequiredOrHasOrgRoleForCampaign(
+    user,
+    contact.assignment_id,
+    contact.campaign_id,
+    "SUPERVOLUNTEER"
+  );
+
+  const [campaign] = await trx("campaign_contact")
+    .update({ message_status: messageStatus })
+    .where({ id: campaignContactId })
+    .returning("*");
+
+  return campaign;
 }
 
 const rootMutations = {
@@ -1546,21 +1712,13 @@ const rootMutations = {
       { messageStatus, campaignContactId },
       { loaders, user }
     ) => {
-      const contact = await loaders.campaignContact.load(campaignContactId);
-
-      await assignmentRequiredOrHasOrgRoleForCampaign(
-        user,
-        contact.assignment_id,
-        contact.campaign_id,
-        "SUPERVOLUNTEER"
+      return editCampaignContactMessageStatus(
+        r.knex,
+        campaignContactId,
+        messageStatus,
+        loaders,
+        user
       );
-
-      const [campaign] = await r
-        .knex("campaign_contact")
-        .update({ message_status: messageStatus })
-        .where({ id: campaignContactId })
-        .returning("*");
-      return campaign;
     },
 
     getAssignmentContacts: async (
@@ -1777,6 +1935,7 @@ const rootMutations = {
           const checkOptOut = true;
           const checkAssignment = false;
           await sendMessage(
+            r.knex,
             user,
             campaignContactId,
             tag.message,
@@ -1807,70 +1966,13 @@ const rootMutations = {
 
       return campaignContact;
     },
+
     createOptOut: async (
       _root,
       { optOut, campaignContactId },
       { loaders, user }
     ) => {
-      const contact = await loaders.campaignContact.load(campaignContactId);
-      let organizationId = contact.organization_id;
-      if (!organizationId) {
-        const campaign = await loaders.campaign.load(contact.campaign_id);
-        organizationId = campaign.organization_id;
-      }
-      try {
-        await assignmentRequired(user, contact.assignment_id);
-      } catch (error) {
-        await accessRequired(user, organizationId, "SUPERVOLUNTEER");
-      }
-
-      const { cell, message, reason } = optOut;
-      let { assignmentId } = optOut;
-      if (!assignmentId) {
-        // Check for existing assignment
-        const assignment = await r
-          .knex("assignment")
-          .where({
-            user_id: user.id,
-            campaign_id: contact.campaign_id
-          })
-          .first("id");
-        if (assignment && assignment.id) {
-          assignmentId = assignment.id;
-        } else {
-          // Create assignment if no exisiting
-          const [newAssignment] = await r
-            .knex("assignment")
-            .insert({
-              user_id: user.id,
-              campaign_id: contact.campaign_id
-            })
-            .returning("*");
-          eventBus.emit(EventType.AssignmentCreated, newAssignment);
-          assignmentId = newAssignment.id;
-        }
-      }
-
-      await cacheableData.optOut.save({
-        cell,
-        reason,
-        assignmentId,
-        organizationId
-      });
-
-      if (message) {
-        const checkOptOut = false;
-        try {
-          await sendMessage(user, campaignContactId, message, checkOptOut);
-        } catch (error) {
-          // Log the sendMessage error, but return successful opt out creation
-          logger.error("Error sending message for opt-out", error);
-        }
-      }
-
-      // Force reload with updated `is_opted_out` status
-      loaders.campaignContact.clear(campaignContactId);
-      return loaders.campaignContact.load(campaignContactId);
+      return createOptOut(r.knex, campaignContactId, optOut, loaders, user);
     },
 
     removeOptOut: async (_root, { cell }, { user }) => {
@@ -2001,7 +2103,7 @@ const rootMutations = {
     },
 
     sendMessage: async (_root, { message, campaignContactId }, { user }) => {
-      return sendMessage(user, campaignContactId, message);
+      return sendMessage(r.knex, user, campaignContactId, message);
     },
 
     deleteQuestionResponses: async (
@@ -2009,24 +2111,13 @@ const rootMutations = {
       { interactionStepIds, campaignContactId },
       { loaders, user }
     ) => {
-      const contact = await loaders.campaignContact.load(campaignContactId);
-      try {
-        await assignmentRequired(user, contact.assignment_id);
-      } catch (error) {
-        const campaign = await r
-          .knex("campaign")
-          .where({ id: contact.campaign_id })
-          .first();
-        const organizationId = campaign.organization_id;
-        await accessRequired(user, organizationId, "SUPERVOLUNTEER");
-      }
-      // TODO: maybe undo action_handler
-      await r
-        .knex("question_response")
-        .where({ campaign_contact_id: campaignContactId })
-        .whereIn("interaction_step_id", interactionStepIds)
-        .del();
-      return contact;
+      return deleteQuestionResponses(
+        r.knex,
+        campaignContactId,
+        interactionStepIds,
+        loaders,
+        user
+      );
     },
 
     updateQuestionResponses: async (
@@ -2034,64 +2125,78 @@ const rootMutations = {
       { questionResponses, campaignContactId },
       { loaders }
     ) => {
-      // TODO: wrap in transaction
-      const count = questionResponses.length;
+      return updateQuestionResponses(
+        r.knex,
+        campaignContactId,
+        questionResponses,
+        loaders
+      );
+    },
 
-      for (let i = 0; i < count; i += 1) {
-        const questionResponse = questionResponses[i];
-        const { interactionStepId, value } = questionResponse;
-        await r
-          .knex("question_response")
-          .where({
-            campaign_contact_id: campaignContactId,
-            interaction_step_id: interactionStepId
-          })
-          .del();
+    handleConversation: async (
+      _root,
+      {
+        campaignContactId,
+        message,
+        questionResponses,
+        interactionStepIdsForDeletedQuestionResponses,
+        optOut,
+        closeConversation
+      },
+      { loaders, user }
+    ) => {
+      const promises = [];
 
-        // TODO: maybe undo action_handler if updated answer
-
-        const [qr] = await r
-          .knex("question_response")
-          .insert({
-            campaign_contact_id: campaignContactId,
-            interaction_step_id: interactionStepId,
-            value
-          })
-          .returning("*");
-        const interactionStepResult = await r
-          .knex("interaction_step")
-          // TODO: is this really parent_interaction_id or just interaction_id?
-          .where({
-            parent_interaction_id: interactionStepId,
-            answer_option: value
-          })
-          .whereNot("answer_actions", "")
-          .whereNotNull("answer_actions");
-
-        const interactionStepAction =
-          interactionStepResult.length &&
-          interactionStepResult[0].answer_actions;
-        if (interactionStepAction) {
-          // run interaction step handler
-          try {
-            // eslint-disable-next-line global-require,import/no-dynamic-require
-            const handler = require(`../action_handlers/${interactionStepAction}.js`);
-            handler.processAction(
-              qr,
-              interactionStepResult[0],
-              campaignContactId
-            );
-          } catch (err) {
-            logger.error("Handler for InteractionStep does not exist", {
-              error: errToObj(err),
-              interactionStepId,
-              interactionStepAction
-            });
-          }
+      await r.knex.transaction(async (trx) => {
+        if (message) {
+          promises.push(sendMessage(trx, user, campaignContactId, message));
         }
-      }
 
-      const contact = loaders.campaignContact.load(campaignContactId);
+        if (questionResponses) {
+          promises.push(
+            updateQuestionResponses(
+              trx,
+              campaignContactId,
+              questionResponses,
+              loaders
+            )
+          );
+        }
+
+        if (interactionStepIdsForDeletedQuestionResponses) {
+          promises.push(
+            deleteQuestionResponses(
+              trx,
+              campaignContactId,
+              interactionStepIdsForDeletedQuestionResponses,
+              loaders,
+              user
+            )
+          );
+        }
+
+        if (optOut) {
+          promises.push(
+            createOptOut(trx, campaignContactId, optOut, loaders, user)
+          );
+        }
+
+        if (closeConversation) {
+          promises.push(
+            editCampaignContactMessageStatus(
+              trx,
+              campaignContactId,
+              optOut,
+              loaders,
+              user
+            )
+          );
+        }
+
+        await Promise.all(promises);
+      });
+
+      const contact = await loaders.campaignContact.load(campaignContactId);
       return contact;
     },
 
