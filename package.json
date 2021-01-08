@@ -184,6 +184,7 @@
     "@types/react": "^15.6.28",
     "@types/react-dom": "^15.5.11",
     "@types/react-router": "^5.1.5",
+    "@types/react-router-dom": "^5.1.7",
     "@types/react-select": "^2.0.0",
     "@types/recompose": "^0.24.0",
     "@types/redis": "^2.8.28",

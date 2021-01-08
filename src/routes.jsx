@@ -19,7 +19,7 @@ import AdminExternalSystems from "./containers/AdminExternalSystems";
 import AdminIncomingMessageList from "./containers/AdminIncomingMessageList";
 import EscalatedConversationList from "./containers/AdminIncomingMessageList/EscalatedConversationList";
 import AdminOptOutList from "./containers/AdminOptOutList";
-import AdminPersonList from "./containers/AdminPersonList";
+import AdminPeople from "./containers/AdminPeople";
 import AdminReplySender from "./containers/AdminReplySender";
 import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
 import AdminTagEditor from "./containers/AdminTagEditor";
@@ -131,10 +131,7 @@ const AdminOrganizationRoutes = (props) => {
             path={`${organizationPath}/campaigns`}
             component={AdminCampaignListRoutes}
           />
-          <Route
-            path={`${organizationPath}/people`}
-            component={AdminPersonList}
-          />
+          <Route path={`${organizationPath}/people`} component={AdminPeople} />
           <Route
             path={`${organizationPath}/teams`}
             component={AdminTeamRoutes}

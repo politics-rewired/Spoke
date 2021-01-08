@@ -86,13 +86,17 @@ export const resolvers = {
       if (!!nameSearch || wantsUserInfo) {
         query.join("user", "user.id", "user_organization.user_id");
       }
-
       if (nameSearch) {
-        query.whereRaw("user.first_name || ' ' || user.last_name ilike  ?", [
-          `%${nameSearch}%`
-        ]);
+        query.whereRaw(
+          `"user"."first_name"
+          || ' ' ||
+          "user"."last_name"
+          || ' ' ||
+          regexp_replace("user"."email", '@\\w+\\.\\w+', '')
+           ilike ?`,
+          [`%${nameSearch}%`]
+        );
       }
-
       if (wantsUserInfo) {
         query.select([
           "user_organization.*",

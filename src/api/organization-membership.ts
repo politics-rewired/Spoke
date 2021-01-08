@@ -1,3 +1,8 @@
+/* eslint-disable no-unused-vars */
+import { Organization } from "./organization";
+import { RelayPageInfo } from "./pagination";
+import { User } from "./user";
+
 export enum UserRoleType {
   TEXTER = "TEXTER",
   SUPERVOLUNTEER = "SUPERVOLUNTEER",
@@ -19,9 +24,19 @@ export interface MembershipFilter {
 
 export interface OrganizationMembership {
   id: string;
-  user: any;
-  organization: any;
+  user: User;
+  organization: Organization;
   requestAutoApprove: RequestAutoApproveType;
+  role: UserRoleType;
+}
+
+export interface OrganizationMembershipEdge {
+  cursor: string;
+  node: OrganizationMembership;
+}
+export interface OrganizationMembershipPage {
+  edges: OrganizationMembershipEdge[];
+  pageInfo: RelayPageInfo;
 }
 
 export const schema = `
@@ -40,7 +55,7 @@ export const schema = `
 
   input MembershipFilter {
     nameSearch: String
-    campaignId: String
+    campaignId: Int
     campaignArchived: Boolean
   }
 
