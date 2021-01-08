@@ -2,6 +2,7 @@ import { ExternalActivistCode } from "./external-activist-code";
 import { ExternalList } from "./external-list";
 import { ExternalResultCode } from "./external-result-code";
 import { ExternalSurveyQuestion } from "./external-survey-question";
+import { ExternalResultCodeTarget } from "./external-sync-config";
 import { RelayPaginatedResponse } from "./pagination";
 
 export enum ExternalSystemType {
@@ -22,6 +23,7 @@ export interface ExternalSystem {
   surveyQuestions: RelayPaginatedResponse<ExternalSurveyQuestion>;
   activistCodes: RelayPaginatedResponse<ExternalActivistCode>;
   resultCodes: RelayPaginatedResponse<ExternalResultCode>;
+  optOutSyncConfig: ExternalResultCodeTarget | null;
 }
 
 export interface ExternalSystemInput {
@@ -71,6 +73,7 @@ export const schema = `
     surveyQuestions(filter: ExternalSurveyQuestionFilter, after: Cursor, first: Int): ExternalSurveyQuestionPage!
     activistCodes(filter: ExternalActivistCodeFilter, after: Cursor, first: Int): ExternalActivistCodePage!
     resultCodes(after: Cursor, first: Int): ExternalResultCodePage!
+    optOutSyncConfig: ExternalResultCodeTarget
   }
 
   type ExternalSystemEdge {

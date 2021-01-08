@@ -3,15 +3,19 @@ import { QuestionResponse } from "./question-response";
 
 export interface InteractionStep {
   id: string;
-  question: Question;
+  question?: Question;
   questionText: string;
   scriptOptions: string[];
   answerOption: string;
-  parentInteractionId: string;
+  parentInteractionId?: string | null;
   isDeleted: boolean;
   answerActions: string;
-  questionResponse: QuestionResponse;
+  questionResponse?: QuestionResponse;
   createdAt: Date;
+}
+
+export interface InteractionStepWithChildren extends InteractionStep {
+  interactionSteps: InteractionStepWithChildren[];
 }
 
 export const schema = `

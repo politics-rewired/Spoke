@@ -68,14 +68,15 @@ interface CanvassResultRow {
 
 export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
   system_id: string;
-  contact_id: string;
+  contact_id: number;
   cc_created_at: string;
   external_id: string;
   phone_id: number;
 }
 
 export const syncCampaignContactToVAN: Task = async (
-  payload: SyncCampaignContactToVANPayload
+  payload: SyncCampaignContactToVANPayload,
+  helpers
 ) => {
   const {
     system_id: systemId,
@@ -189,6 +190,28 @@ export const syncCampaignContactToVAN: Task = async (
 
   if (canvasResultsRaw.length === 0) return;
 
+  const {
+    rows: [{ external_id: optOutResultCode }]
+  } = await helpers.query<{ external_id: number | null }>(
+    `
+      select (
+        select external_id
+        from external_sync_opt_out_configuration config
+        join external_result_code rc on config.external_result_code_id = rc.id
+        where
+          config.system_id = $1
+          and exists (
+            select 1
+            from campaign_contact
+            where
+              id = $2
+              and is_opted_out
+          )
+      ) as external_id;
+    `,
+    [systemId, contactId]
+  );
+
   for (const canvassResult of canvasResultsRaw) {
     const {
       canvassed_at: dateCanvassed,
@@ -213,19 +236,22 @@ export const syncCampaignContactToVAN: Task = async (
       })
     );
 
-    const resultCodeId = result_codes[0]
-      ? result_codes[0].result_code_id
-      : null;
-
     const responses = [...surveyResponses, ...activistCodes];
     const hasResponses = responses.length > 0;
+
+    // Honor mapped result code only if there are no responses (VAN will overwrite as "canvassed")
+    const mappedResultCodeId =
+      !hasResponses && result_codes[0] ? result_codes[0].result_code_id : null;
+
+    // Opt Out mapping will always take precedence if mapping is set and contact is opted out
+    const resultCodeId = optOutResultCode || mappedResultCodeId;
 
     const canvassResponse: VANCanvassResponse = {
       canvassContext: {
         phoneId,
         dateCanvassed
       },
-      resultCodeId: hasResponses ? null : resultCodeId,
+      resultCodeId,
       responses: hasResponses ? responses : null
     };
 

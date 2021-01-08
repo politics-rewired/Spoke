@@ -204,7 +204,13 @@ export const resolvers = {
         .limit(1)
         .then((records) => records.length > 0),
     autoassign: () => true,
-    cannedResponses: () => true
+    cannedResponses: () => true,
+    interactions: (campaign) =>
+      r
+        .reader("interaction_step")
+        .where({ campaign_id: campaign.id })
+        .count()
+        .then(([{ count }]) => count > 0)
   },
   CampaignsReturn: {
     __resolveType(obj, _context, _) {

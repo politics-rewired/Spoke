@@ -51,7 +51,8 @@ const styles = StyleSheet.create({
 const saveLabels = {
   [UserEditMode.SignUp]: "Sign Up",
   [UserEditMode.Login]: "Log In",
-  [UserEditMode.Reset]: "Save New Password"
+  [UserEditMode.Reset]: "Save New Password",
+  [UserEditMode.RequestReset]: "Request Reset"
 };
 
 class LocalLogin extends React.Component {
@@ -62,6 +63,8 @@ class LocalLogin extends React.Component {
     this.state = {
       active: nextUrl.includes("reset")
         ? UserEditMode.Reset
+        : window.location.pathname.includes("email-reset")
+        ? UserEditMode.EmailReset
         : UserEditMode.Login
     };
   }
@@ -111,7 +114,13 @@ class LocalLogin extends React.Component {
           </section>
         )}
         <div className={css(styles.fieldContainer)}>
-          <h2 className={css(styles.header)}>Welcome to Spoke</h2>
+          <h2 className={css(styles.header)}>
+            {active === UserEditMode.EmailReset
+              ? "Reset Your Password"
+              : active === UserEditMode.RequestReset
+              ? "Request a Password Reset Email"
+              : "Welcome to Spoke"}
+          </h2>
           {active === UserEditMode.Reset ? (
             <UserPasswordReset
               history={history}
@@ -125,6 +134,9 @@ class LocalLogin extends React.Component {
               history={history}
               nextUrl={nextUrl}
               style={css(styles.authFields)}
+              startRequestReset={() =>
+                this.setState({ active: UserEditMode.RequestReset })
+              }
             />
           )}
         </div>

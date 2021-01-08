@@ -10,6 +10,7 @@ import { withRouter } from "react-router-dom";
 import { ExternalSystem } from "../../api/external-system";
 import { QueryMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
+import OptOutConfigurationCard from "./components/OptOutConfigurationCard";
 
 interface Props {
   match: any;
@@ -50,6 +51,8 @@ export const AdminExternalSystemsDetail: React.SFC<Props> = (props) => {
           </dl>
         </CardText>
       </Card>
+      <br />
+      <OptOutConfigurationCard systemId={externalSystem.id} />
     </div>
   );
 };

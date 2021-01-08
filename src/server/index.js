@@ -1,4 +1,5 @@
 import { createTerminus } from "@godaddy/terminus";
+import passport from "@passport-next/passport";
 import bodyParser from "body-parser";
 import connectDatadog from "connect-datadog-graphql";
 import cookieSession from "cookie-session";
@@ -7,7 +8,6 @@ import basicAuth from "express-basic-auth";
 import hotShots from "hot-shots";
 import http from "http";
 import cron from "node-cron";
-import passport from "passport";
 
 import { config } from "../config";
 import requestLogging from "../lib/request-logging";
