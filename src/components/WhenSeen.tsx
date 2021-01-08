@@ -1,4 +1,4 @@
-import { isNull } from "lodash/fp";
+import isNull from "lodash/fp/isNull";
 import React from "react";
 
 interface WhenSeenProps {

@@ -200,8 +200,6 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
         />
       </TableRowColumn>
       {window.PASSPORT_STRATEGY === "local" && (
-        // (getDefault)
-        // get(window, "PASSPORT_STRATEGY", "") === "local"
         <TableRowColumn>
           <FlatButton
             label="Reset Password"

@@ -1,5 +1,5 @@
 import { FetchPolicy } from "apollo-client";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 import React from "react";
 
 import { emptyRelayPage, RelayPaginatedResponse } from "../api/pagination";

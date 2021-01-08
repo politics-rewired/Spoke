@@ -1,6 +1,6 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { isString } from "lodash/fp";
+import isString from "lodash/fp/isString";
 import { DropDownMenu, MenuItem, Snackbar } from "material-ui";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import ContentAdd from "material-ui/svg-icons/content/add";
