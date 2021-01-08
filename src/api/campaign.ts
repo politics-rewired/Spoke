@@ -61,6 +61,18 @@ export const schema = `
     optOutsCount: Int
   }
 
+  type DeliverabilityErrorStat {
+    errorCode: String
+    count: Int!
+  }
+
+  type CampaignDeliverabilityStats {
+    deliveredCount: Int!
+    sentCount: Int!
+    errorCount: Int!
+    specificErrors: [DeliverabilityErrorStat]
+  }
+
   type JobRequest {
     id: String!
     jobType: String!
@@ -130,6 +142,7 @@ export const schema = `
     externalSystem: ExternalSystem
     syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
+    deliverabilityStats: CampaignDeliverabilityStats!
   }
 
   type CampaignEdge {

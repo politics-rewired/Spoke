@@ -14,6 +14,7 @@ import { dataTest } from "../../lib/attributes";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignSurveyStats from "./CampaignSurveyStats";
+import DeliverabilityStats from "./DeliverabilityStats";
 import TexterStats from "./TexterStats";
 import TopLineStats from "./TopLineStats";
 import VanExportModal from "./VanExportModal";
@@ -279,9 +280,15 @@ class AdminCampaignStats extends React.Component {
         <div className={css(styles.header)}>Survey Questions</div>
         <CampaignSurveyStats campaignId={campaign.id} />
 
+        <br />
+        <div className={css(styles.header)}>Deliverability</div>
+        <DeliverabilityStats campaignId={campaign.id} />
+        <br />
+
         <div className={css(styles.header)}>Texter stats</div>
         <div className={css(styles.secondaryHeader)}>% of first texts sent</div>
         <TexterStats campaignId={campaign.id} />
+
         <Snackbar
           open={this.state.exportMessageOpen}
           message="Export started - we'll e-mail you when it's done"

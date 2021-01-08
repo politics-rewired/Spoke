@@ -36,3 +36,6 @@ export const stringIsAValidUrl = (s) => {
     return false;
   }
 };
+
+export const asPercentWithTotal = (numerator, denominator) =>
+  `${((numerator / denominator) * 100).toString().slice(0, 4)}%(${numerator})`;
