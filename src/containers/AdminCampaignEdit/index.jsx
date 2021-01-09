@@ -331,7 +331,7 @@ class AdminCampaignEdit extends React.Component {
     const [formVals, propVals] = [
       this.state.campaignFormValues,
       this.props.campaignData.campaign
-    ].map(pick(section.keys));
+    ].map((vals) => pick(vals, section.keys));
     return isEqual(formVals, propVals);
   };
 
