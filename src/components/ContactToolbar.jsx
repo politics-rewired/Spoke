@@ -4,6 +4,8 @@ import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { parseIanaZone } from "../lib/timezones";
+
 const inlineStyles = {
   toolbar: {
     backgroundColor: grey100
@@ -36,7 +38,7 @@ const ContactToolbar = function ContactToolbar(props) {
 
   const timezone = contactTimezone || campaign.timezone;
   const localTime = DateTime.local()
-    .setZone(timezone)
+    .setZone(parseIanaZone(timezone))
     .toLocaleString(DateTime.TIME_SIMPLE);
 
   const location = [city, state]

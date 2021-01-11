@@ -11,6 +11,7 @@ import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
 import { dataSourceItem } from "../../../components/utils";
+import { parseIanaZone } from "../../../lib/timezones";
 import { difference } from "../../../lib/utils";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -53,7 +54,7 @@ const timezones = [
 ];
 
 const timezoneChoices = timezones.map((timezone) =>
-  dataSourceItem(timezone, timezone)
+  dataSourceItem(timezone, parseIanaZone(timezone))
 );
 
 // Types

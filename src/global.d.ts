@@ -8,6 +8,8 @@ interface Window {
   SPOKE_VERSION: string;
   MAX_MESSAGE_LENGTH: number;
   PASSPORT_STRATEGY: string;
+  TZ: string;
+  DST_REFERENCE_TIMEZONE: string;
 }
 
 // This was a workaround while we are transitioning from JS to TS - 2020-12-21
