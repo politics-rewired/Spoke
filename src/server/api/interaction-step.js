@@ -8,7 +8,8 @@ export const resolvers = {
       "answerOption",
       "answerActions",
       "parentInteractionId",
-      "isDeleted"
+      "isDeleted",
+      "createdAt"
     ]),
     scriptOptions: async (interactionStep) => {
       const { script, script_options } = interactionStep;

@@ -11,6 +11,7 @@ export interface InteractionStep {
   isDeleted: boolean;
   answerActions: string;
   questionResponse?: QuestionResponse;
+  createdAt: Date;
 }
 
 export interface InteractionStepWithChildren extends InteractionStep {
@@ -28,5 +29,6 @@ export const schema = `
     isDeleted: Boolean
     answerActions: String
     questionResponse(campaignContactId: String): QuestionResponse
+    createdAt: Date!
   }
 `;

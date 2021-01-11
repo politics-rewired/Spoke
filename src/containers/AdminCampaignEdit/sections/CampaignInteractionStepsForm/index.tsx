@@ -2,6 +2,7 @@ import { ApolloQueryResult } from "apollo-client/core/types";
 import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
+import { DateTime } from "luxon";
 import { Dialog } from "material-ui";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
@@ -88,7 +89,8 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
         answerOption: "",
         scriptOptions: [""],
         answerActions: "",
-        isDeleted: false
+        isDeleted: false,
+        createdAt: DateTime.local().toJSDate()
       }
     ]
   };
@@ -112,7 +114,7 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
       const hasEmptyScripts =
         step.scriptOptions.filter((version) => version.trim() === "").length >
         0;
-      return hasNoOptions || hasEmptyScripts;
+      return !step.isDeleted && (hasNoOptions || hasEmptyScripts);
     });
 
     const hasEmptyScripts = emptyScriptSteps.length > 0;
@@ -156,14 +158,15 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
   createAddStepHandler = (parentInteractionId: string) => () => {
     const randId = this.generateId();
 
-    const newStep = {
+    const newStep: InteractionStep = {
       id: randId,
       parentInteractionId,
       questionText: "",
       scriptOptions: [""],
       answerOption: "",
       answerActions: "",
-      isDeleted: false
+      isDeleted: false,
+      createdAt: DateTime.local().toJSDate()
     };
 
     this.setState({

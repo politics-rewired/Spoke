@@ -83,6 +83,7 @@ const campaignInfoFragment = `
     answerActions
     parentInteractionId
     isDeleted
+    createdAt
   }
   editors
 `;
