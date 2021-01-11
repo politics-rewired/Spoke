@@ -3,22 +3,15 @@ import React from "react";
 
 import DisplayLink from "./DisplayLink";
 
-const OrganizationJoinLink = ({
-  organizationUuid,
-  campaignId,
-  isSuperAdmin
-}) => {
+const OrganizationJoinLink = ({ organizationUuid, campaignId }) => {
   let baseUrl = "http://base";
   if (typeof window !== "undefined") {
     baseUrl = window.location.origin;
   }
-  const orgIdWithAdmin = isSuperAdmin
-    ? `${organizationUuid}&superadmin`
-    : organizationUuid;
 
   const joinUrl = campaignId
-    ? `${baseUrl}/${orgIdWithAdmin}/join/${campaignId}`
-    : `${baseUrl}/${orgIdWithAdmin}/join`;
+    ? `${baseUrl}/${organizationUuid}/join/${campaignId}`
+    : `${baseUrl}/${organizationUuid}/join`;
 
   const textContent =
     "Send your texting volunteers this link! Once they sign up, they'll be automatically assigned to this campaign.";
@@ -28,8 +21,7 @@ const OrganizationJoinLink = ({
 
 OrganizationJoinLink.propTypes = {
   organizationUuid: PropTypes.string,
-  campaignId: PropTypes.string,
-  isSuperAdmin: PropTypes.bool
+  campaignId: PropTypes.string
 };
 
 export default OrganizationJoinLink;

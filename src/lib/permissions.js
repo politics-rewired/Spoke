@@ -2,8 +2,8 @@ export const ROLE_HIERARCHY = [
   "TEXTER",
   "SUPERVOLUNTEER",
   "ADMIN",
-  "SUPERADMIN",
-  "OWNER"
+  "OWNER",
+  "SUPERADMIN"
 ];
 
 export const isRoleGreater = (role1, role2) =>

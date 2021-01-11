@@ -7,8 +7,8 @@ const accessHierarchy = [
   "TEXTER",
   "SUPERVOLUNTEER",
   "ADMIN",
-  "SUPERADMIN",
-  "OWNER"
+  "OWNER",
+  "SUPERADMIN"
 ];
 
 export function authRequired(user) {

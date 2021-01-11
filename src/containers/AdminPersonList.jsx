@@ -1,6 +1,5 @@
 /* eslint-disable react/no-unused-state */
 import gql from "graphql-tag";
-import Checkbox from "material-ui/Checkbox";
 import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
 import FlatButton from "material-ui/FlatButton";
@@ -36,7 +35,6 @@ class AdminPersonList extends React.Component {
     userEdit: false,
     passwordResetHash: "",
     superAdminUserId: null,
-    makeSuperadmin: false,
     isWorking: false,
     saveError: undefined
   };
@@ -122,10 +120,6 @@ class AdminPersonList extends React.Component {
     } else {
       this.handleRoleChange(membershipId, role);
     }
-  };
-
-  handleMakeSuperadminInvite = () => {
-    this.setState({ makeSuperadmin: !this.state.makeSuperadmin });
   };
 
   renderOffsetList = () => {
@@ -286,13 +280,7 @@ class AdminPersonList extends React.Component {
   }
 
   render() {
-    const {
-      organizationData,
-      userData: { currentUser }
-    } = this.props;
-    if (!currentUser) return <LoadingIndicator />;
-
-    const currentUserRole = currentUser.memberships.edges[0].node.role;
+    const { organizationData } = this.props;
 
     return (
       <div>
@@ -343,15 +331,7 @@ class AdminPersonList extends React.Component {
             >
               <OrganizationJoinLink
                 organizationUuid={organizationData.organization.uuid}
-                isSuperAdmin={this.state.makeSuperadmin}
               />
-              {hasRoleAtLeast(currentUserRole, "SUPERADMIN") && (
-                <Checkbox
-                  label="Make superadmin?"
-                  checked={this.state.makeSuperadmin}
-                  onCheck={this.handleMakeSuperadminInvite}
-                />
-              )}
             </Dialog>
             <Dialog
               title="Reset user password"

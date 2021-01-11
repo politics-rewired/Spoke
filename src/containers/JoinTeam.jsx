@@ -22,17 +22,8 @@ class JoinTeam extends React.Component {
   async componentWillMount() {
     let organization = null;
     let campaign = null;
-    // determine if the invite link is for a superadmin by splitting orgUUID by '&',
-    // and checking for presence of 'superadmin' after UUID
-    const orgIdComponents = this.props.match.params.organizationUuid.split("&");
-    const organizationUuid = orgIdComponents[0];
-    const makeSuperadmin =
-      orgIdComponents.length === 2 && orgIdComponents[1] === "superadmin";
     try {
-      organization = await this.props.mutations.joinOrganization(
-        organizationUuid,
-        makeSuperadmin
-      );
+      organization = await this.props.mutations.joinOrganization();
       if (organization.errors) throw organization.errors;
     } catch (ex) {
       this.setState({
@@ -43,9 +34,7 @@ class JoinTeam extends React.Component {
 
     if (this.props.match.params.campaignId) {
       try {
-        campaign = await this.props.mutations.assignUserToCampaign(
-          organizationUuid
-        );
+        campaign = await this.props.mutations.assignUserToCampaign();
         if (campaign.errors) throw campaign.errors;
       } catch (ex) {
         this.setState({
@@ -85,23 +74,17 @@ JoinTeam.propTypes = {
 };
 
 const mutations = {
-  joinOrganization: (_ownProps) => (organizationUuid, makeSuperadmin) => ({
+  joinOrganization: (ownProps) => () => ({
     mutation: gql`
-      mutation joinOrganization(
-        $organizationUuid: String!
-        $makeSuperadmin: Boolean!
-      ) {
-        joinOrganization(
-          organizationUuid: $organizationUuid
-          makeSuperadmin: $makeSuperadmin
-        ) {
+      mutation joinOrganization($organizationUuid: String!) {
+        joinOrganization(organizationUuid: $organizationUuid) {
           id
         }
       }
     `,
-    variables: { organizationUuid, makeSuperadmin }
+    variables: { organizationUuid: ownProps.match.params.organizationUuid }
   }),
-  assignUserToCampaign: (ownProps) => (organizationUuid) => ({
+  assignUserToCampaign: (ownProps) => () => ({
     mutation: gql`
       mutation assignUserToCampaign(
         $organizationUuid: String!
@@ -117,7 +100,7 @@ const mutations = {
     `,
     variables: {
       campaignId: ownProps.match.params.campaignId,
-      organizationUuid
+      organizationUuid: ownProps.match.params.organizationUuid
     }
   })
 };

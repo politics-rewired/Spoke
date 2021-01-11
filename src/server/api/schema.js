@@ -1106,11 +1106,7 @@ const rootMutations = {
       return updatedUser;
     },
 
-    joinOrganization: async (
-      _root,
-      { organizationUuid, makeSuperadmin },
-      { user }
-    ) => {
+    joinOrganization: async (_root, { organizationUuid }, { user }) => {
       const organization = await r
         .knex("organization")
         .where("uuid", organizationUuid)
@@ -1149,19 +1145,6 @@ const rootMutations = {
         // Stub
       }
 
-      // if the invite is for a superadmin, use role SUPERADMIN
-      if (makeSuperadmin) {
-        await r.knex("user_organization").insert({
-          user_id: user.id,
-          organization_id: organization.id,
-          role: "SUPERADMIN",
-          request_status: approvalStatus.toLowerCase()
-        });
-
-        return organization;
-      }
-
-      // for other invites, use role TEXTER
       await r.knex("user_organization").insert({
         user_id: user.id,
         organization_id: organization.id,
