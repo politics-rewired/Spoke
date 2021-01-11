@@ -8,6 +8,7 @@ import groupBy from "lodash/groupBy";
 import { DateTime } from "luxon";
 import request from "superagent";
 
+import { VanOperationMode } from "../../api/external-system";
 import { TextRequestType } from "../../api/organization";
 import { RequestAutoApproveType } from "../../api/organization-membership";
 import { CampaignExportType } from "../../api/types";
@@ -3301,8 +3302,17 @@ const rootMutations = {
     ) => {
       await accessRequired(user, organizationId, "ADMIN");
 
+      const { operationMode } = externalSystem;
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
-      const apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
+      let apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
+
+      if (operationMode === VanOperationMode.MYCAMPAIGN) {
+        apiKeyRef = apiKeyRef.concat("|1");
+      }
+
+      if (operationMode === VanOperationMode.VOTERFILE) {
+        apiKeyRef = apiKeyRef.concat("|0");
+      }
 
       await getWorker().then((worker) =>
         worker.setSecret(apiKeyRef, externalSystem.apiKey)
@@ -3315,7 +3325,8 @@ const rootMutations = {
           type: externalSystem.type.toLowerCase(),
           organization_id: parseInt(organizationId, 10),
           username: externalSystem.username,
-          api_key_ref: apiKeyRef
+          api_key_ref: apiKeyRef,
+          operation_mode: externalSystem.operationMode
         })
         .returning("*");
 
@@ -3342,7 +3353,8 @@ const rootMutations = {
       const payload = {
         name: externalSystem.name,
         type: externalSystem.type.toLowerCase(),
-        username: externalSystem.username
+        username: externalSystem.username,
+        operation_mode: externalSystem.operationMode
       };
 
       if (!externalSystem.apiKey.includes("*")) {
@@ -3352,6 +3364,35 @@ const rootMutations = {
           savedSystem.organization_id,
           truncatedKey
         );
+        await r
+          .knex("graphile_secrets.secrets")
+          .where({ ref: savedSystem.api_key_ref })
+          .del();
+        await getWorker().then((worker) =>
+          worker.setSecret(apiKeyRef, externalSystem.apiKey)
+        );
+        payload.api_key_ref = apiKeyRef;
+      }
+
+      // if the operationMode changed, append the correct digit to the apiKeyRef
+      const operationModeDidChange =
+        externalSystem.operation_mode !== savedSystem.operation_mode;
+      const { operationMode } = externalSystem;
+      const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
+
+      if (operationModeDidChange) {
+        let apiKeyRef = graphileSecretRef(
+          savedSystem.organization_id,
+          truncatedKey
+        );
+
+        if (operationMode === VanOperationMode.MYCAMPAIGN) {
+          apiKeyRef = apiKeyRef.concat("|1");
+        }
+
+        if (operationMode === VanOperationMode.VOTERFILE) {
+          apiKeyRef = apiKeyRef.concat("|0");
+        }
         await r
           .knex("graphile_secrets.secrets")
           .where({ ref: savedSystem.api_key_ref })

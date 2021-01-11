@@ -1,3 +1,4 @@
+import { VanOperationMode } from "../../api/external-system";
 import { r } from "../models";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
@@ -14,6 +15,7 @@ interface ExternalSystem {
   type: ExternalSystemType;
   username: string;
   api_key_ref: string;
+  operation_mode: string;
 }
 
 interface StatusFilterArgs {
@@ -81,6 +83,15 @@ export const resolvers = {
         .reader("public.external_sync_opt_out_configuration")
         .where({ system_id: system.id })
         .first()
-        .then((result) => result || null)
+        .then((result) => result || null),
+    operationMode: async (system: ExternalSystem) => {
+      const components = system.api_key_ref.split("|");
+      const operationMode =
+        components.length === 3 ? components[2] : components[1];
+      if (operationMode === "1") {
+        return VanOperationMode.MYCAMPAIGN;
+      }
+      return VanOperationMode.VOTERFILE;
+    }
   }
 };
