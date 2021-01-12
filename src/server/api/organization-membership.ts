@@ -11,7 +11,7 @@ interface IOrganizationMembership {
 
 export const resolvers = {
   OrganizationMembership: {
-    ...sqlResolvers(["id", "role"]),
+    ...sqlResolvers(["id"]),
     user: async (membership: IOrganizationMembership) =>
       membership.user
         ? membership.user
@@ -24,7 +24,21 @@ export const resolvers = {
             .where({ id: membership.organization_id })
             .first(),
     requestAutoApprove: (membership: IOrganizationMembership) =>
-      membership.request_status.toUpperCase()
+      membership.request_status.toUpperCase(),
+    role: async (membership: IOrganizationMembership) => {
+      const [isSuperadmin] = await r
+        .reader("user")
+        .where({ id: membership.user_id })
+        .first()
+        .pluck("is_superadmin");
+      const [role] = await r
+        .reader("user_organization")
+        .where({ user_id: membership.user_id })
+        .first()
+        .pluck("role");
+
+      return isSuperadmin ? "SUPERADMIN" : role;
+    }
   }
 };
 

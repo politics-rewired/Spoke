@@ -989,26 +989,20 @@ const rootMutations = {
         true
       );
 
+      const user = r
+        .knex("user")
+        .where({
+          id: membership.user_id
+        })
+        .returning("*");
+
       // handle Superadmin role selection
       if (role === "SUPERADMIN") {
-        const user = r
-          .knex("user")
-          .where({
-            id: membership.user_id
-          })
-          .returning("*");
         user.update({ is_superadmin: true });
-        // const updateQuery = r
-        //   .knex("user_organization")
-        //   .where({
-        //     user_id: membership.user_id,
-        //     organization_id: membership.organization_id
-        //   })
-        //   .returning("*");
-        // const [orgMembership] = await updateQuery;
-        // return orgMembership;
-        const [newRole] = await user;
-        return newRole;
+      }
+      // handle Superadmin role de-select
+      if (user.is_superadmin && role !== "SUPERADMIN") {
+        user.update({ is_superadmin: false });
       }
 
       const updateQuery = r
@@ -1020,7 +1014,7 @@ const rootMutations = {
         .returning("*");
 
       if (level) updateQuery.update({ request_status: level.toLowerCase() });
-      if (role && role !== "SUPERADMIN") updateQuery.update({ role });
+      if (role) updateQuery.update({ role });
 
       const [orgMembership] = await updateQuery;
 
