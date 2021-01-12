@@ -1031,7 +1031,6 @@ const rootMutations = {
         userId: membership.user_id,
         organizationId: membership.organization_id
       });
-      logger.info("ORGMEMBESHIPPPPPPPP", orgMembership);
       return orgMembership;
     },
 
@@ -1697,11 +1696,11 @@ const rootMutations = {
         );
 
         if (invite.makeSuperadmin) {
-          await trx("user_organization").insertt({
-            role: "SUPERADMIN",
-            user_id: userId,
-            organization_id: newOrganization.id
-          });
+          // await trx("user_organization").insertt({
+          //   role: "SUPERADMIN",
+          //   user_id: userId,
+          //   organization_id: newOrganization.id
+          // });
         }
 
         await trx("invite")
