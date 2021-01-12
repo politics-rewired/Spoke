@@ -283,8 +283,6 @@ class AdminPersonList extends React.Component {
   render() {
     const { organizationData } = this.props;
 
-    console.log("props", this.props);
-
     return (
       <div>
         {this.renderCampaignList()}

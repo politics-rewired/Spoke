@@ -1690,11 +1690,11 @@ const rootMutations = {
         );
 
         if (invite.makeSuperadmin) {
-          // await trx("user_organization").insertt({
-          //   role: "SUPERADMIN",
-          //   user_id: userId,
-          //   organization_id: newOrganization.id
-          // });
+          await trx("user")
+            .update({
+              is_superadmin: true
+            })
+            .where({ id: userId });
         }
 
         await trx("invite")
