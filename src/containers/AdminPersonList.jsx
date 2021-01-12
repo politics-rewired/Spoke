@@ -196,27 +196,13 @@ class AdminPersonList extends React.Component {
     }
 
     const canResetPassword = window.PASSPORT_STRATEGY === "local";
-    const isCurrentUserSuperadmin =
-      // currentUser.memberships.edges[0].node.user.isSuperadmin;
-      true;
-    const currentUserRole = isCurrentUserSuperadmin
-      ? "SUPERADMIN"
-      : currentUser.memberships.edges[0].node.role;
-
-    const userRoles = isCurrentUserSuperadmin
-      ? { ...UserRoleType, SUPERADMIN: "SUPERADMIN" }
-      : UserRoleType;
+    const currentUserRole = currentUser.memberships.edges[0].node.role;
 
     return (
       <Table selectable={false}>
         <TableBody displayRowCheckbox={false} showRowHover>
           {people.map((person) => {
-            const personIsSuperadmin =
-              person.memberships.edges[0].node.user.isSuperadmin;
-            const personRole = personIsSuperadmin
-              ? "SUPERADMIN"
-              : person.memberships.edges[0].node.role;
-
+            const personRole = person.memberships.edges[0].node.role;
             return (
               <TableRow key={person.id}>
                 <TableRowColumn>{person.displayName}</TableRowColumn>
@@ -232,7 +218,7 @@ class AdminPersonList extends React.Component {
                       person.memberships.edges[0].node.id
                     )}
                   >
-                    {Object.keys(userRoles).map((option) => {
+                    {Object.keys(UserRoleType).map((option) => {
                       const disabled =
                         option === "OWNER" &&
                         !hasRoleAtLeast(currentUserRole, "OWNER");
@@ -430,9 +416,6 @@ const organizationFragment = `
           id
           role
           requestAutoApprove
-          user {
-            isSuperadmin
-          }
         }
       }
     }
@@ -509,9 +492,6 @@ const queries = {
               node {
                 id
                 role
-                user {
-                  isSuperadmin
-                }
               }
             }
           }

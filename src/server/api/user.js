@@ -155,8 +155,7 @@ export const resolvers = {
       "email",
       "cell",
       "assignedCell",
-      "terms",
-      "isSuperadmin"
+      "terms"
     ]),
     displayName: (user) => `${user.first_name} ${user.last_name}`,
     currentRequest: async (user, { organizationId }) => {
