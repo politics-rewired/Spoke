@@ -369,6 +369,10 @@ const validators = {
     desc: "Email server user. Required for custom SMTP server usage.",
     default: undefined
   }),
+  ENABLE_MONTHLY_ORG_MESSAGE_LIMITS: bool({
+    desc: "Whether to enable monthly, per organization message limits",
+    default: false
+  }),
   ENCRYPTION_ALGORITHM: str({
     desc: "Encryption algorithm to use with crypto package.",
     choices: ["aes256"],

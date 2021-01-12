@@ -512,13 +512,29 @@ async function sendMessage(
     ? "and opt_out.organization_id = campaign.organization_id"
     : "";
 
-  const record = await trx("campaign_contact")
+  let recordQuery = trx("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId, 10) })
     .whereRaw("campaign_contact.archived = false")
     .where({ "campaign.is_archived": false })
-    .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
-    .first(
+    .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id");
+
+  if (config.ENABLE_MONTHLY_ORG_MESSAGE_LIMITS) {
+    recordQuery = recordQuery
+      .join("organization", "organization.id", "=", "campaign.organization_id")
+      .leftJoin(
+        "monthly_organization_message_usages",
+        "monthly_organization_message_usages.organization_id",
+        "=",
+        "organization.id"
+      )
+      .whereRaw(
+        `monthly_organization_message_usages.month = extract('month' from now())`
+      );
+  }
+
+  const record = await recordQuery.first(
+    ...[
       "campaign_contact.id as cc_id",
       "campaign_contact.assignment_id as assignment_id",
       "campaign_contact.message_status as cc_message_status",
@@ -539,7 +555,25 @@ async function sendMessage(
         ) as is_opted_out`
       ),
       "campaign_contact.timezone as contact_timezone"
-    );
+    ].concat(
+      config.ENABLE_MONTHLY_ORG_MESSAGE_LIMITS
+        ? [
+            "organization.monthly_message_limit",
+            "monthly_organization_message_usages.sent_message_count"
+          ]
+        : []
+    )
+  );
+
+  if (
+    record.monthly_message_limit !== undefined &&
+    record.sent_message_count !== undefined &&
+    parseInt(record.sent_message_count, 10) >
+      parseInt(record.monthly_message_limit, 10) &&
+    record.cc_message_status === "needsMessage"
+  ) {
+    throw new GraphQLError("Monthly message limit exceeded");
+  }
 
   // If the conversation is unassigned, create an assignment. This assignment will be applied to
   // the message only, and not the campaign contact. We don't use message.assignment_id and the
