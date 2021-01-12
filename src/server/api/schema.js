@@ -989,6 +989,28 @@ const rootMutations = {
         true
       );
 
+      // handle Superadmin role selection
+      if (role === "SUPERADMIN") {
+        const user = r
+          .knex("user")
+          .where({
+            id: membership.user_id
+          })
+          .returning("*");
+        user.update({ is_superadmin: true });
+        // const updateQuery = r
+        //   .knex("user_organization")
+        //   .where({
+        //     user_id: membership.user_id,
+        //     organization_id: membership.organization_id
+        //   })
+        //   .returning("*");
+        // const [orgMembership] = await updateQuery;
+        // return orgMembership;
+        const [newRole] = await user;
+        return newRole;
+      }
+
       const updateQuery = r
         .knex("user_organization")
         .where({
@@ -998,7 +1020,7 @@ const rootMutations = {
         .returning("*");
 
       if (level) updateQuery.update({ request_status: level.toLowerCase() });
-      if (role) updateQuery.update({ role });
+      if (role && role !== "SUPERADMIN") updateQuery.update({ role });
 
       const [orgMembership] = await updateQuery;
 
@@ -1009,7 +1031,7 @@ const rootMutations = {
         userId: membership.user_id,
         organizationId: membership.organization_id
       });
-
+      logger.info("ORGMEMBESHIPPPPPPPP", orgMembership);
       return orgMembership;
     },
 
@@ -1673,6 +1695,14 @@ const rootMutations = {
             organization_id: newOrganization.id
           }))
         );
+
+        if (invite.makeSuperadmin) {
+          await trx("user_organization").insertt({
+            role: "SUPERADMIN",
+            user_id: userId,
+            organization_id: newOrganization.id
+          });
+        }
 
         await trx("invite")
           .update({

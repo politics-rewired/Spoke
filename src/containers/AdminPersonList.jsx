@@ -196,84 +196,99 @@ class AdminPersonList extends React.Component {
     }
 
     const canResetPassword = window.PASSPORT_STRATEGY === "local";
-    const currentUserRole = currentUser.memberships.edges[0].node.role;
+    const isCurrentUserSuperadmin =
+      // currentUser.memberships.edges[0].node.user.isSuperadmin;
+      true;
+    const currentUserRole = isCurrentUserSuperadmin
+      ? "SUPERADMIN"
+      : currentUser.memberships.edges[0].node.role;
+
+    const userRoles = isCurrentUserSuperadmin
+      ? { ...UserRoleType, SUPERADMIN: "SUPERADMIN" }
+      : UserRoleType;
 
     return (
       <Table selectable={false}>
         <TableBody displayRowCheckbox={false} showRowHover>
-          {people.map((person) => (
-            <TableRow key={person.id}>
-              <TableRowColumn>{person.displayName}</TableRowColumn>
-              <TableRowColumn>{person.email}</TableRowColumn>
-              <TableRowColumn>
-                <DropDownMenu
-                  value={person.memberships.edges[0].node.role}
-                  disabled={
-                    person.id === currentUser.id ||
-                    (person.memberships.edges[0].node.role === "OWNER" &&
-                      currentUserRole !== "OWNER")
-                  }
-                  onChange={this.wrapHandleRoleChange(
-                    person.memberships.edges[0].node.id
-                  )}
-                >
-                  {Object.keys(UserRoleType).map((option) => {
-                    const disabled =
-                      (option === "OWNER" && currentUserRole !== "OWNER") ||
-                      (option === "SUPERADMIN" &&
-                        !hasRoleAtLeast(currentUserRole, "SUPERADMIN"));
+          {people.map((person) => {
+            const personIsSuperadmin =
+              person.memberships.edges[0].node.user.isSuperadmin;
+            const personRole = personIsSuperadmin
+              ? "SUPERADMIN"
+              : person.memberships.edges[0].node.role;
 
-                    return (
+            return (
+              <TableRow key={person.id}>
+                <TableRowColumn>{person.displayName}</TableRowColumn>
+                <TableRowColumn>{person.email}</TableRowColumn>
+                <TableRowColumn>
+                  <DropDownMenu
+                    value={personRole}
+                    disabled={
+                      person.id === currentUser.id ||
+                      (personRole === "OWNER" && currentUserRole !== "OWNER")
+                    }
+                    onChange={this.wrapHandleRoleChange(
+                      person.memberships.edges[0].node.id
+                    )}
+                  >
+                    {Object.keys(userRoles).map((option) => {
+                      const disabled =
+                        option === "OWNER" &&
+                        !hasRoleAtLeast(currentUserRole, "OWNER");
+
+                      return (
+                        <MenuItem
+                          key={`${person.id}_${option}`}
+                          value={option}
+                          disabled={disabled}
+                          primaryText={snakeToTitleCase(option)}
+                        />
+                      );
+                    })}
+                  </DropDownMenu>
+                </TableRowColumn>
+                <TableRowColumn>
+                  <DropDownMenu
+                    value={person.memberships.edges[0].node.requestAutoApprove}
+                    disabled={!hasRoleAtLeast(currentUserRole, "ADMIN")}
+                    onChange={this.handleOnChangeAutoApprovalLevel(
+                      person.memberships.edges[0].node.id
+                    )}
+                  >
+                    {Object.keys(RequestAutoApproveType).map((option) => (
                       <MenuItem
                         key={`${person.id}_${option}`}
                         value={option}
-                        disabled={disabled}
+                        disabled={false}
                         primaryText={snakeToTitleCase(option)}
                       />
-                    );
-                  })}
-                </DropDownMenu>
-              </TableRowColumn>
-              <TableRowColumn>
-                <DropDownMenu
-                  value={person.memberships.edges[0].node.requestAutoApprove}
-                  disabled={!hasRoleAtLeast(currentUserRole, "ADMIN")}
-                  onChange={this.handleOnChangeAutoApprovalLevel(
-                    person.memberships.edges[0].node.id
-                  )}
-                >
-                  {Object.keys(RequestAutoApproveType).map((option) => (
-                    <MenuItem
-                      key={`${person.id}_${option}`}
-                      value={option}
-                      disabled={false}
-                      primaryText={snakeToTitleCase(option)}
-                    />
-                  ))}
-                </DropDownMenu>
-              </TableRowColumn>
-              <TableRowColumn>
-                <FlatButton
-                  {...dataTest("editPerson")}
-                  label="Edit"
-                  onClick={() => {
-                    this.editUser(person.id);
-                  }}
-                />
-              </TableRowColumn>
-              {canResetPassword && (
+                    ))}
+                  </DropDownMenu>
+                </TableRowColumn>
                 <TableRowColumn>
                   <FlatButton
-                    label="Reset Password"
-                    disabled={currentUser.id === person.id}
+                    {...dataTest("editPerson")}
+                    label="Edit"
                     onClick={() => {
-                      this.resetPassword(person.id);
+                      this.editUser(person.id);
                     }}
                   />
                 </TableRowColumn>
-              )}
-            </TableRow>
-          ))}
+                {canResetPassword && (
+                  <TableRowColumn>
+                    <FlatButton
+                      label="Reset Password"
+                      disabled={currentUser.id === person.id}
+                      onClick={() => {
+                        this.resetPassword(person.id);
+                      }}
+                    />
+                  </TableRowColumn>
+                )}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     );
@@ -281,6 +296,8 @@ class AdminPersonList extends React.Component {
 
   render() {
     const { organizationData } = this.props;
+
+    console.log("props", this.props);
 
     return (
       <div>
@@ -413,6 +430,9 @@ const organizationFragment = `
           id
           role
           requestAutoApprove
+          user {
+            isSuperadmin
+          }
         }
       }
     }
@@ -489,6 +509,9 @@ const queries = {
               node {
                 id
                 role
+                user {
+                  isSuperadmin
+                }
               }
             }
           }

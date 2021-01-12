@@ -7,8 +7,7 @@ export enum UserRoleType {
   TEXTER = "TEXTER",
   SUPERVOLUNTEER = "SUPERVOLUNTEER",
   ADMIN = "ADMIN",
-  OWNER = "OWNER",
-  SUPERADMIN = "SUPERADMIN"
+  OWNER = "OWNER"
 }
 
 export enum RequestAutoApproveType {
@@ -46,7 +45,6 @@ export const schema = `
     SUPERVOLUNTEER
     ADMIN
     OWNER
-    SUPERADMIN
   }
 
   enum RequestAutoApprove {
