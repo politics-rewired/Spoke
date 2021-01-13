@@ -242,9 +242,8 @@ class AdminPeople extends React.Component<
         organizationId,
         parseInt(userId, 10)
       );
-      console.log("res", res);
-      const { resetUserPassword } = res.data;
-      this.setState({ password: { open: true, hash: resetUserPassword } });
+      const { resetUserPassword: hash } = res.data;
+      this.setState({ password: { open: true, hash } });
     }
   };
 
