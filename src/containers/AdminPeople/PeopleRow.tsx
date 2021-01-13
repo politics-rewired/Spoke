@@ -44,7 +44,8 @@ const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
   onSelect
 }) => {
   const disableRoleEdit =
-    row.isViewingUser || (row.isOwner && !viewing.isOwner);
+    row.isViewingUser ||
+    (row.isOwner && !hasRoleAtLeast(viewing.role, UserRoleType.OWNER));
 
   return (
     <DropDownMenu
@@ -64,7 +65,12 @@ const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
         <MenuItem
           key={option}
           value={option}
-          disabled={option === UserRoleType.OWNER && !viewing.isOwner}
+          disabled={
+            (option === UserRoleType.OWNER &&
+              !hasRoleAtLeast(viewing.role, UserRoleType.OWNER)) ||
+            (option === UserRoleType.SUPERADMIN &&
+              viewing.role !== UserRoleType.SUPERADMIN)
+          }
           primaryText={titleCase(option)}
         />
       ))}

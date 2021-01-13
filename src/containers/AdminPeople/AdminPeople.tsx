@@ -268,10 +268,6 @@ class AdminPeople extends React.Component<
         this.setState((prev) => ({
           userEdit: { ...prev.userEdit, userId, open: true }
         })),
-      createHash: (hash) =>
-        this.setState({
-          password: { hash, open: true }
-        }),
       editRole: (role, userId) => {
         if (role === UserRoleType.SUPERADMIN) {
           this.startConfirmSuperadmin(userId);
@@ -289,7 +285,6 @@ class AdminPeople extends React.Component<
   }
 
   render() {
-    console.log("state", this.state);
     return (
       <div>
         <div className={css(styles.filters)}>
@@ -440,7 +435,7 @@ const mutations: MutationMap<AdminPeopleExtendedProps> = {
       mutation editOrganizationMembership(
         $membershipId: String!
         $level: RequestAutoApprove
-        $role: UserRoleType
+        $role: String
       ) {
         editOrganizationMembership(
           id: $membershipId

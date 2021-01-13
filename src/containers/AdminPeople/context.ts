@@ -31,13 +31,12 @@ export interface AdminPeopleContext {
 
 export interface PeopleRowEventHandlers {
   startEdit: (userId: string) => void;
-  createHash: (hash: string) => void;
-  wasUpdated: (userId: string) => void;
   editRole: (role: UserRoleType, userId: string) => void;
   editAutoApprove: (
     autoApprove: RequestAutoApproveType,
     userId: string
   ) => void;
   resetUserPassword: (userId: string) => void;
+  wasUpdated: (userId: string) => void;
   error: (errorMsg: string) => void;
 }
