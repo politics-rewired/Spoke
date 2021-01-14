@@ -512,7 +512,7 @@ async function sendMessage(
     ? "and opt_out.organization_id = campaign.organization_id"
     : "";
 
-  let recordQuery = trx("campaign_contact")
+  const recordQuery = trx("campaign_contact")
     .join("campaign", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": parseInt(campaignContactId, 10) })
     .whereRaw("campaign_contact.archived = false")
@@ -520,7 +520,7 @@ async function sendMessage(
     .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id");
 
   if (config.ENABLE_MONTHLY_ORG_MESSAGE_LIMITS) {
-    recordQuery = recordQuery
+    recordQuery
       .join("organization", "organization.id", "=", "campaign.organization_id")
       .leftJoin(
         "monthly_organization_message_usages",
@@ -529,7 +529,7 @@ async function sendMessage(
         "organization.id"
       )
       .whereRaw(
-        `monthly_organization_message_usages.month = extract('month' from now())`
+        `monthly_organization_message_usages.month = date_trunc('month', now())`
       );
   }
 

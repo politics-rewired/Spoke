@@ -12,13 +12,13 @@ const updateOrgMessageUsage: Task = async (
         insert into monthly_organization_message_usages (organization_id, month, sent_message_count)
         select 
           campaign.organization_id, 
-          extract('month' from now()) as month,
+          date_trunc('month', now()) as month,
           count(*) as sent_message_count
         from message
         join campaign_contact on campaign_contact.id = message.campaign_contact_id
         join campaign on campaign.id = campaign_contact.campaign_id
-        where message.created_at > date_trunc('minute', $1) - interval '5 minutes'
-          and message.created_at <= date_trunc('minute', $1)
+        where message.created_at >= date_trunc('minute', $1) - interval '5 minutes'
+          and message.created_at < date_trunc('minute', $1)
           and message.is_from_contact = false
         group by 1, 2
         on conflict (organization_id, month)
