@@ -78,6 +78,13 @@ module.exports = {
     "@typescript-eslint/no-non-null-assertion": "off",
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        name: "luxon",
+        message: "Please use src/lib/datetime instead."
+      }
+    ],
 
     // Rules to get linting to pass
     camelcase: ["off", { properties: "never" }],

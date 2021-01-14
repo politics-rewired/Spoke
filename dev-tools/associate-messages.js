@@ -1,4 +1,5 @@
-import { DateTime } from "luxon";
+import { DateTime } from "../src/lib/datetime";
+
 const config = {
   client: "mysql",
   connection: process.env.DATABASE_URL,

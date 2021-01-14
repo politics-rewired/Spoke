@@ -1,7 +1,6 @@
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
-import { DateTime } from "luxon";
 import Autocomplete from "material-ui/AutoComplete";
 import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
@@ -11,7 +10,7 @@ import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
 import { dataSourceItem } from "../../../components/utils";
-import { parseIanaZone } from "../../../lib/timezones";
+import { DateTime, parseIanaZone } from "../../../lib/datetime";
 import { difference } from "../../../lib/utils";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";

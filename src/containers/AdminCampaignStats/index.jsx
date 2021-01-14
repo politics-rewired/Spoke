@@ -1,6 +1,5 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { DateTime } from "luxon";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
@@ -11,6 +10,7 @@ import { withRouter } from "react-router-dom";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";
+import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignSurveyStats from "./CampaignSurveyStats";

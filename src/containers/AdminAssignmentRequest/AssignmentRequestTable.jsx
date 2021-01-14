@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import CircularProgress from "material-ui/CircularProgress";
 import FlatButton from "material-ui/FlatButton";
 import IconButton from "material-ui/IconButton";
@@ -17,6 +16,7 @@ import {
 import PropTypes from "prop-types";
 import React from "react";
 
+import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 
 export const RowWorkStatus = Object.freeze({

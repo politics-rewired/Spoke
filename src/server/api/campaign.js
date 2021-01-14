@@ -1,7 +1,7 @@
 import { ExternalSyncReadinessState } from "../../api/campaign";
 import { emptyRelayPage } from "../../api/pagination";
 import { config } from "../../config";
-import { parseIanaZone } from "../../lib/timezones";
+import { parseIanaZone } from "../../lib/datetime";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { currentEditors } from "../models/cacheable_queries";

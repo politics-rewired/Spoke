@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime } from "./datetime";
 
 export const getProcessEnvTz: () => string = () =>
   typeof window === "undefined" ? (process.env.TZ as string) : window.TZ;

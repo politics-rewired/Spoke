@@ -1,6 +1,5 @@
 import gql from "graphql-tag";
 import { History } from "history";
-import { DateTime } from "luxon";
 import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -31,6 +30,7 @@ import {
   ExternalSystemType
 } from "../api/external-system";
 import { RelayPaginatedResponse } from "../api/pagination";
+import { DateTime } from "../lib/datetime";
 import { MutationMap, QueryMap } from "../network/types";
 import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";

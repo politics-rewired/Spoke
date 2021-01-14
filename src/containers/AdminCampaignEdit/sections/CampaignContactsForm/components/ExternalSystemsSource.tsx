@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import { DateTime } from "luxon";
 import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import DropDownMenu from "material-ui/DropDownMenu";
@@ -8,6 +7,7 @@ import { green500, grey500 } from "material-ui/styles/colors";
 import React from "react";
 
 import { ExternalSystem } from "../../../../../api/external-system";
+import { DateTime } from "../../../../../lib/datetime";
 import { loadData } from "../../../../hoc/with-operations";
 
 interface Props {

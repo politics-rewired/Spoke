@@ -1,5 +1,5 @@
 import { config } from "../../config";
-import { parseIanaZone } from "../../lib/timezones";
+import { parseIanaZone } from "../../lib/datetime";
 import logger from "../../logger";
 import { cacheableData, r } from "../models";
 import { errToObj } from "../utils";
