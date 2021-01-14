@@ -1,8 +1,9 @@
-import { DateTime } from "luxon";
 import { grey100 } from "material-ui/styles/colors";
 import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
 import PropTypes from "prop-types";
 import React from "react";
+
+import { DateTime } from "../lib/datetime";
 
 const inlineStyles = {
   toolbar: {

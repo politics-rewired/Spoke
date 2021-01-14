@@ -5,7 +5,6 @@ import { GraphQLError } from "graphql/error";
 import _ from "lodash";
 import escapeRegExp from "lodash/escapeRegExp";
 import groupBy from "lodash/groupBy";
-import { DateTime } from "luxon";
 import request from "superagent";
 
 import { VanOperationMode } from "../../api/external-system";
@@ -14,6 +13,7 @@ import { RequestAutoApproveType } from "../../api/organization-membership";
 import { CampaignExportType } from "../../api/types";
 import { config } from "../../config";
 import { gzip, makeTree } from "../../lib";
+import { DateTime, parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { isNowBetween } from "../../lib/timezones";
@@ -289,7 +289,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_end: textingHoursEnd,
     is_autoassign_enabled: isAutoassignEnabled,
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
-    timezone,
+    timezone: parseIanaZone(timezone),
     external_system_id: externalSystemId
   };
 

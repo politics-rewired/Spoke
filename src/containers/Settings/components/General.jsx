@@ -1,6 +1,5 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { DateTime } from "luxon";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
@@ -17,6 +16,7 @@ import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import GSSubmitButton from "../../../components/forms/GSSubmitButton";
 import { snakeToTitleCase } from "../../../lib/attributes";
+import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
 
 const styles = StyleSheet.create({

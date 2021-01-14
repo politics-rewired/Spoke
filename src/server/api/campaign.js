@@ -1,6 +1,7 @@
 import { ExternalSyncReadinessState } from "../../api/campaign";
 import { emptyRelayPage } from "../../api/pagination";
 import { config } from "../../config";
+import { parseIanaZone } from "../../lib/datetime";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
@@ -254,10 +255,10 @@ export const resolvers = {
       "textingHoursStart",
       "textingHoursEnd",
       "isAutoassignEnabled",
-      "timezone",
       "createdAt",
       "landlinesFiltered"
     ]),
+    timezone: (campaign) => parseIanaZone(campaign.timezone),
     readiness: (campaign) => campaign,
     repliesStaleAfter: (campaign) => campaign.replies_stale_after_minutes,
     useDynamicAssignment: (_) => false,

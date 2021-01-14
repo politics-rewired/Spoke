@@ -1,4 +1,4 @@
-import { DateTime, Interval } from "luxon";
+import { DateTime, Interval } from "./datetime";
 
 /**
  * Returns true if it is currently between the start and end hours in the specified timezone.

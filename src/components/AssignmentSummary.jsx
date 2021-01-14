@@ -1,5 +1,4 @@
 import { css, StyleSheet } from "aphrodite";
-import { DateTime } from "luxon";
 import Badge from "material-ui/Badge";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
@@ -9,6 +8,7 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 
 import { dataTest } from "../lib/attributes";
+import { DateTime } from "../lib/datetime";
 
 const inlineStyles = {
   badge: {

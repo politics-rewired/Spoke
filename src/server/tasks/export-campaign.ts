@@ -1,8 +1,8 @@
 /* eslint-disable no-cond-assign */
 import { format } from "fast-csv";
 import _ from "lodash";
-import { DateTime } from "luxon";
 
+import { DateTime } from "../../lib/datetime";
 import { getDownloadUrl, getUploadStream } from "../../workers/exports/upload";
 import {
   CampaignContactRecord,

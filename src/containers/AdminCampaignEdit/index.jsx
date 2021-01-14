@@ -1,7 +1,6 @@
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
-import { DateTime } from "luxon";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
@@ -19,6 +18,7 @@ import { compose } from "react-apollo";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../lib/attributes";
+import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignAutoassignModeForm from "./sections/CampaignAutoassignModeForm";

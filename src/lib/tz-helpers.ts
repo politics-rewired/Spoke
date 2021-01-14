@@ -1,11 +1,11 @@
-import { DateTime } from "luxon";
+import { DateTime } from "./datetime";
 
 export const getProcessEnvTz: () => string = () =>
-  typeof window === "undefined" ? process.env.TZ : window.TZ;
+  typeof window === "undefined" ? (process.env.TZ as string) : window.TZ;
 
 export const getProcessEnvDstReferenceTimezone: () => string = () =>
   typeof window === "undefined"
-    ? process.env.DST_REFERENCE_TIMEZONE
+    ? (process.env.DST_REFERENCE_TIMEZONE as string)
     : window.DST_REFERENCE_TIMEZONE;
 
 export const isValidTimezone: (tzstr: string) => boolean = (tzstr) =>

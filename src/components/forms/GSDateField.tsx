@@ -1,7 +1,7 @@
-import { DateTime } from "luxon";
 import { DatePicker, DatePickerProps } from "material-ui";
 import React from "react";
 
+import { DateTime } from "../../lib/datetime";
 import { ISODateString } from "../../lib/js-types";
 import { GSFormField, GSFormFieldProps } from "./GSFormField";
 

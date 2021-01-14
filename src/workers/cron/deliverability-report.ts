@@ -1,8 +1,8 @@
 import knex from "knex";
 import _ from "lodash";
 import groupBy from "lodash/groupBy";
-import { DateTime, Interval } from "luxon";
 
+import { DateTime, Interval } from "../../lib/datetime";
 import { asUtc } from "../../lib/tz-helpers";
 import logger from "../../logger";
 import knexConfig from "../../server/knex";

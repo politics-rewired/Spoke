@@ -1,6 +1,5 @@
 /* eslint-disable max-classes-per-file,react/no-unused-state */
 import gql from "graphql-tag";
-import { DateTime } from "luxon";
 import DataTable from "material-ui-datatables";
 import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";
@@ -9,6 +8,7 @@ import Toggle from "material-ui/Toggle";
 import React from "react";
 
 import LoadingIndicator from "../../../components/LoadingIndicator";
+import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
 
 const ROW_SIZE_OPTIONS = [25, 50, 100];

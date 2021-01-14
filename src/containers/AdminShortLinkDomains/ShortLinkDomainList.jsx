@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import DataTables from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
 import { green500, red500 } from "material-ui/styles/colors";
@@ -10,6 +9,8 @@ import BlockIcon from "material-ui/svg-icons/content/block";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+
+import { DateTime } from "../../lib/datetime";
 
 class ShortLinkDomainList extends Component {
   tableColumns = () => [

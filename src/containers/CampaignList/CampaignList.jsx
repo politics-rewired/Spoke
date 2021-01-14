@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import Chip from "material-ui/Chip";
 import IconButton from "material-ui/IconButton";
 import IconMenu from "material-ui/IconMenu";
@@ -16,6 +15,7 @@ import { withRouter } from "react-router-dom";
 
 import Empty from "../../components/Empty";
 import { dataTest } from "../../lib/attributes";
+import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 
 const inlineStyles = {

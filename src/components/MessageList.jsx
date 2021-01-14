@@ -1,10 +1,11 @@
-import { DateTime } from "luxon";
 import Divider from "material-ui/Divider";
 import { List, ListItem } from "material-ui/List";
 import { red300 } from "material-ui/styles/colors";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
 import PropTypes from "prop-types";
 import React from "react";
+
+import { DateTime } from "../lib/datetime";
 
 const styles = {
   optOut: {

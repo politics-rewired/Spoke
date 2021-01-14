@@ -1,10 +1,10 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import { DateTime } from "luxon";
 import React, { Component } from "react";
 
 import { Message } from "../../../api/message";
 import { loadData } from "../../../containers/hoc/with-operations";
+import { DateTime } from "../../../lib/datetime";
 import { QueryMap } from "../../../network/types";
 
 const styles: Record<string, React.CSSProperties> = StyleSheet.create({
