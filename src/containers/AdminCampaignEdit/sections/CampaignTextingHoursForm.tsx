@@ -135,45 +135,54 @@ class CampaignTextingHoursForm extends React.Component<
     }
   };
 
-  addAutocompleteFormField = (
+  addAutocompleteFormField = <T extends unknown>(
     name: keyof TextingHoursValues,
     stateName: keyof AutoassignState,
-    value: string,
+    value: T,
     label: string,
     hint: string,
-    choices: DataSourceItemType[]
+    choices: DataSourceItemType<T>[]
   ) => (
     <Form.Field
       name={name}
       type={Autocomplete}
       fullWidth
-      dataSource={choices}
+      dataSource={choices.map(({ text, rawValue }) => ({
+        text,
+        value: rawValue
+      }))}
       filter={Autocomplete.caseInsensitiveFilter}
       maxSearchResults={4}
       searchText={
         this.state[stateName] !== undefined
           ? this.state[stateName]
-          : value || ""
+          : choices.find((choice) => choice.rawValue === value)?.text || ""
       }
       hintText={hint}
       floatingLabelText={label}
       onUpdateInput={(text: string) => {
         this.setState(updateState(stateName, text));
       }}
-      onNewRequest={(selection: DataSourceItemType, index: number) => {
+      onNewRequest={(
+        selection: {
+          text: string;
+          value: T;
+        },
+        index: number
+      ) => {
         // If enter was pressed, try to match current search text to an item
-        let choice: DataSourceItemType | undefined;
+        let choice: DataSourceItemType<T> | undefined;
         if (index === -1) {
           choice = choices.find((item) => item.text === selection.text);
           if (!choice) return;
-          selection = choice;
+          selection = { text: choice.text, value: choice.rawValue };
         }
 
         // Clear pending search term
         this.setState(updateState(stateName, undefined));
         // Update pendingChanges with selected value
         const { pendingChanges: existingChanges } = this.state;
-        const updates = { [name]: selection.rawValue };
+        const updates = { [name]: selection.value };
         const pendingChanges = { ...existingChanges, ...updates };
         this.setState({ pendingChanges });
       }}
@@ -205,7 +214,7 @@ class CampaignTextingHoursForm extends React.Component<
           {this.addAutocompleteFormField(
             "textingHoursStart",
             "textingHoursStartSearchText",
-            formatHour(value.textingHoursStart),
+            value.textingHoursStart,
             "Start time",
             "Start typing a start time",
             hourChoices
@@ -214,7 +223,7 @@ class CampaignTextingHoursForm extends React.Component<
           {this.addAutocompleteFormField(
             "textingHoursEnd",
             "textingHoursEndSearchText",
-            formatHour(value.textingHoursEnd),
+            value.textingHoursEnd,
             "End time",
             "Start typing an end time",
             hourChoices

@@ -8,8 +8,8 @@ export interface CampaignReadinessType {
   interactions: boolean;
 }
 
-export interface DataSourceItemType {
+export interface DataSourceItemType<T = string> {
   text: string;
-  rawValue: string;
+  rawValue: T;
   value: React.ReactNode;
 }
