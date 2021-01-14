@@ -617,7 +617,7 @@ async function sendMessage(
 
   const sendBefore = DateTime.utc()
     .set({ hour: endHour })
-    .setZone(parseIanaZone(timezone))
+    .setZone(timezone)
     .startOf("day")
     .toISO();
   const { contactNumber, text } = message;
