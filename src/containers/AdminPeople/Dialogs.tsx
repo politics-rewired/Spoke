@@ -130,7 +130,8 @@ const ConfirmSuperAdmin: React.StatelessComponent<ConfirmSuperAdminProps> = ({
       open={open}
       onRequestClose={onClose}
     >
-      Are you sure you want to make this user a Superadmin?
+      Are you sure you want to make this user a Superadmin? Superadmins have
+      Owner permissions for all organizations and can manage other Superadmins.
     </Dialog>
   </div>
 );

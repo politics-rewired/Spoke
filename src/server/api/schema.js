@@ -10,7 +10,10 @@ import request from "superagent";
 
 import { VanOperationMode } from "../../api/external-system";
 import { TextRequestType } from "../../api/organization";
-import { RequestAutoApproveType } from "../../api/organization-membership";
+import {
+  RequestAutoApproveType,
+  UserRoleType
+} from "../../api/organization-membership";
 import { CampaignExportType } from "../../api/types";
 import { config } from "../../config";
 import { gzip, makeTree } from "../../lib";
@@ -977,9 +980,20 @@ const rootMutations = {
         .first();
       if (!membership) throw new Error("No such org membership");
 
-      let roleRequired = "ADMIN";
-      if (role && (membership.role === "OWNER" || role === "OWNER")) {
-        roleRequired = "OWNER";
+      let roleRequired = UserRoleType.ADMIN;
+      if (
+        role &&
+        (membership.role === UserRoleType.OWNER || role === UserRoleType.OWNER)
+      ) {
+        roleRequired = UserRoleType.OWNER;
+      }
+
+      if (
+        role &&
+        (membership.role === UserRoleType.SUPERADMIN ||
+          role === UserRoleType.SUPERADMIN)
+      ) {
+        roleRequired = UserRoleType.SUPERADMIN;
       }
 
       await accessRequired(
@@ -989,22 +1003,8 @@ const rootMutations = {
         true
       );
 
-      const user = r
-        .knex("user")
-        .where({
-          id: membership.user_id
-        })
-        .returning("*");
-
-      // handle Superadmin role selection
-      if (role === "SUPERADMIN") {
-        user.update({ is_superadmin: true });
-      }
-      // handle Superadmin role de-select
-      if (user.is_superadmin && role !== "SUPERADMIN") {
-        user.update({ is_superadmin: false });
-      }
-
+      // get user to update is_superadmin on role change
+      const userUpdateQuery = r.knex("user").where({ id: membership.user_id });
       const updateQuery = r
         .knex("user_organization")
         .where({
@@ -1014,9 +1014,20 @@ const rootMutations = {
         .returning("*");
 
       if (level) updateQuery.update({ request_status: level.toLowerCase() });
-      if (role) updateQuery.update({ role });
+      if (role) {
+        // update both tables if role change
+        userUpdateQuery.update({
+          is_superadmin: role === UserRoleType.SUPERADMIN
+        });
+        updateQuery.update({
+          role: role === UserRoleType.SUPERADMIN ? UserRoleType.OWNER : role
+        });
+      }
 
-      const [orgMembership] = await updateQuery;
+      const [[orgMembership], _result] = await Promise.all([
+        updateQuery,
+        userUpdateQuery
+      ]);
 
       memoizer.invalidate(cacheOpts.UserOrganizations.key, {
         userId: membership.user_id
