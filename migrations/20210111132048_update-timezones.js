@@ -1,4 +1,4 @@
-const depractedTimezoneMap = {
+const deprecatedTimezoneMap = {
   "us/alaska": "America/Anchorage",
   "us/aleutian": "America/Adak",
   "us/arizona": "America/Phoenix",
@@ -22,7 +22,9 @@ exports.up = function up(knex) {
     .then(() =>
       // Update existing deprecated values in campaign table
       Promise.all(
-        Object.entries(depractedTimezoneMap).map(([deprecatedZone, ianaZone]) =>
+        Object.entries(
+          deprecatedTimezoneMap
+        ).map(([deprecatedZone, ianaZone]) =>
           knex("public.campaign")
             .update({ timezone: ianaZone })
             .whereRaw("lower(timezone) = ?", [deprecatedZone])
