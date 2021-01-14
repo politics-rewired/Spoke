@@ -2,7 +2,6 @@ import { ApolloQueryResult } from "apollo-client/core/types";
 import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
-import { DateTime } from "luxon";
 import { Dialog } from "material-ui";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
@@ -16,6 +15,7 @@ import {
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
 import { dataTest } from "../../../../lib/attributes";
+import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
 import { MutationMap, QueryMap } from "../../../../network/types";
 import { loadData } from "../../../hoc/with-operations";
