@@ -202,6 +202,7 @@ class AdminPeople extends React.Component<
         }
       });
     }
+    this.rowEventHandlers().wasUpdated(userId);
   };
 
   handleEditAutoApprove = async (
@@ -222,6 +223,7 @@ class AdminPeople extends React.Component<
         }
       });
     }
+    this.rowEventHandlers().wasUpdated(userId);
   };
 
   handleCloseSuperadminDialog = () => {
@@ -273,7 +275,6 @@ class AdminPeople extends React.Component<
         } else {
           this.handleEditRole(role, userId);
         }
-        this.rowEventHandlers().wasUpdated(userId);
       },
       editAutoApprove: (autoApprove, userId) =>
         this.handleEditAutoApprove(autoApprove, userId),
