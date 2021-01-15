@@ -337,12 +337,12 @@ class AssignmentTexter extends React.Component {
       ) {
         // opt out or send message Error
         error.snackbarActionTitle = "A previous contact had been opted out";
-      } else {
+      } else if (e.message === undefined) {
         error.snackbarError = "Error: Please wait a few seconds and try again.";
       }
 
       error.snackbarError = `Error for contact ${contact_id}: ${error.snackbarError.replace(
-        "Error: GraphQL error:",
+        "GraphQL error:",
         ""
       )}`;
 
