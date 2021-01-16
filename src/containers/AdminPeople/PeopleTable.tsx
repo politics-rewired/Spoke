@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+import cloneDeep from "lodash/cloneDeep";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import { Table, TableBody } from "material-ui/Table";
 import React from "react";
@@ -7,6 +8,7 @@ import {
   MembershipFilter,
   OrganizationMembership
 } from "../../api/organization-membership";
+import { RelayPaginatedResponse } from "../../api/pagination";
 import Empty from "../../components/Empty";
 import InfiniteRelayList from "../../components/InfiniteRelayList";
 import { AdminPeopleContext, PeopleRowEventHandlers } from "./context";
@@ -48,19 +50,31 @@ const query = gql`
     }
   }
 `;
+
+interface PeopleData {
+  organization: {
+    memberships: RelayPaginatedResponse<OrganizationMembership>;
+  };
+}
+
+interface PeopleVariables {
+  organizationId?: string;
+  first?: number;
+  filter?: MembershipFilter;
+  last?: string;
+}
+
 interface PeopleTableProps {
   context: AdminPeopleContext;
   onlyCampaignId: string | false;
   nameSearch: string;
   rowEventHandlers: PeopleRowEventHandlers;
-  lastMutated: Date;
 }
 const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
   context,
   nameSearch,
   onlyCampaignId,
-  rowEventHandlers,
-  lastMutated
+  rowEventHandlers
 }) => {
   const filter: MembershipFilter = {
     nameSearch: nameSearch === "" ? undefined : nameSearch,
@@ -75,9 +89,8 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
   return (
     <Table selectable={false} style={{ width: "inherit", margin: "auto" }}>
       <TableBody displayRowCheckbox={false} showRowHover>
-        <InfiniteRelayList
+        <InfiniteRelayList<PeopleData, OrganizationMembership, PeopleVariables>
           query={query}
-          dbLastUpdatedAt={lastMutated}
           queryVars={{
             organizationId: context.organization.id,
             first: PAGE_SIZE,
@@ -87,6 +100,22 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
             after: cursor,
             filter
           })}
+          updateQuery={(previousResult, { fetchMoreResult }) => {
+            if (
+              !fetchMoreResult ||
+              fetchMoreResult.organization.memberships.edges.length === 0
+            )
+              return previousResult;
+
+            const nextResult = cloneDeep(previousResult);
+            nextResult.organization.memberships.edges = [
+              ...nextResult.organization.memberships.edges,
+              ...fetchMoreResult.organization.memberships.edges
+            ];
+            nextResult.organization.memberships.pageInfo =
+              fetchMoreResult.organization.memberships.pageInfo;
+            return nextResult;
+          }}
           toRelay={(data) => data.organization.memberships}
           renderNode={(membership: OrganizationMembership) => (
             <PeopleRow

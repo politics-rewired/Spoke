@@ -148,7 +148,6 @@ interface AdminPeopleState {
     message: string;
     seen: boolean;
   };
-  lastMutated: Date;
 }
 
 class AdminPeople extends React.Component<
@@ -177,8 +176,7 @@ class AdminPeople extends React.Component<
     error: {
       message: "",
       seen: true
-    },
-    lastMutated: new Date()
+    }
   };
 
   handleConfirmSuperadmin = () => {
@@ -279,7 +277,6 @@ class AdminPeople extends React.Component<
       editAutoApprove: (autoApprove, userId) =>
         this.handleEditAutoApprove(autoApprove, userId),
       resetUserPassword: (userId) => this.handleResetPassword(userId),
-      wasUpdated: () => this.setState({ lastMutated: new Date() }),
       error: (message) => this.setState({ error: { message, seen: false } })
     };
   }
@@ -316,7 +313,6 @@ class AdminPeople extends React.Component<
           nameSearch={this.state.filter.nameSearch}
           onlyCampaignId={this.ctx().campaignFilter.onlyId}
           rowEventHandlers={this.rowEventHandlers()}
-          lastMutated={this.state.lastMutated}
         />
 
         <AddPersonButton
@@ -334,8 +330,7 @@ class AdminPeople extends React.Component<
           userId={this.state.userEdit.userId}
           afterEditing={() => {
             this.setState({
-              userEdit: { open: false, userId: "" },
-              lastMutated: new Date()
+              userEdit: { open: false, userId: "" }
             });
           }}
         />
