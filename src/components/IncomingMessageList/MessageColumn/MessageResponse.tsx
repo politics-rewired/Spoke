@@ -12,6 +12,7 @@ import { MessageInput } from "../../../api/types";
 import { loadData } from "../../../containers/hoc/with-operations";
 import { MutationMap } from "../../../network/types";
 import GSForm from "../../forms/GSForm";
+import MessageLengthInfo from "../../MessageLengthInfo";
 import SendButton from "../../SendButton";
 
 interface MessageFormValue {
@@ -126,15 +127,18 @@ class MessageResponse extends Component<Props, State> {
           onChange={this.handleMessageFormChange}
         >
           <div style={{ display: "flex", alignItems: "flex-end" }}>
-            <Form.Field
-              name="messageText"
-              label="Send a response"
-              multiLine
-              fullWidth
-              disabled={isSending}
-              rowsMax={6}
-              style={{ flexGrow: "1" }}
-            />
+            <div style={{ flex: 1 }}>
+              <Form.Field
+                name="messageText"
+                label="Send a response"
+                multiLine
+                fullWidth
+                disabled={isSending}
+                rowsMax={6}
+                style={{ flexGrow: "1" }}
+              />
+              <MessageLengthInfo messageText={messageText} />
+            </div>
             <SendButton
               threeClickEnabled={false}
               onFinalTouchTap={this.handleClickSendMessageButton}

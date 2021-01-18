@@ -11,6 +11,7 @@ import { green500, green600, grey100, red400 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React from "react";
 
+import replaceEasyGsmWins from "../lib/charset-utils";
 import { delimit } from "../lib/scripts";
 import Chip from "./Chip";
 
@@ -78,21 +79,6 @@ const UnrecognizedField = (props) => (
 UnrecognizedField.propTypes = {
   children: PropTypes.arrayOf(PropTypes.element)
 };
-
-const gsmReplacements = [
-  ["‘", "'"],
-  ["’", "'"],
-  ["”", '"'],
-  ["”", '"'],
-  ["“", '"'],
-  ["–", "-"]
-];
-
-const replaceEasyGsmWins = (text) =>
-  gsmReplacements.reduce(
-    (acc, replacement) => acc.replace(replacement[0], replacement[1]),
-    text
-  );
 
 class ScriptEditor extends React.Component {
   constructor(props) {

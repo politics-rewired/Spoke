@@ -24,6 +24,7 @@ import BulkSendButton from "../../components/BulkSendButton";
 import CannedResponseMenu from "../../components/CannedResponseMenu";
 import Empty from "../../components/Empty";
 import GSForm from "../../components/forms/GSForm";
+import MessageLengthInfo from "../../components/MessageLengthInfo";
 import MessageList from "../../components/MessageList";
 import SendButton from "../../components/SendButton";
 import SendButtonArrow from "../../components/SendButtonArrow";
@@ -92,6 +93,10 @@ const styles = StyleSheet.create({
     "@media(maxWidth: 450px)": {
       marginBottom: "8%"
     }
+  },
+  messageLengthInfo: {
+    display: "flex",
+    justifyContent: "flex-end"
   }
 });
 
@@ -759,6 +764,14 @@ export class AssignmentTexterContact extends React.Component {
     return null;
   }
 
+  renderMessageLengthInfo() {
+    return (
+      <div className={css(styles.messageLengthInfo)}>
+        <MessageLengthInfo messageText={this.state.messageText} />
+      </div>
+    );
+  }
+
   renderBottomFixedSection() {
     const { contact, tags } = this.props;
     const {
@@ -785,6 +798,7 @@ export class AssignmentTexterContact extends React.Component {
                 onChange={this.handleMessageFormChange}
               >
                 <MessageTextField />
+                {this.renderMessageLengthInfo()}
                 {this.renderCorrectSendButton()}
               </GSForm>
             </div>
