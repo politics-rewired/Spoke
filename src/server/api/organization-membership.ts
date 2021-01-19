@@ -1,3 +1,4 @@
+import { UserRoleType } from "../../api/organization-membership";
 import { r } from "../models";
 import { sqlResolvers } from "./lib/utils";
 
@@ -11,7 +12,7 @@ interface IOrganizationMembership {
 
 export const resolvers = {
   OrganizationMembership: {
-    ...sqlResolvers(["id", "role"]),
+    ...sqlResolvers(["id"]),
     user: async (membership: IOrganizationMembership) =>
       membership.user
         ? membership.user
@@ -24,7 +25,19 @@ export const resolvers = {
             .where({ id: membership.organization_id })
             .first(),
     requestAutoApprove: (membership: IOrganizationMembership) =>
-      membership.request_status.toUpperCase()
+      membership.request_status.toUpperCase(),
+    role: async (membership: IOrganizationMembership) => {
+      const { is_superadmin } = await r
+        .reader("user")
+        .where({ id: membership.user_id })
+        .first("is_superadmin");
+      const { role } = await r
+        .reader("user_organization")
+        .where({ user_id: membership.user_id })
+        .first("role");
+
+      return is_superadmin ? UserRoleType.SUPERADMIN : role;
+    }
   }
 };
 

@@ -1,4 +1,5 @@
 import { css, StyleSheet } from "aphrodite";
+import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isString from "lodash/fp/isString";
 import { DropDownMenu, MenuItem, Snackbar } from "material-ui";
@@ -10,8 +11,12 @@ import { RouteComponentProps, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import { Campaign, CampaignsList } from "../../api/campaign";
+import {
+  RequestAutoApproveType,
+  UserRoleType
+} from "../../api/organization-membership";
 import { dataTest } from "../../lib/attributes";
-import { QueryMap } from "../../network/types";
+import { MutationMap, QueryMap } from "../../network/types";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import {
@@ -69,6 +74,33 @@ const CampaignSelector: React.StatelessComponent<CampaignSelectorProps> = ({
   </DropDownMenu>
 );
 
+export interface AdminPeopleMutations {
+  editOrganizationMembership: (
+    membershipId: string,
+    {
+      autoApprove,
+      role
+    }: {
+      autoApprove?: RequestAutoApproveType;
+      role?: UserRoleType;
+    }
+  ) => Promise<
+    ApolloQueryResult<{
+      id: string;
+      role: UserRoleType;
+      requestAutoApprove: RequestAutoApproveType;
+    }>
+  >;
+  resetUserPassword: (
+    organizationId: string,
+    userId: number
+  ) => Promise<
+    ApolloQueryResult<{
+      resetUserPassword: string;
+    }>
+  >;
+}
+
 interface AdminPeopleRouteParams {
   organizationId?: string;
 }
@@ -85,6 +117,7 @@ interface AdminPeopleExtensionProps
   userData: {
     currentUser: CurrentUser;
   };
+  mutations: AdminPeopleMutations;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -106,6 +139,10 @@ interface AdminPeopleState {
   userEdit: {
     open: boolean;
     userId: string;
+  };
+  confirmSuperadmin: {
+    open: boolean;
+    superadminId: string;
   };
   error: {
     message: string;
@@ -133,11 +170,83 @@ class AdminPeople extends React.Component<
       open: false,
       userId: ""
     },
+    confirmSuperadmin: {
+      open: false,
+      superadminId: ""
+    },
     error: {
       message: "",
       seen: true
     },
     lastMutated: new Date()
+  };
+
+  handleConfirmSuperadmin = () => {
+    const { superadminId } = this.state.confirmSuperadmin;
+    this.handleEditRole(UserRoleType.SUPERADMIN, superadminId);
+    this.handleCloseSuperadminDialog();
+  };
+
+  handleEditRole = async (role: UserRoleType, userId: string) => {
+    const { editOrganizationMembership } = this.props.mutations;
+    try {
+      const response = await editOrganizationMembership(userId, {
+        role
+      });
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      this.setState({
+        error: {
+          message: `Couldn't update user role: ${err.message}`,
+          seen: false
+        }
+      });
+    }
+    this.rowEventHandlers().wasUpdated(userId);
+  };
+
+  handleEditAutoApprove = async (
+    autoApprove: RequestAutoApproveType,
+    userId: string
+  ) => {
+    const { editOrganizationMembership } = this.props.mutations;
+    try {
+      const response = await editOrganizationMembership(userId, {
+        autoApprove
+      });
+      if (response.errors) throw response.errors;
+    } catch (err) {
+      this.setState({
+        error: {
+          message: `Couldn't update user approval level: ${err.message}`,
+          seen: false
+        }
+      });
+    }
+    this.rowEventHandlers().wasUpdated(userId);
+  };
+
+  handleCloseSuperadminDialog = () => {
+    this.setState({ confirmSuperadmin: { open: false, superadminId: "" } });
+  };
+
+  startConfirmSuperadmin = (superadminId: string) =>
+    this.setState(() => ({
+      confirmSuperadmin: { superadminId, open: true }
+    }));
+
+  handleResetPassword = async (userId: string) => {
+    const { organizationId } = this.props.match.params;
+    if (!organizationId) return;
+    const { currentUser } = this.props.userData;
+    if (currentUser.id !== userId) {
+      const res = await this.props.mutations.resetUserPassword(
+        organizationId,
+        parseInt(userId, 10)
+      );
+      const { resetUserPassword: hash } = res.data;
+      this.setState({ password: { open: true, hash } });
+    }
   };
 
   ctx(): AdminPeopleContext {
@@ -160,10 +269,16 @@ class AdminPeople extends React.Component<
         this.setState((prev) => ({
           userEdit: { ...prev.userEdit, userId, open: true }
         })),
-      createHash: (hash) =>
-        this.setState({
-          password: { hash, open: true }
-        }),
+      editRole: (role, userId) => {
+        if (role === UserRoleType.SUPERADMIN) {
+          this.startConfirmSuperadmin(userId);
+        } else {
+          this.handleEditRole(role, userId);
+        }
+      },
+      editAutoApprove: (autoApprove, userId) =>
+        this.handleEditAutoApprove(autoApprove, userId),
+      resetUserPassword: (userId) => this.handleResetPassword(userId),
       wasUpdated: () => this.setState({ lastMutated: new Date() }),
       error: (message) => this.setState({ error: { message, seen: false } })
     };
@@ -228,6 +343,11 @@ class AdminPeople extends React.Component<
           open={this.state.password.open}
           passwordResetHash={this.state.password.hash}
           onClose={() => this.setState({ password: { open: false, hash: "" } })}
+        />
+        <Dialogs.ConfirmSuperAdmin
+          open={this.state.confirmSuperadmin.open}
+          onClose={this.handleCloseSuperadminDialog}
+          handleConfirmSuperadmin={this.handleConfirmSuperadmin}
         />
         <Snackbar
           open={this.state.error.message.length > 0 && !this.state.error.seen}
@@ -299,9 +419,63 @@ const queries: QueryMap<AdminPeopleExtendedProps> = {
   }
 };
 
+const mutations: MutationMap<AdminPeopleExtendedProps> = {
+  editOrganizationMembership: (_ownProps) => (
+    membershipId,
+    {
+      autoApprove,
+      role
+    }: {
+      membershipId: string;
+      autoApprove?: RequestAutoApproveType;
+      role?: UserRoleType;
+    }
+  ) => ({
+    mutation: gql`
+      mutation editOrganizationMembership(
+        $membershipId: String!
+        $level: RequestAutoApprove
+        $role: String
+      ) {
+        editOrganizationMembership(
+          id: $membershipId
+          level: $level
+          role: $role
+        ) {
+          id
+          role
+          requestAutoApprove
+        }
+      }
+    `,
+    variables: {
+      membershipId,
+      level: autoApprove,
+      role
+    }
+  }),
+  resetUserPassword: (_ownProps) => (
+    organizationId: string,
+    userId: number
+  ) => {
+    return {
+      mutation: gql`
+        mutation resetUserPassword($organizationId: String!, $userId: Int!) {
+          resetUserPassword(organizationId: $organizationId, userId: $userId)
+        }
+      `,
+      variables: {
+        organizationId,
+        userId
+      }
+    };
+  }
+};
+
 export default compose<AdminPeopleExtendedProps, AdminPeopleProps>(
   withRouter,
   loadData({
-    queries
+    queries,
+    mutations
   })
 )(AdminPeople);

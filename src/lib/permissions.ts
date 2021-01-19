@@ -4,7 +4,8 @@ export const ROLE_HIERARCHY = [
   UserRoleType.TEXTER,
   UserRoleType.SUPERVOLUNTEER,
   UserRoleType.ADMIN,
-  UserRoleType.OWNER
+  UserRoleType.OWNER,
+  UserRoleType.SUPERADMIN
 ];
 
 export const isRoleGreater = (
