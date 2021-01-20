@@ -63,8 +63,7 @@ export interface Props {
   texters: Texter[];
   orgTexters: any;
   contactsCount: number;
-  handleAssignContacts(numberOfContacts: string): void;
-  handleFocusTexterId(texterId: string | null): void;
+  handleAssignContacts(numberOfContacts: string, texterId: string): void;
   handleRemoveTexter(texterId: string): void;
 }
 
@@ -74,13 +73,12 @@ const TextersAssignmentManager: React.SFC<Props> = (props: Props) => {
     orgTexters,
     contactsCount,
     handleAssignContacts,
-    handleFocusTexterId,
     handleRemoveTexter
   } = props;
 
   const getDisplayName = (texterId: string) => {
-    const texterObj = orgTexters.find((o) => o.id === texterId);
-    return texterObj.displayName;
+    const texter = orgTexters.find((t) => t.id === texterId);
+    return texter.displayName;
   };
 
   return (
@@ -118,9 +116,9 @@ const TextersAssignmentManager: React.SFC<Props> = (props: Props) => {
                 hintText="Contacts"
                 fullWidth
                 value={texter.assignment.contactsCount}
-                onChange={handleAssignContacts}
-                onFocus={() => handleFocusTexterId(texter.id)}
-                onBlur={() => handleFocusTexterId(null)}
+                onChange={(contacts: string) =>
+                  handleAssignContacts(contacts, texter.id)
+                }
                 autoFocus
               />
             </div>
@@ -132,19 +130,6 @@ const TextersAssignmentManager: React.SFC<Props> = (props: Props) => {
                 direction={0}
               />
             </div>
-            {/* {formValues.useDynamicAssignment ? (
-              <div className={css(styles.input)}>
-                <Form.Field
-                  name={`texters[${index}].assignment.maxContacts`}
-                  hintText="Max"
-                  fullWidth
-                  onFocus={() => handleFocusTexterId(texter.id)}
-                  onBlur={() => handleFocusTexterId(null)}
-                />
-              </div>
-            ) : (
-              ""
-            )} */}
             <div className={css(styles.removeButton)}>
               <IconButton onClick={() => handleRemoveTexter(texter.id)}>
                 <DeleteIcon />

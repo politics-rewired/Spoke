@@ -283,8 +283,6 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     description,
     due_by: dueBy,
     organization_id: organizationId,
-    // TODO: re-enable once dynamic assignment is fixed (#548)
-    // use_dynamic_assignment: useDynamicAssignment,
     logo_image_url: logoImageUrl,
     primary_color: primaryColor,
     intro_html: introHtml,
@@ -417,8 +415,6 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "texters")) {
-
-    logger.info("CAMPAIGNNNNNN SCHEMAAAAAAAAA", campaign)
     const [job] = await r
       .knex("job_request")
       .insert({
@@ -441,7 +437,6 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
         assignTexters(job);
       }
     }
-
   }
 
   if (Object.prototype.hasOwnProperty.call(campaign, "interactionSteps")) {

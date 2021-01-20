@@ -24,11 +24,7 @@ import {
 import CampaignTextersManager from "./components/CampaignTextersManager";
 import TexterAssignmentDisplay from "./components/TexterAssignmentDisplay";
 import TextersAssignmentManager from "./components/TextersAssignmentManager";
-import {
-  handleAutoSplit,
-  handleExtraTexterCapacity,
-  mapFormTexters
-} from "./utils";
+import { assignTexterContacts, handleExtraTexterCapacity } from "./utils";
 
 const styles = StyleSheet.create({
   sliderContainer: {
@@ -57,12 +53,12 @@ interface HocProps {
       dueBy: string;
       contactsCount: number;
     };
+    refetch(): void;
   };
 }
 
 interface State {
   autoSplit: boolean;
-  focusedTexterId: string | null;
   textersToAdd: Texter[];
   textersToRemoveIds: string[];
   searchText: string;
@@ -80,12 +76,9 @@ interface InnerProps extends FullComponentProps, HocProps {
   ensureComplete: boolean;
 }
 
-interface FormValues {
-  texters: Texter[];
-}
-
 interface TexterAssignment {
   contactsCount: number;
+  messagedCount: number;
   needsMessageCount: number;
   maxContacts: number;
 }
@@ -103,7 +96,6 @@ interface Values {
 class CampaignTextersForm extends React.Component<InnerProps, State> {
   state = {
     autoSplit: false,
-    focusedTexterId: null,
     textersToAdd: [],
     textersToRemoveIds: [],
     searchText: "",
@@ -144,62 +136,6 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
     };
   };
 
-  onChange = (formValues: FormValues) => {
-    const { focusedTexterId } = this.state;
-    const { contactsCount } = this.props.data.campaign;
-    const { texters: textersToAdd } = formValues;
-    const focusedTexter = textersToAdd.find((t) => t.id === focusedTexterId);
-    const formattedTexters = textersToAdd.map((t) => ({
-      assignment: {
-        contactsCount: t.assignment.contactsCount,
-        needsMessageCount: t.assignment.needsMessageCount,
-        maxContacts: contactsCount
-      },
-      firstName: t.firstName,
-      id: t.id
-    }));
-
-    console.log("on changed formatted texters", formattedTexters);
-
-    this.setState({ textersToAdd: formattedTexters });
-
-    // old
-    // const existingFormValues = this.collectFormValues();
-    // const changedTexterId = this.state.focusedTexterId;
-    // const newFormValues = {
-    //   ...formValues
-    // };
-    // let totalNeedsMessage = 0;
-    // let totalMessaged = 0;
-    // const texterCountChanged =
-    //   newFormValues.texters.length !== existingFormValues.texters.length;
-
-    // // 1. map form texters to existing texters. with needsMessageCount tweaked to minimums when invalid or useless
-
-    // moved to mapFormTexters
-    mapFormTexters();
-
-    // // extraTexterCapacity is the number of contacts assigned to texters in excess of the
-    // // total number of contacts available
-    const extraTexterCapacity = 0;
-    // totalNeedsMessage + totalMessaged - contactsCount;
-
-    if (extraTexterCapacity > 0) {
-      // moved to handleExtraTexter capacity
-      handleExtraTexterCapacity();
-    } else if (this.state.autoSplit) {
-      handleAutoSplit(
-        newFormValues,
-        extraTexterCapacity,
-        changedTexterId,
-        contactsCount
-      );
-    }
-
-    // setState should happen here
-    // this.props.onChange(newFormValues);
-  };
-
   addTexter = (newTexter: Texter) => {
     const { textersToAdd, textersToRemoveIds } = this.state;
     let newIds: string[] = [];
@@ -219,42 +155,61 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
 
   addAllTexters = () => {
     const { orgTexters } = this.props;
+    const { texters } = this.collectFormValues();
+    this.setState({ textersToRemoveIds: [] });
 
     const textersToAdd = orgTexters.map((orgTexter) => {
       const { id, firstName } = orgTexter;
-      return {
+      const newTexter = {
         id,
         firstName,
         assignment: {
           contactsCount: 0,
+          messagedCount: 0,
           needsMessageCount: 0,
           maxContacts: 0
         }
       };
+      const currentlyAddedTexter = texters.find((t) => t.id === id);
+      return currentlyAddedTexter || newTexter;
     });
 
     this.setState({ textersToAdd });
   };
 
-  // see note below for dynamic assignments
-  // handleDynamicAssignmentToggle = (_ev, toggled) =>
-  //   this.props.onChange({ useDynamicAssignment: toggled });
-
   handleSearchTexters = (searchText: string) => {
     this.setState({ searchText });
   };
 
-  handleAssignContacts = (numberOfContacts: string) => {
-    const { focusedTexterId } = this.state;
+  handleAssignContacts = (assignedContacts: string, texterId: string) => {
     const { texters } = this.collectFormValues();
-    const focusedTexter: Texter = texters.find(
-      (t: Texter) => t.id === focusedTexterId
+    const { contactsCount } = this.props.data.campaign;
+    const editedTexter: Texter = texters.find((t: Texter) => t.id === texterId);
+
+    let totalNeedsMessage = 0;
+    let totalMessaged = 0;
+
+    const texterWithContacts = assignTexterContacts(
+      editedTexter,
+      assignedContacts,
+      contactsCount
     );
-    const needsMessageCount = parseInt(numberOfContacts, 10);
-    const texterWithContacts: Texter = {
-      ...focusedTexter,
-      assignment: { ...focusedTexter.assignment, needsMessageCount }
-    };
+
+    totalNeedsMessage += texterWithContacts.assignment.needsMessageCount;
+    totalMessaged += texterWithContacts.assignment.messagedCount;
+
+    const extraTexterCapacity =
+      totalNeedsMessage + totalMessaged - contactsCount;
+
+    if (extraTexterCapacity > 0) {
+      handleExtraTexterCapacity(texterWithContacts, extraTexterCapacity);
+      this.setState({
+        snackbarOpen: true,
+        snackbarMessage: `${editedTexter.assignment.contactsCount} contact${
+          editedTexter.assignment.contactsCount === 1 ? "" : "s"
+        } assigned to ${editedTexter.firstName}`
+      });
+    }
 
     const newTexters = uniqBy(
       [texterWithContacts, ...texters],
@@ -263,10 +218,6 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
     this.setState({
       textersToAdd: newTexters
     });
-  };
-
-  handleFocusTexterId = (focusedTexterId: string | null) => {
-    this.setState({ focusedTexterId });
   };
 
   handleRemoveTexter = (texterId: string) => {
@@ -298,13 +249,11 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
     try {
       const response = await editCampaign({ texters: texterInput });
       if (response.errors) throw response.errors;
-      this.setState({
-        textersToAdd: []
-      });
     } catch (err) {
       this.props.onError(err.message);
     } finally {
-      this.setState({ isWorking: false });
+      this.props.data.refetch();
+      this.setState({ isWorking: false, textersToAdd: [] });
     }
   };
 
@@ -363,21 +312,6 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
             )
           }
         />
-        {/* TODO: re-enable once dynamic assignment is fixed (#548) */}
-        {/* <div>
-          <Toggle
-            {...dataTest("useDynamicAssignment")}
-            label="Dynamically assign contacts"
-            toggled={this.collectFormValues().useDynamicAssignment}
-            onToggle={this.handleDynamicAssignmentToggle}
-          />
-          {this.collectFormValues().useDynamicAssignment && (
-            <OrganizationJoinLink
-              organizationUuid={organizationUuid}
-              campaignId={campaignId}
-            />
-          )}
-        </div> */}
         <GSForm schema={this.formSchema} value={this.collectFormValues()}>
           {shouldShowTextersManager && (
             <CampaignTextersManager
@@ -403,7 +337,6 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
               contactsCount={contactsCount}
               handleAssignContacts={this.handleAssignContacts}
               handleRemoveTexter={this.handleRemoveTexter}
-              handleFocusTexterId={this.handleFocusTexterId}
             />
           </div>
         </GSForm>

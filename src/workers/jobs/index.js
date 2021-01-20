@@ -716,8 +716,6 @@ export async function assignTexters(job) {
   const campaign = (await r.reader("campaign").where({ id: cid }))[0];
   const { texters } = payload;
 
-  logger.info("PAYLODADDDDDD", payload);
-  logger.info("TEXTERSSSSSSSS", texters);
   const currentAssignments = await r
     .knex("assignment")
     .where("assignment.campaign_id", cid)
@@ -746,9 +744,9 @@ export async function assignTexters(job) {
         (user) => parseInt(user.id, 10) === assignment.user_id
       )[0];
       if (texter) {
-        const unchangedMaxContacts =
-          parseInt(texter.maxContacts, 10) === assignment.max_contacts || // integer = integer
-          texter.maxContacts === assignment.max_contacts; // null = null
+        // const unchangedMaxContacts =
+        //   parseInt(texter.maxContacts, 10) === assignment.max_contacts || // integer = integer
+        //   texter.maxContacts === assignment.max_contacts; // null = null
         const unchangedNeedsMessageCount =
           texter.needsMessageCount ===
           parseInt(assignment.needs_message_count, 10);
