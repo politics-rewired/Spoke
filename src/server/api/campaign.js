@@ -549,9 +549,11 @@ export const resolvers = {
         deliveredCount:
           rows.find((o) => o.send_status === "DELIVERED")?.count || 0,
         sentCount: rows.find((o) => o.send_status === "SENT")?.count || 0,
-        errorCount: rows
-          .filter((o) => o.send_status === "ERROR")
-          .reduce((a, b) => a.count + b.count, { count: 0 }),
+        errorCount:
+          rows
+            .filter((o) => o.send_status === "ERROR")
+            .reduce((a, b) => ({ count: a.count + b.count }), { count: 0 })
+            .count || 0,
         specificErrors: rows
           .filter((o) => o.send_status === "ERROR")
           .map((o) => ({
