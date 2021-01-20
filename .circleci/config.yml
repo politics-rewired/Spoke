@@ -30,6 +30,10 @@ jobs:
           name: Lint codebase
           command: yarn lint && yarn format
 
+      - run:
+          name: Unit tests
+          command: yarn jest src/**/*
+
   build_image:
     docker:
       - image: circleci/node:12.20.0
