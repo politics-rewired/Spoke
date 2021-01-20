@@ -1,5 +1,4 @@
 import gql from "graphql-tag";
-import cloneDeep from "lodash/cloneDeep";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import { Table, TableBody } from "material-ui/Table";
 import React from "react";
@@ -100,21 +99,18 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
             after: cursor,
             filter
           })}
-          updateQuery={(previousResult, { fetchMoreResult }) => {
+          updateQuery={(nextResultDraft, { fetchMoreResult }) => {
             if (
               !fetchMoreResult ||
               fetchMoreResult.organization.memberships.edges.length === 0
             )
-              return previousResult;
+              return;
 
-            const nextResult = cloneDeep(previousResult);
-            nextResult.organization.memberships.edges = [
-              ...nextResult.organization.memberships.edges,
-              ...fetchMoreResult.organization.memberships.edges
-            ];
-            nextResult.organization.memberships.pageInfo =
+            nextResultDraft.organization.memberships.edges.concat(
+              fetchMoreResult.organization.memberships.edges
+            );
+            nextResultDraft.organization.memberships.pageInfo =
               fetchMoreResult.organization.memberships.pageInfo;
-            return nextResult;
           }}
           toRelay={(data) => data.organization.memberships}
           renderNode={(membership: OrganizationMembership) => (

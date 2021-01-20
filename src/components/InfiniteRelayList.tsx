@@ -1,4 +1,5 @@
 import { FetchPolicy } from "apollo-client";
+import produce, { Draft } from "immer";
 import React from "react";
 import { Query } from "react-apollo";
 
@@ -12,12 +13,12 @@ export type CliffHanger<T> = (
 ) => React.ReactElement;
 
 export type UpdateQuery<TData, TVariables> = (
-  previousQueryResult: TData,
+  nextQueryResult: Draft<TData>,
   options: {
     fetchMoreResult?: TData;
     variables?: TVariables;
   }
-) => TData;
+) => void;
 
 interface InfiniteRelayListProps<TData, TNode, TVariables> {
   query: any;
@@ -69,7 +70,10 @@ const InfiniteRelayList = <TData, TNode, TVariables>(
               ...props.queryVars,
               ...props.nextQueryVars(relayPage.pageInfo.endCursor)
             },
-            updateQuery: props.updateQuery
+            updateQuery: (previousQueryResult, options) =>
+              produce(previousQueryResult, (nextResult) => {
+                props.updateQuery(nextResult, options);
+              })
           });
 
         return (
