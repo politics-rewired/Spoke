@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.14.1](https://github.com/politics-rewired/spoke/compare/v3.14.0...v3.14.1) (2021-01-20)
+
+
+### Bug Fixes
+
+* add defensive fix for null/undefined zone name ([#861](https://github.com/politics-rewired/spoke/issues/861)) ([010341e](https://github.com/politics-rewired/spoke/commit/010341e7be2e314c1b6b5f3477bd54905a1196a5))
+
 ## [3.14.0](https://github.com/politics-rewired/spoke/compare/v3.13.1...v3.14.0) (2021-01-19)
 
 
