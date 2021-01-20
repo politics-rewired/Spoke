@@ -6,7 +6,6 @@ import uniqBy from "lodash/uniqBy";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
-import moment from "moment";
 import React from "react";
 import { compose } from "recompose";
 import * as yup from "yup";
@@ -74,6 +73,7 @@ interface InnerProps extends FullComponentProps, HocProps {
   saveLabel: string;
   saveDisabled: boolean;
   ensureComplete: boolean;
+  isOverdue: boolean;
 }
 
 interface TexterAssignment {
@@ -253,7 +253,11 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
       this.props.onError(err.message);
     } finally {
       this.props.data.refetch();
-      this.setState({ isWorking: false, textersToAdd: [] });
+      this.setState({
+        isWorking: false,
+        textersToAdd: [],
+        textersToRemoveIds: []
+      });
     }
   };
 
@@ -279,7 +283,7 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
 
   render() {
-    const { saveLabel, saveDisabled, orgTexters, data } = this.props;
+    const { saveLabel, saveDisabled, orgTexters, data, isOverdue } = this.props;
     const {
       searchText,
       autoSplit,
@@ -295,7 +299,6 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
     );
 
     const shouldShowTextersManager = orgTexters.length > 0;
-    const isOverdue = moment().isSameOrAfter(this.props.data.campaign.dueBy);
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
     const finalSaveDisabled = isOverdue || saveDisabled;
 

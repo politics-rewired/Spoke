@@ -92,6 +92,7 @@ export const schema = `
     autoassign: Boolean!
     cannedResponses: Boolean!
     interactions: Boolean!
+    texters: Boolean!
   }
 
   enum ExternalSyncReadinessState {

@@ -58,22 +58,6 @@ const campaignInfoFragment = `
     id
     title
   }
-  ${
-    disableTexters
-      ? ""
-      : `
-  texters {
-    id
-    firstName
-    lastName
-    assignment(campaignId:$campaignId) {
-      contactsCount
-      needsMessageCount: contactsCount(contactsFilter:{messageStatus:"needsMessage"})
-      maxContacts
-    }
-  }
-  `
-  }
   interactionSteps {
     id
     questionText
@@ -489,6 +473,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Texters",
         content: CampaignTextersForm,
+        isStandalone: true,
         keys: ["texters", "contactsCount", "useDynamicAssignment"],
         checkCompleted: () =>
           (this.state.campaignFormValues.texters.length > 0 &&
@@ -796,6 +781,7 @@ class AdminCampaignEdit extends React.Component {
                 saveLabel={saveLabel}
                 onError={this.handleSectionError}
                 onExpandChange={this.handleExpandChange(sectionIndex)}
+                {...section.extraProps}
               />
             );
           }

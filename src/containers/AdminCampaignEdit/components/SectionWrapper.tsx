@@ -208,6 +208,7 @@ const makeQueries = (jobTypes: string[]) => ({
             autoassign
             cannedResponses
             interactions
+            texters
           }
         }
       }
