@@ -112,17 +112,13 @@ const AutoApproveSelect: React.StatelessComponent<AutoApproveSelectProps> = ({
   );
 };
 
-interface PeopleRowExtensionProps {
-  history: History;
-}
-
 interface PeopleRowProps {
   context: AdminPeopleContext;
   membership: OrganizationMembership;
   handlers: PeopleRowEventHandlers;
 }
 
-type PeopleRowExtendedProps = PeopleRowProps & PeopleRowExtensionProps;
+type PeopleRowExtendedProps = PeopleRowProps;
 
 const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
   membership,
