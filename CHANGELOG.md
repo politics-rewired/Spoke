@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.14.3](https://github.com/politics-rewired/spoke/compare/v3.14.2...v3.14.3) (2021-01-21)
+
+
+### Bug Fixes
+
+* add getSendBeforeUtc util to fix sendBefore ([#864](https://github.com/politics-rewired/spoke/issues/864)) ([f70c845](https://github.com/politics-rewired/spoke/commit/f70c8454c98ab58a550fa822b8eb2bc264ce0070))
+* fix error count summation ([#863](https://github.com/politics-rewired/spoke/issues/863)) ([42cd11a](https://github.com/politics-rewired/spoke/commit/42cd11ad026fbffb94f0fe84a57ed4e717a7d314))
+* pass membership id, not user id, to mutation ([#866](https://github.com/politics-rewired/spoke/issues/866)) ([bc04b78](https://github.com/politics-rewired/spoke/commit/bc04b78c906ccbebe3a80ed0e76f4cc5228c6415))
+* **sendbuttonarrow:** pin the send arrow to the top of the message field ([#859](https://github.com/politics-rewired/spoke/issues/859)) ([2fc088b](https://github.com/politics-rewired/spoke/commit/2fc088bf9a473a3271dd104e6729ff3d70796177))
+
 ### [3.14.2](https://github.com/politics-rewired/spoke/compare/v3.14.1...v3.14.2) (2021-01-20)
 
 
