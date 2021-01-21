@@ -83,7 +83,11 @@ const InfiniteRelayList = <TData, TNode, TVariables>(
                 {props.renderNode(node, idx)}
               </ChildOnly>
             ))}
-            <WhenSeen onSeenChange={(isSeen) => isSeen && onLoadMore()}>
+            <WhenSeen
+              onSeenChange={(isSeen) =>
+                isSeen && relayPage.pageInfo.hasNextPage && onLoadMore()
+              }
+            >
               {cliffHanger(relayPage.pageInfo.hasNextPage, relayPage)}
             </WhenSeen>
           </div>

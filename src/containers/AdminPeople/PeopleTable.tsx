@@ -100,15 +100,12 @@ const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
             filter
           })}
           updateQuery={(nextResultDraft, { fetchMoreResult }) => {
-            if (
-              !fetchMoreResult ||
-              fetchMoreResult.organization.memberships.edges.length === 0
-            )
-              return;
+            if (!fetchMoreResult) return;
 
-            nextResultDraft.organization.memberships.edges.concat(
-              fetchMoreResult.organization.memberships.edges
-            );
+            nextResultDraft.organization.memberships.edges = [
+              ...nextResultDraft.organization.memberships.edges,
+              ...fetchMoreResult.organization.memberships.edges
+            ];
             nextResultDraft.organization.memberships.pageInfo =
               fetchMoreResult.organization.memberships.pageInfo;
           }}
