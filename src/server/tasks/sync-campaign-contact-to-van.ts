@@ -1,9 +1,9 @@
+import { PoolClient } from "pg";
 import { Task } from "pg-compose";
 import { post } from "superagent";
 
 import logger from "../../logger";
 import { VanAuthPayload, withVan } from "../lib/external-systems";
-import { r } from "../models";
 
 class VANSyncError extends Error {
   status: number;
@@ -16,6 +16,8 @@ class VANSyncError extends Error {
     this.body = body;
   }
 }
+
+const CANVASSED_TAG_NAME = "Canvassed";
 
 export interface VANCanvassContext {
   phoneId: number;
@@ -56,7 +58,7 @@ export interface VANCanvassResponse {
   responses: VANScriptResponse[] | null;
 }
 
-interface CanvassResultRow {
+export interface CanvassResultRow {
   canvassed_at: string;
   result_codes: { result_code_id: number }[];
   activist_codes: { activist_code_id: number }[];
@@ -66,31 +68,19 @@ interface CanvassResultRow {
   }[];
 }
 
-export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
-  system_id: string;
-  contact_id: number;
-  cc_created_at: string;
-  external_id: string;
-  phone_id: number;
+export interface FetchCanvassResponsesOptions {
+  client: PoolClient;
+  systemId: string;
+  contactId: number;
 }
 
-export const syncCampaignContactToVAN: Task = async (
-  payload: SyncCampaignContactToVANPayload,
-  helpers
-) => {
-  const {
-    system_id: systemId,
-    contact_id: contactId,
-    // canvassed_at: dateCanvassed,
-    external_id: vanId,
-    phone_id: phoneId
-  } = payload;
-
-  // helpers.withPgClient was throwing an error for this query:
-  //     syntax error near ")"
-  // I couldn't reproduce the error in psql. Going with knex instead...
-  const canvasResultsRaw: CanvassResultRow[] = await r.knex
-    .raw(
+export const fetchCanvassResponses = async ({
+  client,
+  systemId,
+  contactId
+}: FetchCanvassResponsesOptions) =>
+  client
+    .query<CanvassResultRow>(
       `
         with configured_response_values as (
           select
@@ -101,8 +91,8 @@ export const syncCampaignContactToVAN: Task = async (
             on question_response.value = qrc.question_response_value
             and question_response.interaction_step_id = qrc.interaction_step_id
           where
-            campaign_contact_id = ?
-            and system_id = ?
+            campaign_contact_id = $1
+            and system_id = $2
         ),
         points as (
           -- Result Codes
@@ -118,9 +108,9 @@ export const syncCampaignContactToVAN: Task = async (
             on qrrc.question_response_config_id = configured_response_values.id
           join external_result_code
             on external_result_code.id = qrrc.external_result_code_id
-        
+
           union
-        
+
           -- Activist Codes
           select
             configured_response_values.canvassed_at,
@@ -136,9 +126,9 @@ export const syncCampaignContactToVAN: Task = async (
             on external_activist_code.id = qrac.external_activist_code_id
           where
             external_activist_code.status = 'active'
-        
+
           union
-        
+
           -- Survey Question Response Options
           select
             configured_response_values.canvassed_at,
@@ -186,75 +176,172 @@ export const syncCampaignContactToVAN: Task = async (
       `,
       [contactId, systemId]
     )
-    .then(({ rows }: { rows: CanvassResultRow[] }) => rows);
+    .then(({ rows }) => rows);
 
-  if (canvasResultsRaw.length === 0) return;
+export interface FetchSyncQueriesOptions {
+  client: PoolClient;
+  systemId: string;
+  contactId: number;
+}
 
-  const {
-    rows: [{ external_id: optOutResultCode }]
-  } = await helpers.query<{ external_id: number | null }>(
-    `
-      select (
-        select external_id
-        from external_sync_opt_out_configuration config
-        join external_result_code rc on config.external_result_code_id = rc.id
-        where
-          config.system_id = $1
-          and exists (
-            select 1
-            from campaign_contact
+export const fetchSyncQueries = async ({
+  client,
+  systemId,
+  contactId
+}: FetchSyncQueriesOptions) =>
+  Promise.all([
+    fetchCanvassResponses({
+      client,
+      contactId,
+      systemId
+    }),
+    client
+      .query<{ external_id: number | null }>(
+        `
+          select (
+            select external_id
+            from external_sync_opt_out_configuration config
+            join external_result_code rc on config.external_result_code_id = rc.id
             where
-              id = $2
-              and is_opted_out
-          )
-      ) as external_id;
-    `,
-    [systemId, contactId]
+              config.system_id = $1
+              and exists (
+                select 1
+                from campaign_contact
+                where
+                  id = $2
+                  and is_opted_out
+              )
+          ) as external_id;
+        `,
+        [systemId, contactId]
+      )
+      .then(({ rows: [{ external_id }] }) => external_id),
+    client
+      .query<{ external_id: number | null }>(
+        `
+          select (
+            select external_id from external_result_code where system_id = $1 name = $2
+          ) as external_id
+        `,
+        [systemId, CANVASSED_TAG_NAME]
+      )
+      .then(({ rows: [{ external_id }] }) => external_id)
+  ]).then(([canvassResultsRaw, optOutResultCode, canvassedResultCode]) => ({
+    canvassResultsRaw,
+    optOutResultCode,
+    canvassedResultCode
+  }));
+
+export interface FormatCanvassResponsePayloadOptions {
+  canvassResultRow: CanvassResultRow;
+  phoneId: number;
+  optOutResultCode: number | null;
+  canvassedResultCode: number | null;
+}
+
+export const formatCanvassResponsePayload = ({
+  canvassResultRow,
+  phoneId,
+  optOutResultCode,
+  canvassedResultCode
+}: FormatCanvassResponsePayloadOptions) => {
+  const {
+    canvassed_at: dateCanvassed,
+    response_options,
+    activist_codes,
+    result_codes
+  } = canvassResultRow;
+
+  const surveyResponses: VANSurveyResponse[] = response_options.map(
+    (option) => ({
+      type: "SurveyResponse",
+      surveyQuestionId: option.survey_question_id,
+      surveyResponseId: option.response_option_id
+    })
   );
 
-  for (const canvassResult of canvasResultsRaw) {
-    const {
-      canvassed_at: dateCanvassed,
-      response_options,
-      activist_codes,
-      result_codes
-    } = canvassResult;
+  const activistCodes: VANActivistCodeResponse[] = activist_codes.map(
+    (code) => ({
+      type: "ActivistCode",
+      activistCodeId: code.activist_code_id,
+      action: "Apply"
+    })
+  );
 
-    const surveyResponses: VANSurveyResponse[] = response_options.map(
-      (option) => ({
-        type: "SurveyResponse",
-        surveyQuestionId: option.survey_question_id,
-        surveyResponseId: option.response_option_id
-      })
-    );
+  const responses = [...surveyResponses, ...activistCodes];
+  const hasResponses = responses.length > 0;
 
-    const activistCodes: VANActivistCodeResponse[] = activist_codes.map(
-      (code) => ({
-        type: "ActivistCode",
-        activistCodeId: code.activist_code_id,
-        action: "Apply"
-      })
-    );
+  // Honor mapped result code only if there are no responses (VAN will overwrite as "canvassed")
+  const mappedResultCodeId = hasResponses
+    ? null
+    : result_codes.length > 0
+    ? result_codes[0].result_code_id
+    : canvassedResultCode;
 
-    const responses = [...surveyResponses, ...activistCodes];
-    const hasResponses = responses.length > 0;
+  // Opt Out mapping will always take precedence if mapping is set and contact is opted out
+  const resultCodeId = optOutResultCode || mappedResultCodeId;
 
-    // Honor mapped result code only if there are no responses (VAN will overwrite as "canvassed")
-    const mappedResultCodeId =
-      !hasResponses && result_codes[0] ? result_codes[0].result_code_id : null;
+  const canvassResponse: VANCanvassResponse = {
+    canvassContext: {
+      phoneId,
+      dateCanvassed
+    },
+    resultCodeId,
+    responses: hasResponses ? responses : null
+  };
 
-    // Opt Out mapping will always take precedence if mapping is set and contact is opted out
-    const resultCodeId = optOutResultCode || mappedResultCodeId;
+  return canvassResponse;
+};
 
-    const canvassResponse: VANCanvassResponse = {
-      canvassContext: {
-        phoneId,
-        dateCanvassed
-      },
-      resultCodeId,
-      responses: hasResponses ? responses : null
-    };
+export const hasPayload = (canvassResponse: VANCanvassResponse) => {
+  const hasResponses =
+    canvassResponse.responses !== null && canvassResponse.responses.length > 0;
+  const hasResultCode = canvassResponse.resultCodeId !== null;
+  return hasResponses || hasResultCode;
+};
 
+export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
+  system_id: string;
+  contact_id: number;
+  cc_created_at: string;
+  external_id: string;
+  phone_id: number;
+}
+
+export const syncCampaignContactToVAN: Task = async (
+  payload: SyncCampaignContactToVANPayload,
+  helpers
+) => {
+  const {
+    system_id: systemId,
+    contact_id: contactId,
+    // canvassed_at: dateCanvassed,
+    external_id: vanId,
+    phone_id: phoneId
+  } = payload;
+
+  const {
+    canvassResultsRaw,
+    canvassedResultCode,
+    optOutResultCode
+  } = await helpers.withPgClient(async (client) =>
+    fetchSyncQueries({ client, systemId, contactId })
+  );
+
+  if (canvassResultsRaw.length === 0) return;
+
+  const allCanvassResponses = canvassResultsRaw.map((canvassResultRow) =>
+    formatCanvassResponsePayload({
+      canvassResultRow,
+      phoneId,
+      optOutResultCode,
+      canvassedResultCode
+    })
+  );
+
+  const canvassResponses = allCanvassResponses.filter(hasPayload);
+
+  for (const canvassResponse of canvassResponses) {
     const response = await post(`/people/${vanId}/canvassResponses`)
       .use(withVan(payload))
       .send(canvassResponse);
