@@ -4,12 +4,14 @@ import NavigationArrowForward from "material-ui/svg-icons/navigation/arrow-forwa
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
-// This is because the Toolbar from material-ui seems to only apply the correct margins if the
-// immediate child is a Button or other type it recognizes. Can get rid of this if we remove material-ui
+const INTERNAL_ARROW_PADDING = 11;
+
 const styles = StyleSheet.create({
   container: {
-    display: "inline-block",
-    marginLeft: 20
+    position: "absolute",
+    right: -INTERNAL_ARROW_PADDING,
+    top: -INTERNAL_ARROW_PADDING,
+    padding: 0
   },
   icon: {
     color: "rgb(83, 180, 119)",
@@ -17,16 +19,13 @@ const styles = StyleSheet.create({
     height: 40
   },
   arrowButton: {
-    "@media(minWidth: 450px)": {
+    "@media(min-width: 450px)": {
       display: "none !important"
     },
-    "@media(maxWidth: 450px)": {
+    "@media(max-width: 450px)": {
       display: "block !important"
     },
-    position: "absolute",
-    right: 2,
-    bottom: 125,
-    zIndex: 100
+    padding: 0 // Override the built-in IconButton padding.
   }
 });
 class SendButtonArrow extends Component {
