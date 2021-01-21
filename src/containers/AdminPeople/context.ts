@@ -31,10 +31,10 @@ export interface AdminPeopleContext {
 
 export interface PeopleRowEventHandlers {
   startEdit: (userId: string) => void;
-  editRole: (role: UserRoleType, userId: string) => void;
+  editMembershipRole: (role: UserRoleType, membershipId: string) => void;
   editAutoApprove: (
     autoApprove: RequestAutoApproveType,
-    userId: string
+    membershipId: string
   ) => void;
   resetUserPassword: (userId: string) => void;
   error: (errorMsg: string) => void;

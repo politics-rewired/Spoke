@@ -142,7 +142,7 @@ interface AdminPeopleState {
   };
   confirmSuperadmin: {
     open: boolean;
-    superadminId: string;
+    superadminMembershipId: string;
   };
   error: {
     message: string;
@@ -171,7 +171,7 @@ class AdminPeople extends React.Component<
     },
     confirmSuperadmin: {
       open: false,
-      superadminId: ""
+      superadminMembershipId: ""
     },
     error: {
       message: "",
@@ -180,15 +180,21 @@ class AdminPeople extends React.Component<
   };
 
   handleConfirmSuperadmin = () => {
-    const { superadminId } = this.state.confirmSuperadmin;
-    this.handleEditRole(UserRoleType.SUPERADMIN, superadminId);
+    const { superadminMembershipId } = this.state.confirmSuperadmin;
+    this.handleEditMembershipRole(
+      UserRoleType.SUPERADMIN,
+      superadminMembershipId
+    );
     this.handleCloseSuperadminDialog();
   };
 
-  handleEditRole = async (role: UserRoleType, userId: string) => {
+  handleEditMembershipRole = async (
+    role: UserRoleType,
+    membershipId: string
+  ) => {
     const { editOrganizationMembership } = this.props.mutations;
     try {
-      const response = await editOrganizationMembership(userId, {
+      const response = await editOrganizationMembership(membershipId, {
         role
       });
       if (response.errors) throw response.errors;
@@ -204,11 +210,11 @@ class AdminPeople extends React.Component<
 
   handleEditAutoApprove = async (
     autoApprove: RequestAutoApproveType,
-    userId: string
+    membershipId: string
   ) => {
     const { editOrganizationMembership } = this.props.mutations;
     try {
-      const response = await editOrganizationMembership(userId, {
+      const response = await editOrganizationMembership(membershipId, {
         autoApprove
       });
       if (response.errors) throw response.errors;
@@ -223,12 +229,14 @@ class AdminPeople extends React.Component<
   };
 
   handleCloseSuperadminDialog = () => {
-    this.setState({ confirmSuperadmin: { open: false, superadminId: "" } });
+    this.setState({
+      confirmSuperadmin: { open: false, superadminMembershipId: "" }
+    });
   };
 
-  startConfirmSuperadmin = (superadminId: string) =>
+  startConfirmSuperadmin = (superadminMembershipId: string) =>
     this.setState(() => ({
-      confirmSuperadmin: { superadminId, open: true }
+      confirmSuperadmin: { superadminMembershipId, open: true }
     }));
 
   handleResetPassword = async (userId: string) => {
@@ -265,11 +273,11 @@ class AdminPeople extends React.Component<
         this.setState((prev) => ({
           userEdit: { ...prev.userEdit, userId, open: true }
         })),
-      editRole: (role, userId) => {
+      editMembershipRole: (role, membershipId) => {
         if (role === UserRoleType.SUPERADMIN) {
-          this.startConfirmSuperadmin(userId);
+          this.startConfirmSuperadmin(membershipId);
         } else {
-          this.handleEditRole(role, userId);
+          this.handleEditMembershipRole(role, membershipId);
         }
       },
       editAutoApprove: (autoApprove, userId) =>
@@ -419,7 +427,6 @@ const mutations: MutationMap<AdminPeopleExtendedProps> = {
       autoApprove,
       role
     }: {
-      membershipId: string;
       autoApprove?: RequestAutoApproveType;
       role?: UserRoleType;
     }

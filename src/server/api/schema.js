@@ -20,6 +20,7 @@ import { DateTime, parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { isNowBetween } from "../../lib/timezones";
+import { getSendBeforeUtc } from "../../lib/tz-helpers";
 import logger from "../../logger";
 import {
   assignTexters,
@@ -653,11 +654,7 @@ async function sendMessage(
     throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
-  const sendBefore = DateTime.utc()
-    .set({ hour: endHour })
-    .setZone(timezone)
-    .startOf("day")
-    .toISO();
+  const sendBefore = getSendBeforeUtc(timezone, endHour, DateTime.local());
   const { contactNumber, text } = message;
 
   if (text.length > (config.MAX_MESSAGE_LENGTH || 99999)) {

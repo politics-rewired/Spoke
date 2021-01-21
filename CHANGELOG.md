@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.14.2](https://github.com/politics-rewired/spoke/compare/v3.14.1...v3.14.2) (2021-01-20)
+
+
+### Bug Fixes
+
+* fall back to provided zone name ([b9e1e79](https://github.com/politics-rewired/spoke/commit/b9e1e794881b6658b25f97ca8f59ca5cabeb3f33))
+
 ### [3.14.1](https://github.com/politics-rewired/spoke/compare/v3.14.0...v3.14.1) (2021-01-20)
 
 
