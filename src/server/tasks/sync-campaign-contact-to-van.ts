@@ -2,7 +2,6 @@ import { PoolClient } from "pg";
 import { Task } from "pg-compose";
 import { post } from "superagent";
 
-import logger from "../../logger";
 import { VanAuthPayload, withVan } from "../lib/external-systems";
 
 class VANSyncError extends Error {
@@ -17,7 +16,7 @@ class VANSyncError extends Error {
   }
 }
 
-const CANVASSED_TAG_NAME = "Canvassed";
+export const CANVASSED_TAG_NAME = "Canvassed";
 
 export interface VANCanvassContext {
   phoneId: number;
@@ -69,16 +68,14 @@ export interface CanvassResultRow {
 }
 
 export interface FetchCanvassResponsesOptions {
-  client: PoolClient;
   systemId: string;
   contactId: number;
 }
 
-export const fetchCanvassResponses = async ({
-  client,
-  systemId,
-  contactId
-}: FetchCanvassResponsesOptions) =>
+export const fetchCanvassResponses = async (
+  client: PoolClient,
+  { systemId, contactId }: FetchCanvassResponsesOptions
+) =>
   client
     .query<CanvassResultRow>(
       `
@@ -178,59 +175,51 @@ export const fetchCanvassResponses = async ({
     )
     .then(({ rows }) => rows);
 
-export interface FetchSyncQueriesOptions {
-  client: PoolClient;
+export interface FetchOptOutCodeOptions {
   systemId: string;
   contactId: number;
 }
 
-export const fetchSyncQueries = async ({
-  client,
-  systemId,
-  contactId
-}: FetchSyncQueriesOptions) =>
-  Promise.all([
-    fetchCanvassResponses({
-      client,
-      contactId,
-      systemId
-    }),
-    client
-      .query<{ external_id: number | null }>(
-        `
-          select (
-            select external_id
-            from external_sync_opt_out_configuration config
-            join external_result_code rc on config.external_result_code_id = rc.id
-            where
-              config.system_id = $1
-              and exists (
-                select 1
-                from campaign_contact
-                where
-                  id = $2
-                  and is_opted_out
-              )
-          ) as external_id;
-        `,
-        [systemId, contactId]
-      )
-      .then(({ rows: [{ external_id }] }) => external_id),
-    client
-      .query<{ external_id: number | null }>(
-        `
-          select (
-            select external_id from external_result_code where system_id = $1 name = $2
-          ) as external_id
-        `,
-        [systemId, CANVASSED_TAG_NAME]
-      )
-      .then(({ rows: [{ external_id }] }) => external_id)
-  ]).then(([canvassResultsRaw, optOutResultCode, canvassedResultCode]) => ({
-    canvassResultsRaw,
-    optOutResultCode,
-    canvassedResultCode
-  }));
+export const fetchOptOutCode = async (
+  client: PoolClient,
+  options: FetchOptOutCodeOptions
+) =>
+  client
+    .query<{ external_id: number | null }>(
+      `
+        select (
+          select external_id
+          from external_sync_opt_out_configuration config
+          join external_result_code rc on config.external_result_code_id = rc.id
+          where
+            config.system_id = $1
+            and exists (
+              select 1
+              from campaign_contact
+              where
+                id = $2
+                and is_opted_out
+            )
+        ) as external_id;
+      `,
+      [options.systemId, options.contactId]
+    )
+    .then(({ rows: [{ external_id }] }) => external_id);
+
+export const fetchCanvassedResultCode = async (
+  client: PoolClient,
+  systemId: string
+) =>
+  client
+    .query<{ external_id: number | null }>(
+      `
+        select (
+          select external_id from external_result_code where system_id = $1 and name = $2
+        ) as external_id
+      `,
+      [systemId, CANVASSED_TAG_NAME]
+    )
+    .then(({ rows: [{ external_id }] }) => external_id);
 
 export interface FormatCanvassResponsePayloadOptions {
   canvassResultRow: CanvassResultRow;
@@ -325,7 +314,20 @@ export const syncCampaignContactToVAN: Task = async (
     canvassedResultCode,
     optOutResultCode
   } = await helpers.withPgClient(async (client) =>
-    fetchSyncQueries({ client, systemId, contactId })
+    Promise.all([
+      fetchCanvassResponses(client, {
+        contactId,
+        systemId
+      }),
+      fetchOptOutCode(client, { systemId, contactId }),
+      fetchCanvassedResultCode(client, systemId)
+    ]).then(
+      ([canvassResultsRawQ, optOutResultCodeQ, canvassedResultCodeQ]) => ({
+        canvassResultsRaw: canvassResultsRawQ,
+        optOutResultCode: optOutResultCodeQ,
+        canvassedResultCode: canvassedResultCodeQ
+      })
+    )
   );
 
   if (canvassResultsRaw.length === 0) return;
@@ -347,7 +349,7 @@ export const syncCampaignContactToVAN: Task = async (
       .send(canvassResponse);
 
     if (response.status !== 204) {
-      logger.error(`sync_campaign_to_van__incorrect_response_code`, {
+      helpers.logger.error(`sync_campaign_to_van__incorrect_response_code`, {
         response: {
           status: response.status,
           body: response.body

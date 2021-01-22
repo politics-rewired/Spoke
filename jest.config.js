@@ -23,6 +23,8 @@ module.exports = {
     SESSION_SECRET: "it is JUST a test! -- it better be!",
     TEST_ENVIRONMENT: "1"
   },
+  globalSetup: "<rootDir>/__test__/setup.js",
+  globalTeardown: "<rootDir>/__test__/teardown.js",
   testMatch: [
     "**/__tests__/**/*.js?(x),**/?(*.)(spec|test).js?(x)",
     "**/?(*.)+(spec|test).[jt]s?(x)"
@@ -42,6 +44,6 @@ module.exports = {
     "!**/deploy/**",
     "!**/coverage/**"
   ],
-  setupTestFrameworkScriptFile: "<rootDir>/__test__/setup.js",
+  setupTestFrameworkScriptFile: "<rootDir>/__test__/setup-framework.js",
   testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/__test__/e2e/"]
 };

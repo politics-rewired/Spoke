@@ -4,6 +4,25 @@ jobs:
   test:
     docker:
       - image: circleci/node:12.20.0
+        environment:
+          NODE_ENV: test
+          WEBPACK_HOST: "localhost"
+          WEBPACK_PORT: "3000"
+          DEV_APP_PORT: "8090"
+
+          BASE_URL: "localhost:3000"
+          SESSION_SECRET: "SuperSecret"
+          DST_REFERENCE_TIMEZONE: "America/New_York"
+          PHONE_NUMBER_COUNTRY: US
+          SUPPRESS_SELF_INVITE: "false"
+          JOBS_SAME_PROCESS: "1"
+
+          TEST_POSTGRES_URL: "postgres://postgres@localhost:5432/spoke_test"
+      - image: circleci/postgres:13.1
+        environment:
+          POSTGRES_DB: spoke_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ""
 
     working_directory: ~/repo
 
@@ -29,6 +48,10 @@ jobs:
       - run:
           name: Lint codebase
           command: yarn lint && yarn format
+
+      - run:
+          name: Run migrations
+          command: yarn migrate:worker && yarn knex migrate:latest
 
       - run:
           name: Unit tests

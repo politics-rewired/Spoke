@@ -85,6 +85,10 @@ module.exports = {
         message: "Please use src/lib/datetime instead."
       }
     ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      { devDependencies: ["__test__/**/*.ts", "**/*.spec.ts"] }
+    ],
 
     // Rules to get linting to pass
     camelcase: ["off", { properties: "never" }],

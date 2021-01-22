@@ -1,13 +1,132 @@
+import { Pool, PoolClient } from "pg";
+
 import {
+  createCompleteCampaign,
+  createMessage
+} from "../../../__test__/testbed-preparation/core";
+import {
+  createExternalResultCode,
+  createExternalSystem
+} from "../../../__test__/testbed-preparation/external-systems";
+import { config } from "../../config";
+import { MessageStatusType } from "../api/types";
+import {
+  CANVASSED_TAG_NAME,
   CanvassResultRow,
+  fetchCanvassResponses,
+  fetchOptOutCode,
   formatCanvassResponsePayload,
   hasPayload,
   VANCanvassResponse
 } from "./sync-campaign-contact-to-van";
 
-describe("fetchSyncQueries", () => {
-  // TODO: write tests once Spoke is set up to run with a test database
-  test("fetches correct database records for VAN sync");
+const createCampaignWithSystem = async (client: PoolClient) => {
+  const {
+    organization,
+    campaign,
+    assignments,
+    contacts
+  } = await createCompleteCampaign(client, {
+    texters: 1,
+    contacts: [{ messageStatus: MessageStatusType.Messaged }, {}]
+  });
+
+  const externalSystem = await createExternalSystem(client, {
+    organizationId: organization.id
+  });
+
+  await client.query(
+    `update campaign set external_system_id = $1 where id = $2`,
+    [externalSystem.id, campaign.id]
+  );
+
+  return { organization, campaign, assignments, contacts, externalSystem };
+};
+
+describe("fetchCanvassResponses", () => {
+  let pool: Pool;
+  let client: PoolClient;
+
+  beforeAll(async () => {
+    pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
+    client = await pool.connect();
+  });
+
+  beforeEach(async () => {
+    client.query(`begin`);
+  });
+
+  afterEach(async () => {
+    client.query(`rollback`);
+  });
+
+  afterAll(async () => {
+    if (client) client.release();
+    if (pool) await pool.end();
+  });
+
+  test("generates empty row for messaged contact without survey responses", async () => {
+    const {
+      contacts: [contact],
+      assignments: [assignment],
+      externalSystem
+    } = await createCampaignWithSystem(client);
+
+    await createMessage(client, {
+      campaignContactId: contact.id,
+      assignmentId: assignment.id
+    });
+
+    const canvassResultsRaw = await fetchCanvassResponses(client, {
+      systemId: externalSystem.id,
+      contactId: contact.id
+    });
+
+    expect(canvassResultsRaw).toHaveLength(1);
+    expect(canvassResultsRaw[0].activist_codes).toHaveLength(0);
+    expect(canvassResultsRaw[0].result_codes).toHaveLength(0);
+    expect(canvassResultsRaw[0].response_options).toHaveLength(0);
+  });
+
+  test("generates opt out result for opted out contact", async () => {
+    const {
+      contacts: [optedOutContact, optedInContact],
+      externalSystem
+    } = await createCampaignWithSystem(client);
+
+    await client.query(
+      `update campaign_contact set is_opted_out = true where id = $1`,
+      [optedOutContact.id]
+    );
+
+    const externalResultCode = await createExternalResultCode(client, {
+      systemId: externalSystem.id,
+      name: CANVASSED_TAG_NAME
+    });
+
+    await client.query<{ id: string }>(
+      `
+        insert into public.external_sync_opt_out_configuration (system_id, external_result_code_id)
+        values ($1, $2)
+      `,
+      [externalSystem.id, externalResultCode.id]
+    );
+
+    const optedOutOptOutCode = await fetchOptOutCode(client, {
+      systemId: externalSystem.id,
+      contactId: optedOutContact.id
+    });
+
+    const optedInOptOutCode = await fetchOptOutCode(client, {
+      systemId: externalSystem.id,
+      contactId: optedInContact.id
+    });
+
+    expect(optedOutOptOutCode).not.toBeNull();
+    expect(optedOutOptOutCode).toBe(externalResultCode.external_id);
+
+    expect(optedInOptOutCode).toBeNull();
+  });
 });
 
 describe("formatCanvassResponsePayload", () => {
