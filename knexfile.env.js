@@ -11,7 +11,7 @@ try {
 
 module.exports = {
   development: config,
-  test: config,
+  test: { ...config, connection: process.env.TEST_DATABASE_URL },
   staging: config,
   production: config
 };

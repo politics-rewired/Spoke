@@ -1,3 +1,3 @@
 module.exports = async () => {
-  console.log("Global setup");
+  console.log("Global teardown");
 };
