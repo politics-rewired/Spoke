@@ -1,6 +1,8 @@
 node_modules
 build
-__test__/**/*.js
+/__test__/**/*.js
+/__test__/**/*.json
+!/__test__/**/*.ts
 __mocks__
 deploy
 docs
