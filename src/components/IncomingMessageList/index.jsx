@@ -6,11 +6,14 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import injectTapEventPlugin from "react-tap-event-plugin";
 
 import { loadData } from "../../containers/hoc/with-operations";
 import { MESSAGE_STATUSES } from "../IncomingMessageFilter";
 import LoadingIndicator from "../LoadingIndicator";
 import ConversationPreviewModal from "./ConversationPreviewModal";
+
+injectTapEventPlugin();
 
 const formatContactName = (contact) => {
   const { firstName, lastName, optOut } = contact;

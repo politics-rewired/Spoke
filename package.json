@@ -146,6 +146,7 @@
     "react-portal": "^4.2.1",
     "react-router-dom": "^5.1.2",
     "react-select": "^2.0.0",
+    "react-tap-event-plugin": "2.0.1",
     "recompose": "^0.24.0",
     "redis": "^2.8.0",
     "redis-promisify": "^0.1.2",
