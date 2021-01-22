@@ -17,12 +17,12 @@ jobs:
           SUPPRESS_SELF_INVITE: "false"
           JOBS_SAME_PROCESS: "1"
 
-          TEST_POSTGRES_URL: "postgres://postgres@localhost:5432/spoke_test"
+          TEST_POSTGRES_URL: "postgres://postgres:secretpassword@localhost:5432/spoke_test"
       - image: circleci/postgres:13.1
         environment:
           POSTGRES_DB: spoke_test
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ""
+          POSTGRES_PASSWORD: "secretpassword"
 
     working_directory: ~/repo
 
@@ -48,6 +48,11 @@ jobs:
       - run:
           name: Lint codebase
           command: yarn lint && yarn format
+
+      - run:
+          name: Wait for Services
+          command: >-
+            dockerize -wait tcp://localhost:5432 -timeout 1m
 
       - run:
           name: Run migrations
