@@ -3369,18 +3369,15 @@ const rootMutations = {
 
       const { operationMode } = externalSystem;
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
-      let apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
 
-      if (operationMode === VanOperationMode.MYCAMPAIGN) {
-        apiKeyRef = apiKeyRef.concat("|1");
-      }
+      const apiKeyAppendage =
+        operationMode === VanOperationMode.MYCAMPAIGN ? "|1" : "|0";
 
-      if (operationMode === VanOperationMode.VOTERFILE) {
-        apiKeyRef = apiKeyRef.concat("|0");
-      }
+      const apiKeyRef =
+        graphileSecretRef(organizationId, truncatedKey) + apiKeyAppendage;
 
       await getWorker().then((worker) =>
-        worker.setSecret(apiKeyRef, externalSystem.apiKey)
+        worker.setSecret(apiKeyRef, externalSystem.apiKey + apiKeyAppendage)
       );
 
       const [created] = await r
@@ -3390,8 +3387,7 @@ const rootMutations = {
           type: externalSystem.type.toLowerCase(),
           organization_id: parseInt(organizationId, 10),
           username: externalSystem.username,
-          api_key_ref: apiKeyRef,
-          operation_mode: externalSystem.operationMode
+          api_key_ref: apiKeyRef
         })
         .returning("*");
 
@@ -3412,65 +3408,65 @@ const rootMutations = {
 
       await accessRequired(user, savedSystem.organization_id, "ADMIN");
 
-      // We will check if the password/API key changed below
-      let authDidChange = externalSystem.username !== savedSystem.username;
-
-      const payload = {
+      const updatePayload = {
         name: externalSystem.name,
         type: externalSystem.type.toLowerCase(),
-        username: externalSystem.username,
-        operation_mode: externalSystem.operationMode
+        username: externalSystem.username
       };
 
-      if (!externalSystem.apiKey.includes("*")) {
-        authDidChange = true;
-        const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
-        const apiKeyRef = graphileSecretRef(
-          savedSystem.organization_id,
-          truncatedKey
-        );
-        await r
-          .knex("graphile_secrets.secrets")
-          .where({ ref: savedSystem.api_key_ref })
-          .del();
-        await getWorker().then((worker) =>
-          worker.setSecret(apiKeyRef, externalSystem.apiKey)
-        );
-        payload.api_key_ref = apiKeyRef;
-      }
+      const savedSystemApiKeySecret = await getWorker().then((worker) => {
+        return worker.getSecret(savedSystem.api_key_ref);
+      });
 
-      // if the operationMode changed, append the correct digit to the apiKeyRef
-      const operationModeDidChange =
-        externalSystem.operation_mode !== savedSystem.operation_mode;
-      const { operationMode } = externalSystem;
+      const [
+        savedSystemApiKey,
+        savedSystemApiKeyAppendage
+      ] = savedSystemApiKeySecret
+        ? savedSystemApiKeySecret.split("|")
+        : [undefined, undefined];
+
+      const savedSystemOperationMode =
+        savedSystemApiKeyAppendage === "1"
+          ? VanOperationMode.MYCAMPAIGN
+          : VanOperationMode.VOTERFILE;
+
+      // We will check if the password/API key changed below
+      const authDidChange =
+        externalSystem.username !== savedSystem.username ||
+        externalSystem.operationMode !== savedSystemOperationMode ||
+        !externalSystem.apiKey.includes("*");
+
+      const apiKeyAppendage =
+        externalSystem.operationMode === VanOperationMode.MYCAMPAIGN
+          ? "|1"
+          : "|0";
+
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
+      const apiKeyRef =
+        graphileSecretRef(savedSystem.organization_id, truncatedKey) +
+        apiKeyAppendage;
 
-      if (operationModeDidChange) {
-        let apiKeyRef = graphileSecretRef(
-          savedSystem.organization_id,
-          truncatedKey
-        );
+      updatePayload.api_key_ref = apiKeyRef;
 
-        if (operationMode === VanOperationMode.MYCAMPAIGN) {
-          apiKeyRef = apiKeyRef.concat("|1");
-        }
-
-        if (operationMode === VanOperationMode.VOTERFILE) {
-          apiKeyRef = apiKeyRef.concat("|0");
-        }
+      if (authDidChange) {
         await r
           .knex("graphile_secrets.secrets")
           .where({ ref: savedSystem.api_key_ref })
           .del();
+
         await getWorker().then((worker) =>
-          worker.setSecret(apiKeyRef, externalSystem.apiKey)
+          worker.setSecret(
+            apiKeyRef,
+            (externalSystem.apiKey.includes("*")
+              ? savedSystemApiKey
+              : externalSystem.apiKey) + apiKeyAppendage
+          )
         );
-        payload.api_key_ref = apiKeyRef;
       }
 
       const [updated] = await r
         .knex("external_system")
-        .update(payload)
+        .update(updatePayload)
         .where({ id: externalSystemId })
         .returning("*");
 
