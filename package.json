@@ -131,7 +131,7 @@
     "passport-local": "^1.0.0",
     "passport-local-authenticate": "^1.2.0",
     "pg": "^6.4.2",
-    "pg-compose": "^0.0.21",
+    "pg-compose": "^0.0.23",
     "pgc-ngp-van": "^0.0.12",
     "promise-retry": "^2.0.1",
     "prop-types": "^15.6.0",
