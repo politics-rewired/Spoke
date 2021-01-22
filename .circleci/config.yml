@@ -17,7 +17,7 @@ jobs:
           SUPPRESS_SELF_INVITE: "false"
           JOBS_SAME_PROCESS: "1"
 
-          TEST_POSTGRES_URL: "postgres://postgres:secretpassword@localhost:5432/spoke_test"
+          TEST_DATABASE_URL: "postgres://postgres:secretpassword@localhost:5432/spoke_test"
       - image: circleci/postgres:13.1
         environment:
           POSTGRES_DB: spoke_test
