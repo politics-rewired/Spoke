@@ -3390,8 +3390,7 @@ const rootMutations = {
           type: externalSystem.type.toLowerCase(),
           organization_id: parseInt(organizationId, 10),
           username: externalSystem.username,
-          api_key_ref: apiKeyRef,
-          operation_mode: externalSystem.operationMode
+          api_key_ref: apiKeyRef
         })
         .returning("*");
 
@@ -3418,8 +3417,7 @@ const rootMutations = {
       const payload = {
         name: externalSystem.name,
         type: externalSystem.type.toLowerCase(),
-        username: externalSystem.username,
-        operation_mode: externalSystem.operationMode
+        username: externalSystem.username
       };
 
       if (!externalSystem.apiKey.includes("*")) {
