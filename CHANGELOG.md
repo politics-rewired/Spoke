@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.14.3](https://github.com/politics-rewired/spoke/compare/v3.14.2...v3.14.3) (2021-01-21)
+
+
+### Bug Fixes
+
+* add getSendBeforeUtc util to fix sendBefore ([#864](https://github.com/politics-rewired/spoke/issues/864)) ([f70c845](https://github.com/politics-rewired/spoke/commit/f70c8454c98ab58a550fa822b8eb2bc264ce0070))
+* fix error count summation ([#863](https://github.com/politics-rewired/spoke/issues/863)) ([42cd11a](https://github.com/politics-rewired/spoke/commit/42cd11ad026fbffb94f0fe84a57ed4e717a7d314))
+* pass membership id, not user id, to mutation ([#866](https://github.com/politics-rewired/spoke/issues/866)) ([bc04b78](https://github.com/politics-rewired/spoke/commit/bc04b78c906ccbebe3a80ed0e76f4cc5228c6415))
+* **sendbuttonarrow:** pin the send arrow to the top of the message field ([#859](https://github.com/politics-rewired/spoke/issues/859)) ([2fc088b](https://github.com/politics-rewired/spoke/commit/2fc088bf9a473a3271dd104e6729ff3d70796177))
+
+### [3.14.2](https://github.com/politics-rewired/spoke/compare/v3.14.1...v3.14.2) (2021-01-20)
+
+
+### Bug Fixes
+
+* fall back to provided zone name ([b9e1e79](https://github.com/politics-rewired/spoke/commit/b9e1e794881b6658b25f97ca8f59ca5cabeb3f33))
+
+### [3.14.1](https://github.com/politics-rewired/spoke/compare/v3.14.0...v3.14.1) (2021-01-20)
+
+
+### Bug Fixes
+
+* add defensive fix for null/undefined zone name ([#861](https://github.com/politics-rewired/spoke/issues/861)) ([010341e](https://github.com/politics-rewired/spoke/commit/010341e7be2e314c1b6b5f3477bd54905a1196a5))
+
+## [3.14.0](https://github.com/politics-rewired/spoke/compare/v3.13.1...v3.14.0) (2021-01-19)
+
+
+### Features
+
+* **users:** add superadmin option to role selection ([#850](https://github.com/politics-rewired/spoke/issues/850)) ([177350b](https://github.com/politics-rewired/spoke/commit/177350bf7fa36bd16810cf898d320994f63c9b05))
+* per organization message limits ([#857](https://github.com/politics-rewired/spoke/issues/857)) ([8c61cf0](https://github.com/politics-rewired/spoke/commit/8c61cf0dd9296192c8cb920adc6ea134253ff009))
+* **campaign-detail-page:** add message errors ([#824](https://github.com/politics-rewired/spoke/issues/824)) ([5b948b0](https://github.com/politics-rewired/spoke/commit/5b948b02b2df5d3de5e3986fbaecbab332443dfc))
+* **van:** add operation mode select to integration config ([#813](https://github.com/politics-rewired/spoke/issues/813)) ([b4a1028](https://github.com/politics-rewired/spoke/commit/b4a1028e095ac3449eeb829edaace393eee9bdec))
+* searchable people ([#819](https://github.com/politics-rewired/spoke/issues/819)) ([45a887d](https://github.com/politics-rewired/spoke/commit/45a887db1f4413959136e4e5f80d56a98e13e37f))
+
+
+### Bug Fixes
+
+* **admincampaignedit:** fix use of lodash/pick in checkSectionSaved ([#852](https://github.com/politics-rewired/spoke/issues/852)) ([976e099](https://github.com/politics-rewired/spoke/commit/976e09940ca850d2f76f920733c3695d589869e7)), closes [#851](https://github.com/politics-rewired/spoke/issues/851)
+* **campaignteamsform:** remove mutation of props ([#825](https://github.com/politics-rewired/spoke/issues/825)) ([448d1e4](https://github.com/politics-rewired/spoke/commit/448d1e45e8e859542ca4d1ab6ecc79d010ea836b))
+* **timezones:** map deprecated tzs to canonical tzs ([#855](https://github.com/politics-rewired/spoke/issues/855)) ([4fb2ac8](https://github.com/politics-rewired/spoke/commit/4fb2ac86f22967162d93ef11059145675f43941c)), closes [#853](https://github.com/politics-rewired/spoke/issues/853)
+* **user:** unique email addresses with migration ([#821](https://github.com/politics-rewired/spoke/issues/821)) ([a9cd813](https://github.com/politics-rewired/spoke/commit/a9cd8130c566e89b9db9b34a4c9f3362b2cdc78c))
+
 ### [3.13.1](https://github.com/politics-rewired/spoke/compare/v3.13.0...v3.13.1) (2021-01-05)
 
 

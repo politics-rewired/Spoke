@@ -1,6 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { CampaignsList } from "../../api/campaign";
-import { UserRoleType } from "../../api/organization-membership";
+import {
+  RequestAutoApproveType,
+  UserRoleType
+} from "../../api/organization-membership";
 
 export interface CurrentUser {
   id: string;
@@ -28,7 +31,12 @@ export interface AdminPeopleContext {
 
 export interface PeopleRowEventHandlers {
   startEdit: (userId: string) => void;
-  createHash: (hash: string) => void;
+  editMembershipRole: (role: UserRoleType, membershipId: string) => void;
+  editAutoApprove: (
+    autoApprove: RequestAutoApproveType,
+    membershipId: string
+  ) => void;
+  resetUserPassword: (userId: string) => void;
   wasUpdated: (userId: string) => void;
   error: (errorMsg: string) => void;
 }

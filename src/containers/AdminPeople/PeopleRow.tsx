@@ -1,5 +1,3 @@
-import { ApolloQueryResult } from "apollo-client";
-import gql from "graphql-tag";
 import {
   DropDownMenu,
   FlatButton,
@@ -8,7 +6,6 @@ import {
   TableRowColumn
 } from "material-ui";
 import React from "react";
-import { compose } from "recompose";
 
 import {
   OrganizationMembership,
@@ -18,8 +15,6 @@ import {
 import { User } from "../../api/user";
 import { dataTest, snakeToTitleCase, titleCase } from "../../lib/attributes";
 import { hasRoleAtLeast } from "../../lib/permissions";
-import { MutationMap } from "../../network/types";
-import { loadData } from "../hoc/with-operations";
 import {
   AdminPeopleContext,
   CurrentUser,
@@ -49,7 +44,8 @@ const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
   onSelect
 }) => {
   const disableRoleEdit =
-    row.isViewingUser || (row.isOwner && !viewing.isOwner);
+    row.isViewingUser ||
+    (row.isOwner && !hasRoleAtLeast(viewing.role, UserRoleType.OWNER));
 
   return (
     <DropDownMenu
@@ -63,12 +59,18 @@ const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
         UserRoleType.TEXTER,
         UserRoleType.SUPERVOLUNTEER,
         UserRoleType.ADMIN,
-        UserRoleType.OWNER
+        UserRoleType.OWNER,
+        UserRoleType.SUPERADMIN
       ].map((option) => (
         <MenuItem
           key={option}
           value={option}
-          disabled={option === UserRoleType.OWNER && !viewing.isOwner}
+          disabled={
+            (option === UserRoleType.OWNER &&
+              !hasRoleAtLeast(viewing.role, UserRoleType.OWNER)) ||
+            (option === UserRoleType.SUPERADMIN &&
+              viewing.role !== UserRoleType.SUPERADMIN)
+          }
           primaryText={titleCase(option)}
         />
       ))}
@@ -110,44 +112,19 @@ const AutoApproveSelect: React.StatelessComponent<AutoApproveSelectProps> = ({
   );
 };
 
-interface PeopleRowExtensionProps {
-  history: History;
-  mutations: {
-    editOrganizationMembership: ({
-      autoApprove,
-      role
-    }: {
-      autoApprove?: RequestAutoApproveType;
-      role?: UserRoleType;
-    }) => Promise<
-      ApolloQueryResult<{
-        id: string;
-        role: UserRoleType;
-        requestAutoApprove: RequestAutoApproveType;
-      }>
-    >;
-    resetUserPassword: () => Promise<
-      ApolloQueryResult<{
-        resetUserPassword: string;
-      }>
-    >;
-  };
-}
-
 interface PeopleRowProps {
   context: AdminPeopleContext;
   membership: OrganizationMembership;
   handlers: PeopleRowEventHandlers;
 }
 
-type PeopleRowExtendedProps = PeopleRowProps & PeopleRowExtensionProps;
+type PeopleRowExtendedProps = PeopleRowProps;
 
 const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
   membership,
   context: {
     viewing: { user: viewingUser }
   },
-  mutations: { editOrganizationMembership, resetUserPassword },
   handlers
 }) => {
   const context: PeopleRowContext = {
@@ -165,6 +142,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
   };
 
   const { row, viewing } = context;
+
   return (
     <TableRow>
       <TableRowColumn>{row.user.displayName}</TableRowColumn>
@@ -172,24 +150,18 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
       <TableRowColumn>
         <RoleSelect
           context={context}
-          onSelect={async (role) => {
-            await editOrganizationMembership({
-              role
-            });
-            handlers.wasUpdated(row.user.id);
-          }}
+          onSelect={(role) =>
+            handlers.editMembershipRole(role, row.membership.id)
+          }
         />
       </TableRowColumn>
 
       <TableRowColumn>
         <AutoApproveSelect
           context={context}
-          onChange={async (autoApprove) => {
-            await editOrganizationMembership({
-              autoApprove
-            });
-            handlers.wasUpdated(row.user.id);
-          }}
+          onChange={(autoApprove) =>
+            handlers.editAutoApprove(autoApprove, row.membership.id)
+          }
         />
       </TableRowColumn>
       <TableRowColumn>
@@ -204,13 +176,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
           <FlatButton
             label="Reset Password"
             disabled={viewing.user.id === row.user.id}
-            onClick={async () => {
-              const { data } = await resetUserPassword();
-              if (data) {
-                const hash = data.resetUserPassword;
-                handlers.createHash(hash);
-              }
-            }}
+            onClick={() => handlers.resetUserPassword(row.user.id)}
           />
         </TableRowColumn>
       )}
@@ -218,54 +184,4 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
   );
 };
 
-const mutations: MutationMap<PeopleRowProps> = {
-  editOrganizationMembership: (props: PeopleRowProps) => ({
-    autoApprove,
-    role
-  }: {
-    autoApprove?: RequestAutoApproveType;
-    role?: UserRoleType;
-  }) => ({
-    mutation: gql`
-      mutation editOrganizationMembership(
-        $membershipId: String!
-        $level: RequestAutoApprove
-        $role: String
-      ) {
-        editOrganizationMembership(
-          id: $membershipId
-          level: $level
-          role: $role
-        ) {
-          id
-          role
-          requestAutoApprove
-        }
-      }
-    `,
-    variables: {
-      membershipId: props.membership.id,
-      level: autoApprove,
-      role
-    }
-  }),
-  resetUserPassword: ({
-    context: { organization },
-    membership: { user }
-  }: PeopleRowProps) => () => {
-    return {
-      mutation: gql`
-        mutation resetUserPassword($organizationId: String!, $userId: Int!) {
-          resetUserPassword(organizationId: $organizationId, userId: $userId)
-        }
-      `,
-      variables: {
-        organizationId: organization.id,
-        userId: user.id
-      }
-    };
-  }
-};
-export default compose<PeopleRowExtendedProps, PeopleRowProps>(
-  loadData({ mutations })
-)(PeopleRow);
+export default PeopleRow;

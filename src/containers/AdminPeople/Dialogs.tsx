@@ -96,9 +96,50 @@ const ResetPassword: React.StatelessComponent<ResetPasswordProps> = ({
   </div>
 );
 
+interface ConfirmSuperAdminProps {
+  open: boolean;
+  onClose: () => void;
+  handleConfirmSuperadmin: () => void;
+}
+
+const ConfirmSuperAdmin: React.StatelessComponent<ConfirmSuperAdminProps> = ({
+  open,
+  onClose,
+  handleConfirmSuperadmin
+}) => (
+  <div>
+    <Dialog
+      title="Confirm Superadmin"
+      actions={[
+        <FlatButton
+          key="cancel"
+          {...dataTest("superAdminOk")}
+          label="Cancel"
+          primary
+          onClick={onClose}
+        />,
+        <FlatButton
+          key="ok"
+          {...dataTest("superAdminOk")}
+          label="Confirm"
+          primary
+          onClick={handleConfirmSuperadmin}
+        />
+      ]}
+      modal={false}
+      open={open}
+      onRequestClose={onClose}
+    >
+      Are you sure you want to make this user a Superadmin? Superadmins have
+      Owner permissions for all organizations and can manage other Superadmins.
+    </Dialog>
+  </div>
+);
+
 const Dialogs = {
   InvitePerson,
   EditPerson,
-  ResetPassword
+  ResetPassword,
+  ConfirmSuperAdmin
 };
 export default Dialogs;

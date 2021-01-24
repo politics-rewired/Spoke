@@ -20,7 +20,7 @@ export const deprecatedTimezoneMap: Record<string, string> = {
 };
 
 export const parseIanaZone = (name: string) =>
-  deprecatedTimezoneMap[name.toLowerCase()] || name;
+  name ? deprecatedTimezoneMap[name.toLowerCase()] || name : name;
 
 export class DateTime extends LuxonDateTime {
   /**

@@ -89,10 +89,11 @@ const styles = StyleSheet.create({
     marginBottom: "none"
   },
   messageField: {
-    padding: "0px 8px",
+    margin: "0px 8px",
     "@media(maxWidth: 450px)": {
       marginBottom: "8%"
-    }
+    },
+    position: "relative"
   },
   messageLengthInfo: {
     display: "flex",
