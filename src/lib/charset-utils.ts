@@ -1,3 +1,5 @@
+/* eslint-disable import/prefer-default-export */
+
 const gsmReplacements = [
   ["‘", "'"],
   ["’", "'"],
@@ -7,10 +9,8 @@ const gsmReplacements = [
   ["–", "-"]
 ];
 
-const replaceEasyGsmWins = (text) =>
+export const replaceEasyGsmWins = (text) =>
   gsmReplacements.reduce(
     (acc, replacement) => acc.replace(replacement[0], replacement[1]),
     text
   );
-
-export { replaceEasyGsmWins as default };

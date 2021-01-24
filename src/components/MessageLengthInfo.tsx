@@ -2,9 +2,11 @@ import { getCharCount } from "@trt2/gsm-charset-utils";
 import PropTypes from "prop-types";
 import React from "react";
 
-import replaceEasyGsmWins from "../lib/charset-utils";
+import { replaceEasyGsmWins } from "../lib/charset-utils";
 
-const MessageLengthInfo = ({ messageText }) => {
+const MessageLengthInfo: React.SFC<{ messageText: string }> = ({
+  messageText
+}) => {
   const { charCount, msgCount, charsPerSegment } = getCharCount(
     replaceEasyGsmWins(messageText)
   );
