@@ -11,7 +11,7 @@ import { green500, green600, grey100, red400 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React from "react";
 
-import replaceEasyGsmWins from "../lib/charset-utils";
+import { replaceEasyGsmWins } from "../lib/charset-utils";
 import { delimit } from "../lib/scripts";
 import Chip from "./Chip";
 
