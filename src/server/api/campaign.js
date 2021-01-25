@@ -533,17 +533,25 @@ export const resolvers = {
       return formatPage(query, { after, first, primaryColumn: "compound_id" });
     },
     deliverabilityStats: async (campaign) => {
-      const { rows } = await r.reader.raw(
-        `
-          select count(*), send_status, error_codes
-          from message
-          join campaign_contact on campaign_contact.id = message.campaign_contact_id
-          where campaign_contact.campaign_id = ?
-            and is_from_contact = false
-          group by 2, 3
-        `,
-        [campaign.id]
-      );
+      const rows = await r.reader
+        .raw(
+          `
+            select count(*), send_status, error_codes
+            from message
+            join campaign_contact on campaign_contact.id = message.campaign_contact_id
+            where campaign_contact.campaign_id = ?
+              and is_from_contact = false
+            group by 2, 3
+          `,
+          [campaign.id]
+        )
+        .then((res) => {
+          // The `count` column is returned as a string so we parse it ourselves
+          return res.rows.map(({ count, ...row }) => ({
+            ...row,
+            count: parseInt(count, 10)
+          }));
+        });
 
       const result = {
         deliveredCount:
