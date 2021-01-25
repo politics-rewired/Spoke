@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.15.0](https://github.com/politics-rewired/spoke/compare/v3.14.3...v3.15.0) (2021-01-25)
+
+
+### Features
+
+* display character/segment counts in texter view and message review ([#860](https://github.com/politics-rewired/spoke/issues/860)) ([2e6fe60](https://github.com/politics-rewired/spoke/commit/2e6fe60c6efd395084dc47786fd248dc023c0c3a))
+
+
+### Bug Fixes
+
+* **van:** fall back to 'canvassed' result code for 'messaged'  contacts ([#867](https://github.com/politics-rewired/spoke/issues/867)) ([4bd6d7e](https://github.com/politics-rewired/spoke/commit/4bd6d7e16d48b2c5a70c5bbc0f5c6b511f9372ea))
+* **vanoperationmode:** remove operation mode key from external system mutations ([#868](https://github.com/politics-rewired/spoke/issues/868)) ([1cfef22](https://github.com/politics-rewired/spoke/commit/1cfef22eb8574a0e83e9cddf1ed92b711404fb22))
+
 ### [3.14.3](https://github.com/politics-rewired/spoke/compare/v3.14.2...v3.14.3) (2021-01-21)
 
 
