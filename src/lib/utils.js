@@ -1,3 +1,4 @@
+import escapeRegExp from "lodash/escapeRegExp";
 import isEqual from "lodash/isEqual";
 import isObject from "lodash/isObject";
 import transform from "lodash/transform";
@@ -43,3 +44,6 @@ export const asPercentWithTotal = (numerator, denominator) =>
       ? 0
       : ((numerator / denominator) * 100).toString().slice(0, 4)
   }%(${numerator})`;
+
+export const replaceAll = (str, find, replace) =>
+  str.replace(new RegExp(escapeRegExp(find), "g"), replace);
