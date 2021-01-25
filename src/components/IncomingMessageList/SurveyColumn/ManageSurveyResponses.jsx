@@ -88,7 +88,7 @@ class ManageSurveyResponses extends Component {
           questionResponses[iStepId] = value;
         }
       } catch (error) {
-        this.setState({ requestError: formatErrorMessage(error) });
+        this.setState({ requestError: formatErrorMessage(error.message) });
       } finally {
         this.setState({
           isMakingRequest: false,

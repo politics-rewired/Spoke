@@ -21,6 +21,7 @@ import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { isNowBetween } from "../../lib/timezones";
 import { getSendBeforeUtc } from "../../lib/tz-helpers";
+import { replaceAll } from "../../lib/utils";
 import logger from "../../logger";
 import {
   assignTexters,
@@ -106,9 +107,6 @@ const { JOBS_SYNC } = config;
 
 const replaceCurlyApostrophes = (rawText) =>
   rawText.replace(/[\u2018\u2019]/g, "'");
-
-const replaceAll = (str, find, replace) =>
-  str.replace(new RegExp(escapeRegExp(find), "g"), replace);
 
 const replaceShortLinkDomains = async (organizationId, messageText) => {
   const domains = await r
