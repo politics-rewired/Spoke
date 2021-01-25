@@ -229,6 +229,7 @@ export type CreateMessageOptions = {
     contactNumber: string;
     isFromContact: boolean;
     userId: number;
+    errorCodes: string[];
   }
 >;
 
@@ -239,8 +240,8 @@ export const createMessage = async (
   client
     .query<MessageRecord>(
       `
-        insert into public.message (campaign_contact_id, contact_number, assignment_id, is_from_contact, text, send_status, user_id)
-        values ($1, $2, $3, $4, $5, $6, $7)
+        insert into public.message (campaign_contact_id, contact_number, assignment_id, is_from_contact, text, send_status, user_id, error_codes)
+        values ($1, $2, $3, $4, $5, $6, $7, $8)
         returning *
       `,
       [
@@ -250,7 +251,8 @@ export const createMessage = async (
         options.isFromContact ?? false,
         options.text ?? faker.lorem.paragraph(),
         options.sendStatus ?? MessageSendStatus.Delivered,
-        options.userId ?? null
+        options.userId ?? null,
+        options.errorCodes ?? null
       ]
     )
     .then(({ rows: [message] }) => message);

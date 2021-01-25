@@ -185,7 +185,7 @@ export interface MessageRecord {
   script_version_hash: string;
   num_segments: number;
   num_media: number;
-  error_codes: string;
+  error_codes: string[] | null;
 }
 
 export interface ExternalSystemRecord {
