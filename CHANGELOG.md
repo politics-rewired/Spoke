@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.15.1](https://github.com/politics-rewired/spoke/compare/v3.15.0...v3.15.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* fix email notifications on campaign start ([#875](https://github.com/politics-rewired/spoke/issues/875)) ([a56adcc](https://github.com/politics-rewired/spoke/commit/a56adcc85d27898a896320b73ad654f1bb1893f3))
+* handle mixed argument types ([#870](https://github.com/politics-rewired/spoke/issues/870)) ([f29e78b](https://github.com/politics-rewired/spoke/commit/f29e78be4eafe2927139ce20b8a46980e255aa38))
+* parse count as integer ([#872](https://github.com/politics-rewired/spoke/issues/872)) ([32c36c9](https://github.com/politics-rewired/spoke/commit/32c36c9476062f81a4d23a5c1d58ae97a9d35e5f))
+
 ## [3.15.0](https://github.com/politics-rewired/spoke/compare/v3.14.3...v3.15.0) (2021-01-25)
 
 
