@@ -67,4 +67,34 @@ describe("getDeliverabilityStats", () => {
       );
     });
   });
+
+  test("generates correct stats for mixed null and empty list error codes", async () => {
+    const {
+      campaign,
+      contacts: [contact],
+      assignments: [assignment]
+    } = await createCompleteCampaign(client, { texters: 1, contacts: 1 });
+
+    await createMessage(client, {
+      campaignContactId: contact.id,
+      assignmentId: assignment.id,
+      sendStatus: "ERROR",
+      errorCodes: []
+    });
+
+    await createMessage(client, {
+      campaignContactId: contact.id,
+      assignmentId: assignment.id,
+      sendStatus: "ERROR",
+      errorCodes: undefined
+    });
+
+    const stats = await getDeliverabilityStats(campaign.id);
+
+    expect(stats.deliveredCount).toBe(0);
+    expect(stats.sentCount).toBe(0);
+    expect(stats.errorCount).toBe(2);
+    expect(stats.specificErrors).toHaveLength(1);
+    expect(stats.specificErrors[0].errorCode).toBeNull();
+  });
 });
