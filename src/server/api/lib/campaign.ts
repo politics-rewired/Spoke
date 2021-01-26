@@ -53,7 +53,7 @@ export const getDeliverabilityStats = async (campaignId: number) => {
   const rows = await r.reader
     .raw(
       `
-        select count(*), send_status, error_codes
+        select count(*), send_status, coalesce(error_codes, '{}') as error_codes
         from message
         join campaign_contact on campaign_contact.id = message.campaign_contact_id
         where campaign_contact.campaign_id = ?
