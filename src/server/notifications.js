@@ -83,7 +83,7 @@ export const sendUserNotification = async (notification) => {
     const assignments = await r
       .reader("assignment")
       .where({ campaign_id: notification.campaignId })
-      .pluck(["user_id", "campaign_id"]);
+      .select(["user_id", "campaign_id"]);
 
     const count = assignments.length;
     for (let i = 0; i < count; i += 1) {
