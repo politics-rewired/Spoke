@@ -12,11 +12,11 @@ class WhenSeen extends React.Component<WhenSeenProps> {
   constructor(props: WhenSeenProps) {
     super(props);
     this.observer = new IntersectionObserver(([entry]) =>
-      props.onSeenChange(entry.isIntersecting)
+      this.props.onSeenChange(entry.isIntersecting)
     );
   }
 
-  onNewRef(newRef: Element | null) {
+  onNewRef = (newRef: Element | null) => {
     if (!isNull(newRef) && this.observer) {
       const oldRef = this.cliffhangerRef;
       if (oldRef !== newRef) {
@@ -25,12 +25,10 @@ class WhenSeen extends React.Component<WhenSeenProps> {
         this.cliffhangerRef = newRef;
       }
     }
-  }
+  };
 
   render() {
-    return (
-      <div ref={(newRef) => this.onNewRef(newRef)}>{this.props.children}</div>
-    );
+    return <div ref={this.onNewRef}>{this.props.children}</div>;
   }
 }
 

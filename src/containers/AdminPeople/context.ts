@@ -37,6 +37,5 @@ export interface PeopleRowEventHandlers {
     membershipId: string
   ) => void;
   resetUserPassword: (userId: string) => void;
-  wasUpdated: (userId: string) => void;
   error: (errorMsg: string) => void;
 }
