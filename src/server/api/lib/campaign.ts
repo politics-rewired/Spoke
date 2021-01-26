@@ -81,7 +81,8 @@ export const getDeliverabilityStats = async (campaignId: number) => {
     specificErrors: rows
       .filter((o) => o.send_status === "ERROR")
       .map((o) => ({
-        errorCode: o.error_codes ? o.error_codes[0] : null,
+        errorCode:
+          o.error_codes && o.error_codes.length > 0 ? o.error_codes[0] : null,
         count: o.count
       }))
   };
