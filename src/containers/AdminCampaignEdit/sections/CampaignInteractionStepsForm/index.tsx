@@ -95,11 +95,7 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
       return hasNoOptions || hasEmptyScriptOption;
     };
 
-    const {
-      campaign: { interactionSteps = [] } = {
-        campaign: { interactionSteps: [] }
-      }
-    } = this.props.data;
+    const interactionSteps = this.props.data?.campaign?.interactionSteps ?? [];
     const liveInteractionSteps = interactionSteps
       .filter(
         (step) =>
