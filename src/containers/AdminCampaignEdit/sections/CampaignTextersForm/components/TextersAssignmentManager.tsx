@@ -4,10 +4,10 @@ import DeleteIcon from "material-ui/svg-icons/action/delete";
 import React from "react";
 import Form from "react-formal";
 
-import { Texter } from "..";
 import Slider from "../../../../../components/Slider";
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
+import { Texter } from "../types";
 
 const styles = StyleSheet.create({
   removeButton: {
@@ -63,7 +63,7 @@ export interface Props {
   texters: Texter[];
   orgTexters: any;
   contactsCount: number;
-  handleAssignContacts(numberOfContacts: string, texterId: string): void;
+  handleAssignContacts(numberOfContacts: number, texterId: string): void;
   handleRemoveTexter(texterId: string): void;
 }
 
@@ -117,7 +117,7 @@ const TextersAssignmentManager: React.SFC<Props> = (props: Props) => {
                 fullWidth
                 value={texter.assignment.contactsCount}
                 onChange={(contacts: string) =>
-                  handleAssignContacts(contacts, texter.id)
+                  handleAssignContacts(parseInt(contacts, 10), texter.id)
                 }
                 autoFocus
               />

@@ -11,6 +11,7 @@ import { compose } from "recompose";
 import * as yup from "yup";
 
 import GSForm from "../../../../components/forms/GSForm";
+import { DateTime } from "../../../../lib/datetime";
 import { MutationMap, QueryMap } from "../../../../network/types";
 import theme from "../../../../styles/theme";
 import { loadData } from "../../../hoc/with-operations";
@@ -23,6 +24,7 @@ import {
 import CampaignTextersManager from "./components/CampaignTextersManager";
 import TexterAssignmentDisplay from "./components/TexterAssignmentDisplay";
 import TextersAssignmentManager from "./components/TextersAssignmentManager";
+import { Texter } from "./types";
 import { assignTexterContacts, handleExtraTexterCapacity } from "./utils";
 
 const styles = StyleSheet.create({
@@ -44,7 +46,7 @@ interface HocProps {
   mutations: {
     editCampaign(payload: Values): ApolloQueryResult<any>;
   };
-  data: {
+  campaignData: {
     campaign: {
       id: string;
       texters: Texter[];
@@ -54,11 +56,12 @@ interface HocProps {
     };
     refetch(): void;
   };
+  organizationData: any;
 }
 
 interface State {
   autoSplit: boolean;
-  textersToAdd: Texter[];
+  upsertedTexters: Texter[];
   textersToRemoveIds: string[];
   searchText: string;
   snackbarOpen: boolean;
@@ -76,27 +79,14 @@ interface InnerProps extends FullComponentProps, HocProps {
   isOverdue: boolean;
 }
 
-interface TexterAssignment {
-  contactsCount: number;
-  messagedCount: number;
-  needsMessageCount: number;
-  maxContacts: number;
-}
-
-export interface Texter {
-  id: string;
-  firstName: string;
-  assignment: TexterAssignment;
-}
-
 interface Values {
   texters: any[];
 }
 
 class CampaignTextersForm extends React.Component<InnerProps, State> {
-  state = {
+  state: State = {
     autoSplit: false,
-    textersToAdd: [],
+    upsertedTexters: [],
     textersToRemoveIds: [],
     searchText: "",
     snackbarOpen: false,
@@ -117,14 +107,14 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
   });
 
   collectFormValues = () => {
-    const { textersToAdd: editedTexters, textersToRemoveIds } = this.state;
-    const { texters } = this.props.data.campaign;
+    const { upsertedTexters: editedTexters, textersToRemoveIds } = this.state;
+    const { texters } = this.props.campaignData.campaign;
     const deletedTexterIds: string[] = textersToRemoveIds;
-    const editedTexterIds = editedTexters.map((t: Texter) => t.id);
+    const editedTexterIds = editedTexters.map((t) => t.id);
     const unorderedTexters = texters
       .filter((texter) => !editedTexterIds.includes(texter.id))
       .concat(editedTexters)
-      .filter((texter: Texter) => !deletedTexterIds.includes(texter.id));
+      .filter((texter) => !deletedTexterIds.includes(texter.id));
 
     const orderedTexters = orderBy(
       unorderedTexters,
@@ -137,28 +127,24 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
   };
 
   addTexter = (newTexter: Texter) => {
-    const { textersToAdd, textersToRemoveIds } = this.state;
-    let newIds: string[] = [];
-    if (textersToRemoveIds.includes(newTexter.id)) {
-      newIds = textersToRemoveIds.filter((id) => id !== newTexter.id);
-    }
-    const prevTexters = textersToAdd.filter(
-      (t: Texter) => t.id !== newTexter.id
+    const { upsertedTexters, textersToRemoveIds } = this.state;
+    const newIdsToRemove = textersToRemoveIds.filter(
+      (id) => id !== newTexter.id
     );
+    const prevTexters = upsertedTexters.filter((t) => t.id !== newTexter.id);
     const newTexters = [newTexter, ...prevTexters];
     this.setState({
-      textersToAdd: newTexters,
+      upsertedTexters: newTexters,
       searchText: "",
-      textersToRemoveIds: newIds
+      textersToRemoveIds: newIdsToRemove
     });
   };
 
   addAllTexters = () => {
     const { orgTexters } = this.props;
     const { texters } = this.collectFormValues();
-    this.setState({ textersToRemoveIds: [] });
 
-    const textersToAdd = orgTexters.map((orgTexter) => {
+    const upsertedTexters = orgTexters.map((orgTexter) => {
       const { id, firstName } = orgTexter;
       const newTexter = {
         id,
@@ -174,17 +160,18 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
       return currentlyAddedTexter || newTexter;
     });
 
-    this.setState({ textersToAdd });
+    this.setState({ upsertedTexters, textersToRemoveIds: [] });
   };
 
   handleSearchTexters = (searchText: string) => {
     this.setState({ searchText });
   };
 
-  handleAssignContacts = (assignedContacts: string, texterId: string) => {
+  handleAssignContacts = (assignedContacts: number, texterId: string) => {
     const { texters } = this.collectFormValues();
-    const { contactsCount } = this.props.data.campaign;
-    const editedTexter: Texter = texters.find((t: Texter) => t.id === texterId);
+    const { contactsCount } = this.props.campaignData.campaign;
+    const editedTexter = texters.find((t) => t.id === texterId);
+    if (!editedTexter) return;
 
     let totalNeedsMessage = 0;
     let totalMessaged = 0;
@@ -216,7 +203,7 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
       (texter) => texter.id
     );
     this.setState({
-      textersToAdd: newTexters
+      upsertedTexters: newTexters
     });
   };
 
@@ -229,16 +216,16 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
   removeEmptyTexters = () => {
     const { texters } = this.collectFormValues();
     const newTexters = texters.filter(
-      (t: Texter) =>
+      (t) =>
         t.assignment.contactsCount !== 0 || t.assignment.needsMessageCount !== 0
     );
-    this.setState({ textersToAdd: newTexters });
+    this.setState({ upsertedTexters: newTexters });
   };
 
   handleSubmit = async () => {
     const { editCampaign } = this.props.mutations;
     const { texters } = this.collectFormValues();
-    const texterInput = texters.map((t: Texter) => ({
+    const texterInput = texters.map((t) => ({
       id: t.id,
       needsMessageCount: t.assignment.needsMessageCount,
       maxContacts: t.assignment.maxContacts,
@@ -252,10 +239,10 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
     } catch (err) {
       this.props.onError(err.message);
     } finally {
-      this.props.data.refetch();
+      this.props.campaignData.refetch();
       this.setState({
         isWorking: false,
-        textersToAdd: [],
+        upsertedTexters: [],
         textersToRemoveIds: []
       });
     }
@@ -266,24 +253,29 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
       if (!this.state.autoSplit) return;
 
       const { texters } = this.collectFormValues();
-      let { contactsCount } = this.props.data.campaign;
+      let { contactsCount } = this.props.campaignData.campaign;
       if (!contactsCount) return;
       contactsCount = Math.floor(contactsCount / texters.length);
-      const newTexters = texters.map((texter: Texter) => ({
+      const newTexters = texters.map((texter) => ({
         ...texter,
         assignment: {
           ...texter.assignment,
           contactsCount
         }
       }));
-      this.setState({ textersToAdd: newTexters });
+      this.setState({ upsertedTexters: newTexters });
     });
 
   handleSnackbarClose = () =>
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
 
   render() {
-    const { saveLabel, saveDisabled, orgTexters, data, isOverdue } = this.props;
+    const {
+      saveLabel,
+      saveDisabled,
+      campaignData,
+      organizationData
+    } = this.props;
     const {
       searchText,
       autoSplit,
@@ -291,15 +283,17 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
       snackbarMessage,
       isWorking
     } = this.state;
-    const { contactsCount } = data.campaign;
+    const { contactsCount, dueBy } = campaignData.campaign;
+    const { texters: orgTexters } = organizationData.organization;
     const availableTexters = this.collectFormValues().texters;
     const assignedContacts = availableTexters.reduce(
-      (prev: number, texter: Texter) => prev + texter.assignment.contactsCount,
+      (prev, texter) => prev + texter.assignment.contactsCount,
       0
     );
 
     const shouldShowTextersManager = orgTexters.length > 0;
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
+    const isOverdue = DateTime.local() >= DateTime.fromISO(dueBy);
     const finalSaveDisabled = isOverdue || saveDisabled;
 
     return (
@@ -361,7 +355,7 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
 }
 
 const queries: QueryMap<InnerProps> = {
-  data: {
+  campaignData: {
     query: gql`
       query getCampaignBasics($campaignId: String!) {
         campaign(id: $campaignId) {
@@ -394,6 +388,26 @@ const queries: QueryMap<InnerProps> = {
         campaignId: ownProps.campaignId
       }
     })
+  },
+  organizationData: {
+    query: gql`
+      query getOrganizationData($organizationId: String!) {
+        organization(id: $organizationId) {
+          id
+          texters: people {
+            id
+            firstName
+            lastName
+            displayName
+          }
+        }
+      }
+    `,
+    options: (ownProps) => ({
+      variables: {
+        organizationId: ownProps.organizationId
+      }
+    })
   }
 };
 
@@ -417,11 +431,6 @@ const mutations: MutationMap<InnerProps> = {
               )
               maxContacts
             }
-          }
-          isStarted
-          readiness {
-            id
-            basics
           }
         }
       }

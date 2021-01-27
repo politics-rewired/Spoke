@@ -2,9 +2,9 @@ import AutoComplete from "material-ui/AutoComplete";
 import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 
-import { Texter } from "..";
 import { dataSourceItem } from "../../../../../components/utils";
 import { dataTest } from "../../../../../lib/attributes";
+import { Texter } from "../types";
 
 const inlineStyles = {
   autocomplete: {

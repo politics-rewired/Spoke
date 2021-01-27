@@ -283,6 +283,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     description,
     due_by: dueBy,
     organization_id: organizationId,
+    // TODO: re-enable once dynamic assignment is fixed (#548)
+    // use_dynamic_assignment: useDynamicAssignment,
     logo_image_url: logoImageUrl,
     primary_color: primaryColor,
     intro_html: introHtml,

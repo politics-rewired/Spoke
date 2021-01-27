@@ -1,6 +1,5 @@
-import { Texter } from ".";
+import { Texter } from "./types";
 
-// eslint-disable-next-line import/prefer-default-export
 export const assignTexterContacts = (
   editedTexter: Texter,
   contactsToAssign: string,
@@ -46,15 +45,15 @@ export const handleExtraTexterCapacity = (
   texter: Texter,
   extraTexterCapacity: number
 ) => {
-  // 2. If extraTexterCapacity > 0, reduce the user's input to the number of contacts available
+  // If extraTexterCapacity > 0, reduce the user's input to the number of contacts available
   // for assignment
-  let { needsMessageCount, contactsCount } = texter.assignment;
+  const { needsMessageCount, contactsCount } = texter.assignment;
   const correctedTexter = {
     ...texter,
     assignment: {
       ...texter.assignment,
-      needsMessageCount: needsMessageCount -= extraTexterCapacity,
-      contactsCount: contactsCount -= extraTexterCapacity
+      needsMessageCount: needsMessageCount - extraTexterCapacity,
+      contactsCount: contactsCount - extraTexterCapacity
     }
   };
   return correctedTexter;

@@ -485,15 +485,7 @@ class AdminCampaignEdit extends React.Component {
           this.state.campaignFormValues.useDynamicAssignment === true,
         blocksStarting: false,
         expandAfterCampaignStarts: true,
-        expandableBySuperVolunteers: true,
-        extraProps: {
-          isOverdue:
-            DateTime.local() >=
-            DateTime.fromISO(this.props.campaignData.campaign.dueBy),
-          orgTexters: this.props.organizationData.organization.texters,
-          organizationUuid: this.props.organizationData.organization.uuid,
-          campaignId: this.props.campaignData.campaign.id
-        }
+        expandableBySuperVolunteers: true
       },
       {
         title: "Interactions",
@@ -781,7 +773,6 @@ class AdminCampaignEdit extends React.Component {
                 saveLabel={saveLabel}
                 onError={this.handleSectionError}
                 onExpandChange={this.handleExpandChange(sectionIndex)}
-                {...section.extraProps}
               />
             );
           }

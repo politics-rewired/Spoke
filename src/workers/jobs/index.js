@@ -737,6 +737,10 @@ export async function assignTexters(job) {
   const demotedTexters = {}; // needsMessageCount reduced
   const deletedAssignmentIds = [];
 
+  // TODO: re-enable once dynamic assignment is fixed (#548)
+  // const dynamic = campaign.use_dynamic_assignment;
+  const dynamic = false;
+
   // detect changed assignments
   currentAssignments
     .map((assignment) => {
@@ -744,33 +748,39 @@ export async function assignTexters(job) {
         (user) => parseInt(user.id, 10) === assignment.user_id
       )[0];
       if (texter) {
-        // const unchangedMaxContacts =
-        //   parseInt(texter.maxContacts, 10) === assignment.max_contacts || // integer = integer
-        //   texter.maxContacts === assignment.max_contacts; // null = null
+        const unchangedMaxContacts =
+          parseInt(texter.maxContacts, 10) === assignment.max_contacts || // integer = integer
+          texter.maxContacts === assignment.max_contacts; // null = null
         const unchangedNeedsMessageCount =
           texter.needsMessageCount ===
           parseInt(assignment.needs_message_count, 10);
-        if (unchangedNeedsMessageCount) {
+        if (
+          (!dynamic && unchangedNeedsMessageCount) ||
+          (dynamic && unchangedMaxContacts)
+        ) {
           unchangedTexters[assignment.user_id] = true;
           return null;
         }
-        // If there is a delta between client and server, then accommodate delta (See #322)
-        const clientMessagedCount =
-          texter.contactsCount - texter.needsMessageCount;
-        const serverMessagedCount =
-          assignment.full_contact_count - assignment.needs_message_count;
+        if (!dynamic) {
+          // standard assignment change
+          // If there is a delta between client and server, then accommodate delta (See #322)
+          const clientMessagedCount =
+            texter.contactsCount - texter.needsMessageCount;
+          const serverMessagedCount =
+            assignment.full_contact_count - assignment.needs_message_count;
 
-        const numDifferent =
-          (texter.needsMessageCount || 0) -
-          assignment.needs_message_count -
-          Math.max(0, serverMessagedCount - clientMessagedCount);
+          const numDifferent =
+            (texter.needsMessageCount || 0) -
+            assignment.needs_message_count -
+            Math.max(0, serverMessagedCount - clientMessagedCount);
 
-        if (numDifferent < 0) {
-          // got less than before
-          demotedTexters[assignment.id] = -numDifferent;
-        } else {
-          // got more than before: assign the difference
-          texter.needsMessageCount = numDifferent;
+          if (numDifferent < 0) {
+            // got less than before
+            demotedTexters[assignment.id] = -numDifferent;
+          } else {
+            // got more than before: assign the difference
+            texter.needsMessageCount = numDifferent;
+          }
         }
         return assignment;
       }
@@ -817,7 +827,7 @@ export async function assignTexters(job) {
 
       const newAssignments = [];
       const existingAssignments = [];
-
+      const dynamicAssignments = [];
       // Do not use `async texter => ...` parallel execution here because `availableContacts`
       // needs to be synchronously updated
       for (let index = 0; index < texters.length; index += 1) {
@@ -841,8 +851,11 @@ export async function assignTexters(job) {
           availableContacts,
           texter.needsMessageCount
         );
+        // TODO: re-enable once dynamic assignment is fixed (#548)
+        // const isDynamic = campaign.use_dynamic_assignment;
+        const isDynamic = false;
         // Avoid creating a new assignment when the texter should get 0
-        if (contactsToAssign === 0) {
+        if (contactsToAssign === 0 && !isDynamic) {
           continue;
         }
 
@@ -852,14 +865,21 @@ export async function assignTexters(job) {
         );
         if (existingAssignment) {
           const { id, user_id } = existingAssignment;
-          existingAssignments.push({
-            assignment: {
-              campaign_id: cid,
-              id,
-              user_id
-            },
-            contactsToAssign
-          });
+          if (!dynamic) {
+            existingAssignments.push({
+              assignment: {
+                campaign_id: cid,
+                id,
+                user_id
+              },
+              contactsToAssign
+            });
+          } else {
+            dynamicAssignments.push({
+              max_contacts: maxContacts,
+              id
+            });
+          }
         } else {
           newAssignments.push({
             assignment: {
@@ -875,6 +895,14 @@ export async function assignTexters(job) {
         const textingWork = Math.floor((75 / texters.length) * (index + 1));
         await updateJob(job, textingWork + 20);
       } // end texters.forEach
+
+      // Update dynamic assignments
+      await Promise.all(
+        dynamicAssignments.map(async (assignment) => {
+          const { id, max_contacts } = assignment;
+          await trx("assignment").where({ id }).update({ max_contacts });
+        })
+      );
 
       /**
        * Using SQL injection to avoid passing archived as a binding
@@ -953,43 +981,51 @@ export async function assignTexters(job) {
               return { assignment, contactsToAssign };
             })
           );
+          if (!dynamic) {
+            for (const directive of updatedChunk) {
+              await assignContacts(directive);
+            }
+            // await Promise.all(updatedChunk.map(async directive => await assignContacts(directive)))
+            // Original MySQL compatible way it was written doesn't work sequentially
+            // since all of the selects run at the same time, and select the same contacts for updating
+            // Potential solutions to make it concurrent:
+            // 1. Skip locked
+            // 2. With select limit
 
-          for (const directive of updatedChunk) {
-            await assignContacts(directive);
+            // Wait to send notification until all contacts have been updated
+            await Promise.all(
+              updatedChunk.map(async (directive) => {
+                const { assignment } = directive;
+                await sendUserNotification({
+                  type: Notifications.ASSIGNMENT_CREATED,
+                  assignment
+                });
+              })
+            );
           }
-          // await Promise.all(updatedChunk.map(async directive => await assignContacts(directive)))
-          // Original MySQL compatible way it was written doesn't work sequentially
-          // since all of the selects run at the same time, and select the same contacts for updating
-          // Potential solutions to make it concurrent:
-          // 1. Skip locked
-          // 2. With select limit
-
-          // Wait to send notification until all contacts have been updated
-          await Promise.all(
-            updatedChunk.map(async (directive) => {
-              const { assignment } = directive;
-              await sendUserNotification({
-                type: Notifications.ASSIGNMENT_CREATED,
-                assignment
-              });
-            })
-          );
         })
       );
 
-      // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
-      // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-      const assignmentIds = await trx("assignment")
-        .select("assignment.id as id")
-        .where("assignment.campaign_id", cid)
-        .leftJoin(
-          "campaign_contact",
-          "assignment.id",
-          "campaign_contact.assignment_id"
-        )
-        .groupBy("assignment.id")
-        .havingRaw("COUNT(campaign_contact.id) = 0")
-        .map((result) => result.id);
+      // TODO: re-enable once dynamic assignment is fixed (#548)
+      // const isDynamic = campaign.use_dynamic_assignment;
+      const isDynamic = false;
+
+      // dynamic assignments, having zero initially is ok
+      if (!isDynamic) {
+        // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
+        // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+        const assignmentIds = await trx("assignment")
+          .select("assignment.id as id")
+          .where("assignment.campaign_id", cid)
+          .leftJoin(
+            "campaign_contact",
+            "assignment.id",
+            "campaign_contact.assignment_id"
+          )
+          .groupBy("assignment.id")
+          .havingRaw("COUNT(campaign_contact.id) = 0")
+          .map((result) => result.id);
+      }
 
       if (job.id) {
         await r.knex("job_request").delete().where({ id: job.id });
