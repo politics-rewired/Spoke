@@ -22,7 +22,6 @@ export {
   findParent,
   getInteractionPath,
   getInteractionTree,
-  sortInteractionSteps,
   interactionStepForId,
   getTopMostParent,
   getChildren,
