@@ -87,7 +87,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
     availableActions &&
     availableActions.length > 0;
 
-  const stepHasScript = scriptOptions.length > 0;
+  const stepHasScript = scriptOptions && scriptOptions.length > 0;
   const stepHasQuestion = questionText;
   const stepCanHaveChildren = !parentInteractionId || answerOption;
   const isAbleToAddResponse =
