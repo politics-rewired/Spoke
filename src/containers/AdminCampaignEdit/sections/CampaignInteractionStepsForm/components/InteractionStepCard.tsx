@@ -49,6 +49,7 @@ interface Props {
   availableActions: any[];
   hasBlockCopied: boolean;
   title?: string;
+  disabled?: boolean;
   onFormChange(e: any): void;
   onCopyBlock(interactionStep: InteractionStep): void;
   onRequestRootPaste(): void;
@@ -64,6 +65,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
     availableActions,
     hasBlockCopied,
     title = "Start",
+    disabled = false,
     onFormChange,
     onCopyBlock,
     onRequestRootPaste,
@@ -106,11 +108,18 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
           }
         />
         <CardActions>
-          <RaisedButton onClick={() => onCopyBlock(interactionStep)}>
+          <RaisedButton
+            disabled={disabled}
+            onClick={() => onCopyBlock(interactionStep)}
+          >
             Copy Block
           </RaisedButton>
           {hasBlockCopied && (
-            <RaisedButton label="+ Paste Block" onClick={onRequestRootPaste} />
+            <RaisedButton
+              label="+ Paste Block"
+              disabled={disabled}
+              onClick={onRequestRootPaste}
+            />
           )}
         </CardActions>
         <CardText>
@@ -128,8 +137,12 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
                   label="Answer"
                   fullWidth
                   hintText="Answer to the previous question"
+                  disabled={disabled}
                 />
-                <IconButton onClick={deleteStepFactory(stepId)}>
+                <IconButton
+                  disabled={disabled}
+                  onClick={deleteStepFactory(stepId)}
+                >
                   <DeleteIcon />
                 </IconButton>
               </div>
@@ -147,8 +160,12 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
                       label: action.display_name
                     }))
                   ]}
+                  disabled={disabled}
                 />
-                <IconButton tooltip="An action is something that is triggered by this answer being chosen, often in an outside system">
+                <IconButton
+                  tooltip="An action is something that is triggered by this answer being chosen, often in an outside system"
+                  disabled={disabled}
+                >
                   <HelpIconOutline />
                 </IconButton>
                 <div>
@@ -167,6 +184,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
               customFields={customFields}
               fullWidth
               multiLine
+              disabled={disabled}
             />
             <Form.Field
               {...dataTest("questionText")}
@@ -174,6 +192,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
               label="Question"
               fullWidth
               hintText="A question for texters to answer. E.g. Can this person attend the event?"
+              disabled={disabled}
             />
           </GSForm>
         </CardText>
@@ -184,16 +203,18 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
             key="add"
             {...dataTest("addResponse")}
             label="+ Add a response"
-            onClick={addStepFactory(stepId)}
             style={{ marginBottom: "10px" }}
+            disabled={disabled}
+            onClick={addStepFactory(stepId)}
           />
         )}
         {isAbleToAddResponse && hasBlockCopied && (
           <RaisedButton
             key="paste"
             label="+ Paste Block"
-            onClick={pasteBlockFactory(stepId)}
+            disabled={disabled}
             style={{ marginBottom: "10px" }}
+            onClick={pasteBlockFactory(stepId)}
           />
         )}
         {childSteps
@@ -206,6 +227,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
               customFields={customFields}
               availableActions={availableActions}
               hasBlockCopied={hasBlockCopied}
+              disabled={disabled}
               onFormChange={onFormChange}
               onCopyBlock={onCopyBlock}
               onRequestRootPaste={onRequestRootPaste}

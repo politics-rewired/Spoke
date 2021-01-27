@@ -338,6 +338,7 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
           customFields={customFields}
           availableActions={availableActions}
           hasBlockCopied={this.state.hasBlockCopied}
+          disabled={isWorking}
           onFormChange={this.handleFormChange}
           onCopyBlock={this.copyBlock}
           onRequestRootPaste={this.onRequestRootPaste}
