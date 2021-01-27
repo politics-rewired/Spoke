@@ -153,4 +153,44 @@ describe("makeTree", () => {
       ]
     });
   });
+
+  test("handles building a tree when given multiple root interaction steps", () => {
+    const rootStepA: InteractionStep = {
+      ...baseEmptyStep,
+      id: "1",
+      parentInteractionId: null,
+      createdAt: "2021-01-26T00:00:01Z"
+    };
+    const childStepAA: InteractionStep = {
+      ...baseEmptyStep,
+      id: "2",
+      parentInteractionId: "1",
+      createdAt: "2021-01-26T00:00:02Z"
+    };
+    const rootStepB: InteractionStep = {
+      ...baseEmptyStep,
+      id: "3",
+      parentInteractionId: null,
+      createdAt: "2021-01-26T00:00:03Z"
+    };
+    const childStepBA: InteractionStep = {
+      ...baseEmptyStep,
+      id: "4",
+      parentInteractionId: "3",
+      createdAt: "2021-01-26T00:00:04Z"
+    };
+
+    const steps: InteractionStep[] = [
+      rootStepA,
+      childStepAA,
+      rootStepB,
+      childStepBA
+    ];
+    const tree = makeTree(steps);
+
+    expect(tree).toEqual({
+      ...rootStepB,
+      interactionSteps: [{ ...childStepBA, interactionSteps: [] }]
+    });
+  });
 });

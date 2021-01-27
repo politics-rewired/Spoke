@@ -5,7 +5,15 @@ import map from "lodash/fp/map";
 import reverse from "lodash/fp/reverse";
 import sortBy from "lodash/fp/sortBy";
 
-const { DateTime } = require("luxon");
+import { DateTime } from "./datetime";
+
+export const sortByCreatedAt = (is) => {
+  const asDate = DateTime.fromISO(is.createdAt);
+  return asDate.isValid ? asDate : null;
+};
+
+// Sort by newest first
+export const sortedSteps = flow(sortBy(sortByCreatedAt), reverse);
 
 export function findParent(interactionStep, allInteractionSteps, isModel) {
   let parent = null;
@@ -95,7 +103,9 @@ export function sortInteractionSteps(interactionSteps) {
 }
 
 export function getTopMostParent(interactionSteps, _isModel) {
-  return interactionSteps.find((step) => step.parentInteractionId === null);
+  return sortedSteps(interactionSteps).find(
+    (step) => step.parentInteractionId === null
+  );
 }
 
 export function makeTree(interactionSteps, id = null, indexed = null) {
@@ -105,19 +115,14 @@ export function makeTree(interactionSteps, id = null, indexed = null) {
       map((is) => [is.id, is]),
       fromPairs
     )(interactionSteps);
-  const root = id
-    ? indexedById[id]
-    : interactionSteps.find((is) => is.parentInteractionId === null);
+
+  const root = id ? indexedById[id] : getTopMostParent(interactionSteps);
 
   return {
     ...root,
     interactionSteps: flow(
       filter((is) => is.parentInteractionId === root.id),
-      sortBy((is) => {
-        const asDate = DateTime.fromISO(is.createdAt);
-        return asDate.isValid ? asDate : null;
-      }),
-      reverse, // ui puts newest step at top
+      sortedSteps,
       map((c) => makeTree(interactionSteps, c.id, indexedById))
     )(interactionSteps)
   };
