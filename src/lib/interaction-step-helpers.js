@@ -13,7 +13,7 @@ export const sortByCreatedAt = (is) => {
 };
 
 // Sort by newest first
-export const sortedSteps = flow(sortBy(sortByCreatedAt), reverse);
+export const sortByNewest = flow(sortBy(sortByCreatedAt), reverse);
 
 export function findParent(interactionStep, allInteractionSteps, isModel) {
   let parent = null;
@@ -103,7 +103,7 @@ export function sortInteractionSteps(interactionSteps) {
 }
 
 export function getTopMostParent(interactionSteps, isModel) {
-  return sortedSteps(interactionSteps).find((step) =>
+  return sortByNewest(interactionSteps).find((step) =>
     isModel
       ? step.parent_interaction_id === null
       : step.parentInteractionId === null
@@ -124,7 +124,7 @@ export function makeTree(interactionSteps, id = null, indexed = null) {
     ...root,
     interactionSteps: flow(
       filter((is) => is.parentInteractionId === root.id),
-      sortedSteps,
+      sortByNewest,
       map((c) => makeTree(interactionSteps, c.id, indexedById))
     )(interactionSteps)
   };
