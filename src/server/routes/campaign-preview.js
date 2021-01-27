@@ -2,6 +2,7 @@ import express from "express";
 import h from "h";
 import { sortBy } from "lodash";
 
+import { getTopMostParent } from "../../lib/interaction-step-helpers";
 import { symmetricDecrypt } from "../api/lib/crypto";
 import { r } from "../models";
 
@@ -93,9 +94,7 @@ const makeCampaignPreviewHtml = async (campaignId) => {
     .reader("canned_response")
     .where({ campaign_id: campaignId });
 
-  const rootInteractionStep = interactionSteps.find(
-    (is) => !is.parent_interaction_id
-  );
+  const rootInteractionStep = getTopMostParent(interactionSteps, true);
 
   const toc = getInteractionStepsWithParentId(
     rootInteractionStep.id,

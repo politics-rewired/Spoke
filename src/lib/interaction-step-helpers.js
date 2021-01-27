@@ -102,9 +102,11 @@ export function sortInteractionSteps(interactionSteps) {
   return orderedSteps;
 }
 
-export function getTopMostParent(interactionSteps, _isModel) {
-  return sortedSteps(interactionSteps).find(
-    (step) => step.parentInteractionId === null
+export function getTopMostParent(interactionSteps, isModel) {
+  return sortedSteps(interactionSteps).find((step) =>
+    isModel
+      ? step.parent_interaction_id === null
+      : step.parentInteractionId === null
   );
 }
 
@@ -116,7 +118,7 @@ export function makeTree(interactionSteps, id = null, indexed = null) {
       fromPairs
     )(interactionSteps);
 
-  const root = id ? indexedById[id] : getTopMostParent(interactionSteps);
+  const root = id ? indexedById[id] : getTopMostParent(interactionSteps, false);
 
   return {
     ...root,
