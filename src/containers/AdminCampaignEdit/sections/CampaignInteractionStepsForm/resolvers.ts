@@ -167,14 +167,17 @@ export const isModified: Resolver = (
 ) => {
   const id = getCacheKey({ __typename: "InteractionStep", id: iStepId });
   const fragment = gql`
-    fragment editableIStep on InteractionStep {
-      questionText
-      scriptOptions
-      answerOption
+    fragment modifiableStep on InteractionStep {
+      isModified
     }
   `;
-  const iStep = client.readFragment({ fragment, id });
-  return iStep?.isModified ?? false;
+  try {
+    const iStep = client.readFragment({ fragment, id });
+    return iStep?.isModified ?? false;
+  } catch {
+    // readFragment throws an error if `isModified` cannot be found (e.g. the starting condition)
+    return false;
+  }
 };
 
 const resolvers: Resolvers = {
