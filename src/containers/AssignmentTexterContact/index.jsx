@@ -283,7 +283,10 @@ export class AssignmentTexterContact extends React.Component {
   getStartingMessageText = () => {
     const { contact, campaign } = this.props;
     if (contact.messageStatus === "needsMessage") {
-      const { scriptOptions } = getTopMostParent(campaign.interactionSteps);
+      const { scriptOptions } = getTopMostParent(
+        campaign.interactionSteps,
+        false
+      );
       const randomScript = sample(scriptOptions);
       const scriptVersionHash = md5(randomScript);
       return [scriptVersionHash, this.getMessageTextFromScript(randomScript)];
