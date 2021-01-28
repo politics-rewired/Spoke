@@ -238,7 +238,8 @@
     "webpack-manifest-plugin": "^2.0.4"
   },
   "resolutions": {
-    "@types/react": "^15.6.28"
+    "@types/react": "^15.6.28",
+    "material-ui": "^0.20.1"
   },
   "config": {
     "commitizen": {
