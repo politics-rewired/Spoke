@@ -53,7 +53,7 @@ export const getDeliverabilityStats = async (campaignId: number) => {
   const rows = await r.reader
     .raw(
       `
-        select count(*), send_status, error_codes
+        select count(*), send_status, coalesce(error_codes, '{}') as error_codes
         from message
         join campaign_contact on campaign_contact.id = message.campaign_contact_id
         where campaign_contact.campaign_id = ?
@@ -81,7 +81,8 @@ export const getDeliverabilityStats = async (campaignId: number) => {
     specificErrors: rows
       .filter((o) => o.send_status === "ERROR")
       .map((o) => ({
-        errorCode: o.error_codes ? o.error_codes[0] : null,
+        errorCode:
+          o.error_codes && o.error_codes.length > 0 ? o.error_codes[0] : null,
         count: o.count
       }))
   };

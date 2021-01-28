@@ -89,19 +89,6 @@ export function getInteractionTree(allInteractionSteps, isModel) {
   return pathLengthHash;
 }
 
-export function sortInteractionSteps(interactionSteps) {
-  const pathTree = getInteractionTree(interactionSteps);
-  const orderedSteps = [];
-  Object.keys(pathTree).forEach((key) => {
-    const orderedBranch = pathTree[key].sort(
-      (a, b) =>
-        JSON.stringify(a.interactionStep) < JSON.stringify(b.interactionStep)
-    );
-    orderedBranch.forEach((ele) => orderedSteps.push(ele.interactionStep));
-  });
-  return orderedSteps;
-}
-
 export function getTopMostParent(interactionSteps, isModel) {
   return sortByNewest(interactionSteps).find((step) =>
     isModel
