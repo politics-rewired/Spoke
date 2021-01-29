@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.15.2](https://github.com/politics-rewired/spoke/compare/v3.15.1...v3.15.2) (2021-01-29)
+
+
+### Bug Fixes
+
+* make makeTree() deterministic ([#880](https://github.com/politics-rewired/spoke/issues/880)) ([de26bf6](https://github.com/politics-rewired/spoke/commit/de26bf67fe7268e786ce731ffaf6feacb5c0f0d1))
+* **datatables:** force latest material-ui to fix rows per page dropdown ([#876](https://github.com/politics-rewired/spoke/issues/876)) ([a6cc048](https://github.com/politics-rewired/spoke/commit/a6cc048348d3dfe17a1df4baa8d854ef94f70364))
+* **deliverability-stats:** ensure consistent null return type ([#877](https://github.com/politics-rewired/spoke/issues/877)) ([18ffa4f](https://github.com/politics-rewired/spoke/commit/18ffa4f0effa1150a225688c9a88e0e87cd0b27b))
+
 ### [3.15.1](https://github.com/politics-rewired/spoke/compare/v3.15.0...v3.15.1) (2021-01-26)
 
 
