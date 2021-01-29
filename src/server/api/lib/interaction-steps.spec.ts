@@ -114,4 +114,55 @@ describe("persistInteractionStepTree", () => {
     expect(deletedStep.question).toEqual(NEW_QUESTION);
     expect(deletedStep.is_deleted).toBe(false);
   });
+
+  test("deletes old root interaction step when saving new tree", async () => {
+    const { campaign } = await createCompleteCampaign(client, {});
+    const oldRootStep = await createInteractionStep(client, {
+      campaignId: campaign.id,
+      createdAt: "2021-01-28T00:00:00Z"
+    });
+    const oldChildStep = await createInteractionStep(client, {
+      campaignId: campaign.id,
+      parentInteractionId: oldRootStep.id,
+      createdAt: "2021-01-28T00:00:01Z"
+    });
+
+    const stepToPersist: InteractionStepWithChildren = {
+      ...emptyStep,
+      id: "new5432",
+      parentInteractionId: null,
+      createdAt: "2021-01-29T00:00:00Z",
+      interactionSteps: [
+        {
+          ...emptyStep,
+          id: `new6432`,
+          parentInteractionId: "new5432",
+          createdAt: "2021-01-29T00:00:00Z"
+        }
+      ]
+    };
+
+    await persistInteractionStepTree(campaign.id, stepToPersist, {
+      is_started: campaign.is_started
+    });
+
+    const { rows: liveSteps } = await client.query<InteractionStepRecord>(
+      `select * from interaction_step where is_deleted = false and campaign_id = $1`,
+      [campaign.id]
+    );
+
+    expect(liveSteps).toHaveLength(2);
+    const rootStep = liveSteps.find(
+      (step) => step.parent_interaction_id === null
+    );
+    expect(rootStep).not.toBeUndefined();
+    expect(rootStep!.id).not.toEqual(oldRootStep.id);
+
+    const childStep = liveSteps.find(
+      (step) => step.parent_interaction_id !== null
+    );
+    expect(childStep).not.toBeUndefined();
+    expect(childStep!.id).not.toEqual(oldChildStep.id);
+    expect(childStep!.parent_interaction_id).toEqual(rootStep!.id);
+  });
 });
