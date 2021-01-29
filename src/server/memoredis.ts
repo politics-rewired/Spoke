@@ -20,7 +20,7 @@ const ONE_HOUR = ONE_MINUTE * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_WEEK = ONE_DAY * 7;
 
-const cacheOpts = {
+const cacheOptsPlain: Record<string, [string, number]> = {
   GetUser: ["get-user", ONE_HOUR],
   GetUserOrganization: ["get-user-organization", ONE_HOUR],
   CampaignHasUnassignedContacts: [
@@ -61,11 +61,11 @@ const cacheOpts = {
   MyCurrentAssignmentTargets: ["my-current-assignment-targets", ONE_SECOND * 5]
 };
 
-Object.keys(cacheOpts).forEach((name) => {
-  cacheOpts[name] = {
-    key: cacheOpts[name][0],
-    ttl: cacheOpts[name][1]
-  };
-});
+const cacheOpts = Object.fromEntries(
+  Object.entries(cacheOptsPlain).map(([name, [key, ttl]]) => [
+    name,
+    { key, ttl }
+  ])
+);
 
 export { memoizer, cacheOpts };

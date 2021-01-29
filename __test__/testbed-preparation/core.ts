@@ -4,13 +4,16 @@ import { PoolClient } from "pg";
 import { Assignment } from "../../src/api/assignment";
 import { Campaign } from "../../src/api/campaign";
 import { CampaignContact } from "../../src/api/campaign-contact";
+import { InteractionStep } from "../../src/api/interaction-step";
 import { Message } from "../../src/api/message";
 import { Organization } from "../../src/api/organization";
 import { User } from "../../src/api/user";
+import { DateTime } from "../../src/lib/datetime";
 import {
   AssignmentRecord,
   CampaignContactRecord,
   CampaignRecord,
+  InteractionStepRecord,
   MessageRecord,
   MessageSendStatus,
   MessageStatusType,
@@ -307,3 +310,43 @@ export const createCompleteCampaign = async (
 
   return { organization, campaign, texters, assignments, contacts };
 };
+
+export type CreateInteractionStepOptions = {
+  campaignId: number;
+} & Partial<
+  Pick<
+    InteractionStep,
+    | "answerOption"
+    | "answerActions"
+    | "questionText"
+    | "scriptOptions"
+    | "isDeleted"
+    | "createdAt"
+  > & {
+    parentInteractionId: number;
+  }
+>;
+
+export const createInteractionStep = async (
+  client: PoolClient,
+  options: CreateInteractionStepOptions
+) =>
+  client
+    .query<InteractionStepRecord>(
+      `
+        insert into public.interaction_step (campaign_id, question, parent_interaction_id, answer_option, answer_actions, is_deleted, script_options, created_at)
+        values ($1, $2, $3, $4, $5, $6, $7, $8)
+        returning *
+      `,
+      [
+        options.campaignId,
+        options.questionText ?? faker.lorem.sentence(),
+        options.parentInteractionId ?? null,
+        options.answerOption ?? faker.lorem.sentence(4),
+        options.answerActions ?? faker.lorem.word(),
+        options.isDeleted ?? false,
+        options.scriptOptions ?? [faker.lorem.sentence()],
+        options.createdAt ?? DateTime.local().toISO()
+      ]
+    )
+    .then(({ rows: [message] }) => message);
