@@ -165,4 +165,91 @@ describe("persistInteractionStepTree", () => {
     expect(childStep!.id).not.toEqual(oldChildStep.id);
     expect(childStep!.parent_interaction_id).toEqual(rootStep!.id);
   });
+
+  test("ignores deleted steps in tree", async () => {
+    const { campaign } = await createCompleteCampaign(client, {
+      campaign: { isStarted: false }
+    });
+
+    const stepToPersist: InteractionStepWithChildren = {
+      ...emptyStep,
+      id: "new5432",
+      parentInteractionId: null,
+      createdAt: "2021-01-29T00:00:00Z",
+      interactionSteps: [
+        {
+          ...emptyStep,
+          id: `new6432`,
+          parentInteractionId: "new5432",
+          createdAt: "2021-01-29T00:00:00Z",
+          isDeleted: true
+        }
+      ]
+    };
+
+    await persistInteractionStepTree(campaign.id, stepToPersist, {
+      is_started: campaign.is_started
+    });
+
+    const { rows: liveSteps } = await client.query<InteractionStepRecord>(
+      `select * from interaction_step where campaign_id = $1`,
+      [campaign.id]
+    );
+
+    expect(liveSteps).toHaveLength(1);
+    expect(liveSteps[0].parent_interaction_id).toBeNull();
+  });
+
+  test("soft deletes steps for a started campaign", async () => {
+    const { campaign } = await createCompleteCampaign(client, {
+      campaign: { isStarted: true }
+    });
+    const rootStep = await createInteractionStep(client, {
+      campaignId: campaign.id
+    });
+    const childStep = await createInteractionStep(client, {
+      campaignId: campaign.id,
+      parentInteractionId: rootStep.id
+    });
+
+    const stepToPersist: InteractionStepWithChildren = {
+      ...emptyStep,
+      id: `${rootStep.id}`,
+      parentInteractionId: null,
+      createdAt: "2021-01-29T00:00:00Z",
+      interactionSteps: [
+        {
+          ...emptyStep,
+          id: `${childStep.id}`,
+          parentInteractionId: `${rootStep.id}`,
+          createdAt: "2021-01-29T00:00:00Z",
+          isDeleted: true
+        }
+      ]
+    };
+
+    await persistInteractionStepTree(campaign.id, stepToPersist, {
+      is_started: campaign.is_started
+    });
+
+    const { rows: liveSteps } = await client.query<InteractionStepRecord>(
+      `select * from interaction_step where campaign_id = $1`,
+      [campaign.id]
+    );
+
+    expect(liveSteps).toHaveLength(2);
+    const rootStepRecord = liveSteps.find(
+      (step) => step.parent_interaction_id === null
+    );
+    expect(rootStepRecord).not.toBeUndefined();
+    expect(rootStepRecord!.id).toEqual(rootStep.id);
+    expect(rootStepRecord!.is_deleted).toBe(false);
+
+    const childStepRecord = liveSteps.find(
+      (step) => step.parent_interaction_id !== null
+    );
+    expect(childStepRecord).not.toBeUndefined();
+    expect(childStepRecord!.id).toEqual(childStep.id);
+    expect(childStepRecord!.is_deleted).toBe(true);
+  });
 });
