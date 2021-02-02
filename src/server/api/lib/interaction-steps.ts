@@ -6,25 +6,16 @@ import { cacheOpts, memoizer } from "../../memoredis";
 import { r } from "../../models";
 import { CampaignRecord } from "../types";
 
-export const persistInteractionStepTree = async (
+export const persistInteractionStepNode = async (
   campaignId: number,
   rootInteractionStep: InteractionStepWithChildren,
-  origCampaignRecord: Pick<CampaignRecord, "is_started">,
-  knexTrx?: Knex,
+  knexTrx: Knex,
   temporaryIdMap: Record<string, string> = {}
-) => {
-  // Perform updates in a transaction if one is not present
-  if (!knexTrx) {
-    return r.knex.transaction(async (trx) => {
-      await persistInteractionStepTree(
-        campaignId,
-        rootInteractionStep,
-        origCampaignRecord,
-        trx,
-        temporaryIdMap
-      );
-    });
-  }
+): Promise<number[]> => {
+  let rootStepId = parseInt(rootInteractionStep.id, 10);
+
+  // Bail on deleted steps -- they will be dealt with by persistInteractionStepTree
+  if (rootInteractionStep.isDeleted) return [];
 
   // Update the parent interaction step ID if this step has a reference to a temporary ID
   // and the parent has since been inserted
@@ -34,15 +25,19 @@ export const persistInteractionStepTree = async (
       temporaryIdMap[parentInteractionId];
   }
 
+  const payload = {
+    question: rootInteractionStep.questionText,
+    script_options: rootInteractionStep.scriptOptions,
+    answer_option: rootInteractionStep.answerOption,
+    answer_actions: rootInteractionStep.answerActions
+  };
+
   if (rootInteractionStep.id.indexOf("new") !== -1) {
     // Insert new interaction steps
     const [newId] = await knexTrx("interaction_step")
       .insert({
+        ...payload,
         parent_interaction_id: rootInteractionStep.parentInteractionId || null,
-        question: rootInteractionStep.questionText,
-        script_options: rootInteractionStep.scriptOptions,
-        answer_option: rootInteractionStep.answerOption,
-        answer_actions: rootInteractionStep.answerActions,
         campaign_id: campaignId,
         is_deleted: false
       })
@@ -56,22 +51,14 @@ export const persistInteractionStepTree = async (
 
     // Update the mapping of temporary IDs
     temporaryIdMap[rootInteractionStep.id] = newId;
-  } else if (!origCampaignRecord.is_started && rootInteractionStep.isDeleted) {
-    // Hard delete interaction steps if the campaign hasn't started
-    await knexTrx("interaction_step")
-      .where({ id: rootInteractionStep.id })
-      .delete();
+
+    rootStepId = newId;
   } else {
     // Update the interaction step record
     await knexTrx("interaction_step")
       .where({ id: rootInteractionStep.id })
-      .update({
-        question: rootInteractionStep.questionText,
-        script_options: rootInteractionStep.scriptOptions,
-        answer_option: rootInteractionStep.answerOption,
-        answer_actions: rootInteractionStep.answerActions,
-        is_deleted: rootInteractionStep.isDeleted
-      });
+      .update(payload)
+      .returning("id");
 
     memoizer.invalidate(cacheOpts.InteractionStepSingleton.key, {
       interactionStepId: rootInteractionStep.id
@@ -79,15 +66,50 @@ export const persistInteractionStepTree = async (
   }
 
   // Persist child interaction steps
-  await Promise.all(
-    rootInteractionStep.interactionSteps.map(async (childStep) => {
-      await persistInteractionStepTree(
-        campaignId,
-        childStep,
-        origCampaignRecord,
-        knexTrx,
-        temporaryIdMap
-      );
-    })
+  const childStepIds = await Promise.all(
+    rootInteractionStep.interactionSteps.map((childStep) =>
+      persistInteractionStepNode(campaignId, childStep, knexTrx, temporaryIdMap)
+    )
+  ).then((childResults) =>
+    childResults.reduce((acc, childIds) => acc.concat(childIds), [])
   );
+
+  return childStepIds.concat([rootStepId]);
+};
+
+export const persistInteractionStepTree = async (
+  campaignId: number,
+  rootInteractionStep: InteractionStepWithChildren,
+  origCampaignRecord: Pick<CampaignRecord, "is_started">,
+  knexTrx?: Knex,
+  temporaryIdMap: Record<string, string> = {}
+): Promise<void> => {
+  if (!knexTrx) {
+    return r.knex.transaction((trx) =>
+      persistInteractionStepTree(
+        campaignId,
+        rootInteractionStep,
+        origCampaignRecord,
+        trx,
+        temporaryIdMap
+      )
+    );
+  }
+
+  const stepIds: number[] = await persistInteractionStepNode(
+    campaignId,
+    rootInteractionStep,
+    knexTrx,
+    temporaryIdMap
+  );
+
+  const delQuery = knexTrx("interaction_step")
+    .where({ campaign_id: campaignId })
+    .whereNotIn("id", stepIds);
+
+  if (origCampaignRecord.is_started) {
+    await delQuery.update({ is_deleted: true });
+  } else {
+    await delQuery.del();
+  }
 };
