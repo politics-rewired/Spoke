@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.15.3](https://github.com/politics-rewired/spoke/compare/v3.15.2...v3.15.3) (2021-02-03)
+
+
+### Bug Fixes
+
+* delete old interaction step tree on save of new tree ([#882](https://github.com/politics-rewired/spoke/issues/882)) ([620e5aa](https://github.com/politics-rewired/spoke/commit/620e5aa378722ec036c140beda2f5028a7b6a2f2))
+* use single source of truth for interaction steps ([#878](https://github.com/politics-rewired/spoke/issues/878)) ([2c364f4](https://github.com/politics-rewired/spoke/commit/2c364f45913b9da82f3a66ea37bd5bc1c3f5de70))
+
 ### [3.15.2](https://github.com/politics-rewired/spoke/compare/v3.15.1...v3.15.2) (2021-01-29)
 
 
