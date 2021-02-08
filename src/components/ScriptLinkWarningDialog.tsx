@@ -27,7 +27,7 @@ const DialogContent = (props: ContentProps) => {
       <p>
         Be sure to read our advice{" "}
         <a
-          href="https://docs.spokerewired.com/article/70-short-link-domains"
+          href="https://docs.spokerewired.com/article/113-sending-links"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -52,7 +52,7 @@ const DialogContent = (props: ContentProps) => {
         If you need to insert a short link into your message, be sure to read
         the docs{" "}
         <a
-          href="https://docs.spokerewired.com/article/70-short-link-domains"
+          href="https://docs.spokerewired.com/article/113-sending-links"
           target="_blank"
           rel="noopener noreferrer"
         >
