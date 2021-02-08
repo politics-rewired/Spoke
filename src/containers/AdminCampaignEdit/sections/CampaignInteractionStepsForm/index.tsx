@@ -420,7 +420,12 @@ const mutations: MutationMap<FullComponentProps> = {
         variables
       });
       const data = produce(old, (draft: any) => {
-        draft.campaign.interactionSteps = editCampaign.interactionSteps;
+        draft.campaign.interactionSteps = editCampaign.interactionSteps.map(
+          (step: InteractionStepWithLocalState) => ({
+            ...step,
+            isModified: false
+          })
+        );
       });
       store.writeQuery({ query: GET_CAMPAIGN_INTERACTIONS, variables, data });
     }
