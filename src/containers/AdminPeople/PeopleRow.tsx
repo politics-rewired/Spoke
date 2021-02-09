@@ -150,7 +150,9 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
       <TableRowColumn>
         <RoleSelect
           context={context}
-          onSelect={(role) => handlers.editRole(role, row.user.id)}
+          onSelect={(role) =>
+            handlers.editMembershipRole(role, row.membership.id)
+          }
         />
       </TableRowColumn>
 
@@ -158,7 +160,7 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
         <AutoApproveSelect
           context={context}
           onChange={(autoApprove) =>
-            handlers.editAutoApprove(autoApprove, row.user.id)
+            handlers.editAutoApprove(autoApprove, row.membership.id)
           }
         />
       </TableRowColumn>

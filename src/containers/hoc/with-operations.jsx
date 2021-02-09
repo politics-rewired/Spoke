@@ -4,6 +4,7 @@ import { compose, graphql, withApollo } from "react-apollo";
 import { branch, renderComponent, withProps } from "recompose";
 
 import LoadingIndicator from "../../components/LoadingIndicator";
+import { replaceAll } from "../../lib/utils";
 
 /**
  * This HOC takes a list of GraphQL query names and adds a loading prop that is true if any of the
@@ -63,7 +64,16 @@ export const withOperations = (options) => {
 
 // remove 'GraphQL Error:' from error messages, per client request
 export const formatErrorMessage = (error) => {
-  return error.message.replaceAll("GraphQL Error:", "").trim();
+  const message =
+    typeof error === "string"
+      ? error
+      : Object.prototype.hasOwnProperty.call(error, "message")
+      ? error.message
+      : `${error}`;
+  return ["GraphQL Error:", "GraphQL error:"].reduce(
+    (acc, prefix) => replaceAll(acc, prefix, ""),
+    message
+  );
 };
 
 export const PrettyErrors = ({ errors }) => {

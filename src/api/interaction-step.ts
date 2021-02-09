@@ -11,7 +11,7 @@ export interface InteractionStep {
   isDeleted: boolean;
   answerActions: string;
   questionResponse?: QuestionResponse;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface InteractionStepWithChildren extends InteractionStep {

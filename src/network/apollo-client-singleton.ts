@@ -12,6 +12,7 @@ import _fetch from "isomorphic-fetch"; // TODO - remove?
 import omitDeep from "omit-deep-lodash";
 
 import { eventBus, EventTypes } from "../client/events";
+import iStepLocalResolvers from "../containers/AdminCampaignEdit/sections/CampaignInteractionStepsForm/resolvers";
 import unions from "./unions.json";
 
 const uploadLink = createUploadLink({
@@ -87,7 +88,8 @@ const ApolloClientSingleton = new ApolloClient({
   link,
   cache,
   connectToDevTools: true,
-  queryDeduplication: true
+  queryDeduplication: true,
+  resolvers: [iStepLocalResolvers]
 });
 
 export default ApolloClientSingleton;

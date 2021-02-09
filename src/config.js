@@ -671,6 +671,11 @@ const validators = {
     default: false,
     isClient: true
   }),
+  TEST_DATABASE_URL: url({
+    desc: "Testing database connection URL",
+    example: "postgres://username:password@127.0.0.1:5432/db_name",
+    default: undefined
+  }),
   TWILIO_API_KEY: str({
     desc: "Twilio API key. Required if using Twilio.",
     default: undefined

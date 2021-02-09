@@ -11,7 +11,11 @@ try {
 
 module.exports = {
   development: config,
-  test: config,
+  test: {
+    ...config,
+    connection: process.env.TEST_DATABASE_URL,
+    useReader: false
+  },
   staging: config,
   production: config
 };

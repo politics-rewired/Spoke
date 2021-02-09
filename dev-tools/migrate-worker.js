@@ -5,8 +5,13 @@ import { config } from "../src/config";
 import logger from "../src/logger";
 
 const main = async () => {
-  logger.info(`migrating with connection string ${config.DATABASE_URL}`);
-  const pool = new Pool({ connectionString: config.DATABASE_URL });
+  const connectionString = config.isTest
+    ? config.TEST_DATABASE_URL
+    : config.DATABASE_URL;
+  logger.info(
+    `Using environment: ${config.NODE_ENV}. Migrating worker with connection string ${connectionString}`
+  );
+  const pool = new Pool({ connectionString });
 
   await runMigrations({
     pgPool: pool,

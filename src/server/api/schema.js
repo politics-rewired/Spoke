@@ -20,6 +20,8 @@ import { DateTime, parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { isNowBetween } from "../../lib/timezones";
+import { getSendBeforeUtc } from "../../lib/tz-helpers";
+import { replaceAll } from "../../lib/utils";
 import logger from "../../logger";
 import {
   assignTexters,
@@ -74,6 +76,7 @@ import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
 import { notifyAssignmentCreated, notifyOnTagConversation } from "./lib/alerts";
 import { processContactsFile } from "./lib/edit-campaign";
+import { persistInteractionStepTree } from "./lib/interaction-steps";
 import {
   getContactMessagingService,
   saveNewIncomingMessage
@@ -105,9 +108,6 @@ const { JOBS_SYNC } = config;
 
 const replaceCurlyApostrophes = (rawText) =>
   rawText.replace(/[\u2018\u2019]/g, "'");
-
-const replaceAll = (str, find, replace) =>
-  str.replace(new RegExp(escapeRegExp(find), "g"), replace);
 
 const replaceShortLinkDomains = async (organizationId, messageText) => {
   const domains = await r
@@ -172,91 +172,6 @@ const replaceShortLinkDomains = async (organizationId, messageText) => {
   };
   const finalMessageText = domains.reduce(replacerReducer, messageText);
   return finalMessageText;
-};
-
-const persistInteractionStepTree = async (
-  campaignId,
-  rootInteractionStep,
-  origCampaignRecord,
-  knexTrx,
-  temporaryIdMap = {}
-) => {
-  // Perform updates in a transaction if one is not present
-  if (!knexTrx) {
-    return r.knex.transaction(async (trx) => {
-      await persistInteractionStepTree(
-        campaignId,
-        rootInteractionStep,
-        origCampaignRecord,
-        trx,
-        temporaryIdMap
-      );
-    });
-  }
-
-  // Update the parent interaction step ID if this step has a reference to a temporary ID
-  // and the parent has since been inserted
-  if (temporaryIdMap[rootInteractionStep.parentInteractionId]) {
-    rootInteractionStep.parentInteractionId =
-      temporaryIdMap[rootInteractionStep.parentInteractionId];
-  }
-
-  if (rootInteractionStep.id.indexOf("new") !== -1) {
-    // Insert new interaction steps
-    const [newId] = await knexTrx("interaction_step")
-      .insert({
-        parent_interaction_id: rootInteractionStep.parentInteractionId || null,
-        question: rootInteractionStep.questionText,
-        script_options: rootInteractionStep.scriptOptions,
-        answer_option: rootInteractionStep.answerOption,
-        answer_actions: rootInteractionStep.answerActions,
-        campaign_id: campaignId,
-        is_deleted: false
-      })
-      .returning("id");
-
-    if (rootInteractionStep.parentInteractionId) {
-      memoizer.invalidate(cacheOpts.InteractionStepChildren.key, {
-        interactionStepId: rootInteractionStep.parentInteractionId
-      });
-    }
-
-    // Update the mapping of temporary IDs
-    temporaryIdMap[rootInteractionStep.id] = newId;
-  } else if (!origCampaignRecord.is_started && rootInteractionStep.isDeleted) {
-    // Hard delete interaction steps if the campaign hasn't started
-    await knexTrx("interaction_step")
-      .where({ id: rootInteractionStep.id })
-      .delete();
-  } else {
-    // Update the interaction step record
-    await knexTrx("interaction_step")
-      .where({ id: rootInteractionStep.id })
-      .update({
-        question: rootInteractionStep.questionText,
-        script_options: rootInteractionStep.scriptOptions,
-        answer_option: rootInteractionStep.answerOption,
-        answer_actions: rootInteractionStep.answerActions,
-        is_deleted: rootInteractionStep.isDeleted
-      });
-
-    memoizer.invalidate(cacheOpts.InteractionStepSingleton.key, {
-      interactionStepId: rootInteractionStep.id
-    });
-  }
-
-  // Persist child interaction steps
-  await Promise.all(
-    rootInteractionStep.interactionSteps.map(async (childStep) => {
-      await persistInteractionStepTree(
-        campaignId,
-        childStep,
-        origCampaignRecord,
-        knexTrx,
-        temporaryIdMap
-      );
-    })
-  );
 };
 
 async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
@@ -653,11 +568,7 @@ async function sendMessage(
     throw new GraphQLError("Outside permitted texting time for this recipient");
   }
 
-  const sendBefore = DateTime.utc()
-    .set({ hour: endHour })
-    .setZone(timezone)
-    .startOf("day")
-    .toISO();
+  const sendBefore = getSendBeforeUtc(timezone, endHour, DateTime.local());
   const { contactNumber, text } = message;
 
   if (text.length > (config.MAX_MESSAGE_LENGTH || 99999)) {
@@ -3372,18 +3283,15 @@ const rootMutations = {
 
       const { operationMode } = externalSystem;
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
-      let apiKeyRef = graphileSecretRef(organizationId, truncatedKey);
 
-      if (operationMode === VanOperationMode.MYCAMPAIGN) {
-        apiKeyRef = apiKeyRef.concat("|1");
-      }
+      const apiKeyAppendage =
+        operationMode === VanOperationMode.MYCAMPAIGN ? "|1" : "|0";
 
-      if (operationMode === VanOperationMode.VOTERFILE) {
-        apiKeyRef = apiKeyRef.concat("|0");
-      }
+      const apiKeyRef =
+        graphileSecretRef(organizationId, truncatedKey) + apiKeyAppendage;
 
       await getWorker().then((worker) =>
-        worker.setSecret(apiKeyRef, externalSystem.apiKey)
+        worker.setSecret(apiKeyRef, externalSystem.apiKey + apiKeyAppendage)
       );
 
       const [created] = await r
@@ -3393,8 +3301,7 @@ const rootMutations = {
           type: externalSystem.type.toLowerCase(),
           organization_id: parseInt(organizationId, 10),
           username: externalSystem.username,
-          api_key_ref: apiKeyRef,
-          operation_mode: externalSystem.operationMode
+          api_key_ref: apiKeyRef
         })
         .returning("*");
 
@@ -3415,65 +3322,65 @@ const rootMutations = {
 
       await accessRequired(user, savedSystem.organization_id, "ADMIN");
 
-      // We will check if the password/API key changed below
-      let authDidChange = externalSystem.username !== savedSystem.username;
-
-      const payload = {
+      const updatePayload = {
         name: externalSystem.name,
         type: externalSystem.type.toLowerCase(),
-        username: externalSystem.username,
-        operation_mode: externalSystem.operationMode
+        username: externalSystem.username
       };
 
-      if (!externalSystem.apiKey.includes("*")) {
-        authDidChange = true;
-        const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
-        const apiKeyRef = graphileSecretRef(
-          savedSystem.organization_id,
-          truncatedKey
-        );
-        await r
-          .knex("graphile_secrets.secrets")
-          .where({ ref: savedSystem.api_key_ref })
-          .del();
-        await getWorker().then((worker) =>
-          worker.setSecret(apiKeyRef, externalSystem.apiKey)
-        );
-        payload.api_key_ref = apiKeyRef;
-      }
+      const savedSystemApiKeySecret = await getWorker().then((worker) => {
+        return worker.getSecret(savedSystem.api_key_ref);
+      });
 
-      // if the operationMode changed, append the correct digit to the apiKeyRef
-      const operationModeDidChange =
-        externalSystem.operation_mode !== savedSystem.operation_mode;
-      const { operationMode } = externalSystem;
+      const [
+        savedSystemApiKey,
+        savedSystemApiKeyAppendage
+      ] = savedSystemApiKeySecret
+        ? savedSystemApiKeySecret.split("|")
+        : [undefined, undefined];
+
+      const savedSystemOperationMode =
+        savedSystemApiKeyAppendage === "1"
+          ? VanOperationMode.MYCAMPAIGN
+          : VanOperationMode.VOTERFILE;
+
+      // We will check if the password/API key changed below
+      const authDidChange =
+        externalSystem.username !== savedSystem.username ||
+        externalSystem.operationMode !== savedSystemOperationMode ||
+        !externalSystem.apiKey.includes("*");
+
+      const apiKeyAppendage =
+        externalSystem.operationMode === VanOperationMode.MYCAMPAIGN
+          ? "|1"
+          : "|0";
+
       const truncatedKey = `${externalSystem.apiKey.slice(0, 5)}********`;
+      const apiKeyRef =
+        graphileSecretRef(savedSystem.organization_id, truncatedKey) +
+        apiKeyAppendage;
 
-      if (operationModeDidChange) {
-        let apiKeyRef = graphileSecretRef(
-          savedSystem.organization_id,
-          truncatedKey
-        );
+      updatePayload.api_key_ref = apiKeyRef;
 
-        if (operationMode === VanOperationMode.MYCAMPAIGN) {
-          apiKeyRef = apiKeyRef.concat("|1");
-        }
-
-        if (operationMode === VanOperationMode.VOTERFILE) {
-          apiKeyRef = apiKeyRef.concat("|0");
-        }
+      if (authDidChange) {
         await r
           .knex("graphile_secrets.secrets")
           .where({ ref: savedSystem.api_key_ref })
           .del();
+
         await getWorker().then((worker) =>
-          worker.setSecret(apiKeyRef, externalSystem.apiKey)
+          worker.setSecret(
+            apiKeyRef,
+            (externalSystem.apiKey.includes("*")
+              ? savedSystemApiKey
+              : externalSystem.apiKey) + apiKeyAppendage
+          )
         );
-        payload.api_key_ref = apiKeyRef;
       }
 
       const [updated] = await r
         .knex("external_system")
-        .update(payload)
+        .update(updatePayload)
         .where({ id: externalSystemId })
         .returning("*");
 

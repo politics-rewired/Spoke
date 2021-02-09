@@ -42,3 +42,50 @@ export const getCampaigns: DoGetCampaigns = memoizer.memoize(
   },
   cacheOpts.CampaignsListRelay
 );
+
+interface DeliverabilityStatRow {
+  count: string;
+  send_status: string;
+  error_codes: string[] | null;
+}
+
+export const getDeliverabilityStats = async (campaignId: number) => {
+  const rows = await r.reader
+    .raw(
+      `
+        select count(*), send_status, coalesce(error_codes, '{}') as error_codes
+        from message
+        join campaign_contact on campaign_contact.id = message.campaign_contact_id
+        where campaign_contact.campaign_id = ?
+          and is_from_contact = false
+        group by 2, 3
+      `,
+      [campaignId]
+    )
+    .then((res: { rows: DeliverabilityStatRow[] }) => {
+      // The `count` column is returned as a string so we parse it ourselves
+      return res.rows.map(({ count, ...row }) => ({
+        ...row,
+        count: parseInt(count, 10)
+      }));
+    });
+
+  const result = {
+    deliveredCount: rows.find((o) => o.send_status === "DELIVERED")?.count || 0,
+    sentCount: rows.find((o) => o.send_status === "SENT")?.count || 0,
+    errorCount:
+      rows
+        .filter((o) => o.send_status === "ERROR")
+        .reduce((a, b) => ({ count: a.count + b.count }), { count: 0 }).count ||
+      0,
+    specificErrors: rows
+      .filter((o) => o.send_status === "ERROR")
+      .map((o) => ({
+        errorCode:
+          o.error_codes && o.error_codes.length > 0 ? o.error_codes[0] : null,
+        count: o.count
+      }))
+  };
+
+  return result;
+};

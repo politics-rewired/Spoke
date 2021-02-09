@@ -5,7 +5,15 @@ import map from "lodash/fp/map";
 import reverse from "lodash/fp/reverse";
 import sortBy from "lodash/fp/sortBy";
 
-const { DateTime } = require("luxon");
+import { DateTime } from "./datetime";
+
+export const sortByCreatedAt = (is) => {
+  const asDate = DateTime.fromISO(is.createdAt);
+  return asDate.isValid ? asDate : null;
+};
+
+// Sort by newest first
+export const sortByNewest = flow(sortBy(sortByCreatedAt), reverse);
 
 export function findParent(interactionStep, allInteractionSteps, isModel) {
   let parent = null;
@@ -81,21 +89,12 @@ export function getInteractionTree(allInteractionSteps, isModel) {
   return pathLengthHash;
 }
 
-export function sortInteractionSteps(interactionSteps) {
-  const pathTree = getInteractionTree(interactionSteps);
-  const orderedSteps = [];
-  Object.keys(pathTree).forEach((key) => {
-    const orderedBranch = pathTree[key].sort(
-      (a, b) =>
-        JSON.stringify(a.interactionStep) < JSON.stringify(b.interactionStep)
-    );
-    orderedBranch.forEach((ele) => orderedSteps.push(ele.interactionStep));
-  });
-  return orderedSteps;
-}
-
-export function getTopMostParent(interactionSteps, _isModel) {
-  return interactionSteps.find((step) => step.parentInteractionId === null);
+export function getTopMostParent(interactionSteps, isModel) {
+  return sortByNewest(interactionSteps).find((step) =>
+    isModel
+      ? step.parent_interaction_id === null
+      : step.parentInteractionId === null
+  );
 }
 
 export function makeTree(interactionSteps, id = null, indexed = null) {
@@ -105,19 +104,14 @@ export function makeTree(interactionSteps, id = null, indexed = null) {
       map((is) => [is.id, is]),
       fromPairs
     )(interactionSteps);
-  const root = id
-    ? indexedById[id]
-    : interactionSteps.find((is) => is.parentInteractionId === null);
+
+  const root = id ? indexedById[id] : getTopMostParent(interactionSteps, false);
 
   return {
     ...root,
     interactionSteps: flow(
       filter((is) => is.parentInteractionId === root.id),
-      sortBy((is) => {
-        const asDate = DateTime.fromISO(is.createdAt);
-        return asDate.isValid ? asDate : null;
-      }),
-      reverse, // ui puts newest step at top
+      sortByNewest,
       map((c) => makeTree(interactionSteps, c.id, indexedById))
     )(interactionSteps)
   };

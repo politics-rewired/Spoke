@@ -23,10 +23,14 @@ module.exports = {
     SESSION_SECRET: "it is JUST a test! -- it better be!",
     TEST_ENVIRONMENT: "1"
   },
-  moduleFileExtensions: ["js", "jsx"],
-  transform: {
-    ".*.js": "<rootDir>/node_modules/babel-jest"
-  },
+  globalSetup: "<rootDir>/__test__/setup.js",
+  globalTeardown: "<rootDir>/__test__/teardown.js",
+  testMatch: [
+    "**/__tests__/**/*.js?(x),**/?(*.)(spec|test).js?(x)",
+    "**/?(*.)+(spec|test).[jt]s?(x)"
+  ],
+  moduleFileExtensions: ["js", "jsx", "ts", "tsx"],
+  transform: { "\\.[jt]sx?$": "babel-jest" },
   moduleDirectories: ["node_modules"],
   moduleNameMapper: {
     "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":
@@ -40,6 +44,6 @@ module.exports = {
     "!**/deploy/**",
     "!**/coverage/**"
   ],
-  setupTestFrameworkScriptFile: "<rootDir>/__test__/setup.js",
+  setupTestFrameworkScriptFile: "<rootDir>/__test__/setup-framework.js",
   testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/__test__/e2e/"]
 };

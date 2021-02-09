@@ -78,6 +78,40 @@ export enum MessageStatusType {
   Closed = "closed"
 }
 
+export interface CampaignRecord {
+  id: number;
+  organization_id: number;
+  title: string;
+  description: string;
+  is_started: boolean | null;
+  due_by: string | null;
+  created_at: string;
+  is_archived: boolean | null;
+  use_dynamic_assignment: boolean | null;
+  logo_image_url: string | null;
+  intro_html: string | null;
+  primary_color: string | null;
+  texting_hours_start: number;
+  texting_hours_end: number;
+  timezone: string;
+  creator_id: number | null;
+  is_autoassign_enabled: boolean;
+  limit_assignment_to_teams: boolean;
+  updated_at: string;
+  replies_stale_after_minutes: number | null;
+  landlines_filtered: boolean;
+  external_system_id: string | null;
+}
+
+export interface AssignmentRecord {
+  id: number;
+  user_id: number;
+  campaign_id: number;
+  created_at: string;
+  max_contacts: number | null;
+  updated_at: string;
+}
+
 export interface CampaignContactRecord {
   id: number;
   campaign_id: number;
@@ -151,5 +185,28 @@ export interface MessageRecord {
   script_version_hash: string;
   num_segments: number;
   num_media: number;
-  error_codes: string;
+  error_codes: string[] | null;
+}
+
+export interface ExternalSystemRecord {
+  id: string;
+  name: string;
+  type: string;
+  api_key_ref: string;
+  organization_id: number;
+  username: string;
+  created_at: string;
+  updated_at: string;
+  synced_at: string | null;
+}
+
+export interface ExternalResultCodeRecord {
+  id: string;
+  system_id: string;
+  external_id: number;
+  name: string | null;
+  medium_name: string | null;
+  short_name: string | null;
+  created_at: string;
+  updated_at: string;
 }

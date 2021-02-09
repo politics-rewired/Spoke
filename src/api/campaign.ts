@@ -28,9 +28,17 @@ export interface CampaignsFilter {
 export interface Campaign {
   id: string;
   title: string;
+  description: string;
   isStarted: boolean;
   dueBy: string;
   contactsCount: number;
+  isArchived: boolean;
+  textingHoursStart: number;
+  textingHoursEnd: number;
+  timezone: string;
+  isAutoassignEnabled: boolean;
+  isAssignmentLimitedToTeams: boolean;
+  landlinesFiltered: boolean;
   syncReadiness: ExternalSyncReadinessState;
   pendingJobs: JobRequest[];
   interactionSteps: InteractionStep[];

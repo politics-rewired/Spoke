@@ -13,14 +13,7 @@ pg.defaults.ssl = config.DB_USE_SSL;
 let connection = {};
 
 if (config.isTest) {
-  connection = {
-    host: config.DB_HOST,
-    port: config.DB_PORT,
-    database: "spoke_test",
-    password: "spoke_test",
-    user: "spoke_test",
-    ssl: config.DB_USE_SSL
-  };
+  connection = config.TEST_DATABASE_URL;
 } else if (config.DATABASE_URL) {
   connection = config.DATABASE_URL;
 } else {
@@ -53,9 +46,10 @@ const knexConfig = {
 
 const useReader = !!config.DATABASE_READER_URL;
 
-const readerConfig = useReader
-  ? { ...knexConfig, connection: config.DATABASE_READER_URL }
-  : knexConfig;
+const readerConfig =
+  useReader && !config.isTest
+    ? { ...knexConfig, connection: config.DATABASE_READER_URL }
+    : knexConfig;
 
 knexConfig.readerConfig = readerConfig;
 knexConfig.useReader = useReader;

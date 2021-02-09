@@ -2,6 +2,69 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.15.4](https://github.com/politics-rewired/spoke/compare/v3.15.3...v3.15.4) (2021-02-09)
+
+
+### Bug Fixes
+
+* **interaction-steps:** fix edit script ([#885](https://github.com/politics-rewired/spoke/issues/885)) ([87af85d](https://github.com/politics-rewired/spoke/commit/87af85dcb8b5f8c83c2eff333939dd230034a2f1))
+
+### [3.15.3](https://github.com/politics-rewired/spoke/compare/v3.15.2...v3.15.3) (2021-02-03)
+
+
+### Bug Fixes
+
+* delete old interaction step tree on save of new tree ([#882](https://github.com/politics-rewired/spoke/issues/882)) ([620e5aa](https://github.com/politics-rewired/spoke/commit/620e5aa378722ec036c140beda2f5028a7b6a2f2))
+* use single source of truth for interaction steps ([#878](https://github.com/politics-rewired/spoke/issues/878)) ([2c364f4](https://github.com/politics-rewired/spoke/commit/2c364f45913b9da82f3a66ea37bd5bc1c3f5de70))
+
+### [3.15.2](https://github.com/politics-rewired/spoke/compare/v3.15.1...v3.15.2) (2021-01-29)
+
+
+### Bug Fixes
+
+* make makeTree() deterministic ([#880](https://github.com/politics-rewired/spoke/issues/880)) ([de26bf6](https://github.com/politics-rewired/spoke/commit/de26bf67fe7268e786ce731ffaf6feacb5c0f0d1))
+* **datatables:** force latest material-ui to fix rows per page dropdown ([#876](https://github.com/politics-rewired/spoke/issues/876)) ([a6cc048](https://github.com/politics-rewired/spoke/commit/a6cc048348d3dfe17a1df4baa8d854ef94f70364))
+* **deliverability-stats:** ensure consistent null return type ([#877](https://github.com/politics-rewired/spoke/issues/877)) ([18ffa4f](https://github.com/politics-rewired/spoke/commit/18ffa4f0effa1150a225688c9a88e0e87cd0b27b))
+
+### [3.15.1](https://github.com/politics-rewired/spoke/compare/v3.15.0...v3.15.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* fix email notifications on campaign start ([#875](https://github.com/politics-rewired/spoke/issues/875)) ([a56adcc](https://github.com/politics-rewired/spoke/commit/a56adcc85d27898a896320b73ad654f1bb1893f3))
+* handle mixed argument types ([#870](https://github.com/politics-rewired/spoke/issues/870)) ([f29e78b](https://github.com/politics-rewired/spoke/commit/f29e78be4eafe2927139ce20b8a46980e255aa38))
+* parse count as integer ([#872](https://github.com/politics-rewired/spoke/issues/872)) ([32c36c9](https://github.com/politics-rewired/spoke/commit/32c36c9476062f81a4d23a5c1d58ae97a9d35e5f))
+
+## [3.15.0](https://github.com/politics-rewired/spoke/compare/v3.14.3...v3.15.0) (2021-01-25)
+
+
+### Features
+
+* display character/segment counts in texter view and message review ([#860](https://github.com/politics-rewired/spoke/issues/860)) ([2e6fe60](https://github.com/politics-rewired/spoke/commit/2e6fe60c6efd395084dc47786fd248dc023c0c3a))
+
+
+### Bug Fixes
+
+* **van:** fall back to 'canvassed' result code for 'messaged'  contacts ([#867](https://github.com/politics-rewired/spoke/issues/867)) ([4bd6d7e](https://github.com/politics-rewired/spoke/commit/4bd6d7e16d48b2c5a70c5bbc0f5c6b511f9372ea))
+* **vanoperationmode:** remove operation mode key from external system mutations ([#868](https://github.com/politics-rewired/spoke/issues/868)) ([1cfef22](https://github.com/politics-rewired/spoke/commit/1cfef22eb8574a0e83e9cddf1ed92b711404fb22))
+
+### [3.14.3](https://github.com/politics-rewired/spoke/compare/v3.14.2...v3.14.3) (2021-01-21)
+
+
+### Bug Fixes
+
+* add getSendBeforeUtc util to fix sendBefore ([#864](https://github.com/politics-rewired/spoke/issues/864)) ([f70c845](https://github.com/politics-rewired/spoke/commit/f70c8454c98ab58a550fa822b8eb2bc264ce0070))
+* fix error count summation ([#863](https://github.com/politics-rewired/spoke/issues/863)) ([42cd11a](https://github.com/politics-rewired/spoke/commit/42cd11ad026fbffb94f0fe84a57ed4e717a7d314))
+* pass membership id, not user id, to mutation ([#866](https://github.com/politics-rewired/spoke/issues/866)) ([bc04b78](https://github.com/politics-rewired/spoke/commit/bc04b78c906ccbebe3a80ed0e76f4cc5228c6415))
+* **sendbuttonarrow:** pin the send arrow to the top of the message field ([#859](https://github.com/politics-rewired/spoke/issues/859)) ([2fc088b](https://github.com/politics-rewired/spoke/commit/2fc088bf9a473a3271dd104e6729ff3d70796177))
+
+### [3.14.2](https://github.com/politics-rewired/spoke/compare/v3.14.1...v3.14.2) (2021-01-20)
+
+
+### Bug Fixes
+
+* fall back to provided zone name ([b9e1e79](https://github.com/politics-rewired/spoke/commit/b9e1e794881b6658b25f97ca8f59ca5cabeb3f33))
+
 ### [3.14.1](https://github.com/politics-rewired/spoke/compare/v3.14.0...v3.14.1) (2021-01-20)
 
 
