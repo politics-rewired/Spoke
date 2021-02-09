@@ -2,8 +2,11 @@
 import { ScriptWarningContext } from "../ScriptLinkWarningDialog";
 import { GENERIC_DOMAINS, SHORTLINK_DOMAINS } from "./lib";
 
-export const getWarningContextForScript = (script: string): void => {
-  let warningContext;
+export const getWarningContextForScript = (
+  script: string
+): ScriptWarningContext | undefined => {
+  // eslint-disable-next-line no-undef-init
+  let warningContext: ScriptWarningContext | undefined = undefined;
   const scriptArray = script.split(" ");
 
   // filter media attachments by excluding array entries that start with '['

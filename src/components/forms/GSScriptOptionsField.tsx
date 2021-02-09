@@ -9,15 +9,32 @@ import DeleteIcon from "material-ui/svg-icons/action/delete";
 import InfoIcon from "material-ui/svg-icons/action/info";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import TextField from "material-ui/TextField";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
 import ScriptLinkWarningDialog from "../ScriptLinkWarningDialog";
-import GSFormField from "./GSFormField";
+import GSFormField, { GSFormFieldProps } from "./GSFormField";
 import { getWarningContextForScript } from "./utils";
+
+interface Props extends GSFormFieldProps {
+  value: string[];
+  name: string;
+  customFields: string[];
+  className?: string;
+  hintText?: string;
+  multiLine?: boolean;
+  fullWidth?: boolean;
+  onChange(value: string[]): void;
+  onBlue?: () => void;
+}
+
+interface State {
+  scriptTarget?: string;
+  scriptDraft: string;
+  scriptWarningOpen: boolean;
+}
 
 const styles = {
   dialog: {
@@ -25,21 +42,23 @@ const styles = {
   }
 };
 
-class GSScriptOptionsField extends GSFormField {
-  state = {
+class GSScriptOptionsField extends GSFormField<Props, State> {
+  state: State = {
     scriptTarget: undefined,
     scriptDraft: "",
     scriptWarningOpen: false
   };
 
-  createDialogHandler = (scriptVersion) => (event) => {
+  createDialogHandler = (scriptVersion: string) => (
+    event: React.FormEvent<unknown>
+  ) => {
     event.stopPropagation();
     event.preventDefault();
 
     this.setState({ scriptTarget: scriptVersion, scriptDraft: scriptVersion });
   };
 
-  createDeleteHandler = (scriptVersion) => () => {
+  createDeleteHandler = (scriptVersion: string) => () => {
     const scriptVersions = [...this.props.value];
     const targetIndex = scriptVersions.indexOf(scriptVersion);
     scriptVersions.splice(targetIndex, 1);
@@ -56,6 +75,9 @@ class GSScriptOptionsField extends GSFormField {
   handleSaveScript = () => {
     const scriptVersions = [...this.props.value];
     const { scriptTarget, scriptDraft } = this.state;
+
+    if (scriptTarget === undefined) return;
+
     const targetIndex = scriptVersions.indexOf(scriptTarget);
     scriptVersions[targetIndex] = scriptDraft.trim();
 
@@ -134,25 +156,26 @@ class GSScriptOptionsField extends GSFormField {
       >
         <DialogContent>
           <ScriptEditor
-            ref={(ref) => {
-              this.inputRef = ref;
-            }}
             name={name}
             scriptText={scriptDraft}
             scriptFields={scriptFields}
             receiveFocus
             expandable
-            onChange={(val) => this.setState({ scriptDraft: val.trim() })}
+            onChange={(val: string) =>
+              this.setState({ scriptDraft: val.trim() })
+            }
           />
           {isDuplicate && (
             <p>A script version with this text already exists!</p>
           )}
-          <ScriptLinkWarningDialog
-            open={scriptWarningOpen}
-            warningContext={warningContext}
-            handleConfirm={this.handleConfirmLinkWarning}
-            handleClose={this.handleCloseLinkWarning}
-          />
+          {warningContext && (
+            <ScriptLinkWarningDialog
+              open={scriptWarningOpen}
+              warningContext={warningContext}
+              handleConfirm={this.handleConfirmLinkWarning}
+              handleClose={this.handleCloseLinkWarning}
+            />
+          )}
         </DialogContent>
         <DialogActions>{actions}</DialogActions>
       </Dialog>
@@ -235,18 +258,5 @@ class GSScriptOptionsField extends GSFormField {
     );
   }
 }
-
-GSScriptOptionsField.propTypes = {
-  value: PropTypes.arrayOf(PropTypes.string),
-  customFields: PropTypes.arrayOf(PropTypes.string).isRequired,
-  name: PropTypes.string,
-  className: PropTypes.string,
-  hintText: PropTypes.string,
-  label: PropTypes.string,
-  multiLine: PropTypes.bool,
-  fullWidth: PropTypes.bool,
-  onChange: PropTypes.func,
-  onBlur: PropTypes.func
-};
 
 export default GSScriptOptionsField;
