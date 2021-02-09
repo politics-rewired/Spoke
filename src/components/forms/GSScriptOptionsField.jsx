@@ -41,7 +41,7 @@ class GSScriptOptionsField extends GSFormField {
   };
 
   createDeleteHandler = (scriptVersion) => () => {
-    const { value: scriptVersions } = this.props;
+    const scriptVersions = [...this.props.value];
     const targetIndex = scriptVersions.indexOf(scriptVersion);
     scriptVersions.splice(targetIndex, 1);
     this.props.onChange(scriptVersions);
@@ -55,7 +55,7 @@ class GSScriptOptionsField extends GSFormField {
 
   // save script if no link warning is needed
   handleSaveScript = () => {
-    const { value: scriptVersions } = this.props;
+    const scriptVersions = [...this.props.value];
     const { scriptTarget, scriptDraft } = this.state;
     const targetIndex = scriptVersions.indexOf(scriptTarget);
     scriptVersions[targetIndex] = scriptDraft.trim();
@@ -65,7 +65,7 @@ class GSScriptOptionsField extends GSFormField {
   };
 
   handleAddScriptVersion = () => {
-    const { value: scriptVersions } = this.props;
+    const scriptVersions = [...this.props.value];
     scriptVersions.push("");
     this.props.onChange(scriptVersions);
   };
