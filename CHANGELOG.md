@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.15.4](https://github.com/politics-rewired/spoke/compare/v3.15.3...v3.15.4) (2021-02-09)
+
+
+### Bug Fixes
+
+* **interaction-steps:** fix edit script ([#885](https://github.com/politics-rewired/spoke/issues/885)) ([87af85d](https://github.com/politics-rewired/spoke/commit/87af85dcb8b5f8c83c2eff333939dd230034a2f1))
+
 ### [3.15.3](https://github.com/politics-rewired/spoke/compare/v3.15.2...v3.15.3) (2021-02-03)
 
 
