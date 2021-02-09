@@ -10,6 +10,8 @@ import React from "react";
 import { compose } from "recompose";
 import * as yup from "yup";
 
+import { Campaign } from "../../../../api/campaign";
+import { User } from "../../../../api/user";
 import GSForm from "../../../../components/forms/GSForm";
 import { DateTime } from "../../../../lib/datetime";
 import { MutationMap, QueryMap } from "../../../../network/types";
@@ -47,16 +49,17 @@ interface HocProps {
     editCampaign(payload: Values): ApolloQueryResult<any>;
   };
   campaignData: {
-    campaign: {
-      id: string;
+    campaign: Pick<Campaign, "id" | "isStarted" | "dueBy" | "contactsCount"> & {
       texters: Texter[];
-      isStarted: boolean;
-      dueBy: string;
-      contactsCount: number;
     };
     refetch(): void;
   };
-  organizationData: any;
+  organizationData: {
+    organization: {
+      id: string;
+      texters: Pick<User, "id" | "firstName" | "lastName" | "displayName">[];
+    };
+  };
 }
 
 interface State {
@@ -75,8 +78,6 @@ interface InnerProps extends FullComponentProps, HocProps {
   contactsCount: number;
   saveLabel: string;
   saveDisabled: boolean;
-  ensureComplete: boolean;
-  isOverdue: boolean;
 }
 
 interface Values {
@@ -141,7 +142,7 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
   };
 
   addAllTexters = () => {
-    const { orgTexters } = this.props;
+    const { texters: orgTexters } = this.props.organizationData.organization;
     const { texters } = this.collectFormValues();
 
     const upsertedTexters = orgTexters.map((orgTexter) => {

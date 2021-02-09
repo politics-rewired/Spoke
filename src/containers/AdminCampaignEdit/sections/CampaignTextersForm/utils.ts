@@ -2,9 +2,9 @@ import { Texter } from "./types";
 
 export const assignTexterContacts = (
   editedTexter: Texter,
-  contactsToAssign: string,
+  contactsToAssign: number,
   contactsCount: number
-) => {
+): Texter => {
   let messagedCount = 0;
   if (editedTexter.assignment.needsMessageCount) {
     messagedCount =
@@ -12,11 +12,9 @@ export const assignTexterContacts = (
       editedTexter.assignment.needsMessageCount;
   }
 
-  let convertedNeedsMessageCount = parseInt(contactsToAssign, 10);
+  let convertedNeedsMessageCount = contactsToAssign;
 
-  const convertedMaxContacts = editedTexter.assignment.maxContacts
-    ? parseInt(editedTexter.assignment.maxContacts, 10)
-    : null;
+  const convertedMaxContacts = editedTexter.assignment.maxContacts || null;
 
   if (Number.isNaN(convertedNeedsMessageCount)) {
     convertedNeedsMessageCount = 0;

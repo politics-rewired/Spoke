@@ -29,6 +29,8 @@ export interface Campaign {
   id: string;
   title: string;
   isStarted: boolean;
+  dueBy: string;
+  contactsCount: number;
   syncReadiness: ExternalSyncReadinessState;
   pendingJobs: JobRequest[];
   interactionSteps: InteractionStep[];
