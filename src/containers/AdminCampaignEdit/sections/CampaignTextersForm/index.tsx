@@ -358,7 +358,7 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
 const queries: QueryMap<InnerProps> = {
   campaignData: {
     query: gql`
-      query getCampaignBasics($campaignId: String!) {
+      query GetCampaignTexters($campaignId: String!) {
         campaign(id: $campaignId) {
           id
           texters {
@@ -392,7 +392,7 @@ const queries: QueryMap<InnerProps> = {
   },
   organizationData: {
     query: gql`
-      query getOrganizationData($organizationId: String!) {
+      query GetOrganizationTexters($organizationId: String!) {
         organization(id: $organizationId) {
           id
           texters: people {
@@ -439,7 +439,8 @@ const mutations: MutationMap<InnerProps> = {
     variables: {
       campaignId: ownProps.campaignId,
       payload
-    }
+    },
+    refetchQueries: ["GetCampaignTexters"]
   })
 };
 
