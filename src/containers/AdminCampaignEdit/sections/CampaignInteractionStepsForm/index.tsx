@@ -34,6 +34,8 @@ import {
   UpdateInteractionStepPayload
 } from "./resolvers";
 
+const DEFAULT_EMPTY_STEP_ID = "DEFAULT_EMPTY_STEP_ID";
+
 interface Values {
   interactionSteps: InteractionStepWithChildren;
 }
@@ -203,6 +205,12 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
     this.props.mutations.stageDeleteInteractionStep(id);
 
   handleFormChange = (changedStep: InteractionStepWithChildren) => {
+    if (changedStep.id === DEFAULT_EMPTY_STEP_ID) {
+      return this.props.mutations.stageAddInteractionStep({
+        ...changedStep,
+        id: generateId()
+      });
+    }
     const { answerOption, questionText, scriptOptions } = changedStep;
     this.props.mutations.stageUpdateInteractionStep(changedStep.id, {
       answerOption,
@@ -287,7 +295,7 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
       interactionSteps: []
     })
       ? {
-          id: "newId",
+          id: DEFAULT_EMPTY_STEP_ID,
           parentInteractionId: null,
           questionText: "",
           answerOption: "",
