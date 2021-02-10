@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.15.5](https://github.com/politics-rewired/spoke/compare/v3.15.4...v3.15.5) (2021-02-10)
+
+
+### Bug Fixes
+
+* **interaction-steps:** handle case of empty campaign ([#886](https://github.com/politics-rewired/spoke/issues/886)) ([d094b0f](https://github.com/politics-rewired/spoke/commit/d094b0f3e7f1141782c0bd811924b904a97260a2))
+
 ### [3.15.4](https://github.com/politics-rewired/spoke/compare/v3.15.3...v3.15.4) (2021-02-09)
 
 
