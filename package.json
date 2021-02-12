@@ -227,7 +227,7 @@
     "react-scripts": "^4.0.1",
     "react-test-renderer": "15",
     "regenerator-runtime": "^0.10.5",
-    "saucelabs": "^1.5.0",
+    "saucelabs": "^4.6.5",
     "selenium-webdriver": "^3.6.0",
     "standard-version": "^7.1.0",
     "terser-webpack-plugin": "^2.3.1",
