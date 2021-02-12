@@ -15941,10 +15941,10 @@ performance-now@^2.1.0:
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
 
-pg-compose@^0.0.23:
-  version "0.0.23"
-  resolved "https://registry.yarnpkg.com/pg-compose/-/pg-compose-0.0.23.tgz#8df34db24b229f35aa3dfdba75bf8488d2ecace9"
-  integrity sha512-H1bNwl2PoeLppxn9GpoO/rUvPNQhbiwIZX1WZNfQIIjAho/NQ85q+ibeh0gjIn2M0XquMoynHz0Jdi5RAE0dTQ==
+pg-compose@^0.0.25:
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/pg-compose/-/pg-compose-0.0.25.tgz#c69db78cb5d1397b30a89a8202de93e417d9690e"
+  integrity sha512-WqwzU1CQ3MNeYAMwF6fcNP/D1TNkSdwfBh9ZcA1IypFu4OR0cdjOHJ/UHP50KfRlA5qxS/MdWv5eqNCcOZQmJw==
   dependencies:
     "@types/cryptr" "^4.0.1"
     chokidar "^3.3.1"
