@@ -61,7 +61,7 @@
     "@babel/runtime": "^7.9.2",
     "@babel/runtime-corejs3": "^7.9.2",
     "@godaddy/terminus": "^4.5.0",
-    "@google-cloud/storage": "^3.0.4",
+    "@google-cloud/storage": "^5.7.4",
     "@passport-next/passport": "^3.1.0",
     "@trt2/gsm-charset-utils": "^1.0.13",
     "@types/luxon": "^1.25.0",
