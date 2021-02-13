@@ -476,7 +476,7 @@ const validators = {
   MODE: str({
     desc: "Server mode",
     choices: Object.values(ServerMode),
-    devDefault: ServerMode.Dual
+    default: ServerMode.Dual
   }),
   NEXMO_API_KEY: str({
     desc: "Nexmo API key. Required if using Nexmo.",
