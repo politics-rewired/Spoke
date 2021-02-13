@@ -241,7 +241,8 @@
   },
   "resolutions": {
     "@types/react": "^15.6.28",
-    "material-ui": "^0.20.1"
+    "material-ui": "^0.20.1",
+    "pg-connection-string": "~2.4.0"
   },
   "config": {
     "commitizen": {
