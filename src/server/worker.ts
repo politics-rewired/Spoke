@@ -4,6 +4,7 @@ import { loadYaml, PgComposeWorker, run } from "pg-compose";
 import url from "url";
 
 import { config } from "../config";
+import { sleep } from "../lib";
 import logger from "../logger";
 import {
   exportCampaign,
@@ -148,9 +149,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
 
   // Someone beat us to the punch of initializing the runner
   if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
-  await new Promise<void>((resolve, _reject) =>
-    setTimeout(() => resolve(), 100)
-  );
+  await sleep(100);
   return getWorker(attempt + 1);
 };
 
