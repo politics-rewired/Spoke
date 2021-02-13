@@ -25,10 +25,12 @@ const knexConfig = {
 
 const useReader = !!config.DATABASE_READER_URL;
 
-const readerConfig =
-  useReader && !config.isTest
-    ? { ...knexConfig, connection: config.DATABASE_READER_URL }
-    : knexConfig;
+const readerConfig = {
+  ...knexConfig,
+  ...(useReader && !config.isTest
+    ? { connection: config.DATABASE_READER_URL }
+    : {})
+};
 
 knexConfig.readerConfig = readerConfig;
 knexConfig.useReader = useReader;
