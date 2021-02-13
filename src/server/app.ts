@@ -1,22 +1,16 @@
-import { createTerminus } from "@godaddy/terminus";
 import passport from "@passport-next/passport";
 import bodyParser from "body-parser";
 import connectDatadog from "connect-datadog-graphql";
 import cookieSession from "cookie-session";
 import express from "express";
 import basicAuth from "express-basic-auth";
-import hotShots from "hot-shots";
-import http from "http";
-import cron from "node-cron";
+import StatsD from "hot-shots";
 
 import { config } from "../config";
 import requestLogging from "../lib/request-logging";
 import logger from "../logger";
 import { fulfillPendingRequestFor } from "./api/assignment";
-import { checkForBadDeliverability } from "./api/lib/alerts";
 import appRenderer from "./middleware/app-renderer";
-import { r } from "./models";
-import { setupUserNotificationObservers } from "./notifications";
 import {
   assembleRouter,
   authRouter,
@@ -27,25 +21,8 @@ import {
   utilsRouter
 } from "./routes";
 import { errToObj } from "./utils";
-import { getWorker } from "./worker";
-
-process.on("uncaughtException", (ex) => {
-  logger.error("uncaughtException: ", ex);
-  process.exit(1);
-});
-
-process.on("unhandledRejection", (err) => {
-  logger.error("unhandledRejection: ", err);
-  process.exit(1);
-});
-
-cron.schedule("0 */1 * * *", checkForBadDeliverability);
-
-setupUserNotificationObservers();
 
 const {
-  DEV_APP_PORT,
-  PORT,
   PUBLIC_DIR,
   SESSION_SECRET,
   ASSIGNMENT_USERNAME,
@@ -88,10 +65,10 @@ if (PUBLIC_DIR) {
 
 if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
   const datadogOptions = {
-    dogstatsd: new hotShots.StatsD(
-      config.DD_AGENT_HOST,
-      config.DD_DOGSTATSD_PORT
-    ),
+    dogstatsd: new StatsD({
+      host: config.DD_AGENT_HOST,
+      port: config.DD_DOGSTATSD_PORT
+    }),
     path: true,
     method: false,
     response_code: true,
@@ -150,7 +127,7 @@ app.post(
 app.use(appRenderer);
 
 // Custom error handling
-app.use((err, req, res, next) => {
+const errorHandler: express.ErrorRequestHandler = (err, req, res, next) => {
   logger.warn("Unhandled express error: ", {
     error: errToObj(err),
     req
@@ -159,73 +136,7 @@ app.use((err, req, res, next) => {
     return next(err);
   }
   return res.status(500).json({ error: true });
-});
-
-const server = http.createServer(app);
-
-// Ensure database is reachable
-const onHealthCheck = async () =>
-  r.knex.raw("select 1;").then(() => ({ status: "healthy" }));
-
-const waitMs = config.SHUTDOWN_GRACE_PERIOD;
-const beforeShutdown = () => {
-  logger.info(
-    `Received kill signal, waiting ${waitMs}ms before shutting down...`
-  );
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      logger.info("Done waiting");
-      resolve();
-    }, waitMs);
-  });
 };
+app.use(errorHandler);
 
-const teardownKnex = async () => {
-  logger.info("Starting cleanup of Postgres pools.");
-  const readerPromise = config.DATABASE_READER_URL
-    ? r.reader.destroy().then(() => logger.info("  - tore down Knex reader"))
-    : Promise.resolve();
-  return Promise.all([
-    r.knex.destroy().then(() => logger.info("  - tore down Knex writer")),
-    readerPromise
-  ]);
-};
-
-const teardownGraphile = async () =>
-  getWorker()
-    .then((worker) => worker.stop())
-    .then(() => logger.info("  - tore down Graphile runner"));
-
-const onSignal = () => {
-  return Promise.all([teardownKnex(), teardownGraphile()]);
-};
-
-const onShutdown = () => {
-  logger.info("Cleanup finished, server is shutting down.");
-};
-
-createTerminus(server, {
-  signals: ["SIGTERM", "SIGINT"],
-  healthChecks: { "/health": onHealthCheck },
-  onSignal,
-  beforeShutdown,
-  onShutdown,
-  logger: (msg, err) => {
-    if (err) {
-      logger.error(`${msg}: `, err);
-    } else {
-      logger.info(msg);
-    }
-  }
-});
-
-getWorker().then(() => {
-  // Heroku requires you to use process.env.PORT
-  const port = DEV_APP_PORT || PORT;
-  server.listen(port, () => {
-    logger.info(`Node app is running on port ${port}`);
-  });
-});
-
-// Used by lambda handler
 export default app;
