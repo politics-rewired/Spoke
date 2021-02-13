@@ -8,7 +8,7 @@ let server;
 let jobs;
 try {
   ({ config } = require("./build/src/config"));
-  app = require("./build/src/server/index");
+  app = require("./build/src/server/app");
   server = awsServerlessExpress.createServer(app.default);
   jobs = require("./build/src/workers/job-processes");
 } catch (err) {
@@ -16,7 +16,7 @@ try {
     console.error(`Unable to load built server: ${err}`);
   }
   ({ config } = require("./src/config"));
-  app = require("./src/server/index");
+  app = require("./src/server/app");
   server = awsServerlessExpress.createServer(app.default);
   jobs = require("./src/workers/job-processes");
 }
