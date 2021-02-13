@@ -67,7 +67,9 @@ if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
   const datadogOptions = {
     dogstatsd: new StatsD({
       host: config.DD_AGENT_HOST,
-      port: config.DD_DOGSTATSD_PORT
+      port: config.DD_DOGSTATSD_PORT,
+      errorHandler: (err: Error) =>
+        logger.error("connect-datadog encountered error: ", errToObj(err))
     }),
     path: true,
     method: false,
