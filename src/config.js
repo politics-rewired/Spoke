@@ -3,6 +3,12 @@ const pickBy = require("lodash/pickBy");
 
 const { str, bool, num, email, url, host, port } = envalid;
 
+const ServerMode = Object.freeze({
+  Server: "SERVER",
+  Worker: "WORKER",
+  Dual: "DUAL"
+});
+
 const validators = {
   ACTION_HANDLERS: str({
     desc: "Comma-separated list of action handlers to enable.",
@@ -467,6 +473,11 @@ const validators = {
     desc: "The key prefix to use for memoredis memoization",
     default: undefined
   }),
+  MODE: str({
+    desc: "Server mode",
+    choices: Object.values(ServerMode),
+    default: ServerMode.Dual
+  }),
   NEXMO_API_KEY: str({
     desc: "Nexmo API key. Required if using Nexmo.",
     default: undefined
@@ -782,4 +793,4 @@ const clientConfig = pickBy(
   (value, key) => validators[key].isClient
 );
 
-module.exports = { config, clientConfig };
+module.exports = { config, clientConfig, ServerMode };
