@@ -340,8 +340,7 @@ const validators = {
     isClient: true
   }),
   EMAIL_FROM: email({
-    desc:
-      "Email from address. Required to send email from either Mailgun or a custom SMTP server.",
+    desc: "Email from address. Required to send email from SMTP server.",
     default: undefined
   }),
   EMAIL_REPLY_TO: email({
@@ -442,32 +441,6 @@ const validators = {
     choices: ["silly", "debug", "verbose", "info", "warn", "error"],
     default: "warn",
     devDefault: "silly"
-  }),
-  MAILGUN_DOMAIN: host({
-    desc: "The domain you set up in Mailgun. Required for Mailgun usage.",
-    example: "email.bartletforamerica.com",
-    default: undefined
-  }),
-  MAILGUN_API_KEY: str({
-    desc:
-      "Should be automatically set during Heroku auto-deploy. Do not modify.",
-    default: undefined
-  }),
-  MAILGUN_SMTP_LOGIN: str({
-    desc: "'Default SMTP Login' in Mailgun. Required for Mailgun usage.",
-    default: undefined
-  }),
-  MAILGUN_SMTP_PASSWORD: str({
-    desc: "'Default Password' in Mailgun. Required for Mailgun usage.",
-    default: undefined
-  }),
-  MAILGUN_SMTP_PORT: port({
-    desc: "'Default Password' in Mailgun. Required for Mailgun usage.",
-    default: 587
-  }),
-  MAILGUN_SMTP_SERVER: host({
-    desc: "Do not modify. Required for Mailgun usage.",
-    default: "smtp.mailgun.org"
   }),
   MAX_CONTACTS: num({
     desc:
