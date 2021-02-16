@@ -4,6 +4,7 @@ import { loadYaml, PgComposeWorker, run } from "pg-compose";
 import url from "url";
 
 import { config } from "../config";
+import { sleep } from "../lib";
 import logger from "../logger";
 import {
   exportCampaign,
@@ -56,6 +57,8 @@ const poolConfig = {
 const workerPool = new Pool(poolConfig);
 
 export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
+  if (worker) return worker;
+
   const m = await loadYaml({ include: `${__dirname}/pg-compose/**/*.yaml` });
 
   m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
@@ -128,7 +131,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
     });
   }
 
-  if (!worker) {
+  if (!workerSemaphore) {
     workerSemaphore = true;
 
     worker = await run(m, {
@@ -140,16 +143,14 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
       noHandleSignals: true,
       pollInterval: 1000
     });
+
+    return worker;
   }
 
   // Someone beat us to the punch of initializing the runner
-  else if (!worker && workerSemaphore) {
-    if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
-    await new Promise((resolve, _reject) => setTimeout(() => resolve(), 100));
-    return getWorker(attempt + 1);
-  }
-
-  return worker!;
+  if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
+  await sleep(100);
+  return getWorker(attempt + 1);
 };
 
 export default getWorker;
