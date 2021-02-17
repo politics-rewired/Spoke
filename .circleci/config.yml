@@ -3,7 +3,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/node:12.20.0
+      - image: circleci/node:14.15.2
         environment:
           NODE_ENV: test
           WEBPACK_HOST: "localhost"
@@ -64,7 +64,7 @@ jobs:
 
   build_image:
     docker:
-      - image: circleci/node:12.20.0
+      - image: circleci/node:14.15.2
 
     working_directory: ~/repo
 

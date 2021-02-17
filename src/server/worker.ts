@@ -1,7 +1,6 @@
 import { LogFunctionFactory, Logger } from "graphile-worker";
 import { Pool } from "pg";
 import { loadYaml, PgComposeWorker, run } from "pg-compose";
-import url from "url";
 
 import { config } from "../config";
 import { sleep } from "../lib";
@@ -41,16 +40,8 @@ const graphileLogger = new Logger(logFactory);
 let worker: PgComposeWorker | undefined;
 let workerSemaphore = false;
 
-// https://github.com/brianc/node-postgres/tree/master/packages/pg-pool#note
-const params = url.parse(config.DATABASE_URL);
-const auth = params.auth ? params.auth.split(":") : [];
 const poolConfig = {
-  user: auth[0],
-  password: auth[1],
-  host: params.hostname || undefined,
-  port: params.port ? parseInt(params.port, 10) : undefined,
-  database: params.pathname ? params.pathname.split("/")[1] : undefined,
-  ssl: config.DB_USE_SSL,
+  connectionString: config.DATABASE_URL,
   max: config.WORKER_MAX_POOL
 };
 
