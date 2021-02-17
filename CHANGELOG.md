@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/politics-rewired/spoke/compare/v3.15.5...v4.0.0) (2021-02-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* Support has been dropped for Node v8, v10, and v12.
+* Support for Mailgun has been dropped due to no suitable Node library.
+
+### Bug Fixes
+
+* **worker:** fix lock on semaphore and add early return ([#891](https://github.com/politics-rewired/spoke/issues/891)) ([0427634](https://github.com/politics-rewired/spoke/commit/042763467473a8a823c66247e44d88dd6f92c0b5))
+* use structured logging for worker migrations ([#888](https://github.com/politics-rewired/spoke/issues/888)) ([2a12c01](https://github.com/politics-rewired/spoke/commit/2a12c013bc903fddfdc226843ea5e6ccf30997a4))
+
+
+### build
+
+* drop old proxy deps ([#889](https://github.com/politics-rewired/spoke/issues/889)) ([e5257b1](https://github.com/politics-rewired/spoke/commit/e5257b103369abad22d8b3903cc8124bc6550e3d))
+* upgrade to node 14 LTS ([#817](https://github.com/politics-rewired/spoke/issues/817)) ([e6d16f2](https://github.com/politics-rewired/spoke/commit/e6d16f29a5d2ee6651afa8efa927fb995f550b18))
+
 ### [3.15.5](https://github.com/politics-rewired/spoke/compare/v3.15.4...v3.15.5) (2021-02-10)
 
 
