@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.1](https://github.com/politics-rewired/spoke/compare/v4.0.0...v4.0.1) (2021-02-18)
+
+
+### Bug Fixes
+
+* force update of fs-capacitor to fix file upload ([54954e0](https://github.com/politics-rewired/spoke/commit/54954e03b3bbc85658853a625a5a37d9494b4191))
+
 ## [4.0.0](https://github.com/politics-rewired/spoke/compare/v3.15.5...v4.0.0) (2021-02-17)
 
 
