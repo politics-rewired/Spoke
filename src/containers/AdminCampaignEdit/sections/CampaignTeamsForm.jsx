@@ -4,10 +4,10 @@ import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
-import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
+import SpokeFormField from "../../../components/forms/SpokeFormField";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 
 const formSchema = yup.object({
@@ -82,7 +82,7 @@ class CampaignTeamsForm extends React.Component {
 
           <br />
 
-          <Form.Field
+          <SpokeFormField
             name="isAssignmentLimitedToTeams"
             type={Toggle}
             toggled={formValues.isAssignmentLimitedToTeams}

@@ -9,10 +9,10 @@ import DeleteIcon from "material-ui/svg-icons/action/delete";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
-import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
+import SpokeFormField from "../../../components/forms/SpokeFormField";
 import Slider from "../../../components/Slider";
 import { dataSourceItem } from "../../../components/utils";
 import { dataTest } from "../../../lib/attributes";
@@ -411,7 +411,7 @@ export default class CampaignTextersForm extends React.Component {
             {this.getDisplayName(texter.id)}
           </div>
           <div className={css(styles.input)}>
-            <Form.Field
+            <SpokeFormField
               {...dataTest("texterAssignment")}
               name={`texters[${index}].assignment.needsMessageCount`}
               hintText="Contacts"
@@ -434,7 +434,7 @@ export default class CampaignTextersForm extends React.Component {
           </div>
           {this.formValues().useDynamicAssignment ? (
             <div className={css(styles.input)}>
-              <Form.Field
+              <SpokeFormField
                 name={`texters[${index}].assignment.maxContacts`}
                 hintText="Max"
                 fullWidth

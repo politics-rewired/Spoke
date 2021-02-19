@@ -9,6 +9,7 @@ import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
 import GSSubmitButton from "../../components/forms/GSSubmitButton";
+import SpokeFormField from "../../components/forms/SpokeFormField";
 
 const FIELD_NAME = "messageText";
 
@@ -87,7 +88,7 @@ class ContactActionDialog extends Component {
                 this.contactActionTextRef = el;
               }}
             >
-              <Form.Field name={FIELD_NAME} fullWidth autoFocus multiLine />
+              <SpokeFormField name={FIELD_NAME} fullWidth autoFocus multiLine />
             </div>
             <div className={css(styles.dialogActions)}>
               <FlatButton

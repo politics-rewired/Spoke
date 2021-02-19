@@ -6,6 +6,7 @@ import * as yup from "yup";
 
 import { CannedResponse } from "../../../../../api/canned-response";
 import GSForm from "../../../../../components/forms/GSForm";
+import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import { dataTest } from "../../../../../lib/attributes";
 
 const styles = StyleSheet.create({
@@ -37,7 +38,7 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
 
   return (
     <GSForm schema={modelSchema} onSubmit={handleSave}>
-      <Form.Field
+      <SpokeFormField
         {...dataTest("title")}
         name="title"
         context="responseEditor"
@@ -45,7 +46,7 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
         label="Title"
         value={editingResponse?.title}
       />
-      <Form.Field
+      <SpokeFormField
         {...dataTest("editorResponse")}
         customFields={customFields}
         name="text"

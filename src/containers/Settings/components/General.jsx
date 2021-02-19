@@ -15,6 +15,7 @@ import * as yup from "yup";
 import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import GSSubmitButton from "../../../components/forms/GSSubmitButton";
+import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
@@ -163,14 +164,14 @@ class Settings extends React.Component {
           onSubmit={this.handleSubmitTextingHoursForm}
           defaultValue={{ textingHoursStart, textingHoursEnd }}
         >
-          <Form.Field
+          <SpokeFormField
             label="Start time"
             name="textingHoursStart"
             type="select"
             fullWidth
             choices={hourChoices}
           />
-          <Form.Field
+          <SpokeFormField
             label="End time"
             name="textingHoursEnd"
             type="select"
@@ -292,7 +293,7 @@ class Settings extends React.Component {
           >
             <CardHeader title="Opt Out Message" />
             <CardText>
-              <Form.Field
+              <SpokeFormField
                 label="Default Opt-Out Message"
                 name="optOutMessage"
                 fullWidth
@@ -361,7 +362,7 @@ class Settings extends React.Component {
             <CardText>
               To enable automatic filtering of landline phone numbers, you will
               need to put in your Assemble Numbers API Key here.
-              <Form.Field
+              <SpokeFormField
                 label="Assemble Numbers API Key"
                 name="numbersApiKey"
                 fullWidth
@@ -413,7 +414,7 @@ class Settings extends React.Component {
               <CardText>
                 If set, a payload will be sent to this URL for every TrollBot
                 alarm.
-                <Form.Field
+                <SpokeFormField
                   label="Webhook URL"
                   name="trollbotWebhookUrl"
                   fullWidth

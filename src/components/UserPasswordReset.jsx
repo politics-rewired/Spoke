@@ -8,6 +8,7 @@ import { UserEditMode } from "../containers/UserEdit";
 import { dataTest } from "../lib/attributes";
 import GSForm from "./forms/GSForm";
 import GSSubmitButton from "./forms/GSSubmitButton";
+import SpokeFormField from "./forms/SpokeFormField";
 
 const styles = StyleSheet.create({
   buttons: {
@@ -70,15 +71,15 @@ class UserPasswordReset extends React.Component {
         className={style}
       >
         {!isEmailReset && (
-          <Form.Field
+          <SpokeFormField
             label="Email"
             name="email"
             disabled={!isLocalAuth}
             {...dataTest("email")}
           />
         )}
-        <Form.Field label="Password" name="password" type="password" />
-        <Form.Field
+        <SpokeFormField label="Password" name="password" type="password" />
+        <SpokeFormField
           label="Confirm Password"
           name="passwordConfirm"
           type="password"

@@ -1,6 +1,7 @@
 import { css, StyleSheet } from "aphrodite";
 import React, { Component } from "react";
-import Form from "react-formal";
+
+import SpokeFormField from "../../components/forms/SpokeFormField";
 
 const FIELD_NAME = "messageText";
 
@@ -48,7 +49,7 @@ class MessageTextField extends Component {
           this.messageTextRef = el;
         }}
       >
-        <Form.Field
+        <SpokeFormField
           className={css(styles.textField)}
           name={FIELD_NAME}
           label="Your message"
