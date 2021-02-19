@@ -2,7 +2,6 @@ import escapeRegExp from "lodash/escapeRegExp";
 import isEqual from "lodash/isEqual";
 import isObject from "lodash/isObject";
 import transform from "lodash/transform";
-import { URL } from "url";
 
 export const sleep = (ms = 0) =>
   new Promise((resolve) => setTimeout(resolve, ms));

@@ -30,6 +30,7 @@ module.exports = {
     "**/?(*.)+(spec|test).[jt]s?(x)"
   ],
   moduleFileExtensions: ["js", "jsx", "ts", "tsx"],
+  modulePathIgnorePatterns: ["<rootDir>/build"],
   transform: { "\\.[jt]sx?$": "babel-jest" },
   moduleDirectories: ["node_modules"],
   moduleNameMapper: {

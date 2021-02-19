@@ -1,7 +1,7 @@
 const { config } = require("./webpack/build-config");
 const path = require("path");
 const webpack = require("webpack");
-const ManifestPlugin = require("webpack-manifest-plugin");
+const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 
 const basePlugins = [
@@ -24,19 +24,21 @@ const basePlugins = [
 
 const productionPlugins = [
   // Ignore publicPath as we use STATIC_BASE_URL at runtime instead
-  new ManifestPlugin({
+  new WebpackManifestPlugin({
     fileName: config.ASSETS_MAP_FILE,
     publicPath: ""
   })
 ];
 
 module.exports = {
+  mode: config.isProd ? "production" : "development",
   context: path.resolve(__dirname, "src"),
   entry: {
     bundle: "./client/index.jsx"
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+    fallback: { path: require.resolve("path-browserify") }
   },
   module: {
     rules: [
