@@ -3589,6 +3589,15 @@
     "@types/node" "*"
     "@types/pg-types" "*"
 
+"@types/pg@^7.14.10", "@types/pg@^7.14.7":
+  version "7.14.10"
+  resolved "https://registry.yarnpkg.com/@types/pg/-/pg-7.14.10.tgz#95c01de1a54e45d78058b9b5b4c365102e4113f7"
+  integrity sha512-m6G0mrpj71YgVgHJF0cIHC3OZTKiQSUzTkMj869a+YWXF2tdbmO2PmIpNnDkiFPhHWcoGq2bk5P2e0CZX0F9Mg==
+  dependencies:
+    "@types/node" "*"
+    pg-protocol "^1.2.0"
+    pg-types "^2.2.0"
+
 "@types/prettier@^2.0.0":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.1.5.tgz#b6ab3bba29e16b821d84e09ecfaded462b816b00"
@@ -6613,7 +6622,7 @@ chokidar@^2.0.2, chokidar@^2.1.8:
   optionalDependencies:
     fsevents "^1.2.7"
 
-chokidar@^3.2.2:
+chokidar@^3.2.2, chokidar@^3.4.0:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.1.tgz#ee9ce7bbebd2b79f49f304799d5468e31e14e68a"
   integrity sha512-9+s+Od+W0VJJzawDma/gvBNQqkTiqYTWLuZoyAsivsI4AaWTCzHG06/TMjsf1cYe9Cb97UCEhjz7HvnPk2p/tw==
@@ -11126,17 +11135,17 @@ graphile-scheduler@^0.0.1:
     tslib "^1.9.3"
     yargs "^15.1.0"
 
-graphile-scheduler@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/graphile-scheduler/-/graphile-scheduler-0.5.0.tgz#86775be761c8b43c36823f0171439594cb51ff20"
-  integrity sha512-Hnw7R3o3rTpifLh+TcuECbqlLLpeEzhp+1vBVYDoS8Hse0WaIoTa7nc9MuXZdv+aCtIMaTkfjrHms/nuEnS6Vg==
+graphile-scheduler@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/graphile-scheduler/-/graphile-scheduler-0.8.0.tgz#e698e0885b1bbfa2c5e90f4f74fffdee397f3ab5"
+  integrity sha512-u2GnvCYUVjsGxbVzZu4l3Dr+H0X+xkIprkatLjYJwepoOvwcoSMtopfF9vB43qYp+4LSAp/29ptJotc3D9d+Kw==
   dependencies:
     "@types/debug" "^4.1.2"
     "@types/jest" "^24.0.11"
-    "@types/pg" "^7.4.11"
-    graphile-worker "0.5.0"
+    "@types/pg" "^7.14.7"
+    graphile-worker "~0.8.1"
     moment "^2.24.0"
-    pg ">=6.5 <8"
+    pg ">=6.5 <9"
     pg-connection-string "^2.0.0"
     tslib "^1.9.3"
     yargs "^15.1.0"
@@ -11155,7 +11164,7 @@ graphile-worker@0.4.0:
     tslib "^1.9.3"
     yargs "^15.1.0"
 
-graphile-worker@0.5.0, graphile-worker@^0.5.0:
+graphile-worker@^0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/graphile-worker/-/graphile-worker-0.5.0.tgz#6a338e31bfe69580c9d43941779c838aca39fd6c"
   integrity sha512-jPQkx/UGToObBc9SG9gOo6UwBwXpsNxTjFlqFuLaCMN3J31UKvXKiuLHydovo7FtcvaDOOe8hppQDj0WRobfSA==
@@ -11166,6 +11175,33 @@ graphile-worker@0.5.0, graphile-worker@^0.5.0:
     cosmiconfig "^6.0.0"
     pg ">=6.5 <8"
     tslib "^1.9.3"
+    yargs "^15.1.0"
+
+graphile-worker@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/graphile-worker/-/graphile-worker-0.9.0.tgz#aa1c794dea80acf7abeb68c5c8ce6a2c41675b1a"
+  integrity sha512-tb3zT0k3XCsVWUqReA1NlepkD4Pezmd1Ot9+9ItKxLLElK2T17eYpkMEsk48vH3yR7tMQSnwJHrEuirtn9z6fg==
+  dependencies:
+    "@types/debug" "^4.1.2"
+    "@types/pg" "^7.14.3"
+    chokidar "^3.4.0"
+    cosmiconfig "^7.0.0"
+    json5 "^2.1.3"
+    pg ">=6.5 <9"
+    tslib "^2.1.0"
+    yargs "^16.2.0"
+
+graphile-worker@~0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/graphile-worker/-/graphile-worker-0.8.1.tgz#101bc21fec8dfb1a307a9ebd290362ac7d3a3ec2"
+  integrity sha512-N6lq7pOiKOQvdMHNO/U6V07TVtpxa5ZTsH5P1VF49a2ia7Uj6XsWn9W2mGkOZXEXw/WIHYaWYe1O4UX6Gmjp4Q==
+  dependencies:
+    "@types/debug" "^4.1.2"
+    "@types/pg" "^7.14.3"
+    chokidar "^3.4.0"
+    cosmiconfig "^6.0.0"
+    pg ">=6.5 <9"
+    tslib "^1.11.1"
     yargs "^15.1.0"
 
 graphql-date@^1.0.3:
@@ -14023,6 +14059,13 @@ json5@^2.1.2:
   dependencies:
     minimist "^1.2.5"
 
+json5@^2.1.3:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.0.tgz#2dfefe720c6ba525d9ebd909950f0515316c89a3"
+  integrity sha512-f+8cldu7X/y7RAJurMEJmdoKXGB/X550w2Nr3tTbezL6RwEE/iMcm+tZnXeoZtKuOq6ft8+CqzEkrIgx1fPoQA==
+  dependencies:
+    minimist "^1.2.5"
+
 jsonfile@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/jsonfile/-/jsonfile-4.0.0.tgz#8771aae0799b64076b76640fca058f9c10e33ecb"
@@ -16732,12 +16775,12 @@ pg-pool@^3.2.2:
   resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-3.2.2.tgz#a560e433443ed4ad946b84d774b3f22452694dff"
   integrity sha512-ORJoFxAlmmros8igi608iVEbQNNZlp89diFVx6yV5v+ehmpMY9sK6QgpmgoXbmkNaBAx8cOOZh9g80kJv1ooyA==
 
-pg-protocol@^1.4.0:
+pg-protocol@^1.2.0, pg-protocol@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/pg-protocol/-/pg-protocol-1.4.0.tgz#43a71a92f6fe3ac559952555aa3335c8cb4908be"
   integrity sha512-El+aXWcwG/8wuFICMQjM5ZSAm6OWiJicFdNYo+VY3QP+8vI4SvLIWVe51PppTzMhikUJR+PsyIFKqfdXPz/yxA==
 
-pg-types@^2.1.0:
+pg-types@^2.1.0, pg-types@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/pg-types/-/pg-types-2.2.0.tgz#2d0250d636454f7cfa3b6ae0382fdfa8063254a3"
   integrity sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==
@@ -16762,7 +16805,7 @@ pg-types@^2.1.0:
     pgpass "1.x"
     semver "4.3.2"
 
-pg@^8.5.1:
+"pg@>=6.5 <9", pg@^8.5.1:
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.5.1.tgz#34dcb15f6db4a29c702bf5031ef2e1e25a06a120"
   integrity sha512-9wm3yX9lCfjvA98ybCyw2pADUivyNWT/yIP4ZcDVpMN0og70BUWYEGXPCTAQdGTAqnytfRADb7NERrY1qxhIqw==
@@ -21416,6 +21459,11 @@ tslib@^1.10.0, tslib@^1.9.0, tslib@^1.9.3:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha512-qOebF53frne81cf0S9B41ByenJ3/IuH8yJKngAX35CmiZySA0khhkovshKK+jGCaMnVomla7gVlIcc3EvKPbTQ==
 
+tslib@^1.11.1:
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
+  integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+
 tslib@^1.8.1:
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.13.0.tgz#c881e13cc7015894ed914862d276436fa9a47043"
@@ -23011,7 +23059,7 @@ yargs@^15.4.1:
     y18n "^4.0.0"
     yargs-parser "^18.1.2"
 
-yargs@^16.0.3:
+yargs@^16.0.3, yargs@^16.2.0:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-16.2.0.tgz#1c82bf0f6b6a66eafce7ef30e376f49a12477f66"
   integrity sha512-D1mvvtDG0L5ft/jGWkLpG1+m0eQxOfaBvTNELraWj22wSVUMWxZUvYgJYcKh6jGGIkJFhH4IZPQhR4TKpc8mBw==
