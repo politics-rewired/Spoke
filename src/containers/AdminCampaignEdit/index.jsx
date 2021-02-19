@@ -108,7 +108,7 @@ class AdminCampaignEdit extends React.Component {
     };
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     // This should only update the campaignFormValues sections that
     // are NOT expanded so the form data doesn't compete with the user
     // The basic flow of data:

@@ -47,7 +47,7 @@ const contactDataFragment = `
 `;
 
 class TexterTodo extends React.Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { assignment } = this.props.data;
     this.assignContactsIfNeeded();
     if (!assignment || assignment.campaign.isArchived) {

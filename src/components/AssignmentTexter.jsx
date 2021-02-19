@@ -46,11 +46,11 @@ class AssignmentTexter extends React.Component {
     errors: []
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.updateCurrentContactIndex(0);
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  UNSAFE_componentWillUpdate(nextProps, nextState) {
     // When we send a message that changes the contact status,
     // then if parent.refreshData is called, then props.contactIds
     // will return a new list with the last contact removed and

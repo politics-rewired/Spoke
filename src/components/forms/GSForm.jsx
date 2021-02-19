@@ -37,7 +37,7 @@ export default class GSForm extends React.Component {
 
   // to display title and script as default values in CannedResponseEditor,
   // state.model must be mapped to children.props.values on mount
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { children } = this.props;
 
     if (Array.isArray(children)) {

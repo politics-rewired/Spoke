@@ -9,7 +9,7 @@ class ApplyTagConfirmationDialog extends Component {
     confirmStepIndex: 0
   };
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { pendingTag: lastTag } = this.props;
     const { pendingTag: nextTag } = nextProps;
     const isNewTag = lastTag === undefined && nextTag !== undefined;

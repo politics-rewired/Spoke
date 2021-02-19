@@ -36,7 +36,7 @@ class TexterRequest extends React.Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // eslint-disable-next-line react/no-direct-mutation-state
     this.state.email = this.props.user.email;
   }
