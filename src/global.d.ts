@@ -10,6 +10,8 @@ interface Window {
   PASSPORT_STRATEGY: string;
   TZ: string;
   DST_REFERENCE_TIMEZONE: string;
+
+  AuthService: any;
 }
 
 // This was a workaround while we are transitioning from JS to TS - 2020-12-21
