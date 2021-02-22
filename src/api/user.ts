@@ -1,7 +1,10 @@
 import { Assignment } from "./assignment";
 import { AssignmentRequest } from "./assignment-request";
 import { Organization } from "./organization";
-import { OrganizationMembership } from "./organization-membership";
+import {
+  OrganizationMembership,
+  UserRoleType
+} from "./organization-membership";
 import { RelayPaginatedResponse } from "./pagination";
 import { Team } from "./team";
 
@@ -15,7 +18,7 @@ export interface User {
   memberships: RelayPaginatedResponse<OrganizationMembership>;
   organizations: Organization[];
   todos: Assignment[];
-  roles: string[];
+  roles: UserRoleType[];
   teams: Team[];
   currentRequest: AssignmentRequest;
   assignedCell: string;
