@@ -68,25 +68,6 @@ class ScriptList extends React.Component {
       }
     };
 
-    // const rightIconButton = (
-    //   <IconMenu
-    //     iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-    //     anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-    //     targetOrigin={{horizontal: 'left', vertical: 'bottom'}}
-    //   >
-    //     <MenuItem primaryText={duplicateCampaignResponses && !script.isUserCreated ? "Duplicate and edit" : "Edit"}
-    //       onClick={() => this.handleEditScript(script)}
-    //     />
-    //     {
-    //       script.isUserCreated ? (
-    //         <MenuItem primaryText="Delete"
-    //           onClick={() => this.handleDeleteScript(script.id)}
-    //         />
-    //       ) : ''
-    //     }
-    //   </IconMenu>
-    // )
-
     const rightIconButton = null;
     const listItems = scripts.map((script) => (
       <ListItem
@@ -111,14 +92,12 @@ class ScriptList extends React.Component {
     return (
       <div>
         {list}
-        {showAddScriptButton ? (
+        {showAddScriptButton && (
           <FlatButton
             label="Add new canned response"
             icon={<CreateIcon />}
             onClick={this.handleOpenDialog}
           />
-        ) : (
-          ""
         )}
         <Form.Context>
           <Dialog
