@@ -30,7 +30,7 @@ const SpokeFormField = React.forwardRef<unknown, Props>(function Component(
         if (typeof children === "function") return children(innerProps);
 
         const { ...fieldProps } = innerProps;
-        const { type } = fieldProps;
+        const { type } = props;
         let Input = as;
 
         // We may get passed a component (e.g. type={Autocomplete})
