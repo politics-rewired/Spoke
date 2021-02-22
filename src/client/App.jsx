@@ -2,8 +2,6 @@ import { css, StyleSheet } from "aphrodite";
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React from "react";
 import { ApolloProvider } from "react-apollo";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { hot } from "react-hot-loader/root";
 import { BrowserRouter as Router } from "react-router-dom";
 
 import ApolloClientSingleton from "../network/apollo-client-singleton";
@@ -32,4 +30,4 @@ const App = () => (
   </ApolloProvider>
 );
 
-export default hot(App);
+export default App;

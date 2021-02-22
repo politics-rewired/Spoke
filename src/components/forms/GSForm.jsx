@@ -14,11 +14,6 @@ const styles = StyleSheet.create({
     textAlign: "center"
   }
 });
-
-// areComponentsEqual() seems to be broken ("proxy.get is not a function") so compare against
-// cached type. See: https://github.com/gaearon/react-hot-loader#checking-element-types
-const CachedFieldType = (<Form.Field />).type;
-const CachedButtonType = (<Form.Button />).type;
 export default class GSForm extends React.Component {
   // eslint-disable-next-line react/static-property-placement
   static propTypes = {
@@ -106,7 +101,7 @@ export default class GSForm extends React.Component {
       if (!React.isValidElement(child)) {
         return child;
       }
-      if (child.type === CachedFieldType) {
+      if (child.type === Form.Field) {
         const { name } = child.props;
         let error = this.state.formErrors ? this.state.formErrors[name] : null;
         let clonedElement = child;
@@ -122,7 +117,7 @@ export default class GSForm extends React.Component {
           events: ["onBlur"]
         });
       }
-      if (child.type === CachedButtonType) {
+      if (child.type === Form.Submit) {
         return React.cloneElement(child, {
           component: GSSubmitButton,
           isSubmitting: this.state.isSubmitting
