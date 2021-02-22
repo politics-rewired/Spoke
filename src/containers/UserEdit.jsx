@@ -358,8 +358,8 @@ UserEdit.defaultProps = {
 };
 
 UserEdit.propTypes = {
-  organizationId: PropTypes.string.isRequired,
-  userId: PropTypes.string.isRequired,
+  organizationId: PropTypes.string,
+  userId: PropTypes.string,
   saveLabel: PropTypes.string,
   nextUrl: PropTypes.string,
   authType: PropTypes.string,
