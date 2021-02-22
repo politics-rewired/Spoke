@@ -58,7 +58,7 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
         value={editingResponse?.text}
       />
       <div className={css(styles.buttonRow)}>
-        <Form.Button
+        <Form.Submit
           {...dataTest("addResponse")}
           type="submit"
           label={submitLabel}

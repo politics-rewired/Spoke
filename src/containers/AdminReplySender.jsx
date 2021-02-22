@@ -93,7 +93,7 @@ class AdminReplySender extends React.Component {
               hintText="Reply"
               fullWidth
             />
-            <Form.Button
+            <Form.Submit
               {...dataTest("send")}
               type="submit"
               label="Send"

@@ -80,11 +80,11 @@ class CreateOrganization extends React.Component {
                 hintText="Bartlet Campaign"
                 fullWidth
               />
-              <Form.Button
+              <Form.Submit
                 type="submit"
                 label="Get Started"
-                name="submit"
                 value="Get Started"
+                name="submit"
                 fullWidth
                 secondary
                 style={{ marginTop: 40 }}

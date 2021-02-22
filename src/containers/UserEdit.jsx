@@ -302,7 +302,7 @@ class UserEdit extends React.Component {
                 />
               </div>
             )}
-            <Form.Button
+            <Form.Submit
               type="submit"
               label={saveLabel || "Save"}
               component={GSSubmitButton}

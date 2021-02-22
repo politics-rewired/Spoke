@@ -14,7 +14,6 @@ import * as yup from "yup";
 
 import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
-import GSSubmitButton from "../../../components/forms/GSSubmitButton";
 import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
@@ -184,10 +183,9 @@ class Settings extends React.Component {
               style={inlineStyles.dialogButton}
               onClick={this.handleCloseTextingHoursDialog}
             />
-            <Form.Button
+            <Form.Submit
               type="submit"
               style={inlineStyles.dialogButton}
-              component={GSSubmitButton}
               label="Save"
             />
           </div>

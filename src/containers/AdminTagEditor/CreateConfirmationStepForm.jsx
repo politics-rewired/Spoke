@@ -58,8 +58,8 @@ const CreateConfirmationStepForm = (props) => {
         </div>
 
         <div className={css(styles.buttons)}>
-          <Form.Button label="Cancel" onClick={handleToggleStepCreatorOpen} />
-          <Form.Button type="submit" label="Save New Confirmation Step" />
+          <Form.Submit label="Cancel" onClick={handleToggleStepCreatorOpen} />
+          <Form.Submit type="submit" label="Save New Confirmation Step" />
         </div>
       </GSForm>
     </Dialog>

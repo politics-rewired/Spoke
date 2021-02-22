@@ -119,7 +119,7 @@ export default class GSForm extends React.Component {
       }
       if (child.type === Form.Submit) {
         return React.cloneElement(child, {
-          component: GSSubmitButton,
+          as: GSSubmitButton,
           isSubmitting: this.state.isSubmitting
         });
       }
