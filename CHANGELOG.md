@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.2](https://github.com/politics-rewired/spoke/compare/v4.0.1...v4.0.2) (2021-02-23)
+
+
+### Bug Fixes
+
+* add missing window global type definition ([fee040f](https://github.com/politics-rewired/spoke/commit/fee040f793ba3170a5307624d742e725ea173699))
+* fix role resolver ([#895](https://github.com/politics-rewired/spoke/issues/895)) ([6252976](https://github.com/politics-rewired/spoke/commit/62529761d9df19f4ca957fead132277dc61b69c1))
+
 ### [4.0.1](https://github.com/politics-rewired/spoke/compare/v4.0.0...v4.0.1) (2021-02-18)
 
 
