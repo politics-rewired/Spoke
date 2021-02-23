@@ -2,6 +2,8 @@ import { css, StyleSheet } from "aphrodite";
 import React, { Component } from "react";
 import Form from "react-formal";
 
+const FIELD_NAME = "messageText";
+
 const styles = StyleSheet.create({
   textField: {
     "@media(max-width: 350px)": {
@@ -23,7 +25,11 @@ class MessageTextField extends Component {
 
   getMessageFieldRef = () => {
     // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.messageText.refs.input.refs.textField.input.refs.input;
+    if (this.messageTextRef !== undefined) {
+      return this.messageTextRef.querySelectorAll(
+        `textarea[name="${FIELD_NAME}"]`
+      )[0];
+    }
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
@@ -37,16 +43,21 @@ class MessageTextField extends Component {
 
   render() {
     return (
-      <Form.Field
-        ref="messageText"
-        className={css(styles.textField)}
-        name="messageText"
-        label="Your message"
-        multiLine
-        fullWidth
-        rowsMax={6}
-        {...this.props}
-      />
+      <div
+        ref={(el) => {
+          this.messageTextRef = el;
+        }}
+      >
+        <Form.Field
+          className={css(styles.textField)}
+          name={FIELD_NAME}
+          label="Your message"
+          multiLine
+          fullWidth
+          rowsMax={6}
+          {...this.props}
+        />
+      </div>
     );
   }
 }

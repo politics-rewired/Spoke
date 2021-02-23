@@ -191,7 +191,7 @@ export class AssignmentTexterContact extends React.Component {
       }, 1500);
     }
 
-    const scroller = this.refs.messageScrollContainer;
+    const scroller = this.messageScrollContainerRef;
     if (scroller) {
       scroller.scrollTo(0, scroller.scrollHeight);
     }
@@ -533,7 +533,7 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleClickSendMessageButton = () => {
-    this.refs.form.submit();
+    this.formRef.submit();
     if (this.props.contact.messageStatus === "needsMessage") {
       this.setState({ justSentNew: true });
     }
@@ -793,7 +793,9 @@ export class AssignmentTexterContact extends React.Component {
           <div>
             <div className={css(styles.messageField)}>
               <GSForm
-                ref="form"
+                ref={(el) => {
+                  this.formRef = el;
+                }}
                 schema={this.messageSchema}
                 value={{ messageText }}
                 onSubmit={
@@ -861,7 +863,9 @@ export class AssignmentTexterContact extends React.Component {
           <div className={css(styles.dynamicFlexSection)}>
             {contact.messages.length > 0 ? (
               <div
-                ref="messageScrollContainer"
+                ref={(el) => {
+                  this.messageScrollContainerRef = el;
+                }}
                 className={css(styles.verticalScrollingSection)}
                 {...dataTest("messageList")}
               >

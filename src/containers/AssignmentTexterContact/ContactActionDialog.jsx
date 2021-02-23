@@ -10,6 +10,8 @@ import * as yup from "yup";
 import GSForm from "../../components/forms/GSForm";
 import GSSubmitButton from "../../components/forms/GSSubmitButton";
 
+const FIELD_NAME = "messageText";
+
 const styles = StyleSheet.create({
   contactActionCard: {
     "@media(max-width: 320px)": {
@@ -43,8 +45,11 @@ class ContactActionDialog extends Component {
 
   getContactActionTextFieldRef = () => {
     // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.contactActionText.refs.input.refs.textField.input.refs
-      .input;
+    if (this.contactActionTextRef) {
+      return this.contactActionTextRef.querySelectorAll(
+        `textarea[name="${FIELD_NAME}"]`
+      )[0];
+    }
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
@@ -77,13 +82,13 @@ class ContactActionDialog extends Component {
             value={{ messageText }}
             onSubmit={onSubmit}
           >
-            <Form.Field
-              ref="contactActionText"
-              name="messageText"
-              fullWidth
-              autoFocus
-              multiLine
-            />
+            <div
+              ref={(el) => {
+                this.contactActionTextRef = el;
+              }}
+            >
+              <Form.Field name={FIELD_NAME} fullWidth autoFocus multiLine />
+            </div>
             <div className={css(styles.dialogActions)}>
               <FlatButton
                 style={inlineStyles.dialogButton}
