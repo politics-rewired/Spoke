@@ -6,82 +6,54 @@ import Menu from "material-ui/Menu";
 import MenuItem from "material-ui/MenuItem";
 import Popover from "material-ui/Popover";
 import Subheader from "material-ui/Subheader";
-import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { compose } from "react-apollo";
-import { withRouter } from "react-router-dom";
+import { ApolloProviderProps, compose, withApollo } from "react-apollo";
+import { RouterProps, withRouter } from "react-router-dom";
 
-import { dataTest } from "../lib/attributes";
-import { hasRole } from "../lib/permissions";
-import { withOperations } from "./hoc/with-operations";
+import { Organization } from "../../api/organization";
+import { User } from "../../api/user";
+import { dataTest } from "../../lib/attributes";
+import { QueryMap } from "../../network/types";
+import { withOperations } from "../hoc/with-operations";
+import OrganizationItem from "./components/OrganizationItem";
 
 const avatarSize = 28;
 
-const OrganizationItemInner = (props) => {
-  const { organization, data, history } = props;
-  const { loading, currentUser } = data;
-  const path =
-    data.currentUser && hasRole("SUPERVOLUNTEER", currentUser.roles)
-      ? `/admin/${organization.id}`
-      : `/app/${organization.id}`;
-
-  const handleClick = (event) => {
-    event.preventDefault();
-    history.push(path);
-  };
-
-  return (
-    <MenuItem
-      primaryText={organization.name}
-      value={path}
-      disabled={loading}
-      onClick={handleClick}
-    />
-  );
+type CurrentUser = Pick<User, "id" | "displayName" | "email"> & {
+  organizations: Pick<Organization, "id" | "name">[];
 };
 
-const orgRoleQueries = {
+interface Props
+  extends Pick<RouterProps, "history">,
+    Pick<ApolloProviderProps<any>, "client"> {
+  orgId: string;
   data: {
-    query: gql`
-      query getCurrentUserRoles($organizationId: String!) {
-        currentUser {
-          id
-          roles(organizationId: $organizationId)
-        }
-      }
-    `,
-    options: (ownProps) => ({
-      variables: {
-        organizationId: ownProps.organization.id
-      }
-    })
-  }
-};
+    currentUser: CurrentUser;
+  };
+}
 
-const OrganizationItem = compose(
-  withRouter,
-  withOperations({ queries: orgRoleQueries })
-)(OrganizationItemInner);
+interface State {
+  open: boolean;
+}
 
-class UserMenu extends Component {
-  state = {
-    open: false,
-    anchorEl: null
+class UserMenu extends Component<Props, State> {
+  anchorRef: Element | undefined = undefined;
+
+  state: State = {
+    open: false
   };
 
-  handleTouchTap = (event) => {
+  // Use `any` because of mismatch between @types/react versions
+  handleTouchTap = (event: any) => {
     // This prevents ghost click.
     event.preventDefault();
 
-    this.setState({
-      open: true,
-      anchorEl: event.currentTarget
-    });
+    this.setState({ open: true });
   };
 
   handleRequestClose = () => this.setState({ open: false });
 
-  handleMenuChange = (_, value) => {
+  handleMenuChange = (_e: React.SyntheticEvent<unknown>, value: any) => {
     const { orgId, data, history } = this.props;
     const { currentUser } = data;
 
@@ -107,7 +79,7 @@ class UserMenu extends Component {
     }
   };
 
-  renderAvatar = (user, size) => {
+  renderAvatar = (user: CurrentUser, size: number) => {
     // Material-UI seems to not be handling this correctly when doing serverside rendering
     const inlineStyles = {
       lineHeight: "1.25",
@@ -123,17 +95,21 @@ class UserMenu extends Component {
   };
 
   render() {
-    const { orgId, data } = this.props;
+    const { orgId, data, history, client } = this.props;
     const { currentUser } = data;
 
     if (!currentUser) {
       return <div />;
     }
 
-    const { open, anchorEl } = this.state;
+    const { open } = this.state;
 
     return (
-      <div>
+      <div
+        ref={(el) => {
+          this.anchorRef = el ?? undefined;
+        }}
+      >
         <IconButton
           {...dataTest("userMenuButton")}
           onClick={this.handleTouchTap}
@@ -143,7 +119,7 @@ class UserMenu extends Component {
         </IconButton>
         <Popover
           open={open}
-          anchorEl={anchorEl}
+          anchorEl={this.anchorRef}
           anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
           targetOrigin={{ horizontal: "left", vertical: "top" }}
           onRequestClose={this.handleRequestClose}
@@ -164,6 +140,8 @@ class UserMenu extends Component {
               <OrganizationItem
                 key={organization.id}
                 organization={organization}
+                client={client}
+                history={history}
               />
             ))}
             <Divider />
@@ -182,13 +160,7 @@ class UserMenu extends Component {
   }
 }
 
-UserMenu.propTypes = {
-  data: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
-  orgId: PropTypes.string
-};
-
-const queries = {
+const queries: QueryMap<Props> = {
   data: {
     query: gql`
       query getCurrentUserForMenu {
@@ -209,4 +181,8 @@ const queries = {
   }
 };
 
-export default compose(withRouter, withOperations({ queries }))(UserMenu);
+export default compose(
+  withApollo,
+  withRouter,
+  withOperations({ queries })
+)(UserMenu);

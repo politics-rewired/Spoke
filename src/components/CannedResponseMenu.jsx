@@ -2,6 +2,7 @@ import { List } from "material-ui/List";
 import Popover from "material-ui/Popover";
 import type from "prop-types";
 import React from "react";
+import { withApollo } from "react-apollo";
 
 import ScriptList from "./ScriptList";
 
@@ -20,10 +21,11 @@ class CannedResponseMenu extends React.Component {
   };
 
   renderCannedResponses({ scripts, subheader, showAddScriptButton }) {
-    const { customFields, campaignId, texterId } = this.props;
+    const { customFields, campaignId, texterId, client } = this.props;
 
     return (
       <ScriptList
+        client={client}
         texterId={texterId}
         campaignId={campaignId}
         scripts={scripts}
@@ -72,6 +74,7 @@ class CannedResponseMenu extends React.Component {
 }
 
 CannedResponseMenu.propTypes = {
+  client: type.object.isRequired,
   scripts: type.array,
   onSelectCannedResponse: type.func,
   onRequestClose: type.func,
@@ -84,4 +87,4 @@ CannedResponseMenu.propTypes = {
   campaignCannedResponses: type.array
 };
 
-export default CannedResponseMenu;
+export default withApollo(CannedResponseMenu);
