@@ -17,12 +17,12 @@ class ApplyTagDialog extends Component {
     pendingTag: undefined
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // eslint-disable-next-line react/no-direct-mutation-state
     this.state.selectedTags = this.props.pendingNewTags;
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!!nextProps.open && !this.props.open) {
       this.resetTags();
     }

@@ -8,7 +8,7 @@ import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
-import GSSubmitButton from "../../components/forms/GSSubmitButton";
+import SpokeFormField from "../../components/forms/SpokeFormField";
 
 const FIELD_NAME = "messageText";
 
@@ -87,7 +87,7 @@ class ContactActionDialog extends Component {
                 this.contactActionTextRef = el;
               }}
             >
-              <Form.Field name={FIELD_NAME} fullWidth autoFocus multiLine />
+              <SpokeFormField name={FIELD_NAME} fullWidth autoFocus multiLine />
             </div>
             <div className={css(styles.dialogActions)}>
               <FlatButton
@@ -95,11 +95,10 @@ class ContactActionDialog extends Component {
                 label="Cancel"
                 onClick={handleCloseDialog}
               />
-              <Form.Button
+              <Form.Submit
                 type="submit"
-                style={inlineStyles.dialogButton}
-                component={GSSubmitButton}
                 label={submitTitle}
+                style={inlineStyles.dialogButton}
               />
             </div>
           </GSForm>

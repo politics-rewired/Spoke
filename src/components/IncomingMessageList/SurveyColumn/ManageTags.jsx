@@ -17,7 +17,7 @@ class ManageTags extends Component {
     error: undefined
   };
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { tags: oldTags } = this.props.contactTags.contact;
     const { tags: newTags } = nextProps.contactTags.contact;
     if (!isEqual(oldTags, newTags)) {

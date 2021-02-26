@@ -5,8 +5,8 @@ module.exports = {
     "@babel/preset-typescript"
   ],
   plugins: [
-    "react-hot-loader/babel",
     ["@babel/plugin-transform-runtime", { corejs: 3 }],
-    "@babel/plugin-proposal-class-properties"
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-export-default-from"
   ]
 };

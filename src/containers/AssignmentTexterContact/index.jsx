@@ -199,7 +199,7 @@ export class AssignmentTexterContact extends React.Component {
     document.body.addEventListener("keyup", this.onEnterUp);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.errors.length !== nextProps.length) {
       // eslint-disable-next-line react/no-direct-mutation-state
       this.state.disabled = false;

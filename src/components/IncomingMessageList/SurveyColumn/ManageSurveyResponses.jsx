@@ -20,7 +20,7 @@ class ManageSurveyResponses extends Component {
     questionResponses: {}
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { interactionSteps } = this.props.campaign;
     const questionResponses = interactionSteps
       .filter((iStep) => iStep.questionResponse)

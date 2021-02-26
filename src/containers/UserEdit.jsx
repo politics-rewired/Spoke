@@ -10,6 +10,7 @@ import * as yup from "yup";
 
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
+import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 
@@ -240,7 +241,7 @@ class UserEdit extends React.Component {
             authType === UserEditMode.Reset ||
             authType === UserEditMode.RequestReset ||
             authType === UserEditMode.Edit) && (
-            <Form.Field
+            <SpokeFormField
               label="Email"
               name="email"
               disabled={!isLocalAuth}
@@ -250,17 +251,17 @@ class UserEdit extends React.Component {
           {(authType === UserEditMode.SignUp ||
             authType === UserEditMode.Edit) && (
             <span>
-              <Form.Field
+              <SpokeFormField
                 label="First name"
                 name="firstName"
                 {...dataTest("firstName")}
               />
-              <Form.Field
+              <SpokeFormField
                 label="Last name"
                 name="lastName"
                 {...dataTest("lastName")}
               />
-              <Form.Field
+              <SpokeFormField
                 label="Cell Number"
                 name="cell"
                 {...dataTest("cell")}
@@ -272,10 +273,10 @@ class UserEdit extends React.Component {
             authType === UserEditMode.Reset ||
             authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
-            <Form.Field label="Password" name="password" type="password" />
+            <SpokeFormField label="Password" name="password" type="password" />
           )}
           {authType === UserEditMode.Change && (
-            <Form.Field
+            <SpokeFormField
               label="New Password"
               name="newPassword"
               type="password"
@@ -285,7 +286,7 @@ class UserEdit extends React.Component {
             authType === UserEditMode.Reset ||
             authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
-            <Form.Field
+            <SpokeFormField
               label="Confirm Password"
               name="passwordConfirm"
               type="password"
@@ -301,7 +302,7 @@ class UserEdit extends React.Component {
                 />
               </div>
             )}
-            <Form.Button
+            <Form.Submit
               type="submit"
               label={saveLabel || "Save"}
               component={GSSubmitButton}

@@ -4,11 +4,11 @@ import isEmpty from "lodash/isEmpty";
 import Autocomplete from "material-ui/AutoComplete";
 import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
-import Form from "react-formal";
 import { compose } from "recompose";
 import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
+import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { dataSourceItem } from "../../../components/utils";
 import { DateTime, parseIanaZone } from "../../../lib/datetime";
 import { difference } from "../../../lib/utils";
@@ -143,7 +143,7 @@ class CampaignTextingHoursForm extends React.Component<
     hint: string,
     choices: DataSourceItemType<T>[]
   ) => (
-    <Form.Field
+    <SpokeFormField
       name={name}
       type={Autocomplete}
       fullWidth

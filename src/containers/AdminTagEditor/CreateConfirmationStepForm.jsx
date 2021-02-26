@@ -6,6 +6,7 @@ import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
+import SpokeFormField from "../../components/forms/SpokeFormField";
 
 const styles = StyleSheet.create({
   formFields: {
@@ -45,17 +46,20 @@ const CreateConfirmationStepForm = (props) => {
     >
       <GSForm schema={formSchema} onSubmit={handleSubmit}>
         <div className={css(styles.formFields)}>
-          <Form.Field
+          <SpokeFormField
             label="Confirmation Body Text"
             name="confirmationBodyText"
           />
-          <Form.Field label="Confirm Button Text" name="confirmButtonText" />
-          <Form.Field label="Cancel Button Text" name="cancelButtonText" />
+          <SpokeFormField
+            label="Confirm Button Text"
+            name="confirmButtonText"
+          />
+          <SpokeFormField label="Cancel Button Text" name="cancelButtonText" />
         </div>
 
         <div className={css(styles.buttons)}>
-          <Form.Button label="Cancel" onClick={handleToggleStepCreatorOpen} />
-          <Form.Button type="submit" label="Save New Confirmation Step" />
+          <Form.Submit label="Cancel" onClick={handleToggleStepCreatorOpen} />
+          <Form.Submit type="submit" label="Save New Confirmation Step" />
         </div>
       </GSForm>
     </Dialog>

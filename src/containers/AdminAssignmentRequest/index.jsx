@@ -19,11 +19,11 @@ class AdminAssignmentRequest extends Component {
     autoApproveReqId: undefined
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.updateAssignmentRequestStateWithNewProps(null, this.props);
   }
 
-  componentWillUpdate(nextProps) {
+  UNSAFE_componentWillUpdate(nextProps) {
     this.updateAssignmentRequestStateWithNewProps(this.props, nextProps);
   }
 

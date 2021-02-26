@@ -4,11 +4,11 @@ import isEmpty from "lodash/isEmpty";
 import ColorPicker from "material-ui-color-picker";
 import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
-import Form from "react-formal";
 import { compose } from "recompose";
 import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
+import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { dataTest } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { difference } from "../../../lib/utils";
@@ -123,7 +123,7 @@ class CampaignBasicsForm extends React.Component<
         >
           <CampaignFormSectionHeading title="What&#39;s your campaign about?" />
 
-          <Form.Field
+          <SpokeFormField
             {...dataTest("title")}
             name="title"
             label="Title"
@@ -131,14 +131,14 @@ class CampaignBasicsForm extends React.Component<
             fullWidth
           />
 
-          <Form.Field
+          <SpokeFormField
             {...dataTest("description")}
             name="description"
             label="Description"
             hintText="Get out the vote"
             fullWidth
           />
-          <Form.Field
+          <SpokeFormField
             {...dataTest("dueBy")}
             name="dueBy"
             label="Due date"
@@ -151,15 +151,20 @@ class CampaignBasicsForm extends React.Component<
             fullWidth
           />
 
-          <Form.Field name="introHtml" label="Intro HTML" multiLine fullWidth />
-          <Form.Field
+          <SpokeFormField
+            name="introHtml"
+            label="Intro HTML"
+            multiLine
+            fullWidth
+          />
+          <SpokeFormField
             name="logoImageUrl"
             label="Logo Image URL"
             hintText="https://www.mysite.com/images/logo.png"
             fullWidth
           />
           <p>Primary color</p>
-          <Form.Field
+          <SpokeFormField
             name="primaryColor"
             label="Primary color"
             defaultValue={value.primaryColor || "#ffffff"}

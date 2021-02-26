@@ -63,8 +63,11 @@ AuthzProvider.propTypes = {
   organizationId: PropTypes.string.isRequired
 };
 
-export const withAuthzContext = (Component) => (props) => (
-  <AuthzContext.Consumer>
-    {(adminPerms) => <Component {...props} adminPerms={adminPerms} />}
-  </AuthzContext.Consumer>
-);
+export const withAuthzContext = (Component) =>
+  function WithAuthzContext(props) {
+    return (
+      <AuthzContext.Consumer>
+        {(adminPerms) => <Component {...props} adminPerms={adminPerms} />}
+      </AuthzContext.Consumer>
+    );
+  };

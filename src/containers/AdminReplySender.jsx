@@ -6,6 +6,7 @@ import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../components/forms/GSForm";
+import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";
@@ -85,14 +86,14 @@ class AdminReplySender extends React.Component {
               );
             }}
           >
-            <Form.Field
+            <SpokeFormField
               {...dataTest("reply")}
               name="message"
               label="Reply"
               hintText="Reply"
               fullWidth
             />
-            <Form.Button
+            <Form.Submit
               {...dataTest("send")}
               type="submit"
               label="Send"

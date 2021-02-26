@@ -5,7 +5,6 @@ import RaisedButton from "material-ui/RaisedButton";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
 import React from "react";
-import Form from "react-formal";
 import * as yup from "yup";
 
 import {
@@ -13,6 +12,7 @@ import {
   InteractionStepWithChildren
 } from "../../../../../api/interaction-step";
 import GSForm from "../../../../../components/forms/GSForm";
+import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
 
@@ -131,7 +131,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
           >
             {parentInteractionId && (
               <div style={{ display: "flex", alignItems: "baseline" }}>
-                <Form.Field
+                <SpokeFormField
                   {...dataTest("answerOption")}
                   name="answerOption"
                   label="Answer"
@@ -149,7 +149,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
             )}
             {displayActions && (
               <div key={`answeractions-${stepId}`}>
-                <Form.Field
+                <SpokeFormField
                   name="answerActions"
                   type="select"
                   default=""
@@ -175,7 +175,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
                 </div>
               </div>
             )}
-            <Form.Field
+            <SpokeFormField
               {...dataTest("editorInteraction")}
               name="scriptOptions"
               type="scriptoptions"
@@ -186,7 +186,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
               multiLine
               disabled={disabled}
             />
-            <Form.Field
+            <SpokeFormField
               {...dataTest("questionText")}
               name="questionText"
               label="Question"
