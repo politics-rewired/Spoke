@@ -89,10 +89,10 @@ class AdminCampaignList extends React.Component {
   };
 
   releaseAllReplies = () => {
-    const ageInHours = this.refs.numberOfHoursToRelease.input.value;
-    const releaseOnRestricted = this.refs.releaseOnRestricted.state.switched;
-    const limitToCurrentlyTextableContacts = this.refs
-      .limitToCurrentlyTextableContacts.state.switched;
+    const ageInHours = this.numberOfHoursToReleaseRef.input.value;
+    const releaseOnRestricted = this.releaseOnRestrictedRef.state.switched;
+    const limitToCurrentlyTextableContacts = this
+      .limitToCurrentlyTextableContactsRef.state.switched;
 
     this.setState({ releasingInProgress: true });
 
@@ -204,7 +204,9 @@ class AdminCampaignList extends React.Component {
                 <TextField
                   type="number"
                   floatingLabelText="Number of Hours"
-                  ref="numberOfHoursToRelease"
+                  ref={(el) => {
+                    this.numberOfHoursToReleaseRef = el;
+                  }}
                   defaultValue={1}
                 />
                 <br />
@@ -212,14 +214,24 @@ class AdminCampaignList extends React.Component {
                 Should we release replies on campaigns that are restricted to
                 teams? If unchecked, replies on campaigns restricted to team
                 members will stay assigned to their current texter.
-                <Toggle ref="releaseOnRestricted" defaultToggled={false} />
+                <Toggle
+                  ref={(el) => {
+                    this.releaseOnRestrictedRef = el;
+                  }}
+                  defaultToggled={false}
+                />
                 <br />
                 <br />
                 Release contacts only if it is within texting hours in the
                 contact's timezone? If unchecked, replies will be released for
                 contacts that may not be textable until later today or until
                 tomorrow.
-                <Toggle ref="limitToCurrentlyTextableContacts" defaultToggled />
+                <Toggle
+                  ref={(el) => {
+                    this.limitToCurrentlyTextableContactsRef = el;
+                  }}
+                  defaultToggled
+                />
               </div>
             ) : (
               <div />

@@ -36,7 +36,9 @@ class GSScriptField extends GSFormField {
       {
         open: true
       },
-      () => this.refs.dialogScriptInput.focus()
+      () => {
+        if (this.scriptInputRef) this.scriptInputRef.focus();
+      }
     );
   };
 
@@ -106,7 +108,9 @@ class GSScriptField extends GSFormField {
         onRequestClose={this.handleCancelDialog}
       >
         <ScriptEditor
-          ref="dialogScriptInput"
+          ref={(el) => {
+            this.scriptInputRef = el;
+          }}
           name={name}
           scriptText={this.state.script}
           scriptFields={scriptFields}

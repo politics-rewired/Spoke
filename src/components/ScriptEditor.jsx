@@ -154,7 +154,11 @@ class ScriptEditor extends React.Component {
     ]);
   };
 
-  focus = () => this.refs.editor.focus();
+  focus = () => {
+    if (this.editorRef) {
+      this.editorRef.focus();
+    }
+  };
 
   addCustomField = (field) => {
     const textToInsert = delimit(field);
@@ -203,7 +207,9 @@ class ScriptEditor extends React.Component {
             name={name}
             editorState={this.state.editorState}
             onChange={this.onEditorChange}
-            ref="editor"
+            ref={(el) => {
+              this.editorRef = el;
+            }}
             spellCheck
           />
         </div>

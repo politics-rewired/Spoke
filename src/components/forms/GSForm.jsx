@@ -53,7 +53,13 @@ export default class GSForm extends React.Component {
   }
 
   submit = () => {
-    this.refs.form.submit();
+    if (this.formRef) {
+      this.formRef.submit();
+    }
+  };
+
+  handleFormRefChange = (ref) => {
+    this.formRef = ref;
   };
 
   handleSubmitForm = async (formValues) => {
@@ -145,7 +151,7 @@ export default class GSForm extends React.Component {
       this.props.value || this.state.model || this.props.defaultValue;
     return (
       <Form
-        ref="form"
+        ref={this.handleFormRefChange}
         value={value}
         {...this.props}
         onChange={this.handleOnFormChange}
