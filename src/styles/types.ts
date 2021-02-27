@@ -51,6 +51,7 @@ export interface CustomTheme {
   primaryColor?: string;
   secondaryColor?: string;
   logoUrl?: string;
+  welcomeText?: string;
 }
 
 export interface MuiThemeProviderProps {

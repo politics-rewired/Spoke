@@ -77,6 +77,9 @@ const Home: React.FC<HomeProps> = (props) => {
   const logoUrl =
     context.theme?.logoUrl ??
     "https://politics-rewired.surge.sh/spoke_logo.svg";
+  const welcomeText =
+    context.theme?.welcomeText ??
+    "Spoke is a new way to run campaigns using text messaging.";
 
   // not sure if we need this anymore -- only for new organizations
   const handleOrgInviteClick = async (
@@ -117,9 +120,7 @@ const Home: React.FC<HomeProps> = (props) => {
           <OrganizationList />
         ) : (
           <div>
-            <div className={css(styles.header)}>
-              Spoke is a new way to run campaigns using text messaging.
-            </div>
+            <div className={css(styles.header)}>{welcomeText}</div>
             <div>
               <a
                 id="login"
