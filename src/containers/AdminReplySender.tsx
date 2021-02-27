@@ -1,46 +1,52 @@
-import { css, StyleSheet } from "aphrodite";
+import { css, StyleSheet } from "aphrodite/no-important";
 import gql from "graphql-tag";
-import PropTypes from "prop-types";
+import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 import Form from "react-formal";
+import { match } from "react-router-dom";
+import { compose } from "recompose";
 import * as yup from "yup";
 
+import { CampaignContact } from "../api/campaign-contact";
+import { Message } from "../api/message";
 import GSForm from "../components/forms/GSForm";
 import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";
-import theme from "../styles/theme";
+import { MutationMap, QueryMap } from "../network/types";
+import baseTheme from "../styles/theme";
+import { MuiThemeProviderProps } from "../styles/types";
 import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({
   infoContainer: {
-    ...theme.layouts.greenBox,
+    ...baseTheme.layouts.greenBox,
     textAlign: "left",
     padding: 20
   },
   header: {
-    ...theme.text.header,
-    color: theme.colors.white,
+    ...baseTheme.text.header,
+    color: baseTheme.colors.white,
     borderBottom: "1px solid white"
   },
   subtitle: {
-    ...theme.text.body,
-    color: theme.colors.darkGray,
-    backgroundColor: theme.colors.lightGray
+    ...baseTheme.text.body,
+    color: baseTheme.colors.darkGray,
+    backgroundColor: baseTheme.colors.lightGray
   },
   fromContactMessage: {
-    ...theme.text.body,
-    backgroundColor: theme.colors.lightGreen,
+    ...baseTheme.text.body,
+    backgroundColor: baseTheme.colors.lightGreen,
     textAlign: "right",
     padding: 5
   },
   message: {
-    ...theme.text.body,
+    ...baseTheme.text.body,
     textAlign: "left",
     padding: 5
   },
   formContainer: {
     width: "60%",
-    backgroundColor: theme.colors.white,
+    backgroundColor: baseTheme.colors.white,
     marginTop: 15,
     marginBottom: 15,
     paddingLeft: 15,
@@ -51,14 +57,47 @@ const styles = StyleSheet.create({
   }
 });
 
-class AdminReplySender extends React.Component {
+type Contact = Pick<
+  CampaignContact,
+  "id" | "firstName" | "lastName" | "cell" | "messageStatus"
+> & {
+  messages: Pick<Message, "id" | "text" | "isFromContact">[];
+};
+
+interface InnerProps extends MuiThemeProviderProps {
+  match: match<{ campaignId: string }>;
+  mutations: {
+    sendReply: (contactId: string, message: string) => Promise<void>;
+  };
+  data: {
+    campaign: {
+      id: string;
+      contacts: Contact[];
+    };
+  };
+}
+
+class AdminReplySender extends React.Component<InnerProps> {
   formSchema = yup.object({
     message: yup.string().required()
   });
 
-  renderMessageSendingForm(contact) {
+  renderMessageSendingForm(contact: Contact) {
+    const { muiTheme } = this.props;
+
+    const overrides = {
+      container: {
+        backgroundColor:
+          muiTheme?.palette?.primary1Color ?? baseTheme.colors.green
+      }
+    };
+
     return (
-      <div key={contact.id} className={css(styles.infoContainer)}>
+      <div
+        key={contact.id}
+        className={css(styles.infoContainer)}
+        style={overrides.container}
+      >
         <div className={css(styles.header)}>
           {`${contact.firstName} ${contact.lastName}: ${contact.cell}`}
         </div>
@@ -79,7 +118,7 @@ class AdminReplySender extends React.Component {
         <div className={css(styles.formContainer)}>
           <GSForm
             schema={this.formSchema}
-            onSubmit={async (formValues) => {
+            onSubmit={async (formValues: { message: string }) => {
               await this.props.mutations.sendReply(
                 contact.id,
                 formValues.message
@@ -109,6 +148,7 @@ class AdminReplySender extends React.Component {
 
   render() {
     const { data } = this.props;
+
     return (
       <div>
         {data.campaign.contacts.map((contact) => {
@@ -125,12 +165,7 @@ class AdminReplySender extends React.Component {
   }
 }
 
-AdminReplySender.propTypes = {
-  mutations: PropTypes.object.isRequired,
-  data: PropTypes.object.isRequired
-};
-
-const queries = {
+const queries: QueryMap<InnerProps> = {
   data: {
     query: gql`
       query getCampaignMessages($campaignId: String!) {
@@ -159,7 +194,7 @@ const queries = {
   }
 };
 
-const mutations = {
+const mutations: MutationMap<never> = {
   sendReply: (_ownProps) => (contactId, message) => ({
     mutation: gql`
       mutation sendReply($contactId: String!, $message: String!) {
@@ -177,7 +212,10 @@ const mutations = {
   })
 };
 
-export default loadData({
-  queries,
-  mutations
-})(AdminReplySender);
+export default compose<InnerProps, never>(
+  muiThemeable(),
+  loadData({
+    queries,
+    mutations
+  })
+)(AdminReplySender);

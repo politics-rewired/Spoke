@@ -1,11 +1,15 @@
-import { css, StyleSheet } from "aphrodite";
+import { css, StyleSheet } from "aphrodite/no-important";
+import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import PropTypes from "prop-types";
+import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 import { compose } from "react-apollo";
-import { withRouter } from "react-router-dom";
+import { RouteChildrenProps, withRouter } from "react-router-dom";
 
+import { Organization } from "../api/organization";
+import { MutationMap } from "../network/types";
 import theme from "../styles/theme";
+import { MuiThemeProviderProps } from "../styles/types";
 import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({
@@ -14,8 +18,23 @@ const styles = StyleSheet.create({
   }
 });
 
-class JoinTeam extends React.Component {
-  state = {
+interface InnerProps
+  extends RouteChildrenProps<{ campaignId: string; organizationUuid: string }>,
+    MuiThemeProviderProps {
+  mutations: {
+    joinOrganization: () => Promise<
+      ApolloQueryResult<{ joinOrganization: Pick<Organization, "id"> }>
+    >;
+    assignUserToCampaign: () => Promise<ApolloQueryResult<never>>;
+  };
+}
+
+interface State {
+  errors: string | null;
+}
+
+class JoinTeam extends React.Component<InnerProps, State> {
+  state: State = {
     errors: null
   };
 
@@ -32,7 +51,7 @@ class JoinTeam extends React.Component {
       return;
     }
 
-    if (this.props.match.params.campaignId) {
+    if (this.props.match?.params.campaignId) {
       try {
         campaign = await this.props.mutations.assignUserToCampaign();
         if (campaign.errors) throw campaign.errors;
@@ -50,9 +69,15 @@ class JoinTeam extends React.Component {
   }
 
   renderErrors() {
+    const { muiTheme } = this.props;
+
+    const style: React.CSSProperties = {
+      backgroundColor: muiTheme?.palette?.primary1Color ?? theme.colors.green
+    };
+
     if (this.state.errors) {
       return (
-        <div className={css(styles.greenBox)}>
+        <div className={css(styles.greenBox)} style={style}>
           {this.state.errors.split("\n").map((part) => (
             <p key={part}>{part}</p>
           ))}
@@ -67,13 +92,7 @@ class JoinTeam extends React.Component {
   }
 }
 
-JoinTeam.propTypes = {
-  mutations: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired
-};
-
-const mutations = {
+const mutations: MutationMap<InnerProps> = {
   joinOrganization: (ownProps) => () => ({
     mutation: gql`
       mutation joinOrganization($organizationUuid: String!) {
@@ -82,7 +101,7 @@ const mutations = {
         }
       }
     `,
-    variables: { organizationUuid: ownProps.match.params.organizationUuid }
+    variables: { organizationUuid: ownProps.match?.params.organizationUuid }
   }),
   assignUserToCampaign: (ownProps) => () => ({
     mutation: gql`
@@ -99,10 +118,14 @@ const mutations = {
       }
     `,
     variables: {
-      campaignId: ownProps.match.params.campaignId,
-      organizationUuid: ownProps.match.params.organizationUuid
+      campaignId: ownProps.match?.params.campaignId,
+      organizationUuid: ownProps.match?.params.organizationUuid
     }
   })
 };
 
-export default compose(withRouter, loadData({ mutations }))(JoinTeam);
+export default compose(
+  muiThemeable(),
+  withRouter,
+  loadData({ mutations })
+)(JoinTeam);
