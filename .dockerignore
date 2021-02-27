@@ -4,7 +4,7 @@
 # Allow source files
 !/package.json
 !/yarn.lock
-!/webpack.config.js
+!/webpack.config.ts
 !/webpack/build-config.js
 !/babel.config.js
 !/knexfile.env.js
