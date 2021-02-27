@@ -15,7 +15,7 @@ const webpackConfig: WebpackConfiguration = {
   mode: config.isProd ? "production" : "development",
   context: path.resolve(__dirname, "src"),
   entry: {
-    bundle: "./client/index.jsx"
+    bundle: "./client/index.tsx"
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],

@@ -10,6 +10,7 @@ interface Window {
   PASSPORT_STRATEGY: string;
   TZ: string;
   DST_REFERENCE_TIMEZONE: string;
+  RENDERED_CLASS_NAMES: string[];
 
   AuthService: any;
 }
