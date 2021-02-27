@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.1.0](https://github.com/politics-rewired/spoke/compare/v4.0.2...v4.1.0) (2021-02-27)
+
+
+### Features
+
+* update react to v16 ([#894](https://github.com/politics-rewired/spoke/issues/894)) ([b3b804c](https://github.com/politics-rewired/spoke/commit/b3b804c0f3193e35ba5c7ccd3c0df7d6ca362fe9))
+
+
+### Bug Fixes
+
+* pass props directly when HOC contexts are not available ([#898](https://github.com/politics-rewired/spoke/issues/898)) ([82aba0e](https://github.com/politics-rewired/spoke/commit/82aba0e612575a281aa9092f116df5abfdd24408))
+* update refs usage ([#897](https://github.com/politics-rewired/spoke/issues/897)) ([5e1db7a](https://github.com/politics-rewired/spoke/commit/5e1db7a4716ee870c2b593a2adeb5fc893aea58c))
+
 ### [4.0.2](https://github.com/politics-rewired/spoke/compare/v4.0.1...v4.0.2) (2021-02-23)
 
 
