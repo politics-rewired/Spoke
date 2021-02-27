@@ -3505,12 +3505,12 @@
   resolved "https://registry.yarnpkg.com/@types/anymatch/-/anymatch-1.3.1.tgz#336badc1beecb9dacc38bea2cf32adf627a8421a"
   integrity sha512-/+CRPXpBDpo2RK9C68N3b2cOvO0Cf5B9aPijHsoDQTHivnGSObdOF2BRQOYjojWTDy6nQvMjmqRXIxH55VjxxA==
 
-"@types/aphrodite@^0.5.1":
-  version "0.5.13"
-  resolved "https://registry.yarnpkg.com/@types/aphrodite/-/aphrodite-0.5.13.tgz#0290eb7250d81aaab384320d894f027eb92452e0"
-  integrity sha512-1Li6+mLQYgKrQYopVh8yM8MhHgf2jsRbDruQeqzGWORXC4VqgYf6H/18TB/PSlKJIC7QN8IIS8aoAYBMGvvhDw==
+"@types/aphrodite@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/aphrodite/-/aphrodite-2.0.0.tgz#49054776a12b61bf8447ba3167952389f2532fae"
+  integrity sha512-E373DSZUdrq+qi4YwWfs/uoSLSwiaJlzM4fI8pdYfP8nJXPlmpPrtyNHfj/EiTrq3lHMgwSec5IqAh74Len/0Q==
   dependencies:
-    csstype "^2.2.0"
+    aphrodite "*"
 
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.12"
@@ -5053,13 +5053,14 @@ anymatch@^3.0.3, anymatch@~3.1.1:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aphrodite@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/aphrodite/-/aphrodite-0.4.1.tgz#d32fd490e83502fe6e269ad4a727128d2d71e2e2"
-  integrity sha1-0y/UkOg1Av5uJprUpycSjS1x4uI=
+aphrodite@*, aphrodite@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/aphrodite/-/aphrodite-2.4.0.tgz#ec1a2afa41ba7310a47a4f1fba27919d99572c91"
+  integrity sha512-1rVRlLco+j1YAT5aKEE8Wuw5zWV+tI41/quEheJAG0vNaGHE64iJ/a2SiVMz8Uc80VdP2/Hjlfd2bPJOWsqJuQ==
   dependencies:
     asap "^2.0.3"
-    inline-style-prefixer "^2.0.0"
+    inline-style-prefixer "^5.1.0"
+    string-hash "^1.1.3"
 
 apollo-cache-control@^0.11.6:
   version "0.11.6"
@@ -6329,7 +6330,7 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
-bowser@^1.0.0, bowser@^1.7.3:
+bowser@^1.7.3:
   version "1.9.4"
   resolved "https://registry.yarnpkg.com/bowser/-/bowser-1.9.4.tgz#890c58a2813a9d3243704334fa81b96a5c150c9a"
   integrity sha512-9IdMmj2KjigRq6oWhmwv1W36pDuA4STQZ8q6YO9um+x07xgYNCD3Oou+WP/3L1HNz7iqythGet3/p4wvc8AAwQ==
@@ -8385,11 +8386,6 @@ cssstyle@^2.2.0:
   integrity sha512-AZL67abkUzIuvcHqk7c09cezpGNcxUxU4Ioi/05xHk4DQeTkWmGYftIE6ctU6AEt+Gn4n1lDStOtj7FKycP71A==
   dependencies:
     cssom "~0.3.6"
-
-csstype@^2.2.0:
-  version "2.6.10"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.10.tgz#e63af50e66d7c266edb6b32909cfd0aabe03928b"
-  integrity sha512-D34BqZU4cIlMCY93rZHbrq9pjTAQJ3U8S8rfBqjwHxkGPThWFjzZDQpgMJY0QViLxth6ZKYiwFBo14RdN44U/w==
 
 csstype@^2.5.2:
   version "2.6.8"
@@ -12373,7 +12369,7 @@ husky@^4.2.3:
     slash "^3.0.0"
     which-pm-runs "^1.0.0"
 
-hyphenate-style-name@^1.0.1, hyphenate-style-name@^1.0.2:
+hyphenate-style-name@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.0.3.tgz#097bb7fa0b8f1a9cf0bd5c734cf95899981a9b48"
   integrity sha512-EcuixamT82oplpoJ2XU4pDtKGWQ7b00CD9f1ug9IaQ3p1bkHMiKCZ9ut9QDI6qsa6cpUuB+A/I+zLtdNK4n2DQ==
@@ -12602,20 +12598,19 @@ ini@^1.3.2, ini@^1.3.4, ini@^1.3.5, ini@~1.3.0:
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
   integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
 
-inline-style-prefixer@^2.0.0:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/inline-style-prefixer/-/inline-style-prefixer-2.0.5.tgz#c153c7e88fd84fef5c602e95a8168b2770671fe7"
-  integrity sha1-wVPH6I/YT+9cYC6VqBaLJ3BnH+c=
-  dependencies:
-    bowser "^1.0.0"
-    hyphenate-style-name "^1.0.1"
-
 inline-style-prefixer@^3.0.8:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/inline-style-prefixer/-/inline-style-prefixer-3.0.8.tgz#8551b8e5b4d573244e66a34b04f7d32076a2b534"
   integrity sha1-hVG45bTVcyROZqNLBPfTIHaitTQ=
   dependencies:
     bowser "^1.7.3"
+    css-in-js-utils "^2.0.0"
+
+inline-style-prefixer@^5.1.0:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/inline-style-prefixer/-/inline-style-prefixer-5.1.2.tgz#e5a5a3515e25600e016b71e39138971228486c33"
+  integrity sha512-PYUF+94gDfhy+LsQxM0g3d6Hge4l1pAqOSOiZuHWzMvQEGsbRQ/ck2WioLqrY2ZkHyPgVUXxn+hrkF7D6QUGbA==
+  dependencies:
     css-in-js-utils "^2.0.0"
 
 inquirer@6.5.0:
@@ -20820,6 +20815,11 @@ string-argv@0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/string-argv/-/string-argv-0.3.1.tgz#95e2fbec0427ae19184935f816d74aaa4c5c19da"
   integrity sha512-a1uQGz7IyVy9YwhqjZIZu1c8JO8dNIe20xBmSS6qu9kv++k3JGzCVmprbNN5Kn+BgzD5E7YYwg1CcjuJMRNsvg==
+
+string-hash@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/string-hash/-/string-hash-1.1.3.tgz#e8aafc0ac1855b4666929ed7dd1275df5d6c811b"
+  integrity sha1-6Kr8CsGFW0Zmkp7X3RJ1311sgRs=
 
 string-length@^2.0.0:
   version "2.0.0"
