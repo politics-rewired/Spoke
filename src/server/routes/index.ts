@@ -3,6 +3,7 @@ import authRouter from "./auth";
 import previewRouter from "./campaign-preview";
 import graphqlRouter from "./graphql";
 import nexmoRouter from "./nexmo";
+import settingsRouter from "./settings";
 import twilioRouter from "./twilio";
 import utilsRouter from "./utils";
 
@@ -12,6 +13,7 @@ export {
   nexmoRouter,
   twilioRouter,
   assembleRouter,
+  settingsRouter,
   utilsRouter,
   previewRouter
 };

@@ -17,6 +17,7 @@ import {
   graphqlRouter,
   nexmoRouter,
   previewRouter,
+  settingsRouter,
   twilioRouter,
   utilsRouter
 } from "./routes";
@@ -92,6 +93,7 @@ app.use(twilioRouter);
 app.use(assembleRouter);
 app.use(utilsRouter);
 app.use(previewRouter);
+app.use(settingsRouter);
 
 app.post(
   "/autoassign",

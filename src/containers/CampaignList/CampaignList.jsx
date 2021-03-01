@@ -4,6 +4,7 @@ import IconMenu from "material-ui/IconMenu";
 import { List, ListItem } from "material-ui/List";
 import MenuItem from "material-ui/MenuItem";
 import { blue300, grey900, red300 } from "material-ui/styles/colors";
+import muiThemeable from "material-ui/styles/muiThemeable";
 import SpeakerNotesIcon from "material-ui/svg-icons/action/speaker-notes";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import ArchiveIcon from "material-ui/svg-icons/content/archive";
@@ -12,6 +13,7 @@ import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import Empty from "../../components/Empty";
 import { dataTest } from "../../lib/attributes";
@@ -27,15 +29,6 @@ const inlineStyles = {
   chip: { margin: "4px" },
   past: {
     opacity: 0.6
-  },
-  warn: {
-    color: theme.colors.orange
-  },
-  good: {
-    color: theme.colors.green
-  },
-  warnUnsent: {
-    color: theme.colors.blue
   },
   secondaryText: {
     whiteSpace: "pre-wrap"
@@ -129,12 +122,19 @@ export class CampaignList extends React.Component {
     if (isArchived) {
       listItemStyle = inlineStyles.past;
     } else if (!isStarted || hasUnassignedContacts) {
-      listItemStyle = inlineStyles.warn;
+      listItemStyle = {
+        color:
+          this.props.muiTheme?.palette?.primary2Color || theme.colors.orange
+      };
       leftIcon = <WarningIcon />;
     } else if (hasUnsentInitialMessages) {
-      listItemStyle = inlineStyles.warnUnsent;
+      listItemStyle = {
+        color: theme.colors.blue
+      };
     } else {
-      listItemStyle = inlineStyles.good;
+      listItemStyle = {
+        color: this.props.muiTheme?.palette?.primary1Color || theme.colors.green
+      };
     }
     const dueBy = DateTime.fromISO(campaign.dueBy);
     const creatorName = campaign.creator ? campaign.creator.displayName : null;
@@ -242,4 +242,4 @@ CampaignList.propTypes = {
   unarchiveCampaign: PropTypes.func.isRequired
 };
 
-export default withRouter(CampaignList);
+export default compose(muiThemeable(), withRouter)(CampaignList);

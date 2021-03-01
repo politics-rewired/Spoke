@@ -1,20 +1,23 @@
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import IconButton from "material-ui/IconButton";
+import muiThemeable from "material-ui/styles/muiThemeable";
 import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
-import PropTypes from "prop-types";
 import React from "react";
 import { Link } from "react-router-dom";
+import { compose } from "recompose";
 
+import { Organization } from "../api/organization";
 import { withOperations } from "../containers/hoc/with-operations";
 import UserMenu from "../containers/UserMenu";
-import theme from "../styles/theme";
+import { QueryMap } from "../network/types";
+import baseTheme from "../styles/theme";
+import { MuiThemeProviderProps } from "../styles/types";
 
 const styles = StyleSheet.create({
   container: {
-    ...theme.layouts.multiColumn.container,
-    backgroundColor: theme.colors.green,
-    color: theme.colors.white,
+    ...baseTheme.layouts.multiColumn.container,
+    color: baseTheme.colors.white,
     height: 65,
     verticalAlign: "middle",
     paddingLeft: 15,
@@ -31,9 +34,9 @@ const styles = StyleSheet.create({
     marginBottom: "auto"
   },
   header: {
-    ...theme.text.header,
+    ...baseTheme.text.header,
     fontSize: 24,
-    color: theme.colors.white
+    color: baseTheme.colors.white
   },
   flexColumn: {
     flex: 1,
@@ -42,10 +45,28 @@ const styles = StyleSheet.create({
   }
 });
 
-const TopNav = (props) => {
-  const { backToURL, orgId, title } = props;
+interface OuterProps {
+  backToURL?: string;
+  title: string;
+  orgId: string;
+}
+
+interface InnerProps extends OuterProps, MuiThemeProviderProps {
+  data: { organization?: Pick<Organization, "id" | "name"> };
+}
+
+const TopNav: React.FC<InnerProps> = (props) => {
+  const { backToURL, orgId, title, muiTheme } = props;
+
+  const overrides = {
+    container: {
+      backgroundColor:
+        muiTheme?.palette?.primary1Color ?? baseTheme.colors.green
+    }
+  };
+
   return (
-    <div className={css(styles.container)}>
+    <div className={css(styles.container)} style={overrides.container}>
       <div className={css(styles.flexColumn)}>
         <div className={css(styles.inline)}>
           {backToURL && (
@@ -53,7 +74,7 @@ const TopNav = (props) => {
               <IconButton>
                 <ArrowBackIcon
                   style={{ fill: "white" }}
-                  color={theme.colors.white}
+                  color={baseTheme.colors.white}
                 />
               </IconButton>
             </Link>
@@ -73,13 +94,7 @@ const TopNav = (props) => {
   );
 };
 
-TopNav.propTypes = {
-  backToURL: PropTypes.string,
-  title: PropTypes.string.isRequired,
-  orgId: PropTypes.string
-};
-
-const queries = {
+const queries: QueryMap<OuterProps> = {
   data: {
     query: gql`
       query getOrganizationName($id: String!) {
@@ -97,4 +112,7 @@ const queries = {
   }
 };
 
-export default withOperations({ queries })(TopNav);
+export default compose<InnerProps, OuterProps>(
+  muiThemeable(),
+  withOperations({ queries })
+)(TopNav);

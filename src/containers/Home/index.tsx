@@ -1,14 +1,17 @@
-import { css, StyleSheet } from "aphrodite";
+import { css, StyleSheet } from "aphrodite/no-important";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import { History } from "history";
-import React from "react";
+import muiThemeable from "material-ui/styles/muiThemeable";
+import React, { useContext } from "react";
 import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
 
+import SpokeContext from "../../client/spoke-context";
 import SuperAdminLogin from "../../components/SuperAdminLogin";
 import { MutationMap, QueryMap } from "../../network/types";
 import theme from "../../styles/theme";
+import { MuiThemeProviderProps } from "../../styles/types";
 import { loadData } from "../hoc/with-operations";
 import OrganizationList from "./components/OrganizationList";
 
@@ -47,7 +50,7 @@ interface InviteInput {
   created_at?: string;
 }
 
-interface HomeProps {
+interface HomeProps extends MuiThemeProviderProps {
   data: {
     currentUser: null | {
       id: string;
@@ -62,7 +65,22 @@ interface HomeProps {
   history: History;
 }
 
-const Home: React.SFC<HomeProps> = (props) => {
+const Home: React.FC<HomeProps> = (props) => {
+  const themeOverrides = {
+    content: {
+      backgroundColor:
+        props.muiTheme?.palette?.primary1Color ?? theme.colors.green
+    }
+  };
+
+  const context = useContext(SpokeContext);
+  const logoUrl =
+    context.theme?.logoUrl ??
+    "https://politics-rewired.surge.sh/spoke_logo.svg";
+  const welcomeText =
+    context.theme?.welcomeText ??
+    "Spoke is a new way to run campaigns using text messaging.";
+
   // not sure if we need this anymore -- only for new organizations
   const handleOrgInviteClick = async (
     e: React.MouseEvent<HTMLAnchorElement>
@@ -92,19 +110,17 @@ const Home: React.SFC<HomeProps> = (props) => {
     <div className={css(styles.container)}>
       <SuperAdminLogin onLoginComplete={handleOnSuperadminLogin} />
       <div className={css(styles.logoDiv)}>
-        <img
-          src="https://politics-rewired.surge.sh/spoke_logo.svg"
-          className={css(styles.logoImg)}
-        />
+        <img src={logoUrl} className={css(styles.logoImg)} />
       </div>
-      <div className={css(styles.content)}>
+      <div
+        className={css(styles.content)}
+        style={{ ...themeOverrides.content }}
+      >
         {currentUser ? (
           <OrganizationList />
         ) : (
           <div>
-            <div className={css(styles.header)}>
-              Spoke is a new way to run campaigns using text messaging.
-            </div>
+            <div className={css(styles.header)}>{welcomeText}</div>
             <div>
               <a
                 id="login"
@@ -147,4 +163,8 @@ const mutations: MutationMap<HomeProps> = {
   })
 };
 
-export default compose(loadData({ queries, mutations }), withRouter)(Home);
+export default compose(
+  muiThemeable(),
+  loadData({ queries, mutations }),
+  withRouter
+)(Home);

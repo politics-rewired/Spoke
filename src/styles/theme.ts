@@ -1,4 +1,11 @@
-const colors = {
+import {
+  ComponentStyles,
+  LayoutStyles,
+  SpokeColors,
+  TextStyles
+} from "./types";
+
+const colors: SpokeColors = {
   orange: "rgb(255, 102, 0)",
   lightGreen: "rgb(245, 255, 247)",
   blue: "rgb(20, 127, 215)",
@@ -21,7 +28,7 @@ const colors = {
 
 const defaultFont = "Poppins";
 
-const text = {
+const text: TextStyles = {
   body: {
     color: colors.darkGray,
     fontSize: 14,
@@ -74,7 +81,7 @@ const text = {
   }
 };
 
-const layouts = {
+const layouts: LayoutStyles = {
   multiColumn: {
     container: {
       display: "flex",
@@ -95,12 +102,11 @@ const layouts = {
     marginLeft: "auto",
     marginRight: "auto",
     textAlign: "center",
-    backgroundColor: colors.green,
     color: colors.white
   }
 };
 
-const components = {
+const components: ComponentStyles = {
   floatingButton: {
     margin: 0,
     top: "auto",
