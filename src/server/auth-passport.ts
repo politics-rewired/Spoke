@@ -1,5 +1,5 @@
-import passportSlack from "@aoberoi/passport-slack";
 import passport from "@passport-next/passport";
+import passportSlack from "@rewired/passport-slack";
 import express, { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import Auth0Strategy from "passport-auth0";
@@ -78,7 +78,8 @@ function setupSlackPassport() {
       if (config.SLACK_TOKEN) {
         const response = await request
           .get(`https://slack.com/api/users.profile.get`)
-          .query({ token: config.SLACK_TOKEN, user: user.id })
+          .query({ user: user.id })
+          .set("Authorization", `Bearer ${config.SLACK_TOKEN}`)
           .then((res) => res.body);
         if (!response.ok) {
           logger.error("Error fetching Slack profile", { response });
