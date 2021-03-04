@@ -51,6 +51,7 @@ export interface CustomTheme {
   primaryColor?: string;
   secondaryColor?: string;
   logoUrl?: string;
+  firstMessageIconUrl?: string;
   welcomeText?: string;
 }
 

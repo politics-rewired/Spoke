@@ -9,7 +9,6 @@ import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { blueGrey100, grey100 } from "material-ui/styles/colors";
-import CreateIcon from "material-ui/svg-icons/content/create";
 import LocalOfferIcon from "material-ui/svg-icons/maps/local-offer";
 import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
@@ -39,6 +38,7 @@ import { isContactNowWithinCampaignHours } from "../../lib/timezones";
 import ApplyTagDialog from "./ApplyTagDialog";
 import ContactActionDialog from "./ContactActionDialog";
 import MessageTextField from "./MessageTextField";
+import NoMessagesIcon from "./NoMessagesIcon";
 import TopFixedSection from "./TopFixedSection";
 
 const TexterDialogType = Object.freeze({
@@ -874,7 +874,7 @@ export class AssignmentTexterContact extends React.Component {
             ) : (
               <Empty
                 title={`This is your first message to ${contact.firstName}`}
-                icon={<CreateIcon color="rgb(83, 180, 119)" />}
+                icon={<NoMessagesIcon />}
                 style={{ flex: "1 1 auto" }}
               />
             )}
