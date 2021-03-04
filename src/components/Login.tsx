@@ -1,11 +1,13 @@
-import { css, StyleSheet } from "aphrodite";
-import PropTypes from "prop-types";
+import { css, StyleSheet } from "aphrodite/no-important";
+import muiThemeable from "material-ui/styles/muiThemeable";
 import queryString from "query-string";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { RouteChildrenProps, withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import UserEdit, { UserEditMode } from "../containers/UserEdit";
 import theme from "../styles/theme";
+import { MuiThemeProviderProps } from "../styles/types";
 import UserPasswordReset from "./UserPasswordReset";
 
 const styles = StyleSheet.create({
@@ -42,21 +44,26 @@ const styles = StyleSheet.create({
   },
   header: {
     ...theme.text.header,
-    color: theme.colors.green,
     "text-align": "center",
     "margin-bottom": 0
   }
 });
 
-const saveLabels = {
+const saveLabels: Record<string, string> = {
   [UserEditMode.SignUp]: "Sign Up",
   [UserEditMode.Login]: "Log In",
   [UserEditMode.Reset]: "Save New Password",
   [UserEditMode.RequestReset]: "Request Reset"
 };
 
-class LocalLogin extends React.Component {
-  constructor(props) {
+type LogalLoginProps = RouteChildrenProps & MuiThemeProviderProps;
+
+interface LogalLoginState {
+  active: string;
+}
+
+class LocalLogin extends React.Component<LogalLoginProps, LogalLoginState> {
+  constructor(props: LogalLoginProps) {
     super(props);
 
     const nextUrl = queryString.parse(window.location.search).nextUrl || "/";
@@ -69,17 +76,19 @@ class LocalLogin extends React.Component {
     };
   }
 
-  handleClick = (e) => {
-    this.setState({ active: e.target.name });
+  handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    this.setState({ active: e.currentTarget.name });
   };
 
-  naiveVerifyInviteValid = (nextUrl) =>
+  naiveVerifyInviteValid = (nextUrl: string) =>
     /\/\w{8}-(\w{4}-){3}\w{12}(\/|$)/.test(nextUrl) ||
     nextUrl.includes("invite");
 
   render() {
-    const { location, history } = this.props;
-    const nextUrl = queryString.parse(location.search).nextUrl || "/";
+    const { location, history, muiTheme } = this.props;
+    const rawNextUrl = queryString.parse(location.search).nextUrl;
+    const nextUrl =
+      (Array.isArray(rawNextUrl) ? rawNextUrl[0] : rawNextUrl) || "/";
     const { active } = this.state;
 
     // If nextUrl is a valid (naive RegEx only) invite or organization
@@ -87,6 +96,8 @@ class LocalLogin extends React.Component {
     const inviteLink =
       nextUrl && (nextUrl.includes("join") || nextUrl.includes("invite"));
     const displaySignUp = inviteLink && this.naiveVerifyInviteValid(nextUrl);
+
+    const headerColor = muiTheme?.palette?.primary1Color ?? theme.colors.green;
 
     return (
       <div className={css(styles.loginPage)}>
@@ -114,7 +125,7 @@ class LocalLogin extends React.Component {
           </section>
         )}
         <div className={css(styles.fieldContainer)}>
-          <h2 className={css(styles.header)}>
+          <h2 className={css(styles.header)} style={{ color: headerColor }}>
             {active === UserEditMode.EmailReset
               ? "Reset Your Password"
               : active === UserEditMode.RequestReset
@@ -122,18 +133,13 @@ class LocalLogin extends React.Component {
               : "Welcome to Spoke"}
           </h2>
           {active === UserEditMode.Reset ? (
-            <UserPasswordReset
-              history={history}
-              nextUrl={nextUrl}
-              style={css(styles.authFields)}
-            />
+            <UserPasswordReset history={history} nextUrl={nextUrl} />
           ) : (
             <UserEdit
               authType={active}
               saveLabel={saveLabels[active]}
               history={history}
               nextUrl={nextUrl}
-              style={css(styles.authFields)}
               startRequestReset={() =>
                 this.setState({ active: UserEditMode.RequestReset })
               }
@@ -145,14 +151,12 @@ class LocalLogin extends React.Component {
   }
 }
 
-LocalLogin.propTypes = {
-  location: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired
-};
+const LocalLoginWrapper = compose<LogalLoginProps, unknown>(
+  muiThemeable(),
+  withRouter
+)(LocalLogin);
 
-const LocalLoginWrapper = withRouter(LocalLogin);
-
-const Login = ({ location, history }) => {
+const Login: React.FC = () => {
   if (window.ALTERNATE_LOGIN_URL) {
     window.location.href = window.ALTERNATE_LOGIN_URL;
     return <div />;
@@ -161,11 +165,11 @@ const Login = ({ location, history }) => {
     case "slack":
       // If Slack strategy, the server needs to initiate the redirect
       // Force reload will hit the server redirect (as opposed to client routing)
-      window.location = "/login";
+      window.location.href = "/login";
       return <div />;
 
     case "local":
-      return <LocalLoginWrapper location={location} history={history} />;
+      return <LocalLoginWrapper />;
 
     default: {
       const { nextUrl } = queryString.parse(window.location.search);
@@ -173,11 +177,6 @@ const Login = ({ location, history }) => {
       return <div />;
     }
   }
-};
-
-Login.propTypes = {
-  location: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired
 };
 
 export default Login;

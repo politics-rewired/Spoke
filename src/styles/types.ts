@@ -29,7 +29,7 @@ export interface TextStyles {
   body: CSSProperties;
   link_light_bg: AphroditeCSSProperties;
   link_dark_bg: AphroditeCSSProperties;
-  header: CSSProperties;
+  header: AphroditeCSSProperties;
   secondaryHeader: CSSProperties;
 }
 
