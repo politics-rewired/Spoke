@@ -1,26 +1,23 @@
+import { ErrorCode, WebAPICallError, WebAPICallResult } from "@slack/web-api";
 import isEmpty from "lodash/isEmpty";
 import { JobHelpers, Task } from "pg-compose";
 import promiseRetry from "promise-retry";
-import bot from "slack";
 
 import { config } from "../../config";
 import { sleep } from "../../lib/utils";
+import { botClient } from "../lib/slack";
 import { withTransaction } from "../utils";
 
 const retrySlack = async <T extends unknown>(
-  fn: () => Promise<T>
-): Promise<T> =>
+  fn: () => Promise<WebAPICallResult>
+): Promise<WebAPICallResult & T> =>
   promiseRetry({ retries: 5, maxTimeout: 1000 }, (retry) =>
-    fn().catch((err) => {
-      if (err.message === "ratelimited") {
-        const retryS = (err.retry && parseInt(err.retry, 10)) || 0;
-        return sleep(retryS * 1000).then(retry);
-      }
+    fn().catch((err: WebAPICallError) => {
+      if (err.code === ErrorCode.RateLimitedError)
+        return sleep(err.retryAfter * 1000).then(() => retry(err));
       throw err;
     })
   );
-
-const PARAMS = { token: config.SLACK_TOKEN };
 
 interface SpokeTeamRow {
   id: string;
@@ -46,15 +43,16 @@ const fetchAllChannels = async (
 ): Promise<SlackChannelRecord[]> => {
   const { acc = [], next_cursor } = options;
   const params = {
-    ...PARAMS,
     types: "public_channel,private_channel",
     exclude_archived: true,
     limit: 200,
     ...(isEmpty(next_cursor) ? {} : { cursor: next_cursor })
   };
-  const response = await retrySlack(() => bot.conversations.list(params));
-  const { channels, response_metadata } = response;
-  const strippedChannels: SlackChannelRecord = channels.map(
+  const response = await retrySlack<{ channels: any[] }>(() =>
+    botClient.conversations.list(params)
+  );
+  const { channels = [], response_metadata = {} } = response;
+  const strippedChannels: SlackChannelRecord[] = channels.map(
     ({ id, name, name_normalized }: SlackChannelRecord) => ({
       id,
       name,
@@ -81,23 +79,24 @@ const fetchChannelMembers = async (
   const { channelId, acc = [], next_cursor } = options;
 
   const params = {
-    ...PARAMS,
     channel: channelId,
     limit: 1000,
     ...(isEmpty(next_cursor) ? {} : { cursor: next_cursor })
   };
-  const response = await retrySlack(() => bot.conversations.members(params));
-  const { members, response_metadata } = response;
-  const strippedMembers = members;
+  const response = await retrySlack<{ members: any[] }>(() =>
+    botClient.conversations.members(params)
+  );
+  const { members, response_metadata = {} } = response;
+  const allMembers = acc.concat(members);
 
   if (response_metadata.next_cursor) {
     return fetchChannelMembers({
       channelId,
-      acc: acc.concat(strippedMembers),
+      acc: allMembers,
       next_cursor: response_metadata.next_cursor
     });
   }
-  const allMembers = acc.concat(strippedMembers);
+
   return allMembers;
 };
 
@@ -106,11 +105,10 @@ let slackIdEmailCache: { [key: string]: string } = {};
 const emailForSlackId = async (slackId: string) =>
   slackIdEmailCache[slackId]
     ? slackIdEmailCache[slackId]
-    : retrySlack<string>(() =>
-        bot.users
-          .info({ ...PARAMS, user: slackId })
-          .then(({ user }) => user.profile.email)
-      ).then((email) => {
+    : retrySlack<{ user: any }>(() =>
+        botClient.users.info({ user: slackId })
+      ).then((res) => {
+        const { email } = res.user.profile;
         slackIdEmailCache[slackId] = email;
         return email;
       });
@@ -137,7 +135,7 @@ const syncTeam = async (options: SyncTeamOptions) => {
     : allChannelMembers;
 
   const updateCount = await helpers.withPgClient(async (poolClient) =>
-    withTransaction(poolClient, async (client) => {
+    withTransaction<number>(poolClient, async (client) => {
       await client.query(`delete from user_team where team_id = $1`, [
         spokeTeam.id
       ]);
