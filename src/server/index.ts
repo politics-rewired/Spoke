@@ -24,7 +24,7 @@ process.on("unhandledRejection", (err) => {
 
 const lightship = createLightship({
   detectKubernetes: true,
-  shutdownDelay: config.SHUTDOWN_GRACE_PERIOD,
+  shutdownDelay: config.isProduction ? config.SHUTDOWN_GRACE_PERIOD : 0,
   port: 9000,
   signals: ["SIGTERM", "SIGINT"],
   terminate: () => {
@@ -43,7 +43,7 @@ if (config.MODE === ServerMode.Server || config.MODE === ServerMode.Dual) {
         resolve(undefined);
       });
       lightship.registerShutdownHandler(async () => {
-        const spokeGracePeriodMs = 30 * 1000;
+        const spokeGracePeriodMs = config.isProduction ? 30 * 1000 : 0;
         logger.info(
           `Received kill signal, waiting ${spokeGracePeriodMs}ms before shutting down Spoke app...`
         );
