@@ -15,7 +15,7 @@ export const createMuiTheme = (overrides: Partial<CustomTheme> = {}) =>
         textColor: baseTheme.text.body.color,
         primary2Color: overrides.secondaryColor || baseTheme.colors.orange,
         primary3Color: grey400,
-        accent1Color: baseTheme.colors.orange,
+        accent1Color: overrides.secondaryColor || baseTheme.colors.orange,
         accent2Color: baseTheme.colors.lightGray,
         accent3Color: grey500,
         alternateTextColor: baseTheme.colors.white,
