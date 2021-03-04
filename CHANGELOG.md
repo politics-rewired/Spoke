@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.2.0](https://github.com/politics-rewired/spoke/compare/v4.1.0...v4.2.0) (2021-03-04)
+
+
+### Features
+
+* add additional styling ([#905](https://github.com/politics-rewired/spoke/issues/905)) ([9093581](https://github.com/politics-rewired/spoke/commit/90935816c7657c0e3a8cf170da863775a19de5c3))
+* support custom themes ([#902](https://github.com/politics-rewired/spoke/issues/902)) ([3fde0a2](https://github.com/politics-rewired/spoke/commit/3fde0a237147f878c21bd21fe2047ef8703cbaca))
+
+
+### Bug Fixes
+
+* set answer actions to correct value ([#906](https://github.com/politics-rewired/spoke/issues/906)) ([1c934b4](https://github.com/politics-rewired/spoke/commit/1c934b474e7e07dcc3981c67906a33fbc2bb5ade))
+* update slack for header-based authentication ([#903](https://github.com/politics-rewired/spoke/issues/903)) ([28a61c3](https://github.com/politics-rewired/spoke/commit/28a61c3053366c403a3b0d17514128934c9cf447))
+
 ## [4.1.0](https://github.com/politics-rewired/spoke/compare/v4.0.2...v4.1.0) (2021-02-27)
 
 
