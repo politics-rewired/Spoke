@@ -4,6 +4,7 @@ import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";
+import muiThemeable from "material-ui/styles/muiThemeable";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
@@ -13,6 +14,7 @@ import { compose, withProps } from "recompose";
 import { withAuthzContext } from "../../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
+import { MuiThemeProviderProps } from "../../../styles/types";
 import { loadData } from "../../hoc/with-operations";
 import { CampaignReadinessType } from "../types";
 
@@ -27,7 +29,7 @@ interface DeleteJobType {
   (jobId: string): ApolloQueryResult<{ id: string }>;
 }
 
-interface WrapperProps {
+interface WrapperProps extends MuiThemeProviderProps {
   // Required Props
   campaignId: string;
   active: boolean;
@@ -78,7 +80,7 @@ const unpackJob = (job?: PendingJobType) => ({
   isSaving: job !== undefined && !job.resultMessage
 });
 
-const SectionWrapper: React.SFC<WrapperProps> = (props) => {
+const SectionWrapper: React.FC<WrapperProps> = (props) => {
   const {
     // Required props
     active,
@@ -91,6 +93,9 @@ const SectionWrapper: React.SFC<WrapperProps> = (props) => {
 
     // Authz HOC
     adminPerms,
+
+    // MUI Theme HOC
+    muiTheme,
 
     // withProps HOC
     isExpandable,
@@ -127,7 +132,8 @@ const SectionWrapper: React.SFC<WrapperProps> = (props) => {
         size={25}
       />
     );
-    cardHeaderStyle.backgroundColor = theme.colors.green;
+    cardHeaderStyle.backgroundColor =
+      muiTheme?.palette?.primary1Color ?? theme.colors.green;
   } else if (!sectionIsDone) {
     avatar = (
       <Avatar
@@ -136,7 +142,8 @@ const SectionWrapper: React.SFC<WrapperProps> = (props) => {
         size={25}
       />
     );
-    cardHeaderStyle.backgroundColor = theme.colors.yellow;
+    cardHeaderStyle.backgroundColor =
+      muiTheme?.palette?.primary2Color ?? theme.colors.yellow;
   }
 
   const handleDiscardJob = async () => {
@@ -308,6 +315,7 @@ interface AuthzProviderProps {
 
 interface WrappedComponentProps
   extends RequiredComponentProps,
+    MuiThemeProviderProps,
     AuthzProviderProps {
   pendingJob?: PendingJobType;
   isExpandable: boolean;
@@ -320,6 +328,7 @@ export const asSection = (options: SectionOptions) => (
 ) =>
   compose<WrappedComponentProps, RequiredComponentProps>(
     withAuthzContext,
+    muiThemeable(),
     loadData({
       queries: makeQueries(options.jobQueueNames),
       mutations
@@ -360,6 +369,7 @@ export const asSection = (options: SectionOptions) => (
 
       // Authz HOC
       adminPerms,
+      muiTheme,
 
       // withProps HOC
       pendingJob,
@@ -382,6 +392,7 @@ export const asSection = (options: SectionOptions) => (
         isExpandable={isExpandable}
         sectionIsDone={sectionIsDone}
         deleteJob={deleteJob}
+        muiTheme={muiTheme}
       >
         <Component
           organizationId={organizationId}

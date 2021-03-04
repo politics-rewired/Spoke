@@ -8,6 +8,7 @@ import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { red600 } from "material-ui/styles/colors";
+import muiThemeable from "material-ui/styles/muiThemeable";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
@@ -772,7 +773,7 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms, match } = this.props;
+    const { adminPerms, match, muiTheme } = this.props;
     const campaignId = parseInt(match.params.campaignId, 10);
     const isNew = this.isNew();
     const saveLabel = isNew ? "Save and goto next section" : "Save";
@@ -842,7 +843,8 @@ class AdminCampaignEdit extends React.Component {
                 size={25}
               />
             );
-            cardHeaderStyle.backgroundColor = theme.colors.green;
+            cardHeaderStyle.backgroundColor =
+              muiTheme?.palette?.primary1Color ?? theme.colors.green;
           } else if (!sectionIsDone) {
             avatar = (
               <Avatar
@@ -851,7 +853,8 @@ class AdminCampaignEdit extends React.Component {
                 size={25}
               />
             );
-            cardHeaderStyle.backgroundColor = theme.colors.yellow;
+            cardHeaderStyle.backgroundColor =
+              muiTheme?.palette?.primary2Color ?? theme.colors.yellow;
           }
           return (
             <Card
@@ -1070,6 +1073,7 @@ const mutations = {
 };
 
 export default compose(
+  muiThemeable(),
   withAuthzContext,
   loadData({
     queries,

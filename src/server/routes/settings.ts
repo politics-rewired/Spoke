@@ -28,6 +28,7 @@ router.get("/settings/theme", async (req, res) => {
     primaryColor: getSetting("theme.primaryColor"),
     secondaryColor: getSetting("theme.secondaryColor"),
     logoUrl: getSetting("theme.logoUrl"),
+    firstMessageIconUrl: getSetting("theme.firstMessageIconUrl"),
     welcomeText: getSetting("theme.welcomeText")
   };
   return res.json(customTheme);
