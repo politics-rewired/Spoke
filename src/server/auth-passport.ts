@@ -1,16 +1,16 @@
-import passportSlack from "@aoberoi/passport-slack";
 import passport from "@passport-next/passport";
+import passportSlack from "@rewired/passport-slack";
 import express, { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import Auth0Strategy from "passport-auth0";
 import { Strategy as LocalStrategy } from "passport-local";
-import request from "superagent";
 
 import { config } from "../config";
 import logger from "../logger";
 import { capitalizeWord } from "./api/lib/utils";
 import { UserRecord } from "./api/types";
 import { contextForRequest } from "./contexts";
+import { botClient } from "./lib/slack";
 import localAuthHelpers, {
   hashPassword,
   LocalAuthError
@@ -19,6 +19,7 @@ import sendEmail from "./mail";
 import { r } from "./models";
 import { userLoggedIn } from "./models/cacheable_queries";
 import { SpokeRequest } from "./types";
+import { errToObj } from "./utils";
 
 type PassportCallback = (err: Error | null, result?: any) => void;
 
@@ -76,16 +77,13 @@ function setupSlackPassport() {
     ) => {
       // scopes is a Set
       if (config.SLACK_TOKEN) {
-        const response = await request
-          .get(`https://slack.com/api/users.profile.get`)
-          .query({ token: config.SLACK_TOKEN, user: user.id })
-          .then((res) => res.body);
-        if (!response.ok) {
-          logger.error("Error fetching Slack profile", { response });
-        } else {
-          const userProfile = response.profile;
+        try {
+          const response = await botClient.users.profile.get({ user: user.id });
+          const userProfile = response.profile as any;
           const { real_name, first_name, last_name, phone } = userProfile;
           user = { ...user, real_name, first_name, last_name, phone };
+        } catch (err) {
+          logger.error("Error fetching Slack profile: ", errToObj(err));
         }
       }
 
