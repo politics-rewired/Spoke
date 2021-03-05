@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  cut-gh-release:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: gcr.io/spoke-rewired/spoke
+      BODY_PATH: release-body.txt
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/} && echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
+      - name: Generate Docker image tag
+        run: 'echo "Docker image: \`$DOCKER_IMAGE:${{ steps.vars.outputs.version }}\`" > $BODY_PATH'
+      - name: Generate Changelog
+        run: awk "/[#]{2,3} \[${{ steps.vars.outputs.version }}/{flag=1; next} /[#]{2,3} \[/{flag=0} flag" CHANGELOG.md >> $BODY_PATH
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: Version ${{ steps.vars.outputs.version }}
+          tag_name: ${{ steps.vars.outputs.tag }}
+          body_path: ${{ env.BODY_PATH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
