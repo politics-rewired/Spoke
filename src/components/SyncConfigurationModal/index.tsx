@@ -1,7 +1,11 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import React from "react";
 import { compose } from "recompose";
@@ -86,37 +90,35 @@ const SyncConfigurationModal: React.SFC<InnerProps> = (props) => {
   };
 
   return (
-    <Dialog
-      open
-      title="Configure Mapping"
-      actions={actions}
-      autoScrollBodyContent
-      onRequestClose={props.onRequestClose}
-    >
-      <p>
-        For instructions on configuring mappings, please see the{" "}
-        <a
-          href="https://docs.spokerewired.com/article/93-van-list-loading"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          VAN Integration
-        </a>{" "}
-        page.
-      </p>
-      {responseMappings.map((responseMapping) => (
-        <QuestionResponseConfig
-          key={responseMapping.id}
-          campaignId={campaignId}
-          config={responseMapping}
-          surveyQuestions={surveyQuestions}
-          activistCodes={activistCodes}
-          resultCodes={resultCodes}
-          style={{ marginTop: "10px" }}
-          createConfig={makeOnCreateConfig(responseMapping.id)}
-          deleteConfig={makeOnDeleteConfig(responseMapping.id)}
-        />
-      ))}
+    <Dialog open scroll="body" onClose={props.onRequestClose}>
+      <DialogTitle>Configure Mapping</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          For instructions on configuring mappings, please see the{" "}
+          <a
+            href="https://docs.spokerewired.com/article/93-van-list-loading"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            VAN Integration
+          </a>{" "}
+          page.
+        </DialogContentText>
+        {responseMappings.map((responseMapping) => (
+          <QuestionResponseConfig
+            key={responseMapping.id}
+            campaignId={campaignId}
+            config={responseMapping}
+            surveyQuestions={surveyQuestions}
+            activistCodes={activistCodes}
+            resultCodes={resultCodes}
+            style={{ marginTop: "10px" }}
+            createConfig={makeOnCreateConfig(responseMapping.id)}
+            deleteConfig={makeOnDeleteConfig(responseMapping.id)}
+          />
+        ))}
+      </DialogContent>
+      <DialogActions>{actions}</DialogActions>
     </Dialog>
   );
 };
