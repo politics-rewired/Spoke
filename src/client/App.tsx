@@ -1,5 +1,6 @@
+import { MuiThemeProvider } from "@material-ui/core/styles";
 import { css, StyleSheet } from "aphrodite";
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import MuiThemeProviderv0 from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
 import { ApolloProvider } from "react-apollo";
 import { BrowserRouter as Router } from "react-router-dom";
@@ -7,7 +8,7 @@ import request from "superagent";
 
 import ApolloClientSingleton from "../network/apollo-client-singleton";
 import AppRoutes from "../routes";
-import { createMuiTheme } from "../styles/mui-theme";
+import { createMuiThemev0, createMuiThemev1 } from "../styles/mui-theme";
 import baseTheme from "../styles/theme";
 import { CustomTheme } from "../styles/types";
 import SpokeContext from "./spoke-context";
@@ -29,20 +30,23 @@ const App: React.FC = () => {
     });
   }, []);
 
-  const muiTheme = createMuiTheme(customTheme);
+  const muiTheme = createMuiThemev1(customTheme);
+  const muiThemev0 = createMuiThemev0(customTheme);
 
   return (
     <SpokeContext.Provider value={{ theme: customTheme }}>
-      <ApolloProvider client={ApolloClientSingleton}>
-        <MuiThemeProvider muiTheme={muiTheme}>
-          <div className={css(styles.root)}>
-            <VersionNotifier />
-            <Router>
-              <AppRoutes />
-            </Router>
-          </div>
-        </MuiThemeProvider>
-      </ApolloProvider>
+      <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProviderv0 muiTheme={muiThemev0}>
+          <ApolloProvider client={ApolloClientSingleton}>
+            <div className={css(styles.root)}>
+              <VersionNotifier />
+              <Router>
+                <AppRoutes />
+              </Router>
+            </div>
+          </ApolloProvider>
+        </MuiThemeProviderv0>
+      </MuiThemeProvider>
     </SpokeContext.Provider>
   );
 };
