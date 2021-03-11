@@ -1,5 +1,9 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
@@ -48,12 +52,15 @@ export default class ConfirmButton extends Component {
           label={this.props.label}
         />
         <Dialog
-          title={this.props.label}
-          actions={actions}
           open={this.state.showConfirmationDialog}
-          modal
+          disableBackdropClick
+          disableEscapeKeyDown
         >
-          Are you sure?
+          <DialogTitle>{this.props.label}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Are you sure?</DialogContentText>
+          </DialogContent>
+          <DialogActions>{actions}</DialogActions>
         </Dialog>
       </div>
     );

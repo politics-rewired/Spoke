@@ -1,5 +1,7 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
 import pick from "lodash/pick";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
@@ -88,13 +90,36 @@ class GSScriptField extends GSFormField {
     return (
       <Dialog
         style={styles.dialog}
-        actions={[
+        disableBackdropClick
+        disableEscapeKeyDown
+        open={open}
+        onClose={this.handleCancelDialog}
+      >
+        <DialogContent>
+          <ScriptEditor
+            ref={(el) => {
+              this.scriptInputRef = el;
+            }}
+            name={name}
+            scriptText={this.state.script}
+            scriptFields={scriptFields}
+            expandable
+            onChange={(val) => this.setState({ script: val })}
+          />
+          <ScriptLinkWarningDialog
+            open={scriptWarningOpen}
+            warningContext={warningContext}
+            handleConfirm={this.handleConfirmLinkWarning}
+            handleClose={this.handleCloseLinkWarning}
+          />
+        </DialogContent>
+        <DialogActions>
           <FlatButton
             key="cancel"
             {...dataTest("scriptCancel")}
             label="Cancel"
             onClick={this.handleCancelDialog}
-          />,
+          />
           <RaisedButton
             key="done"
             {...dataTest("scriptDone")}
@@ -102,27 +127,7 @@ class GSScriptField extends GSFormField {
             onClick={this.wrapSaveScript}
             primary
           />
-        ]}
-        modal
-        open={open}
-        onRequestClose={this.handleCancelDialog}
-      >
-        <ScriptEditor
-          ref={(el) => {
-            this.scriptInputRef = el;
-          }}
-          name={name}
-          scriptText={this.state.script}
-          scriptFields={scriptFields}
-          expandable
-          onChange={(val) => this.setState({ script: val })}
-        />
-        <ScriptLinkWarningDialog
-          open={scriptWarningOpen}
-          warningContext={warningContext}
-          handleConfirm={this.handleConfirmLinkWarning}
-          handleClose={this.handleCloseLinkWarning}
-        />
+        </DialogActions>
       </Dialog>
     );
   }

@@ -1,5 +1,9 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
@@ -148,13 +152,14 @@ class ManageSurveyResponses extends Component {
           );
         })}
         <Dialog
-          title="Error Updating Question Response"
-          actions={errorActions}
-          modal={false}
           open={!!this.state.requestError}
-          onRequestClose={this.handleCloseError}
+          onClose={this.handleCloseError}
         >
-          {this.state.requestError}
+          <DialogTitle>Error Updating Question Response</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{this.state.requestError}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

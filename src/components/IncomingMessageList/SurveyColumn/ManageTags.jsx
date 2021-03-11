@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
@@ -99,27 +103,26 @@ class ManageTags extends Component {
           disabled={isWorking}
           onClick={this.handleOnClickEditTags}
         />
-        <Dialog
-          title="Manage Tags"
-          actions={actions}
-          open={isTagEditorOpen}
-          modal={false}
-          onRequestClose={this.handleCloseTagManager}
-        >
-          <TagSelector
-            dataSource={tagList}
-            value={selectedTags}
-            onChange={this.handleOnChangeTags}
-          />
+        <Dialog open={isTagEditorOpen} onClose={this.handleCloseTagManager}>
+          <DialogTitle>Manage Tags</DialogTitle>
+          <DialogContent>
+            <TagSelector
+              dataSource={tagList}
+              value={selectedTags}
+              onChange={this.handleOnChangeTags}
+            />
+          </DialogContent>
+          <DialogActions>{actions}</DialogActions>
         </Dialog>
         <Dialog
-          title="Error Updating Tags"
-          actions={errorActions}
           open={error !== undefined}
-          modal={false}
-          onRequestClose={this.handleCloseErrorDialog}
+          onClose={this.handleCloseErrorDialog}
         >
-          {error}
+          <DialogTitle>Error Updating Tags</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

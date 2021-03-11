@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -138,21 +142,24 @@ class AdminAssignmentRequest extends Component {
           onDenyRequest={this.handleResolveRequest(false)}
         />
         <Dialog
-          title="Confirm Enable AutoAssignment"
           open={!!autoApproveRequest}
-          actions={autoApproveActions}
-          onRequestClose={this.handleDismissAutoApproveRequest}
+          onClose={this.handleDismissAutoApproveRequest}
         >
-          <p>
-            Are you sure you would like to enable automatic assignment request
-            fulfillment for {((autoApproveRequest || {}).user || {}).firstName}{" "}
-            {((autoApproveRequest || {}).user || {}).lastName}?
-          </p>
-          <p>
-            If enabled, all future assignment requests for this user will be
-            automatically fulfilled. This can be changed at any time from the
-            People page.
-          </p>
+          <DialogTitle>Confirm Enable AutoAssignment</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you would like to enable automatic assignment request
+              fulfillment for{" "}
+              {((autoApproveRequest || {}).user || {}).firstName}{" "}
+              {((autoApproveRequest || {}).user || {}).lastName}?
+            </DialogContentText>
+            <DialogContentText>
+              If enabled, all future assignment requests for this user will be
+              automatically fulfilled. This can be changed at any time from the
+              People page.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>{autoApproveActions}</DialogActions>
         </Dialog>
       </div>
     );

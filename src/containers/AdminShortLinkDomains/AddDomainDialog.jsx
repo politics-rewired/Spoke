@@ -1,4 +1,8 @@
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
@@ -47,33 +51,32 @@ class AddDomainDialog extends Component {
     ];
 
     return (
-      <Dialog
-        title="Add Domain"
-        actions={actions}
-        modal={false}
-        open={open}
-        onRequestClose={onRequestClose}
-      >
-        <p>Add a new shortlink domain.</p>
-        <TextField
-          floatingLabelText="Shortlink Domain"
-          hintText="bit.ly"
-          value={domain}
-          errorText={isDomainValid ? undefined : "You must provide a domain."}
-          onChange={this.handleDomainChange}
-        />
-        <br />
-        <TextField
-          floatingLabelText="Shortlink Domain"
-          value={maxUsageCount}
-          errorText={
-            isMaxUsageCountValid
-              ? undefined
-              : "You must provide a maximum usage count."
-          }
-          type="number"
-          onChange={this.handleMaxUsageCountChange}
-        />
+      <Dialog open={open} onClose={onRequestClose}>
+        <DialogTitle>Add Domain</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Add a new shortlink domain.</DialogContentText>
+
+          <TextField
+            floatingLabelText="Shortlink Domain"
+            hintText="bit.ly"
+            value={domain}
+            errorText={isDomainValid ? undefined : "You must provide a domain."}
+            onChange={this.handleDomainChange}
+          />
+          <br />
+          <TextField
+            floatingLabelText="Shortlink Domain"
+            value={maxUsageCount}
+            errorText={
+              isMaxUsageCountValid
+                ? undefined
+                : "You must provide a maximum usage count."
+            }
+            type="number"
+            onChange={this.handleMaxUsageCountChange}
+          />
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

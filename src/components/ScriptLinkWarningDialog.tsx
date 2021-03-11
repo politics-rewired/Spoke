@@ -1,4 +1,7 @@
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import FlatButton from "material-ui/FlatButton";
 import React from "react";
 
@@ -17,7 +20,7 @@ interface ContentProps {
   warningContext: ScriptWarningContext;
 }
 
-const DialogContent = (props: ContentProps) => {
+const DialogContentWrapper = (props: ContentProps) => {
   const { warningContext } = props;
 
   const genericLinkContent = (
@@ -103,8 +106,12 @@ const ScriptLinkWarningDialog = (props: WarningProps) => {
   ];
 
   return (
-    <Dialog open={open} actions={actions} title={title} style={styles.dialog}>
-      <DialogContent warningContext={warningContext} />
+    <Dialog open={open} style={styles.dialog}>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentWrapper warningContext={warningContext} />
+      </DialogContent>
+      <DialogActions>{actions}</DialogActions>
     </Dialog>
   );
 };

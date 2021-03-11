@@ -1,6 +1,9 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import queryString from "query-string";
@@ -312,32 +315,32 @@ class UserEdit extends React.Component {
         <div>
           <Dialog
             {...dataTest("changePasswordDialog")}
-            title="Change your password"
-            modal={false}
             open={this.state.changePasswordDialog}
-            onRequestClose={this.handleClose}
+            onClose={this.handleClose}
           >
-            <UserEdit
-              authType={UserEditMode.Change}
-              saveLabel="Save new password"
-              handleClose={this.handleClose}
-              openSuccessDialog={this.openSuccessDialog}
-              userId={this.props.userId}
-              mutations={this.props.mutations}
-            />
+            <DialogTitle>Change your password</DialogTitle>
+            <DialogContent>
+              <UserEdit
+                authType={UserEditMode.Change}
+                saveLabel="Save new password"
+                handleClose={this.handleClose}
+                openSuccessDialog={this.openSuccessDialog}
+                userId={this.props.userId}
+                mutations={this.props.mutations}
+              />
+            </DialogContent>
           </Dialog>
           <Dialog
             {...dataTest("successPasswordDialog")}
-            title={
-              this.state.successMessage || "Password changed successfully!"
-            }
-            modal={false}
             open={this.state.successDialog}
-            onRequestClose={this.handleClose}
-            onBackdropClick={this.handleClose}
-            onEscapeKeyDown={this.handleClose}
+            onClose={this.handleClose}
           >
-            <RaisedButton onClick={this.handleClose} label="OK" primary />
+            <DialogTitle>
+              {this.state.successMessage || "Password changed successfully!"}
+            </DialogTitle>
+            <DialogActions>
+              <RaisedButton onClick={this.handleClose} label="OK" primary />
+            </DialogActions>
           </Dialog>
         </div>
 

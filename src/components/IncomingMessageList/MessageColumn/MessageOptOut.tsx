@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import React, { Component } from "react";
@@ -184,14 +188,12 @@ class MessageOptOut extends Component<Props, State> {
             )}
           </div>
         </div>
-        <Dialog
-          title={dialogTitle}
-          actions={dialogActions}
-          modal={false}
-          open={!!dialogTitle}
-          onRequestClose={this.handleCloseAlert}
-        >
-          {dialogText}
+        <Dialog open={!!dialogTitle} onClose={this.handleCloseAlert}>
+          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{dialogText}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{dialogActions}</DialogActions>
         </Dialog>
       </div>
     );

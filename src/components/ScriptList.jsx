@@ -1,5 +1,7 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import { List, ListItem } from "material-ui/List";
@@ -112,21 +114,23 @@ class ScriptList extends React.Component {
         <Dialog
           style={styles.dialog}
           open={dialogOpen}
-          actions={[
+          onClose={this.handleCloseDialog}
+        >
+          <DialogContent>
+            <CannedResponseForm
+              onSaveCannedResponse={onSaveCannedResponse}
+              customFields={customFields}
+              script={this.state.script}
+            />
+          </DialogContent>
+          <DialogActions>
             <FlatButton
               key="cancel"
               label="Cancel"
               onClick={this.handleCloseDialog}
-            />,
+            />
             <GSSubmitButton key="save" label="Save" type="submit" />
-          ]}
-          onRequestClose={this.handleCloseDialog}
-        >
-          <CannedResponseForm
-            onSaveCannedResponse={onSaveCannedResponse}
-            customFields={customFields}
-            script={this.state.script}
-          />
+          </DialogActions>
         </Dialog>
       </div>
     );

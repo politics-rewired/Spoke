@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import AutoComplete from "material-ui/AutoComplete";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
@@ -195,13 +199,12 @@ class AdminTrollAlarms extends React.Component {
           onPageChange={this.handlePageChange}
           onCopyAlarm={this.handleCopyAlarm}
         />
-        <Dialog
-          title="Error"
-          actions={errorActions}
-          open={error !== undefined}
-          onRequestClose={this.handleOnCancelError}
-        >
-          {error || ""}
+        <Dialog open={error !== undefined} onClose={this.handleOnCancelError}>
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
         <Snackbar
           open={copiedAlarmID !== undefined}

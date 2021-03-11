@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import { History } from "history";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import MenuItem from "material-ui/MenuItem";
@@ -266,76 +270,77 @@ class AdminExternalSystems extends Component<Props, State> {
         </Table>
 
         <Dialog
-          title={
-            editingExternalSystem === "new"
-              ? "Create a New Integration"
-              : "Edit Integration"
-          }
           open={editingExternalSystem !== undefined}
-          onRequestClose={this.cancelEditingExternalSystem}
-          actions={[
+          onClose={this.cancelEditingExternalSystem}
+        >
+          <DialogTitle>
+            {editingExternalSystem === "new"
+              ? "Create a New Integration"
+              : "Edit Integration"}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              name="name"
+              floatingLabelText="Integration Name"
+              fullWidth
+              value={name}
+              onChange={this.editExternalSystemProp("name")}
+            />
+            <br />
+            <SelectField floatingLabelText="System Type" value={type} fullWidth>
+              {EXTERNAL_SYSTEM_OPTS.map(([display, val]) => (
+                <MenuItem key={val} value={val} primaryText={display} />
+              ))}
+            </SelectField>
+            {type === "VAN" && (
+              <SelectField
+                floatingLabelText="VAN Operation Mode"
+                fullWidth
+                value={operationMode}
+                onChange={this.handleSelectOperationMode}
+              >
+                {OPERATION_MODE_OPTS.map(([display, val]) => (
+                  <MenuItem key={val} value={val} primaryText={display} />
+                ))}
+              </SelectField>
+            )}
+            <br />
+            <TextField
+              name="username"
+              floatingLabelText="Username"
+              fullWidth
+              value={username}
+              onChange={this.editExternalSystemProp("username")}
+            />
+            <br />
+            <TextField
+              name="apiKey"
+              floatingLabelText="API Key"
+              fullWidth
+              value={apiKey}
+              onChange={this.editExternalSystemProp("apiKey")}
+            />
+          </DialogContent>
+          <DialogActions>
             <FlatButton
               key="cancel"
               label="Cancel"
               onClick={this.cancelEditingExternalSystem}
-            />,
+            />
             <FlatButton
               key="save"
               label="Save"
               primary
               onClick={this.saveExternalSystem}
             />
-          ]}
-        >
-          <TextField
-            name="name"
-            floatingLabelText="Integration Name"
-            fullWidth
-            value={name}
-            onChange={this.editExternalSystemProp("name")}
-          />
-          <br />
-          <SelectField floatingLabelText="System Type" value={type} fullWidth>
-            {EXTERNAL_SYSTEM_OPTS.map(([display, val]) => (
-              <MenuItem key={val} value={val} primaryText={display} />
-            ))}
-          </SelectField>
-          {type === "VAN" && (
-            <SelectField
-              floatingLabelText="VAN Operation Mode"
-              fullWidth
-              value={operationMode}
-              onChange={this.handleSelectOperationMode}
-            >
-              {OPERATION_MODE_OPTS.map(([display, val]) => (
-                <MenuItem key={val} value={val} primaryText={display} />
-              ))}
-            </SelectField>
-          )}
-          <br />
-          <TextField
-            name="username"
-            floatingLabelText="Username"
-            fullWidth
-            value={username}
-            onChange={this.editExternalSystemProp("username")}
-          />
-          <br />
-          <TextField
-            name="apiKey"
-            floatingLabelText="API Key"
-            fullWidth
-            value={apiKey}
-            onChange={this.editExternalSystemProp("apiKey")}
-          />
+          </DialogActions>
         </Dialog>
-        <Dialog
-          title="Integrations Error"
-          actions={errorActions}
-          open={error !== undefined}
-          onRequestClose={this.handleCancelError}
-        >
-          {error || ""}
+        <Dialog open={error !== undefined} onClose={this.handleCancelError}>
+          <DialogTitle>Integrations Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
 
         <Snackbar
