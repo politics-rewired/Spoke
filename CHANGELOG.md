@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.1](https://github.com/politics-rewired/spoke/compare/v4.2.0...v4.2.1) (2021-03-11)
+
+
+### Bug Fixes
+
+* fix VAN sync modal ([#908](https://github.com/politics-rewired/spoke/issues/908)) ([53d0d56](https://github.com/politics-rewired/spoke/commit/53d0d563071d567105fe8e3c2cd46faba2151f2c))
+
 ## [4.2.0](https://github.com/politics-rewired/spoke/compare/v4.1.0...v4.2.0) (2021-03-04)
 
 
