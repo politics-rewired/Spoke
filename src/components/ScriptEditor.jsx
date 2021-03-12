@@ -90,6 +90,12 @@ class ScriptEditor extends React.Component {
     };
   }
 
+  componentDidMount() {
+    if (this.props.receiveFocus === true) {
+      this.focus();
+    }
+  }
+
   UNSAFE_componentWillReceiveProps() {
     const { scriptFields } = this.props;
     const { editorState } = this.state;
@@ -155,9 +161,9 @@ class ScriptEditor extends React.Component {
   };
 
   focus = () => {
-    if (this.editorRef) {
-      this.editorRef.focus();
-    }
+    const { editorState: oldState } = this.state;
+    const editorState = EditorState.moveFocusToEnd(oldState);
+    this.setState({ editorState });
   };
 
   addCustomField = (field) => {
@@ -241,7 +247,8 @@ ScriptEditor.propTypes = {
   name: PropTypes.string.isRequired,
   scriptText: PropTypes.string.isRequired,
   scriptFields: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
+  receiveFocus: PropTypes.bool
 };
 
 export default ScriptEditor;
