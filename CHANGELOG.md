@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.2](https://github.com/politics-rewired/spoke/compare/v4.2.1...v4.2.2) (2021-03-12)
+
+
+### Bug Fixes
+
+* disable unsupported copy/paste block rather than crashing ([#918](https://github.com/politics-rewired/spoke/issues/918)) ([480d24d](https://github.com/politics-rewired/spoke/commit/480d24dd1a1d12f25ba0d5c8e821b4fcd5b1caa8))
+* fix crash editing interaction step ([#919](https://github.com/politics-rewired/spoke/issues/919)) ([6b41cd8](https://github.com/politics-rewired/spoke/commit/6b41cd87e37a314c5126fcfea7bd592cf29b378a))
+* fix texter crash when clearing a survey response ([#920](https://github.com/politics-rewired/spoke/issues/920)) ([f5d3381](https://github.com/politics-rewired/spoke/commit/f5d3381150a8686ff5c0c929f37a4def2a111ec4))
+
 ### [4.2.1](https://github.com/politics-rewired/spoke/compare/v4.2.0...v4.2.1) (2021-03-11)
 
 
