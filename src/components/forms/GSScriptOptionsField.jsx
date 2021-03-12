@@ -34,12 +34,7 @@ class GSScriptOptionsField extends GSFormField {
     event.stopPropagation();
     event.preventDefault();
 
-    this.setState(
-      { scriptTarget: scriptVersion, scriptDraft: scriptVersion },
-      () => {
-        if (this.inputRef) this.inputRef.focus();
-      }
-    );
+    this.setState({ scriptTarget: scriptVersion, scriptDraft: scriptVersion });
   };
 
   createDeleteHandler = (scriptVersion) => () => {
@@ -142,6 +137,7 @@ class GSScriptOptionsField extends GSFormField {
           name={name}
           scriptText={scriptDraft}
           scriptFields={scriptFields}
+          receiveFocus
           expandable
           onChange={(val) => this.setState({ scriptDraft: val.trim() })}
         />
@@ -167,8 +163,8 @@ class GSScriptOptionsField extends GSFormField {
       "multiLine",
       "name",
       "data-test",
-      "onBlur",
-      "onChange"
+      "onBlur"
+      // We manage onChange ourselves so don't pass it though
     ]);
 
     const canDelete = scriptVersions.length > 1;
