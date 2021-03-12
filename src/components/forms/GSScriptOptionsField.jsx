@@ -167,8 +167,8 @@ class GSScriptOptionsField extends GSFormField {
       "multiLine",
       "name",
       "data-test",
-      "onBlur",
-      "onChange"
+      "onBlur"
+      // We manage onChange ourselves so don't pass it though
     ]);
 
     const canDelete = scriptVersions.length > 1;
