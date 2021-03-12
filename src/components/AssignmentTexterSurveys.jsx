@@ -63,7 +63,7 @@ class AssignmentTexterSurveys extends Component {
   handleSelectChange = async (interactionStep, answerIndex, value) => {
     const { onQuestionResponseChange } = this.props;
     let questionResponseValue = null;
-    let nextScript = null;
+    let nextScript = "";
 
     if (value !== "clearResponse") {
       questionResponseValue = value;

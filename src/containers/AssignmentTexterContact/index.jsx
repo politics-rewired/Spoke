@@ -277,7 +277,7 @@ export class AssignmentTexterContact extends React.Component {
           script,
           customFields: campaign.customFields
         })
-      : null;
+      : "";
   };
 
   getStartingMessageText = () => {
@@ -501,8 +501,9 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleChangeScript = (newScript) => {
-    const messageVersionHash = md5(newScript);
-    const messageText = this.getMessageTextFromScript(newScript);
+    const safeScript = newScript || "";
+    const messageVersionHash = md5(safeScript);
+    const messageText = this.getMessageTextFromScript(safeScript);
     this.setState({ messageText, messageVersionHash });
   };
 
