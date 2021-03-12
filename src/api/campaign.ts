@@ -87,8 +87,8 @@ export const schema = `
     assigned: Boolean
     status: Int
     resultMessage: String
-    createdAt: String!
-    updatedAt: String!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type CampaignReadiness {

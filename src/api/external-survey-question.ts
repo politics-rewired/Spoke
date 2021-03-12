@@ -30,8 +30,8 @@ export const schema = `
     shortName: String!
     scriptQuestion: String!
     status: ExternalDataCollectionStatus!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: Date!
+    updatedAt: Date!
     responseOptions(after: Cursor, first: Int): ExternalSurveyQuestionResponseOptionPage!
   }
 

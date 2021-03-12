@@ -114,8 +114,8 @@ export const schema = `
     includesNotActive: Boolean!
     isMissing: Boolean!
     isRequired: Boolean!
-    createdAt: String
-    updatedAt: String
+    createdAt: Date
+    updatedAt: Date
     interactionStep: InteractionStep!
     targets(after: Cursor, first: Int): [ExternalSyncConfigTarget]
   }
@@ -137,8 +137,8 @@ export const schema = `
     includesNotActive: Boolean!
     isMissing: Boolean!
     isRequired: Boolean!
-    createdAt: String
-    updatedAt: String
+    createdAt: Date
+    updatedAt: Date
     tag: Tag!
     targets(after: Cursor, first: Int): ExternalSyncConfigTargetPage
   }

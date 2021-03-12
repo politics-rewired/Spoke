@@ -17,8 +17,8 @@ export const schema = `
     description: String!
     listCount: Int!
     doorCount: Int!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type ExternalListEdge {
