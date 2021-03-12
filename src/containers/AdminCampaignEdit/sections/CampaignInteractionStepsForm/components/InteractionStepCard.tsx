@@ -11,6 +11,7 @@ import {
   InteractionStep,
   InteractionStepWithChildren
 } from "../../../../../api/interaction-step";
+import { supportsClipboard } from "../../../../../client/lib";
 import GSForm from "../../../../../components/forms/GSForm";
 import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import { dataTest } from "../../../../../lib/attributes";
@@ -95,6 +96,8 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
   const isAbleToAddResponse =
     stepHasQuestion && stepHasScript && stepCanHaveChildren;
 
+  const clipboardEnabled = supportsClipboard();
+
   return (
     <div key={stepId}>
       <Card key={stepId} style={styles.interactionStep}>
@@ -109,7 +112,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
         />
         <CardActions>
           <RaisedButton
-            disabled={disabled}
+            disabled={disabled || !clipboardEnabled}
             onClick={() => onCopyBlock(interactionStep)}
           >
             Copy Block
@@ -117,9 +120,12 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
           {hasBlockCopied && (
             <RaisedButton
               label="+ Paste Block"
-              disabled={disabled}
+              disabled={disabled || !clipboardEnabled}
               onClick={onRequestRootPaste}
             />
+          )}
+          {!clipboardEnabled && (
+            <span>Your browser does not support clipboard actions</span>
           )}
         </CardActions>
         <CardText>

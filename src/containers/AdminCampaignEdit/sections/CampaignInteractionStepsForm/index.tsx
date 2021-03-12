@@ -14,6 +14,7 @@ import {
   InteractionStepWithChildren
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
+import { supportsClipboard } from "../../../../client/lib";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
@@ -169,6 +170,8 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
   };
 
   createPasteBlockHandler = (parentInteractionId: string | null) => () => {
+    if (!supportsClipboard()) return;
+
     navigator.clipboard.readText().then((text) => {
       const idMap: Record<string, string> = {};
 
@@ -257,6 +260,8 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
   };
 
   updateClipboardHasBlock = () => {
+    if (!supportsClipboard()) return;
+
     navigator.clipboard.readText().then((text) => {
       try {
         const _newBlock = JSON.parse(text);
