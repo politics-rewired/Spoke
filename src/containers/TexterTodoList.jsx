@@ -141,15 +141,14 @@ class TexterTodoList extends React.Component {
               ]
             )}
             <RaisedButton
+              label="Reassign My Replies"
               primary
               fullWidth
               disabled={
                 this.state.releasingReplies || this.state.releasedReplies
               }
               onClick={this.releaseMyReplies}
-            >
-              Reassign My Replies
-            </RaisedButton>
+            />
           </div>
         </div>
       </div>

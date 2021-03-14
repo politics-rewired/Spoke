@@ -152,9 +152,11 @@ class AdminCampaignList extends React.Component {
       <div>
         <div style={styles.flexContainer}>
           {this.renderFilters()}
-          <RaisedButton onClick={this.startReleasingAllReplies} primary>
-            Release All Unhandled Replies
-          </RaisedButton>
+          <RaisedButton
+            label="Release All Unhandled Replies"
+            primary
+            onClick={this.startReleasingAllReplies}
+          />
         </div>
         {releasingAllReplies && (
           <Dialog open onClose={this.closeReleasingAllReplies}>

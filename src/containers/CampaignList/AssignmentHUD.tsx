@@ -1,22 +1,31 @@
+import { useTheme } from "@material-ui/core/styles";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import Chip from "material-ui/Chip";
-import { red200 } from "material-ui/styles/colors";
-import PropTypes from "prop-types";
 import React from "react";
+
+import { AssignmentTarget } from "../../api/organization";
 
 const styles = StyleSheet.create({
   row: { display: "flex", alignItems: "baseline", marginBottom: "10px" },
   chip: { marginRight: "10px" },
-  disabledChip: { backgroundColor: red200, marginRight: "10px" },
+  disabledChip: { marginRight: "10px" },
   prefix: { whiteSpace: "nowrap", marginRight: "10px" },
   title: {},
   spacer: { flex: 1 },
   count: { whiteSpace: "nowrap", marginLeft: "10px" }
 });
 
-const AssignmentHUD = (props) => {
+interface Props {
+  assignmentTargets: AssignmentTarget[];
+}
+
+const AssignmentHUD: React.FC<Props> = (props) => {
   const { assignmentTargets } = props;
+  const theme = useTheme();
+  const disabledStyle = {
+    backgroundColor: theme.palette.error.main
+  };
 
   return (
     <Card initiallyExpanded>
@@ -29,7 +38,9 @@ const AssignmentHUD = (props) => {
         {assignmentTargets.map((target) => (
           <div key={target.teamTitle} className={css(styles.row)}>
             {!target.enabled && (
-              <Chip className={css(styles.disabledChip)}>Disabled</Chip>
+              <Chip className={css(styles.disabledChip)} style={disabledStyle}>
+                Disabled
+              </Chip>
             )}
             <Chip className={css(styles.chip)}>{target.teamTitle}</Chip>
             <div className={css(styles.prefix)}>{target.type} &#8594;</div>
@@ -43,10 +54,6 @@ const AssignmentHUD = (props) => {
       </CardText>
     </Card>
   );
-};
-
-AssignmentHUD.propTypes = {
-  assignmentTargets: PropTypes.arrayOf(PropTypes.object).isRequired
 };
 
 export default AssignmentHUD;

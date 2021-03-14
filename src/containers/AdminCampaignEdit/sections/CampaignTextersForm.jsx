@@ -1,3 +1,4 @@
+import { withTheme } from "@material-ui/core/styles";
 import { css, StyleSheet } from "aphrodite";
 import orderBy from "lodash/orderBy";
 import AutoComplete from "material-ui/AutoComplete";
@@ -112,7 +113,7 @@ const inlineStyles = {
   }
 };
 
-export default class CampaignTextersForm extends React.Component {
+class CampaignTextersForm extends React.Component {
   state = {
     autoSplit: false,
     focusedTexterId: null,
@@ -483,7 +484,12 @@ export default class CampaignTextersForm extends React.Component {
     this.setState({ snackbarOpen: false, snackbarMessage: "" });
 
   render() {
-    const { isOverdue, saveLabel, saveDisabled } = this.props;
+    const {
+      isOverdue,
+      saveLabel,
+      saveDisabled,
+      theme: stableMuiTheme
+    } = this.props;
 
     const assignedContacts = this.formValues().texters.reduce(
       (prev, texter) => prev + texter.assignment.contactsCount,
@@ -492,8 +498,8 @@ export default class CampaignTextersForm extends React.Component {
 
     const headerColor =
       assignedContacts === this.formValues().contactsCount
-        ? theme.colors.green
-        : theme.colors.orange;
+        ? stableMuiTheme.palette.primary.main
+        : stableMuiTheme.palette.warning.main;
     return (
       <div>
         <CampaignFormSectionHeading
@@ -612,3 +618,5 @@ CampaignTextersForm.propTypes = {
   saveLabel: PropTypes.string,
   saveDisabled: PropTypes.bool
 };
+
+export default withTheme(CampaignTextersForm);

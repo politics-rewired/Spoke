@@ -3,6 +3,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { withTheme } from "@material-ui/core/styles";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
@@ -12,7 +13,6 @@ import CircularProgress from "material-ui/CircularProgress";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { red600 } from "material-ui/styles/colors";
-import muiThemeable from "material-ui/styles/muiThemeable";
 import DoneIcon from "material-ui/svg-icons/action/done";
 import WarningIcon from "material-ui/svg-icons/alert/warning";
 import CancelIcon from "material-ui/svg-icons/navigation/cancel";
@@ -777,7 +777,7 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms, match, muiTheme } = this.props;
+    const { adminPerms, match, theme: stableMuiTheme } = this.props;
     const campaignId = parseInt(match.params.campaignId, 10);
     const isNew = this.isNew();
     const saveLabel = isNew ? "Save and goto next section" : "Save";
@@ -813,6 +813,9 @@ class AdminCampaignEdit extends React.Component {
           const cardHeaderStyle = {
             backgroundColor: theme.colors.lightGray
           };
+          const titleStyle = {
+            width: "100%"
+          };
           const avatarStyle = {
             display: "inline-block",
             verticalAlign: "middle"
@@ -836,9 +839,12 @@ class AdminCampaignEdit extends React.Component {
               savePercent > 100 ? savePercent - 100 : savePercent
             }%`;
           } else if (sectionIsExpanded && sectionCanExpandOrCollapse) {
-            cardHeaderStyle.backgroundColor = theme.colors.lightYellow;
+            cardHeaderStyle.backgroundColor =
+              stableMuiTheme.palette.warning.main;
+            titleStyle.color = stableMuiTheme.palette.text.primary;
           } else if (!sectionCanExpandOrCollapse) {
             cardHeaderStyle.backgroundColor = theme.colors.lightGray;
+            titleStyle.color = stableMuiTheme.palette.text.primary;
           } else if (sectionIsDone) {
             avatar = (
               <Avatar
@@ -848,7 +854,8 @@ class AdminCampaignEdit extends React.Component {
               />
             );
             cardHeaderStyle.backgroundColor =
-              muiTheme?.palette?.primary1Color ?? theme.colors.green;
+              stableMuiTheme.palette.primary.main;
+            titleStyle.color = stableMuiTheme.palette.text.secondary;
           } else if (!sectionIsDone) {
             avatar = (
               <Avatar
@@ -858,7 +865,8 @@ class AdminCampaignEdit extends React.Component {
               />
             );
             cardHeaderStyle.backgroundColor =
-              muiTheme?.palette?.primary2Color ?? theme.colors.yellow;
+              stableMuiTheme.palette.warning.main;
+            titleStyle.color = stableMuiTheme.palette.text.primary;
           }
           return (
             <Card
@@ -875,9 +883,7 @@ class AdminCampaignEdit extends React.Component {
             >
               <CardHeader
                 title={section.title}
-                titleStyle={{
-                  width: "100%"
-                }}
+                titleStyle={titleStyle}
                 style={cardHeaderStyle}
                 actAsExpander={!sectionIsSaving && sectionCanExpandOrCollapse}
                 showExpandableButton={
@@ -1080,7 +1086,7 @@ const mutations = {
 };
 
 export default compose(
-  muiThemeable(),
+  withTheme,
   withAuthzContext,
   loadData({
     queries,
