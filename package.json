@@ -179,6 +179,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
     "@rewired/commitlint-circle": "^3.1.0",
     "@types/aphrodite": "^2.0.0",
+    "@types/draft-js": "^0.10.45",
     "@types/express-rate-limit": "^5.1.1",
     "@types/faker": "^5.1.5",
     "@types/lodash": "^4.14.168",
