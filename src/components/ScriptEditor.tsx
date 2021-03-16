@@ -109,7 +109,9 @@ class ScriptEditor extends React.Component<Props, State> {
 
   componentDidMount() {
     if (this.props.receiveFocus === true) {
-      this.focus();
+      const { editorState: oldState } = this.state;
+      const editorState = EditorState.moveFocusToEnd(oldState);
+      this.setState({ editorState });
     }
   }
 
@@ -183,9 +185,9 @@ class ScriptEditor extends React.Component<Props, State> {
   };
 
   focus = () => {
-    const { editorState: oldState } = this.state;
-    const editorState = EditorState.moveFocusToEnd(oldState);
-    this.setState({ editorState });
+    if (this.editorRef) {
+      this.editorRef.focus();
+    }
   };
 
   addCustomField = (field: string) => {
