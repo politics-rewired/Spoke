@@ -1,6 +1,7 @@
 import { getCharCount } from "@trt2/gsm-charset-utils";
 import {
   CompositeDecorator,
+  ContentBlock,
   ContentState,
   Editor,
   EditorState,
@@ -8,12 +9,19 @@ import {
 } from "draft-js";
 import escapeRegExp from "lodash/escapeRegExp";
 import { green500, green600, grey100, red400 } from "material-ui/styles/colors";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { replaceEasyGsmWins } from "../lib/charset-utils";
 import { delimit } from "../lib/scripts";
 import Chip from "./Chip";
+
+type DecoratorStrategyCallBack = (start: number, end: number) => void;
+
+type DecoratorStrategy = (
+  block: ContentBlock,
+  callback: DecoratorStrategyCallBack,
+  contentState: ContentState
+) => void;
 
 const styles = {
   editor: {
@@ -49,7 +57,11 @@ const styles = {
   }
 };
 
-function findWithRegex(regex, contentBlock, callback) {
+function findWithRegex(
+  regex: RegExp,
+  contentBlock: ContentBlock,
+  callback: DecoratorStrategyCallBack
+) {
   const text = contentBlock.getText();
   let matchArr = regex.exec(text);
   let start;
@@ -60,28 +72,33 @@ function findWithRegex(regex, contentBlock, callback) {
   }
 }
 
-const RecognizedField = (props) => (
+const RecognizedField: React.FC = (props) => (
   <span {...props} style={styles.goodField}>
     {props.children}
   </span>
 );
 
-RecognizedField.propTypes = {
-  children: PropTypes.arrayOf(PropTypes.element)
-};
-
-const UnrecognizedField = (props) => (
+const UnrecognizedField: React.FC = (props) => (
   <span {...props} style={styles.badField}>
     {props.children}
   </span>
 );
 
-UnrecognizedField.propTypes = {
-  children: PropTypes.arrayOf(PropTypes.element)
-};
+interface Props {
+  scriptText: string;
+  scriptFields: string[];
+  onChange: (value: string) => Promise<void> | void;
+  receiveFocus?: boolean;
+}
 
-class ScriptEditor extends React.Component {
-  constructor(props) {
+interface State {
+  editorState: EditorState;
+}
+
+class ScriptEditor extends React.Component<Props, State> {
+  private editorRef: Editor | null = null;
+
+  constructor(props: Props) {
     super(props);
 
     const editorState = this.getEditorState();
@@ -92,7 +109,9 @@ class ScriptEditor extends React.Component {
 
   componentDidMount() {
     if (this.props.receiveFocus === true) {
-      this.focus();
+      const { editorState: oldState } = this.state;
+      const editorState = EditorState.moveFocusToEnd(oldState);
+      this.setState({ editorState });
     }
   }
 
@@ -105,7 +124,7 @@ class ScriptEditor extends React.Component {
     // this.setState({ editorState: this.getEditorState() })
   }
 
-  onEditorChange = (editorState) => {
+  onEditorChange = (editorState: EditorState) => {
     this.setState({ editorState }, () => {
       const { onChange } = this.props;
       if (onChange) {
@@ -136,8 +155,11 @@ class ScriptEditor extends React.Component {
     return replaceEasyGsmWins(editorState.getCurrentContent().getPlainText());
   }
 
-  getCompositeDecorator = (scriptFields) => {
-    const recognizedFieldStrategy = (contentBlock, callback) => {
+  getCompositeDecorator = (scriptFields: string[]) => {
+    const recognizedFieldStrategy: DecoratorStrategy = (
+      contentBlock,
+      callback
+    ) => {
       const regex = new RegExp(
         `{(${scriptFields.map(escapeRegExp).join("|")})}`,
         "g"
@@ -145,8 +167,10 @@ class ScriptEditor extends React.Component {
       return findWithRegex(regex, contentBlock, callback);
     };
 
-    const unrecognizedFieldStrategy = (contentBlock, callback) =>
-      findWithRegex(/\{[^{]*\}/g, contentBlock, callback);
+    const unrecognizedFieldStrategy: DecoratorStrategy = (
+      contentBlock,
+      callback
+    ) => findWithRegex(/\{[^{]*\}/g, contentBlock, callback);
 
     return new CompositeDecorator([
       {
@@ -161,12 +185,12 @@ class ScriptEditor extends React.Component {
   };
 
   focus = () => {
-    const { editorState: oldState } = this.state;
-    const editorState = EditorState.moveFocusToEnd(oldState);
-    this.setState({ editorState });
+    if (this.editorRef) {
+      this.editorRef.focus();
+    }
   };
 
-  addCustomField = (field) => {
+  addCustomField = (field: string) => {
     const textToInsert = delimit(field);
     const { editorState } = this.state;
     const selection = editorState.getSelection();
@@ -201,8 +225,6 @@ class ScriptEditor extends React.Component {
   }
 
   render() {
-    const { name } = this.props;
-
     const text = this.state.editorState.getCurrentContent().getPlainText();
     const info = getCharCount(replaceEasyGsmWins(text));
 
@@ -210,7 +232,6 @@ class ScriptEditor extends React.Component {
       <div>
         <div style={styles.editor} onClick={this.focus}>
           <Editor
-            name={name}
             editorState={this.state.editorState}
             onChange={this.onEditorChange}
             ref={(el) => {
@@ -242,13 +263,5 @@ class ScriptEditor extends React.Component {
     );
   }
 }
-
-ScriptEditor.propTypes = {
-  name: PropTypes.string.isRequired,
-  scriptText: PropTypes.string.isRequired,
-  scriptFields: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired,
-  receiveFocus: PropTypes.bool
-};
 
 export default ScriptEditor;
