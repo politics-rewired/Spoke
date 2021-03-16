@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.3](https://github.com/politics-rewired/spoke/compare/v4.2.2...v4.2.3) (2021-03-16)
+
+
+### Bug Fixes
+
+* fix draft.js focus behavior ([#924](https://github.com/politics-rewired/spoke/issues/924)) ([a4489fa](https://github.com/politics-rewired/spoke/commit/a4489faf50e799309c5834da01f4662c2a86d202))
+
 ### [4.2.2](https://github.com/politics-rewired/spoke/compare/v4.2.1...v4.2.2) (2021-03-12)
 
 
