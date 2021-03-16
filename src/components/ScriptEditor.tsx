@@ -85,7 +85,6 @@ const UnrecognizedField: React.FC = (props) => (
 );
 
 interface Props {
-  name: string;
   scriptText: string;
   scriptFields: string[];
   onChange: (value: string) => Promise<void> | void;
@@ -224,8 +223,6 @@ class ScriptEditor extends React.Component<Props, State> {
   }
 
   render() {
-    const { name } = this.props;
-
     const text = this.state.editorState.getCurrentContent().getPlainText();
     const info = getCharCount(replaceEasyGsmWins(text));
 
@@ -233,7 +230,6 @@ class ScriptEditor extends React.Component<Props, State> {
       <div>
         <div style={styles.editor} onClick={this.focus}>
           <Editor
-            name={name}
             editorState={this.state.editorState}
             onChange={this.onEditorChange}
             ref={(el) => {
