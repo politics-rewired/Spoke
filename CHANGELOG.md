@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.4](https://github.com/politics-rewired/spoke/compare/v4.2.3...v4.2.4) (2021-03-17)
+
+
+### Bug Fixes
+
+* **manual-assignment:** remove unused expensive query ([#926](https://github.com/politics-rewired/spoke/issues/926)) ([f4dc58f](https://github.com/politics-rewired/spoke/commit/f4dc58f8311f6d4c8411d667f4ed38bf9ebda053))
+* remove timeout fetching instance settings ([#925](https://github.com/politics-rewired/spoke/issues/925)) ([46e1979](https://github.com/politics-rewired/spoke/commit/46e1979916c39927738afa206672be726ad8b176))
+
 ### [4.2.3](https://github.com/politics-rewired/spoke/compare/v4.2.2...v4.2.3) (2021-03-16)
 
 
