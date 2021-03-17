@@ -102,7 +102,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
       m.cronJobs!.push({
         name: "sync-slack-team-members",
         task_name: "sync-slack-team-members",
-        pattern: `*/10 * * * *`,
+        pattern: config.SLACK_SYNC_CHANNELS_CRONTAB,
         time_zone: config.TZ
       });
     } else {
