@@ -633,6 +633,10 @@ const validators = {
       "If true, Spoke team membership will be synced with matching Slack channel membership",
     default: false
   }),
+  SLACK_SYNC_CHANNELS_CRONTAB: str({
+    desc: "The crontab schedule to run the team sync on",
+    default: "*/10 * * * *"
+  }),
   STATIC_BASE_URL: str({
     desc: "Alternate static base url",
     example: "https://s3.us-east-1.amazonaws.com/my-spoke-bucket/spoke/static/",
