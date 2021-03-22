@@ -3259,6 +3259,13 @@ const rootMutations = {
     },
     addToken: async (_root, { token, organizationId }, { user }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      try {
+        await r.knex.raw(`select to_tsquery(?)`, [token]);
+      } catch (err) {
+        throw new Error("invalid tsquery token");
+      }
+
       await r
         .knex("troll_trigger")
         .insert({ token, organization_id: parseInt(organizationId, 10) });
