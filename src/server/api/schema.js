@@ -3257,11 +3257,11 @@ const rootMutations = {
 
       return true;
     },
-    addToken: async (_root, { token, organizationId }, { user }) => {
+    addToken: async (_root, { token, organizationId }, { user, db }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
       try {
-        await r.knex.raw(`select to_tsquery(?)`, [token]);
+        await db.reader.raw(`select to_tsquery(?)`, [token]);
       } catch (err) {
         throw new Error("invalid tsquery token");
       }
