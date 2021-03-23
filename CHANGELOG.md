@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.3.0](https://github.com/politics-rewired/spoke/compare/v4.2.4...v4.3.0) (2021-03-23)
+
+
+### Features
+
+* make slack team sync crontab configurable ([#927](https://github.com/politics-rewired/spoke/issues/927)) ([bcd4401](https://github.com/politics-rewired/spoke/commit/bcd4401cfb723dfef3aa2a9d2a07122fe7bf24fb))
+
+
+### Bug Fixes
+
+* serialize dates using ISO 8601 format ([#921](https://github.com/politics-rewired/spoke/issues/921)) ([9ac5376](https://github.com/politics-rewired/spoke/commit/9ac53767761e35364645047084e250ca3ba293d1))
+
 ### [4.2.4](https://github.com/politics-rewired/spoke/compare/v4.2.3...v4.2.4) (2021-03-17)
 
 
