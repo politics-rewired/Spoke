@@ -1,3 +1,4 @@
+import { useTheme } from "@material-ui/core/styles";
 import { css, StyleSheet } from "aphrodite";
 import camelCase from "lodash/camelCase";
 import { FlatButton } from "material-ui";
@@ -5,9 +6,8 @@ import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
 import { List, ListItem } from "material-ui/List";
 import Paper from "material-ui/Paper";
-import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import { dataTest } from "../lib/attributes";
 
@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   sideBarWithMenu: {
     width: 256,
     height: "100%",
-    writingMode: "hoizontal-lr"
+    writingMode: "sideways-lr"
   },
   sideBarWithoutMenu: {
     writingMode: "vertical-rl",
@@ -24,7 +24,23 @@ const styles = StyleSheet.create({
   }
 });
 
-const Navigation = function Navigation(props) {
+export interface NavigationSection {
+  name: string;
+  path: string;
+  role: string;
+  badge?: { count: number };
+}
+
+interface Props {
+  sections: NavigationSection[];
+  onToggleMenu: () => React.MouseEventHandler<unknown>;
+  switchListItem: JSX.Element;
+  showMenu?: boolean;
+}
+
+const Navigation: React.FC<Props> = (props) => {
+  const theme = useTheme();
+  const history = useHistory();
   const { sections, switchListItem } = props;
 
   if (props.showMenu) {
@@ -46,10 +62,13 @@ const Navigation = function Navigation(props) {
                 {...dataTest(camelCase(`nav ${section.path}`))}
                 key={section.name}
                 primaryText={section.name}
-                onClick={() => props.history.push(section.url)}
+                onClick={() => history.push(section.url)}
                 rightAvatar={
                   section.badge && (
-                    <Avatar backgroundColor="#FFAA00" size={30}>
+                    <Avatar
+                      backgroundColor={theme.palette.badge.main}
+                      size={30}
+                    >
                       {section.badge.count}
                     </Avatar>
                   )
@@ -73,16 +92,4 @@ const Navigation = function Navigation(props) {
   );
 };
 
-Navigation.defaultProps = {
-  showMenu: true
-};
-
-Navigation.propTypes = {
-  sections: PropTypes.array,
-  switchListItem: PropTypes.object,
-  history: PropTypes.object.isRequired,
-  onToggleMenu: PropTypes.func.isRequired,
-  showMenu: PropTypes.bool
-};
-
-export default withRouter(Navigation);
+export default Navigation;

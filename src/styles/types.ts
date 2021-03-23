@@ -48,8 +48,20 @@ export interface LayoutStyles {
 }
 
 export interface CustomTheme {
+  canvassColor?: string;
+  primaryTextColor?: string;
+  secondaryTextColor?: string;
   primaryColor?: string;
   secondaryColor?: string;
+  successColor?: string;
+  infoColor?: string;
+  warningColor?: string;
+  errorColor?: string;
+  badgeColor?: string;
+  disabledTextColor?: string;
+  disabledBackgroundColor?: string;
+  defaultCampaignColor?: string;
+  defaultCampaignLogo?: string;
   logoUrl?: string;
   firstMessageIconUrl?: string;
   welcomeText?: string;
@@ -57,4 +69,30 @@ export interface CustomTheme {
 
 export interface MuiThemeProviderProps {
   muiTheme?: MuiTheme;
+}
+
+// TODO: extend theme to support logo URLs
+// declare module "@material-ui/core/styles/createMuiTheme" {
+//   interface Theme {
+//     status: {
+//       danger: React.CSSProperties["color"];
+//     };
+//   }
+//   interface ThemeOptions {
+//     status: {
+//       danger: React.CSSProperties["color"];
+//     };
+//   }
+// }
+
+declare module "@material-ui/core/styles/createPalette" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface Palette {
+    badge?: Palette["primary"];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface PaletteOptions {
+    badge?: PaletteOptions["primary"];
+  }
 }

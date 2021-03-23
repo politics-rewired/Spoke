@@ -218,13 +218,12 @@ class TexterRequest extends React.Component {
           </label>
           <br />
           <RaisedButton
+            label="Request More Texts"
             primary
             onClick={this.submit}
             disabled={submitting}
             fullWidth
-          >
-            Request More Texts
-          </RaisedButton>
+          />
         </GSForm>
         {error && (
           <div style={{ color: "red" }}>

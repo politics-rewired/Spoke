@@ -1,6 +1,9 @@
 /* eslint-disable no-unused-vars */
+import { ExternalSystem } from "./external-system";
 import { InteractionStep } from "./interaction-step";
+import { Team } from "./team";
 import { PageInfo } from "./types";
+import { User } from "./user";
 
 export enum ExternalSyncReadinessState {
   READY = "READY",
@@ -41,6 +44,17 @@ export interface Campaign {
   pendingJobs: JobRequest[];
   interactionSteps: InteractionStep[];
   customFields: string[];
+  hasUnassignedContacts?: boolean | null;
+  dueBy?: string | null;
+  primaryColor?: string | null;
+  logoImageUrl?: string | null;
+  introHtml?: string | null;
+  useDynamicAssignment?: boolean | null;
+  hasUnsentInitialMessages?: boolean | null;
+  hasUnhandledMessages?: boolean | null;
+  teams: Team[];
+  externalSystem?: ExternalSystem | null;
+  creator?: User | null;
 }
 
 export interface PaginatedCampaigns {

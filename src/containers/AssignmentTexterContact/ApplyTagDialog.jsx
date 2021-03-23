@@ -143,12 +143,11 @@ class ApplyTagDialog extends Component {
           <DialogContent>
             {!!escalateTag && (
               <RaisedButton
+                label="Escalate Conversation"
                 buttonStyle={{ paddingLeft: 20, paddingRight: 20 }}
                 secondary
                 onClick={this.handleAddEscalatedTag}
-              >
-                Escalate Conversation
-              </RaisedButton>
+              />
             )}
             <TagSelector
               value={selectedTags}

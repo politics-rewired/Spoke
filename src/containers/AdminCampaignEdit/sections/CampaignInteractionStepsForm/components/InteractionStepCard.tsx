@@ -1,3 +1,4 @@
+import { useTheme } from "@material-ui/core";
 import isNil from "lodash/isNil";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
@@ -23,7 +24,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   interactionStep: {
-    borderLeft: `5px solid ${theme.colors.green}`,
     marginBottom: 24
   },
 
@@ -59,7 +59,8 @@ interface Props {
   pasteBlockFactory: BlockHandlerFactory;
 }
 
-export const InteractionStepCard: React.SFC<Props> = (props) => {
+export const InteractionStepCard: React.FC<Props> = (props) => {
+  const stableMuiTheme = useTheme();
   const {
     interactionStep,
     customFields,
@@ -100,7 +101,13 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
 
   return (
     <div key={stepId}>
-      <Card key={stepId} style={styles.interactionStep}>
+      <Card
+        key={stepId}
+        style={{
+          ...styles.interactionStep,
+          borderLeft: `5px solid ${stableMuiTheme.palette.primary.main}`
+        }}
+      >
         <CardHeader
           style={styles.cardHeader}
           title={title}
@@ -112,11 +119,10 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
         />
         <CardActions>
           <RaisedButton
+            label="Copy Block"
             disabled={disabled || !clipboardEnabled}
             onClick={() => onCopyBlock(interactionStep)}
-          >
-            Copy Block
-          </RaisedButton>
+          />
           {hasBlockCopied && (
             <RaisedButton
               label="+ Paste Block"
