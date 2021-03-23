@@ -997,27 +997,6 @@ export async function assignTexters(job) {
         })
       );
 
-      // TODO: re-enable once dynamic assignment is fixed (#548)
-      // const isDynamic = campaign.use_dynamic_assignment;
-      const isDynamic = false;
-
-      // dynamic assignments, having zero initially is ok
-      if (!isDynamic) {
-        // TODO - MySQL Specific. Look up in separate query as MySQL does not support LIMIT within subquery
-        // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-        const assignmentIds = await trx("assignment")
-          .select("assignment.id as id")
-          .where("assignment.campaign_id", cid)
-          .leftJoin(
-            "campaign_contact",
-            "assignment.id",
-            "campaign_contact.assignment_id"
-          )
-          .groupBy("assignment.id")
-          .havingRaw("COUNT(campaign_contact.id) = 0")
-          .map((result) => result.id);
-      }
-
       if (job.id) {
         await r.knex("job_request").delete().where({ id: job.id });
       }

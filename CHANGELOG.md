@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.4](https://github.com/politics-rewired/spoke/compare/v4.2.3...v4.2.4) (2021-03-17)
+
+
+### Bug Fixes
+
+* **manual-assignment:** remove unused expensive query ([#926](https://github.com/politics-rewired/spoke/issues/926)) ([f4dc58f](https://github.com/politics-rewired/spoke/commit/f4dc58f8311f6d4c8411d667f4ed38bf9ebda053))
+* remove timeout fetching instance settings ([#925](https://github.com/politics-rewired/spoke/issues/925)) ([46e1979](https://github.com/politics-rewired/spoke/commit/46e1979916c39927738afa206672be726ad8b176))
+
+### [4.2.3](https://github.com/politics-rewired/spoke/compare/v4.2.2...v4.2.3) (2021-03-16)
+
+
+### Bug Fixes
+
+* fix draft.js focus behavior ([#924](https://github.com/politics-rewired/spoke/issues/924)) ([a4489fa](https://github.com/politics-rewired/spoke/commit/a4489faf50e799309c5834da01f4662c2a86d202))
+
+### [4.2.2](https://github.com/politics-rewired/spoke/compare/v4.2.1...v4.2.2) (2021-03-12)
+
+
+### Bug Fixes
+
+* disable unsupported copy/paste block rather than crashing ([#918](https://github.com/politics-rewired/spoke/issues/918)) ([480d24d](https://github.com/politics-rewired/spoke/commit/480d24dd1a1d12f25ba0d5c8e821b4fcd5b1caa8))
+* fix crash editing interaction step ([#919](https://github.com/politics-rewired/spoke/issues/919)) ([6b41cd8](https://github.com/politics-rewired/spoke/commit/6b41cd87e37a314c5126fcfea7bd592cf29b378a))
+* fix texter crash when clearing a survey response ([#920](https://github.com/politics-rewired/spoke/issues/920)) ([f5d3381](https://github.com/politics-rewired/spoke/commit/f5d3381150a8686ff5c0c929f37a4def2a111ec4))
+
 ### [4.2.1](https://github.com/politics-rewired/spoke/compare/v4.2.0...v4.2.1) (2021-03-11)
 
 

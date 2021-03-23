@@ -15,7 +15,4 @@ const main = (settings: InstanceSettings) => {
   ReactDOM.render(<App />, document.getElementById("mount"));
 };
 
-request
-  .get("/settings/instance")
-  .timeout(500)
-  .then(({ body: settings }) => main(settings));
+request.get("/settings/instance").then(({ body: settings }) => main(settings));
