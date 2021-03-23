@@ -77,7 +77,7 @@ const rootSchema = `
     answerActions: String
     parentInteractionId: String
     isDeleted: Boolean
-    createdAt: String
+    createdAt: Date
     interactionSteps: [InteractionStepInput]
   }
 

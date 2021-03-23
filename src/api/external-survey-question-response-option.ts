@@ -17,8 +17,8 @@ export const schema = `
     name: String!
     mediumName: String!
     shortName: String!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type ExternalSurveyQuestionResponseOptionEdge {
