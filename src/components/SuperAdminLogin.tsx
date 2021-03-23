@@ -1,4 +1,7 @@
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import FlatButton from "material-ui/FlatButton";
 import TextField from "material-ui/TextField";
 import React from "react";
@@ -101,25 +104,24 @@ class SuperAdminLogin extends React.Component<
     ];
 
     return (
-      <Dialog
-        title="Superadmin Login"
-        open={isOpen}
-        actions={actions}
-        onRequestClose={this.handleRequestClose}
-      >
-        <TextField
-          floatingLabelText="Superadmin secret"
-          errorText={error}
-          type="password"
-          value={superAdminToken}
-          fullWidth
-          onChange={this.handleOnChangeSecret}
-        />
-        <TextField
-          floatingLabelText="Organization ID"
-          value={superAdminOrgId}
-          onChange={this.handleOnChangeOrgId}
-        />
+      <Dialog open={isOpen} onClose={this.handleRequestClose}>
+        <DialogTitle>Superadmin Login</DialogTitle>
+        <DialogContent>
+          <TextField
+            floatingLabelText="Superadmin secret"
+            errorText={error}
+            type="password"
+            value={superAdminToken}
+            fullWidth
+            onChange={this.handleOnChangeSecret}
+          />
+          <TextField
+            floatingLabelText="Organization ID"
+            value={superAdminOrgId}
+            onChange={this.handleOnChangeOrgId}
+          />
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

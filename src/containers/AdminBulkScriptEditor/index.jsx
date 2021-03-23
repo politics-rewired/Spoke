@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
@@ -196,65 +200,63 @@ class AdminBulkScriptEditor extends Component {
           onClick={this.handleSubmitJob}
         />
         {confirmFlaggedCharacters && (
-          <Dialog
-            title="Confirm Flagged Characters"
-            actions={flaggedCharacterActions}
-            open
-            onRequestClose={this.handleClose}
-          >
-            <p>
-              Are you sure you want to run run a bulk script update with special
-              characters?
-            </p>
-            <p>
-              If you don't know what this means, you should cancel and ask an
-              admin!
-            </p>
+          <Dialog open onClose={this.handleClose}>
+            <DialogTitle>Confirm Flagged Characters</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to run run a bulk script update with
+                special characters?
+              </DialogContentText>
+              <DialogContentText>
+                If you don't know what this means, you should cancel and ask an
+                admin!
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>{flaggedCharacterActions}</DialogActions>
           </Dialog>
         )}
         {this.state.error && (
-          <Dialog
-            title="Error"
-            actions={dialogActions}
-            open
-            onRequestClose={this.handleClose}
-          >
-            <p>
-              Spoke ran into the following error when trying to update scripts:
-            </p>
-            <p style={{ fontFamily: "monospace" }}>{this.state.error}</p>
+          <Dialog open onClose={this.handleClose}>
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Spoke ran into the following error when trying to update
+                scripts:
+              </DialogContentText>
+              <p style={{ fontFamily: "monospace" }}>{this.state.error}</p>
+            </DialogContent>
+            <DialogActions>{dialogActions}</DialogActions>
           </Dialog>
         )}
         {this.state.result !== null && (
           <Dialog
-            title={`Updated ${this.state.result.length} Occurence(s)`}
-            actions={dialogActions}
-            modal={false}
             open
-            autoScrollBodyContent
-            contentStyle={{
-              width: "100%",
-              maxWidth: "none"
-            }}
-            onRequestClose={this.handleClose}
+            scroll="paper"
+            fullWidth
+            maxWidth="xl"
+            onClose={this.handleClose}
           >
-            <ul>
-              {this.state.result.map(({ campaignId, found, replaced }) => (
-                <li key={`${campaignId}|${found}|${replaced}`}>
-                  Campaign ID: {campaignId}
-                  <br />
-                  Found: <span style={styles.code}>{found}</span>
-                  <br />
-                  Replaced with: <span style={styles.code}>{replaced}</span>
-                </li>
-              ))}
-            </ul>
-            {this.state.result.length === 0 && (
-              <p>
-                No occurences were found. Check your search parameters and try
-                again.
-              </p>
-            )}
+            <DialogTitle>{`Updated ${this.state.result.length} Occurence(s)`}</DialogTitle>
+            <DialogContent>
+              <ul>
+                {this.state.result.map(({ campaignId, found, replaced }) => (
+                  <li key={`${campaignId}|${found}|${replaced}`}>
+                    Campaign ID: {campaignId}
+                    <br />
+                    Found: <span style={styles.code}>{found}</span>
+                    <br />
+                    Replaced with: <span style={styles.code}>{replaced}</span>
+                  </li>
+                ))}
+              </ul>
+              {this.state.result.length === 0 && (
+                <DialogContentText>
+                  No occurences were found. Check your search parameters and try
+                  again.
+                </DialogContentText>
+              )}
+            </DialogContent>
+            <DialogActions>{dialogActions}</DialogActions>
           </Dialog>
         )}
       </div>

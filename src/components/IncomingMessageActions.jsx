@@ -1,6 +1,9 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import { Tab, Tabs } from "material-ui/Tabs";
 import type from "prop-types";
@@ -160,15 +163,22 @@ class IncomingMessageActions extends Component {
                   />
                 </div>
                 <Dialog
-                  actions={confirmDialogActions(
-                    "Reassign",
-                    this.handleConfirmDialogReassign
-                  )}
                   open={this.state.confirmDialogOpen === "reassign"}
-                  modal
-                  onRequestClose={this.handleConfirmDialogCancel}
+                  disableEscapeKeyDown
+                  disableBackdropClick
+                  onClose={this.handleConfirmDialogCancel}
                 >
-                  {`Reassign all ${conversationCount} matching conversations?`}
+                  <DialogContent>
+                    <DialogContentText>
+                      {`Reassign all ${conversationCount} matching conversations?`}
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    {confirmDialogActions(
+                      "Reassign",
+                      this.handleConfirmDialogReassign
+                    )}
+                  </DialogActions>
                 </Dialog>
               </div>
             </Tab>
@@ -189,15 +199,22 @@ class IncomingMessageActions extends Component {
                   />
                 </div>
                 <Dialog
-                  actions={confirmDialogActions(
-                    "Unassign",
-                    this.handleConfirmDialogUnassign
-                  )}
                   open={this.state.confirmDialogOpen === "unassign"}
-                  modal
-                  onRequestClose={this.handleConfirmDialogCancel}
+                  disableBackdropClick
+                  disableEscapeKeyDown
+                  onClose={this.handleConfirmDialogCancel}
                 >
-                  {`Unassign all ${conversationCount} matching conversations?`}
+                  <DialogContent>
+                    <DialogContentText>
+                      {`Unassign all ${conversationCount} matching conversations?`}
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    {confirmDialogActions(
+                      "Unassign",
+                      this.handleConfirmDialogUnassign
+                    )}
+                  </DialogActions>
                 </Dialog>
               </div>
             </Tab>

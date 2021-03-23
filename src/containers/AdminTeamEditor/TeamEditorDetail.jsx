@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import AutoComplete from "material-ui/AutoComplete";
-import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import PersonAddIcon from "material-ui/svg-icons/social/person-add";
 import {
@@ -142,13 +146,14 @@ class TeamEditorDetail extends React.Component {
           </TableBody>
         </Table>
         <Dialog
-          title="Team Update Error"
-          actions={errorActions}
-          modal={false}
           open={error !== undefined}
-          onRequestClose={this.handleCloseErrorDialog}
+          onClose={this.handleCloseErrorDialog}
         >
-          {error || ""}
+          <DialogTitle>Team Update Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

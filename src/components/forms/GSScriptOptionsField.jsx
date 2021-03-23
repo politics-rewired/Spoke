@@ -1,5 +1,7 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
 import pick from "lodash/pick";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import IconButton from "material-ui/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
@@ -125,29 +127,34 @@ class GSScriptOptionsField extends GSFormField {
     return (
       <Dialog
         open={isDialogOpen}
-        actions={actions}
         style={styles.dialog}
-        modal
-        onRequestClose={this.handleCancelDialog}
+        disableBackdropClick
+        disableEscapeKeyDown
+        onClose={this.handleCancelDialog}
       >
-        <ScriptEditor
-          ref={(ref) => {
-            this.inputRef = ref;
-          }}
-          name={name}
-          scriptText={scriptDraft}
-          scriptFields={scriptFields}
-          receiveFocus
-          expandable
-          onChange={(val) => this.setState({ scriptDraft: val.trim() })}
-        />
-        {isDuplicate && <p>A script version with this text already exists!</p>}
-        <ScriptLinkWarningDialog
-          open={scriptWarningOpen}
-          warningContext={warningContext}
-          handleConfirm={this.handleConfirmLinkWarning}
-          handleClose={this.handleCloseLinkWarning}
-        />
+        <DialogContent>
+          <ScriptEditor
+            ref={(ref) => {
+              this.inputRef = ref;
+            }}
+            name={name}
+            scriptText={scriptDraft}
+            scriptFields={scriptFields}
+            receiveFocus
+            expandable
+            onChange={(val) => this.setState({ scriptDraft: val.trim() })}
+          />
+          {isDuplicate && (
+            <p>A script version with this text already exists!</p>
+          )}
+          <ScriptLinkWarningDialog
+            open={scriptWarningOpen}
+            warningContext={warningContext}
+            handleConfirm={this.handleConfirmLinkWarning}
+            handleClose={this.handleCloseLinkWarning}
+          />
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

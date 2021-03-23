@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import sortBy from "lodash/sortBy";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import RaisedButton from "material-ui/RaisedButton";
@@ -158,33 +162,38 @@ class TrollTokenSettings extends React.Component {
           </FloatingActionButton>
         )}
         <Dialog
-          title="Add Trigger Token"
-          actions={addActions}
           open={addToken !== undefined}
-          onRequestClose={this.handleOnCancelAddToken}
+          onClose={this.handleOnCancelAddToken}
         >
-          <TextField
-            floatingLabelText="New token"
-            value={addToken || ""}
-            onChange={this.handleOnChangeAddToken}
-          />
+          <DialogTitle>Add Trigger Token</DialogTitle>
+          <DialogContent>
+            <TextField
+              floatingLabelText="New token"
+              value={addToken || ""}
+              onChange={this.handleOnChangeAddToken}
+            />
+          </DialogContent>
+          <DialogActions>{addActions}</DialogActions>
         </Dialog>
         <Dialog
-          title="Confirm Delete"
-          actions={deleteActions}
           open={deleteToken !== undefined}
-          onRequestClose={this.handleOnCancelDelete}
+          onClose={this.handleOnCancelDelete}
         >
-          Are you sure you want to delete the token{" "}
-          <span style={styles.tokenHighlight}>{deleteToken || ""}</span>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete the token{" "}
+              <span style={styles.tokenHighlight}>{deleteToken || ""}</span>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>{deleteActions}</DialogActions>
         </Dialog>
-        <Dialog
-          title="Error"
-          actions={errorActions}
-          open={error !== undefined}
-          onRequestClose={this.handleOnCancelError}
-        >
-          {error || ""}
+        <Dialog open={error !== undefined} onClose={this.handleOnCancelError}>
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

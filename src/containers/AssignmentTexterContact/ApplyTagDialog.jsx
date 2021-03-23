@@ -1,4 +1,7 @@
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
@@ -131,26 +134,29 @@ class ApplyTagDialog extends Component {
     return (
       <div id="applyTagDialog">
         <Dialog
-          title="More Actions"
           open={open}
-          actions={selectTagActions}
-          contentStyle={{ width: "100%", maxWidth: "none" }}
-          onRequestClose={this.props.onRequestClose}
+          maxWidth="xl"
+          fullWidth
+          onClose={this.props.onRequestClose}
         >
-          {!!escalateTag && (
-            <RaisedButton
-              buttonStyle={{ paddingLeft: 20, paddingRight: 20 }}
-              secondary
-              onClick={this.handleAddEscalatedTag}
-            >
-              Escalate Conversation
-            </RaisedButton>
-          )}
-          <TagSelector
-            value={selectedTags}
-            dataSource={tagsWithoutEscalated}
-            onChange={this.handleOnTagChange}
-          />
+          <DialogTitle>More Actions</DialogTitle>
+          <DialogContent>
+            {!!escalateTag && (
+              <RaisedButton
+                buttonStyle={{ paddingLeft: 20, paddingRight: 20 }}
+                secondary
+                onClick={this.handleAddEscalatedTag}
+              >
+                Escalate Conversation
+              </RaisedButton>
+            )}
+            <TagSelector
+              value={selectedTags}
+              dataSource={tagsWithoutEscalated}
+              onChange={this.handleOnTagChange}
+            />
+          </DialogContent>
+          <DialogActions>{selectTagActions}</DialogActions>
         </Dialog>
         <ApplyTagConfirmationDialog
           pendingTag={pendingTag}

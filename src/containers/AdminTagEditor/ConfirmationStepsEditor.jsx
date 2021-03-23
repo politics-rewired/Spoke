@@ -1,5 +1,8 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { Chip } from "material-ui";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -43,30 +46,28 @@ class ConfirmationStepsEditor extends Component {
             open={isCreatingStep}
           />
         ) : (
-          <Dialog
-            title="Tag confirmation steps"
-            open={open}
-            modal={false}
-            actions={actions}
-            onRequestClose={handleToggleStepsEditorOpen}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                {confirmationSteps.map((stepArray, stepArrayIdx) => (
-                  <Chip
-                    key={stepArray[0]}
-                    onRequestDelete={() => handleDeleteStep(stepArrayIdx)}
-                    style={{ margin: 4 }}
-                  >
-                    {stepArray[0]}
-                  </Chip>
-                ))}
+          <Dialog open={open} onClose={handleToggleStepsEditorOpen}>
+            <DialogTitle>Tag confirmation steps</DialogTitle>
+            <DialogContent>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  {confirmationSteps.map((stepArray, stepArrayIdx) => (
+                    <Chip
+                      key={stepArray[0]}
+                      onRequestDelete={() => handleDeleteStep(stepArrayIdx)}
+                      style={{ margin: 4 }}
+                    >
+                      {stepArray[0]}
+                    </Chip>
+                  ))}
+                </div>
+                <FlatButton
+                  label="Add New Step"
+                  onClick={this.handleToggleStepCreatorOpen}
+                />
               </div>
-              <FlatButton
-                label="Add New Step"
-                onClick={this.handleToggleStepCreatorOpen}
-              />
-            </div>
+            </DialogContent>
+            <DialogActions>{actions}</DialogActions>
           </Dialog>
         )}
       </div>

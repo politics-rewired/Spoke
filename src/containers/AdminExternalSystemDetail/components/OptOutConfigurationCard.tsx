@@ -1,8 +1,12 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
@@ -101,21 +105,19 @@ class OptOutConfigurationCard extends React.Component<Props, State> {
             />
           </div>
         </CardText>
-        <Dialog
-          title="Error Saving Opt Out Sync Configuration"
-          actions={[
+        <Dialog open={error !== undefined} onClose={this.handleDismissError}>
+          <DialogTitle>Error Saving Opt Out Sync Configuration</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
             <FlatButton
               key="close"
               label="Close"
               primary
               onClick={this.handleDismissError}
             />
-          ]}
-          modal={false}
-          open={error !== undefined}
-          onRequestClose={this.handleDismissError}
-        >
-          {error}
+          </DialogActions>
         </Dialog>
       </Card>
     );

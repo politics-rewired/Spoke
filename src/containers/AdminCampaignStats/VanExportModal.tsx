@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
@@ -88,43 +92,44 @@ class VanExportModal extends React.Component<InnerProps, State> {
     ];
 
     return (
-      <Dialog
-        open={open}
-        title="Export for VAN"
-        actions={actions}
-        onRequestClose={this.props.onRequestClose}
-      >
-        This will export data collected from contacts for upload into VAN. For
-        more information see{" "}
-        <a
-          href="https://docs.spokerewired.com/article/97-export-for-upload-to-van"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Export for Upload to VAN
-        </a>
-        .
-        <br />
-        <SelectField
-          floatingLabelText="VAN ID field"
-          value={vanIdField}
-          onChange={this.handleOnChangeVanIdField}
-        >
-          {selections.map((selection) => (
-            <MenuItem
-              key={selection}
-              value={selection}
-              primaryText={selection}
-            />
-          ))}
-        </SelectField>
-        <br />
-        <br />
-        <Toggle
-          label="Include unmessaged contacts?"
-          toggled={includeUnmessaged}
-          onToggle={this.handleOnToggleIncludeUnmessages}
-        />
+      <Dialog open={open} onClose={this.props.onRequestClose}>
+        <DialogTitle>Export for VAN</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will export data collected from contacts for upload into VAN.
+            For more information see{" "}
+            <a
+              href="https://docs.spokerewired.com/article/97-export-for-upload-to-van"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Export for Upload to VAN
+            </a>
+            .
+          </DialogContentText>
+          <br />
+          <SelectField
+            floatingLabelText="VAN ID field"
+            value={vanIdField}
+            onChange={this.handleOnChangeVanIdField}
+          >
+            {selections.map((selection) => (
+              <MenuItem
+                key={selection}
+                value={selection}
+                primaryText={selection}
+              />
+            ))}
+          </SelectField>
+          <br />
+          <br />
+          <Toggle
+            label="Include unmessaged contacts?"
+            toggled={includeUnmessaged}
+            onToggle={this.handleOnToggleIncludeUnmessages}
+          />
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

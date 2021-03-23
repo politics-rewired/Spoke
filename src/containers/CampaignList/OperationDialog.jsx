@@ -1,5 +1,8 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import FlatButton from "material-ui/FlatButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
@@ -242,22 +245,21 @@ export class OperationDialog extends React.Component {
         ];
 
     return (
-      <Dialog
-        title={operationDefinition.title(campaign)}
-        onRequestClose={clearInProgress}
-        open
-        actions={actions}
-      >
-        <OperationDialogBody {...this.props} />
-        {!(executing || finished) &&
-          this.state.pendingDeletionProtectionCheck && (
-            <TextField
-              floatingLabelText={`To continue, type ${DELETION_PROTECTION_TEXT}`}
-              fullWidth
-              onChange={this.setDeletionProtectionCheckText}
-              value={this.state.deletionProtectionCheckText}
-            />
-          )}
+      <Dialog open onClose={clearInProgress}>
+        <DialogTitle>{operationDefinition.title(campaign)}</DialogTitle>
+        <DialogContent>
+          <OperationDialogBody {...this.props} />
+          {!(executing || finished) &&
+            this.state.pendingDeletionProtectionCheck && (
+              <TextField
+                floatingLabelText={`To continue, type ${DELETION_PROTECTION_TEXT}`}
+                fullWidth
+                onChange={this.setDeletionProtectionCheckText}
+                value={this.state.deletionProtectionCheckText}
+              />
+            )}
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

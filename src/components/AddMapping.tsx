@@ -1,8 +1,12 @@
 /* eslint-disable react/no-unused-state */
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
@@ -209,14 +213,12 @@ class AddMapping extends React.Component<InnerProps, State> {
     return (
       <Dialog
         open={config !== undefined}
-        title="Add Mapping"
-        modal
-        actions={actions}
-        autoScrollBodyContent
-        onRequestClose={this.props.onRequestClose}
+        scroll="paper"
+        onClose={this.props.onRequestClose}
       >
+        <DialogTitle>Add Mapping</DialogTitle>
         {config !== undefined && (
-          <div>
+          <DialogContent>
             <table>
               <tr>
                 <td style={{ color: blueGrey800 }}>Question</td>
@@ -339,11 +341,12 @@ class AddMapping extends React.Component<InnerProps, State> {
                 )}
               </div>
             )}
-          </div>
+            {this.state.errorMessage !== undefined && (
+              <DialogContentText>{this.state.errorMessage}</DialogContentText>
+            )}
+          </DialogContent>
         )}
-        {this.state.errorMessage !== undefined && (
-          <p>{this.state.errorMessage}</p>
-        )}
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

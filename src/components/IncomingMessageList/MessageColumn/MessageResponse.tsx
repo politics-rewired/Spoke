@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import React, { Component } from "react";
 import * as yup from "yup";
@@ -147,13 +151,12 @@ class MessageResponse extends Component<Props, State> {
             />
           </div>
         </GSForm>
-        <Dialog
-          title="Error Sending"
-          open={!!this.state.sendError}
-          actions={errorActions}
-          modal={false}
-        >
-          <p>{this.state.sendError}</p>
+        <Dialog open={!!this.state.sendError}>
+          <DialogTitle>Error Sending</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{this.state.sendError}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

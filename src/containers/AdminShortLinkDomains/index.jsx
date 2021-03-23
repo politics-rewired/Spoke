@@ -1,5 +1,9 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import RaisedButton from "material-ui/RaisedButton";
@@ -163,26 +167,24 @@ class AdminShortLinkDomains extends Component {
           onAddNewDomain={this.handleAddDomain}
         />
         {warnDomainName && (
-          <Dialog
-            title="Confirm Delete Domain"
-            actions={deleteDomainActions}
-            modal={false}
-            open
-            onRequestClose={this.handleCancelDeleteDomain}
-          >
-            Are you sure you want to delete the short link domain{" "}
-            <span style={{ color: "#000000" }}>{warnDomainName}</span>?
+          <Dialog open onClose={this.handleCancelDeleteDomain}>
+            <DialogTitle>Confirm Delete Domain</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete the short link domain{" "}
+                <span style={{ color: "#000000" }}>{warnDomainName}</span>?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>{deleteDomainActions}</DialogActions>
           </Dialog>
         )}
         {webRequestError && (
-          <Dialog
-            title="Error Completing Request"
-            actions={errorActions}
-            modal={false}
-            open
-            onRequestClose={this.handleErrorDialogClose}
-          >
-            {webRequestError.message}
+          <Dialog open onClose={this.handleErrorDialogClose}>
+            <DialogTitle>Error Completing Request</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{webRequestError.message}</DialogContentText>
+            </DialogContent>
+            <DialogActions>{errorActions}</DialogActions>
           </Dialog>
         )}
       </div>

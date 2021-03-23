@@ -1,10 +1,14 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { red600 } from "material-ui/styles/colors";
@@ -902,11 +906,14 @@ class AdminCampaignEdit extends React.Component {
         })}
         <Dialog
           title="Request Error"
-          actions={errorActions}
           open={requestError !== undefined}
-          onRequestClose={this.handleCloseError}
+          onClose={this.handleCloseError}
         >
-          {requestError || ""}
+          <DialogTitle>Request Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{requestError || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

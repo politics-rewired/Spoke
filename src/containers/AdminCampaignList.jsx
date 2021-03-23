@@ -1,6 +1,9 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import { TextField, Toggle } from "material-ui";
-import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import { MenuItem } from "material-ui/Menu";
@@ -154,13 +157,63 @@ class AdminCampaignList extends React.Component {
           </RaisedButton>
         </div>
         {releasingAllReplies && (
-          <Dialog
-            title="Release All Unhandled Replies"
-            modal={false}
-            open
-            onRequestClose={this.closeReleasingAllReplies}
-            actions={
-              releasingInProgress
+          <Dialog open onClose={this.closeReleasingAllReplies}>
+            <DialogTitle>Release All Unhandled Replies</DialogTitle>
+            <DialogContent>
+              {releasingInProgress ? (
+                <LoadingIndicator />
+              ) : this.state.releaseAllRepliesError ? (
+                <span>
+                  Error: {JSON.stringify(this.state.releaseAllRepliesError)}
+                </span>
+              ) : this.state.releaseAllRepliesResult ? (
+                <span>
+                  Released {this.state.releaseAllRepliesResult.contactCount}{" "}
+                  replies on {this.state.releaseAllRepliesResult.campaignCount}{" "}
+                  campaigns
+                </span>
+              ) : !doneReleasingReplies ? (
+                <div>
+                  How many hours ago should a conversation have been idle for it
+                  to be unassigned?
+                  <TextField
+                    type="number"
+                    floatingLabelText="Number of Hours"
+                    ref={(el) => {
+                      this.numberOfHoursToReleaseRef = el;
+                    }}
+                    defaultValue={1}
+                  />
+                  <br />
+                  <br />
+                  Should we release replies on campaigns that are restricted to
+                  teams? If unchecked, replies on campaigns restricted to team
+                  members will stay assigned to their current texter.
+                  <Toggle
+                    ref={(el) => {
+                      this.releaseOnRestrictedRef = el;
+                    }}
+                    defaultToggled={false}
+                  />
+                  <br />
+                  <br />
+                  Release contacts only if it is within texting hours in the
+                  contact's timezone? If unchecked, replies will be released for
+                  contacts that may not be textable until later today or until
+                  tomorrow.
+                  <Toggle
+                    ref={(el) => {
+                      this.limitToCurrentlyTextableContactsRef = el;
+                    }}
+                    defaultToggled
+                  />
+                </div>
+              ) : (
+                <div />
+              )}
+            </DialogContent>
+            <DialogActions>
+              {releasingInProgress
                 ? []
                 : doneReleasingReplies
                 ? [
@@ -182,60 +235,8 @@ class AdminCampaignList extends React.Component {
                       onClick={this.releaseAllReplies}
                       primary
                     />
-                  ]
-            }
-          >
-            {releasingInProgress ? (
-              <LoadingIndicator />
-            ) : this.state.releaseAllRepliesError ? (
-              <span>
-                Error: {JSON.stringify(this.state.releaseAllRepliesError)}
-              </span>
-            ) : this.state.releaseAllRepliesResult ? (
-              <span>
-                Released {this.state.releaseAllRepliesResult.contactCount}{" "}
-                replies on {this.state.releaseAllRepliesResult.campaignCount}{" "}
-                campaigns
-              </span>
-            ) : !doneReleasingReplies ? (
-              <div>
-                How many hours ago should a conversation have been idle for it
-                to be unassigned?
-                <TextField
-                  type="number"
-                  floatingLabelText="Number of Hours"
-                  ref={(el) => {
-                    this.numberOfHoursToReleaseRef = el;
-                  }}
-                  defaultValue={1}
-                />
-                <br />
-                <br />
-                Should we release replies on campaigns that are restricted to
-                teams? If unchecked, replies on campaigns restricted to team
-                members will stay assigned to their current texter.
-                <Toggle
-                  ref={(el) => {
-                    this.releaseOnRestrictedRef = el;
-                  }}
-                  defaultToggled={false}
-                />
-                <br />
-                <br />
-                Release contacts only if it is within texting hours in the
-                contact's timezone? If unchecked, replies will be released for
-                contacts that may not be textable until later today or until
-                tomorrow.
-                <Toggle
-                  ref={(el) => {
-                    this.limitToCurrentlyTextableContactsRef = el;
-                  }}
-                  defaultToggled
-                />
-              </div>
-            ) : (
-              <div />
-            )}
+                  ]}
+            </DialogActions>
           </Dialog>
         )}
         {this.state.isCreating ? (
