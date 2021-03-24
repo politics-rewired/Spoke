@@ -24,13 +24,13 @@ const getTitleContext = (context: ResponseEditorContext) => {
   }
 };
 
-const CannedResponseDialog: React.SFC<CannedResponseDialogProps> = (props) => {
+const CannedResponseDialog: React.FC<CannedResponseDialogProps> = (props) => {
   const { open, context } = props;
 
   const title = getTitleContext(context);
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} fullWidth maxWidth={false}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <CannedResponseEditor {...props} />
