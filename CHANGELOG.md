@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.4.0](https://github.com/politics-rewired/spoke/compare/v4.3.0...v4.4.0) (2021-03-24)
+
+
+### Features
+
+* add campaign ID and contact name to troll alarm details ([#931](https://github.com/politics-rewired/spoke/issues/931)) ([d793226](https://github.com/politics-rewired/spoke/commit/d7932261741ec9b09e3cab7035bc5ac4df79203c))
+* support even more branding options ([#923](https://github.com/politics-rewired/spoke/issues/923)) ([18acce0](https://github.com/politics-rewired/spoke/commit/18acce0c20565f19c0118d59b1e1b60f1fd6f1bf))
+
+
+### Bug Fixes
+
+* **canned-responses:** restore dialog to full width ([#932](https://github.com/politics-rewired/spoke/issues/932)) ([fe66b89](https://github.com/politics-rewired/spoke/commit/fe66b8929a77a410082d66272c096bd95f3911b1))
+* **trollbot:** prevent adding invalid tokens ([#928](https://github.com/politics-rewired/spoke/issues/928)) ([6e4e093](https://github.com/politics-rewired/spoke/commit/6e4e093b9451ea2e1f21fe317503d27488c77bd5))
+
 ## [4.3.0](https://github.com/politics-rewired/spoke/compare/v4.2.4...v4.3.0) (2021-03-23)
 
 
