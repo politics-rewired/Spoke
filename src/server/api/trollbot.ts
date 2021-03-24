@@ -1,6 +1,6 @@
 import { r } from "../models";
 import { sqlResolvers } from "./lib/utils";
-import { UserRecord } from "./types";
+import { CampaignContactRecord, UserRecord } from "./types";
 
 export interface TrollAlarmRecord {
   message_id: number;
@@ -15,11 +15,29 @@ export const resolvers = {
     id: async (alarm: TrollAlarmRecord) => alarm.message_id,
     user: async (alarm: TrollAlarmRecord & { user?: UserRecord }) => {
       if (alarm.user) return alarm.user;
-      return r
+      const user = await r
         .reader("message")
         .join("user", "user.id", "message.user_id")
         .select("user.*")
-        .where({ "message.id": alarm.message_id });
+        .where({ "message.id": alarm.message_id })
+        .then(([record]) => record);
+      return user;
+    },
+    contact: async (
+      alarm: TrollAlarmRecord & { contact?: CampaignContactRecord }
+    ) => {
+      if (alarm.contact) return alarm.contact;
+      const contact = await r
+        .reader("message")
+        .join(
+          "campaign_contact",
+          "campaign_contact.id",
+          "message.campaign_contact_id"
+        )
+        .select("campaign_contact.*")
+        .where({ "message.id": alarm.message_id })
+        .then(([record]) => record);
+      return contact;
     }
   }
 };

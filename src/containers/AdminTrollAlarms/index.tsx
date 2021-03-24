@@ -136,6 +136,8 @@ class AdminTrollAlarms extends React.Component<Props, State> {
   handleCopyAlarm = (alarm: TrollAlarm) => {
     const clipboardContents = [
       `Triggered Token: ${alarm.token}`,
+      `Campaign ID: ${alarm.contact.campaign.id}`,
+      `Contact Name: ${alarm.contact.firstName} ${alarm.contact.lastName}`,
       `Message ID: ${alarm.messageId}`,
       `Message Text: ${alarm.messageText}`,
       `User ID: ${alarm.user.id}`,
