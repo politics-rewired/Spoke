@@ -18,9 +18,8 @@ export const resolvers = {
       const user = await r
         .reader("message")
         .join("user", "user.id", "message.user_id")
-        .select("user.*")
         .where({ "message.id": alarm.message_id })
-        .then(([record]) => record);
+        .first("user.*");
       return user;
     },
     contact: async (
@@ -34,9 +33,8 @@ export const resolvers = {
           "campaign_contact.id",
           "message.campaign_contact_id"
         )
-        .select("campaign_contact.*")
         .where({ "message.id": alarm.message_id })
-        .then(([record]) => record);
+        .first("campaign_contact.*");
       return contact;
     }
   }
