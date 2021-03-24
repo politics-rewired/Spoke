@@ -9,7 +9,7 @@ import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
 import SpokeFormField from "../../../components/forms/SpokeFormField";
-import { dataSourceItem } from "../../../components/utils";
+import { dataSourceItem, DataSourceItemType } from "../../../components/utils";
 import { DateTime, parseIanaZone } from "../../../lib/datetime";
 import { difference } from "../../../lib/utils";
 import { loadData } from "../../hoc/with-operations";
@@ -19,7 +19,6 @@ import {
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
-import { DataSourceItemType } from "../types";
 
 // Constants
 
