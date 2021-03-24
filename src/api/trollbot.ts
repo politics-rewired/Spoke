@@ -1,3 +1,14 @@
+import { User } from "./user";
+
+export interface TrollAlarm {
+  id: string;
+  messageId: string;
+  messageText: string;
+  token: string;
+  dismissed: boolean;
+  user: User;
+}
+
 export const schema = `
   type TrollAlarm {
     id: ID!
