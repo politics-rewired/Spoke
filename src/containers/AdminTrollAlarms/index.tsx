@@ -10,10 +10,12 @@ import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
-import PropTypes from "prop-types";
 import React from "react";
+import { RouteChildrenProps } from "react-router-dom";
 
-import { dataSourceItem } from "../../components/utils";
+import { TrollAlarm } from "../../api/trollbot";
+import { dataSourceItem, DataSourceItemType } from "../../components/utils";
+import { MutationMap, QueryMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
 import TrollAlarmList from "./components/TrollAlarmList";
 
@@ -23,11 +25,37 @@ const styles = {
     display: "flex",
     alignItems: "baseline"
   },
-  controlsColumn: { flexGrow: "1", flexBasis: "1" }
+  controlsColumn: { flexGrow: 1, flexBasis: 1 }
 };
 
-class AdminTrollAlarms extends React.Component {
-  state = {
+interface Props
+  extends Pick<RouteChildrenProps<{ organizationId: string }>, "match"> {
+  // HOC
+  trollTokens: {
+    trollTokens: {
+      token: string;
+    }[];
+  };
+  mutations: {
+    dismissAlarms: (alarmIds: string[]) => Promise<void>;
+    dismissMatchingAlarms: (token: string) => Promise<void>;
+  };
+}
+
+interface State {
+  tokenSearchText: string;
+  copiedAlarmID?: string;
+  pageSize: number;
+  page: number;
+  dismissed: boolean;
+  token: string | null;
+  selectedAlarmIds: string[];
+  isWorking: boolean;
+  error?: string;
+}
+
+class AdminTrollAlarms extends React.Component<Props, State> {
+  state: State = {
     // UI Widgets
     tokenSearchText: "",
     copiedAlarmID: undefined,
@@ -50,25 +78,28 @@ class AdminTrollAlarms extends React.Component {
   handleFocusTokenSearch = () =>
     this.setState({ tokenSearchText: "", token: null });
 
-  handleTokenSearchTextChange = (tokenSearchText) =>
+  handleTokenSearchTextChange = (tokenSearchText: string) =>
     this.setState({ tokenSearchText });
 
-  handleTokenSelected = (selection, index) => {
-    let token = null;
-    if (index > -1) {
-      token = selection.value.key;
+  handleTokenSelected = (
+    selection: DataSourceItemType | string,
+    index: number
+  ) => {
+    let token: string | null = null;
+    if (index > -1 && typeof selection !== "string") {
+      token = selection.value.key as string;
     } else {
       const { trollTokens } = this.props.trollTokens;
-      token = trollTokens.find(
-        ({ token: trollToken }) => trollToken === selection
-      );
+      token =
+        trollTokens.find(({ token: trollToken }) => trollToken === selection)
+          ?.token ?? null;
     }
     if (token) {
       this.setState({ token, selectedAlarmIds: [] });
     }
   };
 
-  handleToggleDismissed = (_event, dismissed) =>
+  handleToggleDismissed = (_event: any, dismissed: boolean) =>
     this.setState({ dismissed, selectedAlarmIds: [] });
 
   // Actions
@@ -87,6 +118,8 @@ class AdminTrollAlarms extends React.Component {
 
   handleDismissMatching = async () => {
     const { token } = this.state;
+    if (!token) return;
+
     this.setState({ isWorking: true, error: undefined });
     try {
       await this.props.mutations.dismissMatchingAlarms(token);
@@ -100,7 +133,7 @@ class AdminTrollAlarms extends React.Component {
 
   handleDismissCopyAlarm = () => this.setState({ copiedAlarmID: undefined });
 
-  handleCopyAlarm = (alarm) => {
+  handleCopyAlarm = (alarm: TrollAlarm) => {
     const clipboardContents = [
       `Triggered Token: ${alarm.token}`,
       `Message ID: ${alarm.messageId}`,
@@ -119,13 +152,13 @@ class AdminTrollAlarms extends React.Component {
   };
 
   // Table selection
-  handleAlarmSelectionChange = (selectedAlarmIds) =>
+  handleAlarmSelectionChange = (selectedAlarmIds: string[]) =>
     this.setState({ selectedAlarmIds });
 
   // Pagination
-  handlePageSizeChange = (pageSize) => this.setState({ pageSize });
+  handlePageSizeChange = (pageSize: number) => this.setState({ pageSize });
 
-  handlePageChange = (page) => this.setState({ page });
+  handlePageChange = (page: number) => this.setState({ page });
 
   render() {
     const { tokenSearchText, copiedAlarmID } = this.state;
@@ -188,7 +221,7 @@ class AdminTrollAlarms extends React.Component {
         </Paper>
         <br />
         <TrollAlarmList
-          organizationId={match.params.organizationId}
+          organizationId={match?.params.organizationId}
           pageSize={pageSize}
           page={page}
           dismissed={dismissed}
@@ -217,19 +250,7 @@ class AdminTrollAlarms extends React.Component {
   }
 }
 
-AdminTrollAlarms.propTypes = {
-  // HOC props
-  match: PropTypes.object.isRequired,
-  trollTokens: PropTypes.shape({
-    trollTokens: PropTypes.arrayOf(
-      PropTypes.shape({
-        token: PropTypes.string.isRequired
-      })
-    ).isRequired
-  }).isRequired
-};
-
-const queries = {
+const queries: QueryMap<Props> = {
   trollTokens: {
     query: gql`
       query getTrollTokensForOrg($organizationId: String!) {
@@ -240,13 +261,13 @@ const queries = {
     `,
     options: (ownProps) => ({
       variables: {
-        organizationId: ownProps.match.params.organizationId
+        organizationId: ownProps.match?.params.organizationId
       }
     })
   }
 };
 
-const mutations = {
+const mutations: MutationMap<Props> = {
   dismissAlarms: (ownProps) => (alarmIds) => ({
     mutation: gql`
       mutation dismissSelectedTrollBotAlarms(
@@ -257,7 +278,7 @@ const mutations = {
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.match?.params.organizationId,
       alarmIds
     },
     refetchQueries: ["getTrollAlarmsForOrg"]
@@ -272,7 +293,7 @@ const mutations = {
       }
     `,
     variables: {
-      organizationId: ownProps.match.params.organizationId,
+      organizationId: ownProps.match?.params.organizationId,
       token
     },
     refetchQueries: ["getTrollAlarmsForOrg"]
