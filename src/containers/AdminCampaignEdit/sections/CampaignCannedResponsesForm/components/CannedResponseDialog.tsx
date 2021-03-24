@@ -30,7 +30,7 @@ const CannedResponseDialog: React.FC<CannedResponseDialogProps> = (props) => {
   const title = getTitleContext(context);
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} fullWidth maxWidth={false}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <CannedResponseEditor {...props} />
