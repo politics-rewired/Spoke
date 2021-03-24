@@ -3831,6 +3831,11 @@ const rootResolvers = {
       const alarms = await query
         .join("message", "message.id", "=", "troll_alarm.message_id")
         .join("user", "user.id", "message.user_id")
+        .join(
+          "campaign_contact",
+          "campaign_contact.id",
+          "message.campaign_contact_id"
+        )
         .select(
           "message_id",
           "trigger_token as token",
@@ -3839,7 +3844,11 @@ const rootResolvers = {
           "user.id",
           "user.first_name",
           "user.last_name",
-          "user.email"
+          "user.email",
+          "campaign_contact.id as cc_id",
+          "campaign_contact.campaign_id",
+          "campaign_contact.first_name as cc_first_name",
+          "campaign_contact.last_name as cc_last_name"
         )
         .orderBy("troll_alarm.message_id")
         .limit(limit)
@@ -3850,13 +3859,23 @@ const rootResolvers = {
             token: alarmToken,
             dismissed: alarmDismissed,
             message_text,
+            cc_id,
+            campaign_id,
+            cc_first_name,
+            cc_last_name,
             ...alarmUser
           }) => ({
             message_id,
             token: alarmToken,
             dismissed: alarmDismissed,
             message_text,
-            user: alarmUser
+            user: alarmUser,
+            contact: {
+              id: cc_id,
+              campaign_id,
+              first_name: cc_first_name,
+              last_name: cc_last_name
+            }
           })
         );
 

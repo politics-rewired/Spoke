@@ -187,6 +187,14 @@ const queries = {
               email
               displayName
             }
+            contact {
+              id
+              firstName
+              lastName
+              campaign {
+                id
+              }
+            }
           }
         }
       }
