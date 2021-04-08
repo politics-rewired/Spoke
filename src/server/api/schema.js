@@ -984,6 +984,29 @@ const rootMutations = {
       return orgMembership;
     },
 
+    purgeOrganizationUsers: async (
+      _root,
+      { organizationId },
+      { user: authUser, db }
+    ) => {
+      const orgId = parseInt(organizationId, 10);
+      await accessRequired(authUser, orgId, "OWNER", true);
+      const { rowCount } = await db.primary.raw(
+        `
+          delete
+          from user_organization uo
+          using public.user u
+          where
+            u.id = uo.user_id
+            and u.is_superadmin is not true
+            and uo.organization_id = ?
+            and uo.role <> 'OWNER'
+        `,
+        [orgId]
+      );
+      return rowCount;
+    },
+
     editOrganizationSettings: async (
       _root,
       { id, input },
