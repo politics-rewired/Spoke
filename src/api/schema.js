@@ -278,6 +278,11 @@ const rootSchema = `
     externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
   }
 
+  input SecondPassInput {
+    excludeAgeInHours: Float
+    excludeNewer: Boolean!
+  }
+
   type RootMutation {
     createInvite(invite:InviteInput!): Invite
     createCampaign(campaign:CampaignInput!): Campaign
@@ -327,7 +332,7 @@ const rootSchema = `
     requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: Int!): String!
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
     releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): ReleaseAllUnhandledRepliesResult!
-    markForSecondPass(campaignId: String!, excludeAgeInHours: Float): String!
+    markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
     unMarkForSecondPass(campaignId: String!): String!
     deleteNeedsMessage(campaignId: String!): String!
     insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!

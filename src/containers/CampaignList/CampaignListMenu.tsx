@@ -47,6 +47,7 @@ export const CampaignListMenu: React.FC<Props> = (props) => {
       <MenuItem
         primaryText="Mark for a Second Pass"
         onClick={startOperation("markForSecondPass", campaign, {
+          excludeNewer: true,
           excludeRecentlyTexted: true,
           days: 3,
           hours: 0

@@ -22,12 +22,8 @@ export const operations = {
   markForSecondPass: {
     title: (campaign) =>
       `Mark Unresponded to Messages in ${campaign.title} for a Second Pass`,
-    body: () => `Marking unresponded to messages for this campaign will reset the state of messages that have\
-      not been responded to by the contact, causing them to show up as needing a first text, as long as the campaign\
-      is not past due. After running this operation, the texts will still be assigned to the same texter, so please\
-      run 'Release Unsent Messages' after if you'd like these second pass messages to be available for auto-assignment.\
-      \n\
-      Note: you should not run this operation if all initial messages have not yet been sent.`
+    body: () => `Marking messages that have not been responded to on this campaign will reset the state of those\
+      messages, causing them to show up as needing a first text for a second time.`
   },
   releaseUnrepliedMessages: {
     title: (campaign) =>
@@ -116,53 +112,31 @@ export const OperationDialogBody = (props) => {
   }
 
   if (operationName === "markForSecondPass") {
-    const { excludeRecentlyTexted, days, hours } = operationArs;
+    const { excludeNewer, excludeRecentlyTexted, days, hours } = operationArs;
     return (
       <div>
         <p>{operationDefinition.body(campaign)}</p>
+        <p>
+          To read about best practices for second passes, head{" "}
+          <a
+            href="https://docs.spokerewired.com/article/101-running-a-second-pass"
+            rel="noreferrer"
+            target="_blank"
+          >
+            here
+          </a>
+          .
+        </p>
         <br />
-        <Toggle
-          label="Exclude recently texted contacts?"
-          toggled={excludeRecentlyTexted}
-          onToggle={(ev, val) =>
-            setState((prevState) => {
-              const nextInProgress = prevState.inProgress.slice();
-              nextInProgress[2].excludeRecentlyTexted = val;
-              return {
-                inProgress: nextInProgress
-              };
-            })
-          }
-        />
-        {excludeRecentlyTexted && (
-          <p>Exlcude contacts messaged within the last:</p>
-        )}
-        {excludeRecentlyTexted && (
-          <div style={{ display: "flex" }}>
-            <TextField
-              style={{ flexGrow: 1, margin: "10px" }}
-              type="number"
-              floatingLabelText="Number of Days"
-              value={days}
-              onChange={(ev, val) =>
+        <div style={{ width: "100%", display: "flex", flexDirection: "row" }}>
+          <div style={{ flexGrow: 1 }}>
+            <Toggle
+              label="Exclude recently texted contacts?"
+              toggled={excludeRecentlyTexted}
+              onToggle={(ev, val) =>
                 setState((prevState) => {
                   const nextInProgress = prevState.inProgress.slice();
-                  nextInProgress[2].days = parseInt(val, 10);
-                  return {
-                    inProgress: nextInProgress
-                  };
-                })
-              }
-            />
-            <TextField
-              style={{ flexGrow: 1, margin: "10px" }}
-              type="number"
-              floatingLabelText="Number of Hours"
-              value={hours}
-              onChange={(ev, val) =>
-                setState((prevState) => {
-                  const nextInProgress = prevState.inProgress.slice();
-                  nextInProgress[2].hours = parseInt(val, 10);
+                  nextInProgress[2].excludeRecentlyTexted = val;
                   return {
                     inProgress: nextInProgress
                   };
@@ -170,7 +144,59 @@ export const OperationDialogBody = (props) => {
               }
             />
           </div>
-        )}
+          <div style={{ flexGrow: 1 }}>
+            {excludeRecentlyTexted &&
+              "Exlcude contacts messaged within the last:"}
+            {excludeRecentlyTexted && (
+              <div style={{ display: "flex" }}>
+                <TextField
+                  style={{ flexGrow: 1, margin: "10px" }}
+                  type="number"
+                  floatingLabelText="Number of Days"
+                  value={days}
+                  onChange={(ev, val) =>
+                    setState((prevState) => {
+                      const nextInProgress = prevState.inProgress.slice();
+                      nextInProgress[2].days = parseInt(val, 10);
+                      return {
+                        inProgress: nextInProgress
+                      };
+                    })
+                  }
+                />
+                <TextField
+                  style={{ flexGrow: 1, margin: "10px" }}
+                  type="number"
+                  floatingLabelText="Number of Hours"
+                  value={hours}
+                  onChange={(ev, val) =>
+                    setState((prevState) => {
+                      const nextInProgress = prevState.inProgress.slice();
+                      nextInProgress[2].hours = parseInt(val, 10);
+                      return {
+                        inProgress: nextInProgress
+                      };
+                    })
+                  }
+                />
+              </div>
+            )}
+          </div>
+        </div>
+        <br />
+        <Toggle
+          label="Exclude contacts uploaded on a newer campaign?"
+          toggled={excludeNewer}
+          onToggle={(ev, val) =>
+            setState((prevState) => {
+              const nextInProgress = prevState.inProgress.slice();
+              nextInProgress[2].excludeNewer = val;
+              return {
+                inProgress: nextInProgress
+              };
+            })
+          }
+        />
       </div>
     );
   }
@@ -245,7 +271,7 @@ export class OperationDialog extends React.Component {
         ];
 
     return (
-      <Dialog open onClose={clearInProgress}>
+      <Dialog open maxWidth="lg" onClose={clearInProgress}>
         <DialogTitle>{operationDefinition.title(campaign)}</DialogTitle>
         <DialogContent>
           <OperationDialogBody {...this.props} />
