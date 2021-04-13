@@ -2223,7 +2223,7 @@ const rootMutations = {
 
     markForSecondPass: async (
       _ignore,
-      { campaignId, excludeAgeInHours },
+      { campaignId, input: { excludeAgeInHours, excludeNewer } },
       { user }
     ) => {
       // verify permissions
@@ -2241,21 +2241,7 @@ const rootMutations = {
         queryArgs.push(parseFloat(excludeAgeInHours));
       }
 
-      /**
-       * "Mark Campaign for Second Pass", will only mark contacts for a second
-       * pass that do not have a more recently created membership in another campaign.
-       * Using SQL injection to avoid passing archived as a binding
-       * Should help with guaranteeing partial index usage
-       */
-      const updateResultRaw = await r.knex.raw(
-        `
-        update
-          campaign_contact as current_contact
-        set
-          message_status = 'needsMessage'
-        where current_contact.campaign_id = ?
-          and current_contact.message_status = 'messaged'
-          and current_contact.archived = ${campaign.is_archived}
+      const excludeNewerSql = `
           and not exists (
             select
               cell
@@ -2265,6 +2251,23 @@ const rootMutations = {
               newer_contact.cell = current_contact.cell
               and newer_contact.created_at > current_contact.created_at
           )
+      `;
+
+      /**
+       * "Mark Campaign for Second Pass", will only mark contacts for a second
+       * pass that do not have a more recently created membership in another campaign.
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
+      const updateSql = `
+        update
+          campaign_contact as current_contact
+        set
+          message_status = 'needsMessage'
+        where current_contact.campaign_id = ?
+          and current_contact.message_status = 'messaged'
+          and current_contact.archived = ${campaign.is_archived}
+          ${excludeNewer ? excludeNewerSql : ""}
           and not exists (
             select 1
             from message
@@ -2277,10 +2280,9 @@ const rootMutations = {
               : ""
           }
         ;
-      `,
-        queryArgs
-      );
+      `;
 
+      const updateResultRaw = await r.knex.raw(updateSql, queryArgs);
       const updateResult = updateResultRaw.rowCount;
 
       return `Marked ${updateResult} campaign contacts for a second pass.`;
