@@ -58,6 +58,10 @@ export interface Organization {
   externalSystems: RelayPaginatedResponse<ExternalSystem>;
 }
 
+export interface EditOrganizationInput {
+  name?: string | null;
+}
+
 export const schema = `
   enum TextRequestType {
     UNSENT
@@ -106,5 +110,9 @@ export const schema = `
     escalationTagList: [Tag]
     teams: [Team]!
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
+  }
+
+  input EditOrganizationInput {
+    name: String
   }
 `;
