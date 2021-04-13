@@ -1687,6 +1687,24 @@ const rootMutations = {
       });
     },
 
+    editOrganization: async (_root, { id, input: { name } }, { user, db }) => {
+      const orgId = parseInt(id, 10);
+      await accessRequired(user, orgId, "OWNER", true);
+
+      if (name) {
+        await db.primary.raw(`update organization set name = ? where id = ?`, [
+          name,
+          orgId
+        ]);
+      }
+
+      const result = await db
+        .primary("organization")
+        .where({ id: orgId })
+        .first();
+      return result;
+    },
+
     editCampaignContactMessageStatus: async (
       _root,
       { messageStatus, campaignContactId },

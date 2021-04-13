@@ -22,6 +22,7 @@ import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
+import EditName from "./EditName";
 
 const styles = StyleSheet.create({
   sectionCard: {
@@ -249,6 +250,10 @@ class Settings extends React.Component {
 
     return (
       <div>
+        <EditName
+          organizationId={organization.id}
+          style={{ marginBottom: 20 }}
+        />
         <Card className={css(styles.sectionCard)}>
           <CardHeader title="Default Text Request Auto-Approval Level" />
           <CardText>
