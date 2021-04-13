@@ -1,3 +1,4 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -135,10 +136,45 @@ const ConfirmSuperAdmin: React.StatelessComponent<ConfirmSuperAdminProps> = ({
   </div>
 );
 
+interface ConfirmRemoveUsersProps {
+  open: boolean;
+  onClose: () => Promise<void> | void;
+  onConfirmRemoveUsers: () => Promise<void> | void;
+}
+
+const ConfirmRemoveUsers: React.FC<ConfirmRemoveUsersProps> = ({
+  open,
+  onClose,
+  onConfirmRemoveUsers
+}) => (
+  <Dialog open={open} onClose={onClose}>
+    <DialogTitle>Confirm Remove Users</DialogTitle>
+    <DialogContent>
+      This will remove all users from the organization who are not Superadmins.
+      Are you sure you would like to do this?
+    </DialogContent>
+    <DialogActions>
+      <Button {...dataTest("removeUsersCancel")} onClick={onClose}>
+        Cancel
+      </Button>
+      <Button
+        {...dataTest("removeUsersOk")}
+        onClick={onConfirmRemoveUsers}
+        variant="contained"
+        color="primary"
+        autoFocus
+      >
+        Confirm
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
 const Dialogs = {
   InvitePerson,
   EditPerson,
   ResetPassword,
-  ConfirmSuperAdmin
+  ConfirmSuperAdmin,
+  ConfirmRemoveUsers
 };
 export default Dialogs;

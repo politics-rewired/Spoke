@@ -292,6 +292,7 @@ const rootSchema = `
     joinOrganization(organizationUuid: String!): Organization!
     editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
     editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OranizationSettings!
+    purgeOrganizationUsers(organizationId: String!): Int!
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     resetUserPassword(organizationId: String!, userId: Int!): String!
     changeUserPassword(userId: Int!, formData: UserPasswordChange): User
