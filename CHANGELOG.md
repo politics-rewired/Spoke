@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.5.0](https://github.com/politics-rewired/spoke/compare/v4.4.0...v4.5.0) (2021-04-13)
+
+
+### Features
+
+* **p2:** add toggle for excluding newer contacts ([#939](https://github.com/politics-rewired/spoke/issues/939)) ([ce72ef7](https://github.com/politics-rewired/spoke/commit/ce72ef72ab33dde9a5b91540b6937555a94db3bd))
+* add button to remove all users from organization ([#937](https://github.com/politics-rewired/spoke/issues/937)) ([274710c](https://github.com/politics-rewired/spoke/commit/274710c5f8be952cb8fe5986d14fb87ae7d133db))
+* allow changing organization name ([#938](https://github.com/politics-rewired/spoke/issues/938)) ([461dbd8](https://github.com/politics-rewired/spoke/commit/461dbd86ba9aed0d63b8d264514cb54dd00027a8))
+
 ## [4.4.0](https://github.com/politics-rewired/spoke/compare/v4.3.0...v4.4.0) (2021-03-24)
 
 
