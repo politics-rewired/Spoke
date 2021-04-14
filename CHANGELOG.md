@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.1](https://github.com/politics-rewired/spoke/compare/v4.5.0...v4.5.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* fix typo in toggle label ([ebc58dd](https://github.com/politics-rewired/spoke/commit/ebc58ddb61d747746203ab32090fc8a51ed51b55))
+
 ## [4.5.0](https://github.com/politics-rewired/spoke/compare/v4.4.0...v4.5.0) (2021-04-13)
 
 
