@@ -29,9 +29,7 @@ const Chart: React.FC<ChartProps> = ({ data }) => {
       {
         label: "Number of responses",
         data: data.map(([_label, value]) => value),
-        backgroundColor: palette("tol", data.length).map(
-          (hex: string) => `#${hex}`
-        )
+        backgroundColor: chartColors
       }
     ]
   };
