@@ -146,7 +146,7 @@ export const OperationDialogBody = (props) => {
           </div>
           <div style={{ flexGrow: 1 }}>
             {excludeRecentlyTexted &&
-              "Exlcude contacts messaged within the last:"}
+              "Exclude contacts messaged within the last:"}
             {excludeRecentlyTexted && (
               <div style={{ display: "flex" }}>
                 <TextField
