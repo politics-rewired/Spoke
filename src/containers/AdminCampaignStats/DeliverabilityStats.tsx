@@ -107,8 +107,7 @@ const DeliverabilityStats = (props: {
 
       <div className={css(styles.secondaryHeader)}>Top errors:</div>
       {specificErrors
-        .sort((e) => e.count)
-        .slice(0, 5)
+        .sort((a, b) => b.count - a.count)
         .map((e) => (
           <div key={e.errorCode}>
             {e.errorCode}{" "}
