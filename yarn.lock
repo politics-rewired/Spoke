@@ -17484,10 +17484,10 @@ performance-now@^2.1.0:
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
 
-pg-compose@^0.0.25:
-  version "0.0.25"
-  resolved "https://registry.yarnpkg.com/pg-compose/-/pg-compose-0.0.25.tgz#c69db78cb5d1397b30a89a8202de93e417d9690e"
-  integrity sha512-WqwzU1CQ3MNeYAMwF6fcNP/D1TNkSdwfBh9ZcA1IypFu4OR0cdjOHJ/UHP50KfRlA5qxS/MdWv5eqNCcOZQmJw==
+pg-compose@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/pg-compose/-/pg-compose-1.0.0.tgz#b9f9aad41a3ed7a2fc881bfaeb3c17a832179ff6"
+  integrity sha512-g4KGcoB24V9FWhc7BL+zAbjN/1/EqzCl+RV8tJVEKgumvo5xAVDLMFxqEpx9fGMgH3zr/Zkplh3MudCOqOJYDA==
   dependencies:
     "@types/cryptr" "^4.0.1"
     chokidar "^3.3.1"
@@ -17497,7 +17497,7 @@ pg-compose@^0.0.25:
     glob "^7.1.6"
     graphile-scheduler "^0.0.1"
     graphile-worker "^0.5.0"
-    lodash "^4.17.15"
+    lodash "^4.17.20"
     mustache "^4.0.1"
     runtypes "^4.2.0"
     tape "^4.13.2"
@@ -17573,10 +17573,10 @@ pg-types@^2.1.0, pg-types@^2.2.0:
     pg-types "^2.1.0"
     pgpass "1.x"
 
-pgc-ngp-van@^0.0.12:
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-0.0.12.tgz#1f578bdcbec40ae25e3e7fe548e2f354150734d0"
-  integrity sha512-UThVmwW4xEKIaRc/DR1WSMqQJVgYZU1eK2TxffdP+7y1f5SVx14rF7VFaGaZsj7nNp0H3ya6ghdGqSU/E4y5Dw==
+pgc-ngp-van@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-1.0.1.tgz#458f9ebba05c483645b746c895eccb286ed3185d"
+  integrity sha512-0YaDAR6ykKaJ1WHq5uzq4DfrUiuexA8rHYk4pGG8CcSY1VEmzqRcJeKe5CMJ6fFEzjQv26Wa9ZGZMfmZisNlVQ==
   dependencies:
     copy "^0.3.2"
     fast-csv "^4.3.0"
