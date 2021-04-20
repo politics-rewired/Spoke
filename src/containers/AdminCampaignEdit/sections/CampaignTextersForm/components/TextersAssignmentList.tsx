@@ -67,7 +67,7 @@ export interface Props {
   handleRemoveTexter(texterId: string): void;
 }
 
-const TextersAssignmentManager: React.SFC<Props> = (props: Props) => {
+const TextersAssignmentList: React.FC<Props> = (props) => {
   const {
     texters,
     orgTexters,
@@ -142,4 +142,4 @@ const TextersAssignmentManager: React.SFC<Props> = (props: Props) => {
   );
 };
 
-export default TextersAssignmentManager;
+export default TextersAssignmentList;

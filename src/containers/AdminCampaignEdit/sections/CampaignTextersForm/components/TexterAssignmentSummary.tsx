@@ -91,7 +91,7 @@ interface Props extends WithTheme {
   handleSplitAssignmentsToggle(event: any, toggled: boolean): void;
 }
 
-const TexterAssignmentDisplay = (props: Props) => {
+const TexterAssignmentSummary: React.FC<Props> = (props) => {
   const {
     assignedContacts,
     contactsCount,
@@ -144,4 +144,4 @@ const TexterAssignmentDisplay = (props: Props) => {
   );
 };
 
-export default withTheme(TexterAssignmentDisplay);
+export default withTheme(TexterAssignmentSummary);

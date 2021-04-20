@@ -28,7 +28,7 @@ interface SearchReturn {
   value: any;
 }
 
-const CampaignTextersManager: React.SFC<Props> = (props: Props) => {
+const AddRemoveTexters: React.FC<Props> = (props) => {
   const {
     orgTexters,
     texters,
@@ -99,4 +99,4 @@ const CampaignTextersManager: React.SFC<Props> = (props: Props) => {
   );
 };
 
-export default CampaignTextersManager;
+export default AddRemoveTexters;

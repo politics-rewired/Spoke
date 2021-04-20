@@ -22,9 +22,9 @@ import {
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
-import CampaignTextersManager from "./components/CampaignTextersManager";
-import TexterAssignmentDisplay from "./components/TexterAssignmentDisplay";
-import TextersAssignmentManager from "./components/TextersAssignmentManager";
+import AddRemoveTexters from "./components/AddRemoveTexters";
+import TexterAssignmentSummary from "./components/TexterAssignmentSummary";
+import TextersAssignmentList from "./components/TextersAssignmentList";
 import {
   EDIT_CAMPAIGN_TEXTERS,
   GET_CAMPAIGN_TEXTERS,
@@ -316,7 +316,7 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
         />
         <GSForm schema={this.formSchema} value={this.collectFormValues()}>
           {shouldShowTextersManager && (
-            <CampaignTextersManager
+            <AddRemoveTexters
               texters={availableTexters}
               orgTexters={orgTexters}
               searchText={searchText}
@@ -327,13 +327,13 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
             />
           )}
           <div className={css(styles.sliderContainer)}>
-            <TexterAssignmentDisplay
+            <TexterAssignmentSummary
               assignedContacts={assignedContacts}
               contactsCount={contactsCount}
               toggled={autoSplit}
               handleSplitAssignmentsToggle={this.handleSplitAssignmentsToggle}
             />
-            <TextersAssignmentManager
+            <TextersAssignmentList
               texters={availableTexters}
               orgTexters={orgTexters}
               contactsCount={contactsCount}
