@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.6.0](https://github.com/politics-rewired/spoke/compare/v4.5.1...v4.6.0) (2021-04-20)
+
+
+### Features
+
+* **deliverability-stats:** show all errors in descending order ([#942](https://github.com/politics-rewired/spoke/issues/942)) ([9ba3320](https://github.com/politics-rewired/spoke/commit/9ba33204edb85f84c579354b649cfeca6632e23e))
+
+
+### Bug Fixes
+
+* assemble numbers process delivery report ([#941](https://github.com/politics-rewired/spoke/issues/941)) ([85db4ac](https://github.com/politics-rewired/spoke/commit/85db4ac720b4775cca8f780eb8b544cdbd074c20))
+* fix admin navigation menu rotation in firefox ([#943](https://github.com/politics-rewired/spoke/issues/943)) ([efdb649](https://github.com/politics-rewired/spoke/commit/efdb649c4aa9948f4a6cdd75d17af7229128d5f3))
+
 ### [4.5.1](https://github.com/politics-rewired/spoke/compare/v4.5.0...v4.5.1) (2021-04-14)
 
 
