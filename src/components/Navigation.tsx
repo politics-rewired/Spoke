@@ -1,7 +1,9 @@
+import IconButton from "@material-ui/core/IconButton";
 import { useTheme } from "@material-ui/core/styles";
+import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
+import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import { css, StyleSheet } from "aphrodite";
 import camelCase from "lodash/camelCase";
-import { FlatButton } from "material-ui";
 import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
 import { List, ListItem } from "material-ui/List";
@@ -14,13 +16,7 @@ import { dataTest } from "../lib/attributes";
 const styles = StyleSheet.create({
   sideBarWithMenu: {
     width: 256,
-    height: "100%",
-    writingMode: "sideways-lr"
-  },
-  sideBarWithoutMenu: {
-    writingMode: "vertical-rl",
-    padding: "5px",
-    paddingTop: "20px"
+    height: "100%"
   }
 });
 
@@ -29,6 +25,7 @@ export interface NavigationSection {
   path: string;
   role: string;
   badge?: { count: number };
+  url: string;
 }
 
 interface Props {
@@ -54,7 +51,9 @@ const Navigation: React.FC<Props> = (props) => {
           }}
         >
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <FlatButton label="Close Menu" onClick={props.onToggleMenu} />
+            <IconButton onClick={props.onToggleMenu}>
+              <ArrowBackIosIcon />
+            </IconButton>
           </div>
           <List>
             {sections.map((section) => (
@@ -83,12 +82,9 @@ const Navigation: React.FC<Props> = (props) => {
     );
   }
   return (
-    <div
-      className={css(styles.sideBarWithoutMenu)}
-      onClick={props.onToggleMenu}
-    >
-      <span style={{ cursor: "pointer" }}>SHOW MENU</span>
-    </div>
+    <IconButton onClick={props.onToggleMenu}>
+      <ArrowForwardIosIcon />
+    </IconButton>
   );
 };
 
