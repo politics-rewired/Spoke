@@ -1,6 +1,5 @@
 import { css, StyleSheet } from "aphrodite";
 import { ApolloQueryResult } from "apollo-client/core/types";
-import gql from "graphql-tag";
 import orderBy from "lodash/orderBy";
 import uniqBy from "lodash/uniqBy";
 import RaisedButton from "material-ui/RaisedButton";
@@ -26,6 +25,11 @@ import {
 import CampaignTextersManager from "./components/CampaignTextersManager";
 import TexterAssignmentDisplay from "./components/TexterAssignmentDisplay";
 import TextersAssignmentManager from "./components/TextersAssignmentManager";
+import {
+  EDIT_CAMPAIGN_TEXTERS,
+  GET_CAMPAIGN_TEXTERS,
+  GET_ORGANIZATION_TEXTERS
+} from "./queries";
 import { Texter } from "./types";
 import { assignTexterContacts, handleExtraTexterCapacity } from "./utils";
 
@@ -357,33 +361,7 @@ class CampaignTextersForm extends React.Component<InnerProps, State> {
 
 const queries: QueryMap<InnerProps> = {
   campaignData: {
-    query: gql`
-      query GetCampaignTexters($campaignId: String!) {
-        campaign(id: $campaignId) {
-          id
-          texters {
-            id
-            firstName
-            lastName
-            displayName
-            assignment(campaignId: $campaignId) {
-              contactsCount
-              needsMessageCount: contactsCount(
-                contactsFilter: { messageStatus: "needsMessage" }
-              )
-              maxContacts
-            }
-          }
-          contactsCount
-          isStarted
-          dueBy
-          readiness {
-            id
-            basics
-          }
-        }
-      }
-    `,
+    query: GET_CAMPAIGN_TEXTERS,
     options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
@@ -391,19 +369,7 @@ const queries: QueryMap<InnerProps> = {
     })
   },
   organizationData: {
-    query: gql`
-      query GetOrganizationTexters($organizationId: String!) {
-        organization(id: $organizationId) {
-          id
-          texters: people {
-            id
-            firstName
-            lastName
-            displayName
-          }
-        }
-      }
-    `,
+    query: GET_ORGANIZATION_TEXTERS,
     options: (ownProps) => ({
       variables: {
         organizationId: ownProps.organizationId
@@ -414,28 +380,7 @@ const queries: QueryMap<InnerProps> = {
 
 const mutations: MutationMap<InnerProps> = {
   editCampaign: (ownProps) => (payload: Values) => ({
-    mutation: gql`
-      mutation editCampaignTexters(
-        $campaignId: String!
-        $payload: CampaignInput!
-      ) {
-        editCampaign(id: $campaignId, campaign: $payload) {
-          id
-          texters {
-            id
-            firstName
-            lastName
-            assignment(campaignId: $campaignId) {
-              contactsCount
-              needsMessageCount: contactsCount(
-                contactsFilter: { messageStatus: "needsMessage" }
-              )
-              maxContacts
-            }
-          }
-        }
-      }
-    `,
+    mutation: EDIT_CAMPAIGN_TEXTERS,
     variables: {
       campaignId: ownProps.campaignId,
       payload
