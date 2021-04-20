@@ -6,6 +6,7 @@ interface IOrganizationMembership {
   user_id: number;
   organization_id: number;
   request_status: string;
+  role: string;
   user?: Record<string, unknown>;
   organization?: Record<string, unknown>;
 }
@@ -31,12 +32,8 @@ export const resolvers = {
         .reader("user")
         .where({ id: membership.user_id })
         .first("is_superadmin");
-      const { role } = await r
-        .reader("user_organization")
-        .where({ user_id: membership.user_id })
-        .first("role");
 
-      return is_superadmin ? UserRoleType.SUPERADMIN : role;
+      return is_superadmin ? UserRoleType.SUPERADMIN : membership.role;
     }
   }
 };

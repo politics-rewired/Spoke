@@ -1,9 +1,9 @@
 import type from "prop-types";
 import React from "react";
-import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "./forms/GSForm";
+import SpokeFormField from "./forms/SpokeFormField";
 
 class CannedResponseForm extends React.Component {
   handleSave = (formValues) => {
@@ -21,8 +21,8 @@ class CannedResponseForm extends React.Component {
     return (
       <div>
         <GSForm ref="form" schema={modelSchema} onSubmit={this.handleSave}>
-          <Form.Field name="title" autoFocus fullWidth label="Title" />
-          <Form.Field
+          <SpokeFormField name="title" autoFocus fullWidth label="Title" />
+          <SpokeFormField
             customFields={customFields}
             name="text"
             type="script"

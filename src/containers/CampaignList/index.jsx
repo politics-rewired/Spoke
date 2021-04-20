@@ -140,22 +140,22 @@ const mutations = {
   }),
   markForSecondPass: (_ownProps) => (
     campaignId,
-    { excludeRecentlyTexted, days, hours }
+    { excludeNewer, excludeRecentlyTexted, days, hours }
   ) => ({
     mutation: gql`
       mutation markForSecondPass(
         $campaignId: String!
-        $excludeAgeInHours: Float
+        $input: SecondPassInput!
       ) {
-        markForSecondPass(
-          campaignId: $campaignId
-          excludeAgeInHours: $excludeAgeInHours
-        )
+        markForSecondPass(campaignId: $campaignId, input: $input)
       }
     `,
     variables: {
-      excludeAgeInHours: excludeRecentlyTexted ? days * 24 + hours : undefined,
-      campaignId
+      campaignId,
+      input: {
+        excludeNewer,
+        excludeAgeInHours: excludeRecentlyTexted ? days * 24 + hours : undefined
+      }
     }
   }),
   releaseUnrepliedMessages: (_ownProps) => (campaignId, { ageInHours }) => ({

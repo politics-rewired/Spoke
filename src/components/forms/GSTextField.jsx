@@ -5,12 +5,16 @@ import React from "react";
 import GSFormField from "./GSFormField";
 
 export default class GSTextField extends GSFormField {
+  handleNewRef = (el) => {
+    this.textFieldRef = el;
+  };
+
   render() {
     const { value } = this.props;
     const safeProps = omit(this.props, "errors");
     return (
       <TextField
-        ref="textField"
+        ref={this.handleNewRef}
         floatingLabelText={this.floatingLabelText()}
         floatingLabelStyle={{
           zIndex: 0

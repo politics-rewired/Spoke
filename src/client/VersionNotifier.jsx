@@ -1,4 +1,8 @@
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import FlatButton from "material-ui/FlatButton";
 import React from "react";
 
@@ -45,16 +49,16 @@ export default class VersionNotifier extends React.Component {
     ];
 
     return (
-      <Dialog
-        title="New Spoke Version Available"
-        actions={actions}
-        modal
-        open={isOpen}
-        onRequestClose={this.handleClose}
-      >
-        Spoke {newServerVersion || "n/a"} is available! To get the update, you
-        will need to refresh the page. Some features may not work until you load
-        the new version
+      <Dialog modal open={isOpen} onClose={this.handleClose}>
+        <DialogTitle>New Spoke Version Available</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Spoke {newServerVersion || "n/a"} is available! To get the update,
+            you will need to refresh the page. Some features may not work until
+            you load the new version
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

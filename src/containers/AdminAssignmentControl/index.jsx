@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
@@ -125,14 +129,12 @@ class AdminAssignmentControl extends Component {
             onClick={this.handleSaveAssignmentControls}
           />
         </CardActions>
-        <Dialog
-          title="Error saving Assignment Controls"
-          actions={dialogActions}
-          modal={false}
-          open={!!error}
-          onRequestClose={this.handleCloseDialog}
-        >
-          {error}
+        <Dialog open={!!error} onClose={this.handleCloseDialog}>
+          <DialogTitle>Error saving Assignment Controls</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{dialogActions}</DialogActions>
         </Dialog>
       </Card>
     );

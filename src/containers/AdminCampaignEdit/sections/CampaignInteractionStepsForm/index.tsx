@@ -14,6 +14,7 @@ import {
   InteractionStepWithChildren
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
+import { supportsClipboard } from "../../../../client/lib";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
@@ -33,6 +34,8 @@ import {
   GET_CAMPAIGN_INTERACTIONS,
   UpdateInteractionStepPayload
 } from "./resolvers";
+
+const DEFAULT_EMPTY_STEP_ID = "DEFAULT_EMPTY_STEP_ID";
 
 interface Values {
   interactionSteps: InteractionStepWithChildren;
@@ -167,6 +170,8 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
   };
 
   createPasteBlockHandler = (parentInteractionId: string | null) => () => {
+    if (!supportsClipboard()) return;
+
     navigator.clipboard.readText().then((text) => {
       const idMap: Record<string, string> = {};
 
@@ -203,6 +208,12 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
     this.props.mutations.stageDeleteInteractionStep(id);
 
   handleFormChange = (changedStep: InteractionStepWithChildren) => {
+    if (changedStep.id === DEFAULT_EMPTY_STEP_ID) {
+      return this.props.mutations.stageAddInteractionStep({
+        ...changedStep,
+        id: generateId()
+      });
+    }
     const { answerOption, questionText, scriptOptions } = changedStep;
     this.props.mutations.stageUpdateInteractionStep(changedStep.id, {
       answerOption,
@@ -249,6 +260,8 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
   };
 
   updateClipboardHasBlock = () => {
+    if (!supportsClipboard()) return;
+
     navigator.clipboard.readText().then((text) => {
       try {
         const _newBlock = JSON.parse(text);
@@ -287,7 +300,7 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
       interactionSteps: []
     })
       ? {
-          id: "newId",
+          id: DEFAULT_EMPTY_STEP_ID,
           parentInteractionId: null,
           questionText: "",
           answerOption: "",

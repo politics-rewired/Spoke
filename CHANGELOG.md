@@ -2,6 +2,160 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.6.0](https://github.com/politics-rewired/spoke/compare/v4.5.1...v4.6.0) (2021-04-20)
+
+
+### Features
+
+* **deliverability-stats:** show all errors in descending order ([#942](https://github.com/politics-rewired/spoke/issues/942)) ([9ba3320](https://github.com/politics-rewired/spoke/commit/9ba33204edb85f84c579354b649cfeca6632e23e))
+
+
+### Bug Fixes
+
+* assemble numbers process delivery report ([#941](https://github.com/politics-rewired/spoke/issues/941)) ([85db4ac](https://github.com/politics-rewired/spoke/commit/85db4ac720b4775cca8f780eb8b544cdbd074c20))
+* fix admin navigation menu rotation in firefox ([#943](https://github.com/politics-rewired/spoke/issues/943)) ([efdb649](https://github.com/politics-rewired/spoke/commit/efdb649c4aa9948f4a6cdd75d17af7229128d5f3))
+
+### [4.5.1](https://github.com/politics-rewired/spoke/compare/v4.5.0...v4.5.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* fix typo in toggle label ([ebc58dd](https://github.com/politics-rewired/spoke/commit/ebc58ddb61d747746203ab32090fc8a51ed51b55))
+
+## [4.5.0](https://github.com/politics-rewired/spoke/compare/v4.4.0...v4.5.0) (2021-04-13)
+
+
+### Features
+
+* **p2:** add toggle for excluding newer contacts ([#939](https://github.com/politics-rewired/spoke/issues/939)) ([ce72ef7](https://github.com/politics-rewired/spoke/commit/ce72ef72ab33dde9a5b91540b6937555a94db3bd))
+* add button to remove all users from organization ([#937](https://github.com/politics-rewired/spoke/issues/937)) ([274710c](https://github.com/politics-rewired/spoke/commit/274710c5f8be952cb8fe5986d14fb87ae7d133db))
+* allow changing organization name ([#938](https://github.com/politics-rewired/spoke/issues/938)) ([461dbd8](https://github.com/politics-rewired/spoke/commit/461dbd86ba9aed0d63b8d264514cb54dd00027a8))
+
+## [4.4.0](https://github.com/politics-rewired/spoke/compare/v4.3.0...v4.4.0) (2021-03-24)
+
+
+### Features
+
+* add campaign ID and contact name to troll alarm details ([#931](https://github.com/politics-rewired/spoke/issues/931)) ([d793226](https://github.com/politics-rewired/spoke/commit/d7932261741ec9b09e3cab7035bc5ac4df79203c))
+* support even more branding options ([#923](https://github.com/politics-rewired/spoke/issues/923)) ([18acce0](https://github.com/politics-rewired/spoke/commit/18acce0c20565f19c0118d59b1e1b60f1fd6f1bf))
+
+
+### Bug Fixes
+
+* **canned-responses:** restore dialog to full width ([#932](https://github.com/politics-rewired/spoke/issues/932)) ([fe66b89](https://github.com/politics-rewired/spoke/commit/fe66b8929a77a410082d66272c096bd95f3911b1))
+* **trollbot:** prevent adding invalid tokens ([#928](https://github.com/politics-rewired/spoke/issues/928)) ([6e4e093](https://github.com/politics-rewired/spoke/commit/6e4e093b9451ea2e1f21fe317503d27488c77bd5))
+
+## [4.3.0](https://github.com/politics-rewired/spoke/compare/v4.2.4...v4.3.0) (2021-03-23)
+
+
+### Features
+
+* make slack team sync crontab configurable ([#927](https://github.com/politics-rewired/spoke/issues/927)) ([bcd4401](https://github.com/politics-rewired/spoke/commit/bcd4401cfb723dfef3aa2a9d2a07122fe7bf24fb))
+
+
+### Bug Fixes
+
+* serialize dates using ISO 8601 format ([#921](https://github.com/politics-rewired/spoke/issues/921)) ([9ac5376](https://github.com/politics-rewired/spoke/commit/9ac53767761e35364645047084e250ca3ba293d1))
+
+### [4.2.4](https://github.com/politics-rewired/spoke/compare/v4.2.3...v4.2.4) (2021-03-17)
+
+
+### Bug Fixes
+
+* **manual-assignment:** remove unused expensive query ([#926](https://github.com/politics-rewired/spoke/issues/926)) ([f4dc58f](https://github.com/politics-rewired/spoke/commit/f4dc58f8311f6d4c8411d667f4ed38bf9ebda053))
+* remove timeout fetching instance settings ([#925](https://github.com/politics-rewired/spoke/issues/925)) ([46e1979](https://github.com/politics-rewired/spoke/commit/46e1979916c39927738afa206672be726ad8b176))
+
+### [4.2.3](https://github.com/politics-rewired/spoke/compare/v4.2.2...v4.2.3) (2021-03-16)
+
+
+### Bug Fixes
+
+* fix draft.js focus behavior ([#924](https://github.com/politics-rewired/spoke/issues/924)) ([a4489fa](https://github.com/politics-rewired/spoke/commit/a4489faf50e799309c5834da01f4662c2a86d202))
+
+### [4.2.2](https://github.com/politics-rewired/spoke/compare/v4.2.1...v4.2.2) (2021-03-12)
+
+
+### Bug Fixes
+
+* disable unsupported copy/paste block rather than crashing ([#918](https://github.com/politics-rewired/spoke/issues/918)) ([480d24d](https://github.com/politics-rewired/spoke/commit/480d24dd1a1d12f25ba0d5c8e821b4fcd5b1caa8))
+* fix crash editing interaction step ([#919](https://github.com/politics-rewired/spoke/issues/919)) ([6b41cd8](https://github.com/politics-rewired/spoke/commit/6b41cd87e37a314c5126fcfea7bd592cf29b378a))
+* fix texter crash when clearing a survey response ([#920](https://github.com/politics-rewired/spoke/issues/920)) ([f5d3381](https://github.com/politics-rewired/spoke/commit/f5d3381150a8686ff5c0c929f37a4def2a111ec4))
+
+### [4.2.1](https://github.com/politics-rewired/spoke/compare/v4.2.0...v4.2.1) (2021-03-11)
+
+
+### Bug Fixes
+
+* fix VAN sync modal ([#908](https://github.com/politics-rewired/spoke/issues/908)) ([53d0d56](https://github.com/politics-rewired/spoke/commit/53d0d563071d567105fe8e3c2cd46faba2151f2c))
+
+## [4.2.0](https://github.com/politics-rewired/spoke/compare/v4.1.0...v4.2.0) (2021-03-04)
+
+
+### Features
+
+* add additional styling ([#905](https://github.com/politics-rewired/spoke/issues/905)) ([9093581](https://github.com/politics-rewired/spoke/commit/90935816c7657c0e3a8cf170da863775a19de5c3))
+* support custom themes ([#902](https://github.com/politics-rewired/spoke/issues/902)) ([3fde0a2](https://github.com/politics-rewired/spoke/commit/3fde0a237147f878c21bd21fe2047ef8703cbaca))
+
+
+### Bug Fixes
+
+* set answer actions to correct value ([#906](https://github.com/politics-rewired/spoke/issues/906)) ([1c934b4](https://github.com/politics-rewired/spoke/commit/1c934b474e7e07dcc3981c67906a33fbc2bb5ade))
+* update slack for header-based authentication ([#903](https://github.com/politics-rewired/spoke/issues/903)) ([28a61c3](https://github.com/politics-rewired/spoke/commit/28a61c3053366c403a3b0d17514128934c9cf447))
+
+## [4.1.0](https://github.com/politics-rewired/spoke/compare/v4.0.2...v4.1.0) (2021-02-27)
+
+
+### Features
+
+* update react to v16 ([#894](https://github.com/politics-rewired/spoke/issues/894)) ([b3b804c](https://github.com/politics-rewired/spoke/commit/b3b804c0f3193e35ba5c7ccd3c0df7d6ca362fe9))
+
+
+### Bug Fixes
+
+* pass props directly when HOC contexts are not available ([#898](https://github.com/politics-rewired/spoke/issues/898)) ([82aba0e](https://github.com/politics-rewired/spoke/commit/82aba0e612575a281aa9092f116df5abfdd24408))
+* update refs usage ([#897](https://github.com/politics-rewired/spoke/issues/897)) ([5e1db7a](https://github.com/politics-rewired/spoke/commit/5e1db7a4716ee870c2b593a2adeb5fc893aea58c))
+
+### [4.0.2](https://github.com/politics-rewired/spoke/compare/v4.0.1...v4.0.2) (2021-02-23)
+
+
+### Bug Fixes
+
+* add missing window global type definition ([fee040f](https://github.com/politics-rewired/spoke/commit/fee040f793ba3170a5307624d742e725ea173699))
+* fix role resolver ([#895](https://github.com/politics-rewired/spoke/issues/895)) ([6252976](https://github.com/politics-rewired/spoke/commit/62529761d9df19f4ca957fead132277dc61b69c1))
+
+### [4.0.1](https://github.com/politics-rewired/spoke/compare/v4.0.0...v4.0.1) (2021-02-18)
+
+
+### Bug Fixes
+
+* force update of fs-capacitor to fix file upload ([54954e0](https://github.com/politics-rewired/spoke/commit/54954e03b3bbc85658853a625a5a37d9494b4191))
+
+## [4.0.0](https://github.com/politics-rewired/spoke/compare/v3.15.5...v4.0.0) (2021-02-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* Support has been dropped for Node v8, v10, and v12.
+* Support for Mailgun has been dropped due to no suitable Node library.
+
+### Bug Fixes
+
+* **worker:** fix lock on semaphore and add early return ([#891](https://github.com/politics-rewired/spoke/issues/891)) ([0427634](https://github.com/politics-rewired/spoke/commit/042763467473a8a823c66247e44d88dd6f92c0b5))
+* use structured logging for worker migrations ([#888](https://github.com/politics-rewired/spoke/issues/888)) ([2a12c01](https://github.com/politics-rewired/spoke/commit/2a12c013bc903fddfdc226843ea5e6ccf30997a4))
+
+
+### build
+
+* drop old proxy deps ([#889](https://github.com/politics-rewired/spoke/issues/889)) ([e5257b1](https://github.com/politics-rewired/spoke/commit/e5257b103369abad22d8b3903cc8124bc6550e3d))
+* upgrade to node 14 LTS ([#817](https://github.com/politics-rewired/spoke/issues/817)) ([e6d16f2](https://github.com/politics-rewired/spoke/commit/e6d16f29a5d2ee6651afa8efa927fb995f550b18))
+
+### [3.15.5](https://github.com/politics-rewired/spoke/compare/v3.15.4...v3.15.5) (2021-02-10)
+
+
+### Bug Fixes
+
+* **interaction-steps:** handle case of empty campaign ([#886](https://github.com/politics-rewired/spoke/issues/886)) ([d094b0f](https://github.com/politics-rewired/spoke/commit/d094b0f3e7f1141782c0bd811924b904a97260a2))
+
 ### [3.15.4](https://github.com/politics-rewired/spoke/compare/v3.15.3...v3.15.4) (2021-02-09)
 
 

@@ -1,11 +1,15 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
-import { Dialog } from "material-ui";
 import PropTypes from "prop-types";
 import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
+import SpokeFormField from "../../components/forms/SpokeFormField";
 
 const styles = StyleSheet.create({
   formFields: {
@@ -37,26 +41,29 @@ const CreateConfirmationStepForm = (props) => {
   };
 
   return (
-    <Dialog
-      title="New confirmation step"
-      open={open}
-      modal={false}
-      onRequestClose={handleToggleStepCreatorOpen}
-    >
+    <Dialog open={open} onClose={handleToggleStepCreatorOpen}>
+      <DialogTitle>New confirmation step</DialogTitle>
       <GSForm schema={formSchema} onSubmit={handleSubmit}>
-        <div className={css(styles.formFields)}>
-          <Form.Field
-            label="Confirmation Body Text"
-            name="confirmationBodyText"
-          />
-          <Form.Field label="Confirm Button Text" name="confirmButtonText" />
-          <Form.Field label="Cancel Button Text" name="cancelButtonText" />
-        </div>
-
-        <div className={css(styles.buttons)}>
-          <Form.Button label="Cancel" onClick={handleToggleStepCreatorOpen} />
-          <Form.Button type="submit" label="Save New Confirmation Step" />
-        </div>
+        <DialogContent>
+          <div className={css(styles.formFields)}>
+            <SpokeFormField
+              label="Confirmation Body Text"
+              name="confirmationBodyText"
+            />
+            <SpokeFormField
+              label="Confirm Button Text"
+              name="confirmButtonText"
+            />
+            <SpokeFormField
+              label="Cancel Button Text"
+              name="cancelButtonText"
+            />
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Form.Submit label="Cancel" onClick={handleToggleStepCreatorOpen} />
+          <Form.Submit type="submit" label="Save New Confirmation Step" />
+        </DialogActions>
       </GSForm>
     </Dialog>
   );

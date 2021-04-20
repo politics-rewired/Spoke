@@ -1,9 +1,9 @@
 import { LogFunctionFactory, Logger } from "graphile-worker";
 import { Pool } from "pg";
 import { loadYaml, PgComposeWorker, run } from "pg-compose";
-import url from "url";
 
 import { config } from "../config";
+import { sleep } from "../lib";
 import logger from "../logger";
 import {
   exportCampaign,
@@ -40,22 +40,16 @@ const graphileLogger = new Logger(logFactory);
 let worker: PgComposeWorker | undefined;
 let workerSemaphore = false;
 
-// https://github.com/brianc/node-postgres/tree/master/packages/pg-pool#note
-const params = url.parse(config.DATABASE_URL);
-const auth = params.auth ? params.auth.split(":") : [];
 const poolConfig = {
-  user: auth[0],
-  password: auth[1],
-  host: params.hostname || undefined,
-  port: params.port ? parseInt(params.port, 10) : undefined,
-  database: params.pathname ? params.pathname.split("/")[1] : undefined,
-  ssl: config.DB_USE_SSL,
+  connectionString: config.DATABASE_URL,
   max: config.WORKER_MAX_POOL
 };
 
 const workerPool = new Pool(poolConfig);
 
 export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
+  if (worker) return worker;
+
   const m = await loadYaml({ include: `${__dirname}/pg-compose/**/*.yaml` });
 
   m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
@@ -108,7 +102,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
       m.cronJobs!.push({
         name: "sync-slack-team-members",
         task_name: "sync-slack-team-members",
-        pattern: `*/10 * * * *`,
+        pattern: config.SLACK_SYNC_CHANNELS_CRONTAB,
         time_zone: config.TZ
       });
     } else {
@@ -128,7 +122,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
     });
   }
 
-  if (!worker) {
+  if (!workerSemaphore) {
     workerSemaphore = true;
 
     worker = await run(m, {
@@ -140,16 +134,14 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
       noHandleSignals: true,
       pollInterval: 1000
     });
+
+    return worker;
   }
 
   // Someone beat us to the punch of initializing the runner
-  else if (!worker && workerSemaphore) {
-    if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
-    await new Promise((resolve, _reject) => setTimeout(() => resolve(), 100));
-    return getWorker(attempt + 1);
-  }
-
-  return worker!;
+  if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
+  await sleep(100);
+  return getWorker(attempt + 1);
 };
 
 export default getWorker;

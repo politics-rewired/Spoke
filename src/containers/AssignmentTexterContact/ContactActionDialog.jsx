@@ -8,7 +8,9 @@ import Form from "react-formal";
 import * as yup from "yup";
 
 import GSForm from "../../components/forms/GSForm";
-import GSSubmitButton from "../../components/forms/GSSubmitButton";
+import SpokeFormField from "../../components/forms/SpokeFormField";
+
+const FIELD_NAME = "messageText";
 
 const styles = StyleSheet.create({
   contactActionCard: {
@@ -43,8 +45,11 @@ class ContactActionDialog extends Component {
 
   getContactActionTextFieldRef = () => {
     // Intercept enter key at the deepest underlying DOM <textarea> leaf
-    return this.refs.contactActionText.refs.input.refs.textField.input.refs
-      .input;
+    if (this.contactActionTextRef) {
+      return this.contactActionTextRef.querySelectorAll(
+        `textarea[name="${FIELD_NAME}"]`
+      )[0];
+    }
   };
 
   // Allow <shift> + <enter> to add newlines rather than submitting
@@ -77,24 +82,23 @@ class ContactActionDialog extends Component {
             value={{ messageText }}
             onSubmit={onSubmit}
           >
-            <Form.Field
-              ref="contactActionText"
-              name="messageText"
-              fullWidth
-              autoFocus
-              multiLine
-            />
+            <div
+              ref={(el) => {
+                this.contactActionTextRef = el;
+              }}
+            >
+              <SpokeFormField name={FIELD_NAME} fullWidth autoFocus multiLine />
+            </div>
             <div className={css(styles.dialogActions)}>
               <FlatButton
                 style={inlineStyles.dialogButton}
                 label="Cancel"
                 onClick={handleCloseDialog}
               />
-              <Form.Button
+              <Form.Submit
                 type="submit"
-                style={inlineStyles.dialogButton}
-                component={GSSubmitButton}
                 label={submitTitle}
+                style={inlineStyles.dialogButton}
               />
             </div>
           </GSForm>

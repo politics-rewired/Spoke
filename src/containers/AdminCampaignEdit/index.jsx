@@ -1,10 +1,15 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import { withTheme } from "@material-ui/core/styles";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { red600 } from "material-ui/styles/colors";
@@ -91,7 +96,7 @@ class AdminCampaignEdit extends React.Component {
     };
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     // This should only update the campaignFormValues sections that
     // are NOT expanded so the form data doesn't compete with the user
     // The basic flow of data:
@@ -748,7 +753,7 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms, match } = this.props;
+    const { adminPerms, match, theme: stableMuiTheme } = this.props;
     const campaignId = parseInt(match.params.campaignId, 10);
     const isNew = this.isNew();
     const saveLabel = isNew ? "Save and goto next section" : "Save";
@@ -784,6 +789,9 @@ class AdminCampaignEdit extends React.Component {
           const cardHeaderStyle = {
             backgroundColor: theme.colors.lightGray
           };
+          const titleStyle = {
+            width: "100%"
+          };
           const avatarStyle = {
             display: "inline-block",
             verticalAlign: "middle"
@@ -807,9 +815,12 @@ class AdminCampaignEdit extends React.Component {
               savePercent > 100 ? savePercent - 100 : savePercent
             }%`;
           } else if (sectionIsExpanded && sectionCanExpandOrCollapse) {
-            cardHeaderStyle.backgroundColor = theme.colors.lightYellow;
+            cardHeaderStyle.backgroundColor =
+              stableMuiTheme.palette.warning.main;
+            titleStyle.color = stableMuiTheme.palette.text.primary;
           } else if (!sectionCanExpandOrCollapse) {
             cardHeaderStyle.backgroundColor = theme.colors.lightGray;
+            titleStyle.color = stableMuiTheme.palette.text.primary;
           } else if (sectionIsDone) {
             avatar = (
               <Avatar
@@ -818,7 +829,9 @@ class AdminCampaignEdit extends React.Component {
                 size={25}
               />
             );
-            cardHeaderStyle.backgroundColor = theme.colors.green;
+            cardHeaderStyle.backgroundColor =
+              stableMuiTheme.palette.primary.main;
+            titleStyle.color = stableMuiTheme.palette.text.secondary;
           } else if (!sectionIsDone) {
             avatar = (
               <Avatar
@@ -827,7 +840,9 @@ class AdminCampaignEdit extends React.Component {
                 size={25}
               />
             );
-            cardHeaderStyle.backgroundColor = theme.colors.yellow;
+            cardHeaderStyle.backgroundColor =
+              stableMuiTheme.palette.warning.main;
+            titleStyle.color = stableMuiTheme.palette.text.primary;
           }
           return (
             <Card
@@ -844,9 +859,7 @@ class AdminCampaignEdit extends React.Component {
             >
               <CardHeader
                 title={section.title}
-                titleStyle={{
-                  width: "100%"
-                }}
+                titleStyle={titleStyle}
                 style={cardHeaderStyle}
                 actAsExpander={!sectionIsSaving && sectionCanExpandOrCollapse}
                 showExpandableButton={
@@ -875,11 +888,14 @@ class AdminCampaignEdit extends React.Component {
         })}
         <Dialog
           title="Request Error"
-          actions={errorActions}
           open={requestError !== undefined}
-          onRequestClose={this.handleCloseError}
+          onClose={this.handleCloseError}
         >
-          {requestError || ""}
+          <DialogTitle>Request Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{requestError || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );
@@ -1046,6 +1062,7 @@ const mutations = {
 };
 
 export default compose(
+  withTheme,
   withAuthzContext,
   loadData({
     queries,

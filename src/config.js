@@ -3,6 +3,12 @@ const pickBy = require("lodash/pickBy");
 
 const { str, bool, num, email, url, host, port } = envalid;
 
+const ServerMode = Object.freeze({
+  Server: "SERVER",
+  Worker: "WORKER",
+  Dual: "DUAL"
+});
+
 const validators = {
   ACTION_HANDLERS: str({
     desc: "Comma-separated list of action handlers to enable.",
@@ -340,8 +346,7 @@ const validators = {
     isClient: true
   }),
   EMAIL_FROM: email({
-    desc:
-      "Email from address. Required to send email from either Mailgun or a custom SMTP server.",
+    desc: "Email from address. Required to send email from SMTP server.",
     default: undefined
   }),
   EMAIL_REPLY_TO: email({
@@ -443,32 +448,6 @@ const validators = {
     default: "warn",
     devDefault: "silly"
   }),
-  MAILGUN_DOMAIN: host({
-    desc: "The domain you set up in Mailgun. Required for Mailgun usage.",
-    example: "email.bartletforamerica.com",
-    default: undefined
-  }),
-  MAILGUN_API_KEY: str({
-    desc:
-      "Should be automatically set during Heroku auto-deploy. Do not modify.",
-    default: undefined
-  }),
-  MAILGUN_SMTP_LOGIN: str({
-    desc: "'Default SMTP Login' in Mailgun. Required for Mailgun usage.",
-    default: undefined
-  }),
-  MAILGUN_SMTP_PASSWORD: str({
-    desc: "'Default Password' in Mailgun. Required for Mailgun usage.",
-    default: undefined
-  }),
-  MAILGUN_SMTP_PORT: port({
-    desc: "'Default Password' in Mailgun. Required for Mailgun usage.",
-    default: 587
-  }),
-  MAILGUN_SMTP_SERVER: host({
-    desc: "Do not modify. Required for Mailgun usage.",
-    default: "smtp.mailgun.org"
-  }),
   MAX_CONTACTS: num({
     desc:
       "If set each campaign can only have a maximum of the value (an integer). This is good for staging/QA/evaluation instances. Set to 0 for no maximum.",
@@ -493,6 +472,11 @@ const validators = {
   MEMOREDIS_PREFIX: str({
     desc: "The key prefix to use for memoredis memoization",
     default: undefined
+  }),
+  MODE: str({
+    desc: "Server mode",
+    choices: Object.values(ServerMode),
+    default: ServerMode.Dual
   }),
   NEXMO_API_KEY: str({
     desc: "Nexmo API key. Required if using Nexmo.",
@@ -648,6 +632,10 @@ const validators = {
     desc:
       "If true, Spoke team membership will be synced with matching Slack channel membership",
     default: false
+  }),
+  SLACK_SYNC_CHANNELS_CRONTAB: str({
+    desc: "The crontab schedule to run the team sync on",
+    default: "*/10 * * * *"
   }),
   STATIC_BASE_URL: str({
     desc: "Alternate static base url",
@@ -809,4 +797,4 @@ const clientConfig = pickBy(
   (value, key) => validators[key].isClient
 );
 
-module.exports = { config, clientConfig };
+module.exports = { config, clientConfig, ServerMode };

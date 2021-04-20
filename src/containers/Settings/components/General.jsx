@@ -1,7 +1,11 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
-import Dialog from "material-ui/Dialog";
 import DropDownMenu from "material-ui/DropDownMenu";
 import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
@@ -14,10 +18,11 @@ import * as yup from "yup";
 
 import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
-import GSSubmitButton from "../../../components/forms/GSSubmitButton";
+import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
+import EditName from "./EditName";
 
 const styles = StyleSheet.create({
   sectionCard: {
@@ -29,12 +34,6 @@ const styles = StyleSheet.create({
   },
   textingHoursSpan: {
     fontWeight: "bold"
-  },
-  dialogActions: {
-    marginTop: 20,
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-end"
   }
 });
 
@@ -156,40 +155,42 @@ class Settings extends React.Component {
     return (
       <Dialog
         open={this.state.textingHoursDialogOpen}
-        onRequestClose={this.handleCloseTextingHoursDialog}
+        onClose={this.handleCloseTextingHoursDialog}
       >
         <GSForm
           schema={formSchema}
           onSubmit={this.handleSubmitTextingHoursForm}
           defaultValue={{ textingHoursStart, textingHoursEnd }}
         >
-          <Form.Field
-            label="Start time"
-            name="textingHoursStart"
-            type="select"
-            fullWidth
-            choices={hourChoices}
-          />
-          <Form.Field
-            label="End time"
-            name="textingHoursEnd"
-            type="select"
-            fullWidth
-            choices={hourChoices}
-          />
-          <div className={css(styles.dialogActions)}>
+          <DialogContent>
+            <SpokeFormField
+              label="Start time"
+              name="textingHoursStart"
+              type="select"
+              fullWidth
+              choices={hourChoices}
+            />
+            <SpokeFormField
+              label="End time"
+              name="textingHoursEnd"
+              type="select"
+              fullWidth
+              choices={hourChoices}
+            />
+            <div className={css(styles.dialogActions)} />
+          </DialogContent>
+          <DialogActions>
             <FlatButton
               label="Cancel"
               style={inlineStyles.dialogButton}
               onClick={this.handleCloseTextingHoursDialog}
             />
-            <Form.Button
+            <Form.Submit
               type="submit"
               style={inlineStyles.dialogButton}
-              component={GSSubmitButton}
               label="Save"
             />
-          </div>
+          </DialogActions>
         </GSForm>
       </Dialog>
     );
@@ -249,6 +250,10 @@ class Settings extends React.Component {
 
     return (
       <div>
+        <EditName
+          organizationId={organization.id}
+          style={{ marginBottom: 20 }}
+        />
         <Card className={css(styles.sectionCard)}>
           <CardHeader title="Default Text Request Auto-Approval Level" />
           <CardText>
@@ -292,7 +297,7 @@ class Settings extends React.Component {
           >
             <CardHeader title="Opt Out Message" />
             <CardText>
-              <Form.Field
+              <SpokeFormField
                 label="Default Opt-Out Message"
                 name="optOutMessage"
                 fullWidth
@@ -361,7 +366,7 @@ class Settings extends React.Component {
             <CardText>
               To enable automatic filtering of landline phone numbers, you will
               need to put in your Assemble Numbers API Key here.
-              <Form.Field
+              <SpokeFormField
                 label="Assemble Numbers API Key"
                 name="numbersApiKey"
                 fullWidth
@@ -413,7 +418,7 @@ class Settings extends React.Component {
               <CardText>
                 If set, a payload will be sent to this URL for every TrollBot
                 alarm.
-                <Form.Field
+                <SpokeFormField
                   label="Webhook URL"
                   name="trollbotWebhookUrl"
                   fullWidth
@@ -431,13 +436,12 @@ class Settings extends React.Component {
           </Card>
         )}
 
-        <Dialog
-          title="Error Saving Settings"
-          open={error !== undefined}
-          actions={errorActions}
-          onRequestClose={this.handleDismissError}
-        >
-          {error || ""}
+        <Dialog open={error !== undefined} onClose={this.handleDismissError}>
+          <DialogTitle>Error Saving Settings</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

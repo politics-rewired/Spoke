@@ -1,6 +1,10 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
@@ -146,43 +150,40 @@ class AdminTeamEditor extends Component {
           <ContentAddIcon />
         </FloatingActionButton>
         {editingTeam && (
-          <Dialog
-            title={`${teamVerb} Team`}
-            actions={actions}
-            modal={false}
-            open
-            onRequestClose={this.handleCancelEditTeam}
-          >
-            <TextField
-              name="title"
-              floatingLabelText="Team name"
-              value={editingTeam.title || ""}
-              onChange={this.createTeamEditorHandle}
-            />
-            <br />
-            <TextField
-              name="description"
-              floatingLabelText="Team description"
-              multiLine
-              value={editingTeam.description || ""}
-              onChange={this.createTeamEditorHandle}
-            />
-            <br />
-            <TextField
-              name="assignmentPriority"
-              floatingLabelText="Assignment priority"
-              value={editingTeam.assignmentPriority || 500}
-              onChange={this.createTeamEditorHandle}
-            />
+          <Dialog open onClose={this.handleCancelEditTeam}>
+            <DialogTitle>{`${teamVerb} Team`}</DialogTitle>
+            <DialogContent>
+              <TextField
+                name="title"
+                floatingLabelText="Team name"
+                value={editingTeam.title || ""}
+                onChange={this.createTeamEditorHandle}
+              />
+              <br />
+              <TextField
+                name="description"
+                floatingLabelText="Team description"
+                multiLine
+                value={editingTeam.description || ""}
+                onChange={this.createTeamEditorHandle}
+              />
+              <br />
+              <TextField
+                name="assignmentPriority"
+                floatingLabelText="Assignment priority"
+                value={editingTeam.assignmentPriority || 500}
+                onChange={this.createTeamEditorHandle}
+              />
+            </DialogContent>
+            <DialogActions>{actions}</DialogActions>
           </Dialog>
         )}
-        <Dialog
-          title="Error"
-          actions={errorActions}
-          open={error !== undefined}
-          onRequestClose={this.handleCancelError}
-        >
-          {error || ""}
+        <Dialog open={error !== undefined} onClose={this.handleCancelError}>
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

@@ -2,8 +2,8 @@ import { css, StyleSheet } from "aphrodite";
 import { IconButton } from "material-ui";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 import React from "react";
-import Form from "react-formal";
 
+import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import Slider from "../../../../../components/Slider";
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
@@ -110,7 +110,7 @@ const TextersAssignmentManager: React.SFC<Props> = (props: Props) => {
               {displayName}
             </div>
             <div className={css(styles.input)}>
-              <Form.Field
+              <SpokeFormField
                 {...dataTest("texterAssignment")}
                 name={`texters[${index}].assignment.needsMessageCount`}
                 hintText="Contacts"

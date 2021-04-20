@@ -2,8 +2,6 @@ import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
 import Form from "react-formal";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { areComponentsEqual } from "react-hot-loader";
 
 import theme from "../../styles/theme";
 import GSSubmitButton from "./GSSubmitButton";
@@ -34,7 +32,7 @@ export default class GSForm extends React.Component {
 
   // to display title and script as default values in CannedResponseEditor,
   // state.model must be mapped to children.props.values on mount
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { children } = this.props;
 
     if (Array.isArray(children)) {
@@ -53,10 +51,40 @@ export default class GSForm extends React.Component {
   }
 
   submit = () => {
-    this.refs.form.submit();
+    if (this.formRef) {
+      this.formRef.submit();
+    }
   };
 
-  handleFormError(err) {
+  handleFormRefChange = (ref) => {
+    this.formRef = ref;
+  };
+
+  handleSubmitForm = async (formValues) => {
+    this.setState({
+      isSubmitting: true,
+      globalErrorMessage: null
+    });
+    if (this.props.onSubmit) {
+      try {
+        await this.props.onSubmit(formValues);
+      } catch (err) {
+        this.handleFormSubmitError(err);
+      }
+    }
+    this.setState({ isSubmitting: false });
+  };
+
+  handleOnFormChange = (model) => {
+    this.setState({ model });
+    if (this.props.onChange) {
+      this.props.onChange(model);
+    }
+  };
+
+  handleFormError = (errors) => this.setState({ formErrors: errors });
+
+  handleFormSubmitError = (err) => {
     if (err.message) {
       this.setState({ globalErrorMessage: err.message });
     } else {
@@ -66,14 +94,14 @@ export default class GSForm extends React.Component {
           "Oops! Your form submission did not work. Contact your administrator."
       });
     }
-  }
+  };
 
-  renderChildren(children) {
+  renderChildren = (children) => {
     return React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) {
         return child;
       }
-      if (areComponentsEqual(child.type, Form.Field)) {
+      if (child.type === Form.Field) {
         const { name } = child.props;
         let error = this.state.formErrors ? this.state.formErrors[name] : null;
         let clonedElement = child;
@@ -89,9 +117,9 @@ export default class GSForm extends React.Component {
           events: ["onBlur"]
         });
       }
-      if (areComponentsEqual(child.type, Form.Button)) {
+      if (child.type === Form.Submit) {
         return React.cloneElement(child, {
-          component: GSSubmitButton,
+          as: GSSubmitButton,
           isSubmitting: this.state.isSubmitting
         });
       }
@@ -102,9 +130,9 @@ export default class GSForm extends React.Component {
       }
       return child;
     });
-  }
+  };
 
-  renderGlobalErrorMessage() {
+  renderGlobalErrorMessage = () => {
     if (!this.state.globalErrorMessage) {
       return "";
     }
@@ -114,37 +142,19 @@ export default class GSForm extends React.Component {
         {this.state.globalErrorMessage}
       </div>
     );
-  }
+  };
 
   render() {
+    const value =
+      this.props.value || this.state.model || this.props.defaultValue;
     return (
       <Form
-        ref="form"
-        value={this.props.value || this.state.model || this.props.defaultValue}
-        onChange={(model) => {
-          this.setState({ model });
-          if (this.props.onChange) {
-            this.props.onChange(model);
-          }
-        }}
-        onError={(errors) => {
-          this.setState({ formErrors: errors });
-        }}
+        ref={this.handleFormRefChange}
+        value={value}
         {...this.props}
-        onSubmit={async (formValues) => {
-          this.setState({
-            isSubmitting: true,
-            globalErrorMessage: null
-          });
-          if (this.props.onSubmit) {
-            try {
-              await this.props.onSubmit(formValues);
-            } catch (ex) {
-              this.handleFormError(ex);
-            }
-          }
-          this.setState({ isSubmitting: false });
-        }}
+        onChange={this.handleOnFormChange}
+        onError={this.handleFormError}
+        onSubmit={this.handleSubmitForm}
       >
         {this.renderGlobalErrorMessage()}
         {this.renderChildren(this.props.children)}

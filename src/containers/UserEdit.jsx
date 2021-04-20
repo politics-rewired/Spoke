@@ -1,6 +1,9 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import queryString from "query-string";
@@ -10,6 +13,7 @@ import * as yup from "yup";
 
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
+import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 
@@ -240,7 +244,7 @@ class UserEdit extends React.Component {
             authType === UserEditMode.Reset ||
             authType === UserEditMode.RequestReset ||
             authType === UserEditMode.Edit) && (
-            <Form.Field
+            <SpokeFormField
               label="Email"
               name="email"
               disabled={!isLocalAuth}
@@ -250,17 +254,17 @@ class UserEdit extends React.Component {
           {(authType === UserEditMode.SignUp ||
             authType === UserEditMode.Edit) && (
             <span>
-              <Form.Field
+              <SpokeFormField
                 label="First name"
                 name="firstName"
                 {...dataTest("firstName")}
               />
-              <Form.Field
+              <SpokeFormField
                 label="Last name"
                 name="lastName"
                 {...dataTest("lastName")}
               />
-              <Form.Field
+              <SpokeFormField
                 label="Cell Number"
                 name="cell"
                 {...dataTest("cell")}
@@ -272,10 +276,10 @@ class UserEdit extends React.Component {
             authType === UserEditMode.Reset ||
             authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
-            <Form.Field label="Password" name="password" type="password" />
+            <SpokeFormField label="Password" name="password" type="password" />
           )}
           {authType === UserEditMode.Change && (
-            <Form.Field
+            <SpokeFormField
               label="New Password"
               name="newPassword"
               type="password"
@@ -285,7 +289,7 @@ class UserEdit extends React.Component {
             authType === UserEditMode.Reset ||
             authType === UserEditMode.EmailReset ||
             authType === UserEditMode.Change) && (
-            <Form.Field
+            <SpokeFormField
               label="Confirm Password"
               name="passwordConfirm"
               type="password"
@@ -301,7 +305,7 @@ class UserEdit extends React.Component {
                 />
               </div>
             )}
-            <Form.Button
+            <Form.Submit
               type="submit"
               label={saveLabel || "Save"}
               component={GSSubmitButton}
@@ -311,32 +315,32 @@ class UserEdit extends React.Component {
         <div>
           <Dialog
             {...dataTest("changePasswordDialog")}
-            title="Change your password"
-            modal={false}
             open={this.state.changePasswordDialog}
-            onRequestClose={this.handleClose}
+            onClose={this.handleClose}
           >
-            <UserEdit
-              authType={UserEditMode.Change}
-              saveLabel="Save new password"
-              handleClose={this.handleClose}
-              openSuccessDialog={this.openSuccessDialog}
-              userId={this.props.userId}
-              mutations={this.props.mutations}
-            />
+            <DialogTitle>Change your password</DialogTitle>
+            <DialogContent>
+              <UserEdit
+                authType={UserEditMode.Change}
+                saveLabel="Save new password"
+                handleClose={this.handleClose}
+                openSuccessDialog={this.openSuccessDialog}
+                userId={this.props.userId}
+                mutations={this.props.mutations}
+              />
+            </DialogContent>
           </Dialog>
           <Dialog
             {...dataTest("successPasswordDialog")}
-            title={
-              this.state.successMessage || "Password changed successfully!"
-            }
-            modal={false}
             open={this.state.successDialog}
-            onRequestClose={this.handleClose}
-            onBackdropClick={this.handleClose}
-            onEscapeKeyDown={this.handleClose}
+            onClose={this.handleClose}
           >
-            <RaisedButton onClick={this.handleClose} label="OK" primary />
+            <DialogTitle>
+              {this.state.successMessage || "Password changed successfully!"}
+            </DialogTitle>
+            <DialogActions>
+              <RaisedButton onClick={this.handleClose} label="OK" primary />
+            </DialogActions>
           </Dialog>
         </div>
 
@@ -358,8 +362,8 @@ UserEdit.defaultProps = {
 };
 
 UserEdit.propTypes = {
-  organizationId: PropTypes.string.isRequired,
-  userId: PropTypes.string.isRequired,
+  organizationId: PropTypes.string,
+  userId: PropTypes.string,
   saveLabel: PropTypes.string,
   nextUrl: PropTypes.string,
   authType: PropTypes.string,

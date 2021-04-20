@@ -1,3 +1,4 @@
+import { useTheme } from "@material-ui/core";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import Avatar from "material-ui/Avatar";
@@ -47,7 +48,7 @@ interface WrapperProps {
   deleteJob: DeleteJobType;
 }
 
-const inlineStyles = {
+const inlineStyles: Record<string, React.CSSProperties> = {
   card: {
     marginTop: 1
   },
@@ -78,7 +79,8 @@ const unpackJob = (job?: PendingJobType) => ({
   isSaving: job !== undefined && !job.resultMessage
 });
 
-const SectionWrapper: React.SFC<WrapperProps> = (props) => {
+const SectionWrapper: React.FC<WrapperProps> = (props) => {
+  const stableMuiTheme = useTheme();
   const {
     // Required props
     active,
@@ -116,9 +118,11 @@ const SectionWrapper: React.SFC<WrapperProps> = (props) => {
     cardHeaderStyle.background = theme.colors.lightGray;
     cardHeaderStyle.width = `${progressPercent}%`;
   } else if (active && isExpandable) {
-    cardHeaderStyle.backgroundColor = theme.colors.lightYellow;
+    cardHeaderStyle.backgroundColor = stableMuiTheme.palette.warning.main;
+    inlineStyles.title.color = stableMuiTheme.palette.text.primary;
   } else if (!isExpandable) {
     cardHeaderStyle.backgroundColor = theme.colors.lightGray;
+    inlineStyles.title.color = stableMuiTheme.palette.text.primary;
   } else if (sectionIsDone) {
     avatar = (
       <Avatar
@@ -127,7 +131,8 @@ const SectionWrapper: React.SFC<WrapperProps> = (props) => {
         size={25}
       />
     );
-    cardHeaderStyle.backgroundColor = theme.colors.green;
+    cardHeaderStyle.backgroundColor = stableMuiTheme.palette.primary.main;
+    inlineStyles.title.color = stableMuiTheme.palette.text.secondary;
   } else if (!sectionIsDone) {
     avatar = (
       <Avatar
@@ -136,7 +141,8 @@ const SectionWrapper: React.SFC<WrapperProps> = (props) => {
         size={25}
       />
     );
-    cardHeaderStyle.backgroundColor = theme.colors.yellow;
+    cardHeaderStyle.backgroundColor = stableMuiTheme.palette.warning.main;
+    inlineStyles.title.color = stableMuiTheme.palette.text.primary;
   }
 
   const handleDiscardJob = async () => {
@@ -309,6 +315,7 @@ interface AuthzProviderProps {
 
 interface WrappedComponentProps
   extends RequiredComponentProps,
+    MuiThemeProviderProps,
     AuthzProviderProps {
   pendingJob?: PendingJobType;
   isExpandable: boolean;
@@ -361,6 +368,7 @@ export const asSection = (options: SectionOptions) => (
 
       // Authz HOC
       adminPerms,
+      muiTheme,
 
       // withProps HOC
       pendingJob,
@@ -383,6 +391,7 @@ export const asSection = (options: SectionOptions) => (
         isExpandable={isExpandable}
         sectionIsDone={sectionIsDone}
         deleteJob={deleteJob}
+        muiTheme={muiTheme}
       >
         <Component
           organizationId={organizationId}

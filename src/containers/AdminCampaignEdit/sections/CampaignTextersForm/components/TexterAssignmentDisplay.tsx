@@ -1,3 +1,4 @@
+import { WithTheme, withTheme } from "@material-ui/core/styles";
 import { css, StyleSheet } from "aphrodite";
 import Toggle from "material-ui/Toggle";
 import React from "react";
@@ -83,7 +84,7 @@ const inlineStyles = {
   }
 };
 
-interface Props {
+interface Props extends WithTheme {
   assignedContacts: number;
   contactsCount: number;
   toggled: boolean;
@@ -95,12 +96,13 @@ const TexterAssignmentDisplay = (props: Props) => {
     assignedContacts,
     contactsCount,
     toggled,
+    theme: stableMuiTheme,
     handleSplitAssignmentsToggle
   } = props;
   const headerColor =
     assignedContacts === contactsCount
-      ? theme.colors.green
-      : theme.colors.orange;
+      ? stableMuiTheme.palette.primary.main
+      : stableMuiTheme.palette.warning.main;
 
   const numberUnassigned = contactsCount - assignedContacts;
   return (
@@ -142,4 +144,4 @@ const TexterAssignmentDisplay = (props: Props) => {
   );
 };
 
-export default TexterAssignmentDisplay;
+export default withTheme(TexterAssignmentDisplay);

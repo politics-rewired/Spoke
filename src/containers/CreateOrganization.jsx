@@ -9,6 +9,7 @@ import { withRouter } from "react-router-dom";
 import * as yup from "yup";
 
 import GSForm from "../components/forms/GSForm";
+import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";
@@ -72,18 +73,18 @@ class CreateOrganization extends React.Component {
                 );
               }}
             >
-              <Form.Field
+              <SpokeFormField
                 {...dataTest("organization")}
                 name="name"
                 label="Your organization"
                 hintText="Bartlet Campaign"
                 fullWidth
               />
-              <Form.Button
+              <Form.Submit
                 type="submit"
                 label="Get Started"
-                name="submit"
                 value="Get Started"
+                name="submit"
                 fullWidth
                 secondary
                 style={{ marginTop: 40 }}

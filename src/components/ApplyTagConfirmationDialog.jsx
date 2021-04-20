@@ -1,4 +1,7 @@
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -9,7 +12,7 @@ class ApplyTagConfirmationDialog extends Component {
     confirmStepIndex: 0
   };
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { pendingTag: lastTag } = this.props;
     const { pendingTag: nextTag } = nextProps;
     const isNewTag = lastTag === undefined && nextTag !== undefined;
@@ -41,7 +44,7 @@ class ApplyTagConfirmationDialog extends Component {
     const { confirmationSteps = [["", "null", "null"]] } = pendingTag || {};
     confirmStepIndex = Math.min(confirmStepIndex, confirmationSteps.length - 1);
     const [content, confirm, cancel] = confirmationSteps[confirmStepIndex];
-    const confrimTagActions = [
+    const confirmTagActions = [
       <FlatButton
         key="confirm"
         label={confirm}
@@ -57,13 +60,12 @@ class ApplyTagConfirmationDialog extends Component {
     ];
 
     return (
-      <Dialog
-        title="Confirm Add Tag"
-        open={pendingTag !== undefined}
-        actions={confrimTagActions}
-        onRequestClose={this.handleRequestClose}
-      >
-        <ReactMarkdown source={content} />
+      <Dialog open={pendingTag !== undefined} onClose={this.handleRequestClose}>
+        <DialogTitle>Confirm Add Tag</DialogTitle>
+        <DialogContent>
+          <ReactMarkdown source={content} />
+        </DialogContent>
+        <DialogActions>{confirmTagActions}</DialogActions>
       </Dialog>
     );
   }

@@ -1,4 +1,6 @@
-import Dialog from "material-ui/Dialog";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import React from "react";
 
 import { ResponseEditorContext } from "../interfaces";
@@ -22,14 +24,17 @@ const getTitleContext = (context: ResponseEditorContext) => {
   }
 };
 
-const CannedResponseDialog: React.SFC<CannedResponseDialogProps> = (props) => {
+const CannedResponseDialog: React.FC<CannedResponseDialogProps> = (props) => {
   const { open, context } = props;
 
   const title = getTitleContext(context);
 
   return (
-    <Dialog open={open} title={title}>
-      <CannedResponseEditor {...props} />
+    <Dialog open={open} fullWidth maxWidth={false}>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <CannedResponseEditor {...props} />
+      </DialogContent>
     </Dialog>
   );
 };

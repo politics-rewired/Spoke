@@ -7,7 +7,7 @@ import { withRouter } from "react-router-dom";
 import { loadData } from "./hoc/with-operations";
 
 class DashboardLoader extends React.Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (this.props.data.currentUser.organizations.length > 0) {
       this.props.history.push(
         `${this.props.path}/${this.props.data.currentUser.organizations[0].id}`

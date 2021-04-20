@@ -79,9 +79,9 @@ export const schema = `
     username: String!
     apiKey: String!
     organizationId: Int!
-    createdAt: String!
-    updatedAt: String!
-    syncedAt: String
+    createdAt: Date!
+    updatedAt: Date!
+    syncedAt: Date
     operationMode: VanOperationMode!
     lists(after: Cursor, first: Int): ExternalListPage!
     surveyQuestions(filter: ExternalSurveyQuestionFilter, after: Cursor, first: Int): ExternalSurveyQuestionPage!

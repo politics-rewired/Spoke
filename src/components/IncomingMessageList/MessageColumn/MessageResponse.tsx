@@ -1,9 +1,12 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import React, { Component } from "react";
-import Form from "react-formal";
 import * as yup from "yup";
 
 import { Conversation } from "../../../api/conversations";
@@ -12,6 +15,7 @@ import { MessageInput } from "../../../api/types";
 import { loadData } from "../../../containers/hoc/with-operations";
 import { MutationMap } from "../../../network/types";
 import GSForm from "../../forms/GSForm";
+import SpokeFormField from "../../forms/SpokeFormField";
 import MessageLengthInfo from "../../MessageLengthInfo";
 import SendButton from "../../SendButton";
 
@@ -128,7 +132,7 @@ class MessageResponse extends Component<Props, State> {
         >
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <div style={{ flex: 1 }}>
-              <Form.Field
+              <SpokeFormField
                 name="messageText"
                 label="Send a response"
                 multiLine
@@ -147,13 +151,12 @@ class MessageResponse extends Component<Props, State> {
             />
           </div>
         </GSForm>
-        <Dialog
-          title="Error Sending"
-          open={!!this.state.sendError}
-          actions={errorActions}
-          modal={false}
-        >
-          <p>{this.state.sendError}</p>
+        <Dialog open={!!this.state.sendError}>
+          <DialogTitle>Error Sending</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{this.state.sendError}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

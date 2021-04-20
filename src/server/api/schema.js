@@ -984,6 +984,29 @@ const rootMutations = {
       return orgMembership;
     },
 
+    purgeOrganizationUsers: async (
+      _root,
+      { organizationId },
+      { user: authUser, db }
+    ) => {
+      const orgId = parseInt(organizationId, 10);
+      await accessRequired(authUser, orgId, "OWNER", true);
+      const { rowCount } = await db.primary.raw(
+        `
+          delete
+          from user_organization uo
+          using public.user u
+          where
+            u.id = uo.user_id
+            and u.is_superadmin is not true
+            and uo.organization_id = ?
+            and uo.role <> 'OWNER'
+        `,
+        [orgId]
+      );
+      return rowCount;
+    },
+
     editOrganizationSettings: async (
       _root,
       { id, input },
@@ -1687,6 +1710,24 @@ const rootMutations = {
       });
     },
 
+    editOrganization: async (_root, { id, input: { name } }, { user, db }) => {
+      const orgId = parseInt(id, 10);
+      await accessRequired(user, orgId, "OWNER", true);
+
+      if (name) {
+        await db.primary.raw(`update organization set name = ? where id = ?`, [
+          name,
+          orgId
+        ]);
+      }
+
+      const result = await db
+        .primary("organization")
+        .where({ id: orgId })
+        .first();
+      return result;
+    },
+
     editCampaignContactMessageStatus: async (
       _root,
       { messageStatus, campaignContactId },
@@ -2182,7 +2223,7 @@ const rootMutations = {
 
     markForSecondPass: async (
       _ignore,
-      { campaignId, excludeAgeInHours },
+      { campaignId, input: { excludeAgeInHours, excludeNewer } },
       { user }
     ) => {
       // verify permissions
@@ -2200,21 +2241,7 @@ const rootMutations = {
         queryArgs.push(parseFloat(excludeAgeInHours));
       }
 
-      /**
-       * "Mark Campaign for Second Pass", will only mark contacts for a second
-       * pass that do not have a more recently created membership in another campaign.
-       * Using SQL injection to avoid passing archived as a binding
-       * Should help with guaranteeing partial index usage
-       */
-      const updateResultRaw = await r.knex.raw(
-        `
-        update
-          campaign_contact as current_contact
-        set
-          message_status = 'needsMessage'
-        where current_contact.campaign_id = ?
-          and current_contact.message_status = 'messaged'
-          and current_contact.archived = ${campaign.is_archived}
+      const excludeNewerSql = `
           and not exists (
             select
               cell
@@ -2224,6 +2251,23 @@ const rootMutations = {
               newer_contact.cell = current_contact.cell
               and newer_contact.created_at > current_contact.created_at
           )
+      `;
+
+      /**
+       * "Mark Campaign for Second Pass", will only mark contacts for a second
+       * pass that do not have a more recently created membership in another campaign.
+       * Using SQL injection to avoid passing archived as a binding
+       * Should help with guaranteeing partial index usage
+       */
+      const updateSql = `
+        update
+          campaign_contact as current_contact
+        set
+          message_status = 'needsMessage'
+        where current_contact.campaign_id = ?
+          and current_contact.message_status = 'messaged'
+          and current_contact.archived = ${campaign.is_archived}
+          ${excludeNewer ? excludeNewerSql : ""}
           and not exists (
             select 1
             from message
@@ -2236,10 +2280,9 @@ const rootMutations = {
               : ""
           }
         ;
-      `,
-        queryArgs
-      );
+      `;
 
+      const updateResultRaw = await r.knex.raw(updateSql, queryArgs);
       const updateResult = updateResultRaw.rowCount;
 
       return `Marked ${updateResult} campaign contacts for a second pass.`;
@@ -3257,8 +3300,15 @@ const rootMutations = {
 
       return true;
     },
-    addToken: async (_root, { token, organizationId }, { user }) => {
+    addToken: async (_root, { token, organizationId }, { user, db }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      try {
+        await db.reader.raw(`select to_tsquery(?)`, [token]);
+      } catch (err) {
+        throw new Error("invalid tsquery token");
+      }
+
       await r
         .knex("troll_trigger")
         .insert({ token, organization_id: parseInt(organizationId, 10) });
@@ -3824,6 +3874,11 @@ const rootResolvers = {
       const alarms = await query
         .join("message", "message.id", "=", "troll_alarm.message_id")
         .join("user", "user.id", "message.user_id")
+        .join(
+          "campaign_contact",
+          "campaign_contact.id",
+          "message.campaign_contact_id"
+        )
         .select(
           "message_id",
           "trigger_token as token",
@@ -3832,7 +3887,11 @@ const rootResolvers = {
           "user.id",
           "user.first_name",
           "user.last_name",
-          "user.email"
+          "user.email",
+          "campaign_contact.id as cc_id",
+          "campaign_contact.campaign_id",
+          "campaign_contact.first_name as cc_first_name",
+          "campaign_contact.last_name as cc_last_name"
         )
         .orderBy("troll_alarm.message_id")
         .limit(limit)
@@ -3843,13 +3902,23 @@ const rootResolvers = {
             token: alarmToken,
             dismissed: alarmDismissed,
             message_text,
+            cc_id,
+            campaign_id,
+            cc_first_name,
+            cc_last_name,
             ...alarmUser
           }) => ({
             message_id,
             token: alarmToken,
             dismissed: alarmDismissed,
             message_text,
-            user: alarmUser
+            user: alarmUser,
+            contact: {
+              id: cc_id,
+              campaign_id,
+              first_name: cc_first_name,
+              last_name: cc_last_name
+            }
           })
         );
 

@@ -1,8 +1,12 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -544,20 +548,25 @@ export class AdminIncomingMessageList extends Component {
           <h3> Please select filters in order to start searching! </h3>
         )}
         <Dialog
-          title={reassignmentAlert && reassignmentAlert.title}
-          actions={[
+          open={!!reassignmentAlert}
+          onClose={this.closeReassignmentDialog}
+        >
+          <DialogTitle>
+            {reassignmentAlert && reassignmentAlert.title}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {reassignmentAlert && reassignmentAlert.message}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
             <FlatButton
               key="ok"
               label="Ok"
               primary
               onClick={this.closeReassignmentDialog}
             />
-          ]}
-          modal={false}
-          open={!!reassignmentAlert}
-          onRequestClose={this.closeReassignmentDialog}
-        >
-          {reassignmentAlert && reassignmentAlert.message}
+          </DialogActions>
         </Dialog>
       </div>
     );

@@ -1,3 +1,4 @@
+import { useTheme } from "@material-ui/core";
 import isNil from "lodash/isNil";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
@@ -5,14 +6,15 @@ import RaisedButton from "material-ui/RaisedButton";
 import DeleteIcon from "material-ui/svg-icons/action/delete";
 import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
 import React from "react";
-import Form from "react-formal";
 import * as yup from "yup";
 
 import {
   InteractionStep,
   InteractionStepWithChildren
 } from "../../../../../api/interaction-step";
+import { supportsClipboard } from "../../../../../client/lib";
 import GSForm from "../../../../../components/forms/GSForm";
+import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
 
@@ -22,7 +24,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   interactionStep: {
-    borderLeft: `5px solid ${theme.colors.green}`,
     marginBottom: 24
   },
 
@@ -58,7 +59,8 @@ interface Props {
   pasteBlockFactory: BlockHandlerFactory;
 }
 
-export const InteractionStepCard: React.SFC<Props> = (props) => {
+export const InteractionStepCard: React.FC<Props> = (props) => {
+  const stableMuiTheme = useTheme();
   const {
     interactionStep,
     customFields,
@@ -95,9 +97,17 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
   const isAbleToAddResponse =
     stepHasQuestion && stepHasScript && stepCanHaveChildren;
 
+  const clipboardEnabled = supportsClipboard();
+
   return (
     <div key={stepId}>
-      <Card key={stepId} style={styles.interactionStep}>
+      <Card
+        key={stepId}
+        style={{
+          ...styles.interactionStep,
+          borderLeft: `5px solid ${stableMuiTheme.palette.primary.main}`
+        }}
+      >
         <CardHeader
           style={styles.cardHeader}
           title={title}
@@ -109,17 +119,19 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
         />
         <CardActions>
           <RaisedButton
-            disabled={disabled}
+            label="Copy Block"
+            disabled={disabled || !clipboardEnabled}
             onClick={() => onCopyBlock(interactionStep)}
-          >
-            Copy Block
-          </RaisedButton>
+          />
           {hasBlockCopied && (
             <RaisedButton
               label="+ Paste Block"
-              disabled={disabled}
+              disabled={disabled || !clipboardEnabled}
               onClick={onRequestRootPaste}
             />
+          )}
+          {!clipboardEnabled && (
+            <span>Your browser does not support clipboard actions</span>
           )}
         </CardActions>
         <CardText>
@@ -131,7 +143,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
           >
             {parentInteractionId && (
               <div style={{ display: "flex", alignItems: "baseline" }}>
-                <Form.Field
+                <SpokeFormField
                   {...dataTest("answerOption")}
                   name="answerOption"
                   label="Answer"
@@ -149,7 +161,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
             )}
             {displayActions && (
               <div key={`answeractions-${stepId}`}>
-                <Form.Field
+                <SpokeFormField
                   name="answerActions"
                   type="select"
                   default=""
@@ -175,7 +187,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
                 </div>
               </div>
             )}
-            <Form.Field
+            <SpokeFormField
               {...dataTest("editorInteraction")}
               name="scriptOptions"
               type="scriptoptions"
@@ -186,7 +198,7 @@ export const InteractionStepCard: React.SFC<Props> = (props) => {
               multiLine
               disabled={disabled}
             />
-            <Form.Field
+            <SpokeFormField
               {...dataTest("questionText")}
               name="questionText"
               label="Question"

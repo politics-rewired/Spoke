@@ -1,7 +1,11 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import { History } from "history";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { green300, red500 } from "material-ui/styles/colors";
@@ -158,104 +162,103 @@ class VanSyncModal extends React.Component<InnerProps, State> {
     ];
 
     return (
-      <Dialog
-        open={open}
-        title="Sync to VAN"
-        actions={actions}
-        onRequestClose={this.props.onRequestClose}
-      >
-        <p>
-          This will sync question responses and tags to VAN. For more
-          information see{" "}
-          <a
-            href="https://docs.spokerewired.com/article/93-van-list-loading"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            VAN Integration
-          </a>
-          .
-        </p>
-        {isSyncing ? (
-          <div>
-            <p>Syncing campaign: {latestSyncAttempt.status}%</p>
-            {syncErrors.length > 0 && [
-              <p key="p">Encountered the following errors</p>,
-              <ul key="ul">
-                {syncErrors.map((error) => (
-                  <li key={error}>{error}</li>
-                ))}
-              </ul>
-            ]}
+      <Dialog open={open} onClose={this.props.onRequestClose}>
+        <DialogTitle>Sync to VAN</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will sync question responses and tags to VAN. For more
+            information see{" "}
+            <a
+              href="https://docs.spokerewired.com/article/93-van-list-loading"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              VAN Integration
+            </a>
+            .
+          </DialogContentText>
+          {isSyncing ? (
+            <div>
+              <p>Syncing campaign: {latestSyncAttempt.status}%</p>
+              {syncErrors.length > 0 && [
+                <p key="p">Encountered the following errors</p>,
+                <ul key="ul">
+                  {syncErrors.map((error) => (
+                    <li key={error}>{error}</li>
+                  ))}
+                </ul>
+              ]}
+              <RaisedButton
+                label="Cancel Sync"
+                primary
+                onClick={this.handleOnCancelSync(latestSyncAttempt.id)}
+              />
+              <br />
+              <br />
+            </div>
+          ) : (
+            <p>
+              Status:{" "}
+              {syncReadiness === ExternalSyncReadinessState.READY && (
+                <span style={{ color: green300 }}>
+                  Your campaign is ready to sync!
+                </span>
+              )}
+              {syncReadiness ===
+                ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING && (
+                <span style={{ color: red500 }}>
+                  Your campaign is missing a required sync mapping!
+                </span>
+              )}
+              {syncReadiness ===
+                ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS && (
+                <span style={{ color: red500 }}>
+                  Your campaign includes mappings to inactive or archived VAN
+                  options!
+                </span>
+              )}
+              {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && (
+                <span style={{ color: red500 }}>
+                  No integration has been set for this campaign!
+                </span>
+              )}
+            </p>
+          )}
+          {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && [
+            <p key="1">Edit the Integration section of the campaign.</p>,
             <RaisedButton
-              label="Cancel Sync"
+              key="2"
+              label="Edit Campaign"
               primary
-              onClick={this.handleOnCancelSync(latestSyncAttempt.id)}
+              disabled={isSyncing}
+              onClick={this.handleOnClickSetIntegration}
             />
-            <br />
-            <br />
-          </div>
-        ) : (
-          <p>
-            Status:{" "}
-            {syncReadiness === ExternalSyncReadinessState.READY && (
-              <span style={{ color: green300 }}>
-                Your campaign is ready to sync!
-              </span>
-            )}
-            {syncReadiness ===
-              ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING && (
-              <span style={{ color: red500 }}>
-                Your campaign is missing a required sync mapping!
-              </span>
-            )}
-            {syncReadiness ===
-              ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS && (
-              <span style={{ color: red500 }}>
-                Your campaign includes mappings to inactive or archived VAN
-                options!
-              </span>
-            )}
-            {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && (
-              <span style={{ color: red500 }}>
-                No integration has been set for this campaign!
-              </span>
-            )}
-          </p>
-        )}
-        {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && [
-          <p key="1">Edit the Integration section of the campaign.</p>,
-          <RaisedButton
-            key="2"
-            label="Edit Campaign"
-            primary
-            disabled={isSyncing}
-            onClick={this.handleOnClickSetIntegration}
-          />
-        ]}
-        {syncReadiness !== ExternalSyncReadinessState.MISSING_SYSTEM && (
-          <RaisedButton
-            label="Configure Mapping"
-            primary
-            disabled={isSyncing}
-            onClick={this.handleOnClickConfigureMapping}
-          />
-        )}
-        {isMappingOpen && (
-          <SyncConfigurationModal
-            organizationId={organizationId}
-            campaignId={campaignId}
-            onRequestClose={this.handleOnDismissConfigureMapping}
-          />
-        )}
-        {latestSyncAttempt && latestSyncAttempt.status === 100 && (
-          <p>
-            Last sync:
-            <br />
-            {new Date(latestSyncAttempt.updatedAt).toLocaleString()} -{" "}
-            {messageFromJobRquest(latestSyncAttempt)}
-          </p>
-        )}
+          ]}
+          {syncReadiness !== ExternalSyncReadinessState.MISSING_SYSTEM && (
+            <RaisedButton
+              label="Configure Mapping"
+              primary
+              disabled={isSyncing}
+              onClick={this.handleOnClickConfigureMapping}
+            />
+          )}
+          {isMappingOpen && (
+            <SyncConfigurationModal
+              organizationId={organizationId}
+              campaignId={campaignId}
+              onRequestClose={this.handleOnDismissConfigureMapping}
+            />
+          )}
+          {latestSyncAttempt && latestSyncAttempt.status === 100 && (
+            <DialogContentText>
+              Last sync:
+              <br />
+              {new Date(latestSyncAttempt.updatedAt).toLocaleString()} -{" "}
+              {messageFromJobRquest(latestSyncAttempt)}
+            </DialogContentText>
+          )}
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     );
   }

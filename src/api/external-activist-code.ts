@@ -27,8 +27,8 @@ export const schema = `
     description: String
     scriptQuestion: String
     status: ExternalDataCollectionStatus!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type ExternalActivistCodeEdge {

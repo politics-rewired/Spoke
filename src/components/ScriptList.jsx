@@ -1,5 +1,7 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
 import gql from "graphql-tag";
-import Dialog from "material-ui/Dialog";
 import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import { List, ListItem } from "material-ui/List";
@@ -7,9 +9,7 @@ import Subheader from "material-ui/Subheader";
 import CreateIcon from "material-ui/svg-icons/content/create";
 import PropTypes from "prop-types";
 import React from "react";
-import Form from "react-formal";
 
-import { withOperations } from "../containers/hoc/with-operations";
 import CannedResponseForm from "./CannedResponseForm";
 import GSSubmitButton from "./forms/GSSubmitButton";
 
@@ -49,7 +49,6 @@ class ScriptList extends React.Component {
       showAddScriptButton,
       customFields,
       campaignId,
-      mutations,
       texterId
     } = this.props;
     const { dialogOpen } = this.state;
@@ -61,31 +60,25 @@ class ScriptList extends React.Component {
           campaignId,
           userId: texterId
         };
-        await mutations.createCannedResponse(saveObject);
+        // Perform this mutation manually because we cannot use withOperations within
+        // CannedResponseMenu's Popover (Popover exists outside of <ApolloProvider> context)
+        await this.props.client.mutate({
+          mutation: gql`
+            mutation createCannedResponse(
+              $cannedResponse: CannedResponseInput!
+            ) {
+              createCannedResponse(cannedResponse: $cannedResponse) {
+                id
+              }
+            }
+          `,
+          variables: { cannedResponse: saveObject }
+        });
         this.setState({ dialogOpen: false });
       } catch (err) {
         console.error(err);
       }
     };
-
-    // const rightIconButton = (
-    //   <IconMenu
-    //     iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-    //     anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-    //     targetOrigin={{horizontal: 'left', vertical: 'bottom'}}
-    //   >
-    //     <MenuItem primaryText={duplicateCampaignResponses && !script.isUserCreated ? "Duplicate and edit" : "Edit"}
-    //       onClick={() => this.handleEditScript(script)}
-    //     />
-    //     {
-    //       script.isUserCreated ? (
-    //         <MenuItem primaryText="Delete"
-    //           onClick={() => this.handleDeleteScript(script.id)}
-    //         />
-    //       ) : ''
-    //     }
-    //   </IconMenu>
-    // )
 
     const rightIconButton = null;
     const listItems = scripts.map((script) => (
@@ -111,47 +104,41 @@ class ScriptList extends React.Component {
     return (
       <div>
         {list}
-        {showAddScriptButton ? (
+        {showAddScriptButton && (
           <FlatButton
             label="Add new canned response"
             icon={<CreateIcon />}
             onClick={this.handleOpenDialog}
           />
-        ) : (
-          ""
         )}
-        <Form.Context>
-          <Dialog
-            style={styles.dialog}
-            open={dialogOpen}
-            actions={[
-              <FlatButton
-                key="cancel"
-                label="Cancel"
-                onClick={this.handleCloseDialog}
-              />,
-              <Form.Button
-                key="save"
-                label="Save"
-                component={GSSubmitButton}
-                type="submit"
-              />
-            ]}
-            onRequestClose={this.handleCloseDialog}
-          >
+        <Dialog
+          style={styles.dialog}
+          open={dialogOpen}
+          onClose={this.handleCloseDialog}
+        >
+          <DialogContent>
             <CannedResponseForm
               onSaveCannedResponse={onSaveCannedResponse}
               customFields={customFields}
               script={this.state.script}
             />
-          </Dialog>
-        </Form.Context>
+          </DialogContent>
+          <DialogActions>
+            <FlatButton
+              key="cancel"
+              label="Cancel"
+              onClick={this.handleCloseDialog}
+            />
+            <GSSubmitButton key="save" label="Save" type="submit" />
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
 }
 
 ScriptList.propTypes = {
+  client: PropTypes.object.isRequired,
   script: PropTypes.object,
   scripts: PropTypes.arrayOf(PropTypes.object),
   subheader: PropTypes.element,
@@ -163,19 +150,4 @@ ScriptList.propTypes = {
   texterId: PropTypes.string
 };
 
-const mutations = {
-  createCannedResponse: () => (cannedResponse) => ({
-    mutation: gql`
-      mutation createCannedResponse($cannedResponse: CannedResponseInput!) {
-        createCannedResponse(cannedResponse: $cannedResponse) {
-          id
-        }
-      }
-    `,
-    variables: { cannedResponse }
-  })
-};
-
-export default withOperations({
-  mutations
-})(ScriptList);
+export default ScriptList;

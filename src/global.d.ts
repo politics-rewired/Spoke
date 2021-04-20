@@ -10,6 +10,11 @@ interface Window {
   PASSPORT_STRATEGY: string;
   TZ: string;
   DST_REFERENCE_TIMEZONE: string;
+  RENDERED_CLASS_NAMES: string[];
+  NOT_IN_USA: boolean;
+  ALLOW_SEND_ALL: boolean;
+
+  AuthService: any;
 }
 
 // This was a workaround while we are transitioning from JS to TS - 2020-12-21

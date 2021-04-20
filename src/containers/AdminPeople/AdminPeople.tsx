@@ -1,3 +1,4 @@
+import Button from "@material-ui/core/Button";
 import { css, StyleSheet } from "aphrodite";
 import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
@@ -99,6 +100,11 @@ export interface AdminPeopleMutations {
       resetUserPassword: string;
     }>
   >;
+  removeUsers: () => Promise<
+    ApolloQueryResult<{
+      purgeOrganizationUsers: number;
+    }>
+  >;
 }
 
 interface AdminPeopleRouteParams {
@@ -132,6 +138,9 @@ interface AdminPeopleState {
   filter: {
     nameSearch: string;
   };
+  removeUsers: {
+    open: boolean;
+  };
   password: {
     open: boolean;
     hash: string;
@@ -160,6 +169,9 @@ class AdminPeople extends React.Component<
     },
     filter: {
       nameSearch: ""
+    },
+    removeUsers: {
+      open: false
     },
     password: {
       open: false,
@@ -239,6 +251,25 @@ class AdminPeople extends React.Component<
       confirmSuperadmin: { superadminMembershipId, open: true }
     }));
 
+  handleCloseRemoveUsersDialog = () =>
+    this.setState({
+      removeUsers: { open: false }
+    });
+
+  handleConfirmRemoveUsers = async () => {
+    this.handleCloseRemoveUsersDialog();
+    try {
+      await this.props.mutations.removeUsers();
+    } catch (err) {
+      this.setState({
+        error: {
+          message: `Couldn't remove users: ${err.message}`,
+          seen: false
+        }
+      });
+    }
+  };
+
   handleResetPassword = async (userId: string) => {
     const { organizationId } = this.props.match.params;
     if (!organizationId) return;
@@ -312,6 +343,13 @@ class AdminPeople extends React.Component<
               }}
             />
           </div>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => this.setState({ removeUsers: { open: true } })}
+          >
+            Remove Users
+          </Button>
         </div>
 
         <PeopleTable
@@ -349,6 +387,11 @@ class AdminPeople extends React.Component<
           open={this.state.confirmSuperadmin.open}
           onClose={this.handleCloseSuperadminDialog}
           handleConfirmSuperadmin={this.handleConfirmSuperadmin}
+        />
+        <Dialogs.ConfirmRemoveUsers
+          open={this.state.removeUsers.open}
+          onClose={this.handleCloseRemoveUsersDialog}
+          onConfirmRemoveUsers={this.handleConfirmRemoveUsers}
         />
         <Snackbar
           open={this.state.error.message.length > 0 && !this.state.error.seen}
@@ -468,6 +511,19 @@ const mutations: MutationMap<AdminPeopleExtendedProps> = {
         organizationId,
         userId
       }
+    };
+  },
+  removeUsers: (ownProps) => () => {
+    return {
+      mutation: gql`
+        mutation PurgeOrganizationUsers($organizationId: String!) {
+          purgeOrganizationUsers(organizationId: $organizationId)
+        }
+      `,
+      variables: {
+        organizationId: ownProps.organizationData.organization.id
+      },
+      refetchQueries: ["getPeople"]
     };
   }
 };

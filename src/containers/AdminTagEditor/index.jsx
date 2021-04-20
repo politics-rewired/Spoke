@@ -1,7 +1,11 @@
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import gql from "graphql-tag";
 import pick from "lodash/pick";
 import ColorPicker from "material-ui-color-picker";
-import Dialog from "material-ui/Dialog";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import ContentAddIcon from "material-ui/svg-icons/content/add";
@@ -212,87 +216,86 @@ class AdminTagEditor extends Component {
         </FloatingActionButton>
         {editingTag && (
           <div>
-            <Dialog
-              title={`${tagVerb} Tag`}
-              actions={actions}
-              modal={false}
-              open
-              onRequestClose={this.handleCancelEditTag}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between"
-                }}
-              >
-                <div>
-                  <TextField
-                    name="title"
-                    floatingLabelText="Tag title"
-                    value={editingTag.title || ""}
-                    onChange={this.createTagEditorHandle}
-                  />
-                  <GSScriptField
-                    name="Script"
-                    label="Tag script"
-                    context="tagEditor"
-                    customFields={customFields}
-                    value={editingTag.onApplyScript || ""}
-                    onChange={this.handleEditTagScript}
-                    onClick={this.handleOpenScriptEditor}
-                  />
-                  <br />
-                  <Toggle
-                    name="isAssignable"
-                    label="Allow assignment?"
-                    toggled={editingTag.isAssignable}
-                    onToggle={this.createTagEditorHandle}
+            <Dialog open onClose={this.handleCancelEditTag}>
+              <DialogTitle>{`${tagVerb} Tag`}</DialogTitle>
+              <DialogContent>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between"
+                  }}
+                >
+                  <div>
+                    <TextField
+                      name="title"
+                      floatingLabelText="Tag title"
+                      value={editingTag.title || ""}
+                      onChange={this.createTagEditorHandle}
+                    />
+                    <GSScriptField
+                      name="Script"
+                      label="Tag script"
+                      context="tagEditor"
+                      customFields={customFields}
+                      value={editingTag.onApplyScript || ""}
+                      onChange={this.handleEditTagScript}
+                      onClick={this.handleOpenScriptEditor}
+                    />
+                    <br />
+                    <Toggle
+                      name="isAssignable"
+                      label="Allow assignment?"
+                      toggled={editingTag.isAssignable}
+                      onToggle={this.createTagEditorHandle}
+                    />
+                  </div>
+                  <div>
+                    <TextField
+                      name="description"
+                      floatingLabelText="Tag description"
+                      multiLine
+                      value={editingTag.description || ""}
+                      onChange={this.createTagEditorHandle}
+                    />
+                    <ColorPicker
+                      name="Text Color"
+                      floatingLabelText="Text color"
+                      defaultValue={editingTag.textColor}
+                      value={editingTag.textColor || ""}
+                      onChange={this.handleEditTextColor}
+                    />
+                    <ColorPicker
+                      name="Background Color"
+                      floatingLabelText="Background color"
+                      defaultValue={editingTag.backgroundColor}
+                      value={editingTag.backgroundColor || ""}
+                      onChange={this.handleEditBackgroundColor}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span>
+                    Tag confirmation steps:{" "}
+                    {editingTag.confirmationSteps.length}
+                  </span>
+                  <FlatButton
+                    label="Manage steps"
+                    onClick={this.handleToggleStepsEditorOpen}
+                    primary
+                    style={{ marginLeft: 8 }}
                   />
                 </div>
-                <div>
-                  <TextField
-                    name="description"
-                    floatingLabelText="Tag description"
-                    multiLine
-                    value={editingTag.description || ""}
-                    onChange={this.createTagEditorHandle}
-                  />
-                  <ColorPicker
-                    name="Text Color"
-                    floatingLabelText="Text color"
-                    defaultValue={editingTag.textColor}
-                    value={editingTag.textColor || ""}
-                    onChange={this.handleEditTextColor}
-                  />
-                  <ColorPicker
-                    name="Background Color"
-                    floatingLabelText="Background color"
-                    defaultValue={editingTag.backgroundColor}
-                    value={editingTag.backgroundColor || ""}
-                    onChange={this.handleEditBackgroundColor}
-                  />
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <span>
-                  Tag confirmation steps: {editingTag.confirmationSteps.length}
-                </span>
-                <FlatButton
-                  label="Manage steps"
-                  onClick={this.handleToggleStepsEditorOpen}
-                  primary
-                  style={{ marginLeft: 8 }}
+                <TextField
+                  name="webhookUrl"
+                  floatingLabelText="Webhook url"
+                  hintText="If set, a request will be sent to this URL whenever this tag is applied."
+                  value={editingTag.webhookUrl || ""}
+                  onChange={this.createTagEditorHandle}
+                  fullWidth
                 />
-              </div>
-              <TextField
-                name="webhookUrl"
-                floatingLabelText="Webhook url"
-                hintText="If set, a request will be sent to this URL whenever this tag is applied."
-                value={editingTag.webhookUrl || ""}
-                onChange={this.createTagEditorHandle}
-                fullWidth
-              />
+              </DialogContent>
+              <DialogActions>{actions}</DialogActions>
             </Dialog>
             <ConfirmationStepsEditor
               confirmationSteps={editingTag.confirmationSteps}
@@ -303,13 +306,12 @@ class AdminTagEditor extends Component {
             />
           </div>
         )}
-        <Dialog
-          title="Error"
-          actions={errorActions}
-          open={error !== undefined}
-          onRequestClose={this.handleCancelError}
-        >
-          {error || ""}
+        <Dialog open={error !== undefined} onClose={this.handleCancelError}>
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{error || ""}</DialogContentText>
+          </DialogContent>
+          <DialogActions>{errorActions}</DialogActions>
         </Dialog>
       </div>
     );

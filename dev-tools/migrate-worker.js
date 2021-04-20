@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import { runMigrations } from "pg-compose";
+import { Logger } from "graphile-worker";
 
 import { config } from "../src/config";
 import logger from "../src/logger";
@@ -13,9 +14,13 @@ const main = async () => {
   );
   const pool = new Pool({ connectionString });
 
+  const logFactory = (scope) => (level, message, meta) =>
+    logger.log({ level, message, ...meta, ...scope });
+  const graphileLogger = new Logger(logFactory);
+
   await runMigrations({
     pgPool: pool,
-    logger
+    logger: graphileLogger
   });
 
   await pool.end();

@@ -279,7 +279,10 @@ export const processDeliveryReport = async (
     if (extra) {
       const payload: Record<string, unknown> = {};
 
-      if (extra.num_segments && extra.num_media) {
+      if (
+        typeof extra.num_segments === "number" ||
+        typeof extra.num_media === "number"
+      ) {
         payload.num_segments = extra.num_segments;
         payload.num_media = extra.num_media;
       }

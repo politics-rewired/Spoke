@@ -118,7 +118,7 @@ export const stageAddInteractionStep: Resolver = (
       questionText: payload.questionText ?? "",
       scriptOptions: payload.scriptOptions ?? [""],
       answerOption: payload.answerOption ?? "",
-      answerActions: payload.answerOption ?? "",
+      answerActions: payload.answerActions ?? "",
       isDeleted: false,
       isModified: true,
       createdAt: DateTime.local().toISO()
