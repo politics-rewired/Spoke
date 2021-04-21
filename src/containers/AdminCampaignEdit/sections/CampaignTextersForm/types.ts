@@ -9,6 +9,8 @@ export type TexterAssignment = Pick<
   needsMessageCount: number;
 };
 
-export type Texter = Pick<User, "id" | "firstName"> & {
+export type OrgTexter = Pick<User, "id" | "firstName" | "displayName">;
+
+export type Texter = OrgTexter & {
   assignment: TexterAssignment;
 };

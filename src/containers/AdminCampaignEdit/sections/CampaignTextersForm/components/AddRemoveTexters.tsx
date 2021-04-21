@@ -1,99 +1,76 @@
-import AutoComplete from "material-ui/AutoComplete";
-import RaisedButton from "material-ui/RaisedButton";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import React from "react";
 
-import { dataSourceItem } from "../../../../../components/utils";
 import { dataTest } from "../../../../../lib/attributes";
-import { Texter } from "../types";
+import { OrgTexter, Texter } from "../types";
 
 const inlineStyles = {
   autocomplete: {
+    width: 300,
     marginBottom: 24
   }
 };
 
 interface Props {
-  orgTexters: any;
+  orgTexters: OrgTexter[];
   texters: Texter[];
-  searchText: string;
-  addTexter(newTexter: any): void;
-  addAllTexters(): void;
-  removeEmptyTexters(): void;
-  handleSearchTexters(term: string): void;
+  onAddTexters: (texters: OrgTexter[]) => Promise<void> | void;
+  onRemoveEmptyTexters: () => Promise<void> | void;
 }
 
-interface SearchReturn {
-  text: string;
-  rawValue: string;
-  value: any;
-}
+export const AddRemoveTexters: React.FC<Props> = (props) => {
+  const { orgTexters, texters, onAddTexters, onRemoveEmptyTexters } = props;
 
-const AddRemoveTexters: React.FC<Props> = (props) => {
-  const {
-    orgTexters,
-    texters,
-    searchText,
-    addTexter,
-    addAllTexters,
-    removeEmptyTexters,
-    handleSearchTexters
-  } = props;
+  const assignedTexterIds = new Set(texters.map(({ id }) => id));
+  const availableTexters = orgTexters.filter(
+    ({ id: orgTexterId }) => !assignedTexterIds.has(orgTexterId)
+  );
 
-  const dataSource = orgTexters
-    .filter(
-      (orgTexter) => !texters.find((texter) => texter.id === orgTexter.id)
-    )
-    .map((orgTexter) => dataSourceItem(orgTexter.displayName, orgTexter.id));
-
-  const filter = (searchTerm: string, key: string) =>
-    key === "allTexters"
-      ? true
-      : AutoComplete.caseInsensitiveFilter(searchTerm, key);
-
-  const handleAddTexter = (value: SearchReturn) => {
-    // If you're searching but get no match, value is a string
-    // representing your search term, but we only want to handle matches
-    if (typeof value === "object") {
-      const texterId = value.value.key;
-      const newTexter = props.orgTexters.find(
-        (texter) => texter.id === texterId
-      );
-      const texterToAdd = {
-        id: texterId,
-        firstName: newTexter.firstName,
-        assignment: {
-          contactsCount: 0,
-          needsMessageCount: 0
-        }
-      };
-      addTexter(texterToAdd);
-    }
+  const handleSelectTexter = (
+    _event: React.ChangeEvent<unknown>,
+    value: OrgTexter | null
+  ) => {
+    if (value) onAddTexters([value]);
   };
+
+  const handleAddAllTexters = () => onAddTexters(availableTexters);
+  const handleRemoveEmptyTexters = () => onRemoveEmptyTexters();
 
   return (
     <div style={{ display: "flex", justifyContent: "space-between" }}>
-      <AutoComplete
+      <Autocomplete<OrgTexter>
+        id="texter-select"
+        value={null}
+        options={availableTexters}
+        getOptionLabel={(option) => option.displayName}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Add texter"
+            helperText="Search for texters to assign"
+            variant="outlined"
+          />
+        )}
         style={inlineStyles.autocomplete}
-        autoFocus
-        onFocus={() => handleSearchTexters("")}
-        onUpdateInput={handleSearchTexters}
-        searchText={searchText}
-        filter={filter}
-        hintText="Search for texters to assign"
-        dataSource={dataSource}
-        onNewRequest={handleAddTexter}
+        onChange={handleSelectTexter}
       />
       <div>
-        <RaisedButton
+        <Button
+          varient="contained"
           {...dataTest("addAll")}
-          label="Add All"
-          onClick={addAllTexters}
-        />
-        <RaisedButton
-          {...dataTest("addAll")}
-          label="Remove Empty"
-          onClick={removeEmptyTexters}
-        />
+          onClick={handleAddAllTexters}
+        >
+          Add All
+        </Button>
+        <Button
+          varient="contained"
+          {...dataTest("removeEmtpy")}
+          onClick={handleRemoveEmptyTexters}
+        >
+          Remove Empty
+        </Button>
       </div>
     </div>
   );

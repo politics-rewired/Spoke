@@ -1,17 +1,16 @@
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import Snackbar from "@material-ui/core/Snackbar";
+import CloseIcon from "@material-ui/icons/Close";
 import { css, StyleSheet } from "aphrodite";
 import { ApolloQueryResult } from "apollo-client/core/types";
 import orderBy from "lodash/orderBy";
-import uniqBy from "lodash/uniqBy";
-import RaisedButton from "material-ui/RaisedButton";
-import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
-import React from "react";
+import React, { useState } from "react";
 import { compose } from "recompose";
-import * as yup from "yup";
 
 import { Campaign } from "../../../../api/campaign";
 import { User } from "../../../../api/user";
-import GSForm from "../../../../components/forms/GSForm";
 import { DateTime } from "../../../../lib/datetime";
 import { MutationMap, QueryMap } from "../../../../network/types";
 import theme from "../../../../styles/theme";
@@ -23,15 +22,16 @@ import {
   RequiredComponentProps
 } from "../../components/SectionWrapper";
 import AddRemoveTexters from "./components/AddRemoveTexters";
+import TexterAssignmentHeaderRow from "./components/TexterAssignmentHeaderRow";
+import TexterAssignmentRow from "./components/TexterAssignmentRow";
 import TexterAssignmentSummary from "./components/TexterAssignmentSummary";
-import TextersAssignmentList from "./components/TextersAssignmentList";
+import { useStagedTextersReducer } from "./hooks";
 import {
   EDIT_CAMPAIGN_TEXTERS,
   GET_CAMPAIGN_TEXTERS,
   GET_ORGANIZATION_TEXTERS
 } from "./queries";
-import { Texter } from "./types";
-import { assignTexterContacts, handleExtraTexterCapacity } from "./utils";
+import { OrgTexter, Texter } from "./types";
 
 const styles = StyleSheet.create({
   sliderContainer: {
@@ -48,15 +48,25 @@ const inlineStyles = {
   }
 };
 
+type CampaignWithTexter = Pick<
+  Campaign,
+  "id" | "isStarted" | "dueBy" | "contactsCount"
+> & {
+  texters: Texter[];
+};
+
+interface CampaignDataResult {
+  campaign: CampaignWithTexter;
+}
+
 interface HocProps {
   mutations: {
-    editCampaign(payload: Values): ApolloQueryResult<any>;
+    editCampaign(
+      payload: Values
+    ): ApolloQueryResult<{ editCampaign: CampaignWithTexter }>;
   };
-  campaignData: {
-    campaign: Pick<Campaign, "id" | "isStarted" | "dueBy" | "contactsCount"> & {
-      texters: Texter[];
-    };
-    refetch(): void;
+  campaignData: CampaignDataResult & {
+    refetch(): ApolloQueryResult<CampaignDataResult>;
   };
   organizationData: {
     organization: {
@@ -64,16 +74,6 @@ interface HocProps {
       texters: Pick<User, "id" | "firstName" | "lastName" | "displayName">[];
     };
   };
-}
-
-interface State {
-  autoSplit: boolean;
-  upsertedTexters: Texter[];
-  textersToRemoveIds: string[];
-  searchText: string;
-  snackbarOpen: boolean;
-  snackbarMessage: string;
-  isWorking: boolean;
 }
 
 interface InnerProps extends FullComponentProps, HocProps {
@@ -88,276 +88,159 @@ interface Values {
   texters: any[];
 }
 
-class CampaignTextersForm extends React.Component<InnerProps, State> {
-  state: State = {
-    autoSplit: false,
-    upsertedTexters: [],
-    textersToRemoveIds: [],
-    searchText: "",
-    snackbarOpen: false,
-    snackbarMessage: "",
-    isWorking: false
-  };
+const CampaignTextersForm: React.FC<InnerProps> = (props) => {
+  const [working, setWorking] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | undefined>(
+    undefined
+  );
 
-  formSchema = yup.object({
-    texters: yup.array().of(
-      yup.object({
-        id: yup.string(),
-        assignment: yup.object({
-          needsMessageCount: yup.number(),
-          maxContacts: yup.number().nullable()
-        })
-      })
-    )
-  });
-
-  collectFormValues = () => {
-    const { upsertedTexters: editedTexters, textersToRemoveIds } = this.state;
-    const { texters } = this.props.campaignData.campaign;
-    const deletedTexterIds: string[] = textersToRemoveIds;
-    const editedTexterIds = editedTexters.map((t) => t.id);
-    const unorderedTexters = texters
-      .filter((texter) => !editedTexterIds.includes(texter.id))
-      .concat(editedTexters)
-      .filter((texter) => !deletedTexterIds.includes(texter.id));
-
-    const orderedTexters = orderBy(
-      unorderedTexters,
-      ["firstName", "lastName"],
-      ["asc", "asc"]
-    );
-    return {
-      texters: orderedTexters
-    };
-  };
-
-  addTexter = (newTexter: Texter) => {
-    const { upsertedTexters, textersToRemoveIds } = this.state;
-    const newIdsToRemove = textersToRemoveIds.filter(
-      (id) => id !== newTexter.id
-    );
-    const prevTexters = upsertedTexters.filter((t) => t.id !== newTexter.id);
-    const newTexters = [newTexter, ...prevTexters];
-    this.setState({
-      upsertedTexters: newTexters,
-      searchText: "",
-      textersToRemoveIds: newIdsToRemove
-    });
-  };
-
-  addAllTexters = () => {
-    const { texters: orgTexters } = this.props.organizationData.organization;
-    const { texters } = this.collectFormValues();
-
-    const upsertedTexters = orgTexters.map((orgTexter) => {
-      const { id, firstName } = orgTexter;
-      const newTexter = {
-        id,
-        firstName,
-        assignment: {
-          contactsCount: 0,
-          messagedCount: 0,
-          needsMessageCount: 0,
-          maxContacts: 0
-        }
-      };
-      const currentlyAddedTexter = texters.find((t) => t.id === id);
-      return currentlyAddedTexter || newTexter;
-    });
-
-    this.setState({ upsertedTexters, textersToRemoveIds: [] });
-  };
-
-  handleSearchTexters = (searchText: string) => {
-    this.setState({ searchText });
-  };
-
-  handleAssignContacts = (assignedContacts: number, texterId: string) => {
-    const { texters } = this.collectFormValues();
-    const { contactsCount } = this.props.campaignData.campaign;
-    const editedTexter = texters.find((t) => t.id === texterId);
-    if (!editedTexter) return;
-
-    let totalNeedsMessage = 0;
-    let totalMessaged = 0;
-
-    const texterWithContacts = assignTexterContacts(
-      editedTexter,
-      assignedContacts,
-      contactsCount
-    );
-
-    totalNeedsMessage += texterWithContacts.assignment.needsMessageCount;
-    totalMessaged += texterWithContacts.assignment.messagedCount;
-
-    const extraTexterCapacity =
-      totalNeedsMessage + totalMessaged - contactsCount;
-
-    if (extraTexterCapacity > 0) {
-      handleExtraTexterCapacity(texterWithContacts, extraTexterCapacity);
-      this.setState({
-        snackbarOpen: true,
-        snackbarMessage: `${editedTexter.assignment.contactsCount} contact${
-          editedTexter.assignment.contactsCount === 1 ? "" : "s"
-        } assigned to ${editedTexter.firstName}`
-      });
+  const {
+    saveDisabled,
+    saveLabel,
+    organizationData: {
+      organization: { texters: orgTexters }
+    },
+    campaignData: {
+      campaign: { contactsCount, texters, dueBy }
     }
+  } = props;
 
-    const newTexters = uniqBy(
-      [texterWithContacts, ...texters],
-      (texter) => texter.id
-    );
-    this.setState({
-      upsertedTexters: newTexters
-    });
+  const {
+    autoSplit,
+    stagedTexters,
+    assignedContactsCount,
+    setAutoSplit,
+    addTexters,
+    removeTexter,
+    removeEmptyTexters,
+    assignContacts,
+    reset
+  } = useStagedTextersReducer(contactsCount, texters);
+
+  const orderedTexters = orderBy(
+    stagedTexters,
+    ["firstName", "lastName", "id"],
+    ["asc", "asc", "asc"]
+  );
+
+  const handleSplitAssignmentsToggle = (toggled: boolean) => {
+    setAutoSplit(toggled);
   };
 
-  handleRemoveTexter = (texterId: string) => {
-    const { textersToRemoveIds } = this.state;
-    const newIds = [...textersToRemoveIds, texterId];
-    this.setState({ textersToRemoveIds: newIds });
-  };
+  // Campaign stuff
+  const isOverdue = dueBy ? DateTime.local() >= DateTime.fromISO(dueBy) : false;
+  const shouldShowTextersManager = orgTexters.length > 0;
+  const finalSaveLabel = working ? "Working..." : saveLabel;
+  const finalSaveDisabled = isOverdue || working || saveDisabled;
 
-  removeEmptyTexters = () => {
-    const { texters } = this.collectFormValues();
-    const newTexters = texters.filter(
-      (t) =>
-        t.assignment.contactsCount !== 0 || t.assignment.needsMessageCount !== 0
-    );
-    this.setState({ upsertedTexters: newTexters });
-  };
+  const handleAddTexters = (newTexters: OrgTexter[]) => addTexters(newTexters);
 
-  handleSubmit = async () => {
-    const { editCampaign } = this.props.mutations;
-    const { texters } = this.collectFormValues();
-    const texterInput = texters.map((t) => ({
-      id: t.id,
-      needsMessageCount: t.assignment.needsMessageCount,
-      maxContacts: t.assignment.maxContacts,
-      contactsCount: t.assignment.contactsCount
+  const handleRemoveEmptyTexters = () => removeEmptyTexters();
+
+  const makeHandleChangeTexterAssignment = (texter: Texter) => (
+    count: number
+  ) => assignContacts(texter.id, count);
+
+  const makeHandleDeleteTexter = (texter: Texter) => () =>
+    removeTexter(texter.id);
+
+  const handleSubmit = async () => {
+    const { editCampaign } = props.mutations;
+    const texterInput = stagedTexters.map((texter) => ({
+      id: texter.id,
+      needsMessageCount: texter.assignment.needsMessageCount,
+      maxContacts: texter.assignment.maxContacts,
+      contactsCount: texter.assignment.contactsCount
     }));
-
-    this.setState({ isWorking: true });
+    setWorking(true);
     try {
       const response = await editCampaign({ texters: texterInput });
       if (response.errors) throw response.errors;
     } catch (err) {
-      this.props.onError(err.message);
+      props.onError(err.message);
     } finally {
-      this.props.campaignData.refetch();
-      this.setState({
-        isWorking: false,
-        upsertedTexters: [],
-        textersToRemoveIds: []
-      });
+      const {
+        data: { campaign }
+      } = await props.campaignData.refetch();
+      reset(campaign.texters, campaign.contactsCount);
+      setWorking(false);
     }
   };
 
-  handleSplitAssignmentsToggle = (_ev: any, toggled: boolean) =>
-    this.setState({ autoSplit: toggled }, () => {
-      if (!this.state.autoSplit) return;
+  const handleCloseSnackbar = () => setSnackbarMessage(undefined);
 
-      const { texters } = this.collectFormValues();
-      let { contactsCount } = this.props.campaignData.campaign;
-      if (!contactsCount) return;
-      contactsCount = Math.floor(contactsCount / texters.length);
-      const newTexters = texters.map((texter) => ({
-        ...texter,
-        assignment: {
-          ...texter.assignment,
-          contactsCount
+  return (
+    <>
+      <CampaignFormSectionHeading
+        title="Who should send the texts?"
+        subtitle={
+          isOverdue && (
+            <span style={{ color: red600 }}>
+              This campaign is overdue! Please change the due date before
+              editing Texters
+            </span>
+          )
         }
-      }));
-      this.setState({ upsertedTexters: newTexters });
-    });
-
-  handleSnackbarClose = () =>
-    this.setState({ snackbarOpen: false, snackbarMessage: "" });
-
-  render() {
-    const {
-      saveLabel,
-      saveDisabled,
-      campaignData,
-      organizationData
-    } = this.props;
-    const {
-      searchText,
-      autoSplit,
-      snackbarOpen,
-      snackbarMessage,
-      isWorking
-    } = this.state;
-    const { contactsCount, dueBy } = campaignData.campaign;
-    const { texters: orgTexters } = organizationData.organization;
-    const availableTexters = this.collectFormValues().texters;
-    const assignedContacts = availableTexters.reduce(
-      (prev, texter) => prev + texter.assignment.contactsCount,
-      0
-    );
-
-    const shouldShowTextersManager = orgTexters.length > 0;
-    const finalSaveLabel = isWorking ? "Working..." : saveLabel;
-    const isOverdue = DateTime.local() >= DateTime.fromISO(dueBy);
-    const finalSaveDisabled = isOverdue || saveDisabled;
-
-    return (
-      <div>
-        <CampaignFormSectionHeading
-          title="Who should send the texts?"
-          subtitle={
-            isOverdue && (
-              <span style={{ color: red600 }}>
-                This campaign is overdue! Please change the due date before
-                editing Texters
-              </span>
-            )
-          }
+      />
+      {shouldShowTextersManager && (
+        <AddRemoveTexters
+          orgTexters={orgTexters}
+          texters={orderedTexters}
+          onAddTexters={handleAddTexters}
+          onRemoveEmptyTexters={handleRemoveEmptyTexters}
         />
-        <GSForm schema={this.formSchema} value={this.collectFormValues()}>
-          {shouldShowTextersManager && (
-            <AddRemoveTexters
-              texters={availableTexters}
-              orgTexters={orgTexters}
-              searchText={searchText}
-              handleSearchTexters={this.handleSearchTexters}
-              addTexter={this.addTexter}
-              addAllTexters={this.addAllTexters}
-              removeEmptyTexters={this.removeEmptyTexters}
-            />
-          )}
-          <div className={css(styles.sliderContainer)}>
-            <TexterAssignmentSummary
-              assignedContacts={assignedContacts}
-              contactsCount={contactsCount}
-              toggled={autoSplit}
-              handleSplitAssignmentsToggle={this.handleSplitAssignmentsToggle}
-            />
-            <TextersAssignmentList
-              texters={availableTexters}
-              orgTexters={orgTexters}
-              contactsCount={contactsCount}
-              handleAssignContacts={this.handleAssignContacts}
-              handleRemoveTexter={this.handleRemoveTexter}
-            />
-          </div>
-        </GSForm>
-        <RaisedButton
-          label={finalSaveLabel}
-          disabled={finalSaveDisabled}
-          onClick={this.handleSubmit}
-          style={inlineStyles.button}
+      )}
+      <div className={css(styles.sliderContainer)}>
+        <TexterAssignmentSummary
+          assignedContacts={assignedContactsCount}
+          contactsCount={contactsCount}
+          toggled={autoSplit}
+          containerStyle={{
+            borderBottom: `1px solid ${theme.colors.lightGray}`,
+            marginBottom: 20
+          }}
+          onToggleAutoSplit={handleSplitAssignmentsToggle}
         />
-        <Snackbar
-          open={snackbarOpen}
-          message={snackbarMessage}
-          autoHideDuration={3000}
-          onRequestClose={this.handleSnackbarClose}
-        />
+        <TexterAssignmentHeaderRow />
+        {orderedTexters.map((stagedTexter) => (
+          <TexterAssignmentRow
+            key={stagedTexter.id}
+            campaignContactCount={contactsCount}
+            texter={stagedTexter}
+            disabled={autoSplit}
+            onChange={makeHandleChangeTexterAssignment(stagedTexter)}
+            onDelete={makeHandleDeleteTexter(stagedTexter)}
+          />
+        ))}
       </div>
-    );
-  }
-}
+      <Button
+        variant="contained"
+        color="primary"
+        style={inlineStyles.button}
+        disabled={finalSaveDisabled}
+        onClick={handleSubmit}
+      >
+        {finalSaveLabel}
+      </Button>
+      <Snackbar
+        open={snackbarMessage !== undefined}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage ?? ""}
+        action={
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleCloseSnackbar}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
+    </>
+  );
+};
 
 const queries: QueryMap<InnerProps> = {
   campaignData: {

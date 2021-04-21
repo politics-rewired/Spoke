@@ -104,7 +104,6 @@ import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 const uuidv4 = require("uuid").v4;
 
 const { JOBS_SAME_PROCESS } = config;
-const { JOBS_SYNC } = config;
 
 const replaceCurlyApostrophes = (rawText) =>
   rawText.replace(/[\u2018\u2019]/g, "'");
@@ -348,11 +347,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       .returning("*");
 
     if (JOBS_SAME_PROCESS) {
-      if (JOBS_SYNC) {
-        await assignTexters(job);
-      } else {
-        assignTexters(job);
-      }
+      await assignTexters(job);
     }
   }
 
