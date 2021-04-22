@@ -190,6 +190,7 @@ const AdminTrollAlarms: React.FC<Props> = (props) => {
           hintText="Search for a trigger token"
           style={{ marginRight: "10px", ...styles.controlsColumn }}
           fullWidth
+          value={token ?? undefined}
           maxSearchResults={8}
           searchText={tokenSearchText}
           dataSource={dataSource}
