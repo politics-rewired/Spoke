@@ -213,24 +213,12 @@ export const resolvers = {
         rows: [{ is_fully_assigned }]
       } = await r.knex.raw(
         `
-          with contact_count as (
-            select count(*)
-            from campaign_contact
-            where campaign_id = ?
-          ),
-          assigned_count as (
-            select count(*) as assigned
-            from assignment a
-            join campaign_contact cc on a.id = cc.assignment_id
-            where a.campaign_id = ?
-          )
           select
-            contact_count.count as contact_count,
-            assigned_count.assigned as assigned_count,
-            contact_count.count = assigned_count.assigned as is_fully_assigned
-          from contact_count, assigned_count
+            count(*) filter (where assignment_id is null) = 0 as is_fully_assigned
+          from campaign_contact
+          where campaign_id = ?
         `,
-        [id, id]
+        [id]
       );
       return use_dynamic_assignment || is_fully_assigned;
     },
