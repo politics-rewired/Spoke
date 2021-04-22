@@ -67,7 +67,7 @@ export function getContacts(
   }
 
   let query = r
-    .knex("campaign_contact")
+    .reader("campaign_contact")
     .where({
       campaign_id: campaign.id,
       assignment_id: assignment.id

@@ -172,7 +172,7 @@ export const resolvers = {
     },
     assignment: async (user, { campaignId }) =>
       r
-        .knex("assignment")
+        .reader("assignment")
         .where({ user_id: user.id, campaign_id: campaignId })
         .first()
         .then((record) => record || null),
