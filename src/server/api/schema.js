@@ -3893,7 +3893,7 @@ const rootResolvers = {
           "campaign_contact.first_name as cc_first_name",
           "campaign_contact.last_name as cc_last_name"
         )
-        .orderBy("troll_alarm.message_id")
+        .orderBy("troll_alarm.message_id", "desc")
         .limit(limit)
         .offset(offset)
         .map(
