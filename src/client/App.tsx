@@ -3,8 +3,9 @@ import { css, StyleSheet } from "aphrodite";
 import MuiThemeProviderv0 from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
 import { ApolloProvider } from "react-apollo";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import request from "superagent";
+import { QueryParamProvider } from "use-query-params";
 
 import ApolloClientSingleton from "../network/apollo-client-singleton";
 import AppRoutes from "../routes";
@@ -41,7 +42,9 @@ const App: React.FC = () => {
             <div className={css(styles.root)}>
               <VersionNotifier />
               <Router>
-                <AppRoutes />
+                <QueryParamProvider ReactRouterRoute={Route}>
+                  <AppRoutes />
+                </QueryParamProvider>
               </Router>
             </div>
           </ApolloProvider>

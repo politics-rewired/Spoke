@@ -10,8 +10,14 @@ import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
-import React from "react";
+import React, { useState } from "react";
 import { RouteChildrenProps } from "react-router-dom";
+import {
+  BooleanParam,
+  NumberParam,
+  StringParam,
+  useQueryParam
+} from "use-query-params";
 
 import { TrollAlarm } from "../../api/trollbot";
 import { dataSourceItem, DataSourceItemType } from "../../components/utils";
@@ -42,98 +48,92 @@ interface Props
   };
 }
 
-interface State {
-  tokenSearchText: string;
-  copiedAlarmID?: string;
-  pageSize: number;
-  page: number;
-  dismissed: boolean;
-  token: string | null;
-  selectedAlarmIds: string[];
-  isWorking: boolean;
-  error?: string;
-}
+const AdminTrollAlarms: React.FC<Props> = (props) => {
+  // UI Widgets
+  const [tokenSearchText, setTokenSearchText] = useState("");
+  const [copiedAlarmID, setCopiedAlarmID] = useState<string | undefined>(
+    undefined
+  );
 
-class AdminTrollAlarms extends React.Component<Props, State> {
-  state: State = {
-    // UI Widgets
-    tokenSearchText: "",
-    copiedAlarmID: undefined,
+  // Operations
+  const [selectedAlarmIds, setSelectedAlarmIds] = useState<string[]>([]);
+  const [isWorking, setIsWorking] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
 
-    // Query params
-    pageSize: 25,
-    page: 0,
-    dismissed: false,
-    token: null,
+  // Query params
+  const [pageSize, setPageSize] = useQueryParam("pageSize", NumberParam);
+  const [page, setPage] = useQueryParam("page", NumberParam);
+  const [dismissed, setDismissed] = useQueryParam("dismissed", BooleanParam);
+  const [token, setToken] = useQueryParam("token", StringParam);
 
-    // Operations
-    selectedAlarmIds: [],
-    isWorking: false,
-    error: undefined
-  };
-
-  handleOnCancelError = () => this.setState({ error: undefined });
+  const handleOnCancelError = () => setError(undefined);
 
   // Query conditions
-  handleFocusTokenSearch = () =>
-    this.setState({ tokenSearchText: "", token: null });
+  const handleFocusTokenSearch = () => {
+    setTokenSearchText("");
+    setToken(null);
+  };
 
-  handleTokenSearchTextChange = (tokenSearchText: string) =>
-    this.setState({ tokenSearchText });
+  const handleTokenSearchTextChange = (newTokenSearchText: string) =>
+    setTokenSearchText(newTokenSearchText);
 
-  handleTokenSelected = (
+  const handleTokenSelected = (
     selection: DataSourceItemType | string,
     index: number
   ) => {
-    let token: string | null = null;
+    let foundToken: string | null = null;
     if (index > -1 && typeof selection !== "string") {
-      token = selection.value.key as string;
+      foundToken = selection.value.key as string;
     } else {
-      const { trollTokens } = this.props.trollTokens;
-      token =
+      const { trollTokens } = props.trollTokens;
+      foundToken =
         trollTokens.find(({ token: trollToken }) => trollToken === selection)
           ?.token ?? null;
     }
-    if (token) {
-      this.setState({ token, selectedAlarmIds: [] });
+    if (foundToken) {
+      setToken(foundToken);
+      setSelectedAlarmIds([]);
     }
   };
 
-  handleToggleDismissed = (_event: any, dismissed: boolean) =>
-    this.setState({ dismissed, selectedAlarmIds: [] });
+  const handleToggleDismissed = (_event: any, newDismissed: boolean) => {
+    setPage(0);
+    setDismissed(newDismissed);
+    setSelectedAlarmIds([]);
+  };
 
   // Actions
-  handleDismissSelected = async () => {
-    const { selectedAlarmIds } = this.state;
-    this.setState({ isWorking: true, error: undefined });
+  const handleDismissSelected = async () => {
+    setIsWorking(true);
+    setError(undefined);
     try {
-      await this.props.mutations.dismissAlarms(selectedAlarmIds);
-      this.setState({ selectedAlarmIds: [] });
+      await props.mutations.dismissAlarms(selectedAlarmIds);
+      setSelectedAlarmIds([]);
     } catch (err) {
-      this.setState({ error: err.message });
+      setError(err.message);
     } finally {
-      this.setState({ isWorking: false });
+      setIsWorking(false);
     }
   };
 
-  handleDismissMatching = async () => {
-    const { token } = this.state;
+  const handleDismissMatching = async () => {
     if (!token) return;
 
-    this.setState({ isWorking: true, error: undefined });
+    setIsWorking(true);
+    setError(undefined);
     try {
-      await this.props.mutations.dismissMatchingAlarms(token);
-      this.setState({ selectedAlarmIds: [] });
+      await props.mutations.dismissMatchingAlarms(token);
+      setSelectedAlarmIds([]);
     } catch (err) {
-      this.setState({ error: err.message });
+      setError(err.message);
     } finally {
-      this.setState({ isWorking: false });
+      setIsWorking(false);
     }
   };
 
-  handleDismissCopyAlarm = () => this.setState({ copiedAlarmID: undefined });
+  const handleDismissCopyAlarm = () => setCopiedAlarmID(undefined);
 
-  handleCopyAlarm = (alarm: TrollAlarm) => {
+  const handleCopyAlarm = (alarm: TrollAlarm) => {
     const clipboardContents = [
       `Triggered Token: ${alarm.token}`,
       `Campaign ID: ${alarm.contact.campaign.id}`,
@@ -147,110 +147,107 @@ class AdminTrollAlarms extends React.Component<Props, State> {
 
     try {
       navigator.clipboard.writeText(clipboardContents);
-      this.setState({ copiedAlarmID: alarm.id });
+      setCopiedAlarmID(alarm.id);
     } catch (err) {
-      this.setState({ error: err.message });
+      setError(err.message);
     }
   };
 
   // Table selection
-  handleAlarmSelectionChange = (selectedAlarmIds: string[]) =>
-    this.setState({ selectedAlarmIds });
+  const handleAlarmSelectionChange = (newSelectedAlarmIds: string[]) =>
+    setSelectedAlarmIds(newSelectedAlarmIds);
 
   // Pagination
-  handlePageSizeChange = (pageSize: number) => this.setState({ pageSize });
+  const handlePageSizeChange = (newPageSize: number) =>
+    setPageSize(newPageSize);
 
-  handlePageChange = (page: number) => this.setState({ page });
+  const handlePageChange = (newPage: number) => setPage(newPage);
 
-  render() {
-    const { tokenSearchText, copiedAlarmID } = this.state;
-    const { pageSize, page, dismissed, token } = this.state;
-    const { selectedAlarmIds, isWorking, error } = this.state;
-    const { match } = this.props;
+  const { match } = props;
 
-    const { trollTokens } = this.props.trollTokens;
-    const dataSource = trollTokens.map(({ token: trollToken }) =>
-      dataSourceItem(trollToken, trollToken)
-    );
+  const { trollTokens } = props.trollTokens;
+  const dataSource = trollTokens.map(({ token: trollToken }) =>
+    dataSourceItem(trollToken, trollToken)
+  );
 
-    const deleteAllSuffix = token ? `"${token}"` : "Token";
-    const isDeleteSelectedDisabled = selectedAlarmIds.length === 0 || isWorking;
+  const deleteAllSuffix = token ? `"${token}"` : "Token";
+  const isDeleteSelectedDisabled = selectedAlarmIds.length === 0 || isWorking;
 
-    const errorActions = [
-      <FlatButton
-        key="close"
-        label="Close"
-        primary
-        onClick={this.handleOnCancelError}
+  const errorActions = [
+    <FlatButton
+      key="close"
+      label="Close"
+      primary
+      onClick={handleOnCancelError}
+    />
+  ];
+
+  return (
+    <div>
+      <Paper style={styles.controlsContainer}>
+        <AutoComplete
+          floatingLabelText="Token"
+          hintText="Search for a trigger token"
+          style={{ marginRight: "10px", ...styles.controlsColumn }}
+          fullWidth
+          value={token ?? undefined}
+          maxSearchResults={8}
+          searchText={tokenSearchText}
+          dataSource={dataSource}
+          filter={AutoComplete.caseInsensitiveFilter}
+          onFocus={handleFocusTokenSearch}
+          onUpdateInput={handleTokenSearchTextChange}
+          onNewRequest={handleTokenSelected}
+        />
+        <Toggle
+          label="Dismissed Alarms"
+          style={{ ...styles.controlsColumn, width: "0px" }}
+          onToggle={handleToggleDismissed}
+          toggled={dismissed}
+        />
+        <RaisedButton
+          label={`Dismiss All Matching ${deleteAllSuffix}`}
+          style={{ marginRight: "10px" }}
+          secondary
+          disabled={token === null}
+          onClick={handleDismissMatching}
+        />
+        <RaisedButton
+          label={`Dismiss Selected (${selectedAlarmIds.length})`}
+          secondary
+          disabled={isDeleteSelectedDisabled}
+          onClick={handleDismissSelected}
+        />
+      </Paper>
+      <br />
+      <TrollAlarmList
+        organizationId={match?.params.organizationId}
+        pageSize={pageSize ?? 25}
+        page={page ?? 0}
+        dismissed={dismissed ?? false}
+        token={token ?? null}
+        selectedAlarmIds={selectedAlarmIds}
+        onAlarmSelectionChange={handleAlarmSelectionChange}
+        onPageSizeChange={handlePageSizeChange}
+        onPageChange={handlePageChange}
+        onCopyAlarm={handleCopyAlarm}
       />
-    ];
-
-    return (
-      <div>
-        <Paper style={styles.controlsContainer}>
-          <AutoComplete
-            floatingLabelText="Token"
-            hintText="Search for a trigger token"
-            style={{ marginRight: "10px", ...styles.controlsColumn }}
-            fullWidth
-            maxSearchResults={8}
-            searchText={tokenSearchText}
-            dataSource={dataSource}
-            filter={AutoComplete.caseInsensitiveFilter}
-            onFocus={this.handleFocusTokenSearch}
-            onUpdateInput={this.handleTokenSearchTextChange}
-            onNewRequest={this.handleTokenSelected}
-          />
-          <Toggle
-            label="Dismissed Alarms"
-            style={{ ...styles.controlsColumn, width: "0px" }}
-            onToggle={this.handleToggleDismissed}
-            toggled={dismissed}
-          />
-          <RaisedButton
-            label={`Dismiss All Matching ${deleteAllSuffix}`}
-            style={{ marginRight: "10px" }}
-            secondary
-            disabled={token === null}
-            onClick={this.handleDismissMatching}
-          />
-          <RaisedButton
-            label={`Dismiss Selected (${selectedAlarmIds.length})`}
-            secondary
-            disabled={isDeleteSelectedDisabled}
-            onClick={this.handleDismissSelected}
-          />
-        </Paper>
-        <br />
-        <TrollAlarmList
-          organizationId={match?.params.organizationId}
-          pageSize={pageSize}
-          page={page}
-          dismissed={dismissed}
-          token={token}
-          selectedAlarmIds={selectedAlarmIds}
-          onAlarmSelectionChange={this.handleAlarmSelectionChange}
-          onPageSizeChange={this.handlePageSizeChange}
-          onPageChange={this.handlePageChange}
-          onCopyAlarm={this.handleCopyAlarm}
-        />
-        <Dialog open={error !== undefined} onClose={this.handleOnCancelError}>
-          <DialogTitle>Error</DialogTitle>
-          <DialogContent>
-            <DialogContentText>{error || ""}</DialogContentText>
-          </DialogContent>
-          <DialogActions>{errorActions}</DialogActions>
-        </Dialog>
-        <Snackbar
-          open={copiedAlarmID !== undefined}
-          message={`Alarm ${copiedAlarmID || ""} details copied to clipboard`}
-          autoHideDuration={4000}
-          onRequestClose={this.handleDismissCopyAlarm}
-        />
-      </div>
-    );
-  }
-}
+      <Dialog open={error !== undefined} onClose={handleOnCancelError}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{error || ""}</DialogContentText>
+        </DialogContent>
+        <DialogActions>{errorActions}</DialogActions>
+      </Dialog>
+      <Snackbar
+        open={copiedAlarmID !== undefined}
+        message={`Alarm ${copiedAlarmID || ""} details copied to clipboard`}
+        autoHideDuration={4000}
+        onRequestClose={handleDismissCopyAlarm}
+      />
+    </div>
+  );
+};
 
 const queries: QueryMap<Props> = {
   trollTokens: {
