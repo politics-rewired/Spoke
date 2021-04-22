@@ -105,6 +105,10 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
     }
   } = props;
 
+  const activeTexters = texters.filter(
+    ({ assignment }) => assignment.contactsCount > 0
+  );
+
   const {
     autoSplit,
     stagedTexters,
@@ -115,7 +119,7 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
     removeEmptyTexters,
     assignContacts,
     reset
-  } = useStagedTextersReducer(contactsCount, texters);
+  } = useStagedTextersReducer(contactsCount, activeTexters);
 
   const orderedTexters = orderBy(
     stagedTexters,
