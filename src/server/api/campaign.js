@@ -213,10 +213,11 @@ export const resolvers = {
         rows: [{ is_fully_assigned }]
       } = await r.knex.raw(
         `
-          select
-            count(*) filter (where assignment_id is null) = 0 as is_fully_assigned
-          from campaign_contact
-          where campaign_id = ?
+          select exists (
+            select 1
+            from campaign_contact
+            where campaign_id = ? and assignment_id is null
+          ) as is_fully_assigned
         `,
         [id]
       );
