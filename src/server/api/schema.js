@@ -24,7 +24,6 @@ import { getSendBeforeUtc } from "../../lib/tz-helpers";
 import { replaceAll } from "../../lib/utils";
 import logger from "../../logger";
 import {
-  assignTexters,
   loadContactsFromDataWarehouse,
   uploadContacts
 } from "../../workers/jobs";
@@ -34,6 +33,7 @@ import { change } from "../local-auth-helpers";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, datawarehouse, r } from "../models";
 import { Notifications, sendUserNotification } from "../notifications";
+import { addAssignTexters } from "../tasks/assign-texters";
 import { addExportCampaign } from "../tasks/export-campaign";
 import { addExportForVan } from "../tasks/export-for-van";
 import { addFilterLandlines } from "../tasks/filter-landlines";
@@ -331,24 +331,12 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "texters")) {
-    const [job] = await r
-      .knex("job_request")
-      .insert({
-        queue_name: `${id}:edit_campaign`,
-        locks_queue: true,
-        assigned: JOBS_SAME_PROCESS, // can get called immediately, below
-        job_type: "assign_texters",
-        campaign_id: id,
-        payload: JSON.stringify({
-          id,
-          texters: campaign.texters
-        })
-      })
-      .returning("*");
-
-    if (JOBS_SAME_PROCESS) {
-      await assignTexters(job);
-    }
+    await addAssignTexters({
+      campaignId: id,
+      texters: campaign.texters,
+      // TODO - source this from mutation
+      ignoreAfterDate: undefined
+    });
   }
 
   if (Object.prototype.hasOwnProperty.call(campaign, "interactionSteps")) {

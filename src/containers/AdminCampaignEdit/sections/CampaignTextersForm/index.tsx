@@ -280,7 +280,7 @@ export default compose<InnerProps, RequiredComponentProps>(
   asSection({
     title: "Texters",
     readinessName: "texters",
-    jobQueueNames: [],
+    jobQueueNames: ["assign-texters"],
     expandAfterCampaignStarts: true,
     expandableBySuperVolunteers: true
   }),
