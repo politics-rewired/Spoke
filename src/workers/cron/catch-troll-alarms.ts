@@ -6,42 +6,45 @@ import knexConfig from "../../server/knex";
 
 const db = knex(knexConfig);
 
-const { TROLL_ALERT_URL } = process.env;
-let { TROLL_ALERT_PERIOD_MINUTES = 6 } = process.env;
-TROLL_ALERT_PERIOD_MINUTES = parseInt(TROLL_ALERT_PERIOD_MINUTES, 10);
+const { TROLL_ALERT_URL, TROLL_ALERT_PERIOD_MINUTES = "6" } = process.env;
+const ALERT_PERIOD = parseInt(TROLL_ALERT_PERIOD_MINUTES, 10);
 
 const batchLogger = logger.child({ batch_timestamp: new Date().getTime() });
 
-const main = async () => {
+interface TrollAlarmRecord {
+  trigger_token: string;
+  text: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+const main = async (): Promise<TrollAlarmRecord[]> => {
   const { rows: newAlarms } = await db.raw(`
     with
-      trigger_query as (
-        select to_tsquery(string_agg(token, ' | ')) as query
+      troll_tokens as (
+        select organization_id, token, config
         from troll_trigger
+        cross join (select * from (values
+          ('simple'::regconfig),
+          ('english'::regconfig),
+          ('spanish'::regconfig)
+        ) regconfigs (config)) types
       ),
       trigger_matches as (
-        select
-          id as message_id,
-          lower((
-            -- Extract first trigger match from ts-formatted result
-            regexp_matches(
-              ts_headline(
-                'english',
-                text,
-                ( select query from trigger_query ),
-                'MaxFragments=1,MaxWords=2,MinWords=1'
-              ),
-              '<b>(.*)</b>')
-            )[1]
-          ) as trigger_token
+        select distinct on (message.id)
+          organization_id,
+          message.id as message_id,
+          troll_tokens.token as matching_token
         from message
-        where message.created_at > now() - interval '${TROLL_ALERT_PERIOD_MINUTES} minute'
+        join troll_tokens
+          on to_tsvector(troll_tokens.config, message.text) @@ to_tsquery(troll_tokens.config, troll_tokens.token)
+        where true -- message.created_at >= now() - interval '${ALERT_PERIOD} minute'
           and is_from_contact = false
-          and to_tsvector(text) @@ ( select query from trigger_query )
       ),
       insert_results as (
-        insert into troll_alarm (message_id, trigger_token)
-        select message_id, trigger_token
+        insert into troll_alarm (organization_id, message_id, trigger_token)
+        select organization_id, message_id, matching_token
         from trigger_matches
         on conflict (message_id) do nothing
         returning *
@@ -59,7 +62,7 @@ const main = async () => {
   return newAlarms;
 };
 
-const raiseAlarms = async (alarms) => {
+const raiseAlarms = async (alarms: TrollAlarmRecord[]) => {
   if (TROLL_ALERT_URL) {
     for (const alarm of alarms) {
       await request.post(TROLL_ALERT_URL).send(alarm);
