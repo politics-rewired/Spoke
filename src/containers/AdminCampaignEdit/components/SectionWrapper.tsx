@@ -76,7 +76,8 @@ const unpackJob = (job?: PendingJobType) => ({
   jobId: job ? job.id : null,
   savePercent: job ? job.status : 0,
   jobMessage: job ? job.resultMessage : "",
-  isSaving: job !== undefined && !job.resultMessage
+  isSaving:
+    job !== undefined && (!job.resultMessage || job.resultMessage === "{}")
 });
 
 const SectionWrapper: React.FC<WrapperProps> = (props) => {
@@ -186,7 +187,9 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
       {isSaving && adminPerms && (
         <CardActions>
           <div>Current Status: {progressMessage}</div>
-          {jobMessage && <div>Message: {jobMessage}</div>}
+          {jobMessage && jobMessage !== "{}" && (
+            <div>Message: {jobMessage}</div>
+          )}
           <RaisedButton
             label="Discard Job"
             icon={<CancelIcon />}
@@ -197,6 +200,20 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
     </Card>
   );
 };
+
+export const GET_CAMPAIGN_JOBS_QUERY = gql`
+  query getCampaignJobs($campaignId: String!, $jobTypes: [String]) {
+    campaign(id: $campaignId) {
+      id
+      pendingJobs(jobTypes: $jobTypes) {
+        id
+        jobType
+        status
+        resultMessage
+      }
+    }
+  }
+`;
 
 const makeQueries = (jobTypes: string[]) => ({
   status: {
@@ -227,19 +244,7 @@ const makeQueries = (jobTypes: string[]) => ({
     })
   },
   jobs: {
-    query: gql`
-      query getCampaignJobs($campaignId: String!, $jobTypes: [String]) {
-        campaign(id: $campaignId) {
-          id
-          pendingJobs(jobTypes: $jobTypes) {
-            id
-            jobType
-            status
-            resultMessage
-          }
-        }
-      }
-    `,
+    query: GET_CAMPAIGN_JOBS_QUERY,
     skip: jobTypes.length === 0,
     options: (ownProps: RequiredComponentProps) => ({
       variables: {

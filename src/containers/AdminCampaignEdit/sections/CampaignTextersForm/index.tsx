@@ -7,6 +7,7 @@ import { ApolloQueryResult } from "apollo-client/core/types";
 import orderBy from "lodash/orderBy";
 import { red600 } from "material-ui/styles/colors";
 import React, { useState } from "react";
+import { withApollo, WithApolloClient } from "react-apollo";
 import { compose } from "recompose";
 
 import { Campaign } from "../../../../api/campaign";
@@ -19,6 +20,7 @@ import CampaignFormSectionHeading from "../../components/CampaignFormSectionHead
 import {
   asSection,
   FullComponentProps,
+  GET_CAMPAIGN_JOBS_QUERY,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
 import AddRemoveTexters from "./components/AddRemoveTexters";
@@ -32,6 +34,8 @@ import {
   GET_ORGANIZATION_TEXTERS
 } from "./queries";
 import { OrgTexter, Texter } from "./types";
+
+const JOB_QUEUE_NAMES = ["assign-texters"];
 
 const styles = StyleSheet.create({
   sliderContainer: {
@@ -59,7 +63,7 @@ interface CampaignDataResult {
   campaign: CampaignWithTexter;
 }
 
-interface HocProps {
+interface HocProps extends WithApolloClient<unknown> {
   mutations: {
     editCampaign(
       payload: Values
@@ -98,6 +102,8 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
   );
 
   const {
+    campaignId,
+    client,
     saveDisabled,
     saveLabel,
     organizationData: {
@@ -124,6 +130,26 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
     assignContacts,
     reset
   } = useStagedTextersReducer(contactsCount, activeTexters);
+
+  const resetJobsOrTexters = async () => {
+    // Check for new pending jobs -- if there is one, asSection will rerender CampaignTextersForm
+    // when the job completes, resetting the reducer state
+    const response = await client.query({
+      query: GET_CAMPAIGN_JOBS_QUERY,
+      variables: { campaignId, jobTypes: JOB_QUEUE_NAMES },
+      fetchPolicy: "network-only"
+    });
+
+    // If there is no pending job then the assignment job completed _much_ faster than usual and
+    // we need to refresh and reset texters state ourselves
+    const { pendingJobs } = response.data.campaign;
+    if (pendingJobs.length === 0) {
+      const {
+        data: { campaign }
+      } = await props.campaignData.refetch();
+      reset(campaign.texters, campaign.contactsCount);
+    }
+  };
 
   const orderedTexters = orderBy(
     stagedTexters,
@@ -168,13 +194,11 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
     try {
       const response = await editCampaign({ texters: texterInput });
       if (response.errors) throw response.errors;
+      // Force refetch of pending jobs for _this_ campaign and section -- refetchQueries wasn't doing the trick
+      await resetJobsOrTexters();
     } catch (err) {
       props.onError(err.message);
     } finally {
-      const {
-        data: { campaign }
-      } = await props.campaignData.refetch();
-      reset(campaign.texters, campaign.contactsCount);
       setWorking(false);
     }
   };
@@ -279,8 +303,7 @@ const mutations: MutationMap<InnerProps> = {
     variables: {
       campaignId: ownProps.campaignId,
       payload
-    },
-    refetchQueries: ["GetCampaignTexters"]
+    }
   })
 };
 
@@ -288,12 +311,13 @@ export default compose<InnerProps, RequiredComponentProps>(
   asSection({
     title: "Texters",
     readinessName: "texters",
-    jobQueueNames: ["assign-texters"],
+    jobQueueNames: JOB_QUEUE_NAMES,
     expandAfterCampaignStarts: true,
     expandableBySuperVolunteers: true
   }),
   loadData({
     queries,
     mutations
-  })
+  }),
+  withApollo
 )(CampaignTextersForm);
