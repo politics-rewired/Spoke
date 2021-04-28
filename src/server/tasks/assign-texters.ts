@@ -68,22 +68,18 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
 
       // Zero out "deleted" texters
       const assignmentIds = assignmentTargets.map(({ id }) => id);
-      const queryArgs: any[] = [campaignId];
-      if (assignmentIds.length > 0) queryArgs.push(assignmentIds);
-      if (ignoreAfterDate) queryArgs.push(ignoreAfterDate);
-
       await trx.query(
         `
           update campaign_contact
           set assignment_id = null
           where
-            campaign_id = ?
+            campaign_id = $1
             and archived = ${campaign.is_archived}
             and assignment_id is not null
-            ${assignmentIds.length > 0 ? "and assignment_id <> ANY(?)" : ""}
-            ${ignoreAfterDate ? "and updated_at >= ?" : ""}
+            and assignment_id <> ANY($2)
+            and updated_at < $3
         `,
-        queryArgs
+        [campaignId, assignmentIds, ignoreAfterDate]
       );
 
       // Free up contacts from assignment counts that have decreased

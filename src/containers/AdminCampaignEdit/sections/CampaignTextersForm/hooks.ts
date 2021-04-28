@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 
+import { DateTime } from "../../../../lib/datetime";
 import { OrgTexter, Texter } from "./types";
 
 const getStagedTexters = (
@@ -45,6 +46,7 @@ interface StagedTexterState {
   autoSplit: boolean;
   upsertedTexters: Texter[];
   texterIdsToRemove: string[];
+  lastReset: DateTime;
 }
 
 type StagedTexterReducer = (
@@ -222,6 +224,7 @@ const stagedTextersReducer: StagedTexterReducer = (state, action) => {
 
     case StagedTexterActionType.Reset: {
       return {
+        lastReset: DateTime.local(),
         savedTexters: action.savedTexters,
         campaignContactCount: action.campaignContactCount,
         autoSplit: false,
@@ -246,7 +249,8 @@ export const useStagedTextersReducer = (
       campaignContactCount,
       autoSplit: false,
       upsertedTexters: [],
-      texterIdsToRemove: []
+      texterIdsToRemove: [],
+      lastReset: DateTime.local()
     }
   );
 
@@ -297,6 +301,7 @@ export const useStagedTextersReducer = (
   };
 
   return {
+    lastReset: items.lastReset,
     autoSplit: items.autoSplit,
     stagedTexters,
     assignedContactsCount,

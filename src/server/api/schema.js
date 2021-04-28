@@ -331,11 +331,11 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "texters")) {
+    const { texters, ignoreAfterDate } = campaign.texters;
     await addAssignTexters({
       campaignId: id,
-      texters: campaign.texters,
-      // TODO - source this from mutation
-      ignoreAfterDate: undefined
+      texters,
+      ignoreAfterDate
     });
   }
 

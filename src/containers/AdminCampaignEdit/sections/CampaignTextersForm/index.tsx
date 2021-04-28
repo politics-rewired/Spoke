@@ -85,7 +85,10 @@ interface InnerProps extends FullComponentProps, HocProps {
 }
 
 interface Values {
-  texters: any[];
+  texters: {
+    texters: any[];
+    ignoreAfterDate: string;
+  };
 }
 
 const CampaignTextersForm: React.FC<InnerProps> = (props) => {
@@ -110,6 +113,7 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
   );
 
   const {
+    lastReset,
     autoSplit,
     stagedTexters,
     assignedContactsCount,
@@ -150,12 +154,16 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
 
   const handleSubmit = async () => {
     const { editCampaign } = props.mutations;
-    const texterInput = stagedTexters.map((texter) => ({
+    const textersInput = stagedTexters.map((texter) => ({
       id: texter.id,
       needsMessageCount: texter.assignment.needsMessageCount,
       maxContacts: texter.assignment.maxContacts,
       contactsCount: texter.assignment.contactsCount
     }));
+    const texterInput = {
+      texters: textersInput,
+      ignoreAfterDate: lastReset.toUTC().toISO()
+    };
     setWorking(true);
     try {
       const response = await editCampaign({ texters: texterInput });
