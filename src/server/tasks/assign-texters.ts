@@ -27,11 +27,6 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
     ignoreAfterDate = DateTime.local().toISO()
   } = payload;
 
-  // TODO: add status updates
-  // await helpers.updateStatus(
-  //   Math.round((processed / contactsCount / 2) * 100) + 50
-  // );
-
   const campaign = await helpers
     .query<CampaignRecord>(`select * from campaign where id = $1 `, [
       campaignId
@@ -66,6 +61,8 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
         });
       }
 
+      await helpers.updateStatus(10);
+
       // Zero out "deleted" texters
       const assignmentIds = assignmentTargets.map(({ id }) => id);
       await trx.query(
@@ -82,8 +79,11 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
         [campaignId, assignmentIds, ignoreAfterDate]
       );
 
+      await helpers.updateStatus(20);
+
       // Free up contacts from assignment counts that have decreased
-      for (const assignmentTarget of assignmentTargets) {
+      for (let index = 0; index < assignmentTargets.length; index += 1) {
+        const assignmentTarget = assignmentTargets[index];
         const { id: assignmentId, contactsCount } = assignmentTarget;
         await trx.query(
           `
@@ -107,10 +107,20 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
           `,
           [campaignId, assignmentId, contactsCount, campaignId, assignmentId]
         );
+
+        if (index % 10 === 0) {
+          const stagePercentCompelte = Math.floor(
+            (index / assignmentTargets.length) * 30
+          );
+          await helpers.updateStatus(20 + stagePercentCompelte);
+        }
       }
 
+      await helpers.updateStatus(50);
+
       // Assign desired payloads to texters
-      for (const assignmentTarget of assignmentTargets) {
+      for (let index = 0; index < assignmentTargets.length; index += 1) {
+        const assignmentTarget = assignmentTargets[index];
         const { id: assignmentId, contactsCount } = assignmentTarget;
         await trx.query(
           `
@@ -143,7 +153,16 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
           `,
           [campaignId, assignmentId, contactsCount, assignmentId]
         );
+
+        if (index % 10 === 0) {
+          const stagePercentCompelte = Math.floor(
+            (index / assignmentTargets.length) * 45
+          );
+          await helpers.updateStatus(50 + stagePercentCompelte);
+        }
       }
+
+      await helpers.updateStatus(95);
 
       await Promise.all(
         assignmentTargets.map(async (assignmentTarget) => {
