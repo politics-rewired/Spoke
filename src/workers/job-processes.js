@@ -4,7 +4,6 @@ import logger from "../logger";
 import { r } from "../server/models";
 import { setupUserNotificationObservers } from "../server/notifications";
 import {
-  assignTexters,
   clearOldJobs,
   fixOrgless,
   handleIncomingMessageParts,
@@ -27,8 +26,7 @@ import { getNextJob } from "./lib";
 
 const jobMap = {
   upload_contacts: uploadContacts,
-  upload_contacts_sql: loadContactsFromDataWarehouse,
-  assign_texters: assignTexters
+  upload_contacts_sql: loadContactsFromDataWarehouse
 };
 
 export async function processJobs() {

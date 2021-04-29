@@ -6,4 +6,5 @@ export interface CampaignReadinessType {
   autoassign: boolean;
   cannedResponses: boolean;
   interactions: boolean;
+  texters: boolean;
 }

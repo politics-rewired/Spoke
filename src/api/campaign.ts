@@ -33,6 +33,8 @@ export interface Campaign {
   title: string;
   description: string;
   isStarted: boolean;
+  dueBy: string;
+  contactsCount: number;
   isArchived: boolean;
   textingHoursStart: number;
   textingHoursEnd: number;
@@ -114,6 +116,7 @@ export const schema = `
     autoassign: Boolean!
     cannedResponses: Boolean!
     interactions: Boolean!
+    texters: Boolean!
   }
 
   enum ExternalSyncReadinessState {

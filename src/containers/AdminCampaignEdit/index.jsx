@@ -48,7 +48,6 @@ const campaignInfoFragment = `
   dueBy
   isStarted
   isArchived
-  contactsCount
   datawarehouseAvailable
   customFields
   useDynamicAssignment
@@ -63,22 +62,6 @@ const campaignInfoFragment = `
   teams {
     id
     title
-  }
-  ${
-    disableTexters
-      ? ""
-      : `
-  texters {
-    id
-    firstName
-    lastName
-    assignment(campaignId:$campaignId) {
-      contactsCount
-      needsMessageCount: contactsCount(contactsFilter:{messageStatus:"needsMessage"})
-      maxContacts
-    }
-  }
-  `
   }
   interactionSteps {
     id
@@ -495,6 +478,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Texters",
         content: CampaignTextersForm,
+        isStandalone: true,
         keys: ["texters", "contactsCount", "useDynamicAssignment"],
         checkCompleted: () =>
           (this.state.campaignFormValues.texters.length > 0 &&
@@ -506,15 +490,7 @@ class AdminCampaignEdit extends React.Component {
           this.state.campaignFormValues.useDynamicAssignment === true,
         blocksStarting: false,
         expandAfterCampaignStarts: true,
-        expandableBySuperVolunteers: true,
-        extraProps: {
-          isOverdue:
-            DateTime.local() >=
-            DateTime.fromISO(this.props.campaignData.campaign.dueBy),
-          orgTexters: this.props.organizationData.organization.texters,
-          organizationUuid: this.props.organizationData.organization.uuid,
-          campaignId: this.props.campaignData.campaign.id
-        }
+        expandableBySuperVolunteers: true
       },
       {
         title: "Interactions",

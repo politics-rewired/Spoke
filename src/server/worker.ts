@@ -6,6 +6,10 @@ import { config } from "../config";
 import { sleep } from "../lib";
 import logger from "../logger";
 import {
+  assignTexters,
+  TASK_IDENTIFIER as assignTextersIdentifier
+} from "./tasks/assign-texters";
+import {
   exportCampaign,
   TASK_IDENTIFIER as exportCampaignIdentifier
 } from "./tasks/export-campaign";
@@ -72,6 +76,9 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   });
   m.taskList![filterLandlinesIdentifier] = wrapProgressTask(filterLandlines, {
     removeOnComplete: false
+  });
+  m.taskList![assignTextersIdentifier] = wrapProgressTask(assignTexters, {
+    removeOnComplete: true
   });
 
   m.cronJobs!.push({

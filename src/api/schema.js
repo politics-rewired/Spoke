@@ -81,11 +81,16 @@ const rootSchema = `
     interactionSteps: [InteractionStepInput]
   }
 
-  input TexterInput {
-    id: String
+  input TexterAssignmentInput {
+    id: String!
+    contactsCount: Int!
     needsMessageCount: Int
     maxContacts: Int
-    contactsCount: Int
+  }
+
+  input TexterInput {
+    texters: [TexterAssignmentInput!]!
+    ignoreAfterDate: Date!
   }
 
   input CampaignInput {
@@ -106,7 +111,7 @@ const rootSchema = `
     organizationId: String
     isAssignmentLimitedToTeams: Boolean
     teamIds: [ID]
-    texters: [TexterInput]
+    texters: TexterInput
     interactionSteps: InteractionStepInput
     cannedResponses: [CannedResponseInput]
     textingHoursStart: Int

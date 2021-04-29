@@ -11,7 +11,7 @@ export interface Assignment {
   contactsCount: number;
   userCannedResponses: CannedResponse[];
   campaignCannedResponses: CannedResponse[];
-  maxContacts: number;
+  maxContacts?: number | null;
 }
 
 export const schema = `
