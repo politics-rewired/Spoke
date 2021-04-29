@@ -357,7 +357,7 @@ const rootSchema = `
     releaseMyReplies(organizationId: String!): Boolean!
     dismissMatchingAlarms(token: String!, organizationId: String!): Boolean!
     dismissAlarms(messageIds: [String!]!, organizationId: String!): Boolean!
-    addToken(token: String!, organizationId: String!): Boolean!
+    addToken(organizationId: String!, input: TrollTriggerInput!): Boolean!
     removeToken(token: String!, organizationId: String!): Boolean!
     createExternalSystem(organizationId: String!, externalSystem: ExternalSystemInput!): ExternalSystem!
     editExternalSystem(id: String!, externalSystem: ExternalSystemInput!): ExternalSystem!

@@ -1,5 +1,9 @@
 exports.up = function up(knex) {
   return knex.schema.raw(`
+    alter table public.troll_trigger
+      add column mode regconfig not null default 'english'::regconfig,
+      add column compiled_tsquery tsquery generated always as (to_tsquery(mode, token)) stored;
+
     create or replace function public.get_trollbot_matches (organization_id integer, troll_interval interval)
       returns table (
         message_id integer,
@@ -9,13 +13,8 @@ exports.up = function up(knex) {
     begin
       return query
         with troll_tokens as (
-          select token, config
+          select token, mode, compiled_tsquery
           from troll_trigger
-          cross join (select * from (values
-            ('simple'::regconfig),
-            ('english'::regconfig),
-            ('spanish'::regconfig)
-          ) regconfigs (config)) types
           where troll_trigger.organization_id = get_trollbot_matches.organization_id
         )
         select distinct on (message.id)
@@ -27,7 +26,7 @@ exports.up = function up(knex) {
         join campaign
           on campaign.id = campaign_contact.campaign_id
         join troll_tokens
-          on to_tsvector(troll_tokens.config, message.text) @@ to_tsquery(troll_tokens.config, troll_tokens.token)
+          on to_tsvector(troll_tokens.mode, message.text) @@ troll_tokens.compiled_tsquery
         where true
           and campaign.organization_id = get_trollbot_matches.organization_id
           and message.created_at >= now() - get_trollbot_matches.troll_interval
@@ -80,5 +79,9 @@ exports.down = function down(knex) {
           and to_tsvector(text) @@ v_troll_trigger;
     end;
     $$ language plpgsql stable security definer set search_path = "public";
+
+    alter table public.troll_trigger
+      drop column compiled_tsquery,
+      drop column mode;
   `);
 };
