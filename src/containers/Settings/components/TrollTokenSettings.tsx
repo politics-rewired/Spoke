@@ -186,7 +186,7 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
               <TableRow>
                 <TableCell>Token</TableCell>
                 <TableCell align="right">Mode</TableCell>
-                <TableCell align="right">Compiled Token</TableCell>
+                <TableCell align="right">Parsed Token</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
