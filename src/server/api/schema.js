@@ -3283,18 +3283,21 @@ const rootMutations = {
 
       return true;
     },
-    addToken: async (_root, { token, organizationId }, { user, db }) => {
+    addToken: async (_root, { organizationId, input }, { user, db }) => {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
+      const { token, mode } = input;
       try {
         await db.reader.raw(`select to_tsquery(?)`, [token]);
       } catch (err) {
         throw new Error("invalid tsquery token");
       }
 
-      await r
-        .knex("troll_trigger")
-        .insert({ token, organization_id: parseInt(organizationId, 10) });
+      await r.knex("troll_trigger").insert({
+        organization_id: parseInt(organizationId, 10),
+        token,
+        mode: mode.toLowerCase()
+      });
 
       return true;
     },
@@ -3933,6 +3936,8 @@ const rootResolvers = {
       return tokens.map((t) => ({
         id: t.token,
         token: t.token,
+        mode: t.mode.toUpperCase(),
+        compiledTsQuery: t.compiled_tsquery,
         organizationId
       }));
     },

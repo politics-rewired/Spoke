@@ -1,6 +1,20 @@
 import { CampaignContact } from "./campaign-contact";
 import { User } from "./user";
 
+export enum TrollTriggerMode {
+  Simple = "SIMPLE",
+  English = "ENGLISH",
+  Spanish = "SPANISH"
+}
+
+export interface TrollTrigger {
+  id: string;
+  token: string;
+  mode: TrollTriggerMode;
+  compiledTsQuery: string;
+  organizationId: string;
+}
+
 export interface TrollAlarm {
   id: string;
   messageId: string;
@@ -27,9 +41,22 @@ export const schema = `
     alarms: [TrollAlarm!]!
   }
 
+  enum TrollTriggerMode {
+    SIMPLE
+    ENGLISH
+    SPANISH
+  }
+
+  input TrollTriggerInput {
+    token: String!
+    mode: TrollTriggerMode!
+  }
+
   type TrollTrigger {
     id: ID!
     token: String!
+    mode: TrollTriggerMode!
+    compiledTsQuery: String!
     organizationId: String!
   }
 
