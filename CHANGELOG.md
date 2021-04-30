@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.1](https://github.com/politics-rewired/spoke/compare/v4.7.0...v4.7.1) (2021-04-30)
+
+
+### Bug Fixes
+
+* **campaign-texters:** fix and simplify manual texter assignment ([#856](https://github.com/politics-rewired/spoke/issues/856)) ([951c688](https://github.com/politics-rewired/spoke/commit/951c6883d3a765bd1cd4f504a9f54b1b540ec62e))
+* **trollbot:** prevent adding empty tokens ([7a7bba5](https://github.com/politics-rewired/spoke/commit/7a7bba5cd1fb540a3c1ccbc7dbe65e6b9ac289ab))
+* **trollbot:** support multiple regconfigs ([#947](https://github.com/politics-rewired/spoke/issues/947)) ([96629ad](https://github.com/politics-rewired/spoke/commit/96629ad901dc641f7be73d3ba905d91e458ea64b)), closes [#930](https://github.com/politics-rewired/spoke/issues/930)
+* **ux:** make dialog text color readable again ([f528faf](https://github.com/politics-rewired/spoke/commit/f528faf3790ed3fccc40fa29b18458a8c986f032))
+
 ## [4.7.0](https://github.com/politics-rewired/spoke/compare/v4.6.0...v4.7.0) (2021-04-28)
 
 
