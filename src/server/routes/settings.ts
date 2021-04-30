@@ -17,8 +17,8 @@ router.get("/settings/instance", (req, res) => {
 });
 
 router.get("/settings/theme", async (req, res) => {
-  const settings = await r
-    .knex<InstanceSettingRow>("instance_setting")
+  const settings: InstanceSettingRow[] = await r
+    .knex("instance_setting")
     .where("name", "like", "theme.%");
 
   const getSetting = (settingName: string) =>
