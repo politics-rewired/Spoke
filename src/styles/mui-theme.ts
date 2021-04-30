@@ -44,7 +44,8 @@ export const createMuiThemev1 = (theme: Partial<CustomTheme> = {}) =>
       info: { main: theme.infoColor || blue[800] },
       text: {
         primary: theme.primaryTextColor || blueGrey[800],
-        secondary: theme.secondaryTextColor || grey[50]
+        // Do not provide default of grey[50] here -- v0 and v1 behave differently
+        secondary: theme.secondaryTextColor
       },
       background: {
         default: theme.canvassColor || grey[50]
