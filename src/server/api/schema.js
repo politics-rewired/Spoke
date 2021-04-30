@@ -3287,6 +3287,7 @@ const rootMutations = {
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
       const { token, mode } = input;
+      if (token.trim() === "") throw new Error("empty token");
       try {
         await db.reader.raw(`select to_tsquery(?)`, [token]);
       } catch (err) {

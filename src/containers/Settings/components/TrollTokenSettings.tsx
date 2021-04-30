@@ -77,6 +77,8 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
   const [isWorking, setIsWorking] = useState(false);
   const [error, setError] = useState<string>();
 
+  const isAddTokenValid = (addToken?.token ?? "").trim() !== "";
+
   const handleOnCancelError = () => setError(undefined);
 
   const handleDeleteToken = (token: string) => () => setDeleteToken(token);
@@ -125,7 +127,7 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
   };
 
   const handleOnConfirmAddToken = async () => {
-    if (!addToken) return;
+    if (!addToken || !isAddTokenValid) return;
 
     setIsWorking(true);
     setError(undefined);
@@ -147,6 +149,7 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
     <FlatButton
       key="confirm"
       label="Confirm"
+      disabled={!isAddTokenValid}
       onClick={handleOnConfirmAddToken}
     />,
     <FlatButton
