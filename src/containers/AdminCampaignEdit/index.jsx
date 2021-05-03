@@ -48,8 +48,6 @@ import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
 import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
 
-const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
-
 const extractStageAndStatus = (percentComplete) => {
   if (percentComplete > 100) {
     return `Filtering out landlines. ${percentComplete - 100}% complete`;
@@ -506,10 +504,7 @@ class AdminCampaignEdit extends React.Component {
       }
     ];
 
-    return (disableTexters
-      ? sections.filter((section) => section.title !== "Texters")
-      : sections
-    ).filter((section) => !section.exclude);
+    return sections.filter((section) => !section.exclude);
   };
 
   sectionSaveStatus = (section) => {
