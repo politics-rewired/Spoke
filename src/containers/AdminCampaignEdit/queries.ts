@@ -112,8 +112,8 @@ export const ARCHIVE_CAMPAIGN = gql`
     archiveCampaign(id: $campaignId) {
       ...EditCampaignFragment
     }
-    ${EditCampaignFragment}
   }
+  ${EditCampaignFragment}
 `;
 
 export const UNARCHIVE_CAMPAIGN = gql`
