@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.2](https://github.com/politics-rewired/spoke/compare/v4.7.1...v4.7.2) (2021-05-04)
+
+
+### Bug Fixes
+
+* fix start campaign button ([#952](https://github.com/politics-rewired/spoke/issues/952)) ([267c699](https://github.com/politics-rewired/spoke/commit/267c69991940570b235433a48c6466f021018993))
+* **export:** fix datetime parsing from sql ([#951](https://github.com/politics-rewired/spoke/issues/951)) ([36bd4ae](https://github.com/politics-rewired/spoke/commit/36bd4ae42aa9cbf0d4945ad7d5c8ffe290464db2))
+
 ### [4.7.1](https://github.com/politics-rewired/spoke/compare/v4.7.0...v4.7.1) (2021-04-30)
 
 
