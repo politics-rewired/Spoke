@@ -4,7 +4,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { withTheme } from "@material-ui/core/styles";
-import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
 import Avatar from "material-ui/Avatar";
@@ -26,6 +25,17 @@ import { camelCase, dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
+import {
+  ARCHIVE_CAMPAIGN,
+  DELETE_JOB,
+  EDIT_CAMPAIGN,
+  GET_CAMPAIGN_JOBS,
+  GET_EDIT_CAMPAIGN_DATA,
+  GET_ORGANIZATION_ACTIONS,
+  GET_ORGANIZATION_DATA,
+  START_CAMPAIGN,
+  UNARCHIVE_CAMPAIGN
+} from "./queries";
 import CampaignAutoassignModeForm from "./sections/CampaignAutoassignModeForm";
 import CampaignBasicsForm from "./sections/CampaignBasicsForm";
 import CampaignCannedResponsesForm from "./sections/CampaignCannedResponsesForm";
@@ -37,44 +47,6 @@ import CampaignOverlapManager from "./sections/CampaignOverlapManager";
 import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
 import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
-
-const disableTexters = window.DISABLE_CAMPAIGN_EDIT_TEXTERS;
-
-// TODO: replace with Fragment
-const campaignInfoFragment = `
-  id
-  title
-  description
-  dueBy
-  isStarted
-  isArchived
-  datawarehouseAvailable
-  customFields
-  useDynamicAssignment
-  logoImageUrl
-  introHtml
-  primaryColor
-  textingHoursStart
-  textingHoursEnd
-  isAssignmentLimitedToTeams
-  isAutoassignEnabled
-  timezone
-  teams {
-    id
-    title
-  }
-  interactionSteps {
-    id
-    questionText
-    scriptOptions
-    answerOption
-    answerActions
-    parentInteractionId
-    isDeleted
-    createdAt
-  }
-  editors
-`;
 
 const extractStageAndStatus = (percentComplete) => {
   if (percentComplete > 100) {
@@ -532,10 +504,7 @@ class AdminCampaignEdit extends React.Component {
       }
     ];
 
-    return (disableTexters
-      ? sections.filter((section) => section.title !== "Texters")
-      : sections
-    ).filter((section) => !section.exclude);
+    return sections.filter((section) => !section.exclude);
   };
 
   sectionSaveStatus = (section) => {
@@ -915,20 +884,7 @@ AdminCampaignEdit.propTypes = {
 
 const queries = {
   pendingJobsData: {
-    query: gql`
-      query getCampaignJobs($campaignId: String!) {
-        campaign(id: $campaignId) {
-          id
-          pendingJobs {
-            id
-            jobType
-            assigned
-            status
-            resultMessage
-          }
-        }
-      }
-    `,
+    query: GET_CAMPAIGN_JOBS,
     options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
@@ -937,11 +893,7 @@ const queries = {
     })
   },
   campaignData: {
-    query: gql`query getCampaign($campaignId: String!) {
-      campaign(id: $campaignId) {
-        ${campaignInfoFragment}
-      }
-    }`,
+    query: GET_EDIT_CAMPAIGN_DATA,
     options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
@@ -950,38 +902,7 @@ const queries = {
     })
   },
   organizationData: {
-    query: gql`
-      query getOrganizationData($organizationId: String!) {
-        organization(id: $organizationId) {
-          id
-          uuid
-          teams {
-            id
-            title
-          }
-          ${
-            disableTexters
-              ? ""
-              : `
-          texters: people {
-            id
-            firstName
-            lastName
-            displayName
-          }
-          `
-          }
-          numbersApiKey
-          campaigns(cursor: { offset: 0, limit: 5000 }) {
-            campaigns {
-              id
-              title
-              createdAt
-            }
-          }
-        }
-      }
-    `,
+    query: GET_ORGANIZATION_DATA,
     options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
@@ -989,15 +910,7 @@ const queries = {
     })
   },
   availableActionsData: {
-    query: gql`
-      query getActions($organizationId: String!) {
-        availableActions(organizationId: $organizationId) {
-          name
-          display_name
-          instructions
-        }
-      }
-    `,
+    query: GET_ORGANIZATION_ACTIONS,
     options: (ownProps) => ({
       variables: {
         organizationId: ownProps.match.params.organizationId
@@ -1007,53 +920,28 @@ const queries = {
   }
 };
 
-// Right now we are copying the result fields instead of using a fragment because of https://github.com/apollostack/apollo-client/issues/451
 const mutations = {
   archiveCampaign: (_ownProps) => (campaignId) => ({
-    mutation: gql`mutation archiveCampaign($campaignId: String!) {
-          archiveCampaign(id: $campaignId) {
-            ${campaignInfoFragment}
-          }
-        }`,
+    mutation: ARCHIVE_CAMPAIGN,
     variables: { campaignId }
   }),
   unarchiveCampaign: (_ownProps) => (campaignId) => ({
-    mutation: gql`mutation unarchiveCampaign($campaignId: String!) {
-        unarchiveCampaign(id: $campaignId) {
-          ${campaignInfoFragment}
-        }
-      }`,
+    mutation: UNARCHIVE_CAMPAIGN,
     variables: { campaignId }
   }),
   startCampaign: (_ownProps) => (campaignId) => ({
-    mutation: gql`mutation startCampaign($campaignId: String!) {
-        startCampaign(id: $campaignId) {
-          ${campaignInfoFragment}
-        }
-      }`,
+    mutation: START_CAMPAIGN,
     variables: { campaignId }
   }),
   editCampaign: (_ownProps) => (campaignId, campaign) => ({
-    mutation: gql`
-      mutation editCampaign($campaignId: String!, $campaign: CampaignInput!) {
-        editCampaign(id: $campaignId, campaign: $campaign) {
-          ${campaignInfoFragment}
-        }
-      },
-    `,
+    mutation: EDIT_CAMPAIGN,
     variables: {
       campaignId,
       campaign
     }
   }),
   deleteJob: (ownProps) => (jobId) => ({
-    mutation: gql`
-      mutation deleteJob($campaignId: String!, $id: String!) {
-        deleteJob(campaignId: $campaignId, id: $id) {
-          id
-        }
-      }
-    `,
+    mutation: DELETE_JOB,
     variables: {
       campaignId: ownProps.match.params.campaignId,
       id: jobId

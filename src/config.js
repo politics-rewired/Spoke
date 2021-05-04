@@ -335,11 +335,6 @@ const validators = {
     example: "assignment.message.received,assignment.updated",
     default: ""
   }),
-  DISABLE_CAMPAIGN_EDIT_TEXTERS: bool({
-    desc: "Whether to disable showing the texters panel on campaign edit.",
-    default: "false",
-    isClient: true
-  }),
   DISABLE_SIDEBAR_BADGES: bool({
     desc: "Whether to disable showing the badge counts on the admin sidebar.",
     default: "false",
