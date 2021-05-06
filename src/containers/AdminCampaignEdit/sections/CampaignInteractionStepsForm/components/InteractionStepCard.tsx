@@ -93,7 +93,8 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
 
   const stepHasScript = scriptOptions && scriptOptions.length > 0;
   const stepHasQuestion = questionText;
-  const stepCanHaveChildren = !parentInteractionId || answerOption;
+  const isRootStep = !parentInteractionId;
+  const stepCanHaveChildren = isRootStep || answerOption;
   const isAbleToAddResponse =
     stepHasQuestion && stepHasScript && stepCanHaveChildren;
 
@@ -123,7 +124,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
             disabled={disabled || !clipboardEnabled}
             onClick={() => onCopyBlock(interactionStep)}
           />
-          {hasBlockCopied && (
+          {hasBlockCopied && isRootStep && (
             <RaisedButton
               label="+ Paste Block"
               disabled={disabled || !clipboardEnabled}
