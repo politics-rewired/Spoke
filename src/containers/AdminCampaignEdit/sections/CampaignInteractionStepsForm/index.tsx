@@ -5,7 +5,7 @@ import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
 
 import { Campaign } from "../../../../api/campaign";
@@ -68,24 +68,29 @@ interface HocProps {
 
 interface InnerProps extends FullComponentProps, HocProps {}
 
-interface State {
-  hasBlockCopied: boolean;
-  confirmingRootPaste: boolean;
-  isWorking: boolean;
-}
+const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
+  const [isWorking, setIsWorking] = useState(false);
+  const [hasBlockCopied, setHasBlockCopied] = useState(false);
+  const [confirmingRootPaste, setConfirmingRootPaste] = useState(false);
 
-class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
-  state: State = {
-    isWorking: false,
-    hasBlockCopied: false,
-    confirmingRootPaste: false
+  const updateClipboardHasBlock = () => {
+    if (!supportsClipboard()) return;
+
+    navigator.clipboard.readText().then((text) => {
+      try {
+        const _newBlock = JSON.parse(text);
+        if (!hasBlockCopied) setHasBlockCopied(true);
+      } catch (ex) {
+        if (hasBlockCopied) setHasBlockCopied(false);
+      }
+    });
   };
 
-  componentDidMount() {
-    this.updateClipboardHasBlock();
-  }
+  useEffect(() => {
+    updateClipboardHasBlock();
+  }, []);
 
-  pendingInteractionSteps = (options: {
+  const pendingInteractionSteps = (options: {
     filterEmpty: boolean;
     filterDeleted: boolean;
     stripLocals: boolean;
@@ -98,7 +103,7 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
       return hasNoOptions || hasEmptyScriptOption;
     };
 
-    const interactionSteps = this.props.data?.campaign?.interactionSteps ?? [];
+    const interactionSteps = props.data?.campaign?.interactionSteps ?? [];
     const liveInteractionSteps = interactionSteps
       .filter(
         (step) =>
@@ -128,48 +133,45 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
     };
   };
 
-  handleSave = async () => {
-    const { didChange } = this.pendingInteractionSteps({
+  const handleSave = async () => {
+    const { didChange } = pendingInteractionSteps({
       filterEmpty: true,
       filterDeleted: false,
       stripLocals: true
     });
 
     const interactionSteps = makeTree(
-      this.props.data.campaign.interactionSteps.map(
+      props.data.campaign.interactionSteps.map(
         ({ isModified: _, ...step }) => step
       )
     );
 
     if (!didChange) return;
 
-    this.setState({ isWorking: true });
+    setIsWorking(true);
     try {
-      const response = await this.props.mutations.editCampaign({
+      const response = await props.mutations.editCampaign({
         interactionSteps
       });
       if (response.errors) throw response.errors;
     } catch (err) {
-      this.props.onError(err.message);
+      props.onError(err.message);
     } finally {
-      this.setState({ isWorking: false });
+      setIsWorking(false);
     }
   };
 
-  createAddStepHandler = (parentInteractionId: string) => () => {
-    this.props.mutations.stageAddInteractionStep({ parentInteractionId });
+  const createAddStepHandler = (parentInteractionId: string) => () => {
+    props.mutations.stageAddInteractionStep({ parentInteractionId });
   };
 
-  onRequestRootPaste = () => {
-    this.setState({ confirmingRootPaste: true });
+  const onRequestRootPaste = () => {
+    setConfirmingRootPaste(true);
   };
 
-  confirmRootPaste = () => {
-    this.setState({ confirmingRootPaste: false });
-    this.createPasteBlockHandler(null)();
-  };
-
-  createPasteBlockHandler = (parentInteractionId: string | null) => () => {
+  const createPasteBlockHandler = (
+    parentInteractionId: string | null
+  ) => () => {
     if (!supportsClipboard()) return;
 
     navigator.clipboard.readText().then((text) => {
@@ -195,34 +197,39 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
       );
 
       if (parentInteractionId === null) {
-        this.props.mutations.stageClearInteractionSteps();
+        props.mutations.stageClearInteractionSteps();
       }
 
       mappedBlocks.forEach((newStep) =>
-        this.props.mutations.stageAddInteractionStep(newStep)
+        props.mutations.stageAddInteractionStep(newStep)
       );
     });
   };
 
-  createDeleteStepHandler = (id: string) => () =>
-    this.props.mutations.stageDeleteInteractionStep(id);
+  const confirmRootPaste = () => {
+    setConfirmingRootPaste(false);
+    createPasteBlockHandler(null)();
+  };
 
-  handleFormChange = (changedStep: InteractionStepWithChildren) => {
+  const createDeleteStepHandler = (id: string) => () =>
+    props.mutations.stageDeleteInteractionStep(id);
+
+  const handleFormChange = (changedStep: InteractionStepWithChildren) => {
     if (changedStep.id === DEFAULT_EMPTY_STEP_ID) {
-      return this.props.mutations.stageAddInteractionStep({
+      return props.mutations.stageAddInteractionStep({
         ...changedStep,
         id: generateId()
       });
     }
     const { answerOption, questionText, scriptOptions } = changedStep;
-    this.props.mutations.stageUpdateInteractionStep(changedStep.id, {
+    props.mutations.stageUpdateInteractionStep(changedStep.id, {
       answerOption,
       questionText,
       scriptOptions
     });
   };
 
-  copyBlock = (interactionStep: InteractionStepWithChildren) => {
+  const copyBlock = (interactionStep: InteractionStepWithChildren) => {
     const interactionStepsInBlock = new Set([interactionStep.id]);
     const {
       parentInteractionId: _id,
@@ -233,7 +240,7 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
 
     let interactionStepsAdded = 1;
 
-    const { interactionSteps } = this.pendingInteractionSteps({
+    const { interactionSteps } = pendingInteractionSteps({
       filterEmpty: false,
       filterDeleted: true,
       stripLocals: true
@@ -256,121 +263,99 @@ class CampaignInteractionStepsForm extends React.Component<InnerProps, State> {
     }
 
     navigator.clipboard.writeText(JSON.stringify(block));
-    this.updateClipboardHasBlock();
+    updateClipboardHasBlock();
   };
 
-  updateClipboardHasBlock = () => {
-    if (!supportsClipboard()) return;
+  const {
+    isNew,
+    saveLabel,
+    data: { campaign: { customFields } = { customFields: [] } },
+    availableActions: { availableActions }
+  } = props;
 
-    navigator.clipboard.readText().then((text) => {
-      try {
-        const _newBlock = JSON.parse(text);
-        if (!this.state.hasBlockCopied) this.setState({ hasBlockCopied: true });
-      } catch (ex) {
-        if (this.state.hasBlockCopied) this.setState({ hasBlockCopied: false });
+  const {
+    interactionSteps,
+    didChange: hasPendingChanges,
+    hasEmptyScripts
+  } = pendingInteractionSteps({
+    filterEmpty: false,
+    filterDeleted: true,
+    stripLocals: true
+  });
+  const isSaveDisabled =
+    isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
+  const finalSaveLabel = isWorking ? "Working..." : saveLabel;
+
+  const tree = makeTree(interactionSteps);
+  const finalFree: InteractionStepWithChildren = isEqual(tree, {
+    interactionSteps: []
+  })
+    ? {
+        id: DEFAULT_EMPTY_STEP_ID,
+        parentInteractionId: null,
+        questionText: "",
+        answerOption: "",
+        scriptOptions: [""],
+        answerActions: "",
+        interactionSteps: [],
+        isDeleted: false,
+        createdAt: DateTime.local().toISO()
       }
-    });
-  };
+    : tree;
 
-  render() {
-    const { isWorking } = this.state;
-
-    const {
-      isNew,
-      saveLabel,
-      data: { campaign: { customFields } = { customFields: [] } },
-      availableActions: { availableActions }
-    } = this.props;
-
-    const {
-      interactionSteps,
-      didChange: hasPendingChanges,
-      hasEmptyScripts
-    } = this.pendingInteractionSteps({
-      filterEmpty: false,
-      filterDeleted: true,
-      stripLocals: true
-    });
-    const isSaveDisabled =
-      isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
-    const finalSaveLabel = isWorking ? "Working..." : saveLabel;
-
-    const tree = makeTree(interactionSteps);
-    const finalFree: InteractionStepWithChildren = isEqual(tree, {
-      interactionSteps: []
-    })
-      ? {
-          id: DEFAULT_EMPTY_STEP_ID,
-          parentInteractionId: null,
-          questionText: "",
-          answerOption: "",
-          scriptOptions: [""],
-          answerActions: "",
-          interactionSteps: [],
-          isDeleted: false,
-          createdAt: DateTime.local().toISO()
-        }
-      : tree;
-
-    return (
-      <div
-        onFocus={this.updateClipboardHasBlock}
-        onClick={this.updateClipboardHasBlock}
+  return (
+    <div onFocus={updateClipboardHasBlock} onClick={updateClipboardHasBlock}>
+      <Dialog
+        open={confirmingRootPaste}
+        actions={[
+          <FlatButton
+            key="cancel"
+            label="Cancel"
+            primary
+            onClick={() => setConfirmingRootPaste(false)}
+          />,
+          <FlatButton
+            key="paste"
+            label="Paste"
+            primary
+            onClick={confirmRootPaste}
+          />
+        ]}
       >
-        <Dialog
-          open={this.state.confirmingRootPaste}
-          actions={[
-            <FlatButton
-              key="cancel"
-              label="Cancel"
-              primary
-              onClick={() => this.setState({ confirmingRootPaste: false })}
-            />,
-            <FlatButton
-              key="paste"
-              label="Paste"
-              primary
-              onClick={this.confirmRootPaste}
-            />
-          ]}
-        >
-          Pasting over the initial message will overwrite the whole script and
-          you may need to change your sync configuration. Are you sure you want
-          to continue?
-        </Dialog>
-        <CampaignFormSectionHeading
-          title="What do you want to discuss?"
-          subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
-        />
-        <InteractionStepCard
-          interactionStep={finalFree}
-          customFields={customFields}
-          availableActions={availableActions}
-          hasBlockCopied={this.state.hasBlockCopied}
-          disabled={isWorking}
-          onFormChange={this.handleFormChange}
-          onCopyBlock={this.copyBlock}
-          onRequestRootPaste={this.onRequestRootPaste}
-          deleteStepFactory={this.createDeleteStepHandler}
-          addStepFactory={this.createAddStepHandler}
-          pasteBlockFactory={this.createPasteBlockHandler}
-        />
-        <RaisedButton
-          {...dataTest("interactionSubmit")}
-          primary
-          label={finalSaveLabel}
-          disabled={isSaveDisabled}
-          onClick={this.handleSave}
-        />
-        {hasEmptyScripts && (
-          <p style={{ color: "#DD0000" }}>
-            You have one or more empty scripts!
-          </p>
-        )}
-      </div>
-    );
-  }
-}
+        Pasting over the initial message will overwrite the whole script and you
+        may need to change your sync configuration. Are you sure you want to
+        continue?
+      </Dialog>
+      <CampaignFormSectionHeading
+        title="What do you want to discuss?"
+        subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
+      />
+      <InteractionStepCard
+        interactionStep={finalFree}
+        customFields={customFields}
+        availableActions={availableActions}
+        hasBlockCopied={hasBlockCopied}
+        disabled={isWorking}
+        onFormChange={handleFormChange}
+        onCopyBlock={copyBlock}
+        onRequestRootPaste={onRequestRootPaste}
+        deleteStepFactory={createDeleteStepHandler}
+        addStepFactory={createAddStepHandler}
+        pasteBlockFactory={createPasteBlockHandler}
+      />
+      <RaisedButton
+        {...dataTest("interactionSubmit")}
+        primary
+        label={finalSaveLabel}
+        disabled={isSaveDisabled}
+        onClick={handleSave}
+      />
+      {hasEmptyScripts && (
+        <p style={{ color: "#DD0000" }}>You have one or more empty scripts!</p>
+      )}
+    </div>
+  );
+};
 
 const queries: QueryMap<FullComponentProps> = {
   data: {
