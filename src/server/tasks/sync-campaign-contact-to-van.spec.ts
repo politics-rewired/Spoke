@@ -193,6 +193,25 @@ describe("formatCanvassResponsePayload", () => {
     expect(canvassResponse.responses).toHaveLength(1);
     expect(canvassResponse.resultCodeId).toBeNull();
   });
+
+  test("correctly formats a contact with both survey responses and an opt-out result code", () => {
+    const optOutResultCode = 4321;
+
+    const canvassResultRow: CanvassResultRow = {
+      canvassed_at: "2021-01-21",
+      result_codes: [],
+      activist_codes: [],
+      response_options: [{ survey_question_id: 999, response_option_id: 888 }]
+    };
+    const canvassResponse = formatCanvassResponsePayload({
+      canvassResultRow,
+      phoneId,
+      canvassedResultCode,
+      optOutResultCode
+    });
+    expect(canvassResponse.responses).toBeNull();
+    expect(canvassResponse.resultCodeId).toBe(optOutResultCode);
+  });
 });
 
 describe("hasPayload", () => {
