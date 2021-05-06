@@ -150,9 +150,11 @@ describe("formatCanvassResponsePayload", () => {
       canvassedResultCode,
       optOutResultCode
     });
-    expect(canvassResponse).toHaveLength(1);
+    expect(canvassResponse).toHaveLength(2);
     expect(canvassResponse[0].responses).toBeNull();
-    expect(canvassResponse[0].resultCodeId).toBe(optOutResultCode);
+    expect(canvassResponse[0].resultCodeId).toBeNull();
+    expect(canvassResponse[1].responses).toBeNull();
+    expect(canvassResponse[1].resultCodeId).toBe(optOutResultCode);
   });
 
   test("correctly formats a messaged contact without survey responses", () => {
