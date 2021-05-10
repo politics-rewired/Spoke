@@ -14,7 +14,7 @@ import {
   InteractionStepWithChildren
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
-import { supportsClipboard } from "../../../../client/lib";
+import { readClipboardText, writeClipboardText } from "../../../../client/lib";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
@@ -34,6 +34,7 @@ import {
   GET_CAMPAIGN_INTERACTIONS,
   UpdateInteractionStepPayload
 } from "./resolvers";
+import { isBlock } from "./utils";
 
 const DEFAULT_EMPTY_STEP_ID = "DEFAULT_EMPTY_STEP_ID";
 
@@ -73,17 +74,9 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const [hasBlockCopied, setHasBlockCopied] = useState(false);
   const [confirmingRootPaste, setConfirmingRootPaste] = useState(false);
 
-  const updateClipboardHasBlock = () => {
-    if (!supportsClipboard()) return;
-
-    navigator.clipboard.readText().then((text) => {
-      try {
-        const _newBlock = JSON.parse(text);
-        if (!hasBlockCopied) setHasBlockCopied(true);
-      } catch (ex) {
-        if (hasBlockCopied) setHasBlockCopied(false);
-      }
-    });
+  const updateClipboardHasBlock = async () => {
+    const clipboardText = await readClipboardText();
+    setHasBlockCopied(isBlock(clipboardText));
   };
 
   useEffect(() => {
@@ -172,9 +165,9 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const createPasteBlockHandler = (
     parentInteractionId: string | null
   ) => () => {
-    if (!supportsClipboard()) return;
+    readClipboardText().then((text) => {
+      if (!isBlock(text)) return;
 
-    navigator.clipboard.readText().then((text) => {
       const idMap: Record<string, string> = {};
 
       const newBlocks: InteractionStep[] = JSON.parse(text);
@@ -229,7 +222,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     });
   };
 
-  const copyBlock = (interactionStep: InteractionStepWithChildren) => {
+  const copyBlock = async (interactionStep: InteractionStepWithChildren) => {
     const interactionStepsInBlock = new Set([interactionStep.id]);
     const {
       parentInteractionId: _id,
@@ -262,8 +255,8 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       }
     }
 
-    navigator.clipboard.writeText(JSON.stringify(block));
-    updateClipboardHasBlock();
+    await writeClipboardText(JSON.stringify(block));
+    await updateClipboardHasBlock();
   };
 
   const {
