@@ -284,7 +284,8 @@ const queries: QueryMap<InnerProps> = {
     options: (ownProps) => ({
       variables: {
         campaignId: ownProps.campaignId
-      }
+      },
+      fetchPolicy: "network-only"
     })
   },
   organizationData: {
