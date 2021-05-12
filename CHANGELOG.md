@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.3](https://github.com/politics-rewired/spoke/compare/v4.7.2...v4.7.3) (2021-05-12)
+
+
+### Bug Fixes
+
+* force fetching fresh data ([#958](https://github.com/politics-rewired/spoke/issues/958)) ([c0235ff](https://github.com/politics-rewired/spoke/commit/c0235ffe84fc74466f241e2b5b74bb74826d36be))
+* harden clipboard usage ([#954](https://github.com/politics-rewired/spoke/issues/954)) ([096e7f6](https://github.com/politics-rewired/spoke/commit/096e7f655e4788d109732e8d5d7c677720fc2c0b))
+* only show paste-over-block button for root step ([#957](https://github.com/politics-rewired/spoke/issues/957)) ([20aa387](https://github.com/politics-rewired/spoke/commit/20aa387db7d6035b27610460778b632c3fe12e7f))
+
 ### [4.7.2](https://github.com/politics-rewired/spoke/compare/v4.7.1...v4.7.2) (2021-05-04)
 
 
