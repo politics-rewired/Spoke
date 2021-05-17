@@ -4,6 +4,8 @@
   "description": "Spoke",
   "main": "src/server",
   "engines": {
+    "npm": "please-use-yarn",
+    "yarn": ">= 1.19.1",
     "node": "^14.15.2"
   },
   "scripts": {
