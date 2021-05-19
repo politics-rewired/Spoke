@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.4](https://github.com/politics-rewired/spoke/compare/v4.7.3...v4.7.4) (2021-05-19)
+
+
+### Bug Fixes
+
+* update pgc-ngp-van for configurable webhook url ([#963](https://github.com/politics-rewired/spoke/issues/963)) ([52077ec](https://github.com/politics-rewired/spoke/commit/52077ecc0870fefd9a4e994cbb75b244e918956e))
+
 ### [4.7.3](https://github.com/politics-rewired/spoke/compare/v4.7.2...v4.7.3) (2021-05-12)
 
 
