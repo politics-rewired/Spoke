@@ -11,11 +11,16 @@ export const errToObj = (err: any): any =>
     return acc;
   }, {});
 
-export type WithClientFn<T> = (client: PoolClient | Client) => Promise<T>;
+export type WithClientFn<T, C extends PoolClient | Client> = (
+  client: C
+) => Promise<T>;
 
-export const withTransaction = async <T extends unknown>(
-  client: PoolClient | Client,
-  callback: WithClientFn<T>
+export const withTransaction = async <
+  T extends unknown,
+  C extends PoolClient | Client
+>(
+  client: C,
+  callback: WithClientFn<T, C>
 ) => {
   await client.query("begin");
   try {
