@@ -6,7 +6,7 @@ import {
 } from "../../../__test__/testbed-preparation/core";
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
-import { AssignmentRecord } from "../api/types";
+import { AssignmentRecord, MessageStatusType } from "../api/types";
 import {
   AssignmentTarget,
   assignPayloads,
@@ -252,5 +252,40 @@ describe("assign-texters", () => {
     expect(assignedCounts[0]).toBe(100);
     expect(assignedCounts[1]).toBe(200);
     expect(assignedCounts[2]).toBe(300);
+  });
+
+  test("it assigns conversations when no needsMessage conversations exist", async () => {
+    const {
+      campaign,
+      texters,
+      assignments,
+      contacts
+    } = await createCompleteCampaign(client, {
+      texters: 1,
+      contacts: [
+        { messageStatus: MessageStatusType.NeedsMessage },
+        { messageStatus: MessageStatusType.NeedsResponse },
+        { messageStatus: MessageStatusType.Conversation },
+        { messageStatus: MessageStatusType.Messaged }
+      ]
+    });
+
+    const assignmentTarget: AssignmentTarget = {
+      id: `${assignments[0].id}`,
+      userId: `${texters[0].id}`,
+      contactsCount: contacts.length,
+      operation: "insert"
+    };
+
+    await assignPayloads({
+      client,
+      campaignId: campaign.id,
+      isArchived: campaign.is_archived!,
+      assignmentTargets: [assignmentTarget]
+    });
+
+    const assignedCount = await texterContactCount(client, texters[0].id);
+
+    expect(assignedCount).toBe(contacts.length);
   });
 });
