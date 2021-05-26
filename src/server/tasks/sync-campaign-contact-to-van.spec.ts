@@ -131,6 +131,7 @@ describe("fetchCanvassResponses", () => {
 
 describe("formatCanvassResponsePayload", () => {
   const phoneId = 5432;
+  const phoneNumber = "+16463893770";
   const canvassedResultCode = 1234;
 
   test("correctly formats an opted-out contact without survey responses", () => {
@@ -145,6 +146,7 @@ describe("formatCanvassResponsePayload", () => {
     const canvassResponse = formatCanvassResponsePayload({
       canvassResultRow,
       phoneId,
+      phoneNumber,
       canvassedResultCode,
       optOutResultCode
     });
@@ -164,6 +166,7 @@ describe("formatCanvassResponsePayload", () => {
     const canvassResponse = formatCanvassResponsePayload({
       canvassResultRow,
       phoneId,
+      phoneNumber,
       canvassedResultCode,
       optOutResultCode
     });
@@ -183,6 +186,7 @@ describe("formatCanvassResponsePayload", () => {
     const canvassResponse = formatCanvassResponsePayload({
       canvassResultRow,
       phoneId,
+      phoneNumber,
       canvassedResultCode,
       optOutResultCode
     });
@@ -196,6 +200,10 @@ describe("hasPayload", () => {
     const nullResponsesResponse: VANCanvassResponse = {
       canvassContext: {
         phoneId: 1234,
+        phone: {
+          dialingPrefix: "1",
+          phoneNumber: "+16463893770"
+        },
         dateCanvassed: "2021-01-21"
       },
       resultCodeId: null,
@@ -206,6 +214,10 @@ describe("hasPayload", () => {
     const emptyResponsesResponse: VANCanvassResponse = {
       canvassContext: {
         phoneId: 1234,
+        phone: {
+          dialingPrefix: "1",
+          phoneNumber: "+16463893770"
+        },
         dateCanvassed: "2021-01-21"
       },
       resultCodeId: null,
@@ -218,6 +230,10 @@ describe("hasPayload", () => {
     const resultCodeResponse: VANCanvassResponse = {
       canvassContext: {
         phoneId: 1234,
+        phone: {
+          dialingPrefix: "1",
+          phoneNumber: "+16463893770"
+        },
         dateCanvassed: "2021-01-21"
       },
       resultCodeId: 5432,
@@ -230,6 +246,10 @@ describe("hasPayload", () => {
     const resultCodeResponse: VANCanvassResponse = {
       canvassContext: {
         phoneId: 1234,
+        phone: {
+          dialingPrefix: "1",
+          phoneNumber: "+16463893770"
+        },
         dateCanvassed: "2021-01-21"
       },
       resultCodeId: null,

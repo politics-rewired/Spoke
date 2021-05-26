@@ -18,8 +18,14 @@ class VANSyncError extends Error {
 
 export const CANVASSED_TAG_NAME = "Canvassed";
 
+export interface VANCanvassContextPhone {
+  dialingPrefix: "1";
+  phoneNumber: string;
+}
+
 export interface VANCanvassContext {
   phoneId: number;
+  phone: VANCanvassContextPhone;
   contactTypeId?: number; //	Optional; a valid contact type ID
   inputTypeId?: number; //	Optional; a valid input type ID (defaults to 11 → API)
   dateCanvassed?: string; //	Optional; the ISO-8601 formatted date that the canvass attempt was made (defaults to today’s date)
@@ -224,6 +230,7 @@ export const fetchCanvassedResultCode = async (
 export interface FormatCanvassResponsePayloadOptions {
   canvassResultRow: CanvassResultRow;
   phoneId: number;
+  phoneNumber: string;
   optOutResultCode: number | null;
   canvassedResultCode: number | null;
 }
@@ -231,6 +238,7 @@ export interface FormatCanvassResponsePayloadOptions {
 export const formatCanvassResponsePayload = ({
   canvassResultRow,
   phoneId,
+  phoneNumber,
   optOutResultCode,
   canvassedResultCode
 }: FormatCanvassResponsePayloadOptions) => {
@@ -273,6 +281,10 @@ export const formatCanvassResponsePayload = ({
   const canvassResponse: VANCanvassResponse = {
     canvassContext: {
       phoneId,
+      phone: {
+        dialingPrefix: "1",
+        phoneNumber: phoneNumber.replace("+1", "")
+      },
       dateCanvassed
     },
     resultCodeId,
@@ -295,6 +307,7 @@ export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
   cc_created_at: string;
   external_id: string;
   phone_id: number;
+  phone_number: string;
 }
 
 export const syncCampaignContactToVAN: Task = async (
@@ -306,7 +319,8 @@ export const syncCampaignContactToVAN: Task = async (
     contact_id: contactId,
     // canvassed_at: dateCanvassed,
     external_id: vanId,
-    phone_id: phoneId
+    phone_id: phoneId,
+    phone_number: phoneNumber
   } = payload;
 
   const {
@@ -336,6 +350,7 @@ export const syncCampaignContactToVAN: Task = async (
     formatCanvassResponsePayload({
       canvassResultRow,
       phoneId,
+      phoneNumber,
       optOutResultCode,
       canvassedResultCode
     })
