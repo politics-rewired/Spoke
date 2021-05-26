@@ -885,7 +885,7 @@ CREATE FUNCTION public.queue_sync_campaign_to_van(campaign_id integer) RETURNS v
       into v_system_id;
 
       if v_system_id is null then
-       raise 'No external system configured for campaign with id %', queue_sync_campaign_to_van.campaign_id;
+        raise 'No external system configured for campaign with id %', queue_sync_campaign_to_van.campaign_id;
       end if;
 
       select username, api_key_ref
@@ -939,6 +939,7 @@ CREATE FUNCTION public.queue_sync_campaign_to_van(campaign_id integer) RETURNS v
             'contact_id', cc.id,
             'external_id', cc.external_id,
             'phone_id', ((cc.custom_fields)::json->>'phone_id')::integer,
+            'phone_number', cc.cell,
             '__context', json_build_object(
               'job_request_id', v_job_request_id,
               'contact_count', v_contact_count
