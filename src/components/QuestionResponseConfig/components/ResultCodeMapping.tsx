@@ -9,13 +9,15 @@ import { ExternalResultCode } from "../../../api/external-result-code";
 
 interface Props {
   resultCode: ExternalResultCode;
+  warning?: string;
   onClickDelete(): void;
 }
 
-export const ResultCodeMapping: React.SFC<Props> = (props) => {
+export const ResultCodeMapping: React.FC<Props> = (props) => {
   return (
     <ListItem
       primaryText={props.resultCode.name}
+      secondaryText={props.warning}
       leftIcon={<InputIcon color={green200} />}
       rightIconButton={
         <IconButton onClick={props.onClickDelete}>
