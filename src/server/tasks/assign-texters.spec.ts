@@ -6,11 +6,12 @@ import {
 } from "../../../__test__/testbed-preparation/core";
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
-import { AssignmentRecord } from "../api/types";
+import { AssignmentRecord, MessageStatusType } from "../api/types";
 import {
   AssignmentTarget,
   assignPayloads,
   ensureAssignments,
+  freeUpTexters,
   zeroOutDeleted
 } from "./assign-texters";
 
@@ -166,6 +167,118 @@ describe("assign-texters", () => {
     const finalContactCount1 = await texterContactCount(client, texters[1].id);
     expect(finalContactCount0).toBe(75);
     expect(finalContactCount1).toBe(0);
+  });
+
+  test("it frees up over-assigned texters (all needsMessage)", async () => {
+    const { campaign, texters, assignments } = await createCompleteCampaign(
+      client,
+      {
+        texters: 3,
+        contacts: 45
+      }
+    );
+
+    for (const assignment of assignments) {
+      await client.query(
+        `
+          update campaign_contact
+          set assignment_id = $1
+          where id in (
+            select id from campaign_contact
+            where campaign_id = $2
+              and assignment_id is null
+            limit $3
+          )
+        `,
+        [assignment.id, campaign.id, 15]
+      );
+    }
+
+    const assignmentTargets: AssignmentTarget[] = assignments.map(
+      (assignment, index) => ({
+        id: `${assignment.id}`,
+        userId: `${texters[index].id}`,
+        contactsCount: 10,
+        operation: "insert"
+      })
+    );
+
+    await freeUpTexters({
+      client,
+      campaignId: campaign.id,
+      isArchived: campaign.is_archived!,
+      assignmentTargets
+    });
+
+    const assignedCounts = await Promise.all(
+      texters.map(({ id }) => texterContactCount(client, id))
+    );
+
+    expect(assignedCounts).toHaveLength(3);
+    expect(assignedCounts[0]).toBe(10);
+    expect(assignedCounts[1]).toBe(10);
+    expect(assignedCounts[2]).toBe(10);
+  });
+
+  test("it frees up over-assigned texters (needs reply)", async () => {
+    const contacts = [...Array(100)].map((_, index) => ({
+      messageStatus:
+        index >= 45
+          ? MessageStatusType.NeedsMessage
+          : MessageStatusType.NeedsResponse
+    }));
+    const { campaign, texters, assignments } = await createCompleteCampaign(
+      client,
+      {
+        texters: 4,
+        contacts
+      }
+    );
+
+    // Assign replies for first 3 texters
+    console.log(assignments.slice(0, 3).map(({ id }) => id));
+    for (const assignment of assignments.slice(0, 3)) {
+      await client.query(
+        `
+          update campaign_contact
+          set assignment_id = $1
+          where id in (
+            select id from campaign_contact
+            where campaign_id = $2
+              and assignment_id is null
+              and message_status = 'needsResponse'
+            limit $3
+          )
+        `,
+        [assignment.id, campaign.id, 15]
+      );
+    }
+
+    const assignmentTargets: AssignmentTarget[] = assignments.map(
+      (assignment, index) => ({
+        id: `${assignment.id}`,
+        userId: `${texters[index].id}`,
+        contactsCount: 15,
+        operation: "insert"
+      })
+    );
+
+    await freeUpTexters({
+      client,
+      campaignId: campaign.id,
+      isArchived: campaign.is_archived!,
+      assignmentTargets
+    });
+
+    const assignedCounts = await Promise.all(
+      texters.map(({ id }) => texterContactCount(client, id))
+    );
+
+    expect(assignedCounts).toHaveLength(4);
+    expect(assignedCounts[0]).toBe(15);
+    expect(assignedCounts[1]).toBe(15);
+    expect(assignedCounts[2]).toBe(15);
+    expect(assignedCounts[3]).toBe(0); // Nothing to free up yet for the new texter
   });
 
   test("it does basic assignment", async () => {
