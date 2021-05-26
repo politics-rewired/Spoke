@@ -23,7 +23,10 @@ import React from "react";
 import { compose } from "recompose";
 
 import { ExternalActivistCode } from "../../api/external-activist-code";
-import { ExternalResultCode } from "../../api/external-result-code";
+import {
+  ExternalResultCode,
+  resultCodeWarning
+} from "../../api/external-result-code";
 import { ExternalSurveyQuestion } from "../../api/external-survey-question";
 import {
   ExternalSyncQuestionResponseConfig,
@@ -172,10 +175,12 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
                     );
                   }
                   if (isResultCode(target)) {
+                    const warning = resultCodeWarning(target.resultCode);
                     return (
                       <ResultCodeMapping
                         key={target.id}
                         resultCode={target.resultCode}
+                        warning={warning}
                         onClickDelete={this.makeHandleOnClickDeleteTarget(
                           target.id
                         )}

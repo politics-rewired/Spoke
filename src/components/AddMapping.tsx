@@ -15,7 +15,10 @@ import React from "react";
 import { compose } from "recompose";
 
 import { ExternalActivistCode } from "../api/external-activist-code";
-import { ExternalResultCode } from "../api/external-result-code";
+import {
+  ExternalResultCode,
+  resultCodeWarning
+} from "../api/external-result-code";
 import { ExternalSurveyQuestion } from "../api/external-survey-question";
 import {
   ExternalSyncConfigTarget,
@@ -297,13 +300,20 @@ class AddMapping extends React.Component<InnerProps, State> {
                 autoWidth
                 onChange={this.handleOnChangeResultCode}
               >
-                {this.props.resultCodes.edges.map(({ node }) => (
-                  <MenuItem
-                    key={node.id}
-                    value={node.id}
-                    primaryText={node.name}
-                  />
-                ))}
+                {this.props.resultCodes.edges.map(({ node }) => {
+                  const warning = resultCodeWarning(node);
+                  const name = warning
+                    ? `${node.name} - ${warning}`
+                    : node.name;
+                  return (
+                    <MenuItem
+                      key={node.id}
+                      value={node.id}
+                      primaryText={name}
+                      disabled={warning !== undefined}
+                    />
+                  );
+                })}
               </SelectField>
             )}
             {this.state.type === MappingType.ResponseOption && (
