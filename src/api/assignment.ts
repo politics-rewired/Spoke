@@ -3,6 +3,11 @@ import { CampaignContact } from "./campaign-contact";
 import { CannedResponse } from "./canned-response";
 import { User } from "./user";
 
+export interface TexterAssignmentInput {
+  userId: string;
+  contactsCount: number;
+}
+
 export interface Assignment {
   id: string;
   texter: User;

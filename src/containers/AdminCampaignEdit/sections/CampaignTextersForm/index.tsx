@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { withApollo, WithApolloClient } from "react-apollo";
 import { compose } from "recompose";
 
+import { TexterAssignmentInput } from "../../../../api/assignment";
 import { Campaign } from "../../../../api/campaign";
 import { User } from "../../../../api/user";
 import { DateTime } from "../../../../lib/datetime";
@@ -90,7 +91,7 @@ interface InnerProps extends FullComponentProps, HocProps {
 
 interface Values {
   texters: {
-    texters: any[];
+    assignmentInputs: TexterAssignmentInput[];
     ignoreAfterDate: string;
   };
 }
@@ -180,14 +181,12 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
 
   const handleSubmit = async () => {
     const { editCampaign } = props.mutations;
-    const textersInput = stagedTexters.map((texter) => ({
-      id: texter.id,
-      needsMessageCount: texter.assignment.needsMessageCount,
-      maxContacts: texter.assignment.maxContacts,
+    const assignmentInputs = stagedTexters.map((texter) => ({
+      userId: texter.id,
       contactsCount: texter.assignment.contactsCount
     }));
     const texterInput = {
-      texters: textersInput,
+      assignmentInputs,
       ignoreAfterDate: lastReset.toUTC().toISO()
     };
     setWorking(true);

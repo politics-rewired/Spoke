@@ -1,5 +1,6 @@
 import { Pool, PoolClient } from "pg";
 
+import { TexterAssignmentInput } from "../../api/assignment";
 import { DateTime } from "../../lib/datetime";
 import { CampaignRecord } from "../api/types";
 import { Notifications, sendUserNotification } from "../notifications";
@@ -7,11 +8,6 @@ import { withTransaction } from "../utils";
 import { addProgressJob, ProgressTask } from "./utils";
 
 export const TASK_IDENTIFIER = "assign-texters";
-
-interface Texter {
-  id: string;
-  contactsCount: number;
-}
 
 export interface AssignmentTarget {
   id: string;
@@ -23,13 +19,13 @@ export interface AssignmentTarget {
 interface EnsureAssignmentsOptions {
   client: PoolClient | Pool;
   campaignId: number;
-  texters: Texter[];
+  assignmentInputs: TexterAssignmentInput[];
 }
 
 export const ensureAssignments = async (options: EnsureAssignmentsOptions) => {
-  const { client, campaignId, texters } = options;
+  const { client, campaignId, assignmentInputs } = options;
   const assignmentTargets: AssignmentTarget[] = [];
-  for (const texter of texters) {
+  for (const assignmentInput of assignmentInputs) {
     const {
       rows: [{ id, operation }]
     } = await client.query<{ id: string; operation: string }>(
@@ -43,12 +39,12 @@ export const ensureAssignments = async (options: EnsureAssignmentsOptions) => {
           id,
           (case when created_at = updated_at then 'insert' else 'update' end) as operation
       `,
-      [texter.id, campaignId]
+      [assignmentInput.userId, campaignId]
     );
     assignmentTargets.push({
       id,
-      userId: texter.id,
-      contactsCount: texter.contactsCount,
+      userId: assignmentInput.userId,
+      contactsCount: assignmentInput.contactsCount,
       operation
     });
   }
@@ -230,7 +226,7 @@ const sendAssignmentNotifications = async (
 
 export interface AssignTextersPayload {
   campaignId: number;
-  texters: Texter[];
+  assignmentInputs: TexterAssignmentInput[];
   ignoreAfterDate?: string;
 }
 
@@ -240,7 +236,7 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
 ) => {
   const {
     campaignId,
-    texters,
+    assignmentInputs,
     ignoreAfterDate = DateTime.local().toISO()
   } = payload;
 
@@ -256,7 +252,7 @@ export const assignTexters: ProgressTask<AssignTextersPayload> = async (
       const assignmentTargets = await ensureAssignments({
         client: trx,
         campaignId,
-        texters
+        assignmentInputs
       });
       await helpers.updateStatus(10);
 

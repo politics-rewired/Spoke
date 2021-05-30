@@ -71,9 +71,9 @@ describe("assign-texters", () => {
     await ensureAssignments({
       client,
       campaignId: campaign.id,
-      texters: [
-        { id: `${texter0.id}`, contactsCount: 1 },
-        { id: `${texter1.id}`, contactsCount: 1 }
+      assignmentInputs: [
+        { userId: `${texter0.id}`, contactsCount: 1 },
+        { userId: `${texter1.id}`, contactsCount: 1 }
       ]
     });
 

@@ -82,14 +82,12 @@ const rootSchema = `
   }
 
   input TexterAssignmentInput {
-    id: String!
+    userId: String!
     contactsCount: Int!
-    needsMessageCount: Int
-    maxContacts: Int
   }
 
   input TexterInput {
-    texters: [TexterAssignmentInput!]!
+    assignmentInputs: [TexterAssignmentInput!]!
     ignoreAfterDate: Date!
   }
 
