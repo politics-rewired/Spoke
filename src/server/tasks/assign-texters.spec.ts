@@ -36,6 +36,27 @@ const texterContactCount = async (
   return count;
 };
 
+const assignContacts = async (
+  client: PoolClient,
+  assignmentId: number,
+  campaignId: number,
+  count: number
+) => {
+  await client.query(
+    `
+      update campaign_contact
+      set assignment_id = $1
+      where id in (
+        select id from campaign_contact
+        where campaign_id = $2
+          and assignment_id is null
+        limit $3
+      )
+    `,
+    [assignmentId, campaignId, count]
+  );
+};
+
 describe("assign-texters", () => {
   let pool: Pool;
   let client: PoolClient;
@@ -101,10 +122,7 @@ describe("assign-texters", () => {
       }
     );
 
-    await client.query(
-      `update campaign_contact set assignment_id = $1 where campaign_id = $2`,
-      [assignments[0].id, campaign.id]
-    );
+    await assignContacts(client, assignments[0].id, campaign.id, 150);
 
     const initalContactCount = await texterContactCount(
       client,
@@ -138,31 +156,8 @@ describe("assign-texters", () => {
       }
     );
 
-    await client.query(
-      `
-        update campaign_contact
-        set assignment_id = $1
-        where id in (
-          select id from campaign_contact
-          where campaign_id = $2
-            and assignment_id is null
-          limit $3
-        )`,
-      [assignments[0].id, campaign.id, 75]
-    );
-
-    await client.query(
-      `
-        update campaign_contact
-        set assignment_id = $1
-        where id in (
-          select id from campaign_contact
-          where campaign_id = $2
-            and assignment_id is null
-          limit $3
-        )`,
-      [assignments[1].id, campaign.id, 75]
-    );
+    await assignContacts(client, assignments[0].id, campaign.id, 75);
+    await assignContacts(client, assignments[1].id, campaign.id, 75);
 
     const initalContactCount0 = await texterContactCount(
       client,
@@ -209,19 +204,7 @@ describe("assign-texters", () => {
     );
 
     for (const assignment of assignments) {
-      await client.query(
-        `
-          update campaign_contact
-          set assignment_id = $1
-          where id in (
-            select id from campaign_contact
-            where campaign_id = $2
-              and assignment_id is null
-            limit $3
-          )
-        `,
-        [assignment.id, campaign.id, 15]
-      );
+      await assignContacts(client, assignment.id, campaign.id, 15);
     }
 
     const assignmentTargets: AssignmentTarget[] = assignments.map(
@@ -268,20 +251,7 @@ describe("assign-texters", () => {
     // Assign replies for first 3 texters
     console.log(assignments.slice(0, 3).map(({ id }) => id));
     for (const assignment of assignments.slice(0, 3)) {
-      await client.query(
-        `
-          update campaign_contact
-          set assignment_id = $1
-          where id in (
-            select id from campaign_contact
-            where campaign_id = $2
-              and assignment_id is null
-              and message_status = 'needsResponse'
-            limit $3
-          )
-        `,
-        [assignment.id, campaign.id, 15]
-      );
+      await assignContacts(client, assignment.id, campaign.id, 15);
     }
 
     const assignmentTargets: AssignmentTarget[] = assignments.map(
@@ -356,19 +326,7 @@ describe("assign-texters", () => {
     );
 
     for (const assignment of assignments) {
-      await client.query(
-        `
-          update campaign_contact
-          set assignment_id = $1
-          where id in (
-            select id from campaign_contact
-            where campaign_id = $2
-              and assignment_id is null
-            limit $3
-          )
-        `,
-        [assignment.id, campaign.id, 50]
-      );
+      await assignContacts(client, assignment.id, campaign.id, 50);
     }
 
     const assignmentTargets: AssignmentTarget[] = assignments.map(
