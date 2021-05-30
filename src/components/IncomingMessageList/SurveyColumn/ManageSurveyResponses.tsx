@@ -113,10 +113,19 @@ export const ManageSurveyResponses: React.FC<ManageSurveyResponsesProps> = (
       try {
         // Delete response for this and all children (unless this is a single question change)
         if (affectedSteps.length > 1 || !value) {
-          const iStepIds = affectedSteps.map((iStep) => iStep.id);
-          const response = await deleteQuestionResponses(iStepIds, contact.id);
+          const affectedIStepIds = affectedSteps.map((iStep) => iStep.id);
+          const response = await deleteQuestionResponses(
+            affectedIStepIds,
+            contact.id
+          );
           if (response.errors) throw response.errors;
-          iStepIds.forEach((stepId) => delete questionResponses[stepId]);
+          setQuestionResponses(
+            Object.fromEntries(
+              Object.entries(questionResponses).filter(
+                ([stepId]) => !affectedIStepIds.includes(stepId)
+              )
+            )
+          );
         }
 
         if (value) {
@@ -127,7 +136,7 @@ export const ManageSurveyResponses: React.FC<ManageSurveyResponsesProps> = (
           };
           const response = await updateQuestionResponses([input], contact.id);
           if (response.errors) throw response.errors;
-          questionResponses[iStepId] = value;
+          setQuestionResponses({ ...questionResponses, [iStepId]: value });
         }
       } catch (error) {
         setRequestError(formatErrorMessage(error.message));
