@@ -86,7 +86,10 @@ export const ManageSurveyResponses: React.FC<ManageSurveyResponsesProps> = (
       currentStep = value
         ? // Only show actionable questions
           interactionSteps.find(
-            (iStep) => iStep.questionText && iStep.answerOption === value
+            (iStep) =>
+              iStep.parentInteractionId === currentStepId &&
+              iStep.questionText &&
+              iStep.answerOption === value
           ) ?? null
         : null;
     }
