@@ -249,7 +249,6 @@ describe("assign-texters", () => {
     );
 
     // Assign replies for first 3 texters
-    console.log(assignments.slice(0, 3).map(({ id }) => id));
     for (const assignment of assignments.slice(0, 3)) {
       await assignContacts(client, assignment.id, campaign.id, 15);
     }
