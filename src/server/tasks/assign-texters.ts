@@ -75,7 +75,7 @@ export const zeroOutDeleted = async (options: ZeroOutDeletedOptions) => {
         campaign_id = $1
         and archived = ${isArchived}
         and assignment_id is not null
-        and (cardinality($2::integer[]) = 0 or assignment_id <> ANY($2))
+        and not assignment_id = ANY($2)
         and updated_at < $3
     `,
     [campaignId, assignmentIds, ignoreAfterDate]
