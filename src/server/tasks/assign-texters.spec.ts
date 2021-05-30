@@ -15,7 +15,11 @@ import {
   zeroOutDeleted
 } from "./assign-texters";
 
-const texterContactCount = async (client: PoolClient, texterId: number) => {
+const texterContactCount = async (
+  client: PoolClient,
+  texterId: number,
+  campaignId: number
+) => {
   const {
     rows: [{ count }]
   } = await client.query<{ count: number }>(
@@ -23,9 +27,11 @@ const texterContactCount = async (client: PoolClient, texterId: number) => {
       select count(*)::integer as count
       from campaign_contact cc
       join assignment a on a.id = cc.assignment_id
-      where user_id = $1
+      where
+        a.user_id = $1
+        and a.campaign_id = $2
     `,
-    [texterId]
+    [texterId, campaignId]
   );
   return count;
 };
@@ -100,7 +106,11 @@ describe("assign-texters", () => {
       [assignments[0].id, campaign.id]
     );
 
-    const initalContactCount = await texterContactCount(client, texters[0].id);
+    const initalContactCount = await texterContactCount(
+      client,
+      texters[0].id,
+      campaign.id
+    );
     expect(initalContactCount).toBe(150);
 
     await zeroOutDeleted({
@@ -111,7 +121,11 @@ describe("assign-texters", () => {
       ignoreAfterDate: DateTime.local().toUTC().plus({ hour: 1 }).toISO()
     });
 
-    const finalContactCount = await texterContactCount(client, texters[0].id);
+    const finalContactCount = await texterContactCount(
+      client,
+      texters[0].id,
+      campaign.id
+    );
     expect(finalContactCount).toBe(0);
   });
 
@@ -150,8 +164,16 @@ describe("assign-texters", () => {
       [assignments[1].id, campaign.id, 75]
     );
 
-    const initalContactCount0 = await texterContactCount(client, texters[0].id);
-    const initalContactCount1 = await texterContactCount(client, texters[1].id);
+    const initalContactCount0 = await texterContactCount(
+      client,
+      texters[0].id,
+      campaign.id
+    );
+    const initalContactCount1 = await texterContactCount(
+      client,
+      texters[1].id,
+      campaign.id
+    );
     expect(initalContactCount0).toBe(75);
     expect(initalContactCount1).toBe(75);
 
@@ -163,8 +185,16 @@ describe("assign-texters", () => {
       ignoreAfterDate: DateTime.local().toUTC().plus({ hour: 1 }).toISO()
     });
 
-    const finalContactCount0 = await texterContactCount(client, texters[0].id);
-    const finalContactCount1 = await texterContactCount(client, texters[1].id);
+    const finalContactCount0 = await texterContactCount(
+      client,
+      texters[0].id,
+      campaign.id
+    );
+    const finalContactCount1 = await texterContactCount(
+      client,
+      texters[1].id,
+      campaign.id
+    );
     expect(finalContactCount0).toBe(75);
     expect(finalContactCount1).toBe(0);
   });
@@ -211,7 +241,7 @@ describe("assign-texters", () => {
     });
 
     const assignedCounts = await Promise.all(
-      texters.map(({ id }) => texterContactCount(client, id))
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
     );
 
     expect(assignedCounts).toHaveLength(3);
@@ -271,7 +301,7 @@ describe("assign-texters", () => {
     });
 
     const assignedCounts = await Promise.all(
-      texters.map(({ id }) => texterContactCount(client, id))
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
     );
 
     expect(assignedCounts).toHaveLength(4);
@@ -307,7 +337,7 @@ describe("assign-texters", () => {
     });
 
     const assignedCounts = await Promise.all(
-      texters.map(({ id }) => texterContactCount(client, id))
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
     );
 
     expect(assignedCounts).toHaveLength(3);
@@ -358,7 +388,7 @@ describe("assign-texters", () => {
     });
 
     const assignedCounts = await Promise.all(
-      texters.map(({ id }) => texterContactCount(client, id))
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
     );
 
     expect(assignedCounts).toHaveLength(3);
