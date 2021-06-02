@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.5](https://github.com/politics-rewired/spoke/compare/v4.7.4...v4.7.5) (2021-06-02)
+
+
+### Bug Fixes
+
+* fix message review infinite loop ([#971](https://github.com/politics-rewired/spoke/issues/971)) ([f758c35](https://github.com/politics-rewired/spoke/commit/f758c356171a77abffc0bc2490bc70102e3654cb))
+* fix texters section readiness check ([#972](https://github.com/politics-rewired/spoke/issues/972)) ([14a738b](https://github.com/politics-rewired/spoke/commit/14a738b07cebd129561a287e2339a0b23532989e))
+* **texters:** fix assignment bugs ([#966](https://github.com/politics-rewired/spoke/issues/966)) ([b22d4e6](https://github.com/politics-rewired/spoke/commit/b22d4e6c586e6e165497cd45535abb3f831bd941))
+* **van:** add deprecation warning for disconnected result code ([#969](https://github.com/politics-rewired/spoke/issues/969)) ([3bee78a](https://github.com/politics-rewired/spoke/commit/3bee78ac405e0a2198dd7e52f2f5cba798d423c8))
+* **van:** send phone object ([#968](https://github.com/politics-rewired/spoke/issues/968)) ([786661e](https://github.com/politics-rewired/spoke/commit/786661ea312e4bdb06e288a8b13d240aa513229e))
+* **van:** update pgc-ngp-van for larger page size ([#970](https://github.com/politics-rewired/spoke/issues/970)) ([9e30436](https://github.com/politics-rewired/spoke/commit/9e30436e58b4836b61f2973b3760a625c1c4f2d9))
+
 ### [4.7.4](https://github.com/politics-rewired/spoke/compare/v4.7.3...v4.7.4) (2021-05-19)
 
 
