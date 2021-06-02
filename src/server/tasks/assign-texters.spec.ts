@@ -6,15 +6,20 @@ import {
 } from "../../../__test__/testbed-preparation/core";
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
-import { AssignmentRecord } from "../api/types";
+import { AssignmentRecord, MessageStatusType } from "../api/types";
 import {
   AssignmentTarget,
   assignPayloads,
   ensureAssignments,
+  freeUpTexters,
   zeroOutDeleted
 } from "./assign-texters";
 
-const texterContactCount = async (client: PoolClient, texterId: number) => {
+const texterContactCount = async (
+  client: PoolClient,
+  texterId: number,
+  campaignId: number
+) => {
   const {
     rows: [{ count }]
   } = await client.query<{ count: number }>(
@@ -22,11 +27,34 @@ const texterContactCount = async (client: PoolClient, texterId: number) => {
       select count(*)::integer as count
       from campaign_contact cc
       join assignment a on a.id = cc.assignment_id
-      where user_id = $1
+      where
+        a.user_id = $1
+        and a.campaign_id = $2
     `,
-    [texterId]
+    [texterId, campaignId]
   );
   return count;
+};
+
+const assignContacts = async (
+  client: PoolClient,
+  assignmentId: number,
+  campaignId: number,
+  count: number
+) => {
+  await client.query(
+    `
+      update campaign_contact
+      set assignment_id = $1
+      where id in (
+        select id from campaign_contact
+        where campaign_id = $2
+          and assignment_id is null
+        limit $3
+      )
+    `,
+    [assignmentId, campaignId, count]
+  );
 };
 
 describe("assign-texters", () => {
@@ -70,9 +98,9 @@ describe("assign-texters", () => {
     await ensureAssignments({
       client,
       campaignId: campaign.id,
-      texters: [
-        { id: `${texter0.id}`, contactsCount: 1 },
-        { id: `${texter1.id}`, contactsCount: 1 }
+      assignmentInputs: [
+        { userId: `${texter0.id}`, contactsCount: 1 },
+        { userId: `${texter1.id}`, contactsCount: 1 }
       ]
     });
 
@@ -85,22 +113,18 @@ describe("assign-texters", () => {
     expect(finalAssignments[1].user_id).toBe(texter1.id);
   });
 
-  test('zeroes out "deleted" assignments for simple case', async () => {
+  test("zeroes out all assignments for empty assignment targets", async () => {
     const { campaign, texters, assignments } = await createCompleteCampaign(
       client,
       {
-        texters: 1,
-        contacts: 150
+        texters: 3,
+        contacts: 15
       }
     );
 
-    await client.query(
-      `update campaign_contact set assignment_id = $1 where campaign_id = $2`,
-      [assignments[0].id, campaign.id]
-    );
-
-    const initalContactCount = await texterContactCount(client, texters[0].id);
-    expect(initalContactCount).toBe(150);
+    await assignContacts(client, assignments[0].id, campaign.id, 4);
+    await assignContacts(client, assignments[1].id, campaign.id, 5);
+    await assignContacts(client, assignments[2].id, campaign.id, 6);
 
     await zeroOutDeleted({
       client,
@@ -110,49 +134,68 @@ describe("assign-texters", () => {
       ignoreAfterDate: DateTime.local().toUTC().plus({ hour: 1 }).toISO()
     });
 
-    const finalContactCount = await texterContactCount(client, texters[0].id);
-    expect(finalContactCount).toBe(0);
+    const finalCounts = await Promise.all(
+      [...Array(3)].map((_, index) =>
+        texterContactCount(client, texters[index].id, campaign.id)
+      )
+    );
+    expect(finalCounts[0]).toBe(0);
+    expect(finalCounts[1]).toBe(0);
+    expect(finalCounts[2]).toBe(0);
   });
 
-  test('zeroes out "deleted" assignments for "complex" case', async () => {
+  test("zeroes out no unchanged assignments", async () => {
     const { campaign, texters, assignments } = await createCompleteCampaign(
       client,
       {
-        texters: 2,
-        contacts: 150
+        texters: 3,
+        contacts: 15
+      }
+    );
+    await assignContacts(client, assignments[0].id, campaign.id, 4);
+    await assignContacts(client, assignments[1].id, campaign.id, 5);
+    await assignContacts(client, assignments[2].id, campaign.id, 6);
+
+    const assignmentIds = assignments.map(({ id }) => id);
+    await zeroOutDeleted({
+      client,
+      campaignId: campaign.id,
+      isArchived: campaign.is_archived!,
+      assignmentIds,
+      ignoreAfterDate: DateTime.local().toUTC().plus({ hour: 1 }).toISO()
+    });
+
+    const finalCounts = await Promise.all(
+      [...Array(3)].map((_, index) =>
+        texterContactCount(client, texters[index].id, campaign.id)
+      )
+    );
+    expect(finalCounts[0]).toBe(4);
+    expect(finalCounts[1]).toBe(5);
+    expect(finalCounts[2]).toBe(6);
+  });
+
+  test("zeroes out deleted assignments for mixed case", async () => {
+    const { campaign, texters, assignments } = await createCompleteCampaign(
+      client,
+      {
+        texters: 3,
+        contacts: 15
       }
     );
 
-    await client.query(
-      `
-        update campaign_contact
-        set assignment_id = $1
-        where id in (
-          select id from campaign_contact
-          where campaign_id = $2
-            and assignment_id is null
-          limit $3
-        )`,
-      [assignments[0].id, campaign.id, 75]
-    );
+    await assignContacts(client, assignments[0].id, campaign.id, 4);
+    await assignContacts(client, assignments[1].id, campaign.id, 5);
+    await assignContacts(client, assignments[2].id, campaign.id, 6);
 
-    await client.query(
-      `
-        update campaign_contact
-        set assignment_id = $1
-        where id in (
-          select id from campaign_contact
-          where campaign_id = $2
-            and assignment_id is null
-          limit $3
-        )`,
-      [assignments[1].id, campaign.id, 75]
+    const initialCounts = await Promise.all(
+      [...Array(3)].map((_, index) =>
+        texterContactCount(client, texters[index].id, campaign.id)
+      )
     );
-
-    const initalContactCount0 = await texterContactCount(client, texters[0].id);
-    const initalContactCount1 = await texterContactCount(client, texters[1].id);
-    expect(initalContactCount0).toBe(75);
-    expect(initalContactCount1).toBe(75);
+    expect(initialCounts[0]).toBe(4);
+    expect(initialCounts[1]).toBe(5);
+    expect(initialCounts[2]).toBe(6);
 
     await zeroOutDeleted({
       client,
@@ -162,10 +205,100 @@ describe("assign-texters", () => {
       ignoreAfterDate: DateTime.local().toUTC().plus({ hour: 1 }).toISO()
     });
 
-    const finalContactCount0 = await texterContactCount(client, texters[0].id);
-    const finalContactCount1 = await texterContactCount(client, texters[1].id);
-    expect(finalContactCount0).toBe(75);
-    expect(finalContactCount1).toBe(0);
+    const finalCounts = await Promise.all(
+      [...Array(3)].map((_, index) =>
+        texterContactCount(client, texters[index].id, campaign.id)
+      )
+    );
+    expect(finalCounts[0]).toBe(4);
+    expect(finalCounts[1]).toBe(0);
+    expect(finalCounts[2]).toBe(0);
+  });
+
+  test("it frees up over-assigned texters (all needsMessage)", async () => {
+    const { campaign, texters, assignments } = await createCompleteCampaign(
+      client,
+      {
+        texters: 3,
+        contacts: 45
+      }
+    );
+
+    for (const assignment of assignments) {
+      await assignContacts(client, assignment.id, campaign.id, 15);
+    }
+
+    const assignmentTargets: AssignmentTarget[] = assignments.map(
+      (assignment, index) => ({
+        id: `${assignment.id}`,
+        userId: `${texters[index].id}`,
+        contactsCount: 10,
+        operation: "insert"
+      })
+    );
+
+    await freeUpTexters({
+      client,
+      campaignId: campaign.id,
+      isArchived: campaign.is_archived!,
+      assignmentTargets
+    });
+
+    const assignedCounts = await Promise.all(
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
+    );
+
+    expect(assignedCounts).toHaveLength(3);
+    expect(assignedCounts[0]).toBe(10);
+    expect(assignedCounts[1]).toBe(10);
+    expect(assignedCounts[2]).toBe(10);
+  });
+
+  test("it frees up over-assigned texters (needs reply)", async () => {
+    const contacts = [...Array(100)].map((_, index) => ({
+      messageStatus:
+        index >= 45
+          ? MessageStatusType.NeedsMessage
+          : MessageStatusType.NeedsResponse
+    }));
+    const { campaign, texters, assignments } = await createCompleteCampaign(
+      client,
+      {
+        texters: 4,
+        contacts
+      }
+    );
+
+    // Assign replies for first 3 texters
+    for (const assignment of assignments.slice(0, 3)) {
+      await assignContacts(client, assignment.id, campaign.id, 15);
+    }
+
+    const assignmentTargets: AssignmentTarget[] = assignments.map(
+      (assignment, index) => ({
+        id: `${assignment.id}`,
+        userId: `${texters[index].id}`,
+        contactsCount: 15,
+        operation: "insert"
+      })
+    );
+
+    await freeUpTexters({
+      client,
+      campaignId: campaign.id,
+      isArchived: campaign.is_archived!,
+      assignmentTargets
+    });
+
+    const assignedCounts = await Promise.all(
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
+    );
+
+    expect(assignedCounts).toHaveLength(4);
+    expect(assignedCounts[0]).toBe(15);
+    expect(assignedCounts[1]).toBe(15);
+    expect(assignedCounts[2]).toBe(15);
+    expect(assignedCounts[3]).toBe(0); // Nothing to free up yet for the new texter
   });
 
   test("it does basic assignment", async () => {
@@ -194,7 +327,7 @@ describe("assign-texters", () => {
     });
 
     const assignedCounts = await Promise.all(
-      texters.map(({ id }) => texterContactCount(client, id))
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
     );
 
     expect(assignedCounts).toHaveLength(3);
@@ -213,19 +346,7 @@ describe("assign-texters", () => {
     );
 
     for (const assignment of assignments) {
-      await client.query(
-        `
-          update campaign_contact
-          set assignment_id = $1
-          where id in (
-            select id from campaign_contact
-            where campaign_id = $2
-              and assignment_id is null
-            limit $3
-          )
-        `,
-        [assignment.id, campaign.id, 50]
-      );
+      await assignContacts(client, assignment.id, campaign.id, 50);
     }
 
     const assignmentTargets: AssignmentTarget[] = assignments.map(
@@ -245,7 +366,7 @@ describe("assign-texters", () => {
     });
 
     const assignedCounts = await Promise.all(
-      texters.map(({ id }) => texterContactCount(client, id))
+      texters.map(({ id }) => texterContactCount(client, id, campaign.id))
     );
 
     expect(assignedCounts).toHaveLength(3);
