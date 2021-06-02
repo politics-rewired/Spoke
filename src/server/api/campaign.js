@@ -213,7 +213,7 @@ export const resolvers = {
         rows: [{ is_fully_assigned }]
       } = await r.knex.raw(
         `
-          select exists (
+          select not exists (
             select 1
             from campaign_contact
             where campaign_id = ? and assignment_id is null
