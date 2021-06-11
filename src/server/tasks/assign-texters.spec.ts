@@ -405,7 +405,11 @@ describe("assign-texters", () => {
       assignmentTargets: [assignmentTarget]
     });
 
-    const assignedCount = await texterContactCount(client, texters[0].id);
+    const assignedCount = await texterContactCount(
+      client,
+      texters[0].id,
+      campaign.id
+    );
 
     expect(assignedCount).toBe(contacts.length);
   });
