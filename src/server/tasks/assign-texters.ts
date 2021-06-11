@@ -177,7 +177,16 @@ export const assignPayloads = async (options: AssignPayloadsOptions) => {
           campaign_id = $3
           and archived = ${isArchived}
           and assignment_id is null
-          and message_status = 'needsMessage'
+        order by
+          -- prioritize conversations requiring action
+          (case
+            when message_status = 'needsMessage' then 10
+            when message_status = 'needsResponse' then 20
+            when message_status = 'convo' then 30
+            when message_status = 'messaged' then 40
+            when message_status = 'closed' then 50
+            else 60
+          end) asc
       ),
       final_payloads as (
         select ap.assignment_id, ac.campaign_contact_id
