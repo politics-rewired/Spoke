@@ -158,7 +158,9 @@ export const assignPayloads = async (options: AssignPayloadsOptions) => {
           assignment_id,
           generate_series(1, desired_count - (
             select count(*) from campaign_contact
-            where campaign_contact.assignment_id = raw_assignments.assignment_id
+            where
+              campaign_id = $3
+              and campaign_contact.assignment_id = raw_assignments.assignment_id
           ))
         from raw_assignments
       ),
