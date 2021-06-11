@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.6](https://github.com/politics-rewired/spoke/compare/v4.7.5...v4.7.6) (2021-06-11)
+
+
+### Bug Fixes
+
+* update copy for filter landlines section ([#982](https://github.com/politics-rewired/spoke/issues/982)) ([700df7b](https://github.com/politics-rewired/spoke/commit/700df7b1bc252a66b2ae891d4d4bd44b2889f229)), closes [#965](https://github.com/politics-rewired/spoke/issues/965)
+* **texters:** assign from pool of all unassigned conversations ([#973](https://github.com/politics-rewired/spoke/issues/973)) ([774197f](https://github.com/politics-rewired/spoke/commit/774197f1342d2c257d163d8931700e4c45cbd589)), closes [#964](https://github.com/politics-rewired/spoke/issues/964)
+
 ### [4.7.5](https://github.com/politics-rewired/spoke/compare/v4.7.4...v4.7.5) (2021-06-02)
 
 
