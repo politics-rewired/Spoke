@@ -160,6 +160,7 @@ export const assignPayloads = async (options: AssignPayloadsOptions) => {
             select count(*) from campaign_contact
             where
               campaign_id = $3
+              and archived = ${isArchived}
               and campaign_contact.assignment_id = raw_assignments.assignment_id
           ))
         from raw_assignments
