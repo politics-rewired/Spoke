@@ -316,6 +316,15 @@ const formatInboundBody = (body: string, numMedia: number) => {
   return text;
 };
 
+export class UnsolicitedAssembleNumbersMessageError extends Error {
+  public readonly assembleMessage: NumbersInboundMessagePayload;
+
+  constructor(message: NumbersInboundMessagePayload) {
+    super("Unsolicited Assemble Numbers message!");
+    this.assembleMessage = message;
+  }
+}
+
 /**
  * Convert an inbound Assemble Numbers message object to a Spoke message record.
  * @param {object} assembleMessage The Assemble Numbers message object
@@ -343,11 +352,7 @@ const convertInboundMessage = async (
   });
 
   if (!ccInfo) {
-    logger.error(
-      "Could not match inbound assemble message to existing conversation",
-      { payload: assembleMessage }
-    );
-    return;
+    throw new UnsolicitedAssembleNumbersMessageError(assembleMessage);
   }
 
   const spokeMessage = {
@@ -384,10 +389,28 @@ export const handleIncomingMessage = async (
   message: NumbersInboundMessagePayload
 ) => {
   if (config.JOBS_SAME_PROCESS) {
-    const inboundMessage = await convertInboundMessage(message);
-    // Only persist the message if it was matched to an existing conversation
-    if (inboundMessage) {
+    try {
+      const inboundMessage = await convertInboundMessage(message);
       await saveNewIncomingMessage(inboundMessage);
+    } catch (err) {
+      if (err instanceof UnsolicitedAssembleNumbersMessageError) {
+        const { assembleMessage } = err;
+        await r.knex("unsolicited_message").insert({
+          messaging_service_sid: assembleMessage.profileId,
+          service_id: assembleMessage.id,
+          from_number: assembleMessage.from,
+          body: assembleMessage.body,
+          num_segments: assembleMessage.numSegments,
+          num_media: assembleMessage.numMedia,
+          media_urls: assembleMessage.mediaUrls,
+          service_response: assembleMessage
+        });
+      } else {
+        logger.error(
+          "Encountered error parsing inbound assemble numbers message: ",
+          errToObj(err)
+        );
+      }
     }
   } else {
     const { id: serviceId, from, to } = message;
