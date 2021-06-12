@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.8.0](https://github.com/politics-rewired/spoke/compare/v4.7.6...v4.8.0) (2021-06-12)
+
+
+### Features
+
+* handle unsolicited inbound messages ([#975](https://github.com/politics-rewired/spoke/issues/975)) ([b3d12b7](https://github.com/politics-rewired/spoke/commit/b3d12b7ebb9d995d45d436854e479d2138ce72ac))
+
 ### [4.7.6](https://github.com/politics-rewired/spoke/compare/v4.7.5...v4.7.6) (2021-06-11)
 
 
