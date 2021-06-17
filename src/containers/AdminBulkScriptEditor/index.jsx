@@ -204,8 +204,8 @@ class AdminBulkScriptEditor extends Component {
             <DialogTitle>Confirm Flagged Characters</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Are you sure you want to run run a bulk script update with
-                special characters?
+                Are you sure you want to run a bulk script update with special
+                characters?
               </DialogContentText>
               <DialogContentText>
                 If you don't know what this means, you should cancel and ask an
