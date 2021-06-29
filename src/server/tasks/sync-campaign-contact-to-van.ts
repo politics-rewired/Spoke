@@ -18,6 +18,8 @@ class VANSyncError extends Error {
 
 export const CANVASSED_TAG_NAME = "Canvassed";
 
+export const VAN_SMS_TEXT_CONTACT_TYPE_ID = 37;
+
 export interface VANCanvassContextPhone {
   dialingPrefix: "1";
   phoneNumber: string;
@@ -285,6 +287,7 @@ export const formatCanvassResponsePayload = ({
         dialingPrefix: "1",
         phoneNumber: phoneNumber.replace("+1", "")
       },
+      contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
       dateCanvassed
     },
     resultCodeId,
