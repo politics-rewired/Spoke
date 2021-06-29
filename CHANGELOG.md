@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.9.0](https://github.com/politics-rewired/spoke/compare/v4.8.0...v4.9.0) (2021-06-29)
+
+
+### Features
+
+* **van:** use 'SMS Text' contact type for canvass responses ([#989](https://github.com/politics-rewired/spoke/issues/989)) ([8381dd1](https://github.com/politics-rewired/spoke/commit/8381dd15c77f195e045df92561bc97f4c1aa6433))
+
+
+### Bug Fixes
+
+* **copy:** remove duplicate 'run' ([#986](https://github.com/politics-rewired/spoke/issues/986)) ([37e1f9f](https://github.com/politics-rewired/spoke/commit/37e1f9f4ecd83891f0fc1763ec2f1d9389f4bc2d))
+
 ## [4.8.0](https://github.com/politics-rewired/spoke/compare/v4.7.6...v4.8.0) (2021-06-12)
 
 
