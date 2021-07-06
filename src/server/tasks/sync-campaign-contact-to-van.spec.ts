@@ -211,6 +211,7 @@ describe("formatCanvassResponsePayload", () => {
     const canvassResponse = formatCanvassResponsePayload({
       canvassResultRow,
       phoneId,
+      phoneNumber,
       canvassedResultCode,
       optOutResultCode
     });

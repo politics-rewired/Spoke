@@ -76,6 +76,11 @@ export interface CanvassResultRow {
   }[];
 }
 
+export const formatPhone = (phoneNumber: string): VANCanvassContextPhone => ({
+  dialingPrefix: "1",
+  phoneNumber: phoneNumber.replace("+1", "")
+});
+
 export interface FetchCanvassResponsesOptions {
   systemId: string;
   contactId: number;
@@ -284,10 +289,7 @@ export const formatCanvassResponsePayload = ({
     {
       canvassContext: {
         phoneId,
-        phone: {
-          dialingPrefix: "1",
-          phoneNumber: phoneNumber.replace("+1", "")
-        },
+        phone: formatPhone(phoneNumber),
         contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
         dateCanvassed
       },
@@ -300,10 +302,7 @@ export const formatCanvassResponsePayload = ({
     result.push({
       canvassContext: {
         phoneId,
-        phone: {
-          dialingPrefix: "1",
-          phoneNumber: phoneNumber.replace("+1", "")
-        },
+        phone: formatPhone(phoneNumber),
         contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
         dateCanvassed
       },
