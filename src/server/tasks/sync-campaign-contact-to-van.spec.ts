@@ -150,8 +150,11 @@ describe("formatCanvassResponsePayload", () => {
       canvassedResultCode,
       optOutResultCode
     });
-    expect(canvassResponse.responses).toBeNull();
-    expect(canvassResponse.resultCodeId).toBe(optOutResultCode);
+    expect(canvassResponse).toHaveLength(2);
+    expect(canvassResponse[0].responses).toBeNull();
+    expect(canvassResponse[0].resultCodeId).toBeNull();
+    expect(canvassResponse[1].responses).toBeNull();
+    expect(canvassResponse[1].resultCodeId).toBe(optOutResultCode);
   });
 
   test("correctly formats a messaged contact without survey responses", () => {
@@ -170,8 +173,9 @@ describe("formatCanvassResponsePayload", () => {
       canvassedResultCode,
       optOutResultCode
     });
-    expect(canvassResponse.responses).toBeNull();
-    expect(canvassResponse.resultCodeId).toBe(canvassedResultCode);
+    expect(canvassResponse).toHaveLength(1);
+    expect(canvassResponse[0].responses).toBeNull();
+    expect(canvassResponse[0].resultCodeId).toBe(canvassedResultCode);
   });
 
   test("correctly formats a contact with both survey responses and a canvass result code", () => {
@@ -190,8 +194,32 @@ describe("formatCanvassResponsePayload", () => {
       canvassedResultCode,
       optOutResultCode
     });
-    expect(canvassResponse.responses).toHaveLength(1);
-    expect(canvassResponse.resultCodeId).toBeNull();
+    expect(canvassResponse).toHaveLength(1);
+    expect(canvassResponse[0].responses).toHaveLength(1);
+    expect(canvassResponse[0].resultCodeId).toBeNull();
+  });
+
+  test("correctly formats a contact with both survey responses and an opt-out result code", () => {
+    const optOutResultCode = 4321;
+
+    const canvassResultRow: CanvassResultRow = {
+      canvassed_at: "2021-01-21",
+      result_codes: [],
+      activist_codes: [],
+      response_options: [{ survey_question_id: 999, response_option_id: 888 }]
+    };
+    const canvassResponse = formatCanvassResponsePayload({
+      canvassResultRow,
+      phoneId,
+      phoneNumber,
+      canvassedResultCode,
+      optOutResultCode
+    });
+    expect(canvassResponse).toHaveLength(2);
+    expect(canvassResponse[0].responses).toHaveLength(1);
+    expect(canvassResponse[0].resultCodeId).toBeNull();
+    expect(canvassResponse[1].responses).toBeNull();
+    expect(canvassResponse[1].resultCodeId).toBe(optOutResultCode);
   });
 });
 

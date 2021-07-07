@@ -1,3 +1,4 @@
+import isNil from "lodash/isNil";
 import { PoolClient } from "pg";
 import { Task } from "pg-compose";
 import { post } from "superagent";
@@ -74,6 +75,11 @@ export interface CanvassResultRow {
     response_option_id: number;
   }[];
 }
+
+export const formatPhone = (phoneNumber: string): VANCanvassContextPhone => ({
+  dialingPrefix: "1",
+  phoneNumber: phoneNumber.replace("+1", "")
+});
 
 export interface FetchCanvassResponsesOptions {
   systemId: string;
@@ -269,38 +275,49 @@ export const formatCanvassResponsePayload = ({
 
   const responses = [...surveyResponses, ...activistCodes];
   const hasResponses = responses.length > 0;
+  const isOptedOut = !isNil(optOutResultCode);
 
   // Honor mapped result code only if there are no responses (VAN will overwrite as "canvassed")
-  const mappedResultCodeId = hasResponses
-    ? null
-    : result_codes.length > 0
-    ? result_codes[0].result_code_id
-    : canvassedResultCode;
+  const mappedResultCodeId =
+    hasResponses || isOptedOut
+      ? null
+      : result_codes.length > 0
+      ? result_codes[0].result_code_id
+      : canvassedResultCode;
 
-  // Opt Out mapping will always take precedence if mapping is set and contact is opted out
-  const resultCodeId = optOutResultCode || mappedResultCodeId;
-
-  const canvassResponse: VANCanvassResponse = {
-    canvassContext: {
-      phoneId,
-      phone: {
-        dialingPrefix: "1",
-        phoneNumber: phoneNumber.replace("+1", "")
+  const result: VANCanvassResponse[] = [
+    {
+      canvassContext: {
+        phoneId,
+        phone: formatPhone(phoneNumber),
+        contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
+        dateCanvassed
       },
-      contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
-      dateCanvassed
-    },
-    resultCodeId,
-    responses: hasResponses ? responses : null
-  };
+      resultCodeId: mappedResultCodeId,
+      responses: hasResponses ? responses : null
+    }
+  ];
 
-  return canvassResponse;
+  if (!isNil(optOutResultCode)) {
+    result.push({
+      canvassContext: {
+        phoneId,
+        phone: formatPhone(phoneNumber),
+        contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
+        dateCanvassed
+      },
+      resultCodeId: optOutResultCode,
+      responses: null
+    });
+  }
+
+  return result;
 };
 
 export const hasPayload = (canvassResponse: VANCanvassResponse) => {
   const hasResponses =
-    canvassResponse.responses !== null && canvassResponse.responses.length > 0;
-  const hasResultCode = canvassResponse.resultCodeId !== null;
+    !isNil(canvassResponse.responses) && canvassResponse.responses.length > 0;
+  const hasResultCode = !isNil(canvassResponse.resultCodeId);
   return hasResponses || hasResultCode;
 };
 
@@ -349,15 +366,17 @@ export const syncCampaignContactToVAN: Task = async (
 
   if (canvassResultsRaw.length === 0) return;
 
-  const allCanvassResponses = canvassResultsRaw.map((canvassResultRow) =>
-    formatCanvassResponsePayload({
-      canvassResultRow,
-      phoneId,
-      phoneNumber,
-      optOutResultCode,
-      canvassedResultCode
-    })
-  );
+  const allCanvassResponses = canvassResultsRaw
+    .map((canvassResultRow) =>
+      formatCanvassResponsePayload({
+        canvassResultRow,
+        phoneId,
+        phoneNumber,
+        optOutResultCode,
+        canvassedResultCode
+      })
+    )
+    .flat();
 
   const canvassResponses = allCanvassResponses.filter(hasPayload);
 
