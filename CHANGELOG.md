@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.9.1](https://github.com/politics-rewired/spoke/compare/v4.9.0...v4.9.1) (2021-07-08)
+
+
+### Bug Fixes
+
+* fix inconsistent landline filtration ([d2c523c](https://github.com/politics-rewired/spoke/commit/d2c523cb25ab6d9bc6f7c29f28e7a554d4b6ee54))
+* **van:** fix sync for contacts with both opt out and responses ([#953](https://github.com/politics-rewired/spoke/issues/953)) ([374c49c](https://github.com/politics-rewired/spoke/commit/374c49c117a8882b7de56a9203f4679bee8dea21))
+
 ## [4.9.0](https://github.com/politics-rewired/spoke/compare/v4.8.0...v4.9.0) (2021-06-29)
 
 
