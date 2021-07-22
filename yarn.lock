@@ -17605,10 +17605,10 @@ pg-types@^2.1.0, pg-types@^2.2.0:
     pg-types "^2.1.0"
     pgpass "1.x"
 
-pgc-ngp-van@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-1.1.1.tgz#7555a44749074518a921fe427958c96b4b435028"
-  integrity sha512-xT8AmgP2UBGgFLZs3YvsGyVruH08Xzxs3UJDx8oa41tRsw5OB6zfE/6fk3oONRkX8nAPVg8uJDi+TXxtPO8BMw==
+pgc-ngp-van@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/pgc-ngp-van/-/pgc-ngp-van-1.1.2.tgz#5393e5d6fe65dfaaf02811f19e12405929a232ab"
+  integrity sha512-p4vd4JkRDivr7o0KXKyQwb/JxRJZktvt+9gtd2/ybAyvLdk1XRMjzO+ynlilx9nUnNBXjif1QpgQaOZouLxHEQ==
   dependencies:
     copy "^0.3.2"
     fast-csv "^4.3.0"
