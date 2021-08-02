@@ -283,26 +283,31 @@ export const processDeliveryReportBody = async (
   );
 
   // Update segment counts
-  if (
-    extra &&
-    (typeof extra.num_segments === "number" ||
-      typeof extra.num_media === "number")
-  ) {
-    await client.query(
-      `
-        update message
-        set
-          num_segments = coalesce($1, num_segments),
-          num_media = coalesce($2, num_media)
-        where
-          service_id = $3
-          and (
-            num_segments is null
-            or num_media is null
-          )
-      `,
-      [extra.num_segments || null, extra.num_media || null, messageId]
-    );
+  if (extra) {
+    const { num_segments, num_media } = extra;
+    const hasNumSegments = typeof num_segments === "number";
+    const hasNumMedia = typeof num_media === "number";
+
+    if (hasNumSegments || hasNumMedia) {
+      const numSegments = hasNumSegments ? num_segments : null;
+      const numMedia = hasNumMedia ? num_media : null;
+
+      await client.query(
+        `
+          update message
+          set
+            num_segments = coalesce($1, num_segments),
+            num_media = coalesce($2, num_media)
+          where
+            service_id = $3
+            and (
+              num_segments is null
+              or num_media is null
+            )
+        `,
+        [numSegments, numMedia, messageId]
+      );
+    }
   }
 };
 
