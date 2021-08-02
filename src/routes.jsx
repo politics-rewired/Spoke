@@ -6,7 +6,6 @@ import AdminDashboard from "./components/AdminDashboard";
 import { AuthzProvider } from "./components/AuthzProvider";
 import Login from "./components/Login";
 import TexterDashboard from "./components/TexterDashboard";
-import TexterFaqs from "./components/TexterFaqs";
 import TopNav from "./components/TopNav";
 import AdminAssignmentControl from "./containers/AdminAssignmentControl";
 import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
@@ -35,7 +34,6 @@ import Terms from "./containers/Terms";
 import TexterTodo from "./containers/TexterTodo";
 import TexterTodoList from "./containers/TexterTodoList";
 import UserEdit from "./containers/UserEdit";
-import FAQs from "./lib/faqs";
 import ApolloClientSingleton from "./network/apollo-client-singleton";
 
 class ProtectedInner extends React.Component {
@@ -305,13 +303,6 @@ const TexterOrganizationRoutes = (props) => {
   return (
     <AuthzProvider organizationId={organizationId}>
       <Switch>
-        <TexterDashboardRoute
-          path={`${organizationPath}/faqs`}
-          main={() => <TexterFaqs faqs={FAQs} />}
-          topNav={({ match }) => (
-            <TopNav title="FAQs" orgId={match.params.organizationId} />
-          )}
-        />
         <TexterDashboardRoute
           path={`${organizationPath}/account/:userId`}
           main={({ match }) => (

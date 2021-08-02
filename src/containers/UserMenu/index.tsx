@@ -1,3 +1,4 @@
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import gql from "graphql-tag";
 import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
@@ -74,8 +75,8 @@ class UserMenu extends Component<Props, State> {
       }
     } else if (value === "home") {
       history.push(`/app/${orgId}/todos`);
-    } else if (value === "faqs") {
-      history.push(`/app/${orgId}/faqs`);
+    } else if (value === "docs") {
+      window.open("https://docs.spokerewired.com", "_blank");
     }
   };
 
@@ -135,6 +136,8 @@ class UserMenu extends Component<Props, State> {
               {currentUser.email}
             </MenuItem>
             <Divider />
+            <MenuItem {...dataTest("home")} primaryText="Home" value="home" />
+            <Divider />
             <Subheader>Teams</Subheader>
             {currentUser.organizations.map((organization) => (
               <OrganizationItem
@@ -145,8 +148,13 @@ class UserMenu extends Component<Props, State> {
               />
             ))}
             <Divider />
-            <MenuItem {...dataTest("home")} primaryText="Home" value="home" />
-            <MenuItem {...dataTest("faqs")} primaryText="FAQs" value="faqs" />
+            <Subheader>Help</Subheader>
+            <MenuItem
+              {...dataTest("docs")}
+              primaryText="Documentation"
+              value="docs"
+              rightIcon={<OpenInNewIcon />}
+            />
             <Divider />
             <MenuItem
               {...dataTest("userMenuLogOut")}
