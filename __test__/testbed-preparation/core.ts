@@ -229,6 +229,7 @@ export type CreateMessageOptions = {
   assignmentId: number;
 } & Partial<
   Pick<Message, "text" | "sendStatus"> & {
+    serviceId: string;
     contactNumber: string;
     isFromContact: boolean;
     userId: number;
@@ -243,8 +244,8 @@ export const createMessage = async (
   client
     .query<MessageRecord>(
       `
-        insert into public.message (campaign_contact_id, contact_number, assignment_id, is_from_contact, text, send_status, user_id, error_codes)
-        values ($1, $2, $3, $4, $5, $6, $7, $8)
+        insert into public.message (campaign_contact_id, contact_number, assignment_id, is_from_contact, text, send_status, user_id, service_id, error_codes)
+        values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         returning *
       `,
       [
@@ -255,6 +256,7 @@ export const createMessage = async (
         options.text ?? faker.lorem.paragraph(),
         options.sendStatus ?? MessageSendStatus.Delivered,
         options.userId ?? null,
+        options.serviceId ?? faker.random.uuid(),
         options.errorCodes ?? null
       ]
     )
