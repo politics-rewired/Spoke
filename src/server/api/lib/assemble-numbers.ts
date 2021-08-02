@@ -56,7 +56,7 @@ interface NumbersInboundMessagePayload {
   sendingLocationId: string;
 }
 
-interface NumbersDeliveryReportPayload {
+export interface NumbersDeliveryReportPayload {
   errorCodes: string[];
   eventType: NumbersSendStatus;
   generatedAt: string;
