@@ -1,5 +1,4 @@
-import Knex from "knex";
-import isEmpty from "lodash/isEmpty";
+import { PoolClient } from "pg";
 
 import { config } from "../../../config";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
@@ -256,47 +255,55 @@ export const handleDeliveryReport = async (
     body: JSON.stringify(reportBody)
   });
 
-export const processDeliveryReport = async (
+export const processDeliveryReportBody = async (
+  client: PoolClient,
   reportBody: NumbersDeliveryReportPayload
 ) => {
   const { eventType, messageId, errorCodes, extra } = reportBody;
 
-  await r.knex.transaction(async (trx: Knex.Transaction) => {
-    // Update send status if message is not already "complete"
-    await trx("message")
-      .update({
-        service_response_at: r.knex.fn.now(),
-        send_status: getMessageStatus(eventType),
-        error_codes: errorCodes
-      })
-      .where({ service_id: messageId })
-      .whereNotIn("send_status", [
-        SpokeSendStatus.Delivered,
-        SpokeSendStatus.Error
-      ]);
+  // Update send status if message is not already "complete"
+  await client.query(
+    `
+      update message
+      set
+        service_response_at = now(),
+        send_status = $1,
+        error_codes = $2
+      where
+        service_id = $3
+        and send_status not in ($4, $5)
+    `,
+    [
+      getMessageStatus(eventType),
+      errorCodes,
+      messageId,
+      SpokeSendStatus.Delivered,
+      SpokeSendStatus.Error
+    ]
+  );
 
-    // Update segment counts
-    if (extra) {
-      const payload: Record<string, unknown> = {};
-
-      if (
-        typeof extra.num_segments === "number" ||
-        typeof extra.num_media === "number"
-      ) {
-        payload.num_segments = extra.num_segments;
-        payload.num_media = extra.num_media;
-      }
-
-      if (!isEmpty(payload)) {
-        await trx("message")
-          .update(payload)
-          .where({ service_id: messageId })
-          .where((builder) =>
-            builder.whereNull("num_segments").orWhereNull("num_media")
-          );
-      }
-    }
-  });
+  // Update segment counts
+  if (
+    extra &&
+    (typeof extra.num_segments === "number" ||
+      typeof extra.num_media === "number")
+  ) {
+    await client.query(
+      `
+        update message
+        set
+          num_segments = coalesce($1, num_segments),
+          num_media = coalesce($2, num_media)
+        where
+          service_id = $3
+          and (
+            num_segments is null
+            or num_media is null
+          )
+      `,
+      [extra.num_segments || null, extra.num_media || null, messageId]
+    );
+  }
 };
 
 /**

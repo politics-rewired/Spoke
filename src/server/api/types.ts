@@ -210,3 +210,12 @@ export interface ExternalResultCodeRecord {
   created_at: string;
   updated_at: string;
 }
+
+export interface LogRecord {
+  id: number;
+  message_sid: string;
+  body: string | null;
+  created_at: string;
+  updated_at: string;
+  service_type: MessagingServiceType | null;
+}
