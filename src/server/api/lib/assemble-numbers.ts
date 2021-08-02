@@ -441,7 +441,7 @@ export default {
   inboundMessageValidator,
   deliveryReportValidator,
   handleDeliveryReport,
-  processDeliveryReport,
+  processDeliveryReportBody,
   handleIncomingMessage,
   convertMessagePartsToMessage
 };
