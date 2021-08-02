@@ -108,7 +108,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
   } = assignment.campaign;
   const { maxContacts } = assignment;
   const dueByText = dueBy
-    ? DateTime.fromISO(dueBy).toFormat("MMM D YYYY")
+    ? DateTime.fromISO(dueBy).toFormat("MMM d, yyyy")
     : "No Due Date";
   const subtitle = `${description} - ${dueByText}`;
 
