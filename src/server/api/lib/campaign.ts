@@ -72,6 +72,7 @@ export const getDeliverabilityStats = async (campaignId: number) => {
 
   const result = {
     deliveredCount: rows.find((o) => o.send_status === "DELIVERED")?.count || 0,
+    sendingCount: rows.find((o) => o.send_status === "SENDING")?.count || 0,
     sentCount: rows.find((o) => o.send_status === "SENT")?.count || 0,
     errorCount:
       rows

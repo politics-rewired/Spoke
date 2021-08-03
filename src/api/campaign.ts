@@ -22,6 +22,19 @@ export interface JobRequest {
   updatedAt: string;
 }
 
+export interface DeliverabilityErrorStat {
+  errorCode: string | null;
+  count: number;
+}
+
+export interface CampaignDeliverabilityStats {
+  deliveredCount: number;
+  sendingCount: number;
+  sentCount: number;
+  errorCount: number;
+  specificErrors: DeliverabilityErrorStat[];
+}
+
 export interface CampaignsFilter {
   isArchived?: boolean;
   organizationId?: number;
@@ -57,6 +70,7 @@ export interface Campaign {
   teams: Team[];
   externalSystem?: ExternalSystem | null;
   creator?: User | null;
+  deliverabilityStats: CampaignDeliverabilityStats;
 }
 
 export interface PaginatedCampaigns {
@@ -92,6 +106,7 @@ export const schema = `
 
   type CampaignDeliverabilityStats {
     deliveredCount: Int!
+    sendingCount: Int!
     sentCount: Int!
     errorCount: Int!
     specificErrors: [DeliverabilityErrorStat]

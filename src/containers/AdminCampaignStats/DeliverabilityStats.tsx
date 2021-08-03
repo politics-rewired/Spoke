@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { Campaign } from "../../api/campaign";
 import { asPercentWithTotal } from "../../lib/utils";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
@@ -53,18 +54,7 @@ const styles = StyleSheet.create({
 
 const DeliverabilityStats = (props: {
   data: {
-    campaign: {
-      id: string;
-      deliverabilityStats: {
-        deliveredCount: number;
-        sentCount: number;
-        errorCount: number;
-        specificErrors: {
-          errorCode: string;
-          count: number;
-        }[];
-      };
-    };
+    campaign: Pick<Campaign, "id" | "deliverabilityStats">;
   };
 }) => {
   const {
@@ -72,6 +62,7 @@ const DeliverabilityStats = (props: {
       campaign: {
         deliverabilityStats: {
           deliveredCount,
+          sendingCount,
           sentCount,
           errorCount,
           specificErrors
@@ -80,7 +71,7 @@ const DeliverabilityStats = (props: {
     }
   } = props;
 
-  const total = deliveredCount + sentCount + errorCount;
+  const total = deliveredCount + sendingCount + sentCount + errorCount;
 
   return (
     <div>
@@ -94,7 +85,7 @@ const DeliverabilityStats = (props: {
         <div className={css(styles.flexColumn, styles.spacer)}>
           <CampaignStat
             title="Sending"
-            count={asPercentWithTotal(sentCount, total)}
+            count={asPercentWithTotal(sendingCount + sentCount, total)}
           />
         </div>
         <div className={css(styles.flexColumn, styles.spacer)}>
@@ -133,6 +124,7 @@ const queries = {
           id
           deliverabilityStats {
             deliveredCount
+            sendingCount
             sentCount
             errorCount
             specificErrors {
