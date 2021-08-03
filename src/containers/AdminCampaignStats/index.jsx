@@ -281,7 +281,7 @@ class AdminCampaignStats extends React.Component {
         <CampaignSurveyStats campaignId={campaign.id} />
 
         <br />
-        <div className={css(styles.header)}>Deliverability</div>
+        <div className={css(styles.header)}>Outbound Deliverability</div>
         <DeliverabilityStats campaignId={campaign.id} />
         <br />
 

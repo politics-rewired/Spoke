@@ -3,32 +3,33 @@ import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { Campaign } from "../../api/campaign";
 import { asPercentWithTotal } from "../../lib/utils";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignStat from "./CampaignStat";
 
-const descriptions = {
-  40001: "Invalid destination number",
-  40002: "Blocked as spam",
-  40003: "Blocked as spam",
-  40004: "Unknown",
-  40005: "Expired",
-  40006: "Carrier outage",
-  40007: "Unknown",
-  40008: "Unknown",
-  40009: "Invalid body",
-  40011: "Too many messages",
-  40012: "Invalid destination number",
-  21610: "Recipient unsubscribed",
-  30001: "Queue overflow",
-  30002: "Account suspended",
-  30003: "Unreachable phone number",
-  30004: "Message blocked",
-  30005: "Unknown destination handset",
-  30006: "Landline or unreachable carrier",
-  30007: "Blocked as spam",
-  30008: "Unknown error"
+const descriptions: Record<string, string> = {
+  "40001": "Invalid destination number",
+  "40002": "Blocked as spam",
+  "40003": "Blocked as spam",
+  "40004": "Unknown",
+  "40005": "Expired",
+  "40006": "Carrier outage",
+  "40007": "Unknown",
+  "40008": "Unknown",
+  "40009": "Invalid body",
+  "40011": "Too many messages",
+  "40012": "Invalid destination number",
+  "21610": "Recipient unsubscribed",
+  "30001": "Queue overflow",
+  "30002": "Account suspended",
+  "30003": "Unreachable phone number",
+  "30004": "Message blocked",
+  "30005": "Unknown destination handset",
+  "30006": "Landline or unreachable carrier",
+  "30007": "Blocked as spam",
+  "30008": "Unknown error"
 };
 
 const styles = StyleSheet.create({
@@ -53,18 +54,7 @@ const styles = StyleSheet.create({
 
 const DeliverabilityStats = (props: {
   data: {
-    campaign: {
-      id: string;
-      deliverabilityStats: {
-        deliveredCount: number;
-        sentCount: number;
-        errorCount: number;
-        specificErrors: {
-          errorCode: string;
-          count: number;
-        }[];
-      };
-    };
+    campaign: Pick<Campaign, "id" | "deliverabilityStats">;
   };
 }) => {
   const {
@@ -72,6 +62,7 @@ const DeliverabilityStats = (props: {
       campaign: {
         deliverabilityStats: {
           deliveredCount,
+          sendingCount,
           sentCount,
           errorCount,
           specificErrors
@@ -80,7 +71,7 @@ const DeliverabilityStats = (props: {
     }
   } = props;
 
-  const total = deliveredCount + sentCount + errorCount;
+  const total = deliveredCount + sendingCount + sentCount + errorCount;
 
   return (
     <div>
@@ -94,7 +85,7 @@ const DeliverabilityStats = (props: {
         <div className={css(styles.flexColumn, styles.spacer)}>
           <CampaignStat
             title="Sending"
-            count={asPercentWithTotal(sentCount, total)}
+            count={asPercentWithTotal(sendingCount + sentCount, total)}
           />
         </div>
         <div className={css(styles.flexColumn, styles.spacer)}>
@@ -108,15 +99,18 @@ const DeliverabilityStats = (props: {
       <div className={css(styles.secondaryHeader)}>Top errors:</div>
       {specificErrors
         .sort((a, b) => b.count - a.count)
-        .map((e) => (
-          <div key={e.errorCode}>
-            {e.errorCode}{" "}
-            {descriptions[e.errorCode]
-              ? `(${descriptions[e.errorCode]})`
-              : "Unknown error"}
-            : {asPercentWithTotal(e.count, total)}
-          </div>
-        ))}
+        .map((e) => {
+          const errorCode = e.errorCode ? `${e.errorCode}` : "n/a";
+          return (
+            <div key={errorCode}>
+              {errorCode}{" "}
+              {descriptions[errorCode]
+                ? `(${descriptions[errorCode]})`
+                : "Unknown error"}
+              : {asPercentWithTotal(e.count, total)}
+            </div>
+          );
+        })}
     </div>
   );
 };
@@ -133,6 +127,7 @@ const queries = {
           id
           deliverabilityStats {
             deliveredCount
+            sendingCount
             sentCount
             errorCount
             specificErrors {
