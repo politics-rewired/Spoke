@@ -69,6 +69,7 @@ describe("handle-delivery-report", () => {
     const preJobMessage = await getMessage();
     expect(preJobMessage.num_segments).toBeNull();
     expect(preJobMessage.num_media).toBeNull();
+    expect(preJobMessage.service_response).toEqual("[]");
 
     await client.query(
       `insert into log (message_sid, body, service_type) values ($1, $2, $3)`,
@@ -93,6 +94,9 @@ describe("handle-delivery-report", () => {
     expect(postJobMessage.num_segments).toBe(extra?.num_segments);
     expect(postJobMessage.num_media).toBe(extra?.num_media);
     expect(postJobMessage.send_status).toBe("DELIVERED");
+    expect(JSON.parse(postJobMessage.service_response)).toContainEqual(
+      deliveryReport
+    );
   });
 
   it("handles twilio delivery report", async () => {
