@@ -133,5 +133,8 @@ describe("handle-delivery-report", () => {
     // Twilio segment counts are recorded at send-time
     expect(messageRecord.num_segments).toBeNull();
     expect(messageRecord.num_media).toBeNull();
+    expect(JSON.parse(messageRecord.service_response)).toContainEqual(
+      deliveryReport
+    );
   });
 });

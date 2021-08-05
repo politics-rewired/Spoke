@@ -328,13 +328,15 @@ export const processDeliveryReportBody = async (client, reportBody) => {
       update message
       set
         service_response_at = now(),
-        send_status = $1
+        send_status = $1,
+        service_response = (coalesce(service_response, '[]')::jsonb || cast($2 as jsonb))::text
       where
-        service_id = $2
-        and send_status not in  ($3, $4)
+        service_id = $3
+        and send_status not in  ($4, $5)
     `,
     [
       getMessageStatus(MessageStatus),
+      JSON.stringify([reportBody]),
       service_id,
       SpokeSendStatus.Delivered,
       SpokeSendStatus.Error
