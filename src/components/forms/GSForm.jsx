@@ -5,6 +5,7 @@ import Form from "react-formal";
 
 import theme from "../../styles/theme";
 import GSSubmitButton from "./GSSubmitButton";
+import SpokeFormField from "./SpokeFormField";
 
 const styles = StyleSheet.create({
   errorMessage: {
@@ -101,7 +102,7 @@ export default class GSForm extends React.Component {
       if (!React.isValidElement(child)) {
         return child;
       }
-      if (child.type === Form.Field) {
+      if (child.type === Form.Field || child.type === SpokeFormField) {
         const { name } = child.props;
         let error = this.state.formErrors ? this.state.formErrors[name] : null;
         let clonedElement = child;
