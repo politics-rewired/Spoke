@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.10.0](https://github.com/politics-rewired/spoke/compare/v4.9.2...v4.10.0) (2021-08-06)
+
+
+### Features
+
+* add documentation link ([#993](https://github.com/politics-rewired/spoke/issues/993)) ([b79b8f3](https://github.com/politics-rewired/spoke/commit/b79b8f3c6b6255f29597ea5425cec6d4a1cef189))
+* delete log record after processing ([#995](https://github.com/politics-rewired/spoke/issues/995)) ([b566315](https://github.com/politics-rewired/spoke/commit/b566315c5cac98276432ed15191abc8b0853daaf))
+
+
+### Bug Fixes
+
+* disambiguate deliverability stats ([#996](https://github.com/politics-rewired/spoke/issues/996)) ([5fb4b71](https://github.com/politics-rewired/spoke/commit/5fb4b712099463cff9a7883046ec2fc3464ad53a))
+* use correct date format for luxon ([#994](https://github.com/politics-rewired/spoke/issues/994)) ([66cefef](https://github.com/politics-rewired/spoke/commit/66cefef08f72e8402a24f0c5f8909a7141d483c1))
+
 ### [4.9.2](https://github.com/politics-rewired/spoke/compare/v4.9.1...v4.9.2) (2021-07-22)
 
 
