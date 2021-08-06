@@ -320,20 +320,28 @@ const handleDeliveryReport = async (report) =>
     body: JSON.stringify(report)
   });
 
-export const processDeliveryReport = async (body) => {
-  const { MessageSid: service_id, MessageStatus } = body;
+export const processDeliveryReportBody = async (client, reportBody) => {
+  const { MessageSid: service_id, MessageStatus } = reportBody;
 
-  await r
-    .knex("message")
-    .update({
-      service_response_at: r.knex.fn.now(),
-      send_status: getMessageStatus(MessageStatus)
-    })
-    .where({ service_id })
-    .whereNotIn("send_status", [
+  await client.query(
+    `
+      update message
+      set
+        service_response_at = now(),
+        send_status = $1,
+        service_response = (coalesce(service_response, '[]')::jsonb || cast($2 as jsonb))::text
+      where
+        service_id = $3
+        and send_status not in  ($4, $5)
+    `,
+    [
+      getMessageStatus(MessageStatus),
+      JSON.stringify([reportBody]),
+      service_id,
       SpokeSendStatus.Delivered,
       SpokeSendStatus.Error
-    ]);
+    ]
+  );
 };
 
 async function handleIncomingMessage(message) {
@@ -382,6 +390,6 @@ export default {
   sendMessage,
   saveNewIncomingMessage,
   handleDeliveryReport,
-  processDeliveryReport,
+  processDeliveryReportBody,
   handleIncomingMessage
 };

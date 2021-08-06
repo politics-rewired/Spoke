@@ -1,18 +1,30 @@
-import { processDeliveryReport as processAssembleDeliveryReport } from "../api/lib/assemble-numbers";
-import { processDeliveryReport as processTwilioDeliveryReport } from "../api/lib/twilio";
-import { MessagingServiceType } from "../api/types";
+import { Task } from "pg-compose";
 
-export const handleDeliveryReport = async (payload: any, _helpers: any) => {
-  const { service_type, body: stringBody } = payload;
-  const body = JSON.parse(stringBody);
+import { processDeliveryReportBody as processAssembleDeliveryReport } from "../api/lib/assemble-numbers";
+import { processDeliveryReportBody as processTwilioDeliveryReport } from "../api/lib/twilio";
+import { LogRecord, MessagingServiceType } from "../api/types";
+import { withTransaction } from "../utils";
 
-  if (service_type === MessagingServiceType.AssembleNumbers) {
-    await processAssembleDeliveryReport(body);
-  } else if (service_type === MessagingServiceType.Twilio) {
-    await processTwilioDeliveryReport(body);
-  } else {
-    throw new Error(`Unknown service type ${service_type}`);
-  }
+export const handleDeliveryReport: Task = async (
+  payload: LogRecord,
+  helpers
+) => {
+  const { id: logId, service_type, body: stringBody } = payload;
+  const body = JSON.parse(stringBody || "");
+
+  await helpers.withPgClient((client) =>
+    withTransaction(client, async (trx) => {
+      if (service_type === MessagingServiceType.AssembleNumbers) {
+        await processAssembleDeliveryReport(trx, body);
+      } else if (service_type === MessagingServiceType.Twilio) {
+        await processTwilioDeliveryReport(trx, body);
+      } else {
+        throw new Error(`Unknown service type ${service_type}`);
+      }
+
+      await trx.query(`delete from log where id = $1`, [logId]);
+    })
+  );
 };
 
 export default handleDeliveryReport;
