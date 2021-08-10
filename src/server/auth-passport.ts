@@ -154,7 +154,7 @@ function setupSlackPassport() {
         auth0_id: auth0Id,
         first_name,
         last_name,
-        cell: user.phone ?? "unknown",
+        cell: user.phone || "unknown",
         email: user.email,
         is_superadmin: false
       };
