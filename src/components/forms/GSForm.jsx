@@ -5,6 +5,7 @@ import Form from "react-formal";
 
 import theme from "../../styles/theme";
 import GSSubmitButton from "./GSSubmitButton";
+import SpokeFormField from "./SpokeFormField";
 
 const styles = StyleSheet.create({
   errorMessage: {
@@ -24,7 +25,6 @@ export default class GSForm extends React.Component {
   };
 
   state = {
-    formErrors: null,
     isSubmitting: false,
     model: null,
     globalErrorMessage: null
@@ -82,8 +82,6 @@ export default class GSForm extends React.Component {
     }
   };
 
-  handleFormError = (errors) => this.setState({ formErrors: errors });
-
   handleFormSubmitError = (err) => {
     if (err.message) {
       this.setState({ globalErrorMessage: err.message });
@@ -96,22 +94,41 @@ export default class GSForm extends React.Component {
     }
   };
 
+  getFormErrors = () => {
+    let formErrors = {};
+
+    try {
+      const value =
+        this.props.value || this.state.model || this.props.defaultValue;
+      this.props.schema.validateSync(value, { abortEarly: false });
+    } catch (err) {
+      formErrors = err.inner.reduce((acc, { path, errors }) => {
+        return {
+          ...acc,
+          [path]: errors.map((message) => ({ message }))
+        };
+      }, {});
+    }
+
+    return formErrors;
+  };
+
   renderChildren = (children) => {
+    const formErrors = this.getFormErrors();
+
     return React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) {
         return child;
       }
-      if (child.type === Form.Field) {
-        const { name } = child.props;
-        let error = this.state.formErrors ? this.state.formErrors[name] : null;
+      if (child.type === Form.Field || child.type === SpokeFormField) {
+        const { name, label } = child.props;
+        const error = formErrors[name];
         let clonedElement = child;
         if (error) {
-          error = error[0]
-            ? error[0].message.replace(name, child.props.label)
+          const errorText = error[0]
+            ? error[0].message.replace(name, label)
             : null;
-          clonedElement = React.cloneElement(child, {
-            errorText: error
-          });
+          clonedElement = React.cloneElement(child, { errorText });
         }
         return React.cloneElement(clonedElement, {
           events: ["onBlur"]
@@ -152,8 +169,8 @@ export default class GSForm extends React.Component {
         ref={this.handleFormRefChange}
         value={value}
         {...this.props}
+        errors={this.getFormErrors()}
         onChange={this.handleOnFormChange}
-        onError={this.handleFormError}
         onSubmit={this.handleSubmitForm}
       >
         {this.renderGlobalErrorMessage()}
