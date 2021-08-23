@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.10.1](https://github.com/politics-rewired/spoke/compare/v4.10.0...v4.10.1) (2021-08-23)
+
+
+### Bug Fixes
+
+* **slack:** set unknown phone number for empty string ([#999](https://github.com/politics-rewired/spoke/issues/999)) ([3930e16](https://github.com/politics-rewired/spoke/commit/3930e168cf98b3647d856fdf7e010d8426c02ba2))
+* display gsform errors ([#998](https://github.com/politics-rewired/spoke/issues/998)) ([0f55774](https://github.com/politics-rewired/spoke/commit/0f55774d2c6827cacdb4f531aea21574bd5cb274))
+
 ## [4.10.0](https://github.com/politics-rewired/spoke/compare/v4.9.2...v4.10.0) (2021-08-06)
 
 
