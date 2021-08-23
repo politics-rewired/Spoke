@@ -45,6 +45,6 @@ module.exports = {
     "!**/deploy/**",
     "!**/coverage/**"
   ],
-  setupTestFrameworkScriptFile: "<rootDir>/__test__/setup-framework.js",
+  setupFilesAfterEnv: ["<rootDir>/__test__/setup-framework.js"],
   testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/__test__/e2e/"]
 };
