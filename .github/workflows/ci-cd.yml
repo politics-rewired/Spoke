@@ -39,7 +39,7 @@ jobs:
       SUPPRESS_SELF_INVITE: "false"
       JOBS_SAME_PROCESS: "1"
 
-      TEST_POSTGRES_URL: "postgres://postgres:postgres@postgres:5432/spoke"
+      TEST_DATABASE_URL: "postgres://postgres:postgres@postgres:5432/spoke"
 
       PASSPORT_STRATEGY: "local"
 
