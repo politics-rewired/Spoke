@@ -165,7 +165,7 @@ const Login: React.FC = () => {
     case "slack":
       // If Slack strategy, the server needs to initiate the redirect
       // Force reload will hit the server redirect (as opposed to client routing)
-      window.location.href = "/login";
+      window.location.href = `${window.location.href}`;
       return <div />;
 
     case "local":
