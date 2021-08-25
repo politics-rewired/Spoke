@@ -173,13 +173,15 @@ function setupSlackPassport() {
     return redirectPostSignIn(req, res, false);
   };
 
-  // Cast as any to allow passing Slack options
-  const passportOptions: any = {
-    scope: SLACK_SCOPES.split(",")
-  };
-
   const app = express();
-  app.get("/login", passport.authenticate("slack", passportOptions));
+  app.get("/login", (req, res, next) => {
+    // Cast as any to allow passing Slack options
+    const passportOptions: any = {
+      scope: SLACK_SCOPES.split(","),
+      state: req.query.nextUrl
+    };
+    return passport.authenticate("slack", passportOptions)(req, res, next);
+  });
 
   app.get(
     "/login-callback",
