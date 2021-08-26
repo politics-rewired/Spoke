@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.10.2](https://github.com/politics-rewired/spoke/compare/v4.10.1...v4.10.2) (2021-08-26)
+
+
+### Bug Fixes
+
+* preserve nextUrl through slack login flow ([#1006](https://github.com/politics-rewired/spoke/issues/1006)) ([4bb0d0c](https://github.com/politics-rewired/spoke/commit/4bb0d0c81dece0ff95ac01a80a102ccbca3a3ed5))
+
 ### [4.10.1](https://github.com/politics-rewired/spoke/compare/v4.10.0...v4.10.1) (2021-08-23)
 
 
