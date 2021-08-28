@@ -158,7 +158,7 @@ export const deliveryReportValidator: RequestHandlerFactory = () => async (
 export const sendMessage = async (
   message: SendMessagePayload,
   organizationId: number,
-  _trx: Knex
+  _trx?: Knex
 ) => {
   const {
     id: spokeMessageId,
