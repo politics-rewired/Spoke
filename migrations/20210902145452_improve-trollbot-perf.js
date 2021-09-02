@@ -14,7 +14,7 @@ exports.up = function (knex) {
 					ts_queries as (
 						select mode, to_tsquery('(' || array_to_string(array_agg(token), ') | (') || ')') as tsquery
 						from troll_trigger
-						where troll_trigger.organization_id = 1 
+						where troll_trigger.organization_id = get_trollbot_matches.organization_id
 						group by 1
 					),
 					bad_messages as (
