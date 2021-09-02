@@ -2706,6 +2706,49 @@ ALTER SEQUENCE public.unhealthy_link_domain_id_seq OWNED BY public.unhealthy_lin
 
 
 --
+-- Name: unsolicited_message; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.unsolicited_message (
+    id integer NOT NULL,
+    messaging_service_sid text NOT NULL,
+    service_id text NOT NULL,
+    from_number text NOT NULL,
+    body text NOT NULL,
+    num_segments integer NOT NULL,
+    num_media integer NOT NULL,
+    media_urls text[] DEFAULT '{}'::text[] NOT NULL,
+    service_response json NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.unsolicited_message OWNER TO postgres;
+
+--
+-- Name: unsolicited_message_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.unsolicited_message_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.unsolicited_message_id_seq OWNER TO postgres;
+
+--
+-- Name: unsolicited_message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.unsolicited_message_id_seq OWNED BY public.unsolicited_message.id;
+
+
+--
 -- Name: user; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3008,6 +3051,13 @@ ALTER TABLE ONLY public.team ALTER COLUMN id SET DEFAULT nextval('public.team_id
 --
 
 ALTER TABLE ONLY public.unhealthy_link_domain ALTER COLUMN id SET DEFAULT nextval('public.unhealthy_link_domain_id_seq'::regclass);
+
+
+--
+-- Name: unsolicited_message id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.unsolicited_message ALTER COLUMN id SET DEFAULT nextval('public.unsolicited_message_id_seq'::regclass);
 
 
 --
@@ -3461,6 +3511,14 @@ ALTER TABLE ONLY public.unhealthy_link_domain
 
 ALTER TABLE ONLY public.canned_response
     ADD CONSTRAINT unique_per_campaign UNIQUE (campaign_id, title);
+
+
+--
+-- Name: unsolicited_message unsolicited_message_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.unsolicited_message
+    ADD CONSTRAINT unsolicited_message_pkey PRIMARY KEY (id);
 
 
 --
@@ -4170,6 +4228,13 @@ CREATE TRIGGER _500_message_updated_at BEFORE UPDATE ON public.message FOR EACH 
 
 
 --
+-- Name: unsolicited_message _500_message_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER _500_message_updated_at BEFORE UPDATE ON public.unsolicited_message FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+
+
+--
 -- Name: messaging_service_stick _500_messaging_service_stick_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -4633,6 +4698,14 @@ ALTER TABLE ONLY public.troll_alarm
 
 ALTER TABLE ONLY public.troll_trigger
     ADD CONSTRAINT troll_trigger_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: unsolicited_message unsolicited_message_messaging_service_sid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.unsolicited_message
+    ADD CONSTRAINT unsolicited_message_messaging_service_sid_fkey FOREIGN KEY (messaging_service_sid) REFERENCES public.messaging_service(messaging_service_sid);
 
 
 --
