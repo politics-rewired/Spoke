@@ -1644,11 +1644,34 @@ CREATE TABLE public.campaign_team (
     campaign_id integer,
     team_id integer,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    id integer NOT NULL
 );
 
 
 ALTER TABLE public.campaign_team OWNER TO postgres;
+
+--
+-- Name: campaign_team_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.campaign_team_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.campaign_team_id_seq OWNER TO postgres;
+
+--
+-- Name: campaign_team_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.campaign_team_id_seq OWNED BY public.campaign_team.id;
+
 
 --
 -- Name: canned_response; Type: TABLE; Schema: public; Owner: postgres
@@ -2355,9 +2378,9 @@ ALTER SEQUENCE public.message_id_seq OWNED BY public.message.id;
 --
 
 CREATE TABLE public.messaging_service_stick (
-    cell text,
-    organization_id integer,
-    messaging_service_sid text,
+    cell text NOT NULL,
+    organization_id integer NOT NULL,
+    messaging_service_sid text NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 )
 WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000');
@@ -2640,11 +2663,34 @@ CREATE TABLE public.team_escalation_tags (
     team_id integer,
     tag_id integer,
     created_at timestamp with time zone,
-    updated_at timestamp with time zone
+    updated_at timestamp with time zone,
+    id integer NOT NULL
 );
 
 
 ALTER TABLE public.team_escalation_tags OWNER TO postgres;
+
+--
+-- Name: team_escalation_tags_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.team_escalation_tags_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.team_escalation_tags_id_seq OWNER TO postgres;
+
+--
+-- Name: team_escalation_tags_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.team_escalation_tags_id_seq OWNED BY public.team_escalation_tags.id;
+
 
 --
 -- Name: team_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2890,11 +2936,34 @@ CREATE TABLE public.user_team (
     user_id integer,
     team_id integer,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    id integer NOT NULL
 );
 
 
 ALTER TABLE public.user_team OWNER TO postgres;
+
+--
+-- Name: user_team_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.user_team_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_team_id_seq OWNER TO postgres;
+
+--
+-- Name: user_team_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.user_team_id_seq OWNED BY public.user_team.id;
+
 
 --
 -- Name: zip_code; Type: TABLE; Schema: public; Owner: postgres
@@ -2953,6 +3022,13 @@ ALTER TABLE ONLY public.campaign ALTER COLUMN id SET DEFAULT nextval('public.cam
 --
 
 ALTER TABLE ONLY public.campaign_contact ALTER COLUMN id SET DEFAULT nextval('public.campaign_contact_id_seq'::regclass);
+
+
+--
+-- Name: campaign_team id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_team ALTER COLUMN id SET DEFAULT nextval('public.campaign_team_id_seq'::regclass);
 
 
 --
@@ -3061,6 +3137,13 @@ ALTER TABLE ONLY public.team ALTER COLUMN id SET DEFAULT nextval('public.team_id
 
 
 --
+-- Name: team_escalation_tags id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.team_escalation_tags ALTER COLUMN id SET DEFAULT nextval('public.team_escalation_tags_id_seq'::regclass);
+
+
+--
 -- Name: unhealthy_link_domain id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3093,6 +3176,13 @@ ALTER TABLE ONLY public.user_cell ALTER COLUMN id SET DEFAULT nextval('public.us
 --
 
 ALTER TABLE ONLY public.user_organization ALTER COLUMN id SET DEFAULT nextval('public.user_organization_id_seq'::regclass);
+
+
+--
+-- Name: user_team id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_team ALTER COLUMN id SET DEFAULT nextval('public.user_team_id_seq'::regclass);
 
 
 --
@@ -3173,6 +3263,14 @@ ALTER TABLE ONLY public.campaign
 
 ALTER TABLE ONLY public.campaign_team
     ADD CONSTRAINT campaign_team_campaign_id_team_id_unique UNIQUE (campaign_id, team_id);
+
+
+--
+-- Name: campaign_team campaign_team_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_team
+    ADD CONSTRAINT campaign_team_pkey PRIMARY KEY (id);
 
 
 --
@@ -3414,6 +3512,8 @@ ALTER TABLE ONLY public.messaging_service
 ALTER TABLE ONLY public.messaging_service_stick
     ADD CONSTRAINT messaging_service_stick_cell_organization_unique_constraint UNIQUE (cell, organization_id);
 
+ALTER TABLE ONLY public.messaging_service_stick REPLICA IDENTITY USING INDEX messaging_service_stick_cell_organization_unique_constraint;
+
 
 --
 -- Name: monthly_organization_message_usages monthly_organization_message_usages_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -3477,6 +3577,14 @@ ALTER TABLE ONLY public.all_tag
 
 ALTER TABLE ONLY public.all_tag
     ADD CONSTRAINT tag_title_organization_id_unique UNIQUE (title, organization_id);
+
+
+--
+-- Name: team_escalation_tags team_escalation_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.team_escalation_tags
+    ADD CONSTRAINT team_escalation_tags_pkey PRIMARY KEY (id);
 
 
 --
@@ -3565,6 +3673,14 @@ ALTER TABLE ONLY public.user_organization
 
 ALTER TABLE ONLY public."user"
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_team user_team_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_team
+    ADD CONSTRAINT user_team_pkey PRIMARY KEY (id);
 
 
 --
