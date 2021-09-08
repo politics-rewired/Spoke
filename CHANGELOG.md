@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.12.0](https://github.com/politics-rewired/spoke/compare/v4.11.0...v4.12.0) (2021-09-08)
+
+
+### Features
+
+* add resend-message task ([#1008](https://github.com/politics-rewired/spoke/issues/1008)) ([68a0d38](https://github.com/politics-rewired/spoke/commit/68a0d38ce0469df6a12ab30666d1c293b6337675))
+
+
+### Bug Fixes
+
+* add missing primary keys ([#1011](https://github.com/politics-rewired/spoke/issues/1011)) ([6839481](https://github.com/politics-rewired/spoke/commit/683948102c3d9eba044ba494553a575ab88d626f))
+
 ## [4.11.0](https://github.com/politics-rewired/spoke/compare/v4.10.2...v4.11.0) (2021-09-02)
 
 
