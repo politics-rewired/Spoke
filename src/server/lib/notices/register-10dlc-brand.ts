@@ -1,7 +1,8 @@
 import request from "superagent";
 
-import { Notice, Register10DlcBrandNotice } from "../../api/notice";
-import { r } from "../models";
+import { Register10DlcBrandNotice } from "../../../api/notice";
+import { r } from "../../models";
+import { OrgLevelNotificationGetter } from "./types";
 
 const graphqlQuery = `
   query AnonGetTcr10DlcBrand($switchboardProfileId: String!) {
@@ -38,14 +39,7 @@ const graphqlQuery = `
   }
 `;
 
-export const getInstanceNotifications = (_userId: string): Notice[] => [];
-
-type OrgLevelNotificationGetter = (
-  userId: string,
-  organizationId?: string
-) => Promise<Notice[]> | Notice[];
-
-const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
+export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   userId,
   organizationId
 ) => {
@@ -102,12 +96,4 @@ const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   return result;
 };
 
-export const getOrgLevelNotifications: OrgLevelNotificationGetter = async (
-  userId,
-  organizationId
-) => {
-  const notices: Notice[] = await Promise.all([
-    get10DlcBrandNotices(userId, organizationId)
-  ]).then((noticeSets) => noticeSets.flat());
-  return notices;
-};
+export default get10DlcBrandNotices;
