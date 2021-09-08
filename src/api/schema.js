@@ -15,6 +15,7 @@ import { schema as interactionStepSchema } from "./interaction-step";
 import { schema as inviteSchema } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
 import { schema as messageSchema } from "./message";
+import { schema as noticeSchema } from "./notice";
 import { schema as optOutSchema } from "./opt-out";
 import { schema as organizationSchema } from "./organization";
 import { schema as membershipSchema } from "./organization-membership";
@@ -279,6 +280,7 @@ const rootSchema = `
     externalSystem(systemId: String!): ExternalSystem!
     externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!
     externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
+    notices(organizationId: String): NoticePage!
   }
 
   input SecondPassInput {
@@ -390,6 +392,7 @@ export const schema = [
   interactionStepSchema,
   optOutSchema,
   messageSchema,
+  noticeSchema,
   campaignContactSchema,
   cannedResponseSchema,
   questionResponseSchema,

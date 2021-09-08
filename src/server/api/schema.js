@@ -29,6 +29,10 @@ import {
 } from "../../workers/jobs";
 import { eventBus, EventType } from "../event-bus";
 import { refreshExternalSystem } from "../lib/external-systems";
+import {
+  getInstanceNotifications,
+  getOrgLevelNotifications
+} from "../lib/notices";
 import { change } from "../local-auth-helpers";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, datawarehouse, r } from "../models";
@@ -3976,6 +3980,36 @@ const rootResolvers = {
         system_id: systemId
       });
       return formatPage(query, { after, first });
+    },
+    notices: async (_root, { organizationId }, { user }) => {
+      let notices = [];
+      if (!user) return notices;
+
+      if (user && user.is_superadmin) {
+        const instanceNotifications = await getInstanceNotifications(user.id);
+        notices = notices.concat(instanceNotifications);
+      }
+
+      const orgNotices = await getOrgLevelNotifications(
+        user.id,
+        organizationId ?? undefined
+      );
+      notices = notices.concat(orgNotices);
+
+      const pageInfo = {
+        totalCount: notices.length,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: notices[0]?.id ?? null,
+        endCursor: notices[notices.length - 1]?.id ?? null
+      };
+
+      const edges = notices.map((notice) => ({
+        cursor: notice.id,
+        node: notice
+      }));
+
+      return { pageInfo, edges };
     }
   }
 };
