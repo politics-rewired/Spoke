@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.12.1](https://github.com/politics-rewired/spoke/compare/v4.12.0...v4.12.1) (2021-09-18)
+
+
+### Bug Fixes
+
+* resolve id column ambiguity ([0b6aab8](https://github.com/politics-rewired/spoke/commit/0b6aab843bf6276bffecf3df241409d2eb11bcaa))
+
 ## [4.12.0](https://github.com/politics-rewired/spoke/compare/v4.11.0...v4.12.0) (2021-09-08)
 
 
