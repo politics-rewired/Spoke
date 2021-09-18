@@ -536,7 +536,7 @@ export async function cachedMyCurrentAssignmentTargets(userId, organizationId) {
       is_assignment_enabled: true,
       organization_id: parseInt(organizationId, 10)
     })
-    .pluck("id");
+    .pluck("team.id");
 
   const myEscalationTags = await r
     .reader("team_escalation_tags")
