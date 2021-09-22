@@ -9,6 +9,7 @@ import AdminNavigation from "../containers/AdminNavigation";
 import { loadData } from "../containers/hoc/with-operations";
 import { hasRole } from "../lib/permissions";
 import theme from "../styles/theme";
+import NotificationCard from "./NotificationCard";
 import TopNav from "./TopNav";
 
 const styles = StyleSheet.create({
@@ -138,7 +139,10 @@ class AdminDashboard extends React.Component {
           {this.renderNavigation(
             sections.filter((s) => hasRole(s.role, roles))
           )}
-          <div className={css(styles.content)}>{children}</div>
+          <div className={css(styles.content)}>
+            <NotificationCard organizationId={match.params.organizationId} />
+            {children}
+          </div>
         </div>
       </div>
     );
