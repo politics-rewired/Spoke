@@ -36,7 +36,7 @@ const Register10DlcBrandNoticeCard: React.FC<Register10DlcBrandNotice> = (
       <CardContent>
         <p>
           You must provide details required for us to register a 10DLC brand on
-          your behalf by September 24th! If you do not provide this information
+          your behalf by September 27th! If you do not provide this information
           by then, you may not be able to send messages starting on October 1st
           until 3-5 business days after you provide this information.
         </p>
