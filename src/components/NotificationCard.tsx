@@ -52,20 +52,28 @@ const Register10DlcBrandNoticeCard: React.FC<Register10DlcBrandNotice> = (
           </a>
           .
         </p>
+
+        {props.tcrBrandRegistrationUrl === null && (
+          <p style={{ fontWeight: "bold" }}>
+            Please contact your Spoke organization owner to resolve this!
+          </p>
+        )}
       </CardContent>
-      <CardActions disableSpacing>
-        <Button
-          href={props.tcrBrandRegistrationUrl}
-          target="_blank"
-          rel="noreferrer"
-          color="primary"
-          variant="contained"
-          style={{ marginLeft: "auto" }}
-          endIcon={<OpenInNew />}
-        >
-          Register
-        </Button>
-      </CardActions>
+      {props.tcrBrandRegistrationUrl && (
+        <CardActions disableSpacing>
+          <Button
+            href={props.tcrBrandRegistrationUrl}
+            target="_blank"
+            rel="noreferrer"
+            color="primary"
+            variant="contained"
+            style={{ marginLeft: "auto" }}
+            endIcon={<OpenInNew />}
+          >
+            Register
+          </Button>
+        </CardActions>
+      )}
     </Card>
   );
 };

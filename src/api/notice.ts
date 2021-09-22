@@ -3,7 +3,7 @@ import { GraphQLType } from "./types";
 
 export interface Register10DlcBrandNotice {
   id: string;
-  tcrBrandRegistrationUrl: string;
+  tcrBrandRegistrationUrl: string | null;
 }
 
 export type Notice = Register10DlcBrandNotice;
@@ -24,7 +24,7 @@ export type NoticePage = RelayPaginatedResponse<Notice>;
 export const schema = `
   type Register10DlcBrandNotice {
     id: ID!
-    tcrBrandRegistrationUrl: String!
+    tcrBrandRegistrationUrl: String
   }
 
   union Notice = Register10DlcBrandNotice

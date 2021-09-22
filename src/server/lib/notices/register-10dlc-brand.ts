@@ -45,31 +45,36 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
 ) => {
   const query = r
     .knex("messaging_service")
-    .select("messaging_service_sid")
-    .where({ service_type: "assemble-numbers" })
-    .whereIn("organization_id", function whereIn(this: any) {
-      this.select("organization_id")
-        .from("user_organization")
-        .where({ user_id: userId, role: "OWNER" });
-    });
+    .join(
+      "user_organization",
+      "user_organization.organization_id",
+      "messaging_service.organization_id"
+    )
+    .select(["messaging_service_sid", r.knex.raw("array_agg(role) as roles")])
+    .groupBy("messaging_service_sid")
+    .where({
+      service_type: "assemble-numbers",
+      user_id: userId
+    })
+    .whereIn("role", ["OWNER", "ADMIN"]);
   if (organizationId !== undefined) {
-    query.where({ organization_id: organizationId });
+    query.where({ "user_organization.organization_id": organizationId });
   }
 
-  const profileIds: string[] = (await query).map(
-    ({ messaging_service_sid }: { messaging_service_sid: string }) =>
-      messaging_service_sid
-  );
+  const profiles: {
+    messaging_service_sid: string;
+    roles: string[];
+  }[] = await query;
   const notifications: (
     | Register10DlcBrandNotice
     | undefined
   )[] = await Promise.all(
-    profileIds.map(async (profileId: string) => {
+    profiles.map(async ({ messaging_service_sid, roles }) => {
       const payload = {
         operationName: "AnonGetTcr10DlcBrand",
         query: graphqlQuery,
         variables: {
-          switchboardProfileId: profileId
+          switchboardProfileId: messaging_service_sid
         }
       };
       const response = await request
@@ -79,8 +84,10 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
       if (!response.body.data.brand) {
         return {
           __typename: "Register10DlcBrandNotice",
-          id: profileId,
-          tcrBrandRegistrationUrl: `https://portal.spokerewired.com/10dlc-registration/${profileId}`
+          id: messaging_service_sid,
+          tcrBrandRegistrationUrl: roles.includes("OWNER")
+            ? `https://portal.spokerewired.com/10dlc-registration/${messaging_service_sid}`
+            : null
         };
       }
       return undefined;
