@@ -15,6 +15,7 @@ import { schema as interactionStepSchema } from "./interaction-step";
 import { schema as inviteSchema } from "./invite";
 import { schema as linkDomainSchema } from "./link-domain";
 import { schema as messageSchema } from "./message";
+import { schema as messagingServiceSchema } from "./messaging-service";
 import { schema as noticeSchema } from "./notice";
 import { schema as optOutSchema } from "./opt-out";
 import { schema as organizationSchema } from "./organization";
@@ -392,6 +393,7 @@ export const schema = [
   interactionStepSchema,
   optOutSchema,
   messageSchema,
+  messagingServiceSchema,
   noticeSchema,
   campaignContactSchema,
   cannedResponseSchema,
