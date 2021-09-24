@@ -23,7 +23,7 @@ const graphqlQuery = `
   fragment Tcr10DlcBrandInfo on Tcr10DlcBrand {
     id
     nodeId
-    legalCompannyName
+    legalCompanyName
     dba
     entityForm
     industry
