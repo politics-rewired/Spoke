@@ -1,6 +1,7 @@
 import { Campaign, PaginatedCampaigns } from "./campaign";
 import { ExternalSystem } from "./external-system";
 import { LinkDomain, UnhealthyLinkDomain } from "./link-domain";
+import { MessagingServicePage } from "./messaging-service";
 import { OptOut } from "./opt-out";
 import { OrganizationMembership } from "./organization-membership";
 import { OranizationSettings } from "./organization-settings";
@@ -56,6 +57,7 @@ export interface Organization {
   escalationTagList: Tag[];
   teams: Team[];
   externalSystems: RelayPaginatedResponse<ExternalSystem>;
+  messagingServices: MessagingServicePage;
 }
 
 export interface EditOrganizationInput {
@@ -110,6 +112,7 @@ export const schema = `
     escalationTagList: [Tag]
     teams: [Team]!
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
+    messagingServices(after: Cursor, first: Int): MessagingServicePage!
   }
 
   input EditOrganizationInput {

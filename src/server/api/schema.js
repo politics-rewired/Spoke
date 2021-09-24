@@ -90,6 +90,7 @@ import serviceMap from "./lib/services";
 import { graphileSecretRef } from "./lib/utils";
 import { resolvers as linkDomainResolvers } from "./link-domain";
 import { resolvers as messageResolvers } from "./message";
+import { resolvers as messagingServiceResolvers } from "./messaging-service";
 import { resolvers as optOutResolvers } from "./opt-out";
 import { resolvers as organizationResolvers } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
@@ -4041,6 +4042,7 @@ export const resolvers = {
   ...externalActivistCodeResolvers,
   ...externalResultCodeResolvers,
   ...externalSyncConfigResolvers,
+  ...messagingServiceResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },

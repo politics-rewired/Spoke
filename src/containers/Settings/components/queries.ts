@@ -26,3 +26,24 @@ export const EDIT_ORGANIZATION_NAME = gql`
     }
   }
 `;
+
+export interface OrganizationMessagingServicesType {
+  organization: Pick<Organization, "id" | "messagingServices">;
+}
+
+export const GET_MESSAGING_SERVICES = gql`
+  query GetOrganizationMessagingServices($organizationId: String!) {
+    organization(id: $organizationId) {
+      id
+      messagingServices {
+        edges {
+          node {
+            id
+            serviceType
+            tcrBrandRegistrationLink
+          }
+        }
+      }
+    }
+  }
+`;

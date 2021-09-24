@@ -403,6 +403,19 @@ export const resolvers = {
         .reader("external_system")
         .where({ organization_id: organizationId });
       return formatPage(query, { after, first });
+    },
+    messagingServices: async (organization, { after, first }, { user }) => {
+      const organizationId = parseInt(organization.id, 10);
+      await accessRequired(user, organizationId, "OWNER", true);
+
+      const query = r
+        .reader("messaging_service")
+        .where({ organization_id: organizationId });
+      return formatPage(query, {
+        after,
+        first,
+        primaryColumn: "messaging_service_sid"
+      });
     }
   }
 };

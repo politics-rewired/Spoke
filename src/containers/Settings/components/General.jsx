@@ -23,6 +23,7 @@ import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
 import EditName from "./EditName";
+import Review10DlcInfo from "./Review10DlcInfo";
 
 const styles = StyleSheet.create({
   sectionCard: {
@@ -250,6 +251,10 @@ class Settings extends React.Component {
 
     return (
       <div>
+        <Review10DlcInfo
+          organizationId={organization.id}
+          style={{ marginBottom: 20 }}
+        />
         <EditName
           organizationId={organization.id}
           style={{ marginBottom: 20 }}
