@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.14.0](https://github.com/politics-rewired/spoke/compare/v4.13.1...v4.14.0) (2021-09-24)
+
+
+### Features
+
+* **10dlc:** add registration link to settings ([#1013](https://github.com/politics-rewired/spoke/issues/1013)) ([c9a4176](https://github.com/politics-rewired/spoke/commit/c9a4176e50fc467ba557780557f4174931dacac5))
+
 ### [4.13.1](https://github.com/politics-rewired/spoke/compare/v4.13.0...v4.13.1) (2021-09-24)
 
 
