@@ -5,22 +5,22 @@ import { r } from "../../models";
 import { OrgLevelNotificationGetter } from "./types";
 
 const graphqlQuery = `
-  query AnonGetTcr10DlcBrand($switchboardProfileId: String!) {
+  query AnonGetTcr10DlcSurvey($switchboardProfileId: String!) {
     billingAccountId: billingAccountIdBySwitchboardProfileId(
       switchboardProfileId: $switchboardProfileId
     )
     billingAccountName: billingAccountNameBySwitchboardProfileId(
       switchboardProfileId: $switchboardProfileId
     )
-    brand: tcr10DlcBrandBySwitchboardProfileId(
+    survey: tcr10DlcSurveyBySwitchboardProfileId(
       switchboardProfileId: $switchboardProfileId
     ) {
-      ...Tcr10DlcBrandInfo
+      ...Tcr10DlcSurveyInfo
       __typename
     }
   }
 
-  fragment Tcr10DlcBrandInfo on Tcr10DlcBrand {
+  fragment Tcr10DlcSurveyInfo on Tcr10DlcSurvey {
     id
     nodeId
     legalCompanyName
@@ -71,7 +71,7 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   )[] = await Promise.all(
     profiles.map(async ({ messaging_service_sid, roles }) => {
       const payload = {
-        operationName: "AnonGetTcr10DlcBrand",
+        operationName: "AnonGetTcr10DlcSurvey",
         query: graphqlQuery,
         variables: {
           switchboardProfileId: messaging_service_sid
@@ -81,7 +81,7 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
         .post(`https://api.portal.spokerewired.com/graphql`)
         .send(payload);
 
-      if (!response.body.data.brand) {
+      if (!response.body.data.survey) {
         return {
           __typename: "Register10DlcBrandNotice",
           id: messaging_service_sid,
