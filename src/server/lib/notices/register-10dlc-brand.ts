@@ -71,30 +71,26 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
   )[] = await Promise.all(
     profiles.map(async ({ messaging_service_sid, roles }) => {
       const payload = {
-        operationName: "AnonGetTcr10DlcBrand",
+        operationName: "AnonGetTcr10DlcSurvey",
         query: graphqlQuery,
         variables: {
           switchboardProfileId: messaging_service_sid
         }
       };
-      try {
-        const response = await request
-          .post(`https://api.portal.spokerewired.com/graphql`)
-          .send(payload);
+      const response = await request
+        .post(`https://api.portal.spokerewired.com/graphql`)
+        .send(payload);
 
-        if (!response.body.data.survey) {
-          return {
-            __typename: "Register10DlcBrandNotice",
-            id: messaging_service_sid,
-            tcrBrandRegistrationUrl: roles.includes("OWNER")
-              ? `https://portal.spokerewired.com/10dlc-registration/${messaging_service_sid}`
-              : null
-          };
-        }
-        return undefined;
-      } catch (err) {
-        return undefined;
+      if (!response.body.data.survey) {
+        return {
+          __typename: "Register10DlcBrandNotice",
+          id: messaging_service_sid,
+          tcrBrandRegistrationUrl: roles.includes("OWNER")
+            ? `https://portal.spokerewired.com/10dlc-registration/${messaging_service_sid}`
+            : null
+        };
       }
+      return undefined;
     })
   );
 

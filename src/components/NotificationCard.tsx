@@ -14,12 +14,13 @@ import {
   NoticePage,
   Register10DlcBrandNotice
 } from "../api/notice";
-import { loadData } from "../containers/hoc/with-operations";
+import { withOperations } from "../containers/hoc/with-operations";
 import { QueryMap } from "../network/types";
 
 interface InnerProps {
   organizationId: string;
   data: {
+    error?: any;
     notices: NoticePage;
   };
 }
@@ -79,6 +80,13 @@ const Register10DlcBrandNoticeCard: React.FC<Register10DlcBrandNotice> = (
 };
 
 export const NotificationCard: React.FC<InnerProps> = (props) => {
+  if (props.data.error || !props.data.notices) {
+    return (
+      <Card style={{ marginBottom: "2em" }}>
+        <CardContent>There was an error fetching notifications.</CardContent>
+      </Card>
+    );
+  }
   return (
     <div>
       {props.data.notices.edges.map(({ node }) => {
@@ -120,6 +128,6 @@ const queries: QueryMap<InnerProps> = {
   }
 };
 
-export default loadData({
+export default withOperations({
   queries
 })(NotificationCard);
