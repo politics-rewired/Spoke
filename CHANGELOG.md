@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.14.1](https://github.com/politics-rewired/spoke/compare/v4.14.0...v4.14.1) (2021-09-26)
+
+
+### Bug Fixes
+
+* **10dlc:** handle graphql errors ([#1014](https://github.com/politics-rewired/spoke/issues/1014)) ([d9438f1](https://github.com/politics-rewired/spoke/commit/d9438f1f846a05fabf346e43e2b2533c6069da52))
+
 ## [4.14.0](https://github.com/politics-rewired/spoke/compare/v4.13.1...v4.14.0) (2021-09-24)
 
 
