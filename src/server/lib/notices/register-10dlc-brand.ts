@@ -77,20 +77,24 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
           switchboardProfileId: messaging_service_sid
         }
       };
-      const response = await request
-        .post(`https://api.portal.spokerewired.com/graphql`)
-        .send(payload);
+      try {
+        const response = await request
+          .post(`https://api.portal.spokerewired.com/graphql`)
+          .send(payload);
 
-      if (!response.body.data.brand) {
-        return {
-          __typename: "Register10DlcBrandNotice",
-          id: messaging_service_sid,
-          tcrBrandRegistrationUrl: roles.includes("OWNER")
-            ? `https://portal.spokerewired.com/10dlc-registration/${messaging_service_sid}`
-            : null
-        };
+        if (!response.body.data.brand) {
+          return {
+            __typename: "Register10DlcBrandNotice",
+            id: messaging_service_sid,
+            tcrBrandRegistrationUrl: roles.includes("OWNER")
+              ? `https://portal.spokerewired.com/10dlc-registration/${messaging_service_sid}`
+              : null
+          };
+        }
+        return undefined;
+      } catch (err) {
+        return undefined;
       }
-      return undefined;
     })
   );
 
