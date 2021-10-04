@@ -4,6 +4,16 @@ on:
   push:
 
 jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    name: "Hadolint"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jbergstroem/hadolint-gh-action@v1
+        with:
+          error_level: 0
+          dockerfile: "Dockerfile"
+
   test:
     runs-on: ubuntu-latest
 
