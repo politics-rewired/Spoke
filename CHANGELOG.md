@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.15.0](https://github.com/politics-rewired/spoke/compare/v4.14.1...v4.15.0) (2021-10-14)
+
+
+### Features
+
+* add campaign groups ([#1016](https://github.com/politics-rewired/spoke/issues/1016)) ([6b3d654](https://github.com/politics-rewired/spoke/commit/6b3d654707e26a38e9ed136d42a957c17d5727e8))
+
+
+### Bug Fixes
+
+* fix blank screen for invalid invite ([#1017](https://github.com/politics-rewired/spoke/issues/1017)) ([0b3c825](https://github.com/politics-rewired/spoke/commit/0b3c825aaf16e99cfda9beb0b44f7006be412ca9)), closes [#997](https://github.com/politics-rewired/spoke/issues/997)
+
 ### [4.14.1](https://github.com/politics-rewired/spoke/compare/v4.14.0...v4.14.1) (2021-09-26)
 
 
