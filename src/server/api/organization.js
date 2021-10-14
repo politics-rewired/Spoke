@@ -416,6 +416,16 @@ export const resolvers = {
         first,
         primaryColumn: "messaging_service_sid"
       });
+    },
+    campaignGroups: async (organization, { after, first }, { user }) => {
+      const organizationId = parseInt(organization.id, 10);
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const query = r
+        .reader("campaign_group")
+        .where({ organization_id: organizationId });
+      const result = await formatPage(query, { after, first });
+      return result;
     }
   }
 };

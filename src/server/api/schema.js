@@ -51,6 +51,7 @@ import {
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { getCampaigns, resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
+import { resolvers as campaignGroupResolvers } from "./campaign-group";
 import {
   queryCampaignOverlapCount,
   queryCampaignOverlaps
@@ -334,6 +335,40 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       );
     });
     memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
+  }
+  if (Object.prototype.hasOwnProperty.call(campaign, "campaignGroupIds")) {
+    const { campaignGroupIds } = campaign;
+    await r.knex.transaction(async (trx) => {
+      // Remove all existing team memberships and then add everything again
+      await trx.raw(
+        `
+          delete from campaign_group_campaign
+          where
+            campaign_id = ?
+            and campaign_group_id in (
+              select id
+              from campaign_group
+              where
+                organization_id = ?
+                and id != ALL(?)
+            )
+        `,
+        [id, organizationId, campaignGroupIds]
+      );
+
+      if (campaignGroupIds.length < 1) return;
+      const valuesStr = [...Array(campaignGroupIds.length)]
+        .map(() => "(?, ?)")
+        .join(", ");
+      await trx.raw(
+        `
+          insert into campaign_group_campaign (campaign_group_id, campaign_id)
+          values ${valuesStr}
+          on conflict (campaign_group_id, campaign_id) do nothing
+        `,
+        campaignGroupIds.flatMap((groupId) => [groupId, id])
+      );
+    });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "texters")) {
     const { assignmentInputs, ignoreAfterDate } = campaign.texters;
@@ -3635,6 +3670,52 @@ const rootMutations = {
       }
 
       return externalSystem;
+    },
+    saveCampaignGroups: async (
+      _root,
+      { organizationId, campaignGroups },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, user);
+
+      const result = [];
+      for (const campaignGroup of campaignGroups) {
+        const { id: campaignGroupId, ...payload } = campaignGroup;
+        if (campaignGroupId) {
+          const whereClause = {
+            id: campaignGroup.id,
+            organization_id: organizationId
+          };
+          const [updatedCampaign] = await r
+            .knex("campaign_group")
+            .update(payload)
+            .where(whereClause)
+            .returning("*");
+          result.push(updatedCampaign);
+        } else {
+          const [newCampaign] = await r
+            .knex("campaign_group")
+            .insert({ ...payload, organization_id: organizationId })
+            .returning("*");
+          result.push(newCampaign);
+        }
+      }
+
+      return result;
+    },
+    deleteCampaignGroup: async (
+      _root,
+      { organizationId, campaignGroupId },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, user);
+
+      await r
+        .knex("campaign_group")
+        .where({ id: campaignGroupId, organization_id: organizationId })
+        .del();
+
+      return true;
     }
   }
 };
@@ -4011,6 +4092,18 @@ const rootResolvers = {
       }));
 
       return { pageInfo, edges };
+    },
+    campaignGroups: async (
+      _root,
+      { organizationId, after, first },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const query = r.reader("campaign_group").where({
+        organization_id: parseInt(organizationId, 10)
+      });
+      return formatPage(query, { after, first });
     }
   }
 };
@@ -4029,6 +4122,7 @@ export const resolvers = {
   ...interactionStepResolvers,
   ...optOutResolvers,
   ...messageResolvers,
+  ...campaignGroupResolvers,
   ...campaignContactResolvers,
   ...cannedResponseResolvers,
   ...questionResponseResolvers,

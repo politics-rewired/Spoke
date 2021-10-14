@@ -2,6 +2,7 @@ import { schema as assignmentSchema } from "./assignment";
 import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as campaignSchema } from "./campaign";
 import { schema as campaignContactSchema } from "./campaign-contact";
+import { schema as campaignGroupSchema } from "./campaign-group";
 import { schema as cannedResponseSchema } from "./canned-response";
 import { schema as conversationSchema } from "./conversations";
 import { schema as externalActivistCodeSchema } from "./external-activist-code";
@@ -111,6 +112,7 @@ const rootSchema = `
     organizationId: String
     isAssignmentLimitedToTeams: Boolean
     teamIds: [ID]
+    campaignGroupIds: [String!]
     texters: TexterInput
     interactionSteps: InteractionStepInput
     cannedResponses: [CannedResponseInput]
@@ -282,6 +284,7 @@ const rootSchema = `
     externalSystems(organizationId: String!, after: Cursor, first: Int): ExternalSystemPage!
     externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
     notices(organizationId: String): NoticePage!
+    campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
   }
 
   input SecondPassInput {
@@ -293,6 +296,8 @@ const rootSchema = `
     createInvite(invite:InviteInput!): Invite
     createCampaign(campaign:CampaignInput!): Campaign
     editCampaign(id:String!, campaign:CampaignInput!): Campaign
+    saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
+    deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!
     filterLandlines(id:String!): Campaign
     bulkUpdateScript(organizationId:String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateResult]
     deleteJob(campaignId:String!, id:String!): JobRequest
@@ -396,6 +401,7 @@ export const schema = [
   messagingServiceSchema,
   noticeSchema,
   campaignContactSchema,
+  campaignGroupSchema,
   cannedResponseSchema,
   questionResponseSchema,
   questionSchema,

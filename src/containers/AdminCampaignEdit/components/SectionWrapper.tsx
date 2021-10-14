@@ -232,6 +232,7 @@ const makeQueries = (jobTypes: string[]) => ({
             cannedResponses
             interactions
             texters
+            campaignGroups
           }
         }
       }

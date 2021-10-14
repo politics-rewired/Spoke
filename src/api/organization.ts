@@ -1,4 +1,5 @@
 import { Campaign, PaginatedCampaigns } from "./campaign";
+import { CampaignGroupPage } from "./campaign-group";
 import { ExternalSystem } from "./external-system";
 import { LinkDomain, UnhealthyLinkDomain } from "./link-domain";
 import { MessagingServicePage } from "./messaging-service";
@@ -58,6 +59,7 @@ export interface Organization {
   teams: Team[];
   externalSystems: RelayPaginatedResponse<ExternalSystem>;
   messagingServices: MessagingServicePage;
+  campaignGroups: CampaignGroupPage;
 }
 
 export interface EditOrganizationInput {
@@ -113,6 +115,7 @@ export const schema = `
     teams: [Team]!
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
     messagingServices(after: Cursor, first: Int): MessagingServicePage!
+    campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
   }
 
   input EditOrganizationInput {
