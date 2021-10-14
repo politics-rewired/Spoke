@@ -11,6 +11,7 @@ import AdminAssignmentControl from "./containers/AdminAssignmentControl";
 import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
 import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
 import AdminCampaignEdit from "./containers/AdminCampaignEdit";
+import AdminCampaignGroupEditor from "./containers/AdminCampaignGroupEditor";
 import AdminCampaignList from "./containers/AdminCampaignList";
 import AdminCampaignStats from "./containers/AdminCampaignStats";
 import AdminExternalSystemDetail from "./containers/AdminExternalSystemDetail";
@@ -128,6 +129,10 @@ const AdminOrganizationRoutes = (props) => {
           <Route
             path={`${organizationPath}/campaigns`}
             component={AdminCampaignListRoutes}
+          />
+          <Route
+            path={`${organizationPath}/campaign-groups`}
+            component={AdminCampaignGroupEditor}
           />
           <Route path={`${organizationPath}/people`} component={AdminPeople} />
           <Route

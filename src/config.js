@@ -320,6 +320,11 @@ const validators = {
       "The interval length in minutes that each troll patrol sweep will examine messages within.",
     default: 6
   }),
+  ENABLE_CAMPAIGN_GROUPS: bool({
+    desc: "Whether to enable campaign groups",
+    default: false,
+    isClient: true
+  }),
   ENABLE_SHORTLINK_DOMAINS: bool({
     desc: "Whether to enable shortlink domains",
     default: false,
