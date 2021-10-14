@@ -30,11 +30,41 @@ exports.up = function up(knex) {
       on public.campaign_group_campaign
       for each row
       execute procedure universal_updated_at();
+
+    create or replace function campaigns_in_group(group_name text)
+    returns setof campaign
+    as $$
+      select *
+      from campaign
+      where exists (
+        select 1
+        from campaign_group_campaign
+        join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
+        where campaign_group_campaign.campaign_id = campaign.id
+          and campaign_group.name = campaigns_in_group.group_name
+      )
+    $$ language sql stable;
+
+    create or replace function campaigns_in_group(group_id integer)
+    returns setof campaign
+    as $$
+      select *
+      from campaign
+      where exists (
+        select 1
+        from campaign_group_campaign
+        join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
+        where campaign_group_campaign.campaign_id = campaign.id
+          and campaign_group.id = campaigns_in_group.group_id
+      )
+    $$ language sql stable;
   `);
 };
 
 exports.down = function down(knex) {
   return knex.schema.raw(`
+    drop function campaigns_in_group(integer);
+    drop function campaigns_in_group(text);
     drop table campaign_group_campaign;
     drop table campaign_group;
   `);
