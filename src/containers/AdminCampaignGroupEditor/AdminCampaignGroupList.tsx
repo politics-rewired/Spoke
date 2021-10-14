@@ -37,9 +37,10 @@ export const AdminCampaignGroupList: React.FC<AdminCampaignGroupListProps> = (
 
   return (
     <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="simple table">
+      <Table className={classes.table} aria-label="campaign groups table">
         <TableHead>
           <TableRow>
+            <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
             <TableCell align="right">Description</TableCell>
             <TableCell align="right">Actions</TableCell>
@@ -48,6 +49,7 @@ export const AdminCampaignGroupList: React.FC<AdminCampaignGroupListProps> = (
         <TableBody>
           {props.campaignGroups.map((campaignGroup) => (
             <TableRow key={campaignGroup.name}>
+              <TableCell scope="row">{campaignGroup.id}</TableCell>
               <TableCell component="th" scope="row">
                 {campaignGroup.name}
               </TableCell>
