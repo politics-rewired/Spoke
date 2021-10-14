@@ -1615,6 +1615,81 @@ ALTER SEQUENCE public.campaign_contact_id_seq OWNED BY public.campaign_contact.i
 
 
 --
+-- Name: campaign_group; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.campaign_group (
+    id integer NOT NULL,
+    organization_id integer NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.campaign_group OWNER TO postgres;
+
+--
+-- Name: campaign_group_campaign; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.campaign_group_campaign (
+    id integer NOT NULL,
+    campaign_group_id integer NOT NULL,
+    campaign_id integer NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.campaign_group_campaign OWNER TO postgres;
+
+--
+-- Name: campaign_group_campaign_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.campaign_group_campaign_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.campaign_group_campaign_id_seq OWNER TO postgres;
+
+--
+-- Name: campaign_group_campaign_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.campaign_group_campaign_id_seq OWNED BY public.campaign_group_campaign.id;
+
+
+--
+-- Name: campaign_group_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.campaign_group_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.campaign_group_id_seq OWNER TO postgres;
+
+--
+-- Name: campaign_group_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.campaign_group_id_seq OWNED BY public.campaign_group.id;
+
+
+--
 -- Name: campaign_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -3025,6 +3100,20 @@ ALTER TABLE ONLY public.campaign_contact ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
+-- Name: campaign_group id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group ALTER COLUMN id SET DEFAULT nextval('public.campaign_group_id_seq'::regclass);
+
+
+--
+-- Name: campaign_group_campaign id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group_campaign ALTER COLUMN id SET DEFAULT nextval('public.campaign_group_campaign_id_seq'::regclass);
+
+
+--
 -- Name: campaign_team id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3247,6 +3336,38 @@ ALTER TABLE ONLY public.campaign_contact
 
 ALTER TABLE ONLY public.campaign_contact_tag
     ADD CONSTRAINT campaign_contact_tag_pkey PRIMARY KEY (campaign_contact_id, tag_id);
+
+
+--
+-- Name: campaign_group_campaign campaign_group_campaign_campaign_group_id_campaign_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group_campaign
+    ADD CONSTRAINT campaign_group_campaign_campaign_group_id_campaign_id_key UNIQUE (campaign_group_id, campaign_id);
+
+
+--
+-- Name: campaign_group_campaign campaign_group_campaign_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group_campaign
+    ADD CONSTRAINT campaign_group_campaign_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: campaign_group campaign_group_organization_id_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group
+    ADD CONSTRAINT campaign_group_organization_id_name_key UNIQUE (organization_id, name);
+
+
+--
+-- Name: campaign_group campaign_group_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group
+    ADD CONSTRAINT campaign_group_pkey PRIMARY KEY (id);
 
 
 --
@@ -4442,6 +4563,20 @@ CREATE TRIGGER _500_unhealthy_link_domain_updated_at BEFORE UPDATE ON public.unh
 
 
 --
+-- Name: campaign_group _500_universal_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER _500_universal_updated_at BEFORE UPDATE ON public.campaign_group FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+
+
+--
+-- Name: campaign_group_campaign _500_universal_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER _500_universal_updated_at BEFORE UPDATE ON public.campaign_group_campaign FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+
+
+--
 -- Name: user_organization _500_user_organization_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -4556,6 +4691,30 @@ ALTER TABLE ONLY public.campaign
 
 ALTER TABLE ONLY public.campaign
     ADD CONSTRAINT campaign_external_system_id_fkey FOREIGN KEY (external_system_id) REFERENCES public.external_system(id);
+
+
+--
+-- Name: campaign_group_campaign campaign_group_campaign_campaign_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group_campaign
+    ADD CONSTRAINT campaign_group_campaign_campaign_group_id_fkey FOREIGN KEY (campaign_group_id) REFERENCES public.campaign_group(id);
+
+
+--
+-- Name: campaign_group_campaign campaign_group_campaign_campaign_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group_campaign
+    ADD CONSTRAINT campaign_group_campaign_campaign_id_fkey FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+
+
+--
+-- Name: campaign_group campaign_group_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_group
+    ADD CONSTRAINT campaign_group_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id);
 
 
 --

@@ -49,6 +49,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     hasUnsentInitialMessages,
     hasUnhandledMessages,
     teams,
+    campaignGroups,
     externalSystem
   } = campaign;
 
@@ -107,6 +108,9 @@ export const CampaignListRow: React.FC<Props> = (props) => {
   }
 
   tags = tags.concat(teams.map(({ title }) => ({ title })));
+  tags = tags.concat(
+    campaignGroups.edges.map(({ node }) => ({ title: node.name }))
+  );
 
   const primaryText = (
     <div style={inlineStyles.chipWrapper}>

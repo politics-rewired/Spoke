@@ -228,7 +228,8 @@ export const resolvers = {
         .reader("interaction_step")
         .where({ campaign_id: campaign.id })
         .count()
-        .then(([{ count }]) => count > 0)
+        .then(([{ count }]) => count > 0),
+    campaignGroups: () => true
   },
   CampaignsReturn: {
     __resolveType(obj, _context, _) {
@@ -552,6 +553,22 @@ export const resolvers = {
     deliverabilityStats: async (campaign) => {
       const stats = await getDeliverabilityStats(parseInt(campaign.id, 10));
       return stats;
+    },
+    campaignGroups: async (campaign, { after, first }, { user }) => {
+      const organizationId = parseInt(campaign.organization_id, 10);
+      await accessRequired(user, organizationId, "ADMIN");
+
+      const query = r
+        .reader("campaign_group")
+        .select("campaign_group.*")
+        .join(
+          "campaign_group_campaign",
+          "campaign_group_campaign.campaign_group_id",
+          "campaign_group.id"
+        )
+        .where({ campaign_id: campaign.id });
+      const result = await formatPage(query, { after, first });
+      return result;
     }
   }
 };

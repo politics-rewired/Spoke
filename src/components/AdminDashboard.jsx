@@ -68,6 +68,7 @@ class AdminDashboard extends React.Component {
 
     const sections = [
       { name: "Campaigns", path: "campaigns", role: "ADMIN" },
+      { name: "Campaign Groups", path: "campaign-groups", role: "ADMIN" },
       { name: "People", path: "people", role: "ADMIN" },
       { name: "Teams", path: "teams", role: "ADMIN" },
       { name: "Assignment Control", path: "assignment-control", role: "ADMIN" },
@@ -113,6 +114,11 @@ class AdminDashboard extends React.Component {
 
     if (!window.ENABLE_SHORTLINK_DOMAINS) {
       const index = sections.findIndex((s) => s.name === "Short Link Domains");
+      sections.splice(index, 1);
+    }
+
+    if (!window.ENABLE_CAMPAIGN_GROUPS) {
+      const index = sections.findIndex((s) => s.name === "Campaign Groups");
       sections.splice(index, 1);
     }
 

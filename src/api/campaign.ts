@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { CampaignGroupPage } from "./campaign-group";
 import { ExternalSystem } from "./external-system";
 import { InteractionStep } from "./interaction-step";
 import { Team } from "./team";
@@ -68,6 +69,7 @@ export interface Campaign {
   hasUnsentInitialMessages?: boolean | null;
   hasUnhandledMessages?: boolean | null;
   teams: Team[];
+  campaignGroups: CampaignGroupPage;
   externalSystem?: ExternalSystem | null;
   creator?: User | null;
   deliverabilityStats: CampaignDeliverabilityStats;
@@ -130,6 +132,7 @@ export const schema = `
     contacts: Boolean!
     autoassign: Boolean!
     cannedResponses: Boolean!
+    campaignGroups: Boolean!
     interactions: Boolean!
     texters: Boolean!
   }
@@ -170,6 +173,7 @@ export const schema = `
     logoImageUrl: String
     editors: String
     teams: [Team]!
+    campaignGroups: CampaignGroupPage!
     textingHoursStart: Int
     textingHoursEnd: Int
     isAutoassignEnabled: Boolean!
