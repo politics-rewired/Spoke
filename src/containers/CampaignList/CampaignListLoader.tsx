@@ -41,6 +41,14 @@ const query = gql`
               id
               title
             }
+            campaignGroups {
+              edges {
+                node {
+                  id
+                  name
+                }
+              }
+            }
             externalSystem {
               id
               type
