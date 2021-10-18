@@ -76,17 +76,20 @@ const webpackConfig: WebpackConfiguration = {
   },
   // See: https://webpack.js.org/configuration/dev-server/
   devServer: {
-    contentBase: "/assets/",
-    publicPath: "/assets/",
+    devMiddleware: {
+      publicPath: "/assets/",
+      stats: "minimal"
+    },
+    static: {
+      directory: "/assets/"
+    },
     hot: true,
-    // this should be temporary until we get the real hostname plugged in everywhere
-    disableHostCheck: true,
+    allowedHosts: "all",
     headers: { "Access-Control-Allow-Origin": "*" },
     port: config.WEBPACK_PORT || config.PORT,
     proxy: {
       "*": `http://127.0.0.1:${config.DEV_APP_PORT}`
-    },
-    stats: "minimal"
+    }
   }
 };
 
