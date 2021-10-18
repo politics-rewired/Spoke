@@ -1,6 +1,5 @@
-import { ApolloQueryResult } from "@apollo/client";
+import { ApolloQueryResult, gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
-import gql from "graphql-tag";
 import { History } from "history";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React, { useContext } from "react";

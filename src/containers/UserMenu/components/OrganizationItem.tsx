@@ -1,5 +1,4 @@
-import { ApolloClient } from "@apollo/client";
-import gql from "graphql-tag";
+import { ApolloClient, gql } from "@apollo/client";
 import MenuItem from "material-ui/MenuItem";
 import React from "react";
 import { RouterProps } from "react-router-dom";

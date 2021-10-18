@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
-import gql from "graphql-tag";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";

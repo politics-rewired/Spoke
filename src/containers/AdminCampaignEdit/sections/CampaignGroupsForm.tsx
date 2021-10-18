@@ -1,6 +1,5 @@
-import { ApolloQueryResult } from "@apollo/client";
+import { ApolloQueryResult, gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
-import gql from "graphql-tag";
 import ChipInput from "material-ui-chip-input";
 import React, { useState } from "react";
 import { compose } from "recompose";

@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
-import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";

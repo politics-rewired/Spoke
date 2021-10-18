@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unused-state */
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
-import gql from "graphql-tag";
 import IconButton from "material-ui/IconButton/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Check from "material-ui/svg-icons/action/check-circle";

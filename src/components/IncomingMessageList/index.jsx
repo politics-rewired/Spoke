@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 import DataTables from "material-ui-datatables";
 import FlatButton from "material-ui/FlatButton";
 import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";

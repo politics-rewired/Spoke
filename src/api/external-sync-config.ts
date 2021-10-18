@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 import { ExternalActivistCode } from "./external-activist-code";
 import { ExternalResultCode } from "./external-result-code";

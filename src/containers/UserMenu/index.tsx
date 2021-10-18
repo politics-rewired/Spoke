@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client";
 import { withApollo, WithApolloClient } from "@apollo/client/react/hoc";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import gql from "graphql-tag";
 import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
 import IconButton from "material-ui/IconButton";

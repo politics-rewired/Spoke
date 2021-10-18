@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 import { History } from "history";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";

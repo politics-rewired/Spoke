@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
-import gql from "graphql-tag";
 import { History } from "history";
 import sortBy from "lodash/sortBy";
 import { List, ListItem } from "material-ui/List";

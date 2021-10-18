@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";

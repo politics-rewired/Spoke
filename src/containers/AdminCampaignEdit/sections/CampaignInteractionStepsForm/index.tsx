@@ -1,5 +1,4 @@
-import { ApolloQueryResult } from "@apollo/client";
-import gql from "graphql-tag";
+import { ApolloQueryResult, gql } from "@apollo/client";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";

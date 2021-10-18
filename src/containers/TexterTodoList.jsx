@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 import { RaisedButton } from "material-ui";
 import Check from "material-ui/svg-icons/action/check-circle";
 import PropTypes from "prop-types";
