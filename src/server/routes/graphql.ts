@@ -1,6 +1,10 @@
+/* eslint-disable import/prefer-default-export */
+import { addMocksToSchema } from "@graphql-tools/mock";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ApolloError, ApolloServer } from "apollo-server-express";
 import express from "express";
-import { addMockFunctionsToSchema, makeExecutableSchema } from "graphql-tools";
+import { graphqlUploadExpress } from "graphql-upload";
 
 import { schema } from "../../api/schema";
 import { config } from "../../config";
@@ -9,56 +13,63 @@ import mocks from "../api/mocks";
 import { resolvers } from "../api/schema";
 import { contextForRequest } from "../contexts";
 
-const router = express();
+export const createRouter = async () => {
+  const router = express();
 
-const executableSchema = makeExecutableSchema({
-  typeDefs: schema,
-  resolvers,
-  allowUndefinedInResolve: false
-});
+  const executableSchema = makeExecutableSchema({
+    typeDefs: schema,
+    resolvers
+  });
 
-const formatError = (err: any) => {
-  // Ignore intentional ApolloErrors
-  if (err.originalError instanceof ApolloError) {
+  const schemaWithMocks = addMocksToSchema({
+    schema: executableSchema,
+    mocks,
+    resolvers,
+    preserveResolvers: true
+  });
+
+  const formatError = (err: any) => {
+    // Ignore intentional ApolloErrors
+    if (err.originalError instanceof ApolloError) {
+      return err;
+    }
+
+    // node-postgres does not use an Error subclass so we check for schema property
+    const hasSchema = Object.prototype.hasOwnProperty.call(
+      err.originalError,
+      "schema"
+    );
+    if (hasSchema && config.isProduction) {
+      logger.error("Postgres error: ", err);
+      return new Error("Internal server error");
+    }
+
+    logger.error("GraphQL error: ", err);
     return err;
-  }
+  };
 
-  // node-postgres does not use an Error subclass so we check for schema property
-  const hasSchema = Object.prototype.hasOwnProperty.call(
-    err.originalError,
-    "schema"
+  const plugins = config.isProduction
+    ? []
+    : [ApolloServerPluginLandingPageGraphQLPlayground()];
+
+  const server = new ApolloServer({
+    schema: schemaWithMocks,
+    formatError,
+    debug: !config.isProduction,
+    introspection: !config.isProduction,
+    plugins,
+    context: ({ req, res: _res }) => contextForRequest(req)
+  });
+
+  await server.start();
+
+  router.use(
+    graphqlUploadExpress({
+      maxFileSize: 50 * 1000 * 1000, // 50 MB
+      maxFiles: 20
+    })
   );
-  if (hasSchema && config.isProduction) {
-    logger.error("Postgres error: ", err);
-    return new Error("Internal server error");
-  }
+  router.use(server.getMiddleware({ path: "/graphql" }));
 
-  logger.error("GraphQL error: ", err);
-  return err;
+  return router;
 };
-
-addMockFunctionsToSchema({
-  schema: executableSchema,
-  mocks,
-  preserveResolvers: true
-});
-
-const server = new ApolloServer({
-  schema: executableSchema,
-  formatError,
-  uploads: {
-    maxFileSize: 50 * 1000 * 1000, // 50 MB
-    maxFiles: 20
-  },
-  debug: !config.isProduction,
-  introspection: !config.isProduction,
-  playground: !config.isProduction,
-  context: ({ req, res: _res }) => contextForRequest(req)
-});
-
-server.applyMiddleware({
-  app: router,
-  path: "/graphql"
-});
-
-export default router;

@@ -1,4 +1,4 @@
-import { Resolver, Resolvers } from "apollo-client";
+import { Resolver, Resolvers } from "@apollo/client";
 import gql from "graphql-tag";
 import produce from "immer";
 

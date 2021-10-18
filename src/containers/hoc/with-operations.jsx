@@ -1,7 +1,7 @@
+import { graphql, withApollo } from "@apollo/client/react/hoc";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import React from "react";
-import { compose, graphql, withApollo } from "react-apollo";
-import { branch, renderComponent, withProps } from "recompose";
+import { branch, compose, renderComponent, withProps } from "recompose";
 
 import LoadingIndicator from "../../components/LoadingIndicator";
 import { replaceAll } from "../../lib/utils";

@@ -2,8 +2,8 @@ import { css, StyleSheet } from "aphrodite";
 import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import AdminNavigation from "../containers/AdminNavigation";
 import { loadData } from "../containers/hoc/with-operations";

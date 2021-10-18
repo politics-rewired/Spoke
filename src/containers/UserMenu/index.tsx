@@ -1,3 +1,4 @@
+import { withApollo, WithApolloClient } from "@apollo/client/react/hoc";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import gql from "graphql-tag";
 import Avatar from "material-ui/Avatar";
@@ -8,8 +9,8 @@ import MenuItem from "material-ui/MenuItem";
 import Popover from "material-ui/Popover";
 import Subheader from "material-ui/Subheader";
 import React, { Component } from "react";
-import { ApolloProviderProps, compose, withApollo } from "react-apollo";
 import { RouterProps, withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import { Organization } from "../../api/organization";
 import { User } from "../../api/user";
@@ -24,9 +25,7 @@ type CurrentUser = Pick<User, "id" | "displayName" | "email"> & {
   organizations: Pick<Organization, "id" | "name">[];
 };
 
-interface Props
-  extends Pick<RouterProps, "history">,
-    Pick<ApolloProviderProps<any>, "client"> {
+interface Props extends Pick<RouterProps, "history"> {
   orgId: string;
   data: {
     currentUser: CurrentUser;
@@ -37,7 +36,7 @@ interface State {
   open: boolean;
 }
 
-class UserMenu extends Component<Props, State> {
+class UserMenu extends Component<WithApolloClient<Props>, State> {
   anchorRef: Element | undefined = undefined;
 
   state: State = {
@@ -143,7 +142,7 @@ class UserMenu extends Component<Props, State> {
               <OrganizationItem
                 key={organization.id}
                 organization={organization}
-                client={client}
+                client={client!}
                 history={history}
               />
             ))}

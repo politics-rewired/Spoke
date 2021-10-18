@@ -1,3 +1,4 @@
+import { ApolloQueryResult } from "@apollo/client";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -15,7 +16,6 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TextField from "@material-ui/core/TextField";
-import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import sortBy from "lodash/sortBy";
 import FlatButton from "material-ui/FlatButton";

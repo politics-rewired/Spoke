@@ -1,11 +1,11 @@
+import { ApolloQueryResult } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
-import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import { History } from "history";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React, { useContext } from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import SpokeContext from "../../client/spoke-context";
 import SuperAdminLogin from "../../components/SuperAdminLogin";

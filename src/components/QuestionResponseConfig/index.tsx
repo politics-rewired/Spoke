@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from "apollo-client";
+import { ApolloQueryResult } from "@apollo/client";
 import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
 import Avatar from "material-ui/Avatar";

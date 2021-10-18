@@ -1,8 +1,8 @@
 import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import { loadData } from "./hoc/with-operations";
 

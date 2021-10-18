@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from "apollo-client/core/types";
+import { ApolloQueryResult } from "@apollo/client";
 import gql from "graphql-tag";
 import produce from "immer";
 import isEqual from "lodash/isEqual";

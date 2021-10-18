@@ -1,3 +1,4 @@
+import { ApolloQueryResult } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -8,12 +9,11 @@ import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import AddIcon from "@material-ui/icons/Add";
-import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import { History } from "history";
 import React, { useState } from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import {
   CampaignGroupInput,

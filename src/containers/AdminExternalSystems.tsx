@@ -25,8 +25,8 @@ import {
 } from "material-ui/Table";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import {
   ExternalSystem,

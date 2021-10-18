@@ -5,8 +5,8 @@ import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";

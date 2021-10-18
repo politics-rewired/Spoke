@@ -1,6 +1,6 @@
+import { ApolloQueryResult } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { css, StyleSheet } from "aphrodite";
-import { ApolloQueryResult } from "apollo-client";
 import gql from "graphql-tag";
 import isString from "lodash/fp/isString";
 import { DropDownMenu, MenuItem, Snackbar } from "material-ui";

@@ -9,8 +9,8 @@ import NavigateNextIcon from "material-ui/svg-icons/image/navigate-next";
 import { ToolbarTitle } from "material-ui/Toolbar";
 import PropTypes from "prop-types";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
 import { loadData } from "../containers/hoc/with-operations";

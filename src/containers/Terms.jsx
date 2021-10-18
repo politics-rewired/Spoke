@@ -7,8 +7,8 @@ import { Step, StepContent, StepLabel, Stepper } from "material-ui/Stepper";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import { loadData } from "./hoc/with-operations";
 
