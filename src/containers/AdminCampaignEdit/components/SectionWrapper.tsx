@@ -1,4 +1,4 @@
-import gql, { ApolloQueryResult } from "@apollo/client";
+import { ApolloQueryResult, gql } from "@apollo/client";
 import { useTheme } from "@material-ui/core";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";

@@ -1,4 +1,4 @@
-import gql, { ApolloQueryResult } from "@apollo/client";
+import { ApolloQueryResult, gql } from "@apollo/client";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
