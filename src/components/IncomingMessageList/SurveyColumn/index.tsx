@@ -1,5 +1,4 @@
-import { ApolloQueryResult } from "apollo-client";
-import gql from "graphql-tag";
+import { ApolloQueryResult, gql } from "@apollo/client";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import React, { Component } from "react";
