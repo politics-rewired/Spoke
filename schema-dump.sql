@@ -1091,6 +1091,21 @@ CREATE FUNCTION public.raise_trollbot_alarms(organization_id integer, troll_inte
 ALTER FUNCTION public.raise_trollbot_alarms(organization_id integer, troll_interval interval) OWNER TO postgres;
 
 --
+-- Name: regconfig_mode(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.regconfig_mode(mode text) RETURNS regconfig
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+    begin
+      return cast(mode as regconfig);
+    end
+    $$;
+
+
+ALTER FUNCTION public.regconfig_mode(mode text) OWNER TO postgres;
+
+--
 -- Name: soft_delete_tag(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -2838,8 +2853,8 @@ ALTER SEQUENCE public.team_id_seq OWNED BY public.team.id;
 CREATE TABLE public.troll_trigger (
     token character varying(255) NOT NULL,
     organization_id integer NOT NULL,
-    mode regconfig DEFAULT 'english'::regconfig NOT NULL,
-    compiled_tsquery tsquery GENERATED ALWAYS AS (to_tsquery(mode, (token)::text)) STORED
+    mode text DEFAULT 'english'::text NOT NULL,
+    compiled_tsquery tsquery GENERATED ALWAYS AS (to_tsquery(public.regconfig_mode(mode), (token)::text)) STORED
 );
 
 
