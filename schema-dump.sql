@@ -2854,7 +2854,8 @@ CREATE TABLE public.troll_trigger (
     token character varying(255) NOT NULL,
     organization_id integer NOT NULL,
     mode text DEFAULT 'english'::text NOT NULL,
-    compiled_tsquery tsquery GENERATED ALWAYS AS (to_tsquery(public.regconfig_mode(mode), (token)::text)) STORED
+    compiled_tsquery tsquery GENERATED ALWAYS AS (to_tsquery(public.regconfig_mode(mode), (token)::text)) STORED,
+    CONSTRAINT valid_regconfig CHECK ((mode = ((mode)::regconfig)::text))
 );
 
 

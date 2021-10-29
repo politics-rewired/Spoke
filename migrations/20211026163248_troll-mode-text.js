@@ -11,6 +11,7 @@ exports.up = function up(knex) {
     alter table public.troll_trigger
       drop column compiled_tsquery,
       alter column mode type text,
+      add constraint valid_regconfig check (mode = (mode::regconfig)::text),
       alter column mode set default 'english',
       add column compiled_tsquery tsquery generated always as (to_tsquery(regconfig_mode(mode), token::text)) stored;
 
@@ -64,6 +65,7 @@ exports.down = function down(knex) {
   return knex.schema.raw(`
     alter table public.troll_trigger
       drop column compiled_tsquery,
+      drop constraint valid_regconfig,
       alter column mode drop default,
       alter column mode type regconfig using regconfig_mode(mode),
       alter column mode set default 'english'::regconfig,
