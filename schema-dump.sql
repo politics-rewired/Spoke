@@ -187,6 +187,84 @@ CREATE FUNCTION public.backfill_segment_info(min_log_id bigint, max_log_id bigin
 
 ALTER FUNCTION public.backfill_segment_info(min_log_id bigint, max_log_id bigint) OWNER TO postgres;
 
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: campaign; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.campaign (
+    id integer NOT NULL,
+    organization_id integer NOT NULL,
+    title text DEFAULT ''::text NOT NULL,
+    description text DEFAULT ''::text NOT NULL,
+    is_started boolean,
+    due_by timestamp with time zone,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    is_archived boolean,
+    use_dynamic_assignment boolean,
+    logo_image_url text,
+    intro_html text,
+    primary_color text,
+    texting_hours_start integer DEFAULT 9,
+    texting_hours_end integer DEFAULT 21,
+    timezone text DEFAULT 'America/New_York'::text,
+    creator_id integer,
+    is_autoassign_enabled boolean DEFAULT false NOT NULL,
+    limit_assignment_to_teams boolean DEFAULT false NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    replies_stale_after_minutes integer,
+    landlines_filtered boolean DEFAULT false,
+    external_system_id uuid
+);
+
+
+ALTER TABLE public.campaign OWNER TO postgres;
+
+--
+-- Name: campaigns_in_group(integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.campaigns_in_group(group_id integer) RETURNS SETOF public.campaign
+    LANGUAGE sql STABLE
+    AS $$
+      select *
+      from campaign
+      where exists (
+        select 1
+        from campaign_group_campaign
+        join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
+        where campaign_group_campaign.campaign_id = campaign.id
+          and campaign_group.id = campaigns_in_group.group_id
+      )
+    $$;
+
+
+ALTER FUNCTION public.campaigns_in_group(group_id integer) OWNER TO postgres;
+
+--
+-- Name: campaigns_in_group(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.campaigns_in_group(group_name text) RETURNS SETOF public.campaign
+    LANGUAGE sql STABLE
+    AS $$
+      select *
+      from campaign
+      where exists (
+        select 1
+        from campaign_group_campaign
+        join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
+        where campaign_group_campaign.campaign_id = campaign.id
+          and campaign_group.name = campaigns_in_group.group_name
+      )
+    $$;
+
+
+ALTER FUNCTION public.campaigns_in_group(group_name text) OWNER TO postgres;
+
 --
 -- Name: cascade_archived_to_campaign_contacts(); Type: FUNCTION; Schema: public; Owner: postgres
 --
@@ -288,10 +366,6 @@ CREATE FUNCTION public.get_api_key_ref_from_van_system_with_id(van_system_id uui
 
 
 ALTER FUNCTION public.get_api_key_ref_from_van_system_with_id(van_system_id uuid) OWNER TO postgres;
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
 
 --
 -- Name: messaging_service; Type: TABLE; Schema: public; Owner: postgres
@@ -1297,38 +1371,6 @@ CREATE TABLE public.all_tag (
 
 
 ALTER TABLE public.all_tag OWNER TO postgres;
-
---
--- Name: campaign; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.campaign (
-    id integer NOT NULL,
-    organization_id integer NOT NULL,
-    title text DEFAULT ''::text NOT NULL,
-    description text DEFAULT ''::text NOT NULL,
-    is_started boolean,
-    due_by timestamp with time zone,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    is_archived boolean,
-    use_dynamic_assignment boolean,
-    logo_image_url text,
-    intro_html text,
-    primary_color text,
-    texting_hours_start integer DEFAULT 9,
-    texting_hours_end integer DEFAULT 21,
-    timezone text DEFAULT 'America/New_York'::text,
-    creator_id integer,
-    is_autoassign_enabled boolean DEFAULT false NOT NULL,
-    limit_assignment_to_teams boolean DEFAULT false NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    replies_stale_after_minutes integer,
-    landlines_filtered boolean DEFAULT false,
-    external_system_id uuid
-);
-
-
-ALTER TABLE public.campaign OWNER TO postgres;
 
 --
 -- Name: campaign_contact; Type: TABLE; Schema: public; Owner: postgres
