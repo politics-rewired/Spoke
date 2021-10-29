@@ -459,7 +459,7 @@ CREATE FUNCTION public.get_trollbot_matches(organization_id integer, troll_inter
           on campaign_contact.id = message.campaign_contact_id
         join campaign
           on campaign.id = campaign_contact.campaign_id
-        join ts_queries on to_tsvector(mode, message.text) @@ ts_queries.tsquery
+        join ts_queries on to_tsvector(regconfig_mode(mode), message.text) @@ ts_queries.tsquery
         where true
           and message.created_at >= now() - get_trollbot_matches.troll_interval
           and message.is_from_contact = false
@@ -469,7 +469,7 @@ CREATE FUNCTION public.get_trollbot_matches(organization_id integer, troll_inter
       messages_with_match as (
         select bad_messages.id, bad_messages.text, token
         from bad_messages
-        join troll_tokens on to_tsvector(troll_tokens.mode, bad_messages.text) @@ troll_tokens.compiled_tsquery
+        join troll_tokens on to_tsvector(regconfig_mode(troll_tokens.mode), bad_messages.text) @@ troll_tokens.compiled_tsquery
         where troll_tokens.mode = bad_messages.mode
       )
       select id, token::text as trigger_token
