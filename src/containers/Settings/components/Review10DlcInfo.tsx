@@ -46,9 +46,9 @@ const Review10DlcInfo: React.FC<InnerProps> = (props) => {
       <CardContent>
         <p>
           You must provide details required for us to register a 10DLC brand on
-          your behalf by September 27th, 2021! If you do not provide this
+          your behalf by November 24th, 2021! If you do not provide this
           information by then, you may not be able to send messages starting on
-          October 1st, 2021 until 3-5 business days after you provide this
+          December 1st, 2021 until 3-5 business days after you provide this
           information.
         </p>
 
