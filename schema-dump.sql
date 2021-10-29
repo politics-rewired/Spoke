@@ -459,7 +459,7 @@ CREATE FUNCTION public.get_trollbot_matches(organization_id integer, troll_inter
           on campaign_contact.id = message.campaign_contact_id
         join campaign
           on campaign.id = campaign_contact.campaign_id
-        join ts_queries on to_tsvector(mode, message.text) @@ ts_queries.tsquery
+        join ts_queries on to_tsvector(regconfig_mode(mode), message.text) @@ ts_queries.tsquery
         where true
           and message.created_at >= now() - get_trollbot_matches.troll_interval
           and message.is_from_contact = false
@@ -469,7 +469,7 @@ CREATE FUNCTION public.get_trollbot_matches(organization_id integer, troll_inter
       messages_with_match as (
         select bad_messages.id, bad_messages.text, token
         from bad_messages
-        join troll_tokens on to_tsvector(troll_tokens.mode, bad_messages.text) @@ troll_tokens.compiled_tsquery
+        join troll_tokens on to_tsvector(regconfig_mode(troll_tokens.mode), bad_messages.text) @@ troll_tokens.compiled_tsquery
         where troll_tokens.mode = bad_messages.mode
       )
       select id, token::text as trigger_token
@@ -1089,6 +1089,21 @@ CREATE FUNCTION public.raise_trollbot_alarms(organization_id integer, troll_inte
 
 
 ALTER FUNCTION public.raise_trollbot_alarms(organization_id integer, troll_interval interval) OWNER TO postgres;
+
+--
+-- Name: regconfig_mode(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.regconfig_mode(mode text) RETURNS regconfig
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+    begin
+      return cast(mode as regconfig);
+    end
+    $$;
+
+
+ALTER FUNCTION public.regconfig_mode(mode text) OWNER TO postgres;
 
 --
 -- Name: soft_delete_tag(); Type: FUNCTION; Schema: public; Owner: postgres
@@ -2838,8 +2853,9 @@ ALTER SEQUENCE public.team_id_seq OWNED BY public.team.id;
 CREATE TABLE public.troll_trigger (
     token character varying(255) NOT NULL,
     organization_id integer NOT NULL,
-    mode regconfig DEFAULT 'english'::regconfig NOT NULL,
-    compiled_tsquery tsquery GENERATED ALWAYS AS (to_tsquery(mode, (token)::text)) STORED
+    mode text DEFAULT 'english'::text NOT NULL,
+    compiled_tsquery tsquery GENERATED ALWAYS AS (to_tsquery(public.regconfig_mode(mode), (token)::text)) STORED,
+    CONSTRAINT valid_regconfig CHECK ((mode = ((mode)::regconfig)::text))
 );
 
 
