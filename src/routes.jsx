@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import React from "react";
 import { Redirect, Route, Switch, withRouter } from "react-router-dom";
 

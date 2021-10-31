@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -7,6 +6,7 @@ import CardHeader from "@material-ui/core/CardHeader";
 import Divider from "@material-ui/core/Divider";
 import OpenInNew from "@material-ui/icons/OpenInNew";
 import Warning from "@material-ui/icons/Warning";
+import gql from "graphql-tag";
 import React from "react";
 
 import {

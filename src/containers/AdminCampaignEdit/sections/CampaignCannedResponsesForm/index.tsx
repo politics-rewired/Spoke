@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import { ApolloQueryResult } from "apollo-client/core/types";
+import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import uniqBy from "lodash/uniqBy";
 import FlatButton from "material-ui/FlatButton";

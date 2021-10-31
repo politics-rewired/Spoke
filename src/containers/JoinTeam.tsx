@@ -1,9 +1,10 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
+import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
+import { compose } from "react-apollo";
 import { RouteChildrenProps, withRouter } from "react-router-dom";
-import { compose } from "recompose";
 
 import { Organization } from "../api/organization";
 import { MutationMap } from "../network/types";

@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import IconButton from "material-ui/IconButton";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";

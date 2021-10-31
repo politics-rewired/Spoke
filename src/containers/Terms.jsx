@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
@@ -7,8 +7,8 @@ import { Step, StepContent, StepLabel, Stepper } from "material-ui/Stepper";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
+import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
-import { compose } from "recompose";
 
 import { loadData } from "./hoc/with-operations";
 

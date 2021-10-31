@@ -1,10 +1,11 @@
 /* eslint-disable react/no-unused-state */
-import { ApolloQueryResult, gql } from "@apollo/client";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import cloneDeep from "lodash/cloneDeep";
 import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";

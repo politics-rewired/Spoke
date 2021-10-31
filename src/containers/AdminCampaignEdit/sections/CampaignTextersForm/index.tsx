@@ -1,13 +1,13 @@
-import { ApolloQueryResult } from "@apollo/client";
-import { withApollo, WithApolloClient } from "@apollo/client/react/hoc";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Snackbar from "@material-ui/core/Snackbar";
 import CloseIcon from "@material-ui/icons/Close";
 import { css, StyleSheet } from "aphrodite";
+import { ApolloQueryResult } from "apollo-client/core/types";
 import orderBy from "lodash/orderBy";
 import { red600 } from "material-ui/styles/colors";
 import React, { useState } from "react";
+import { withApollo, WithApolloClient } from "react-apollo";
 import { compose } from "recompose";
 
 import { TexterAssignmentInput } from "../../../../api/assignment";

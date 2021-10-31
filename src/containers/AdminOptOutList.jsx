@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import { List, ListItem } from "material-ui/List";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
 import PropTypes from "prop-types";
