@@ -58,7 +58,7 @@ export const stageDeleteInteractionStep: Resolver = (
 
   const iStep = client.readFragment({ fragment, id });
   const data = { ...iStep, isDeleted: true };
-  client.writeFragment({ id, fragment, data });
+  client.writeData({ id, data });
   return null;
 };
 
@@ -155,7 +155,7 @@ export const stageUpdateInteractionStep: Resolver = (
   `;
   const iStep = client.readFragment({ fragment, id });
   const data = { ...iStep, ...payload, isModified: true };
-  client.writeFragment({ id, fragment, data });
+  client.writeData({ id, data });
   return null;
 };
 
