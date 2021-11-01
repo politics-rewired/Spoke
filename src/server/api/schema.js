@@ -93,6 +93,7 @@ import { graphileSecretRef } from "./lib/utils";
 import { resolvers as linkDomainResolvers } from "./link-domain";
 import { resolvers as messageResolvers } from "./message";
 import { resolvers as messagingServiceResolvers } from "./messaging-service";
+import { resolvers as noticeResolvers } from "./notice";
 import { resolvers as optOutResolvers } from "./opt-out";
 import { resolvers as organizationResolvers } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
@@ -4138,6 +4139,7 @@ export const resolvers = {
   ...externalResultCodeResolvers,
   ...externalSyncConfigResolvers,
   ...messagingServiceResolvers,
+  ...noticeResolvers,
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },
