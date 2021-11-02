@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.15.3](https://github.com/politics-rewired/spoke/compare/v4.15.2...v4.15.3) (2021-11-02)
+
+
+### Bug Fixes
+
+* change mode column type to text ([#1022](https://github.com/politics-rewired/spoke/issues/1022)) ([9bca5e6](https://github.com/politics-rewired/spoke/commit/9bca5e62f4531de86bb7a75ab784de2171d0c02a))
+* revert apollo update ([#1024](https://github.com/politics-rewired/spoke/issues/1024)) ([bb4f752](https://github.com/politics-rewired/spoke/commit/bb4f752a404243f7e121ac592c8b131352f536ab))
+* update 10dlc registration dates ([#1021](https://github.com/politics-rewired/spoke/issues/1021)) ([7de8cd7](https://github.com/politics-rewired/spoke/commit/7de8cd78583de767d1a035d8ee65eb57f931b7e7))
+
 ### [4.15.2](https://github.com/politics-rewired/spoke/compare/v4.15.1...v4.15.2) (2021-10-27)
 
 
