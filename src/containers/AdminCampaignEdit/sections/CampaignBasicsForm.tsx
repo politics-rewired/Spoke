@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import isEmpty from "lodash/isEmpty";
 import ColorPicker from "material-ui-color-picker";
 import RaisedButton from "material-ui/RaisedButton";

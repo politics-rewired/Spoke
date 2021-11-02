@@ -1,11 +1,11 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import DataTables from "material-ui-datatables";
 import FlatButton from "material-ui/FlatButton";
 import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
-import { compose } from "recompose";
 
 import { loadData } from "../../containers/hoc/with-operations";
 import { MESSAGE_STATUSES } from "../IncomingMessageFilter";

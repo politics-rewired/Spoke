@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file,react/no-unused-state */
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import DataTable from "material-ui-datatables";
 import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";

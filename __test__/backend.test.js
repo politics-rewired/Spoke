@@ -1,4 +1,3 @@
-import { makeExecutableSchema } from '@graphql-tools/schema'
 import { resolvers } from '../src/server/api/schema'
 import { schema } from '../src/api/schema'
 import { graphql } from 'graphql'
@@ -7,6 +6,7 @@ import { resolvers as campaignResolvers } from '../src/server/api/campaign'
 import { getContext,
   setupTest,
   cleanupTest } from './test_helpers'
+import { makeExecutableSchema } from 'graphql-tools'
 
 const mySchema = makeExecutableSchema({
   typeDefs: schema,

@@ -1,9 +1,9 @@
-import { gql } from "@apollo/client";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import gql from "graphql-tag";
 import { History } from "history";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -25,8 +25,8 @@ import {
 } from "material-ui/Table";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
+import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
-import { compose } from "recompose";
 
 import {
   ExternalSystem,

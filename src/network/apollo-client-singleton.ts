@@ -1,12 +1,19 @@
-import { ApolloClient, ApolloLink, InMemoryCache } from "@apollo/client";
-import { onError } from "@apollo/client/link/error";
-import { getMainDefinition } from "@apollo/client/utilities";
+import {
+  defaultDataIdFromObject,
+  InMemoryCache,
+  IntrospectionFragmentMatcher
+} from "apollo-cache-inmemory";
+import { ApolloClient } from "apollo-client";
+import { ApolloLink } from "apollo-link";
+import { onError } from "apollo-link-error";
 import { createUploadLink } from "apollo-upload-client";
+import { getMainDefinition } from "apollo-utilities";
 import _fetch from "isomorphic-fetch"; // TODO - remove?
 import omitDeep from "omit-deep-lodash";
 
 import { eventBus, EventTypes } from "../client/events";
 import iStepLocalResolvers from "../containers/AdminCampaignEdit/sections/CampaignInteractionStepsForm/resolvers";
+import unions from "./unions.json";
 
 const uploadLink = createUploadLink({
   uri: window.GRAPHQL_URL || "/graphql",
@@ -49,7 +56,7 @@ const cleanTypenameLink = new ApolloLink((operation, forward) => {
   const keysToOmit = ["__typename"]; // more keys like timestamps could be included here
 
   const def = getMainDefinition(operation.query);
-  if (def.kind === "OperationDefinition" && def.operation === "mutation") {
+  if (def && def.operation === "mutation") {
     operation.variables = omitDeep(operation.variables, keysToOmit);
   }
   return forward ? forward(operation) : null;
@@ -60,18 +67,19 @@ const link = cleanTypenameLink
   .concat(errorLink)
   .concat(uploadLink);
 
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData: unions
+});
+
 const cache = new InMemoryCache({
   addTypename: true,
-  possibleTypes: {
-    ExternalSyncConfigTarget: [
-      "ExternalResultCode",
-      "ExternalActivistCode",
-      "ExternalSurveyQuestionResponseOption"
-    ]
-  },
-  typePolicies: {
-    ExternalList: {
-      keyFields: (object) => `${object.id}:${object.externalId}`
+  fragmentMatcher,
+  dataIdFromObject: (object: any) => {
+    switch (object.__typename) {
+      case "ExternalList":
+        return `${object.systemId}:${object.externalId}`;
+      default:
+        return defaultDataIdFromObject(object);
     }
   }
 });

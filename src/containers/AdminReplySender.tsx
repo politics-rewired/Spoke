@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
+import gql from "graphql-tag";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 import Form from "react-formal";

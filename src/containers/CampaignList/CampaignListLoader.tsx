@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import React from "react";
 
 import { Campaign, CampaignsFilter } from "../../api/campaign";

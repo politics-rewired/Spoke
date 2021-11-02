@@ -1,8 +1,8 @@
-import { withApollo } from "@apollo/client/react/hoc";
 import { List } from "material-ui/List";
 import Popover from "material-ui/Popover";
 import type from "prop-types";
 import React from "react";
+import { withApollo } from "react-apollo";
 
 import ScriptList from "./ScriptList";
 

@@ -1,7 +1,7 @@
-import { makeExecutableSchema } from '@graphql-tools/schema'
 import { resolvers } from '../src/server/api/schema'
 import { schema } from '../src/api/schema'
 import twilio from '../src/server/api/lib/twilio'
+import { makeExecutableSchema } from 'graphql-tools'
 
 const mySchema = makeExecutableSchema({
   typeDefs: schema,

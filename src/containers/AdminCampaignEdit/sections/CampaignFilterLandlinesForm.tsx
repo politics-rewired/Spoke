@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import { ApolloQueryResult } from "apollo-client";
+import gql from "graphql-tag";
 import RaisedButton from "material-ui/RaisedButton";
 import CheckIcon from "material-ui/svg-icons/action/check-circle";
 import ErrorIcon from "material-ui/svg-icons/alert/error";

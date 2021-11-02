@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import DataTable from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
 import { red500 } from "material-ui/styles/colors";

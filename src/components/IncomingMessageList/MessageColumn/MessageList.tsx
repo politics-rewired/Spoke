@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
+import gql from "graphql-tag";
 import React, { Component } from "react";
 
 import { Message } from "../../../api/message";

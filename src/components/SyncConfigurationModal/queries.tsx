@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 
 import { FullListRefreshFragment } from "../../api/external-sync-config";
 

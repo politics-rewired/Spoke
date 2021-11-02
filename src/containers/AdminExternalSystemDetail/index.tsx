@@ -1,11 +1,11 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import { History } from "history";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
 import ArrowBack from "material-ui/svg-icons/navigation/arrow-back";
 import React from "react";
+import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
-import { compose } from "recompose";
 
 import { ExternalSystem } from "../../api/external-system";
 import { QueryMap } from "../../network/types";

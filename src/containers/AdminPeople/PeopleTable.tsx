@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import gql from "graphql-tag";
 import PeopleIcon from "material-ui/svg-icons/social/people";
 import { Table, TableBody } from "material-ui/Table";
 import React from "react";

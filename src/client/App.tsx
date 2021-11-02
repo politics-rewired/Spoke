@@ -1,8 +1,8 @@
-import { ApolloProvider } from "@apollo/client";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { css, StyleSheet } from "aphrodite";
 import MuiThemeProviderv0 from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
+import { ApolloProvider } from "react-apollo";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import request from "superagent";
 import { QueryParamProvider } from "use-query-params";
