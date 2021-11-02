@@ -48,6 +48,7 @@ class ScriptList extends React.Component {
       onSelectCannedResponse,
       showAddScriptButton,
       customFields,
+      integrationSourced,
       campaignId,
       texterId
     } = this.props;
@@ -120,6 +121,7 @@ class ScriptList extends React.Component {
             <CannedResponseForm
               onSaveCannedResponse={onSaveCannedResponse}
               customFields={customFields}
+              integrationSourced={integrationSourced}
               script={this.state.script}
             />
           </DialogContent>
@@ -145,6 +147,7 @@ ScriptList.propTypes = {
   onSelectCannedResponse: PropTypes.func,
   showAddScriptButton: PropTypes.bool,
   customFields: PropTypes.array,
+  integrationSourced: PropTypes.bool,
   campaignId: PropTypes.string,
   mutations: PropTypes.object,
   texterId: PropTypes.string

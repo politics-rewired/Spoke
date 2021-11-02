@@ -33,6 +33,9 @@ export const GET_CAMPAIGN_INTERACTIONS = gql`
         ...EditInteractionStep
       }
       customFields
+      externalSystem {
+        id
+      }
     }
   }
   ${EditInteractionStepFragment}

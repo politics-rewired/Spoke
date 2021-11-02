@@ -17,13 +17,14 @@ class CannedResponseForm extends React.Component {
       text: yup.string().required()
     });
 
-    const { customFields } = this.props;
+    const { customFields, integrationSourced } = this.props;
     return (
       <div>
         <GSForm ref="form" schema={modelSchema} onSubmit={this.handleSave}>
           <SpokeFormField name="title" autoFocus fullWidth label="Title" />
           <SpokeFormField
             customFields={customFields}
+            integrationSourced={integrationSourced}
             name="text"
             type="script"
             label="Script"

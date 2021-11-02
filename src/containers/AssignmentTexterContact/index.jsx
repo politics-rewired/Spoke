@@ -739,6 +739,9 @@ export class AssignmentTexterContact extends React.Component {
     const { campaign, assignment, texter } = this.props;
     const { userCannedResponses, campaignCannedResponses } = assignment;
 
+    // We do not allow Texters to compose their own canned responses
+    const integrationSourced = false;
+
     return (
       <CannedResponseMenu
         onRequestClose={this.handleClosePopover}
@@ -747,6 +750,7 @@ export class AssignmentTexterContact extends React.Component {
         campaignCannedResponses={campaignCannedResponses}
         userCannedResponses={userCannedResponses}
         customFields={campaign.customFields}
+        integrationSourced={integrationSourced}
         campaignId={campaign.id}
         texterId={texter.id}
         onSelectCannedResponse={this.handleCannedResponseChange}

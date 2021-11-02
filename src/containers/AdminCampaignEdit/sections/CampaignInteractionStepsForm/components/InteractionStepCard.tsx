@@ -47,6 +47,7 @@ type BlockHandlerFactory = (stepId: string) => () => Promise<void> | void;
 interface Props {
   interactionStep: InteractionStepWithChildren;
   customFields: string[];
+  integrationSourced: boolean;
   availableActions: any[];
   hasBlockCopied: boolean;
   title?: string;
@@ -64,6 +65,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
   const {
     interactionStep,
     customFields,
+    integrationSourced,
     availableActions,
     hasBlockCopied,
     title = "Start",
@@ -195,6 +197,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
               label="Script"
               hintText="This is what your texters will send to your contacts. E.g. Hi, {firstName}. It's {texterFirstName} here."
               customFields={customFields}
+              integrationSourced={integrationSourced}
               fullWidth
               multiLine
               disabled={disabled}
@@ -238,6 +241,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
               title={`Question: ${questionText}`}
               interactionStep={childStep}
               customFields={customFields}
+              integrationSourced={integrationSourced}
               availableActions={availableActions}
               hasBlockCopied={hasBlockCopied}
               disabled={disabled}
