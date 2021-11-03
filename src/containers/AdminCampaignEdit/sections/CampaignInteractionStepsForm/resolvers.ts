@@ -1,5 +1,4 @@
-import { Resolver, Resolvers } from "apollo-client";
-import gql from "graphql-tag";
+import { gql, Resolver, Resolvers } from "@apollo/client";
 import produce from "immer";
 
 import { InteractionStep } from "../../../../api/interaction-step";
@@ -62,7 +61,7 @@ export const stageDeleteInteractionStep: Resolver = (
 
   const iStep = client.readFragment({ fragment, id });
   const data = { ...iStep, isDeleted: true };
-  client.writeData({ id, data });
+  client.writeFragment({ id, fragment, data });
   return null;
 };
 
@@ -159,7 +158,7 @@ export const stageUpdateInteractionStep: Resolver = (
   `;
   const iStep = client.readFragment({ fragment, id });
   const data = { ...iStep, ...payload, isModified: true };
-  client.writeData({ id, data });
+  client.writeFragment({ id, fragment, data });
   return null;
 };
 

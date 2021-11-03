@@ -1,5 +1,4 @@
-import ApolloClient from "apollo-client";
-import gql from "graphql-tag";
+import { ApolloClient, gql } from "@apollo/client";
 import MenuItem from "material-ui/MenuItem";
 import React from "react";
 import { RouterProps } from "react-router-dom";
@@ -13,7 +12,7 @@ import { hasRole } from "../../../lib/permissions";
 // (Popover content exists outside of <BrowserRouter> context)
 interface Props extends Pick<RouterProps, "history"> {
   organization: Pick<Organization, "id" | "name">;
-  client: ApolloClient<unknown>;
+  client: ApolloClient<any>;
 }
 
 interface State {

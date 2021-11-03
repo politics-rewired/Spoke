@@ -6,7 +6,7 @@ import { config, ServerMode } from "../config";
 import { sleep } from "../lib";
 import logger from "../logger";
 import { checkForBadDeliverability } from "./api/lib/alerts";
-import app from "./app";
+import { createApp } from "./app";
 import { r } from "./models";
 import { setupUserNotificationObservers } from "./notifications";
 import { errToObj } from "./utils";
@@ -36,19 +36,21 @@ const lightship = createLightship({
 if (config.MODE === ServerMode.Server || config.MODE === ServerMode.Dual) {
   // Launch Spoke Express application
   lightship.queueBlockingTask(
-    new Promise((resolve) => {
-      const port = config.DEV_APP_PORT || config.PORT;
-      const server = app.listen(port, () => {
-        logger.info(`Node app is running on port ${port}`);
-        resolve(undefined);
-      });
-      lightship.registerShutdownHandler(async () => {
-        const spokeGracePeriodMs = config.isProduction ? 30 * 1000 : 0;
-        logger.info(
-          `Received kill signal, waiting ${spokeGracePeriodMs}ms before shutting down Spoke app...`
-        );
-        await sleep(spokeGracePeriodMs);
-        server.close();
+    createApp().then((app) => {
+      return new Promise((resolve) => {
+        const port = config.DEV_APP_PORT || config.PORT;
+        const server = app.listen(port, () => {
+          logger.info(`Node app is running on port ${port}`);
+          resolve(undefined);
+        });
+        lightship.registerShutdownHandler(async () => {
+          const spokeGracePeriodMs = config.isProduction ? 30 * 1000 : 0;
+          logger.info(
+            `Received kill signal, waiting ${spokeGracePeriodMs}ms before shutting down Spoke app...`
+          );
+          await sleep(spokeGracePeriodMs);
+          server.close();
+        });
       });
     })
   );

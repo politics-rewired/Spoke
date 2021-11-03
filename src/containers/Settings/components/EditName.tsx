@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from "apollo-client";
+import { ApolloQueryResult } from "@apollo/client";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";

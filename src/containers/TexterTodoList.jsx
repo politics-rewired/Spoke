@@ -1,10 +1,10 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 import { RaisedButton } from "material-ui";
 import Check from "material-ui/svg-icons/action/check-circle";
 import PropTypes from "prop-types";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import AssignmentSummary from "../components/AssignmentSummary";
 import Empty from "../components/Empty";

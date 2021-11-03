@@ -18,7 +18,7 @@ import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
-import { compose } from "react-apollo";
+import { compose } from "recompose";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../lib/attributes";
@@ -736,7 +736,7 @@ class AdminCampaignEdit extends React.Component {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
     const { adminPerms, match, theme: stableMuiTheme } = this.props;
-    const campaignId = parseInt(match.params.campaignId, 10);
+    const { campaignId } = match.params;
     const isNew = this.isNew();
     const saveLabel = isNew ? "Save and goto next section" : "Save";
 
