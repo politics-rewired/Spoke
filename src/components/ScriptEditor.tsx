@@ -244,7 +244,7 @@ class ScriptEditor extends React.Component<Props, State> {
         {this.props.integrationSourced && (
           <p>
             <span style={{ color: "black" }}>Note:</span> these fields are
-            provided by an integration and are not all guarateed to contain
+            provided by an integration and are not all guaranteed to contain
             values for all contacts.
           </p>
         )}
