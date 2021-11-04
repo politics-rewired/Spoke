@@ -58,7 +58,10 @@ interface HocProps {
     ): Promise<void>;
   };
   data: {
-    campaign: Pick<Campaign, "id" | "isStarted" | "customFields"> & {
+    campaign: Pick<
+      Campaign,
+      "id" | "isStarted" | "customFields" | "externalSystem"
+    > & {
       interactionSteps: InteractionStepWithLocalState[];
     };
   };
@@ -262,7 +265,12 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const {
     isNew,
     saveLabel,
-    data: { campaign: { customFields } = { customFields: [] } },
+    data: {
+      campaign: { customFields, externalSystem } = {
+        customFields: [],
+        externalSystem: null
+      }
+    },
     availableActions: { availableActions }
   } = props;
 
@@ -326,6 +334,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}
+        integrationSourced={externalSystem !== null}
         availableActions={availableActions}
         hasBlockCopied={hasBlockCopied}
         disabled={isWorking}

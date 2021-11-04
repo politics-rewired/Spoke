@@ -87,6 +87,7 @@ const UnrecognizedField: React.FC = (props) => (
 interface Props {
   scriptText: string;
   scriptFields: string[];
+  integrationSourced: boolean;
   onChange: (value: string) => Promise<void> | void;
   receiveFocus?: boolean;
 }
@@ -240,6 +241,13 @@ class ScriptEditor extends React.Component<Props, State> {
             spellCheck
           />
         </div>
+        {this.props.integrationSourced && (
+          <p>
+            <span style={{ color: "black" }}>Note:</span> these fields are
+            provided by an integration and are not all guaranteed to contain
+            values for all contacts.
+          </p>
+        )}
         {this.renderCustomFields()}
         <div>
           <br />

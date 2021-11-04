@@ -37,6 +37,7 @@ interface HocProps {
       cannedResponses: CannedResponse[];
       isStarted: boolean;
       customFields: string[];
+      externalSystem: { id: string } | null;
     };
   };
 }
@@ -162,7 +163,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const { shouldShowEditor, editingResponse } = this.state;
     const {
       data: {
-        campaign: { customFields }
+        campaign: { customFields, externalSystem }
       }
     } = this.props;
 
@@ -178,6 +179,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         open={shouldShowEditor}
         context={context}
         customFields={customFields}
+        integrationSourced={externalSystem !== null}
         editingResponse={editingResponse!}
         onCancel={this.handleOnCancelResponseEdit}
         onSave={onSave}
@@ -253,6 +255,9 @@ const queries: QueryMap<InnerProps> = {
           }
           isStarted
           customFields
+          externalSystem {
+            id
+          }
         }
       }
     `,

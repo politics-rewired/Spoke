@@ -92,7 +92,12 @@ class GSScriptOptionsField extends GSFormField {
   };
 
   renderDialog() {
-    const { name, customFields, value: scriptVersions } = this.props;
+    const {
+      name,
+      customFields,
+      value: scriptVersions,
+      integrationSourced
+    } = this.props;
     const { scriptTarget, scriptDraft, scriptWarningOpen } = this.state;
     const scriptFields = allScriptFields(customFields);
 
@@ -140,6 +145,7 @@ class GSScriptOptionsField extends GSFormField {
             name={name}
             scriptText={scriptDraft}
             scriptFields={scriptFields}
+            integrationSourced={integrationSourced}
             receiveFocus
             expandable
             onChange={(val) => this.setState({ scriptDraft: val.trim() })}

@@ -23,12 +23,19 @@ const modelSchema = yup.object({
 export interface CannedResponseEditorProps {
   editingResponse: CannedResponse;
   customFields: string[];
+  integrationSourced: boolean;
   onSave(...args: any[]): void;
   onCancel(): void;
 }
 
 const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
-  const { customFields, editingResponse, onSave, onCancel } = props;
+  const {
+    customFields,
+    integrationSourced,
+    editingResponse,
+    onSave,
+    onCancel
+  } = props;
 
   const handleSave = (formValues: any) => {
     onSave(formValues);
@@ -49,6 +56,7 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
       <SpokeFormField
         {...dataTest("editorResponse")}
         customFields={customFields}
+        integrationSourced={integrationSourced}
         name="text"
         context="responseEditor"
         type="script"

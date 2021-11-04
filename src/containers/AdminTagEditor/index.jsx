@@ -190,6 +190,7 @@ class AdminTagEditor extends Component {
     // Custom fields are campaign-specific and thus cannot be used in Tag scripts.
     // However, this is a required prop for GSScriptField
     const customFields = [""];
+    const integrationSourced = false;
 
     const errorActions = [
       <FlatButton
@@ -238,6 +239,7 @@ class AdminTagEditor extends Component {
                       label="Tag script"
                       context="tagEditor"
                       customFields={customFields}
+                      integrationSourced={integrationSourced}
                       value={editingTag.onApplyScript || ""}
                       onChange={this.handleEditTagScript}
                       onClick={this.handleOpenScriptEditor}

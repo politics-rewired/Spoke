@@ -82,7 +82,7 @@ class GSScriptField extends GSFormField {
   };
 
   renderDialog() {
-    const { name, customFields } = this.props;
+    const { name, customFields, integrationSourced } = this.props;
     const { open, scriptWarningOpen, script } = this.state;
     const scriptFields = allScriptFields(customFields);
     const warningContext = script && getWarningContextForScript(script);
@@ -103,6 +103,7 @@ class GSScriptField extends GSFormField {
             name={name}
             scriptText={this.state.script}
             scriptFields={scriptFields}
+            integrationSourced={integrationSourced}
             expandable
             onChange={(val) => this.setState({ script: val })}
           />
