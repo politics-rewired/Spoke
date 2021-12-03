@@ -96,10 +96,14 @@ export const filterLandlines: ProgressTask<ProgressJobPayload> = async (
     onPage: deleteNumbers
   });
 
+  await numbersRequest.voips.eachPage({
+    onPage: deleteNumbers
+  });
+
   // Setting result_message marks the job as complete
   await Promise.all([
     helpers.updateResult({
-      message: `${landlinesFilteredOut} contacts removed because they were landlines or invalid`
+      message: `${landlinesFilteredOut} contacts removed because they were landlines, voips, or invalid`
     }),
     helpers.query(
       `
