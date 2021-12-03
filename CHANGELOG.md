@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.15.4](https://github.com/politics-rewired/spoke/compare/v4.15.3...v4.15.4) (2021-12-03)
+
+
+### Bug Fixes
+
+* **filter-landlines:** remove voips ([#1029](https://github.com/politics-rewired/spoke/issues/1029)) ([a5f6450](https://github.com/politics-rewired/spoke/commit/a5f6450a75bbdedf747c4c7a20e4a97c39c7edd3))
+* **van:** add warning about van-supplied fields ([#1026](https://github.com/politics-rewired/spoke/issues/1026)) ([9e4638c](https://github.com/politics-rewired/spoke/commit/9e4638cb1ade739ce5bb9ad071b62b19d513b111))
+* **van:** include all van fields from export ([#1023](https://github.com/politics-rewired/spoke/issues/1023)) ([1df9604](https://github.com/politics-rewired/spoke/commit/1df96040e2b96c14c115e79bfa8b9af40a8feb1e))
+
 ### [4.15.3](https://github.com/politics-rewired/spoke/compare/v4.15.2...v4.15.3) (2021-11-02)
 
 
