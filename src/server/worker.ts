@@ -28,6 +28,7 @@ import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 import { resendMessage } from "./tasks/resend-message";
+import { retryInteractionStep } from "./tasks/retry-interaction-step";
 import {
   syncCampaignContactToVAN,
   updateVanSyncStatuses
@@ -70,6 +71,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
   m.taskList!["update-org-message-usage"] = updateOrgMessageUsage;
   m.taskList!["resend-message"] = resendMessage;
+  m.taskList!["retry-interaction-step"] = retryInteractionStep;
   m.taskList![exportCampaignIdentifier] = wrapProgressTask(exportCampaign, {
     removeOnComplete: true
   });
