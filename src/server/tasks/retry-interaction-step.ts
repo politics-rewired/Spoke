@@ -62,11 +62,12 @@ export const retryInteractionStep: Task = async (
   const script = sample(interaction_step.script_options)!;
   const contact = recordToCamelCase<CampaignContact>(campaign_contact);
   const texter = recordToCamelCase<User>(user);
+  const customFields = Object.keys(JSON.parse(contact.customFields));
 
   const body = applyScript({
     script,
     contact,
-    customFields: contact.customFields,
+    customFields,
     texter
   });
 
