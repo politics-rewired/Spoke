@@ -1,3 +1,4 @@
+import humps from "humps";
 import isEmpty from "lodash/isEmpty";
 
 // Used to generate data-test attributes on non-production environments and used by end-to-end tests
@@ -43,3 +44,8 @@ export const nameComponents = (name: string) => {
 
   return { firstName, lastName };
 };
+
+export const recordToCamelCase = <T = any>(record: any) =>
+  Object.fromEntries(
+    Object.entries(record).map(([key, value]) => [humps.camelize(key), value])
+  ) as T;

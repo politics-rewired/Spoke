@@ -3901,6 +3901,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/humps@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@types/humps/-/humps-2.0.1.tgz#fc87ccbe59913240c3fdca5f0dd43cb9f073eb72"
+  integrity sha512-cxIGJjiOQRl5s/KjqoTa0u39qKrVD3T6+6eGsERva0MLBp9AMVG8udKn9JZgVDe9zF0J9H4SRVzKILK6iZ9IZQ==
+
 "@types/is-stream@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@types/is-stream/-/is-stream-1.1.0.tgz#b84d7bb207a210f2af9bed431dc0fbe9c4143be1"

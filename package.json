@@ -190,6 +190,7 @@
     "@types/draft-js": "^0.10.45",
     "@types/express-rate-limit": "^5.1.1",
     "@types/faker": "^5.1.5",
+    "@types/humps": "^2.0.1",
     "@types/lodash": "^4.14.168",
     "@types/luxon": "^1.25.2",
     "@types/material-ui": "^0.21.7",
