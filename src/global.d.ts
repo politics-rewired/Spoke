@@ -13,6 +13,7 @@ interface Window {
   RENDERED_CLASS_NAMES: string[];
   NOT_IN_USA: boolean;
   ALLOW_SEND_ALL: boolean;
+  NODE_ENV: string;
 
   AuthService: any;
 }
