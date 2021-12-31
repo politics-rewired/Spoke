@@ -1,13 +1,14 @@
+import humps from "humps";
 import isEmpty from "lodash/isEmpty";
 
 // Used to generate data-test attributes on non-production environments and used by end-to-end tests
-export const dataTest = (value, disable) => {
+export const dataTest = (value: string, disable: boolean) => {
   const attribute =
     window.NODE_ENV !== "production" && !disable ? { "data-test": value } : {};
   return attribute;
 };
 
-export const camelCase = (str) => {
+export const camelCase = (str: string) => {
   return str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => {
       return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
@@ -15,16 +16,16 @@ export const camelCase = (str) => {
     .replace(/\s+/g, "");
 };
 
-export const titleCase = (value) =>
+export const titleCase = (value: string) =>
   `${value.charAt(0).toUpperCase()}${value.substring(1).toLowerCase()}`;
 
-export const snakeToTitleCase = (value) =>
+export const snakeToTitleCase = (value: string) =>
   value
     .split("_")
     .map((s) => titleCase(s))
     .join(" ");
 
-export const nameComponents = (name) => {
+export const nameComponents = (name: string) => {
   let firstName;
   let lastName;
 
@@ -43,3 +44,8 @@ export const nameComponents = (name) => {
 
   return { firstName, lastName };
 };
+
+export const recordToCamelCase = <T = any>(record: any) =>
+  Object.fromEntries(
+    Object.entries(record).map(([key, value]) => [humps.camelize(key), value])
+  ) as T;

@@ -1,11 +1,14 @@
 import escapeRegExp from "lodash/escapeRegExp";
 
+import { CampaignContact } from "../api/campaign-contact";
+import { User } from "../api/user";
+
 export const delimiters = {
   startDelimiter: "{",
   endDelimiter: "}"
 };
 
-export const delimit = (text) => {
+export const delimit = (text: string) => {
   const { startDelimiter, endDelimiter } = delimiters;
   return `${startDelimiter}${text}${endDelimiter}`;
 };
@@ -32,22 +35,26 @@ const CAPITALIZE_FIELDS = [
 const LOWERCASE_FIRST_NAMES = ["friend", "there"];
 
 // TODO: This will include zipCode even if you ddin't upload it
-export const allScriptFields = (customFields) =>
+export const allScriptFields = (customFields: string[]) =>
   TOP_LEVEL_UPLOAD_FIELDS.concat(TEXTER_SCRIPT_FIELDS).concat(customFields);
 
-const capitalize = (str) => {
+const capitalize = (str: string) => {
   const strTrimmed = str.trim();
   return strTrimmed.charAt(0).toUpperCase() + strTrimmed.slice(1).toLowerCase();
 };
 
-const getScriptFieldValue = (contact, texter, fieldName) => {
+const getScriptFieldValue = (
+  contact: CampaignContact,
+  texter: User,
+  fieldName: string
+) => {
   let result;
   if (fieldName === "texterFirstName") {
     result = texter.firstName;
   } else if (fieldName === "texterLastName") {
     result = texter.lastName;
   } else if (TOP_LEVEL_UPLOAD_FIELDS.indexOf(fieldName) !== -1) {
-    result = contact[fieldName];
+    result = contact[fieldName as keyof CampaignContact];
   } else {
     const customFieldNames = JSON.parse(contact.customFields);
     result = customFieldNames[fieldName];
@@ -64,7 +71,19 @@ const getScriptFieldValue = (contact, texter, fieldName) => {
   return result;
 };
 
-export const applyScript = ({ script, contact, customFields, texter }) => {
+interface ApplyScriptOptions {
+  script: string;
+  contact: CampaignContact;
+  customFields: string[];
+  texter: User;
+}
+
+export const applyScript = ({
+  script,
+  contact,
+  customFields,
+  texter
+}: ApplyScriptOptions) => {
   const scriptFields = allScriptFields(customFields);
   let appliedScript = script;
 
