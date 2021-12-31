@@ -1,5 +1,5 @@
 import DataLoader from "dataloader";
-import Knex from "knex";
+import { Knex } from "knex";
 import groupBy from "lodash/groupBy";
 import { RedisClient } from "redis";
 
