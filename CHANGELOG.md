@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.16.0](https://github.com/politics-rewired/spoke/compare/v4.15.4...v4.16.0) (2021-12-31)
+
+
+### Features
+
+* add retry-interaction-step task ([#1034](https://github.com/politics-rewired/spoke/issues/1034)) ([4365276](https://github.com/politics-rewired/spoke/commit/43652766ab6a2b3bacdf8bffb2345b486faf4ef7))
+
 ### [4.15.4](https://github.com/politics-rewired/spoke/compare/v4.15.3...v4.15.4) (2021-12-03)
 
 
