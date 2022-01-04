@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { Request } from "express";
-import Knex from "knex";
+import { Knex } from "knex";
 import createMemoizer from "memoredis";
 
 import { config } from "../config";

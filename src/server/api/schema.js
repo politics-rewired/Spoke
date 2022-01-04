@@ -13,7 +13,7 @@ import {
 } from "../../api/organization-membership";
 import { CampaignExportType } from "../../api/types";
 import { config } from "../../config";
-import { gzip, makeTree } from "../../lib";
+import { gzip } from "../../lib";
 import { parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
@@ -76,6 +76,7 @@ import { resolvers as externalSystemResolvers } from "./external-system";
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
 import { notifyAssignmentCreated, notifyOnTagConversation } from "./lib/alerts";
+import { copyCampaign } from "./lib/campaign";
 import { processContactsFile } from "./lib/edit-campaign";
 import { persistInteractionStepTree } from "./lib/interaction-steps";
 import { saveNewIncomingMessage } from "./lib/message-sending";
@@ -1015,71 +1016,19 @@ const rootMutations = {
       );
     },
 
-    copyCampaign: async (_root, { id }, { user, loaders }) => {
-      const campaign = await loaders.campaign.load(id);
+    copyCampaign: async (_root, { id }, { user, loaders, db }) => {
+      const campaignId = parseInt(id, 10);
+      const campaign = await loaders.campaign.load(campaignId);
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
-      const result = await r.knex.transaction(async (trx) => {
-        const [newCampaign] = await trx("campaign")
-          .insert({
-            organization_id: campaign.organization_id,
-            creator_id: user.id,
-            title: `COPY - ${campaign.title}`,
-            description: campaign.description,
-            due_by: campaign.dueBy,
-            timezone: campaign.timezone,
-            is_started: false,
-            is_archived: false
-          })
-          .returning("*");
-        const newCampaignId = newCampaign.id;
-        const oldCampaignId = campaign.id;
-
-        // copy interactions
-        const interactions = (
-          await trx("interaction_step").where({
-            campaign_id: oldCampaignId,
-            is_deleted: false
-          })
-        ).map((interaction) => ({
-          id: `new${interaction.id}`,
-          questionText: interaction.question,
-          scriptOptions: interaction.script_options,
-          answerOption: interaction.answer_option,
-          answerActions: interaction.answer_actions,
-          isDeleted: interaction.is_deleted,
-          campaign_id: newCampaignId,
-          parentInteractionId: interaction.parent_interaction_id
-            ? `new${interaction.parent_interaction_id}`
-            : interaction.parent_interaction_id
-        }));
-
-        await persistInteractionStepTree(
-          newCampaignId,
-          makeTree(interactions, (id = null)),
-          campaign,
-          trx
-        );
-
-        // Copy canned responses
-        await trx.raw(
-          `
-            insert into canned_response (campaign_id, title, text)
-            select
-              ? as campaign_id,
-              title,
-              text
-            from canned_response
-            where campaign_id = ?
-          `,
-          [newCampaignId, oldCampaignId]
-        );
-
-        return newCampaign;
+      const result = await copyCampaign({
+        db,
+        campaignId,
+        userId: parseInt(user.id, 10)
       });
 
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
-        organizationId: campaign.organizationId
+        organizationId: result.organization_id
       });
 
       return result;
