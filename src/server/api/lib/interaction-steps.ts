@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import Knex from "knex";
+import { Knex } from "knex";
 
 import { InteractionStepWithChildren } from "../../../api/interaction-step";
 import { cacheOpts, memoizer } from "../../memoredis";
