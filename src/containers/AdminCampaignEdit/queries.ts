@@ -84,16 +84,6 @@ export const EditCampaignFragment = gql`
       id
       title
     }
-    interactionSteps {
-      id
-      questionText
-      scriptOptions
-      answerOption
-      answerActions
-      parentInteractionId
-      isDeleted
-      createdAt
-    }
     editors
   }
 `;
