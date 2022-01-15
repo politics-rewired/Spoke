@@ -483,7 +483,7 @@ class AdminCampaignEdit extends React.Component {
         isStandalone: true,
         keys: ["interactionSteps"],
         checkCompleted: () =>
-          this.state.campaignFormValues.interactionSteps.length > 0,
+          this.props.campaignData.campaign.readiness.interactions,
         blocksStarting: true,
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true,

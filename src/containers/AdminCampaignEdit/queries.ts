@@ -85,6 +85,17 @@ export const EditCampaignFragment = gql`
       title
     }
     editors
+    readiness {
+      basics
+      textingHours
+      integration
+      contacts
+      autoassign
+      cannedResponses
+      campaignGroups
+      interactions
+      texters
+    }
   }
 `;
 
