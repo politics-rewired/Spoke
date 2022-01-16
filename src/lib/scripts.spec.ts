@@ -14,10 +14,10 @@ describe("script utilities", () => {
   it("converts uppercase words to title case", () => {
     expect(titleCase("SPOKE REWIRED")).toEqual("Spoke Rewired");
   });
-  it("converts lowercase single word to title case", () => {
+  it("converts lowercase words to title case", () => {
     expect(titleCase("spoke rewired")).toEqual("Spoke Rewired");
   });
-  it("converts mixed-case single word to title case", () => {
+  it("converts mixed-case words to title case", () => {
     expect(titleCase("sPoKe ReWirEd")).toEqual("Spoke Rewired");
   });
   it("ignores hyphens", () => {
