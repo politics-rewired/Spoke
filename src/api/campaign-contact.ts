@@ -37,6 +37,15 @@ export interface CampaignContact {
   updatedAt: Date;
 }
 
+export interface CampaignContactInput {
+  firstName: string;
+  lastName: string;
+  cell: string;
+  zip: string | null;
+  external_id: string | null;
+  customFields: string | null;
+}
+
 export const schema = `
   input ContactsFilter {
     messageStatus: String
@@ -76,5 +85,14 @@ export const schema = `
     updatedAt: Date
 
     contactTags: [Tag]
+  }
+
+  input CampaignContactInput {
+    firstName: String!
+    lastName: String!
+    cell: String!
+    zip: String
+    external_id: String
+    customFields: String
   }
 `;

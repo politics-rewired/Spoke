@@ -3,7 +3,11 @@ import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import { QueryResult } from "pg";
 
-import { Campaign, CampaignsFilter } from "../../../api/campaign";
+import {
+  Campaign,
+  CampaignInput,
+  CampaignsFilter
+} from "../../../api/campaign";
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import { config } from "../../../config";
 import { gzip, makeTree } from "../../../lib";
@@ -17,7 +21,7 @@ import { cacheOpts, memoizer } from "../../memoredis";
 import { cacheableData, datawarehouse, r } from "../../models";
 import { addAssignTexters } from "../../tasks/assign-texters";
 import { accessRequired } from "../errors";
-import { CampaignRecord, InteractionStepRecord } from "../types";
+import { CampaignRecord, InteractionStepRecord, UserRecord } from "../types";
 import { processContactsFile } from "./edit-campaign";
 import { persistInteractionStepTree } from "./interaction-steps";
 import { formatPage } from "./pagination";
@@ -245,10 +249,10 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
 
 export const editCampaign = async (
   id: number,
-  campaign: any,
+  campaign: CampaignInput,
   loaders: any,
-  user: any,
-  origCampaignRecord: any
+  user: UserRecord,
+  origCampaignRecord: CampaignRecord
 ) => {
   const {
     title,
@@ -269,8 +273,8 @@ export const editCampaign = async (
   const organizationId = origCampaignRecord.organization_id;
   const campaignUpdates: Partial<CampaignRecord> = {
     id,
-    title,
-    description,
+    title: title ?? undefined,
+    description: description ?? undefined,
     due_by: dueBy,
     organization_id: organizationId,
     // TODO: re-enable once dynamic assignment is fixed (#548)
@@ -278,11 +282,11 @@ export const editCampaign = async (
     logo_image_url: logoImageUrl,
     primary_color: primaryColor,
     intro_html: introHtml,
-    texting_hours_start: textingHoursStart,
-    texting_hours_end: textingHoursEnd,
-    is_autoassign_enabled: isAutoassignEnabled,
+    texting_hours_start: textingHoursStart ?? undefined,
+    texting_hours_end: textingHoursEnd ?? undefined,
+    is_autoassign_enabled: isAutoassignEnabled ?? undefined,
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
-    timezone: parseIanaZone(timezone),
+    timezone: timezone ? parseIanaZone(timezone) : undefined,
     external_system_id: externalSystemId
   };
 
@@ -327,9 +331,9 @@ export const editCampaign = async (
       })
       .where({ id });
 
-    const contactsToSave = campaign.contacts.map((datum: any) => {
+    const contactsToSave = campaign.contacts.map((datum) => {
       const modelData = {
-        campaign_id: datum.campaignId,
+        campaign_id: id,
         first_name: datum.firstName,
         last_name: datum.lastName,
         cell: datum.cell,
@@ -401,7 +405,7 @@ export const editCampaign = async (
       // Remove all existing team memberships and then add everything again
       await trx("campaign_team").where({ campaign_id: id }).del();
       await trx("campaign_team").insert(
-        campaign.teamIds.map((team_id: number) => ({
+        campaign.teamIds.map((team_id) => ({
           team_id,
           campaign_id: id
         }))
@@ -410,7 +414,7 @@ export const editCampaign = async (
     memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
   }
   if (Object.prototype.hasOwnProperty.call(campaign, "campaignGroupIds")) {
-    const { campaignGroupIds } = campaign;
+    const campaignGroupIds = campaign.campaignGroupIds ?? [];
     await r.knex.transaction(async (trx) => {
       // Remove all existing team memberships and then add everything again
       await trx.raw(
@@ -439,7 +443,7 @@ export const editCampaign = async (
           values ${valuesStr}
           on conflict (campaign_group_id, campaign_id) do nothing
         `,
-        campaignGroupIds.flatMap((groupId: number) => [groupId, id])
+        campaignGroupIds.flatMap((groupId) => [groupId, id])
       );
     });
   }
@@ -466,7 +470,7 @@ export const editCampaign = async (
       );
       await persistInteractionStepTree(
         id,
-        campaign.interactionSteps,
+        campaign.interactionSteps ?? [],
         origCampaignRecord
       );
     }

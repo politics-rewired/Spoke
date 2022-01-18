@@ -31,15 +31,6 @@ import { schema as trollbotSchema } from "./trollbot";
 import { schema as userSchema } from "./user";
 
 const rootSchema = `
-  input CampaignContactInput {
-    firstName: String!
-    lastName: String!
-    cell: String!
-    zip: String
-    external_id: String
-    customFields: String
-  }
-
   input BulkUpdateScriptInput {
     searchString: String!
     replaceString: String!
@@ -70,57 +61,6 @@ const rootSchema = `
     action: String
     value: String!
     nextInteractionStepId: String
-  }
-
-  input InteractionStepInput {
-    id: String
-    questionText: String
-    scriptOptions: [String]!
-    answerOption: String
-    answerActions: String
-    parentInteractionId: String
-    isDeleted: Boolean
-    createdAt: Date
-    interactionSteps: [InteractionStepInput]
-  }
-
-  input TexterAssignmentInput {
-    userId: String!
-    contactsCount: Int!
-  }
-
-  input TexterInput {
-    assignmentInputs: [TexterAssignmentInput!]!
-    ignoreAfterDate: Date!
-  }
-
-  input CampaignInput {
-    title: String
-    description: String
-    dueBy: Date
-    logoImageUrl: String
-    primaryColor: String
-    introHtml: String
-    externalSystemId: String
-    useDynamicAssignment: Boolean
-    contacts: [CampaignContactInput]
-    contactsFile: Upload
-    externalListId: String
-    filterOutLandlines: Boolean
-    excludeCampaignIds: [Int]
-    contactSql: String
-    organizationId: String
-    isAssignmentLimitedToTeams: Boolean
-    teamIds: [ID]
-    campaignGroupIds: [String!]
-    texters: TexterInput
-    interactionSteps: InteractionStepInput
-    cannedResponses: [CannedResponseInput]
-    textingHoursStart: Int
-    textingHoursEnd: Int
-    isAutoassignEnabled: Boolean
-    timezone: String
-    repliesStaleAfter: Int
   }
 
   input MessageInput {
