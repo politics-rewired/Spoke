@@ -1,3 +1,5 @@
+import gql from "graphql-tag";
+
 import { RequestAutoApproveType } from "./organization-membership";
 
 export interface OrganizationSettingsInput {
@@ -41,5 +43,18 @@ export const schema = `
     showContactLastName: Boolean
     showContactCell: Boolean
     confirmationClickForScriptLinks: Boolean!
+  }
+`;
+
+export const AllOrganizationSettingsFragment = gql`
+  fragment AllOrganizationSettingsFragment on OranizationSettings {
+    id
+    defaulTexterApprovalStatus
+    optOutMessage
+    numbersApiKey
+    trollbotWebhookUrl
+    showContactLastName
+    showContactCell
+    confirmationClickForScriptLinks
   }
 `;

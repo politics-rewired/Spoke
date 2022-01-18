@@ -5,6 +5,7 @@ import React from "react";
 
 import { hasRole } from "../lib/permissions";
 import ApolloClientSingleton from "../network/apollo-client-singleton";
+import OrgSettingsFetcher from "./OrgSettingsFetcher";
 
 const AuthzContext = createReactContext(false);
 
@@ -53,7 +54,9 @@ export class AuthzProvider extends React.Component {
 
     return (
       <AuthzContext.Provider value={adminPerms}>
-        {this.props.children}
+        <OrgSettingsFetcher organizationId={this.props.organizationId}>
+          {this.props.children}
+        </OrgSettingsFetcher>
       </AuthzContext.Provider>
     );
   }
