@@ -1,6 +1,7 @@
 import gql from "graphql-tag";
 
 import { Organization } from "../../../api/organization";
+import { OranizationSettings } from "../../../api/organization-settings";
 
 export interface OrganizationNameType {
   organization: Pick<Organization, "id" | "name">;
@@ -23,6 +24,39 @@ export const EDIT_ORGANIZATION_NAME = gql`
     editOrganization(id: $organizationId, input: $input) {
       id
       name
+    }
+  }
+`;
+
+export interface ConfirmationClickForScriptLinksType {
+  organization: Pick<Organization, "id"> & {
+    settings: Pick<
+      OranizationSettings,
+      "id" | "confirmationClickForScriptLinks"
+    >;
+  };
+}
+
+export const GET_CONFIRMATION_CLICK_FOR_SCRIPT_LINKS = gql`
+  query GetConfirmationClickForScriptLinks($organizationId: String!) {
+    organization(id: $organizationId) {
+      id
+      settings {
+        id
+        confirmationClickForScriptLinks
+      }
+    }
+  }
+`;
+
+export const EDIT_CONFIRMATION_CLICK_FOR_SCRIPT_LINKS = gql`
+  mutation EditConfirmationClickForScriptLinks(
+    $organizationId: String!
+    $input: OrganizationSettingsInput!
+  ) {
+    editOrganizationSettings(id: $organizationId, input: $input) {
+      id
+      confirmationClickForScriptLinks
     }
   }
 `;
