@@ -12,6 +12,7 @@ interface IOrganizationSettings {
   trollbotWebhookUrl?: string;
   showContactLastName: boolean;
   showContactCell: boolean;
+  confirmationClickForScriptLinks: boolean;
 }
 
 const SETTINGS_PERMISSIONS: { [key in keyof IOrganizationSettings]: string } = {
@@ -20,7 +21,8 @@ const SETTINGS_PERMISSIONS: { [key in keyof IOrganizationSettings]: string } = {
   numbersApiKey: "OWNER",
   trollbotWebhookUrl: "OWNER",
   showContactLastName: "TEXTER",
-  showContactCell: "TEXTER"
+  showContactCell: "TEXTER",
+  confirmationClickForScriptLinks: "OWNER"
 };
 
 const SETTINGS_NAMES: { [key: string]: string } = {
@@ -33,7 +35,8 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
     config.OPT_OUT_MESSAGE ??
     "I'm opting you out of texts immediately. Have a great day.",
   showContactLastName: false,
-  showContactCell: false
+  showContactCell: false,
+  confirmationClickForScriptLinks: true
 };
 
 const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
@@ -106,7 +109,8 @@ export const resolvers = {
       "numbersApiKey",
       "trollbotWebhookUrl",
       "showContactLastName",
-      "showContactCell"
+      "showContactCell",
+      "confirmationClickForScriptLinks"
     ])
   }
 };

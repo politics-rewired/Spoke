@@ -8,6 +8,7 @@ import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { withSpokeContext } from "../../client/spoke-context";
 import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
@@ -62,7 +63,9 @@ class GSScriptField extends GSFormField {
   // check script for links, then save
   wrapSaveScript = () => {
     const { script } = this.state;
-    const warningContext = getWarningContextForScript(script);
+    const warningContext =
+      this.props.orgSettings.confirmationClickForScriptLinks &&
+      getWarningContextForScript(script);
 
     if (warningContext) {
       this.setState({ scriptWarningOpen: true });
@@ -82,10 +85,13 @@ class GSScriptField extends GSFormField {
   };
 
   renderDialog() {
-    const { name, customFields, integrationSourced } = this.props;
+    const { name, customFields, integrationSourced, orgSettings } = this.props;
     const { open, scriptWarningOpen, script } = this.state;
     const scriptFields = allScriptFields(customFields);
-    const warningContext = script && getWarningContextForScript(script);
+    const warningContext =
+      script &&
+      orgSettings.confirmationClickForScriptLinks &&
+      getWarningContextForScript(script);
 
     return (
       <Dialog
@@ -173,8 +179,9 @@ GSScriptField.propTypes = {
   label: PropTypes.string,
   multiLine: PropTypes.bool,
   fullWidth: PropTypes.bool,
+  orgSettings: PropTypes.object,
   onChange: PropTypes.func.isRequired,
   onBlur: PropTypes.func
 };
 
-export default GSScriptField;
+export default withSpokeContext(GSScriptField);

@@ -1,3 +1,5 @@
+import gql from "graphql-tag";
+
 import { RequestAutoApproveType } from "./organization-membership";
 
 export interface OrganizationSettingsInput {
@@ -7,6 +9,7 @@ export interface OrganizationSettingsInput {
   trollbotWebhookUrl: string | null;
   showContactLastName: boolean | null;
   showContactCell: boolean | null;
+  confirmationClickForScriptLinks: boolean | null;
 }
 
 export interface OranizationSettings {
@@ -17,6 +20,7 @@ export interface OranizationSettings {
   trollbotWebhookUrl: string | null;
   showContactLastName: boolean | null;
   showContactCell: boolean | null;
+  confirmationClickForScriptLinks: boolean;
 }
 
 export const schema = `
@@ -27,6 +31,7 @@ export const schema = `
     trollbotWebhookUrl: String
     showContactLastName: Boolean
     showContactCell: Boolean
+    confirmationClickForScriptLinks: Boolean
   }
 
   type OranizationSettings {
@@ -37,5 +42,19 @@ export const schema = `
     trollbotWebhookUrl: String
     showContactLastName: Boolean
     showContactCell: Boolean
+    confirmationClickForScriptLinks: Boolean!
+  }
+`;
+
+export const AllOrganizationSettingsFragment = gql`
+  fragment AllOrganizationSettingsFragment on OranizationSettings {
+    id
+    defaulTexterApprovalStatus
+    optOutMessage
+    numbersApiKey
+    trollbotWebhookUrl
+    showContactLastName
+    showContactCell
+    confirmationClickForScriptLinks
   }
 `;
