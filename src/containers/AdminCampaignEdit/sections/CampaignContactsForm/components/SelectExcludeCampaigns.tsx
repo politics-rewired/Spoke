@@ -23,7 +23,7 @@ const mapOption = ({ id, title }: { id: string; title: string }) => ({
   value: id
 });
 
-export const SelectExcludeCampaigns: React.SFC<SelectExcludeCampaignsProps> = (
+export const SelectExcludeCampaigns: React.FC<SelectExcludeCampaignsProps> = (
   props
 ) => {
   const { allOtherCampaigns, selectedCampaignIds } = props;
@@ -46,9 +46,10 @@ export const SelectExcludeCampaigns: React.SFC<SelectExcludeCampaignsProps> = (
   return (
     <div>
       <p>
-        You can filter out contacts from this upload that are already uploaded
-        to an existing Spoke campaigns (regardless of whether they have been
-        texted yet in that campaign).
+        You can <span style={{ fontWeight: "bold" }}>optionally</span> filter
+        out contacts from this upload that are already uploaded to an existing
+        Spoke campaigns (regardless of whether they have been texted yet in that
+        campaign).
       </p>
       <Select
         name="Campaigns"
