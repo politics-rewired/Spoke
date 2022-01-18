@@ -1,3 +1,11 @@
+export interface CannedResponseInput {
+  id: string;
+  title: string;
+  text: string;
+  campaignId: string;
+  userId: string;
+}
+
 export interface CannedResponse {
   id: string;
   title: string;

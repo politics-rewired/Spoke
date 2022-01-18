@@ -1,16 +1,32 @@
 /* eslint-disable import/prefer-default-export */
+import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import { QueryResult } from "pg";
 
-import { Campaign, CampaignsFilter } from "../../../api/campaign";
+import {
+  Campaign,
+  CampaignInput,
+  CampaignsFilter
+} from "../../../api/campaign";
 import { RelayPaginatedResponse } from "../../../api/pagination";
-import { makeTree } from "../../../lib";
+import { config } from "../../../config";
+import { gzip, makeTree } from "../../../lib";
+import { parseIanaZone } from "../../../lib/datetime";
+import {
+  loadContactsFromDataWarehouse,
+  uploadContacts
+} from "../../../workers/jobs";
 import { SpokeDbContext } from "../../contexts";
 import { cacheOpts, memoizer } from "../../memoredis";
-import { r } from "../../models";
-import { CampaignRecord, InteractionStepRecord } from "../types";
+import { cacheableData, datawarehouse, r } from "../../models";
+import { addAssignTexters } from "../../tasks/assign-texters";
+import { accessRequired } from "../errors";
+import { CampaignRecord, InteractionStepRecord, UserRecord } from "../types";
+import { processContactsFile } from "./edit-campaign";
 import { persistInteractionStepTree } from "./interaction-steps";
 import { formatPage } from "./pagination";
+
+const { JOBS_SAME_PROCESS } = config;
 
 interface GetCampaignsOptions {
   first?: number;
@@ -229,4 +245,269 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
   });
 
   return result;
+};
+
+export const editCampaign = async (
+  id: number,
+  campaign: CampaignInput,
+  loaders: any,
+  user: UserRecord,
+  origCampaignRecord: CampaignRecord
+) => {
+  const {
+    title,
+    description,
+    dueBy,
+    useDynamicAssignment: _useDynamicAssignment,
+    logoImageUrl,
+    introHtml,
+    primaryColor,
+    textingHoursStart,
+    textingHoursEnd,
+    isAutoassignEnabled,
+    repliesStaleAfter,
+    timezone,
+    externalSystemId
+  } = campaign;
+
+  const organizationId = origCampaignRecord.organization_id;
+  const campaignUpdates: Partial<CampaignRecord> = {
+    id,
+    title: title ?? undefined,
+    description: description ?? undefined,
+    due_by: dueBy,
+    organization_id: organizationId,
+    // TODO: re-enable once dynamic assignment is fixed (#548)
+    // use_dynamic_assignment: useDynamicAssignment,
+    logo_image_url: logoImageUrl,
+    primary_color: primaryColor,
+    intro_html: introHtml,
+    texting_hours_start: textingHoursStart ?? undefined,
+    texting_hours_end: textingHoursEnd ?? undefined,
+    is_autoassign_enabled: isAutoassignEnabled ?? undefined,
+    replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
+    timezone: timezone ? parseIanaZone(timezone) : undefined,
+    external_system_id: externalSystemId
+  };
+
+  Object.keys(campaignUpdates).forEach((key) => {
+    if (typeof campaignUpdates[key as keyof CampaignRecord] === "undefined") {
+      delete campaignUpdates[key as keyof CampaignRecord];
+    }
+  });
+
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "externalListId") &&
+    campaign.externalListId
+  ) {
+    await r.knex("campaign_contact").where({ campaign_id: id }).del();
+    await r.knex.raw(
+      `select * from public.queue_load_list_into_campaign(?, ?)`,
+      [id, parseInt(campaign.externalListId, 10)]
+    );
+  }
+
+  let validationStats = {};
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "contactsFile") &&
+    campaign.contactsFile
+  ) {
+    const processedContacts = await processContactsFile(campaign.contactsFile);
+    campaign.contacts = processedContacts.contacts;
+    validationStats = processedContacts.validationStats;
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "contacts") &&
+    campaign.contacts
+  ) {
+    await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
+
+    // Uploading contacts from a CSV invalidates external system configuration
+    await r
+      .knex("campaign")
+      .update({
+        external_system_id: null
+      })
+      .where({ id });
+
+    const contactsToSave = campaign.contacts.map((datum) => {
+      const modelData = {
+        campaign_id: id,
+        first_name: datum.firstName,
+        last_name: datum.lastName,
+        cell: datum.cell,
+        external_id: datum.external_id,
+        custom_fields: datum.customFields,
+        message_status: "needsMessage",
+        is_opted_out: false,
+        zip: datum.zip || ""
+      };
+      modelData.campaign_id = id;
+      return modelData;
+    });
+    const jobPayload = {
+      excludeCampaignIds: campaign.excludeCampaignIds || [],
+      contacts: contactsToSave,
+      filterOutLandlines: campaign.filterOutLandlines,
+      validationStats
+    };
+    const compressedString = await gzip(JSON.stringify(jobPayload));
+    const [job] = await r
+      .knex("job_request")
+      .insert({
+        queue_name: `${id}:edit_campaign`,
+        job_type: "upload_contacts",
+        locks_queue: true,
+        assigned: JOBS_SAME_PROCESS, // can get called immediately, below
+        campaign_id: id,
+        // NOTE: stringifying because compressedString is a binary buffer
+        payload: compressedString.toString("base64")
+      })
+      .returning("*");
+    if (JOBS_SAME_PROCESS) {
+      uploadContacts(job);
+    }
+  }
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "contactSql") &&
+    datawarehouse &&
+    user.is_superadmin
+  ) {
+    await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
+    const [job] = await r
+      .knex("job_request")
+      .insert({
+        queue_name: `${id}:edit_campaign`,
+        job_type: "upload_contacts_sql",
+        locks_queue: true,
+        assigned: JOBS_SAME_PROCESS, // can get called immediately, below
+        campaign_id: id,
+        payload: campaign.contactSql
+      })
+      .returning("*");
+    if (JOBS_SAME_PROCESS) {
+      loadContactsFromDataWarehouse(job);
+    }
+  }
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "isAssignmentLimitedToTeams")
+  ) {
+    await r
+      .knex("campaign")
+      .update({
+        limit_assignment_to_teams: campaign.isAssignmentLimitedToTeams
+      })
+      .where({ id });
+  }
+  if (Object.prototype.hasOwnProperty.call(campaign, "teamIds")) {
+    await r.knex.transaction(async (trx) => {
+      // Remove all existing team memberships and then add everything again
+      await trx("campaign_team").where({ campaign_id: id }).del();
+      await trx("campaign_team").insert(
+        campaign.teamIds.map((team_id) => ({
+          team_id,
+          campaign_id: id
+        }))
+      );
+    });
+    memoizer.invalidate(cacheOpts.CampaignTeams.key, { campaignId: id });
+  }
+  if (Object.prototype.hasOwnProperty.call(campaign, "campaignGroupIds")) {
+    const campaignGroupIds = campaign.campaignGroupIds ?? [];
+    await r.knex.transaction(async (trx) => {
+      // Remove all existing team memberships and then add everything again
+      await trx.raw(
+        `
+          delete from campaign_group_campaign
+          where
+            campaign_id = ?
+            and campaign_group_id in (
+              select id
+              from campaign_group
+              where
+                organization_id = ?
+                and id != ALL(?)
+            )
+        `,
+        [id, organizationId, campaignGroupIds]
+      );
+
+      if (campaignGroupIds.length < 1) return;
+      const valuesStr = [...Array(campaignGroupIds.length)]
+        .map(() => "(?, ?)")
+        .join(", ");
+      await trx.raw(
+        `
+          insert into campaign_group_campaign (campaign_group_id, campaign_id)
+          values ${valuesStr}
+          on conflict (campaign_group_id, campaign_id) do nothing
+        `,
+        campaignGroupIds.flatMap((groupId) => [groupId, id])
+      );
+    });
+  }
+  if (Object.prototype.hasOwnProperty.call(campaign, "texters")) {
+    const { assignmentInputs, ignoreAfterDate } = campaign.texters;
+    await addAssignTexters({
+      campaignId: id,
+      assignmentInputs,
+      ignoreAfterDate
+    });
+  }
+
+  if (Object.prototype.hasOwnProperty.call(campaign, "interactionSteps")) {
+    memoizer.invalidate(cacheOpts.CampaignInteractionSteps.key, {
+      campaignId: id
+    });
+    // TODO: debug why { script: '' } is even being sent from the client in the first place
+    if (!isEqual(campaign.interactionSteps, { scriptOptions: [""] })) {
+      await accessRequired(
+        user,
+        organizationId,
+        "SUPERVOLUNTEER",
+        /* superadmin */ true
+      );
+      await persistInteractionStepTree(
+        id,
+        campaign.interactionSteps ?? [],
+        origCampaignRecord
+      );
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(campaign, "cannedResponses")) {
+    memoizer.invalidate(cacheOpts.CampaignCannedResponses.key, {
+      campaignId: id
+    });
+
+    // Ignore the mocked `id` automatically created on the input by GraphQL
+    const convertedResponses = campaign.cannedResponses.map(
+      ({ id: _cannedResponseId, ...response }: { id: number } | any) => ({
+        ...response,
+        campaign_id: id
+      })
+    );
+
+    await r.knex.transaction(async (trx) => {
+      await trx("canned_response")
+        .where({ campaign_id: id })
+        .whereNull("user_id")
+        .del();
+      await trx("canned_response").insert(convertedResponses);
+    });
+
+    await cacheableData.cannedResponse.clearQuery({
+      userId: "",
+      campaignId: id
+    });
+  }
+
+  const [newCampaign] = await r
+    .knex("campaign")
+    .update(campaignUpdates)
+    .where({ id })
+    .returning("*");
+  cacheableData.campaign.reload(id);
+  return newCampaign || loaders.campaign.load(id);
 };

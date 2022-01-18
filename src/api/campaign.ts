@@ -1,7 +1,9 @@
 /* eslint-disable no-unused-vars */
+import { CampaignContactInput } from "./campaign-contact";
 import { CampaignGroupPage } from "./campaign-group";
+import { CannedResponseInput } from "./canned-response";
 import { ExternalSystem } from "./external-system";
-import { InteractionStep } from "./interaction-step";
+import { InteractionStep, InteractionStepInput } from "./interaction-step";
 import { Team } from "./team";
 import { PageInfo } from "./types";
 import { User } from "./user";
@@ -42,12 +44,51 @@ export interface CampaignsFilter {
   campaignId?: number;
 }
 
+export interface TexterAssignmentInput {
+  userId: string;
+  contactsCount: number;
+}
+
+export interface TexterInput {
+  assignmentInputs: TexterAssignmentInput[];
+  ignoreAfterDate: string;
+}
+
+export interface CampaignInput {
+  title: string | null;
+  description: string | null;
+  dueBy: string | null;
+  logoImageUrl: string | null;
+  primaryColor: string | null;
+  introHtml: string | null;
+  externalSystemId: string | null;
+  useDynamicAssignment: boolean | null;
+  contacts: CampaignContactInput[] | null;
+  contactsFile: any | null;
+  externalListId: string | null;
+  filterOutLandlines: boolean | null;
+  excludeCampaignIds: number[] | null;
+  contactSql: string | null;
+  organizationId: string | null;
+  isAssignmentLimitedToTeams: boolean | null;
+  teamIds: string[];
+  campaignGroupIds: string[] | null;
+  texters: TexterInput;
+  interactionSteps: InteractionStepInput;
+  cannedResponses: CannedResponseInput[];
+  textingHoursStart: number | null;
+  textingHoursEnd: number | null;
+  isAutoassignEnabled: boolean | null;
+  timezone: string | null;
+  repliesStaleAfter: number | null;
+}
+
 export interface Campaign {
   id: string;
   title: string;
   description: string;
   isStarted: boolean;
-  dueBy: string;
+  dueBy?: string | null;
   contactsCount: number;
   isArchived: boolean;
   textingHoursStart: number;
@@ -61,7 +102,6 @@ export interface Campaign {
   interactionSteps: InteractionStep[];
   customFields: string[];
   hasUnassignedContacts?: boolean | null;
-  dueBy?: string | null;
   primaryColor?: string | null;
   logoImageUrl?: string | null;
   introHtml?: string | null;
@@ -208,5 +248,44 @@ export const schema = `
   type PaginatedCampaigns {
     campaigns: [Campaign]
     pageInfo: PageInfo
+  }
+
+  input TexterAssignmentInput {
+    userId: String!
+    contactsCount: Int!
+  }
+
+  input TexterInput {
+    assignmentInputs: [TexterAssignmentInput!]!
+    ignoreAfterDate: Date!
+  }
+
+  input CampaignInput {
+    title: String
+    description: String
+    dueBy: Date
+    logoImageUrl: String
+    primaryColor: String
+    introHtml: String
+    externalSystemId: String
+    useDynamicAssignment: Boolean
+    contacts: [CampaignContactInput]
+    contactsFile: Upload
+    externalListId: String
+    filterOutLandlines: Boolean
+    excludeCampaignIds: [Int]
+    contactSql: String
+    organizationId: String
+    isAssignmentLimitedToTeams: Boolean
+    teamIds: [ID]
+    campaignGroupIds: [String!]
+    texters: TexterInput
+    interactionSteps: InteractionStepInput
+    cannedResponses: [CannedResponseInput]
+    textingHoursStart: Int
+    textingHoursEnd: Int
+    isAutoassignEnabled: Boolean
+    timezone: String
+    repliesStaleAfter: Int
   }
 `;
