@@ -160,7 +160,7 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           texting_hours_end,
           timezone,
           ? as creator_id,
-          is_autoassign_enabled,
+          false as is_autoassign_enabled,
           limit_assignment_to_teams,
           replies_stale_after_minutes,
           external_system_id
