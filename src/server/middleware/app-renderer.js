@@ -42,8 +42,10 @@ if (config.isProduction) {
 // good for doing dev offline
 const externalLinks = config.NO_EXTERNAL_LINKS
   ? ""
-  : `<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Poppins">
-  <script src="https://cdn.auth0.com/js/lock/11.0.1/lock.min.js"></script>`;
+  : `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.auth0.com/js/lock/11.0.1/lock.min.js"></script>`;
 
 const rollbarScript = config.ROLLBAR_ACCESS_TOKEN
   ? `

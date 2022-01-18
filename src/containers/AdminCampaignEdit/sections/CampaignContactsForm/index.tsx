@@ -242,11 +242,6 @@ class CampaignContactsForm extends React.Component<
     return (
       <div>
         <CampaignFormSectionHeading title="Who are you contacting?" />
-        <SelectExcludeCampaigns
-          allOtherCampaigns={allOtherCampaigns}
-          selectedCampaignIds={selectedCampaignIds}
-          onChangeExcludedCamapignIds={this.handleOnChangeExcludedCamapignIds}
-        />
         <SelectField
           floatingLabelText="Contact source"
           value={source}
@@ -287,6 +282,11 @@ class CampaignContactsForm extends React.Component<
             onChangeValidSql={this.handleOnChangeValidSql}
           />
         )}
+        <SelectExcludeCampaigns
+          allOtherCampaigns={allOtherCampaigns}
+          selectedCampaignIds={selectedCampaignIds}
+          onChangeExcludedCamapignIds={this.handleOnChangeExcludedCamapignIds}
+        />
         <UploadResults
           contactsCount={contactsCount}
           customFields={customFields}
