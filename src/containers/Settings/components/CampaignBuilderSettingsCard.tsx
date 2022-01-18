@@ -63,7 +63,7 @@ const CampaignBuilderSettingsCard: React.FC<InnerProps> = (props) => {
 
   return (
     <Card style={style}>
-      <CardHeader title="Campaign Builder Settings" />
+      <CardHeader title="Campaign Builder Settings" disableTypography />
       <CardContent>
         {errorMsg && <p>Error: {errorMsg}</p>}
         <FormGroup row>
