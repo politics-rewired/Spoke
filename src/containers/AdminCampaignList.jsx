@@ -56,9 +56,7 @@ class AdminCampaignList extends React.Component {
       organizationId,
       contacts: [],
       interactionSteps: {
-        id: "new",
-        scriptOptions: [""],
-        interactionSteps: []
+        scriptOptions: [""]
       }
     });
     if (newCampaign.errors) {

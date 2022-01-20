@@ -149,9 +149,7 @@ describe("create / edit campaign", () => {
             organizationId: organization.id,
             contacts: [],
             interactionSteps: {
-              id: "new",
-              scriptOptions: [""],
-              interactionSteps: []
+              scriptOptions: [""]
             }
           }
         },

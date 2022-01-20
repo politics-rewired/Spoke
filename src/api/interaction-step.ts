@@ -15,7 +15,7 @@ export interface InteractionStep {
 }
 
 export interface InteractionStepInput {
-  id: string;
+  id: string | null;
   questionText: string | null;
   scriptOptions: string[];
   answerOption: string | null;
@@ -23,11 +23,10 @@ export interface InteractionStepInput {
   parentInteractionId: string | null;
   isDeleted: boolean;
   createdAt: string;
-  interactionSteps: InteractionStepInput[];
 }
 
 export interface InteractionStepWithChildren extends InteractionStepInput {
-  interactionSteps: InteractionStepWithChildren[];
+  interactionSteps: InteractionStepWithChildren[] | null;
 }
 
 export const schema = `
@@ -45,7 +44,7 @@ export const schema = `
   }
 
   input InteractionStepInput {
-    id: String!
+    id: String
     questionText: String
     scriptOptions: [String]!
     answerOption: String
@@ -53,6 +52,6 @@ export const schema = `
     parentInteractionId: String
     isDeleted: Boolean
     createdAt: Date
-    interactionSteps: [InteractionStepInput]!
+    interactionSteps: [InteractionStepInput]
   }
 `;
