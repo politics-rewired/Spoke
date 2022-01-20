@@ -6,7 +6,7 @@ import { capitalizeWord } from "./api/lib/utils";
 import { UserRecord } from "./api/types";
 import { SpokeDbContext } from "./contexts";
 
-interface HashedPassword {
+export interface HashedPassword {
   salt: string;
   hash: string;
 }

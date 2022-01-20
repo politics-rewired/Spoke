@@ -3,7 +3,10 @@ import { CampaignContactInput } from "./campaign-contact";
 import { CampaignGroupPage } from "./campaign-group";
 import { CannedResponseInput } from "./canned-response";
 import { ExternalSystem } from "./external-system";
-import { InteractionStep, InteractionStepInput } from "./interaction-step";
+import {
+  InteractionStep,
+  InteractionStepWithChildren
+} from "./interaction-step";
 import { Team } from "./team";
 import { PageInfo } from "./types";
 import { User } from "./user";
@@ -74,7 +77,7 @@ export interface CampaignInput {
   teamIds: string[];
   campaignGroupIds: string[] | null;
   texters: TexterInput;
-  interactionSteps: InteractionStepInput;
+  interactionSteps: InteractionStepWithChildren;
   cannedResponses: CannedResponseInput[];
   textingHoursStart: number | null;
   textingHoursEnd: number | null;

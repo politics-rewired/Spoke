@@ -1,4 +1,5 @@
 import faker from "faker";
+import AuthHasher from "passport-local-authenticate";
 import { PoolClient } from "pg";
 
 import { Assignment } from "../../src/api/assignment";
@@ -7,6 +8,7 @@ import { CampaignContact } from "../../src/api/campaign-contact";
 import { InteractionStep } from "../../src/api/interaction-step";
 import { Message } from "../../src/api/message";
 import { Organization } from "../../src/api/organization";
+import { UserRoleType } from "../../src/api/organization-membership";
 import { User } from "../../src/api/user";
 import { DateTime } from "../../src/lib/datetime";
 import {
@@ -20,6 +22,7 @@ import {
   OrganizationRecord,
   UserRecord
 } from "../../src/server/api/types";
+import { HashedPassword } from "../../src/server/local-auth-helpers";
 
 export type CreateOrganizationOptions = Partial<
   Pick<Organization, "name"> & { uuid: string; features: Record<string, any> }
@@ -70,6 +73,49 @@ export const createTexter = async (
       ]
     )
     .then(({ rows: [user] }) => user);
+
+export type CreateUserOptions = Partial<
+  Pick<User, "firstName" | "lastName" | "cell" | "email">
+> & {
+  password: string;
+};
+
+export const createUser = async (
+  client: PoolClient,
+  options: CreateUserOptions
+) => {
+  const auth0Id = await new Promise<string>((resolve, reject) => {
+    AuthHasher.hash(options.password, (err: Error, hashed: HashedPassword) => {
+      if (err) reject(err);
+      const passwordToSave = `localauth|${hashed.salt}|${hashed.hash}`;
+      resolve(passwordToSave);
+    });
+  });
+  const user = await createTexter(client, { ...options, auth0Id });
+  return user;
+};
+
+export type CreateUserOrganizationOptions = {
+  userId: number;
+  organizationId: number;
+  role?: UserRoleType;
+};
+
+export const createUserOrganization = async (
+  client: PoolClient,
+  options: CreateUserOrganizationOptions
+) =>
+  client.query(
+    `
+      insert into user_organization (user_id, organization_id, role)
+      values ($1, $2, $3)
+    `,
+    [
+      options.userId,
+      options.organizationId,
+      options.role ?? UserRoleType.TEXTER
+    ]
+  );
 
 export type CreateCampaignOptions = Partial<
   Pick<

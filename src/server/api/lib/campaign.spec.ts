@@ -1,10 +1,18 @@
 import { Pool, PoolClient } from "pg";
+import supertest from "supertest";
 
+import { createSession } from "../../../../__test__/lib/session";
 import {
   createCompleteCampaign,
-  createMessage
+  createMessage,
+  createOrganization,
+  createUser,
+  createUserOrganization
 } from "../../../../__test__/testbed-preparation/core";
+import { UserRoleType } from "../../../api/organization-membership";
 import { config } from "../../../config";
+import app from "../../app";
+import { OrganizationRecord } from "../types";
 import { getDeliverabilityStats } from "./campaign";
 
 describe("getDeliverabilityStats", () => {
@@ -96,5 +104,65 @@ describe("getDeliverabilityStats", () => {
     expect(stats.errorCount).toBe(2);
     expect(stats.specificErrors).toHaveLength(1);
     expect(stats.specificErrors[0].errorCode).toBeNull();
+  });
+});
+
+describe("create / edit campaign", () => {
+  let pool: Pool;
+  let client: PoolClient;
+  let organization: OrganizationRecord;
+  let agent: supertest.SuperAgentTest;
+  let cookies: Record<string, string>;
+
+  beforeAll(async () => {
+    pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
+    client = await pool.connect();
+    agent = supertest.agent(app);
+    organization = await createOrganization(client, {});
+
+    const password = "KeepItSecretKeepItSafe";
+    const user = await createUser(client, { password });
+    await createUserOrganization(client, {
+      userId: user.id,
+      organizationId: organization.id,
+      role: UserRoleType.OWNER
+    });
+    cookies = await createSession({ agent, email: user.email, password });
+  });
+
+  afterAll(async () => {
+    if (client) client.release();
+    if (pool) await pool.end();
+  });
+
+  it("creates a blank campaign", async () => {
+    const response = await agent
+      .post(`/graphql`)
+      .set(cookies)
+      .send({
+        operationName: "createBlankCampaign",
+        variables: {
+          campaign: {
+            title: "New Campaign",
+            description: "",
+            dueBy: null,
+            organizationId: organization.id,
+            contacts: [],
+            interactionSteps: {
+              scriptOptions: [""]
+            }
+          }
+        },
+        query: `
+          mutation createBlankCampaign($campaign: CampaignInput!) {
+            createCampaign(campaign: $campaign) {
+              id
+            }
+          }
+        `
+      });
+
+    expect(response.ok).toBeTruthy();
+    expect(response.body.data.createCampaign).toHaveProperty("id");
   });
 });
