@@ -18,6 +18,8 @@ jobs:
           JOBS_SAME_PROCESS: "1"
 
           TEST_DATABASE_URL: "postgres://postgres:secretpassword@localhost:5432/spoke_test"
+
+          PASSPORT_STRATEGY: "local"
       - image: circleci/postgres:13.1
         environment:
           POSTGRES_DB: spoke_test
