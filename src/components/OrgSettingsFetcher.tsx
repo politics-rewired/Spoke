@@ -15,18 +15,24 @@ interface OuterProps {
 interface InnerProps
   extends OuterProps,
     ApolloQueryResult<{
-      organization: Pick<Organization, "id" | "settings">;
+      organization: Pick<Organization, "id" | "name" | "settings">;
     }> {}
 
 export const OrgSettingsFetcher: React.FC<InnerProps> = (props) => {
-  const { setOrgSettings } = useContext(SpokeContext);
+  const { setOrgSettings, setOrg } = useContext(SpokeContext);
 
   useEffect(() => {
-    if (!setOrgSettings) return;
+    if (!setOrgSettings || !setOrg) return;
 
-    setOrgSettings(props.data.organization.settings);
-    return () => setOrgSettings(undefined);
-  }, [props.data.organization.settings]);
+    const { settings, ...org } = props.data.organization;
+
+    setOrg(org);
+    setOrgSettings(settings);
+    return () => {
+      setOrg(undefined);
+      setOrgSettings(undefined);
+    };
+  }, [props.data.organization, props.data.organization.settings]);
 
   return <>{props.children}</>;
 };
@@ -37,6 +43,7 @@ const queries: QueryMap<OuterProps> = {
       query GetOrganizationSettings($organizationId: String!) {
         organization(id: $organizationId) {
           id
+          name
           settings {
             ...AllOrganizationSettingsFragment
           }

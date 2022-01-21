@@ -1,7 +1,9 @@
 import gql from "graphql-tag";
 import PropTypes from "prop-types";
 import React from "react";
+import { compose } from "react-apollo";
 
+import { withSpokeContext } from "../../client/spoke-context";
 import { loadData } from "../hoc/with-operations";
 import AssignmentHUD from "./AssignmentHUD";
 import CampaignListLoader from "./CampaignListLoader";
@@ -56,6 +58,9 @@ export class CampaignList extends React.Component {
     const { archiveCampaign, unarchiveCampaign } = mutations;
     return (
       <div>
+        {/* <Helmet>
+          <title>{org.name} - Campaigns</title>
+        </Helmet> */}
         {inProgress && (
           <OperationDialog
             operations={operations}
@@ -254,7 +259,10 @@ const queries = {
   }
 };
 
-export default loadData({
-  queries,
-  mutations
-})(CampaignList);
+export default compose(
+  withSpokeContext,
+  loadData({
+    queries,
+    mutations
+  })
+)(CampaignList);
