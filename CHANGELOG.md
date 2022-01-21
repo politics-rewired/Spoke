@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.17.1](https://github.com/politics-rewired/spoke/compare/v4.17.0...v4.17.1) (2022-01-21)
+
+
+### Bug Fixes
+
+* fix create campaign payload ([#1047](https://github.com/politics-rewired/spoke/issues/1047)) ([5cda01d](https://github.com/politics-rewired/spoke/commit/5cda01d6cedaf290a7422e6bde3b15cc859364d6))
+
 ## [4.17.0](https://github.com/politics-rewired/spoke/compare/v4.16.1...v4.17.0) (2022-01-18)
 
 
