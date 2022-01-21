@@ -6,8 +6,10 @@ import { red600 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React from "react";
 import { compose } from "react-apollo";
+import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 
+import { withSpokeContext } from "../../client/spoke-context";
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
@@ -151,8 +153,17 @@ class AdminCampaignStats extends React.Component {
       : "No Due Date";
     const isOverdue = DateTime.local() >= DateTime.fromISO(campaign.dueBy);
 
+    const oldTitle = Helmet.peek().title;
+    // append campaign id if it's not already at end of title
+    const newTitle = oldTitle.match(/.\d$/)
+      ? oldTitle
+      : `${oldTitle} - ${campaignId}`;
+
     return (
       <div>
+        <Helmet>
+          <title>{newTitle}</title>
+        </Helmet>
         <div className={css(styles.container)}>
           {campaign.isArchived ? (
             <div className={css(styles.archivedBanner)}>
@@ -417,6 +428,7 @@ const mutations = {
 export default compose(
   withRouter,
   withAuthzContext,
+  withSpokeContext,
   loadData({
     queries,
     mutations
