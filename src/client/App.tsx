@@ -13,7 +13,7 @@ import AppRoutes from "../routes";
 import { createMuiThemev0, createMuiThemev1 } from "../styles/mui-theme";
 import baseTheme from "../styles/theme";
 import { CustomTheme } from "../styles/types";
-import SpokeContext, { SimpleOrganization } from "./spoke-context";
+import SpokeContext from "./spoke-context";
 import VersionNotifier from "./VersionNotifier";
 
 const styles = StyleSheet.create({
@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
 
 const App: React.FC = () => {
   const [customTheme, setTheme] = useState<CustomTheme>({});
-  const [org, setOrg] = useState<SimpleOrganization | undefined>(undefined);
   const [orgSettings, setOrgSettings] = useState<
     OranizationSettings | undefined
   >(undefined);
@@ -41,7 +40,7 @@ const App: React.FC = () => {
 
   return (
     <SpokeContext.Provider
-      value={{ theme: customTheme, orgSettings, setOrgSettings, org, setOrg }}
+      value={{ theme: customTheme, orgSettings, setOrgSettings }}
     >
       <MuiThemeProvider theme={muiTheme}>
         <MuiThemeProviderv0 muiTheme={muiThemev0}>

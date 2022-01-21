@@ -1,6 +1,5 @@
 import React from "react";
 
-import { Organization } from "../api/organization";
 import { OranizationSettings } from "../api/organization-settings";
 import { CustomTheme } from "../styles/types";
 
@@ -11,12 +10,8 @@ export interface InstanceSettings {
   RENDERED_CLASS_NAMES?: string[];
 }
 
-export type SimpleOrganization = Pick<Organization, "id" | "name">;
-
 export interface SpokeContextType {
   settings?: InstanceSettings;
-  org?: SimpleOrganization;
-  setOrg?: (org?: SimpleOrganization) => void;
   orgSettings?: OranizationSettings;
   setOrgSettings?: (settings?: OranizationSettings) => void;
   theme?: CustomTheme;
