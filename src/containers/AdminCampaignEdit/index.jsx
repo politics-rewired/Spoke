@@ -19,6 +19,7 @@ import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 import { compose } from "react-apollo";
+import { Helmet } from "react-helmet";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../lib/attributes";
@@ -744,8 +745,17 @@ class AdminCampaignEdit extends React.Component {
       <FlatButton key="ok" label="Ok" primary onClick={this.handleCloseError} />
     ];
 
+    const oldTitle = Helmet.peek().title;
+    // append campaign id if it's not already at end of title
+    const newTitle = oldTitle.match(/.\d$/)
+      ? oldTitle
+      : `${oldTitle} - ${campaignId}`;
+
     return (
       <div>
+        <Helmet>
+          <title>{newTitle}</title>
+        </Helmet>
         {this.renderHeader()}
         {sections.map((section, sectionIndex) => {
           if (section.isStandalone) {

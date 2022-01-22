@@ -4,6 +4,7 @@ import IconButton from "material-ui/IconButton";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
 import React from "react";
+import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { compose } from "recompose";
 
@@ -65,8 +66,16 @@ const TopNav: React.FC<InnerProps> = (props) => {
     }
   };
 
+  const orgTitle =
+    props.data && props.data.organization
+      ? `${props.data.organization.name} - ${title}`
+      : "";
+
   return (
     <div className={css(styles.container)} style={overrides.container}>
+      <Helmet>
+        <title>{orgTitle}</title>
+      </Helmet>
       <div className={css(styles.flexColumn)}>
         <div className={css(styles.inline)}>
           {backToURL && (
@@ -80,12 +89,7 @@ const TopNav: React.FC<InnerProps> = (props) => {
             </Link>
           )}
         </div>
-        <div className={css(styles.inline, styles.header)}>
-          {props.data && props.data.organization
-            ? `${props.data.organization.name} - `
-            : ""}
-          {title}
-        </div>
+        <div className={css(styles.inline, styles.header)}>{orgTitle}</div>
       </div>
       <div className={css(styles.userMenu)}>
         <UserMenu orgId={orgId} />
