@@ -9,7 +9,6 @@ import { compose } from "react-apollo";
 import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 
-import { withSpokeContext } from "../../client/spoke-context";
 import { withAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
@@ -428,7 +427,6 @@ const mutations = {
 export default compose(
   withRouter,
   withAuthzContext,
-  withSpokeContext,
   loadData({
     queries,
     mutations
