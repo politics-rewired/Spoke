@@ -1,4 +1,4 @@
-import { Client, PoolClient } from "pg";
+import { Client, Pool, PoolClient } from "pg";
 
 /**
  * Convert an Error instance to a plain object, including all its non-iterable properties.
@@ -14,6 +14,19 @@ export const errToObj = (err: any): any =>
 export type WithClientFn<T, C extends PoolClient | Client> = (
   client: C
 ) => Promise<T>;
+
+export const withClient = async <T extends unknown>(
+  pool: Pool,
+  callback: WithClientFn<T, PoolClient>
+) => {
+  const client = await pool.connect();
+  try {
+    const result = await callback(client);
+    return result;
+  } finally {
+    client.release();
+  }
+};
 
 export const withTransaction = async <
   T extends unknown,
