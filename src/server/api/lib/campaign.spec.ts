@@ -20,12 +20,7 @@ describe("getDeliverabilityStats", () => {
   let pool: Pool;
 
   beforeAll(async () => {
-    pool = new Pool({
-      connectionString: config.TEST_DATABASE_URL,
-      connectionTimeoutMillis: 30 * 1000,
-      idleTimeoutMillis: 30 * 1000,
-      allowExitOnIdle: false
-    });
+    pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
   });
 
   afterAll(async () => {

@@ -23,12 +23,7 @@ describe("handle-delivery-report", () => {
   let assignmentId: number;
 
   beforeAll(async () => {
-    pool = new Pool({
-      connectionString: config.TEST_DATABASE_URL,
-      connectionTimeoutMillis: 30 * 1000,
-      idleTimeoutMillis: 30 * 1000,
-      allowExitOnIdle: false
-    });
+    pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
     workerOptions = { pgPool: pool };
     await withClient(pool, async (client) => {
       // Set up campaign contact
