@@ -100,8 +100,8 @@ const rootSchema = `
 
   input CampaignIdContactId {
     campaignId: String!
-    campaignContactId: Int!
-    messageIds: [Int]!
+    campaignContactId: String!
+    messageIds: [String]!
   }
 
   input UpdateLinkDomain {
