@@ -27,7 +27,7 @@ const SETTINGS_PERMISSIONS: {
   trollbotWebhookUrl: UserRoleType.OWNER,
   showContactLastName: UserRoleType.TEXTER,
   showContactCell: UserRoleType.TEXTER,
-  confirmationClickForScriptLinks: UserRoleType.OWNER
+  confirmationClickForScriptLinks: UserRoleType.TEXTER
 };
 
 const SETTINGS_NAMES: { [key: string]: string } = {

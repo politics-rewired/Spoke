@@ -58,3 +58,12 @@ export const AllOrganizationSettingsFragment = gql`
     confirmationClickForScriptLinks
   }
 `;
+
+export const TexterOrganizationSettingsFragment = gql`
+  fragment TexterOrganizationSettingsFragment on OrganizationSettings {
+    id
+    showContactLastName
+    showContactCell
+    confirmationClickForScriptLinks
+  }
+`;
