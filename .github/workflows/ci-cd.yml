@@ -123,6 +123,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          build-args: |
+            SPOKE_VERSION=${{ steps.image-tags.outputs.version }}
           tags: |
             us-east4-docker.pkg.dev/spoke-rewired/spoke/core:latest
             us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.version }}
