@@ -13,8 +13,7 @@ const inlineStyles = {
   count: {
     fontSize: "60px",
     paddingTop: "10px",
-    textAlign: "center",
-    fontWeight: "bold"
+    textAlign: "center"
   },
   title: {
     textTransform: "uppercase",
