@@ -1,6 +1,6 @@
 import React from "react";
 
-import { OranizationSettings } from "../api/organization-settings";
+import { OrganizationSettings } from "../api/organization-settings";
 import { CustomTheme } from "../styles/types";
 
 export interface InstanceSettings {
@@ -12,8 +12,8 @@ export interface InstanceSettings {
 
 export interface SpokeContextType {
   settings?: InstanceSettings;
-  orgSettings?: OranizationSettings;
-  setOrgSettings?: (settings?: OranizationSettings) => void;
+  orgSettings?: OrganizationSettings;
+  setOrgSettings?: (settings?: OrganizationSettings) => void;
   theme?: CustomTheme;
 }
 

@@ -101,7 +101,7 @@ const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
   }, {});
 
 export const resolvers = {
-  OranizationSettings: {
+  OrganizationSettings: {
     id: (organization: { id: number }) => organization.id,
     ...settingResolvers([
       "defaulTexterApprovalStatus",
