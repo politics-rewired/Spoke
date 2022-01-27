@@ -24,7 +24,7 @@ const TOP_LEVEL_UPLOAD_FIELDS = [
 const TEXTER_SCRIPT_FIELDS = ["texterFirstName", "texterLastName"];
 
 // Fields that should be capitalized when a script is applied
-const CAPITALIZE_FIELDS = [
+const TITLE_CASE_FIELDS = [
   "firstName",
   "lastName",
   "texterFirstName",
@@ -38,10 +38,12 @@ const LOWERCASE_FIRST_NAMES = ["friend", "there"];
 export const allScriptFields = (customFields: string[]) =>
   TOP_LEVEL_UPLOAD_FIELDS.concat(TEXTER_SCRIPT_FIELDS).concat(customFields);
 
-const capitalize = (str: string) => {
-  const strTrimmed = str.trim();
-  return strTrimmed.charAt(0).toUpperCase() + strTrimmed.slice(1).toLowerCase();
-};
+export const titleCase = (str: string) =>
+  str
+    .trim()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 
 const getScriptFieldValue = (
   contact: CampaignContact,
@@ -60,12 +62,12 @@ const getScriptFieldValue = (
     result = customFieldNames[fieldName];
   }
 
-  const isCapitalizedField = CAPITALIZE_FIELDS.includes(fieldName);
+  const isTitleCaseField = TITLE_CASE_FIELDS.includes(fieldName);
   const isSpecialFirstName =
     fieldName === "firstName" &&
     LOWERCASE_FIRST_NAMES.includes(result.toLowerCase());
-  if (isCapitalizedField && !isSpecialFirstName) {
-    result = capitalize(result);
+  if (isTitleCaseField && !isSpecialFirstName) {
+    result = titleCase(result);
   }
 
   return result;

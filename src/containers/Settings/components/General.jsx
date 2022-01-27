@@ -22,6 +22,7 @@ import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
+import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
 import Review10DlcInfo from "./Review10DlcInfo";
 
@@ -407,6 +408,11 @@ class Settings extends React.Component {
             />
           </CardText>
         </Card>
+
+        <CampaignBuilderSettingsCard
+          organizationId={organization.id}
+          style={{ marginBottom: 20 }}
+        />
 
         {window.ENABLE_TROLLBOT && (
           <Card className={css(styles.sectionCard)}>

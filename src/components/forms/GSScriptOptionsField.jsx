@@ -12,6 +12,7 @@ import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { withSpokeContext } from "../../client/spoke-context";
 import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
@@ -72,7 +73,9 @@ class GSScriptOptionsField extends GSFormField {
   // check draftScript for links, then save
   wrapSaveScript = () => {
     const { scriptDraft } = this.state;
-    const warningContext = getWarningContextForScript(scriptDraft);
+    const warningContext =
+      this.props.orgSettings.confirmationClickForScriptLinks &&
+      getWarningContextForScript(scriptDraft);
 
     if (warningContext) {
       this.setState({ scriptWarningOpen: true });
@@ -96,7 +99,8 @@ class GSScriptOptionsField extends GSFormField {
       name,
       customFields,
       value: scriptVersions,
-      integrationSourced
+      integrationSourced,
+      orgSettings
     } = this.props;
     const { scriptTarget, scriptDraft, scriptWarningOpen } = this.state;
     const scriptFields = allScriptFields(customFields);
@@ -110,7 +114,9 @@ class GSScriptOptionsField extends GSFormField {
     // Script target could be "" which is falsey, so make explicit check against undefined
     const isDialogOpen = scriptTarget !== undefined;
 
-    const warningContext = getWarningContextForScript(scriptDraft);
+    const warningContext =
+      orgSettings.confirmationClickForScriptLinks &&
+      getWarningContextForScript(scriptDraft);
 
     const actions = [
       <FlatButton
@@ -251,8 +257,9 @@ GSScriptOptionsField.propTypes = {
   label: PropTypes.string,
   multiLine: PropTypes.bool,
   fullWidth: PropTypes.bool,
+  orgSettings: PropTypes.object,
   onChange: PropTypes.func,
   onBlur: PropTypes.func
 };
 
-export default GSScriptOptionsField;
+export default withSpokeContext(GSScriptOptionsField);

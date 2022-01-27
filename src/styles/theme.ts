@@ -71,7 +71,7 @@ const text: TextStyles = {
   header: {
     color: colors.darkGray,
     fontSize: "1.5em",
-    fontWeight: 600,
+    fontWeight: 400,
     fontFamily: defaultFont
   },
   secondaryHeader: {

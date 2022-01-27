@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.17.1](https://github.com/politics-rewired/spoke/compare/v4.17.0...v4.17.1) (2022-01-21)
+
+
+### Bug Fixes
+
+* fix create campaign payload ([#1047](https://github.com/politics-rewired/spoke/issues/1047)) ([5cda01d](https://github.com/politics-rewired/spoke/commit/5cda01d6cedaf290a7422e6bde3b15cc859364d6))
+
+## [4.17.0](https://github.com/politics-rewired/spoke/compare/v4.16.1...v4.17.0) (2022-01-18)
+
+
+### Features
+
+* support disabling script link confirmation ([#1043](https://github.com/politics-rewired/spoke/issues/1043)) ([fc111dc](https://github.com/politics-rewired/spoke/commit/fc111dca1528ebe9a9a8fe2724199dc22d02cb6b))
+
+
+### Bug Fixes
+
+* clarify that contact filtering is optional ([#1045](https://github.com/politics-rewired/spoke/issues/1045)) ([cb77b51](https://github.com/politics-rewired/spoke/commit/cb77b518356cb3744d3401db396593af49318bde))
+* leave autoassign disabled for copied campaigns ([#1040](https://github.com/politics-rewired/spoke/issues/1040)) ([bb6d14b](https://github.com/politics-rewired/spoke/commit/bb6d14b1b711825e91429a5d29400550f7b1aba0))
+* use title case for name fields in scripts ([#1042](https://github.com/politics-rewired/spoke/issues/1042)) ([0b13999](https://github.com/politics-rewired/spoke/commit/0b139994335a986248fb019b7a14a364a8832cc3)), closes [#1038](https://github.com/politics-rewired/spoke/issues/1038)
+
 ### [4.16.1](https://github.com/politics-rewired/spoke/compare/v4.16.0...v4.16.1) (2022-01-06)
 
 

@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route } from "react-router-dom";
 import request from "superagent";
 import { QueryParamProvider } from "use-query-params";
 
+import { OranizationSettings } from "../api/organization-settings";
 import ApolloClientSingleton from "../network/apollo-client-singleton";
 import AppRoutes from "../routes";
 import { createMuiThemev0, createMuiThemev1 } from "../styles/mui-theme";
@@ -24,6 +25,9 @@ const styles = StyleSheet.create({
 
 const App: React.FC = () => {
   const [customTheme, setTheme] = useState<CustomTheme>({});
+  const [orgSettings, setOrgSettings] = useState<
+    OranizationSettings | undefined
+  >(undefined);
 
   useEffect(() => {
     request.get("/settings/theme").then(({ body }) => {
@@ -35,7 +39,9 @@ const App: React.FC = () => {
   const muiThemev0 = createMuiThemev0(customTheme);
 
   return (
-    <SpokeContext.Provider value={{ theme: customTheme }}>
+    <SpokeContext.Provider
+      value={{ theme: customTheme, orgSettings, setOrgSettings }}
+    >
       <MuiThemeProvider theme={muiTheme}>
         <MuiThemeProviderv0 muiTheme={muiThemev0}>
           <ApolloProvider client={ApolloClientSingleton}>

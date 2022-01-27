@@ -14,8 +14,19 @@ export interface InteractionStep {
   createdAt: string;
 }
 
-export interface InteractionStepWithChildren extends InteractionStep {
-  interactionSteps: InteractionStepWithChildren[];
+export interface InteractionStepInput {
+  id: string | null;
+  questionText: string | null;
+  scriptOptions: string[];
+  answerOption: string | null;
+  answerActions: string | null;
+  parentInteractionId: string | null;
+  isDeleted: boolean;
+  createdAt: string;
+}
+
+export interface InteractionStepWithChildren extends InteractionStepInput {
+  interactionSteps: InteractionStepWithChildren[] | null;
 }
 
 export const schema = `
@@ -30,5 +41,17 @@ export const schema = `
     answerActions: String
     questionResponse(campaignContactId: String): QuestionResponse
     createdAt: Date!
+  }
+
+  input InteractionStepInput {
+    id: String
+    questionText: String
+    scriptOptions: [String]!
+    answerOption: String
+    answerActions: String
+    parentInteractionId: String
+    isDeleted: Boolean
+    createdAt: Date
+    interactionSteps: [InteractionStepInput]
   }
 `;
