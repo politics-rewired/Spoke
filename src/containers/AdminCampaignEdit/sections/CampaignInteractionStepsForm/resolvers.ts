@@ -143,24 +143,33 @@ export interface StageUpdateInteractionStepVars
   iStepId: string;
 }
 
+const EditableIStepFragment = gql`
+  fragment EditableIStep on InteractionStep {
+    questionText
+    scriptOptions
+    answerOption
+    isModified @client
+  }
+`;
+
 export const stageUpdateInteractionStep: Resolver = (
   _root,
   { iStepId, ...payload }: StageUpdateInteractionStepVars,
   { client, getCacheKey }: LocalResolverContext
 ) => {
   const id = getCacheKey({ __typename: "InteractionStep", id: iStepId });
-  const fragment = gql`
-    fragment editableIStep on InteractionStep {
-      questionText
-      scriptOptions
-      answerOption
-    }
-  `;
-  const iStep = client.readFragment({ fragment, id });
+  const iStep = client.readFragment({ fragment: EditableIStepFragment, id });
   const data = { ...iStep, ...payload, isModified: true };
-  client.writeFragment({ id, fragment, data });
+  client.writeFragment({ id, fragment: EditableIStepFragment, data });
   return null;
 };
+
+const ModifiedStepFragment = gql`
+  fragment ModifiableStep on InteractionStep {
+    id
+    isModified
+  }
+`;
 
 export const isModified: Resolver = (
   { id: iStepId },
@@ -168,18 +177,11 @@ export const isModified: Resolver = (
   { client, getCacheKey }: LocalResolverContext
 ) => {
   const id = getCacheKey({ __typename: "InteractionStep", id: iStepId });
-  const fragment = gql`
-    fragment modifiableStep on InteractionStep {
-      isModified
-    }
-  `;
-  try {
-    const iStep = client.readFragment({ fragment, id });
-    return iStep?.isModified ?? false;
-  } catch {
-    // readFragment throws an error if `isModified` cannot be found (e.g. the starting condition)
-    return false;
-  }
+  const iStep = client.readFragment<{ isModified: boolean }>({
+    fragment: ModifiedStepFragment,
+    id
+  });
+  return iStep?.isModified ?? false;
 };
 
 const resolvers: Resolvers = {
