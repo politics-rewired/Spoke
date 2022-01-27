@@ -150,7 +150,7 @@ describe("create / edit campaign", () => {
             title: "New Campaign",
             description: "",
             dueBy: null,
-            organizationId: organization.id,
+            organizationId: `${organization.id}`,
             contacts: [],
             interactionSteps: {
               scriptOptions: [""]
