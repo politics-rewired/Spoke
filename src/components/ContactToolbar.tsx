@@ -1,8 +1,10 @@
 import { grey100 } from "material-ui/styles/colors";
 import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
-import PropTypes from "prop-types";
 import React from "react";
 
+import { Campaign } from "../api/campaign";
+import { CampaignContact } from "../api/campaign-contact";
+import { OranizationSettings } from "../api/organization-settings";
 import { DateTime } from "../lib/datetime";
 
 const inlineStyles = {
@@ -17,7 +19,17 @@ const inlineStyles = {
   }
 };
 
-const ContactToolbar = function ContactToolbar(props) {
+interface ContactToolbarProps {
+  campaignContact: CampaignContact;
+  contactSettings: Pick<
+    OranizationSettings,
+    "showContactLastName" | "showContactCell"
+  >;
+  rightToolbarIcon: React.ReactNode;
+  campaign: Campaign;
+}
+
+const ContactToolbar: React.FC<ContactToolbarProps> = (props) => {
   const {
     campaign,
     campaignContact,
@@ -25,7 +37,7 @@ const ContactToolbar = function ContactToolbar(props) {
     rightToolbarIcon
   } = props;
   const {
-    location: { city, state },
+    location: contactLocation,
     timezone: contactTimezone,
     firstName,
     lastName
@@ -40,7 +52,7 @@ const ContactToolbar = function ContactToolbar(props) {
     .setZone(timezone)
     .toLocaleString(DateTime.TIME_SIMPLE);
 
-  const location = [city, state]
+  const location = [contactLocation?.city, contactLocation?.state]
     .filter((item) => !!item)
     .join(", ")
     .trim();
@@ -68,12 +80,6 @@ const ContactToolbar = function ContactToolbar(props) {
       </ToolbarGroup>
     </Toolbar>
   );
-};
-
-ContactToolbar.propTypes = {
-  campaignContact: PropTypes.object, // contacts for current assignment
-  rightToolbarIcon: PropTypes.element,
-  campaign: PropTypes.object
 };
 
 export default ContactToolbar;

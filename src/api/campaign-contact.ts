@@ -26,7 +26,7 @@ export interface CampaignContact {
   customFields: any;
   messages: Message[];
   timezone: string;
-  location: Location;
+  location: Location | null;
   optOut: OptOut;
   campaign: Campaign;
   questionResponseValues: AnswerOption[];
