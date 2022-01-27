@@ -1,4 +1,7 @@
-import { RequestAutoApproveType } from "../../api/organization-membership";
+import {
+  RequestAutoApproveType,
+  UserRoleType
+} from "../../api/organization-membership";
 import { config } from "../../config";
 import { stringIsAValidUrl } from "../../lib/utils";
 import { r } from "../models";
@@ -15,14 +18,16 @@ interface IOrganizationSettings {
   confirmationClickForScriptLinks: boolean;
 }
 
-const SETTINGS_PERMISSIONS: { [key in keyof IOrganizationSettings]: string } = {
-  defaulTexterApprovalStatus: "OWNER",
-  optOutMessage: "OWNER",
-  numbersApiKey: "OWNER",
-  trollbotWebhookUrl: "OWNER",
-  showContactLastName: "TEXTER",
-  showContactCell: "TEXTER",
-  confirmationClickForScriptLinks: "OWNER"
+const SETTINGS_PERMISSIONS: {
+  [key in keyof IOrganizationSettings]: UserRoleType;
+} = {
+  defaulTexterApprovalStatus: UserRoleType.OWNER,
+  optOutMessage: UserRoleType.OWNER,
+  numbersApiKey: UserRoleType.OWNER,
+  trollbotWebhookUrl: UserRoleType.OWNER,
+  showContactLastName: UserRoleType.TEXTER,
+  showContactCell: UserRoleType.TEXTER,
+  confirmationClickForScriptLinks: UserRoleType.TEXTER
 };
 
 const SETTINGS_NAMES: { [key: string]: string } = {
@@ -101,7 +106,7 @@ const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
   }, {});
 
 export const resolvers = {
-  OranizationSettings: {
+  OrganizationSettings: {
     id: (organization: { id: number }) => organization.id,
     ...settingResolvers([
       "defaulTexterApprovalStatus",
