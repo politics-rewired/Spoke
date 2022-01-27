@@ -1,4 +1,13 @@
+import { PoolClient } from "pg";
 import { SuperAgentTest } from "supertest";
+
+import { UserRoleType } from "../../src/api/organization-membership";
+import {
+  createOrganization,
+  CreateOrganizationOptions,
+  createUser,
+  createUserOrganization
+} from "../testbed-preparation/core";
 
 export interface CreateSessionOptions {
   agent: SuperAgentTest;
@@ -26,4 +35,29 @@ export const createSession = async (options: CreateSessionOptions) => {
       return cookies;
     });
   return sessionCookies;
+};
+
+export interface CreateOrgAndSessionOptions {
+  agent: SuperAgentTest;
+  role: UserRoleType;
+  orgOptions?: CreateOrganizationOptions;
+}
+
+export const createOrgAndSession = async (
+  client: PoolClient,
+  options: CreateOrgAndSessionOptions
+) => {
+  const { agent, role, orgOptions = {} } = options;
+  const organization = await createOrganization(client, orgOptions);
+
+  const password = "KeepItSecretKeepItSafe";
+  const user = await createUser(client, { password });
+  await createUserOrganization(client, {
+    userId: user.id,
+    organizationId: organization.id,
+    role
+  });
+  const cookies = await createSession({ agent, email: user.email, password });
+
+  return { organization, user, cookies };
 };
