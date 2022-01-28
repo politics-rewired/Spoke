@@ -47,9 +47,9 @@ export const SelectExcludeCampaigns: React.FC<SelectExcludeCampaignsProps> = (
     <div>
       <p>
         You can <span style={{ fontWeight: "bold" }}>optionally</span> exclude
-        contacts from this upload who are already uploaded to an existing Spoke
-        campaigns (regardless of whether they have been texted yet in that
-        campaign).
+        contacts from this upload who are already uploaded to existing Spoke
+        campaigns (regardless of whether they have been texted yet in those
+        campaigns).
       </p>
       <Select
         name="Campaigns"
