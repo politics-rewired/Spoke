@@ -16,6 +16,7 @@ import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import DeliverabilityStats from "./DeliverabilityStats";
+import { GET_CAMPAIGN, GET_ORGANIZATION_DATA } from "./queries";
 import TexterStats from "./TexterStats";
 import TopLineStats from "./TopLineStats";
 import VanExportModal from "./VanExportModal";
@@ -152,11 +153,7 @@ class AdminCampaignStats extends React.Component {
       : "No Due Date";
     const isOverdue = DateTime.local() >= DateTime.fromISO(campaign.dueBy);
 
-    const oldTitle = Helmet.peek().title;
-    // append campaign id if it's not already at end of title
-    const newTitle = oldTitle.match(/.\d$/)
-      ? oldTitle
-      : `${oldTitle} - ${campaignId}`;
+    const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${campaign.title}`;
 
     return (
       <div>
@@ -351,27 +348,19 @@ AdminCampaignStats.propTypes = {
 
 const queries = {
   data: {
-    query: gql`
-      query getCampaign($campaignId: String!) {
-        campaign(id: $campaignId) {
-          id
-          title
-          dueBy
-          isArchived
-          useDynamicAssignment
-          pendingJobs {
-            id
-            jobType
-            assigned
-            status
-          }
-          previewUrl
-        }
-      }
-    `,
+    query: GET_CAMPAIGN,
     options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
+      }
+    })
+  },
+
+  organizationData: {
+    query: GET_ORGANIZATION_DATA,
+    options: (ownProps) => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
       }
     })
   }

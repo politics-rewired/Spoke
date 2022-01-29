@@ -745,11 +745,7 @@ class AdminCampaignEdit extends React.Component {
       <FlatButton key="ok" label="Ok" primary onClick={this.handleCloseError} />
     ];
 
-    const oldTitle = Helmet.peek().title;
-    // append campaign id if it's not already at end of title
-    const newTitle = oldTitle.match(/.\d$/)
-      ? oldTitle
-      : `${oldTitle} - ${campaignId}`;
+    const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${this.props.campaignData.campaign.title}`;
 
     return (
       <div>

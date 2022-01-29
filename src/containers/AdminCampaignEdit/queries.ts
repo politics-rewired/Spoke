@@ -4,6 +4,7 @@ export const GET_ORGANIZATION_DATA = gql`
   query getOrganizationData($organizationId: String!) {
     organization(id: $organizationId) {
       id
+      name
       uuid
       teams {
         id

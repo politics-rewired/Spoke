@@ -66,10 +66,9 @@ const TopNav: React.FC<InnerProps> = (props) => {
     }
   };
 
-  const orgTitle =
-    props.data && props.data.organization
-      ? `${props.data.organization.name} - ${title}`
-      : "";
+  const orgTitle = props.data?.organization
+    ? `${props.data.organization.name} - ${title}`
+    : "";
 
   return (
     <div className={css(styles.container)} style={overrides.container}>
