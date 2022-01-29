@@ -1,2 +1,4 @@
 server: yarn dev:server
 webpack: yarn dev:client
+codegen-schema: yarn dev:codegen:schema
+codegen-ts: yarn dev:codegen:ts

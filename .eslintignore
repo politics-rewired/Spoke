@@ -8,3 +8,4 @@ deploy
 docs
 seeds
 dev-tools
+libs/spoke-codegen/generated.ts

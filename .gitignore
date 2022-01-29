@@ -3,6 +3,10 @@
 *#
 .env.*
 
+### Codegen
+libs/spoke-codegen/schema.graphql
+libs/spoke-codegen/src/generated.ts
+
 ### Editor ###
 .idea/
 *.vscode

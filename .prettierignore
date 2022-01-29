@@ -8,3 +8,4 @@ deploy
 docs
 seeds
 CHANGELOG.md
+libs/spoke-codegen/generated.ts
