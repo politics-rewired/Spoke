@@ -2,7 +2,10 @@ import { ApolloQueryResult, gql } from "@apollo/client";
 import React, { useContext, useEffect } from "react";
 
 import { Organization } from "../api/organization";
-import { AllOrganizationSettingsFragment } from "../api/organization-settings";
+import {
+  OrganizationSettings,
+  TexterOrganizationSettingsFragment
+} from "../api/organization-settings";
 import SpokeContext from "../client/spoke-context";
 import { loadData } from "../containers/hoc/with-operations";
 import { QueryMap } from "../network/types";
@@ -14,7 +17,15 @@ interface OuterProps {
 interface InnerProps
   extends OuterProps,
     ApolloQueryResult<{
-      organization: Pick<Organization, "id" | "settings">;
+      organization: Pick<Organization, "id" | "settings"> & {
+        settings: Pick<
+          OrganizationSettings,
+          | "id"
+          | "showContactCell"
+          | "showContactLastName"
+          | "confirmationClickForScriptLinks"
+        >;
+      };
     }> {}
 
 export const OrgSettingsFetcher: React.FC<InnerProps> = (props) => {
@@ -37,11 +48,11 @@ const queries: QueryMap<OuterProps> = {
         organization(id: $organizationId) {
           id
           settings {
-            ...AllOrganizationSettingsFragment
+            ...TexterOrganizationSettingsFragment
           }
         }
       }
-      ${AllOrganizationSettingsFragment}
+      ${TexterOrganizationSettingsFragment}
     `,
     skip: (props) => !props.organizationId,
     options: ({ organizationId }) => ({

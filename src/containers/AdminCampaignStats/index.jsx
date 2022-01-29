@@ -30,7 +30,6 @@ const styles = StyleSheet.create({
   archivedBanner: {
     backgroundColor: "#FFFBE6",
     fontSize: "16px",
-    fontWeight: "bold",
     width: "100%",
     padding: "15px",
     textAlign: "center",

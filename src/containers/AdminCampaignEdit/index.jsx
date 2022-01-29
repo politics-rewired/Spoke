@@ -605,8 +605,7 @@ class AdminCampaignEdit extends React.Component {
       <div
         {...dataTest("campaignIsStarted")}
         style={{
-          color: isOverdue ? red600 : theme.colors.green,
-          fontWeight: 800
+          color: isOverdue ? red600 : theme.colors.green
         }}
       >
         {isOverdue
@@ -627,12 +626,7 @@ class AdminCampaignEdit extends React.Component {
       >
         {title && <h1> {title} </h1>}
         {this.state.startingCampaign ? (
-          <div
-            style={{
-              color: theme.colors.gray,
-              fontWeight: 800
-            }}
-          >
+          <div style={{ color: theme.colors.gray }}>
             <CircularProgress
               size={0.5}
               style={{
