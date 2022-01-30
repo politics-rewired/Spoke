@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 
-import { OrganizationSettings } from "../api/organization-settings";
-import { CustomTheme } from "../styles/types";
+import {
+  TexterOrganizationSettingsFragmentFragment,
+  useGetOrganizationSettingsQuery
+} from "../../libs/spoke-codegen/src";
 
 export interface InstanceSettings {
   BASE_URL: string;
@@ -12,21 +14,47 @@ export interface InstanceSettings {
 
 export interface SpokeContextType {
   settings?: InstanceSettings;
-  orgSettings?: OrganizationSettings;
-  setOrgSettings?: (settings?: OrganizationSettings) => void;
-  theme?: CustomTheme;
+  orgSettings?: TexterOrganizationSettingsFragmentFragment;
+  setOrganizationId: (organizationId?: string) => void;
 }
 
-export const SpokeContext = React.createContext<SpokeContextType>({});
+export const SpokeContext = React.createContext<SpokeContextType>({
+  setOrganizationId: () => {}
+});
 
-export function withSpokeContext<P>(Component: React.Component<P>) {
-  return function SpokeContextComponent(props: P) {
-    return (
-      <SpokeContext.Consumer>
-        {(contexts) => <Component {...props} {...contexts} />}
-      </SpokeContext.Consumer>
-    );
+export const SpokeContextProvider: React.FC = (props) => {
+  const [organizationId, setOrganizationId] = useState<string | undefined>(
+    undefined
+  );
+
+  const { data } = useGetOrganizationSettingsQuery({
+    variables: { organizationId: organizationId! },
+    skip: organizationId === undefined
+  });
+
+  const value = {
+    orgSettings: data?.organization?.settings,
+    setOrganizationId
   };
-}
+
+  return (
+    <SpokeContext.Provider value={value}>
+      {props.children}
+    </SpokeContext.Provider>
+  );
+};
+
+export const useSpokeContext = () => useContext(SpokeContext);
+
+export const withSpokeContext = <P extends unknown>(
+  Component: React.ComponentType<P & SpokeContextType>
+) => {
+  const ComponentWithSpokeContext: React.FC<P> = (props) => {
+    const context = useSpokeContext();
+    return <Component {...props} {...context} />;
+  };
+
+  return ComponentWithSpokeContext;
+};
 
 export default SpokeContext;

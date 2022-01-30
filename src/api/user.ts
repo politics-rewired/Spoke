@@ -37,7 +37,7 @@ export const schema = `
     memberships(organizationId: String, after: Cursor, first: Int): OrganizationMembershipPage
     organizations(role: String): [Organization]
     todos(organizationId: String): [Assignment]
-    roles(organizationId: String!): [String]
+    roles(organizationId: String!): [String!]!
     teams(organizationId: String!): [Team]!
     currentRequest(organizationId: String!): AssignmentRequest
     assignedCell: Phone
