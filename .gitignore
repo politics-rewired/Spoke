@@ -4,8 +4,9 @@
 .env.*
 
 ### Codegen
-src/schema.graphql
-libs/spoke-codegen/src/generated.ts
+# TODO: generate these during build
+# src/schema.graphql
+# libs/spoke-codegen/src/generated.ts
 
 ### Editor ###
 .idea/
