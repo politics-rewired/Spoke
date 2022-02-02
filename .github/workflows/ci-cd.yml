@@ -126,7 +126,8 @@ jobs:
           build-args: |
             SPOKE_VERSION=${{ steps.image-tags.outputs.version }}
           tags: |
-            us-east4-docker.pkg.dev/spoke-rewired/spoke/core:apollo-client-v3
+            us-east4-docker.pkg.dev/spoke-rewired/spoke/core:latest
+            us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.version }}
             us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
