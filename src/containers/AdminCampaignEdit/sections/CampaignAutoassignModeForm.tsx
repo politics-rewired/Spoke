@@ -1,5 +1,4 @@
-import { ApolloQueryResult } from "apollo-client";
-import gql from "graphql-tag";
+import { ApolloQueryResult, gql } from "@apollo/client";
 import { TextField } from "material-ui";
 import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";

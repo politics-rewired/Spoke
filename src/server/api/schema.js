@@ -1,6 +1,7 @@
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
+import { GraphQLUpload } from "graphql-upload";
 import { GraphQLError } from "graphql/error";
 import _ from "lodash";
 import groupBy from "lodash/groupBy";
@@ -3504,6 +3505,7 @@ export const resolvers = {
   ...{ Date: GraphQLDate },
   ...{ JSON: GraphQLJSON },
   ...{ Phone: GraphQLPhone },
+  ...{ Upload: GraphQLUpload },
   ...questionResolvers,
   ...conversationsResolver,
   ...rootMutations

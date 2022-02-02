@@ -11,7 +11,7 @@ import {
 } from "../../../../__test__/testbed-preparation/core";
 import { UserRoleType } from "../../../api/organization-membership";
 import { config } from "../../../config";
-import app from "../../app";
+import { createApp } from "../../app";
 import { withClient } from "../../utils";
 import { OrganizationRecord } from "../types";
 import { getDeliverabilityStats } from "./campaign";
@@ -119,6 +119,7 @@ describe("create / edit campaign", () => {
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
+    const app = await createApp();
     agent = supertest.agent(app);
     await withClient(pool, async (client) => {
       organization = await createOrganization(client, {});
@@ -149,7 +150,7 @@ describe("create / edit campaign", () => {
             title: "New Campaign",
             description: "",
             dueBy: null,
-            organizationId: organization.id,
+            organizationId: `${organization.id}`,
             contacts: [],
             interactionSteps: {
               scriptOptions: [""]

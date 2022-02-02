@@ -102,7 +102,7 @@ class IncomingMessageActions extends Component {
   render() {
     let texters = this.props.people || [];
     texters = texters.map((texter) => ({
-      value: parseInt(texter.id, 10),
+      value: texter.id,
       label: formatTexter(texter)
     }));
 

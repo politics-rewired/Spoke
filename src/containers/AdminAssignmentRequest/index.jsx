@@ -1,9 +1,9 @@
+import { gql } from "@apollo/client";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import gql from "graphql-tag";
 import isEqual from "lodash/isEqual";
 import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";

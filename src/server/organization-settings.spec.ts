@@ -4,7 +4,7 @@ import supertest from "supertest";
 import { createOrgAndSession } from "../../__test__/lib/session";
 import { UserRoleType } from "../api/organization-membership";
 import { config } from "../config";
-import app from "./app";
+import { createApp } from "./app";
 import { withClient } from "./utils";
 
 describe("get organization settings", () => {
@@ -13,6 +13,7 @@ describe("get organization settings", () => {
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
+    const app = await createApp();
     agent = supertest.agent(app);
   });
 

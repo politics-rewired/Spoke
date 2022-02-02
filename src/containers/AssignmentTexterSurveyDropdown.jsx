@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 import Divider from "material-ui/Divider";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";

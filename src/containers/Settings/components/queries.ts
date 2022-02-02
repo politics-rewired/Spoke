@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 import { Organization } from "../../../api/organization";
 import { OrganizationSettings } from "../../../api/organization-settings";

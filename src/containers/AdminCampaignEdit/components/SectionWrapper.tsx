@@ -1,6 +1,5 @@
+import { ApolloQueryResult, gql } from "@apollo/client";
 import { useTheme } from "@material-ui/core";
-import { ApolloQueryResult } from "apollo-client";
-import gql from "graphql-tag";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";

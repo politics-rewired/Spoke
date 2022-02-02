@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 export const GET_ORGANIZATION_DATA = gql`
   query getOrganizationData($organizationId: String!) {
@@ -84,17 +84,18 @@ export const EditCampaignFragment = gql`
       id
       title
     }
-    interactionSteps {
-      id
-      questionText
-      scriptOptions
-      answerOption
-      answerActions
-      parentInteractionId
-      isDeleted
-      createdAt
-    }
     editors
+    readiness {
+      basics
+      textingHours
+      integration
+      contacts
+      autoassign
+      cannedResponses
+      campaignGroups
+      interactions
+      texters
+    }
   }
 `;
 

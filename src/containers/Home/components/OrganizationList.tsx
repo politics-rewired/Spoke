@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
-import gql from "graphql-tag";
 import { History } from "history";
 import sortBy from "lodash/sortBy";
 import { List, ListItem } from "material-ui/List";
@@ -8,8 +8,8 @@ import { amber500, grey500 } from "material-ui/styles/colors";
 import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
 import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 import React from "react";
-import { compose } from "react-apollo";
 import { Redirect, withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import theme from "../../../styles/theme";
