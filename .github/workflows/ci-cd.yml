@@ -68,14 +68,14 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Run codegen
+        run: yarn codegen
+
       - name: Lint Apps
         run: yarn lint && yarn format
 
       - name: Run migrations
         run: yarn migrate:worker && yarn knex migrate:latest
-
-      - name: Run codegen
-        run: yarn codegen
 
       - name: Run Tests
         run: yarn jest --forceExit --detectOpenHandles src/**/*
