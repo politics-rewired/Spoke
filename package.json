@@ -25,7 +25,7 @@
     "release:changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "build": "run-s build:*",
     "build:clean": "rm -rf $OUTPUT_DIR",
-    "build:codegen": "codegen",
+    "build:codegen": "yarn codegen",
     "build:client": "webpack --mode production",
     "build:server": "babel -d ./build/src --source-maps --copy-files --extensions .ts,.js ./src",
     "build:tools": "babel -d ./build/tools ./dev-tools",

@@ -74,6 +74,9 @@ jobs:
       - name: Run migrations
         run: yarn migrate:worker && yarn knex migrate:latest
 
+      - name: Run codegen
+        run: yarn codegen
+
       - name: Run Tests
         run: yarn jest --forceExit --detectOpenHandles src/**/*
 
