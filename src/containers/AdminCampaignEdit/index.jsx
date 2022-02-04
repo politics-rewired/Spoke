@@ -18,6 +18,7 @@ import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
+import { Helmet } from "react-helmet";
 import { compose } from "recompose";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
@@ -738,8 +739,13 @@ class AdminCampaignEdit extends React.Component {
       <FlatButton key="ok" label="Ok" primary onClick={this.handleCloseError} />
     ];
 
+    const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${this.props.campaignData.campaign.title}`;
+
     return (
       <div>
+        <Helmet>
+          <title>{newTitle}</title>
+        </Helmet>
         {this.renderHeader()}
         {sections.map((section, sectionIndex) => {
           if (section.isStandalone) {

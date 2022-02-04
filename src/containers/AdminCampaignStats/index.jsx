@@ -5,6 +5,7 @@ import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React from "react";
+import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
@@ -15,6 +16,7 @@ import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import DeliverabilityStats from "./DeliverabilityStats";
+import { GET_CAMPAIGN, GET_ORGANIZATION_DATA } from "./queries";
 import TexterStats from "./TexterStats";
 import TopLineStats from "./TopLineStats";
 import VanExportModal from "./VanExportModal";
@@ -150,8 +152,13 @@ class AdminCampaignStats extends React.Component {
       : "No Due Date";
     const isOverdue = DateTime.local() >= DateTime.fromISO(campaign.dueBy);
 
+    const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${campaign.title}`;
+
     return (
       <div>
+        <Helmet>
+          <title>{newTitle}</title>
+        </Helmet>
         <div className={css(styles.container)}>
           {campaign.isArchived ? (
             <div className={css(styles.archivedBanner)}>
@@ -340,27 +347,19 @@ AdminCampaignStats.propTypes = {
 
 const queries = {
   data: {
-    query: gql`
-      query getCampaign($campaignId: String!) {
-        campaign(id: $campaignId) {
-          id
-          title
-          dueBy
-          isArchived
-          useDynamicAssignment
-          pendingJobs {
-            id
-            jobType
-            assigned
-            status
-          }
-          previewUrl
-        }
-      }
-    `,
+    query: GET_CAMPAIGN,
     options: (ownProps) => ({
       variables: {
         campaignId: ownProps.match.params.campaignId
+      }
+    })
+  },
+
+  organizationData: {
+    query: GET_ORGANIZATION_DATA,
+    options: (ownProps) => ({
+      variables: {
+        organizationId: ownProps.match.params.organizationId
       }
     })
   }
