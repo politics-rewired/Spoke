@@ -66,6 +66,7 @@ class SurveyColumn extends Component<Props & HocProps, State> {
           <RaisedButton
             key="open-script-preview"
             label="Open Script Preview"
+            style={{ marginRight: "10px" }}
             onClick={() => {
               window.open(`/preview/${campaign.previewUrl}`, "_blank");
             }}
