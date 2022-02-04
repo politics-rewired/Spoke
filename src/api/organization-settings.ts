@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 import { RequestAutoApproveType } from "./organization-membership";
 
@@ -12,7 +12,7 @@ export interface OrganizationSettingsInput {
   confirmationClickForScriptLinks: boolean | null;
 }
 
-export interface OranizationSettings {
+export interface OrganizationSettings {
   id: string;
   defaulTexterApprovalStatus: RequestAutoApproveType;
   optOutMessage: string | null;
@@ -34,7 +34,7 @@ export const schema = `
     confirmationClickForScriptLinks: Boolean
   }
 
-  type OranizationSettings {
+  type OrganizationSettings {
     id: ID!
     defaulTexterApprovalStatus: RequestAutoApprove!
     optOutMessage: String
@@ -47,12 +47,21 @@ export const schema = `
 `;
 
 export const AllOrganizationSettingsFragment = gql`
-  fragment AllOrganizationSettingsFragment on OranizationSettings {
+  fragment AllOrganizationSettingsFragment on OrganizationSettings {
     id
     defaulTexterApprovalStatus
     optOutMessage
     numbersApiKey
     trollbotWebhookUrl
+    showContactLastName
+    showContactCell
+    confirmationClickForScriptLinks
+  }
+`;
+
+export const TexterOrganizationSettingsFragment = gql`
+  fragment TexterOrganizationSettingsFragment on OrganizationSettings {
+    id
     showContactLastName
     showContactCell
     confirmationClickForScriptLinks

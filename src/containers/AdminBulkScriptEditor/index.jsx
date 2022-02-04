@@ -1,9 +1,9 @@
+import { gql } from "@apollo/client";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import gql from "graphql-tag";
 import pick from "lodash/pick";
 import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
@@ -18,9 +18,6 @@ import CampaignPrefixSelector from "./CampaignPrefixSelector";
 const PROTECTED_CHARACTERS = ["/"];
 
 const styles = {
-  bold: {
-    fontWeight: "bold"
-  },
   paddedPaper: {
     padding: "10px",
     marginBottom: "15px"
@@ -144,7 +141,7 @@ class AdminBulkScriptEditor extends Component {
       <div>
         <h1>Bulk Script Editor</h1>
         <Paper style={styles.paddedPaper}>
-          <p style={styles.bold}>Find and replace</p>
+          <p>Find and replace</p>
           <TextField
             hintText="Replace this text..."
             value={searchString}
@@ -178,7 +175,7 @@ class AdminBulkScriptEditor extends Component {
           </p>
         </Paper>
         <Paper style={styles.paddedPaper}>
-          <p style={styles.bold}>Filter campaigns</p>
+          <p>Filter campaigns</p>
           <Toggle
             label="Include archived campaigns"
             style={{ marginBottom: "25px" }}

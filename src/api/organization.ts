@@ -5,7 +5,7 @@ import { LinkDomain, UnhealthyLinkDomain } from "./link-domain";
 import { MessagingServicePage } from "./messaging-service";
 import { OptOut } from "./opt-out";
 import { OrganizationMembership } from "./organization-membership";
-import { OranizationSettings } from "./organization-settings";
+import { OrganizationSettings } from "./organization-settings";
 import { RelayPaginatedResponse } from "./pagination";
 import { Tag } from "./tag";
 import { Team } from "./team";
@@ -53,7 +53,7 @@ export interface Organization {
   linkDomains: LinkDomain[];
   unhealthyLinkDomains: UnhealthyLinkDomain[];
   numbersApiKey: string;
-  settings: OranizationSettings;
+  settings: OrganizationSettings;
   tagList: Tag[];
   escalationTagList: Tag[];
   teams: Team[];
@@ -109,7 +109,7 @@ export const schema = `
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
     numbersApiKey: String
-    settings: OranizationSettings!
+    settings: OrganizationSettings!
     tagList: [Tag]
     escalationTagList: [Tag]
     teams: [Team]!

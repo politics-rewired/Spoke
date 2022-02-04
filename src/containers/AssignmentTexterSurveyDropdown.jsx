@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 import Divider from "material-ui/Divider";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
@@ -8,13 +8,6 @@ import React, { Component } from "react";
 import { loadData } from "./hoc/with-operations";
 
 const styles = {
-  previousStep: {
-    fontSize: 16,
-    verticalAlign: "middle"
-  },
-  currentStep: {
-    // fontSize: 16,
-  },
   currentStepSelect: {
     fontSize: 16,
     color: "red"
@@ -23,14 +16,6 @@ const styles = {
     fontSize: 16,
     opacity: 0.8
     // fontSize: 16
-  },
-  previousStepLabel: {
-    fontSize: 16
-  },
-  currentStepLabel: {
-    fontSize: 16,
-    color: "red",
-    fontWeight: "bold"
   }
 };
 

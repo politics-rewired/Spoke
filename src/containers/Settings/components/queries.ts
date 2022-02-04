@@ -1,7 +1,7 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 import { Organization } from "../../../api/organization";
-import { OranizationSettings } from "../../../api/organization-settings";
+import { OrganizationSettings } from "../../../api/organization-settings";
 
 export interface OrganizationNameType {
   organization: Pick<Organization, "id" | "name">;
@@ -31,7 +31,7 @@ export const EDIT_ORGANIZATION_NAME = gql`
 export interface ConfirmationClickForScriptLinksType {
   organization: Pick<Organization, "id"> & {
     settings: Pick<
-      OranizationSettings,
+      OrganizationSettings,
       "id" | "confirmationClickForScriptLinks"
     >;
   };

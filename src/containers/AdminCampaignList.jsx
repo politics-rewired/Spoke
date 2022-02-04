@@ -1,8 +1,8 @@
+import { gql } from "@apollo/client";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import gql from "graphql-tag";
 import { TextField, Toggle } from "material-ui";
 import DropDownMenu from "material-ui/DropDownMenu";
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -11,8 +11,8 @@ import RaisedButton from "material-ui/RaisedButton";
 import ContentAdd from "material-ui/svg-icons/content/add";
 import PropTypes from "prop-types";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import { withAuthzContext } from "../components/AuthzProvider";
 import LoadingIndicator from "../components/LoadingIndicator";

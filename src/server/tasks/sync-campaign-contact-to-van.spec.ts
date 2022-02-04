@@ -10,6 +10,7 @@ import {
 } from "../../../__test__/testbed-preparation/external-systems";
 import { config } from "../../config";
 import { MessageStatusType } from "../api/types";
+import { withClient, withTransaction } from "../utils";
 import {
   CANVASSED_TAG_NAME,
   CanvassResultRow,
@@ -45,87 +46,84 @@ const createCampaignWithSystem = async (client: PoolClient) => {
 
 describe("fetchCanvassResponses", () => {
   let pool: Pool;
-  let client: PoolClient;
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
-    client = await pool.connect();
-  });
-
-  beforeEach(async () => {
-    client.query(`begin`);
-  });
-
-  afterEach(async () => {
-    client.query(`rollback`);
   });
 
   afterAll(async () => {
-    if (client) client.release();
     if (pool) await pool.end();
   });
 
   test("generates empty row for messaged contact without survey responses", async () => {
-    const {
-      contacts: [contact],
-      assignments: [assignment],
-      externalSystem
-    } = await createCampaignWithSystem(client);
+    await withClient(pool, async (poolClient) => {
+      await withTransaction(poolClient, async (client) => {
+        const {
+          contacts: [contact],
+          assignments: [assignment],
+          externalSystem
+        } = await createCampaignWithSystem(client);
 
-    await createMessage(client, {
-      campaignContactId: contact.id,
-      assignmentId: assignment.id
+        await createMessage(client, {
+          campaignContactId: contact.id,
+          assignmentId: assignment.id
+        });
+
+        const canvassResultsRaw = await fetchCanvassResponses(client, {
+          systemId: externalSystem.id,
+          contactId: contact.id
+        });
+
+        expect(canvassResultsRaw).toHaveLength(1);
+        expect(canvassResultsRaw[0].activist_codes).toHaveLength(0);
+        expect(canvassResultsRaw[0].result_codes).toHaveLength(0);
+        expect(canvassResultsRaw[0].response_options).toHaveLength(0);
+      });
     });
-
-    const canvassResultsRaw = await fetchCanvassResponses(client, {
-      systemId: externalSystem.id,
-      contactId: contact.id
-    });
-
-    expect(canvassResultsRaw).toHaveLength(1);
-    expect(canvassResultsRaw[0].activist_codes).toHaveLength(0);
-    expect(canvassResultsRaw[0].result_codes).toHaveLength(0);
-    expect(canvassResultsRaw[0].response_options).toHaveLength(0);
   });
 
   test("generates opt out result for opted out contact", async () => {
-    const {
-      contacts: [optedOutContact, optedInContact],
-      externalSystem
-    } = await createCampaignWithSystem(client);
+    await withClient(pool, async (poolClient) => {
+      await withTransaction(poolClient, async (client) => {
+        const {
+          contacts: [optedOutContact, optedInContact],
+          externalSystem
+        } = await createCampaignWithSystem(client);
 
-    await client.query(
-      `update campaign_contact set is_opted_out = true where id = $1`,
-      [optedOutContact.id]
-    );
+        await client.query(
+          `update campaign_contact set is_opted_out = true where id = $1`,
+          [optedOutContact.id]
+        );
 
-    const externalResultCode = await createExternalResultCode(client, {
-      systemId: externalSystem.id,
-      name: CANVASSED_TAG_NAME
-    });
+        const externalResultCode = await createExternalResultCode(client, {
+          systemId: externalSystem.id,
+          name: CANVASSED_TAG_NAME
+        });
 
-    await client.query<{ id: string }>(
-      `
+        await client.query<{ id: string }>(
+          `
         insert into public.external_sync_opt_out_configuration (system_id, external_result_code_id)
         values ($1, $2)
       `,
-      [externalSystem.id, externalResultCode.id]
-    );
+          [externalSystem.id, externalResultCode.id]
+        );
 
-    const optedOutOptOutCode = await fetchOptOutCode(client, {
-      systemId: externalSystem.id,
-      contactId: optedOutContact.id
+        const optedOutOptOutCode = await fetchOptOutCode(client, {
+          systemId: externalSystem.id,
+          contactId: optedOutContact.id
+        });
+
+        const optedInOptOutCode = await fetchOptOutCode(client, {
+          systemId: externalSystem.id,
+          contactId: optedInContact.id
+        });
+
+        expect(optedOutOptOutCode).not.toBeNull();
+        expect(optedOutOptOutCode).toBe(externalResultCode.external_id);
+
+        expect(optedInOptOutCode).toBeNull();
+      });
     });
-
-    const optedInOptOutCode = await fetchOptOutCode(client, {
-      systemId: externalSystem.id,
-      contactId: optedInContact.id
-    });
-
-    expect(optedOutOptOutCode).not.toBeNull();
-    expect(optedOutOptOutCode).toBe(externalResultCode.external_id);
-
-    expect(optedInOptOutCode).toBeNull();
   });
 });
 

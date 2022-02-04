@@ -100,8 +100,8 @@ const rootSchema = `
 
   input CampaignIdContactId {
     campaignId: String!
-    campaignContactId: Int!
-    messageIds: [Int]!
+    campaignContactId: String!
+    messageIds: [String]!
   }
 
   input UpdateLinkDomain {
@@ -248,7 +248,7 @@ const rootSchema = `
     editOrganization(id: String! input: EditOrganizationInput!): Organization!
     joinOrganization(organizationUuid: String!): Organization!
     editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
-    editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OranizationSettings!
+    editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OrganizationSettings!
     purgeOrganizationUsers(organizationId: String!): Int!
     editUser(organizationId: String!, userId: Int!, userData:UserInput): User
     resetUserPassword(organizationId: String!, userId: Int!): String!

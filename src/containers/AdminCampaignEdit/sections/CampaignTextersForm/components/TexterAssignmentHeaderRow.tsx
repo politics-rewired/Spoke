@@ -6,11 +6,9 @@ import rowStyles from "./rowStyles";
 const headerStyles = StyleSheet.create({
   alreadyTextedHeader: {
     textAlign: "right",
-    fontWeight: 600,
     fontSize: 16
   },
   availableHeader: {
-    fontWeight: 600,
     fontSize: 16
   }
 });

@@ -1,10 +1,10 @@
+import { ApolloQueryResult } from "@apollo/client";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormGroup from "@material-ui/core/FormGroup";
 import Switch from "@material-ui/core/Switch";
-import { ApolloQueryResult } from "apollo-client";
 import React, { useState } from "react";
 import { compose } from "recompose";
 

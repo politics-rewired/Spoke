@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unused-state */
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
-import gql from "graphql-tag";
 import IconButton from "material-ui/IconButton/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
 import Check from "material-ui/svg-icons/action/check-circle";
@@ -9,8 +9,8 @@ import NavigateNextIcon from "material-ui/svg-icons/image/navigate-next";
 import { ToolbarTitle } from "material-ui/Toolbar";
 import PropTypes from "prop-types";
 import React from "react";
-import { compose } from "react-apollo";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
 import { loadData } from "../containers/hoc/with-operations";
