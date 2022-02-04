@@ -345,6 +345,7 @@ const queries = {
             campaign {
               id
               title
+              previewUrl
             }
           }
         }
