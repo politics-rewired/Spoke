@@ -2534,7 +2534,9 @@ const rootMutations = {
               teamToReturn = updatedTeam;
             } else if (team.id) {
               // true if we're only upating the escalationTags
-              teamToReturn = team;
+              teamToReturn = await trx("team")
+                .where({ id: team.id })
+                .first("*");
             } else {
               // Create new team
               const [newTeam] = await trx("team")
