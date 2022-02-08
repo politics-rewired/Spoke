@@ -265,7 +265,7 @@ const rootSchema = `
     deleteQuestionResponses(interactionStepIds:[String], campaignContactId:String!): CampaignContact,
     updateQuestionResponses(questionResponses:[QuestionResponseInput], campaignContactId:String!): CampaignContact,
     handleConversation(
-      campaignContactId: String!, 
+      campaignContactId: String!,
       message:MessageInput,
       questionResponses: [QuestionResponseInput],
       interactionStepIdsForDeletedQuestionResponses: [String],
