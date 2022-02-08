@@ -11,6 +11,38 @@ type WebpackConfiguration = webpack.Configuration & {
   devServer: Record<string, any>;
 };
 
+const plugins: webpack.WebpackPluginInstance[] = [
+  new webpack.DefinePlugin({
+    "process.env.NODE_ENV": JSON.stringify(config.NODE_ENV),
+    "process.env.PHONE_NUMBER_COUNTRY": JSON.stringify(
+      config.PHONE_NUMBER_COUNTRY
+    )
+  }),
+  // See: https://github.com/spiritit/timezonecomplete#webpack
+  new webpack.ContextReplacementPlugin(
+    // eslint-disable-next-line no-useless-escape
+    /[\/\\]node_modules[\/\\]timezonecomplete[\/\\]/,
+    path.resolve("tz-database-context"),
+    {
+      tzdata: "tzdata"
+    }
+  )
+];
+
+if (config.isDevelopment) {
+  // plugins.push(new webpack.HotModuleReplacementPlugin());
+  plugins.push(new ReactRefreshWebpackPlugin());
+}
+if (config.isProduction) {
+  // Ignore publicPath as we use STATIC_BASE_URL at runtime instead
+  plugins.push(
+    new WebpackManifestPlugin({
+      fileName: config.ASSETS_MAP_FILE,
+      publicPath: ""
+    })
+  );
+}
+
 const webpackConfig: WebpackConfiguration = {
   mode: config.isProd ? "production" : "development",
   context: path.resolve(__dirname, "src"),
@@ -39,31 +71,7 @@ const webpackConfig: WebpackConfiguration = {
       }
     ]
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      "process.env.NODE_ENV": JSON.stringify(config.NODE_ENV),
-      "process.env.PHONE_NUMBER_COUNTRY": JSON.stringify(
-        config.PHONE_NUMBER_COUNTRY
-      )
-    }),
-    // See: https://github.com/spiritit/timezonecomplete#webpack
-    new webpack.ContextReplacementPlugin(
-      // eslint-disable-next-line no-useless-escape
-      /[\/\\]node_modules[\/\\]timezonecomplete[\/\\]/,
-      path.resolve("tz-database-context"),
-      {
-        tzdata: "tzdata"
-      }
-    ),
-    // config.isDevelopment && new webpack.HotModuleReplacementPlugin(),
-    config.isDevelopment && new ReactRefreshWebpackPlugin(),
-    config.isProduction &&
-      // Ignore publicPath as we use STATIC_BASE_URL at runtime instead
-      new WebpackManifestPlugin({
-        fileName: config.ASSETS_MAP_FILE,
-        publicPath: ""
-      })
-  ].filter(Boolean),
+  plugins,
   optimization: {
     minimize: config.isProduction,
     minimizer: [new TerserPlugin()]

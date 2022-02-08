@@ -68,6 +68,9 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Run codegen
+        run: yarn codegen:ts
+
       - name: Lint Apps
         run: yarn lint && yarn format
 

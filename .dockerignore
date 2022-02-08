@@ -15,4 +15,5 @@
 !/dev-tools/export-campaigns-by-argv.js
 !/src/*
 !/migrations
+!/libs
 !/seeds
