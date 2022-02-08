@@ -9,12 +9,8 @@ import { OrganizationSettings } from "./organization-settings";
 import { RelayPaginatedResponse } from "./pagination";
 import { Tag } from "./tag";
 import { Team } from "./team";
+import { TextRequestType } from "./types";
 import { User } from "./user";
-
-export const TextRequestType = Object.freeze({
-  UNSENT: "UNSENT",
-  UNREPLIED: "UNREPLIED"
-});
 
 export interface AssignmentTarget {
   type: string;
@@ -42,7 +38,7 @@ export interface Organization {
   textingHoursStart: number;
   textingHoursEnd: number;
   textRequestFormEnabled: boolean;
-  textRequestType: string;
+  textRequestType: TextRequestType;
   textRequestMaxCount: number;
   textsAvailable: boolean;
   pendingAssignmentRequestCount: number;

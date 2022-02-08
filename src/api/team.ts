@@ -21,6 +21,19 @@ export interface Team {
   escalationTags: Tag[];
 }
 
+export interface TeamInput {
+  id: string | null;
+  title: string | null;
+  description: string | null;
+  textColor: string | null;
+  backgroundColor: string | null;
+  isAssignmentEnabled: boolean | null;
+  assignmentPriority: number | null;
+  assignmentType: TextRequestType;
+  maxRequestCount: number | null;
+  escalationTagIds: string[] | null;
+}
+
 export const schema = `
   type Team {
     id: ID!
@@ -50,6 +63,6 @@ export const schema = `
     assignmentPriority: Int
     assignmentType: TextRequestType
     maxRequestCount: Int
-    escalationTagIds: [Int]
+    escalationTagIds: [String!]
   }
 `;
