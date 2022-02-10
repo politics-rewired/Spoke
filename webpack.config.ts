@@ -5,7 +5,7 @@ import TerserPlugin from "terser-webpack-plugin";
 import * as webpack from "webpack";
 import { WebpackManifestPlugin } from "webpack-manifest-plugin";
 
-import { config } from "./webpack/build-config";
+import config from "./webpack/build-config";
 
 type WebpackConfiguration = webpack.Configuration & {
   devServer: Record<string, any>;
@@ -101,4 +101,4 @@ const webpackConfig: WebpackConfiguration = {
   }
 };
 
-module.exports = webpackConfig;
+export default webpackConfig;

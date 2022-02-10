@@ -1,16 +1,12 @@
-const envalid = require("envalid");
-
-const { str, port, host, num } = envalid;
+import { cleanEnv, host, num, port, str } from "envalid";
 
 const validators = {
   ASSETS_DIR: str({
-    desc:
-      "Directory path where front-end packaged JavaScript is saved and loaded.",
+    desc: "Directory path where front-end packaged JavaScript is saved and loaded.",
     default: "./build/client/assets"
   }),
   ASSETS_MAP_FILE: str({
-    desc:
-      "File name of map file, within ASSETS_DIR, containing map of general file names to unique build-specific file names.",
+    desc: "File name of map file, within ASSETS_DIR, containing map of general file names to unique build-specific file names.",
     default: "assets.json"
   }),
   DEV_APP_PORT: num({
@@ -21,8 +17,7 @@ const validators = {
   NODE_ENV: str({
     desc: "Node environment",
     choices: ["production", "development", "test"],
-    default: "development",
-    isClient: true
+    default: "development"
   }),
   OUTPUT_DIR: str({
     desc: "Directory path for packaged files should be saved to. Required.",
@@ -30,8 +25,7 @@ const validators = {
   }),
   PHONE_NUMBER_COUNTRY: str({
     desc: "Country code for phone number formatting.",
-    default: "US",
-    isClient: true
+    default: "US"
   }),
   PORT: port({
     desc: "Port for Heroku servers.",
@@ -51,10 +45,8 @@ const validators = {
   })
 };
 
-const config = envalid.cleanEnv(process.env, validators, {
+const config = cleanEnv(process.env, validators, {
   strict: true
 });
 
-module.exports = {
-  config
-};
+export default config;
