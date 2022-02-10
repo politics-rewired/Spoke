@@ -7,12 +7,11 @@ import _ from "lodash";
 import groupBy from "lodash/groupBy";
 
 import { VanOperationMode } from "../../api/external-system";
-import { TextRequestType } from "../../api/organization";
 import {
   RequestAutoApproveType,
   UserRoleType
 } from "../../api/organization-membership";
-import { CampaignExportType } from "../../api/types";
+import { CampaignExportType, TextRequestType } from "../../api/types";
 import { config } from "../../config";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
