@@ -1,6 +1,4 @@
-import envalid from "envalid";
-
-const { str, port, host, num } = envalid;
+import { cleanEnv, host, num, port, str } from "envalid";
 
 const validators = {
   ASSETS_DIR: str({
@@ -49,7 +47,7 @@ const validators = {
   })
 };
 
-export const config = envalid.cleanEnv(process.env, validators, {
+const config = cleanEnv(process.env, validators, {
   strict: true
 });
 

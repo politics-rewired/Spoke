@@ -217,6 +217,8 @@
     "@types/redis": "^2.8.28",
     "@types/superagent": "^4.1.7",
     "@types/supertest": "^2.0.11",
+    "@types/webpack": "^5.28.0",
+    "@types/webpack-dev-server": "^4.7.2",
     "@types/yup": "^0.26.34",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
