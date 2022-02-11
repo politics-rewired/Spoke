@@ -101,4 +101,4 @@ const webpackConfig: WebpackConfiguration = {
   }
 };
 
-module.exports = webpackConfig;
+export default webpackConfig;

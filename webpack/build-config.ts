@@ -1,4 +1,4 @@
-const envalid = require("envalid");
+import envalid from "envalid";
 
 const { str, port, host, num } = envalid;
 
@@ -21,8 +21,7 @@ const validators = {
   NODE_ENV: str({
     desc: "Node environment",
     choices: ["production", "development", "test"],
-    default: "development",
-    isClient: true
+    default: "development"
   }),
   OUTPUT_DIR: str({
     desc: "Directory path for packaged files should be saved to. Required.",
@@ -30,8 +29,7 @@ const validators = {
   }),
   PHONE_NUMBER_COUNTRY: str({
     desc: "Country code for phone number formatting.",
-    default: "US",
-    isClient: true
+    default: "US"
   }),
   PORT: port({
     desc: "Port for Heroku servers.",
@@ -51,10 +49,8 @@ const validators = {
   })
 };
 
-const config = envalid.cleanEnv(process.env, validators, {
+export const config = envalid.cleanEnv(process.env, validators, {
   strict: true
 });
 
-module.exports = {
-  config
-};
+export default config;
