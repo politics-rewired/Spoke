@@ -324,7 +324,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     .reader("campaign_contact")
     .count("*")
     .where({ campaign_id: campaignId });
-  const contactsCount = countQueryResult[0].count;
+  const contactsCount = countQueryResult[0].count as number;
 
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
