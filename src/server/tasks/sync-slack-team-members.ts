@@ -8,7 +8,7 @@ import { sleep } from "../../lib/utils";
 import { botClient } from "../lib/slack";
 import { withTransaction } from "../utils";
 
-const retrySlack = async <T extends unknown>(
+const retrySlack = async <T>(
   fn: () => Promise<WebAPICallResult>
 ): Promise<WebAPICallResult & T> =>
   promiseRetry({ retries: 5, maxTimeout: 1000 }, (retry) =>

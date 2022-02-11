@@ -33,7 +33,7 @@ export const SpokeThemeProvider: React.FC = (props) => {
 
 export const useSpokeTheme = () => useContext(SpokeThemeContext);
 
-export const withSpokeTheme = <P extends unknown>(
+export const withSpokeTheme = <P,>(
   Component: React.ComponentType<P & { theme: CustomTheme }>
 ) => {
   const ComponentWithSpokeTheme: React.FC<P> = (props) => {
