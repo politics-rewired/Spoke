@@ -65,20 +65,18 @@ class ProtectedInner extends React.Component {
 
 const Protected = withRouter(ProtectedInner);
 
-function AuthenticatedRoute({ component: Component, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      render={(routeProps) => (
-        <Protected>
-          <Component {...routeProps} />
-        </Protected>
-      )}
-    />
-  );
-}
+const AuthenticatedRoute = ({ component: Component, ...rest }) => (
+  <Route
+    {...rest}
+    render={(routeProps) => (
+      <Protected>
+        <Component {...routeProps} />
+      </Protected>
+    )}
+  />
+);
 
-function AdminCampaignRoutes() {
+const AdminCampaignRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignPath = "/admin/:organizationId/campaigns/:campaignId";
   return (
@@ -92,9 +90,9 @@ function AdminCampaignRoutes() {
       <Redirect to={campaignPath} />
     </Switch>
   );
-}
+};
 
-function AdminCampaignListRoutes() {
+const AdminCampaignListRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignsPath = "/admin/:organizationId/campaigns";
   return (
@@ -107,9 +105,9 @@ function AdminCampaignListRoutes() {
       <Redirect to={campaignsPath} />
     </Switch>
   );
-}
+};
 
-function AdminTeamRoutes() {
+const AdminTeamRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const teamsPath = "/admin/:organizationId/teams";
   return (
@@ -119,9 +117,9 @@ function AdminTeamRoutes() {
       <Redirect to={teamsPath} />
     </Switch>
   );
-}
+};
 
-function AdminOrganizationRoutes(props) {
+const AdminOrganizationRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const organizationPath = "/admin/:organizationId";
   const { organizationId } = props.match.params;
@@ -201,28 +199,26 @@ function AdminOrganizationRoutes(props) {
       </AdminDashboard>
     </AuthzProvider>
   );
-}
+};
 
-function AdminRoutes({ match }) {
-  return (
-    <Switch>
-      <Route
-        path={match.path}
-        exact
-        render={(indexProps) => (
-          <DashboardLoader path={match.path} {...indexProps} />
-        )}
-      />
-      <Route
-        path={`${match.path}/:organizationId`}
-        component={AdminOrganizationRoutes}
-      />
-      <Redirect to={match.path} />
-    </Switch>
-  );
-}
+const AdminRoutes = ({ match }) => (
+  <Switch>
+    <Route
+      path={match.path}
+      exact
+      render={(indexProps) => (
+        <DashboardLoader path={match.path} {...indexProps} />
+      )}
+    />
+    <Route
+      path={`${match.path}/:organizationId`}
+      component={AdminOrganizationRoutes}
+    />
+    <Redirect to={match.path} />
+  </Switch>
+);
 
-function TexterDashboardRoute(props) {
+const TexterDashboardRoute = (props) => {
   const { children, main, topNav, fullScreen, ...rest } = props;
   return (
     <Route
@@ -239,9 +235,9 @@ function TexterDashboardRoute(props) {
       )}
     />
   );
-}
+};
 
-function TexterAssignmentRoutes() {
+const TexterAssignmentRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const assignmentPath = "/app/:organizationId/todos/:assignmentId";
   return (
@@ -283,9 +279,9 @@ function TexterAssignmentRoutes() {
       <Redirect to={`${assignmentPath}/text`} />
     </Switch>
   );
-}
+};
 
-function TexterTodoRoutes() {
+const TexterTodoRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const todosPath = "/app/:organizationId/todos";
   return (
@@ -304,9 +300,9 @@ function TexterTodoRoutes() {
       />
     </Switch>
   );
-}
+};
 
-function TexterOrganizationRoutes(props) {
+const TexterOrganizationRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const organizationPath = "/app/:organizationId";
   const { organizationId } = props.match.params;
@@ -335,55 +331,51 @@ function TexterOrganizationRoutes(props) {
       </Switch>
     </AuthzProvider>
   );
-}
+};
 
-function TexterRoutes({ match }) {
-  return (
-    <Switch>
-      <Route
-        path={match.path}
-        exact
-        render={() => <DashboardLoader path={match.path} />}
-      />
-      <Route
-        path={`${match.path}/:organizationId`}
-        component={TexterOrganizationRoutes}
-      />
-      <Redirect to={match.path} />
-    </Switch>
-  );
-}
+const TexterRoutes = ({ match }) => (
+  <Switch>
+    <Route
+      path={match.path}
+      exact
+      render={() => <DashboardLoader path={match.path} />}
+    />
+    <Route
+      path={`${match.path}/:organizationId`}
+      component={TexterOrganizationRoutes}
+    />
+    <Redirect to={match.path} />
+  </Switch>
+);
 
-function AppRoutes() {
-  return (
-    <Switch>
-      <Route path="/" exact component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/terms" component={Terms} />
-      <Route
-        path="/reset/:resetHash"
-        render={({ location }) => (
-          <Redirect to={`/login?nextUrl=${location.pathname}`} />
-        )}
-      />
-      <Route path="/email-reset" component={Login} />
-      <AuthenticatedRoute path="/admin" component={AdminRoutes} />
-      <AuthenticatedRoute path="/app" component={TexterRoutes} />
-      <AuthenticatedRoute
-        path="/invite/:inviteId"
-        component={CreateOrganization}
-      />
-      <AuthenticatedRoute
-        path="/:organizationUuid/join"
-        exact
-        component={JoinTeam}
-      />
-      <AuthenticatedRoute
-        path="/:organizationUuid/join/:campaignId"
-        component={JoinTeam}
-      />
-    </Switch>
-  );
-}
+const AppRoutes = () => (
+  <Switch>
+    <Route path="/" exact component={Home} />
+    <Route path="/login" component={Login} />
+    <Route path="/terms" component={Terms} />
+    <Route
+      path="/reset/:resetHash"
+      render={({ location }) => (
+        <Redirect to={`/login?nextUrl=${location.pathname}`} />
+      )}
+    />
+    <Route path="/email-reset" component={Login} />
+    <AuthenticatedRoute path="/admin" component={AdminRoutes} />
+    <AuthenticatedRoute path="/app" component={TexterRoutes} />
+    <AuthenticatedRoute
+      path="/invite/:inviteId"
+      component={CreateOrganization}
+    />
+    <AuthenticatedRoute
+      path="/:organizationUuid/join"
+      exact
+      component={JoinTeam}
+    />
+    <AuthenticatedRoute
+      path="/:organizationUuid/join/:campaignId"
+      component={JoinTeam}
+    />
+  </Switch>
+);
 
 export default AppRoutes;
