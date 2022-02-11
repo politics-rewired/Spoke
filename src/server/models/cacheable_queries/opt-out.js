@@ -82,6 +82,7 @@ export const optOutCache = {
     return dbResult.length > 0;
   },
   save: async (
+    // eslint-disable-next-line default-param-last
     trx = r.knex,
     { cell, organizationId, assignmentId, reason }
   ) => {
