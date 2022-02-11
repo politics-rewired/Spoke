@@ -1,9 +1,9 @@
 import { Component } from "react";
-import Form from "react-formal";
+import { FieldProps } from "react-formal/Field";
 
 import { TruthyString } from "../../lib/js-types";
 
-export interface GSFormFieldProps extends Form.Field.FieldProps {
+export interface GSFormFieldProps extends FieldProps {
   floatingLabelText: TruthyString;
   label: string;
   ["data-test"]?: any;
@@ -13,6 +13,7 @@ export class GSFormField<P extends GSFormFieldProps, S> extends Component<
   P,
   S
 > {
+  // eslint-disable-next-line react/no-unused-class-component-methods
   floatingLabelText() {
     return this.props.floatingLabelText === false
       ? null

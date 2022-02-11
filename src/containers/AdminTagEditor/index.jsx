@@ -127,6 +127,7 @@ class AdminTagEditor extends Component {
     });
   };
 
+  // eslint-disable-next-line react/no-unused-class-component-methods
   handleEditWebhookUrl = (url) => {
     this.setState({
       editingTag: { ...this.state.editingTag, webhookUrl: url }
