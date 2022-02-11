@@ -217,6 +217,8 @@
     "@types/redis": "^2.8.28",
     "@types/superagent": "^4.1.7",
     "@types/supertest": "^2.0.11",
+    "@types/webpack": "^5.28.0",
+    "@types/webpack-dev-server": "^4.7.2",
     "@types/yup": "^0.26.34",
     "@typescript-eslint/eslint-plugin": "^4.1.0",
     "@typescript-eslint/parser": "^4.1.0",
@@ -257,6 +259,7 @@
     "standard-version": "^7.1.0",
     "supertest": "^6.2.2",
     "terser-webpack-plugin": "^5.3.0",
+    "ts-node": "^10.5.0",
     "type-fest": "^0.21.2",
     "typescript": "^4.5.5",
     "wait-on": "^2.1.0",
@@ -269,7 +272,8 @@
     "@types/react": "^15.6.28",
     "material-ui": "^0.20.1",
     "pg-connection-string": "~2.4.0",
-    "fs-capacitor": "6.2.0"
+    "fs-capacitor": "6.2.0",
+    "eslint": "6.8.0"
   },
   "config": {
     "commitizen": {
