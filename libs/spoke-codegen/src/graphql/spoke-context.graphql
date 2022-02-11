@@ -1,0 +1,15 @@
+query GetOrganizationSettings($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    settings {
+      ...TexterOrganizationSettingsFragment
+    }
+  }
+}
+
+fragment TexterOrganizationSettingsFragment on OrganizationSettings {
+  id
+  showContactLastName
+  showContactCell
+  confirmationClickForScriptLinks
+}
