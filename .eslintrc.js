@@ -129,7 +129,8 @@ module.exports = {
       files: ["*.ts", "*.tsx"],
       rules: {
         "no-shadow": "off", // JS `no-shadow` rule doesn't handle enums correctly
-        "@typescript-eslint/no-shadow": "error"
+        "@typescript-eslint/no-shadow": "error",
+        "no-unused-vars": "off" // JS `no-unused-vars` rule doesn't handle typescript correctly
       }
     }
   ]
