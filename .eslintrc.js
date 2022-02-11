@@ -121,7 +121,8 @@ module.exports = {
     "react/require-default-props": ["off"],
     "react/no-unescaped-entities": ["off"],
     "jsx-a11y/alt-text": ["off"],
-    "react/no-unused-prop-types": ["off"]
+    "react/no-unused-prop-types": ["off"],
+    "react/function-component-definition": ["off"]
   },
   overrides: [
     {
