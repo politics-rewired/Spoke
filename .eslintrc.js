@@ -72,7 +72,6 @@ module.exports = {
       { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
     ],
     "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
     "no-nested-ternary": "off",
     "no-underscore-dangle": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
@@ -115,7 +114,6 @@ module.exports = {
     "react/state-in-constructor": ["off"],
     "react/destructuring-assignment": ["off"],
     "react/no-access-state-in-setstate": ["off"],
-    "@typescript-eslint/explicit-module-boundary-types": ["off"],
     "react/forbid-prop-types": ["off"],
     "jsx-a11y/click-events-have-key-events": ["off"],
     "jsx-a11y/no-static-element-interactions": ["off"],
