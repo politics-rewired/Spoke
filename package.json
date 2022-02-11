@@ -94,7 +94,6 @@
     "chart.js": "^2.9.4",
     "connect-datadog-graphql": "^0.0.11",
     "cookie-session": "^1.4.0",
-    "create-react-context": "^0.3.0",
     "css-loader": "^5.0.1",
     "dataloader": "^1.2.0",
     "dotenv": "^8.0.0",
