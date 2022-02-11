@@ -111,10 +111,6 @@ const inlineStyles = {
 };
 
 export class AssignmentTexterContact extends React.Component {
-  optOutSchema = yup.object({
-    optOutMessageText: yup.string()
-  });
-
   messageSchema = yup.object({
     messageText: yup
       .string()
