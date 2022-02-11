@@ -2,11 +2,13 @@ import { cleanEnv, host, num, port, str } from "envalid";
 
 const validators = {
   ASSETS_DIR: str({
-    desc: "Directory path where front-end packaged JavaScript is saved and loaded.",
+    desc:
+      "Directory path where front-end packaged JavaScript is saved and loaded.",
     default: "./build/client/assets"
   }),
   ASSETS_MAP_FILE: str({
-    desc: "File name of map file, within ASSETS_DIR, containing map of general file names to unique build-specific file names.",
+    desc:
+      "File name of map file, within ASSETS_DIR, containing map of general file names to unique build-specific file names.",
     default: "assets.json"
   }),
   DEV_APP_PORT: num({
