@@ -92,7 +92,7 @@ class AdminCampaignList extends React.Component {
   };
 
   releaseAllReplies = () => {
-    const ageInHours = this.numberOfHoursToReleaseRef.input.value;
+    const ageInHours = parseFloat(this.numberOfHoursToReleaseRef.input.value);
     const releaseOnRestricted = this.releaseOnRestrictedRef.state.switched;
     const limitToCurrentlyTextableContacts = this
       .limitToCurrentlyTextableContactsRef.state.switched;

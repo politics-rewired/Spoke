@@ -5,22 +5,49 @@ import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
-import PropTypes from "prop-types";
 import React from "react";
 
-import { TextRequestType } from "../../api/organization";
+import { TextRequestType } from "../../api/types";
+import { TagWithTitle, TeamForAssignment } from "./types";
 
-const AssignmentRow = (props) => {
-  const { assignmentPool, isRowDisabled, onChange, escalationTagList } = props;
+type TagChip = {
+  id: string;
+  title: string;
+};
 
-  const handleToggleIsEnabled = (_event, isAssignmentEnabled) =>
-    onChange({ isAssignmentEnabled });
+interface Props {
+  assignmentPool: TeamForAssignment;
+  escalationTagList: TagWithTitle[];
+  isRowDisabled: boolean;
+  onChange: (payload: any) => Promise<void> | void;
+}
 
-  const handleChangeAssignmentType = (_event, _index, assignmentType) =>
-    onChange({ assignmentType });
+const AssignmentRow: React.FC<Props> = (props) => {
+  const {
+    assignmentPool,
+    isRowDisabled = false,
+    onChange,
+    escalationTagList
+  } = props;
 
-  const handleChangeMaxCount = (_event, maxRequestCount) =>
-    onChange({ maxRequestCount: parseInt(maxRequestCount, 10) });
+  const handleToggleIsEnabled = (
+    _event: React.MouseEvent<unknown, MouseEvent>,
+    isAssignmentEnabled: boolean
+  ) => onChange({ isAssignmentEnabled });
+
+  const handleChangeAssignmentType = (
+    _event: React.SyntheticEvent<unknown, Event>,
+    _index: number,
+    assignmentType: any
+  ) => onChange({ assignmentType });
+
+  const handleChangeMaxCount = (
+    _event: React.FormEvent<unknown>,
+    maxRequestCount: string
+  ) =>
+    onChange({
+      maxRequestCount: maxRequestCount ? parseInt(maxRequestCount, 10) : null
+    });
 
   const {
     id,
@@ -33,24 +60,26 @@ const AssignmentRow = (props) => {
     escalationTags
   } = assignmentPool;
 
-  const handleCheckEscalationTag = (newTag) => {
+  const handleCheckEscalationTag = (newTag: TagChip | string) => {
     // when a tag is added by search, newTag will be a string,
     // not the tag object within escalationTagList -
     // here we trim possible whitespace, then verify the tag
-    const formattedTag = newTag.id ? newTag.title : newTag.trim();
+    const formattedTag =
+      typeof newTag === "string" ? newTag.trim() : newTag.title;
     const tagNames = escalationTagList.map((tag) => tag.title);
     const tagExists = tagNames.includes(formattedTag);
 
     return tagExists;
   };
 
-  const handleAddEscalationTag = (newTag) => {
+  const handleAddEscalationTag = (newTag: TagChip) => {
     // when a tag is added by search, ChipInput coerces it to an object -
     // we want to find the tag within escalationTagList that matches
     // newTag object's title, not add the new object to escalationTags
     const foundTag = escalationTagList.find(
       (tag) => tag.title === newTag.title
     );
+    if (!foundTag) return;
     const newEscalationTags = uniqBy(
       escalationTags.concat(foundTag),
       (t) => t.id
@@ -58,7 +87,7 @@ const AssignmentRow = (props) => {
     onChange({ escalationTags: newEscalationTags });
   };
 
-  const handleRemoveEscalationTag = (oldTagId) => {
+  const handleRemoveEscalationTag = (oldTagId: string) => {
     const newEscalationTags = escalationTags.filter(
       (tag) => tag.id !== oldTagId
     );
@@ -130,36 +159,6 @@ const AssignmentRow = (props) => {
       />
     </div>
   );
-};
-
-AssignmentRow.defaultProps = {
-  isRowDisabled: false
-};
-
-AssignmentRow.propTypes = {
-  assignmentPool: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    textColor: PropTypes.string.isRequired,
-    backgroundColor: PropTypes.string.isRequired,
-    isAssignmentEnabled: PropTypes.bool.isRequired,
-    assignmentType: PropTypes.string.isRequired,
-    maxRequestCount: PropTypes.number.isRequired,
-    escalationTags: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        title: PropTypes.string.isRequired
-      })
-    )
-  }).isRequired,
-  escalationTagList: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired
-    })
-  ).isRequired,
-  isRowDisabled: PropTypes.bool,
-  onChange: PropTypes.func.isRequired
 };
 
 export default AssignmentRow;

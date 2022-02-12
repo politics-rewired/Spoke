@@ -1,4 +1,3 @@
-import { TextRequestType } from "../../api/organization";
 import { config } from "../../config";
 import logger from "../../logger";
 import { cacheOpts, memoizer } from "../memoredis";
@@ -192,7 +191,7 @@ export const resolvers = {
       }
     },
     textRequestType: (organization) => {
-      const defaultValue = TextRequestType.UNSENT;
+      const defaultValue = "UNSENT";
       try {
         const features = JSON.parse(organization.features);
         return features.textRequestType || defaultValue;

@@ -1,0 +1,14 @@
+overwrite: true
+schema: "src/schema.graphql"
+generates:
+  libs/spoke-codegen/src/generated.ts:
+    documents: "libs/spoke-codegen/src/graphql/**/*.graphql"
+    plugins:
+      - "typescript"
+      - "typescript-resolvers"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+    config:
+      withHooks: true
+      withComponent: false
+      withHOC: false
