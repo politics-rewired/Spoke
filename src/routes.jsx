@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { gql } from "@apollo/client";
 import React from "react";
 import { Redirect, Route, Switch, withRouter } from "react-router-dom";

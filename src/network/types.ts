@@ -13,7 +13,7 @@ export interface MutationMap<OuterProps> {
   [key: string]: MutationCreator<OuterProps>;
 }
 
-export interface LocalResolverContext<TCacheShape extends unknown = any> {
+export interface LocalResolverContext<TCacheShape = any> {
   client: ApolloClient<TCacheShape>;
   cache: ApolloCache<TCacheShape>;
   getCacheKey: (obj: { __typename: string; id: string | number }) => any;

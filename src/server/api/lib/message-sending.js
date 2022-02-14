@@ -222,7 +222,7 @@ export const assignMissingMessagingServices = async (
   return trx("messaging_service_stick").insert(allToInsert);
 };
 
-const mediaExtractor = new RegExp(/\[\s*(http[^\]\s]*)\s*\]/);
+const mediaExtractor = /\[\s*(http[^\]\s]*)\s*\]/;
 
 /**
  * Extract Spoke-style media attachments from the plain message text.

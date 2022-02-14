@@ -32,6 +32,7 @@ export const SpokeContextProvider: React.FC = (props) => {
     skip: organizationId === undefined
   });
 
+  // eslint-disable-next-line react/jsx-no-constructed-context-values
   const value = {
     orgSettings: data?.organization?.settings,
     setOrganizationId
@@ -46,7 +47,7 @@ export const SpokeContextProvider: React.FC = (props) => {
 
 export const useSpokeContext = () => useContext(SpokeContext);
 
-export const withSpokeContext = <P extends unknown>(
+export const withSpokeContext = <P,>(
   Component: React.ComponentType<P & SpokeContextType>
 ) => {
   const ComponentWithSpokeContext: React.FC<P> = (props) => {

@@ -31,7 +31,7 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
     }
   }, [loading, hasAdminPermissions]);
 
-  if (loading) return <></>;
+  if (loading) return null;
 
   return (
     <AuthzContext.Provider value={hasAdminPermissions}>
@@ -42,7 +42,7 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
 
 export const useAuthzContext = () => useContext(AuthzContext);
 
-export const withAuthzContext = <P extends unknown>(
+export const withAuthzContext = <P,>(
   Component: React.ComponentType<P & { adminPerms: boolean }>
 ) => {
   const ComponentWithAuthzContext: React.FC<P> = (props) => {

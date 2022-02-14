@@ -50,6 +50,7 @@ export default class GSForm extends React.Component {
     }
   }
 
+  // eslint-disable-next-line react/no-unused-class-component-methods
   submit = () => {
     if (this.formRef) {
       this.formRef.submit();

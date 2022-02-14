@@ -46,6 +46,7 @@ class AssignmentTexterSurveys extends Component {
     this.setState({ showAllQuestions: newExpandedState });
   };
 
+  // eslint-disable-next-line react/no-unused-class-component-methods
   handlePrevious = () => {
     const { stepIndex } = this.state;
     this.setState({
@@ -53,6 +54,7 @@ class AssignmentTexterSurveys extends Component {
     });
   };
 
+  // eslint-disable-next-line react/no-unused-class-component-methods
   handleNext = () => {
     const { stepIndex } = this.state;
     this.setState({
