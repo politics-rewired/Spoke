@@ -89,6 +89,7 @@
     "autodetect-decoder-stream": "^1.0.3",
     "aws-sdk": "^2.6.3",
     "aws-serverless-express": "https://registry.npmjs.org/aws-serverless-express/-/aws-serverless-express-3.0.2.tgz",
+    "axios": "0.21.1",
     "body-parser": "^1.19.0",
     "camelcase-keys": "^4.1.0",
     "chart.js": "^2.9.4",
