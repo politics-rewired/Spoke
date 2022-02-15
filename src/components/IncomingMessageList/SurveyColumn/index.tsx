@@ -2,8 +2,10 @@ import { ApolloQueryResult, gql } from "@apollo/client";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import React, { Component } from "react";
+import { compose } from "recompose";
 
 import { loadData } from "../../../containers/hoc/with-operations";
+import { withAuthzContext } from "../../AuthzProvider";
 import ManageSurveyResponses from "./ManageSurveyResponses";
 import ManageTags from "./ManageTags";
 
@@ -54,7 +56,7 @@ class SurveyColumn extends Component<Props & HocProps, State> {
   handleDismissError = () => this.setState({ errorMessage: undefined });
 
   render() {
-    const { campaign, contact, organizationId } = this.props;
+    const { campaign, contact, organizationId, adminPerms } = this.props;
     const { isWorking, errorMessage } = this.state;
 
     return (
@@ -63,14 +65,16 @@ class SurveyColumn extends Component<Props & HocProps, State> {
         <div style={styles.spacer} />
         <div style={{ display: "flex" }}>
           <div style={styles.spacer} />
-          <RaisedButton
-            key="open-script-preview"
-            label="Open Script Preview"
-            style={{ marginRight: "10px" }}
-            onClick={() => {
-              window.open(`/preview/${campaign.previewUrl}`, "_blank");
-            }}
-          />
+          {adminPerms ? (
+            <RaisedButton
+              key="open-script-preview"
+              label="Open Script Preview"
+              style={{ marginRight: "10px" }}
+              onClick={() => {
+                window.open(`/preview/${campaign.previewUrl}`, "_blank");
+              }}
+            />
+          ) : null}
           <RaisedButton
             label="End Conversation"
             disabled={isWorking}
@@ -114,6 +118,4 @@ const mutations = {
   })
 };
 
-export default loadData({
-  mutations
-})(SurveyColumn);
+export default compose(withAuthzContext, loadData({ mutations }))(SurveyColumn);
