@@ -6,6 +6,7 @@ import { isNowBetween } from "../../lib/timezones";
 import { sleep } from "../../lib/utils";
 import logger from "../../logger";
 import { eventBus, EventType } from "../event-bus";
+import { selectionsByType } from "../lib/graphql";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { sqlResolvers } from "./lib/utils";
@@ -1205,7 +1206,7 @@ export const resolvers = {
         getContacts(assignment, contactsFilter, organization, campaign, true)
       );
     },
-    contacts: async (assignment, { contactsFilter }) => {
+    contacts: async (assignment, { contactsFilter }, _context, info) => {
       const campaign = await r
         .reader("campaign")
         .where({ id: assignment.campaign_id })
@@ -1215,7 +1216,27 @@ export const resolvers = {
         .reader("organization")
         .where({ id: campaign.organization_id })
         .first();
-      return getContacts(assignment, contactsFilter, organization, campaign);
+
+      const contactsQuery = getContacts(
+        assignment,
+        contactsFilter,
+        organization,
+        campaign
+      );
+
+      // Limit fields read from DB if possible
+      const fieldNode = info.fieldNodes.find(
+        ({ name: { value } }) => value === "contacts"
+      );
+      const selections = selectionsByType(fieldNode);
+      if (selections.complex.length === 0) {
+        const simpleFields = selections.simple
+          .map(({ name: { value } }) => value)
+          .filter((name) => name !== "__typename");
+        contactsQuery.select(simpleFields);
+      }
+
+      return contactsQuery;
     },
     campaignCannedResponses: async (assignment) => {
       const getCannedResponses = memoizer.memoize(
