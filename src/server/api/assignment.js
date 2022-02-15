@@ -1,3 +1,4 @@
+import humps from "humps";
 import _ from "lodash";
 import request from "superagent";
 
@@ -1232,7 +1233,8 @@ export const resolvers = {
       if (selections.complex.length === 0) {
         const simpleFields = selections.simple
           .map(({ name: { value } }) => value)
-          .filter((name) => name !== "__typename");
+          .filter((name) => name !== "__typename")
+          .map((gqlKey) => humps.decamelize(gqlKey, { separator: "_" }));
         contactsQuery.select(simpleFields);
       }
 
