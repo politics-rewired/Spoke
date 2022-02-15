@@ -10,7 +10,7 @@ export const AuthzContext = React.createContext(false);
 
 export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
   const { organizationId } = useParams<{ organizationId: string }>();
-  const { data, loading } = useCurrentUserOrganizationRolesQuery({
+  const { data, loading, error } = useCurrentUserOrganizationRolesQuery({
     variables: { organizationId: props.organizationId },
     skip: props.organizationId === undefined
   });
@@ -24,12 +24,12 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
   }, [organizationId]);
 
   useEffect(() => {
-    if (!loading && !hasAdminPermissions) {
+    if (!loading && error !== undefined) {
       const loginUrl = `/login?nextUrl=${window.location.pathname}`;
       // We can't use replace(...) here because /login is not a react-router path
       window.location.href = loginUrl;
     }
-  }, [loading, hasAdminPermissions]);
+  }, [loading, hasAdminPermissions, error]);
 
   if (loading) return null;
 
