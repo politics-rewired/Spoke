@@ -645,7 +645,7 @@ class AdminCampaignEdit extends React.Component {
   };
 
   renderStartButton = () => {
-    if (!this.props.adminPerms) {
+    if (!this.props.isAdmin) {
       // Supervolunteers don't have access to start the campaign or un/archive it
       return null;
     }
@@ -730,7 +730,7 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms, match, theme: stableMuiTheme } = this.props;
+    const { isAdmin, match, theme: stableMuiTheme } = this.props;
     const { campaignId } = match.params;
     const isNew = this.isNew();
     const saveLabel = isNew ? "Save and goto next section" : "Save";
@@ -788,7 +788,7 @@ class AdminCampaignEdit extends React.Component {
           const sectionCanExpandOrCollapse =
             (section.expandAfterCampaignStarts ||
               !this.props.campaignData.campaign.isStarted) &&
-            (adminPerms || section.expandableBySuperVolunteers);
+            (isAdmin || section.expandableBySuperVolunteers);
 
           if (sectionIsSaving) {
             avatar = <CircularProgress style={avatarStyle} size={25} />;
@@ -852,7 +852,7 @@ class AdminCampaignEdit extends React.Component {
               <CardText expandable>
                 {this.renderCampaignFormSection(section, sectionIsSaving)}
               </CardText>
-              {sectionIsSaving && adminPerms ? (
+              {sectionIsSaving && isAdmin ? (
                 <CardActions>
                   <div>
                     Current Status: {extractStageAndStatus(savePercent)}
@@ -889,7 +889,7 @@ AdminCampaignEdit.propTypes = {
   mutations: PropTypes.object,
   organizationData: PropTypes.object,
   match: PropTypes.object.isRequired,
-  adminPerms: PropTypes.bool.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
   location: PropTypes.object,
   pendingJobsData: PropTypes.object,
   availableActionsData: PropTypes.object

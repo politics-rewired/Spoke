@@ -33,14 +33,14 @@ const inlineStyles = {
 
 interface Props extends CampaignOperations {
   organizationId: string;
-  adminPerms: boolean;
+  isAdmin: boolean;
   campaign: Campaign;
 }
 
 export const CampaignListRow: React.FC<Props> = (props) => {
   const theme = useTheme();
   const history = useHistory();
-  const { organizationId, adminPerms, campaign } = props;
+  const { organizationId, isAdmin, campaign } = props;
   const {
     isStarted,
     isArchived,
@@ -159,7 +159,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
         secondary={secondaryText}
         secondaryTypographyProps={{ color: "textPrimary" }}
       />
-      {adminPerms && (
+      {isAdmin && (
         <ListItemSecondaryAction>
           <CampaignListMenu
             campaign={campaign}

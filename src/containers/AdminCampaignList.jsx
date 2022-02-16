@@ -147,7 +147,7 @@ class AdminCampaignList extends React.Component {
       this.state.releaseAllRepliesResult || this.state.releaseAllRepliesError;
 
     const { organizationId } = this.props.match.params;
-    const { adminPerms } = this.props;
+    const { isAdmin } = this.props;
     return (
       <div>
         <div style={styles.flexContainer}>
@@ -248,11 +248,11 @@ class AdminCampaignList extends React.Component {
             organizationId={organizationId}
             campaignsFilter={campaignsFilter}
             pageSize={DEFAULT_PAGE_SIZE}
-            adminPerms={adminPerms}
+            isAdmin={isAdmin}
           />
         )}
 
-        {adminPerms ? (
+        {isAdmin ? (
           <FloatingActionButton
             {...dataTest("addCampaign")}
             style={theme.components.floatingButton}
@@ -270,7 +270,7 @@ AdminCampaignList.propTypes = {
   match: PropTypes.object,
   history: PropTypes.object,
   mutations: PropTypes.object,
-  adminPerms: PropTypes.bool.isRequired
+  isAdmin: PropTypes.bool.isRequired
 };
 
 const mutations = {

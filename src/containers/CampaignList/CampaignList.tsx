@@ -10,7 +10,7 @@ import CampaignListRow from "./CampaignListRow";
 interface Props extends CampaignOperations {
   organizationId: string;
   campaigns: Campaign[];
-  adminPerms: boolean;
+  isAdmin: boolean;
 }
 
 export const CampaignList: React.FC<Props> = (props) => {
@@ -24,7 +24,7 @@ export const CampaignList: React.FC<Props> = (props) => {
         <CampaignListRow
           key={campaign.id}
           organizationId={props.organizationId}
-          adminPerms={props.adminPerms}
+          isAdmin={props.isAdmin}
           campaign={campaign}
           startOperation={props.startOperation}
           archiveCampaign={props.archiveCampaign}
