@@ -6,7 +6,25 @@ import { UserRoleType } from "../api/organization-membership";
 import { useSpokeContext } from "../client/spoke-context";
 import { hasRole } from "../lib/permissions";
 
-export const AuthzContext = React.createContext(false);
+export interface AuthzContextType {
+  roles: UserRoleType[];
+  hasRole: (role: UserRoleType) => boolean;
+
+  isSuperadmin: boolean;
+  isOwner: boolean;
+  isAdmin: boolean;
+  isSupervol: boolean;
+}
+
+export const AuthzContext = React.createContext<AuthzContextType>({
+  roles: [],
+  hasRole: () => false,
+
+  isSuperadmin: false,
+  isOwner: false,
+  isAdmin: false,
+  isSupervol: false
+});
 
 export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
   const { organizationId } = useParams<{ organizationId: string }>();
@@ -33,8 +51,18 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
 
   if (loading) return null;
 
+  const value = {
+    roles,
+    hasRole: (role: UserRoleType) => hasRole(role, roles),
+
+    isSuperadmin: hasRole(UserRoleType.SUPERADMIN, roles),
+    isOwner: hasRole(UserRoleType.OWNER, roles),
+    isAdmin: hasRole(UserRoleType.ADMIN, roles),
+    isSupervol: hasRole(UserRoleType.SUPERVOLUNTEER, roles)
+  };
+
   return (
-    <AuthzContext.Provider value={hasAdminPermissions}>
+    <AuthzContext.Provider value={value}>
       {props.children}
     </AuthzContext.Provider>
   );
@@ -42,12 +70,12 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
 
 export const useAuthzContext = () => useContext(AuthzContext);
 
-export const withAuthzContext = <P,>(
-  Component: React.ComponentType<P & { adminPerms: boolean }>
+export const withAuthzContext = <P extends unknown>(
+  Component: React.ComponentType<P & AuthzContextType>
 ) => {
   const ComponentWithAuthzContext: React.FC<P> = (props) => {
-    const adminPerms = useAuthzContext();
-    return <Component {...props} adminPerms={adminPerms} />;
+    const authzProps = useAuthzContext();
+    return <Component {...props} {...authzProps} />;
   };
 
   return ComponentWithAuthzContext;

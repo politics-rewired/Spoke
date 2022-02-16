@@ -215,8 +215,8 @@ export const sendMessage = async (
         organization_id: record.organization_id
       })
       .pluck("role");
-    const isAdmin = hasRole(UserRoleType.SUPERVOLUNTEER, currentRoles);
-    if (!isAdmin) {
+    const isSupervol = hasRole(UserRoleType.SUPERVOLUNTEER, currentRoles);
+    if (!isSupervol) {
       throw new GraphQLError(
         "You are not authorized to send a message for this assignment!"
       );
