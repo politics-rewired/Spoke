@@ -51,15 +51,18 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
 
   if (loading) return null;
 
-  const value = {
-    roles,
-    hasRole: (role: UserRoleType) => hasRole(role, roles),
+  const value = React.useMemo(
+    () => ({
+      roles,
+      hasRole: (role: UserRoleType) => hasRole(role, roles),
 
-    isSuperadmin: hasRole(UserRoleType.SUPERADMIN, roles),
-    isOwner: hasRole(UserRoleType.OWNER, roles),
-    isAdmin: hasRole(UserRoleType.ADMIN, roles),
-    isSupervol: hasRole(UserRoleType.SUPERVOLUNTEER, roles)
-  };
+      isSuperadmin: hasRole(UserRoleType.SUPERADMIN, roles),
+      isOwner: hasRole(UserRoleType.OWNER, roles),
+      isAdmin: hasRole(UserRoleType.ADMIN, roles),
+      isSupervol: hasRole(UserRoleType.SUPERVOLUNTEER, roles)
+    }),
+    [roles]
+  );
 
   return (
     <AuthzContext.Provider value={value}>
@@ -70,7 +73,7 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
 
 export const useAuthzContext = () => useContext(AuthzContext);
 
-export const withAuthzContext = <P extends unknown>(
+export const withAuthzContext = <P,>(
   Component: React.ComponentType<P & AuthzContextType>
 ) => {
   const ComponentWithAuthzContext: React.FC<P> = (props) => {
