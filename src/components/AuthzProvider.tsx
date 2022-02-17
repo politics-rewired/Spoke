@@ -49,8 +49,6 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
     }
   }, [loading, hasAdminPermissions, error]);
 
-  if (loading) return null;
-
   const value = React.useMemo(
     () => ({
       roles,
