@@ -62,6 +62,7 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
     [roles]
   );
 
+  if (loading) return null;
   return (
     <AuthzContext.Provider value={value}>
       {props.children}
