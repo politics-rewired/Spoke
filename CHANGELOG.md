@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.18.0](https://github.com/politics-rewired/spoke/compare/v4.17.2...v4.18.0) (2022-02-19)
+
+
+### Features
+
+* **script:** add indicator of message type, check if attachment is image ([#1076](https://github.com/politics-rewired/spoke/issues/1076)) ([0171a1e](https://github.com/politics-rewired/spoke/commit/0171a1e6097bc2c69f86184365e8aa7462a70965)), closes [#874](https://github.com/politics-rewired/spoke/issues/874)
+* set page title based on navigation ([#1049](https://github.com/politics-rewired/spoke/issues/1049)) ([998a3e8](https://github.com/politics-rewired/spoke/commit/998a3e838251054fc6757f94ce1f76c5fa041b0f))
+* update apollo-client ([#1027](https://github.com/politics-rewired/spoke/issues/1027)) ([7931f4c](https://github.com/politics-rewired/spoke/commit/7931f4c0587bb3e5b2927a314dcc538c70ce74b0)), closes [/github.com/apollographql/apollo-client/issues/6760#issuecomment-668188727](https://github.com/politics-rewired//github.com/apollographql/apollo-client/issues/6760/issues/issuecomment-668188727)
+
+
+### Bug Fixes
+
+* convert string to float ([#1074](https://github.com/politics-rewired/spoke/issues/1074)) ([45accae](https://github.com/politics-rewired/spoke/commit/45accae978eecec8f9909cf2c9980a589f7ff41e))
+* fix assignment control ([#1062](https://github.com/politics-rewired/spoke/issues/1062)) ([a07cdac](https://github.com/politics-rewired/spoke/commit/a07cdacedf8c63b74f5a0439e7c88e8bce01beb9))
+* fix authzprovider hook ([#1082](https://github.com/politics-rewired/spoke/issues/1082)) ([e6ff8e4](https://github.com/politics-rewired/spoke/commit/e6ff8e4ab71b71cd9eadb6317d664f72f16b381b))
+* fix create org using the wrong types ([#1069](https://github.com/politics-rewired/spoke/issues/1069)) ([7e45ca2](https://github.com/politics-rewired/spoke/commit/7e45ca2b1ed4ee6de832668ec66e18a366c55e4d))
+* navigate to login only on error fetching roles ([#1079](https://github.com/politics-rewired/spoke/issues/1079)) ([d9e1e3f](https://github.com/politics-rewired/spoke/commit/d9e1e3fda2a62dacabbd66e4e2cce7928fe77cb4))
+* **10dlc:** update 10dlc deadlines ([#1075](https://github.com/politics-rewired/spoke/issues/1075)) ([a96caee](https://github.com/politics-rewired/spoke/commit/a96caee0e8ecdf2ffe5190fd1a78f0b8fcdef063))
+* remove undesired bolding ([#1055](https://github.com/politics-rewired/spoke/issues/1055)) ([67c49ec](https://github.com/politics-rewired/spoke/commit/67c49eca13efc5fee5abdb8617eadca2cd42569b))
+* update disclaimer copy ([#1054](https://github.com/politics-rewired/spoke/issues/1054)) ([47be131](https://github.com/politics-rewired/spoke/commit/47be131d1e59d8f1005e000f155dc51fd59f14f6))
+
 ### [4.17.2](https://github.com/politics-rewired/spoke/compare/v4.17.1...v4.17.2) (2022-01-27)
 
 
