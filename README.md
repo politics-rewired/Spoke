@@ -25,6 +25,7 @@ Clone the repo:
 ```sh
 git clone git@github.com:politics-rewired/Spoke.git
 cd Spoke
+git config --local blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
 Install Node dependencies:
