@@ -291,7 +291,7 @@ export const processMessagesChunk = async (
     numMedia: message.num_media,
     sendStatus: message.send_status,
     errorCodes: message.error_codes,
-    attemptedAt: DateTime.fromSQL(message.created_at).toISO(),
+    attemptedAt: DateTime.fromJSDate(new Date(message.created_at)).toISO(),
     text: message.text,
     campaignId,
     "texter[firstName]": message.first_name,
