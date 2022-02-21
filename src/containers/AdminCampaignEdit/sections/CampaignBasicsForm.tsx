@@ -1,7 +1,9 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import isEmpty from "lodash/isEmpty";
 import ColorPicker from "material-ui-color-picker";
+import IconButton from "material-ui/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
+import DeleteIcon from "material-ui/svg-icons/action/delete";
 import React from "react";
 import { compose } from "recompose";
 import * as yup from "yup";
@@ -22,7 +24,7 @@ import {
 interface BasicsValues {
   title?: string;
   description?: string;
-  dueBy?: string;
+  dueBy?: string | null;
   logoImageUrl?: string;
   primaryColor?: string;
   introHtml?: string;
@@ -51,7 +53,7 @@ const schemaForIsStarted = (mustBeComplete: boolean) =>
   yup.object({
     title: mustBeComplete ? yup.string().required() : yup.string(),
     description: mustBeComplete ? yup.string().required() : yup.string(),
-    dueBy: mustBeComplete ? yup.mixed().required() : yup.mixed(),
+    dueBy: yup.mixed().nullable(),
     logoImageUrl: yup
       .string()
       .url()
@@ -98,6 +100,11 @@ class CampaignBasicsForm extends React.Component<
     }
   };
 
+  deleteDueDate = () => {
+    const pendingChanges = { dueBy: null };
+    this.setState({ pendingChanges });
+  };
+
   render() {
     const { pendingChanges, isWorking } = this.state;
     const {
@@ -137,18 +144,27 @@ class CampaignBasicsForm extends React.Component<
             hintText="Get out the vote"
             fullWidth
           />
-          <SpokeFormField
-            {...dataTest("dueBy")}
-            name="dueBy"
-            label="Due date"
-            type="date"
-            locale="en-US"
-            shouldDisableDate={(date: Date) =>
-              DateTime.fromJSDate(date) < DateTime.local()
-            }
-            autoOk
-            fullWidth
-          />
+          <div style={{ display: "inline-block", width: 256 }}>
+            <SpokeFormField
+              {...dataTest("dueBy")}
+              name="dueBy"
+              label="Due date"
+              type="date"
+              locale="en-US"
+              shouldDisableDate={(date: Date) =>
+                DateTime.fromJSDate(date) < DateTime.local()
+              }
+              autoOk
+            />
+          </div>
+          <IconButton
+            tooltip="Delete the Due Date"
+            tooltipPosition="top"
+            onClick={this.deleteDueDate}
+            style={{ width: 50 }}
+          >
+            <DeleteIcon />
+          </IconButton>
 
           <SpokeFormField
             name="introHtml"
