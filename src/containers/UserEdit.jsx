@@ -396,7 +396,7 @@ const mutations = {
     mutation: gql`
       mutation editUser(
         $organizationId: String!
-        $userId: Int!
+        $userId: String!
         $userData: UserInput
       ) {
         editUser(
@@ -421,7 +421,7 @@ const mutations = {
   changeUserPassword: (ownProps) => (formData) => ({
     mutation: gql`
       mutation changeUserPassword(
-        $userId: Int!
+        $userId: String!
         $formData: UserPasswordChange
       ) {
         changeUserPassword(userId: $userId, formData: $formData) {

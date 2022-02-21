@@ -275,7 +275,7 @@ const mutations = {
         $count: Int!
         $email: String!
         $organizationId: String!
-        $preferredTeamId: Int!
+        $preferredTeamId: String!
       ) {
         requestTexts(
           count: $count

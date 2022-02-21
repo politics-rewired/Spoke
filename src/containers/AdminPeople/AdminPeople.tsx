@@ -502,7 +502,7 @@ const mutations: MutationMap<AdminPeopleExtendedProps> = {
   ) => {
     return {
       mutation: gql`
-        mutation resetUserPassword($organizationId: String!, $userId: Int!) {
+        mutation resetUserPassword($organizationId: String!, $userId: String!) {
           resetUserPassword(organizationId: $organizationId, userId: $userId)
         }
       `,
