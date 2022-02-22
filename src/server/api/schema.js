@@ -527,7 +527,11 @@ const rootMutations = {
       return passwordResetHash;
     },
 
-    changeUserPassword: async (_root, { formData, ...stringIds }, { user }) => {
+    changeUserPassword: async (
+      _root,
+      { formData, ...stringIds },
+      { user, db }
+    ) => {
       const userId = parseInt(stringIds.userId, 10);
 
       if (user.id !== userId) {
@@ -537,6 +541,7 @@ const rootMutations = {
       const { password, newPassword, passwordConfirm } = formData;
 
       const updatedUser = await change({
+        db,
         user,
         password,
         newPassword,

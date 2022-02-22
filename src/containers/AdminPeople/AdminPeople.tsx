@@ -93,7 +93,7 @@ export interface AdminPeopleMutations {
   >;
   resetUserPassword: (
     organizationId: string,
-    userId: number
+    userId: string
   ) => Promise<
     ApolloQueryResult<{
       resetUserPassword: string;
@@ -276,7 +276,7 @@ class AdminPeople extends React.Component<
     if (currentUser.id !== userId) {
       const res = await this.props.mutations.resetUserPassword(
         organizationId,
-        parseInt(userId, 10)
+        userId
       );
       const { resetUserPassword: hash } = res.data;
       this.setState({ password: { open: true, hash } });
@@ -498,7 +498,7 @@ const mutations: MutationMap<AdminPeopleExtendedProps> = {
   }),
   resetUserPassword: (_ownProps) => (
     organizationId: string,
-    userId: number
+    userId: string
   ) => {
     return {
       mutation: gql`
