@@ -321,8 +321,7 @@ class AdminCampaignEdit extends React.Component {
         expandableBySuperVolunteers: true,
         checkCompleted: () =>
           this.state.campaignFormValues.title !== "" &&
-          this.state.campaignFormValues.description !== "" &&
-          this.state.campaignFormValues.dueBy !== null
+          this.state.campaignFormValues.description !== ""
       },
       {
         title: "Campaign Groups",
