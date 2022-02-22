@@ -332,7 +332,7 @@ type AssignmentTarget {
   campaign: Campaign
   countLeft: Int
   teamTitle: String
-  teamId: Int
+  teamId: String
   enabled: Boolean
   maxRequestCount: Int
 }

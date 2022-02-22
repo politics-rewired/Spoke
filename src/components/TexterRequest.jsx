@@ -162,7 +162,7 @@ class TexterRequest extends React.Component {
     }
 
     const makeOptionText = (at) =>
-      `${at.teamTitle}: ${at.maxRequestCount} ${
+      `${at.teamTitle}: ${at.maxRequestCount ?? ""} ${
         at.type === "UNSENT" ? "Initials" : "Replies"
       }`;
 

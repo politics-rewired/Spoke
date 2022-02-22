@@ -15,11 +15,11 @@ import { User } from "./user";
 export interface AssignmentTarget {
   type: string;
   campaign: Campaign;
-  countLeft: number;
+  countLeft?: number | null;
   teamTitle: string;
-  teamId: number;
+  teamId: string;
   enabled: boolean;
-  maxRequestCount: number;
+  maxRequestCount?: number | null;
 }
 
 export interface Organization {
@@ -73,7 +73,7 @@ export const schema = `
     campaign: Campaign
     countLeft: Int
     teamTitle: String
-    teamId: Int
+    teamId: String
     enabled: Boolean
     maxRequestCount: Int
   }
