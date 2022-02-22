@@ -276,7 +276,7 @@ export const schema = `
     contactsFile: Upload
     externalListId: String
     filterOutLandlines: Boolean
-    excludeCampaignIds: [Int]
+    excludeCampaignIds: [String!]
     contactSql: String
     organizationId: String
     isAssignmentLimitedToTeams: Boolean
