@@ -250,10 +250,9 @@ export const sendMessage = async (
   }
 
   const escapedApostrophes = replaceCurlyApostrophes(text!);
-  const replacedDomainsText = await replaceShortLinkDomains(
-    record.organization_id,
-    escapedApostrophes
-  );
+  const replacedDomainsText = config.ENABLE_SHORTLINK_DOMAINS
+    ? await replaceShortLinkDomains(record.organization_id, escapedApostrophes)
+    : escapedApostrophes;
 
   const { service_type } = await getContactMessagingService(
     campaignContactId,
