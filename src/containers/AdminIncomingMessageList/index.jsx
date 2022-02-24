@@ -200,9 +200,9 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  searchByContactName = ({ firstName, lastName }) => {
+  searchByContactName = ({ firstName, lastName, cellNumber }) => {
     this.setState({
-      contactNameFilter: { firstName, lastName },
+      contactNameFilter: { firstName, lastName, cellNumber },
       campaignIdsContactIds: [],
       needsRender: true
     });
