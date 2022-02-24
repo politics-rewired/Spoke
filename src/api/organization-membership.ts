@@ -4,6 +4,7 @@ import type { RelayPageInfo } from "./pagination";
 import type { User } from "./user";
 
 export enum UserRoleType {
+  SUSPENDED = "SUSPENDED",
   TEXTER = "TEXTER",
   SUPERVOLUNTEER = "SUPERVOLUNTEER",
   ADMIN = "ADMIN",
@@ -21,6 +22,7 @@ export interface MembershipFilter {
   nameSearch?: string;
   campaignId?: string;
   campaignArchived?: boolean;
+  roles?: string[];
 }
 
 export interface OrganizationMembership {
@@ -42,6 +44,7 @@ export interface OrganizationMembershipPage {
 
 export const schema = `
   enum UserRole {
+    SUSPENDED
     TEXTER
     SUPERVOLUNTEER
     ADMIN
@@ -59,6 +62,7 @@ export const schema = `
     nameSearch: String
     campaignId: Int
     campaignArchived: Boolean
+    roles: [String]
   }
 
   type OrganizationMembership {

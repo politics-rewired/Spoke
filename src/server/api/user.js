@@ -2,6 +2,7 @@ import { ForbiddenError } from "apollo-server-errors";
 import { GraphQLError } from "graphql/error";
 import groupBy from "lodash/groupBy";
 
+import { UserRoleType } from "../../api/organization-membership";
 import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 import { accessRequired } from "./errors";
@@ -15,12 +16,15 @@ export function buildUserOrganizationQuery(
   campaignId,
   offset
 ) {
-  const roleFilter = role ? { role } : {};
+  if (role !== UserRoleType.SUSPENDED) {
+    queryParam.whereNot({ role: UserRoleType.SUSPENDED });
+  } else if (role) {
+    queryParam.where({ role });
+  }
 
   queryParam
     .from("user_organization")
     .innerJoin("user", "user_organization.user_id", "user.id")
-    .where(roleFilter)
     .where({ "user_organization.organization_id": organizationId })
     .distinct();
 
@@ -254,6 +258,15 @@ export const resolvers = {
           "team.organization_id": organizationId
         }),
     todos: async (user, { organizationId }) => {
+      const { role: userRole } = await r
+        .knex("user_organization")
+        .first("role")
+        .where({ user_id: user.id, organization_id: organizationId });
+
+      if (userRole === UserRoleType.SUSPENDED) {
+        return [];
+      }
+
       const todos = await r.reader.raw(
         `
         select 

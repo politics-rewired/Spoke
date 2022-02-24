@@ -315,6 +315,7 @@ const rootSchema = `
     deleteQuestionResponseSyncTarget(targetId: String!): String!
     syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
     editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
+    unassignTextsFromUser(membershipId: String!): Boolean!
   }
 
   schema {

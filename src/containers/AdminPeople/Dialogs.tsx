@@ -136,6 +136,44 @@ const ConfirmSuperAdmin: React.StatelessComponent<ConfirmSuperAdminProps> = ({
   </div>
 );
 
+interface ConfirmUnassignTextsProps {
+  open: boolean;
+  onClose: () => void;
+  handleConfirmUnassignTexts: (unassignTexts: boolean) => void;
+}
+
+const ConfirmUnassignTexts: React.StatelessComponent<ConfirmUnassignTextsProps> = ({
+  open,
+  onClose,
+  handleConfirmUnassignTexts
+}) => (
+  <div>
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Unassign Texts for User?</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          You've just suspended a user's account, do you want to unassign their
+          texts? Unassigned texts will be able to be picked up by other texters.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <FlatButton
+          key="no"
+          label="No"
+          primary
+          onClick={() => handleConfirmUnassignTexts(false)}
+        />
+        <FlatButton
+          key="yes"
+          label="Yes"
+          primary
+          onClick={() => handleConfirmUnassignTexts(true)}
+        />
+      </DialogActions>
+    </Dialog>
+  </div>
+);
+
 interface ConfirmRemoveUsersProps {
   open: boolean;
   onClose: () => Promise<void> | void;
@@ -175,6 +213,7 @@ const Dialogs = {
   EditPerson,
   ResetPassword,
   ConfirmSuperAdmin,
+  ConfirmUnassignTexts,
   ConfirmRemoveUsers
 };
 export default Dialogs;

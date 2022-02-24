@@ -4,6 +4,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { css } from "aphrodite";
 import React from "react";
 
+import { UserRoleType } from "../../../../../api/organization-membership";
 import Slider from "../../../../../components/Slider";
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
@@ -30,6 +31,7 @@ const TexterAssignmentRow: React.FC<Props> = (props) => {
 
   const {
     displayName,
+    roles,
     assignment: { contactsCount, needsMessageCount }
   } = texter;
   const messagedCount = contactsCount - needsMessageCount;
@@ -66,7 +68,9 @@ const TexterAssignmentRow: React.FC<Props> = (props) => {
       </div>
       <div className={css(rowStyles.assignedCount)}>{messagedCount}</div>
       <div {...dataTest("texterName")} className={css(rowStyles.nameColumn)}>
-        {displayName}
+        {roles?.includes(UserRoleType.SUSPENDED)
+          ? `${displayName} (SUSPENDED)`
+          : displayName}
       </div>
       <div className={css(rowStyles.input)}>
         <TextField
