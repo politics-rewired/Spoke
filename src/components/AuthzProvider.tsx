@@ -1,7 +1,7 @@
+import { useCurrentUserOrganizationRolesQuery } from "@spoke/spoke-codegen";
 import React, { useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { useCurrentUserOrganizationRolesQuery } from "../../libs/spoke-codegen/src";
 import { UserRoleType } from "../api/organization-membership";
 import { useSpokeContext } from "../client/spoke-context";
 import { hasRole } from "../lib/permissions";
