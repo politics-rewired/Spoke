@@ -1,8 +1,10 @@
+import Divider from "@material-ui/core/Divider";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
 import sample from "lodash/sample";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import Divider from "material-ui/Divider";
-import MenuItem from "material-ui/MenuItem";
-import SelectField from "material-ui/SelectField";
 import { grey50 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -31,8 +33,10 @@ class AssignmentTexterSurveys extends Component {
     };
   }
 
-  getNextScript = ({ interactionStep, answerIndex }) => {
-    const answerOption = interactionStep.question.answerOptions[answerIndex];
+  getNextScript = ({ interactionStep, answerValue }) => {
+    const answerOption = interactionStep.question.answerOptions.find(
+      ({ value }) => value === answerValue
+    );
 
     const { nextInteractionStep } = answerOption;
     if (nextInteractionStep) {
@@ -62,14 +66,14 @@ class AssignmentTexterSurveys extends Component {
     });
   };
 
-  handleSelectChange = async (interactionStep, answerIndex, value) => {
+  handleSelectChange = async (interactionStep, value) => {
     const { onQuestionResponseChange } = this.props;
     let questionResponseValue = null;
     let nextScript = "";
 
     if (value !== "clearResponse") {
       questionResponseValue = value;
-      nextScript = this.getNextScript({ interactionStep, answerIndex });
+      nextScript = this.getNextScript({ interactionStep, answerValue: value });
     }
 
     onQuestionResponseChange({
@@ -81,47 +85,39 @@ class AssignmentTexterSurveys extends Component {
 
   renderAnswers = (step) => {
     const menuItems = step.question.answerOptions.map((answerOption) => (
-      <MenuItem
-        key={answerOption.value}
-        value={answerOption.value}
-        primaryText={answerOption.value}
-      />
+      <MenuItem key={answerOption.value} value={answerOption.value}>
+        {answerOption.value}
+      </MenuItem>
     ));
 
     menuItems.push(<Divider key="divider" />);
     menuItems.push(
-      <MenuItem
-        key="clear"
-        value="clearResponse"
-        primaryText="Clear response"
-      />
+      <MenuItem key="clear" value="clearResponse">
+        Clear response
+      </MenuItem>
     );
 
     return menuItems;
   };
 
-  renderStep(step, isCurrentStep) {
+  renderStep(step) {
     const { questionResponses } = this.props;
     const responseValue = questionResponses[step.id];
     const { question } = step;
 
     return question.text ? (
       <div key={step.id}>
-        <SelectField
-          style={
-            isCurrentStep ? styles.currentStepSelect : styles.previousStepSelect
-          }
-          onChange={(event, index, value) =>
-            this.handleSelectChange(step, index, value)
-          }
-          name={question.id}
-          fullWidth
-          value={responseValue}
-          floatingLabelText={question.text}
-          hintText="Choose answer"
-        >
-          {this.renderAnswers(step)}
-        </SelectField>
+        <FormControl style={{ minWidth: "200px" }}>
+          <InputLabel>{question?.text}</InputLabel>
+          <Select
+            name={step.id}
+            value={responseValue}
+            fullWidth
+            onChange={(e) => this.handleSelectChange(step, e.target.value)}
+          >
+            {this.renderAnswers(step)}
+          </Select>
+        </FormControl>
       </div>
     ) : (
       ""
@@ -140,14 +136,10 @@ class AssignmentTexterSurveys extends Component {
           showExpandableButton={interactionSteps.length > 1}
         />
         <CardText style={styles.cardText}>
-          {showAllQuestions
-            ? ""
-            : this.renderStep(currentInteractionStep, true)}
+          {showAllQuestions ? "" : this.renderStep(currentInteractionStep)}
         </CardText>
         <CardText style={styles.cardText} expandable>
-          {interactionSteps.map((step) =>
-            this.renderStep(step, step.id === currentInteractionStep.id)
-          )}
+          {interactionSteps.map((step) => this.renderStep(step))}
         </CardText>
       </Card>
     );
