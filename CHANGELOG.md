@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.19.0](https://github.com/politics-rewired/spoke/compare/v4.18.1...v4.19.0) (2022-02-25)
+
+
+### Features
+
+* make due dates for campaigns optional ([#1084](https://github.com/politics-rewired/spoke/issues/1084)) ([35925bb](https://github.com/politics-rewired/spoke/commit/35925bb79b2fe98bbe15b5adbe74c478ec01a483))
+
+
+### Bug Fixes
+
+* convert client-side id args from int to string ([#1085](https://github.com/politics-rewired/spoke/issues/1085)) ([8c0e83c](https://github.com/politics-rewired/spoke/commit/8c0e83ce20e98457cd40d4ad4703b0e88b8dfb66))
+* enable link replacement only if envvar is enabled ([#1088](https://github.com/politics-rewired/spoke/issues/1088)) ([4ec2f16](https://github.com/politics-rewired/spoke/commit/4ec2f16aaed91129ff633d890ea4f5b14b2a4d1d))
+
 ### [4.18.1](https://github.com/politics-rewired/spoke/compare/v4.18.0...v4.18.1) (2022-02-20)
 
 
