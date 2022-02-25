@@ -459,7 +459,9 @@ const rootMutations = {
       return updatedOrganization;
     },
 
-    editUser: async (_root, { organizationId, userId, userData }, { user }) => {
+    editUser: async (_root, { userData, ...stringIds }, { user }) => {
+      const organizationId = parseInt(stringIds.organizationId, 10);
+      const userId = parseInt(stringIds.userId, 10);
       if (user.id !== userId) {
         // User can edit themselves
         await accessRequired(user, organizationId, "ADMIN", true);
@@ -501,11 +503,15 @@ const rootMutations = {
       return userData;
     },
 
-    resetUserPassword: async (_root, { organizationId, userId }, { user }) => {
+    resetUserPassword: async (_root, args, { user }) => {
       if (config.PASSPORT_STRATEGY !== "local")
         throw new Error(
           "Password reset may only be used with the 'local' login strategy."
         );
+
+      const organizationId = parseInt(args.organizationId, 10);
+      const userId = parseInt(args.userId, 10);
+
       if (user.id === userId) {
         throw new Error("You can't reset your own password.");
       }
@@ -521,7 +527,13 @@ const rootMutations = {
       return passwordResetHash;
     },
 
-    changeUserPassword: async (_root, { userId, formData }, { user }) => {
+    changeUserPassword: async (
+      _root,
+      { formData, ...stringIds },
+      { user, db }
+    ) => {
+      const userId = parseInt(stringIds.userId, 10);
+
       if (user.id !== userId) {
         throw new Error("You can only change your own password.");
       }
@@ -529,6 +541,7 @@ const rootMutations = {
       const { password, newPassword, passwordConfirm } = formData;
 
       const updatedUser = await change({
+        db,
         user,
         password,
         newPassword,
@@ -1447,11 +1460,13 @@ const rootMutations = {
       }));
     },
 
-    bulkSendMessages: async (_root, { assignmentId }, loaders) => {
+    bulkSendMessages: async (_root, args, loaders) => {
       if (!config.ALLOW_SEND_ALL || !config.NOT_IN_USA) {
         logger.error("Not allowed to send all messages at once");
         throw new GraphQLError("Not allowed to send all messages at once");
       }
+
+      const assignmentId = parseInt(args.assignmentId, 10);
 
       const assignment = await r
         .knex("assignment")
@@ -1999,11 +2014,9 @@ const rootMutations = {
       return true;
     },
 
-    requestTexts: async (
-      _root,
-      { count, organizationId, preferredTeamId },
-      { user }
-    ) => {
+    requestTexts: async (_root, { count, ...stringIds }, { user }) => {
+      const organizationId = parseInt(stringIds.organizationId, 10);
+      const preferredTeamId = parseInt(stringIds.preferredTeamId, 10);
       const myAssignmentTarget = await myCurrentAssignmentTarget(
         user.id,
         organizationId

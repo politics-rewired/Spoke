@@ -78,7 +78,7 @@ export const schema = `
     type: ExternalSystemType!
     username: String!
     apiKey: String!
-    organizationId: Int!
+    organizationId: String!
     createdAt: Date!
     updatedAt: Date!
     syncedAt: Date

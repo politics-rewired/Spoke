@@ -219,7 +219,7 @@ export const resolvers = {
       const cats = await allCurrentAssignmentTargets(organization.id);
       const formatted = cats.map((cat) => ({
         type: cat.assignment_type,
-        countLeft: parseInt(cat.count_left, 10),
+        countLeft: cat.count_left ? parseInt(cat.count_left, 10) : null,
         campaign: {
           id: cat.id,
           title: cat.title
@@ -235,14 +235,23 @@ export const resolvers = {
         organization.id
       );
 
-      return assignmentTarget
-        ? {
-            type: assignmentTarget.type,
-            countLeft: parseInt(assignmentTarget.count_left, 10),
-            maxRequestCount: parseInt(assignmentTarget.max_request_count, 10),
-            teamTitle: assignmentTarget.team_title
-          }
-        : null;
+      if (assignmentTarget) {
+        const {
+          type: assignmentType,
+          count_left,
+          max_request_count,
+          team_title
+        } = assignmentTarget;
+        return {
+          type: assignmentType,
+          countLeft: count_left ? parseInt(count_left, 10) : null,
+          maxRequestCount: max_request_count
+            ? parseInt(max_request_count, 10)
+            : null,
+          teamTitle: team_title
+        };
+      }
+      return null;
     },
     myCurrentAssignmentTargets: async (organization, _, context) => {
       await accessRequired(
@@ -259,8 +268,10 @@ export const resolvers = {
 
         return assignmentTargets.map((at) => ({
           type: at.type,
-          countLeft: parseInt(at.count_left, 10),
-          maxRequestCount: parseInt(at.max_request_count, 10),
+          countLeft: at.count_left ? parseInt(at.count_left, 10) : null,
+          maxRequestCount: at.max_request_count
+            ? parseInt(at.max_request_count, 10)
+            : null,
           teamTitle: at.team_title,
           teamId: at.team_id
         }));
