@@ -202,7 +202,7 @@ export const resolvers = {
     textRequestMaxCount: (organization) => {
       try {
         const features = JSON.parse(organization.features);
-        return parseInt(features.textRequestMaxCount, 10);
+        return parseInt(features.textRequestMaxCount, 10) || null;
       } catch (ex) {
         return null;
       }
