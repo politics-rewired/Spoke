@@ -3,6 +3,7 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import sample from "lodash/sample";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import { grey50 } from "material-ui/styles/colors";
@@ -24,6 +25,11 @@ const styles = {
     padding: 0
   }
 };
+
+const LargeDropDownIcon = (props) => (
+  <ArrowDropDownIcon fontSize="large" {...props} />
+);
+
 class AssignmentTexterSurveys extends Component {
   constructor(props) {
     super(props);
@@ -112,6 +118,7 @@ class AssignmentTexterSurveys extends Component {
           <Select
             name={step.id}
             value={responseValue}
+            IconComponent={LargeDropDownIcon}
             onChange={(e) => this.handleSelectChange(step, e.target.value)}
           >
             {this.renderAnswers(step)}
