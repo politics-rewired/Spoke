@@ -2,7 +2,46 @@ import { JobHelpers, TaskSpec } from "graphile-worker";
 
 import { JobRequestRecord } from "../api/types";
 import { r } from "../models";
-import { getWorker } from "../worker";
+
+const addGraphileJob = async (
+  identifier: string,
+  payload: any,
+  taskSpec: TaskSpec
+) => {
+  const columns = [];
+  const bindings = [];
+  if (taskSpec.queueName) {
+    columns.push("queue_name");
+    bindings.push(taskSpec.queueName);
+  }
+  if (taskSpec.runAt) {
+    columns.push("run_at");
+    bindings.push(taskSpec.runAt);
+  }
+  if (taskSpec.priority) {
+    columns.push("priority");
+    bindings.push(taskSpec.priority);
+  }
+  if (taskSpec.maxAttempts) {
+    columns.push("max_attempts");
+    bindings.push(taskSpec.maxAttempts);
+  }
+  if (taskSpec.jobKey) {
+    columns.push("key");
+    bindings.push(taskSpec.jobKey);
+  }
+
+  const columnsVals = columns.map((colName) => `, ${colName}`).join("");
+  const bindingPlaceholders = columns.map((_) => ", ?").join("");
+
+  await r.knex.raw(
+    `
+      insert into graphile_worker.jobs (task_identifier, payload${columnsVals})
+      values (?, ?${bindingPlaceholders})
+    `,
+    [identifier, JSON.stringify(payload), ...bindings]
+  );
+};
 
 export interface ProgressJobPayload {
   campaignId: number;
@@ -48,8 +87,8 @@ export const addProgressJob = async <P extends ProgressJobPayload>(
     jobKey: `${jobResult.id}`
   };
 
-  const worker = await getWorker();
-  worker.addJob(identifier, wrappedPayload, innerSpec);
+  await addGraphileJob(identifier, wrappedPayload, innerSpec);
+
   return jobResult;
 };
 
