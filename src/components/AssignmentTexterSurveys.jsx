@@ -107,12 +107,11 @@ class AssignmentTexterSurveys extends Component {
 
     return question.text ? (
       <div key={step.id}>
-        <FormControl style={{ minWidth: "200px" }}>
+        <FormControl fullWidth>
           <InputLabel>{question?.text}</InputLabel>
           <Select
             name={step.id}
             value={responseValue}
-            fullWidth
             onChange={(e) => this.handleSelectChange(step, e.target.value)}
           >
             {this.renderAnswers(step)}
