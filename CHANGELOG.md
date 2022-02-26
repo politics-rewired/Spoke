@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.19.1](https://github.com/politics-rewired/spoke/compare/v4.19.0...v4.19.1) (2022-02-26)
+
+
+### Bug Fixes
+
+* fall back to null on NaN ([8642409](https://github.com/politics-rewired/spoke/commit/8642409bf72edffe15794eff4533dda30230e3bc))
+
 ## [4.19.0](https://github.com/politics-rewired/spoke/compare/v4.18.1...v4.19.0) (2022-02-25)
 
 
