@@ -4,7 +4,7 @@ import React from "react";
 
 import { Campaign } from "../api/campaign";
 import { CampaignContact } from "../api/campaign-contact";
-import { OranizationSettings } from "../api/organization-settings";
+import { OrganizationSettings } from "../api/organization-settings";
 import { DateTime } from "../lib/datetime";
 
 const inlineStyles = {
@@ -22,7 +22,7 @@ const inlineStyles = {
 interface ContactToolbarProps {
   campaignContact: CampaignContact;
   contactSettings: Pick<
-    OranizationSettings,
+    OrganizationSettings,
     "showContactLastName" | "showContactCell"
   >;
   rightToolbarIcon: React.ReactNode;
