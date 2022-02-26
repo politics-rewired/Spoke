@@ -1,8 +1,8 @@
-import { Campaign } from "./campaign";
-import { InteractionStep } from "./interaction-step";
-import { Message } from "./message";
-import { OptOut } from "./opt-out";
-import { AnswerOption } from "./question";
+import type { Campaign } from "./campaign";
+import type { InteractionStep } from "./interaction-step";
+import type { Message } from "./message";
+import type { OptOut } from "./opt-out";
+import type { AnswerOption } from "./question";
 
 export interface Location {
   city: string;

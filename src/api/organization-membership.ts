@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { Organization } from "./organization";
-import { RelayPageInfo } from "./pagination";
-import { User } from "./user";
+import type { Organization } from "./organization";
+import type { RelayPageInfo } from "./pagination";
+import type { User } from "./user";
 
 export enum UserRoleType {
   TEXTER = "TEXTER",

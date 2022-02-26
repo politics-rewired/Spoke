@@ -1,7 +1,7 @@
-import { Campaign } from "./campaign";
-import { Tag } from "./tag";
-import { TextRequestType } from "./types";
-import { User } from "./user";
+import type { Campaign } from "./campaign";
+import type { Tag } from "./tag";
+import type { TextRequestType } from "./types";
+import type { User } from "./user";
 
 export interface Team {
   id: string;

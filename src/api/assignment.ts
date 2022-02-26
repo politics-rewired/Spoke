@@ -1,7 +1,7 @@
-import { Campaign } from "./campaign";
-import { CampaignContact } from "./campaign-contact";
-import { CannedResponse } from "./canned-response";
-import { User } from "./user";
+import type { Campaign } from "./campaign";
+import type { CampaignContact } from "./campaign-contact";
+import type { CannedResponse } from "./canned-response";
+import type { User } from "./user";
 
 export interface TexterAssignmentInput {
   userId: string;

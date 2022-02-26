@@ -3,7 +3,7 @@ import { Knex } from "knex";
 import groupBy from "lodash/groupBy";
 import { RedisClient } from "redis";
 
-import { SpokeContext } from "../contexts";
+import type { SpokeContext } from "../contexts";
 import { cacheableData } from "./cacheable_queries";
 import datawarehouse from "./datawarehouse";
 import thinky from "./thinky";
