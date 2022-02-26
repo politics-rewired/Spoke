@@ -102,7 +102,7 @@ export const wrapProgressTask = <P extends { [key: string]: any }>(
     if (options.removeOnComplete) {
       await r.knex("job_request").where({ id: jobId }).del();
     }
-  } catch (err) {
+  } catch (err: any) {
     const { attempts, max_attempts } = helpers.job;
     if (attempts === max_attempts) {
       // "Complete" graphile job by recording error on the final attempt
