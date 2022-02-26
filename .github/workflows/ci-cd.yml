@@ -81,7 +81,7 @@ jobs:
         run: yarn jest --forceExit --detectOpenHandles src/**/*
 
   publish-docker-image:
-    if: startsWith( github.ref, 'refs/tags/v')
+    if: true # startsWith( github.ref, 'refs/tags/v')
     needs: test
     name: Publish Docker image
     runs-on: ubuntu-latest
