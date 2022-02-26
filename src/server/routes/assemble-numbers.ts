@@ -1,7 +1,7 @@
 import express from "express";
 
 import logger from "../../logger";
-import assembleNumbers from "../api/lib/assemble-numbers";
+import * as assembleNumbers from "../api/lib/assemble-numbers";
 import { errToObj } from "../utils";
 
 const router = express.Router();
