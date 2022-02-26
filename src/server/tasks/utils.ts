@@ -29,8 +29,8 @@ export const addProgressJob = async <P extends ProgressJobPayload>(
   const { campaignId } = payload;
   const { queueName = `${campaignId}:${identifier}` } = taskSpec;
 
-  const [jobResult]: [JobRequestRecord] = await r
-    .knex("job_request")
+  const [jobResult] = await r
+    .knex<JobRequestRecord>("job_request")
     .insert({
       job_type: identifier,
       status: 0,
@@ -80,14 +80,16 @@ export const wrapProgressTask = <P extends { [key: string]: any }>(
 
   const jobRequest = await r.knex("job_request").where({ id: jobId }).first();
 
-  const updateStatus = async (status: number) =>
-    r.knex("job_request").update({ status }).where({ id: jobId });
+  const updateStatus = async (status: number) => {
+    await r.knex("job_request").update({ status }).where({ id: jobId });
+  };
 
-  const updateResult = async (result: Record<string, unknown>) =>
-    r
+  const updateResult = async (result: Record<string, unknown>) => {
+    await r
       .knex("job_request")
       .update({ result_message: result })
       .where({ id: jobId });
+  };
 
   const progressHelpers: ProgressTaskHelpers = {
     ...helpers,
