@@ -19,10 +19,10 @@ const styles = {
     padding: 10
   },
   cardHeader: {
-    padding: 0
+    padding: 5
   },
   cardText: {
-    padding: 0
+    padding: 5
   }
 };
 
