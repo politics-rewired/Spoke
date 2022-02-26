@@ -159,7 +159,7 @@ class IncomingMessageActions extends Component {
                   <FlatButton
                     label={`Reassign all ${conversationCount} matching`}
                     onClick={this.onReassignAllMatchingClicked}
-                    disabled={conversationCount === 0}
+                    disabled={conversationCount === 0 || !hasSeletedTexters}
                   />
                 </div>
                 <Dialog
