@@ -46,7 +46,9 @@ export const StartCampaignButton: React.FC<StartCampaignButtonProps> = (
 
   const startText = data?.campaign?.isStarted
     ? "Already started"
-    : authz.isSuperadmin && !data?.campaign?.isApproved
+    : authz.isSuperadmin &&
+      !data?.campaign?.isApproved &&
+      orgSettings?.startCampaignRequiresApproval
     ? "Approve and start"
     : "Start this campaign";
 

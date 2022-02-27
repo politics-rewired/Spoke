@@ -43,7 +43,7 @@ export const ApproveCampaignButton: React.FC<ApproveCampaignButtonProps> = (
     });
   }, [campaignId, isSuperadmin, working, isApproved, setCampaignApproved]);
 
-  if (!isSuperadmin) {
+  if (!isSuperadmin || !orgSettings?.startCampaignRequiresApproval) {
     return null;
   }
 
