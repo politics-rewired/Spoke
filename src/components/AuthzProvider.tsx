@@ -1,6 +1,5 @@
 import { useCurrentUserOrganizationRolesQuery } from "@spoke/spoke-codegen";
 import React, { useContext, useEffect } from "react";
-import { useParams } from "react-router-dom";
 
 import { UserRoleType } from "../api/organization-membership";
 import { useSpokeContext } from "../client/spoke-context";
@@ -25,19 +24,20 @@ export const AuthzContext = React.createContext<AuthzContextType>({
 });
 
 export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
-  const { organizationId } = useParams<{ organizationId: string }>();
   const { data, loading, error } = useCurrentUserOrganizationRolesQuery({
     variables: { organizationId: props.organizationId },
     skip: props.organizationId === undefined
   });
   const roles = (data?.currentUser?.roles ?? []) as UserRoleType[];
-  const hasAdminPermissions = hasRole(UserRoleType.ADMIN, roles);
+  const isSuperadmin = data?.currentUser?.isSuperadmin ?? false;
+  const hasAdminPermissions =
+    isSuperadmin || hasRole(UserRoleType.ADMIN, roles);
 
   const { setOrganizationId } = useSpokeContext();
 
   useEffect(() => {
-    setOrganizationId(organizationId);
-  }, [organizationId]);
+    setOrganizationId(props.organizationId);
+  }, [props.organizationId]);
 
   useEffect(() => {
     if (!loading && error !== undefined) {
@@ -51,7 +51,7 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
     () => ({
       roles,
       hasRole: (role: UserRoleType) => hasRole(role, roles),
-      isSuperadmin: hasRole(UserRoleType.SUPERADMIN, roles),
+      isSuperadmin,
       isOwner: hasRole(UserRoleType.OWNER, roles),
       isAdmin: hasRole(UserRoleType.ADMIN, roles),
       isSupervol: hasRole(UserRoleType.SUPERVOLUNTEER, roles)

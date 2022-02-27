@@ -1,0 +1,28 @@
+query GetCampaignBuilderSettings($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    settings {
+      id
+      confirmationClickForScriptLinks
+      startCampaignRequiresApproval
+    }
+  }
+}
+
+mutation UpdateCampaignBuilderSettings(
+  $organizationId: String!
+  $confirmationClicks: Boolean
+  $requiresApproval: Boolean
+) {
+  editOrganizationSettings(
+    id: $organizationId
+    input: {
+      confirmationClickForScriptLinks: $confirmationClicks
+      startCampaignRequiresApproval: $requiresApproval
+    }
+  ) {
+    id
+    confirmationClickForScriptLinks
+    startCampaignRequiresApproval
+  }
+}
