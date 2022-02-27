@@ -42,7 +42,9 @@ const SETTINGS_WRITE_PERMISSIONS: {
   trollbotWebhookUrl: UserRoleType.OWNER
 };
 
-const SETTINGS_NAMES: { [key: string]: string } = {
+const SETTINGS_NAMES: Partial<
+  { [key in keyof IOrganizationSettings]: string }
+> = {
   optOutMessage: "opt_out_message"
 };
 
@@ -53,10 +55,17 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
     "I'm opting you out of texts immediately. Have a great day.",
   showContactLastName: false,
   showContactCell: false,
-  confirmationClickForScriptLinks: true
+  confirmationClickForScriptLinks: true,
+  startCampaignRequiresApproval: false
 };
 
-const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
+const SETTINGS_TRANSFORMERS: Partial<
+  {
+    [key in keyof IOrganizationSettings]: (
+      value: string
+    ) => IOrganizationSettings[key];
+  }
+> = {
   numbersApiKey: (value: string) => `${value.slice(0, 4)}****************`
 };
 
@@ -76,10 +85,10 @@ const SETTINGS_VALIDATORS: {
   }
 };
 
-const getOrgFeature = (
-  featureName: keyof IOrganizationSettings,
+export const getOrgFeature = <T extends keyof IOrganizationSettings>(
+  featureName: T,
   rawFeatures = "{}"
-): string | boolean | null => {
+): IOrganizationSettings[T] | null => {
   const defaultValue = SETTINGS_DEFAULTS[featureName];
   const finalName = SETTINGS_NAMES[featureName] ?? featureName;
   try {
@@ -87,7 +96,8 @@ const getOrgFeature = (
     const value = features[finalName] ?? defaultValue ?? null;
     const transformer = SETTINGS_TRANSFORMERS[featureName];
     if (transformer && value) {
-      return SETTINGS_TRANSFORMERS[featureName](value);
+      const result = transformer(value);
+      return result as IOrganizationSettings[T];
     }
     return value;
   } catch (_err) {
@@ -95,17 +105,17 @@ const getOrgFeature = (
   }
 };
 
-interface SettingsResolverType {
+interface SettingsResolverType<F extends keyof IOrganizationSettings> {
   (
     organization: { id: string; features: string },
     _: any,
     context: { user: { id: string } }
-  ): Promise<string | boolean | null>;
+  ): Promise<IOrganizationSettings[F] | null>;
 }
 
 const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
   settingNames.reduce((accumulator, settingName) => {
-    const resolver: SettingsResolverType = async (
+    const resolver: SettingsResolverType<typeof settingName> = async (
       { id: organizationId, features },
       _,
       { user }
