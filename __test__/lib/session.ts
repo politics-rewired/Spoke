@@ -51,11 +51,14 @@ export const createOrgAndSession = async (
   const organization = await createOrganization(client, orgOptions);
 
   const password = "KeepItSecretKeepItSafe";
-  const user = await createUser(client, { password });
+  const user = await createUser(client, {
+    password,
+    isSuperadmin: role === UserRoleType.SUPERADMIN
+  });
   await createUserOrganization(client, {
     userId: user.id,
     organizationId: organization.id,
-    role
+    role: role === UserRoleType.SUPERADMIN ? UserRoleType.OWNER : role
   });
   const cookies = await createSession({ agent, email: user.email, password });
 

@@ -1,7 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 
 import {
-  TexterOrganizationSettingsFragmentFragment,
+  OrganizationSettingsFragmentFragment,
   useGetOrganizationSettingsQuery
 } from "../../libs/spoke-codegen/src";
 
@@ -14,7 +14,7 @@ export interface InstanceSettings {
 
 export interface SpokeContextType {
   settings?: InstanceSettings;
-  orgSettings?: TexterOrganizationSettingsFragmentFragment;
+  orgSettings?: OrganizationSettingsFragmentFragment;
   setOrganizationId: (organizationId?: string) => void;
 }
 
@@ -29,14 +29,17 @@ export const SpokeContextProvider: React.FC = (props) => {
 
   const { data } = useGetOrganizationSettingsQuery({
     variables: { organizationId: organizationId! },
-    skip: organizationId === undefined
+    skip: organizationId === undefined,
+    errorPolicy: "ignore"
   });
 
-  // eslint-disable-next-line react/jsx-no-constructed-context-values
-  const value = {
-    orgSettings: data?.organization?.settings,
-    setOrganizationId
-  };
+  const value = useMemo(
+    () => ({
+      orgSettings: data?.organization?.settings,
+      setOrganizationId
+    }),
+    [data?.organization?.settings, setOrganizationId]
+  );
 
   return (
     <SpokeContext.Provider value={value}>

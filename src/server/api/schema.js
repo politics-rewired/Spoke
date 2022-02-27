@@ -57,7 +57,8 @@ import {
   assignmentRequired,
   assignmentRequiredOrHasOrgRoleForCampaign,
   authRequired,
-  superAdminRequired
+  superAdminRequired,
+  userRoleRequired
 } from "./errors";
 import { resolvers as externalActivistCodeResolvers } from "./external-activist-code";
 import { resolvers as externalListResolvers } from "./external-list";
@@ -83,7 +84,8 @@ import { resolvers as organizationResolvers } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
 import {
   resolvers as settingsSchema,
-  updateOrganizationSettings
+  updateOrganizationSettings,
+  writePermissionRequired
 } from "./organization-settings";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
@@ -451,7 +453,8 @@ const rootMutations = {
       { user: authUser }
     ) => {
       const organizationId = parseInt(id, 10);
-      await accessRequired(authUser, organizationId, "OWNER");
+      const roleRequired = writePermissionRequired(input);
+      await userRoleRequired(authUser, organizationId, roleRequired);
       const updatedOrganization = await updateOrganizationSettings(
         organizationId,
         input

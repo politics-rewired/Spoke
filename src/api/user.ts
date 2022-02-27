@@ -24,6 +24,7 @@ export interface User {
   assignedCell: string;
   assignment: Assignment;
   terms: boolean;
+  isSuperadmin: boolean;
 }
 
 export const schema = `
@@ -43,6 +44,7 @@ export const schema = `
     assignedCell: Phone
     assignment(campaignId: String): Assignment,
     terms: Boolean
+    isSuperadmin: Boolean!
   }
   
   type UsersList {
