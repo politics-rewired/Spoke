@@ -740,6 +740,13 @@ const rootMutations = {
         "ADMIN",
         /* allowSuperadmin= */ true
       );
+      const { features } = await loaders.organization.load(
+        campaign.organizationId
+      );
+      const requiresApproval = getOrgFeature(
+        "startCampaignRequiresApproval",
+        features
+      );
 
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
@@ -754,7 +761,8 @@ const rootMutations = {
           description: campaign.description,
           due_by: campaign.dueBy,
           is_started: false,
-          is_archived: false
+          is_archived: false,
+          is_approved: false
         })
         .returning("*");
 
@@ -764,7 +772,7 @@ const rootMutations = {
         loaders,
         user,
         origCampaignRecord,
-        false
+        requiresApproval
       );
     },
 
@@ -816,6 +824,23 @@ const rootMutations = {
         .update({ is_archived: true })
         .where({ id })
         .returning("*");
+
+      return campaign;
+    },
+
+    setCampaignApproved: async (_root, { id, approved }, { user, loaders }) => {
+      const { organization_id } = await loaders.campaign.load(id);
+      await superAdminRequired(user);
+
+      const [campaign] = await r
+        .knex("campaign")
+        .update({ is_approved: approved })
+        .where({ id })
+        .returning("*");
+
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
 
       return campaign;
     },

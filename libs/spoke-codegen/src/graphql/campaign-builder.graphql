@@ -1,0 +1,23 @@
+query GetCampaignStatus($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    isStarted
+    isApproved
+  }
+}
+
+mutation SetCampaignApproved($campaignId: String!, $approved: Boolean!) {
+  setCampaignApproved(id: $campaignId, approved: $approved) {
+    id
+    isStarted
+    isApproved
+  }
+}
+
+mutation StartCampaign($campaignId: String!) {
+  startCampaign(id: $campaignId) {
+    id
+    isStarted
+    isApproved
+  }
+}

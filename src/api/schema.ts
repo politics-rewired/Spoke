@@ -272,6 +272,7 @@ const rootSchema = `
       optOut: ContactActionInput,
       closeConversation: Boolean
     ): CampaignContact,
+    setCampaignApproved(id: String!, approved: Boolean!): Campaign!,
     startCampaign(id:String!): Campaign,
     archiveCampaign(id:String!): Campaign,
     unarchiveCampaign(id:String!): Campaign,

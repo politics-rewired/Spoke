@@ -210,6 +210,7 @@ const queries = {
           logoImageUrl
           primaryColor
           isStarted
+          isApproved
         }
       }
     `,
@@ -237,6 +238,7 @@ const mutations = {
           logoImageUrl
           primaryColor
           isStarted
+          isApproved
           readiness {
             id
             basics
