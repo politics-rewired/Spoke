@@ -252,8 +252,18 @@ export const editCampaign = async (
   campaign: CampaignInput,
   loaders: any,
   user: UserRecord,
-  origCampaignRecord: CampaignRecord
+  origCampaignRecord: CampaignRecord,
+  requiresApproval = false
 ) => {
+  const unstartIfNecessary = async () => {
+    if (!user.is_superadmin && requiresApproval) {
+      await r
+        .knex("campaign")
+        .update({ is_started: false, is_approved: false })
+        .where({ id });
+    }
+  };
+
   const {
     title,
     description,
@@ -457,6 +467,7 @@ export const editCampaign = async (
   }
 
   if (Object.prototype.hasOwnProperty.call(campaign, "interactionSteps")) {
+    await unstartIfNecessary();
     memoizer.invalidate(cacheOpts.CampaignInteractionSteps.key, {
       campaignId: id
     });
@@ -477,6 +488,7 @@ export const editCampaign = async (
   }
 
   if (Object.prototype.hasOwnProperty.call(campaign, "cannedResponses")) {
+    await unstartIfNecessary();
     memoizer.invalidate(cacheOpts.CampaignCannedResponses.key, {
       campaignId: id
     });

@@ -16,4 +16,5 @@ fragment OrganizationSettingsInfo on OrganizationSettings {
   showContactLastName
   showContactCell
   confirmationClickForScriptLinks
+  startCampaignRequiresApproval
 }

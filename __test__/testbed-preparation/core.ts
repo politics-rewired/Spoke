@@ -123,6 +123,7 @@ export type CreateCampaignOptions = Partial<
     Campaign,
     | "title"
     | "description"
+    | "isApproved"
     | "isStarted"
     | "isArchived"
     | "textingHoursStart"
@@ -151,6 +152,7 @@ export const createCampaign = async (
         organization_id,
         title,
         description,
+        is_approved,
         is_started,
         is_archived,
         use_dynamic_assignment,
@@ -166,13 +168,14 @@ export const createCampaign = async (
         replies_stale_after_minutes,
         landlines_filtered,
         external_system_id
-      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
       returning *
     `,
       [
         options.organizationId,
         options.title ?? faker.company.companyName(),
         options.description ?? faker.lorem.sentence(),
+        options.isApproved ?? false,
         options.isStarted ?? true,
         options.isArchived ?? false,
         false,

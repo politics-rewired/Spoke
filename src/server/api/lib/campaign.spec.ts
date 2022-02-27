@@ -1,8 +1,12 @@
 import { Pool } from "pg";
 import supertest from "supertest";
 
-import { createSession } from "../../../../__test__/lib/session";
 import {
+  createOrgAndSession,
+  createSession
+} from "../../../../__test__/lib/session";
+import {
+  createCampaign,
   createCompleteCampaign,
   createMessage,
   createOrganization,
@@ -168,5 +172,197 @@ describe("create / edit campaign", () => {
 
     expect(response.ok).toBeTruthy();
     expect(response.body.data.createCampaign).toHaveProperty("id");
+  });
+
+  const mockCampaign = async (args: {
+    role: UserRoleType;
+    startCampaignRequiresApproval: boolean;
+    isStarted: boolean;
+    isApproved: boolean;
+  }) => {
+    const { role, startCampaignRequiresApproval, isStarted, isApproved } = args;
+    const mocks = await withClient(pool, async (client) => {
+      const result = await createOrgAndSession(client, {
+        agent,
+        role,
+        orgOptions: { features: { startCampaignRequiresApproval } }
+      });
+      const campaign = await createCampaign(client, {
+        organizationId: result.organization.id,
+        isStarted,
+        isApproved
+      });
+      return { ...result, campaign };
+    });
+    return mocks;
+  };
+
+  const startCampaignReq = async (
+    reqCookies: Record<string, string>,
+    campaignId: number
+  ) => {
+    const response = await agent
+      .post(`/graphql`)
+      .set(reqCookies)
+      .send({
+        operationName: "StartCampaign",
+        variables: { campaignId: `${campaignId}` },
+        query: `
+          mutation StartCampaign($campaignId: String!) {
+            startCampaign(id: $campaignId) {
+              id
+              isStarted
+              isApproved
+            }
+          }
+        `
+      });
+    return response;
+  };
+
+  it("allows an owner to start a campaign by default", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.OWNER,
+      startCampaignRequiresApproval: false,
+      isStarted: false,
+      isApproved: false
+    });
+
+    const response = await startCampaignReq(mocks.cookies, mocks.campaign.id);
+
+    expect(response.ok).toBe(true);
+    expect(response.body.data.startCampaign.isStarted).toBe(true);
+  });
+
+  it("prevents an owner from starting a campaign if unapproved", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.OWNER,
+      startCampaignRequiresApproval: true,
+      isStarted: false,
+      isApproved: false
+    });
+
+    const response = await startCampaignReq(mocks.cookies, mocks.campaign.id);
+
+    expect(response.ok).toBe(true);
+    expect(response.body.data.startCampaign).toBeNull();
+    expect(response.body.errors.length).toBeGreaterThan(0);
+  });
+
+  it("allows an owner to start a campaign if approved", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.OWNER,
+      startCampaignRequiresApproval: true,
+      isStarted: false,
+      isApproved: true
+    });
+
+    const response = await startCampaignReq(mocks.cookies, mocks.campaign.id);
+
+    expect(response.ok).toBe(true);
+    expect(response.body.data.startCampaign.isStarted).toBe(true);
+  });
+
+  it("allows a superadmin to start a campaign if unapproved", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.SUPERADMIN,
+      startCampaignRequiresApproval: true,
+      isStarted: false,
+      isApproved: false
+    });
+
+    const response = await startCampaignReq(mocks.cookies, mocks.campaign.id);
+
+    expect(response.ok).toBe(true);
+    const { startCampaign } = response.body.data;
+    expect(startCampaign.isStarted).toBe(true);
+    expect(startCampaign.isApproved).toBe(true);
+  });
+
+  const campaignEdits = {
+    questionText: "How are they?",
+    scriptOption: "How are you doing?"
+  };
+
+  const makeEdits = async (
+    cookiesForEdit: Record<string, string>,
+    campaignId: number
+  ) => {
+    const response = await agent
+      .post(`/graphql`)
+      .set(cookiesForEdit)
+      .send({
+        operationName: "EditCampaign",
+        variables: {
+          campaignId: `${campaignId}`,
+          campaign: {
+            interactionSteps: {
+              id: "new",
+              scriptOptions: [campaignEdits.scriptOption],
+              questionText: campaignEdits.questionText,
+              interactionSteps: []
+            }
+          }
+        },
+        query: `
+          mutation EditCampaign($campaignId: String!, $campaign: CampaignInput!) {
+            editCampaign(id: $campaignId, campaign: $campaign) {
+              id
+              isStarted
+              isApproved
+              interactionSteps {
+                id
+                questionText
+                scriptOptions
+              }
+            }
+          }
+        `
+      });
+    return response;
+  };
+
+  it("unstarts running campaign if owner makes changes", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.OWNER,
+      startCampaignRequiresApproval: true,
+      isStarted: true,
+      isApproved: true
+    });
+
+    const response = await makeEdits(mocks.cookies, mocks.campaign.id);
+
+    expect(response.ok).toBe(true);
+    const { editCampaign } = response.body.data;
+    expect(editCampaign.isStarted).toBe(false);
+    expect(editCampaign.isApproved).toBe(false);
+    expect(editCampaign.interactionSteps[0].questionText).toEqual(
+      campaignEdits.questionText
+    );
+    expect(editCampaign.interactionSteps[0].scriptOptions[0]).toEqual(
+      campaignEdits.scriptOption
+    );
+  });
+
+  it("does not unstart running campaign if superadmin makes changes", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.SUPERADMIN,
+      startCampaignRequiresApproval: true,
+      isStarted: true,
+      isApproved: true
+    });
+
+    const response = await makeEdits(mocks.cookies, mocks.campaign.id);
+
+    expect(response.ok).toBe(true);
+    const { editCampaign } = response.body.data;
+    expect(editCampaign.isStarted).toBe(true);
+    expect(editCampaign.isApproved).toBe(mocks.campaign.is_approved);
+    expect(editCampaign.interactionSteps[0].questionText).toEqual(
+      campaignEdits.questionText
+    );
+    expect(editCampaign.interactionSteps[0].scriptOptions[0]).toEqual(
+      campaignEdits.scriptOption
+    );
   });
 });

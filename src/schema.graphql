@@ -409,6 +409,9 @@ input OrganizationSettingsInput {
   defaulTexterApprovalStatus: RequestAutoApprove
   numbersApiKey: String
   trollbotWebhookUrl: String
+
+  # Superadmin
+  startCampaignRequiresApproval: Boolean
 }
 
 type OrganizationSettings {
@@ -419,6 +422,9 @@ type OrganizationSettings {
   showContactLastName: Boolean!
   showContactCell: Boolean!
   confirmationClickForScriptLinks: Boolean!
+
+  # Supervolunteer
+  startCampaignRequiresApproval: Boolean
 
   # Owner
   defaulTexterApprovalStatus: RequestAutoApprove
@@ -532,6 +538,7 @@ type Campaign {
   description: String
   dueBy: Date
   readiness: CampaignReadiness!
+  isApproved: Boolean!
   isStarted: Boolean
   isArchived: Boolean
   creator: User
