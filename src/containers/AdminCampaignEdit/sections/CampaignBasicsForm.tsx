@@ -101,7 +101,7 @@ class CampaignBasicsForm extends React.Component<
   };
 
   deleteDueDate = () => {
-    const pendingChanges = { dueBy: null };
+    const pendingChanges = { ...this.state.pendingChanges, dueBy: null };
     this.setState({ pendingChanges });
   };
 
