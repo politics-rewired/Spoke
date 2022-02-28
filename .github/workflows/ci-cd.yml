@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 14.18.3-buster
+          - 16.14.0-buster
 
     container:
       image: node:${{ matrix.node-version }}
