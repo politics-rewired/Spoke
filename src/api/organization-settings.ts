@@ -1,4 +1,4 @@
-import { RequestAutoApproveType } from "./organization-membership";
+import type { RequestAutoApproveType } from "./organization-membership";
 
 export interface OrganizationSettingsInput {
   // Owner

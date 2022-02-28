@@ -6,7 +6,7 @@
   "engines": {
     "npm": "please-use-yarn",
     "yarn": ">= 1.19.1",
-    "node": "^14.16.0"
+    "node": ">= 16.14.0"
   },
   "scripts": {
     "preinstall": "node -e \"if(process.env.npm_execpath.indexOf('yarn') === -1) throw new Error('spoke must be installed with Yarn: https://yarnpkg.com/')\"",
@@ -204,7 +204,7 @@
     "@types/lodash": "^4.14.168",
     "@types/luxon": "^1.25.2",
     "@types/material-ui": "^0.21.7",
-    "@types/node": "^14.14.30",
+    "@types/node": "^16.11.26",
     "@types/node-cron": "^2.0.3",
     "@types/nodemailer": "^6.4.0",
     "@types/passport": "^1.0.4",
@@ -223,11 +223,12 @@
     "@types/webpack-dev-server": "^4.7.2",
     "@types/yup": "^0.26.34",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
-    "@typescript-eslint/parser": "^5.11.0",
+    "@typescript-eslint/parser": "^5.12.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^27.0.6",
     "babel-loader": "^8.0.0",
+    "babel-plugin-tsconfig-paths-module-resolver": "^1.0.3",
     "commitizen": "^4.0.3",
     "conventional-changelog-cli": "^2.0.31",
     "enzyme": "^3.11.0",
@@ -235,7 +236,8 @@
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^6.9.0",
-    "eslint-plugin-import": "^2.25.3",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.28.0",

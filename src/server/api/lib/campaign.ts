@@ -16,7 +16,7 @@ import {
   loadContactsFromDataWarehouse,
   uploadContacts
 } from "../../../workers/jobs";
-import { SpokeDbContext } from "../../contexts";
+import type { SpokeDbContext } from "../../contexts/types";
 import { cacheOpts, memoizer } from "../../memoredis";
 import { cacheableData, datawarehouse, r } from "../../models";
 import { addAssignTexters } from "../../tasks/assign-texters";

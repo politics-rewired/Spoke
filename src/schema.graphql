@@ -760,6 +760,7 @@ type Location {
 input ContactNameFilter {
   firstName: String
   lastName: String
+  cellNumber: String
 }
 
 type CampaignContact {

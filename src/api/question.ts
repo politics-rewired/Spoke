@@ -1,5 +1,5 @@
-import { CampaignContact } from "./campaign-contact";
-import { InteractionStep } from "./interaction-step";
+import type { CampaignContact } from "./campaign-contact";
+import type { InteractionStep } from "./interaction-step";
 
 export interface AnswerOption {
   interactionStepId: string;

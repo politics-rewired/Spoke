@@ -123,7 +123,7 @@ class IncomingMessageActions extends Component {
 
     const { contactsAreSelected, conversationCount } = this.props;
     const { selectedTexters } = this.state;
-    const hasSeletedTexters = selectedTexters.length > 0;
+    const hasSelectedTexters = selectedTexters.length > 0;
     return (
       <Card>
         <CardHeader
@@ -152,14 +152,14 @@ class IncomingMessageActions extends Component {
                   <FlatButton
                     label="Reassign selected"
                     onClick={this.onReassignmentClicked}
-                    disabled={!contactsAreSelected || !hasSeletedTexters}
+                    disabled={!contactsAreSelected || !hasSelectedTexters}
                   />
                 </div>
                 <div className={css(styles.flexColumn)}>
                   <FlatButton
                     label={`Reassign all ${conversationCount} matching`}
                     onClick={this.onReassignAllMatchingClicked}
-                    disabled={conversationCount === 0}
+                    disabled={conversationCount === 0 || !hasSelectedTexters}
                   />
                 </div>
                 <Dialog

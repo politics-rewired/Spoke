@@ -1,8 +1,8 @@
+import { OrganizationSettingsInput } from "@spoke/spoke-codegen";
 import { Pool } from "pg";
 import supertest from "supertest";
 
 import { createOrgAndSession } from "../../__test__/lib/session";
-import { OrganizationSettingsInput } from "../../libs/spoke-codegen/src";
 import {
   RequestAutoApproveType,
   UserRoleType

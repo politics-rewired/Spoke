@@ -78,6 +78,10 @@ async function getConversationsJoinsAndWhereClause(
         "ilike",
         `${contactNameFilter.lastName}%`
       );
+    if (contactNameFilter.cellNumber)
+      query = query.where({
+        "campaign_contact.cell": contactNameFilter.cellNumber
+      });
   }
 
   if (campaignsFilter) {
