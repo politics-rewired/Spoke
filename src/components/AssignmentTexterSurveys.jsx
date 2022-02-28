@@ -1,11 +1,18 @@
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
+import Collapse from "@material-ui/core/Collapse";
 import Divider from "@material-ui/core/Divider";
 import FormControl from "@material-ui/core/FormControl";
+import IconButton from "@material-ui/core/IconButton";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import Typography from "@material-ui/core/Typography";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import sample from "lodash/sample";
-import { Card, CardHeader, CardText } from "material-ui/Card";
 import { grey50 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -21,7 +28,7 @@ const styles = {
   cardHeader: {
     padding: 5
   },
-  cardText: {
+  cardContent: {
     padding: 5
   }
 };
@@ -52,8 +59,8 @@ class AssignmentTexterSurveys extends Component {
     return null;
   };
 
-  handleExpandChange = (newExpandedState) => {
-    this.setState({ showAllQuestions: newExpandedState });
+  handleExpandChange = () => {
+    this.setState({ showAllQuestions: !this.state.showAllQuestions });
   };
 
   // eslint-disable-next-line react/no-unused-class-component-methods
@@ -72,7 +79,7 @@ class AssignmentTexterSurveys extends Component {
     });
   };
 
-  handleSelectChange = async (interactionStep, value) => {
+  handleSelectChange = (interactionStep, value) => {
     const { onQuestionResponseChange } = this.props;
     let questionResponseValue = null;
     let nextScript = "";
@@ -117,7 +124,7 @@ class AssignmentTexterSurveys extends Component {
           <InputLabel>{question?.text}</InputLabel>
           <Select
             name={step.id}
-            value={responseValue}
+            value={responseValue ?? ""}
             IconComponent={LargeDropDownIcon}
             onChange={(e) => this.handleSelectChange(step, e.target.value)}
           >
@@ -132,21 +139,38 @@ class AssignmentTexterSurveys extends Component {
 
   render() {
     const { interactionSteps, currentInteractionStep } = this.props;
+    const questions = interactionSteps.filter(
+      ({ question }) => (question.text || "") !== ""
+    );
 
     const { showAllQuestions } = this.state;
-    return interactionSteps.length === 0 ? null : (
-      <Card style={styles.card} onExpandChange={this.handleExpandChange}>
+    return questions.length === 0 ? null : (
+      <Card style={styles.card}>
         <CardHeader
+          title={
+            <Typography variant="body1" component="span">
+              {showAllQuestions ? "All questions" : "Current question"}
+            </Typography>
+          }
           style={styles.cardHeader}
-          title={showAllQuestions ? "All questions" : "Current question"}
-          showExpandableButton={interactionSteps.length > 1}
+          action={
+            questions.length > 1 && (
+              <IconButton onClick={this.handleExpandChange}>
+                {showAllQuestions ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              </IconButton>
+            )
+          }
         />
-        <CardText style={styles.cardText}>
-          {showAllQuestions ? "" : this.renderStep(currentInteractionStep)}
-        </CardText>
-        <CardText style={styles.cardText} expandable>
-          {interactionSteps.map((step) => this.renderStep(step))}
-        </CardText>
+        <CardContent style={styles.cardContent}>
+          {currentInteractionStep && this.renderStep(currentInteractionStep)}
+        </CardContent>
+        <Collapse in={showAllQuestions}>
+          <CardContent style={styles.cardContent}>
+            {questions
+              .filter((step) => step.id !== currentInteractionStep.id)
+              .map((step) => this.renderStep(step))}
+          </CardContent>
+        </Collapse>
       </Card>
     );
   }
