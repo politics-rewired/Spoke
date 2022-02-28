@@ -1,15 +1,15 @@
 /* eslint-disable no-unused-vars */
-import { CampaignContactInput } from "./campaign-contact";
-import { CampaignGroupPage } from "./campaign-group";
-import { CannedResponseInput } from "./canned-response";
-import { ExternalSystem } from "./external-system";
-import {
+import type { CampaignContactInput } from "./campaign-contact";
+import type { CampaignGroupPage } from "./campaign-group";
+import type { CannedResponseInput } from "./canned-response";
+import type { ExternalSystem } from "./external-system";
+import type {
   InteractionStep,
   InteractionStepWithChildren
 } from "./interaction-step";
-import { Team } from "./team";
-import { PageInfo } from "./types";
-import { User } from "./user";
+import type { Team } from "./team";
+import type { PageInfo } from "./types";
+import type { User } from "./user";
 
 export enum ExternalSyncReadinessState {
   READY = "READY",

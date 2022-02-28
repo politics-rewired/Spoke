@@ -3,8 +3,8 @@
 import AuthHasher from "passport-local-authenticate";
 
 import { capitalizeWord } from "./api/lib/utils";
-import { UserRecord } from "./api/types";
-import { SpokeDbContext } from "./contexts";
+import type { UserRecord } from "./api/types";
+import type { SpokeDbContext } from "./contexts/types";
 
 export interface HashedPassword {
   salt: string;

@@ -1,9 +1,8 @@
-import React, { useContext, useState } from "react";
-
 import {
   TexterOrganizationSettingsFragmentFragment,
   useGetOrganizationSettingsQuery
-} from "../../libs/spoke-codegen/src";
+} from "@spoke/spoke-codegen";
+import React, { useContext, useState } from "react";
 
 export interface InstanceSettings {
   BASE_URL: string;
