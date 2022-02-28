@@ -2,12 +2,12 @@ query GetOrganizationSettings($organizationId: String!) {
   organization(id: $organizationId) {
     id
     settings {
-      ...OrganizationSettingsFragment
+      ...OrganizationSettingsInfo
     }
   }
 }
 
-fragment OrganizationSettingsFragment on OrganizationSettings {
+fragment OrganizationSettingsInfo on OrganizationSettings {
   id
   defaulTexterApprovalStatus
   optOutMessage

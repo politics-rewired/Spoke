@@ -1,7 +1,7 @@
 import React, { useContext, useMemo, useState } from "react";
 
 import {
-  OrganizationSettingsFragmentFragment,
+  OrganizationSettingsInfoFragment,
   useGetOrganizationSettingsQuery
 } from "../../libs/spoke-codegen/src";
 
@@ -14,7 +14,7 @@ export interface InstanceSettings {
 
 export interface SpokeContextType {
   settings?: InstanceSettings;
-  orgSettings?: OrganizationSettingsFragmentFragment;
+  orgSettings?: OrganizationSettingsInfoFragment;
   setOrganizationId: (organizationId?: string) => void;
 }
 
