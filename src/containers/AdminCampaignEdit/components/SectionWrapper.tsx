@@ -10,9 +10,13 @@ import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import React from "react";
 import { compose, withProps } from "recompose";
 
-import { withAuthzContext } from "../../../components/AuthzProvider";
+import {
+  AuthzContextType,
+  withAuthzContext
+} from "../../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
+import { MuiThemeProviderProps } from "../../../styles/types";
 import { loadData } from "../../hoc/with-operations";
 import { CampaignReadinessType } from "../types";
 
@@ -314,14 +318,10 @@ interface WrapperGraphqlProps {
   };
 }
 
-interface AuthzProviderProps {
-  isAdmin: boolean;
-}
-
 interface WrappedComponentProps
   extends RequiredComponentProps,
     MuiThemeProviderProps,
-    AuthzProviderProps {
+    AuthzContextType {
   pendingJob?: PendingJobType;
   isExpandable: boolean;
   sectionIsDone: boolean;
@@ -337,7 +337,7 @@ export const asSection = (options: SectionOptions) => (
       queries: makeQueries(options.jobQueueNames),
       mutations
     }),
-    withProps((ownerProps: WrapperGraphqlProps & AuthzProviderProps) => {
+    withProps((ownerProps: WrapperGraphqlProps & AuthzContextType) => {
       const {
         expandableBySuperVolunteers,
         expandAfterCampaignStarts,

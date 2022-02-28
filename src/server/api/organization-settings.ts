@@ -6,7 +6,7 @@ import { config } from "../../config";
 import { stringIsAValidUrl } from "../../lib/utils";
 import { r } from "../models";
 import { organizationCache } from "../models/cacheable_queries/organization";
-import { accessRequired } from "./errors";
+import { accessRequired, roleIndex } from "./errors";
 
 interface IOrganizationSettings {
   defaulTexterApprovalStatus: string;
@@ -21,16 +21,30 @@ interface IOrganizationSettings {
 const SETTINGS_PERMISSIONS: {
   [key in keyof IOrganizationSettings]: UserRoleType;
 } = {
-  defaulTexterApprovalStatus: UserRoleType.OWNER,
-  optOutMessage: UserRoleType.OWNER,
-  numbersApiKey: UserRoleType.OWNER,
-  trollbotWebhookUrl: UserRoleType.OWNER,
+  optOutMessage: UserRoleType.TEXTER,
   showContactLastName: UserRoleType.TEXTER,
   showContactCell: UserRoleType.TEXTER,
-  confirmationClickForScriptLinks: UserRoleType.TEXTER
+  confirmationClickForScriptLinks: UserRoleType.TEXTER,
+  defaulTexterApprovalStatus: UserRoleType.OWNER,
+  numbersApiKey: UserRoleType.OWNER,
+  trollbotWebhookUrl: UserRoleType.OWNER
 };
 
-const SETTINGS_NAMES: { [key: string]: string } = {
+const SETTINGS_WRITE_PERMISSIONS: {
+  [key in keyof IOrganizationSettings]: UserRoleType;
+} = {
+  optOutMessage: UserRoleType.OWNER,
+  showContactLastName: UserRoleType.OWNER,
+  showContactCell: UserRoleType.OWNER,
+  confirmationClickForScriptLinks: UserRoleType.OWNER,
+  defaulTexterApprovalStatus: UserRoleType.OWNER,
+  numbersApiKey: UserRoleType.OWNER,
+  trollbotWebhookUrl: UserRoleType.OWNER
+};
+
+const SETTINGS_NAMES: Partial<
+  { [key in keyof IOrganizationSettings]: string }
+> = {
   optOutMessage: "opt_out_message"
 };
 
@@ -44,7 +58,13 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   confirmationClickForScriptLinks: true
 };
 
-const SETTINGS_TRANSFORMERS: { [key: string]: { (value: string): string } } = {
+const SETTINGS_TRANSFORMERS: Partial<
+  {
+    [key in keyof IOrganizationSettings]: (
+      value: string
+    ) => IOrganizationSettings[key];
+  }
+> = {
   numbersApiKey: (value: string) => `${value.slice(0, 4)}****************`
 };
 
@@ -64,10 +84,10 @@ const SETTINGS_VALIDATORS: {
   }
 };
 
-const getOrgFeature = (
-  featureName: keyof IOrganizationSettings,
+export const getOrgFeature = <T extends keyof IOrganizationSettings>(
+  featureName: T,
   rawFeatures = "{}"
-): string | boolean | null => {
+): IOrganizationSettings[T] | null => {
   const defaultValue = SETTINGS_DEFAULTS[featureName];
   const finalName = SETTINGS_NAMES[featureName] ?? featureName;
   try {
@@ -75,7 +95,8 @@ const getOrgFeature = (
     const value = features[finalName] ?? defaultValue ?? null;
     const transformer = SETTINGS_TRANSFORMERS[featureName];
     if (transformer && value) {
-      return SETTINGS_TRANSFORMERS[featureName](value);
+      const result = transformer(value);
+      return result as IOrganizationSettings[T];
     }
     return value;
   } catch (_err) {
@@ -83,17 +104,17 @@ const getOrgFeature = (
   }
 };
 
-interface SettingsResolverType {
+interface SettingsResolverType<F extends keyof IOrganizationSettings> {
   (
     organization: { id: string; features: string },
     _: any,
     context: { user: { id: string } }
-  ): Promise<string | boolean | null>;
+  ): Promise<IOrganizationSettings[F] | null>;
 }
 
 const settingResolvers = (settingNames: (keyof IOrganizationSettings)[]) =>
   settingNames.reduce((accumulator, settingName) => {
-    const resolver: SettingsResolverType = async (
+    const resolver: SettingsResolverType<typeof settingName> = async (
       { id: organizationId, features },
       _,
       { user }
@@ -118,6 +139,27 @@ export const resolvers = {
       "confirmationClickForScriptLinks"
     ])
   }
+};
+
+export const writePermissionRequired = (
+  input: Partial<IOrganizationSettings>
+): UserRoleType => {
+  let highestRole = UserRoleType.TEXTER;
+  const settingNames = Object.keys(input) as (keyof IOrganizationSettings)[];
+
+  for (const settingName of settingNames) {
+    const settingRequires = SETTINGS_WRITE_PERMISSIONS[settingName]!;
+    if ([highestRole, settingRequires].includes(UserRoleType.SUPERADMIN)) {
+      highestRole = UserRoleType.SUPERADMIN;
+    } else {
+      highestRole =
+        roleIndex(settingRequires) > roleIndex(highestRole)
+          ? settingRequires
+          : highestRole;
+    }
+  }
+
+  return highestRole;
 };
 
 export const updateOrganizationSettings = async (
