@@ -55,8 +55,7 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
     "I'm opting you out of texts immediately. Have a great day.",
   showContactLastName: false,
   showContactCell: false,
-  confirmationClickForScriptLinks: true,
-  startCampaignRequiresApproval: false
+  confirmationClickForScriptLinks: true
 };
 
 const SETTINGS_TRANSFORMERS: Partial<
