@@ -73,7 +73,8 @@ const IDLE_KEY_TIME = 500;
 class IncomingMessageFilter extends Component {
   state = {
     firstName: undefined,
-    lastName: undefined
+    lastName: undefined,
+    cellNumber: undefined
   };
 
   submitNameUpdateTimeout = undefined;
@@ -130,11 +131,8 @@ class IncomingMessageFilter extends Component {
 
   onContactNameChanged = (ev) => {
     const name = ev.target.value;
-    const { firstName, lastName } = nameComponents(name);
-    // eslint-disable-next-line react/no-direct-mutation-state
-    this.state.firstName = firstName;
-    // eslint-disable-next-line react/no-direct-mutation-state
-    this.state.lastName = lastName;
+    const { firstName, lastName, cellNumber } = nameComponents(name);
+    this.setState({ firstName, lastName, cellNumber });
     clearTimeout(this.submitNameUpdateTimeout);
     this.submitNameUpdateTimeout = setTimeout(
       this.searchByNewContactName,
@@ -143,8 +141,8 @@ class IncomingMessageFilter extends Component {
   };
 
   searchByNewContactName = () => {
-    const { firstName, lastName } = this.state;
-    this.props.searchByContactName({ firstName, lastName });
+    const { firstName, lastName, cellNumber } = this.state;
+    this.props.searchByContactName({ firstName, lastName, cellNumber });
   };
 
   render() {
@@ -304,7 +302,7 @@ class IncomingMessageFilter extends Component {
             <TextField
               onChange={this.onContactNameChanged}
               fullWidth
-              floatingLabelText="Filter by Contact Name"
+              floatingLabelText="Filter by Contact Name Or Number"
             />
           </div>
 

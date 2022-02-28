@@ -62,6 +62,7 @@ export const schema = `
   input ContactNameFilter {
     firstName: String
     lastName: String
+    cellNumber: String
   }
 
   type CampaignContact {
