@@ -2,13 +2,17 @@ query GetOrganizationSettings($organizationId: String!) {
   organization(id: $organizationId) {
     id
     settings {
-      ...TexterOrganizationSettingsFragment
+      ...OrganizationSettingsInfo
     }
   }
 }
 
-fragment TexterOrganizationSettingsFragment on OrganizationSettings {
+fragment OrganizationSettingsInfo on OrganizationSettings {
   id
+  defaulTexterApprovalStatus
+  optOutMessage
+  numbersApiKey
+  trollbotWebhookUrl
   showContactLastName
   showContactCell
   confirmationClickForScriptLinks

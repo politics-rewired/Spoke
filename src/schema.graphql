@@ -307,6 +307,7 @@ type User {
   assignedCell: Phone
   assignment(campaignId: String): Assignment,
   terms: Boolean
+  isSuperadmin: Boolean!
 }
 
 type UsersList {
@@ -400,24 +401,29 @@ scalar Phone
 
 
 input OrganizationSettingsInput {
-  defaulTexterApprovalStatus: RequestAutoApprove
+  # Owner
   optOutMessage: String
-  numbersApiKey: String
-  trollbotWebhookUrl: String
   showContactLastName: Boolean
   showContactCell: Boolean
   confirmationClickForScriptLinks: Boolean
+  defaulTexterApprovalStatus: RequestAutoApprove
+  numbersApiKey: String
+  trollbotWebhookUrl: String
 }
 
 type OrganizationSettings {
   id: ID!
-  defaulTexterApprovalStatus: RequestAutoApprove!
-  optOutMessage: String
+
+  # Texter
+  optOutMessage: String!
+  showContactLastName: Boolean!
+  showContactCell: Boolean!
+  confirmationClickForScriptLinks: Boolean!
+
+  # Owner
+  defaulTexterApprovalStatus: RequestAutoApprove
   numbersApiKey: String
   trollbotWebhookUrl: String
-  showContactLastName: Boolean
-  showContactCell: Boolean
-  confirmationClickForScriptLinks: Boolean!
 }
 
 
@@ -754,6 +760,7 @@ type Location {
 input ContactNameFilter {
   firstName: String
   lastName: String
+  cellNumber: String
 }
 
 type CampaignContact {

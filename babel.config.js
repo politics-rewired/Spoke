@@ -6,6 +6,7 @@ module.exports = {
   ],
   plugins: [
     ["@babel/plugin-transform-runtime", { corejs: 3 }],
+    "tsconfig-paths-module-resolver",
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-proposal-export-default-from"
   ]

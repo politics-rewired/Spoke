@@ -1,7 +1,7 @@
+import { useCurrentUserOrganizationRolesQuery } from "@spoke/spoke-codegen";
 import React, { useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { useCurrentUserOrganizationRolesQuery } from "../../libs/spoke-codegen/src";
 import { UserRoleType } from "../api/organization-membership";
 import { useSpokeContext } from "../client/spoke-context";
 import { hasRole } from "../lib/permissions";
@@ -9,7 +9,6 @@ import { hasRole } from "../lib/permissions";
 export interface AuthzContextType {
   roles: UserRoleType[];
   hasRole: (role: UserRoleType) => boolean;
-
   isSuperadmin: boolean;
   isOwner: boolean;
   isAdmin: boolean;
@@ -19,7 +18,6 @@ export interface AuthzContextType {
 export const AuthzContext = React.createContext<AuthzContextType>({
   roles: [],
   hasRole: () => false,
-
   isSuperadmin: false,
   isOwner: false,
   isAdmin: false,
@@ -53,7 +51,6 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
     () => ({
       roles,
       hasRole: (role: UserRoleType) => hasRole(role, roles),
-
       isSuperadmin: hasRole(UserRoleType.SUPERADMIN, roles),
       isOwner: hasRole(UserRoleType.OWNER, roles),
       isAdmin: hasRole(UserRoleType.ADMIN, roles),

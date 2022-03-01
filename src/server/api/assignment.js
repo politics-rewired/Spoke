@@ -1228,6 +1228,11 @@ export const resolvers = {
         campaign
       );
 
+      // Handle early return case in getContacts
+      if (Array.isArray(contactsQuery)) {
+        return contactsQuery;
+      }
+
       // Limit fields read from DB if possible
       const fieldNode = info.fieldNodes.find(
         ({ name: { value } }) => value === "contacts"

@@ -7,7 +7,7 @@ module.exports = {
       jsx: true
     }
   },
-  plugins: ["@typescript-eslint", "simple-import-sort"],
+  plugins: ["@typescript-eslint", "simple-import-sort", "import"],
   extends: [
     "eslint:recommended",
     "airbnb",
@@ -31,7 +31,14 @@ module.exports = {
     react: {
       version: "detect"
     },
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
     "import/resolver": {
+      typescript: {
+        alwaysTryTypes: true,
+        project: ["tsconfig.json"]
+      },
       node: {
         extensions: [".js", ".jsx", ".ts", ".tsx"]
       }

@@ -1,12 +1,12 @@
-import { Assignment } from "./assignment";
-import { AssignmentRequest } from "./assignment-request";
-import { Organization } from "./organization";
-import {
+import type { Assignment } from "./assignment";
+import type { AssignmentRequest } from "./assignment-request";
+import type { Organization } from "./organization";
+import type {
   OrganizationMembership,
   UserRoleType
 } from "./organization-membership";
-import { RelayPaginatedResponse } from "./pagination";
-import { Team } from "./team";
+import type { RelayPaginatedResponse } from "./pagination";
+import type { Team } from "./team";
 
 export interface User {
   id: string;
@@ -24,6 +24,7 @@ export interface User {
   assignedCell: string;
   assignment: Assignment;
   terms: boolean;
+  isSuperadmin: boolean;
 }
 
 export const schema = `
@@ -43,6 +44,7 @@ export const schema = `
     assignedCell: Phone
     assignment(campaignId: String): Assignment,
     terms: Boolean
+    isSuperadmin: Boolean!
   }
   
   type UsersList {
