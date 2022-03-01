@@ -1,10 +1,10 @@
 import { useTheme } from "@material-ui/core";
 import { css, StyleSheet } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
-import SpokeContext from "../client/spoke-context";
 import { dataTest } from "../lib/attributes";
+import { useSpokeTheme } from "../styles/spoke-theme-context";
 
 // This is because the Toolbar from material-ui seems to only apply the correct margins if the
 // immediate child is a Button or other type it recognizes. Can get rid of this if we remove material-ui
@@ -24,7 +24,7 @@ interface Props {
 
 const SendButton: React.FC<Props> = (props) => {
   const theme = useTheme();
-  const context = useContext(SpokeContext);
+  const spokeTheme = useSpokeTheme();
   const [clickStepIndex, setClickStepIndex] = useState(0);
 
   const clickStepLabels = props.threeClickEnabled
@@ -48,7 +48,7 @@ const SendButton: React.FC<Props> = (props) => {
         onClick={handleTouchTap}
         disabled={props.disabled}
         label={clickStepLabels[clickStepIndex]}
-        primary={context.theme?.successColor === undefined}
+        primary={spokeTheme?.successColor === undefined}
         backgroundColor={theme.palette.success.main}
       />
     </div>
