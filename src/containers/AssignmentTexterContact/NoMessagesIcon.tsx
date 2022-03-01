@@ -9,13 +9,13 @@ const NoMessagesIcon: React.FC<MuiThemeProviderProps> = ({
   muiTheme,
   ...iconProps
 }) => {
-  const theme = useSpokeTheme();
+  const spokeTheme = useSpokeTheme();
 
-  if (theme?.firstMessageIconUrl) {
+  if (spokeTheme?.firstMessageIconUrl) {
     return (
       <div {...iconProps}>
         <img
-          src={theme?.firstMessageIconUrl}
+          src={spokeTheme?.firstMessageIconUrl}
           style={{ display: "block", margin: "auto", height: "100%" }}
         />
       </div>
