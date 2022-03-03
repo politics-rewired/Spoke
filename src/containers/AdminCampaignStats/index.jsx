@@ -1,5 +1,8 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { css, StyleSheet } from "aphrodite";
+import Divider from "material-ui/Divider";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
@@ -16,7 +19,11 @@ import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import DeliverabilityStats from "./DeliverabilityStats";
-import { GET_CAMPAIGN, GET_ORGANIZATION_DATA } from "./queries";
+import {
+  GET_CAMPAIGN,
+  GET_CAMPAIGN_NAVIGATION_DATA,
+  GET_ORGANIZATION_DATA
+} from "./queries";
 import TexterStats from "./TexterStats";
 import TopLineStats from "./TopLineStats";
 import VanExportModal from "./VanExportModal";
@@ -27,6 +34,13 @@ const styles = StyleSheet.create({
     ...theme.layouts.multiColumn.container,
     marginBottom: 40,
     justifyContent: "space-around",
+    flexWrap: "wrap"
+  },
+  buttonContainer: {
+    ...theme.layouts.multiColumn.container,
+    justifyContent: "flex-end",
+    paddingTop: 20,
+    paddingBottom: 20,
     flexWrap: "wrap"
   },
   archivedBanner: {
@@ -108,6 +122,22 @@ class AdminCampaignStats extends React.Component {
       disableVanSyncButton: true
     });
 
+  prevCampaignClicked = () => {
+    const { history } = this.props;
+    const { organizationId } = this.props.match.params;
+    const campaignId = this.props.campaignNavigationData.campaignNavigation
+      .prevCampaignId;
+    history.push(`/admin/${organizationId}/campaigns/${campaignId}`);
+  };
+
+  nextCampaignClicked = () => {
+    const { history } = this.props;
+    const { organizationId } = this.props.match.params;
+    const campaignId = this.props.campaignNavigationData.campaignNavigation
+      .nextCampaignId;
+    history.push(`/admin/${organizationId}/campaigns/${campaignId}`);
+  };
+
   render() {
     const {
       disableExportButton,
@@ -154,11 +184,31 @@ class AdminCampaignStats extends React.Component {
 
     const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${campaign.title}`;
 
+    const campaignNavigationData = this.props.campaignNavigationData
+      .campaignNavigation;
+
     return (
       <div>
         <Helmet>
           <title>{newTitle}</title>
         </Helmet>
+        <div className={css(styles.buttonContainer)}>
+          <ButtonGroup disableElevation variant="contained" color="primary">
+            <Button
+              disabled={!campaignNavigationData.prevCampaignId}
+              onClick={this.prevCampaignClicked}
+            >
+              Previous
+            </Button>
+            <Button
+              disabled={!campaignNavigationData.nextCampaignId}
+              onClick={this.nextCampaignClicked}
+            >
+              Next
+            </Button>
+          </ButtonGroup>
+        </div>
+        <Divider style={{ marginBottom: 20 }} />
         <div className={css(styles.container)}>
           {campaign.isArchived ? (
             <div className={css(styles.archivedBanner)}>
@@ -359,6 +409,15 @@ const queries = {
     query: GET_ORGANIZATION_DATA,
     options: (ownProps) => ({
       variables: {
+        organizationId: ownProps.match.params.organizationId
+      }
+    })
+  },
+  campaignNavigationData: {
+    query: GET_CAMPAIGN_NAVIGATION_DATA,
+    options: (ownProps) => ({
+      variables: {
+        campaignId: ownProps.match.params.campaignId,
         organizationId: ownProps.match.params.organizationId
       }
     })

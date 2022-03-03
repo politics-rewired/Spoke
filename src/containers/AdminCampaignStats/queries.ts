@@ -46,3 +46,15 @@ export const GET_ORGANIZATION_DATA = gql`
     }
   }
 `;
+
+export const GET_CAMPAIGN_NAVIGATION_DATA = gql`
+  query getCampaignNavigation($campaignId: String!, $organizationId: String!) {
+    campaignNavigation(
+      campaignId: $campaignId
+      organizationId: $organizationId
+    ) {
+      nextCampaignId
+      prevCampaignId
+    }
+  }
+`;

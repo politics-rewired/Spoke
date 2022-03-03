@@ -193,6 +193,7 @@ type RootQuery {
   externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
   notices(organizationId: String): NoticePage!
   campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
+  campaignNavigation(campaignId: String!, organizationId: String!): CampaignNavigation!
 }
 
 input SecondPassInput {
@@ -583,6 +584,11 @@ union CampaignsReturn = PaginatedCampaigns | CampaignsList
 type PaginatedCampaigns {
   campaigns: [Campaign]
   pageInfo: PageInfo
+}
+
+type CampaignNavigation {
+  nextCampaignId: Int
+  prevCampaignId: Int
 }
 
 input TexterAssignmentInput {

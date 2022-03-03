@@ -127,6 +127,11 @@ export interface CampaignsList {
   campaigns: Campaign[];
 }
 
+export interface CampaignNavigation {
+  nextCampaignId: number | null;
+  prevCampaignId: number | null;
+}
+
 export type CampaignsReturn = PaginatedCampaigns | CampaignsList;
 
 export const schema = `
@@ -251,6 +256,11 @@ export const schema = `
   type PaginatedCampaigns {
     campaigns: [Campaign]
     pageInfo: PageInfo
+  }
+
+  type CampaignNavigation {
+    nextCampaignId: Int
+    prevCampaignId: Int
   }
 
   input TexterAssignmentInput {

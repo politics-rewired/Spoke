@@ -3482,6 +3482,29 @@ const rootResolvers = {
         organization_id: parseInt(organizationId, 10)
       });
       return formatPage(query, { after, first });
+    },
+    campaignNavigation: async (
+      _root,
+      { campaignId, organizationId },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      const {
+        rows: [{ prevcampaign }]
+      } = await r.knex.raw(
+        `SELECT max(id) as prevCampaign FROM campaign where id < ${campaignId} AND is_started = TRUE AND organization_id = ${organizationId} AND is_archived = FALSE;`
+      );
+      const {
+        rows: [{ nextcampaign }]
+      } = await r.knex.raw(
+        `SELECT min(id) as nextCampaign FROM campaign where id > ${campaignId} AND is_started = TRUE AND organization_id = ${organizationId} AND is_archived = FALSE;`
+      );
+
+      return {
+        prevCampaignId: prevcampaign,
+        nextCampaignId: nextcampaign
+      };
     }
   }
 };
