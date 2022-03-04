@@ -1,9 +1,9 @@
 import { useTheme } from "@material-ui/core";
 import RaisedButton from "material-ui/RaisedButton";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
-import SpokeContext from "../client/spoke-context";
 import { dataTest } from "../lib/attributes";
+import { useSpokeTheme } from "../styles/spoke-theme-context";
 
 interface Props {
   threeClickEnabled?: boolean;
@@ -14,7 +14,7 @@ interface Props {
 
 const SendButton: React.FC<Props> = (props) => {
   const theme = useTheme();
-  const context = useContext(SpokeContext);
+  const spokeTheme = useSpokeTheme();
   const [clickStepIndex, setClickStepIndex] = useState(0);
 
   const clickStepLabels = props.threeClickEnabled
@@ -38,7 +38,7 @@ const SendButton: React.FC<Props> = (props) => {
       onClick={handleTouchTap}
       disabled={props.disabled}
       label={clickStepLabels[clickStepIndex]}
-      primary={context.theme?.successColor === undefined}
+      primary={spokeTheme?.successColor === undefined}
       backgroundColor={theme.palette.success.main}
     />
   );
