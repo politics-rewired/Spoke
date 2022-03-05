@@ -226,7 +226,7 @@
     "@types/yup": "^0.26.34",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.12.1",
-    "@vramework/schemats": "^1.0.1",
+    "@vramework/schemats": "^1.0.4",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^27.0.6",
