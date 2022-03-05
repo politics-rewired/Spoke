@@ -1,3 +1,4 @@
+import TextField from "@material-ui/core/TextField";
 import { css, StyleSheet } from "aphrodite";
 import React, { Component } from "react";
 
@@ -53,7 +54,8 @@ class MessageTextField extends Component {
           className={css(styles.textField)}
           name={FIELD_NAME}
           label="Your message"
-          multiLine
+          as={TextField}
+          multiline
           fullWidth
           rowsMax={6}
           {...this.props}

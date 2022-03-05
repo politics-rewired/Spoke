@@ -26,6 +26,8 @@ import { camelCase, dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
+import ApproveCampaignButton from "./components/ApproveCampaignButton";
+import StartCampaignButton from "./components/StartCampaignButton";
 import {
   ARCHIVE_CAMPAIGN,
   DELETE_JOB,
@@ -321,8 +323,7 @@ class AdminCampaignEdit extends React.Component {
         expandableBySuperVolunteers: true,
         checkCompleted: () =>
           this.state.campaignFormValues.title !== "" &&
-          this.state.campaignFormValues.description !== "" &&
-          this.state.campaignFormValues.dueBy !== null
+          this.state.campaignFormValues.description !== ""
       },
       {
         title: "Campaign Groups",
@@ -645,7 +646,7 @@ class AdminCampaignEdit extends React.Component {
   };
 
   renderStartButton = () => {
-    if (!this.props.adminPerms) {
+    if (!this.props.isAdmin) {
       // Supervolunteers don't have access to start the campaign or un/archive it
       return null;
     }
@@ -698,22 +699,12 @@ class AdminCampaignEdit extends React.Component {
               }
             />
           )}
-          <RaisedButton
-            {...dataTest("startCampaign")}
-            primary
-            label="Start This Campaign!"
-            disabled={!isCompleted}
-            onClick={async () => {
-              this.setState({
-                startingCampaign: true
-              });
-              await this.props.mutations.startCampaign(
-                this.props.campaignData.campaign.id
-              );
-              this.setState({
-                startingCampaign: false
-              });
-            }}
+          <ApproveCampaignButton
+            campaignId={this.props.campaignData.campaign.id}
+          />
+          <StartCampaignButton
+            campaignId={this.props.campaignData.campaign.id}
+            isCompleted={isCompleted}
           />
         </div>
       </div>
@@ -730,7 +721,7 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { adminPerms, match, theme: stableMuiTheme } = this.props;
+    const { isAdmin, match, theme: stableMuiTheme } = this.props;
     const { campaignId } = match.params;
     const isNew = this.isNew();
     const saveLabel = isNew ? "Save and goto next section" : "Save";
@@ -788,7 +779,7 @@ class AdminCampaignEdit extends React.Component {
           const sectionCanExpandOrCollapse =
             (section.expandAfterCampaignStarts ||
               !this.props.campaignData.campaign.isStarted) &&
-            (adminPerms || section.expandableBySuperVolunteers);
+            (isAdmin || section.expandableBySuperVolunteers);
 
           if (sectionIsSaving) {
             avatar = <CircularProgress style={avatarStyle} size={25} />;
@@ -852,7 +843,7 @@ class AdminCampaignEdit extends React.Component {
               <CardText expandable>
                 {this.renderCampaignFormSection(section, sectionIsSaving)}
               </CardText>
-              {sectionIsSaving && adminPerms ? (
+              {sectionIsSaving && isAdmin ? (
                 <CardActions>
                   <div>
                     Current Status: {extractStageAndStatus(savePercent)}
@@ -889,7 +880,7 @@ AdminCampaignEdit.propTypes = {
   mutations: PropTypes.object,
   organizationData: PropTypes.object,
   match: PropTypes.object.isRequired,
-  adminPerms: PropTypes.bool.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
   location: PropTypes.object,
   pendingJobsData: PropTypes.object,
   availableActionsData: PropTypes.object

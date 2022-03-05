@@ -1,4 +1,4 @@
-exports.up = function (knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create table password_reset_request (
       id serial primary key,
@@ -14,7 +14,7 @@ exports.up = function (knex) {
   `);
 };
 
-exports.down = function (knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     drop table password_reset_request;
   `);

@@ -1,21 +1,21 @@
 import muiThemeable from "material-ui/styles/muiThemeable";
 import CreateIcon from "material-ui/svg-icons/content/create";
-import React, { useContext } from "react";
+import React from "react";
 
-import SpokeContext from "../../client/spoke-context";
+import { useSpokeTheme } from "../../styles/spoke-theme-context";
 import { MuiThemeProviderProps } from "../../styles/types";
 
 const NoMessagesIcon: React.FC<MuiThemeProviderProps> = ({
   muiTheme,
   ...iconProps
 }) => {
-  const context = useContext(SpokeContext);
+  const spokeTheme = useSpokeTheme();
 
-  if (context.theme?.firstMessageIconUrl) {
+  if (spokeTheme?.firstMessageIconUrl) {
     return (
       <div {...iconProps}>
         <img
-          src={context.theme?.firstMessageIconUrl}
+          src={spokeTheme?.firstMessageIconUrl}
           style={{ display: "block", margin: "auto", height: "100%" }}
         />
       </div>

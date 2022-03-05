@@ -1,6 +1,8 @@
 import humps from "humps";
 import isEmpty from "lodash/isEmpty";
 
+import { getFormattedPhoneNumber, phoneNumberRegex } from "./phone-format";
+
 // Used to generate data-test attributes on non-production environments and used by end-to-end tests
 export const dataTest = (value: string, disable: boolean) => {
   const attribute =
@@ -28,13 +30,21 @@ export const snakeToTitleCase = (value: string) =>
 export const nameComponents = (name: string) => {
   let firstName;
   let lastName;
+  let cellNumber;
 
-  if (isEmpty(name)) return { firstName, lastName };
+  const unformattedNumber = name.match(phoneNumberRegex)?.[0];
+
+  if (unformattedNumber) {
+    cellNumber = getFormattedPhoneNumber(unformattedNumber);
+  }
+
+  name = name.replace(phoneNumberRegex, "").trim();
+
+  if (isEmpty(name)) return { firstName, lastName, cellNumber };
 
   const splitName = name.split(" ");
   if (splitName.length === 1) {
     [firstName] = splitName;
-    lastName = "";
   } else if (splitName.length === 2) {
     [firstName, lastName] = splitName;
   } else {
@@ -42,7 +52,7 @@ export const nameComponents = (name: string) => {
     lastName = splitName.slice(1, splitName.length + 1).join(" ");
   }
 
-  return { firstName, lastName };
+  return { firstName, lastName, cellNumber };
 };
 
 export const recordToCamelCase = <T = any>(record: any) =>

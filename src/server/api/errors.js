@@ -1,9 +1,12 @@
 import { AuthenticationError, ForbiddenError } from "apollo-server-express";
 
+import { UserRoleType } from "../../api/organization-membership";
 import { cacheOpts, memoizer } from "../memoredis";
 import { r } from "../models";
 
 const accessHierarchy = ["TEXTER", "SUPERVOLUNTEER", "ADMIN", "OWNER"];
+
+export const roleIndex = (role) => accessHierarchy.indexOf(role);
 
 export function authRequired(user) {
   if (!user) {
@@ -46,6 +49,14 @@ export async function accessRequired(
   if (!hasRole) {
     throw new ForbiddenError("You are not authorized to access that resource.");
   }
+}
+
+export async function userRoleRequired(user, orgId, role) {
+  authRequired(user);
+  if (role === UserRoleType.SUPERADMIN && user.is_superadmin !== true) {
+    throw new ForbiddenError("You are not authorized to access that resource.");
+  }
+  await accessRequired(user, orgId, role);
 }
 
 export async function assignmentRequired(user, assignmentId) {

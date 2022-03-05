@@ -1,3 +1,4 @@
+import { ForbiddenError } from "apollo-server-errors";
 import { GraphQLError } from "graphql/error";
 import groupBy from "lodash/groupBy";
 
@@ -157,6 +158,10 @@ export const resolvers = {
       "assignedCell",
       "terms"
     ]),
+    isSuperadmin: (userRecord, _, { user: authUser }) => {
+      if (userRecord.id !== authUser.id) throw new ForbiddenError();
+      return userRecord.is_superadmin;
+    },
     displayName: (user) => `${user.first_name} ${user.last_name}`,
     currentRequest: async (user, { organizationId }) => {
       const currentRequest = await r

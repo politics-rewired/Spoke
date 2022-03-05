@@ -2,11 +2,11 @@ import { useTheme } from "@material-ui/core";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
-import React, { useContext } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
 
 import { Assignment } from "../../api/assignment";
-import SpokeContext from "../../client/spoke-context";
+import { useSpokeContext } from "../../client/spoke-context";
 import { DateTime } from "../../lib/datetime";
 import BadgeButton from "../BadgeButton";
 
@@ -38,7 +38,7 @@ interface Props {
 export const AssignmentSummary: React.FC<Props> = (props) => {
   const theme = useTheme();
   const history = useHistory();
-  const context = useContext(SpokeContext);
+  const context = useSpokeContext();
 
   const makeGoToTodosHandler = (
     contactsFilter: string | null,

@@ -2,13 +2,13 @@ import { ApolloQueryResult, gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
 import { History } from "history";
 import muiThemeable from "material-ui/styles/muiThemeable";
-import React, { useContext } from "react";
+import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import SpokeContext from "../../client/spoke-context";
 import SuperAdminLogin from "../../components/SuperAdminLogin";
 import { MutationMap, QueryMap } from "../../network/types";
+import { useSpokeTheme } from "../../styles/spoke-theme-context";
 import theme from "../../styles/theme";
 import { MuiThemeProviderProps } from "../../styles/types";
 import { loadData } from "../hoc/with-operations";
@@ -72,12 +72,11 @@ const Home: React.FC<HomeProps> = (props) => {
     }
   };
 
-  const context = useContext(SpokeContext);
+  const spokeTheme = useSpokeTheme();
   const logoUrl =
-    context.theme?.logoUrl ??
-    "https://politics-rewired.surge.sh/spoke_logo.svg";
+    spokeTheme?.logoUrl ?? "https://politics-rewired.surge.sh/spoke_logo.svg";
   const welcomeText =
-    context.theme?.welcomeText ??
+    spokeTheme?.welcomeText ??
     "Spoke is a new way to run campaigns using text messaging.";
 
   // not sure if we need this anymore -- only for new organizations

@@ -291,7 +291,7 @@ export const processMessagesChunk = async (
     numMedia: message.num_media,
     sendStatus: message.send_status,
     errorCodes: message.error_codes,
-    attemptedAt: DateTime.fromSQL(message.created_at).toISO(),
+    attemptedAt: DateTime.fromJSDate(new Date(message.created_at)).toISO(),
     text: message.text,
     campaignId,
     "texter[firstName]": message.first_name,
@@ -324,7 +324,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     .reader("campaign_contact")
     .count("*")
     .where({ campaign_id: campaignId });
-  const contactsCount = countQueryResult[0].count;
+  const contactsCount = countQueryResult[0].count as number;
 
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
@@ -360,9 +360,9 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     );
   });
 
-  const campaignContactsUploadPromise = new Promise((resolve) =>
-    campaignContactsUploadStream.on("finish", resolve)
-  );
+  const campaignContactsUploadPromise = new Promise((resolve) => {
+    campaignContactsUploadStream.on("finish", resolve);
+  });
 
   campaignContactsWriteStream.pipe(campaignContactsUploadStream);
 
@@ -379,9 +379,9 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     helpers.logger.error("error in messagesWriteStream: ", errToObj(err));
   });
 
-  const messagesUploadPromise = new Promise((resolve) =>
-    messagesUploadStream.on("finish", resolve)
-  );
+  const messagesUploadPromise = new Promise((resolve) => {
+    messagesUploadStream.on("finish", resolve);
+  });
 
   messagesWriteStream.pipe(messagesUploadStream);
 

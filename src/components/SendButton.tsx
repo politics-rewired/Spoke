@@ -1,30 +1,20 @@
 import { useTheme } from "@material-ui/core";
-import { css, StyleSheet } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
-import SpokeContext from "../client/spoke-context";
 import { dataTest } from "../lib/attributes";
-
-// This is because the Toolbar from material-ui seems to only apply the correct margins if the
-// immediate child is a Button or other type it recognizes. Can get rid of this if we remove material-ui
-const styles = StyleSheet.create({
-  container: {
-    display: "inline-block",
-    marginLeft: 24,
-    marginBottom: 10
-  }
-});
+import { useSpokeTheme } from "../styles/spoke-theme-context";
 
 interface Props {
   threeClickEnabled?: boolean;
   disabled?: boolean;
+  style?: React.CSSProperties;
   onFinalTouchTap: () => void | Promise<void>;
 }
 
 const SendButton: React.FC<Props> = (props) => {
   const theme = useTheme();
-  const context = useContext(SpokeContext);
+  const spokeTheme = useSpokeTheme();
   const [clickStepIndex, setClickStepIndex] = useState(0);
 
   const clickStepLabels = props.threeClickEnabled
@@ -42,16 +32,15 @@ const SendButton: React.FC<Props> = (props) => {
   };
 
   return (
-    <div className={css(styles.container)}>
-      <RaisedButton
-        {...dataTest("send")}
-        onClick={handleTouchTap}
-        disabled={props.disabled}
-        label={clickStepLabels[clickStepIndex]}
-        primary={context.theme?.successColor === undefined}
-        backgroundColor={theme.palette.success.main}
-      />
-    </div>
+    <RaisedButton
+      {...dataTest("send")}
+      style={props.style}
+      onClick={handleTouchTap}
+      disabled={props.disabled}
+      label={clickStepLabels[clickStepIndex]}
+      primary={spokeTheme?.successColor === undefined}
+      backgroundColor={theme.palette.success.main}
+    />
   );
 };
 

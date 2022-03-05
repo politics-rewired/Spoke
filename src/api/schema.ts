@@ -250,13 +250,13 @@ const rootSchema = `
     editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
     editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OrganizationSettings!
     purgeOrganizationUsers(organizationId: String!): Int!
-    editUser(organizationId: String!, userId: Int!, userData:UserInput): User
-    resetUserPassword(organizationId: String!, userId: Int!): String!
-    changeUserPassword(userId: Int!, formData: UserPasswordChange): User
+    editUser(organizationId: String!, userId: String!, userData:UserInput): User
+    resetUserPassword(organizationId: String!, userId: String!): String!
+    changeUserPassword(userId: String!, formData: UserPasswordChange): User
     updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
     updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
-    bulkSendMessages(assignmentId: Int!): [CampaignContact]
+    bulkSendMessages(assignmentId: String!): [CampaignContact]
     sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
     tagConversation(campaignContactId: String!, tag: ContactTagActionInput!): CampaignContact
     createOptOut(optOut:ContactActionInput!, campaignContactId:String!):CampaignContact,
@@ -272,6 +272,7 @@ const rootSchema = `
       optOut: ContactActionInput,
       closeConversation: Boolean
     ): CampaignContact,
+    setCampaignApproved(id: String!, approved: Boolean!): Campaign!,
     startCampaign(id:String!): Campaign,
     archiveCampaign(id:String!): Campaign,
     unarchiveCampaign(id:String!): Campaign,
@@ -282,7 +283,7 @@ const rootSchema = `
     userAgreeTerms(userId: String!): User
     megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]): Boolean!
     megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter: ContactNameFilter, newTexterUserIds:[String]): Boolean!
-    requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: Int!): String!
+    requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: String!): String!
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
     releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): ReleaseAllUnhandledRepliesResult!
     markForSecondPass(campaignId: String!, input: SecondPassInput!): String!

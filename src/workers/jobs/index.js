@@ -162,7 +162,10 @@ export async function uploadContacts(job) {
 
   let jobPayload = await gunzip(Buffer.from(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
-  const { excludeCampaignIds = [], validationStats } = jobPayload;
+  const { validationStats } = jobPayload;
+  const excludeCampaignIds = (jobPayload.excludeCampaignIds ?? []).map((id) =>
+    parseInt(id, 10)
+  );
   let { contacts } = jobPayload;
 
   const maxContacts = parseInt(
@@ -270,25 +273,25 @@ export async function uploadContacts(job) {
           ? { rowCount: 0 }
           : await trx.raw(
               `
-          with exclude_cell as (
-            select distinct on (campaign_contact.cell)
-              campaign_contact.cell
-            from
-              campaign_contact
-            where
-              campaign_contact.campaign_id in (${whereInParams})
-          )
-          delete from
-            campaign_contact
-          where
-            campaign_contact.campaign_id = ?
-            and exists (
-              select 1
-              from exclude_cell
-              where exclude_cell.cell = campaign_contact.cell
-            )
-          ;
-        `,
+                with exclude_cell as (
+                  select distinct on (campaign_contact.cell)
+                    campaign_contact.cell
+                  from
+                    campaign_contact
+                  where
+                    campaign_contact.campaign_id in (${whereInParams})
+                )
+                delete from
+                  campaign_contact
+                where
+                  campaign_contact.campaign_id = ?
+                  and exists (
+                    select 1
+                    from exclude_cell
+                    where exclude_cell.cell = campaign_contact.cell
+                  )
+                ;
+              `,
               excludeCampaignIds.concat([campaignId])
             );
 

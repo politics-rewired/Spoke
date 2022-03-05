@@ -83,6 +83,7 @@ export interface CampaignRecord {
   organization_id: number;
   title: string;
   description: string;
+  is_approved: boolean;
   is_started: boolean | null;
   due_by: string | null;
   created_at: string;

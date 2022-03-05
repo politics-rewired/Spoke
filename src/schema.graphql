@@ -218,13 +218,13 @@ type RootMutation {
   editOrganizationMembership(id: String!, level: RequestAutoApprove, role: String): OrganizationMembership!
   editOrganizationSettings(id: String!, input: OrganizationSettingsInput!): OrganizationSettings!
   purgeOrganizationUsers(organizationId: String!): Int!
-  editUser(organizationId: String!, userId: Int!, userData:UserInput): User
-  resetUserPassword(organizationId: String!, userId: Int!): String!
-  changeUserPassword(userId: Int!, formData: UserPasswordChange): User
+  editUser(organizationId: String!, userId: String!, userData:UserInput): User
+  resetUserPassword(organizationId: String!, userId: String!): String!
+  changeUserPassword(userId: String!, formData: UserPasswordChange): User
   updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
   updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
   updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization
-  bulkSendMessages(assignmentId: Int!): [CampaignContact]
+  bulkSendMessages(assignmentId: String!): [CampaignContact]
   sendMessage(message:MessageInput!, campaignContactId:String!): CampaignContact,
   tagConversation(campaignContactId: String!, tag: ContactTagActionInput!): CampaignContact
   createOptOut(optOut:ContactActionInput!, campaignContactId:String!):CampaignContact,
@@ -240,6 +240,7 @@ type RootMutation {
     optOut: ContactActionInput,
     closeConversation: Boolean
   ): CampaignContact,
+  setCampaignApproved(id: String!, approved: Boolean!): Campaign!,
   startCampaign(id:String!): Campaign,
   archiveCampaign(id:String!): Campaign,
   unarchiveCampaign(id:String!): Campaign,
@@ -250,7 +251,7 @@ type RootMutation {
   userAgreeTerms(userId: String!): User
   megaReassignCampaignContacts(organizationId:String!, campaignIdsContactIds:[CampaignIdContactId]!, newTexterUserIds:[String]): Boolean!
   megaBulkReassignCampaignContacts(organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter: ContactNameFilter, newTexterUserIds:[String]): Boolean!
-  requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: Int!): String!
+  requestTexts(count: Int!, email: String!, organizationId: String!, preferredTeamId: String!): String!
   releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
   releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): ReleaseAllUnhandledRepliesResult!
   markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
@@ -301,12 +302,13 @@ type User {
   memberships(organizationId: String, after: Cursor, first: Int): OrganizationMembershipPage
   organizations(role: String): [Organization]
   todos(organizationId: String): [Assignment]
-  roles(organizationId: String!): [String]
+  roles(organizationId: String!): [String!]!
   teams(organizationId: String!): [Team]!
   currentRequest(organizationId: String!): AssignmentRequest
   assignedCell: Phone
   assignment(campaignId: String): Assignment,
   terms: Boolean
+  isSuperadmin: Boolean!
 }
 
 type UsersList {
@@ -332,7 +334,7 @@ type AssignmentTarget {
   campaign: Campaign
   countLeft: Int
   teamTitle: String
-  teamId: Int
+  teamId: String
   enabled: Boolean
   maxRequestCount: Int
 }
@@ -400,24 +402,35 @@ scalar Phone
 
 
 input OrganizationSettingsInput {
-  defaulTexterApprovalStatus: RequestAutoApprove
+  # Owner
   optOutMessage: String
-  numbersApiKey: String
-  trollbotWebhookUrl: String
   showContactLastName: Boolean
   showContactCell: Boolean
   confirmationClickForScriptLinks: Boolean
+  defaulTexterApprovalStatus: RequestAutoApprove
+  numbersApiKey: String
+  trollbotWebhookUrl: String
+
+  # Superadmin
+  startCampaignRequiresApproval: Boolean
 }
 
 type OrganizationSettings {
   id: ID!
-  defaulTexterApprovalStatus: RequestAutoApprove!
-  optOutMessage: String
+
+  # Texter
+  optOutMessage: String!
+  showContactLastName: Boolean!
+  showContactCell: Boolean!
+  confirmationClickForScriptLinks: Boolean!
+
+  # Supervolunteer
+  startCampaignRequiresApproval: Boolean
+
+  # Owner
+  defaulTexterApprovalStatus: RequestAutoApprove
   numbersApiKey: String
   trollbotWebhookUrl: String
-  showContactLastName: Boolean
-  showContactCell: Boolean
-  confirmationClickForScriptLinks: Boolean!
 }
 
 
@@ -526,6 +539,7 @@ type Campaign {
   description: String
   dueBy: Date
   readiness: CampaignReadiness!
+  isApproved: Boolean!
   isStarted: Boolean
   isArchived: Boolean
   creator: User
@@ -608,7 +622,7 @@ input CampaignInput {
   contactsFile: Upload
   externalListId: String
   filterOutLandlines: Boolean
-  excludeCampaignIds: [Int]
+  excludeCampaignIds: [String!]
   contactSql: String
   organizationId: String
   isAssignmentLimitedToTeams: Boolean
@@ -754,6 +768,7 @@ type Location {
 input ContactNameFilter {
   firstName: String
   lastName: String
+  cellNumber: String
 }
 
 type CampaignContact {
@@ -986,7 +1001,7 @@ input TeamInput {
   assignmentPriority: Int
   assignmentType: TextRequestType
   maxRequestCount: Int
-  escalationTagIds: [Int]
+  escalationTagIds: [String!]
 }
 
 
@@ -1068,7 +1083,7 @@ type ExternalSystem {
   type: ExternalSystemType!
   username: String!
   apiKey: String!
-  organizationId: Int!
+  organizationId: String!
   createdAt: Date!
   updatedAt: Date!
   syncedAt: Date

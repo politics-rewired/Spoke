@@ -48,7 +48,7 @@ export const createOrganization = async (
     .then(({ rows: [organization] }) => organization);
 
 export type CreateTexterOptions = Partial<
-  Pick<User, "firstName" | "lastName" | "cell" | "email"> & {
+  Pick<User, "firstName" | "lastName" | "cell" | "email" | "isSuperadmin"> & {
     auth0Id: string;
   }
 >;
@@ -60,8 +60,8 @@ export const createTexter = async (
   client
     .query<UserRecord>(
       `
-        insert into public.user (auth0_id, first_name, last_name, cell, email)
-        values ($1, $2, $3, $4, $5)
+        insert into public.user (auth0_id, first_name, last_name, cell, email, is_superadmin)
+        values ($1, $2, $3, $4, $5, $6)
         returning *
       `,
       [
@@ -69,13 +69,14 @@ export const createTexter = async (
         options.firstName ?? faker.name.firstName(),
         options.lastName ?? faker.name.lastName(),
         options.cell ?? faker.phone.phoneNumber("+1###########"),
-        options.email ?? faker.internet.email()
+        options.email ?? faker.internet.email(),
+        options.isSuperadmin ?? false
       ]
     )
     .then(({ rows: [user] }) => user);
 
 export type CreateUserOptions = Partial<
-  Pick<User, "firstName" | "lastName" | "cell" | "email">
+  Pick<User, "firstName" | "lastName" | "cell" | "email" | "isSuperadmin">
 > & {
   password: string;
 };
@@ -122,6 +123,7 @@ export type CreateCampaignOptions = Partial<
     Campaign,
     | "title"
     | "description"
+    | "isApproved"
     | "isStarted"
     | "isArchived"
     | "textingHoursStart"
@@ -150,6 +152,7 @@ export const createCampaign = async (
         organization_id,
         title,
         description,
+        is_approved,
         is_started,
         is_archived,
         use_dynamic_assignment,
@@ -165,13 +168,14 @@ export const createCampaign = async (
         replies_stale_after_minutes,
         landlines_filtered,
         external_system_id
-      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
       returning *
     `,
       [
         options.organizationId,
         options.title ?? faker.company.companyName(),
         options.description ?? faker.lorem.sentence(),
+        options.isApproved ?? false,
         options.isStarted ?? true,
         options.isArchived ?? false,
         false,

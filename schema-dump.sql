@@ -217,7 +217,8 @@ CREATE TABLE public.campaign (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     replies_stale_after_minutes integer,
     landlines_filtered boolean DEFAULT false,
-    external_system_id uuid
+    external_system_id uuid,
+    is_approved boolean DEFAULT false
 );
 
 

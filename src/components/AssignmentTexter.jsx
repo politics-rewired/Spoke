@@ -211,6 +211,7 @@ class AssignmentTexter extends React.Component {
     this.incrementCurrentContactIndex(-1);
   };
 
+  // eslint-disable-next-line react/no-unused-class-component-methods
   handleCannedResponseChange = (script) => {
     this.handleScriptChange(script);
     this.handleClosePopover();
@@ -662,7 +663,7 @@ const mutations = {
 
   bulkSendMessages: () => (assignmentId) => ({
     mutation: gql`
-      mutation bulkSendMessages($assignmentId: Int!) {
+      mutation bulkSendMessages($assignmentId: String!) {
         bulkSendMessages(assignmentId: $assignmentId) {
           id
         }

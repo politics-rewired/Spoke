@@ -1,11 +1,14 @@
+import humps from "humps";
 import _ from "lodash";
 import request from "superagent";
 
 import { config } from "../../config";
+import { DateTime } from "../../lib/datetime";
 import { isNowBetween } from "../../lib/timezones";
 import { sleep } from "../../lib/utils";
 import logger from "../../logger";
 import { eventBus, EventType } from "../event-bus";
+import { selectionsByType } from "../lib/graphql";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { sqlResolvers } from "./lib/utils";
@@ -53,9 +56,11 @@ export function getContacts(
 ) {
   // 24-hours past due - why is this 24 hours offset?
   const includePastDue = contactsFilter && contactsFilter.includePastDue;
-  const pastDue =
-    campaign.due_by &&
-    Number(campaign.due_by) + 24 * 60 * 60 * 1000 < Number(new Date());
+
+  const dueBy = DateTime.fromJSDate(new Date(campaign.due_by));
+  const pastDue = campaign.due_by
+    ? dueBy.plus({ days: 1 }) < DateTime.local()
+    : false;
 
   if (
     !includePastDue &&
@@ -1205,7 +1210,7 @@ export const resolvers = {
         getContacts(assignment, contactsFilter, organization, campaign, true)
       );
     },
-    contacts: async (assignment, { contactsFilter }) => {
+    contacts: async (assignment, { contactsFilter }, _context, info) => {
       const campaign = await r
         .reader("campaign")
         .where({ id: assignment.campaign_id })
@@ -1215,7 +1220,33 @@ export const resolvers = {
         .reader("organization")
         .where({ id: campaign.organization_id })
         .first();
-      return getContacts(assignment, contactsFilter, organization, campaign);
+
+      const contactsQuery = getContacts(
+        assignment,
+        contactsFilter,
+        organization,
+        campaign
+      );
+
+      // Handle early return case in getContacts
+      if (Array.isArray(contactsQuery)) {
+        return contactsQuery;
+      }
+
+      // Limit fields read from DB if possible
+      const fieldNode = info.fieldNodes.find(
+        ({ name: { value } }) => value === "contacts"
+      );
+      const selections = selectionsByType(fieldNode);
+      if (selections.complex.length === 0) {
+        const simpleFields = selections.simple
+          .map(({ name: { value } }) => value)
+          .filter((name) => name !== "__typename")
+          .map((gqlKey) => humps.decamelize(gqlKey, { separator: "_" }));
+        contactsQuery.select(simpleFields);
+      }
+
+      return contactsQuery;
     },
     campaignCannedResponses: async (assignment) => {
       const getCannedResponses = memoizer.memoize(

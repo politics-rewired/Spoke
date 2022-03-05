@@ -1,28 +1,12 @@
 /* eslint-disable import/prefer-default-export */
 import { Request } from "express";
-import { Knex } from "knex";
 import createMemoizer from "memoredis";
 
-import { config } from "../config";
-import logger from "../logger";
-import { createLoaders, r } from "./models";
-import { Memoizer } from "./types";
-
-export interface SpokeDbContext {
-  schema: string;
-  primary: Knex;
-  reader: Knex;
-}
-
-export interface SpokeContext {
-  db: SpokeDbContext;
-  memoizer: Memoizer;
-}
-
-export interface SpokeRequestContext extends SpokeContext {
-  user: any;
-  loaders: any;
-}
+import { config } from "../../config";
+import logger from "../../logger";
+import { createLoaders, r } from "../models";
+import type { Memoizer } from "../types";
+import type { SpokeContext, SpokeRequestContext } from "./types";
 
 const createHostMemoizer = (_host: string): Memoizer => {
   const opts = config.MEMOREDIS_URL

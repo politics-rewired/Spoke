@@ -189,10 +189,7 @@ export const resolvers = {
   },
   CampaignReadiness: {
     id: ({ id }) => id,
-    basics: (campaign) =>
-      campaign.title !== "" &&
-      campaign.description !== "" &&
-      campaign.due_by !== null,
+    basics: (campaign) => campaign.title !== "" && campaign.description !== "",
     textingHours: (campaign) =>
       campaign.textingHoursStart !== null &&
       campaign.textingHoursEnd !== null &&
@@ -263,6 +260,7 @@ export const resolvers = {
       "id",
       "title",
       "description",
+      "isApproved",
       "isStarted",
       "isArchived",
       // TODO: re-enable once dynamic assignment is fixed (#548)
