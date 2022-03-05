@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.20.0](https://github.com/politics-rewired/spoke/compare/v4.19.1...v4.20.0) (2022-03-05)
+
+
+### Features
+
+* add superadmin approval for campaigns ([#1106](https://github.com/politics-rewired/spoke/issues/1106)) ([dbb2882](https://github.com/politics-rewired/spoke/commit/dbb28820e53de6658793272bf1976d9807268319))
+* **message filter:** allow searching using cell phone number ([#1090](https://github.com/politics-rewired/spoke/issues/1090)) ([8c08a2c](https://github.com/politics-rewired/spoke/commit/8c08a2c2a1708cec3293642b383686610e65c2c2))
+
+
+### Bug Fixes
+
+* delete due date button clearing up other fields ([#1103](https://github.com/politics-rewired/spoke/issues/1103)) ([a1a9a4b](https://github.com/politics-rewired/spoke/commit/a1a9a4b2b00f5a0515bd36cb4ae1c0b32ddec677)), closes [#1101](https://github.com/politics-rewired/spoke/issues/1101)
+* disable reassign all without target texter(s) ([#1094](https://github.com/politics-rewired/spoke/issues/1094)) ([fe126d1](https://github.com/politics-rewired/spoke/commit/fe126d16984b708a2a37c0dfc897b98a4e2274ee))
+* fix design of survey question select elements ([#1091](https://github.com/politics-rewired/spoke/issues/1091)) ([aa6a844](https://github.com/politics-rewired/spoke/commit/aa6a844cee0bd5d72929d5683f2193ec013b0581))
+* fix use of react contexts ([#1107](https://github.com/politics-rewired/spoke/issues/1107)) ([51f4012](https://github.com/politics-rewired/spoke/commit/51f4012b4b780b1281131b6445ec481c51346462))
+* handle component lifecycle correctly ([#1099](https://github.com/politics-rewired/spoke/issues/1099)) ([00a408a](https://github.com/politics-rewired/spoke/commit/00a408a5aee44c5b655cc4b0c0ec2a33edde7b8d))
+* handle overdue early return case ([#1096](https://github.com/politics-rewired/spoke/issues/1096)) ([1ee2645](https://github.com/politics-rewired/spoke/commit/1ee2645c96fa722e1ee8e9cf357eb66713687da8))
+* update deps to fix stream handling error ([#1104](https://github.com/politics-rewired/spoke/issues/1104)) ([b6eb0cb](https://github.com/politics-rewired/spoke/commit/b6eb0cb70d5537e1f0132b645f23a4b2975ebd1e))
+
 ### [4.19.1](https://github.com/politics-rewired/spoke/compare/v4.19.0...v4.19.1) (2022-02-26)
 
 
