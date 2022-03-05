@@ -225,6 +225,7 @@ const makeQueries = (jobTypes: string[]) => ({
         campaign(id: $campaignId) {
           id
           isStarted
+          isApproved
           readiness {
             id
             basics

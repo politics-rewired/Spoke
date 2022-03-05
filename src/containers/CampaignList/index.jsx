@@ -96,6 +96,7 @@ const campaignInfoFragment = `
   id
   title
   isStarted
+  isApproved
   isArchived
   hasUnassignedContacts
   hasUnsentInitialMessages

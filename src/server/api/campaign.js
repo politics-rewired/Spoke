@@ -260,6 +260,7 @@ export const resolvers = {
       "id",
       "title",
       "description",
+      "isApproved",
       "isStarted",
       "isArchived",
       // TODO: re-enable once dynamic assignment is fixed (#548)

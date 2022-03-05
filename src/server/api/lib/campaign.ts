@@ -150,6 +150,7 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           organization_id,
           'COPY - ' || title,
           description,
+          false as is_approved,
           false as is_started,
           false as is_archived,
           due_by,
@@ -252,8 +253,18 @@ export const editCampaign = async (
   campaign: CampaignInput,
   loaders: any,
   user: UserRecord,
-  origCampaignRecord: CampaignRecord
+  origCampaignRecord: CampaignRecord,
+  requiresApproval = false
 ) => {
+  const unstartIfNecessary = async () => {
+    if (!user.is_superadmin && requiresApproval) {
+      await r
+        .knex("campaign")
+        .update({ is_started: false, is_approved: false })
+        .where({ id });
+    }
+  };
+
   const {
     title,
     description,
@@ -457,6 +468,7 @@ export const editCampaign = async (
   }
 
   if (Object.prototype.hasOwnProperty.call(campaign, "interactionSteps")) {
+    await unstartIfNecessary();
     memoizer.invalidate(cacheOpts.CampaignInteractionSteps.key, {
       campaignId: id
     });
@@ -477,6 +489,7 @@ export const editCampaign = async (
   }
 
   if (Object.prototype.hasOwnProperty.call(campaign, "cannedResponses")) {
+    await unstartIfNecessary();
     memoizer.invalidate(cacheOpts.CampaignCannedResponses.key, {
       campaignId: id
     });

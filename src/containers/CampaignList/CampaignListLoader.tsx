@@ -27,6 +27,7 @@ const query = gql`
             id
             title
             isStarted
+            isApproved
             isArchived
             isAutoassignEnabled
             hasUnassignedContacts

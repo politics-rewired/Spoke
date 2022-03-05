@@ -16,6 +16,7 @@ interface IOrganizationSettings {
   showContactLastName: boolean;
   showContactCell: boolean;
   confirmationClickForScriptLinks: boolean;
+  startCampaignRequiresApproval: boolean;
 }
 
 const SETTINGS_PERMISSIONS: {
@@ -25,6 +26,7 @@ const SETTINGS_PERMISSIONS: {
   showContactLastName: UserRoleType.TEXTER,
   showContactCell: UserRoleType.TEXTER,
   confirmationClickForScriptLinks: UserRoleType.TEXTER,
+  startCampaignRequiresApproval: UserRoleType.SUPERVOLUNTEER,
   defaulTexterApprovalStatus: UserRoleType.OWNER,
   numbersApiKey: UserRoleType.OWNER,
   trollbotWebhookUrl: UserRoleType.OWNER
@@ -39,7 +41,8 @@ const SETTINGS_WRITE_PERMISSIONS: {
   confirmationClickForScriptLinks: UserRoleType.OWNER,
   defaulTexterApprovalStatus: UserRoleType.OWNER,
   numbersApiKey: UserRoleType.OWNER,
-  trollbotWebhookUrl: UserRoleType.OWNER
+  trollbotWebhookUrl: UserRoleType.OWNER,
+  startCampaignRequiresApproval: UserRoleType.SUPERADMIN
 };
 
 const SETTINGS_NAMES: Partial<
@@ -55,7 +58,8 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
     "I'm opting you out of texts immediately. Have a great day.",
   showContactLastName: false,
   showContactCell: false,
-  confirmationClickForScriptLinks: true
+  confirmationClickForScriptLinks: true,
+  startCampaignRequiresApproval: false
 };
 
 const SETTINGS_TRANSFORMERS: Partial<
@@ -136,7 +140,8 @@ export const resolvers = {
       "trollbotWebhookUrl",
       "showContactLastName",
       "showContactCell",
-      "confirmationClickForScriptLinks"
+      "confirmationClickForScriptLinks",
+      "startCampaignRequiresApproval"
     ])
   }
 };

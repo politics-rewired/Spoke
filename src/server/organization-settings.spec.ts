@@ -31,6 +31,7 @@ describe("get organization settings", () => {
     showContactLastName: false,
     showContactCell: false,
     confirmationClickForScriptLinks: true,
+    startCampaignRequiresApproval: false,
     defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED,
     numbersApiKey: "SomethingSecret",
     trollbotWebhookUrl: "https://rewired.coop/trolls"
@@ -58,6 +59,7 @@ describe("get organization settings", () => {
                 showContactLastName
                 showContactCell
                 confirmationClickForScriptLinks
+                startCampaignRequiresApproval
                 defaulTexterApprovalStatus
                 numbersApiKey
                 trollbotWebhookUrl
@@ -114,6 +116,9 @@ describe("get organization settings", () => {
     expect(settings.confirmationClickForScriptLinks).toEqual(
       features.confirmationClickForScriptLinks
     );
+    expect(settings.startCampaignRequiresApproval).toEqual(
+      features.startCampaignRequiresApproval
+    );
     expect(settings.defaulTexterApprovalStatus).toEqual(
       features.defaulTexterApprovalStatus
     );
@@ -126,6 +131,12 @@ describe("get organization settings", () => {
       optOutMessage: "See ya"
     });
     expect(ownerRole).toEqual(UserRoleType.OWNER);
+
+    const superAdminRole = writePermissionRequired({
+      optOutMessage: "See ya",
+      startCampaignRequiresApproval: true
+    });
+    expect(superAdminRole).toEqual(UserRoleType.SUPERADMIN);
   });
 
   const makeSettingsUpdateRequest = async (
@@ -167,6 +178,16 @@ describe("get organization settings", () => {
       { optOutMessage: "Something new" }
     );
     expect(validResponse.ok).toBe(true);
+
+    const invalidResponse = await makeSettingsUpdateRequest(
+      organization.id,
+      cookies,
+      { startCampaignRequiresApproval: true }
+    );
+    expect(invalidResponse.ok).toBe(true);
+    expect(invalidResponse.body).toHaveProperty("errors");
+    expect(invalidResponse.body.errors.length).toBeGreaterThan(0);
+    expect(invalidResponse.body.data).toBeNull();
   });
 
   it("allows superadmin to update appropriately permissioned settings", async () => {
@@ -185,5 +206,10 @@ describe("get organization settings", () => {
       { optOutMessage: "Something new" }
     );
     expect(validResponse.ok).toBe(true);
+
+    const response = await makeSettingsUpdateRequest(organization.id, cookies, {
+      startCampaignRequiresApproval: true
+    });
+    expect(response.ok).toBe(true);
   });
 });

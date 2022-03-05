@@ -68,6 +68,7 @@ export const EditCampaignFragment = gql`
     description
     dueBy
     isStarted
+    isApproved
     isArchived
     contactsCount
     datawarehouseAvailable

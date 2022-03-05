@@ -9,6 +9,9 @@ export interface OrganizationSettingsInput {
   defaulTexterApprovalStatus: RequestAutoApproveType | null;
   numbersApiKey: string | null;
   trollbotWebhookUrl: string | null;
+
+  // Superadmin
+  startCampaignRequiresApproval: boolean | null;
 }
 
 export interface OrganizationSettings {
@@ -19,6 +22,9 @@ export interface OrganizationSettings {
   showContactLastName: boolean;
   showContactCell: boolean;
   confirmationClickForScriptLinks: boolean;
+
+  // Supervolunteer
+  startCampaignRequiresApproval: boolean | null;
 
   // Owner
   defaulTexterApprovalStatus: RequestAutoApproveType | null;
@@ -36,6 +42,9 @@ export const schema = `
     defaulTexterApprovalStatus: RequestAutoApprove
     numbersApiKey: String
     trollbotWebhookUrl: String
+
+    # Superadmin
+    startCampaignRequiresApproval: Boolean
   }
 
   type OrganizationSettings {
@@ -46,6 +55,9 @@ export const schema = `
     showContactLastName: Boolean!
     showContactCell: Boolean!
     confirmationClickForScriptLinks: Boolean!
+
+    # Supervolunteer
+    startCampaignRequiresApproval: Boolean
 
     # Owner
     defaulTexterApprovalStatus: RequestAutoApprove
