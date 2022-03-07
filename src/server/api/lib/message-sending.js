@@ -366,21 +366,19 @@ export async function saveNewIncomingMessage(messageInstance) {
 
   if (OPT_OUT_TRIGGERS.includes(cleanedUpText)) {
     updateQuery = updateQuery.update({ message_status: "closed" });
-    console.log(newMessage);
 
-    const organization_id = await r
+    const { id: organizationId } = await r
       .knex("organization")
-      .select("organization.id")
+      .first("organization.id")
       .join("campaign", "organization_id", "=", "organization.id")
       .join("assignment", "campaign_id", "=", "campaign.id")
-      .where({ "assignment.id": assignment_id })
-      .limit(1);
+      .where({ "assignment.id": assignment_id });
 
     await cacheableData.optOut.save(r.knex, {
       cell: contact_number,
       reason: "Automatic OptOut",
       assignmentId: assignment_id,
-      organizationId: organization_id[0].id
+      organizationId
     });
   } else {
     updateQuery = updateQuery.update({ message_status: "needsResponse" });
