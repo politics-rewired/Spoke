@@ -399,6 +399,7 @@ const mutations: MutationMap<FullComponentProps> = {
             ...EditInteractionStep
           }
           isStarted
+          isApproved
           customFields
           readiness {
             id

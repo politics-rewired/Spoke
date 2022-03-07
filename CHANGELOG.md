@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.20.0](https://github.com/politics-rewired/spoke/compare/v4.19.1...v4.20.0) (2022-03-05)
+
+
+### Features
+
+* add superadmin approval for campaigns ([#1106](https://github.com/politics-rewired/spoke/issues/1106)) ([dbb2882](https://github.com/politics-rewired/spoke/commit/dbb28820e53de6658793272bf1976d9807268319))
+* **message filter:** allow searching using cell phone number ([#1090](https://github.com/politics-rewired/spoke/issues/1090)) ([8c08a2c](https://github.com/politics-rewired/spoke/commit/8c08a2c2a1708cec3293642b383686610e65c2c2))
+
+
+### Bug Fixes
+
+* delete due date button clearing up other fields ([#1103](https://github.com/politics-rewired/spoke/issues/1103)) ([a1a9a4b](https://github.com/politics-rewired/spoke/commit/a1a9a4b2b00f5a0515bd36cb4ae1c0b32ddec677)), closes [#1101](https://github.com/politics-rewired/spoke/issues/1101)
+* disable reassign all without target texter(s) ([#1094](https://github.com/politics-rewired/spoke/issues/1094)) ([fe126d1](https://github.com/politics-rewired/spoke/commit/fe126d16984b708a2a37c0dfc897b98a4e2274ee))
+* fix design of survey question select elements ([#1091](https://github.com/politics-rewired/spoke/issues/1091)) ([aa6a844](https://github.com/politics-rewired/spoke/commit/aa6a844cee0bd5d72929d5683f2193ec013b0581))
+* fix use of react contexts ([#1107](https://github.com/politics-rewired/spoke/issues/1107)) ([51f4012](https://github.com/politics-rewired/spoke/commit/51f4012b4b780b1281131b6445ec481c51346462))
+* handle component lifecycle correctly ([#1099](https://github.com/politics-rewired/spoke/issues/1099)) ([00a408a](https://github.com/politics-rewired/spoke/commit/00a408a5aee44c5b655cc4b0c0ec2a33edde7b8d))
+* handle overdue early return case ([#1096](https://github.com/politics-rewired/spoke/issues/1096)) ([1ee2645](https://github.com/politics-rewired/spoke/commit/1ee2645c96fa722e1ee8e9cf357eb66713687da8))
+* update deps to fix stream handling error ([#1104](https://github.com/politics-rewired/spoke/issues/1104)) ([b6eb0cb](https://github.com/politics-rewired/spoke/commit/b6eb0cb70d5537e1f0132b645f23a4b2975ebd1e))
+
+### [4.19.1](https://github.com/politics-rewired/spoke/compare/v4.19.0...v4.19.1) (2022-02-26)
+
+
+### Bug Fixes
+
+* fall back to null on NaN ([8642409](https://github.com/politics-rewired/spoke/commit/8642409bf72edffe15794eff4533dda30230e3bc))
+
+## [4.19.0](https://github.com/politics-rewired/spoke/compare/v4.18.1...v4.19.0) (2022-02-25)
+
+
+### Features
+
+* make due dates for campaigns optional ([#1084](https://github.com/politics-rewired/spoke/issues/1084)) ([35925bb](https://github.com/politics-rewired/spoke/commit/35925bb79b2fe98bbe15b5adbe74c478ec01a483))
+
+
+### Bug Fixes
+
+* convert client-side id args from int to string ([#1085](https://github.com/politics-rewired/spoke/issues/1085)) ([8c0e83c](https://github.com/politics-rewired/spoke/commit/8c0e83ce20e98457cd40d4ad4703b0e88b8dfb66))
+* enable link replacement only if envvar is enabled ([#1088](https://github.com/politics-rewired/spoke/issues/1088)) ([4ec2f16](https://github.com/politics-rewired/spoke/commit/4ec2f16aaed91129ff633d890ea4f5b14b2a4d1d))
+
+### [4.18.1](https://github.com/politics-rewired/spoke/compare/v4.18.0...v4.18.1) (2022-02-20)
+
+
+### Bug Fixes
+
+* **export-campaign:** fix attemptedAt being empty in export ([#1083](https://github.com/politics-rewired/spoke/issues/1083)) ([1fd221e](https://github.com/politics-rewired/spoke/commit/1fd221ef79a5d5a32daee1beaca46e887555eab5)), closes [#1068](https://github.com/politics-rewired/spoke/issues/1068)
+
+## [4.18.0](https://github.com/politics-rewired/spoke/compare/v4.17.2...v4.18.0) (2022-02-19)
+
+
+### Features
+
+* **script:** add indicator of message type, check if attachment is image ([#1076](https://github.com/politics-rewired/spoke/issues/1076)) ([0171a1e](https://github.com/politics-rewired/spoke/commit/0171a1e6097bc2c69f86184365e8aa7462a70965)), closes [#874](https://github.com/politics-rewired/spoke/issues/874)
+* set page title based on navigation ([#1049](https://github.com/politics-rewired/spoke/issues/1049)) ([998a3e8](https://github.com/politics-rewired/spoke/commit/998a3e838251054fc6757f94ce1f76c5fa041b0f))
+* update apollo-client ([#1027](https://github.com/politics-rewired/spoke/issues/1027)) ([7931f4c](https://github.com/politics-rewired/spoke/commit/7931f4c0587bb3e5b2927a314dcc538c70ce74b0)), closes [/github.com/apollographql/apollo-client/issues/6760#issuecomment-668188727](https://github.com/politics-rewired//github.com/apollographql/apollo-client/issues/6760/issues/issuecomment-668188727)
+
+
+### Bug Fixes
+
+* convert string to float ([#1074](https://github.com/politics-rewired/spoke/issues/1074)) ([45accae](https://github.com/politics-rewired/spoke/commit/45accae978eecec8f9909cf2c9980a589f7ff41e))
+* fix assignment control ([#1062](https://github.com/politics-rewired/spoke/issues/1062)) ([a07cdac](https://github.com/politics-rewired/spoke/commit/a07cdacedf8c63b74f5a0439e7c88e8bce01beb9))
+* fix authzprovider hook ([#1082](https://github.com/politics-rewired/spoke/issues/1082)) ([e6ff8e4](https://github.com/politics-rewired/spoke/commit/e6ff8e4ab71b71cd9eadb6317d664f72f16b381b))
+* fix create org using the wrong types ([#1069](https://github.com/politics-rewired/spoke/issues/1069)) ([7e45ca2](https://github.com/politics-rewired/spoke/commit/7e45ca2b1ed4ee6de832668ec66e18a366c55e4d))
+* navigate to login only on error fetching roles ([#1079](https://github.com/politics-rewired/spoke/issues/1079)) ([d9e1e3f](https://github.com/politics-rewired/spoke/commit/d9e1e3fda2a62dacabbd66e4e2cce7928fe77cb4))
+* **10dlc:** update 10dlc deadlines ([#1075](https://github.com/politics-rewired/spoke/issues/1075)) ([a96caee](https://github.com/politics-rewired/spoke/commit/a96caee0e8ecdf2ffe5190fd1a78f0b8fcdef063))
+* remove undesired bolding ([#1055](https://github.com/politics-rewired/spoke/issues/1055)) ([67c49ec](https://github.com/politics-rewired/spoke/commit/67c49eca13efc5fee5abdb8617eadca2cd42569b))
+* update disclaimer copy ([#1054](https://github.com/politics-rewired/spoke/issues/1054)) ([47be131](https://github.com/politics-rewired/spoke/commit/47be131d1e59d8f1005e000f155dc51fd59f14f6))
+
 ### [4.17.2](https://github.com/politics-rewired/spoke/compare/v4.17.1...v4.17.2) (2022-01-27)
 
 

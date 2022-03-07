@@ -7,6 +7,7 @@ query GetCurrentUserId {
 query CurrentUserOrganizationRoles($organizationId: String!) {
   currentUser {
     id
+    isSuperadmin
     roles(organizationId: $organizationId)
   }
 }

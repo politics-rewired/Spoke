@@ -1,9 +1,8 @@
-import React, { useContext, useState } from "react";
-
 import {
-  TexterOrganizationSettingsFragmentFragment,
+  OrganizationSettingsInfoFragment,
   useGetOrganizationSettingsQuery
-} from "../../libs/spoke-codegen/src";
+} from "@spoke/spoke-codegen";
+import React, { useContext, useMemo, useState } from "react";
 
 export interface InstanceSettings {
   BASE_URL: string;
@@ -14,7 +13,7 @@ export interface InstanceSettings {
 
 export interface SpokeContextType {
   settings?: InstanceSettings;
-  orgSettings?: TexterOrganizationSettingsFragmentFragment;
+  orgSettings?: OrganizationSettingsInfoFragment;
   setOrganizationId: (organizationId?: string) => void;
 }
 
@@ -29,13 +28,17 @@ export const SpokeContextProvider: React.FC = (props) => {
 
   const { data } = useGetOrganizationSettingsQuery({
     variables: { organizationId: organizationId! },
-    skip: organizationId === undefined
+    skip: organizationId === undefined,
+    errorPolicy: "ignore"
   });
 
-  const value = {
-    orgSettings: data?.organization?.settings,
-    setOrganizationId
-  };
+  const value = useMemo(
+    () => ({
+      orgSettings: data?.organization?.settings,
+      setOrganizationId
+    }),
+    [data?.organization?.settings, setOrganizationId]
+  );
 
   return (
     <SpokeContext.Provider value={value}>
@@ -46,7 +49,7 @@ export const SpokeContextProvider: React.FC = (props) => {
 
 export const useSpokeContext = () => useContext(SpokeContext);
 
-export const withSpokeContext = <P extends unknown>(
+export const withSpokeContext = <P,>(
   Component: React.ComponentType<P & SpokeContextType>
 ) => {
   const ComponentWithSpokeContext: React.FC<P> = (props) => {

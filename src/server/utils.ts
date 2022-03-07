@@ -15,7 +15,7 @@ export type WithClientFn<T, C extends PoolClient | Client> = (
   client: C
 ) => Promise<T>;
 
-export const withClient = async <T extends unknown>(
+export const withClient = async <T>(
   pool: Pool,
   callback: WithClientFn<T, PoolClient>
 ) => {
@@ -28,10 +28,7 @@ export const withClient = async <T extends unknown>(
   }
 };
 
-export const withTransaction = async <
-  T extends unknown,
-  C extends PoolClient | Client
->(
+export const withTransaction = async <T, C extends PoolClient | Client>(
   client: C,
   callback: WithClientFn<T, C>
 ) => {

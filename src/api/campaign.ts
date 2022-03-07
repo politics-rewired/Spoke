@@ -1,15 +1,15 @@
 /* eslint-disable no-unused-vars */
-import { CampaignContactInput } from "./campaign-contact";
-import { CampaignGroupPage } from "./campaign-group";
-import { CannedResponseInput } from "./canned-response";
-import { ExternalSystem } from "./external-system";
-import {
+import type { CampaignContactInput } from "./campaign-contact";
+import type { CampaignGroupPage } from "./campaign-group";
+import type { CannedResponseInput } from "./canned-response";
+import type { ExternalSystem } from "./external-system";
+import type {
   InteractionStep,
   InteractionStepWithChildren
 } from "./interaction-step";
-import { Team } from "./team";
-import { PageInfo } from "./types";
-import { User } from "./user";
+import type { Team } from "./team";
+import type { PageInfo } from "./types";
+import type { User } from "./user";
 
 export enum ExternalSyncReadinessState {
   READY = "READY",
@@ -93,6 +93,7 @@ export interface Campaign {
   isStarted: boolean;
   dueBy?: string | null;
   contactsCount: number;
+  isApproved: boolean;
   isArchived: boolean;
   textingHoursStart: number;
   textingHoursEnd: number;
@@ -194,6 +195,7 @@ export const schema = `
     description: String
     dueBy: Date
     readiness: CampaignReadiness!
+    isApproved: Boolean!
     isStarted: Boolean
     isArchived: Boolean
     creator: User
@@ -276,7 +278,7 @@ export const schema = `
     contactsFile: Upload
     externalListId: String
     filterOutLandlines: Boolean
-    excludeCampaignIds: [Int]
+    excludeCampaignIds: [String!]
     contactSql: String
     organizationId: String
     isAssignmentLimitedToTeams: Boolean

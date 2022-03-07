@@ -1,25 +1,25 @@
-import { Campaign, PaginatedCampaigns } from "./campaign";
-import { CampaignGroupPage } from "./campaign-group";
-import { ExternalSystem } from "./external-system";
-import { LinkDomain, UnhealthyLinkDomain } from "./link-domain";
-import { MessagingServicePage } from "./messaging-service";
-import { OptOut } from "./opt-out";
-import { OrganizationMembership } from "./organization-membership";
-import { OrganizationSettings } from "./organization-settings";
-import { RelayPaginatedResponse } from "./pagination";
-import { Tag } from "./tag";
-import { Team } from "./team";
-import { TextRequestType } from "./types";
-import { User } from "./user";
+import type { Campaign, PaginatedCampaigns } from "./campaign";
+import type { CampaignGroupPage } from "./campaign-group";
+import type { ExternalSystem } from "./external-system";
+import type { LinkDomain, UnhealthyLinkDomain } from "./link-domain";
+import type { MessagingServicePage } from "./messaging-service";
+import type { OptOut } from "./opt-out";
+import type { OrganizationMembership } from "./organization-membership";
+import type { OrganizationSettings } from "./organization-settings";
+import type { RelayPaginatedResponse } from "./pagination";
+import type { Tag } from "./tag";
+import type { Team } from "./team";
+import type { TextRequestType } from "./types";
+import type { User } from "./user";
 
 export interface AssignmentTarget {
   type: string;
   campaign: Campaign;
-  countLeft: number;
+  countLeft?: number | null;
   teamTitle: string;
-  teamId: number;
+  teamId: string;
   enabled: boolean;
-  maxRequestCount: number;
+  maxRequestCount?: number | null;
 }
 
 export interface Organization {
@@ -73,7 +73,7 @@ export const schema = `
     campaign: Campaign
     countLeft: Int
     teamTitle: String
-    teamId: Int
+    teamId: String
     enabled: Boolean
     maxRequestCount: Int
   }

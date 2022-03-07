@@ -133,7 +133,7 @@ class CampaignTextingHoursForm extends React.Component<
     }
   };
 
-  addAutocompleteFormField = <T extends unknown>(
+  addAutocompleteFormField = <T,>(
     name: keyof TextingHoursValues,
     stateName: keyof AutoassignState,
     value: T,

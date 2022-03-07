@@ -1,5 +1,5 @@
-import { Campaign } from "./campaign";
-import { RelayEdge, RelayPaginatedResponse } from "./pagination";
+import type { Campaign } from "./campaign";
+import type { RelayEdge, RelayPaginatedResponse } from "./pagination";
 
 export interface CampaignGroupInput {
   id?: string | null;

@@ -114,7 +114,7 @@ class AdminCampaignStats extends React.Component {
       disableVanExportButton,
       disableVanSyncButton
     } = this.state;
-    const { data, match, adminPerms } = this.props;
+    const { data, match, isAdmin } = this.props;
     const { organizationId, campaignId } = match.params;
     const { campaign } = data;
     const { pendingJobs } = campaign;
@@ -190,7 +190,7 @@ class AdminCampaignStats extends React.Component {
                       label="Edit"
                     />
                   ) : null}
-                  {adminPerms
+                  {isAdmin
                     ? [
                         // Buttons for Admins (and not Supervolunteers)
                         // export
@@ -342,7 +342,7 @@ AdminCampaignStats.propTypes = {
   data: PropTypes.object,
   match: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
-  adminPerms: PropTypes.bool.isRequired
+  isAdmin: PropTypes.bool.isRequired
 };
 
 const queries = {

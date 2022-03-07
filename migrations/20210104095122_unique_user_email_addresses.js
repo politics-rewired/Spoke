@@ -1,4 +1,4 @@
-exports.up = function (knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     create extension if not exists citext;
     alter table public.user alter column email type citext;
@@ -88,7 +88,7 @@ exports.up = function (knex) {
   `);
 };
 
-exports.down = function (knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     alter table public.user drop constraint email_unique;
     alter table public.user alter column email type text;

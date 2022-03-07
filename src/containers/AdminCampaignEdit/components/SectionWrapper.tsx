@@ -10,9 +10,13 @@ import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import React from "react";
 import { compose, withProps } from "recompose";
 
-import { withAuthzContext } from "../../../components/AuthzProvider";
+import {
+  AuthzContextType,
+  withAuthzContext
+} from "../../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
+import { MuiThemeProviderProps } from "../../../styles/types";
 import { loadData } from "../../hoc/with-operations";
 import { CampaignReadinessType } from "../types";
 
@@ -38,7 +42,7 @@ interface WrapperProps {
   title: string;
 
   // HOC
-  adminPerms: boolean;
+  isAdmin: boolean;
 
   // withProps
   pendingJob?: PendingJobType;
@@ -92,7 +96,7 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
     title,
 
     // Authz HOC
-    adminPerms,
+    isAdmin,
 
     // withProps HOC
     isExpandable,
@@ -183,7 +187,7 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
         avatar={avatar}
       />
       <CardText expandable>{children}</CardText>
-      {isSaving && adminPerms && (
+      {isSaving && isAdmin && (
         <CardActions>
           <div>Current Status: {progressMessage}</div>
           {jobMessage && jobMessage !== "{}" && (
@@ -221,6 +225,7 @@ const makeQueries = (jobTypes: string[]) => ({
         campaign(id: $campaignId) {
           id
           isStarted
+          isApproved
           readiness {
             id
             basics
@@ -314,14 +319,10 @@ interface WrapperGraphqlProps {
   };
 }
 
-interface AuthzProviderProps {
-  adminPerms: boolean;
-}
-
 interface WrappedComponentProps
   extends RequiredComponentProps,
     MuiThemeProviderProps,
-    AuthzProviderProps {
+    AuthzContextType {
   pendingJob?: PendingJobType;
   isExpandable: boolean;
   sectionIsDone: boolean;
@@ -337,7 +338,7 @@ export const asSection = (options: SectionOptions) => (
       queries: makeQueries(options.jobQueueNames),
       mutations
     }),
-    withProps((ownerProps: WrapperGraphqlProps & AuthzProviderProps) => {
+    withProps((ownerProps: WrapperGraphqlProps & AuthzContextType) => {
       const {
         expandableBySuperVolunteers,
         expandAfterCampaignStarts,
@@ -346,7 +347,7 @@ export const asSection = (options: SectionOptions) => (
       const {
         status,
         jobs,
-        adminPerms,
+        isAdmin,
         mutations: { deleteJob }
       } = ownerProps;
       const { isStarted, readiness } = status.campaign;
@@ -354,7 +355,7 @@ export const asSection = (options: SectionOptions) => (
 
       const isExpandable =
         (expandAfterCampaignStarts || !isStarted) &&
-        (expandableBySuperVolunteers || adminPerms);
+        (expandableBySuperVolunteers || isAdmin);
 
       const sectionIsDone = readiness[readinessName];
 
@@ -372,7 +373,7 @@ export const asSection = (options: SectionOptions) => (
       onError,
 
       // Authz HOC
-      adminPerms,
+      isAdmin,
       muiTheme,
 
       // withProps HOC
@@ -391,7 +392,7 @@ export const asSection = (options: SectionOptions) => (
         onExpandChange={onExpandChange}
         onError={onError}
         title={options.title}
-        adminPerms={adminPerms}
+        isAdmin={isAdmin}
         pendingJob={pendingJob}
         isExpandable={isExpandable}
         sectionIsDone={sectionIsDone}

@@ -4,7 +4,9 @@ import isObject from "lodash/isObject";
 import transform from "lodash/transform";
 
 export const sleep = (ms = 0) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 /**
  * Deep diff between two object, using lodash

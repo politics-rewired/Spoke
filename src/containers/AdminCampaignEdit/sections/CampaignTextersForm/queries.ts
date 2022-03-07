@@ -19,6 +19,7 @@ export const GET_CAMPAIGN_TEXTERS = gql`
       }
       contactsCount
       isStarted
+      isApproved
       dueBy
       readiness {
         id

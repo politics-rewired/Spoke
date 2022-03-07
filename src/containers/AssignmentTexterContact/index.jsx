@@ -111,10 +111,6 @@ const inlineStyles = {
 };
 
 export class AssignmentTexterContact extends React.Component {
-  optOutSchema = yup.object({
-    optOutMessageText: yup.string()
-  });
-
   messageSchema = yup.object({
     messageText: yup
       .string()
@@ -618,7 +614,7 @@ export class AssignmentTexterContact extends React.Component {
       return (
         <div>
           <Toolbar style={inlineStyles.actionToolbarFirst}>
-            <ToolbarGroup firstChild>
+            <ToolbarGroup>
               <SendButton
                 threeClickEnabled={campaign.organization.threeClickEnabled}
                 onFinalTouchTap={
@@ -699,7 +695,7 @@ export class AssignmentTexterContact extends React.Component {
       return (
         <div>
           <Toolbar style={inlineStyles.actionToolbarFirst}>
-            <ToolbarGroup firstChild>
+            <ToolbarGroup>
               <SendButton
                 threeClickEnabled={campaign.organization.threeClickEnabled}
                 onFinalTouchTap={this.handleClickSendMessageButton}

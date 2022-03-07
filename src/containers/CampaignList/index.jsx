@@ -48,7 +48,7 @@ export class CampaignList extends React.Component {
       organizationId,
       pageSize,
       campaignsFilter,
-      adminPerms,
+      isAdmin,
       data,
       mutations
     } = this.props;
@@ -73,7 +73,7 @@ export class CampaignList extends React.Component {
           organizationId={organizationId}
           campaignsFilter={campaignsFilter}
           pageSize={pageSize}
-          adminPerms={adminPerms}
+          isAdmin={isAdmin}
           startOperation={this.start}
           archiveCampaign={archiveCampaign}
           unarchiveCampaign={unarchiveCampaign}
@@ -87,7 +87,7 @@ CampaignList.propTypes = {
   organizationId: PropTypes.string.isRequired,
   campaignsFilter: PropTypes.object.isRequired,
   pageSize: PropTypes.number.isRequired,
-  adminPerms: PropTypes.bool.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
   mutations: PropTypes.object.isRequired
 };
@@ -96,6 +96,7 @@ const campaignInfoFragment = `
   id
   title
   isStarted
+  isApproved
   isArchived
   hasUnassignedContacts
   hasUnsentInitialMessages

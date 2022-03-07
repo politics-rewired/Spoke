@@ -1,1 +1,4 @@
-export { default } from "./AdminPeople";
+import AdminPeople from "./AdminPeople";
+
+export { AdminPeople };
+export default AdminPeople;

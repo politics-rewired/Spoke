@@ -19,6 +19,7 @@ const menuPortalCSS = ({
     const { left, top } = appendTo.getBoundingClientRect();
     const { offsetLeft, offsetTop } = appendTo;
     containerLeft = left - offsetLeft;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
     containerTop = top - offsetTop;
   }
 
@@ -60,9 +61,9 @@ class MenuPortal extends PureComponent {
 
   state = { placement: null };
 
-  getChildContext = () => {
+  getChildContext() {
     return { getPortalPlacement: this.getPortalPlacement };
-  };
+  }
 
   // callback in case menu needs to flip
   getPortalPlacement = ({ placement }) => {

@@ -27,6 +27,7 @@ const query = gql`
             id
             title
             isStarted
+            isApproved
             isArchived
             isAutoassignEnabled
             hasUnassignedContacts
@@ -65,7 +66,7 @@ interface Props {
   organizationId: string;
   pageSize: number;
   campaignsFilter: CampaignsFilter;
-  adminPerms: boolean;
+  isAdmin: boolean;
   startOperation: (...args: any[]) => any;
   archiveCampaign: (...args: any[]) => any;
   unarchiveCampaign: (...args: any[]) => any;
@@ -166,7 +167,7 @@ export class CampaignListLoader extends React.Component<Props, State> {
   render() {
     const {
       organizationId,
-      adminPerms,
+      isAdmin,
       startOperation,
       archiveCampaign,
       unarchiveCampaign
@@ -180,7 +181,7 @@ export class CampaignListLoader extends React.Component<Props, State> {
         <CampaignList
           organizationId={organizationId}
           campaigns={campaigns}
-          adminPerms={adminPerms}
+          isAdmin={isAdmin}
           startOperation={startOperation}
           archiveCampaign={archiveCampaign}
           unarchiveCampaign={unarchiveCampaign}

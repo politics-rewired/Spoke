@@ -149,6 +149,7 @@ const queries: QueryMap<InnerProps> = {
             id
           }
           isStarted
+          isApproved
         }
       }
     `,
@@ -196,6 +197,7 @@ const mutations: MutationMap<InnerProps> = {
             id
           }
           isStarted
+          isApproved
           syncReadiness
           readiness {
             id

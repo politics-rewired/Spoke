@@ -1,40 +1,67 @@
+import { useCurrentUserOrganizationRolesQuery } from "@spoke/spoke-codegen";
 import React, { useContext, useEffect } from "react";
-import { useParams } from "react-router-dom";
 
-import { useCurrentUserOrganizationRolesQuery } from "../../libs/spoke-codegen/src";
 import { UserRoleType } from "../api/organization-membership";
 import { useSpokeContext } from "../client/spoke-context";
 import { hasRole } from "../lib/permissions";
 
-export const AuthzContext = React.createContext(false);
+export interface AuthzContextType {
+  roles: UserRoleType[];
+  hasRole: (role: UserRoleType) => boolean;
+  isSuperadmin: boolean;
+  isOwner: boolean;
+  isAdmin: boolean;
+  isSupervol: boolean;
+}
+
+export const AuthzContext = React.createContext<AuthzContextType>({
+  roles: [],
+  hasRole: () => false,
+  isSuperadmin: false,
+  isOwner: false,
+  isAdmin: false,
+  isSupervol: false
+});
 
 export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
-  const { organizationId } = useParams<{ organizationId: string }>();
-  const { data, loading } = useCurrentUserOrganizationRolesQuery({
+  const { data, loading, error } = useCurrentUserOrganizationRolesQuery({
     variables: { organizationId: props.organizationId },
     skip: props.organizationId === undefined
   });
   const roles = (data?.currentUser?.roles ?? []) as UserRoleType[];
-  const hasAdminPermissions = hasRole(UserRoleType.ADMIN, roles);
+  const isSuperadmin = data?.currentUser?.isSuperadmin ?? false;
+  const hasAdminPermissions =
+    isSuperadmin || hasRole(UserRoleType.ADMIN, roles);
 
   const { setOrganizationId } = useSpokeContext();
 
   useEffect(() => {
-    setOrganizationId(organizationId);
-  }, [organizationId]);
+    setOrganizationId(props.organizationId);
+  }, [props.organizationId]);
 
   useEffect(() => {
-    if (!loading && !hasAdminPermissions) {
+    if (!loading && error !== undefined) {
       const loginUrl = `/login?nextUrl=${window.location.pathname}`;
       // We can't use replace(...) here because /login is not a react-router path
       window.location.href = loginUrl;
     }
-  }, [loading, hasAdminPermissions]);
+  }, [loading, hasAdminPermissions, error]);
 
-  if (loading) return <></>;
+  const value = React.useMemo(
+    () => ({
+      roles,
+      hasRole: (role: UserRoleType) => hasRole(role, roles),
+      isSuperadmin,
+      isOwner: hasRole(UserRoleType.OWNER, roles),
+      isAdmin: hasRole(UserRoleType.ADMIN, roles),
+      isSupervol: hasRole(UserRoleType.SUPERVOLUNTEER, roles)
+    }),
+    [roles]
+  );
 
+  if (loading) return null;
   return (
-    <AuthzContext.Provider value={hasAdminPermissions}>
+    <AuthzContext.Provider value={value}>
       {props.children}
     </AuthzContext.Provider>
   );
@@ -42,12 +69,12 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
 
 export const useAuthzContext = () => useContext(AuthzContext);
 
-export const withAuthzContext = <P extends unknown>(
-  Component: React.ComponentType<P & { adminPerms: boolean }>
+export const withAuthzContext = <P,>(
+  Component: React.ComponentType<P & AuthzContextType>
 ) => {
   const ComponentWithAuthzContext: React.FC<P> = (props) => {
-    const adminPerms = useAuthzContext();
-    return <Component {...props} adminPerms={adminPerms} />;
+    const authzProps = useAuthzContext();
+    return <Component {...props} {...authzProps} />;
   };
 
   return ComponentWithAuthzContext;

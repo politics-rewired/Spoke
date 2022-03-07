@@ -12,9 +12,13 @@ export const SpokeThemeProvider: React.FC = (props) => {
   const [customTheme, setCustomTheme] = useState<CustomTheme>({});
 
   useEffect(() => {
-    request.get("/settings/theme").then(({ body }) => {
+    const req = request.get("/settings/theme");
+
+    req.then(({ body }) => {
       setCustomTheme(body);
     });
+
+    return () => req.abort();
   }, []);
 
   const muiTheme = createMuiThemev1(customTheme);
@@ -33,7 +37,7 @@ export const SpokeThemeProvider: React.FC = (props) => {
 
 export const useSpokeTheme = () => useContext(SpokeThemeContext);
 
-export const withSpokeTheme = <P extends unknown>(
+export const withSpokeTheme = <P,>(
   Component: React.ComponentType<P & { theme: CustomTheme }>
 ) => {
   const ComponentWithSpokeTheme: React.FC<P> = (props) => {
