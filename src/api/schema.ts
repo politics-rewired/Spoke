@@ -225,7 +225,7 @@ const rootSchema = `
     externalLists(organizationId: String!, systemId: String!, after: Cursor, first: Int): ExternalListPage!
     notices(organizationId: String): NoticePage!
     campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
-    campaignNavigation(campaignId: String!, organizationId: String!): CampaignNavigation!
+    campaignNavigation(campaignId: String!): CampaignNavigation!
   }
 
   input SecondPassInput {

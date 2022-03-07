@@ -128,8 +128,8 @@ export interface CampaignsList {
 }
 
 export interface CampaignNavigation {
-  nextCampaignId: number | null;
-  prevCampaignId: number | null;
+  nextCampaignId: string | null;
+  prevCampaignId: string | null;
 }
 
 export type CampaignsReturn = PaginatedCampaigns | CampaignsList;
@@ -259,8 +259,8 @@ export const schema = `
   }
 
   type CampaignNavigation {
-    nextCampaignId: Int
-    prevCampaignId: Int
+    nextCampaignId: String
+    prevCampaignId: String
   }
 
   input TexterAssignmentInput {

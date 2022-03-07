@@ -9,6 +9,7 @@ import pick from "lodash/pick";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
+import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { red600 } from "material-ui/styles/colors";
@@ -22,6 +23,7 @@ import { Helmet } from "react-helmet";
 import { compose } from "recompose";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
+import CampaignNavigation from "../../components/CampaignNavigation";
 import { camelCase, dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
@@ -558,6 +560,18 @@ class AdminCampaignEdit extends React.Component {
     };
   };
 
+  prevCampaignClicked = (campaignId) => {
+    const { history } = this.props;
+    const { organizationId } = this.props.match.params;
+    history.push(`/admin/${organizationId}/campaigns/${campaignId}/edit`);
+  };
+
+  nextCampaignClicked = (campaignId) => {
+    const { history } = this.props;
+    const { organizationId } = this.props.match.params;
+    history.push(`/admin/${organizationId}/campaigns/${campaignId}/edit`);
+  };
+
   renderCurrentEditors = () => {
     const { editors } = this.props.campaignData.campaign;
     if (editors) {
@@ -624,6 +638,12 @@ class AdminCampaignEdit extends React.Component {
           fontSize: 16
         }}
       >
+        <CampaignNavigation
+          prevCampaignClicked={this.prevCampaignClicked}
+          nextCampaignClicked={this.nextCampaignClicked}
+          campaignId={this.props.campaignData.campaign.id}
+        />
+        <Divider style={{ marginBottom: 20 }} />
         {title && <h1> {title} </h1>}
         {this.state.startingCampaign ? (
           <div style={{ color: theme.colors.gray }}>

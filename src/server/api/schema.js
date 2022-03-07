@@ -3483,27 +3483,31 @@ const rootResolvers = {
       });
       return formatPage(query, { after, first });
     },
-    campaignNavigation: async (
-      _root,
-      { campaignId, organizationId },
-      { user }
-    ) => {
+    campaignNavigation: async (_root, { campaignId }, { user }) => {
+      const { organization_id: organizationId } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first("organization_id");
+
       await accessRequired(user, organizationId, "SUPERVOLUNTEER");
 
-      const {
-        rows: [{ prevcampaign }]
-      } = await r.knex.raw(
-        `SELECT max(id) as prevCampaign FROM campaign where id < ${campaignId} AND is_started = TRUE AND organization_id = ${organizationId} AND is_archived = FALSE;`
-      );
-      const {
-        rows: [{ nextcampaign }]
-      } = await r.knex.raw(
-        `SELECT min(id) as nextCampaign FROM campaign where id > ${campaignId} AND is_started = TRUE AND organization_id = ${organizationId} AND is_archived = FALSE;`
-      );
+      const { prev_campaign: prevCampaignId } = await r
+        .knex("campaign")
+        .max({ prev_campaign: "id" })
+        .where("id", "<", campaignId)
+        .where({ organization_id: organizationId })
+        .first();
+
+      const { next_campaign: nextCampaignId } = await r
+        .knex("campaign")
+        .min({ next_campaign: "id" })
+        .where("id", ">", campaignId)
+        .where({ organization_id: organizationId })
+        .first();
 
       return {
-        prevCampaignId: prevcampaign,
-        nextCampaignId: nextcampaign
+        prevCampaignId,
+        nextCampaignId
       };
     }
   }
