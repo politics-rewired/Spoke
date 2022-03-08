@@ -9,8 +9,8 @@ import { QueryMap } from "../network/types";
 import theme from "../styles/theme";
 
 interface Props {
-  prevCampaignClicked(campaignId: string): void;
-  nextCampaignClicked(campaignId: string): void;
+  prevCampaignClicked(campaignId: string | null): void;
+  nextCampaignClicked(campaignId: string | null): void;
   campaignId: string;
   campaignNavigation: {
     campaignNavigation: {
