@@ -6,7 +6,6 @@ import React from "react";
 
 import { loadData } from "../containers/hoc/with-operations";
 import { QueryMap } from "../network/types";
-import theme from "../styles/theme";
 
 interface Props {
   prevCampaignClicked(campaignId: string | null): void;
@@ -22,7 +21,7 @@ interface Props {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    ...theme.layouts.multiColumn.container,
+    display: "flex",
     justifyContent: "flex-end",
     paddingTop: 20,
     paddingBottom: 20,
