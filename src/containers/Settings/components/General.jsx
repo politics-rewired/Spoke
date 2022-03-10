@@ -24,6 +24,7 @@ import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
+import MessageReviewSettingsCard from "./MessageReviewSettingsCard";
 import Review10DlcInfo from "./Review10DlcInfo";
 
 const styles = StyleSheet.create({
@@ -410,6 +411,11 @@ class Settings extends React.Component {
         </Card>
 
         <CampaignBuilderSettingsCard
+          organizationId={organization.id}
+          style={{ marginBottom: 20 }}
+        />
+
+        <MessageReviewSettingsCard
           organizationId={organization.id}
           style={{ marginBottom: 20 }}
         />

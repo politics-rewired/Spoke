@@ -17,6 +17,7 @@ interface IOrganizationSettings {
   showContactCell: boolean;
   confirmationClickForScriptLinks: boolean;
   startCampaignRequiresApproval: boolean;
+  scriptPreviewForSupervolunteers: boolean;
 }
 
 const SETTINGS_PERMISSIONS: {
@@ -27,6 +28,7 @@ const SETTINGS_PERMISSIONS: {
   showContactCell: UserRoleType.TEXTER,
   confirmationClickForScriptLinks: UserRoleType.TEXTER,
   startCampaignRequiresApproval: UserRoleType.SUPERVOLUNTEER,
+  scriptPreviewForSupervolunteers: UserRoleType.SUPERVOLUNTEER,
   defaulTexterApprovalStatus: UserRoleType.OWNER,
   numbersApiKey: UserRoleType.OWNER,
   trollbotWebhookUrl: UserRoleType.OWNER
@@ -42,6 +44,7 @@ const SETTINGS_WRITE_PERMISSIONS: {
   defaulTexterApprovalStatus: UserRoleType.OWNER,
   numbersApiKey: UserRoleType.OWNER,
   trollbotWebhookUrl: UserRoleType.OWNER,
+  scriptPreviewForSupervolunteers: UserRoleType.OWNER,
   startCampaignRequiresApproval: UserRoleType.SUPERADMIN
 };
 
@@ -59,7 +62,8 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   showContactLastName: false,
   showContactCell: false,
   confirmationClickForScriptLinks: true,
-  startCampaignRequiresApproval: false
+  startCampaignRequiresApproval: false,
+  scriptPreviewForSupervolunteers: false
 };
 
 const SETTINGS_TRANSFORMERS: Partial<
@@ -141,7 +145,8 @@ export const resolvers = {
       "showContactLastName",
       "showContactCell",
       "confirmationClickForScriptLinks",
-      "startCampaignRequiresApproval"
+      "startCampaignRequiresApproval",
+      "scriptPreviewForSupervolunteers"
     ])
   }
 };

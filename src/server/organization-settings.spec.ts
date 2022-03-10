@@ -32,6 +32,7 @@ describe("get organization settings", () => {
     showContactCell: false,
     confirmationClickForScriptLinks: true,
     startCampaignRequiresApproval: false,
+    scriptPreviewForSupervolunteers: false,
     defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED,
     numbersApiKey: "SomethingSecret",
     trollbotWebhookUrl: "https://rewired.coop/trolls"
@@ -60,6 +61,7 @@ describe("get organization settings", () => {
                 showContactCell
                 confirmationClickForScriptLinks
                 startCampaignRequiresApproval
+                scriptPreviewForSupervolunteers
                 defaulTexterApprovalStatus
                 numbersApiKey
                 trollbotWebhookUrl
@@ -118,6 +120,9 @@ describe("get organization settings", () => {
     );
     expect(settings.startCampaignRequiresApproval).toEqual(
       features.startCampaignRequiresApproval
+    );
+    expect(settings.scriptPreviewForSupervolunteers).toEqual(
+      features.scriptPreviewForSupervolunteers
     );
     expect(settings.defaulTexterApprovalStatus).toEqual(
       features.defaulTexterApprovalStatus

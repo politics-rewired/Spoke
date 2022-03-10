@@ -9,6 +9,7 @@ export interface OrganizationSettingsInput {
   defaulTexterApprovalStatus: RequestAutoApproveType | null;
   numbersApiKey: string | null;
   trollbotWebhookUrl: string | null;
+  scriptPreviewForSupervolunteers: boolean | null;
 
   // Superadmin
   startCampaignRequiresApproval: boolean | null;
@@ -25,6 +26,7 @@ export interface OrganizationSettings {
 
   // Supervolunteer
   startCampaignRequiresApproval: boolean | null;
+  scriptPreviewForSupervolunteers: boolean | null;
 
   // Owner
   defaulTexterApprovalStatus: RequestAutoApproveType | null;
@@ -42,6 +44,7 @@ export const schema = `
     defaulTexterApprovalStatus: RequestAutoApprove
     numbersApiKey: String
     trollbotWebhookUrl: String
+    scriptPreviewForSupervolunteers: Boolean
 
     # Superadmin
     startCampaignRequiresApproval: Boolean
@@ -58,6 +61,7 @@ export const schema = `
 
     # Supervolunteer
     startCampaignRequiresApproval: Boolean
+    scriptPreviewForSupervolunteers: Boolean
 
     # Owner
     defaulTexterApprovalStatus: RequestAutoApprove
