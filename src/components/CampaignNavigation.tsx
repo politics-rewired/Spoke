@@ -1,11 +1,9 @@
-import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { css, StyleSheet } from "aphrodite";
 import React from "react";
 
-import { loadData } from "../containers/hoc/with-operations";
-import { QueryMap } from "../network/types";
+import { useGetCampaignNavigationQuery } from "../../libs/spoke-codegen/src";
 
 interface Props {
   prevCampaignClicked(campaignId: string | null): void;
@@ -30,23 +28,41 @@ const styles = StyleSheet.create({
 });
 
 const CampaignNavigation: React.FC<Props> = (props) => {
-  const { campaignNavigation } = props.campaignNavigation;
+  const { data, loading } = useGetCampaignNavigationQuery({
+    variables: { campaignId: props.campaignId }
+  });
+
+  if (loading) {
+    return (
+      <div className={css(styles.buttonContainer)}>
+        <ButtonGroup disableElevation variant="contained" color="primary">
+          <Button disabled>Previous</Button>
+          <Button disabled>Next</Button>
+        </ButtonGroup>
+      </div>
+    );
+  }
+  const campaignNavigation = data?.campaignNavigation;
 
   return (
     <div className={css(styles.buttonContainer)}>
       <ButtonGroup disableElevation variant="contained" color="primary">
         <Button
-          disabled={!campaignNavigation.prevCampaignId}
+          disabled={!campaignNavigation?.prevCampaignId}
           onClick={() => {
-            props.prevCampaignClicked(campaignNavigation.prevCampaignId);
+            props.prevCampaignClicked(
+              campaignNavigation?.prevCampaignId || null
+            );
           }}
         >
           Previous
         </Button>
         <Button
-          disabled={!campaignNavigation.nextCampaignId}
+          disabled={!campaignNavigation?.nextCampaignId}
           onClick={() => {
-            props.nextCampaignClicked(campaignNavigation.nextCampaignId);
+            props.nextCampaignClicked(
+              campaignNavigation?.nextCampaignId || null
+            );
           }}
         >
           Next
@@ -56,22 +72,4 @@ const CampaignNavigation: React.FC<Props> = (props) => {
   );
 };
 
-const queries: QueryMap<Props> = {
-  campaignNavigation: {
-    query: gql`
-      query getCampaignNavigation($campaignId: String!) {
-        campaignNavigation(campaignId: $campaignId) {
-          nextCampaignId
-          prevCampaignId
-        }
-      }
-    `,
-    options: (ownProps) => ({
-      variables: {
-        campaignId: ownProps.campaignId
-      }
-    })
-  }
-};
-
-export default loadData({ queries })(CampaignNavigation);
+export default CampaignNavigation;

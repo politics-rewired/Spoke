@@ -1,0 +1,6 @@
+query GetCampaignNavigation($campaignId: String!) {
+  campaignNavigation(campaignId: $campaignId) {
+    nextCampaignId
+    prevCampaignId
+  }
+}
