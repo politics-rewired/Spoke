@@ -1,4 +1,4 @@
-import { isNil } from "lodash/isNil";
+import isNil from "lodash/isNil";
 
 import { ExternalSyncReadinessState } from "../../api/campaign";
 import { emptyRelayPage } from "../../api/pagination";
