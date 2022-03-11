@@ -28,6 +28,8 @@ import { camelCase, dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
+import ApproveCampaignButton from "./components/ApproveCampaignButton";
+import StartCampaignButton from "./components/StartCampaignButton";
 import {
   ARCHIVE_CAMPAIGN,
   DELETE_JOB,
@@ -717,22 +719,12 @@ class AdminCampaignEdit extends React.Component {
               }
             />
           )}
-          <RaisedButton
-            {...dataTest("startCampaign")}
-            primary
-            label="Start This Campaign!"
-            disabled={!isCompleted}
-            onClick={async () => {
-              this.setState({
-                startingCampaign: true
-              });
-              await this.props.mutations.startCampaign(
-                this.props.campaignData.campaign.id
-              );
-              this.setState({
-                startingCampaign: false
-              });
-            }}
+          <ApproveCampaignButton
+            campaignId={this.props.campaignData.campaign.id}
+          />
+          <StartCampaignButton
+            campaignId={this.props.campaignData.campaign.id}
+            isCompleted={isCompleted}
           />
         </div>
       </div>

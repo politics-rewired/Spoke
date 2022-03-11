@@ -1,69 +1,67 @@
-import { gql } from "@apollo/client";
-
 import type { RequestAutoApproveType } from "./organization-membership";
 
 export interface OrganizationSettingsInput {
-  defaulTexterApprovalStatus: RequestAutoApproveType | null;
+  // Owner
   optOutMessage: string | null;
-  numbersApiKey: string | null;
-  trollbotWebhookUrl: string | null;
   showContactLastName: boolean | null;
   showContactCell: boolean | null;
   confirmationClickForScriptLinks: boolean | null;
+  defaulTexterApprovalStatus: RequestAutoApproveType | null;
+  numbersApiKey: string | null;
+  trollbotWebhookUrl: string | null;
+
+  // Superadmin
+  startCampaignRequiresApproval: boolean | null;
 }
 
 export interface OrganizationSettings {
   id: string;
-  defaulTexterApprovalStatus: RequestAutoApproveType;
-  optOutMessage: string | null;
+
+  // Texter
+  optOutMessage: string;
+  showContactLastName: boolean;
+  showContactCell: boolean;
+  confirmationClickForScriptLinks: boolean;
+
+  // Supervolunteer
+  startCampaignRequiresApproval: boolean | null;
+
+  // Owner
+  defaulTexterApprovalStatus: RequestAutoApproveType | null;
   numbersApiKey: string | null;
   trollbotWebhookUrl: string | null;
-  showContactLastName: boolean | null;
-  showContactCell: boolean | null;
-  confirmationClickForScriptLinks: boolean;
 }
 
 export const schema = `
   input OrganizationSettingsInput {
-    defaulTexterApprovalStatus: RequestAutoApprove
+    # Owner
     optOutMessage: String
-    numbersApiKey: String
-    trollbotWebhookUrl: String
     showContactLastName: Boolean
     showContactCell: Boolean
     confirmationClickForScriptLinks: Boolean
+    defaulTexterApprovalStatus: RequestAutoApprove
+    numbersApiKey: String
+    trollbotWebhookUrl: String
+
+    # Superadmin
+    startCampaignRequiresApproval: Boolean
   }
 
   type OrganizationSettings {
     id: ID!
-    defaulTexterApprovalStatus: RequestAutoApprove!
-    optOutMessage: String
+
+    # Texter
+    optOutMessage: String!
+    showContactLastName: Boolean!
+    showContactCell: Boolean!
+    confirmationClickForScriptLinks: Boolean!
+
+    # Supervolunteer
+    startCampaignRequiresApproval: Boolean
+
+    # Owner
+    defaulTexterApprovalStatus: RequestAutoApprove
     numbersApiKey: String
     trollbotWebhookUrl: String
-    showContactLastName: Boolean
-    showContactCell: Boolean
-    confirmationClickForScriptLinks: Boolean!
-  }
-`;
-
-export const AllOrganizationSettingsFragment = gql`
-  fragment AllOrganizationSettingsFragment on OrganizationSettings {
-    id
-    defaulTexterApprovalStatus
-    optOutMessage
-    numbersApiKey
-    trollbotWebhookUrl
-    showContactLastName
-    showContactCell
-    confirmationClickForScriptLinks
-  }
-`;
-
-export const TexterOrganizationSettingsFragment = gql`
-  fragment TexterOrganizationSettingsFragment on OrganizationSettings {
-    id
-    showContactLastName
-    showContactCell
-    confirmationClickForScriptLinks
   }
 `;

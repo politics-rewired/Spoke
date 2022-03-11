@@ -125,6 +125,7 @@ const queries: QueryMap<InnerProps> = {
             }
           }
           isStarted
+          isApproved
         }
       }
     `,
@@ -175,6 +176,7 @@ const mutations: MutationMap<InnerProps> = {
             }
           }
           isStarted
+          isApproved
           readiness {
             id
             campaignGroups

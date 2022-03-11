@@ -1,3 +1,4 @@
+import { ForbiddenError } from "apollo-server-errors";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
@@ -57,7 +58,8 @@ import {
   assignmentRequired,
   assignmentRequiredOrHasOrgRoleForCampaign,
   authRequired,
-  superAdminRequired
+  superAdminRequired,
+  userRoleRequired
 } from "./errors";
 import { resolvers as externalActivistCodeResolvers } from "./external-activist-code";
 import { resolvers as externalListResolvers } from "./external-list";
@@ -82,8 +84,10 @@ import { resolvers as optOutResolvers } from "./opt-out";
 import { resolvers as organizationResolvers } from "./organization";
 import { resolvers as membershipSchema } from "./organization-membership";
 import {
+  getOrgFeature,
   resolvers as settingsSchema,
-  updateOrganizationSettings
+  updateOrganizationSettings,
+  writePermissionRequired
 } from "./organization-settings";
 import { GraphQLPhone } from "./phone";
 import { resolvers as questionResolvers } from "./question";
@@ -451,7 +455,8 @@ const rootMutations = {
       { user: authUser }
     ) => {
       const organizationId = parseInt(id, 10);
-      await accessRequired(authUser, organizationId, "OWNER");
+      const roleRequired = writePermissionRequired(input);
+      await userRoleRequired(authUser, organizationId, roleRequired);
       const updatedOrganization = await updateOrganizationSettings(
         organizationId,
         input
@@ -735,6 +740,13 @@ const rootMutations = {
         "ADMIN",
         /* allowSuperadmin= */ true
       );
+      const { features } = await loaders.organization.load(
+        campaign.organizationId
+      );
+      const requiresApproval = getOrgFeature(
+        "startCampaignRequiresApproval",
+        features
+      );
 
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
@@ -749,7 +761,8 @@ const rootMutations = {
           description: campaign.description,
           due_by: campaign.dueBy,
           is_started: false,
-          is_archived: false
+          is_archived: false,
+          is_approved: false
         })
         .returning("*");
 
@@ -758,7 +771,8 @@ const rootMutations = {
         campaign,
         loaders,
         user,
-        origCampaignRecord
+        origCampaignRecord,
+        requiresApproval
       );
     },
 
@@ -814,17 +828,51 @@ const rootMutations = {
       return campaign;
     },
 
-    startCampaign: async (_root, { id }, { user, loaders }) => {
+    setCampaignApproved: async (_root, { id, approved }, { user, loaders }) => {
       const { organization_id } = await loaders.campaign.load(id);
-      await accessRequired(user, organization_id, "ADMIN");
+      await superAdminRequired(user);
+
+      const [campaign] = await r
+        .knex("campaign")
+        .update({ is_approved: approved })
+        .where({ id })
+        .returning("*");
 
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: organization_id
       });
 
+      return campaign;
+    },
+
+    startCampaign: async (_root, { id }, { user, loaders }) => {
+      const { organization_id, is_approved } = await loaders.campaign.load(id);
+      const { features } = await loaders.organization.load(organization_id);
+      const requiresApproval = getOrgFeature(
+        "startCampaignRequiresApproval",
+        features
+      );
+
+      if (!user.is_superadmin && requiresApproval && !is_approved) {
+        throw new ForbiddenError(
+          "Campaign must be approved by superadmin before starting."
+        );
+      }
+
+      await accessRequired(user, organization_id, "ADMIN", true);
+
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: organization_id
+      });
+
+      const payload = {
+        is_started: true,
+        ...(user.is_superadmin ? { is_approved: true } : {})
+      };
+
       const [campaign] = await r
         .knex("campaign")
-        .update({ is_started: true })
+        .update(payload)
         .where({ id })
         .returning("*");
 
@@ -842,6 +890,13 @@ const rootMutations = {
       { user, loaders }
     ) => {
       const origCampaign = await r.knex("campaign").where({ id }).first();
+      const { features } = await loaders.organization.load(
+        origCampaign.organization_id
+      );
+      const requiresApproval = getOrgFeature(
+        "startCampaignRequiresApproval",
+        features
+      );
 
       // Sometimes, campaign was coming through as having
       // a "null prototype", which caused .hasOwnProperty calls
@@ -867,7 +922,15 @@ const rootMutations = {
           "Not allowed to add contacts after the campaign starts"
         );
       }
-      return editCampaign(id, campaign, loaders, user, origCampaign);
+
+      return editCampaign(
+        id,
+        campaign,
+        loaders,
+        user,
+        origCampaign,
+        requiresApproval
+      );
     },
 
     filterLandlines: async (_root, { id }, { user, loaders }) => {

@@ -93,6 +93,7 @@ export interface Campaign {
   isStarted: boolean;
   dueBy?: string | null;
   contactsCount: number;
+  isApproved: boolean;
   isArchived: boolean;
   textingHoursStart: number;
   textingHoursEnd: number;
@@ -199,6 +200,7 @@ export const schema = `
     description: String
     dueBy: Date
     readiness: CampaignReadiness!
+    isApproved: Boolean!
     isStarted: Boolean
     isArchived: Boolean
     creator: User

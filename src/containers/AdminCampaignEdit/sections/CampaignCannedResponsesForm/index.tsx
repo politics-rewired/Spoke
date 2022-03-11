@@ -253,6 +253,7 @@ const queries: QueryMap<InnerProps> = {
             text
           }
           isStarted
+          isApproved
           customFields
           externalSystem {
             id
@@ -283,6 +284,7 @@ const mutations: MutationMap<InnerProps> = {
             text
           }
           isStarted
+          isApproved
           customFields
           readiness {
             id

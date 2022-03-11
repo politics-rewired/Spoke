@@ -2,7 +2,7 @@ import groupBy from "lodash/groupBy";
 
 import { config } from "../../../config";
 import { eventBus, EventType } from "../../event-bus";
-import { r } from "../../models";
+import { cacheableData, r } from "../../models";
 
 export const SpokeSendStatus = Object.freeze({
   Queued: "QUEUED",
@@ -13,6 +13,17 @@ export const SpokeSendStatus = Object.freeze({
   Paused: "PAUSED",
   NotAttempted: "NOT_ATTEMPTED"
 });
+
+const OPT_OUT_TRIGGERS = [
+  "stop",
+  "stop all",
+  "stopall",
+  "unsub",
+  "unsubscribe",
+  "cancel",
+  "end",
+  "quit"
+];
 
 /**
  * Return a list of messaing services for an organization that are candidates for assignment.
@@ -341,18 +352,37 @@ export async function saveNewIncomingMessage(messageInstance) {
     .knex("message")
     .insert(messageInstance)
     .returning("*");
-  const { assignment_id, contact_number } = newMessage;
+  const { text, assignment_id, contact_number } = newMessage;
   const payload = {
     assignmentId: assignment_id,
     contactNumber: contact_number
   };
   eventBus.emit(EventType.MessageReceived, payload);
 
+  const cleanedUpText = text.toLowerCase().trim();
+
   // Separate update fields according to: https://stackoverflow.com/a/42307979
-  let updateQuery = r
-    .knex("campaign_contact")
-    .update({ message_status: "needsResponse" })
-    .limit(1);
+  let updateQuery = r.knex("campaign_contact").limit(1);
+
+  if (OPT_OUT_TRIGGERS.includes(cleanedUpText)) {
+    updateQuery = updateQuery.update({ message_status: "closed" });
+
+    const { id: organizationId } = await r
+      .knex("organization")
+      .first("organization.id")
+      .join("campaign", "organization_id", "=", "organization.id")
+      .join("assignment", "campaign_id", "=", "campaign.id")
+      .where({ "assignment.id": assignment_id });
+
+    await cacheableData.optOut.save(r.knex, {
+      cell: contact_number,
+      reason: "Automatic OptOut",
+      assignmentId: assignment_id,
+      organizationId
+    });
+  } else {
+    updateQuery = updateQuery.update({ message_status: "needsResponse" });
+  }
 
   // Prefer to match on campaign contact ID
   if (messageInstance.campaign_contact_id) {

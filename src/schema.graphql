@@ -241,6 +241,7 @@ type RootMutation {
     optOut: ContactActionInput,
     closeConversation: Boolean
   ): CampaignContact,
+  setCampaignApproved(id: String!, approved: Boolean!): Campaign!,
   startCampaign(id:String!): Campaign,
   archiveCampaign(id:String!): Campaign,
   unarchiveCampaign(id:String!): Campaign,
@@ -308,6 +309,7 @@ type User {
   assignedCell: Phone
   assignment(campaignId: String): Assignment,
   terms: Boolean
+  isSuperadmin: Boolean!
 }
 
 type UsersList {
@@ -401,24 +403,35 @@ scalar Phone
 
 
 input OrganizationSettingsInput {
-  defaulTexterApprovalStatus: RequestAutoApprove
+  # Owner
   optOutMessage: String
-  numbersApiKey: String
-  trollbotWebhookUrl: String
   showContactLastName: Boolean
   showContactCell: Boolean
   confirmationClickForScriptLinks: Boolean
+  defaulTexterApprovalStatus: RequestAutoApprove
+  numbersApiKey: String
+  trollbotWebhookUrl: String
+
+  # Superadmin
+  startCampaignRequiresApproval: Boolean
 }
 
 type OrganizationSettings {
   id: ID!
-  defaulTexterApprovalStatus: RequestAutoApprove!
-  optOutMessage: String
+
+  # Texter
+  optOutMessage: String!
+  showContactLastName: Boolean!
+  showContactCell: Boolean!
+  confirmationClickForScriptLinks: Boolean!
+
+  # Supervolunteer
+  startCampaignRequiresApproval: Boolean
+
+  # Owner
+  defaulTexterApprovalStatus: RequestAutoApprove
   numbersApiKey: String
   trollbotWebhookUrl: String
-  showContactLastName: Boolean
-  showContactCell: Boolean
-  confirmationClickForScriptLinks: Boolean!
 }
 
 
@@ -527,6 +540,7 @@ type Campaign {
   description: String
   dueBy: Date
   readiness: CampaignReadiness!
+  isApproved: Boolean!
   isStarted: Boolean
   isArchived: Boolean
   creator: User

@@ -28,6 +28,7 @@ export const GET_CAMPAIGN_INTERACTIONS = gql`
     campaign(id: $campaignId) {
       id
       isStarted
+      isApproved
       interactionSteps {
         ...EditInteractionStep
       }

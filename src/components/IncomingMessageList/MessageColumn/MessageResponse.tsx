@@ -146,7 +146,7 @@ class MessageResponse extends Component<Props, State> {
               threeClickEnabled={false}
               onFinalTouchTap={this.handleClickSendMessageButton}
               disabled={isSendDisabled}
-              style={{ flexShrink: "1" }}
+              style={{ flexShrink: 1, marginBottom: 10 }}
             />
           </div>
         </GSForm>

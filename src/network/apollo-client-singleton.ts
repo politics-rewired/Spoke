@@ -81,7 +81,18 @@ const ApolloClientSingleton = new ApolloClient({
   cache,
   connectToDevTools: true,
   queryDeduplication: true,
-  resolvers: [iStepLocalResolvers]
+  resolvers: [iStepLocalResolvers],
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: "all"
+    },
+    query: {
+      errorPolicy: "all"
+    },
+    mutate: {
+      errorPolicy: "all"
+    }
+  }
 });
 
 export default ApolloClientSingleton;

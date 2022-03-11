@@ -9,3 +9,4 @@ docs
 seeds
 dev-tools
 libs/spoke-codegen/src/generated.ts
+libs/spoke-codegen/src/pg-types.ts
