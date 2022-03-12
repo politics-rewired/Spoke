@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
+import Divider from "material-ui/Divider";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { red600 } from "material-ui/styles/colors";
@@ -10,6 +11,7 @@ import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import { withAuthzContext } from "../../components/AuthzProvider";
+import CampaignNavigation from "../../components/CampaignNavigation";
 import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
@@ -27,6 +29,13 @@ const styles = StyleSheet.create({
     ...theme.layouts.multiColumn.container,
     marginBottom: 40,
     justifyContent: "space-around",
+    flexWrap: "wrap"
+  },
+  buttonContainer: {
+    ...theme.layouts.multiColumn.container,
+    justifyContent: "flex-end",
+    paddingTop: 20,
+    paddingBottom: 20,
     flexWrap: "wrap"
   },
   archivedBanner: {
@@ -108,6 +117,18 @@ class AdminCampaignStats extends React.Component {
       disableVanSyncButton: true
     });
 
+  prevCampaignClicked = (campaignId) => {
+    const { history } = this.props;
+    const { organizationId } = this.props.match.params;
+    history.push(`/admin/${organizationId}/campaigns/${campaignId}`);
+  };
+
+  nextCampaignClicked = (campaignId) => {
+    const { history } = this.props;
+    const { organizationId } = this.props.match.params;
+    history.push(`/admin/${organizationId}/campaigns/${campaignId}`);
+  };
+
   render() {
     const {
       disableExportButton,
@@ -159,6 +180,12 @@ class AdminCampaignStats extends React.Component {
         <Helmet>
           <title>{newTitle}</title>
         </Helmet>
+        <CampaignNavigation
+          prevCampaignClicked={this.prevCampaignClicked}
+          nextCampaignClicked={this.nextCampaignClicked}
+          campaignId={campaign.id}
+        />
+        <Divider style={{ marginBottom: 20 }} />
         <div className={css(styles.container)}>
           {campaign.isArchived ? (
             <div className={css(styles.archivedBanner)}>

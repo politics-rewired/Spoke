@@ -3545,6 +3545,33 @@ const rootResolvers = {
         organization_id: parseInt(organizationId, 10)
       });
       return formatPage(query, { after, first });
+    },
+    campaignNavigation: async (_root, { campaignId }, { user }) => {
+      const { organization_id: organizationId } = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first("organization_id");
+
+      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+
+      const { prev_campaign: prevCampaignId } = await r
+        .knex("campaign")
+        .max({ prev_campaign: "id" })
+        .where("id", "<", campaignId)
+        .where({ organization_id: organizationId })
+        .first();
+
+      const { next_campaign: nextCampaignId } = await r
+        .knex("campaign")
+        .min({ next_campaign: "id" })
+        .where("id", ">", campaignId)
+        .where({ organization_id: organizationId })
+        .first();
+
+      return {
+        prevCampaignId,
+        nextCampaignId
+      };
     }
   }
 };
