@@ -62,7 +62,7 @@ export const schema = `
     nameSearch: String
     campaignId: Int
     campaignArchived: Boolean
-    roles: [String]
+    roles: [String!]
   }
 
   type OrganizationMembership {

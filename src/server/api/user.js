@@ -16,10 +16,10 @@ export function buildUserOrganizationQuery(
   campaignId,
   offset
 ) {
-  if (role !== UserRoleType.SUSPENDED) {
-    queryParam.whereNot({ role: UserRoleType.SUSPENDED });
-  } else if (role) {
+  if (role) {
     queryParam.where({ role });
+  } else {
+    queryParam.whereNot({ role: UserRoleType.SUSPENDED });
   }
 
   queryParam

@@ -2103,6 +2103,18 @@ const rootMutations = {
         organizationId
       );
 
+      const { role } = await r
+        .knex("user_organization")
+        .where({
+          user_id: user.id,
+          organization_id: organizationId
+        })
+        .first(["role"]);
+
+      if (role === UserRoleType.SUSPENDED) {
+        return "You don't have the permission to request texts";
+      }
+
       if (!myAssignmentTarget) {
         return "No texts available at the moment";
       }
