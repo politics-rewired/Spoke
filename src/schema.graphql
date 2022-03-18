@@ -563,7 +563,7 @@ type Campaign {
   logoImageUrl: String
   editors: String
   teams: [Team]!
-  campaignGroups: CampaignGroupPage!
+  campaignGroups: CampaignGroupPage
   textingHoursStart: Int
   textingHoursEnd: Int
   isAutoassignEnabled: Boolean!
