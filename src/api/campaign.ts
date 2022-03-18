@@ -113,7 +113,7 @@ export interface Campaign {
   hasUnsentInitialMessages?: boolean | null;
   hasUnhandledMessages?: boolean | null;
   teams: Team[];
-  campaignGroups: CampaignGroupPage;
+  campaignGroups?: CampaignGroupPage | null;
   externalSystem?: ExternalSystem | null;
   creator?: User | null;
   deliverabilityStats: CampaignDeliverabilityStats;
@@ -223,7 +223,7 @@ export const schema = `
     logoImageUrl: String
     editors: String
     teams: [Team]!
-    campaignGroups: CampaignGroupPage!
+    campaignGroups: CampaignGroupPage
     textingHoursStart: Int
     textingHoursEnd: Int
     isAutoassignEnabled: Boolean!
