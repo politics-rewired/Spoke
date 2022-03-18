@@ -12,6 +12,7 @@ import Typography from "@material-ui/core/Typography";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import isEmpty from "lodash/isEmpty";
 import sample from "lodash/sample";
 import { grey50 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
@@ -141,16 +142,15 @@ class AssignmentTexterSurveys extends Component {
   render() {
     const { interactionSteps, currentInteractionStep } = this.props;
     const questions = interactionSteps.filter(
-      ({ question }) => (question.text || "") !== ""
+      ({ question }) => !isEmpty(question.text)
     );
 
-    const currentQuestion =
-      (currentInteractionStep.question.text || "") !== ""
-        ? currentInteractionStep
-        : undefined;
+    const currentQuestion = isEmpty(currentInteractionStep.question.text)
+      ? undefined
+      : currentInteractionStep;
 
     const pastQuestions = questions.filter(
-      (step) => step.id !== (currentQuestion || {}).id
+      (step) => step.id !== currentQuestion?.id
     );
 
     const { showAllQuestions } = this.state;
