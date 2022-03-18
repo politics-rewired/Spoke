@@ -12,6 +12,7 @@ import Typography from "@material-ui/core/Typography";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import isEmpty from "lodash/isEmpty";
 import sample from "lodash/sample";
 import { grey50 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
@@ -125,6 +126,7 @@ class AssignmentTexterSurveys extends Component {
           <Select
             name={step.id}
             value={responseValue ?? ""}
+            autoWidth
             IconComponent={LargeDropDownIcon}
             onChange={(e) => this.handleSelectChange(step, e.target.value)}
           >
@@ -140,7 +142,15 @@ class AssignmentTexterSurveys extends Component {
   render() {
     const { interactionSteps, currentInteractionStep } = this.props;
     const questions = interactionSteps.filter(
-      ({ question }) => (question.text || "") !== ""
+      ({ question }) => !isEmpty(question.text)
+    );
+
+    const currentQuestion = isEmpty(currentInteractionStep.question.text)
+      ? undefined
+      : currentInteractionStep;
+
+    const pastQuestions = questions.filter(
+      (step) => step.id !== currentQuestion?.id
     );
 
     const { showAllQuestions } = this.state;
@@ -154,21 +164,19 @@ class AssignmentTexterSurveys extends Component {
           }
           style={styles.cardHeader}
           action={
-            questions.length > 1 && (
+            pastQuestions.length > 0 && (
               <IconButton onClick={this.handleExpandChange}>
-                {showAllQuestions ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                {showAllQuestions ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )
           }
         />
         <CardContent style={styles.cardContent}>
-          {currentInteractionStep && this.renderStep(currentInteractionStep)}
+          {currentQuestion && this.renderStep(currentQuestion)}
         </CardContent>
         <Collapse in={showAllQuestions}>
           <CardContent style={styles.cardContent}>
-            {questions
-              .filter((step) => step.id !== currentInteractionStep.id)
-              .map((step) => this.renderStep(step))}
+            {pastQuestions.map((step) => this.renderStep(step))}
           </CardContent>
         </Collapse>
       </Card>
