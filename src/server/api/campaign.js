@@ -1,3 +1,5 @@
+import isNil from "lodash/isNil";
+
 import { ExternalSyncReadinessState } from "../../api/campaign";
 import { emptyRelayPage } from "../../api/pagination";
 import { config } from "../../config";
@@ -260,7 +262,6 @@ export const resolvers = {
       "id",
       "title",
       "description",
-      "isApproved",
       "isStarted",
       "isArchived",
       // TODO: re-enable once dynamic assignment is fixed (#548)
@@ -274,6 +275,8 @@ export const resolvers = {
       "createdAt",
       "landlinesFiltered"
     ]),
+    isApproved: (campaign) =>
+      isNil(campaign.is_approved) ? false : campaign.is_approved,
     timezone: (campaign) => parseIanaZone(campaign.timezone),
     readiness: (campaign) => campaign,
     repliesStaleAfter: (campaign) => campaign.replies_stale_after_minutes,
