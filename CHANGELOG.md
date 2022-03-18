@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.21.1](https://github.com/politics-rewired/spoke/compare/v4.21.0...v4.21.1) (2022-03-18)
+
+
+### Bug Fixes
+
+* fix copy campaign statement ([0425b1f](https://github.com/politics-rewired/spoke/commit/0425b1f5d9bbb92ea295836f1a69c69ac92ae7f9))
+
 ## [4.21.0](https://github.com/politics-rewired/spoke/compare/v4.20.0...v4.21.0) (2022-03-18)
 
 
