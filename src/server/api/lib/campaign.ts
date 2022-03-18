@@ -131,6 +131,7 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           organization_id,
           title,
           description,
+          is_approved,
           is_started,
           is_archived,
           due_by,
