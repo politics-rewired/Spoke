@@ -125,6 +125,7 @@ class AssignmentTexterSurveys extends Component {
           <Select
             name={step.id}
             value={responseValue ?? ""}
+            autoWidth
             IconComponent={LargeDropDownIcon}
             onChange={(e) => this.handleSelectChange(step, e.target.value)}
           >
@@ -143,6 +144,15 @@ class AssignmentTexterSurveys extends Component {
       ({ question }) => (question.text || "") !== ""
     );
 
+    const currentQuestion =
+      (currentInteractionStep.question.text || "") !== ""
+        ? currentInteractionStep
+        : undefined;
+
+    const pastQuestions = questions.filter(
+      (step) => step.id !== (currentQuestion || {}).id
+    );
+
     const { showAllQuestions } = this.state;
     return questions.length === 0 ? null : (
       <Card style={styles.card}>
@@ -154,21 +164,19 @@ class AssignmentTexterSurveys extends Component {
           }
           style={styles.cardHeader}
           action={
-            questions.length > 1 && (
+            pastQuestions.length > 0 && (
               <IconButton onClick={this.handleExpandChange}>
-                {showAllQuestions ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                {showAllQuestions ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )
           }
         />
         <CardContent style={styles.cardContent}>
-          {currentInteractionStep && this.renderStep(currentInteractionStep)}
+          {currentQuestion && this.renderStep(currentQuestion)}
         </CardContent>
         <Collapse in={showAllQuestions}>
           <CardContent style={styles.cardContent}>
-            {questions
-              .filter((step) => step.id !== currentInteractionStep.id)
-              .map((step) => this.renderStep(step))}
+            {pastQuestions.map((step) => this.renderStep(step))}
           </CardContent>
         </Collapse>
       </Card>
