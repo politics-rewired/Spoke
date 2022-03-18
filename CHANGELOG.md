@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.21.0](https://github.com/politics-rewired/spoke/compare/v4.20.0...v4.21.0) (2022-03-18)
+
+
+### Features
+
+* allow navigation to previous and next campaign through campaign page ([#1111](https://github.com/politics-rewired/spoke/issues/1111)) ([7d875e0](https://github.com/politics-rewired/spoke/commit/7d875e0a277c90bdf2e1b585892da00d3c229197)), closes [#1087](https://github.com/politics-rewired/spoke/issues/1087)
+* **optout:** automatically optout for common optout language ([#1110](https://github.com/politics-rewired/spoke/issues/1110)) ([74b5bd9](https://github.com/politics-rewired/spoke/commit/74b5bd9a92746a811ef252f04d8255d3230fc271)), closes [#1089](https://github.com/politics-rewired/spoke/issues/1089)
+
+
+### Bug Fixes
+
+* ensure non-null value for campaign isApproved ([#1119](https://github.com/politics-rewired/spoke/issues/1119)) ([5c3b7c4](https://github.com/politics-rewired/spoke/commit/5c3b7c40200bcc447811ae33602ea72e3997ed8e))
+* fix display of survey questions ([#1122](https://github.com/politics-rewired/spoke/issues/1122)) ([8b0d3e0](https://github.com/politics-rewired/spoke/commit/8b0d3e06f0eb19dc9948fc5dc3e943d6db007596))
+* handle null campaign groups for supervolunteer role ([#1121](https://github.com/politics-rewired/spoke/issues/1121)) ([e7b109d](https://github.com/politics-rewired/spoke/commit/e7b109df9313f6e669c4939dfcab1a5208cb441a))
+
 ## [4.20.0](https://github.com/politics-rewired/spoke/compare/v4.19.1...v4.20.0) (2022-03-05)
 
 
