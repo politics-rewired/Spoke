@@ -2,8 +2,11 @@ import { ApolloQueryResult, gql } from "@apollo/client";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import React, { Component } from "react";
+import { compose } from "recompose";
 
+import { withSpokeContext } from "../../../client/spoke-context";
 import { loadData } from "../../../containers/hoc/with-operations";
+import { AuthzContextType, withAuthzContext } from "../../AuthzProvider";
 import ManageSurveyResponses from "./ManageSurveyResponses";
 import ManageTags from "./ManageTags";
 
@@ -22,7 +25,7 @@ interface Props {
   contact: any;
 }
 
-interface HocProps {
+interface HocProps extends AuthzContextType {
   mutations: {
     closeConversation(): ApolloQueryResult<any>;
   };
@@ -54,8 +57,16 @@ class SurveyColumn extends Component<Props & HocProps, State> {
   handleDismissError = () => this.setState({ errorMessage: undefined });
 
   render() {
-    const { campaign, contact, organizationId } = this.props;
+    const {
+      campaign,
+      contact,
+      organizationId,
+      isAdmin,
+      orgSettings
+    } = this.props;
     const { isWorking, errorMessage } = this.state;
+    const showScriptPreview =
+      isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
 
     return (
       <div style={styles.container}>
@@ -63,6 +74,16 @@ class SurveyColumn extends Component<Props & HocProps, State> {
         <div style={styles.spacer} />
         <div style={{ display: "flex" }}>
           <div style={styles.spacer} />
+          {showScriptPreview ? (
+            <RaisedButton
+              key="open-script-preview"
+              label="Open Script Preview"
+              style={{ marginRight: "10px" }}
+              onClick={() => {
+                window.open(`/preview/${campaign.previewUrl}`, "_blank");
+              }}
+            />
+          ) : null}
           <RaisedButton
             label="End Conversation"
             disabled={isWorking}
@@ -106,6 +127,8 @@ const mutations = {
   })
 };
 
-export default loadData({
-  mutations
-})(SurveyColumn);
+export default compose(
+  withAuthzContext,
+  withSpokeContext,
+  loadData({ mutations })
+)(SurveyColumn);

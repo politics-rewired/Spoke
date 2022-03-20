@@ -17,4 +17,5 @@ fragment OrganizationSettingsInfo on OrganizationSettings {
   showContactCell
   confirmationClickForScriptLinks
   startCampaignRequiresApproval
+  scriptPreviewForSupervolunteers
 }

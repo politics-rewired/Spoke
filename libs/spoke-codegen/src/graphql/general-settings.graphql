@@ -26,3 +26,29 @@ mutation UpdateCampaignBuilderSettings(
     startCampaignRequiresApproval
   }
 }
+
+query GetMessageReviewSettings($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    settings {
+      id
+      scriptPreviewForSupervolunteers
+    }
+  }
+}
+
+mutation UpdateMessageReviewSettings(
+  $organizationId: String!
+  $forSupervols: Boolean
+) {
+  editOrganizationSettings(
+    id: $organizationId
+    input: {
+      scriptPreviewForSupervolunteers: $forSupervols
+    }
+  ) {
+    id
+    scriptPreviewForSupervolunteers
+  }
+}
+
