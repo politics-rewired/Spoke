@@ -58,7 +58,8 @@ const cacheOptsPlain: Record<string, [string, number]> = {
   FullfillAssignmentLock: ["fulfull-assignment-lock", ONE_MINUTE * 2],
   AssignmentCompleteLock: ["assignment-complete-lock", THIRTY_SECONDS],
   GetUsers: ["get-users", ONE_MINUTE * 5],
-  MyCurrentAssignmentTargets: ["my-current-assignment-targets", ONE_SECOND * 5]
+  MyCurrentAssignmentTargets: ["my-current-assignment-targets", ONE_SECOND * 5],
+  PercentUnhandledReplies: ["percent-unhandled-replies", ONE_SECOND * 5]
 };
 
 const cacheOpts = Object.fromEntries(

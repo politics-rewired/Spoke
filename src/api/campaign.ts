@@ -237,6 +237,7 @@ export const schema = `
     syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
     deliverabilityStats: CampaignDeliverabilityStats!
+    percentUnhandledReplies: Float!
   }
 
   type CampaignEdge {

@@ -188,6 +188,36 @@ export const resolvers = {
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
+    },
+
+    percentUnhandledReplies: async (campaign) => {
+      const getPercentUnhandledReplies = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          const {
+            rows: [{ percent_unhandled_replies: result }]
+          } = await r.reader.raw(
+            `
+            select 
+              (
+                count(*) filter (where message_status not in ('needsMessage', 'messaged', 'needsResponse')) / 
+                (count(*) filter (where message_status not in ('needsMessage', 'messaged')))::float
+              ) * 100 as percent_unhandled_replies
+            from campaign_contact cc
+            where cc.archived = ${archived}
+              and cc.campaign_id = $1
+          `,
+            [campaignId]
+          );
+
+          return result;
+        },
+        cacheOpts.PercentUnhandledReplies
+      );
+
+      return getPercentUnhandledReplies({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
     }
   },
   CampaignReadiness: {
