@@ -120,8 +120,7 @@ export const resolvers = {
       "jobType",
       "resultMessage",
       "createdAt",
-      "updatedAt",
-      "autosendStatus"
+      "updatedAt"
     ])
   },
   CampaignStats: {
@@ -304,7 +303,8 @@ export const resolvers = {
       "textingHoursEnd",
       "isAutoassignEnabled",
       "createdAt",
-      "landlinesFiltered"
+      "landlinesFiltered",
+      "autosendStatus"
     ]),
     isApproved: (campaign) =>
       isNil(campaign.is_approved) ? false : campaign.is_approved,

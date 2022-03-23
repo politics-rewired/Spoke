@@ -148,6 +148,7 @@ export const schema = `
     sentMessagesCount: Int
     receivedMessagesCount: Int
     optOutsCount: Int
+    percentUnhandledReplies: Float!
   }
 
   type DeliverabilityErrorStat {
@@ -237,7 +238,7 @@ export const schema = `
     syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
     deliverabilityStats: CampaignDeliverabilityStats!
-    percentUnhandledReplies: Float!
+    autosendStatus: String!
   }
 
   type CampaignEdge {
