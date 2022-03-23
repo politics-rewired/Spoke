@@ -120,7 +120,8 @@ export const resolvers = {
       "jobType",
       "resultMessage",
       "createdAt",
-      "updatedAt"
+      "updatedAt",
+      "autosendStatus"
     ])
   },
   CampaignStats: {
