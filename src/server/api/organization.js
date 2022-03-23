@@ -77,10 +77,14 @@ export const resolvers = {
         primaryColumn: "user_organization.id"
       };
 
-      const { nameSearch, campaignId, campaignArchived } = filter || {};
+      const { nameSearch, campaignId, campaignArchived, roles } = filter || {};
 
       const userQueryPath = "memberships.edges.node.user";
       const wantsUserInfo = infoHasQueryPath(info, userQueryPath);
+
+      if (roles) {
+        query.whereIn("role", roles);
+      }
 
       if (!!nameSearch || wantsUserInfo) {
         query.join("user", "user.id", "user_organization.user_id");

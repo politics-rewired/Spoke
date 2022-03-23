@@ -3,13 +3,15 @@ import isEqual from "lodash/isEqual";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
+import { UserRoleType } from "../api/organization-membership";
 import apolloClient from "../network/apollo-client-singleton";
 
 const fetchPeople = async ({
   organizationId,
   after,
   first,
-  campaignsFilter
+  campaignsFilter,
+  filterSuspended
 }) => {
   const filter = {};
   if (campaignsFilter.isArchived !== undefined) {
@@ -17,6 +19,15 @@ const fetchPeople = async ({
   }
   if (campaignsFilter.campaignId !== undefined) {
     filter.campaignId = campaignsFilter.campaignId;
+  }
+  if (filterSuspended) {
+    filter.roles = [
+      UserRoleType.ADMIN,
+      UserRoleType.OWNER,
+      UserRoleType.SUPERADMIN,
+      UserRoleType.SUPERVOLUNTEER,
+      UserRoleType.TEXTER
+    ];
   }
 
   return apolloClient.query({
@@ -74,7 +85,12 @@ export class PaginatedUsersRetriever extends Component {
   handlePropsReceived = async (prevProps = {}) => {
     if (isEqual(prevProps, this.props)) return;
 
-    const { organizationId, campaignsFilter = {}, pageSize } = this.props;
+    const {
+      organizationId,
+      campaignsFilter = {},
+      pageSize,
+      filterSuspended
+    } = this.props;
 
     // Track current request so we can bail on fetching if a new request has been kicked off
     const requestRef = new Date().getTime();
@@ -91,7 +107,8 @@ export class PaginatedUsersRetriever extends Component {
         organizationId,
         after,
         first: pageSize,
-        campaignsFilter
+        campaignsFilter,
+        filterSuspended
       });
       const { pageInfo, edges } = results.data.organization.memberships;
       const newUsers = edges.map((edge) => ({
@@ -132,7 +149,8 @@ PaginatedUsersRetriever.propTypes = {
     isArchived: PropTypes.bool,
     campaignId: PropTypes.number
   }),
-  setCampaignTextersLoadedFraction: PropTypes.func
+  setCampaignTextersLoadedFraction: PropTypes.func,
+  filterSuspended: PropTypes.bool
 };
 
 export default PaginatedUsersRetriever;

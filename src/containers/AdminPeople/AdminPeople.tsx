@@ -104,6 +104,13 @@ export interface AdminPeopleMutations {
       purgeOrganizationUsers: number;
     }>
   >;
+  unassignTexts: (
+    membershipId: string
+  ) => Promise<
+    ApolloQueryResult<{
+      unassignTextsFromUser: string;
+    }>
+  >;
 }
 
 interface AdminPeopleRouteParams {
@@ -152,6 +159,10 @@ interface AdminPeopleState {
     open: boolean;
     superadminMembershipId: string;
   };
+  confirmUnassignTexts: {
+    open: boolean;
+    suspendedUserMembershipId: string;
+  };
   error: {
     message: string;
     seen: boolean;
@@ -184,6 +195,10 @@ class AdminPeople extends React.Component<
       open: false,
       superadminMembershipId: ""
     },
+    confirmUnassignTexts: {
+      open: false,
+      suspendedUserMembershipId: ""
+    },
     error: {
       message: "",
       seen: true
@@ -197,6 +212,18 @@ class AdminPeople extends React.Component<
       superadminMembershipId
     );
     this.handleCloseSuperadminDialog();
+  };
+
+  handleConfirmUnassignTexts = async (unassignTexts: boolean) => {
+    const { suspendedUserMembershipId } = this.state.confirmUnassignTexts;
+    if (unassignTexts) {
+      await this.props.mutations.unassignTexts(suspendedUserMembershipId);
+    }
+    this.handleEditMembershipRole(
+      UserRoleType.SUSPENDED,
+      suspendedUserMembershipId
+    );
+    this.handleCloseUnassignTextsDialog();
   };
 
   handleEditMembershipRole = async (
@@ -245,9 +272,20 @@ class AdminPeople extends React.Component<
     });
   };
 
+  handleCloseUnassignTextsDialog = () => {
+    this.setState(() => ({
+      confirmUnassignTexts: { suspendedUserMembershipId: "", open: false }
+    }));
+  };
+
   startConfirmSuperadmin = (superadminMembershipId: string) =>
     this.setState(() => ({
       confirmSuperadmin: { superadminMembershipId, open: true }
+    }));
+
+  startConfirmUnassignTexts = (suspendedUserMembershipId: string) =>
+    this.setState(() => ({
+      confirmUnassignTexts: { suspendedUserMembershipId, open: true }
     }));
 
   handleCloseRemoveUsersDialog = () =>
@@ -306,6 +344,8 @@ class AdminPeople extends React.Component<
       editMembershipRole: (role, membershipId) => {
         if (role === UserRoleType.SUPERADMIN) {
           this.startConfirmSuperadmin(membershipId);
+        } else if (role === UserRoleType.SUSPENDED) {
+          this.startConfirmUnassignTexts(membershipId);
         } else {
           this.handleEditMembershipRole(role, membershipId);
         }
@@ -386,6 +426,11 @@ class AdminPeople extends React.Component<
           open={this.state.confirmSuperadmin.open}
           onClose={this.handleCloseSuperadminDialog}
           handleConfirmSuperadmin={this.handleConfirmSuperadmin}
+        />
+        <Dialogs.ConfirmUnassignTexts
+          open={this.state.confirmUnassignTexts.open}
+          onClose={this.handleCloseUnassignTextsDialog}
+          handleConfirmUnassignTexts={this.handleConfirmUnassignTexts}
         />
         <Dialogs.ConfirmRemoveUsers
           open={this.state.removeUsers.open}
@@ -523,6 +568,18 @@ const mutations: MutationMap<AdminPeopleExtendedProps> = {
         organizationId: ownProps.organizationData.organization.id
       },
       refetchQueries: ["getPeople"]
+    };
+  },
+  unassignTexts: (_ownProps) => (membershipId: string) => {
+    return {
+      mutation: gql`
+        mutation UnassignTextsFromUser($membershipId: String!) {
+          unassignTextsFromUser(membershipId: $membershipId)
+        }
+      `,
+      variables: {
+        membershipId
+      }
     };
   }
 };

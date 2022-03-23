@@ -13,4 +13,5 @@ export type OrgTexter = Pick<User, "id" | "firstName" | "displayName">;
 
 export type Texter = OrgTexter & {
   assignment: TexterAssignment;
+  roles: string[];
 };

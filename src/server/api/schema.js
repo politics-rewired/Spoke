@@ -556,6 +556,24 @@ const rootMutations = {
       return updatedUser;
     },
 
+    unassignTextsFromUser: async (_root, { membershipId }, { user }) => {
+      const userOrg = await r
+        .knex("user_organization")
+        .where({ id: membershipId })
+        .first();
+      await accessRequired(user, userOrg.organization_id, "OWNER");
+
+      const assignment_ids = await r
+        .knex("assignment")
+        .where({ user_id: userOrg.user_id })
+        .pluck("id");
+
+      return r
+        .knex("campaign_contact")
+        .whereIn("assignment_id", assignment_ids)
+        .update({ assignment_id: null });
+    },
+
     joinOrganization: async (_root, { organizationUuid }, { user }) => {
       const organization = await r
         .knex("organization")
@@ -2084,6 +2102,18 @@ const rootMutations = {
         user.id,
         organizationId
       );
+
+      const { role } = await r
+        .knex("user_organization")
+        .where({
+          user_id: user.id,
+          organization_id: organizationId
+        })
+        .first(["role"]);
+
+      if (role === UserRoleType.SUSPENDED) {
+        return "You don't have the permission to request texts";
+      }
 
       if (!myAssignmentTarget) {
         return "No texts available at the moment";

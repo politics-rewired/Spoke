@@ -464,6 +464,7 @@ export class AdminIncomingMessageList extends Component {
           organizationId={organizationId}
           onUsersReceived={this.handleReassignmentTextersReceived}
           pageSize={1000}
+          filterSuspended
         />
         <PaginatedUsersRetriever
           organizationId={organizationId}

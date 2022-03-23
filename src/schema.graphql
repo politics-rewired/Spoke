@@ -284,6 +284,7 @@ type RootMutation {
   deleteQuestionResponseSyncTarget(targetId: String!): String!
   syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
   editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
+  unassignTextsFromUser(membershipId: String!): Boolean!
 }
 
 schema {
@@ -439,6 +440,7 @@ type OrganizationSettings {
 
 
 enum UserRole {
+  SUSPENDED
   TEXTER
   SUPERVOLUNTEER
   ADMIN
@@ -456,6 +458,7 @@ input MembershipFilter {
   nameSearch: String
   campaignId: Int
   campaignArchived: Boolean
+  roles: [String!]
 }
 
 type OrganizationMembership {
