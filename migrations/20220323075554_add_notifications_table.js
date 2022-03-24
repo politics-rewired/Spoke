@@ -1,6 +1,6 @@
 exports.up = function up(knex) {
-  return Promise.all([
-    knex.schema.createTable("notification", (t) => {
+  return knex.schema
+    .createTable("notification", (t) => {
       t.increments("id").primary();
 
       t.integer("user_id").notNullable();
@@ -11,20 +11,18 @@ exports.up = function up(knex) {
       t.timestamps(true, true);
 
       t.foreign("user_id").references("user.id");
-    }),
-    knex.schema.raw(`
+    })
+    .then(() => {
+      knex.schema.raw(`
       create trigger _500_notification_updated_at
         before update
         on public.notification
         for each row
         execute procedure universal_updated_at();
-    `)
-  ]);
+    `);
+    });
 };
 
 exports.down = function down(knex) {
-  return Promise.all([
-    knex.schema.dropTable("notification"),
-    knex.schema.raw(`drop trigger _500_notification_updated_at`)
-  ]);
+  return knex.schema.dropTable("notification");
 };
