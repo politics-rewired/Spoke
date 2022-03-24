@@ -1,6 +1,7 @@
 import isNil from "lodash/isNil";
 
 import { ExternalSyncReadinessState } from "../../api/campaign";
+import { UserRoleType } from "../../api/organization-membership";
 import { emptyRelayPage } from "../../api/pagination";
 import { config } from "../../config";
 import { parseIanaZone } from "../../lib/datetime";
@@ -509,7 +510,9 @@ export const resolvers = {
         "scriptPreviewForSupervolunteers",
         features
       );
-      const requiredRole = supervolAccess ? "SUPERVOLUNTEER" : "ADMIN";
+      const requiredRole = supervolAccess
+        ? UserRoleType.SUPERVOLUNTEER
+        : UserRoleType.ADMIN;
       try {
         await accessRequired(user, organizationId, requiredRole);
       } catch {
