@@ -138,6 +138,7 @@ export type CampaignsReturn = PaginatedCampaigns | CampaignsList;
 export const schema = `
   input CampaignsFilter {
     isArchived: Boolean
+    isStarted: Boolean
     organizationId: Int
     campaignId: Int
     listSize: Int
@@ -149,6 +150,7 @@ export const schema = `
     receivedMessagesCount: Int
     optOutsCount: Int
     percentUnhandledReplies: Float!
+    countMessagedContacts: Int!
   }
 
   type DeliverabilityErrorStat {

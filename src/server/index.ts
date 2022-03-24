@@ -68,6 +68,7 @@ if (config.MODE === ServerMode.Server || config.MODE === ServerMode.Dual) {
   setupUserNotificationObservers();
 }
 
+console.log(config.MODE);
 if (config.MODE === ServerMode.Worker || config.MODE === ServerMode.Dual) {
   // Launch pg-compose worker
   lightship.queueBlockingTask(getWorker());

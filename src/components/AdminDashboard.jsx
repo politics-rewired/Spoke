@@ -72,6 +72,7 @@ class AdminDashboard extends React.Component {
       { name: "People", path: "people", role: "ADMIN" },
       { name: "Teams", path: "teams", role: "ADMIN" },
       { name: "Assignment Control", path: "assignment-control", role: "ADMIN" },
+      { name: "Autosending", path: "autosending", role: "ADMIN" },
       { name: "Tags", path: "tag-editor", role: "ADMIN" },
       { name: "Message Review", path: "incoming", role: "SUPERVOLUNTEER" },
       {
@@ -101,6 +102,11 @@ class AdminDashboard extends React.Component {
       { name: "Integrations", path: "integrations", role: "OWNER" },
       { name: "Settings", path: "settings", role: "OWNER" }
     ];
+
+    if (!window.ENABLE_AUTOSENDING) {
+      const index = sections.findIndex((s) => s.name === "Autosending");
+      sections.splice(index, 1)
+    }
 
     if (window.DISABLE_ASSIGNMENT_PAGE) {
       const index = sections.findIndex((s) => s.name === "Assignment Requests");

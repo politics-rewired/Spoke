@@ -1783,11 +1783,13 @@ const rootMutations = {
         );
       }
 
-      await r
+      const [updatedCampaign] = await r
         .knex("campaign")
-        .update({ autosend_status: "sending", autosending_user_id: user.id })
-        .where({ id });
-      return true;
+        .update({ autosend_status: "sending", autosend_user_id: user.id })
+        .where({ id })
+        .returning("*");
+
+      return updatedCampaign;
     },
 
     pauseAutosending: async (_ignore, { campaignId }, { user }) => {
@@ -1802,20 +1804,33 @@ const rootMutations = {
 
       await accessRequired(user, organizationId, "ADMIN", true);
 
+      let updatedCampaign;
+
       if (campaign.autosend_status === "sending") {
-        await r.knex("campaign").update({ autosend_status: "paused" });
+        const [updatedCampaignResult] = await r
+          .knex("campaign")
+          .update({ autosend_status: "paused" })
+          .where({ id })
+          .returning("*");
+
+        updatedCampaign = updatedCampaignResult
+
         await r.knex.raw(
           `
-          select graphile_worker.remove_job(job_key)
-          from graphile_worker.jobs
-          where task_identifier = 'retry-interaction-step'
-            and payload->>'campaignId' = $1
+          select count(*)
+          from (
+            select graphile_worker.remove_job(key)
+            from graphile_worker.jobs
+            where task_identifier = 'retry-interaction-step'
+              and payload->>'campaignId' = ?
+          ) deleted_jobs
         `,
           [id]
         );
       }
 
-      return true;
+      const result = updatedCampaign || campaign;
+      return result
     },
 
     unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {

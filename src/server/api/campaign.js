@@ -24,6 +24,11 @@ export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
     if ("isArchived" in campaignsFilter) {
       query = query.where("campaign.is_archived", campaignsFilter.isArchived);
     }
+
+    if ("isStarted" in campaignsFilter) {
+      query = query.where("campaign.is_started", campaignsFilter.isStarted);
+    }
+
     if ("campaignId" in campaignsFilter) {
       query = query.where(
         "campaign.id",
@@ -189,6 +194,32 @@ export const resolvers = {
       });
     },
 
+    countMessagedContacts: async (campaign) => {
+      const getCountMessagedContacts = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          const { rows } = await r.reader.raw(
+            `
+              select count(*) as count_messaged_contacts
+              from campaign_contact
+              where message_status <> 'needsMessage'
+                and archived = ${archived}
+                and campaign_id = ?
+            `,
+            [campaignId]
+          );
+
+          const [{ count_messaged_contacts: result }] = rows;
+          return result;
+        },
+        cacheOpts.PercentUnhandledReplies
+      );
+
+      return getCountMessagedContacts({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
+    },
+
     percentUnhandledReplies: async (campaign) => {
       const getPercentUnhandledReplies = memoizer.memoize(
         async ({ campaignId, archived }) => {
@@ -197,13 +228,19 @@ export const resolvers = {
           } = await r.reader.raw(
             `
             select 
-              (
+              coalesce(
+                (
                 count(*) filter (where message_status not in ('needsMessage', 'messaged', 'needsResponse')) / 
-                (count(*) filter (where message_status not in ('needsMessage', 'messaged')))::float
-              ) * 100 as percent_unhandled_replies
+                nullif(
+                  (count(*) filter (where message_status not in ('needsMessage', 'messaged')))::float,
+                  0
+                )
+                ) * 100,
+                0
+              ) as percent_unhandled_replies
             from campaign_contact cc
             where cc.archived = ${archived}
-              and cc.campaign_id = $1
+              and cc.campaign_id = ?
           `,
             [campaignId]
           );
