@@ -12,6 +12,7 @@ import { getDeliverabilityStats } from "./lib/campaign";
 import { symmetricEncrypt } from "./lib/crypto";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
+import { getOrgFeature } from "./organization-settings";
 import { getUsers } from "./user";
 
 export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
@@ -500,11 +501,21 @@ export const resolvers = {
     },
     creator: async (campaign, _, { loaders }) =>
       campaign.creator_id ? loaders.user.load(campaign.creator_id) : null,
-    previewUrl: async (campaign, _, { user }) => {
-      const organizaitonId = await getCampaignOrganization({
-        campaignId: campaign.id
-      });
-      await accessRequired(user, organizaitonId, "ADMIN");
+    previewUrl: async (campaign, _, { user, loaders }) => {
+      const campaignId = campaign.id;
+      const organizationId = await getCampaignOrganization({ campaignId });
+      const { features } = await loaders.organization.load(organizationId);
+      const supervolAccess = getOrgFeature(
+        "scriptPreviewForSupervolunteers",
+        features
+      );
+      const requiredRole = supervolAccess ? "SUPERVOLUNTEER" : "ADMIN";
+      try {
+        await accessRequired(user, organizationId, requiredRole);
+      } catch {
+        // Return null because Message Review uses loadData() HOC which does not tolerate errors
+        return null;
+      }
       const token = symmetricEncrypt(`${campaign.id}`);
       return token;
     },
