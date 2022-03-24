@@ -1813,7 +1813,7 @@ const rootMutations = {
           .where({ id })
           .returning("*");
 
-        updatedCampaign = updatedCampaignResult
+        updatedCampaign = updatedCampaignResult;
 
         await r.knex.raw(
           `
@@ -1830,7 +1830,7 @@ const rootMutations = {
       }
 
       const result = updatedCampaign || campaign;
-      return result
+      return result;
     },
 
     unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {
