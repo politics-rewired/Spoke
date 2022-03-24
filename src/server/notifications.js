@@ -11,10 +11,10 @@ export const Notifications = Object.freeze({
   ASSIGNMENT_UPDATED: "assignment.updated"
 });
 
-async function createNotification(user_id, subject, content, replyTo) {
+async function createNotification(userId, subject, content, replyTo) {
   await r
     .knex("notification")
-    .insert({ user_id, subject, content, reply_to: replyTo });
+    .insert({ user_id: userId, subject, content, reply_to: replyTo });
 }
 
 async function getOrganizationOwner(organizationId) {
