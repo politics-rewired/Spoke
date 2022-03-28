@@ -147,7 +147,9 @@ export interface campaign {
   replies_stale_after_minutes?: number | null
   landlines_filtered?: boolean | null
   external_system_id?: string | null
-  is_approved?: boolean | null 
+  is_approved?: boolean | null
+  autosend_status?: string | null
+  autosend_user_id?: number | null 
 }
 
 export interface campaign_contact { 
