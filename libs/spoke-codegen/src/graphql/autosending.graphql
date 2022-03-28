@@ -1,3 +1,22 @@
+fragment AutosendingTarget on Campaign {
+  id
+  title
+  autosendStatus
+  contactsCount
+  stats {
+    optOutsCount
+    percentUnhandledReplies
+    receivedMessagesCount
+    countMessagedContacts
+  }
+  deliverabilityStats {
+    deliveredCount
+    sendingCount
+    sentCount
+    errorCount
+  }
+}
+
 query CampaignsEligibleForAutosending($organizationId: String!) {
   organization(id: $organizationId) {
     id
@@ -6,22 +25,7 @@ query CampaignsEligibleForAutosending($organizationId: String!) {
       cursor: { offset: 0, limit: 5000 }
     ) {
       campaigns {
-        id
-        title
-        autosendStatus
-        contactsCount
-        stats {
-          optOutsCount
-          percentUnhandledReplies
-          receivedMessagesCount
-          countMessagedContacts
-        }
-        deliverabilityStats {
-          deliveredCount
-          sendingCount
-          sentCount
-          errorCount
-        }
+        ...AutosendingTarget
       }
     }
   }

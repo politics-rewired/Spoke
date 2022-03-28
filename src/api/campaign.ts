@@ -260,8 +260,8 @@ export const schema = `
   union CampaignsReturn = PaginatedCampaigns | CampaignsList
 
   type PaginatedCampaigns {
-    campaigns: [Campaign]
-    pageInfo: PageInfo
+    campaigns: [Campaign!]!
+    pageInfo: PageInfo!
   }
 
   type CampaignNavigation {

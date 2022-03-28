@@ -1,102 +1,125 @@
-import Chip from "material-ui/Chip";
-import { Card, CardHeader, CardText } from "material-ui/Card";
-import Snackbar from "material-ui/Snackbar";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
+import Paper from "@material-ui/core/Paper";
+import Snackbar from "@material-ui/core/Snackbar";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
-import Paper from "@material-ui/core/Paper";
 import TableRow from "@material-ui/core/TableRow";
-import PauseIcon from "material-ui/svg-icons/av/pause";
-import PlayIcon from "material-ui/svg-icons/av/play-arrow";
-import MoreIcon from "material-ui/svg-icons/navigation/arrow-forward";
-import React from "react";
+import Alert from "@material-ui/lab/Alert";
 import {
   useCampaignsEligibleForAutosendingQuery,
-  useStartAutosendingMutation,
-  usePauseAutosendingMutation
+  usePauseAutosendingMutation,
+  useStartAutosendingMutation
 } from "@spoke/spoke-codegen";
-import LoadingIndicator from "../../components/LoadingIndicator";
-import { match } from "react-router";
-import { FlatButton } from "material-ui";
-import {
-  green100,
-  green400,
-  red200,
-  red600,
-  grey200
-} from "material-ui/styles/colors";
 import { sortBy } from "lodash";
-import { Link } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-interface Props {
-  match: match<{ organizationId: string }>;
-}
+import LoadingIndicator from "../../components/LoadingIndicator";
+import AutosendingTargetRow from "./components/AutosendingTargetRow";
 
-const AdminAutosending: React.FC<Props> = (props) => {
-  const organizationId = props.match.params.organizationId;
-  const { data, loading } = useCampaignsEligibleForAutosendingQuery({
+const AdminAutosending: React.FC = () => {
+  const { organizationId } = useParams<{ organizationId: string }>();
+
+  const {
+    data,
+    loading,
+    error: getCampaignsError
+  } = useCampaignsEligibleForAutosendingQuery({
     variables: { organizationId }
   });
 
   const [
     startAutosending,
-    { loading: _isStartingAutosending, error: startAutosendingError }
+    { loading: isStartingAutosending, error: startAutosendingError }
   ] = useStartAutosendingMutation();
 
   const [
     pauseAutosending,
-    { loading: _isPausingAutosending, error: pauseAutosendingError }
+    { loading: isPausingAutosending, error: pauseAutosendingError }
   ] = usePauseAutosendingMutation();
 
-  if (loading) {
-    return <LoadingIndicator />;
-  }
+  const [alertErrorMessage, setAlertErrorMessage] = useState<
+    string | undefined
+  >(undefined);
 
-  const mutationError = startAutosendingError || pauseAutosendingError;
-  const errorSnackbar = mutationError ? (
-    <Snackbar
-      open={true}
-      message={mutationError.message.replace("GraphQL error:", "")}
-      autoHideDuration={2000}
-    />
-  ) : undefined;
+  useEffect(() => {
+    if (getCampaignsError) setAlertErrorMessage(getCampaignsError.message);
+  }, [getCampaignsError?.message]);
+  useEffect(() => {
+    if (startAutosendingError)
+      setAlertErrorMessage(startAutosendingError.message);
+  }, [startAutosendingError?.message]);
+  useEffect(() => {
+    if (pauseAutosendingError)
+      setAlertErrorMessage(pauseAutosendingError.message);
+  }, [pauseAutosendingError?.message]);
 
-  const campaigns = data?.organization?.campaigns?.campaigns;
+  const handleDismissAlert = useCallback(
+    () => setAlertErrorMessage(undefined),
+    [setAlertErrorMessage]
+  );
+
+  const handlePlayFactory = useCallback(
+    (campaignId: string) => () =>
+      startAutosending({ variables: { campaignId } }),
+    [startAutosending]
+  );
+
+  const handlePauseFactory = useCallback(
+    (campaignId: string) => () =>
+      pauseAutosending({ variables: { campaignId } }),
+    [pauseAutosending]
+  );
+
+  const campaigns = data?.organization?.campaigns.campaigns ?? [];
   const activeCampaigns = sortBy(
-    campaigns!.filter((c) => {
-      const camp = c!;
-      return ["paused", "sending"].includes(camp.autosendStatus);
-    }),
-    (c) => c?.id
+    campaigns.filter(
+      (c) =>
+        c.autosendStatus && ["paused", "sending"].includes(c.autosendStatus)
+    ),
+    (c) => c.id
   );
 
   const inactiveCampaigns = sortBy(
-    campaigns!.filter((c) => {
-      const camp = c!;
-      return !["paused", "sending"].includes(camp.autosendStatus);
-    }),
+    campaigns.filter(
+      (c) =>
+        c.autosendStatus && !["paused", "sending"].includes(c.autosendStatus)
+    ),
     (c) => c.id
   );
 
   const sortedCampaigns = activeCampaigns.concat(inactiveCampaigns);
 
+  const actionsDisabled = isStartingAutosending || isPausingAutosending;
+
   return (
     <Card>
-      {errorSnackbar}
+      <Snackbar
+        open={alertErrorMessage !== undefined}
+        autoHideDuration={6000}
+        onClose={handleDismissAlert}
+      >
+        <Alert onClose={handleDismissAlert} severity="error">
+          {alertErrorMessage?.replace("GraphQL error:", "")}
+        </Alert>
+      </Snackbar>
       <CardHeader
         title="Autosending Controls"
         subtitle="Campaigns will send in order of ID"
       />
-      <CardText>
+      <CardContent>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Campaign</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell></TableCell>
+                <TableCell />
                 <TableCell>Contacts</TableCell>
                 <TableCell>Delivered</TableCell>
                 <TableCell>Replies</TableCell>
@@ -108,112 +131,22 @@ const AdminAutosending: React.FC<Props> = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedCampaigns.map((c) => {
-                const row = c!;
-
-                const campaignId = row.id!;
-
-                const totalSent = row.stats?.countMessagedContacts;
-
-                const statusChipDisplay =
-                  row.autosendStatus === "sending"
-                    ? totalSent === 0
-                      ? "up next"
-                      : row.autosendStatus
-                    : row.autosendStatus;
-
-                const chipColor =
-                  statusChipDisplay === "sending"
-                    ? green400
-                    : statusChipDisplay === "paused"
-                    ? red200
-                    : statusChipDisplay === "complete"
-                    ? green100
-                    : grey200;
-
-                return (
-                  <TableRow key={row.id}>
-                    <TableCell>
-                      {campaignId}: {row.title}
-                    </TableCell>
-                    <TableCell>
-                      <Chip backgroundColor={chipColor}>
-                        {statusChipDisplay}
-                      </Chip>
-                    </TableCell>
-                    <TableCell>
-                      {row.autosendStatus ===
-                      "complete" ? undefined : row.autosendStatus ===
-                        "sending" ? (
-                        <FlatButton
-                          label="Pause"
-                          icon={<PauseIcon />}
-                          onClick={() =>
-                            pauseAutosending({
-                              variables: { campaignId }
-                            })
-                          }
-                        />
-                      ) : (
-                        <FlatButton
-                          label="Queue"
-                          icon={<PlayIcon />}
-                          onClick={() =>
-                            startAutosending({ variables: { campaignId } })
-                          }
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell>{row.contactsCount}</TableCell>
-
-                    <TableCell>
-                      {row.deliverabilityStats.deliveredCount}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        style={{
-                          color:
-                            row.stats?.percentUnhandledReplies > 25
-                              ? red600
-                              : "black"
-                        }}
-                      >
-                        {row.stats?.receivedMessagesCount}
-                      </span>
-                    </TableCell>
-                    <TableCell>{row.stats?.optOutsCount}</TableCell>
-                    <TableCell>{row.contactsCount - totalSent}</TableCell>
-                    <TableCell>
-                      {row.deliverabilityStats.sendingCount}
-                    </TableCell>
-                    <TableCell>{row.deliverabilityStats.errorCount}</TableCell>
-                    <TableCell>
-                      <Link to={`/admin/1/campaigns/${row.id}`}>
-                        <MoreIcon />
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                  // <div style={{ display: "flex", alignItems: "center" }}>
-                  //   <div style={{ minWidth: "200px" }}>
-                  //     <Chip style={{ display: "inline-block" }}>{row.title}</Chip>
-                  //   </div>
-
-                  //   <div style={{ minWidth: "200px" }}>
-                  //     <Chip style={{ display: "inline-block" }}>
-                  //       {row.autosendStatus}
-                  //     </Chip>
-                  //   </div>
-                  // </div>
-                );
-              })}
+              {sortedCampaigns.map((c) => (
+                <AutosendingTargetRow
+                  key={c.id}
+                  target={c}
+                  disabled={actionsDisabled}
+                  onStart={handlePlayFactory(c!.id!)}
+                  onPause={handlePauseFactory(c!.id!)}
+                />
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
-      </CardText>
+        {loading && <LoadingIndicator />}
+      </CardContent>
     </Card>
   );
 };
-
-// const AdminAutosendingRow: React.FC()
 
 export default AdminAutosending;
