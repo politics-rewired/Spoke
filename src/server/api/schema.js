@@ -1817,14 +1817,14 @@ const rootMutations = {
 
         await r.knex.raw(
           `
-          select count(*)
-          from (
-            select graphile_worker.remove_job(key)
-            from graphile_worker.jobs
-            where task_identifier = 'retry-interaction-step'
-              and payload->>'campaignId' = ?
-          ) deleted_jobs
-        `,
+            select count(*)
+            from (
+              select graphile_worker.remove_job(key)
+              from graphile_worker.jobs
+              where task_identifier = 'retry-interaction-step'
+                and payload->>'campaignId' = ?
+            ) deleted_jobs
+          `,
           [id]
         );
       }
