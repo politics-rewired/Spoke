@@ -1801,13 +1801,19 @@ const rootMutations = {
         );
       }
 
-      const [updatedCampaign] = await r
-        .knex("campaign")
-        .update({ autosend_status: "sending", autosend_user_id: user.id })
-        .where({ id })
-        .returning("*");
+      const result = await r.knex.transaction(async (trx) => {
+        const [updatedCampaign] = await trx("campaign")
+          .update({ autosend_status: "sending", autosend_user_id: user.id })
+          .where({ id })
+          .returning("*");
 
-      return updatedCampaign;
+        const taskIdentifier = "queue-autosend-initials";
+        await trx.raw(`select graphile_worker.add_job(?)`, [taskIdentifier]);
+
+        return updatedCampaign;
+      });
+
+      return result;
     },
 
     pauseAutosending: async (_ignore, { campaignId }, { user }) => {
