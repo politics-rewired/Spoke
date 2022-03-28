@@ -496,6 +496,17 @@ export interface monthly_organization_message_usages {
   sent_message_count?: number | null 
 }
 
+export interface notification { 
+  id: number
+  user_id: number
+  subject: string
+  content: string
+  reply_to?: string | null
+  sent_at?: Date | null
+  created_at: Date
+  updated_at: Date 
+}
+
 export interface opt_out { 
   id: number
   cell: string
@@ -728,6 +739,7 @@ export interface Tables {
   messaging_service_stick: messaging_service_stick,
   missing_external_sync_question_response_configuration: missing_external_sync_question_response_configuration,
   monthly_organization_message_usages: monthly_organization_message_usages,
+  notification: notification,
   opt_out: opt_out,
   organization: organization,
   password_reset_request: password_reset_request,
