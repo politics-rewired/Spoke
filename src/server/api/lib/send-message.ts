@@ -157,6 +157,18 @@ export const sendMessage = async (
     )
   );
 
+  const { role } = await r
+    .knex("user_organization")
+    .where({
+      user_id: user.id,
+      organization_id: record.organization_id
+    })
+    .first(["role"]);
+
+  if (role === UserRoleType.SUSPENDED) {
+    throw new GraphQLError("You don't have the permission to send messages");
+  }
+
   if (
     record.monthly_message_limit !== undefined &&
     record.sent_message_count !== undefined &&

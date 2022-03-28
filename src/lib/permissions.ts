@@ -1,6 +1,7 @@
 import { UserRoleType } from "../api/organization-membership";
 
 export const ROLE_HIERARCHY = [
+  UserRoleType.SUSPENDED,
   UserRoleType.TEXTER,
   UserRoleType.SUPERVOLUNTEER,
   UserRoleType.ADMIN,

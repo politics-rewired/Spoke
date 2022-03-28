@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const GET_CAMPAIGN_TEXTERS = gql`
-  query GetCampaignTexters($campaignId: String!) {
+  query GetCampaignTexters($campaignId: String!, $organizationId: String!) {
     campaign(id: $campaignId) {
       id
       texters {
@@ -16,6 +16,7 @@ export const GET_CAMPAIGN_TEXTERS = gql`
           )
           maxContacts
         }
+        roles(organizationId: $organizationId)
       }
       contactsCount
       isStarted
@@ -38,6 +39,7 @@ export const GET_ORGANIZATION_TEXTERS = gql`
         firstName
         lastName
         displayName
+        roles(organizationId: $organizationId)
       }
     }
   }

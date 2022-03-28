@@ -56,6 +56,7 @@ const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
       onChange={(_, __, newRole: UserRoleType) => onSelect(newRole)}
     >
       {[
+        UserRoleType.SUSPENDED,
         UserRoleType.TEXTER,
         UserRoleType.SUPERVOLUNTEER,
         UserRoleType.ADMIN,
