@@ -229,21 +229,21 @@ export const resolvers = {
             rows: [{ percent_unhandled_replies: result }]
           } = await r.reader.raw(
             `
-            select 
-              coalesce(
-                (
-                count(*) filter (where message_status not in ('needsMessage', 'messaged', 'needsResponse')) / 
-                nullif(
-                  (count(*) filter (where message_status not in ('needsMessage', 'messaged')))::float,
+              with contact_counts as (
+                select
+                  count(*) filter (where message_status not in ('needsMessage', 'messaged', 'needsResponse')) as convo_or_closed_count,
+                  count(*) filter (where message_status not in ('needsMessage', 'messaged'))::float as engaged_count
+                from campaign_contact cc
+                where cc.archived = ${archived}
+                  and cc.campaign_id = ?
+              )
+              select
+                coalesce(
+                  ( convo_or_closed_count /  nullif(engaged_count, 0) ) * 100,
                   0
-                )
-                ) * 100,
-                0
-              ) as percent_unhandled_replies
-            from campaign_contact cc
-            where cc.archived = ${archived}
-              and cc.campaign_id = ?
-          `,
+                ) as percent_unhandled_replies
+              from contact_counts
+            `,
             [campaignId]
           );
 
