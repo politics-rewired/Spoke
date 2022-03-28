@@ -1,7 +1,6 @@
 import { config } from "../config";
 import logger from "../logger";
 import { eventBus, EventType } from "./event-bus";
-import { sendEmail } from "./mail";
 import { r } from "./models";
 import { errToObj } from "./utils";
 
@@ -11,6 +10,12 @@ export const Notifications = Object.freeze({
   ASSIGNMENT_CREATED: "assignment.created",
   ASSIGNMENT_UPDATED: "assignment.updated"
 });
+
+async function createNotification(userId, subject, content, replyTo) {
+  await r
+    .knex("notification")
+    .insert({ user_id: userId, subject, content, reply_to: replyTo });
+}
 
 async function getOrganizationOwner(organizationId) {
   return r
@@ -45,7 +50,6 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .reader("organization")
     .where({ id: campaign.organization_id })
     .first();
-  const user = await r.reader("user").where({ id: assignment.user_id }).first();
 
   const replyTo = await replyToForOrg(organization.id);
 
@@ -60,12 +64,7 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
   }
 
   try {
-    await sendEmail({
-      to: user.email,
-      replyTo,
-      subject,
-      text
-    });
+    await createNotification(assignment.user_id, subject, text, replyTo);
   } catch (e) {
     logger.error("Error sending assignment notification email: ", e);
   }
@@ -114,23 +113,16 @@ export const sendUserNotification = async (notification) => {
       .first();
 
     if (!campaignContact.is_opted_out && !campaign.is_archived) {
-      const user = await r
-        .reader("user")
-        .where({ id: assignment.user_id })
-        .first();
       const organization = await r
         .reader("organization")
         .where({ id: campaign.organization_id })
         .first();
       const replyTo = await replyToForOrg(organization.id);
+      const subject = `[${organization.name}] [${campaign.title}] New reply`;
+      const text = `Someone responded to your message. See all your replies here: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos/${notification.assignmentId}/reply`;
 
       try {
-        await sendEmail({
-          to: user.email,
-          replyTo,
-          subject: `[${organization.name}] [${campaign.title}] New reply`,
-          text: `Someone responded to your message. See all your replies here: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos/${notification.assignmentId}/reply`
-        });
+        await createNotification(assignment.user_id, subject, text, replyTo);
       } catch (err) {
         logger.error("Error sending conversation reply notification email: ", {
           ...errToObj(err)
