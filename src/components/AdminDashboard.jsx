@@ -105,7 +105,7 @@ class AdminDashboard extends React.Component {
 
     if (!window.ENABLE_AUTOSENDING) {
       const index = sections.findIndex((s) => s.name === "Autosending");
-      sections.splice(index, 1)
+      sections.splice(index, 1);
     }
 
     if (window.DISABLE_ASSIGNMENT_PAGE) {
