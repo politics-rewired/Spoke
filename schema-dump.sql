@@ -218,7 +218,7 @@ CREATE TABLE public.campaign (
     replies_stale_after_minutes integer,
     landlines_filtered boolean DEFAULT false,
     external_system_id uuid,
-    is_approved boolean DEFAULT false
+    is_approved boolean DEFAULT false NOT NULL
 );
 
 
@@ -2572,6 +2572,46 @@ CREATE TABLE public.monthly_organization_message_usages (
 ALTER TABLE public.monthly_organization_message_usages OWNER TO postgres;
 
 --
+-- Name: notification; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.notification (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    subject text NOT NULL,
+    content text NOT NULL,
+    reply_to character varying(255),
+    sent_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.notification OWNER TO postgres;
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.notification_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.notification_id_seq OWNER TO postgres;
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.notification_id_seq OWNED BY public.notification.id;
+
+
+--
 -- Name: opt_out; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3071,7 +3111,7 @@ CREATE TABLE public.user_organization (
     role text NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     request_status public.texter_status DEFAULT 'approval_required'::public.texter_status NOT NULL,
-    CONSTRAINT user_organization_role_check CHECK ((role = ANY (ARRAY['OWNER'::text, 'ADMIN'::text, 'SUPERVOLUNTEER'::text, 'TEXTER'::text])))
+    CONSTRAINT user_organization_role_check CHECK ((role = ANY (ARRAY['OWNER'::text, 'ADMIN'::text, 'SUPERVOLUNTEER'::text, 'TEXTER'::text, 'SUSPENDED'::text])))
 );
 
 
@@ -3284,6 +3324,13 @@ ALTER TABLE ONLY public.log ALTER COLUMN id SET DEFAULT nextval('public.log_id_s
 --
 
 ALTER TABLE ONLY public.message ALTER COLUMN id SET DEFAULT nextval('public.message_id_seq'::regclass);
+
+
+--
+-- Name: notification id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.notification ALTER COLUMN id SET DEFAULT nextval('public.notification_id_seq'::regclass);
 
 
 --
@@ -3738,6 +3785,14 @@ ALTER TABLE ONLY public.messaging_service_stick REPLICA IDENTITY USING INDEX mes
 
 ALTER TABLE ONLY public.monthly_organization_message_usages
     ADD CONSTRAINT monthly_organization_message_usages_pkey PRIMARY KEY (organization_id, month);
+
+
+--
+-- Name: notification notification_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.notification
+    ADD CONSTRAINT notification_pkey PRIMARY KEY (id);
 
 
 --
@@ -5003,6 +5058,14 @@ ALTER TABLE ONLY public.message
 
 ALTER TABLE ONLY public.monthly_organization_message_usages
     ADD CONSTRAINT monthly_organization_message_usages_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: notification notification_user_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.notification
+    ADD CONSTRAINT notification_user_id_foreign FOREIGN KEY (user_id) REFERENCES public."user"(id);
 
 
 --
