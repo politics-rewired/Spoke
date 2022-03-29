@@ -103,6 +103,7 @@ jobs:
           export GIT_REF=${GITHUB_REF#refs/*/}
           echo "$GIT_REF"
           export SPOKE_VERSION=${GIT_REF#"v"}
+          export SPOKE_VERSION=${SPOKE_VERSION//[\/]/-}
           echo "::set-output name=version::$SPOKE_VERSION"
 
       - name: Login to GAR
