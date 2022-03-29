@@ -117,16 +117,23 @@ const AdminAutosending: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell colSpan={3} />
+                <TableCell colSpan={5}>Progress</TableCell>
+                <TableCell colSpan={2}>Engagement</TableCell>
+                <TableCell />
+              </TableRow>
+              <TableRow>
                 <TableCell>Campaign</TableCell>
                 <TableCell>Status</TableCell>
+                {/* Actions */}
                 <TableCell />
                 <TableCell>Contacts</TableCell>
                 <TableCell>Delivered</TableCell>
-                <TableCell>Replies</TableCell>
-                <TableCell>Opt Outs</TableCell>
                 <TableCell>Waiting to Send</TableCell>
                 <TableCell>Waiting to Deliver</TableCell>
                 <TableCell>Failed</TableCell>
+                <TableCell>Replies</TableCell>
+                <TableCell>Opt Outs</TableCell>
                 <TableCell>More Info</TableCell>
               </TableRow>
             </TableHead>

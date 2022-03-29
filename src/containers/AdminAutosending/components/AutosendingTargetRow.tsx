@@ -103,15 +103,15 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       <TableCell>{target.contactsCount}</TableCell>
 
       <TableCell>{target.deliverabilityStats.deliveredCount}</TableCell>
+      <TableCell>{target.contactsCount! - totalSent!}</TableCell>
+      <TableCell>{waitingToDeliver}</TableCell>
+      <TableCell>{target.deliverabilityStats.errorCount}</TableCell>
       <TableCell>
         <span style={{ color: repliesColor }}>
           {target.stats?.receivedMessagesCount}
         </span>
       </TableCell>
       <TableCell>{target.stats?.optOutsCount}</TableCell>
-      <TableCell>{target.contactsCount! - totalSent!}</TableCell>
-      <TableCell>{waitingToDeliver}</TableCell>
-      <TableCell>{target.deliverabilityStats.errorCount}</TableCell>
       <TableCell>
         <Link to={`/admin/${organizationId}/campaigns/${target.id}`}>
           <MoreIcon />
