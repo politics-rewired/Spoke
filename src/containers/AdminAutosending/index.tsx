@@ -135,6 +135,7 @@ const AdminAutosending: React.FC = () => {
                 <AutosendingTargetRow
                   key={c.id}
                   target={c}
+                  organizationId={organizationId}
                   disabled={actionsDisabled}
                   onStart={handlePlayFactory(c!.id!)}
                   onPause={handlePauseFactory(c!.id!)}

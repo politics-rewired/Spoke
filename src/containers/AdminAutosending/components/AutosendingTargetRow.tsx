@@ -30,6 +30,7 @@ const useStyles = makeStyles({
 
 interface AutosendingTargetRowProps {
   target: AutosendingTargetFragment;
+  organizationId: string;
   disabled?: boolean;
   onStart?: () => Promise<unknown> | unknown;
   onPause?: () => Promise<unknown> | unknown;
@@ -38,7 +39,7 @@ interface AutosendingTargetRowProps {
 export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
   props
 ) => {
-  const { target, disabled = false, onStart, onPause } = props;
+  const { target, organizationId, disabled = false, onStart, onPause } = props;
 
   const chipClasses = useStyles();
 
@@ -111,7 +112,7 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       <TableCell>{target.deliverabilityStats.sendingCount}</TableCell>
       <TableCell>{target.deliverabilityStats.errorCount}</TableCell>
       <TableCell>
-        <Link to={`/admin/1/campaigns/${target.id}`}>
+        <Link to={`/admin/${organizationId}/campaigns/${target.id}`}>
           <MoreIcon />
         </Link>
       </TableCell>
