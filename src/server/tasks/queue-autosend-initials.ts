@@ -10,6 +10,8 @@ interface Payload {
 const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
   const contactsToQueueInOneMinute = config.AUTOSEND_MESSAGES_PER_SECOND * 60;
 
+  const restrictTimezone = config.isTest ? "true or" : "";
+
   const { rows: contactsQueued } = await helpers.query<{
     campaign_id: string;
     count_queued: string;
@@ -30,6 +32,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
           and c.autosend_status = 'sending'
           -- is textable now
           and (
+            ${restrictTimezone}
               ( cc.timezone is null
                 and extract(hour from CURRENT_TIMESTAMP at time zone c.timezone) < c.texting_hours_end
                 and extract(hour from CURRENT_TIMESTAMP at time zone c.timezone) >= c.texting_hours_start
