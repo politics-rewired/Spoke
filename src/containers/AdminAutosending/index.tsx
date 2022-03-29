@@ -30,7 +30,8 @@ const AdminAutosending: React.FC = () => {
     loading,
     error: getCampaignsError
   } = useCampaignsEligibleForAutosendingQuery({
-    variables: { organizationId }
+    variables: { organizationId },
+    pollInterval: 10 * 1000
   });
 
   const [
