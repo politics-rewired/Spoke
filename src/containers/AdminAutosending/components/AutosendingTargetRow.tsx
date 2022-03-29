@@ -64,6 +64,7 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
   const hasHighUnhandledReplies =
     target.stats?.percentUnhandledReplies !== undefined &&
     target.stats.percentUnhandledReplies > 25;
+  const repliesColor = hasHighUnhandledReplies ? red[600] : "black";
 
   const waitingToDeliver =
     target.deliverabilityStats.sendingCount +
@@ -103,11 +104,7 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
 
       <TableCell>{target.deliverabilityStats.deliveredCount}</TableCell>
       <TableCell>
-        <span
-          style={{
-            color: hasHighUnhandledReplies ? red[600] : "black"
-          }}
-        >
+        <span style={{ color: repliesColor }}>
           {target.stats?.receivedMessagesCount}
         </span>
       </TableCell>
