@@ -65,6 +65,10 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
     target.stats?.percentUnhandledReplies !== undefined &&
     target.stats.percentUnhandledReplies > 25;
 
+  const waitingToDeliver =
+    target.deliverabilityStats.sendingCount +
+    target.deliverabilityStats.sentCount;
+
   return (
     <TableRow>
       <TableCell>
@@ -109,7 +113,7 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       </TableCell>
       <TableCell>{target.stats?.optOutsCount}</TableCell>
       <TableCell>{target.contactsCount! - totalSent!}</TableCell>
-      <TableCell>{target.deliverabilityStats.sendingCount}</TableCell>
+      <TableCell>{waitingToDeliver}</TableCell>
       <TableCell>{target.deliverabilityStats.errorCount}</TableCell>
       <TableCell>
         <Link to={`/admin/${organizationId}/campaigns/${target.id}`}>
