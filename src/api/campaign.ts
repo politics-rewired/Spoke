@@ -158,6 +158,10 @@ export const schema = `
     count: Int!
   }
 
+  input CampaignDeliverabilityStatsFilter {
+    initialMessagesOnly: Boolean
+  }
+
   type CampaignDeliverabilityStats {
     deliveredCount: Int!
     sendingCount: Int!
@@ -239,7 +243,7 @@ export const schema = `
     externalSystem: ExternalSystem
     syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
-    deliverabilityStats: CampaignDeliverabilityStats!
+    deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
     autosendStatus: String!
   }
 

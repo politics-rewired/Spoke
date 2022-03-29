@@ -633,8 +633,11 @@ export const resolvers = {
         });
       return formatPage(query, { after, first, primaryColumn: "compound_id" });
     },
-    deliverabilityStats: async (campaign) => {
-      const stats = await getDeliverabilityStats(parseInt(campaign.id, 10));
+    deliverabilityStats: async (campaign, { filter }) => {
+      const stats = await getDeliverabilityStats(
+        parseInt(campaign.id, 10),
+        filter
+      );
       return stats;
     },
     campaignGroups: async (campaign, { after, first }, { user }) => {

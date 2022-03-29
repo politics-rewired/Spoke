@@ -9,7 +9,7 @@ fragment AutosendingTarget on Campaign {
     receivedMessagesCount
     countMessagedContacts
   }
-  deliverabilityStats {
+  deliverabilityStats(filter: { initialMessagesOnly: true }) {
     deliveredCount
     sendingCount
     sentCount
