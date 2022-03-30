@@ -17,14 +17,18 @@ fragment AutosendingTarget on Campaign {
   }
 }
 
-query CampaignsEligibleForAutosending($organizationId: String!) {
+query CampaignsEligibleForAutosending(
+  $organizationId: String!
+  $isStarted: Boolean!
+) {
   organization(id: $organizationId) {
     id
     campaigns(
-      campaignsFilter: { isArchived: false, isStarted: true }
+      campaignsFilter: { isArchived: false, isStarted: $isStarted }
       cursor: { offset: 0, limit: 5000 }
     ) {
       campaigns {
+        isStarted
         ...AutosendingTarget
       }
     }

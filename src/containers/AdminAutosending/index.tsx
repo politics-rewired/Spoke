@@ -1,7 +1,11 @@
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
 import Paper from "@material-ui/core/Paper";
+import Select from "@material-ui/core/Select";
 import Snackbar from "@material-ui/core/Snackbar";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -18,19 +22,25 @@ import {
 import { sortBy } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { BooleanParam, useQueryParam, withDefault } from "use-query-params";
 
 import LoadingIndicator from "../../components/LoadingIndicator";
 import AutosendingTargetRow from "./components/AutosendingTargetRow";
+import AutosendingUnstartedTargetRow from "./components/AutosendingUnstartedTargetRow";
 
 const AdminAutosending: React.FC = () => {
   const { organizationId } = useParams<{ organizationId: string }>();
+  const [isStarted = true, setIsStarted] = useQueryParam(
+    "isStarted",
+    withDefault(BooleanParam, true)
+  );
 
   const {
     data,
     loading,
     error: getCampaignsError
   } = useCampaignsEligibleForAutosendingQuery({
-    variables: { organizationId },
+    variables: { organizationId, isStarted },
     pollInterval: 10 * 1000
   });
 
@@ -59,6 +69,16 @@ const AdminAutosending: React.FC = () => {
     if (pauseAutosendingError)
       setAlertErrorMessage(pauseAutosendingError.message);
   }, [pauseAutosendingError?.message]);
+
+  const handleChangeFilter = useCallback(
+    (
+      event: React.ChangeEvent<{
+        name?: string | undefined;
+        value: unknown;
+      }>
+    ) => setIsStarted(event.target.value === "started"),
+    [setIsStarted]
+  );
 
   const handleDismissAlert = useCallback(
     () => setAlertErrorMessage(undefined),
@@ -112,6 +132,23 @@ const AdminAutosending: React.FC = () => {
       <CardHeader
         title="Autosending Controls"
         subtitle="Campaigns will send in order of ID"
+        action={
+          <FormControl>
+            <InputLabel id="is-started-select-label">
+              Campaign Status
+            </InputLabel>
+            <Select
+              labelId="is-started-select-label"
+              id="is-started-select"
+              value={isStarted ? "started" : "unstarted"}
+              style={{ width: 200, marginRight: 10 }}
+              onChange={handleChangeFilter}
+            >
+              <MenuItem value="started">Started</MenuItem>
+              <MenuItem value="unstarted">Unstarted</MenuItem>
+            </Select>
+          </FormControl>
+        }
       />
       <CardContent>
         <TableContainer component={Paper}>
@@ -139,16 +176,24 @@ const AdminAutosending: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedCampaigns.map((c) => (
-                <AutosendingTargetRow
-                  key={c.id}
-                  target={c}
-                  organizationId={organizationId}
-                  disabled={actionsDisabled}
-                  onStart={handlePlayFactory(c!.id!)}
-                  onPause={handlePauseFactory(c!.id!)}
-                />
-              ))}
+              {sortedCampaigns.map((c) =>
+                c.isStarted ? (
+                  <AutosendingTargetRow
+                    key={c.id}
+                    target={c}
+                    organizationId={organizationId}
+                    disabled={actionsDisabled}
+                    onStart={handlePlayFactory(c!.id!)}
+                    onPause={handlePauseFactory(c!.id!)}
+                  />
+                ) : (
+                  <AutosendingUnstartedTargetRow
+                    key={c.id}
+                    target={c}
+                    organizationId={organizationId}
+                  />
+                )
+              )}
             </TableBody>
           </Table>
         </TableContainer>
