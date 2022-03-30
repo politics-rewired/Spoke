@@ -26,6 +26,11 @@ export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
     if ("isArchived" in campaignsFilter) {
       query = query.where("campaign.is_archived", campaignsFilter.isArchived);
     }
+
+    if ("isStarted" in campaignsFilter) {
+      query = query.where("campaign.is_started", campaignsFilter.isStarted);
+    }
+
     if ("campaignId" in campaignsFilter) {
       query = query.where(
         "campaign.id",
@@ -189,6 +194,68 @@ export const resolvers = {
         campaignId: campaign.id,
         archived: campaign.is_archived
       });
+    },
+
+    countMessagedContacts: async (campaign) => {
+      const getCountMessagedContacts = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          const { rows } = await r.reader.raw(
+            `
+              select count(*) as count_messaged_contacts
+              from campaign_contact
+              where message_status <> 'needsMessage'
+                and archived = ${archived}
+                and campaign_id = ?
+            `,
+            [campaignId]
+          );
+
+          const [{ count_messaged_contacts: result }] = rows;
+          return result;
+        },
+        cacheOpts.PercentUnhandledReplies
+      );
+
+      return getCountMessagedContacts({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
+    },
+
+    percentUnhandledReplies: async (campaign) => {
+      const getPercentUnhandledReplies = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          const {
+            rows: [{ percent_unhandled_replies: result }]
+          } = await r.reader.raw(
+            `
+              with contact_counts as (
+                select
+                  count(*) filter (where message_status = 'needsResponse') as needs_response_count,
+                  count(*) filter (where message_status not in ('needsMessage', 'messaged'))::float as engaged_count
+                from campaign_contact cc
+                where cc.archived = ${archived}
+                  and cc.campaign_id = ?
+              )
+              select
+                coalesce(
+                  ( needs_response_count /  nullif(engaged_count, 0) ) * 100,
+                  0
+                ) as percent_unhandled_replies
+              from contact_counts
+            `,
+            [campaignId]
+          );
+
+          return result;
+        },
+        cacheOpts.PercentUnhandledReplies
+      );
+
+      return getPercentUnhandledReplies({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
     }
   },
   CampaignReadiness: {
@@ -275,7 +342,8 @@ export const resolvers = {
       "textingHoursEnd",
       "isAutoassignEnabled",
       "createdAt",
-      "landlinesFiltered"
+      "landlinesFiltered",
+      "autosendStatus"
     ]),
     isApproved: (campaign) =>
       isNil(campaign.is_approved) ? false : campaign.is_approved,
@@ -565,8 +633,11 @@ export const resolvers = {
         });
       return formatPage(query, { after, first, primaryColumn: "compound_id" });
     },
-    deliverabilityStats: async (campaign) => {
-      const stats = await getDeliverabilityStats(parseInt(campaign.id, 10));
+    deliverabilityStats: async (campaign, { filter }) => {
+      const stats = await getDeliverabilityStats(
+        parseInt(campaign.id, 10),
+        filter
+      );
       return stats;
     },
     campaignGroups: async (campaign, { after, first }, { user }) => {

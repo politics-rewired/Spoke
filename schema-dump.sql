@@ -218,7 +218,10 @@ CREATE TABLE public.campaign (
     replies_stale_after_minutes integer,
     landlines_filtered boolean DEFAULT false,
     external_system_id uuid,
-    is_approved boolean DEFAULT false NOT NULL
+    is_approved boolean DEFAULT false NOT NULL,
+    autosend_status text DEFAULT 'unstarted'::text,
+    autosend_user_id integer,
+    CONSTRAINT campaign_autosend_status_check CHECK ((autosend_status = ANY (ARRAY['unstarted'::text, 'sending'::text, 'paused'::text, 'complete'::text])))
 );
 
 
@@ -4786,6 +4789,14 @@ ALTER TABLE ONLY public.assignment
 
 ALTER TABLE ONLY public.assignment
     ADD CONSTRAINT assignment_user_id_foreign FOREIGN KEY (user_id) REFERENCES public."user"(id);
+
+
+--
+-- Name: campaign campaign_autosend_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign
+    ADD CONSTRAINT campaign_autosend_user_id_fkey FOREIGN KEY (autosend_user_id) REFERENCES public."user"(id);
 
 
 --

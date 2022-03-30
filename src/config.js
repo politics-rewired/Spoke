@@ -110,6 +110,15 @@ const validators = {
     desc: "Whether to auto handle requests after submission",
     default: false
   }),
+  ENABLE_AUTOSENDING: bool({
+    desc: "Whether autosending is enabled",
+    default: false,
+    isClient: true
+  }),
+  AUTOSEND_MESSAGES_PER_SECOND: num({
+    desc: "How many messages autosending should send per second",
+    default: 10
+  }),
   DISABLE_ASSIGNMENT_CASCADE: bool({
     desc:
       "Whether to just assign from 1 campaign rather than gathering from multiple to fulfill a request",

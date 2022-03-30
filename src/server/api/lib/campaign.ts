@@ -70,15 +70,38 @@ interface DeliverabilityStatRow {
   error_codes: string[] | null;
 }
 
-export const getDeliverabilityStats = async (campaignId: number) => {
+interface DeliverabilityStatsFilter {
+  initialMessagesOnly?: boolean;
+}
+
+export const getDeliverabilityStats = async (
+  campaignId: number,
+  filter: DeliverabilityStatsFilter = {}
+) => {
+  const { initialMessagesOnly = false } = filter;
+
+  const selectClause = initialMessagesOnly
+    ? "select distinct on (campaign_contact_id)"
+    : "select";
+  const orderClause = initialMessagesOnly
+    ? "order by campaign_contact_id, message.id asc"
+    : "";
+
   const rows = await r.reader
     .raw(
       `
-        select count(*), send_status, coalesce(error_codes, '{}') as error_codes
-        from message
-        join campaign_contact on campaign_contact.id = message.campaign_contact_id
-        where campaign_contact.campaign_id = ?
-          and is_from_contact = false
+        with messages_for_stats as (
+          ${selectClause}
+            send_status,
+            coalesce(error_codes, '{}') as error_codes
+          from message
+          join campaign_contact on campaign_contact.id = message.campaign_contact_id
+          where campaign_contact.campaign_id = ?
+            and is_from_contact = false
+          ${orderClause}
+        )
+        select count(*), send_status, error_codes
+        from messages_for_stats
         group by 2, 3
       `,
       [campaignId]

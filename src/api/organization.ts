@@ -82,7 +82,7 @@ export const schema = `
     id: ID
     uuid: String
     name: String
-    campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): PaginatedCampaigns
+    campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): PaginatedCampaigns!
     campaignsRelay(after: Cursor, first: Int, filter: CampaignsFilter): CampaignPage!
     memberships(after: Cursor, first: Int, filter: MembershipFilter): OrganizationMembershipPage
     people(role: String, campaignId: String, offset: Int): [User]

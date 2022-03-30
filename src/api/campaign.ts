@@ -138,6 +138,7 @@ export type CampaignsReturn = PaginatedCampaigns | CampaignsList;
 export const schema = `
   input CampaignsFilter {
     isArchived: Boolean
+    isStarted: Boolean
     organizationId: Int
     campaignId: Int
     listSize: Int
@@ -148,11 +149,17 @@ export const schema = `
     sentMessagesCount: Int
     receivedMessagesCount: Int
     optOutsCount: Int
+    percentUnhandledReplies: Float!
+    countMessagedContacts: Int!
   }
 
   type DeliverabilityErrorStat {
     errorCode: String
     count: Int!
+  }
+
+  input CampaignDeliverabilityStatsFilter {
+    initialMessagesOnly: Boolean
   }
 
   type CampaignDeliverabilityStats {
@@ -236,7 +243,8 @@ export const schema = `
     externalSystem: ExternalSystem
     syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
-    deliverabilityStats: CampaignDeliverabilityStats!
+    deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
+    autosendStatus: String!
   }
 
   type CampaignEdge {
@@ -256,8 +264,8 @@ export const schema = `
   union CampaignsReturn = PaginatedCampaigns | CampaignsList
 
   type PaginatedCampaigns {
-    campaigns: [Campaign]
-    pageInfo: PageInfo
+    campaigns: [Campaign!]!
+    pageInfo: PageInfo!
   }
 
   type CampaignNavigation {

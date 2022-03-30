@@ -1,4 +1,4 @@
-import Knex from "knex";
+import { Knex } from "knex";
 import { createLightship } from "lightship";
 import cron from "node-cron";
 

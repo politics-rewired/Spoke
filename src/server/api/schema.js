@@ -1712,11 +1712,24 @@ const rootMutations = {
       const campaign = await r
         .knex("campaign")
         .where({ id: parseInt(campaignId, 10) })
-        .first(["organization_id", "is_archived"]);
+        .first(["organization_id", "is_archived", "autosend_status"]);
 
       const organizationId = campaign.organization_id;
 
       await accessRequired(user, organizationId, "ADMIN", true);
+
+      if (!["complete", "unstarted"].includes(campaign.autosend_status)) {
+        throw new Error(
+          campaign.autosend_status === "paused"
+            ? `Cannot mark camapign ${campaignId} for a second pass, autosending is currently paused. When it's resumed, some contacts will receive duplicate messages`
+            : `Cannot mark camapign ${campaignId} for a second pass, autosending is currently ongoing. As a result, some contacts will receive duplicate messages`
+        );
+      }
+
+      await r
+        .knex("campaign")
+        .update({ autosend_status: "unstarted" })
+        .where({ id: parseInt(campaignId, 10) });
 
       const queryArgs = [parseInt(campaignId, 10)];
       if (excludeAgeInHours) {
@@ -1768,6 +1781,80 @@ const rootMutations = {
       const updateResult = updateResultRaw.rowCount;
 
       return `Marked ${updateResult} campaign contacts for a second pass.`;
+    },
+
+    startAutosending: async (_ignore, { campaignId }, { user }) => {
+      const id = parseInt(campaignId, 10);
+
+      const campaign = await r
+        .knex("campaign")
+        .where({ id })
+        .first(["organization_id", "is_archived", "autosend_status"]);
+
+      const organizationId = campaign.organization_id;
+
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      if (["sending", "complete"].includes(campaign.autosend_status)) {
+        throw new Error(
+          `Cannot queue campaign ${campaignId} for autosending: campaign ${campaignId}'s autosend status is already ${campaign.autosend_status}`
+        );
+      }
+
+      const result = await r.knex.transaction(async (trx) => {
+        const [updatedCampaign] = await trx("campaign")
+          .update({ autosend_status: "sending", autosend_user_id: user.id })
+          .where({ id })
+          .returning("*");
+
+        const taskIdentifier = "queue-autosend-initials";
+        await trx.raw(`select graphile_worker.add_job(?)`, [taskIdentifier]);
+
+        return updatedCampaign;
+      });
+
+      return result;
+    },
+
+    pauseAutosending: async (_ignore, { campaignId }, { user }) => {
+      const id = parseInt(campaignId, 10);
+
+      const campaign = await r
+        .knex("campaign")
+        .where({ id })
+        .first(["organization_id", "is_archived", "autosend_status"]);
+
+      const organizationId = campaign.organization_id;
+
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      let updatedCampaign;
+
+      if (campaign.autosend_status === "sending") {
+        const [updatedCampaignResult] = await r
+          .knex("campaign")
+          .update({ autosend_status: "paused" })
+          .where({ id })
+          .returning("*");
+
+        updatedCampaign = updatedCampaignResult;
+
+        await r.knex.raw(
+          `
+            select count(*)
+            from (
+              select graphile_worker.remove_job(key)
+              from graphile_worker.jobs
+              where task_identifier = 'retry-interaction-step'
+                and payload->>'campaignId' = ?
+            ) deleted_jobs
+          `,
+          [id]
+        );
+      }
+
+      const result = updatedCampaign || campaign;
+      return result;
     },
 
     unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {
