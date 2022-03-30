@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.23.0](https://github.com/politics-rewired/spoke/compare/v4.22.1...v4.23.0) (2022-03-30)
+
+
+### Features
+
+* autosend initials ([#1128](https://github.com/politics-rewired/spoke/issues/1128)) ([842ea75](https://github.com/politics-rewired/spoke/commit/842ea759db9415f9a95e2d8a63d4c40219769221))
+* use worker to process notifications ([#1126](https://github.com/politics-rewired/spoke/issues/1126)) ([8f1d5e6](https://github.com/politics-rewired/spoke/commit/8f1d5e6fe73370963e9d2a7d8a00e7066055f61d))
+
 ### [4.22.1](https://github.com/politics-rewired/spoke/compare/v4.22.0...v4.22.1) (2022-03-24)
 
 
