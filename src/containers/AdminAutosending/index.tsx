@@ -194,6 +194,13 @@ const AdminAutosending: React.FC = () => {
                   />
                 )
               )}
+              {sortedCampaigns.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={11} style={{ textAlign: "center" }}>
+                    No campaigns found
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
