@@ -96,7 +96,7 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
             disabled={disabled}
             onClick={onStart}
           >
-            Queue
+            {target.autosendStatus === "unstarted" ? "Queue" : "Resume"}
           </Button>
         )}
       </TableCell>
