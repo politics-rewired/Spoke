@@ -81,7 +81,7 @@ jobs:
         run: yarn jest --forceExit --detectOpenHandles src/**/*
 
   publish-docker-image:
-    # if: startsWith( github.ref, 'refs/tags/v')
+    if: startsWith( github.ref, 'refs/tags/v')
     needs: test
     name: Publish Docker image
     runs-on: ubuntu-latest
@@ -103,7 +103,6 @@ jobs:
           export GIT_REF=${GITHUB_REF#refs/*/}
           echo "$GIT_REF"
           export SPOKE_VERSION=${GIT_REF#"v"}
-          export SPOKE_VERSION=${SPOKE_VERSION//[\/]/-}
           echo "::set-output name=version::$SPOKE_VERSION"
 
       - name: Login to GAR
@@ -120,11 +119,8 @@ jobs:
           push: true
           build-args: |
             SPOKE_VERSION=${{ steps.image-tags.outputs.version }}
-          # tags: |
-          #   us-east4-docker.pkg.dev/spoke-rewired/spoke/core:latest
-          #   us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.version }}
-          #   us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.sha }}
           tags: |
+            us-east4-docker.pkg.dev/spoke-rewired/spoke/core:latest
             us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.version }}
             us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.sha }}
           cache-from: type=gha
