@@ -8,6 +8,12 @@ import type {
 import type { RelayPaginatedResponse } from "./pagination";
 import type { Team } from "./team";
 
+export enum NotificationFrequencyType {
+  ALL = "ALL",
+  PERIODIC = "PERIODIC",
+  DAILY = "DAILY"
+}
+
 export interface User {
   id: string;
   firstName: string;
@@ -25,6 +31,7 @@ export interface User {
   assignment: Assignment;
   terms: boolean;
   isSuperadmin: boolean;
+  notificationFrequency: NotificationFrequencyType;
 }
 
 export const schema = `
@@ -42,9 +49,10 @@ export const schema = `
     teams(organizationId: String!): [Team]!
     currentRequest(organizationId: String!): AssignmentRequest
     assignedCell: Phone
-    assignment(campaignId: String): Assignment,
+    assignment(campaignId: String): Assignment
     terms: Boolean
     isSuperadmin: Boolean!
+    notificationFrequency: String
   }
   
   type UsersList {

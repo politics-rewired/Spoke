@@ -179,6 +179,9 @@ export const resolvers = {
 
       return currentRequest || null;
     },
+    notificationFrequency: async (user, _params, _) => {
+      return user.notification_frequency;
+    },
     assignment: async (user, { campaignId }) =>
       r
         .reader("assignment")

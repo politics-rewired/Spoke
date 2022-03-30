@@ -4,6 +4,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
+import { DropDownMenu, MenuItem } from "material-ui";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import queryString from "query-string";
@@ -11,10 +12,11 @@ import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
 
+import { NotificationFrequencyType } from "../api/user";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
 import SpokeFormField from "../components/forms/SpokeFormField";
-import { dataTest } from "../lib/attributes";
+import { dataTest, titleCase } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 
 export const UserEditMode = Object.freeze({
@@ -152,6 +154,12 @@ class UserEdit extends React.Component {
     this.setState({ changePasswordDialog: false, successDialog: false });
   };
 
+  handleNotificationFrequencyChange = (_, __, newFrequency) => {
+    const { user } = this.state;
+    user.notificationFrequency = newFrequency;
+    this.setState({ user });
+  };
+
   openSuccessDialog = () => this.setState({ successDialog: true });
 
   buildFormSchema = (authType) => {
@@ -159,7 +167,8 @@ class UserEdit extends React.Component {
     const userFields = {
       firstName: yup.string().required(),
       lastName: yup.string().required(),
-      cell: yup.string().required()
+      cell: yup.string().required(),
+      notificationFrequency: yup.string().required()
     };
     const password = yup.string().required();
     const passwordConfirm = (refField = "password") =>
@@ -269,6 +278,24 @@ class UserEdit extends React.Component {
                 name="cell"
                 {...dataTest("cell")}
               />
+              <DropDownMenu
+                primaryText="Notification Frequency"
+                name="notificationFrequency"
+                value={user.notificationFrequency}
+                onChange={this.handleNotificationFrequencyChange}
+              >
+                {[
+                  NotificationFrequencyType.ALL,
+                  NotificationFrequencyType.PERIODIC,
+                  NotificationFrequencyType.DAILY
+                ].map((option) => (
+                  <MenuItem
+                    key={option}
+                    value={option}
+                    primaryText={titleCase(option)}
+                  />
+                ))}
+              </DropDownMenu>
             </span>
           )}
           {(authType === UserEditMode.Login ||
@@ -409,6 +436,7 @@ const mutations = {
           lastName
           cell
           email
+          notificationFrequency
         }
       }
     `,

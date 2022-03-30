@@ -26,11 +26,18 @@ import {
 } from "./tasks/filter-landlines";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
-import queuePendingNotifications from "./tasks/queue-pending-notifications";
+import {
+  queueDailyNotifications,
+  queuePendingNotifications,
+  queuePeriodicNotifications
+} from "./tasks/queue-pending-notifications";
 import { releaseStaleReplies } from "./tasks/release-stale-replies";
 import { resendMessage } from "./tasks/resend-message";
 import { retryInteractionStep } from "./tasks/retry-interaction-step";
-import sendNotificationEmail from "./tasks/send-notification-email";
+import {
+  sendNotificationDigest,
+  sendNotificationEmail
+} from "./tasks/send-notification-email";
 import {
   syncCampaignContactToVAN,
   updateVanSyncStatuses
@@ -75,7 +82,10 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["resend-message"] = resendMessage;
   m.taskList!["retry-interaction-step"] = retryInteractionStep;
   m.taskList!["queue-pending-notifications"] = queuePendingNotifications;
+  m.taskList!["queue-periodic-notifications"] = queuePeriodicNotifications;
+  m.taskList!["queue-daily-notifications"] = queueDailyNotifications;
   m.taskList!["send-notification-email"] = sendNotificationEmail;
+  m.taskList!["send-notification-digest"] = sendNotificationDigest;
   m.taskList![exportCampaignIdentifier] = wrapProgressTask(exportCampaign, {
     removeOnComplete: true
   });
@@ -107,6 +117,20 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
     name: "queue-pending-notifications",
     task_name: "queue-pending-notifications",
     pattern: "* * * * *",
+    time_zone: config.TZ
+  });
+
+  m.cronJobs!.push({
+    name: "queue-periodic-notifications",
+    task_name: "queue-periodic-notifications",
+    pattern: "0 9,13,17,21 * * *",
+    time_zone: config.TZ
+  });
+
+  m.cronJobs!.push({
+    name: "queue-daily-notifications",
+    task_name: "queue-daily-notifications",
+    pattern: "0 9 * * *",
     time_zone: config.TZ
   });
 
