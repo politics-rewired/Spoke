@@ -1,6 +1,7 @@
 fragment AutosendingTarget on Campaign {
   id
   title
+  isStarted
   autosendStatus
   contactsCount
   stats {
@@ -28,7 +29,6 @@ query CampaignsEligibleForAutosending(
       cursor: { offset: 0, limit: 5000 }
     ) {
       campaigns {
-        isStarted
         ...AutosendingTarget
       }
     }
