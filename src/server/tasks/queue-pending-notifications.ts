@@ -16,7 +16,14 @@ export const queuePendingNotifications: Task = async (_payload, helpers) => {
     .knex("notification")
     .whereNull("sent_at")
     .where("notification_frequency", "ALL")
-    .select(["notification.id", "email", "subject", "content", "reply_to"])
+    .select([
+      "notification.id",
+      "user_id",
+      "email",
+      "organization_id",
+      "campaign_id",
+      "category"
+    ])
     .join("user", "user_id", "user.id");
 
   for (const notification of notificationsToSend) {
@@ -27,6 +34,7 @@ export const queuePendingNotifications: Task = async (_payload, helpers) => {
 };
 
 export const queuePeriodicNotifications: Task = async (_payload, helpers) => {
+  return;
   const usersToNotify = await getUserIdsForDigest("PERIODIC");
 
   for (const user of usersToNotify) {
@@ -37,6 +45,7 @@ export const queuePeriodicNotifications: Task = async (_payload, helpers) => {
 };
 
 export const queueDailyNotifications: Task = async (_payload, helpers) => {
+  return;
   const usersToNotify = await getUserIdsForDigest("DAILY");
 
   for (const user of usersToNotify) {

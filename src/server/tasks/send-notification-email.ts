@@ -2,6 +2,7 @@ import { Task } from "pg-compose";
 
 import logger from "../../logger";
 import getDigest from "../lib/templates/digest";
+import getNotificationContent from "../lib/templates/notification";
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
@@ -24,12 +25,13 @@ const createDigest = async (userId: number) => {
 
 export const sendNotificationEmail: Task = async (payload, _helpers) => {
   try {
-    const { email, subject, content, replyTo } = payload;
+    const { email } = payload;
+    const { subject, content } = await getNotificationContent(payload);
+
     await sendEmail({
       to: email,
       subject,
-      text: content,
-      replyTo
+      html: content
     });
 
     await r

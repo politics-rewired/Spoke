@@ -11,30 +11,19 @@ export const Notifications = Object.freeze({
   ASSIGNMENT_UPDATED: "assignment.updated"
 });
 
-async function createNotification(userId, subject, content, replyTo) {
-  await r
-    .knex("notification")
-    .insert({ user_id: userId, subject, content, reply_to: replyTo });
+async function createNotification(
+  userId,
+  organizationId,
+  campaignId,
+  category
+) {
+  await r.knex("notification").insert({
+    user_id: userId,
+    organization_id: organizationId,
+    campaign_id: campaignId,
+    category
+  });
 }
-
-async function getOrganizationOwner(organizationId) {
-  return r
-    .reader("user")
-    .join("user_organization", "user_organization.user_id", "user.id")
-    .where({
-      "user_organization.organization_id": organizationId,
-      role: "OWNER"
-    })
-    .orderBy("user.id")
-    .first("user.*");
-}
-
-const replyToForOrg = async (organizationId) => {
-  if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
-
-  const orgOwner = await getOrganizationOwner(organizationId);
-  return orgOwner.email;
-};
 
 const sendAssignmentUserNotification = async (assignment, notification) => {
   const campaign = await r
@@ -51,20 +40,13 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .where({ id: campaign.organization_id })
     .first();
 
-  const replyTo = await replyToForOrg(organization.id);
-
-  let subject;
-  let text;
-  if (notification === Notifications.ASSIGNMENT_UPDATED) {
-    subject = `[${organization.name}] Updated assignment: ${campaign.title}`;
-    text = `Your assignment changed: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
-  } else if (notification === Notifications.ASSIGNMENT_CREATED) {
-    subject = `[${organization.name}] New assignment: ${campaign.title}`;
-    text = `You just got a new texting assignment from ${organization.name}. You can start sending texts right away: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
-  }
-
   try {
-    await createNotification(assignment.user_id, subject, text, replyTo);
+    await createNotification(
+      assignment.user_id,
+      organization.id,
+      campaign.id,
+      notification
+    );
   } catch (e) {
     logger.error("Error sending assignment notification email: ", e);
   }
@@ -117,12 +99,14 @@ export const sendUserNotification = async (notification) => {
         .reader("organization")
         .where({ id: campaign.organization_id })
         .first();
-      const replyTo = await replyToForOrg(organization.id);
-      const subject = `[${organization.name}] [${campaign.title}] New reply`;
-      const text = `Someone responded to your message. See all your replies here: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos/${notification.assignmentId}/reply`;
 
       try {
-        await createNotification(assignment.user_id, subject, text, replyTo);
+        await createNotification(
+          assignment.user_id,
+          organization.id,
+          campaign.id,
+          type
+        );
       } catch (err) {
         logger.error("Error sending conversation reply notification email: ", {
           ...errToObj(err)
