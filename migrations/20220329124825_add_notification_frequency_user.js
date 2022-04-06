@@ -1,7 +1,8 @@
 exports.up = function up(knex) {
   return knex.schema.alterTable("user", (table) => {
     table
-      .enu("notification_frequency", ["ALL", "PERIODIC", "DAILY"])
+      .enu("notification_frequency", ["ALL", "PERIODIC", "DAILY", "NONE"])
+      .notNullable()
       .defaultTo("ALL");
   });
 };

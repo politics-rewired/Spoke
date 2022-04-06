@@ -3,8 +3,10 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
 import { css, StyleSheet } from "aphrodite";
-import { DropDownMenu, MenuItem } from "material-ui";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import queryString from "query-string";
@@ -42,7 +44,9 @@ const styles = StyleSheet.create({
 
 class UserEdit extends React.Component {
   state = {
-    user: {},
+    user: {
+      notificationFrequency: "ALL"
+    },
     changePasswordDialog: false,
     successDialog: false,
     successMessage: undefined
@@ -154,7 +158,8 @@ class UserEdit extends React.Component {
     this.setState({ changePasswordDialog: false, successDialog: false });
   };
 
-  handleNotificationFrequencyChange = (_, __, newFrequency) => {
+  handleNotificationFrequencyChange = (event) => {
+    const newFrequency = event.target.value;
     const { user } = this.state;
     user.notificationFrequency = newFrequency;
     this.setState({ user });
@@ -278,24 +283,27 @@ class UserEdit extends React.Component {
                 name="cell"
                 {...dataTest("cell")}
               />
-              <DropDownMenu
-                primaryText="Notification Frequency"
-                name="notificationFrequency"
-                value={user.notificationFrequency}
-                onChange={this.handleNotificationFrequencyChange}
-              >
-                {[
-                  NotificationFrequencyType.ALL,
-                  NotificationFrequencyType.PERIODIC,
-                  NotificationFrequencyType.DAILY
-                ].map((option) => (
-                  <MenuItem
-                    key={option}
-                    value={option}
-                    primaryText={titleCase(option)}
-                  />
-                ))}
-              </DropDownMenu>
+              <div style={{ marginTop: 20 }}>
+                <InputLabel
+                  style={{ marginBottom: 15 }}
+                  id="notification-frequency-label"
+                >
+                  Notification Frequency
+                </InputLabel>
+                <Select
+                  id="notification-frequency"
+                  labelId="notification-frequency-label"
+                  name="notificationFrequency"
+                  value={user.notificationFrequency}
+                  onChange={this.handleNotificationFrequencyChange}
+                >
+                  {Object.values(NotificationFrequencyType).map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {titleCase(option)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </div>
             </span>
           )}
           {(authType === UserEditMode.Login ||

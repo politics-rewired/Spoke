@@ -160,7 +160,8 @@ export const resolvers = {
       "email",
       "cell",
       "assignedCell",
-      "terms"
+      "terms",
+      "notificationFrequency"
     ]),
     isSuperadmin: (userRecord, _, { user: authUser }) => {
       if (userRecord.id !== authUser.id) throw new ForbiddenError();
@@ -178,9 +179,6 @@ export const resolvers = {
         .first("id", "amount", "status");
 
       return currentRequest || null;
-    },
-    notificationFrequency: async (user, _params, _) => {
-      return user.notification_frequency;
     },
     assignment: async (user, { campaignId }) =>
       r

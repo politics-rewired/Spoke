@@ -123,7 +123,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.cronJobs!.push({
     name: "queue-periodic-notifications",
     task_name: "queue-periodic-notifications",
-    pattern: "0 9,13,17,21 * * *",
+    pattern: "0 9,13,16,20 * * *",
     time_zone: config.TZ
   });
 

@@ -52,7 +52,7 @@ input UserInput {
   lastName: String!
   email: String!
   cell: String!
-  notificationFrequency: String
+  notificationFrequency: String!
   oldPassword: String
   newPassword: String
 }
@@ -312,7 +312,7 @@ type User {
   assignment(campaignId: String): Assignment
   terms: Boolean
   isSuperadmin: Boolean!
-  notificationFrequency: String
+  notificationFrequency: String!
 }
 
 type UsersList {

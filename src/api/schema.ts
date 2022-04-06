@@ -84,7 +84,7 @@ const rootSchema = `
     lastName: String!
     email: String!
     cell: String!
-    notificationFrequency: String
+    notificationFrequency: String!
     oldPassword: String
     newPassword: String
   }
