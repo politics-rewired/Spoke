@@ -7,9 +7,11 @@ import CardHeader from "@material-ui/core/CardHeader";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from "@material-ui/icons/Delete";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
 import HelpIconOutline from "@material-ui/icons/HelpOutline";
 import isNil from "lodash/isNil";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import * as yup from "yup";
 
 import {
@@ -65,7 +67,9 @@ interface Props {
 }
 
 export const InteractionStepCard: React.FC<Props> = (props) => {
+  const [expanded, setExpanded] = useState(true);
   const stableMuiTheme = useTheme();
+
   const {
     interactionStep,
     customFields,
@@ -106,6 +110,21 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
 
   const clipboardEnabled = supportsClipboard();
 
+  const handleToggleExpanded = useCallback(() => setExpanded(!expanded), [
+    expanded,
+    setExpanded
+  ]);
+
+  const handleAddResponse = useCallback(() => {
+    setExpanded(true);
+    addStepFactory(stepId)();
+  }, [setExpanded, addStepFactory, stepId]);
+
+  const handlePasteBlock = useCallback(() => {
+    setExpanded(true);
+    pasteBlockFactory(stepId)();
+  }, [setExpanded, pasteBlockFactory, stepId]);
+
   return (
     <div key={stepId}>
       <Card
@@ -122,6 +141,13 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
             parentInteractionId
               ? ""
               : "Enter a script for your texter along with the question you want the texter be able to answer on behalf of the contact."
+          }
+          action={
+            childSteps?.length > 0 && (
+              <IconButton onClick={handleToggleExpanded}>
+                {expanded ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            )
           }
         />
         <CardActions>
@@ -228,7 +254,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
             {...dataTest("addResponse")}
             style={{ marginBottom: "10px" }}
             disabled={disabled}
-            onClick={addStepFactory(stepId)}
+            onClick={handleAddResponse}
           >
             + Add a response
           </Button>
@@ -239,31 +265,32 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
             variant="contained"
             disabled={disabled}
             style={{ marginBottom: "10px" }}
-            onClick={pasteBlockFactory(stepId)}
+            onClick={handlePasteBlock}
           >
             + Paste Block
           </Button>
         )}
-        {(childSteps ?? [])
-          .filter((is) => !is.isDeleted)
-          .map((childStep) => (
-            <InteractionStepCard
-              key={childStep.id}
-              title={`Question: ${questionText}`}
-              interactionStep={childStep}
-              customFields={customFields}
-              integrationSourced={integrationSourced}
-              availableActions={availableActions}
-              hasBlockCopied={hasBlockCopied}
-              disabled={disabled}
-              onFormChange={onFormChange}
-              onCopyBlock={onCopyBlock}
-              onRequestRootPaste={onRequestRootPaste}
-              addStepFactory={addStepFactory}
-              deleteStepFactory={deleteStepFactory}
-              pasteBlockFactory={pasteBlockFactory}
-            />
-          ))}
+        {expanded &&
+          (childSteps ?? [])
+            .filter((is) => !is.isDeleted)
+            .map((childStep) => (
+              <InteractionStepCard
+                key={childStep.id}
+                title={`Question: ${questionText}`}
+                interactionStep={childStep}
+                customFields={customFields}
+                integrationSourced={integrationSourced}
+                availableActions={availableActions}
+                hasBlockCopied={hasBlockCopied}
+                disabled={disabled}
+                onFormChange={onFormChange}
+                onCopyBlock={onCopyBlock}
+                onRequestRootPaste={onRequestRootPaste}
+                addStepFactory={addStepFactory}
+                deleteStepFactory={deleteStepFactory}
+                pasteBlockFactory={pasteBlockFactory}
+              />
+            ))}
       </div>
     </div>
   );
