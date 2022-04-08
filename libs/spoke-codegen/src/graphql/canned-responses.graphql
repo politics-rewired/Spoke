@@ -1,0 +1,14 @@
+fragment CannedResponseInfo on CannedResponse {
+  id
+  title
+  text
+}
+
+query GetCampaignCannedResponses($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    cannedResponses {
+      ...CannedResponseInfo
+    }
+  }
+}
