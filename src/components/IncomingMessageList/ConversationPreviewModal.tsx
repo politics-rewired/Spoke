@@ -76,9 +76,9 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
   } = props;
   const isOpen = conversation !== undefined;
 
-  const { firstName, lastName } = conversation.contact;
+  const { firstName, lastName } = conversation?.contact ?? {};
   const title = `Conversation Review: ${firstName} ${lastName}`;
-  const { id: campaignId, title: campaignTitle } = conversation.campaign;
+  const { id: campaignId, title: campaignTitle } = conversation?.campaign ?? {};
   const subheader = `Campaign ${campaignId}: ${campaignTitle}`;
 
   return (
