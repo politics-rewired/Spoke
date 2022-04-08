@@ -29,6 +29,7 @@ const MessageColumn: React.FC<Props> = (props) => {
   const [isOptedOut, setIsOptedOut] = useState(
     !isNil(conversation.contact.optOut?.cell)
   );
+  // TODO: use apollo client cache rather than state to manage changes to messages list
   const [messages, setMessages] = useState<ConversationMessageFragment[]>([]);
 
   useEffect(() => {
