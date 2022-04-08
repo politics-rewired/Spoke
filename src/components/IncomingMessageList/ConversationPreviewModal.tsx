@@ -1,5 +1,6 @@
 import Button from "@material-ui/core/Button";
 import CardActions from "@material-ui/core/CardActions";
+import CardHeader from "@material-ui/core/CardHeader";
 import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
@@ -11,34 +12,6 @@ import React from "react";
 
 import MessageColumn from "./MessageColumn";
 import SurveyColumn from "./SurveyColumn";
-
-interface ConversationPreviewHeaderProps {
-  campaignTitle?: string;
-  onRequestClose: () => Promise<void> | void;
-}
-
-const ConversationPreviewHeader: React.FC<ConversationPreviewHeaderProps> = ({
-  campaignTitle,
-  onRequestClose
-}) => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "baseline",
-      padding: "0 10px"
-    }}
-  >
-    <h2>
-      {campaignTitle
-        ? `Conversation Review: ${campaignTitle}`
-        : "Conversation Review"}
-    </h2>
-    <span style={{ flex: "1" }} />
-    <Button endIcon={<CloseIcon />} onClick={onRequestClose}>
-      Close
-    </Button>
-  </div>
-);
 
 const columnStyles = StyleSheet.create({
   container: {
@@ -103,6 +76,11 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
   } = props;
   const isOpen = conversation !== undefined;
 
+  const { firstName, lastName } = conversation.contact;
+  const title = `Conversation Review: ${firstName} ${lastName}`;
+  const { id: campaignId, title: campaignTitle } = conversation.campaign;
+  const subheader = `Campaign ${campaignId}: ${campaignTitle}`;
+
   return (
     <Paper
       style={{
@@ -117,9 +95,14 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <ConversationPreviewHeader
-        campaignTitle={conversation?.campaign?.title ?? undefined}
-        onRequestClose={onRequestClose}
+      <CardHeader
+        title={title}
+        subheader={subheader}
+        action={
+          <Button endIcon={<CloseIcon />} onClick={onRequestClose}>
+            Close
+          </Button>
+        }
       />
       <div style={{ flex: "1 1 auto", display: "flex" }}>
         {isOpen && (
