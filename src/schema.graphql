@@ -567,7 +567,7 @@ type Campaign {
   hasUnsentInitialMessages: Boolean
   hasUnhandledMessages: Boolean
   customFields: [String]
-  cannedResponses(userId: String): [CannedResponse]
+  cannedResponses(userId: String): [CannedResponse!]!
   stats: CampaignStats,
   pendingJobs(jobTypes: [String]): [JobRequest]!
   datawarehouseAvailable: Boolean
@@ -863,9 +863,9 @@ input CannedResponseInput {
 }
 
 type CannedResponse {
-  id: ID
-  title: String
-  text: String
+  id: ID!
+  title: String!
+  text: String!
   isUserCreated: Boolean
 }
 

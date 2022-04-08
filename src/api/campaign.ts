@@ -220,7 +220,7 @@ export const schema = `
     hasUnsentInitialMessages: Boolean
     hasUnhandledMessages: Boolean
     customFields: [String]
-    cannedResponses(userId: String): [CannedResponse]
+    cannedResponses(userId: String): [CannedResponse!]!
     stats: CampaignStats,
     pendingJobs(jobTypes: [String]): [JobRequest]!
     datawarehouseAvailable: Boolean
