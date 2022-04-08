@@ -118,7 +118,7 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
       onClick={(e) => e.stopPropagation()}
     >
       <ConversationPreviewHeader
-        campaignTitle={conversation.campaign?.title ?? undefined}
+        campaignTitle={conversation?.campaign?.title ?? undefined}
         onRequestClose={onRequestClose}
       />
       <div style={{ flex: "1 1 auto", display: "flex" }}>
