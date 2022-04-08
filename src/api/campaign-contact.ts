@@ -73,7 +73,7 @@ export const schema = `
     zip: String
     external_id: String
     customFields: JSON
-    messages: [Message]
+    messages: [Message!]!
     timezone: String
     location: Location
     optOut: OptOut
