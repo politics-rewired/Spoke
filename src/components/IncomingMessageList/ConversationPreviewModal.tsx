@@ -1,12 +1,11 @@
+import Button from "@material-ui/core/Button";
+import CardActions from "@material-ui/core/CardActions";
+import IconButton from "@material-ui/core/IconButton";
+import Paper from "@material-ui/core/Paper";
+import ChevronLeft from "@material-ui/icons/ChevronLeft";
+import ChevronRight from "@material-ui/icons/ChevronRight";
+import CloseIcon from "@material-ui/icons/Close";
 import { css, StyleSheet } from "aphrodite";
-import { CardActions } from "material-ui/Card";
-import FlatButton from "material-ui/FlatButton";
-import IconButton from "material-ui/IconButton";
-import Paper from "material-ui/Paper";
-import ChevronLeft from "material-ui/svg-icons/navigation/chevron-left";
-import ChevronRight from "material-ui/svg-icons/navigation/chevron-right";
-import CloseIcon from "material-ui/svg-icons/navigation/close";
-import PropTypes from "prop-types";
 import React from "react";
 
 import MessageColumn from "./MessageColumn";
@@ -34,12 +33,9 @@ const ConversationPreviewHeader: React.FC<ConversationPreviewHeaderProps> = ({
         : "Conversation Review"}
     </h2>
     <span style={{ flex: "1" }} />
-    <FlatButton
-      label="Close"
-      labelPosition="before"
-      icon={<CloseIcon />}
-      onClick={onRequestClose}
-    />
+    <Button endIcon={<CloseIcon />} onClick={onRequestClose}>
+      Close
+    </Button>
   </div>
 );
 
@@ -121,7 +117,7 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
         right: "20px",
         bottom: "20px",
         left: "20px",
-        zIndex: "1000"
+        zIndex: 1000
       }}
       onClick={(e) => e.stopPropagation()}
     >
