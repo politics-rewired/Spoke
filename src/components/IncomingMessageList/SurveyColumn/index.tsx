@@ -1,12 +1,12 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
-import RaisedButton from "material-ui/RaisedButton";
-import Snackbar from "material-ui/Snackbar";
-import React, { Component } from "react";
-import { compose } from "recompose";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import Snackbar from "@material-ui/core/Snackbar";
+import CloseIcon from "@material-ui/icons/Close";
+import { useCloseConversationMutation } from "@spoke/spoke-codegen";
+import React, { useCallback, useState } from "react";
 
-import { withSpokeContext } from "../../../client/spoke-context";
-import { loadData } from "../../../containers/hoc/with-operations";
-import { AuthzContextType, withAuthzContext } from "../../AuthzProvider";
+import { useSpokeContext } from "../../../client/spoke-context";
+import { useAuthzContext } from "../../AuthzProvider";
 import ManageSurveyResponses from "./ManageSurveyResponses";
 import ManageTags from "./ManageTags";
 
@@ -25,110 +25,87 @@ interface Props {
   contact: any;
 }
 
-interface HocProps extends AuthzContextType {
-  mutations: {
-    closeConversation(): ApolloQueryResult<any>;
-  };
-}
+const SurveyColumn: React.FC<Props> = (props) => {
+  const { campaign, contact, organizationId } = props;
 
-interface State {
-  isWorking: boolean;
-  errorMessage?: string;
-}
+  const [isWorking, setIsWorking] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
+  const { orgSettings } = useSpokeContext();
+  const { isAdmin } = useAuthzContext();
 
-class SurveyColumn extends Component<Props & HocProps, State> {
-  state: State = {
-    isWorking: false,
-    errorMessage: undefined
-  };
-
-  handleClickClose = async () => {
-    this.setState({ isWorking: true });
-    try {
-      const response = await this.props.mutations.closeConversation();
-      if (response.errors) throw response.errors;
-    } catch (err) {
-      this.setState({ errorMessage: err.message });
-    } finally {
-      this.setState({ isWorking: false });
-    }
-  };
-
-  handleDismissError = () => this.setState({ errorMessage: undefined });
-
-  render() {
-    const {
-      campaign,
-      contact,
-      organizationId,
-      isAdmin,
-      orgSettings
-    } = this.props;
-    const { isWorking, errorMessage } = this.state;
-    const showScriptPreview =
-      isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
-
-    return (
-      <div style={styles.container}>
-        <ManageSurveyResponses contact={contact} campaign={campaign} />
-        <div style={styles.spacer} />
-        <div style={{ display: "flex" }}>
-          <div style={styles.spacer} />
-          {showScriptPreview ? (
-            <RaisedButton
-              key="open-script-preview"
-              label="Open Script Preview"
-              style={{ marginRight: "10px" }}
-              onClick={() => {
-                window.open(`/preview/${campaign.previewUrl}`, "_blank");
-              }}
-            />
-          ) : null}
-          <RaisedButton
-            label="End Conversation"
-            disabled={isWorking}
-            style={{ marginRight: "10px" }}
-            onClick={this.handleClickClose}
-          />
-          <ManageTags organizationId={organizationId} contactId={contact.id} />
-        </div>
-        <Snackbar
-          open={errorMessage !== undefined}
-          message={errorMessage || ""}
-          onRequestClose={this.handleDismissError}
-          autoHideDuration={4000}
-        />
-      </div>
-    );
-  }
-}
-
-const mutations = {
-  closeConversation: (ownProps: Props) => () => ({
-    mutation: gql`
-      mutation closeConversation(
-        $campaignContactId: String!
-        $messageStatus: String!
-      ) {
-        editCampaignContactMessageStatus(
-          messageStatus: $messageStatus
-          campaignContactId: $campaignContactId
-        ) {
-          id
-          messageStatus
-        }
-      }
-    `,
-    variables: {
-      campaignContactId: ownProps.contact.id,
-      messageStatus: "closed"
-    },
+  const [closeConversation] = useCloseConversationMutation({
     refetchQueries: ["getContactTags"]
-  })
+  });
+
+  const handleClickClose = useCallback(async () => {
+    setIsWorking(true);
+    try {
+      const response = await closeConversation({
+        variables: { campaignContactId: props.contact.id }
+      });
+      if (response.errors) throw response.errors;
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    } finally {
+      setIsWorking(false);
+    }
+  }, [setIsWorking, setErrorMessage, closeConversation]);
+
+  const handleDismissError = useCallback(() => setErrorMessage(undefined), [
+    setErrorMessage
+  ]);
+
+  const showScriptPreview =
+    isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
+
+  return (
+    <div style={styles.container}>
+      <ManageSurveyResponses contact={contact} campaign={campaign} />
+      <div style={styles.spacer} />
+      <div style={{ display: "flex" }}>
+        <div style={styles.spacer} />
+        {showScriptPreview ? (
+          <Button
+            key="open-script-preview"
+            variant="contained"
+            style={{ marginRight: "10px" }}
+            onClick={() => {
+              window.open(`/preview/${campaign.previewUrl}`, "_blank");
+            }}
+          >
+            Open Script Preview
+          </Button>
+        ) : null}
+        <Button
+          variant="contained"
+          disabled={isWorking}
+          style={{ marginRight: "10px" }}
+          onClick={handleClickClose}
+        >
+          End Conversation
+        </Button>
+        <ManageTags organizationId={organizationId} contactId={contact.id} />
+      </div>
+      <Snackbar
+        open={errorMessage !== undefined}
+        message={errorMessage || ""}
+        autoHideDuration={4000}
+        onClose={handleDismissError}
+        action={
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleDismissError}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
+    </div>
+  );
 };
 
-export default compose(
-  withAuthzContext,
-  withSpokeContext,
-  loadData({ mutations })
-)(SurveyColumn);
+export default SurveyColumn;
