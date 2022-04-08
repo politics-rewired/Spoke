@@ -81,7 +81,7 @@ const ConversationPreviewBody: React.FC<ConversationPreviewBodyProps> = ({
 
 interface ConversationPreviewModalProps {
   organizationId: string;
-  conversation: ConversationInfoFragment;
+  conversation?: ConversationInfoFragment;
   navigation?: {
     previous: boolean;
     next: boolean;
