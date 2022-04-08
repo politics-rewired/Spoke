@@ -3,6 +3,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Grid from "@material-ui/core/Grid";
 import { withTheme } from "@material-ui/core/styles";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
@@ -640,11 +641,24 @@ class AdminCampaignEdit extends React.Component {
           fontSize: 16
         }}
       >
-        <CampaignNavigation
-          prevCampaignClicked={this.prevCampaignClicked}
-          nextCampaignClicked={this.nextCampaignClicked}
-          campaignId={this.props.campaignData.campaign.id}
-        />
+        <Grid container>
+          <Grid item xs={4}>
+            <RaisedButton
+              style={{ marginTop: 15 }}
+              onClick={this.handleNavigateToStats}
+            >
+              Details
+            </RaisedButton>
+          </Grid>
+          <Grid item xs={4} />
+          <Grid item xs={4}>
+            <CampaignNavigation
+              prevCampaignClicked={this.prevCampaignClicked}
+              nextCampaignClicked={this.nextCampaignClicked}
+              campaignId={this.props.campaignData.campaign.id}
+            />
+          </Grid>
+        </Grid>
         <Divider style={{ marginBottom: 20 }} />
         {title && <h1> {title} </h1>}
         {this.state.startingCampaign ? (
@@ -737,6 +751,12 @@ class AdminCampaignEdit extends React.Component {
 
   handleExpandChange = (sectionIndex) => (isExpended) =>
     this.onExpandChange(sectionIndex, isExpended);
+
+  handleNavigateToStats = () => {
+    const { organizationId, campaignId } = this.props.match.params;
+    const editUrl = `/admin/${organizationId}/campaigns/${campaignId}`;
+    this.props.history.push(editUrl);
+  };
 
   render() {
     const sections = this.sections();
