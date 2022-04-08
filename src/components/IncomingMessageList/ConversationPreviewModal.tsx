@@ -5,6 +5,7 @@ import Paper from "@material-ui/core/Paper";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
 import CloseIcon from "@material-ui/icons/Close";
+import { ConversationInfoFragment } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import React from "react";
 
@@ -12,7 +13,7 @@ import MessageColumn from "./MessageColumn";
 import SurveyColumn from "./SurveyColumn";
 
 interface ConversationPreviewHeaderProps {
-  campaignTitle: string;
+  campaignTitle?: string;
   onRequestClose: () => Promise<void> | void;
 }
 
@@ -54,7 +55,7 @@ const columnStyles = StyleSheet.create({
 
 interface ConversationPreviewBodyProps {
   organizationId: string;
-  conversation: any;
+  conversation: ConversationInfoFragment;
 }
 
 const ConversationPreviewBody: React.FC<ConversationPreviewBodyProps> = ({
@@ -78,14 +79,9 @@ const ConversationPreviewBody: React.FC<ConversationPreviewBodyProps> = ({
   </div>
 );
 
-ConversationPreviewBody.propTypes = {
-  conversation: PropTypes.object.isRequired,
-  organizationId: PropTypes.string.isRequired
-};
-
 interface ConversationPreviewModalProps {
   organizationId: string;
-  conversation: any;
+  conversation: ConversationInfoFragment;
   navigation?: {
     previous: boolean;
     next: boolean;
@@ -122,7 +118,7 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
       onClick={(e) => e.stopPropagation()}
     >
       <ConversationPreviewHeader
-        campaignTitle={conversation && conversation.campaign.title}
+        campaignTitle={conversation.campaign?.title ?? undefined}
         onRequestClose={onRequestClose}
       />
       <div style={{ flex: "1 1 auto", display: "flex" }}>
