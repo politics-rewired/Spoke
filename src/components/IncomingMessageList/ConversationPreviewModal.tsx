@@ -12,7 +12,15 @@ import React from "react";
 import MessageColumn from "./MessageColumn";
 import SurveyColumn from "./SurveyColumn";
 
-const ConversationPreviewHeader = ({ campaignTitle, onRequestClose }) => (
+interface ConversationPreviewHeaderProps {
+  campaignTitle: string;
+  onRequestClose: () => Promise<void> | void;
+}
+
+const ConversationPreviewHeader: React.FC<ConversationPreviewHeaderProps> = ({
+  campaignTitle,
+  onRequestClose
+}) => (
   <div
     style={{
       display: "flex",
@@ -48,7 +56,15 @@ const columnStyles = StyleSheet.create({
   }
 });
 
-const ConversationPreviewBody = ({ conversation, organizationId }) => (
+interface ConversationPreviewBodyProps {
+  organizationId: string;
+  conversation: any;
+}
+
+const ConversationPreviewBody: React.FC<ConversationPreviewBodyProps> = ({
+  conversation,
+  organizationId
+}) => (
   <div className={css(columnStyles.container)}>
     <div className={css(columnStyles.column)}>
       <MessageColumn
@@ -71,13 +87,27 @@ ConversationPreviewBody.propTypes = {
   organizationId: PropTypes.string.isRequired
 };
 
-const ConversationPreviewModal = (props) => {
+interface ConversationPreviewModalProps {
+  organizationId: string;
+  conversation: any;
+  navigation?: {
+    previous: boolean;
+    next: boolean;
+  };
+  onRequestPrevious: () => Promise<void> | void;
+  onRequestNext: () => Promise<void> | void;
+  onRequestClose: () => Promise<void> | void;
+}
+
+const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
+  props
+) => {
   const {
     conversation,
-    navigation,
-    onRequestPrevious,
-    onRequestNext,
-    onRequestClose
+    navigation = { previous: false, next: false },
+    onRequestPrevious = () => {},
+    onRequestNext = () => {},
+    onRequestClose = () => {}
   } = props;
   const isOpen = conversation !== undefined;
 
@@ -118,25 +148,6 @@ const ConversationPreviewModal = (props) => {
       </CardActions>
     </Paper>
   );
-};
-
-ConversationPreviewModal.defaultProps = {
-  navigation: { previous: false, next: false },
-  onRequestPrevious: () => {},
-  onRequestNext: () => {},
-  onRequestClose: () => {}
-};
-
-ConversationPreviewModal.propTypes = {
-  organizationId: PropTypes.string.isRequired,
-  conversation: PropTypes.object,
-  navigation: PropTypes.shape({
-    previous: PropTypes.bool.isRequired,
-    next: PropTypes.bool.isRequired
-  }),
-  onRequestPrevious: PropTypes.func,
-  onRequestNext: PropTypes.func,
-  onRequestClose: PropTypes.func
 };
 
 export default ConversationPreviewModal;
