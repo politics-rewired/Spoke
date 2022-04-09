@@ -1,18 +1,26 @@
+import Button from "@material-ui/core/Button";
+import CardActions from "@material-ui/core/CardActions";
+import IconButton from "@material-ui/core/IconButton";
+import Paper from "@material-ui/core/Paper";
+import ChevronLeft from "@material-ui/icons/ChevronLeft";
+import ChevronRight from "@material-ui/icons/ChevronRight";
+import CloseIcon from "@material-ui/icons/Close";
+import { ConversationInfoFragment } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
-import { CardActions } from "material-ui/Card";
-import FlatButton from "material-ui/FlatButton";
-import IconButton from "material-ui/IconButton";
-import Paper from "material-ui/Paper";
-import ChevronLeft from "material-ui/svg-icons/navigation/chevron-left";
-import ChevronRight from "material-ui/svg-icons/navigation/chevron-right";
-import CloseIcon from "material-ui/svg-icons/navigation/close";
-import PropTypes from "prop-types";
 import React from "react";
 
 import MessageColumn from "./MessageColumn";
 import SurveyColumn from "./SurveyColumn";
 
-const ConversationPreviewHeader = ({ campaignTitle, onRequestClose }) => (
+interface ConversationPreviewHeaderProps {
+  campaignTitle?: string;
+  onRequestClose: () => Promise<void> | void;
+}
+
+const ConversationPreviewHeader: React.FC<ConversationPreviewHeaderProps> = ({
+  campaignTitle,
+  onRequestClose
+}) => (
   <div
     style={{
       display: "flex",
@@ -26,12 +34,9 @@ const ConversationPreviewHeader = ({ campaignTitle, onRequestClose }) => (
         : "Conversation Review"}
     </h2>
     <span style={{ flex: "1" }} />
-    <FlatButton
-      label="Close"
-      labelPosition="before"
-      icon={<CloseIcon />}
-      onClick={onRequestClose}
-    />
+    <Button endIcon={<CloseIcon />} onClick={onRequestClose}>
+      Close
+    </Button>
   </div>
 );
 
@@ -48,7 +53,15 @@ const columnStyles = StyleSheet.create({
   }
 });
 
-const ConversationPreviewBody = ({ conversation, organizationId }) => (
+interface ConversationPreviewBodyProps {
+  organizationId: string;
+  conversation: ConversationInfoFragment;
+}
+
+const ConversationPreviewBody: React.FC<ConversationPreviewBodyProps> = ({
+  conversation,
+  organizationId
+}) => (
   <div className={css(columnStyles.container)}>
     <div className={css(columnStyles.column)}>
       <MessageColumn
@@ -66,18 +79,27 @@ const ConversationPreviewBody = ({ conversation, organizationId }) => (
   </div>
 );
 
-ConversationPreviewBody.propTypes = {
-  conversation: PropTypes.object.isRequired,
-  organizationId: PropTypes.string.isRequired
-};
+interface ConversationPreviewModalProps {
+  organizationId: string;
+  conversation?: ConversationInfoFragment;
+  navigation?: {
+    previous: boolean;
+    next: boolean;
+  };
+  onRequestPrevious: () => Promise<void> | void;
+  onRequestNext: () => Promise<void> | void;
+  onRequestClose: () => Promise<void> | void;
+}
 
-const ConversationPreviewModal = (props) => {
+const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
+  props
+) => {
   const {
     conversation,
-    navigation,
-    onRequestPrevious,
-    onRequestNext,
-    onRequestClose
+    navigation = { previous: false, next: false },
+    onRequestPrevious = () => {},
+    onRequestNext = () => {},
+    onRequestClose = () => {}
   } = props;
   const isOpen = conversation !== undefined;
 
@@ -91,12 +113,12 @@ const ConversationPreviewModal = (props) => {
         right: "20px",
         bottom: "20px",
         left: "20px",
-        zIndex: "1000"
+        zIndex: 1000
       }}
       onClick={(e) => e.stopPropagation()}
     >
       <ConversationPreviewHeader
-        campaignTitle={conversation && conversation.campaign.title}
+        campaignTitle={conversation?.campaign?.title ?? undefined}
         onRequestClose={onRequestClose}
       />
       <div style={{ flex: "1 1 auto", display: "flex" }}>
@@ -118,25 +140,6 @@ const ConversationPreviewModal = (props) => {
       </CardActions>
     </Paper>
   );
-};
-
-ConversationPreviewModal.defaultProps = {
-  navigation: { previous: false, next: false },
-  onRequestPrevious: () => {},
-  onRequestNext: () => {},
-  onRequestClose: () => {}
-};
-
-ConversationPreviewModal.propTypes = {
-  organizationId: PropTypes.string.isRequired,
-  conversation: PropTypes.object,
-  navigation: PropTypes.shape({
-    previous: PropTypes.bool.isRequired,
-    next: PropTypes.bool.isRequired
-  }),
-  onRequestPrevious: PropTypes.func,
-  onRequestNext: PropTypes.func,
-  onRequestClose: PropTypes.func
 };
 
 export default ConversationPreviewModal;

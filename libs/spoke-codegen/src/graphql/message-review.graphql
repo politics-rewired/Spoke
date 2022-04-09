@@ -1,0 +1,74 @@
+fragment ConversationMessage on Message {
+  id
+  text
+  isFromContact
+  createdAt
+  userId
+  sendStatus
+}
+
+fragment ConversationInfo on Conversation {
+  texter {
+    id
+    displayName
+  }
+  contact {
+    id
+    assignmentId
+    firstName
+    lastName
+    cell
+    messageStatus
+    messages {
+      ...ConversationMessage
+    }
+    optOut {
+      cell
+    }
+    updatedAt
+  }
+  campaign {
+    id
+    title
+    previewUrl
+  }
+}
+
+query GetConversationsForMessageReview(
+  $organizationId: String!
+  $cursor: OffsetLimitCursor!
+  $contactsFilter: ContactsFilter
+  $campaignsFilter: CampaignsFilter
+  $assignmentsFilter: AssignmentsFilter
+  $tagsFilter: TagsFilter
+  $contactNameFilter: ContactNameFilter
+) {
+  conversations(
+    cursor: $cursor
+    organizationId: $organizationId
+    campaignsFilter: $campaignsFilter
+    contactsFilter: $contactsFilter
+    assignmentsFilter: $assignmentsFilter
+    tagsFilter: $tagsFilter
+    contactNameFilter: $contactNameFilter
+  ) {
+    pageInfo {
+      limit
+      offset
+      total
+    }
+    conversations {
+      ...ConversationInfo
+    }
+  }
+}
+
+mutation CloseConversation($campaignContactId: String!) {
+  editCampaignContactMessageStatus(
+    campaignContactId: $campaignContactId
+    messageStatus: "closed"
+  ) {
+    id
+    messageStatus
+  }
+}
