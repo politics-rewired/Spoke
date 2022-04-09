@@ -1,11 +1,17 @@
 import { useTheme } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import DeleteIcon from "@material-ui/icons/Delete";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import HelpIconOutline from "@material-ui/icons/HelpOutline";
 import isNil from "lodash/isNil";
-import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
-import IconButton from "material-ui/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import HelpIconOutline from "material-ui/svg-icons/action/help-outline";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import * as yup from "yup";
 
 import {
@@ -61,7 +67,9 @@ interface Props {
 }
 
 export const InteractionStepCard: React.FC<Props> = (props) => {
+  const [expanded, setExpanded] = useState(true);
   const stableMuiTheme = useTheme();
+
   const {
     interactionStep,
     customFields,
@@ -102,6 +110,21 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
 
   const clipboardEnabled = supportsClipboard();
 
+  const handleToggleExpanded = useCallback(() => setExpanded(!expanded), [
+    expanded,
+    setExpanded
+  ]);
+
+  const handleAddResponse = useCallback(() => {
+    setExpanded(true);
+    addStepFactory(stepId)();
+  }, [setExpanded, addStepFactory, stepId]);
+
+  const handlePasteBlock = useCallback(() => {
+    setExpanded(true);
+    pasteBlockFactory(stepId)();
+  }, [setExpanded, pasteBlockFactory, stepId]);
+
   return (
     <div key={stepId}>
       <Card
@@ -114,30 +137,41 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
         <CardHeader
           style={styles.cardHeader}
           title={title}
-          subtitle={
+          subheader={
             parentInteractionId
               ? ""
               : "Enter a script for your texter along with the question you want the texter be able to answer on behalf of the contact."
           }
+          action={
+            childSteps?.length > 0 && (
+              <IconButton onClick={handleToggleExpanded}>
+                {expanded ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            )
+          }
         />
         <CardActions>
-          <RaisedButton
-            label="Copy Block"
+          <Button
+            variant="contained"
             disabled={disabled || !clipboardEnabled}
             onClick={() => onCopyBlock(interactionStep)}
-          />
+          >
+            Copy Block
+          </Button>
           {hasBlockCopied && isRootStep && (
-            <RaisedButton
-              label="+ Paste Block"
+            <Button
+              variant="contained"
               disabled={disabled || !clipboardEnabled}
               onClick={onRequestRootPaste}
-            />
+            >
+              + Paste Block
+            </Button>
           )}
           {!clipboardEnabled && (
             <span>Your browser does not support clipboard actions</span>
           )}
         </CardActions>
-        <CardText>
+        <CardContent>
           <GSForm
             {...dataTest("childInteraction", !parentInteractionId)}
             schema={interactionStepSchema}
@@ -177,12 +211,11 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
                   ]}
                   disabled={disabled}
                 />
-                <IconButton
-                  tooltip="An action is something that is triggered by this answer being chosen, often in an outside system"
-                  disabled={disabled}
-                >
-                  <HelpIconOutline />
-                </IconButton>
+                <Tooltip title="An action is something that is triggered by this answer being chosen, often in an outside system">
+                  <IconButton disabled={disabled}>
+                    <HelpIconOutline />
+                  </IconButton>
+                </Tooltip>
                 <div>
                   {answerActions &&
                     availableActions.filter((a) => a.name === answerActions)[0]
@@ -211,48 +244,53 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
               disabled={disabled}
             />
           </GSForm>
-        </CardText>
+        </CardContent>
       </Card>
       <div style={styles.answerContainer}>
         {isAbleToAddResponse && (
-          <RaisedButton
+          <Button
             key="add"
+            variant="contained"
             {...dataTest("addResponse")}
-            label="+ Add a response"
             style={{ marginBottom: "10px" }}
             disabled={disabled}
-            onClick={addStepFactory(stepId)}
-          />
+            onClick={handleAddResponse}
+          >
+            + Add a response
+          </Button>
         )}
         {isAbleToAddResponse && hasBlockCopied && (
-          <RaisedButton
+          <Button
             key="paste"
-            label="+ Paste Block"
+            variant="contained"
             disabled={disabled}
             style={{ marginBottom: "10px" }}
-            onClick={pasteBlockFactory(stepId)}
-          />
+            onClick={handlePasteBlock}
+          >
+            + Paste Block
+          </Button>
         )}
-        {childSteps
-          .filter((is) => !is.isDeleted)
-          .map((childStep) => (
-            <InteractionStepCard
-              key={childStep.id}
-              title={`Question: ${questionText}`}
-              interactionStep={childStep}
-              customFields={customFields}
-              integrationSourced={integrationSourced}
-              availableActions={availableActions}
-              hasBlockCopied={hasBlockCopied}
-              disabled={disabled}
-              onFormChange={onFormChange}
-              onCopyBlock={onCopyBlock}
-              onRequestRootPaste={onRequestRootPaste}
-              addStepFactory={addStepFactory}
-              deleteStepFactory={deleteStepFactory}
-              pasteBlockFactory={pasteBlockFactory}
-            />
-          ))}
+        {expanded &&
+          (childSteps ?? [])
+            .filter((is) => !is.isDeleted)
+            .map((childStep) => (
+              <InteractionStepCard
+                key={childStep.id}
+                title={`Question: ${questionText}`}
+                interactionStep={childStep}
+                customFields={customFields}
+                integrationSourced={integrationSourced}
+                availableActions={availableActions}
+                hasBlockCopied={hasBlockCopied}
+                disabled={disabled}
+                onFormChange={onFormChange}
+                onCopyBlock={onCopyBlock}
+                onRequestRootPaste={onRequestRootPaste}
+                addStepFactory={addStepFactory}
+                deleteStepFactory={deleteStepFactory}
+                pasteBlockFactory={pasteBlockFactory}
+              />
+            ))}
       </div>
     </div>
   );
