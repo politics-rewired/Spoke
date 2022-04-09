@@ -1,3 +1,4 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -643,12 +644,13 @@ class AdminCampaignEdit extends React.Component {
       >
         <Grid container>
           <Grid item xs={4}>
-            <RaisedButton
-              style={{ marginTop: 15 }}
+            <Button
+              variant="contained"
+              style={{ marginTop: 20 }}
               onClick={this.handleNavigateToStats}
             >
               Details
-            </RaisedButton>
+            </Button>
           </Grid>
           <Grid item xs={4} />
           <Grid item xs={4}>
