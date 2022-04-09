@@ -6,7 +6,7 @@
   "engines": {
     "npm": "please-use-yarn",
     "yarn": ">= 1.19.1",
-    "node": ">= 16.14.0"
+    "node": "^16.14.0"
   },
   "scripts": {
     "preinstall": "node -e \"if(process.env.npm_execpath.indexOf('yarn') === -1) throw new Error('spoke must be installed with Yarn: https://yarnpkg.com/')\"",
