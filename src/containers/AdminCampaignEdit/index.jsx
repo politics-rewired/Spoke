@@ -642,18 +642,13 @@ class AdminCampaignEdit extends React.Component {
           fontSize: 16
         }}
       >
-        <Grid container>
-          <Grid item xs={4}>
-            <Button
-              variant="contained"
-              style={{ marginTop: 20 }}
-              onClick={this.handleNavigateToStats}
-            >
+        <Grid container justify="space-between">
+          <Grid item>
+            <Button variant="contained" onClick={this.handleNavigateToStats}>
               Details
             </Button>
           </Grid>
-          <Grid item xs={4} />
-          <Grid item xs={4}>
+          <Grid item>
             <CampaignNavigation
               prevCampaignClicked={this.prevCampaignClicked}
               nextCampaignClicked={this.nextCampaignClicked}
@@ -661,7 +656,7 @@ class AdminCampaignEdit extends React.Component {
             />
           </Grid>
         </Grid>
-        <Divider style={{ marginBottom: 20 }} />
+        <Divider style={{ marginTop: 20, marginBottom: 20 }} />
         {title && <h1> {title} </h1>}
         {this.state.startingCampaign ? (
           <div style={{ color: theme.colors.gray }}>
