@@ -201,10 +201,10 @@ export const schema = `
   }
 
   type Campaign {
-    id: ID
-    organization: Organization
-    title: String
-    description: String
+    id: ID!
+    organization: Organization!
+    title: String!
+    description: String!
     dueBy: Date
     readiness: CampaignReadiness!
     isApproved: Boolean!
@@ -220,7 +220,7 @@ export const schema = `
     hasUnsentInitialMessages: Boolean
     hasUnhandledMessages: Boolean
     customFields: [String]
-    cannedResponses(userId: String): [CannedResponse]
+    cannedResponses(userId: String): [CannedResponse!]!
     stats: CampaignStats,
     pendingJobs(jobTypes: [String]): [JobRequest]!
     datawarehouseAvailable: Boolean
@@ -237,7 +237,7 @@ export const schema = `
     repliesStaleAfter: Int
     isAssignmentLimitedToTeams: Boolean!
     timezone: String
-    createdAt: Date
+    createdAt: Date!
     previewUrl: String
     landlinesFiltered: Boolean!
     externalSystem: ExternalSystem

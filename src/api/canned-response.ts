@@ -23,9 +23,9 @@ export const schema = `
   }
 
   type CannedResponse {
-    id: ID
-    title: String
-    text: String
+    id: ID!
+    title: String!
+    text: String!
     isUserCreated: Boolean
   }
 `;

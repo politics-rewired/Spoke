@@ -18,12 +18,10 @@ import SpokeFormField from "../../forms/SpokeFormField";
 import MessageLengthInfo from "../../MessageLengthInfo";
 import SendButton from "../../SendButton";
 
-interface MessageFormValue {
-  messageText: string;
-}
-
 interface InnerProps {
   conversation: Conversation;
+  value?: string;
+  onChange?: (value: string) => Promise<void> | void;
   messagesChanged(messages: Message[]): Promise<void> | void;
 }
 
@@ -39,14 +37,12 @@ interface HocProps {
 interface Props extends InnerProps, HocProps {}
 
 interface State {
-  messageText: string;
   isSending: boolean;
   sendError: string;
 }
 
 class MessageResponse extends Component<Props, State> {
   state: State = {
-    messageText: "",
     isSending: false,
     sendError: ""
   };
@@ -65,7 +61,7 @@ class MessageResponse extends Component<Props, State> {
   };
 
   handleMessageFormChange = ({ messageText }: MessageFormValue) =>
-    this.setState({ messageText });
+    this.props.onChange?.(messageText);
 
   handleMessageFormSubmit = async ({ messageText }: MessageFormValue) => {
     const { contact } = this.props.conversation;
@@ -82,7 +78,7 @@ class MessageResponse extends Component<Props, State> {
       );
       const { messages } = response.data.sendMessage;
       this.props.messagesChanged(messages);
-      this.setState({ messageText: "" });
+      this.props.onChange?.("");
     } catch (e) {
       this.setState({ sendError: e.message });
     } finally {
@@ -106,8 +102,8 @@ class MessageResponse extends Component<Props, State> {
         .max(window.MAX_MESSAGE_LENGTH)
     });
 
-    const { messageText, isSending } = this.state;
-    const isSendDisabled = isSending || messageText.trim() === "";
+    const { isSending } = this.state;
+    const isSendDisabled = isSending || this.props.value?.trim() === "";
 
     const errorActions = [
       <FlatButton
@@ -125,7 +121,7 @@ class MessageResponse extends Component<Props, State> {
             this.messageForm = ref;
           }}
           schema={messageSchema}
-          value={{ messageText: this.state.messageText }}
+          value={{ messageText: this.props.value ?? "" }}
           onSubmit={this.handleMessageFormSubmit}
           onChange={this.handleMessageFormChange}
         >
@@ -140,7 +136,7 @@ class MessageResponse extends Component<Props, State> {
                 rowsMax={6}
                 style={{ flexGrow: "1" }}
               />
-              <MessageLengthInfo messageText={messageText} />
+              <MessageLengthInfo messageText={this.props.value} />
             </div>
             <SendButton
               threeClickEnabled={false}
