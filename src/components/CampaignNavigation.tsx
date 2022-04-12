@@ -1,6 +1,5 @@
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-import { css, StyleSheet } from "aphrodite";
 import React from "react";
 
 import { useGetCampaignNavigationQuery } from "../../libs/spoke-codegen/src";
@@ -17,16 +16,6 @@ interface Props {
   };
 }
 
-const styles = StyleSheet.create({
-  buttonContainer: {
-    display: "flex",
-    justifyContent: "flex-end",
-    paddingTop: 20,
-    paddingBottom: 20,
-    flexWrap: "wrap"
-  }
-});
-
 const CampaignNavigation: React.FC<Props> = (props) => {
   const { data, loading } = useGetCampaignNavigationQuery({
     variables: { campaignId: props.campaignId }
@@ -34,7 +23,7 @@ const CampaignNavigation: React.FC<Props> = (props) => {
 
   if (loading) {
     return (
-      <div className={css(styles.buttonContainer)}>
+      <div>
         <ButtonGroup disableElevation variant="contained" color="primary">
           <Button disabled>Previous</Button>
           <Button disabled>Next</Button>
@@ -45,7 +34,7 @@ const CampaignNavigation: React.FC<Props> = (props) => {
   const campaignNavigation = data?.campaignNavigation;
 
   return (
-    <div className={css(styles.buttonContainer)}>
+    <div>
       <ButtonGroup disableElevation variant="contained" color="primary">
         <Button
           disabled={!campaignNavigation?.prevCampaignId}

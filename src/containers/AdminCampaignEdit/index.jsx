@@ -1,8 +1,10 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Grid from "@material-ui/core/Grid";
 import { withTheme } from "@material-ui/core/styles";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
@@ -640,12 +642,21 @@ class AdminCampaignEdit extends React.Component {
           fontSize: 16
         }}
       >
-        <CampaignNavigation
-          prevCampaignClicked={this.prevCampaignClicked}
-          nextCampaignClicked={this.nextCampaignClicked}
-          campaignId={this.props.campaignData.campaign.id}
-        />
-        <Divider style={{ marginBottom: 20 }} />
+        <Grid container justify="space-between">
+          <Grid item>
+            <Button variant="contained" onClick={this.handleNavigateToStats}>
+              Details
+            </Button>
+          </Grid>
+          <Grid item>
+            <CampaignNavigation
+              prevCampaignClicked={this.prevCampaignClicked}
+              nextCampaignClicked={this.nextCampaignClicked}
+              campaignId={this.props.campaignData.campaign.id}
+            />
+          </Grid>
+        </Grid>
+        <Divider style={{ marginTop: 20, marginBottom: 20 }} />
         {title && <h1> {title} </h1>}
         {this.state.startingCampaign ? (
           <div style={{ color: theme.colors.gray }}>
@@ -737,6 +748,12 @@ class AdminCampaignEdit extends React.Component {
 
   handleExpandChange = (sectionIndex) => (isExpended) =>
     this.onExpandChange(sectionIndex, isExpended);
+
+  handleNavigateToStats = () => {
+    const { organizationId, campaignId } = this.props.match.params;
+    const statsUrl = `/admin/${organizationId}/campaigns/${campaignId}`;
+    this.props.history.push(statsUrl);
+  };
 
   render() {
     const sections = this.sections();
