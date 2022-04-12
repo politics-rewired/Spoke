@@ -74,17 +74,18 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
     onRequestNext = () => {},
     onRequestClose = () => {}
   } = props;
-  const isOpen = conversation !== undefined;
 
-  const { firstName, lastName } = conversation?.contact ?? {};
+  if (!conversation) return null;
+
+  const { firstName, lastName } = conversation.contact;
   const title = `Conversation Review: ${firstName} ${lastName}`;
-  const { id: campaignId, title: campaignTitle } = conversation?.campaign ?? {};
+  const { id: campaignId, title: campaignTitle } = conversation.campaign;
   const subheader = `Campaign ${campaignId}: ${campaignTitle}`;
 
   return (
     <Paper
       style={{
-        display: isOpen ? "flex" : "none",
+        display: "flex",
         flexDirection: "column",
         position: "fixed",
         top: "20px",
@@ -105,13 +106,11 @@ const ConversationPreviewModal: React.FC<ConversationPreviewModalProps> = (
         }
       />
       <div style={{ flex: "1 1 auto", display: "flex" }}>
-        {isOpen && (
-          <ConversationPreviewBody
-            key={conversation.contact.id}
-            conversation={conversation}
-            organizationId={props.organizationId}
-          />
-        )}
+        <ConversationPreviewBody
+          key={conversation.contact.id}
+          conversation={conversation}
+          organizationId={props.organizationId}
+        />
       </div>
       <CardActions>
         <IconButton disabled={!navigation.previous} onClick={onRequestPrevious}>
