@@ -6,7 +6,7 @@ import React from "react";
 
 interface CannedResponseMenuProps {
   anchorEl?: Element;
-  campaignId?: string;
+  campaignId: string;
   onSelectCannedResponse?: (script: string) => Promise<void> | void;
   onRequestClose?: () => Promise<void> | void;
 }

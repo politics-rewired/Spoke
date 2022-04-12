@@ -93,8 +93,8 @@ const MessageColumn: React.FC<Props> = (props) => {
         </Grid>
       </div>
       <CannedResponseMenu
-        campaignId={conversation.campaign.id ?? undefined}
         anchorEl={anchorEl ?? undefined}
+        campaignId={conversation.campaign.id}
         onSelectCannedResponse={handleScriptSelected}
         onRequestClose={handleRequestClose}
       />
