@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.24.0](https://github.com/politics-rewired/spoke/compare/v4.23.0...v4.24.0) (2022-04-12)
+
+
+### Features
+
+* add canned responses to message review ([#1142](https://github.com/politics-rewired/spoke/issues/1142)) ([50f9a37](https://github.com/politics-rewired/spoke/commit/50f9a37b28ad101e23c25c190ed032c64ba61253))
+* add contact name and campaign title to message review ([#1141](https://github.com/politics-rewired/spoke/issues/1141)) ([3b19f08](https://github.com/politics-rewired/spoke/commit/3b19f08950a1720795dcf412a88cacab08be156c))
+* allow collapsing interaction steps ([#1137](https://github.com/politics-rewired/spoke/issues/1137)) ([f008792](https://github.com/politics-rewired/spoke/commit/f00879224e8b0adf2b7651aff1a1286d3ff6c878))
+* allow navigation to campaign stats page from campaign edit page ([#1139](https://github.com/politics-rewired/spoke/issues/1139)) ([2702100](https://github.com/politics-rewired/spoke/commit/2702100e0754107c2e1c6253cfd0aeacbbbbfc28))
+
 ## [4.23.0](https://github.com/politics-rewired/spoke/compare/v4.22.1...v4.23.0) (2022-03-30)
 
 
