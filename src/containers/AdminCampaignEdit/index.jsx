@@ -751,8 +751,8 @@ class AdminCampaignEdit extends React.Component {
 
   handleNavigateToStats = () => {
     const { organizationId, campaignId } = this.props.match.params;
-    const editUrl = `/admin/${organizationId}/campaigns/${campaignId}`;
-    this.props.history.push(editUrl);
+    const statsUrl = `/admin/${organizationId}/campaigns/${campaignId}`;
+    this.props.history.push(statsUrl);
   };
 
   render() {
