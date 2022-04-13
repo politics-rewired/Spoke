@@ -34,7 +34,6 @@ export const queuePendingNotifications: Task = async (_payload, helpers) => {
 };
 
 export const queuePeriodicNotifications: Task = async (_payload, helpers) => {
-  return;
   const usersToNotify = await getUserIdsForDigest("PERIODIC");
 
   for (const user of usersToNotify) {
@@ -45,7 +44,6 @@ export const queuePeriodicNotifications: Task = async (_payload, helpers) => {
 };
 
 export const queueDailyNotifications: Task = async (_payload, helpers) => {
-  return;
   const usersToNotify = await getUserIdsForDigest("DAILY");
 
   for (const user of usersToNotify) {

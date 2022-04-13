@@ -1,17 +1,11 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 
+import { notification as Notification } from "../../../../libs/spoke-codegen/src";
 import { config } from "../../../config";
 import { CampaignRecord, OrganizationRecord } from "../../api/types";
 import { r } from "../../models";
 import { Notifications } from "../../notifications";
-
-interface Notification {
-  campaign_id: number;
-  category: string;
-  organization_id: number;
-  user_id: number;
-}
 
 interface Props {
   campaign: CampaignRecord;

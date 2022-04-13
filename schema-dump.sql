@@ -2578,12 +2578,12 @@ ALTER TABLE public.monthly_organization_message_usages OWNER TO postgres;
 CREATE TABLE public.notification (
     id integer NOT NULL,
     user_id integer NOT NULL,
-    subject text NOT NULL,
-    content text NOT NULL,
-    reply_to character varying(255),
     sent_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    organization_id integer,
+    campaign_id integer,
+    category character varying(255) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -3034,7 +3034,9 @@ CREATE TABLE public."user" (
     assigned_cell text,
     is_superadmin boolean,
     terms boolean DEFAULT false,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    notification_frequency text DEFAULT 'ALL'::text NOT NULL,
+    CONSTRAINT user_notification_frequency_check CHECK ((notification_frequency = ANY (ARRAY['ALL'::text, 'PERIODIC'::text, 'DAILY'::text, 'NONE'::text])))
 );
 
 
@@ -4266,6 +4268,20 @@ CREATE INDEX messaging_service_stick_messaging_service_sid_index ON public.messa
 
 
 --
+-- Name: notification_category_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX notification_category_index ON public.notification USING btree (category);
+
+
+--
+-- Name: notification_user_id_organization_id_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX notification_user_id_organization_id_index ON public.notification USING btree (user_id, organization_id);
+
+
+--
 -- Name: opt_out_assignment_id_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -5058,6 +5074,22 @@ ALTER TABLE ONLY public.message
 
 ALTER TABLE ONLY public.monthly_organization_message_usages
     ADD CONSTRAINT monthly_organization_message_usages_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: notification notification_campaign_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.notification
+    ADD CONSTRAINT notification_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+
+
+--
+-- Name: notification notification_organization_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.notification
+    ADD CONSTRAINT notification_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organization(id);
 
 
 --
