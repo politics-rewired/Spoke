@@ -136,6 +136,8 @@ export type CreateCampaignOptions = Partial<
     creatorId: number;
     repliesStaleAfterMinutes: number;
     externalSystemId: string;
+    autosendStatus: string;
+    autosendUserId: number;
   }
 > & {
   organizationId: number;
@@ -167,8 +169,10 @@ export const createCampaign = async (
         limit_assignment_to_teams,
         replies_stale_after_minutes,
         landlines_filtered,
-        external_system_id
-      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+        external_system_id,
+        autosend_status,
+        autosend_user_id
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       returning *
     `,
       [
@@ -190,7 +194,9 @@ export const createCampaign = async (
         options.isAssignmentLimitedToTeams ?? false,
         options.repliesStaleAfterMinutes ?? null,
         options.landlinesFiltered ?? false,
-        options.externalSystemId ?? null
+        options.externalSystemId ?? null,
+        options.autosendStatus ?? null,
+        options.autosendUserId ?? null
       ]
     )
     .then(({ rows: [campaign] }) => campaign);

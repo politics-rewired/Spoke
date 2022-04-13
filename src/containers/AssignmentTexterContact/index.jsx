@@ -306,12 +306,13 @@ export class AssignmentTexterContact extends React.Component {
 
   handleClosePopover = () => {
     this.setState({
-      responsePopoverOpen: false
+      responsePopoverAnchorEl: undefined
     });
   };
 
   handleCannedResponseChange = (cannedResponseScript) => {
     this.handleChangeScript(cannedResponseScript);
+    this.handleClosePopover();
   };
 
   createMessageToContact = (text) => {
@@ -732,24 +733,14 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderCannedResponsePopover() {
-    const { campaign, assignment, texter } = this.props;
-    const { userCannedResponses, campaignCannedResponses } = assignment;
-
-    // We do not allow Texters to compose their own canned responses
-    const integrationSourced = false;
+    const { campaign } = this.props;
 
     return (
       <CannedResponseMenu
-        onRequestClose={this.handleClosePopover}
-        open={this.state.responsePopoverOpen}
-        anchorEl={this.state.responsePopoverAnchorEl}
-        campaignCannedResponses={campaignCannedResponses}
-        userCannedResponses={userCannedResponses}
-        customFields={campaign.customFields}
-        integrationSourced={integrationSourced}
         campaignId={campaign.id}
-        texterId={texter.id}
+        anchorEl={this.state.responsePopoverAnchorEl}
         onSelectCannedResponse={this.handleCannedResponseChange}
+        onRequestClose={this.handleClosePopover}
       />
     );
   }

@@ -66,24 +66,24 @@ export const schema = `
   }
 
   type CampaignContact {
-    id: ID
-    firstName: String
-    lastName: String
-    cell: Phone
+    id: ID!
+    firstName: String!
+    lastName: String!
+    cell: Phone!
     zip: String
     external_id: String
     customFields: JSON
-    messages: [Message]
+    messages: [Message!]!
     timezone: String
     location: Location
     optOut: OptOut
-    campaign: Campaign
-    questionResponseValues: [AnswerOption]
-    questionResponses: [AnswerOption]
-    interactionSteps: [InteractionStep]
-    messageStatus: String
+    campaign: Campaign!
+    questionResponseValues: [AnswerOption!]!
+    questionResponses: [AnswerOption!]!
+    interactionSteps: [InteractionStep!]!
+    messageStatus: String!
     assignmentId: String
-    updatedAt: Date
+    updatedAt: Date!
 
     contactTags: [Tag]
   }

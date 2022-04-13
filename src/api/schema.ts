@@ -289,6 +289,8 @@ const rootSchema = `
     releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
     releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): ReleaseAllUnhandledRepliesResult!
     markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
+    startAutosending(campaignId: String!): Campaign!
+    pauseAutosending(campaignId: String!): Campaign!
     unMarkForSecondPass(campaignId: String!): String!
     deleteNeedsMessage(campaignId: String!): String!
     insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!

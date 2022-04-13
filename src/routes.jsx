@@ -10,6 +10,7 @@ import TexterDashboard from "./components/TexterDashboard";
 import TopNav from "./components/TopNav";
 import AdminAssignmentControl from "./containers/AdminAssignmentControl";
 import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
+import AdminAutosending from "./containers/AdminAutosending";
 import AdminBulkScriptEditor from "./containers/AdminBulkScriptEditor";
 import AdminCampaignEdit from "./containers/AdminCampaignEdit";
 import AdminCampaignGroupEditor from "./containers/AdminCampaignGroupEditor";
@@ -143,6 +144,10 @@ const AdminOrganizationRoutes = (props) => {
           <Route
             path={`${organizationPath}/assignment-control`}
             component={AdminAssignmentControl}
+          />
+          <Route
+            path={`${organizationPath}/autosending`}
+            component={AdminAutosending}
           />
           <Route
             path={`${organizationPath}/tag-editor`}

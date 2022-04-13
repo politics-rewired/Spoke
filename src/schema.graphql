@@ -257,6 +257,8 @@ type RootMutation {
   releaseMessages(campaignId: String!, target: ReleaseActionTarget!, ageInHours: Float): String!
   releaseAllUnhandledReplies(organizationId: String!, ageInHours: Float, releaseOnRestricted: Boolean, limitToCurrentlyTextableContacts: Boolean): ReleaseAllUnhandledRepliesResult!
   markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
+  startAutosending(campaignId: String!): Campaign!
+  pauseAutosending(campaignId: String!): Campaign!
   unMarkForSecondPass(campaignId: String!): String!
   deleteNeedsMessage(campaignId: String!): String!
   insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!
@@ -347,7 +349,7 @@ type Organization {
   id: ID
   uuid: String
   name: String
-  campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): PaginatedCampaigns
+  campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): PaginatedCampaigns!
   campaignsRelay(after: Cursor, first: Int, filter: CampaignsFilter): CampaignPage!
   memberships(after: Cursor, first: Int, filter: MembershipFilter): OrganizationMembershipPage
   people(role: String, campaignId: String, offset: Int): [User]
@@ -485,6 +487,7 @@ type OrganizationMembershipPage {
 
 input CampaignsFilter {
   isArchived: Boolean
+  isStarted: Boolean
   organizationId: Int
   campaignId: Int
   listSize: Int
@@ -495,11 +498,17 @@ type CampaignStats {
   sentMessagesCount: Int
   receivedMessagesCount: Int
   optOutsCount: Int
+  percentUnhandledReplies: Float!
+  countMessagedContacts: Int!
 }
 
 type DeliverabilityErrorStat {
   errorCode: String
   count: Int!
+}
+
+input CampaignDeliverabilityStatsFilter {
+  initialMessagesOnly: Boolean
 }
 
 type CampaignDeliverabilityStats {
@@ -541,10 +550,10 @@ enum ExternalSyncReadinessState {
 }
 
 type Campaign {
-  id: ID
-  organization: Organization
-  title: String
-  description: String
+  id: ID!
+  organization: Organization!
+  title: String!
+  description: String!
   dueBy: Date
   readiness: CampaignReadiness!
   isApproved: Boolean!
@@ -560,7 +569,7 @@ type Campaign {
   hasUnsentInitialMessages: Boolean
   hasUnhandledMessages: Boolean
   customFields: [String]
-  cannedResponses(userId: String): [CannedResponse]
+  cannedResponses(userId: String): [CannedResponse!]!
   stats: CampaignStats,
   pendingJobs(jobTypes: [String]): [JobRequest]!
   datawarehouseAvailable: Boolean
@@ -577,13 +586,14 @@ type Campaign {
   repliesStaleAfter: Int
   isAssignmentLimitedToTeams: Boolean!
   timezone: String
-  createdAt: Date
+  createdAt: Date!
   previewUrl: String
   landlinesFiltered: Boolean!
   externalSystem: ExternalSystem
   syncReadiness: ExternalSyncReadinessState!
   externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
-  deliverabilityStats: CampaignDeliverabilityStats!
+  deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
+  autosendStatus: String!
 }
 
 type CampaignEdge {
@@ -603,8 +613,8 @@ type CampaignsList {
 union CampaignsReturn = PaginatedCampaigns | CampaignsList
 
 type PaginatedCampaigns {
-  campaigns: [Campaign]
-  pageInfo: PageInfo
+  campaigns: [Campaign!]!
+  pageInfo: PageInfo!
 }
 
 type CampaignNavigation {
@@ -785,24 +795,24 @@ input ContactNameFilter {
 }
 
 type CampaignContact {
-  id: ID
-  firstName: String
-  lastName: String
-  cell: Phone
+  id: ID!
+  firstName: String!
+  lastName: String!
+  cell: Phone!
   zip: String
   external_id: String
   customFields: JSON
-  messages: [Message]
+  messages: [Message!]!
   timezone: String
   location: Location
   optOut: OptOut
-  campaign: Campaign
-  questionResponseValues: [AnswerOption]
-  questionResponses: [AnswerOption]
-  interactionSteps: [InteractionStep]
-  messageStatus: String
+  campaign: Campaign!
+  questionResponseValues: [AnswerOption!]!
+  questionResponses: [AnswerOption!]!
+  interactionSteps: [InteractionStep!]!
+  messageStatus: String!
   assignmentId: String
-  updatedAt: Date
+  updatedAt: Date!
 
   contactTags: [Tag]
 }
@@ -855,9 +865,9 @@ input CannedResponseInput {
 }
 
 type CannedResponse {
-  id: ID
-  title: String
-  text: String
+  id: ID!
+  title: String!
+  text: String!
   isUserCreated: Boolean
 }
 

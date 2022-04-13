@@ -1,7 +1,13 @@
-import React, { Component } from "react";
+import Button from "@material-ui/core/Button";
+import Grid from "@material-ui/core/Grid";
+import {
+  ConversationInfoFragment,
+  ConversationMessageFragment
+} from "@spoke/spoke-codegen";
+import isNil from "lodash/isNil";
+import React, { useCallback, useEffect, useState } from "react";
+import CannedResponseMenu from "src/components/CannedResponseMenu";
 
-import { Conversation } from "../../../api/conversations";
-import { Message } from "../../../api/message";
 import MessageList from "./MessageList";
 import MessageOptOut from "./MessageOptOut";
 import MessageResponse from "./MessageResponse";
@@ -14,63 +20,86 @@ const styles: Record<string, React.CSSProperties> = {
   }
 };
 
+type ClickButtonHandler = React.MouseEventHandler<HTMLButtonElement>;
+
 interface Props {
   organizationId: string;
-  conversation: Conversation;
+  conversation: ConversationInfoFragment;
 }
 
-interface State {
-  isOptedOut: boolean;
-  messages: Message[];
-}
+const MessageColumn: React.FC<Props> = (props) => {
+  const { organizationId, conversation } = props;
+  const { contact } = conversation;
 
-class MessageColumn extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
+  const [messageText, setMessageText] = useState("");
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null);
+  const [isOptedOut, setIsOptedOut] = useState(
+    !isNil(conversation.contact.optOut?.cell)
+  );
+  // TODO: use apollo client cache rather than state to manage changes to messages list
+  const [messages, setMessages] = useState<ConversationMessageFragment[]>([]);
 
-    const { conversation } = props;
-    const isOptedOut =
-      conversation.contact.optOut && !!conversation.contact.optOut.cell;
-    this.state = {
-      messages: conversation.contact.messages,
-      isOptedOut
-    };
-  }
+  useEffect(() => {
+    setMessages(conversation.contact.messages);
+  }, [setMessages]);
 
-  messagesChanged = (messages: Message[]) => {
-    this.setState({ messages });
-  };
+  const handleOpenCannedResponse: ClickButtonHandler = useCallback(
+    (event) => {
+      setAnchorEl(event.currentTarget);
+    },
+    [setAnchorEl]
+  );
 
-  optOutChanged = (isOptedOut: boolean) => {
-    this.setState({ isOptedOut });
-  };
+  const handleScriptSelected = useCallback(
+    (script: string) => {
+      setAnchorEl(null);
+      setMessageText(script);
+    },
+    [setAnchorEl]
+  );
 
-  render() {
-    const { messages, isOptedOut } = this.state;
-    const { conversation } = this.props;
-    const { contact } = conversation;
+  const handleRequestClose = useCallback(() => setAnchorEl(null), [
+    setAnchorEl
+  ]);
 
-    return (
+  return (
+    <>
       <div style={styles.container}>
         <h4>Messages</h4>
-        <MessageList
-          messages={messages}
-          organizationId={this.props.organizationId}
-        />
+        <MessageList messages={messages} organizationId={organizationId} />
         {!isOptedOut && (
           <MessageResponse
+            value={messageText}
             conversation={conversation}
-            messagesChanged={this.messagesChanged}
+            messagesChanged={setMessages}
+            onChange={setMessageText}
           />
         )}
-        <MessageOptOut
-          contact={contact}
-          isOptedOut={isOptedOut}
-          optOutChanged={this.optOutChanged}
-        />
+        <Grid container spacing={2} justify="flex-end">
+          <Grid item>
+            <MessageOptOut
+              contact={contact}
+              isOptedOut={isOptedOut}
+              optOutChanged={setIsOptedOut}
+            />
+          </Grid>
+          {!isOptedOut && (
+            <Grid item>
+              <Button variant="contained" onClick={handleOpenCannedResponse}>
+                Canned Responses
+              </Button>
+            </Grid>
+          )}
+        </Grid>
       </div>
-    );
-  }
-}
+      <CannedResponseMenu
+        anchorEl={anchorEl ?? undefined}
+        campaignId={conversation.campaign.id}
+        onSelectCannedResponse={handleScriptSelected}
+        onRequestClose={handleRequestClose}
+      />
+    </>
+  );
+};
 
 export default MessageColumn;

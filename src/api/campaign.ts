@@ -138,6 +138,7 @@ export type CampaignsReturn = PaginatedCampaigns | CampaignsList;
 export const schema = `
   input CampaignsFilter {
     isArchived: Boolean
+    isStarted: Boolean
     organizationId: Int
     campaignId: Int
     listSize: Int
@@ -148,11 +149,17 @@ export const schema = `
     sentMessagesCount: Int
     receivedMessagesCount: Int
     optOutsCount: Int
+    percentUnhandledReplies: Float!
+    countMessagedContacts: Int!
   }
 
   type DeliverabilityErrorStat {
     errorCode: String
     count: Int!
+  }
+
+  input CampaignDeliverabilityStatsFilter {
+    initialMessagesOnly: Boolean
   }
 
   type CampaignDeliverabilityStats {
@@ -194,10 +201,10 @@ export const schema = `
   }
 
   type Campaign {
-    id: ID
-    organization: Organization
-    title: String
-    description: String
+    id: ID!
+    organization: Organization!
+    title: String!
+    description: String!
     dueBy: Date
     readiness: CampaignReadiness!
     isApproved: Boolean!
@@ -213,7 +220,7 @@ export const schema = `
     hasUnsentInitialMessages: Boolean
     hasUnhandledMessages: Boolean
     customFields: [String]
-    cannedResponses(userId: String): [CannedResponse]
+    cannedResponses(userId: String): [CannedResponse!]!
     stats: CampaignStats,
     pendingJobs(jobTypes: [String]): [JobRequest]!
     datawarehouseAvailable: Boolean
@@ -230,13 +237,14 @@ export const schema = `
     repliesStaleAfter: Int
     isAssignmentLimitedToTeams: Boolean!
     timezone: String
-    createdAt: Date
+    createdAt: Date!
     previewUrl: String
     landlinesFiltered: Boolean!
     externalSystem: ExternalSystem
     syncReadiness: ExternalSyncReadinessState!
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
-    deliverabilityStats: CampaignDeliverabilityStats!
+    deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
+    autosendStatus: String!
   }
 
   type CampaignEdge {
@@ -256,8 +264,8 @@ export const schema = `
   union CampaignsReturn = PaginatedCampaigns | CampaignsList
 
   type PaginatedCampaigns {
-    campaigns: [Campaign]
-    pageInfo: PageInfo
+    campaigns: [Campaign!]!
+    pageInfo: PageInfo!
   }
 
   type CampaignNavigation {

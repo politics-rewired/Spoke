@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Grid from "@material-ui/core/Grid";
 import { css, StyleSheet } from "aphrodite";
 import Divider from "material-ui/Divider";
 import RaisedButton from "material-ui/RaisedButton";
@@ -180,12 +181,16 @@ class AdminCampaignStats extends React.Component {
         <Helmet>
           <title>{newTitle}</title>
         </Helmet>
-        <CampaignNavigation
-          prevCampaignClicked={this.prevCampaignClicked}
-          nextCampaignClicked={this.nextCampaignClicked}
-          campaignId={campaign.id}
-        />
-        <Divider style={{ marginBottom: 20 }} />
+        <Grid container justify="flex-end">
+          <Grid item>
+            <CampaignNavigation
+              prevCampaignClicked={this.prevCampaignClicked}
+              nextCampaignClicked={this.nextCampaignClicked}
+              campaignId={campaign.id}
+            />
+          </Grid>
+        </Grid>
+        <Divider style={{ marginTop: 20, marginBottom: 20 }} />
         <div className={css(styles.container)}>
           {campaign.isArchived ? (
             <div className={css(styles.archivedBanner)}>

@@ -26,6 +26,7 @@ import {
 } from "./tasks/filter-landlines";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
+import queueAutoSendInitials from "./tasks/queue-autosend-initials";
 import {
   queueDailyNotifications,
   queuePendingNotifications,
@@ -86,6 +87,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["queue-daily-notifications"] = queueDailyNotifications;
   m.taskList!["send-notification-email"] = sendNotificationEmail;
   m.taskList!["send-notification-digest"] = sendNotificationDigest;
+  m.taskList!["queue-autosend-initials"] = queueAutoSendInitials;
   m.taskList![exportCampaignIdentifier] = wrapProgressTask(exportCampaign, {
     removeOnComplete: true
   });
@@ -133,6 +135,15 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
     pattern: "0 9 * * *",
     time_zone: config.TZ
   });
+
+  if (config.ENABLE_AUTOSENDING) {
+    m.cronJobs!.push({
+      name: "queue-autosend-initials",
+      task_name: "queue-autosend-initials",
+      pattern: "*/1 * * * *",
+      time_zone: config.TZ
+    });
+  }
 
   if (config.ENABLE_MONTHLY_ORG_MESSAGE_LIMITS) {
     m.cronJobs!.push({

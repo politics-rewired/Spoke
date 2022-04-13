@@ -1,0 +1,50 @@
+fragment AutosendingTarget on Campaign {
+  id
+  title
+  isStarted
+  autosendStatus
+  contactsCount
+  stats {
+    optOutsCount
+    percentUnhandledReplies
+    receivedMessagesCount
+    countMessagedContacts
+  }
+  deliverabilityStats(filter: { initialMessagesOnly: true }) {
+    deliveredCount
+    sendingCount
+    sentCount
+    errorCount
+  }
+}
+
+query CampaignsEligibleForAutosending(
+  $organizationId: String!
+  $isStarted: Boolean!
+) {
+  organization(id: $organizationId) {
+    id
+    campaigns(
+      campaignsFilter: { isArchived: false, isStarted: $isStarted }
+      cursor: { offset: 0, limit: 5000 }
+    ) {
+      campaigns {
+        ...AutosendingTarget
+      }
+    }
+  }
+}
+
+mutation StartAutosending($campaignId: String!) {
+  startAutosending(campaignId: $campaignId) {
+    id
+    autosendStatus
+  }
+}
+
+mutation PauseAutosending($campaignId: String!) {
+  pauseAutosending(campaignId: $campaignId) {
+    id
+    autosendStatus
+  }
+}
