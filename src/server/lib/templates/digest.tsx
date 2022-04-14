@@ -3,14 +3,24 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 
 import { notification as Notification } from "../../../../libs/spoke-codegen/src";
+import { config } from "../../../config";
 import { OrganizationRecord } from "../../api/types";
 import { r } from "../../models";
 import { Notifications } from "../../notifications";
 
-interface Props {
+interface DigestProps {
   notificationsContent: string[];
   organization: OrganizationRecord;
+  userId: number;
 }
+
+const textingUrl = (orgId: number) => {
+  return `${config.BASE_URL}/app/${orgId}/todos`;
+};
+
+const settingsUrl = (orgId: number, userId: number) => {
+  return `${config.BASE_URL}/app/${orgId}/account/${userId}`;
+};
 
 const getContentForReplies = async (
   campaignId: string,
@@ -94,7 +104,11 @@ const getContentForNotifications = async (notifications: Notification[]) => {
   return notificationsContent;
 };
 
-const Digest: React.FC<Props> = ({ notificationsContent, organization }) => {
+const Digest: React.FC<DigestProps> = ({
+  notificationsContent,
+  organization,
+  userId
+}) => {
   return (
     <div>
       <p>You have outstanding text assignments from {organization.name}</p>
@@ -104,13 +118,23 @@ const Digest: React.FC<Props> = ({ notificationsContent, organization }) => {
           <p>{content}</p>
         );
       })}
+      <p>
+        You can start sending texts right away here:{" "}
+        <a href={textingUrl(organization.id)}>{textingUrl(organization.id)}</a>
+      </p>
+      <br />
+      <p>
+        To modify your notification settings, go{" "}
+        <a href={settingsUrl(organization.id, userId)}>here</a>
+      </p>
     </div>
   );
 };
 
 const getDigestContent = async (
   organizationId: string,
-  notifications: notification[]
+  userId: number,
+  notifications: Notification[]
 ) => {
   const organization = await r
     .knex("organization")
@@ -124,6 +148,7 @@ const getDigestContent = async (
     <Digest
       notificationsContent={notificationsContent}
       organization={organization}
+      userId={userId}
     />
   );
   const content = ReactDOMServer.renderToStaticMarkup(template);

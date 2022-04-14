@@ -7,7 +7,7 @@ import { CampaignRecord, OrganizationRecord } from "../../api/types";
 import { r } from "../../models";
 import { Notifications } from "../../notifications";
 
-interface Props {
+interface NotificationProps {
   campaign: CampaignRecord;
   notification: Notification;
   organization: OrganizationRecord;
@@ -22,7 +22,7 @@ const settingsUrl = (orgId: number, userId: number) => {
   return `${config.BASE_URL}/app/${orgId}/account/${userId}`;
 };
 
-const AssignmentCreated: React.FC<Props> = ({
+const AssignmentCreated: React.FC<NotificationProps> = ({
   notification,
   organization,
   campaign,
@@ -48,7 +48,7 @@ const AssignmentCreated: React.FC<Props> = ({
   );
 };
 
-const AssignmentUpdated: React.FC<Props> = ({
+const AssignmentUpdated: React.FC<NotificationProps> = ({
   notification,
   organization,
   campaign,
@@ -74,7 +74,7 @@ const AssignmentUpdated: React.FC<Props> = ({
   );
 };
 
-const AssignmentMessageReceived: React.FC<Props> = ({
+const AssignmentMessageReceived: React.FC<NotificationProps> = ({
   notification,
   organization,
   campaign

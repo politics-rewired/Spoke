@@ -59,6 +59,7 @@ export const sendNotificationDigest: Task = async (payload, _helpers) => {
     const { email } = notifications[0];
     const { subject, content } = await getDigestContent(
       organizationId,
+      payload.id,
       notifications
     );
 
