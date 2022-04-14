@@ -15,7 +15,7 @@ import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import md5 from "md5";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import * as yup from "yup";
 
 import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";

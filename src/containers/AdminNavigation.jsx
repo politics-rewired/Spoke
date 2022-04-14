@@ -1,7 +1,7 @@
 import { ListItem } from "material-ui/List";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../components/ClassRouter";
 
 import Navigation from "../components/Navigation";
 import { dataTest } from "../lib/attributes";

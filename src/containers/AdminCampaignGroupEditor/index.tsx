@@ -11,7 +11,7 @@ import TextField from "@material-ui/core/TextField";
 import AddIcon from "@material-ui/icons/Add";
 import { History } from "history";
 import React, { useState } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import {

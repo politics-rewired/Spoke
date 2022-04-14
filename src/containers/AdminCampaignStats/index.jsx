@@ -8,7 +8,7 @@ import { red600 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React from "react";
 import { Helmet } from "react-helmet";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import { withAuthzContext } from "../../components/AuthzProvider";

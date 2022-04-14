@@ -10,7 +10,7 @@ import pick from "lodash/pick";
 import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import IncomingMessageActions from "../../components/IncomingMessageActions";

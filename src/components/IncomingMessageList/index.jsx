@@ -4,7 +4,7 @@ import FlatButton from "material-ui/FlatButton";
 import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../ClassRouter";
 import { compose } from "recompose";
 
 import { loadData } from "../../containers/hoc/with-operations";

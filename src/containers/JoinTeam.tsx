@@ -2,7 +2,8 @@ import { ApolloQueryResult, gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
-import { RouteChildrenProps, withRouter } from "react-router-dom";
+import { RouteChildrenProps } from "react-router-dom";
+import { withRouter } from "../components/ClassRouter";
 import { compose } from "recompose";
 
 import { Organization } from "../api/organization";

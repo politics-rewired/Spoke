@@ -11,7 +11,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import ContentAdd from "material-ui/svg-icons/content/add";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../components/ClassRouter";
 import { compose } from "recompose";
 
 import { withAuthzContext } from "../components/AuthzProvider";

@@ -25,7 +25,7 @@ import {
 } from "material-ui/Table";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../components/ClassRouter";
 import { compose } from "recompose";
 
 import {

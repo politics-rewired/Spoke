@@ -1,7 +1,7 @@
 import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "./ClassRouter";
 
 import theme from "../styles/theme";
 

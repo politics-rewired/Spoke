@@ -9,7 +9,8 @@ import MenuItem from "material-ui/MenuItem";
 import Popover from "material-ui/Popover";
 import Subheader from "material-ui/Subheader";
 import React, { Component } from "react";
-import { RouterProps, withRouter } from "react-router-dom";
+import { RouterProps } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import { Organization } from "../../api/organization";

@@ -8,7 +8,8 @@ import { amber500, grey500 } from "material-ui/styles/colors";
 import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
 import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 import React from "react";
-import { Redirect, withRouter } from "react-router-dom";
+import { Redirect } from "react-router-dom";
+import { withRouter } from "../../../components/ClassRouter";
 import { compose } from "recompose";
 
 import { RelayPaginatedResponse } from "../../../api/pagination";

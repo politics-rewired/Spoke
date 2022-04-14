@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "./ClassRouter";
 import { compose } from "recompose";
 
 import AdminNavigation from "../containers/AdminNavigation";

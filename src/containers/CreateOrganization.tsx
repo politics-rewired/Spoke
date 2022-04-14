@@ -7,7 +7,8 @@ import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import React from "react";
 import Form from "react-formal";
-import { Link, RouteComponentProps, withRouter } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
+import { withRouter } from "../components/ClassRouter";
 import { compose } from "recompose";
 import * as yup from "yup";
 

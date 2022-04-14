@@ -3,7 +3,7 @@ import { RaisedButton } from "material-ui";
 import Check from "material-ui/svg-icons/action/check-circle";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../components/ClassRouter";
 import { compose } from "recompose";
 
 import AssignmentSummary from "../components/AssignmentSummary";

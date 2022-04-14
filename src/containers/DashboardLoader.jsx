@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 import PropTypes from "prop-types";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../components/ClassRouter";
 import { compose } from "recompose";
 
 import { loadData } from "./hoc/with-operations";

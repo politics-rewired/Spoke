@@ -7,7 +7,8 @@ import FloatingActionButton from "material-ui/FloatingActionButton";
 import ContentAdd from "material-ui/svg-icons/content/add";
 import queryString from "query-string";
 import React from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import { RouteComponentProps } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import { Campaign, CampaignsList } from "../../api/campaign";

@@ -3,7 +3,7 @@ import { css, StyleSheet } from "aphrodite/no-important";
 import { History } from "history";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import SuperAdminLogin from "../../components/SuperAdminLogin";

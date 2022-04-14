@@ -9,7 +9,7 @@ import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import { green300, red500 } from "material-ui/styles/colors";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import {

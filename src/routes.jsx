@@ -1,7 +1,8 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { gql } from "@apollo/client";
 import React from "react";
-import { Redirect, Route, Switch, withRouter } from "react-router-dom";
+import { Redirect, Route, Routes } from "react-router-dom";
+import { withRouter } from "./components/ClassRouter";
 
 import AdminDashboard from "./components/AdminDashboard";
 import { AuthzProvider } from "./components/AuthzProvider";
@@ -81,15 +82,18 @@ const AdminCampaignRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignPath = "/admin/:organizationId/campaigns/:campaignId";
   return (
-    <Switch>
-      <Route path={campaignPath} exact component={AdminCampaignStats} />
-      <Route path={`${campaignPath}/edit`} component={AdminCampaignEdit} />
-      <Route
-        path={`${campaignPath}/send-replies`}
-        component={AdminReplySender}
-      />
+    <Routes>
+      <Route path={campaignPath} exact>
+        <AdminCampaignStats />
+      </Route>
+      <Route path={`${campaignPath}/edit`}>
+        <AdminCampaignEdit />
+      </Route>
+      <Route path={`${campaignPath}/send-replies`}>
+        <AdminReplySender />
+      </Route>
       <Redirect to={campaignPath} />
-    </Switch>
+    </Routes>
   );
 };
 
@@ -97,14 +101,15 @@ const AdminCampaignListRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const campaignsPath = "/admin/:organizationId/campaigns";
   return (
-    <Switch>
-      <Route path={campaignsPath} exact component={AdminCampaignList} />
-      <Route
-        path={`${campaignsPath}/:campaignId`}
-        component={AdminCampaignRoutes}
-      />
+    <Routes>
+      <Route path={campaignsPath} exact>
+        <AdminCampaignList />
+      </Route>
+      <Route path={`${campaignsPath}/:campaignId`}>
+        <AdminCampaignRoutes />
+      </Route>
       <Redirect to={campaignsPath} />
-    </Switch>
+    </Routes>
   );
 };
 
@@ -112,11 +117,15 @@ const AdminTeamRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const teamsPath = "/admin/:organizationId/teams";
   return (
-    <Switch>
-      <Route path={teamsPath} exact component={AdminTeamEditor} />
-      <Route path={`${teamsPath}/:teamId`} component={TeamEditorDetail} />
+    <Routes>
+      <Route path={teamsPath} exact>
+        <AdminTeamEditor />
+      </Route>
+      <Route path={`${teamsPath}/:teamId`}>
+        <TeamEditorDetail />
+      </Route>
       <Redirect to={teamsPath} />
-    </Switch>
+    </Routes>
   );
 };
 
@@ -127,87 +136,72 @@ const AdminOrganizationRoutes = (props) => {
   return (
     <AuthzProvider organizationId={organizationId}>
       <AdminDashboard {...props}>
-        <Switch>
-          <Route
-            path={`${organizationPath}/campaigns`}
-            component={AdminCampaignListRoutes}
-          />
-          <Route
-            path={`${organizationPath}/campaign-groups`}
-            component={AdminCampaignGroupEditor}
-          />
-          <Route path={`${organizationPath}/people`} component={AdminPeople} />
-          <Route
-            path={`${organizationPath}/teams`}
-            component={AdminTeamRoutes}
-          />
-          <Route
-            path={`${organizationPath}/assignment-control`}
-            component={AdminAssignmentControl}
-          />
-          <Route
-            path={`${organizationPath}/autosending`}
-            component={AdminAutosending}
-          />
-          <Route
-            path={`${organizationPath}/tag-editor`}
-            component={AdminTagEditor}
-          />
-          <Route
-            path={`${organizationPath}/optouts`}
-            component={AdminOptOutList}
-          />
-          <Route
-            path={`${organizationPath}/incoming`}
-            component={AdminIncomingMessageList}
-          />
-          <Route
-            path={`${organizationPath}/escalated`}
-            component={EscalatedConversationList}
-          />
-          <Route
-            path={`${organizationPath}/bulk-script-editor`}
-            component={AdminBulkScriptEditor}
-          />
-          <Route
-            path={`${organizationPath}/short-link-domains`}
-            component={AdminShortLinkDomains}
-          />
-          <Route
-            path={`${organizationPath}/assignment-requests`}
-            component={AdminAssignmentRequest}
-          />
-          <Route
-            path={`${organizationPath}/trollalarms`}
-            component={AdminTrollAlarms}
-          />
-          <Route
-            exact
-            path={`${organizationPath}/integrations`}
-            component={AdminExternalSystems}
-          />
-          <Route
-            path={`${organizationPath}/integrations/:systemId`}
-            component={AdminExternalSystemDetail}
-          />
+        <Routes>
+          <Route path={`${organizationPath}/campaigns`}>
+            <AdminCampaignListRoutes />
+          </Route>
+          <Route path={`${organizationPath}/campaign-groups`}>
+            <AdminCampaignGroupEditor />
+          </Route>
+          <Route path={`${organizationPath}/people`}>
+            <AdminPeople />
+          </Route>
+          <Route path={`${organizationPath}/teams`}>
+            <AdminTeamRoutes />
+          </Route>
+          <Route path={`${organizationPath}/assignment-control`}>
+            <AdminAssignmentControl />
+          </Route>
+          <Route path={`${organizationPath}/autosending`}>
+            <AdminAutosending />
+          </Route>
+          <Route path={`${organizationPath}/tag-editor`}>
+            <AdminTagEditor />
+          </Route>
+          <Route path={`${organizationPath}/optouts`}>
+            <AdminOptOutList />
+          </Route>
+          <Route path={`${organizationPath}/incoming`}>
+            <AdminIncomingMessageList />
+          </Route>
+          <Route path={`${organizationPath}/escalated`}>
+            <EscalatedConversationList />
+          </Route>
+          <Route path={`${organizationPath}/bulk-script-editor`}>
+            <AdminBulkScriptEditor />
+          </Route>
+          <Route path={`${organizationPath}/short-link-domains`}>
+            <AdminShortLinkDomains />
+          </Route>
+          <Route path={`${organizationPath}/assignment-requests`}>
+            <AdminAssignmentRequest />
+          </Route>
+          <Route path={`${organizationPath}/trollalarms`}>
+            <AdminTrollAlarms />
+          </Route>
+          <Route exact path={`${organizationPath}/integrations`}>
+            <AdminExternalSystems />
+          </Route>
+          <Route path={`${organizationPath}/integrations/:systemId`}>
+            <AdminExternalSystemDetail />
+          </Route>
           <Redirect
             exact
             path={`${organizationPath}/settings`}
             to={`${organizationPath}/settings/general`}
           />
-          <Route
-            path={`${organizationPath}/settings/:page`}
-            component={SettingsRouter}
-          />
+          <Route path={`${organizationPath}/settings/:page`}>
+            <SettingsRouter />
+          </Route>
           <Redirect to={`${organizationPath}/campaigns`} />
-        </Switch>
+        </Routes>
       </AdminDashboard>
     </AuthzProvider>
   );
 };
 
 const AdminRoutes = ({ match }) => (
-  <Switch>
+  <Routes>
     <Route
       path={match.path}
       exact
@@ -215,12 +209,11 @@ const AdminRoutes = ({ match }) => (
         <DashboardLoader path={match.path} {...indexProps} />
       )}
     />
-    <Route
-      path={`${match.path}/:organizationId`}
-      component={AdminOrganizationRoutes}
-    />
+    <Route path={`${match.path}/:organizationId`}>
+      <AdminOrganizationRoutes />
+    </Route>
     <Redirect to={match.path} />
-  </Switch>
+  </Routes>
 );
 
 const TexterDashboardRoute = (props) => {
@@ -246,7 +239,7 @@ const TexterAssignmentRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const assignmentPath = "/app/:organizationId/todos/:assignmentId";
   return (
-    <Switch>
+    <Routes>
       <TexterDashboardRoute
         path={`${assignmentPath}/text`}
         fullScreen={(routeProups) => (
@@ -282,7 +275,7 @@ const TexterAssignmentRoutes = () => {
         topNav={undefined}
       />
       <Redirect to={`${assignmentPath}/text`} />
-    </Switch>
+    </Routes>
   );
 };
 
@@ -290,7 +283,7 @@ const TexterTodoRoutes = () => {
   // Use full path over props.match.path to get access to organizationId param
   const todosPath = "/app/:organizationId/todos";
   return (
-    <Switch>
+    <Routes>
       <TexterDashboardRoute
         path={todosPath}
         exact
@@ -299,11 +292,10 @@ const TexterTodoRoutes = () => {
           <TopNav title="Texting" orgId={match.params.organizationId} />
         )}
       />
-      <Route
-        path={`${todosPath}/:assignmentId`}
-        component={TexterAssignmentRoutes}
-      />
-    </Switch>
+      <Route path={`${todosPath}/:assignmentId`}>
+        <TexterAssignmentRoutes />
+      </Route>
+    </Routes>
   );
 };
 
@@ -313,7 +305,7 @@ const TexterOrganizationRoutes = (props) => {
   const { organizationId } = props.match.params;
   return (
     <AuthzProvider organizationId={organizationId}>
-      <Switch>
+      <Routes>
         <TexterDashboardRoute
           path={`${organizationPath}/account/:userId`}
           main={({ match }) => (
@@ -327,44 +319,50 @@ const TexterOrganizationRoutes = (props) => {
           )}
         />
 
-        <Route
-          path={`${organizationPath}/todos`}
-          component={TexterTodoRoutes}
-        />
+        <Route path={`${organizationPath}/todos`}>
+          <TexterTodoRoutes />
+        </Route>
 
         <Redirect to={`${organizationPath}/todos`} />
-      </Switch>
+      </Routes>
     </AuthzProvider>
   );
 };
 
 const TexterRoutes = ({ match }) => (
-  <Switch>
+  <Routes>
     <Route
       path={match.path}
       exact
       render={() => <DashboardLoader path={match.path} />}
     />
-    <Route
-      path={`${match.path}/:organizationId`}
-      component={TexterOrganizationRoutes}
-    />
+    <Route path={`${match.path}/:organizationId`}>
+      <TexterOrganizationRoutes />
+    </Route>
     <Redirect to={match.path} />
-  </Switch>
+  </Routes>
 );
 
 const AppRoutes = () => (
-  <Switch>
-    <Route path="/" exact component={Home} />
-    <Route path="/login" component={Login} />
-    <Route path="/terms" component={Terms} />
+  <Routes>
+    <Route path="/" exact>
+      <Home />
+    </Route>
+    <Route path="/login">
+      <Login />
+    </Route>
+    <Route path="/terms">
+      <Terms />
+    </Route>
     <Route
       path="/reset/:resetHash"
       render={({ location }) => (
         <Redirect to={`/login?nextUrl=${location.pathname}`} />
       )}
     />
-    <Route path="/email-reset" component={Login} />
+    <Route path="/email-reset">
+      <Login />
+    </Route>
     <AuthenticatedRoute path="/admin" component={AdminRoutes} />
     <AuthenticatedRoute path="/app" component={TexterRoutes} />
     <AuthenticatedRoute
@@ -380,7 +378,7 @@ const AppRoutes = () => (
       path="/:organizationUuid/join/:campaignId"
       component={JoinTeam}
     />
-  </Switch>
+  </Routes>
 );
 
 export default AppRoutes;

@@ -4,7 +4,7 @@ import { Card, CardHeader, CardText } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
 import ArrowBack from "material-ui/svg-icons/navigation/arrow-back";
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../components/ClassRouter";
 import { compose } from "recompose";
 
 import { ExternalSystem } from "../../api/external-system";

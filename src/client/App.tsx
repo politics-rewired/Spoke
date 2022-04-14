@@ -2,7 +2,6 @@ import { ApolloProvider } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
 import React from "react";
 import { BrowserRouter, Route } from "react-router-dom";
-import { QueryParamProvider } from "use-query-params";
 
 import ApolloClientSingleton from "../network/apollo-client-singleton";
 import AppRoutes from "../routes";
@@ -22,16 +21,14 @@ const App: React.FC = () => {
   return (
     <ApolloProvider client={ApolloClientSingleton}>
       <BrowserRouter>
-        <QueryParamProvider ReactRouterRoute={Route}>
-          <SpokeContextProvider>
-            <SpokeThemeProvider>
-              <div className={css(styles.root)}>
-                <VersionNotifier />
-                <AppRoutes />
-              </div>
-            </SpokeThemeProvider>
-          </SpokeContextProvider>
-        </QueryParamProvider>
+        <SpokeContextProvider>
+          <SpokeThemeProvider>
+            <div className={css(styles.root)}>
+              <VersionNotifier />
+              <AppRoutes />
+            </div>
+          </SpokeThemeProvider>
+        </SpokeContextProvider>
       </BrowserRouter>
     </ApolloProvider>
   );
