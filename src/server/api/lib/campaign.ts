@@ -1,4 +1,5 @@
 /* eslint-disable import/prefer-default-export */
+import isEmpty from "lodash/isEmpty";
 import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import { QueryResult } from "pg";
@@ -354,7 +355,8 @@ export const editCampaign = async (
 
   if (
     Object.prototype.hasOwnProperty.call(campaign, "contacts") &&
-    campaign.contacts
+    campaign.contacts &&
+    !isEmpty(campaign.contacts)
   ) {
     await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
 
