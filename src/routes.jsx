@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { gql } from "@apollo/client";
 import React from "react";
-import { Redirect, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { withRouter } from "./components/ClassRouter";
 
 import AdminDashboard from "./components/AdminDashboard";
@@ -83,16 +83,13 @@ const AdminCampaignRoutes = () => {
   const campaignPath = "/admin/:organizationId/campaigns/:campaignId";
   return (
     <Routes>
-      <Route path={campaignPath} exact>
-        <AdminCampaignStats />
-      </Route>
-      <Route path={`${campaignPath}/edit`}>
-        <AdminCampaignEdit />
-      </Route>
-      <Route path={`${campaignPath}/send-replies`}>
-        <AdminReplySender />
-      </Route>
-      <Redirect to={campaignPath} />
+      <Route path={campaignPath} exact element={AdminCampaignStats} />
+      <Route path={`${campaignPath}/edit`} element={AdminCampaignEdit} />
+      <Route
+        path={`${campaignPath}/send-replies`}
+        element={AdminReplySender}
+      />
+      <Navigate to={campaignPath} />
     </Routes>
   );
 };
@@ -102,13 +99,12 @@ const AdminCampaignListRoutes = () => {
   const campaignsPath = "/admin/:organizationId/campaigns";
   return (
     <Routes>
-      <Route path={campaignsPath} exact>
-        <AdminCampaignList />
-      </Route>
-      <Route path={`${campaignsPath}/:campaignId`}>
-        <AdminCampaignRoutes />
-      </Route>
-      <Redirect to={campaignsPath} />
+      <Route path={campaignsPath} exact element={AdminCampaignList} />
+      <Route
+        path={`${campaignsPath}/:campaignId`}
+        element={AdminCampaignRoutes}
+      />
+      <Navigate to={campaignsPath} />
     </Routes>
   );
 };
@@ -118,13 +114,9 @@ const AdminTeamRoutes = () => {
   const teamsPath = "/admin/:organizationId/teams";
   return (
     <Routes>
-      <Route path={teamsPath} exact>
-        <AdminTeamEditor />
-      </Route>
-      <Route path={`${teamsPath}/:teamId`}>
-        <TeamEditorDetail />
-      </Route>
-      <Redirect to={teamsPath} />
+      <Route path={teamsPath} exact element={AdminTeamEditor} />
+      <Route path={`${teamsPath}/:teamId`} element={TeamEditorDetail} />
+      <Navigate to={teamsPath} />
     </Routes>
   );
 };
@@ -137,70 +129,86 @@ const AdminOrganizationRoutes = (props) => {
     <AuthzProvider organizationId={organizationId}>
       <AdminDashboard {...props}>
         <Routes>
-          <Route path={`${organizationPath}/campaigns`}>
-            <AdminCampaignListRoutes />
-          </Route>
-          <Route path={`${organizationPath}/campaign-groups`}>
-            <AdminCampaignGroupEditor />
-          </Route>
-          <Route path={`${organizationPath}/people`}>
-            <AdminPeople />
-          </Route>
-          <Route path={`${organizationPath}/teams`}>
-            <AdminTeamRoutes />
-          </Route>
-          <Route path={`${organizationPath}/assignment-control`}>
-            <AdminAssignmentControl />
-          </Route>
-          <Route path={`${organizationPath}/autosending`}>
-            <AdminAutosending />
-          </Route>
-          <Route path={`${organizationPath}/tag-editor`}>
-            <AdminTagEditor />
-          </Route>
-          <Route path={`${organizationPath}/optouts`}>
-            <AdminOptOutList />
-          </Route>
-          <Route path={`${organizationPath}/incoming`}>
-            <AdminIncomingMessageList />
-          </Route>
-          <Route path={`${organizationPath}/escalated`}>
-            <EscalatedConversationList />
-          </Route>
-          <Route path={`${organizationPath}/bulk-script-editor`}>
-            <AdminBulkScriptEditor />
-          </Route>
-          <Route path={`${organizationPath}/short-link-domains`}>
-            <AdminShortLinkDomains />
-          </Route>
-          <Route path={`${organizationPath}/assignment-requests`}>
-            <AdminAssignmentRequest />
-          </Route>
-          <Route path={`${organizationPath}/trollalarms`}>
-            <AdminTrollAlarms />
-          </Route>
-          <Route exact path={`${organizationPath}/integrations`}>
-            <AdminExternalSystems />
-          </Route>
-          <Route path={`${organizationPath}/integrations/:systemId`}>
-            <AdminExternalSystemDetail />
-          </Route>
-          <Redirect
+          <Route
+            path={`${organizationPath}/campaigns`}
+            element={AdminCampaignListRoutes}
+          />
+          <Route
+            path={`${organizationPath}/campaign-groups`}
+            element={AdminCampaignGroupEditor}
+          />
+          <Route path={`${organizationPath}/people`} element={AdminPeople} />
+          <Route
+            path={`${organizationPath}/teams`}
+            element={AdminTeamRoutes}
+          />
+          <Route
+            path={`${organizationPath}/assignment-control`}
+            element={AdminAssignmentControl}
+          />
+          <Route
+            path={`${organizationPath}/autosending`}
+            element={AdminAutosending}
+          />
+          <Route
+            path={`${organizationPath}/tag-editor`}
+            element={AdminTagEditor}
+          />
+          <Route
+            path={`${organizationPath}/optouts`}
+            element={AdminOptOutList}
+          />
+          <Route
+            path={`${organizationPath}/incoming`}
+            element={AdminIncomingMessageList}
+          />
+          <Route
+            path={`${organizationPath}/escalated`}
+            element={EscalatedConversationList}
+          />
+          <Route
+            path={`${organizationPath}/bulk-script-editor`}
+            element={AdminBulkScriptEditor}
+          />
+          <Route
+            path={`${organizationPath}/short-link-domains`}
+            element={AdminShortLinkDomains}
+          />
+          <Route
+            path={`${organizationPath}/assignment-requests`}
+            element={AdminAssignmentRequest}
+          />
+          <Route
+            path={`${organizationPath}/trollalarms`}
+            element={AdminTrollAlarms}
+          />
+          <Route
+            exact
+            path={`${organizationPath}/integrations`}
+            element={AdminExternalSystems}
+          />
+          <Route
+            path={`${organizationPath}/integrations/:systemId`}
+            element={AdminExternalSystemDetail}
+          />
+          <Navigate
             exact
             path={`${organizationPath}/settings`}
             to={`${organizationPath}/settings/general`}
           />
-          <Route path={`${organizationPath}/settings/:page`}>
-            <SettingsRouter />
-          </Route>
-          <Redirect to={`${organizationPath}/campaigns`} />
+          <Route
+            path={`${organizationPath}/settings/:page`}
+            element={SettingsRouter}
+          />
+          <Navigate to={`${organizationPath}/campaigns`} />
         </Routes>
       </AdminDashboard>
     </AuthzProvider>
   );
 };
 
-const AdminRoutes = ({ match }) => (
+const AdminRoutes = ({ match }) => {
+return (
   <Routes>
     <Route
       path={match.path}
@@ -209,12 +217,12 @@ const AdminRoutes = ({ match }) => (
         <DashboardLoader path={match.path} {...indexProps} />
       )}
     />
-    <Route path={`${match.path}/:organizationId`}>
+    <Route path={`${match.path}/:organizationId`} >
       <AdminOrganizationRoutes />
     </Route>
-    <Redirect to={match.path} />
+    <Navigate to={match.path} />
   </Routes>
-);
+)};
 
 const TexterDashboardRoute = (props) => {
   const { children, main, topNav, fullScreen, ...rest } = props;
@@ -274,7 +282,7 @@ const TexterAssignmentRoutes = () => {
         )}
         topNav={undefined}
       />
-      <Redirect to={`${assignmentPath}/text`} />
+      <Navigate to={`${assignmentPath}/text`} />
     </Routes>
   );
 };
@@ -292,9 +300,10 @@ const TexterTodoRoutes = () => {
           <TopNav title="Texting" orgId={match.params.organizationId} />
         )}
       />
-      <Route path={`${todosPath}/:assignmentId`}>
-        <TexterAssignmentRoutes />
-      </Route>
+      <Route
+        path={`${todosPath}/:assignmentId`}
+        element={TexterAssignmentRoutes}
+      />
     </Routes>
   );
 };
@@ -319,11 +328,12 @@ const TexterOrganizationRoutes = (props) => {
           )}
         />
 
-        <Route path={`${organizationPath}/todos`}>
-          <TexterTodoRoutes />
-        </Route>
+        <Route
+          path={`${organizationPath}/todos`}
+          element={TexterTodoRoutes}
+        />
 
-        <Redirect to={`${organizationPath}/todos`} />
+        <Navigate to={`${organizationPath}/todos`} />
       </Routes>
     </AuthzProvider>
   );
@@ -336,48 +346,31 @@ const TexterRoutes = ({ match }) => (
       exact
       render={() => <DashboardLoader path={match.path} />}
     />
-    <Route path={`${match.path}/:organizationId`}>
-      <TexterOrganizationRoutes />
-    </Route>
-    <Redirect to={match.path} />
+    <Route
+      path={`${match.path}/:organizationId`}
+      element={TexterOrganizationRoutes}
+    />
+    <Navigate to={match.path} />
   </Routes>
 );
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" exact>
-      <Home />
-    </Route>
-    <Route path="/login">
-      <Login />
-    </Route>
-    <Route path="/terms">
-      <Terms />
-    </Route>
+    <Route path="/" exact element={<Home />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/terms" element={<Terms />} />
     <Route
       path="/reset/:resetHash"
       render={({ location }) => (
-        <Redirect to={`/login?nextUrl=${location.pathname}`} />
+        <Navigate to={`/login?nextUrl=${location.pathname}`} />
       )}
     />
-    <Route path="/email-reset">
-      <Login />
-    </Route>
-    <AuthenticatedRoute path="/admin" component={AdminRoutes} />
-    <AuthenticatedRoute path="/app" component={TexterRoutes} />
-    <AuthenticatedRoute
-      path="/invite/:inviteId"
-      component={CreateOrganization}
-    />
-    <AuthenticatedRoute
-      path="/:organizationUuid/join"
-      exact
-      component={JoinTeam}
-    />
-    <AuthenticatedRoute
-      path="/:organizationUuid/join/:campaignId"
-      component={JoinTeam}
-    />
+    <Route path="/email-reset" element={Login} />
+    <Route path="/admin" element={
+      <Protected>
+        <AdminRoutes />
+      </Protected>
+    } />
   </Routes>
 );
 

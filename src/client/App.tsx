@@ -1,7 +1,7 @@
 import { ApolloProvider } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
 import React from "react";
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
 import ApolloClientSingleton from "../network/apollo-client-singleton";
 import AppRoutes from "../routes";
@@ -24,7 +24,6 @@ const App: React.FC = () => {
         <SpokeContextProvider>
           <SpokeThemeProvider>
             <div className={css(styles.root)}>
-              <VersionNotifier />
               <AppRoutes />
             </div>
           </SpokeThemeProvider>
