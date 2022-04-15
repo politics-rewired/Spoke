@@ -19,13 +19,13 @@ const formatContactName = (contact) => {
 };
 
 const prepareDataTableData = (conversations) =>
-  conversations.map((conversation, index) => ({
-    campaignTitle: conversation.campaign.title,
-    texter: conversation.texter.displayName,
-    to: formatContactName(conversation.contact),
-    status: conversation.contact.messageStatus,
-    messages: conversation.contact.messages,
-    updatedAt: conversation.contact.updatedAt,
+  conversations.map(({ campaign, texter, contact }, index) => ({
+    campaignTitle: `${campaign.id}: ${campaign.title}`,
+    texter: texter.displayName,
+    to: formatContactName(contact),
+    status: contact.messageStatus,
+    messages: contact.messages,
+    updatedAt: contact.updatedAt,
     index
   }));
 
