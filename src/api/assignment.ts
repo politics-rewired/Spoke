@@ -26,13 +26,13 @@ export const schema = `
   }
 
   type Assignment {
-    id: ID
-    texter: User
-    campaign: Campaign
-    contacts(contactsFilter: ContactsFilter): [CampaignContact]
-    contactsCount(contactsFilter: ContactsFilter): Int
-    userCannedResponses: [CannedResponse]
-    campaignCannedResponses: [CannedResponse]
+    id: ID!
+    texter: User!
+    campaign: Campaign!
+    contacts(contactsFilter: ContactsFilter): [CampaignContact!]!
+    contactsCount(contactsFilter: ContactsFilter): Int!
+    userCannedResponses: [CannedResponse!]!
+    campaignCannedResponses: [CannedResponse!]!
     maxContacts: Int
   }
 `;
