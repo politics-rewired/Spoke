@@ -733,11 +733,11 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   renderCannedResponsePopover() {
-    const { campaign } = this.props;
+    const { assignment } = this.props;
 
     return (
       <CannedResponseMenu
-        campaignId={campaign.id}
+        assignmentId={assignment.id}
         anchorEl={this.state.responsePopoverAnchorEl}
         onSelectCannedResponse={this.handleCannedResponseChange}
         onRequestClose={this.handleClosePopover}

@@ -12,3 +12,12 @@ query GetCampaignCannedResponses($campaignId: String!) {
     }
   }
 }
+
+query GetAssignmentCannedResponses($assignmentId: String!) {
+  assignment(id: $assignmentId) {
+    id
+    cannedResponses: campaignCannedResponses {
+      ...CannedResponseInfo
+    }
+  }
+}
