@@ -136,6 +136,8 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
       >
         <CardHeader
           style={styles.cardHeader}
+          titleTypographyProps={{ variant: "body1" }}
+          subheaderTypographyProps={{ variant: "body2" }}
           title={title}
           subheader={
             parentInteractionId
