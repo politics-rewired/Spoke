@@ -13,7 +13,7 @@ const getUserByAuth0Id = memoizer.memoize(
   async ({ auth0Id }: { auth0Id: string | number }) => {
     const userAuth = await r
       .reader("user")
-      .where("auth0_id", auth0Id)
+      .where({ auth0_id: auth0Id, is_suspended: false })
       .first("*");
 
     return userAuth;
@@ -23,7 +23,10 @@ const getUserByAuth0Id = memoizer.memoize(
 
 const getUserById = memoizer.memoize(
   async ({ id }: { id: string | number }) => {
-    const userAuth = await r.reader("user").where({ id }).first("*");
+    const userAuth = await r
+      .reader("user")
+      .where({ id, is_suspended: false })
+      .first("*");
 
     return userAuth;
   },
