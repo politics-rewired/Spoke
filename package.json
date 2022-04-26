@@ -218,7 +218,7 @@
     "@types/react-router-dom": "^5.1.7",
     "@types/react-select": "^2.0.0",
     "@types/recompose": "^0.30.7",
-    "@types/redis": "^2.8.28",
+    "@types/redis": "^2.8.32",
     "@types/superagent": "^4.1.7",
     "@types/supertest": "^2.0.11",
     "@types/webpack": "^5.28.0",
