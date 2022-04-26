@@ -3037,7 +3037,8 @@ CREATE TABLE public."user" (
     assigned_cell text,
     is_superadmin boolean,
     terms boolean DEFAULT false,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    is_suspended boolean DEFAULT false NOT NULL
 );
 
 
