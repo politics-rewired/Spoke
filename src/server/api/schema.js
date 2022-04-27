@@ -581,8 +581,6 @@ const rootMutations = {
     clearUserSessions: async (_root, { userId }, { user, db }) => {
       await superAdminRequired(user);
 
-      console.log("clearUserSessions", userId);
-
       await db.primary.raw(`delete from user_session where user_id = ?`, [
         userId
       ]);
