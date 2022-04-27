@@ -13,7 +13,7 @@ const getUserByAuth0Id = memoizer.memoize(
   async ({ auth0Id }: { auth0Id: string | number }) => {
     const userAuth = await r
       .reader("user")
-      .where({ auth0_id: auth0Id, is_suspended: false })
+      .where("auth0_id", auth0Id)
       .first("*");
 
     return userAuth;
@@ -23,10 +23,7 @@ const getUserByAuth0Id = memoizer.memoize(
 
 export const getUserById = memoizer.memoize(
   async ({ id }: { id: string | number }) => {
-    const userAuth = await r
-      .reader("user")
-      .where({ id, is_suspended: false })
-      .first("*");
+    const userAuth = await r.reader("user").where({ id }).first("*");
 
     return userAuth;
   },
@@ -44,7 +41,7 @@ export async function userLoggedIn(
       ? await getUserByAuth0Id({ auth0Id: val })
       : null;
 
-  return result;
+  return result.is_suspended ? null : result;
 }
 
 export async function currentEditors(
