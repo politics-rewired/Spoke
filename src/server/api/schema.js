@@ -574,7 +574,7 @@ const rootMutations = {
         auth0Id: user.auth0_id
       });
 
-      const userResult = await getUserById(userId);
+      const userResult = await getUserById({ id: userId });
       return userResult;
     },
 
@@ -587,7 +587,7 @@ const rootMutations = {
         userId
       ]);
 
-      const userResult = await getUserById(userId);
+      const userResult = await getUserById({ id: userId });
       return userResult;
     },
 
