@@ -65,7 +65,8 @@ export const createApp = async () => {
         pool: pgPool,
         tableName: "user_session",
         createTableIfMissing: false,
-        errorLog: (...args) => logger.error(...args)
+        errorLog: (...args) => logger.error(...args),
+        pruneSessionInterval: config.isTest ? false : 60
       }),
       resave: false,
       saveUninitialized: false
