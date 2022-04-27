@@ -21,7 +21,7 @@ const getUserByAuth0Id = memoizer.memoize(
   cacheOpts.GetUser
 );
 
-const getUserById = memoizer.memoize(
+export const getUserById = memoizer.memoize(
   async ({ id }: { id: string | number }) => {
     const userAuth = await r
       .reader("user")

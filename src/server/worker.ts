@@ -1,10 +1,10 @@
 import { LogFunctionFactory, Logger } from "graphile-worker";
-import { Pool } from "pg";
 import { loadYaml, PgComposeWorker, run } from "pg-compose";
 
 import { config } from "../config";
 import { sleep } from "../lib";
 import logger from "../logger";
+import pgPool from "./db";
 import {
   assignTexters,
   TASK_IDENTIFIER as assignTextersIdentifier
@@ -48,13 +48,6 @@ const graphileLogger = new Logger(logFactory);
 
 let worker: PgComposeWorker | undefined;
 let workerSemaphore = false;
-
-const poolConfig = {
-  connectionString: config.DATABASE_URL,
-  max: config.WORKER_MAX_POOL
-};
-
-const workerPool = new Pool(poolConfig);
 
 export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   if (worker) return worker;
@@ -159,7 +152,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
     workerSemaphore = true;
 
     worker = await run(m, {
-      pgPool: workerPool,
+      pgPool,
       encryptionSecret: config.SESSION_SECRET,
       concurrency: config.WORKER_CONCURRENCY,
       logger: graphileLogger,

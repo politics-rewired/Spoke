@@ -27,6 +27,7 @@ import {
 import { change } from "../local-auth-helpers";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
+import { getUserById } from "../models/cacheable_queries";
 import { Notifications, sendUserNotification } from "../notifications";
 import { addExportCampaign } from "../tasks/export-campaign";
 import { addExportForVan } from "../tasks/export-for-van";
@@ -554,6 +555,40 @@ const rootMutations = {
       });
 
       return updatedUser;
+    },
+
+    setUserSuspended: async (_root, { userId, isSuspended }, { user, db }) => {
+      await superAdminRequired(user);
+
+      await db.primary.transaction(async (trx) => {
+        await trx.raw(`update public.user set is_suspended = ? where id = ?`, [
+          isSuspended,
+          userId
+        ]);
+
+        await trx.raw(`delete from user_session where user_id = ?`, [userId]);
+      });
+
+      memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
+      memoizer.invalidate(cacheOpts.GetUser.key, {
+        auth0Id: user.auth0_id
+      });
+
+      const userResult = await getUserById(userId);
+      return userResult;
+    },
+
+    clearUserSessions: async (_root, { userId }, { user, db }) => {
+      await superAdminRequired(user);
+
+      console.log("clearUserSessions", userId);
+
+      await db.primary.raw(`delete from user_session where user_id = ?`, [
+        userId
+      ]);
+
+      const userResult = await getUserById(userId);
+      return userResult;
     },
 
     unassignTextsFromUser: async (_root, { membershipId }, { user }) => {

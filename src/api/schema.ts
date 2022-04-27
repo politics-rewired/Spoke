@@ -254,6 +254,8 @@ const rootSchema = `
     editUser(organizationId: String!, userId: String!, userData:UserInput): User
     resetUserPassword(organizationId: String!, userId: String!): String!
     changeUserPassword(userId: String!, formData: UserPasswordChange): User
+    setUserSuspended(userId: String!, isSuspended: Boolean!): User!
+    clearUserSessions(userId: String!): User!
     updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
     updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization

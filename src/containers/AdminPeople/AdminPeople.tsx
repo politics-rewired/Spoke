@@ -99,6 +99,22 @@ export interface AdminPeopleMutations {
       resetUserPassword: string;
     }>
   >;
+  setUserSuspended: (
+    userId: string,
+    isSuspended: boolean
+  ) => Promise<
+    ApolloQueryResult<{
+      id: string;
+      isSuspended: boolean;
+    }>
+  >;
+  clearUserSessions: (
+    userId: string
+  ) => Promise<
+    ApolloQueryResult<{
+      id: string;
+    }>
+  >;
   removeUsers: () => Promise<
     ApolloQueryResult<{
       purgeOrganizationUsers: number;
@@ -321,6 +337,14 @@ class AdminPeople extends React.Component<
     }
   };
 
+  handleSetSuspended = async (userId: string, isSuspended: boolean) => {
+    await this.props.mutations.setUserSuspended(userId, isSuspended);
+  };
+
+  handleClearSessions = async (userId: string) => {
+    await this.props.mutations.clearUserSessions(userId);
+  };
+
   ctx(): AdminPeopleContext {
     const { campaignId } = queryString.parse(this.props.location.search);
     return {
@@ -353,6 +377,9 @@ class AdminPeople extends React.Component<
       editAutoApprove: (autoApprove, userId) =>
         this.handleEditAutoApprove(autoApprove, userId),
       resetUserPassword: (userId) => this.handleResetPassword(userId),
+      setSuspended: (userId, isSuspended) =>
+        this.handleSetSuspended(userId, isSuspended),
+      clearSessions: (userId) => this.handleClearSessions(userId),
       error: (message) => this.setState({ error: { message, seen: false } })
     };
   }
@@ -553,6 +580,36 @@ const mutations: MutationMap<AdminPeopleExtendedProps> = {
       `,
       variables: {
         organizationId,
+        userId
+      }
+    };
+  },
+  setUserSuspended: (_ownProps) => (userId: string, isSuspended: boolean) => {
+    return {
+      mutation: gql`
+        mutation SetUserSuspended($userId: String!, $isSuspended: Boolean!) {
+          setUserSuspended(userId: $userId, isSuspended: $isSuspended) {
+            id
+            isSuspended
+          }
+        }
+      `,
+      variables: {
+        userId,
+        isSuspended
+      }
+    };
+  },
+  clearUserSessions: (_ownProps) => (userId: string) => {
+    return {
+      mutation: gql`
+        mutation ClearUserSessions($userId: String!) {
+          clearUserSessions(userId: $userId) {
+            id
+          }
+        }
+      `,
+      variables: {
         userId
       }
     };
