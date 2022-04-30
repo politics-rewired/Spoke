@@ -1,6 +1,6 @@
+import Chip from "@material-ui/core/Chip";
 import uniqBy from "lodash/uniqBy";
 import ChipInput from "material-ui-chip-input";
-import Chip from "material-ui/Chip";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import TextField from "material-ui/TextField";
@@ -101,12 +101,9 @@ const AssignmentRow: React.FC<Props> = (props) => {
     <div style={{ display: "flex", alignItems: "center" }}>
       <div style={{ minWidth: "200px" }}>
         <Chip
-          style={{ display: "inline-block" }}
-          labelColor={textColor}
-          backgroundColor={backgroundColor}
-        >
-          {title}
-        </Chip>
+          label={title}
+          style={{ display: "inline-block", color: textColor, backgroundColor }}
+        />
       </div>
       <div>
         <Toggle

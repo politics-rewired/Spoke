@@ -1,7 +1,7 @@
+import Chip from "@material-ui/core/Chip";
 import { useTheme } from "@material-ui/core/styles";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import Chip from "material-ui/Chip";
 import React from "react";
 
 import { AssignmentTarget } from "../../api/organization";
@@ -38,9 +38,11 @@ const AssignmentHUD: React.FC<Props> = (props) => {
         {assignmentTargets.map((target) => (
           <div key={target.teamTitle} className={css(styles.row)}>
             {!target.enabled && (
-              <Chip className={css(styles.disabledChip)} style={disabledStyle}>
-                Disabled
-              </Chip>
+              <Chip
+                label="Disabled"
+                className={css(styles.disabledChip)}
+                style={disabledStyle}
+              />
             )}
             <Chip className={css(styles.chip)}>{target.teamTitle}</Chip>
             <div className={css(styles.prefix)}>{target.type} &#8594;</div>

@@ -1,8 +1,8 @@
+import Chip from "@material-ui/core/Chip";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { Chip } from "material-ui";
 import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -54,11 +54,10 @@ class ConfirmationStepsEditor extends Component {
                   {confirmationSteps.map((stepArray, stepArrayIdx) => (
                     <Chip
                       key={stepArray[0]}
-                      onRequestDelete={() => handleDeleteStep(stepArrayIdx)}
+                      label={stepArray[0]}
                       style={{ margin: 4 }}
-                    >
-                      {stepArray[0]}
-                    </Chip>
+                      onDelete={() => handleDeleteStep(stepArrayIdx)}
+                    />
                   ))}
                 </div>
                 <FlatButton
