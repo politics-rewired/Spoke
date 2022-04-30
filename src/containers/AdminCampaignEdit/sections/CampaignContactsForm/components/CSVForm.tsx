@@ -1,8 +1,9 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import "../styles/file-drop.css";
 
+import Button from "@material-ui/core/Button";
 import PublishIcon from "@material-ui/icons/Publish";
 import { css, StyleSheet } from "aphrodite";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 import { FileDrop } from "react-file-drop";
 
@@ -62,19 +63,22 @@ const CSVForm: React.SFC<Props> = (props) => {
         }
       >
         <p>{contactsFile ? contactsFile.name : "Drop a csv here, or"}</p>
-        <RaisedButton
-          label="Select a file"
-          containerElement="label"
-          icon={<PublishIcon />}
-        >
-          <input
-            id="csv-upload-field"
-            type="file"
-            accept=".csv"
-            style={{ display: "none" }}
-            onChange={handleOnSelectFile}
-          />
-        </RaisedButton>
+        <input
+          id="csv-upload-field"
+          type="file"
+          accept=".csv"
+          style={{ display: "none" }}
+          onChange={handleOnSelectFile}
+        />
+        <label htmlFor="csv-upload-field">
+          <Button
+            variant="contained"
+            endIcon={<PublishIcon />}
+            component="span"
+          >
+            Select a file
+          </Button>
+        </label>
       </FileDrop>
     </div>
   );

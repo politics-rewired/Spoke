@@ -1,6 +1,6 @@
+import Button from "@material-ui/core/Button";
 import differenceBy from "lodash/differenceBy";
 import ChipInput from "material-ui-chip-input";
-import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
@@ -90,12 +90,14 @@ class CampaignTeamsForm extends React.Component {
             onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
           />
         </GSForm>
-        <RaisedButton
-          label={saveLabel}
+        <Button
+          variant="contained"
+          style={styles.button}
           disabled={saveDisabled}
           onClick={this.props.onSubmit}
-          style={styles.button}
-        />
+        >
+          {saveLabel}
+        </Button>
       </div>
     );
   }

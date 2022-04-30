@@ -1,9 +1,8 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import CreateIcon from "@material-ui/icons/Create";
 import isEqual from "lodash/isEqual";
 import uniqBy from "lodash/uniqBy";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 import { compose } from "recompose";
 
@@ -222,20 +221,23 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         <hr />
         {this.renderCannedResponseDialog()}
         {!shouldShowEditor && (
-          <FlatButton
+          <Button
             {...dataTest("newCannedResponse")}
-            secondary
-            label="Add new canned response"
-            icon={<CreateIcon />}
+            color="secondary"
+            endIcon={<CreateIcon />}
             onClick={this.makeHandleToggleResponseDialog()}
-          />
+          >
+            Add new canned response
+          </Button>
         )}
         <br />
-        <RaisedButton
-          label={finalSaveLabel}
+        <Button
+          variant="contained"
           disabled={isSaveDisabled}
           onClick={this.handleSubmit}
-        />
+        >
+          {finalSaveLabel}
+        </Button>
       </div>
     );
   }

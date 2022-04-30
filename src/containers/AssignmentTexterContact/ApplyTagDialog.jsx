@@ -1,9 +1,8 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -100,35 +99,31 @@ class ApplyTagDialog extends Component {
 
     const saveActions = shouldAllowUserToMoveOn
       ? [
-          <FlatButton
+          <Button
             key="save-with-message"
-            label="Save and Type Message"
-            primary
+            color="primary"
             onClick={this.handleApplyTags}
-          />,
-          <FlatButton
+          >
+            Save and Type Message
+          </Button>,
+          <Button
             key="save-without-message"
-            label="Save and Move On Without a Message"
-            primary
+            color="primary"
             onClick={this.handleApplyTagsAndMoveOn}
-          />
+          >
+            Save and Move On Without a Message
+          </Button>
         ]
       : [
-          <FlatButton
-            key="save"
-            label="Save"
-            primary
-            onClick={this.handleApplyTags}
-          />
+          <Button key="save" color="primary" onClick={this.handleApplyTags}>
+            Save
+          </Button>
         ];
 
     const selectTagActions = saveActions.concat([
-      <FlatButton
-        key="save"
-        label="Cancel"
-        primary
-        onClick={this.props.onRequestClose}
-      />
+      <Button key="save" color="primary" onClick={this.props.onRequestClose}>
+        Cancel
+      </Button>
     ]);
 
     return (
@@ -142,12 +137,14 @@ class ApplyTagDialog extends Component {
           <DialogTitle>More Actions</DialogTitle>
           <DialogContent>
             {!!escalateTag && (
-              <RaisedButton
-                label="Escalate Conversation"
-                buttonStyle={{ paddingLeft: 20, paddingRight: 20 }}
-                secondary
+              <Button
+                variant="contained"
+                color="secondary"
+                style={{ paddingLeft: 20, paddingRight: 20 }}
                 onClick={this.handleAddEscalatedTag}
-              />
+              >
+                Escalate Conversation
+              </Button>
             )}
             <TagSelector
               value={selectedTags}

@@ -1,11 +1,11 @@
 /* eslint-disable react/display-name */
 import { gql } from "@apollo/client";
 import { red } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
 import AlarmIcon from "@material-ui/icons/Alarm";
 import AlarmOffIcon from "@material-ui/icons/AlarmOff";
 import SaveIcon from "@material-ui/icons/Save";
 import DataTable from "material-ui-datatables";
-import IconButton from "material-ui/IconButton";
 import PropTypes from "prop-types";
 import React from "react";
 

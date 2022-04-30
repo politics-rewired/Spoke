@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -7,7 +8,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import isEqual from "lodash/isEqual";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
-import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
@@ -561,12 +561,13 @@ export class AdminIncomingMessageList extends Component {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <FlatButton
+            <Button
               key="ok"
-              label="Ok"
-              primary
+              color="primary"
               onClick={this.closeReassignmentDialog}
-            />
+            >
+              Ok
+            </Button>
           </DialogActions>
         </Dialog>
       </div>

@@ -1,5 +1,5 @@
+import Button from "@material-ui/core/Button";
 import { css, StyleSheet } from "aphrodite";
-import FlatButton from "material-ui/FlatButton";
 import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
@@ -74,14 +74,15 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
             display: "inline-block"
           }}
         />
-        <FlatButton
-          label="Cancel"
+        <Button
           onClick={onCancel}
           style={{
             marginLeft: 5,
             display: "inline-block"
           }}
-        />
+        >
+          Cancel
+        </Button>
       </div>
     </GSForm>
   );

@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file,react/no-unused-state */
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import DataTable from "material-ui-datatables";
 import CircularProgress from "material-ui/CircularProgress";
-import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import React from "react";
@@ -176,18 +176,18 @@ class CampaignOverlapManager extends React.Component {
             Warning: clicking the trashcan will trigger an irreversible delete.
           </p>
           <div style={{ flexGrow: 1 }} />
-          <RaisedButton
-            label={
-              deleting.size > 0
-                ? "Deleting..."
-                : isDeleteAllDisabled
-                ? "Delete Selected"
-                : `Delete ${selectedCampaignIds.size} Selected`
-            }
-            secondary
+          <Button
+            variant="contained"
+            color="secondary"
             disabled={isDeleteAllDisabled}
             onClick={this.handleDeleteAllSelected}
-          />
+          >
+            {deleting.size > 0
+              ? "Deleting..."
+              : isDeleteAllDisabled
+              ? "Delete Selected"
+              : `Delete ${selectedCampaignIds.size} Selected`}
+          </Button>
         </div>
         <TextField
           fullWidth

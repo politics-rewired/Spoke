@@ -1,4 +1,5 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -20,9 +21,7 @@ import TextField from "@material-ui/core/TextField";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import sortBy from "lodash/sortBy";
-import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
-import RaisedButton from "material-ui/RaisedButton";
 import React, { useState } from "react";
 import { RouteChildrenProps } from "react-router-dom";
 
@@ -145,36 +144,31 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
   const sortedTokens = sortBy(trollTokens, "token");
 
   const addActions = [
-    <FlatButton
+    <Button
       key="confirm"
-      label="Confirm"
       disabled={!isAddTokenValid}
       onClick={handleOnConfirmAddToken}
-    />,
-    <FlatButton
-      key="cancel"
-      label="Cancel"
-      primary
-      onClick={handleOnCancelAddToken}
-    />
+    >
+      Confirm
+    </Button>,
+    <Button key="cancel" color="primary" onClick={handleOnCancelAddToken}>
+      Cancel
+    </Button>
   ];
 
   const deleteActions = [
-    <FlatButton
-      key="confirm"
-      label="Confirm"
-      onClick={handleConfirmDeleteToken}
-    />,
-    <FlatButton
-      key="cancel"
-      label="Cancel"
-      primary
-      onClick={handleOnCancelDelete}
-    />
+    <Button key="confirm" onClick={handleConfirmDeleteToken}>
+      Confirm
+    </Button>,
+    <Button key="cancel" color="primary" onClick={handleOnCancelDelete}>
+      Cancel
+    </Button>
   ];
 
   const errorActions = [
-    <FlatButton key="ok" label="Ok" primary onClick={handleOnCancelError} />
+    <Button key="ok" color="primary" onClick={handleOnCancelError}>
+      Ok
+    </Button>
   ];
 
   return (
@@ -201,12 +195,15 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
                     <span style={styles.tokenHighlight}>{compiledTsQuery}</span>
                   </TableCell>
                   <TableCell align="right">
-                    <RaisedButton
-                      label="Delete"
-                      labelPosition="before"
-                      icon={<DeleteForeverIcon style={{ color: red[500] }} />}
+                    <Button
+                      variant="contained"
+                      endIcon={
+                        <DeleteForeverIcon style={{ color: red[500] }} />
+                      }
                       onClick={handleDeleteToken(token)}
-                    />
+                    >
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

@@ -1,15 +1,16 @@
 /* eslint-disable react/no-unused-state */
+import Button from "@material-ui/core/Button";
 import { blueGrey, grey } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
 import LocalOfferIcon from "@material-ui/icons/LocalOffer";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
 import sortBy from "lodash/sortBy";
 import CircularProgress from "material-ui/CircularProgress";
-import IconButton from "material-ui/IconButton";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
-import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import md5 from "md5";
@@ -578,17 +579,21 @@ export class AssignmentTexterContact extends React.Component {
     let button = null;
     if (messageStatus === "closed") {
       button = (
-        <RaisedButton
+        <Button
+          variant="contained"
           onClick={() => this.handleEditMessageStatus("needsResponse")}
-          label="Reopen"
-        />
+        >
+          Reopen
+        </Button>
       );
     } else if (messageStatus === "needsResponse") {
       button = (
-        <RaisedButton
+        <Button
+          variant="contained"
           onClick={this.handleClickCloseContactButton}
-          label="Skip Reply"
-        />
+        >
+          Skip Reply
+        </Button>
       );
     }
 
@@ -656,18 +661,23 @@ export class AssignmentTexterContact extends React.Component {
             backgroundColor: "white"
           }}
         >
-          <RaisedButton
-            {...dataTest("optOut")}
-            secondary
-            label="Opt out"
-            onClick={this.handleOpenOptOutDialog}
-            tooltip="Opt out this contact"
-          />
-          <RaisedButton
-            label="Canned replies"
+          <Tooltip title="Opt out this contact">
+            <Button
+              {...dataTest("optOut")}
+              variant="contained"
+              color="secondary"
+              onClick={this.handleOpenOptOutDialog}
+            >
+              Opt out
+            </Button>
+          </Tooltip>
+          <Button
+            variant="contained"
             onClick={this.handleOpenPopover}
             disabled={!isCannedResponseEnabled}
-          />
+          >
+            Canned replies
+          </Button>
           {this.renderNeedsResponseToggleButton(contact)}
           <div style={{ flexGrow: 1, textAlign: "center" }}>
             {navigationToolbarChildren}
@@ -703,24 +713,30 @@ export class AssignmentTexterContact extends React.Component {
                 disabled={this.state.disabled}
               />
               {this.renderNeedsResponseToggleButton(contact)}
-              <RaisedButton
-                label="Canned responses"
+              <Button
+                variant="contained"
                 onClick={this.handleOpenPopover}
                 disabled={!isCannedResponseEnabled}
-              />
-              <RaisedButton
+              >
+                Canned responses
+              </Button>
+              <Button
                 {...dataTest("optOut")}
-                secondary
-                label="Opt out"
+                variant="contained"
+                color="secondary"
                 onClick={this.handleOpenOptOutDialog}
-              />
-              <RaisedButton
-                label="Manage Tags"
-                backgroundColor={blueGrey[100]}
-                icon={<LocalOfferIcon />}
+              >
+                Opt out
+              </Button>
+              <Button
+                variant="contained"
+                style={{ backgroundColor: blueGrey[100] }}
+                endIcon={<LocalOfferIcon />}
                 disabled={tags.length === 0}
                 onClick={() => this.setState({ isTagEditorOpen: true })}
-              />
+              >
+                Manage Tags
+              </Button>
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
               </div>

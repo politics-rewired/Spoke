@@ -1,7 +1,7 @@
 import { green, orange } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PollIcon from "@material-ui/icons/Poll";
-import IconButton from "material-ui/IconButton";
 import { ListItem } from "material-ui/List";
 import React from "react";
 

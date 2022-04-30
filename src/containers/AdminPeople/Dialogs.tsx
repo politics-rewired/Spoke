@@ -4,7 +4,6 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FlatButton from "material-ui/FlatButton";
 import React from "react";
 
 import OrganizationJoinLink from "../../components/OrganizationJoinLink";
@@ -54,13 +53,14 @@ const InvitePerson: React.StatelessComponent<InvitePersonProps> = ({
       <OrganizationJoinLink organizationUuid={organizationUUID} />
     </DialogContent>
     <DialogActions>
-      <FlatButton
+      <Button
         key="ok"
         {...dataTest("inviteOk")}
-        label="OK"
-        primary
+        color="primary"
         onClick={onClose}
-      />
+      >
+        OK
+      </Button>
     </DialogActions>
   </Dialog>
 );
@@ -83,13 +83,14 @@ const ResetPassword: React.StatelessComponent<ResetPasswordProps> = ({
         <PasswordResetLink passwordResetHash={passwordResetHash} />
       </DialogContent>
       <DialogActions>
-        <FlatButton
+        <Button
           key="ok"
           {...dataTest("passResetOK")}
-          label="OK"
-          primary
+          color="primary"
           onClick={onClose}
-        />
+        >
+          OK
+        </Button>
       </DialogActions>
     </Dialog>
   </div>
@@ -117,20 +118,22 @@ const ConfirmSuperAdmin: React.StatelessComponent<ConfirmSuperAdminProps> = ({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <FlatButton
+        <Button
           key="cancel"
           {...dataTest("superAdminOk")}
-          label="Cancel"
-          primary
+          color="primary"
           onClick={onClose}
-        />
-        <FlatButton
+        >
+          Cancel
+        </Button>
+        <Button
           key="ok"
           {...dataTest("superAdminOk")}
-          label="Confirm"
-          primary
+          color="primary"
           onClick={handleConfirmSuperadmin}
-        />
+        >
+          Confirm
+        </Button>
       </DialogActions>
     </Dialog>
   </div>
@@ -157,18 +160,20 @@ const ConfirmUnassignTexts: React.StatelessComponent<ConfirmUnassignTextsProps> 
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <FlatButton
+        <Button
           key="no"
-          label="No"
-          primary
+          color="primary"
           onClick={() => handleConfirmUnassignTexts(false)}
-        />
-        <FlatButton
+        >
+          No
+        </Button>
+        <Button
           key="yes"
-          label="Yes"
-          primary
+          color="primary"
           onClick={() => handleConfirmUnassignTexts(true)}
-        />
+        >
+          Yes
+        </Button>
       </DialogActions>
     </Dialog>
   </div>

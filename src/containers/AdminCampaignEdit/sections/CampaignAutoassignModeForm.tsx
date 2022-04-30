@@ -1,6 +1,6 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import { TextField } from "material-ui";
-import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import React from "react";
 import { compose } from "recompose";
@@ -155,11 +155,13 @@ class CampaignAutoassignModeForm extends React.Component<
           </div>
         )}
 
-        <RaisedButton
-          label={finalSaveLabel}
+        <Button
+          variant="contained"
           disabled={isSaveDisabled}
           onClick={this.handleDidSubmit}
-        />
+        >
+          {finalSaveLabel}
+        </Button>
       </div>
     );
   }

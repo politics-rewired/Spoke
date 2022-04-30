@@ -1,6 +1,6 @@
+import IconButton from "@material-ui/core/IconButton";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import { css, StyleSheet } from "aphrodite";
-import IconButton from "material-ui/IconButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 

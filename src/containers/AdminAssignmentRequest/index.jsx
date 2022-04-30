@@ -1,11 +1,11 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import isEqual from "lodash/isEqual";
-import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -119,17 +119,16 @@ class AdminAssignmentRequest extends Component {
       assignmentRequests.find(({ id }) => id === autoApproveReqId);
 
     const autoApproveActions = [
-      <FlatButton
-        key="confirm"
-        label="Confirm"
-        onClick={this.handleConfirmAutoApprove}
-      />,
-      <FlatButton
+      <Button key="confirm" onClick={this.handleConfirmAutoApprove}>
+        Confirm
+      </Button>,
+      <Button
         key="cancel"
-        label="Cancel"
-        primary
+        color="primary"
         onClick={this.handleDismissAutoApproveRequest}
-      />
+      >
+        Cancel
+      </Button>
     ];
 
     return (

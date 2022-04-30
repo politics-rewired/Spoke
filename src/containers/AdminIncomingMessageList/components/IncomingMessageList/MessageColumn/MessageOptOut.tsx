@@ -1,11 +1,10 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import React, { Component } from "react";
 
 import { CampaignContact } from "../../../../../api/campaign-contact";
@@ -66,19 +65,12 @@ class MessageOptOut extends Component<Props, State> {
       "Are you sure you would like to opt this contact back in? " +
       "This will mean they can receive texts from all campaigns.";
     const dialogActions = [
-      <FlatButton
-        key="cancel"
-        label="Cancel"
-        primary
-        onClick={this.handleCloseAlert}
-      />,
-      <FlatButton
-        key="submit"
-        label="Submit"
-        primary
-        keyboardFocused
-        onClick={this.handleClickOptIn}
-      />
+      <Button key="cancel" color="primary" onClick={this.handleCloseAlert}>
+        Cancel
+      </Button>,
+      <Button key="submit" color="primary" onClick={this.handleClickOptIn}>
+        Submit
+      </Button>
     ];
     this.setState({
       dialogTitle: "Confirm Opt-In",
@@ -102,12 +94,9 @@ class MessageOptOut extends Component<Props, State> {
       this.handleCloseAlert();
     } catch (error) {
       const dialogActions = [
-        <FlatButton
-          key="close"
-          label="Close"
-          primary
-          onClick={this.handleCloseAlert}
-        />
+        <Button key="close" color="primary" onClick={this.handleCloseAlert}>
+          Close
+        </Button>
       ];
       this.setState({
         dialogTitle: "Error Submitting",
@@ -138,12 +127,9 @@ class MessageOptOut extends Component<Props, State> {
       this.props.optOutChanged(true);
     } catch (error) {
       const dialogActions = [
-        <FlatButton
-          key="close"
-          label="Close"
-          primary
-          onClick={this.handleCloseAlert}
-        />
+        <Button key="close" color="primary" onClick={this.handleCloseAlert}>
+          Close
+        </Button>
       ];
       this.setState({
         dialogTitle: "Error Opting Out",
@@ -169,21 +155,24 @@ class MessageOptOut extends Component<Props, State> {
           </p>
           <div style={{ flexShrink: 1 }}>
             {isOptedOut && (
-              <RaisedButton
-                label="Opt-In"
-                backgroundColor="#ff0033"
+              <Button
+                variant="contained"
+                style={{ float: "right", backgroundColor: "#ff0033" }}
                 disabled={this.state.isMakingRequest}
                 onClick={this.openOptInConfirmation}
-                style={{ float: "right" }}
-              />
+              >
+                Opt-In
+              </Button>
             )}
             {!isOptedOut && (
-              <RaisedButton
-                label="Opt-Out"
-                secondary
+              <Button
+                variant="contained"
+                color="secondary"
                 disabled={this.state.isMakingRequest}
                 onClick={this.handleClickOptOut}
-              />
+              >
+                Opt-Out
+              </Button>
             )}
           </div>
         </div>

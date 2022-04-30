@@ -1,7 +1,7 @@
+import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import CreateIcon from "@material-ui/icons/Create";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
-import RaisedButton from "material-ui/RaisedButton";
 import {
   Table,
   TableBody,
@@ -62,26 +62,28 @@ class TeamEditorList extends Component {
               <TableRowColumn>{team.title}</TableRowColumn>
               <TableRowColumn>{team.description}</TableRowColumn>
               <TableRowColumn>
-                <RaisedButton
-                  label="Edit"
-                  labelPosition="before"
+                <Button
+                  variant="contained"
+                  color="primary"
                   disabled={team.isSystem}
-                  primary
-                  icon={<CreateIcon />}
+                  endIcon={<CreateIcon />}
                   style={{ marginRight: 10 }}
                   onClick={this.createHandleEditTeam(team.id)}
-                />
-                <RaisedButton
-                  label="Delete"
-                  labelPosition="before"
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="contained"
                   disabled={team.isSystem}
-                  icon={
+                  endIcon={
                     <DeleteForeverIcon
                       style={{ color: !team.isSystem ? red[500] : undefined }}
                     />
                   }
                   onClick={this.createHandleDeleteTeam(team.id)}
-                />
+                >
+                  Delete
+                </Button>
               </TableRowColumn>
             </TableRow>
           ))}

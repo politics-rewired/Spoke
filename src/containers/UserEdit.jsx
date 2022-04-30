@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -7,7 +8,6 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import { css, StyleSheet } from "aphrodite";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
@@ -342,11 +342,9 @@ class UserEdit extends React.Component {
           <div className={css(styles.buttons)}>
             {canChangePassword && (
               <div className={css(styles.container)}>
-                <RaisedButton
-                  onClick={this.handleClick}
-                  label="Change password"
-                  variant="outlined"
-                />
+                <Button variant="outlined" onClick={this.handleClick}>
+                  Change password
+                </Button>
               </div>
             )}
             <Form.Submit
@@ -383,7 +381,13 @@ class UserEdit extends React.Component {
               {this.state.successMessage || "Password changed successfully!"}
             </DialogTitle>
             <DialogActions>
-              <RaisedButton onClick={this.handleClose} label="OK" primary />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={this.handleClose}
+              >
+                OK
+              </Button>
             </DialogActions>
           </Dialog>
         </div>

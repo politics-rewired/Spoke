@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
 import { withApollo, WithApolloClient } from "@apollo/client/react/hoc";
+import IconButton from "@material-ui/core/IconButton";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import Avatar from "material-ui/Avatar";
 import Divider from "material-ui/Divider";
-import IconButton from "material-ui/IconButton";
 import Menu from "material-ui/Menu";
 import MenuItem from "material-ui/MenuItem";
 import Popover from "material-ui/Popover";

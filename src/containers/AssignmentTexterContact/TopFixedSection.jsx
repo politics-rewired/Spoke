@@ -1,5 +1,6 @@
+import { Tooltip } from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
 import HomeIcon from "@material-ui/icons/Home";
-import IconButton from "material-ui/IconButton/IconButton";
 import React from "react";
 
 import ContactToolbar from "../../components/ContactToolbar";
@@ -13,13 +14,11 @@ const TopFixedSection = (props) => {
       campaignContact={contact}
       contactSettings={contactSettings}
       rightToolbarIcon={
-        <IconButton
-          onClick={onExitTexter}
-          tooltip="Return Home"
-          tooltipPosition="bottom-center"
-        >
-          <HomeIcon />
-        </IconButton>
+        <Tooltip title="Return Home" placement="bottom">
+          <IconButton onClick={onExitTexter}>
+            <HomeIcon />
+          </IconButton>
+        </Tooltip>
       }
     />
   );

@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unused-state */
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import { blueGrey } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -7,7 +8,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import cloneDeep from "lodash/cloneDeep";
-import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React from "react";
@@ -198,18 +198,17 @@ class AddMapping extends React.Component<InnerProps, State> {
       !(resultCodeExists || !isRootAnswer);
 
     const actions = [
-      <FlatButton
-        key="cancel"
-        label="Cancel"
-        onClick={this.props.onRequestClose}
-      />,
-      <FlatButton
+      <Button key="cancel" onClick={this.props.onRequestClose}>
+        Cancel
+      </Button>,
+      <Button
         key="add"
-        label="Add"
-        primary
+        color="primary"
         disabled={validTarget === undefined || !canMakeChanges}
         onClick={this.handleOnAddMapping}
-      />
+      >
+        Add
+      </Button>
     ];
 
     return (

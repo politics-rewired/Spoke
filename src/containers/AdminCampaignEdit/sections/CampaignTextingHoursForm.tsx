@@ -1,7 +1,7 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import isEmpty from "lodash/isEmpty";
 import Autocomplete from "material-ui/AutoComplete";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 import { compose } from "recompose";
 import * as yup from "yup";
@@ -236,11 +236,13 @@ class CampaignTextingHoursForm extends React.Component<
             timezoneChoices
           )}
         </GSForm>
-        <RaisedButton
-          label={finalSaveLabel}
+        <Button
+          variant="contained"
           disabled={isSaveDisabled}
           onClick={this.handleSubmit}
-        />
+        >
+          {finalSaveLabel}
+        </Button>
       </div>
     );
   }

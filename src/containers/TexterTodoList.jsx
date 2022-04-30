@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import CheckIcon from "@material-ui/icons/Check";
-import { RaisedButton } from "material-ui";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -140,15 +140,17 @@ class TexterTodoList extends React.Component {
                 </p>
               ]
             )}
-            <RaisedButton
-              label="Reassign My Replies"
-              primary
+            <Button
+              variant="contained"
+              color="primary"
               fullWidth
               disabled={
                 this.state.releasingReplies || this.state.releasedReplies
               }
               onClick={this.releaseMyReplies}
-            />
+            >
+              Reassign My Replies
+            </Button>
           </div>
         </div>
       </div>
