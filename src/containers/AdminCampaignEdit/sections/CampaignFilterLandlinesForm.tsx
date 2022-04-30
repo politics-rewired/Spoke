@@ -1,8 +1,8 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import ErrorIcon from "@material-ui/icons/Error";
+import WarningIcon from "@material-ui/icons/Warning";
 import RaisedButton from "material-ui/RaisedButton";
-import CheckIcon from "material-ui/svg-icons/action/check-circle";
-import ErrorIcon from "material-ui/svg-icons/alert/error";
-import NotificationIcon from "material-ui/svg-icons/alert/warning";
 import React from "react";
 import { compose } from "recompose";
 
@@ -114,7 +114,7 @@ class FilterLandlinesForm extends React.Component<Props, State> {
         )}
         {landlinesFiltered && message && (
           <div style={{ display: "flex", alignItems: "center" }}>
-            <CheckIcon style={{ marginRight: 10 }} />
+            <CheckCircleIcon style={{ marginRight: 10 }} />
             <span>{message}</span>
           </div>
         )}
@@ -126,7 +126,7 @@ class FilterLandlinesForm extends React.Component<Props, State> {
         )}
         {landlinesFiltered && unknown && (
           <div style={{ display: "flex", alignItems: "center" }}>
-            <NotificationIcon style={{ marginRight: 10 }} />
+            <WarningIcon style={{ marginRight: 10 }} />
             <span>{unknown}</span>
           </div>
         )}

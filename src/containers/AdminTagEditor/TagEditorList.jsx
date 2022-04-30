@@ -1,11 +1,11 @@
+import { red } from "@material-ui/core/colors";
+import BlockIcon from "@material-ui/icons/Block";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import CreateIcon from "@material-ui/icons/Create";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import Chip from "material-ui/Chip";
 import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
-import { red500 } from "material-ui/styles/colors";
-import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import BlockIcon from "material-ui/svg-icons/content/block";
-import CreateIcon from "material-ui/svg-icons/content/create";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -72,7 +72,7 @@ class TagEditorList extends Component {
                 disabled={tag.isSystem}
                 icon={
                   <DeleteForeverIcon
-                    color={!tag.isSystem ? red500 : undefined}
+                    style={{ color: !tag.isSystem ? red[500] : undefined }}
                   />
                 }
                 onClick={this.createHandleDeleteTag(tag.id)}

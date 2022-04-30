@@ -4,9 +4,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import AutoComplete from "material-ui/AutoComplete";
 import RaisedButton from "material-ui/RaisedButton";
-import PersonAddIcon from "material-ui/svg-icons/social/person-add";
 import {
   Table,
   TableBody,

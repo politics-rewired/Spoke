@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unused-state */
 import { ApolloQueryResult, gql } from "@apollo/client";
+import { blueGrey } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -9,7 +10,6 @@ import cloneDeep from "lodash/cloneDeep";
 import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
-import { blueGrey800 } from "material-ui/styles/colors";
 import React from "react";
 import { compose } from "recompose";
 
@@ -223,11 +223,11 @@ class AddMapping extends React.Component<InnerProps, State> {
           <DialogContent>
             <table>
               <tr>
-                <td style={{ color: blueGrey800 }}>Question</td>
+                <td style={{ color: blueGrey[800] }}>Question</td>
                 <td>{config.interactionStep.questionText}</td>
               </tr>
               <tr>
-                <td style={{ color: blueGrey800 }}>Answer</td>
+                <td style={{ color: blueGrey[800] }}>Answer</td>
                 <td>{config.questionResponseValue}</td>
               </tr>
             </table>

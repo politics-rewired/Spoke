@@ -1,5 +1,5 @@
-import SettingsIcon from "material-ui/svg-icons/action/settings";
-import AlarmIcon from "material-ui/svg-icons/device/access-alarms";
+import AccessAlarmsIcon from "@material-ui/icons/AccessAlarms";
+import SettingsIcon from "@material-ui/icons/Settings";
 import { Tab, Tabs } from "material-ui/Tabs";
 import React from "react";
 
@@ -22,7 +22,7 @@ export const SettingsRouter = (props) => {
       </Tab>
       {window.ENABLE_TROLLBOT && (
         <Tab
-          icon={<AlarmIcon />}
+          icon={<AccessAlarmsIcon />}
           label="TrollBot Trigger Tokens"
           value="trolltokens"
         >

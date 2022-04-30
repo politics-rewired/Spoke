@@ -4,6 +4,10 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import AddIcon from "@material-ui/icons/Add";
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import CreateIcon from "@material-ui/icons/Create";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import { History } from "history";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
@@ -11,10 +15,6 @@ import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
 import Snackbar from "material-ui/Snackbar";
-import ContentAdd from "material-ui/svg-icons/content/add";
-import CreateIcon from "material-ui/svg-icons/content/create";
-import SyncIcon from "material-ui/svg-icons/file/cloud-download";
-import RefreshIcon from "material-ui/svg-icons/navigation/refresh";
 import {
   Table,
   TableBody,
@@ -216,7 +216,7 @@ class AdminExternalSystems extends Component<Props, State> {
           style={theme.components.floatingButton}
           onClick={this.startCreateExternalSystem}
         >
-          <ContentAdd />
+          <AddIcon />
         </FloatingActionButton>
 
         <RaisedButton
@@ -258,7 +258,7 @@ class AdminExternalSystems extends Component<Props, State> {
                   <RaisedButton
                     label="Refresh Sync Options"
                     labelPosition="before"
-                    icon={<SyncIcon />}
+                    icon={<CloudDownloadIcon />}
                     style={{ marginRight: 10 }}
                     onClick={this.makeHandleRefreshExternalSystem(system.id)}
                     disabled={this.state.syncInitiatedForId === system.id}

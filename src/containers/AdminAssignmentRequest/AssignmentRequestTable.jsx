@@ -1,10 +1,10 @@
+import { green, red } from "@material-ui/core/colors";
+import AssignmentTurnedInIcon from "@material-ui/icons/AssignmentTurnedIn";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CircularProgress from "material-ui/CircularProgress";
 import FlatButton from "material-ui/FlatButton";
 import IconButton from "material-ui/IconButton";
-import { green300, red500 } from "material-ui/styles/colors";
-import AssignmentTurnedInIcon from "material-ui/svg-icons/action/assignment-turned-in";
-import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
-import HighlightOffIcon from "material-ui/svg-icons/action/highlight-off";
 import {
   Table,
   TableBody,
@@ -104,7 +104,7 @@ const AssignmentRequestTable = (props) => {
                         tooltipPosition="top-center"
                         onClick={handleDenyRow(requestId)}
                       >
-                        <HighlightOffIcon color={red500} />
+                        <HighlightOffIcon style={{ color: red[500] }} />
                       </IconButton>
                     )}
                     {showActions && (
@@ -113,7 +113,7 @@ const AssignmentRequestTable = (props) => {
                         tooltipPosition="top-center"
                         onClick={handleApproveRow(requestId)}
                       >
-                        <CheckCircleIcon color={green300} />
+                        <CheckCircleIcon style={{ color: green[300] }} />
                       </IconButton>
                     )}
                     {showActions && isAdmin && (
@@ -121,7 +121,11 @@ const AssignmentRequestTable = (props) => {
                         label="AutoApprove"
                         labelPosition="before"
                         primary
-                        icon={<AssignmentTurnedInIcon color={green300} />}
+                        icon={
+                          <AssignmentTurnedInIcon
+                            style={{ color: green[300] }}
+                          />
+                        }
                         onClick={handleAutoApproveRow(requestId)}
                       />
                     )}

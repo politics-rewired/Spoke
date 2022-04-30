@@ -1,7 +1,7 @@
+import { red } from "@material-ui/core/colors";
+import CreateIcon from "@material-ui/icons/Create";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import RaisedButton from "material-ui/RaisedButton";
-import { red500 } from "material-ui/styles/colors";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import CreateIcon from "material-ui/svg-icons/content/create";
 import {
   Table,
   TableBody,
@@ -77,7 +77,7 @@ class TeamEditorList extends Component {
                   disabled={team.isSystem}
                   icon={
                     <DeleteForeverIcon
-                      color={!team.isSystem ? red500 : undefined}
+                      style={{ color: !team.isSystem ? red[500] : undefined }}
                     />
                   }
                   onClick={this.createHandleDeleteTeam(team.id)}

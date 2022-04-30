@@ -1,11 +1,11 @@
+import { green, red } from "@material-ui/core/colors";
+import BlockIcon from "@material-ui/icons/Block";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+import ThumbDownIcon from "@material-ui/icons/ThumbDown";
+import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import DataTables from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
-import { green500, red500 } from "material-ui/styles/colors";
-import CheckCircleIcon from "material-ui/svg-icons/action/check-circle";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import ThumbDownIcon from "material-ui/svg-icons/action/thumb-down";
-import ThumbUpIcon from "material-ui/svg-icons/action/thumb-up";
-import BlockIcon from "material-ui/svg-icons/content/block";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -20,9 +20,9 @@ class ShortLinkDomainList extends Component {
       render: (value, row) => {
         const isEligible = row.isHealthy && !row.isManuallyDisabled;
         return isEligible ? (
-          <CheckCircleIcon color={green500} />
+          <CheckCircleIcon style={{ color: green[500] }} />
         ) : (
-          <BlockIcon color={red500} />
+          <BlockIcon style={{ color: red[500] }} />
         );
       }
     },
@@ -62,9 +62,9 @@ class ShortLinkDomainList extends Component {
       tooltip: "Health of the domain based on text delivery report summaries.",
       render: (value) => {
         return value ? (
-          <ThumbUpIcon color={green500} />
+          <ThumbUpIcon style={{ color: green[500] }} />
         ) : (
-          <ThumbDownIcon color={red500} />
+          <ThumbDownIcon style={{ color: red[500] }} />
         );
       }
     },
@@ -88,7 +88,7 @@ class ShortLinkDomainList extends Component {
             disabled={row.isRowDisabled}
             onClick={this.createHandleDeleteClick(row.id)}
           >
-            <DeleteForeverIcon color={red500} />
+            <DeleteForeverIcon style={{ color: red[500] }} />
           </IconButton>
         );
       }

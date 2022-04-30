@@ -2,11 +2,11 @@ import { gql } from "@apollo/client";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
+import CreateIcon from "@material-ui/icons/Create";
 import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import { List, ListItem } from "material-ui/List";
 import Subheader from "material-ui/Subheader";
-import CreateIcon from "material-ui/svg-icons/content/create";
 import PropTypes from "prop-types";
 import React from "react";
 

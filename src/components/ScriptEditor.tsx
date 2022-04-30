@@ -1,3 +1,4 @@
+import { green, grey, red } from "@material-ui/core/colors";
 import { getCharCount } from "@trt2/gsm-charset-utils";
 import {
   CompositeDecorator,
@@ -8,7 +9,6 @@ import {
   Modifier
 } from "draft-js";
 import escapeRegExp from "lodash/escapeRegExp";
-import { green500, green600, grey100, red400 } from "material-ui/styles/colors";
 import React from "react";
 
 import { replaceEasyGsmWins } from "../lib/charset-utils";
@@ -36,18 +36,18 @@ const styles = {
     textAlign: "center"
   },
   goodField: {
-    color: green500,
+    color: green[500],
     direction: "ltr",
     unicodeBidi: "bidi-override"
   },
   badField: {
-    color: red400
+    color: red[400]
   },
   scriptFieldButton: {
     fontSize: "11px",
-    color: green600,
+    color: green[600],
     textTransform: "none",
-    backgroundColor: grey100,
+    backgroundColor: grey[100],
     // margin: '5px 10px',
     cursor: "pointer"
     // display: 'inline-block',

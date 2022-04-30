@@ -1,5 +1,5 @@
+import CreateIcon from "@material-ui/icons/Create";
 import muiThemeable from "material-ui/styles/muiThemeable";
-import CreateIcon from "material-ui/svg-icons/content/create";
 import React from "react";
 
 import { useSpokeTheme } from "../../styles/spoke-theme-context";
@@ -23,7 +23,7 @@ const NoMessagesIcon: React.FC<MuiThemeProviderProps> = ({
   }
 
   const iconColor = muiTheme?.palette?.primary1Color ?? "rgb(83, 180, 119)";
-  return <CreateIcon color={iconColor} {...iconProps} />;
+  return <CreateIcon style={{ color: iconColor }} {...iconProps} />;
 };
 
 export default muiThemeable()(NoMessagesIcon);

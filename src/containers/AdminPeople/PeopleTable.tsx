@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { gql } from "@apollo/client";
-import PeopleIcon from "material-ui/svg-icons/social/people";
+import PeopleIcon from "@material-ui/icons/People";
 import { Table, TableBody } from "material-ui/Table";
 import React from "react";
 

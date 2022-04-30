@@ -1,4 +1,4 @@
-import { grey600, grey900 } from "material-ui/styles/colors";
+import { grey } from "@material-ui/core/colors";
 import React from "react";
 
 const largeListStyle: React.CSSProperties = {
@@ -27,14 +27,14 @@ const largeListItemStyles: { [key: string]: React.CSSProperties } = {
     padding: 0,
     fontFamily: "Poppins",
     fontSize: "16px",
-    color: grey900
+    color: grey[900]
   },
   secondaryText: {
     margin: "5px 0 0 0",
     padding: 0,
     fontFamily: "Poppins",
     fontSize: "14px",
-    color: grey600
+    color: grey[600]
   }
 };
 

@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
+import NotInterestedIcon from "@material-ui/icons/NotInterested";
 import { List, ListItem } from "material-ui/List";
-import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -13,7 +13,10 @@ const AdminOptOutList = function AdminOptOutList(props) {
   return (
     <div>
       {optOuts.length === 0 ? (
-        <Empty title="Yay, no one has opted out!" icon={<ProhibitedIcon />} />
+        <Empty
+          title="Yay, no one has opted out!"
+          icon={<NotInterestedIcon />}
+        />
       ) : (
         <List>
           {optOuts.map((optOut) => (

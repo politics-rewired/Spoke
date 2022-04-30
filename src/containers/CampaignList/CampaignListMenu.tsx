@@ -1,9 +1,9 @@
+import ArchiveIcon from "@material-ui/icons/Archive";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import UnarchiveIcon from "@material-ui/icons/Unarchive";
 import IconButton from "material-ui/IconButton";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
-import ArchiveIcon from "material-ui/svg-icons/content/archive";
-import UnarchiveIcon from "material-ui/svg-icons/content/unarchive";
-import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import React from "react";
 
 import { Campaign } from "../../api/campaign";

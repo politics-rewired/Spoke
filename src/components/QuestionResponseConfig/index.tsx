@@ -1,23 +1,17 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import { green, grey, orange, red } from "@material-ui/core/colors";
+import AddBoxIcon from "@material-ui/icons/AddBox";
+import BrokenImageIcon from "@material-ui/icons/BrokenImage";
+import DeleteIcon from "@material-ui/icons/Delete";
+import DoneIcon from "@material-ui/icons/Done";
+import InfoIcon from "@material-ui/icons/Info";
+import NotificationsPausedIcon from "@material-ui/icons/NotificationsPaused";
+import WarningIcon from "@material-ui/icons/Warning";
 import cloneDeep from "lodash/cloneDeep";
 import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import { List } from "material-ui/List";
 import RaisedButton from "material-ui/RaisedButton";
-import {
-  darkBlack,
-  green200,
-  grey400,
-  orange200,
-  red600
-} from "material-ui/styles/colors";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import DoneIcon from "material-ui/svg-icons/action/done";
-import InfoIcon from "material-ui/svg-icons/action/info";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
-import AddBoxIcon from "material-ui/svg-icons/content/add-box";
-import BrokenIcon from "material-ui/svg-icons/image/broken-image";
-import NotificationPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 import React from "react";
 import { compose } from "recompose";
 
@@ -104,29 +98,33 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
 
     const avatar = includesNotActive ? (
       <Avatar
-        icon={<BrokenIcon />}
-        color={darkBlack}
-        backgroundColor={orange200}
+        icon={<BrokenImageIcon />}
+        color={grey[900]}
+        backgroundColor={orange[200]}
       />
     ) : isRequired ? (
       <Avatar
         icon={<WarningIcon />}
-        color={darkBlack}
-        backgroundColor={orange200}
+        color={grey[900]}
+        backgroundColor={orange[200]}
       />
     ) : isMissing ? (
-      <Avatar icon={<InfoIcon />} color={darkBlack} backgroundColor={grey400} />
+      <Avatar
+        icon={<InfoIcon />}
+        color={grey[900]}
+        backgroundColor={grey[400]}
+      />
     ) : targets && targets.length === 0 ? (
       <Avatar
-        icon={<NotificationPausedIcon />}
-        color={darkBlack}
-        backgroundColor={green200}
+        icon={<NotificationsPausedIcon />}
+        color={grey[900]}
+        backgroundColor={green[200]}
       />
     ) : (
       <Avatar
         icon={<DoneIcon />}
-        color={darkBlack}
-        backgroundColor={green200}
+        color={grey[900]}
+        backgroundColor={green[200]}
       />
     );
 
@@ -143,7 +141,13 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
           subtitle={questionText}
           avatar={avatar}
           showExpandableButton
-          closeIcon={isMissing ? <AddBoxIcon /> : <DeleteIcon color={red600} />}
+          closeIcon={
+            isMissing ? (
+              <AddBoxIcon />
+            ) : (
+              <DeleteIcon style={{ color: red[600] }} />
+            )
+          }
         />
         {!isMissing && targets !== null && (
           <CardText>

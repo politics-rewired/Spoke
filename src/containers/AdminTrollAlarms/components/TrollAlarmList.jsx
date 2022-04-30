@@ -1,11 +1,11 @@
 /* eslint-disable react/display-name */
 import { gql } from "@apollo/client";
+import { red } from "@material-ui/core/colors";
+import AlarmIcon from "@material-ui/icons/Alarm";
+import AlarmOffIcon from "@material-ui/icons/AlarmOff";
+import SaveIcon from "@material-ui/icons/Save";
 import DataTable from "material-ui-datatables";
 import IconButton from "material-ui/IconButton";
-import { red500 } from "material-ui/styles/colors";
-import AlarmIcon from "material-ui/svg-icons/action/alarm";
-import AlarmOffIcon from "material-ui/svg-icons/action/alarm-off";
-import SaveIcon from "material-ui/svg-icons/content/save";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -67,7 +67,11 @@ export const TrollAlarmList = (props) => {
       label: "Status",
       style: { width: 40 },
       render: (isRowDismissed, _row) =>
-        isRowDismissed ? <AlarmOffIcon /> : <AlarmIcon color={red500} />
+        isRowDismissed ? (
+          <AlarmOffIcon />
+        ) : (
+          <AlarmIcon style={{ color: red[500] }} />
+        )
     },
     {
       key: "token",

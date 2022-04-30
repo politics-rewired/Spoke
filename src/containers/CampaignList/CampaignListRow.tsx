@@ -6,8 +6,8 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import { useTheme } from "@material-ui/core/styles";
+import WarningIcon from "@material-ui/icons/Warning";
 import Chip from "material-ui/Chip";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
