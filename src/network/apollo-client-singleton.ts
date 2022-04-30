@@ -13,7 +13,7 @@ const uploadLink = createUploadLink({
   credentials: "same-origin"
 });
 
-const errorLink = onError(({ networkError }) => {
+const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError && "statusCode" in networkError) {
     switch (networkError.statusCode) {
       case 401:
@@ -26,6 +26,16 @@ const errorLink = onError(({ networkError }) => {
         window.location.href = "/404";
         break;
       // no default
+    }
+  }
+  if (graphQLErrors) {
+    for (const err of graphQLErrors) {
+      switch (err.extensions.code) {
+        case "UNAUTHENTICATED":
+          window.location.href = `/login?nextUrl=${window.location.pathname}`;
+          break;
+        // no default
+      }
     }
   }
 });
