@@ -652,7 +652,8 @@ export interface user {
   assigned_cell?: string | null
   is_superadmin?: boolean | null
   terms?: boolean | null
-  updated_at?: Date | null 
+  updated_at?: Date | null
+  is_suspended: boolean 
 }
 
 export interface user_cell { 
@@ -670,6 +671,13 @@ export interface user_organization {
   role: string
   updated_at?: Date | null
   request_status: texter_status 
+}
+
+export interface user_session { 
+  sid: string
+  sess: unknown
+  expire: Date
+  user_id?: number | null 
 }
 
 export interface user_team { 
@@ -757,6 +765,7 @@ export interface Tables {
   user: user,
   user_cell: user_cell,
   user_organization: user_organization,
+  user_session: user_session,
   user_team: user_team,
   v_troll_trigger: v_troll_trigger,
   zip_code: zip_code
