@@ -36,6 +36,8 @@ export interface PeopleRowEventHandlers {
     autoApprove: RequestAutoApproveType,
     membershipId: string
   ) => void;
+  setSuspended: (membershipId: string, isSuspended: boolean) => void;
+  clearSessions: (membershipId: string) => void;
   resetUserPassword: (userId: string) => void;
   error: (errorMsg: string) => void;
 }

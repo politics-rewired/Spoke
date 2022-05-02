@@ -1,7 +1,5 @@
 import DataLoader from "dataloader";
-import { Knex } from "knex";
 import groupBy from "lodash/groupBy";
-import { RedisClient } from "redis";
 
 import type { SpokeContext } from "../contexts/types";
 import { cacheableData } from "./cacheable_queries";
@@ -13,20 +11,7 @@ export interface LoadOptions {
   cacheObj: any;
 }
 
-interface RethinkQuery {
-  k: Knex;
-  knex: Knex;
-  reader: Knex;
-  redis?: RedisClient;
-}
-
-interface ThinkyConnection {
-  config: Knex.Config | string;
-  k: Knex;
-  r: RethinkQuery;
-}
-
-const { r } = thinky as ThinkyConnection;
+const { r } = thinky;
 
 const LOADER_DEFAULTS: LoadOptions = {
   idKey: "id",

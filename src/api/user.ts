@@ -25,6 +25,7 @@ export interface User {
   assignment: Assignment;
   terms: boolean;
   isSuperadmin: boolean;
+  isSuspended: boolean;
 }
 
 export const schema = `
@@ -45,6 +46,7 @@ export const schema = `
     assignment(campaignId: String): Assignment,
     terms: Boolean
     isSuperadmin: Boolean!
+    isSuspended: Boolean!
   }
   
   type UsersList {

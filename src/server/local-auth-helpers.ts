@@ -33,6 +33,11 @@ export class LocalAuthError extends Error {
   }
 }
 
+export class SuspendedUserError extends LocalAuthError {
+  constructor() {
+    super("Your account is suspended. Contact your administrator.");
+  }
+}
 export class InvalidInviteError extends LocalAuthError {
   constructor() {
     super("Invalid invite code. Contact your administrator.");

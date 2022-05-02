@@ -2,15 +2,17 @@
 import passport from "@passport-next/passport";
 import bodyParser from "body-parser";
 import connectDatadog from "connect-datadog-graphql";
-import cookieSession from "cookie-session";
+import pgSession from "connect-pg-simple";
 import express from "express";
 import basicAuth from "express-basic-auth";
+import expressSession from "express-session";
 import StatsD from "hot-shots";
 
 import { config } from "../config";
 import requestLogging from "../lib/request-logging";
 import logger from "../logger";
 import { fulfillPendingRequestFor } from "./api/assignment";
+import pgPool from "./db";
 import appRenderer from "./middleware/app-renderer";
 import {
   assembleRouter,
@@ -46,17 +48,28 @@ export const createApp = async () => {
     });
   }
 
+  const PgSession = pgSession(expressSession);
+
   app.enable("trust proxy"); // Don't rate limit heroku
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(
-    cookieSession({
+    expressSession({
+      secret: SESSION_SECRET,
       cookie: {
         httpOnly: true,
         secure: config.isProduction,
-        maxAge: null
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
       },
-      secret: SESSION_SECRET
+      store: new PgSession({
+        pool: pgPool,
+        tableName: "user_session",
+        createTableIfMissing: false,
+        errorLog: (...args) => logger.error(...args),
+        pruneSessionInterval: config.isTest ? false : 60
+      }),
+      resave: false,
+      saveUninitialized: false
     })
   );
   app.use(passport.initialize());

@@ -160,7 +160,8 @@ export const resolvers = {
       "email",
       "cell",
       "assignedCell",
-      "terms"
+      "terms",
+      "isSuspended"
     ]),
     isSuperadmin: (userRecord, _, { user: authUser }) => {
       if (userRecord.id !== authUser.id) throw new ForbiddenError();

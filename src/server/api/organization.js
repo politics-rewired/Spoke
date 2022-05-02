@@ -106,7 +106,8 @@ export const resolvers = {
           "user.id as user_table_id",
           "user.email",
           "user.first_name",
-          "user.last_name"
+          "user.last_name",
+          "user.is_suspended"
         ]);
         pagerOptions.nodeTransformer = (record) => {
           const {
@@ -114,6 +115,7 @@ export const resolvers = {
             email,
             first_name,
             last_name,
+            is_suspended,
             ...node
           } = record;
           return {
@@ -122,7 +124,8 @@ export const resolvers = {
               id: user_table_id,
               email,
               first_name,
-              last_name
+              last_name,
+              is_suspended
             }
           };
         };

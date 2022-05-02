@@ -13,7 +13,8 @@ import { contextForRequest } from "./contexts";
 import { botClient } from "./lib/slack";
 import localAuthHelpers, {
   hashPassword,
-  LocalAuthError
+  LocalAuthError,
+  SuspendedUserError
 } from "./local-auth-helpers";
 import sendEmail from "./mail";
 import { r } from "./models";
@@ -51,6 +52,18 @@ function redirectPostSignIn(req: Request, res: Response, isNewUser: boolean) {
     : "/";
 
   return res.redirect(redirectDestionation);
+}
+
+async function handleSuspendedUser(req: Request, res: Response) {
+  await new Promise<void>((resolve, reject) => {
+    req.session.destroy((err) => {
+      if (err) return reject(err);
+      return resolve();
+    });
+  });
+  return res
+    .status(400)
+    .send({ success: false, message: new SuspendedUserError().message });
 }
 
 function setupSlackPassport() {
@@ -119,6 +132,11 @@ function setupSlackPassport() {
         logger.error("Slack login error: could not find existing user: ", err);
         throw err;
       });
+
+    if (existingUser.is_suspended) {
+      await handleSuspendedUser(req, res);
+      return;
+    }
 
     if (!existingUser && SLACK_CONVERT_EXISTING) {
       const [existingEmailUser] = await db
@@ -235,6 +253,11 @@ function setupAuth0Passport() {
       .where({ auth0_id: auth0Id })
       .first();
 
+    if (existingUser.is_suspended) {
+      await handleSuspendedUser(req, res);
+      return;
+    }
+
     if (!existingUser) {
       // eslint-disable-next-line no-underscore-dangle
       const userJson = req.user._json;
@@ -308,6 +331,9 @@ function setupLocalAuthPassport() {
           uuidMatch,
           reqBody: req.body
         });
+        if (user.is_suspended) {
+          return done(new SuspendedUserError());
+        }
         return done(null, user);
       } catch (error) {
         return done(error);

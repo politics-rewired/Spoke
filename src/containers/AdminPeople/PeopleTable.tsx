@@ -36,6 +36,7 @@ const query = gql`
               lastName
               displayName
               email
+              isSuspended
             }
             role
             requestAutoApprove
@@ -70,7 +71,7 @@ interface PeopleTableProps {
   nameSearch: string;
   rowEventHandlers: PeopleRowEventHandlers;
 }
-const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
+const PeopleTable: React.FC<PeopleTableProps> = ({
   context,
   nameSearch,
   onlyCampaignId,
