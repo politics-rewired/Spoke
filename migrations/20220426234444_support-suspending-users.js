@@ -5,10 +5,10 @@ exports.up = function up(knex) {
     alter table public.user add column is_suspended boolean not null default false;
 
     create table user_session (
-        sid text primary key
-      , sess json not null
-      , expire timestamptz not null
-      , user_id integer generated always as ((sess->'passport'->>'user')::integer) stored
+      sid text primary key,
+      sess json not null,
+      expire timestamptz not null,
+      user_id integer generated always as ((sess->'passport'->>'user')::integer) stored
     );
 
     create index on user_session (expire);
