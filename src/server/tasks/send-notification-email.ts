@@ -41,16 +41,16 @@ export const sendNotificationEmail: Task = async (payload, _helpers) => {
         subject,
         html: content
       });
-
-      trx.commit();
     } catch (err) {
       logger.error("Failed to send email notification...", errToObj(err));
-      trx.rollback();
     }
   });
 };
 
-export const sendNotificationDigest: Task = async (payload, _helpers) => {
+export const sendNotificationDigestForUser: Task = async (
+  payload,
+  _helpers
+) => {
   const notificationsGrouped = await notificationsByOrg(payload.id);
 
   for (const [organizationId, notifications] of Object.entries(
@@ -77,10 +77,8 @@ export const sendNotificationDigest: Task = async (payload, _helpers) => {
           subject,
           html: content
         });
-        trx.commit();
       } catch (err) {
         logger.error("Failed to send email notification...", errToObj(err));
-        trx.rollback();
       }
     });
   }

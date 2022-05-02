@@ -36,7 +36,7 @@ import { releaseStaleReplies } from "./tasks/release-stale-replies";
 import { resendMessage } from "./tasks/resend-message";
 import { retryInteractionStep } from "./tasks/retry-interaction-step";
 import {
-  sendNotificationDigest,
+  sendNotificationDigestForUser,
   sendNotificationEmail
 } from "./tasks/send-notification-email";
 import {
@@ -86,7 +86,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList!["queue-periodic-notifications"] = queuePeriodicNotifications;
   m.taskList!["queue-daily-notifications"] = queueDailyNotifications;
   m.taskList!["send-notification-email"] = sendNotificationEmail;
-  m.taskList!["send-notification-digest"] = sendNotificationDigest;
+  m.taskList!["send-notification-digest"] = sendNotificationDigestForUser;
   m.taskList!["queue-autosend-initials"] = queueAutoSendInitials;
   m.taskList![exportCampaignIdentifier] = wrapProgressTask(exportCampaign, {
     removeOnComplete: true

@@ -1,13 +1,14 @@
 import { Task } from "pg-compose";
 
+import { NotificationFrequencyType } from "../../api/user";
 import { r } from "../models";
 
-const getUserIdsForDigest = (frequency: string) => {
+const getUserIdsForDigest = (frequency: NotificationFrequencyType) => {
   return r
     .knex("notification")
     .whereNull("sent_at")
     .where("user.notification_frequency", frequency)
-    .select(["user.id"])
+    .distinct("user.id")
     .join("user", "user_id", "user.id");
 };
 
@@ -34,7 +35,9 @@ export const queuePendingNotifications: Task = async (_payload, helpers) => {
 };
 
 export const queuePeriodicNotifications: Task = async (_payload, helpers) => {
-  const usersToNotify = await getUserIdsForDigest("PERIODIC");
+  const usersToNotify = await getUserIdsForDigest(
+    NotificationFrequencyType.Periodic
+  );
 
   for (const user of usersToNotify) {
     await helpers.addJob("send-notification-digest", user, {
@@ -44,7 +47,9 @@ export const queuePeriodicNotifications: Task = async (_payload, helpers) => {
 };
 
 export const queueDailyNotifications: Task = async (_payload, helpers) => {
-  const usersToNotify = await getUserIdsForDigest("DAILY");
+  const usersToNotify = await getUserIdsForDigest(
+    NotificationFrequencyType.Daily
+  );
 
   for (const user of usersToNotify) {
     await helpers.addJob("send-notification-digest", user, {

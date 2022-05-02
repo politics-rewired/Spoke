@@ -3,13 +3,9 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import IconButton from "@material-ui/core/IconButton";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
-import Snackbar from "@material-ui/core/Snackbar";
-import CloseIcon from "@material-ui/icons/Close";
-import MuiAlert from "@material-ui/lab/Alert";
 import { css, StyleSheet } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
@@ -22,6 +18,7 @@ import { NotificationFrequencyType } from "../api/user";
 import GSForm from "../components/forms/GSForm";
 import GSSubmitButton from "../components/forms/GSSubmitButton";
 import SpokeFormField from "../components/forms/SpokeFormField";
+import { SaveNotificationSettingsAlert } from "../components/SaveNotificationSettingsAlert";
 import { dataTest, titleCase } from "../lib/attributes";
 import { loadData } from "./hoc/with-operations";
 
@@ -64,41 +61,6 @@ class UserEdit extends React.Component {
       });
     }
   }
-
-  getSnackbarText = () => {
-    switch (this.state.user.notificationFrequency) {
-      case NotificationFrequencyType.All:
-        return (
-          <p>
-            Emails will be sent for all notification, including assignment
-            changes and replies.
-          </p>
-        );
-      case NotificationFrequencyType.Daily:
-        return (
-          <p>
-            Email notifications are sent at 9AM in the time zone of your Spoke
-            workspace.
-          </p>
-        );
-      case NotificationFrequencyType.Periodic:
-        return (
-          <p>
-            Email notifications are sent at 9AM, 1PM, 4PM, and 8PM in the time
-            zone of your Spoke workspace.
-          </p>
-        );
-      case NotificationFrequencyType.None:
-        return (
-          <p>
-            You will not receive notifications about changes to your assignment,
-            or replies.
-          </p>
-        );
-      default:
-        return <p />;
-    }
-  };
 
   handleCloseSnackbar = () => {
     this.setState({ snackbarOpen: false });
@@ -205,8 +167,10 @@ class UserEdit extends React.Component {
 
   handleNotificationFrequencyChange = (event) => {
     const newFrequency = event.target.value;
-    const { user } = this.state;
-    user.notificationFrequency = newFrequency;
+    const user = {
+      ...this.state.user,
+      notificationFrequency: newFrequency
+    };
     this.setState({ user });
   };
 
@@ -432,32 +396,11 @@ class UserEdit extends React.Component {
             Forgot your password?
           </div>
         )}
-
-        <Snackbar
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right"
-          }}
+        <SaveNotificationSettingsAlert
           open={this.state.snackbarOpen}
-          autoHideDuration={6000}
-          onClose={this.handleCloseSnackbar}
-          action={
-            <IconButton
-              size="small"
-              aria-label="close"
-              color="inherit"
-              onClick={this.handleCloseSnackbar}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          }
-        >
-          <MuiAlert variant="filled" elevation={6} severity="success">
-            Changes Saved!
-            <h3>{titleCase(this.state.user.notificationFrequency)}</h3>
-            {this.getSnackbarText()}
-          </MuiAlert>
-        </Snackbar>
+          notificationFrequency={this.state.user.notificationFrequency}
+          handleCloseSnackbar={this.handleCloseSnackbar}
+        />
       </div>
     );
   }
