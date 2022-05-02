@@ -89,7 +89,7 @@ exports.up = function up(knex) {
 
 exports.down = function down(knex) {
   return knex.raw(`
-    create function public.queue_sync_campaign_to_van(campaign_id integer)
+    create or replace function public.queue_sync_campaign_to_van(campaign_id integer)
       returns void as $$
     declare
       v_system_id uuid;
