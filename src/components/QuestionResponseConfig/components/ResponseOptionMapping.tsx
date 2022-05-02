@@ -1,8 +1,8 @@
+import { green, orange } from "@material-ui/core/colors";
+import DeleteIcon from "@material-ui/icons/Delete";
+import PollIcon from "@material-ui/icons/Poll";
 import IconButton from "material-ui/IconButton";
 import { ListItem } from "material-ui/List";
-import { green200, orange200 } from "material-ui/styles/colors";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import PollIcon from "material-ui/svg-icons/social/poll";
 import React from "react";
 
 import { ExternalSurveyQuestion } from "../../../api/external-survey-question";
@@ -32,7 +32,9 @@ export const ResponseOptionMapping: React.SFC<Props> = (props) => {
     <ListItem
       primaryText={primaryText}
       secondaryText={question && question.node.scriptQuestion}
-      leftIcon={<PollIcon color={isActive ? green200 : orange200} />}
+      leftIcon={
+        <PollIcon style={{ color: isActive ? green[200] : orange[200] }} />
+      }
       rightIconButton={
         <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />

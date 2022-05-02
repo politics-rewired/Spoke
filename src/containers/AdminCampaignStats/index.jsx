@@ -1,10 +1,10 @@
 import { gql } from "@apollo/client";
+import { red } from "@material-ui/core/colors";
 import Grid from "@material-ui/core/Grid";
 import { css, StyleSheet } from "aphrodite";
 import Divider from "material-ui/Divider";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
-import { red600 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React from "react";
 import { Helmet } from "react-helmet";
@@ -206,7 +206,7 @@ class AdminCampaignStats extends React.Component {
             Campaign ID: {campaign.id}
             <br />
             Due:{" "}
-            <span style={{ color: isOverdue ? red600 : undefined }}>
+            <span style={{ color: isOverdue ? red[600] : undefined }}>
               {dueFormatted} {isOverdue && "(Overdue)"}
             </span>
           </div>

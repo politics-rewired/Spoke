@@ -1,10 +1,10 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import AddIcon from "@material-ui/icons/Add";
 import { css, StyleSheet } from "aphrodite";
 import isString from "lodash/fp/isString";
 import { DropDownMenu, MenuItem, Snackbar } from "material-ui";
 import FloatingActionButton from "material-ui/FloatingActionButton";
-import ContentAdd from "material-ui/svg-icons/content/add";
 import queryString from "query-string";
 import React from "react";
 import { RouteComponentProps, withRouter } from "react-router-dom";
@@ -45,7 +45,7 @@ const AddPersonButton: React.StatelessComponent<{ onClick: () => void }> = ({
     style={theme.components.floatingButton}
     onClick={onClick}
   >
-    <ContentAdd />
+    <AddIcon />
   </FloatingActionButton>
 );
 

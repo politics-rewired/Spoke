@@ -1,9 +1,9 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import CreateIcon from "@material-ui/icons/Create";
 import isEqual from "lodash/isEqual";
 import uniqBy from "lodash/uniqBy";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import CreateIcon from "material-ui/svg-icons/content/create";
 import React from "react";
 import { compose } from "recompose";
 

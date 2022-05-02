@@ -1,5 +1,5 @@
+import HomeIcon from "@material-ui/icons/Home";
 import IconButton from "material-ui/IconButton/IconButton";
-import NavigateHomeIcon from "material-ui/svg-icons/action/home";
 import React from "react";
 
 import ContactToolbar from "../../components/ContactToolbar";
@@ -18,7 +18,7 @@ const TopFixedSection = (props) => {
           tooltip="Return Home"
           tooltipPosition="bottom-center"
         >
-          <NavigateHomeIcon />
+          <HomeIcon />
         </IconButton>
       }
     />

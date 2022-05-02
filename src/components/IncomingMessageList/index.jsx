@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import DataTables from "material-ui-datatables";
 import FlatButton from "material-ui/FlatButton";
-import ActionOpenInNew from "material-ui/svg-icons/action/open-in-new";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
@@ -167,7 +167,7 @@ export class IncomingMessageList extends Component {
               event.stopPropagation();
               this.handleOpenConversation(row.index);
             }}
-            icon={<ActionOpenInNew />}
+            icon={<OpenInNewIcon />}
           />
         )
       }

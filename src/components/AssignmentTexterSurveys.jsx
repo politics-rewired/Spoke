@@ -2,6 +2,7 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
 import Collapse from "@material-ui/core/Collapse";
+import { grey } from "@material-ui/core/colors";
 import Divider from "@material-ui/core/Divider";
 import FormControl from "@material-ui/core/FormControl";
 import IconButton from "@material-ui/core/IconButton";
@@ -14,7 +15,6 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import isEmpty from "lodash/isEmpty";
 import sample from "lodash/sample";
-import { grey50 } from "material-ui/styles/colors";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -23,7 +23,7 @@ const styles = {
   card: {
     marginTop: 10,
     marginBottom: 10,
-    backgroundColor: grey50,
+    backgroundColor: grey[50],
     padding: 10
   },
   cardHeader: {

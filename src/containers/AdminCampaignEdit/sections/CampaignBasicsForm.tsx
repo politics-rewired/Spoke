@@ -1,9 +1,9 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import DeleteIcon from "@material-ui/icons/Delete";
 import isEmpty from "lodash/isEmpty";
 import ColorPicker from "material-ui-color-picker";
 import IconButton from "material-ui/IconButton";
 import RaisedButton from "material-ui/RaisedButton";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
 import React from "react";
 import { compose } from "recompose";
 import * as yup from "yup";

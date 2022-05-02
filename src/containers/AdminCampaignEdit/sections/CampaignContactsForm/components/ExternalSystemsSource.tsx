@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
+import { green, grey } from "@material-ui/core/colors";
 import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
-import { green500, grey500 } from "material-ui/styles/colors";
 import React from "react";
 
 import { ExternalSystem } from "../../../../../api/external-system";
@@ -48,7 +48,7 @@ export const ExternalSystemsSource: React.SFC<Props> = (props) => {
         avatar={
           <Avatar
             backgroundColor={
-              externalSystem.lists.edges.length > 0 ? green500 : grey500
+              externalSystem.lists.edges.length > 0 ? green[500] : grey[500]
             }
           >
             {externalSystem.lists.edges.length > 9

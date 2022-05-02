@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { History } from "history";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import IconButton from "material-ui/IconButton";
-import ArrowBack from "material-ui/svg-icons/navigation/arrow-back";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
@@ -36,7 +36,7 @@ export const AdminExternalSystemsDetail: React.SFC<Props> = (props) => {
     <div>
       <h1>
         <IconButton onClick={handleNavigateToIntegrations}>
-          <ArrowBack />
+          <ArrowBackIcon />
         </IconButton>
         {externalSystem.name}
       </h1>

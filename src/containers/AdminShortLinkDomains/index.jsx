@@ -4,11 +4,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import AddIcon from "@material-ui/icons/Add";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import RaisedButton from "material-ui/RaisedButton";
-import ContentAddIcon from "material-ui/svg-icons/content/add";
-import CloudUploadIcon from "material-ui/svg-icons/file/cloud-upload";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -159,7 +159,7 @@ class AdminShortLinkDomains extends Component {
           disabled={addDomainIsWorking}
           onClick={this.handleAddDomainClick}
         >
-          {addDomainIsWorking ? <CloudUploadIcon /> : <ContentAddIcon />}
+          {addDomainIsWorking ? <CloudUploadIcon /> : <AddIcon />}
         </FloatingActionButton>
         <AddDomainDialog
           open={showAddDomainDialog}

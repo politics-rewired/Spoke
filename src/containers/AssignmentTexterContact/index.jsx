@@ -1,4 +1,7 @@
 /* eslint-disable react/no-unused-state */
+import { blueGrey, grey } from "@material-ui/core/colors";
+import LocalOfferIcon from "@material-ui/icons/LocalOffer";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
 import sortBy from "lodash/sortBy";
@@ -8,9 +11,6 @@ import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
 import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
-import { blueGrey100, grey100 } from "material-ui/styles/colors";
-import LocalOfferIcon from "material-ui/svg-icons/maps/local-offer";
-import MoreVertIcon from "material-ui/svg-icons/navigation/more-vert";
 import { Toolbar, ToolbarGroup } from "material-ui/Toolbar";
 import md5 from "md5";
 import PropTypes from "prop-types";
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     overflow: "-moz-scrollbars-vertical"
   },
   messageComposition: {
-    borderTop: `1px solid ${grey100}`,
+    borderTop: `1px solid ${grey[100]}`,
     marginBottom: "none"
   },
   messageField: {
@@ -674,7 +674,7 @@ export class AssignmentTexterContact extends React.Component {
           </div>
           <IconMenu
             iconButtonElement={
-              <IconButton style={{ backgroundColor: blueGrey100 }}>
+              <IconButton style={{ backgroundColor: blueGrey[100] }}>
                 <MoreVertIcon />
               </IconButton>
             }
@@ -716,7 +716,7 @@ export class AssignmentTexterContact extends React.Component {
               />
               <RaisedButton
                 label="Manage Tags"
-                backgroundColor={blueGrey100}
+                backgroundColor={blueGrey[100]}
                 icon={<LocalOfferIcon />}
                 disabled={tags.length === 0}
                 onClick={() => this.setState({ isTagEditorOpen: true })}
