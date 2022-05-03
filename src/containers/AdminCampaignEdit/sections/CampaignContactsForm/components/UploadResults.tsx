@@ -47,13 +47,11 @@ export const UploadResults: React.SFC<Props> = (props) => {
         />
       )}
       {pendingJob && <Subheader>Upload Messages</Subheader>}
-      {pendingJob && pendingJob.resultMessage.split("\n").length > 0 ? (
-        pendingJob.resultMessage
-          .split("\n")
-          .map((message) => <ListItem key={message} primaryText={message} />)
-      ) : (
-        <ListItem primaryText="No results" />
-      )}
+      {pendingJob && pendingJob.resultMessage.split("\n").length > 0
+        ? pendingJob.resultMessage
+            .split("\n")
+            .map((message) => <ListItem key={message} primaryText={message} />)
+        : ""}
     </List>
   );
 };

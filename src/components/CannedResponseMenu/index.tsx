@@ -1,34 +1,39 @@
 import ListItemText from "@material-ui/core/ListItemText";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import { useGetCampaignCannedResponsesQuery } from "@spoke/spoke-codegen";
 import React from "react";
 
-interface CannedResponseMenuProps {
+import { useGetCannedResponses } from "./hooks";
+import type { AssignmentIdOrCampaignId } from "./types";
+
+type CannedResponseMenuProps = {
   anchorEl?: Element;
-  campaignId: string;
   onSelectCannedResponse?: (script: string) => Promise<void> | void;
   onRequestClose?: () => Promise<void> | void;
-}
+} & AssignmentIdOrCampaignId;
 
 const CannedResponseMenu: React.FC<CannedResponseMenuProps> = (props) => {
-  const { campaignId, anchorEl } = props;
-  const { data, loading, error } = useGetCampaignCannedResponsesQuery({
-    variables: { campaignId: campaignId! },
-    skip: campaignId === undefined
-  });
+  const {
+    anchorEl,
+    onSelectCannedResponse,
+    onRequestClose,
+    children: _children,
+    ...ids
+  } = props;
+
+  const { data, loading, error } = useGetCannedResponses(ids);
 
   const handleOnClickFactory = (script: string) => () =>
-    props.onSelectCannedResponse?.(script);
+    onSelectCannedResponse?.(script);
 
-  const cannedResponses = data?.campaign?.cannedResponses ?? [];
+  const cannedResponses = data?.cannedResponses ?? [];
 
   return (
     <Menu
       anchorEl={anchorEl}
       keepMounted
       open={Boolean(anchorEl)}
-      onClose={props?.onRequestClose}
+      onClose={onRequestClose}
     >
       {loading && (
         <MenuItem disabled>

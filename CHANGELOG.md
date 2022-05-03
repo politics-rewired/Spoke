@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.24.1](https://github.com/politics-rewired/spoke/compare/v4.24.0...v4.24.1) (2022-04-26)
+
+
+### Bug Fixes
+
+* add campaign id to conversation rows ([#1148](https://github.com/politics-rewired/spoke/issues/1148)) ([f0de0c4](https://github.com/politics-rewired/spoke/commit/f0de0c49fdc0feeacf6ba2d91d87600cd6017ca0)), closes [#831](https://github.com/politics-rewired/spoke/issues/831)
+* don't create a contacts upload job if contacts doesn't exist ([#1147](https://github.com/politics-rewired/spoke/issues/1147)) ([b2266ff](https://github.com/politics-rewired/spoke/commit/b2266ff9a6fbd5a1abb47b0c5884dafb137874f5)), closes [#678](https://github.com/politics-rewired/spoke/issues/678)
+* fix fetching canned responses by texters ([#1150](https://github.com/politics-rewired/spoke/issues/1150)) ([63dde87](https://github.com/politics-rewired/spoke/commit/63dde872515ae28360a84bb4aa02566152de7912))
+* remove header element styling from interaction step titles ([#1149](https://github.com/politics-rewired/spoke/issues/1149)) ([00db0bb](https://github.com/politics-rewired/spoke/commit/00db0bbef27f6ef80ad4b802470236c42bdcc97d))
+* update spoke portal hostname ([1de8d14](https://github.com/politics-rewired/spoke/commit/1de8d14b83982cfee385bd6eae581e47299cf3c9))
+
 ## [4.24.0](https://github.com/politics-rewired/spoke/compare/v4.23.0...v4.24.0) (2022-04-12)
 
 

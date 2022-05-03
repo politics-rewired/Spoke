@@ -78,7 +78,7 @@ export const get10DlcBrandNotices: OrgLevelNotificationGetter = async (
         }
       };
       const response = await request
-        .post(`https://api.portal.spokerewired.com/graphql`)
+        .post(`https://portal-api.spokerewired.com/graphql`)
         .send(payload);
 
       if (!response.body.data.survey) {
