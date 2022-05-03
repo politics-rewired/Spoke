@@ -1,32 +1,26 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 
-import { notification as Notification } from "../../../../libs/spoke-codegen/src";
-import { config } from "../../../config";
-import { CampaignRecord, OrganizationRecord } from "../../api/types";
-import { r } from "../../models";
-import { Notifications } from "../../notifications";
+import {
+  CampaignRecord,
+  NotificationTypes,
+  OrganizationRecord
+} from "../../api/types";
 
 interface NotificationProps {
   campaign: CampaignRecord;
-  notification: Notification;
   organization: OrganizationRecord;
   assignmentCount: string;
+  settingsUrl: string;
+  textingUrl: string;
 }
 
-const textingUrl = (orgId: number) => {
-  return `${config.BASE_URL}/app/${orgId}/todos`;
-};
-
-const settingsUrl = (orgId: number, userId: number) => {
-  return `${config.BASE_URL}/app/${orgId}/account/${userId}`;
-};
-
 const AssignmentCreated: React.FC<NotificationProps> = ({
-  notification,
   organization,
   campaign,
-  assignmentCount
+  assignmentCount,
+  textingUrl,
+  settingsUrl
 }) => {
   return (
     <div>
@@ -37,22 +31,22 @@ const AssignmentCreated: React.FC<NotificationProps> = ({
       <br />
       <p>
         You can start sending texts right away here:{" "}
-        <a href={textingUrl(organization.id)}>{textingUrl(organization.id)}</a>
+        <a href={textingUrl}>{textingUrl}</a>
       </p>
       <br />
       <p>
-        To modify your notification settings, go{" "}
-        <a href={settingsUrl(organization.id, notification.user_id)}>here</a>
+        To modify your notification settings, go <a href={settingsUrl}>here</a>
       </p>
     </div>
   );
 };
 
 const AssignmentUpdated: React.FC<NotificationProps> = ({
-  notification,
   organization,
   campaign,
-  assignmentCount
+  assignmentCount,
+  textingUrl,
+  settingsUrl
 }) => {
   return (
     <div>
@@ -63,21 +57,21 @@ const AssignmentUpdated: React.FC<NotificationProps> = ({
       <br />
       <p>
         You can start sending texts right away here:{" "}
-        <a href={textingUrl(organization.id)}>{textingUrl(organization.id)}</a>
+        <a href={textingUrl}>{textingUrl}</a>
       </p>
       <br />
       <p>
-        To modify your notification settings, go{" "}
-        <a href={settingsUrl(organization.id, notification.user_id)}>here</a>
+        To modify your notification settings, go <a href={settingsUrl}>here</a>
       </p>
     </div>
   );
 };
 
 const AssignmentMessageReceived: React.FC<NotificationProps> = ({
-  notification,
   organization,
-  campaign
+  campaign,
+  textingUrl,
+  settingsUrl
 }) => {
   return (
     <div>
@@ -88,60 +82,35 @@ const AssignmentMessageReceived: React.FC<NotificationProps> = ({
       <br />
       <p>
         You can look at your pending texts here:{" "}
-        <a href={textingUrl(organization.id)}>{textingUrl(organization.id)}</a>
+        <a href={textingUrl}>{textingUrl}</a>
       </p>
       <br />
       <p>
-        To modify your notification settings, go{" "}
-        <a href={settingsUrl(organization.id, notification.user_id)}>here</a>
+        To modify your notification settings, go <a href={settingsUrl}>here</a>
       </p>
     </div>
   );
 };
 
-const getNotificationContent = async (notification: Notification) => {
+const getNotificationContent = (
+  data: NotificationProps,
+  notificationType: NotificationTypes
+) => {
   let template = null;
   let subject = "";
 
-  const organization = await r
-    .knex("organization")
-    .where({ id: notification.organization_id })
-    .first();
-  const campaign = await r
-    .knex("campaign")
-    .where({ id: notification.campaign_id })
-    .first();
-  const assignment = await r
-    .knex("assignment")
-    .where({
-      user_id: notification.user_id,
-      campaign_id: notification.campaign_id
-    })
-    .first();
-  const { count: assignmentCount } = await r
-    .knex("campaign_contact")
-    .where({ campaign_id: campaign.id, assignment_id: assignment.id })
-    .count()
-    .first();
-
-  const props = {
-    notification,
-    organization,
-    campaign,
-    assignmentCount
-  };
-
-  switch (notification.category) {
-    case Notifications.ASSIGNMENT_CREATED:
-      template = <AssignmentCreated {...props} />;
+  const { organization, campaign } = data;
+  switch (notificationType) {
+    case NotificationTypes.AssignmentCreated:
+      template = <AssignmentCreated {...data} />;
       subject = `[${organization.name}] New Assignment: ${campaign.title}`;
       break;
-    case Notifications.ASSIGNMENT_UPDATED:
-      template = <AssignmentUpdated {...props} />;
+    case NotificationTypes.AssignmentUpdated:
+      template = <AssignmentUpdated {...data} />;
       subject = `[${organization.name}] Updated Assignment: ${campaign.title}`;
       break;
-    case Notifications.ASSIGNMENT_MESSAGE_RECEIVED:
-      template = <AssignmentMessageReceived {...props} />;
+    case NotificationTypes.AssignmentMessageReceived:
+      template = <AssignmentMessageReceived {...data} />;
       subject = `[${organization.name}] New Reply: ${campaign.title}`;
       break;
     default:

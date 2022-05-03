@@ -220,3 +220,17 @@ export interface LogRecord {
   updated_at: string;
   service_type: MessagingServiceType | null;
 }
+
+export enum NotificationTypes {
+  AssignmentCreated = "AssignmentCreated",
+  AssignmentUpdated = "AssignmentUpdated",
+  AssignmentMessageReceived = "AssignmentMessageReceived"
+}
+
+export interface NotificationRecord {
+  id: number;
+  user_id: number;
+  organization_id?: number | null;
+  campaign_id?: number | null;
+  sent_at?: Date | null;
+}

@@ -23,7 +23,7 @@ export const queuePendingNotifications: Task = async (_payload, helpers) => {
       "email",
       "organization_id",
       "campaign_id",
-      "category"
+      "notification_type"
     ])
     .join("user", "user_id", "user.id");
 

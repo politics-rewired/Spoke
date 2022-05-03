@@ -1,22 +1,22 @@
 export enum messaging_service_type {
-  'AssembleNumbers' = 'assemble-numbers',
-  'Twilio' = 'twilio' 
+  'Twilio' = 'twilio',
+  'AssembleNumbers' = 'assemble-numbers' 
 }
 
 export enum texter_status {
-  'AutoApprove' = 'auto_approve',
+  'DoNotApprove' = 'do_not_approve',
   'ApprovalRequired' = 'approval_required',
-  'DoNotApprove' = 'do_not_approve' 
+  'AutoApprove' = 'auto_approve' 
 }
 
 export interface all_external_sync_question_response_configuration { 
   id: string
-  system_id: string
   campaign_id: number
   interaction_step_id: number
   question_response_value: string
   created_at: Date
-  updated_at: Date 
+  updated_at: Date
+  system_id?: string | null 
 }
 
 export interface all_question_response { 
@@ -201,6 +201,33 @@ export interface campaign_team {
   created_at: Date
   updated_at?: Date | null
   id: number 
+}
+
+export interface campaign_with_groups { 
+  id?: number | null
+  organization_id?: number | null
+  title?: string | null
+  description?: string | null
+  is_started?: boolean | null
+  due_by?: Date | null
+  created_at?: Date | null
+  is_archived?: boolean | null
+  use_dynamic_assignment?: boolean | null
+  logo_image_url?: string | null
+  intro_html?: string | null
+  primary_color?: string | null
+  texting_hours_start?: number | null
+  texting_hours_end?: number | null
+  timezone?: string | null
+  creator_id?: number | null
+  is_autoassign_enabled?: boolean | null
+  limit_assignment_to_teams?: boolean | null
+  updated_at?: Date | null
+  replies_stale_after_minutes?: number | null
+  landlines_filtered?: boolean | null
+  external_system_id?: string | null
+  group_name?: string | null
+  group_description?: string | null 
 }
 
 export interface canned_response { 
@@ -436,9 +463,9 @@ export interface message {
   campaign_contact_id?: number | null
   updated_at?: Date | null
   script_version_hash?: string | null
-  error_codes?: string[] | null
   num_segments?: number | null
-  num_media?: number | null 
+  num_media?: number | null
+  error_codes?: string[] | null 
 }
 
 export interface messaging_service { 
@@ -474,12 +501,12 @@ export interface monthly_organization_message_usages {
 export interface notification { 
   id: number
   user_id: number
+  subject: string
+  content: string
+  reply_to?: string | null
   sent_at?: Date | null
   created_at: Date
-  updated_at: Date
-  organization_id?: number | null
-  campaign_id?: number | null
-  category: string 
+  updated_at: Date 
 }
 
 export interface opt_out { 
@@ -625,8 +652,7 @@ export interface user {
   assigned_cell?: string | null
   is_superadmin?: boolean | null
   terms?: boolean | null
-  updated_at?: Date | null
-  notification_frequency: string 
+  updated_at?: Date | null 
 }
 
 export interface user_cell { 
@@ -652,6 +678,10 @@ export interface user_team {
   created_at: Date
   updated_at?: Date | null
   id: number 
+}
+
+export interface v_troll_trigger { 
+  to_tsquery?: any | null 
 }
 
 export interface zip_code { 
@@ -684,6 +714,7 @@ export interface Tables {
   campaign_group: campaign_group,
   campaign_group_campaign: campaign_group_campaign,
   campaign_team: campaign_team,
+  campaign_with_groups: campaign_with_groups,
   canned_response: canned_response,
   deliverability_report: deliverability_report,
   external_activist_code: external_activist_code,
@@ -727,5 +758,6 @@ export interface Tables {
   user_cell: user_cell,
   user_organization: user_organization,
   user_team: user_team,
+  v_troll_trigger: v_troll_trigger,
   zip_code: zip_code
 }

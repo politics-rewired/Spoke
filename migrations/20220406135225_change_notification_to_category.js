@@ -6,13 +6,13 @@ exports.up = function up(knex) {
 
     table.integer("organization_id");
     table.integer("campaign_id");
-    table.string("category").notNullable().default("");
+    table.string("notification_type").notNullable().default("");
 
     table.foreign("organization_id").references("organization.id");
     table.foreign("campaign_id").references("campaign.id");
 
     table.index(["user_id", "organization_id"]);
-    table.index("category");
+    table.index("notification_type");
   });
 };
 
@@ -22,7 +22,7 @@ exports.down = function down(knex) {
 
     table.dropColumn("organization_id");
     table.dropColumn("campaign_id");
-    table.dropColumn("category");
+    table.dropColumn("notification_type");
 
     table.text("subject").notNullable().default("");
     table.text("content").notNullable().default("");

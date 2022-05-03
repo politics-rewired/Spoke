@@ -1,5 +1,6 @@
 import { config } from "../config";
 import logger from "../logger";
+import { NotificationTypes } from "./api/types";
 import { eventBus, EventType } from "./event-bus";
 import { r } from "./models";
 import { errToObj } from "./utils";
@@ -15,13 +16,13 @@ async function createNotification(
   userId,
   organizationId,
   campaignId,
-  category
+  notificationType
 ) {
   await r.knex("notification").insert({
     user_id: userId,
     organization_id: organizationId,
     campaign_id: campaignId,
-    category
+    notification_type: notificationType
   });
 }
 
@@ -71,7 +72,7 @@ export const sendUserNotification = async (notification) => {
       const assignment = assignments[i];
       await sendAssignmentUserNotification(
         assignment,
-        Notifications.ASSIGNMENT_CREATED
+        NotificationTypes.AssignmentCreated
       );
     }
     return;
@@ -105,7 +106,7 @@ export const sendUserNotification = async (notification) => {
           assignment.user_id,
           organization.id,
           campaign.id,
-          type
+          NotificationTypes.AssignmentMessageReceived
         );
       } catch (err) {
         logger.error("Error sending conversation reply notification email: ", {
@@ -115,10 +116,16 @@ export const sendUserNotification = async (notification) => {
     }
   } else if (type === Notifications.ASSIGNMENT_CREATED) {
     const { assignment } = notification;
-    await sendAssignmentUserNotification(assignment, type);
+    await sendAssignmentUserNotification(
+      assignment,
+      NotificationTypes.AssignmentCreated
+    );
   } else if (type === Notifications.ASSIGNMENT_UPDATED) {
     const { assignment } = notification;
-    await sendAssignmentUserNotification(assignment, type);
+    await sendAssignmentUserNotification(
+      assignment,
+      NotificationTypes.AssignmentUpdated
+    );
   }
 };
 

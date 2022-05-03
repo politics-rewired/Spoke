@@ -2,8 +2,10 @@ import groupBy from "lodash/groupBy";
 import { Task } from "pg-compose";
 
 import logger from "../../logger";
-import getDigestContent from "../lib/templates/digest";
-import getNotificationContent from "../lib/templates/notification";
+import {
+  getDigestNotificationContent,
+  getSingleNotificationContent
+} from "../api/notification";
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
@@ -19,7 +21,7 @@ const notificationsByOrg = async (userId: number) => {
       "email",
       "organization_id",
       "campaign_id",
-      "category"
+      "notification_type"
     ])
     .join("user", "user_id", "user.id");
 
@@ -28,7 +30,7 @@ const notificationsByOrg = async (userId: number) => {
 
 export const sendNotificationEmail: Task = async (payload, _helpers) => {
   const { email } = payload;
-  const { subject, content } = await getNotificationContent(payload);
+  const { subject, content } = await getSingleNotificationContent(payload);
 
   await r.knex.transaction(async (trx) => {
     await trx("notification")
@@ -57,7 +59,7 @@ export const sendNotificationDigestForUser: Task = async (
     notificationsGrouped
   )) {
     const { email } = notifications[0];
-    const { subject, content } = await getDigestContent(
+    const { subject, content } = await getDigestNotificationContent(
       organizationId,
       payload.id,
       notifications
