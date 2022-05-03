@@ -1,8 +1,8 @@
+import { green, orange } from "@material-ui/core/colors";
+import DeleteIcon from "@material-ui/icons/Delete";
+import LocalActivityIcon from "@material-ui/icons/LocalActivity";
 import IconButton from "material-ui/IconButton";
 import { ListItem } from "material-ui/List";
-import { green200, orange200 } from "material-ui/styles/colors";
-import DeleteIcon from "material-ui/svg-icons/action/delete";
-import LocalActivityIcon from "material-ui/svg-icons/maps/local-activity";
 import React from "react";
 
 import { ExternalActivistCode } from "../../../api/external-activist-code";
@@ -21,7 +21,11 @@ export const ActivistCodeMapping: React.SFC<Props> = (props) => {
     <ListItem
       primaryText={props.activistCode.name}
       secondaryText={props.activistCode.type}
-      leftIcon={<LocalActivityIcon color={isActive ? green200 : orange200} />}
+      leftIcon={
+        <LocalActivityIcon
+          style={{ color: isActive ? green[200] : orange[200] }}
+        />
+      }
       rightIconButton={
         <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />

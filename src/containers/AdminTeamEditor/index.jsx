@@ -4,10 +4,10 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import AddIcon from "@material-ui/icons/Add";
 import pick from "lodash/pick";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
-import ContentAddIcon from "material-ui/svg-icons/content/add";
 import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -147,7 +147,7 @@ class AdminTeamEditor extends Component {
           disabled={isWorking}
           onClick={this.handleClickAddTeam}
         >
-          <ContentAddIcon />
+          <AddIcon />
         </FloatingActionButton>
         {editingTeam && (
           <Dialog open onClose={this.handleCancelEditTeam}>

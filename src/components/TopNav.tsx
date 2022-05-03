@@ -1,8 +1,9 @@
 import { gql } from "@apollo/client";
+import { common } from "@material-ui/core/colors";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { css, StyleSheet } from "aphrodite";
 import IconButton from "material-ui/IconButton";
 import muiThemeable from "material-ui/styles/muiThemeable";
-import ArrowBackIcon from "material-ui/svg-icons/navigation/arrow-back";
 import React from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
@@ -18,7 +19,7 @@ import { MuiThemeProviderProps } from "../styles/types";
 const styles = StyleSheet.create({
   container: {
     ...baseTheme.layouts.multiColumn.container,
-    color: baseTheme.colors.white,
+    color: common.white,
     height: 65,
     verticalAlign: "middle",
     paddingLeft: 15,
@@ -37,7 +38,7 @@ const styles = StyleSheet.create({
   header: {
     ...baseTheme.text.header,
     fontSize: 24,
-    color: baseTheme.colors.white
+    color: common.white
   },
   flexColumn: {
     flex: 1,
@@ -80,10 +81,7 @@ const TopNav: React.FC<InnerProps> = (props) => {
           {backToURL && (
             <Link to={backToURL}>
               <IconButton>
-                <ArrowBackIcon
-                  style={{ fill: "white" }}
-                  color={baseTheme.colors.white}
-                />
+                <ArrowBackIcon style={{ color: common.white }} />
               </IconButton>
             </Link>
           )}

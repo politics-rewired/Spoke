@@ -3039,6 +3039,7 @@ CREATE TABLE public."user" (
     terms boolean DEFAULT false,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     notification_frequency text DEFAULT 'ALL'::text NOT NULL,
+    is_suspended boolean DEFAULT false NOT NULL,
     CONSTRAINT user_notification_frequency_check CHECK ((notification_frequency = ANY (ARRAY['ALL'::text, 'PERIODIC'::text, 'DAILY'::text, 'NONE'::text])))
 );
 
@@ -3143,6 +3144,20 @@ ALTER TABLE public.user_organization_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.user_organization_id_seq OWNED BY public.user_organization.id;
 
+
+--
+-- Name: user_session; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.user_session (
+    sid text NOT NULL,
+    sess json NOT NULL,
+    expire timestamp with time zone NOT NULL,
+    user_id integer GENERATED ALWAYS AS ((((sess -> 'passport'::text) ->> 'user'::text))::integer) STORED
+);
+
+
+ALTER TABLE public.user_session OWNER TO postgres;
 
 --
 -- Name: user_team; Type: TABLE; Schema: public; Owner: postgres
@@ -3953,6 +3968,14 @@ ALTER TABLE ONLY public."user"
 
 
 --
+-- Name: user_session user_session_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_session
+    ADD CONSTRAINT user_session_pkey PRIMARY KEY (sid);
+
+
+--
 -- Name: user_team user_team_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4478,6 +4501,13 @@ CREATE INDEX user_organization_organization_id_user_id_index ON public.user_orga
 --
 
 CREATE INDEX user_organization_user_id_index ON public.user_organization USING btree (user_id);
+
+
+--
+-- Name: user_session_expire_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX user_session_expire_idx ON public.user_session USING btree (expire);
 
 
 --

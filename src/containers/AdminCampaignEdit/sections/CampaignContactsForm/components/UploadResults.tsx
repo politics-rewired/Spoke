@@ -1,13 +1,15 @@
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import { List, ListItem } from "material-ui/List";
 import Subheader from "material-ui/Subheader";
-import CheckIcon from "material-ui/svg-icons/action/check-circle";
 import React from "react";
 
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
 import { PendingJobType } from "../../../components/SectionWrapper";
 
-const GreenCheck = () => <CheckIcon color={theme.colors.green} />;
+const GreenCheck = () => (
+  <CheckCircleIcon style={{ color: theme.colors.green }} />
+);
 
 const inlineStyles = {
   nestedItem: {

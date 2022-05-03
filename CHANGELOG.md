@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.25.0](https://github.com/politics-rewired/spoke/compare/v4.24.1...v4.25.0) (2022-05-02)
+
+
+### Features
+
+* support user session management ([#1157](https://github.com/politics-rewired/spoke/issues/1157)) ([96f88f3](https://github.com/politics-rewired/spoke/commit/96f88f378e86ad1345723bf20f332b5d779c5243))
+
 ### [4.24.1](https://github.com/politics-rewired/spoke/compare/v4.24.0...v4.24.1) (2022-04-26)
 
 

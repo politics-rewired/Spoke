@@ -1,5 +1,5 @@
 import List from "@material-ui/core/List";
-import SpeakerNotesIcon from "material-ui/svg-icons/action/speaker-notes";
+import SpeakerNotesIcon from "@material-ui/icons/SpeakerNotes";
 import React from "react";
 
 import { Campaign } from "../../api/campaign";

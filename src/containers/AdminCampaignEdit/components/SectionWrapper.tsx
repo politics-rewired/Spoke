@@ -1,12 +1,12 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import { useTheme } from "@material-ui/core";
+import CancelIcon from "@material-ui/icons/Cancel";
+import DoneIcon from "@material-ui/icons/Done";
+import WarningIcon from "@material-ui/icons/Warning";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
 import RaisedButton from "material-ui/RaisedButton";
-import DoneIcon from "material-ui/svg-icons/action/done";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
-import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import React from "react";
 import { compose, withProps } from "recompose";
 

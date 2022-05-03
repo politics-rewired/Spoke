@@ -1,4 +1,5 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import { green, red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -7,7 +8,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { History } from "history";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import { green300, red500 } from "material-ui/styles/colors";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
@@ -199,25 +199,25 @@ class VanSyncModal extends React.Component<InnerProps, State> {
             <p>
               Status:{" "}
               {syncReadiness === ExternalSyncReadinessState.READY && (
-                <span style={{ color: green300 }}>
+                <span style={{ color: green[300] }}>
                   Your campaign is ready to sync!
                 </span>
               )}
               {syncReadiness ===
                 ExternalSyncReadinessState.MISSING_REQUIRED_MAPPING && (
-                <span style={{ color: red500 }}>
+                <span style={{ color: red[500] }}>
                   Your campaign is missing a required sync mapping!
                 </span>
               )}
               {syncReadiness ===
                 ExternalSyncReadinessState.INCLUDES_NOT_ACTIVE_TARGETS && (
-                <span style={{ color: red500 }}>
+                <span style={{ color: red[500] }}>
                   Your campaign includes mappings to inactive or archived VAN
                   options!
                 </span>
               )}
               {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && (
-                <span style={{ color: red500 }}>
+                <span style={{ color: red[500] }}>
                   No integration has been set for this campaign!
                 </span>
               )}

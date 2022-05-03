@@ -1,12 +1,12 @@
 import { gql } from "@apollo/client";
+import { amber, grey } from "@material-ui/core/colors";
+import MarkunreadMailboxIcon from "@material-ui/icons/MarkunreadMailbox";
+import NotificationsPausedIcon from "@material-ui/icons/NotificationsPaused";
 import { css, StyleSheet } from "aphrodite";
 import { History } from "history";
 import sortBy from "lodash/sortBy";
 import { List, ListItem } from "material-ui/List";
 import Paper from "material-ui/Paper";
-import { amber500, grey500 } from "material-ui/styles/colors";
-import MailboxIcon from "material-ui/svg-icons/action/markunread-mailbox";
-import NotificationsPausedIcon from "material-ui/svg-icons/social/notifications-paused";
 import React from "react";
 import { Redirect, withRouter } from "react-router-dom";
 import { compose } from "recompose";
@@ -110,9 +110,9 @@ export const OrganizationList: React.SFC<OrganizationListProps> = (props) => {
           {sortedList.map(({ membership, hasAssignments }) => {
             const leftIcon = showIcons ? (
               hasAssignments ? (
-                <MailboxIcon color={amber500} />
+                <MarkunreadMailboxIcon style={{ color: amber[500] }} />
               ) : (
-                <NotificationsPausedIcon color={grey500} />
+                <NotificationsPausedIcon style={{ color: grey[500] }} />
               )
             ) : undefined;
             return (

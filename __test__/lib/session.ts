@@ -21,7 +21,7 @@ export const createSession = async (options: CreateSessionOptions) => {
     .post("/login-callback")
     .send({ authType: "login", email, password })
     .then((res) => {
-      const setCookies: string[] = res.headers["set-cookie"];
+      const setCookies: string[] = res.headers["set-cookie"] ?? [];
       const cookies = setCookies.reduce<Record<string, string>>(
         (acc, cookie) => {
           const [cookieName, cookieValue] = cookie.split(";")[0].split("=");

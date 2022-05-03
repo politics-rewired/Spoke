@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
+import CheckIcon from "@material-ui/icons/Check";
 import { RaisedButton } from "material-ui";
-import Check from "material-ui/svg-icons/action/check-circle";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -85,7 +85,7 @@ class TexterTodoList extends React.Component {
 
     const empty = (
       <div>
-        <Empty title="Waiting for replies!" icon={<Check />} />
+        <Empty title="Waiting for replies!" icon={<CheckIcon />} />
       </div>
     );
 

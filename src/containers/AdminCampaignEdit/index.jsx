@@ -1,4 +1,5 @@
 import Button from "@material-ui/core/Button";
+import { red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -6,6 +7,9 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Grid from "@material-ui/core/Grid";
 import { withTheme } from "@material-ui/core/styles";
+import CancelIcon from "@material-ui/icons/Cancel";
+import DoneIcon from "@material-ui/icons/Done";
+import WarningIcon from "@material-ui/icons/Warning";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
 import Avatar from "material-ui/Avatar";
@@ -14,10 +18,6 @@ import CircularProgress from "material-ui/CircularProgress";
 import Divider from "material-ui/Divider";
 import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
-import { red600 } from "material-ui/styles/colors";
-import DoneIcon from "material-ui/svg-icons/action/done";
-import WarningIcon from "material-ui/svg-icons/alert/warning";
-import CancelIcon from "material-ui/svg-icons/navigation/cancel";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
@@ -623,7 +623,7 @@ class AdminCampaignEdit extends React.Component {
       <div
         {...dataTest("campaignIsStarted")}
         style={{
-          color: isOverdue ? red600 : theme.colors.green
+          color: isOverdue ? red[600] : theme.colors.green
         }}
       >
         {isOverdue

@@ -33,6 +33,7 @@ export interface User {
   terms: boolean;
   isSuperadmin: boolean;
   notificationFrequency: NotificationFrequencyType;
+  isSuspended: boolean;
 }
 
 export const schema = `
@@ -54,8 +55,9 @@ export const schema = `
     terms: Boolean
     isSuperadmin: Boolean!
     notificationFrequency: String!
+    isSuspended: Boolean!
   }
-  
+
   type UsersList {
     users: [User]
   }

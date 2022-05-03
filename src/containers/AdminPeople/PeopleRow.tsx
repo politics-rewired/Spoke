@@ -1,11 +1,25 @@
+import { makeStyles } from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@material-ui/core/Typography";
+import BlockIcon from "@material-ui/icons/Block";
+import EditIcon from "@material-ui/icons/Edit";
+import LinkOffIcon from "@material-ui/icons/LinkOff";
+import LockIcon from "@material-ui/icons/Lock";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import PersonAddIcon from "@material-ui/icons/PersonAdd";
+import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 import {
   DropDownMenu,
-  FlatButton,
-  MenuItem,
+  MenuItem as MenuItemV0,
   TableRow,
   TableRowColumn
 } from "material-ui";
-import React from "react";
+import React, { useCallback, useState } from "react";
+import { useAuthzContext } from "src/components/AuthzProvider";
 
 import {
   OrganizationMembership,
@@ -13,7 +27,7 @@ import {
   UserRoleType
 } from "../../api/organization-membership";
 import { User } from "../../api/user";
-import { dataTest, snakeToTitleCase, titleCase } from "../../lib/attributes";
+import { snakeToTitleCase, titleCase } from "../../lib/attributes";
 import { hasRoleAtLeast } from "../../lib/permissions";
 import {
   AdminPeopleContext,
@@ -39,7 +53,7 @@ interface RoleSelectProps {
   context: PeopleRowContext;
   onSelect: (newRole: UserRoleType) => void;
 }
-const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
+const RoleSelect: React.FC<RoleSelectProps> = ({
   context: { row, viewing },
   onSelect
 }) => {
@@ -63,7 +77,7 @@ const RoleSelect: React.StatelessComponent<RoleSelectProps> = ({
         UserRoleType.OWNER,
         UserRoleType.SUPERADMIN
       ].map((option) => (
-        <MenuItem
+        <MenuItemV0
           key={option}
           value={option}
           disabled={
@@ -83,7 +97,7 @@ interface AutoApproveSelectProps {
   context: PeopleRowContext;
   onChange: (autoApprove: RequestAutoApproveType) => void;
 }
-const AutoApproveSelect: React.StatelessComponent<AutoApproveSelectProps> = ({
+const AutoApproveSelect: React.FC<AutoApproveSelectProps> = ({
   context: { row, viewing },
   onChange
 }) => {
@@ -102,7 +116,7 @@ const AutoApproveSelect: React.StatelessComponent<AutoApproveSelectProps> = ({
         RequestAutoApproveType.AUTO_APPROVE,
         RequestAutoApproveType.DO_NOT_APPROVE
       ].map((option) => (
-        <MenuItem
+        <MenuItemV0
           key={option}
           value={option}
           disabled={false}
@@ -113,6 +127,13 @@ const AutoApproveSelect: React.StatelessComponent<AutoApproveSelectProps> = ({
   );
 };
 
+const useStyles = makeStyles((_theme) => ({
+  wrapIcon: {
+    verticalAlign: "middle",
+    display: "inline-flex"
+  }
+}));
+
 interface PeopleRowProps {
   context: AdminPeopleContext;
   membership: OrganizationMembership;
@@ -121,13 +142,16 @@ interface PeopleRowProps {
 
 type PeopleRowExtendedProps = PeopleRowProps;
 
-const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
+const PeopleRow: React.FC<PeopleRowExtendedProps> = ({
   membership,
   context: {
     viewing: { user: viewingUser }
   },
   handlers
 }) => {
+  const classes = useStyles();
+  const auth = useAuthzContext();
+  const [menuAnchor, setMenuAnchor] = useState<HTMLButtonElement | null>(null);
   const context: PeopleRowContext = {
     row: {
       membership,
@@ -144,43 +168,115 @@ const PeopleRow: React.StatelessComponent<PeopleRowExtendedProps> = ({
 
   const { row, viewing } = context;
 
+  const handleEditRole = useCallback(
+    (role: UserRoleType) =>
+      handlers.editMembershipRole(role, row.membership.id),
+    [handlers.editMembershipRole, row.membership.id]
+  );
+
+  const handleEditAutoApprove = useCallback(
+    (autoApprove: RequestAutoApproveType) =>
+      handlers.editAutoApprove(autoApprove, row.membership.id),
+    [handlers.editAutoApprove, row.membership.id]
+  );
+
+  const handleClickEdit = useCallback(() => {
+    handlers.startEdit(row.user.id);
+  }, [handlers.startEdit, row.user.id]);
+
+  const handleToggleSuspend = useCallback(() => {
+    handlers.setSuspended(row.user.id, !row.user.isSuspended);
+  }, [handlers.setSuspended, row.user.id, row.user.isSuspended]);
+
+  const handleClearSessions = useCallback(() => {
+    handlers.clearSessions(row.user.id);
+  }, [handlers.clearSessions, row.user.id]);
+
+  const handleClickReset = useCallback(() => {
+    handlers.resetUserPassword(row.user.id);
+  }, [handlers.resetUserPassword, row.user.id]);
+
+  const handleClickMenu = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+      setMenuAnchor(event.currentTarget),
+    [setMenuAnchor]
+  );
+
+  const handleCloseMenu = useCallback(() => setMenuAnchor(null), [
+    setMenuAnchor
+  ]);
+
   return (
     <TableRow>
-      <TableRowColumn>{row.user.displayName}</TableRowColumn>
+      <TableRowColumn style={{ verticalAlign: "middle" }}>
+        <Typography variant="body2" className={classes.wrapIcon}>
+          {row.user.isSuspended && (
+            <Tooltip title="Suspended">
+              <BlockIcon />
+            </Tooltip>
+          )}
+          &nbsp;
+          {row.user.displayName}
+        </Typography>
+      </TableRowColumn>
       <TableRowColumn>{row.user.email}</TableRowColumn>
       <TableRowColumn>
-        <RoleSelect
-          context={context}
-          onSelect={(role) =>
-            handlers.editMembershipRole(role, row.membership.id)
-          }
-        />
+        <RoleSelect context={context} onSelect={handleEditRole} />
       </TableRowColumn>
 
       <TableRowColumn>
-        <AutoApproveSelect
-          context={context}
-          onChange={(autoApprove) =>
-            handlers.editAutoApprove(autoApprove, row.membership.id)
-          }
-        />
+        <AutoApproveSelect context={context} onChange={handleEditAutoApprove} />
       </TableRowColumn>
       <TableRowColumn>
-        <FlatButton
-          {...dataTest("editPerson")}
-          label="Edit"
-          onClick={() => handlers.startEdit(row.user.id)}
-        />
+        <IconButton aria-label="people-row-menu" onClick={handleClickMenu}>
+          <MoreVertIcon />
+        </IconButton>
+        <Menu
+          anchorEl={menuAnchor}
+          open={menuAnchor !== null}
+          onClose={handleCloseMenu}
+        >
+          <MenuItem onClick={handleClickEdit}>
+            <ListItemIcon>
+              <EditIcon />
+            </ListItemIcon>
+            Edit
+          </MenuItem>
+          <MenuItem
+            disabled={!auth.isSuperadmin || viewing.user.id === row.user.id}
+            onClick={handleToggleSuspend}
+          >
+            <ListItemIcon>
+              {row.user.isSuspended ? (
+                <PersonAddIcon />
+              ) : (
+                <RemoveCircleOutlineIcon />
+              )}
+            </ListItemIcon>
+            {row.user.isSuspended ? "Unsuspend" : "Suspend"}
+          </MenuItem>
+          <MenuItem
+            disabled={!auth.isSuperadmin || viewing.user.id === row.user.id}
+            onClick={handleClearSessions}
+          >
+            <ListItemIcon>
+              <LinkOffIcon />
+            </ListItemIcon>
+            Clear Sessions
+          </MenuItem>
+          {window.PASSPORT_STRATEGY === "local" && (
+            <MenuItem
+              disabled={viewing.user.id === row.user.id}
+              onClick={handleClickReset}
+            >
+              <ListItemIcon>
+                <LockIcon />
+              </ListItemIcon>
+              Reset Password
+            </MenuItem>
+          )}
+        </Menu>
       </TableRowColumn>
-      {window.PASSPORT_STRATEGY === "local" && (
-        <TableRowColumn>
-          <FlatButton
-            label="Reset Password"
-            disabled={viewing.user.id === row.user.id}
-            onClick={() => handlers.resetUserPassword(row.user.id)}
-          />
-        </TableRowColumn>
-      )}
     </TableRow>
   );
 };

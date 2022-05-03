@@ -87,8 +87,22 @@ module.exports = {
     "no-restricted-imports": [
       "error",
       {
-        name: "luxon",
-        message: "Please use src/lib/datetime instead."
+        paths: [
+          {
+            name: "luxon",
+            message: "Please use src/lib/datetime instead."
+          }
+        ],
+        patterns: [
+          {
+            group: ["material-ui/svg-icons/*"],
+            message: "Please use @material-ui/icons instead."
+          },
+          {
+            group: ["material-ui/styles/colors"],
+            message: "Please use @material-ui/core/colors instead."
+          }
+        ]
       }
     ],
     "import/no-extraneous-dependencies": [

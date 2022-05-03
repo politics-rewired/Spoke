@@ -1,7 +1,7 @@
+import { red } from "@material-ui/core/colors";
+import NotInterestedIcon from "@material-ui/icons/NotInterested";
 import Divider from "material-ui/Divider";
 import { List, ListItem } from "material-ui/List";
-import { red300 } from "material-ui/styles/colors";
-import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -50,7 +50,7 @@ const MessageList = function MessageList(props) {
       <Divider />
       <ListItem
         style={styles.optOut}
-        leftIcon={<ProhibitedIcon style={{ fill: red300 }} />}
+        leftIcon={<NotInterestedIcon style={{ color: red[300] }} />}
         disabled
         primaryText={`${firstName} opted out of texts`}
         secondaryText={DateTime.fromISO(optOut.createdAt).toRelative()}

@@ -1,4 +1,4 @@
-import { grey100 } from "material-ui/styles/colors";
+import { grey } from "@material-ui/core/colors";
 import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
 import React from "react";
 
@@ -9,7 +9,7 @@ import { DateTime } from "../lib/datetime";
 
 const inlineStyles = {
   toolbar: {
-    backgroundColor: grey100
+    backgroundColor: grey[100]
   },
   locationToolbarTitle: {
     fontSize: "1em"

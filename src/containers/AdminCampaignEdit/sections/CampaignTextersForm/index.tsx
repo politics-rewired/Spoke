@@ -1,12 +1,12 @@
 import { ApolloQueryResult } from "@apollo/client";
 import { withApollo, WithApolloClient } from "@apollo/client/react/hoc";
 import Button from "@material-ui/core/Button";
+import { red } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import Snackbar from "@material-ui/core/Snackbar";
 import CloseIcon from "@material-ui/icons/Close";
 import { css, StyleSheet } from "aphrodite";
 import orderBy from "lodash/orderBy";
-import { red600 } from "material-ui/styles/colors";
 import React, { useState } from "react";
 import { compose } from "recompose";
 
@@ -210,7 +210,7 @@ const CampaignTextersForm: React.FC<InnerProps> = (props) => {
         title="Who should send the texts?"
         subtitle={
           isOverdue && (
-            <span style={{ color: red600 }}>
+            <span style={{ color: red[600] }}>
               This campaign is overdue! Please change the due date before
               editing Texters
             </span>

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { gql } from "@apollo/client";
-import PeopleIcon from "material-ui/svg-icons/social/people";
+import PeopleIcon from "@material-ui/icons/People";
 import { Table, TableBody } from "material-ui/Table";
 import React from "react";
 
@@ -36,6 +36,7 @@ const query = gql`
               lastName
               displayName
               email
+              isSuspended
             }
             role
             requestAutoApprove
@@ -70,7 +71,7 @@ interface PeopleTableProps {
   nameSearch: string;
   rowEventHandlers: PeopleRowEventHandlers;
 }
-const PeopleTable: React.StatelessComponent<PeopleTableProps> = ({
+const PeopleTable: React.FC<PeopleTableProps> = ({
   context,
   nameSearch,
   onlyCampaignId,

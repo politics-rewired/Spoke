@@ -161,7 +161,8 @@ export const resolvers = {
       "cell",
       "assignedCell",
       "terms",
-      "notificationFrequency"
+      "notificationFrequency",
+      "isSuspended"
     ]),
     isSuperadmin: (userRecord, _, { user: authUser }) => {
       if (userRecord.id !== authUser.id) throw new ForbiddenError();

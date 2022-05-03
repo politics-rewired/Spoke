@@ -1,8 +1,8 @@
 import "../styles/file-drop.css";
 
+import PublishIcon from "@material-ui/icons/Publish";
 import { css, StyleSheet } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
-import UploadIcon from "material-ui/svg-icons/file/file-upload";
 import React from "react";
 import FileDrop from "react-file-drop";
 
@@ -65,7 +65,7 @@ const CSVForm: React.SFC<Props> = (props) => {
         <RaisedButton
           label="Select a file"
           containerElement="label"
-          icon={<UploadIcon />}
+          icon={<PublishIcon />}
         >
           <input
             id="csv-upload-field"

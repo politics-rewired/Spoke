@@ -1,4 +1,5 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import { red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -16,13 +17,12 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TextField from "@material-ui/core/TextField";
+import AddIcon from "@material-ui/icons/Add";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import sortBy from "lodash/sortBy";
 import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import RaisedButton from "material-ui/RaisedButton";
-import { red500 } from "material-ui/styles/colors";
-import DeleteForeverIcon from "material-ui/svg-icons/action/delete-forever";
-import ContentAddIcon from "material-ui/svg-icons/content/add";
 import React, { useState } from "react";
 import { RouteChildrenProps } from "react-router-dom";
 
@@ -204,7 +204,7 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
                     <RaisedButton
                       label="Delete"
                       labelPosition="before"
-                      icon={<DeleteForeverIcon color={red500} />}
+                      icon={<DeleteForeverIcon style={{ color: red[500] }} />}
                       onClick={handleDeleteToken(token)}
                     />
                   </TableCell>
@@ -220,7 +220,7 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
           disabled={isWorking}
           onClick={handleAddToken}
         >
-          <ContentAddIcon />
+          <AddIcon />
         </FloatingActionButton>
       )}
       <Dialog open={addToken !== undefined} onClose={handleOnCancelAddToken}>
