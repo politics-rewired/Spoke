@@ -2586,7 +2586,7 @@ CREATE TABLE public.notification (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     organization_id integer,
     campaign_id integer,
-    category character varying(255) DEFAULT ''::character varying NOT NULL
+    notification_type character varying(255) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -4271,10 +4271,10 @@ CREATE INDEX messaging_service_stick_messaging_service_sid_index ON public.messa
 
 
 --
--- Name: notification_category_index; Type: INDEX; Schema: public; Owner: postgres
+-- Name: notification_notification_type_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX notification_category_index ON public.notification USING btree (category);
+CREATE INDEX notification_notification_type_index ON public.notification USING btree (notification_type);
 
 
 --
