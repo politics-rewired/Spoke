@@ -7,9 +7,9 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { loadData } from "../../containers/hoc/with-operations";
+import LoadingIndicator from "../../../../components/LoadingIndicator";
+import { loadData } from "../../../hoc/with-operations";
 import { MESSAGE_STATUSES } from "../IncomingMessageFilter";
-import LoadingIndicator from "../LoadingIndicator";
 import ConversationPreviewModal from "./ConversationPreviewModal";
 
 const formatContactName = (contact) => {

@@ -10,7 +10,7 @@ import type from "prop-types";
 import React, { Component } from "react";
 import Select, { createFilter } from "react-select";
 
-import theme from "../styles/theme";
+import theme from "../../../styles/theme";
 
 const styles = StyleSheet.create({
   container: {

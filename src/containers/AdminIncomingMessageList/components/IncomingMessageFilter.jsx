@@ -8,10 +8,10 @@ import Toggle from "material-ui/Toggle";
 import type from "prop-types";
 import React, { Component } from "react";
 
-import { nameComponents } from "../lib/attributes";
-import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../lib/constants";
-import theme from "../styles/theme";
-import { dataSourceItem } from "./utils";
+import { dataSourceItem } from "../../../components/utils";
+import { nameComponents } from "../../../lib/attributes";
+import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../../lib/constants";
+import theme from "../../../styles/theme";
 
 const styles = StyleSheet.create({
   container: {

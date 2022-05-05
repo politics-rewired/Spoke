@@ -13,13 +13,13 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import IncomingMessageActions from "../../components/IncomingMessageActions";
-import IncomingMessageFilter from "../../components/IncomingMessageFilter";
-import IncomingMessageList from "../../components/IncomingMessageList";
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../lib/constants";
 import { loadData } from "../hoc/with-operations";
 import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
 import PaginatedUsersRetriever from "../PaginatedUsersRetriever";
+import IncomingMessageActions from "./components/IncomingMessageActions";
+import IncomingMessageFilter from "./components/IncomingMessageFilter";
+import IncomingMessageList from "./components/IncomingMessageList";
 
 function getCampaignsFilterForCampaignArchiveStatus(
   includeActiveCampaigns,
