@@ -4419,6 +4419,14 @@
     execa "^5.0.0"
     tslib "^2.1.0"
 
+"@rewired/h@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@rewired/h/-/h-1.1.0.tgz#c9ac0d6990948f94297cd8af9fae901bb5242c9a"
+  integrity sha512-EcGMoFDB4ojxQ7qc9SbGUzW0OxT9Uiq4Wekn8fhRter229iUJ+muhHkfAE7RVfaK+/CZ+8oLwYFhMeEZ5eGg3A==
+  dependencies:
+    cssesc "^3.0.0"
+    html-escape "^2.0.0"
+
 "@rewired/passport-slack@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@rewired/passport-slack/-/passport-slack-1.0.6.tgz#3d3744f864bb9d3d5c1dd0177d1b278d30d10ea1"
@@ -13478,14 +13486,6 @@ gzip-size@5.1.1:
   dependencies:
     duplexer "^0.1.1"
     pify "^4.0.1"
-
-h@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/h/-/h-1.0.0.tgz#a637773a89b3c07d316bdbda87d4a65b2a5f8cf4"
-  integrity sha512-nxC1orTrM/gMBsMyWnFqLe2kzqD/iVIVoBIdpOtQc9hyKzWWPuuCiXGwi0o3TwC+3SyhIR5d73WGg6KlcokWzw==
-  dependencies:
-    cssesc "^3.0.0"
-    html-escape "^2.0.0"
 
 handle-thing@^2.0.0:
   version "2.0.0"

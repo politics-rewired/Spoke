@@ -1,5 +1,5 @@
+import h from "@rewired/h";
 import express from "express";
-import h from "h";
 import { sortBy } from "lodash";
 
 import { getTopMostParent } from "../../lib/interaction-step-helpers";
