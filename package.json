@@ -157,7 +157,7 @@
     "react-file-drop": "^0.2.8",
     "react-formal": "^2.2.2",
     "react-helmet": "^6.1.0",
-    "react-markdown": "^4.1.0",
+    "react-markdown": "^8.0.3",
     "react-portal": "^4.2.1",
     "react-router-dom": "^5.2.0",
     "react-select": "^2.0.0",
