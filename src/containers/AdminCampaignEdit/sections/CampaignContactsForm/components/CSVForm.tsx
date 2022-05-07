@@ -4,7 +4,7 @@ import PublishIcon from "@material-ui/icons/Publish";
 import { css, StyleSheet } from "aphrodite";
 import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
-import FileDrop from "react-file-drop";
+import { FileDrop } from "react-file-drop";
 
 import theme from "../../../../../styles/theme";
 
