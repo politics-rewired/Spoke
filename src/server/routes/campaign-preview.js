@@ -34,7 +34,7 @@ const makeInteractionStepHtml = (
     : []
   ).concat(
     interactionStep.script_options
-      .map((opt) => ["p.script", ["em", `"${opt}"`]])
+      .map((opt) => ["p.script", ["em", `${opt}`]])
       .concat(
         interactionStep.question
           ? [
@@ -84,7 +84,7 @@ const makeCannedResponsesHtml = (cannedResponses) => {
     cannedResponses.map((cr) => [
       "li.canned-response",
       ["p.title", ["strong", cr.title]],
-      ["p.text", ["em", `"${cr.text}"`]]
+      ["p.text", ["em", `${cr.text}`]]
     ])
   ];
 };
