@@ -63,7 +63,7 @@ class ApplyTagConfirmationDialog extends Component {
       <Dialog open={pendingTag !== undefined} onClose={this.handleRequestClose}>
         <DialogTitle>Confirm Add Tag</DialogTitle>
         <DialogContent>
-          <ReactMarkdown source={content} />
+          <ReactMarkdown>{content}</ReactMarkdown>
         </DialogContent>
         <DialogActions>{confirmTagActions}</DialogActions>
       </Dialog>
