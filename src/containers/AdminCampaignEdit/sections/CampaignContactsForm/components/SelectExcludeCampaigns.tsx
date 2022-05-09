@@ -1,7 +1,6 @@
 import sortBy from "lodash/sortBy";
 import React from "react";
 import Select from "react-select";
-import { ValueType } from "react-select/lib/types";
 
 interface OptionType {
   label: string;
@@ -33,7 +32,7 @@ export const SelectExcludeCampaigns: React.FC<SelectExcludeCampaignsProps> = (
   const sortedCampaigns = sortBy(allOtherCampaigns, ["createdAt"], ["desc"]);
   const options = sortedCampaigns.map(mapOption);
 
-  const handleOnChangeSelections = (selectedOptions: ValueType<OptionType>) => {
+  const handleOnChangeSelections = (selectedOptions: OptionType[]) => {
     if (!Array.isArray(selectedOptions)) {
       return props.onChangeExcludedCamapignIds([]);
     }

@@ -2,7 +2,7 @@
 import uniqBy from "lodash/uniqBy";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
-import CreatableSelect from "react-select/lib/Creatable";
+import CreatableSelect from "react-select/creatable";
 
 const components = {
   DropdownIndicator: null
