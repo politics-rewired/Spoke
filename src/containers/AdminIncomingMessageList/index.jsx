@@ -151,10 +151,10 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleTagsChanged = (_1, _2, values) => {
+  handleTagsChanged = (event) => {
     this.setState((prevState) => {
       const newTagsFilter = { ...prevState.tagsFilter };
-      newTagsFilter.specificTagIds = values;
+      newTagsFilter.specificTagIds = event.target.value;
 
       return {
         tagsFilter: newTagsFilter,
