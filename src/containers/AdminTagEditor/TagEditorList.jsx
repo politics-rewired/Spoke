@@ -1,9 +1,9 @@
+import Chip from "@material-ui/core/Chip";
 import { red } from "@material-ui/core/colors";
 import BlockIcon from "@material-ui/icons/Block";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import CreateIcon from "@material-ui/icons/Create";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
-import Chip from "material-ui/Chip";
 import Paper from "material-ui/Paper";
 import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
@@ -42,12 +42,13 @@ class TagEditorList extends Component {
           <Paper key={tag.id} style={styles.card}>
             <div style={{ display: "flex" }}>
               <Chip
-                backgroundColor={tag.backgroundColor}
-                labelColor={tag.textColor}
-                style={styles.chip}
-              >
-                {tag.title}
-              </Chip>
+                label={tag.title}
+                style={{
+                  ...styles.chip,
+                  color: tag.textColor,
+                  backgroundColor: tag.backgroundColor
+                }}
+              />
             </div>
             {tag.description && (
               <p style={styles.description}>{tag.description}</p>

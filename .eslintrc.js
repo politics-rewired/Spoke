@@ -91,6 +91,11 @@ module.exports = {
           {
             name: "luxon",
             message: "Please use src/lib/datetime instead."
+          },
+          {
+            name: "material-ui",
+            importNames: ["Chip"],
+            message: "Please use @material-ui/core instead."
           }
         ],
         patterns: [
@@ -101,6 +106,10 @@ module.exports = {
           {
             group: ["material-ui/styles/colors"],
             message: "Please use @material-ui/core/colors instead."
+          },
+          {
+            group: ["material-ui/Chip"],
+            message: "Please use @material-ui/core instead."
           }
         ]
       }

@@ -1,4 +1,5 @@
 import Avatar from "@material-ui/core/Avatar";
+import Chip from "@material-ui/core/Chip";
 import blue from "@material-ui/core/colors/blue";
 import grey from "@material-ui/core/colors/grey";
 import ListItem from "@material-ui/core/ListItem";
@@ -7,7 +8,6 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import { useTheme } from "@material-ui/core/styles";
 import WarningIcon from "@material-ui/icons/Warning";
-import Chip from "material-ui/Chip";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
@@ -120,12 +120,13 @@ export const CampaignListRow: React.FC<Props> = (props) => {
       {tags.map((tag) => (
         <Chip
           key={tag.title}
-          labelColor={tag.color}
-          backgroundColor={tag.backgroundColor}
-          style={inlineStyles.chip}
-        >
-          {tag.title}
-        </Chip>
+          label={tag.title}
+          style={{
+            ...inlineStyles.chip,
+            color: tag.color,
+            backgroundColor: tag.backgroundColor
+          }}
+        />
       ))}
     </div>
   );
