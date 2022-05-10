@@ -488,7 +488,8 @@ const rootMutations = {
           first_name: userData.firstName,
           last_name: userData.lastName,
           email: userData.email,
-          cell: userData.cell
+          cell: userData.cell,
+          notification_frequency: userData.notificationFrequency
         });
 
         memoizer.invalidate(cacheOpts.GetUser.key, { id: userId });
@@ -501,7 +502,8 @@ const rootMutations = {
           first_name: userData.firstName,
           last_name: userData.lastName,
           email: userData.email,
-          cell: userData.cell
+          cell: userData.cell,
+          notification_frequency: userData.notificationFrequency
         };
       } else {
         userData = member;

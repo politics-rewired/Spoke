@@ -52,6 +52,7 @@ input UserInput {
   lastName: String!
   email: String!
   cell: String!
+  notificationFrequency: String!
   oldPassword: String
   newPassword: String
 }
@@ -312,9 +313,10 @@ type User {
   teams(organizationId: String!): [Team]!
   currentRequest(organizationId: String!): AssignmentRequest
   assignedCell: Phone
-  assignment(campaignId: String): Assignment,
+  assignment(campaignId: String): Assignment
   terms: Boolean
   isSuperadmin: Boolean!
+  notificationFrequency: String!
   isSuspended: Boolean!
 }
 

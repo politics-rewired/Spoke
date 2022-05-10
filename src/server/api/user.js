@@ -161,6 +161,7 @@ export const resolvers = {
       "cell",
       "assignedCell",
       "terms",
+      "notificationFrequency",
       "isSuspended"
     ]),
     isSuperadmin: (userRecord, _, { user: authUser }) => {

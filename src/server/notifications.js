@@ -1,5 +1,6 @@
 import { config } from "../config";
 import logger from "../logger";
+import { NotificationTypes } from "./api/types";
 import { eventBus, EventType } from "./event-bus";
 import { r } from "./models";
 import { errToObj } from "./utils";
@@ -11,30 +12,19 @@ export const Notifications = Object.freeze({
   ASSIGNMENT_UPDATED: "assignment.updated"
 });
 
-async function createNotification(userId, subject, content, replyTo) {
-  await r
-    .knex("notification")
-    .insert({ user_id: userId, subject, content, reply_to: replyTo });
+async function createNotification(
+  userId,
+  organizationId,
+  campaignId,
+  notificationType
+) {
+  await r.knex("notification").insert({
+    user_id: userId,
+    organization_id: organizationId,
+    campaign_id: campaignId,
+    notification_type: notificationType
+  });
 }
-
-async function getOrganizationOwner(organizationId) {
-  return r
-    .reader("user")
-    .join("user_organization", "user_organization.user_id", "user.id")
-    .where({
-      "user_organization.organization_id": organizationId,
-      role: "OWNER"
-    })
-    .orderBy("user.id")
-    .first("user.*");
-}
-
-const replyToForOrg = async (organizationId) => {
-  if (config.EMAIL_REPLY_TO) return config.EMAIL_REPLY_TO;
-
-  const orgOwner = await getOrganizationOwner(organizationId);
-  return orgOwner.email;
-};
 
 const sendAssignmentUserNotification = async (assignment, notification) => {
   const campaign = await r
@@ -51,20 +41,13 @@ const sendAssignmentUserNotification = async (assignment, notification) => {
     .where({ id: campaign.organization_id })
     .first();
 
-  const replyTo = await replyToForOrg(organization.id);
-
-  let subject;
-  let text;
-  if (notification === Notifications.ASSIGNMENT_UPDATED) {
-    subject = `[${organization.name}] Updated assignment: ${campaign.title}`;
-    text = `Your assignment changed: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
-  } else if (notification === Notifications.ASSIGNMENT_CREATED) {
-    subject = `[${organization.name}] New assignment: ${campaign.title}`;
-    text = `You just got a new texting assignment from ${organization.name}. You can start sending texts right away: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos`;
-  }
-
   try {
-    await createNotification(assignment.user_id, subject, text, replyTo);
+    await createNotification(
+      assignment.user_id,
+      organization.id,
+      campaign.id,
+      notification
+    );
   } catch (e) {
     logger.error("Error sending assignment notification email: ", e);
   }
@@ -89,7 +72,7 @@ export const sendUserNotification = async (notification) => {
       const assignment = assignments[i];
       await sendAssignmentUserNotification(
         assignment,
-        Notifications.ASSIGNMENT_CREATED
+        NotificationTypes.AssignmentCreated
       );
     }
     return;
@@ -117,12 +100,14 @@ export const sendUserNotification = async (notification) => {
         .reader("organization")
         .where({ id: campaign.organization_id })
         .first();
-      const replyTo = await replyToForOrg(organization.id);
-      const subject = `[${organization.name}] [${campaign.title}] New reply`;
-      const text = `Someone responded to your message. See all your replies here: \n\n${config.BASE_URL}/app/${campaign.organization_id}/todos/${notification.assignmentId}/reply`;
 
       try {
-        await createNotification(assignment.user_id, subject, text, replyTo);
+        await createNotification(
+          assignment.user_id,
+          organization.id,
+          campaign.id,
+          NotificationTypes.AssignmentMessageReceived
+        );
       } catch (err) {
         logger.error("Error sending conversation reply notification email: ", {
           ...errToObj(err)
@@ -131,10 +116,16 @@ export const sendUserNotification = async (notification) => {
     }
   } else if (type === Notifications.ASSIGNMENT_CREATED) {
     const { assignment } = notification;
-    await sendAssignmentUserNotification(assignment, type);
+    await sendAssignmentUserNotification(
+      assignment,
+      NotificationTypes.AssignmentCreated
+    );
   } else if (type === Notifications.ASSIGNMENT_UPDATED) {
     const { assignment } = notification;
-    await sendAssignmentUserNotification(assignment, type);
+    await sendAssignmentUserNotification(
+      assignment,
+      NotificationTypes.AssignmentUpdated
+    );
   }
 };
 

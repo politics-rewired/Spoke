@@ -37,7 +37,7 @@
     "codegen:ts": "graphql-codegen --config libs/spoke-codegen/codegen.yml",
     "codegen:pg": "dotenv -- bash -c 'yarn schemats postgres \"$DATABASE_URL\" -s public --no-write-header --no-throw-on-missing-type -e -o libs/spoke-codegen/src/pg-types.ts'",
     "dev": "nf start --wrap --procfile ./dev-tools/Procfile.dev",
-    "dev:server": "nodemon -e ts,js -w ./src --exec babel-node --extensions .ts,.js ./src/server",
+    "dev:server": "nodemon -e ts,tsx,js -w ./src --exec babel-node --extensions .ts,.tsx,.js ./src/server",
     "dev:client": "webpack serve --config webpack.config.ts",
     "dev:codegen:schema": "run-when-changed --watch \"src/api/**/*\" --exec \"yarn codegen:schema\"",
     "dev:codegen:ts": "run-when-changed --watch \"src/schema.graphql\" --watch \"libs/spoke-codegen/src/graphql/**/*.graphql\" --exec \"yarn codegen:ts\"",

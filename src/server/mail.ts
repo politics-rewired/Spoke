@@ -16,15 +16,17 @@ const sender = nodemailer.createTransport({
 export interface SendMailOptions {
   to: string;
   subject: string;
-  text: string;
+  text?: string;
+  html?: string;
   replyTo?: string;
 }
 
 export const sendEmail = async (options: SendMailOptions) => {
-  const { to, subject, text, replyTo } = options;
+  const { to, subject, text, html, replyTo } = options;
 
   if (config.isDevelopment) {
-    logger.info(`Would send e-mail with subject ${subject} and text ${text}.`);
+    const body = text || html;
+    logger.info(`Would send e-mail with subject ${subject} and body ${body}.`);
     return null;
   }
 
@@ -33,9 +35,16 @@ export const sendEmail = async (options: SendMailOptions) => {
   const params: nodemailer.SendMailOptions = {
     from: config.EMAIL_FROM,
     to,
-    subject,
-    text
+    subject
   };
+
+  if (text) {
+    params.text = text;
+  }
+
+  if (html) {
+    params.html = html;
+  }
 
   if (replyTo) {
     params.replyTo = replyTo;
