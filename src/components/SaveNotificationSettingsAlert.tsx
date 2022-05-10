@@ -21,7 +21,7 @@ export const SaveNotificationSettingsAlert: React.FC<SaveNotificationSettingsAle
       case NotificationFrequencyType.All:
         return (
           <p>
-            Emails will be sent for all notification, including assignment
+            Emails will be sent for all notifications, including assignment
             changes and replies.
           </p>
         );
@@ -42,8 +42,8 @@ export const SaveNotificationSettingsAlert: React.FC<SaveNotificationSettingsAle
       case NotificationFrequencyType.None:
         return (
           <p>
-            You will not receive notifications about changes to your assignment,
-            or replies.
+            You will not receive notifications about changes to your
+            assignments, or replies.
           </p>
         );
       default:
