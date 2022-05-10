@@ -22,11 +22,16 @@ import Autocomplete, {
   AutocompleteChangeReason
 } from "@material-ui/lab/Autocomplete";
 import { css, StyleSheet } from "aphrodite";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { dataSourceItem, DataSourceItemType } from "../../../components/utils";
 import { nameComponents } from "../../../lib/attributes";
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../../lib/constants";
+
+type MessageStatus = {
+  name: string;
+  children: string[];
+};
 
 const styles = StyleSheet.create({
   fullWidth: {
@@ -34,7 +39,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export const MESSAGE_STATUSES = {
+export const MESSAGE_STATUSES: Record<string, MessageStatus> = {
   all: {
     name: "All",
     children: ["needsResponse", "needsMessage", "convo", "messaged"]
@@ -113,7 +118,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [cellNumber, setCellNumber] = useState<string>();
   const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
   const [showSection, setShowSection] = useState<boolean>(false);
-  const [timeoutId, setTimeoutId] = useState<any>();
+  const timeoutId = useRef<NodeJS.Timeout | null>(null);
 
   const onMessageFilterSelectChanged = (
     event: React.ChangeEvent<{ value: unknown }>,
@@ -123,7 +128,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     setMessageFilter(values);
     const messageStatuses = new Set();
     values.forEach((value: string) => {
-      const { children } = (MESSAGE_STATUSES as any)[value];
+      const { children } = MESSAGE_STATUSES[value];
       if (children.length > 0) {
         children.forEach((child: string) => messageStatuses.add(child));
       } else {
@@ -142,7 +147,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   ) => {
     let campaignId;
     if (value === null) {
-      campaignId = 1;
+      campaignId = -1;
     } else {
       campaignId = value.rawValue;
     }
@@ -180,13 +185,13 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     setLastName(newLastName);
     setCellNumber(newCellNumber);
 
-    clearTimeout(timeoutId);
+    clearTimeout(timeoutId.current as NodeJS.Timeout);
     const submitNameUpdateTimeout = setTimeout(
       searchByNewContactName,
       IDLE_KEY_TIME
     );
 
-    setTimeoutId(submitNameUpdateTimeout);
+    timeoutId.current = submitNameUpdateTimeout;
   };
 
   const handleExpandChange = () => {
@@ -329,14 +334,13 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
                   renderValue={(selected) =>
                     (selected as string[])
                       .map((s) => {
-                        return (MESSAGE_STATUSES as any)[s].name;
+                        return MESSAGE_STATUSES[s].name;
                       })
                       .join(", ")
                   }
                 >
                   {Object.keys(MESSAGE_STATUSES).map((messageStatus) => {
-                    const displayText = (MESSAGE_STATUSES as any)[messageStatus]
-                      .name;
+                    const displayText = MESSAGE_STATUSES[messageStatus].name;
                     const isChecked =
                       messageFilter &&
                       messageFilter.indexOf(messageStatus) > -1;
