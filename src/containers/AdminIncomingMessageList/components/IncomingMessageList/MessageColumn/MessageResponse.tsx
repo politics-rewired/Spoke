@@ -8,15 +8,15 @@ import FlatButton from "material-ui/FlatButton";
 import React, { Component } from "react";
 import * as yup from "yup";
 
-import { Conversation } from "../../../api/conversations";
-import { Message } from "../../../api/message";
-import { MessageInput } from "../../../api/types";
-import { loadData } from "../../../containers/hoc/with-operations";
-import { MutationMap } from "../../../network/types";
-import GSForm from "../../forms/GSForm";
-import SpokeFormField from "../../forms/SpokeFormField";
-import MessageLengthInfo from "../../MessageLengthInfo";
-import SendButton from "../../SendButton";
+import { Conversation } from "../../../../../api/conversations";
+import { Message } from "../../../../../api/message";
+import { MessageInput } from "../../../../../api/types";
+import GSForm from "../../../../../components/forms/GSForm";
+import SpokeFormField from "../../../../../components/forms/SpokeFormField";
+import MessageLengthInfo from "../../../../../components/MessageLengthInfo";
+import SendButton from "../../../../../components/SendButton";
+import { MutationMap } from "../../../../../network/types";
+import { loadData } from "../../../../hoc/with-operations";
 
 interface InnerProps {
   conversation: Conversation;

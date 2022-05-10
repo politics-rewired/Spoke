@@ -8,13 +8,13 @@ import FlatButton from "material-ui/FlatButton";
 import RaisedButton from "material-ui/RaisedButton";
 import React, { Component } from "react";
 
-import { CampaignContact } from "../../../api/campaign-contact";
-import { ContactActionInput } from "../../../api/types";
+import { CampaignContact } from "../../../../../api/campaign-contact";
+import { ContactActionInput } from "../../../../../api/types";
+import { MutationMap } from "../../../../../network/types";
 import {
   formatErrorMessage,
   withOperations
-} from "../../../containers/hoc/with-operations";
-import { MutationMap } from "../../../network/types";
+} from "../../../../hoc/with-operations";
 
 interface InnerProps {
   contact: CampaignContact;

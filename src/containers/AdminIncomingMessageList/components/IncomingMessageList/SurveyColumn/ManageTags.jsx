@@ -10,8 +10,8 @@ import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
-import { loadData } from "../../../containers/hoc/with-operations";
-import TagSelector from "../../TagSelector";
+import TagSelector from "../../../../../components/TagSelector";
+import { loadData } from "../../../../hoc/with-operations";
 
 class ManageTags extends Component {
   state = {

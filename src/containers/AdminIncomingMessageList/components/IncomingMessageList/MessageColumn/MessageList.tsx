@@ -2,10 +2,10 @@ import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite";
 import React, { Component } from "react";
 
-import { Message } from "../../../api/message";
-import { loadData } from "../../../containers/hoc/with-operations";
-import { DateTime } from "../../../lib/datetime";
-import { QueryMap } from "../../../network/types";
+import { Message } from "../../../../../api/message";
+import { DateTime } from "../../../../../lib/datetime";
+import { QueryMap } from "../../../../../network/types";
+import { loadData } from "../../../../hoc/with-operations";
 
 const styles: Record<string, React.CSSProperties> = StyleSheet.create({
   conversationRow: {

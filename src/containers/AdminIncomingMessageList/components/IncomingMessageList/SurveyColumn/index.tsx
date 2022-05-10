@@ -5,8 +5,8 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useCloseConversationMutation } from "@spoke/spoke-codegen";
 import React, { useCallback, useState } from "react";
 
-import { useSpokeContext } from "../../../client/spoke-context";
-import { useAuthzContext } from "../../AuthzProvider";
+import { useSpokeContext } from "../../../../../client/spoke-context";
+import { useAuthzContext } from "../../../../../components/AuthzProvider";
 import ManageSurveyResponses from "./ManageSurveyResponses";
 import ManageTags from "./ManageTags";
 

@@ -9,16 +9,16 @@ import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React, { useEffect, useState } from "react";
 
-import { Campaign } from "../../../api/campaign";
-import { CampaignContact } from "../../../api/campaign-contact";
-import { InteractionStep } from "../../../api/interaction-step";
+import { Campaign } from "../../../../../api/campaign";
+import { CampaignContact } from "../../../../../api/campaign-contact";
+import { InteractionStep } from "../../../../../api/interaction-step";
+import LoadingIndicator from "../../../../../components/LoadingIndicator";
+import { MutationMap, QueryMap } from "../../../../../network/types";
 import {
   formatErrorMessage,
   PrettyErrors,
   withOperations
-} from "../../../containers/hoc/with-operations";
-import { MutationMap, QueryMap } from "../../../network/types";
-import LoadingIndicator from "../../LoadingIndicator";
+} from "../../../../hoc/with-operations";
 
 type QuestionResponseMap = Record<string, string>;
 
