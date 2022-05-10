@@ -170,6 +170,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
 
   const searchByNewContactName = () => {
     props.searchByContactName({ firstName, lastName, cellNumber });
+    timeoutId.current = null;
   };
 
   const onContactNameChanged = (
@@ -185,7 +186,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     setLastName(newLastName);
     setCellNumber(newCellNumber);
 
-    clearTimeout(timeoutId.current as NodeJS.Timeout);
+    if (timeoutId.current) clearTimeout(timeoutId.current as NodeJS.Timeout);
     const submitNameUpdateTimeout = setTimeout(
       searchByNewContactName,
       IDLE_KEY_TIME
