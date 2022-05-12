@@ -76,7 +76,11 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         insert into graphile_worker.jobs (task_identifier, payload, key, queue_name, max_attempts, run_at)
         select 
           'retry-interaction-step' as task_identifier, 
-          json_build_object('campaignContactId', id, 'campaignId', campaign_id) as payload,
+          json_build_object(
+            'campaignContactId', id, 
+            'campaignId', campaign_id
+            'unassignAfterSend', true
+          ) as payload,
           id::text as key,
           null as queue_name,
           1 as max_attempts,
