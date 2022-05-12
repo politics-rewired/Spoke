@@ -78,7 +78,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
           'retry-interaction-step' as task_identifier, 
           json_build_object(
             'campaignContactId', id, 
-            'campaignId', campaign_id
+            'campaignId', campaign_id,
             'unassignAfterSend', true
           ) as payload,
           id::text as key,
