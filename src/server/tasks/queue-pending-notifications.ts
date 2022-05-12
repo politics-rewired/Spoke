@@ -29,7 +29,8 @@ export const queuePendingNotifications: Task = async (_payload, helpers) => {
 
   for (const notification of notificationsToSend) {
     await helpers.addJob("send-notification-email", notification, {
-      jobKey: `send-notification-email-${notification.id}`
+      jobKey: `send-notification-email-${notification.id}`,
+      maxAttempts: 6
     });
   }
 };
@@ -41,7 +42,8 @@ export const queuePeriodicNotifications: Task = async (_payload, helpers) => {
 
   for (const user of usersToNotify) {
     await helpers.addJob("send-notification-digest", user, {
-      jobKey: `send-notification-periodic-${user.id}`
+      jobKey: `send-notification-periodic-${user.id}`,
+      maxAttempts: 6
     });
   }
 };
@@ -53,7 +55,8 @@ export const queueDailyNotifications: Task = async (_payload, helpers) => {
 
   for (const user of usersToNotify) {
     await helpers.addJob("send-notification-digest", user, {
-      jobKey: `send-notification-daily-${user.id}`
+      jobKey: `send-notification-daily-${user.id}`,
+      maxAttempts: 6
     });
   }
 };
