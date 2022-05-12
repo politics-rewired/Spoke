@@ -24,12 +24,6 @@ export interface SendMailOptions {
 export const sendEmail = async (options: SendMailOptions) => {
   const { to, subject, text, html, replyTo } = options;
 
-  if (config.isDevelopment) {
-    const body = text || html;
-    logger.info(`Would send e-mail with subject ${subject} and body ${body}.`);
-    return null;
-  }
-
   logger.info(`Sending e-mail to ${to} with subject ${subject}.`);
 
   const params: nodemailer.SendMailOptions = {
@@ -48,6 +42,11 @@ export const sendEmail = async (options: SendMailOptions) => {
 
   if (replyTo) {
     params.replyTo = replyTo;
+  }
+
+  if (config.isDevelopment) {
+    logger.info(`Would send e-mail with params`, { params });
+    return null;
   }
 
   return sender.sendMail(params);
