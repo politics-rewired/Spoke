@@ -114,7 +114,7 @@ const getNotificationContent = (
       subject = `[${organization.name}] New Reply: ${campaign.title}`;
       break;
     default:
-      template = <div />;
+      throw new Error(`Unrecognized notification type ${notificationType}`);
   }
 
   const content = ReactDOMServer.renderToStaticMarkup(template);
