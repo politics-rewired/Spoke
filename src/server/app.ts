@@ -58,7 +58,7 @@ export const createApp = async () => {
       secret: SESSION_SECRET,
       cookie: {
         httpOnly: true,
-        secure: config.isProduction,
+        secure: false, // config.isProduction,
         maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
       },
       store: new PgSession({
