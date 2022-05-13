@@ -19,7 +19,10 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import type { AutocompleteChangeReason } from "@material-ui/lab/Autocomplete";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { css, StyleSheet } from "aphrodite";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+import { useSearchUsersQuery } from "../../../../libs/spoke-codegen/src";
+import { UserRoleType } from "../../../api/organization-membership";
 
 const styles = StyleSheet.create({
   fullWidth: {
@@ -30,23 +33,6 @@ const styles = StyleSheet.create({
     width: "50%"
   }
 });
-
-type Texter = {
-  displayName: string;
-  email: string;
-  role: string;
-  id: number;
-};
-
-type TexterOption = {
-  value: string;
-  label: string;
-};
-
-const formatTexter = (texter: Texter) => {
-  const { displayName, email, role } = texter;
-  return `${displayName} (${email}) ${role}`;
-};
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -64,7 +50,15 @@ const TabPanel: React.FC<TabPanelProps> = (props) => {
   );
 };
 
+type Texter = {
+  id: number;
+  displayName: string;
+  role: string;
+  email: string;
+};
+
 interface IncomingMessageActionsProps {
+  organizationId: string;
   people: Array<any>;
   contactsAreSelected: boolean;
   conversationCount: number;
@@ -78,20 +72,51 @@ interface IncomingMessageActionsProps {
 const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
   props
 ) => {
-  const [selectedTexters, setSelectedTexters] = useState<Array<TexterOption>>(
-    []
-  );
+  const [selectedTexters, setSelectedTexters] = useState<Array<Texter>>([]);
   const [reassignDialogOpen, setReassignDialogOpen] = useState<boolean>(false);
   const [unassignDialogOpen, setUnassignDialogOpen] = useState<boolean>(false);
   const [showSection, setShowSection] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [texterOptions, setTexterOptions] = useState<Array<Texter>>([]);
+
+  const { data: getTexters, loading: textersLoading } = useSearchUsersQuery({
+    variables: {
+      organizationId: props.organizationId,
+      filter: {
+        roles: [
+          UserRoleType.ADMIN,
+          UserRoleType.OWNER,
+          UserRoleType.SUPERADMIN,
+          UserRoleType.SUPERVOLUNTEER,
+          UserRoleType.TEXTER
+        ]
+      }
+    }
+  });
+
+  const formatTexters = (texters: Array<any>) => {
+    return texters.map((texter) => {
+      return {
+        id: parseInt(texter.node.id, 10),
+        displayName: texter.node.user.displayName,
+        role: texter.node.role,
+        email: texter.node.user.email
+      };
+    });
+  };
+
+  useEffect(() => {
+    const texters = getTexters?.organization?.memberships?.edges ?? [];
+
+    setTexterOptions(formatTexters(texters));
+  }, [textersLoading]);
 
   const handleExpandChange = () => {
     setShowSection(!showSection);
   };
 
   const onReassignmentClicked = () => {
-    const ids = selectedTexters.map(({ value }) => value);
+    const ids = selectedTexters.map(({ id }) => id.toString());
     props.onReassignRequested(ids);
   };
 
@@ -109,7 +134,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
 
   const handleTextersChanged = (
     _event: React.ChangeEvent<any>,
-    value: TexterOption[],
+    value: Texter[],
     _reason: AutocompleteChangeReason
   ) => {
     setSelectedTexters(value);
@@ -122,7 +147,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
 
   const handleConfirmDialogReassign = () => {
     setReassignDialogOpen(false);
-    const ids = selectedTexters.map(({ value }) => value);
+    const ids = selectedTexters.map(({ id }) => id.toString());
     props.onReassignAllMatchingRequested(ids);
   };
 
@@ -130,11 +155,6 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
     setUnassignDialogOpen(false);
     props.onUnassignAllMatchingRequested();
   };
-
-  const texters: TexterOption[] = (props.people ?? []).map((texter) => ({
-    value: texter.id,
-    label: formatTexter(texter)
-  }));
 
   const confirmDialogActions = (
     actionVerb: string,
@@ -184,8 +204,10 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
             <Autocomplete
               multiple
               fullWidth
-              options={texters}
-              getOptionLabel={(option) => option.label}
+              options={texterOptions}
+              getOptionLabel={(option) =>
+                `${option.displayName} (${option.email}) ${option.role}`
+              }
               value={selectedTexters}
               onChange={handleTextersChanged}
               renderInput={(params) => (

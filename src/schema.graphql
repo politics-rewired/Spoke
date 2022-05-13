@@ -506,6 +506,7 @@ input CampaignsFilter {
   campaignId: Int
   listSize: Int
   pageSize: Int
+  campaignTitle: String
 }
 
 type CampaignStats {

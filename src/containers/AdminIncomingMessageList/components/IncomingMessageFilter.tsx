@@ -20,9 +20,17 @@ import Autocomplete, {
   AutocompleteChangeReason
 } from "@material-ui/lab/Autocomplete";
 import { css, StyleSheet } from "aphrodite";
-import React, { useRef, useState } from "react";
+import debounce from "lodash/debounce";
+import isEmpty from "lodash/isEmpty";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { dataSourceItem, DataSourceItemType } from "../../../components/utils";
+import {
+  useGetTagsQuery,
+  useSearchCampaignsLazyQuery,
+  useSearchCampaignsQuery,
+  useSearchUsersLazyQuery,
+  useSearchUsersQuery
+} from "../../../../libs/spoke-codegen/src";
 import { nameComponents } from "../../../lib/attributes";
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../../lib/constants";
 
@@ -64,18 +72,30 @@ export const MESSAGE_STATUSES: Record<string, MessageStatus> = {
   }
 };
 
-export const CAMPAIGN_TYPE_FILTERS = [{ id: -1, title: "All Campaigns" }];
+export const CAMPAIGN_TYPE_FILTERS: Campaign[] = [
+  { id: -1, title: "All Campaigns" }
+];
 
-export const TEXTER_FILTERS = [
-  { id: UNASSIGNED_TEXTER, name: "Unassigned" },
-  { id: ALL_TEXTERS, name: "All Texters" }
+export const TEXTER_FILTERS: Texter[] = [
+  { id: UNASSIGNED_TEXTER, displayName: "Unassigned" },
+  { id: ALL_TEXTERS, displayName: "All Texters" }
 ];
 
 const IDLE_KEY_TIME = 500;
 
-type Tag = {
-  id: string;
+type Campaign = {
+  id: number;
   title: string;
+};
+
+type Tag = {
+  id: number;
+  title: string;
+};
+
+type Texter = {
+  id: number;
+  displayName: string;
 };
 
 type SearchByContactName = {
@@ -92,7 +112,9 @@ interface IncomingMessageFilterProps {
   includeOptedOutConversations: boolean;
   includeArchivedCampaigns: boolean;
   includeActiveCampaigns: boolean;
-  textersLoadedFraction: number;
+  assignmentsFilter: { texterId: number };
+  tagsFilter: Array<string>;
+  organizationId: string;
   onCampaignChanged(campaignId: number): void;
   onTagsChanged(): void;
   onTexterChanged(texterId: number): void;
@@ -103,11 +125,6 @@ interface IncomingMessageFilterProps {
   onOptedOutConversationsToggled(): void;
   onMessageFilterChanged(messageStatuesString: string): void;
   searchByContactName(contactDetails: SearchByContactName): void;
-  campaigns: Array<any>;
-  texters: Array<any>;
-  assignmentsFilter: { texterId: number };
-  tags: Array<Tag>;
-  tagsFilter: Array<string>;
 }
 
 const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
@@ -116,7 +133,141 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [cellNumber, setCellNumber] = useState<string>();
   const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
   const [showSection, setShowSection] = useState<boolean>(false);
+  const [campaignOptions, setCampaignOptions] = useState<Array<Campaign>>([]);
+  const [texterOptions, setTexterOptions] = useState<Array<Texter>>([]);
+  const [tagOptions, setTagOptions] = useState<Array<Tag>>([]);
+  const [campaignSearchInput, setCampaignSearchInput] = useState<string>();
+  const [texterSearchInput, setTexterSearchInput] = useState<string>();
   const timeoutId = useRef<NodeJS.Timeout | null>(null);
+
+  const { data: getTags, loading: tagsLoading } = useGetTagsQuery({
+    variables: { organizationId: props.organizationId }
+  });
+
+  const {
+    data: getCampaigns,
+    loading: campaignsLoading
+  } = useSearchCampaignsQuery({
+    variables: { organizationId: props.organizationId }
+  });
+
+  const { data: getTexters, loading: textersLoading } = useSearchUsersQuery({
+    variables: { organizationId: props.organizationId }
+  });
+
+  const [
+    searchCampaigns,
+    { data: searchCampaignsData, loading: searchCampaignLoading }
+  ] = useSearchCampaignsLazyQuery();
+  const [
+    searchTexters,
+    { data: searchTextersData, loading: searchTexterLoading }
+  ] = useSearchUsersLazyQuery();
+
+  const formatTags = (tags: Array<any>) => {
+    return tags.map((tag) => {
+      return {
+        id: parseInt(tag.id, 10),
+        title: tag.title
+      };
+    });
+  };
+
+  const formatCampaigns = (campaigns: Array<any>) => {
+    return CAMPAIGN_TYPE_FILTERS.concat(
+      campaigns.map((campaign) => {
+        const title = `${campaign.id}: ${campaign.title}`;
+        return { id: parseInt(campaign.id, 10), title };
+      })
+    );
+  };
+
+  const formatTexters = (texters: Array<any>) => {
+    const formattedTexters: Texter[] = texters.map((texter) => {
+      return {
+        id: parseInt(texter.node.id, 10),
+        displayName: texter.node.user.displayName
+      };
+    });
+
+    return TEXTER_FILTERS.concat(formattedTexters);
+  };
+
+  const searchCampaignsDebounced = useCallback(
+    debounce((campaignSearchText) => {
+      searchCampaigns({
+        variables: {
+          organizationId: props.organizationId,
+          campaignsFilter: {
+            campaignTitle: campaignSearchText
+          }
+        }
+      });
+    }, 500),
+    []
+  );
+
+  const searchTextersDebounced = useCallback(
+    debounce((texterSearchText) => {
+      searchTexters({
+        variables: {
+          organizationId: props.organizationId,
+          filter: {
+            nameSearch: texterSearchText
+          }
+        }
+      });
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    if (!tagsLoading && !campaignsLoading && !textersLoading) {
+      const tags = getTags?.organization?.tagList ?? [];
+      const campaigns = getCampaigns?.campaigns?.campaigns ?? [];
+      const texters = getTexters?.organization?.memberships?.edges ?? [];
+
+      setTagOptions(formatTags(tags));
+      setCampaignOptions(formatCampaigns(campaigns));
+      setTexterOptions(formatTexters(texters));
+    }
+  }, [tagsLoading, campaignsLoading, textersLoading]);
+
+  useEffect(() => {
+    if (!isEmpty(campaignSearchInput)) {
+      searchCampaignsDebounced(campaignSearchInput);
+    } else {
+      setCampaignOptions(
+        formatCampaigns(getCampaigns?.campaigns?.campaigns ?? [])
+      );
+    }
+  }, [campaignSearchInput]);
+
+  useEffect(() => {
+    if (!searchCampaignLoading) {
+      setCampaignOptions(
+        formatCampaigns(searchCampaignsData?.campaigns?.campaigns ?? [])
+      );
+    }
+  }, [searchCampaignLoading]);
+
+  useEffect(() => {
+    if (!isEmpty(texterSearchInput)) {
+      searchTextersDebounced(texterSearchInput);
+    } else {
+      setTexterOptions(
+        formatTexters(getTexters?.organization?.memberships?.edges ?? [])
+      );
+    }
+  }, [texterSearchInput]);
+
+  useEffect(() => {
+    if (!searchTexterLoading) {
+      setTexterOptions(
+        formatTexters(searchTextersData?.organization?.memberships?.edges ?? [])
+      );
+    }
+  }, [searchTexterLoading]);
 
   const onMessageFilterSelectChanged = (
     event: React.ChangeEvent<{ value: unknown }>,
@@ -140,28 +291,28 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
 
   const onCampaignSelected = (
     _event: React.ChangeEvent<any>,
-    value: DataSourceItemType<number> | null,
+    value: Campaign | null,
     _reason: AutocompleteChangeReason
   ) => {
     let campaignId;
     if (value === null) {
       campaignId = -1;
     } else {
-      campaignId = value.rawValue;
+      campaignId = value.id;
     }
     props.onCampaignChanged(campaignId as number);
   };
 
   const onTexterSelected = (
     _event: React.ChangeEvent<any>,
-    value: DataSourceItemType<number> | null,
+    value: Texter | null,
     _reason: AutocompleteChangeReason
   ) => {
     let texterId;
     if (value === null) {
       texterId = -1;
     } else {
-      texterId = value.rawValue;
+      texterId = value.id;
     }
     props.onTexterChanged(texterId as number);
   };
@@ -196,37 +347,6 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const handleExpandChange = () => {
     setShowSection(!showSection);
   };
-
-  const texterNodes = TEXTER_FILTERS.map((texterFilter) =>
-    dataSourceItem(texterFilter.name, texterFilter.id)
-  ).concat(
-    !props.texters
-      ? []
-      : props.texters.map((user) => {
-          const userId = parseInt(user.id, 10);
-          return dataSourceItem(user.displayName, userId);
-        })
-  );
-
-  texterNodes.sort((left, right) => {
-    return left.text.localeCompare(right.text, "en", { sensitivity: "base" });
-  });
-
-  const campaignNodes = CAMPAIGN_TYPE_FILTERS.map((campaignTypeFilter) =>
-    dataSourceItem(campaignTypeFilter.title, campaignTypeFilter.id)
-  ).concat(
-    !props.campaigns
-      ? []
-      : props.campaigns.map((campaign) => {
-          const campaignId = parseInt(campaign.id, 10);
-          const campaignDisplay = `${campaignId}: ${campaign.title}`;
-          return dataSourceItem(campaignDisplay, campaignId);
-        })
-  );
-
-  campaignNodes.sort((left, right) => {
-    return left.text.localeCompare(right.text, "en", { sensitivity: "base" });
-  });
 
   const renderSwitches = () => {
     return (
@@ -356,8 +476,11 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             </Grid>
             <Grid item xs={4}>
               <Autocomplete
-                options={campaignNodes}
-                getOptionLabel={(campaign) => campaign.text}
+                options={campaignOptions}
+                getOptionLabel={(campaign) => campaign.title}
+                onInputChange={(_event, newValue) => {
+                  setCampaignSearchInput(newValue);
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -371,8 +494,11 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             <Grid item xs={4}>
               {props.isTexterFilterable && (
                 <Autocomplete
-                  options={texterNodes}
-                  getOptionLabel={(texter) => texter.text}
+                  options={texterOptions}
+                  getOptionLabel={(texter) => texter.displayName}
+                  onInputChange={(_event, newValue) => {
+                    setTexterSearchInput(newValue);
+                  }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -404,11 +530,11 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
                   onChange={props.onTagsChanged}
                   renderValue={(selected) =>
                     (selected as string[])
-                      .map((s) => props.tags.find((tag) => tag.id === s)?.title)
+                      .map((s) => tagOptions.find((tag) => tag.id === s)?.title)
                       .join(", ")
                   }
                 >
-                  {props.tags.map(({ id, title }) => {
+                  {tagOptions.map(({ id, title }) => {
                     const isChecked =
                       props.tagsFilter && props.tagsFilter.includes(id);
                     return (
