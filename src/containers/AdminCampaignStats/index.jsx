@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import Grid from "@material-ui/core/Grid";
 import { css, StyleSheet } from "aphrodite";
 import Divider from "material-ui/Divider";
-import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import PropTypes from "prop-types";
 import React from "react";
@@ -216,71 +216,85 @@ class AdminCampaignStats extends React.Component {
                 <div className={css(styles.inline)}>
                   {!campaign.isArchived ? (
                     // edit
-                    <RaisedButton
+                    <Button
                       {...dataTest("editCampaign")}
+                      variant="contained"
                       onClick={this.handleNavigateToEdit}
-                      label="Edit"
-                    />
+                    >
+                      Edit
+                    </Button>
                   ) : null}
                   {isAdmin
                     ? [
                         // Buttons for Admins (and not Supervolunteers)
                         // export
-                        <RaisedButton
+                        <Button
                           key="export"
-                          onClick={this.handleOnClickExport}
-                          label={exportLabel}
+                          variant="contained"
                           disabled={shouldDisableExport}
-                        />,
+                          onClick={this.handleOnClickExport}
+                        >
+                          {exportLabel}
+                        </Button>,
                         // Export for VAN
-                        <RaisedButton
+                        <Button
                           key="van-export"
-                          label={vanExportLabel}
+                          variant="contained"
                           disabled={isVanExportDisabled}
                           onClick={this.handleOnClickVanExport}
-                        />,
+                        >
+                          {vanExportLabel}
+                        </Button>,
                         // Sync to VAN
-                        <RaisedButton
+                        <Button
                           key="van-sync"
-                          label={vanSyncLabel}
+                          variant="contained"
                           disabled={isVanSyncDisabled}
                           onClick={this.handleOnClickVanSync}
-                        />,
+                        >
+                          {vanSyncLabel}
+                        </Button>,
                         // unarchive
                         campaign.isArchived ? (
-                          <RaisedButton
+                          <Button
                             key="unarchive"
+                            variant="contained"
                             onClick={() =>
                               this.props.mutations.unarchiveCampaign()
                             }
-                            label="Unarchive"
-                          />
+                          >
+                            Unarchive
+                          </Button>
                         ) : null, // archive
                         !campaign.isArchived ? (
-                          <RaisedButton
+                          <Button
                             key="archive"
+                            variant="contained"
                             onClick={() =>
                               this.props.mutations.archiveCampaign()
                             }
-                            label="Archive"
-                          />
+                          >
+                            Archive
+                          </Button>
                         ) : null,
                         // Open script preview
-                        <RaisedButton
+                        <Button
                           key="open-script-preview"
-                          label="Open Script Preview"
+                          variant="contained"
                           onClick={() => {
                             window.open(
                               `/preview/${campaign.previewUrl}`,
                               "_blank"
                             );
                           }}
-                        />,
+                        >
+                          Open Script Preview
+                        </Button>,
                         // Copy
-                        <RaisedButton
+                        <Button
                           key="copy"
                           {...dataTest("copyCampaign")}
-                          label="Copy Campaign"
+                          variant="contained"
                           disabled={this.state.copyingCampaign}
                           onClick={() => {
                             this.setState({ copyingCampaign: true });
@@ -306,7 +320,9 @@ class AdminCampaignStats extends React.Component {
                                 })
                               );
                           }}
-                        />
+                        >
+                          Copy Campaign
+                        </Button>
                       ]
                     : null}
                 </div>

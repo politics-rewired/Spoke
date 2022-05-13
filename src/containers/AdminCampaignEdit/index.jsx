@@ -16,8 +16,6 @@ import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
 import Divider from "material-ui/Divider";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
@@ -712,23 +710,27 @@ class AdminCampaignEdit extends React.Component {
         </div>
         <div>
           {this.props.campaignData.campaign.isArchived ? (
-            <RaisedButton
-              label="Unarchive"
+            <Button
+              variant="contained"
               onClick={() =>
                 this.props.mutations.unarchiveCampaign(
                   this.props.campaignData.campaign.id
                 )
               }
-            />
+            >
+              Unarchive
+            </Button>
           ) : (
-            <RaisedButton
-              label="Archive"
+            <Button
+              variant="contained"
               onClick={() =>
                 this.props.mutations.archiveCampaign(
                   this.props.campaignData.campaign.id
                 )
               }
-            />
+            >
+              Archive
+            </Button>
           )}
           <ApproveCampaignButton
             campaignId={this.props.campaignData.campaign.id}
@@ -764,7 +766,9 @@ class AdminCampaignEdit extends React.Component {
     const saveLabel = isNew ? "Save and goto next section" : "Save";
 
     const errorActions = [
-      <FlatButton key="ok" label="Ok" primary onClick={this.handleCloseError} />
+      <Button key="ok" color="primary" onClick={this.handleCloseError}>
+        Ok
+      </Button>
     ];
 
     const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${this.props.campaignData.campaign.title}`;
@@ -886,11 +890,13 @@ class AdminCampaignEdit extends React.Component {
                     Current Status: {extractStageAndStatus(savePercent)}
                   </div>
                   {jobMessage ? <div>Message: {jobMessage}</div> : null}
-                  <RaisedButton
-                    label="Discard Job"
-                    icon={<CancelIcon />}
+                  <Button
+                    variant="contained"
+                    endIcon={<CancelIcon />}
                     onClick={() => this.handleDeleteJob(jobId)}
-                  />
+                  >
+                    Discard Job
+                  </Button>
                 </CardActions>
               ) : null}
             </Card>

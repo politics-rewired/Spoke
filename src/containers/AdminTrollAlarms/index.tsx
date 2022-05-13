@@ -1,13 +1,12 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import AutoComplete from "material-ui/AutoComplete";
-import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
-import RaisedButton from "material-ui/RaisedButton";
 import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
 import React, { useState } from "react";
@@ -174,12 +173,9 @@ const AdminTrollAlarms: React.FC<Props> = (props) => {
   const isDeleteSelectedDisabled = selectedAlarmIds.length === 0 || isWorking;
 
   const errorActions = [
-    <FlatButton
-      key="close"
-      label="Close"
-      primary
-      onClick={handleOnCancelError}
-    />
+    <Button key="close" color="primary" onClick={handleOnCancelError}>
+      Close
+    </Button>
   ];
 
   return (
@@ -205,19 +201,23 @@ const AdminTrollAlarms: React.FC<Props> = (props) => {
           onToggle={handleToggleDismissed}
           toggled={dismissed}
         />
-        <RaisedButton
-          label={`Dismiss All Matching ${deleteAllSuffix}`}
+        <Button
+          variant="contained"
+          color="secondary"
           style={{ marginRight: "10px" }}
-          secondary
           disabled={token === null}
           onClick={handleDismissMatching}
-        />
-        <RaisedButton
-          label={`Dismiss Selected (${selectedAlarmIds.length})`}
-          secondary
+        >
+          {`Dismiss All Matching ${deleteAllSuffix}`}
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
           disabled={isDeleteSelectedDisabled}
           onClick={handleDismissSelected}
-        />
+        >
+          {`Dismiss Selected (${selectedAlarmIds.length})`}
+        </Button>
       </Paper>
       <br />
       <TrollAlarmList

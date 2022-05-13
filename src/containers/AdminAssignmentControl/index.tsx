@@ -1,12 +1,11 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import React, { useState } from "react";
 import { match } from "react-router-dom";
 
@@ -122,7 +121,9 @@ const AdminAssignmentControl: React.FC<InnerProps> = (props) => {
     : [];
 
   const dialogActions = [
-    <FlatButton key="close" label="Close" primary onClick={handleCloseDialog} />
+    <Button key="close" color="primary" onClick={handleCloseDialog}>
+      Close
+    </Button>
   ];
 
   return (
@@ -140,12 +141,14 @@ const AdminAssignmentControl: React.FC<InnerProps> = (props) => {
         ))}
       </CardText>
       <CardActions style={{ textAlign: "right" }}>
-        <RaisedButton
-          label="Save"
-          primary
+        <Button
+          variant="contained"
+          color="primary"
           disabled={working || !hasChanges}
           onClick={handleSaveAssignmentControls}
-        />
+        >
+          Save
+        </Button>
       </CardActions>
       <Dialog open={!!error} onClose={handleCloseDialog}>
         <DialogTitle>Error saving Assignment Controls</DialogTitle>

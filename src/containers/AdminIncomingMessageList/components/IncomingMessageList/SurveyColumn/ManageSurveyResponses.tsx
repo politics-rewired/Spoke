@@ -1,10 +1,10 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React, { useEffect, useState } from "react";
@@ -161,7 +161,9 @@ export const ManageSurveyResponses: React.FC<ManageSurveyResponsesProps> = (
   }
 
   const errorActions = [
-    <FlatButton key="ok" label="OK" primary onClick={handleCloseError} />
+    <Button key="ok" color="primary" onClick={handleCloseError}>
+      OK
+    </Button>
   ];
 
   return (

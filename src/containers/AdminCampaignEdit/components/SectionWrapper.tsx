@@ -1,12 +1,12 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import { useTheme } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
 import CancelIcon from "@material-ui/icons/Cancel";
 import DoneIcon from "@material-ui/icons/Done";
 import WarningIcon from "@material-ui/icons/Warning";
 import Avatar from "material-ui/Avatar";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 import { compose, withProps } from "recompose";
 
@@ -193,11 +193,13 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
           {jobMessage && jobMessage !== "{}" && (
             <div>Message: {jobMessage}</div>
           )}
-          <RaisedButton
-            label="Discard Job"
-            icon={<CancelIcon />}
+          <Button
+            variant="contained"
+            endIcon={<CancelIcon />}
             onClick={handleDiscardJob}
-          />
+          >
+            Discard Job
+          </Button>
         </CardActions>
       )}
     </Card>

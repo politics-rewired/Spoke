@@ -1,9 +1,8 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import pick from "lodash/pick";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React from "react";
@@ -121,19 +120,22 @@ class GSScriptField extends GSFormField {
           />
         </DialogContent>
         <DialogActions>
-          <FlatButton
+          <Button
             key="cancel"
             {...dataTest("scriptCancel")}
-            label="Cancel"
             onClick={this.handleCancelDialog}
-          />
-          <RaisedButton
+          >
+            Cancel
+          </Button>
+          <Button
             key="done"
+            variant="contained"
+            color="primary"
             {...dataTest("scriptDone")}
-            label="Done"
             onClick={this.wrapSaveScript}
-            primary
-          />
+          >
+            Done
+          </Button>
         </DialogActions>
       </Dialog>
     );

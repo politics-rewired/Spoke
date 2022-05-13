@@ -1,5 +1,5 @@
+import Button from "@material-ui/core/Button";
 import Badge from "material-ui/Badge";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 
 import { dataTest } from "../lib/attributes";
@@ -35,13 +35,15 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
 
   if (props.badgeCount === 0) {
     return (
-      <RaisedButton
+      <Button
         {...dataTest(props.dataTestText)}
+        variant="contained"
         disabled={props.disabled}
-        label={props.title}
-        primary={props.primary && !props.disabled}
+        color={props.primary && !props.disabled ? "primary" : "default"}
         onClick={props.onClick}
-      />
+      >
+        {props.title}
+      </Button>
     );
   }
 
@@ -53,12 +55,14 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
       primary={props.primary && !props.disabled}
       secondary={!props.primary && !props.disabled}
     >
-      <RaisedButton
+      <Button
         {...dataTest(props.dataTestText)}
+        variant="contained"
         disabled={props.disabled}
-        label={props.title}
         onClick={props.onClick}
-      />
+      >
+        {props.title}
+      </Button>
     </Badge>
   );
 };

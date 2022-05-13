@@ -1,10 +1,10 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import CreateIcon from "@material-ui/icons/Create";
 import Divider from "material-ui/Divider";
-import FlatButton from "material-ui/FlatButton";
 import { List, ListItem } from "material-ui/List";
 import Subheader from "material-ui/Subheader";
 import PropTypes from "prop-types";
@@ -106,11 +106,9 @@ class ScriptList extends React.Component {
       <div>
         {list}
         {showAddScriptButton && (
-          <FlatButton
-            label="Add new canned response"
-            icon={<CreateIcon />}
-            onClick={this.handleOpenDialog}
-          />
+          <Button endIcon={<CreateIcon />} onClick={this.handleOpenDialog}>
+            Add new canned response
+          </Button>
         )}
         <Dialog
           style={styles.dialog}
@@ -126,11 +124,9 @@ class ScriptList extends React.Component {
             />
           </DialogContent>
           <DialogActions>
-            <FlatButton
-              key="cancel"
-              label="Cancel"
-              onClick={this.handleCloseDialog}
-            />
+            <Button key="cancel" onClick={this.handleCloseDialog}>
+              Cancel
+            </Button>
             <GSSubmitButton key="save" label="Save" type="submit" />
           </DialogActions>
         </Dialog>

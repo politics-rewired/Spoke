@@ -1,6 +1,6 @@
+import IconButton from "@material-ui/core/IconButton";
 import CreateIcon from "@material-ui/icons/Create";
 import DeleteIcon from "@material-ui/icons/Delete";
-import IconButton from "material-ui/IconButton";
 import React from "react";
 
 import { CannedResponse } from "../../../../../api/canned-response";

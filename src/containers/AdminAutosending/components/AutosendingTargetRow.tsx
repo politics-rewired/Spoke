@@ -103,7 +103,9 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       <TableCell>{target.contactsCount}</TableCell>
 
       <TableCell>{target.deliverabilityStats.deliveredCount}</TableCell>
-      <TableCell>{target.contactsCount! - totalSent!}</TableCell>
+      <TableCell>
+        {target.contactsCount! - totalSent! - (target.stats?.optOutsCount || 0)}
+      </TableCell>
       <TableCell>{waitingToDeliver}</TableCell>
       <TableCell>{target.deliverabilityStats.errorCount}</TableCell>
       <TableCell>

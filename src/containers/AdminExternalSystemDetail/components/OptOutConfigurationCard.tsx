@@ -1,4 +1,5 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -6,7 +7,6 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React from "react";
@@ -110,12 +110,13 @@ class OptOutConfigurationCard extends React.Component<Props, State> {
             <DialogContentText>{error}</DialogContentText>
           </DialogContent>
           <DialogActions>
-            <FlatButton
+            <Button
               key="close"
-              label="Close"
-              primary
+              color="primary"
               onClick={this.handleDismissError}
-            />
+            >
+              Close
+            </Button>
           </DialogActions>
         </Dialog>
       </Card>

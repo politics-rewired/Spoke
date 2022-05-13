@@ -1,11 +1,11 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import cloneDeep from "lodash/cloneDeep";
-import FlatButton from "material-ui/FlatButton";
 import React from "react";
 import { compose } from "recompose";
 
@@ -67,7 +67,9 @@ const SyncConfigurationModal: React.SFC<InnerProps> = (props) => {
   );
 
   const actions = [
-    <FlatButton key="ok" label="Ok" primary onClick={props.onRequestClose} />
+    <Button key="ok" color="primary" onClick={props.onRequestClose}>
+      Ok
+    </Button>
   ];
 
   const makeOnCreateConfig = (id: string) => async () => {

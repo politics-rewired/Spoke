@@ -1,13 +1,12 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import pick from "lodash/pick";
-import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
-import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import React, { Component } from "react";
@@ -124,17 +123,18 @@ class AdminBulkScriptEditor extends Component {
     const isSubmitDisabled = isSubmitting || !searchString;
 
     const flaggedCharacterActions = [
-      <FlatButton key="cancel" label="Cancel" onClick={this.handleClose} />,
-      <FlatButton
-        key="confirm"
-        label="Confirm"
-        primary
-        onClick={this.handleConfirmSubmit}
-      />
+      <Button key="cancel" onClick={this.handleClose}>
+        Cancel
+      </Button>,
+      <Button key="confirm" color="primary" onClick={this.handleConfirmSubmit}>
+        Confirm
+      </Button>
     ];
 
     const dialogActions = [
-      <FlatButton key="ok" label="OK" primary onClick={this.handleClose} />
+      <Button key="ok" color="primary" onClick={this.handleClose}>
+        OK
+      </Button>
     ];
 
     return (
@@ -190,12 +190,14 @@ class AdminBulkScriptEditor extends Component {
             onChange={this.handleCampaignPrefixChange}
           />
         </Paper>
-        <RaisedButton
-          label={isSubmitting ? "Working..." : "Find & replace"}
-          primary
+        <Button
+          variant="contained"
+          color="primary"
           disabled={isSubmitDisabled}
           onClick={this.handleSubmitJob}
-        />
+        >
+          {isSubmitting ? "Working..." : "Find & replace"}
+        </Button>
         {confirmFlaggedCharacters && (
           <Dialog open onClose={this.handleClose}>
             <DialogTitle>Confirm Flagged Characters</DialogTitle>

@@ -1,9 +1,8 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
 
@@ -308,18 +307,16 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       <Dialog
         open={confirmingRootPaste}
         actions={[
-          <FlatButton
+          <Button
             key="cancel"
-            label="Cancel"
-            primary
+            color="primary"
             onClick={() => setConfirmingRootPaste(false)}
-          />,
-          <FlatButton
-            key="paste"
-            label="Paste"
-            primary
-            onClick={confirmRootPaste}
-          />
+          >
+            Cancel
+          </Button>,
+          <Button key="paste" color="primary" onClick={confirmRootPaste}>
+            Paste
+          </Button>
         ]}
       >
         Pasting over the initial message will overwrite the whole script and you
@@ -344,13 +341,15 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
         addStepFactory={createAddStepHandler}
         pasteBlockFactory={createPasteBlockHandler}
       />
-      <RaisedButton
+      <Button
         {...dataTest("interactionSubmit")}
-        primary
-        label={finalSaveLabel}
+        variant="containted"
+        color="primary"
         disabled={isSaveDisabled}
         onClick={handleSave}
-      />
+      >
+        {finalSaveLabel}
+      </Button>
       {hasEmptyScripts && (
         <p style={{ color: "#DD0000" }}>You have one or more empty scripts!</p>
       )}

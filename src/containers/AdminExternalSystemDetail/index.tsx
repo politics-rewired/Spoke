@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
+import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { History } from "history";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import IconButton from "material-ui/IconButton";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";

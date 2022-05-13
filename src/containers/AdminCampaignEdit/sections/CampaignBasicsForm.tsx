@@ -1,9 +1,10 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from "@material-ui/icons/Delete";
 import isEmpty from "lodash/isEmpty";
 import ColorPicker from "material-ui-color-picker";
-import IconButton from "material-ui/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 import { compose } from "recompose";
 import * as yup from "yup";
@@ -157,14 +158,11 @@ class CampaignBasicsForm extends React.Component<
               autoOk
             />
           </div>
-          <IconButton
-            tooltip="Delete the Due Date"
-            tooltipPosition="top"
-            onClick={this.deleteDueDate}
-            style={{ width: 50 }}
-          >
-            <DeleteIcon />
-          </IconButton>
+          <Tooltip title="Delete the Due Date" placement="top">
+            <IconButton onClick={this.deleteDueDate} style={{ width: 50 }}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
 
           <SpokeFormField
             name="introHtml"
@@ -187,11 +185,13 @@ class CampaignBasicsForm extends React.Component<
           />
         </GSForm>
 
-        <RaisedButton
-          label={finalSaveLabel}
+        <Button
+          variant="contained"
           disabled={isSaveDisabled}
           onClick={this.handleSubmit}
-        />
+        >
+          {finalSaveLabel}
+        </Button>
       </div>
     );
   }

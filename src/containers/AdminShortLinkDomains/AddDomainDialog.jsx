@@ -1,10 +1,9 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -35,19 +34,18 @@ class AddDomainDialog extends Component {
     const isSubmitDisabled = !isDomainValid || !isMaxUsageCountValid;
 
     const actions = [
-      <FlatButton
-        key="close"
-        label="Close"
-        primary={false}
-        onClick={onRequestClose}
-      />,
-      <RaisedButton
+      <Button key="close" onClick={onRequestClose}>
+        Close
+      </Button>,
+      <Button
         key="add"
-        label="Add"
-        primary
+        variant="contained"
+        color="primary"
         disabled={isSubmitDisabled}
         onClick={this.handleAddDomainClick}
-      />
+      >
+        Add
+      </Button>
     ];
 
     return (

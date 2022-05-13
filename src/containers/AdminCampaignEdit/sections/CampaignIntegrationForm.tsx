@@ -1,7 +1,7 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import isEmpty from "lodash/isEmpty";
 import MenuItem from "material-ui/MenuItem";
-import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
 import React from "react";
 import { compose } from "recompose";
@@ -129,11 +129,13 @@ class CampaignIntegrationForm extends React.Component<InnerProps, State> {
           ))}
         </SelectField>
         <br />
-        <RaisedButton
-          label={finalSaveLabel}
+        <Button
+          variant="contained"
           disabled={isSaveDisabled}
           onClick={this.handleSubmit}
-        />
+        >
+          {finalSaveLabel}
+        </Button>
       </div>
     );
   }

@@ -162,7 +162,7 @@ const AdminAutosending: React.FC = () => {
               </TableRow>
               <TableRow>
                 <TableCell>Campaign</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell>Autosending Status</TableCell>
                 {/* Actions */}
                 <TableCell />
                 <TableCell>Contacts</TableCell>

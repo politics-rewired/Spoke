@@ -1,8 +1,7 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Divider from "material-ui/Divider";
-import FlatButton from "material-ui/FlatButton";
 import Paper from "material-ui/Paper";
-import RaisedButton from "material-ui/RaisedButton";
 import { Step, StepContent, StepLabel, Stepper } from "material-ui/Stepper";
 import PropTypes from "prop-types";
 import queryString from "query-string";
@@ -48,22 +47,25 @@ class Terms extends React.Component {
 
     return (
       <div style={{ margin: "12px 0" }}>
-        <RaisedButton
-          label={stepIndex === 2 ? "Agree" : "Next"}
+        <Button
+          variant="contained"
+          color="primary"
           disableTouchRipple
           disableFocusRipple
-          primary
-          onClick={this.handleNext}
           style={{ marginRight: 12 }}
-        />
+          onClick={this.handleNext}
+        >
+          {stepIndex === 2 ? "Agree" : "Next"}
+        </Button>
         {step > 0 && (
-          <FlatButton
-            label="Back"
+          <Button
             disabled={stepIndex === 0}
             disableTouchRipple
             disableFocusRipple
             onClick={this.handlePrev}
-          />
+          >
+            Back
+          </Button>
         )}
       </div>
     );

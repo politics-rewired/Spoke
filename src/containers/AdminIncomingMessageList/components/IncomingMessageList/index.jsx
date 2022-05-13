@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
+import IconButton from "@material-ui/core/IconButton";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import DataTables from "material-ui-datatables";
-import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
@@ -162,13 +162,14 @@ export class IncomingMessageList extends Component {
           whiteSpace: "pre-line"
         },
         render: (columnKey, row) => (
-          <FlatButton
+          <IconButton
             onClick={(event) => {
               event.stopPropagation();
               this.handleOpenConversation(row.index);
             }}
-            icon={<OpenInNewIcon />}
-          />
+          >
+            <OpenInNewIcon />
+          </IconButton>
         )
       }
     ];

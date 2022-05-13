@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -6,7 +7,6 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import AutoComplete from "material-ui/AutoComplete";
-import RaisedButton from "material-ui/RaisedButton";
 import {
   Table,
   TableBody,
@@ -95,7 +95,13 @@ class TeamEditorDetail extends React.Component {
     const nonMembers = people.filter(({ id }) => !teamMemberIds.has(id));
 
     const errorActions = [
-      <RaisedButton key="ok" label="OK" onClick={this.handleCloseErrorDialog} />
+      <Button
+        key="ok"
+        variant="contained"
+        onClick={this.handleCloseErrorDialog}
+      >
+        OK
+      </Button>
     ];
 
     return (
@@ -115,11 +121,13 @@ class TeamEditorDetail extends React.Component {
             onNewRequest={this.handleNewTexterRequest}
           />
           <div style={styles.spacer} />
-          <RaisedButton
-            label="Remove Selected"
+          <Button
+            variant="contained"
             disabled={selectedUserIds.length === 0}
             onClick={this.handleRemoveSelected}
-          />
+          >
+            Remove Selected
+          </Button>
         </div>
         <Table
           selectable

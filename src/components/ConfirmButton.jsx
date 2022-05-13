@@ -1,11 +1,10 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -36,21 +35,19 @@ export default class ConfirmButton extends Component {
 
   render() {
     const actions = [
-      <FlatButton
-        key="no"
-        label="No"
-        primary
-        onClick={this.toggleConfirmationDialog}
-      />,
-      <FlatButton key="yes" label="Yes" primary onClick={this.handleConfirm} />
+      <Button key="no" color="primary" onClick={this.toggleConfirmationDialog}>
+        No
+      </Button>,
+      <Button key="yes" color="primary" onClick={this.handleConfirm}>
+        Yes
+      </Button>
     ];
 
     return (
       <div className={css(styles.container)}>
-        <RaisedButton
-          onClick={this.toggleConfirmationDialog}
-          label={this.props.label}
-        />
+        <Button variant="contained" onClick={this.toggleConfirmationDialog}>
+          {this.props.label}
+        </Button>
         <Dialog
           open={this.state.showConfirmationDialog}
           disableBackdropClick

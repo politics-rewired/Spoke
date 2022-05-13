@@ -1,5 +1,5 @@
 import { useTheme } from "@material-ui/core";
-import RaisedButton from "material-ui/RaisedButton";
+import Button from "@material-ui/core/Button";
 import React, { useState } from "react";
 
 import { dataTest } from "../lib/attributes";
@@ -32,15 +32,16 @@ const SendButton: React.FC<Props> = (props) => {
   };
 
   return (
-    <RaisedButton
+    <Button
       {...dataTest("send")}
-      style={props.style}
+      variant="contained"
+      style={{ backgroundColor: theme.palette.success.main, ...props.style }}
       onClick={handleTouchTap}
       disabled={props.disabled}
-      label={clickStepLabels[clickStepIndex]}
-      primary={spokeTheme?.successColor === undefined}
-      backgroundColor={theme.palette.success.main}
-    />
+      color={spokeTheme?.successColor === undefined ? "primary" : "default"}
+    >
+      {clickStepLabels[clickStepIndex]}
+    </Button>
   );
 };
 
