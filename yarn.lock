@@ -4419,14 +4419,6 @@
     execa "^5.0.0"
     tslib "^2.1.0"
 
-"@rewired/h@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@rewired/h/-/h-1.1.0.tgz#c9ac0d6990948f94297cd8af9fae901bb5242c9a"
-  integrity sha512-EcGMoFDB4ojxQ7qc9SbGUzW0OxT9Uiq4Wekn8fhRter229iUJ+muhHkfAE7RVfaK+/CZ+8oLwYFhMeEZ5eGg3A==
-  dependencies:
-    cssesc "^3.0.0"
-    html-escape "^2.0.0"
-
 "@rewired/passport-slack@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@rewired/passport-slack/-/passport-slack-1.0.6.tgz#3d3744f864bb9d3d5c1dd0177d1b278d30d10ea1"
@@ -13838,11 +13830,6 @@ html-entities@^2.1.0, html-entities@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-2.3.2.tgz#760b404685cb1d794e4f4b744332e3b00dcfe488"
   integrity sha512-c3Ab/url5ksaT0WyleslpBEthOzWhrjQbg75y7XUsfSzi3Dgzt0l8w5e7DylRn15MTlMMD58dTfzddNS2kcAjQ==
-
-html-escape@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/html-escape/-/html-escape-2.0.0.tgz#60c8ddd465edf0cae02af9e99fdf5f883b09be49"
-  integrity sha1-YMjd1GXt8MrgKvnpn99fiDsJvkk=
 
 html-escaper@^2.0.0:
   version "2.0.2"
