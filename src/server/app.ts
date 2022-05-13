@@ -55,6 +55,7 @@ export const createApp = async () => {
   app.use(
     cors({
       origin: config.BASE_URL,
+      preflightContinue: true,
       credentials: true
     })
   );
