@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.26.3](https://github.com/politics-rewired/spoke/compare/v4.26.2...v4.26.3) (2022-05-13)
+
+
+### Bug Fixes
+
+* disable secure cookies ([#1192](https://github.com/politics-rewired/spoke/issues/1192)) ([a106173](https://github.com/politics-rewired/spoke/commit/a10617361984441922d2c70040db3c76ddfe5779))
+
 ### [4.26.2](https://github.com/politics-rewired/spoke/compare/v4.26.1...v4.26.2) (2022-05-13)
 
 ### [4.26.1](https://github.com/politics-rewired/spoke/compare/v4.26.0...v4.26.1) (2022-05-13)
