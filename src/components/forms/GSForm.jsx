@@ -1,3 +1,4 @@
+import Tooltip from "@material-ui/core/Tooltip";
 import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
@@ -119,6 +120,9 @@ export default class GSForm extends React.Component {
 
     return React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) {
+        return child;
+      }
+      if (child.type === Tooltip) {
         return child;
       }
       if (child.type === Form.Field || child.type === SpokeFormField) {
