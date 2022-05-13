@@ -176,6 +176,7 @@ const validators = {
     desc:
       "The base URL of the website, without trailing slash, used to construct various URLs.",
     example: "https://example.org",
+    devDefault: "http://localhost:3000",
     isClient: true
   }),
   BULK_SEND_CHUNK_SIZE: num({
