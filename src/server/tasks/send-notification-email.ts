@@ -45,6 +45,7 @@ export const sendNotificationEmail: Task = async (payload, _helpers) => {
       });
     } catch (err) {
       logger.error("Failed to send email notification...", errToObj(err));
+      throw err;
     }
   });
 };
@@ -81,6 +82,7 @@ export const sendNotificationDigestForUser: Task = async (
         });
       } catch (err) {
         logger.error("Failed to send email notification...", errToObj(err));
+        throw err;
       }
     });
   }
