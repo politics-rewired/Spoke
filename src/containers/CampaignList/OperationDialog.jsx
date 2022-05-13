@@ -1,9 +1,9 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FlatButton from "material-ui/FlatButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import React from "react";
@@ -237,25 +237,22 @@ export class OperationDialog extends React.Component {
 
     const actions = finished
       ? [
-          <FlatButton
-            key="done"
-            label="Done"
-            primary
-            onClick={clearInProgress}
-          />
+          <Button key="done" color="primary" onClick={clearInProgress}>
+            Done
+          </Button>
         ]
       : [
-          <FlatButton
+          <Button
             key="cancel"
-            label="Cancel"
-            primary
+            color="primary"
             disabled={executing}
             onClick={clearInProgress}
-          />,
-          <FlatButton
+          >
+            Cancel
+          </Button>,
+          <Button
             key="execute"
-            label="Execute Operation"
-            primary
+            color="primary"
             disabled={
               this.state.pendingDeletionProtectionCheck &&
               !deletionProtectionChallengeCompleted
@@ -267,7 +264,9 @@ export class OperationDialog extends React.Component {
                   : this.startDeletionProtectionCheck
                 : executeOperation
             }
-          />
+          >
+            Execute Operation
+          </Button>
         ];
 
     return (

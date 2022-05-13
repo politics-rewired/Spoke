@@ -1,6 +1,6 @@
 import { ApolloQueryResult } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
-import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import React, { useState } from "react";
 import { compose } from "recompose";
@@ -73,12 +73,14 @@ const EditName: React.FC<InnerProps> = (props) => {
         />
       </CardText>
       <CardActions>
-        <RaisedButton
-          label="Save Name"
-          primary
+        <Button
+          variant="contained"
+          color="primary"
           disabled={working || !isDifferent}
           onClick={saveOrganizationName}
-        />
+        >
+          Save Name
+        </Button>
       </CardActions>
     </Card>
   );

@@ -1,6 +1,6 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import MenuItem from "material-ui/MenuItem";
-import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
 import React from "react";
 import { compose } from "recompose";
@@ -292,11 +292,13 @@ class CampaignContactsForm extends React.Component<
           pendingJob={pendingJob}
         />
         <br />
-        <RaisedButton
-          label={finalSaveLabel}
+        <Button
+          variant="contained"
           disabled={isSaveDisabled}
           onClick={this.handleOnSubmit}
-        />
+        >
+          {finalSaveLabel}
+        </Button>
       </div>
     );
   }

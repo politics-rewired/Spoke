@@ -1,10 +1,10 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import FlatButton from "material-ui/FlatButton";
 import { Tab, Tabs } from "material-ui/Tabs";
 import type from "prop-types";
 import React, { Component } from "react";
@@ -107,18 +107,16 @@ class IncomingMessageActions extends Component {
     }));
 
     const confirmDialogActions = (actionVerb, confirmAction) => [
-      <FlatButton
+      <Button
         key="cancel"
-        label="Cancel"
-        primary
+        color="primary"
         onClick={this.handleConfirmDialogCancel}
-      />,
-      <FlatButton
-        key="verb"
-        label={actionVerb || "Reassign"}
-        primary
-        onClick={confirmAction}
-      />
+      >
+        Cancel
+      </Button>,
+      <Button key="verb" color="primary" onClick={confirmAction}>
+        {actionVerb || "Reassign"}
+      </Button>
     ];
 
     const { contactsAreSelected, conversationCount } = this.props;
@@ -149,18 +147,18 @@ class IncomingMessageActions extends Component {
 
               <div className={css(styles.container)}>
                 <div className={css(styles.flexColumn)}>
-                  <FlatButton
-                    label="Reassign selected"
+                  <Button
                     onClick={this.onReassignmentClicked}
                     disabled={!contactsAreSelected || !hasSelectedTexters}
-                  />
+                  >
+                    Reassign selected
+                  </Button>
                 </div>
                 <div className={css(styles.flexColumn)}>
-                  <FlatButton
-                    label={`Reassign all ${conversationCount} matching`}
+                  <Button
                     onClick={this.onReassignAllMatchingClicked}
                     disabled={conversationCount === 0 || !hasSelectedTexters}
-                  />
+                  >{`Reassign all ${conversationCount} matching`}</Button>
                 </div>
                 <Dialog
                   open={this.state.confirmDialogOpen === "reassign"}
@@ -185,18 +183,18 @@ class IncomingMessageActions extends Component {
             <Tab label="Unassign">
               <div className={css(styles.container)}>
                 <div className={css(styles.flexColumn)}>
-                  <FlatButton
-                    label="Unassign selected"
+                  <Button
                     onClick={this.onUnassignClicked}
                     disabled={!contactsAreSelected}
-                  />
+                  >
+                    Unassign selected
+                  </Button>
                 </div>
                 <div className={css(styles.flexColumn)}>
-                  <FlatButton
-                    label={`Unassign all ${conversationCount} matching`}
+                  <Button
                     onClick={this.onUnassignAllMatchingClicked}
                     disabled={conversationCount === 0}
-                  />
+                  >{`Unassign all ${conversationCount} matching`}</Button>
                 </div>
                 <Dialog
                   open={this.state.confirmDialogOpen === "unassign"}
@@ -222,12 +220,13 @@ class IncomingMessageActions extends Component {
 
           {/* <br/>
           <div>
-            <FlatButton
-              label="Reset Message Status"
-              primary={true}
+            <Button
+              color="primary"
               onClick={this.props.markForSecondPass}
               disabled={!this.props.contactsAreSelected}
-            />
+            >
+              Reset Message Status
+            </Button>
           </div> */}
         </CardText>
       </Card>

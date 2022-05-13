@@ -1,12 +1,11 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import isEqual from "lodash/isEqual";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -72,37 +71,39 @@ class ManageTags extends Component {
     const { isTagEditorOpen, selectedTags, isWorking, error } = this.state;
 
     const actions = [
-      <RaisedButton
+      <Button
         key="save"
-        label="Save"
-        primary
+        variant="contained"
+        color="primary"
         disabled={isWorking}
         onClick={this.handleSaveTags}
-      />,
-      <FlatButton
-        key="cancel"
-        label="Cancel"
-        onClick={this.handleCloseTagManager}
-      />
+      >
+        Save
+      </Button>,
+      <Button key="cancel" onClick={this.handleCloseTagManager}>
+        Cancel
+      </Button>
     ];
 
     const errorActions = [
-      <RaisedButton
+      <Button
         key="ok"
-        label="OK"
-        primary
+        variant="contained"
+        color="primary"
         disabled={isWorking}
         onClick={this.handleCloseErrorDialog}
-      />
+      >
+        OK
+      </Button>
     ];
 
     return (
       <div style={{ textAlign: "right" }}>
-        <RaisedButton
-          label={`Edit Tags (${contactTags.length})`}
+        <Button
+          variant="contained"
           disabled={isWorking}
           onClick={this.handleOnClickEditTags}
-        />
+        >{`Edit Tags (${contactTags.length})`}</Button>
         <Dialog open={isTagEditorOpen} onClose={this.handleCloseTagManager}>
           <DialogTitle>Manage Tags</DialogTitle>
           <DialogContent>

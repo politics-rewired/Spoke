@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -8,7 +9,6 @@ import { TextField, Toggle } from "material-ui";
 import DropDownMenu from "material-ui/DropDownMenu";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import { MenuItem } from "material-ui/Menu";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -151,11 +151,13 @@ class AdminCampaignList extends React.Component {
       <div>
         <div style={styles.flexContainer}>
           {this.renderFilters()}
-          <RaisedButton
-            label="Release All Unhandled Replies"
-            primary
+          <Button
+            variant="contained"
+            color="primary"
             onClick={this.startReleasingAllReplies}
-          />
+          >
+            Release All Unhandled Replies
+          </Button>
         </div>
         {releasingAllReplies && (
           <Dialog open onClose={this.closeReleasingAllReplies}>
@@ -218,24 +220,30 @@ class AdminCampaignList extends React.Component {
                 ? []
                 : doneReleasingReplies
                 ? [
-                    <RaisedButton
+                    <Button
                       key="done"
-                      label="Done"
+                      variant="contained"
                       onClick={this.closeReleasingAllReplies}
-                    />
+                    >
+                      Done
+                    </Button>
                   ]
                 : [
-                    <RaisedButton
+                    <Button
                       key="cancel"
-                      label="Cancel"
+                      variant="contained"
                       onClick={this.closeReleasingAllReplies}
-                    />,
-                    <RaisedButton
+                    >
+                      Cancel
+                    </Button>,
+                    <Button
                       key="release"
-                      label="Release"
+                      variant="contained"
+                      color="primary"
                       onClick={this.releaseAllReplies}
-                      primary
-                    />
+                    >
+                      Release
+                    </Button>
                   ]}
             </DialogActions>
           </Dialog>

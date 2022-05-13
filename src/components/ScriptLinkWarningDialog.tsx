@@ -1,8 +1,8 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FlatButton from "material-ui/FlatButton";
 import React from "react";
 
 const styles = {
@@ -91,18 +91,12 @@ const ScriptLinkWarningDialog = (props: WarningProps) => {
     (warningContext === ScriptWarningContext.ShortLink && "Short Link Warning");
 
   const actions = [
-    <FlatButton
-      key="close"
-      label="Close"
-      primary={false}
-      onClick={handleClose}
-    />,
-    <FlatButton
-      key="save"
-      label="Confirm and Save"
-      primary
-      onClick={handleConfirm}
-    />
+    <Button key="close" onClick={handleClose}>
+      Close
+    </Button>,
+    <Button key="save" color="primary" onClick={handleConfirm}>
+      Confirm and Save
+    </Button>
   ];
 
   return (

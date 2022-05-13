@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -6,9 +7,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import AddIcon from "@material-ui/icons/Add";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -123,27 +122,23 @@ class AdminShortLinkDomains extends Component {
         .domain;
 
     const deleteDomainActions = [
-      <FlatButton
-        key="cancel"
-        label="Cancel"
-        primary={false}
-        onClick={this.handleCancelDeleteDomain}
-      />,
-      <RaisedButton
+      <Button key="cancel" onClick={this.handleCancelDeleteDomain}>
+        Cancel
+      </Button>,
+      <Button
         key="delete"
-        label="Delete"
-        primary
+        variant="contained"
+        color="primary"
         onClick={this.handleDeleteDomain}
-      />
+      >
+        Delete
+      </Button>
     ];
 
     const errorActions = [
-      <FlatButton
-        key="close"
-        label="Close"
-        primary
-        onClick={this.handleErrorDialogClose}
-      />
+      <Button key="close" color="primary" onClick={this.handleErrorDialogClose}>
+        Close
+      </Button>
     ];
 
     return (

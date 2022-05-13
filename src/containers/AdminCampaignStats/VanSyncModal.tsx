@@ -1,4 +1,5 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import { green, red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -6,8 +7,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { History } from "history";
-import FlatButton from "material-ui/FlatButton";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
@@ -146,18 +145,17 @@ class VanSyncModal extends React.Component<InnerProps, State> {
       isSyncing;
 
     const actions = [
-      <FlatButton
-        key="cancel"
-        label="Cancel"
-        onClick={this.props.onRequestClose}
-      />,
-      <FlatButton
+      <Button key="cancel" onClick={this.props.onRequestClose}>
+        Cancel
+      </Button>,
+      <Button
         key="sync"
-        label="Sync"
-        primary
+        color="primary"
         disabled={isSyncDisabled}
         onClick={this.handleOnConfirmSync}
-      />
+      >
+        Sync
+      </Button>
     ];
 
     return (
@@ -187,11 +185,13 @@ class VanSyncModal extends React.Component<InnerProps, State> {
                   ))}
                 </ul>
               ]}
-              <RaisedButton
-                label="Cancel Sync"
-                primary
+              <Button
+                variant="contained"
+                color="primary"
                 onClick={this.handleOnCancelSync(latestSyncAttempt.id)}
-              />
+              >
+                Cancel Sync
+              </Button>
               <br />
               <br />
             </div>
@@ -225,21 +225,25 @@ class VanSyncModal extends React.Component<InnerProps, State> {
           )}
           {syncReadiness === ExternalSyncReadinessState.MISSING_SYSTEM && [
             <p key="1">Edit the Integration section of the campaign.</p>,
-            <RaisedButton
+            <Button
               key="2"
-              label="Edit Campaign"
-              primary
+              variant="contained"
+              color="primary"
               disabled={isSyncing}
               onClick={this.handleOnClickSetIntegration}
-            />
+            >
+              Edit Campaign
+            </Button>
           ]}
           {syncReadiness !== ExternalSyncReadinessState.MISSING_SYSTEM && (
-            <RaisedButton
-              label="Configure Mapping"
-              primary
+            <Button
+              variant="contained"
+              color="primary"
               disabled={isSyncing}
               onClick={this.handleOnClickConfigureMapping}
-            />
+            >
+              Configure Mapping
+            </Button>
           )}
           {isMappingOpen && (
             <SyncConfigurationModal

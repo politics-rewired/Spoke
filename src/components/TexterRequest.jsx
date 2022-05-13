@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import MenuItem from "material-ui/MenuItem";
 import Paper from "material-ui/Paper";
-import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
 import TextField from "material-ui/TextField";
 import React from "react";
@@ -217,13 +217,15 @@ class TexterRequest extends React.Component {
             />
           </label>
           <br />
-          <RaisedButton
-            label="Request More Texts"
-            primary
-            onClick={this.submit}
+          <Button
+            variant="contained"
+            color="primary"
             disabled={submitting}
             fullWidth
-          />
+            onClick={this.submit}
+          >
+            Request More Texts
+          </Button>
         </GSForm>
         {error && (
           <div style={{ color: "red" }}>

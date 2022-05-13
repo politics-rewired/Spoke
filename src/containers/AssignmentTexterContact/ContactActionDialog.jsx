@@ -1,7 +1,7 @@
+import Button from "@material-ui/core/Button";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardActions, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
-import FlatButton from "material-ui/FlatButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import Form from "react-formal";
@@ -90,11 +90,12 @@ class ContactActionDialog extends Component {
               <SpokeFormField name={FIELD_NAME} fullWidth autoFocus multiLine />
             </div>
             <div className={css(styles.dialogActions)}>
-              <FlatButton
+              <Button
                 style={inlineStyles.dialogButton}
-                label="Cancel"
                 onClick={handleCloseDialog}
-              />
+              >
+                Cancel
+              </Button>
               <Form.Submit
                 type="submit"
                 label={submitTitle}

@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 import { common } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { css, StyleSheet } from "aphrodite";
-import IconButton from "material-ui/IconButton";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 import { Helmet } from "react-helmet";

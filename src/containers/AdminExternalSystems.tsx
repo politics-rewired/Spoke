@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -9,10 +10,8 @@ import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import CreateIcon from "@material-ui/icons/Create";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { History } from "history";
-import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import MenuItem from "material-ui/MenuItem";
-import RaisedButton from "material-ui/RaisedButton";
 import SelectField from "material-ui/SelectField";
 import Snackbar from "material-ui/Snackbar";
 import {
@@ -202,12 +201,9 @@ class AdminExternalSystems extends Component<Props, State> {
     const syncingSystem = syncingEdge ? syncingEdge.node : undefined;
 
     const errorActions = [
-      <FlatButton
-        key="ok"
-        label="Ok"
-        primary
-        onClick={this.handleCancelError}
-      />
+      <Button key="ok" color="primary" onClick={this.handleCancelError}>
+        Ok
+      </Button>
     ];
 
     return (
@@ -219,12 +215,13 @@ class AdminExternalSystems extends Component<Props, State> {
           <AddIcon />
         </FloatingActionButton>
 
-        <RaisedButton
-          label="Refresh"
-          labelPosition="before"
-          icon={<RefreshIcon />}
+        <Button
+          variant="contained"
+          endIcon={<RefreshIcon />}
           onClick={this.handleRefreshSystems}
-        />
+        >
+          Refresh
+        </Button>
 
         <Table selectable={false} onCellClick={this.handleCellClick}>
           <TableHeader displaySelectAll={false} enableSelectAll={false}>
@@ -247,22 +244,24 @@ class AdminExternalSystems extends Component<Props, State> {
                     : "never"}
                 </TableRowColumn>
                 <TableRowColumn>
-                  <RaisedButton
-                    label="Edit"
-                    labelPosition="before"
-                    primary
-                    icon={<CreateIcon />}
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    endIcon={<CreateIcon />}
                     style={{ marginRight: 10 }}
                     onClick={this.makeStartEditExternalSystem(system.id)}
-                  />
-                  <RaisedButton
-                    label="Refresh Sync Options"
-                    labelPosition="before"
-                    icon={<CloudDownloadIcon />}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    endIcon={<CloudDownloadIcon />}
                     style={{ marginRight: 10 }}
-                    onClick={this.makeHandleRefreshExternalSystem(system.id)}
                     disabled={this.state.syncInitiatedForId === system.id}
-                  />
+                    onClick={this.makeHandleRefreshExternalSystem(system.id)}
+                  >
+                    Refresh Sync Options
+                  </Button>
                 </TableRowColumn>
               </TableRow>
             ))}
@@ -322,17 +321,16 @@ class AdminExternalSystems extends Component<Props, State> {
             />
           </DialogContent>
           <DialogActions>
-            <FlatButton
-              key="cancel"
-              label="Cancel"
-              onClick={this.cancelEditingExternalSystem}
-            />
-            <FlatButton
+            <Button key="cancel" onClick={this.cancelEditingExternalSystem}>
+              Cancel
+            </Button>
+            <Button
               key="save"
-              label="Save"
-              primary
+              color="primary"
               onClick={this.saveExternalSystem}
-            />
+            >
+              Save
+            </Button>
           </DialogActions>
         </Dialog>
         <Dialog open={error !== undefined} onClose={this.handleCancelError}>

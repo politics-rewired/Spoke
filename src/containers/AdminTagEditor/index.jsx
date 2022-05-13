@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -7,7 +8,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import AddIcon from "@material-ui/icons/Add";
 import pick from "lodash/pick";
 import ColorPicker from "material-ui-color-picker";
-import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
@@ -175,17 +175,12 @@ class AdminTagEditor extends Component {
     const isNewTag = (editingTag || {}).id === undefined;
     const tagVerb = isNewTag ? "Create" : "Edit";
     const actions = [
-      <FlatButton
-        key="cancel"
-        label="Cancel"
-        onClick={this.handleCancelEditTag}
-      />,
-      <FlatButton
-        key="verb"
-        label={tagVerb}
-        primary
-        onClick={this.handleSaveTag}
-      />
+      <Button key="cancel" onClick={this.handleCancelEditTag}>
+        Cancel
+      </Button>,
+      <Button key="verb" color="primary" onClick={this.handleSaveTag}>
+        {tagVerb}
+      </Button>
     ];
 
     // Custom fields are campaign-specific and thus cannot be used in Tag scripts.
@@ -194,12 +189,9 @@ class AdminTagEditor extends Component {
     const integrationSourced = false;
 
     const errorActions = [
-      <FlatButton
-        key="ok"
-        label="Ok"
-        primary
-        onClick={this.handleCancelError}
-      />
+      <Button key="ok" color="primary" onClick={this.handleCancelError}>
+        Ok
+      </Button>
     ];
 
     return (
@@ -282,12 +274,13 @@ class AdminTagEditor extends Component {
                     Tag confirmation steps:{" "}
                     {editingTag.confirmationSteps.length}
                   </span>
-                  <FlatButton
-                    label="Manage steps"
+                  <Button
                     onClick={this.handleToggleStepsEditorOpen}
-                    primary
+                    color="primary"
                     style={{ marginLeft: 8 }}
-                  />
+                  >
+                    Manage steps
+                  </Button>
                 </div>
                 <TextField
                   name="webhookUrl"

@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -6,7 +7,6 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import AddIcon from "@material-ui/icons/Add";
 import pick from "lodash/pick";
-import FlatButton from "material-ui/FlatButton";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
@@ -112,26 +112,18 @@ class AdminTeamEditor extends Component {
     const isNewTeam = (editingTeam || {}).id === undefined;
     const teamVerb = isNewTeam ? "Create" : "Edit";
     const actions = [
-      <FlatButton
-        key="cancel"
-        label="Cancel"
-        onClick={this.handleCancelEditTeam}
-      />,
-      <FlatButton
-        key={teamVerb}
-        label={teamVerb}
-        primary
-        onClick={this.handleSaveTeam}
-      />
+      <Button key="cancel" onClick={this.handleCancelEditTeam}>
+        Cancel
+      </Button>,
+      <Button key={teamVerb} color="primary" onClick={this.handleSaveTeam}>
+        {teamVerb}
+      </Button>
     ];
 
     const errorActions = [
-      <FlatButton
-        key="ok"
-        label="Ok"
-        primary
-        onClick={this.handleCancelError}
-      />
+      <Button key="ok" color="primary" onClick={this.handleCancelError}>
+        Ok
+      </Button>
     ];
 
     return (

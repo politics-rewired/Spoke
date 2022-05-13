@@ -1,5 +1,5 @@
+import Button from "@material-ui/core/Button";
 import CircularProgress from "material-ui/CircularProgress";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 
 const styles = {
@@ -24,14 +24,15 @@ const GSSubmitButton: React.FC<Props> = (props) => {
   ) : null;
   return (
     <div style={styles.button} {...props}>
-      <RaisedButton
-        primary
+      <Button
+        variant="contained"
+        color="primary"
         type="submit"
-        label={props.label}
-        labelPosition="after"
-        icon={icon}
+        startIcon={icon}
         disabled={props.isSubmitting}
-      />
+      >
+        {props.label}
+      </Button>
     </div>
   );
 };

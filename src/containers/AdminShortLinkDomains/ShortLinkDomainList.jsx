@@ -1,11 +1,11 @@
 import { green, red } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
 import BlockIcon from "@material-ui/icons/Block";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import DataTables from "material-ui-datatables";
-import IconButton from "material-ui/IconButton";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React, { Component } from "react";

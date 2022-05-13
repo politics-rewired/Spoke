@@ -1,10 +1,10 @@
+import Button from "@material-ui/core/Button";
 import { green, red } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
 import AssignmentTurnedInIcon from "@material-ui/icons/AssignmentTurnedIn";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CircularProgress from "material-ui/CircularProgress";
-import FlatButton from "material-ui/FlatButton";
-import IconButton from "material-ui/IconButton";
 import {
   Table,
   TableBody,
@@ -117,17 +117,17 @@ const AssignmentRequestTable = (props) => {
                       </IconButton>
                     )}
                     {showActions && isAdmin && (
-                      <FlatButton
-                        label="AutoApprove"
-                        labelPosition="before"
-                        primary
-                        icon={
+                      <Button
+                        color="primary"
+                        endIcon={
                           <AssignmentTurnedInIcon
                             style={{ color: green[300] }}
                           />
                         }
                         onClick={handleAutoApproveRow(requestId)}
-                      />
+                      >
+                        AutoApprove
+                      </Button>
                     )}
                     {status === RowWorkStatus.Working && (
                       <CircularProgress size={25} />

@@ -1,13 +1,12 @@
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
+import IconButton from "@material-ui/core/IconButton";
 import CreateIcon from "@material-ui/icons/Create";
 import DeleteIcon from "@material-ui/icons/Delete";
 import InfoIcon from "@material-ui/icons/Info";
 import pick from "lodash/pick";
-import FlatButton from "material-ui/FlatButton";
-import IconButton from "material-ui/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
 import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React from "react";
@@ -119,20 +118,23 @@ class GSScriptOptionsField extends GSFormField {
       getWarningContextForScript(scriptDraft);
 
     const actions = [
-      <FlatButton
+      <Button
         key="cancel"
         {...dataTest("scriptCancel")}
-        label="Cancel"
         onClick={this.handleCancelDialog}
-      />,
-      <RaisedButton
+      >
+        Cancel
+      </Button>,
+      <Button
         key="done"
         {...dataTest("scriptDone")}
-        label="Done"
-        onClick={this.wrapSaveScript}
-        primary
+        variant="contained"
+        color="primary"
         disabled={isDuplicate}
-      />
+        onClick={this.wrapSaveScript}
+      >
+        Done
+      </Button>
     ];
 
     return (
@@ -234,14 +236,14 @@ class GSScriptOptionsField extends GSFormField {
             )}
           </div>
         ))}
-        <FlatButton
-          label="Add script version"
-          labelPosition="before"
-          primary
-          icon={<CreateIcon />}
+        <Button
+          color="primary"
+          endIcon={<CreateIcon />}
           disabled={emptyVersionExists}
           onClick={this.handleAddScriptVersion}
-        />
+        >
+          Add script version
+        </Button>
         {this.renderDialog()}
       </div>
     );

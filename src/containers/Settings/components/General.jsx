@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -7,9 +8,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import DropDownMenu from "material-ui/DropDownMenu";
-import FlatButton from "material-ui/FlatButton";
 import MenuItem from "material-ui/MenuItem";
-import RaisedButton from "material-ui/RaisedButton";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
 import React from "react";
@@ -183,11 +182,12 @@ class Settings extends React.Component {
             <div className={css(styles.dialogActions)} />
           </DialogContent>
           <DialogActions>
-            <FlatButton
-              label="Cancel"
+            <Button
               style={inlineStyles.dialogButton}
               onClick={this.handleCloseTextingHoursDialog}
-            />
+            >
+              Cancel
+            </Button>
             <Form.Submit
               type="submit"
               style={inlineStyles.dialogButton}
@@ -243,12 +243,9 @@ class Settings extends React.Component {
     const isTrollbotSaveDisabled = isWorking || noWebhookChange;
 
     const errorActions = [
-      <FlatButton
-        key="ok"
-        label="OK"
-        primary
-        onClick={this.handleDismissError}
-      />
+      <Button key="ok" color="primary" onClick={this.handleDismissError}>
+        OK
+      </Button>
     ];
 
     return (
@@ -282,12 +279,14 @@ class Settings extends React.Component {
             </DropDownMenu>
           </CardText>
           <CardActions>
-            <RaisedButton
-              label="Save Default Level"
-              primary
+            <Button
+              variant="contained"
+              color="primary"
               disabled={isWorking || noApprovalChange}
               onClick={this.handleSaveApprovalLevel}
-            />
+            >
+              Save Default Level
+            </Button>
           </CardActions>
         </Card>
         <Card className={css(styles.sectionCard)}>
@@ -311,12 +310,14 @@ class Settings extends React.Component {
               />
             </CardText>
             <CardActions>
-              <RaisedButton
-                label="Save Opt-Out Message"
-                primary
+              <Button
+                variant="contained"
+                color="primary"
                 disabled={isOptOutSaveDisabled}
                 onClick={this.handleSaveOptOutMessage}
-              />
+              >
+                Save Opt-Out Message
+              </Button>
             </CardActions>
           </GSForm>
         </Card>
@@ -347,11 +348,13 @@ class Settings extends React.Component {
           </CardText>
           <CardActions>
             {organization.textingHoursEnforced && (
-              <RaisedButton
-                label="Change texting hours"
-                primary
+              <Button
+                variant="contained"
+                color="primary"
                 onClick={this.handleOpenTextingHoursDialog}
-              />
+              >
+                Change texting hours
+              </Button>
             )}
           </CardActions>
           {this.renderTextingHoursForm()}
@@ -380,12 +383,14 @@ class Settings extends React.Component {
               />
             </CardText>
             <CardActions>
-              <RaisedButton
-                label="Save Api Key"
-                primary
+              <Button
+                variant="contained"
+                color="primary"
                 disabled={isApiKeySaveDisabled}
                 onClick={this.handleSaveNumbersApiKey}
-              />
+              >
+                Save Api Key
+              </Button>
             </CardActions>
           </GSForm>
         </Card>
@@ -442,12 +447,14 @@ class Settings extends React.Component {
                 />
               </CardText>
               <CardActions>
-                <RaisedButton
-                  label="Save Trollbot Url"
-                  primary
+                <Button
+                  variant="contained"
+                  color="primary"
                   disabled={isTrollbotSaveDisabled}
                   onClick={this.handleSaveTrollbotUrl}
-                />
+                >
+                  Save Trollbot Url
+                </Button>
               </CardActions>
             </GSForm>
           </Card>

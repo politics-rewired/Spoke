@@ -1,8 +1,8 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import ErrorIcon from "@material-ui/icons/Error";
 import WarningIcon from "@material-ui/icons/Warning";
-import RaisedButton from "material-ui/RaisedButton";
 import React from "react";
 import { compose } from "recompose";
 
@@ -106,11 +106,13 @@ class FilterLandlinesForm extends React.Component<Props, State> {
           }
         />
         {!landlinesFiltered && (
-          <RaisedButton
-            label="Filter Landlines"
-            onClick={this.filterLandlines}
+          <Button
+            variant="contained"
             disabled={isWorking}
-          />
+            onClick={this.filterLandlines}
+          >
+            Filter Landlines
+          </Button>
         )}
         {landlinesFiltered && message && (
           <div style={{ display: "flex", alignItems: "center" }}>

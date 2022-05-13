@@ -1,5 +1,5 @@
+import Button from "@material-ui/core/Button";
 import { css, StyleSheet } from "aphrodite";
-import RaisedButton from "material-ui/RaisedButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -29,16 +29,16 @@ export default class BulkSendButton extends Component {
   render() {
     return (
       <div className={css(styles.container)}>
-        <RaisedButton
-          onClick={this.sendMessages}
-          label={
-            this.state.isSending
-              ? "Sending..."
-              : `Send Bulk (${window.BULK_SEND_CHUNK_SIZE})`
-          }
+        <Button
+          variant="contained"
+          color="primary"
           disabled={this.state.isSending}
-          primary
-        />
+          onClick={this.sendMessages}
+        >
+          {this.state.isSending
+            ? "Sending..."
+            : `Send Bulk (${window.BULK_SEND_CHUNK_SIZE})`}
+        </Button>
       </div>
     );
   }

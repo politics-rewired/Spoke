@@ -1,11 +1,11 @@
 /* eslint-disable react/no-unused-state */
 import { gql } from "@apollo/client";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import { css, StyleSheet } from "aphrodite";
-import IconButton from "material-ui/IconButton/IconButton";
-import RaisedButton from "material-ui/RaisedButton";
 import { ToolbarTitle } from "material-ui/Toolbar";
 import PropTypes from "prop-types";
 import React from "react";
@@ -405,10 +405,9 @@ class AssignmentTexter extends React.Component {
           title="You've already messaged or replied to all your assigned contacts for now."
           icon={<CheckCircleIcon />}
           content={
-            <RaisedButton
-              label="Back To Todos"
-              onClick={this.handleExitTexter}
-            />
+            <Button variant="contained" onClick={this.handleExitTexter}>
+              Back To Todos
+            </Button>
           }
         />
       </div>
