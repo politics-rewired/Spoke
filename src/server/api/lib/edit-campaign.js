@@ -46,12 +46,13 @@ export const processContactsFile = async (file) => {
     Papa.parse(stream, {
       header: true,
       transformHeader: (header) => {
+        const trimmedHeader = header.trim();
         for (const [field, aliases] of Object.entries(fieldAliases)) {
-          if (aliases.includes(header)) {
+          if (aliases.includes(trimmedHeader)) {
             return field;
           }
         }
-        return header;
+        return trimmedHeader;
       },
       step: ({ data, meta, errors: _errors }, parser) => {
         // Exit early on bad header
