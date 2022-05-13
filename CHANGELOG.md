@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.26.1](https://github.com/politics-rewired/spoke/compare/v4.26.0...v4.26.1) (2022-05-13)
+
+
+### Bug Fixes
+
+* **mui:** ignore tooltips within gsform ([#1188](https://github.com/politics-rewired/spoke/issues/1188)) ([e036dbb](https://github.com/politics-rewired/spoke/commit/e036dbb58ee44910cf1dcf400793253c706e9f04))
+
 ## [4.26.0](https://github.com/politics-rewired/spoke/compare/v4.25.0...v4.26.0) (2022-05-13)
 
 
