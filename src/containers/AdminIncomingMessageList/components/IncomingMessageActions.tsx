@@ -1,25 +1,23 @@
-import {
-  AppBar,
-  Box,
-  Button,
-  ButtonGroup,
-  Card,
-  CardContent,
-  CardHeader,
-  Collapse,
-  FormControl,
-  IconButton,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  Select,
-  Tab,
-  Tabs
-} from "@material-ui/core";
+import AppBar from "@material-ui/core/AppBar";
+import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
+import Collapse from "@material-ui/core/Collapse";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
+import FormControl from "@material-ui/core/FormControl";
+import IconButton from "@material-ui/core/IconButton";
+import InputLabel from "@material-ui/core/InputLabel";
+import ListItemText from "@material-ui/core/ListItemText";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import Tab from "@material-ui/core/Tab";
+import Tabs from "@material-ui/core/Tabs";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import { css, StyleSheet } from "aphrodite";
