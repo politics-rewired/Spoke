@@ -159,4 +159,65 @@ describe("queue-autosend-initials", () => {
       );
     });
   });
+
+  // This test was added when we changed autoassign to steal assignments from users
+  // Before that, part of the mechanism preventing duplicate sends was that the
+  // contact got assigned to the autosend user before getting queued, so a
+  // subsequent run wouldn't pick them up
+  // Now, that doesn't happen, so this test seemed like a useful check since we're
+  // only relying on job_key
+  it("does not double queue contacts after change to include assigned messages", async () => {
+    await withClient(pool, async (client) => {
+      const campaign = await createCampaign(client, {
+        organizationId: organization.id,
+        isStarted: true,
+        autosendUserId: texter.id,
+        autosendStatus: "sending"
+      });
+
+      await createInteractionStep(client, {
+        campaignId: campaign.id,
+        scriptOptions: ["Have a text {firstName}"]
+      });
+
+      await Promise.all(
+        [...Array(6)].map(() =>
+          createCampaignContact(client, {
+            campaignId: campaign.id,
+            firstName: faker.name.firstName()
+          })
+        )
+      );
+
+      const runQueueAutoSendInitials = async () => {
+        await client.query(`select graphile_worker.add_job($1)`, [
+          "queue-autosend-initials"
+        ]);
+
+        await runTaskListOnce(
+          workerOptions,
+          {
+            "queue-autosend-initials": queueAutoSendInitials
+          },
+          client
+        );
+      };
+
+      await runQueueAutoSendInitials();
+      await runQueueAutoSendInitials();
+
+      const {
+        rowCount
+      } = await client.query(
+        `select * from graphile_worker.jobs where payload->>'campaignId' = $1`,
+        [campaign.id]
+      );
+      expect(rowCount).toBe(6);
+
+      await pool.query(
+        `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
+        [["queue-autosend-initials", "retry-interaction-step"]]
+      );
+    });
+  });
 });

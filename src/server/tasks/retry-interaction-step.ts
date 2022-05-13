@@ -17,6 +17,7 @@ import { r } from "../models";
 
 export interface RetryInteractionStepPayload {
   campaignContactId: number;
+  unassignAfterSend?: boolean;
 }
 
 interface RetryInteractionStepRecord {
@@ -81,5 +82,12 @@ export const retryInteractionStep: Task = async (
 
   await r.knex.transaction(async (trx) => {
     await sendMessage(trx, user, `${campaignContactId}`, message);
+
+    // if false or undefined, dont execute
+    if (payload.unassignAfterSend === true) {
+      await trx("campaign_contact")
+        .update({ assignment_id: null })
+        .where({ id: payload.campaignContactId });
+    }
   });
 };
