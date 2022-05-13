@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.26.2](https://github.com/politics-rewired/spoke/compare/v4.26.1...v4.26.2) (2022-05-13)
+
 ### [4.26.1](https://github.com/politics-rewired/spoke/compare/v4.26.0...v4.26.1) (2022-05-13)
 
 
