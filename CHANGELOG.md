@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.26.0](https://github.com/politics-rewired/spoke/compare/v4.25.0...v4.26.0) (2022-05-13)
+
+
+### Features
+
+* **notifications:** allow texters to configure notification frequency ([#1131](https://github.com/politics-rewired/spoke/issues/1131)) ([8800ee2](https://github.com/politics-rewired/spoke/commit/8800ee2410b580a0eef06bfdbf1d34f55106e6bd))
+
+
+### Bug Fixes
+
+* cleanup autosending ([#1186](https://github.com/politics-rewired/spoke/issues/1186)) ([635a7f3](https://github.com/politics-rewired/spoke/commit/635a7f317c918781d9eb6b8ee79a18bd1d403a23))
+* fix errors in down migrations ([#1168](https://github.com/politics-rewired/spoke/issues/1168)) ([001f8de](https://github.com/politics-rewired/spoke/commit/001f8de1b6953bded8760761b63884fa25dbf4d6))
+* remove quotes around campaign preview script values ([#1172](https://github.com/politics-rewired/spoke/issues/1172)) ([633d900](https://github.com/politics-rewired/spoke/commit/633d9005c32ef8dd7d18c5da244c7f93eac1949b))
+* throw error and retry on empty email ([#1187](https://github.com/politics-rewired/spoke/issues/1187)) ([edd01eb](https://github.com/politics-rewired/spoke/commit/edd01ebc7f52879398bcc80f4050e0c79a1f8b89))
+
 ## [4.25.0](https://github.com/politics-rewired/spoke/compare/v4.24.1...v4.25.0) (2022-05-02)
 
 
