@@ -172,7 +172,7 @@ describe("queue-autosend-initials", () => {
         organizationId: organization.id,
         isStarted: true,
         autosendUserId: texter.id,
-        autosendStatus: "unstarted"
+        autosendStatus: "sending"
       });
 
       await createInteractionStep(client, {
