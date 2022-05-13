@@ -130,7 +130,7 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
   } else if (sectionIsDone) {
     avatar = (
       <Avatar
-        icon={<DoneIcon style={{ fill: theme.colors.darkGreen }} />}
+        icon={<DoneIcon style={{ color: theme.colors.darkGreen }} />}
         style={avatarStyle}
         size={25}
       />
@@ -140,7 +140,7 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
   } else if (!sectionIsDone) {
     avatar = (
       <Avatar
-        icon={<WarningIcon style={{ fill: theme.colors.orange }} />}
+        icon={<WarningIcon style={{ color: theme.colors.orange }} />}
         style={avatarStyle}
         size={25}
       />
