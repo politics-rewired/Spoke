@@ -140,7 +140,7 @@ class CampaignContactsForm extends React.Component<
         excludeCampaignIds: selectedCampaignIds
       };
       const response = await this.props.mutations.editCampaign(campaignInput);
-      if (response.errors) throw response.errors;
+      if (response.errors) throw response.errors[0];
       // TODO: this.props.onComplete();
     } catch (err) {
       this.props.onError(err.message);
