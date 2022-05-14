@@ -4,7 +4,7 @@ import green from "@material-ui/core/colors/green";
 import grey from "@material-ui/core/colors/grey";
 import red from "@material-ui/core/colors/red";
 import yellow from "@material-ui/core/colors/yellow";
-import { createMuiTheme } from "@material-ui/core/styles"; // v1.x
+import { createTheme } from "@material-ui/core/styles"; // v4.x
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 import baseTheme from "./theme";
@@ -33,7 +33,7 @@ export const createMuiThemev0 = (theme: Partial<CustomTheme> = {}) =>
 
 // TODO: return real theme once components beyond Dialog are converted
 export const createMuiThemev1 = (theme: Partial<CustomTheme> = {}) =>
-  createMuiTheme({
+  createTheme({
     palette: {
       primary: { main: theme.primaryColor || baseTheme.colors.green },
       secondary: { main: theme.secondaryColor || baseTheme.colors.green },

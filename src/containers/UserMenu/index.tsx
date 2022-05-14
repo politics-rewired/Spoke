@@ -113,7 +113,6 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
         <IconButton
           {...dataTest("userMenuButton")}
           onClick={this.handleTouchTap}
-          iconStyle={{ fontSize: "18px" }}
         >
           {this.renderAvatar(currentUser, avatarSize)}
         </IconButton>
