@@ -856,7 +856,6 @@ export async function assignLoop(
         .join("user_team", "team.id", "=", "user_team.team_id")
         .where({
           user_id: parseInt(user.id, 10),
-          is_assignment_enabled: true,
           organization_id: parseInt(organizationId, 10)
         })
     )
