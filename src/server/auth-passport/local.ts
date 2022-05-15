@@ -58,7 +58,7 @@ export function setupLocalAuthPassport() {
           uuidMatch,
           reqBody: req.body
         });
-        if (user.is_suspended) {
+        if (user?.is_suspended === true) {
           return done(new SuspendedUserError());
         }
         return done(null, user);

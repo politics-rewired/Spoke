@@ -41,7 +41,7 @@ export async function userLoggedIn(
       ? await getUserByAuth0Id({ auth0Id: val })
       : null;
 
-  return result.is_suspended ? null : result;
+  return result?.is_suspended === true ? null : result;
 }
 
 export async function currentEditors(

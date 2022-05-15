@@ -89,11 +89,6 @@ export function setupSlackPassport() {
         throw err;
       });
 
-    if (existingUser.is_suspended) {
-      await handleSuspendedUser(req, res);
-      return;
-    }
-
     if (!existingUser && SLACK_CONVERT_EXISTING) {
       const [existingEmailUser] = await db
         .primary("user")
@@ -142,6 +137,11 @@ export function setupSlackPassport() {
         });
 
       return redirectPostSignIn(req, res, true);
+    }
+
+    if (existingUser.is_suspended) {
+      await handleSuspendedUser(req, res);
+      return;
     }
 
     return redirectPostSignIn(req, res, false);
