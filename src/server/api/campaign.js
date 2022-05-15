@@ -245,6 +245,32 @@ export const resolvers = {
       });
     },
 
+    countNeedsMessageContacts: async (campaign) => {
+      const getCountNeedsMessageContacts = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          const { rows } = await r.reader.raw(
+            `
+              select count(*) as count_needs_message_contacts
+              from campaign_contact
+              where message_status = 'needsMessage'
+                and archived = ${archived}
+                and campaign_id = ?
+            `,
+            [campaignId]
+          );
+
+          const [{ count_needs_message_contacts: result }] = rows;
+          return result;
+        },
+        cacheOpts.PercentUnhandledReplies
+      );
+
+      return getCountNeedsMessageContacts({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
+    },
+
     percentUnhandledReplies: async (campaign) => {
       const getPercentUnhandledReplies = memoizer.memoize(
         async ({ campaignId, archived }) => {

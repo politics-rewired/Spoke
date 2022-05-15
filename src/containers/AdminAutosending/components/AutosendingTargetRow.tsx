@@ -46,7 +46,9 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
   const totalSent = target.stats?.countMessagedContacts;
 
   const statusChipDisplay =
-    target.autosendStatus === "sending"
+    target.stats?.countNeedsMessageContacts === 0
+      ? "complete"
+      : target.autosendStatus === "sending"
       ? totalSent === 0
         ? "up next"
         : target.autosendStatus

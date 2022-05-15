@@ -10,6 +10,7 @@ fragment AutosendingTarget on Campaign {
     percentUnhandledReplies
     receivedMessagesCount
     countMessagedContacts
+    countNeedsMessageContacts
   }
   deliverabilityStats(filter: { initialMessagesOnly: true }) {
     deliveredCount

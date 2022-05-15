@@ -152,6 +152,7 @@ export const schema = `
     needsMessageOptOutsCount: Int
     percentUnhandledReplies: Float!
     countMessagedContacts: Int!
+    countNeedsMessageContacts: Int!
   }
 
   type DeliverabilityErrorStat {
