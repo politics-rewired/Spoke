@@ -6,7 +6,7 @@ import Auth0Strategy from "passport-auth0";
 import { config } from "../../config";
 import { capitalizeWord } from "../api/lib/utils";
 import { contextForRequest } from "../contexts";
-import { userLoggedIn } from "../models/cacheable_queries";
+import { getUserByAuth0Id, userLoggedIn } from "../models/cacheable_queries";
 import type { SpokeRequest } from "../types";
 import type { PassportCallback } from "./util";
 import { handleSuspendedUser, redirectPostSignIn } from "./util";
@@ -36,11 +36,13 @@ export function setupAuth0Passport() {
     // This is the Auth0 user object, not the db one
     // eslint-disable-next-line no-underscore-dangle
     const auth0Id = auth0User.id || auth0User._json.sub;
-    done(null, auth0Id);
+    getUserByAuth0Id({ auth0Id })
+      .then((spokeUser) => done(null, spokeUser?.id))
+      .catch((err) => done(err));
   });
 
-  passport.deserializeUser((auth0Id: string, done: any) =>
-    userLoggedIn(auth0Id, "auth0_id")
+  passport.deserializeUser((userId: string, done: any) =>
+    userLoggedIn(userId, "id")
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
   );

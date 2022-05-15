@@ -7,7 +7,7 @@ import { config } from "../../config";
 import logger from "../../logger";
 import { contextForRequest } from "../contexts";
 import { botClient } from "../lib/slack";
-import { userLoggedIn } from "../models/cacheable_queries";
+import { getUserByAuth0Id, userLoggedIn } from "../models/cacheable_queries";
 import type { SpokeRequest } from "../types";
 import { errToObj } from "../utils";
 import type { PassportCallback } from "./util";
@@ -62,12 +62,14 @@ export function setupSlackPassport() {
 
   passport.use(strategy);
 
-  passport.serializeUser(({ id: slackUserId }: { id: string }, done: any) =>
-    done(null, slackUserId)
-  );
+  passport.serializeUser(({ id: slackUserId }: { id: string }, done: any) => {
+    getUserByAuth0Id({ auth0Id: slackUserId })
+      .then((spokeUser) => done(null, spokeUser?.id))
+      .catch((err) => done(err));
+  });
 
-  passport.deserializeUser((slackUserId: any, done: any) =>
-    userLoggedIn(slackUserId, "auth0_id")
+  passport.deserializeUser((userId: any, done: any) =>
+    userLoggedIn(userId, "id")
       .then((user: any) => done(null, user || false))
       .catch((error: any) => done(error))
   );
