@@ -63,6 +63,10 @@ class AdminTeamEditor extends Component {
       "backgroundColor",
       "assignmentPriority"
     ]);
+    if ("assignmentPriority" in team) {
+      team.assignmentPriority = parseInt(team.assignmentPriority, 10);
+    }
+
     this.setState({ isWorking: true });
     try {
       const result = await this.props.mutations.saveTeams([team]);
