@@ -236,7 +236,7 @@ export const resolvers = {
           const [{ count_messaged_contacts: result }] = rows;
           return result;
         },
-        cacheOpts.PercentUnhandledReplies
+        cacheOpts.CountMessagedContacts
       );
 
       return getCountMessagedContacts({
@@ -262,7 +262,7 @@ export const resolvers = {
           const [{ count_needs_message_contacts: result }] = rows;
           return result;
         },
-        cacheOpts.PercentUnhandledReplies
+        cacheOpts.CountNeedsMessageContacts
       );
 
       return getCountNeedsMessageContacts({
