@@ -6,6 +6,7 @@ fragment AutosendingTarget on Campaign {
   contactsCount
   stats {
     optOutsCount
+    needsMessageOptOutsCount
     percentUnhandledReplies
     receivedMessagesCount
     countMessagedContacts

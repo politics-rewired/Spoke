@@ -41,6 +41,10 @@ const cacheOptsPlain: Record<string, [string, number]> = {
     ONE_MINUTE
   ],
   CampaignOptOutsCount: ["campaign-opt-outs-count", ONE_MINUTE],
+  CampaignNeedsMessageOptOutsCount: [
+    "campaign-needs-message-opt-outs-count",
+    ONE_MINUTE
+  ],
   CampaignTeams: ["campaign-teams", ONE_WEEK],
   CampaignsList: ["campaigns-list", ONE_WEEK],
   CampaignsListRelay: ["campaigns-list-relay", ONE_WEEK],

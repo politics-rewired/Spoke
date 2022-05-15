@@ -196,6 +196,29 @@ export const resolvers = {
       });
     },
 
+    needsMessageOptOutsCount: async (campaign) => {
+      const getNeedsMessageOptOutsCount = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          return r.getCount(
+            r
+              .reader("campaign_contact")
+              .where({
+                is_opted_out: true,
+                campaign_id: campaignId,
+                message_status: "needsMessage"
+              })
+              .whereRaw(`archived = ${archived}`) // partial index friendly
+          );
+        },
+        cacheOpts.CampaignNeedsMessageOptOutsCount
+      );
+
+      return getNeedsMessageOptOutsCount({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
+    },
+
     countMessagedContacts: async (campaign) => {
       const getCountMessagedContacts = memoizer.memoize(
         async ({ campaignId, archived }) => {
