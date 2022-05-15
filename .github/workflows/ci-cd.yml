@@ -80,7 +80,7 @@ jobs:
         run: yarn jest --forceExit --detectOpenHandles src/**/*
 
   publish-docker-image:
-    if: startsWith( github.ref, 'refs/tags/v')
+    # if: startsWith( github.ref, 'refs/tags/v')
     needs: test
     name: Publish Docker image
     runs-on: ubuntu-latest
@@ -120,7 +120,6 @@ jobs:
           build-args: |
             SPOKE_VERSION=${{ steps.image-tags.outputs.version }}
           tags: |
-            us-east4-docker.pkg.dev/spoke-rewired/spoke/core:latest
             us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.version }}
             us-east4-docker.pkg.dev/spoke-rewired/spoke/core:${{ steps.image-tags.outputs.sha }}
           cache-from: type=gha
