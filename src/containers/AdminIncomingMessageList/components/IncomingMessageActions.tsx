@@ -10,16 +10,14 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import FormControl from "@material-ui/core/FormControl";
 import IconButton from "@material-ui/core/IconButton";
-import InputLabel from "@material-ui/core/InputLabel";
-import ListItemText from "@material-ui/core/ListItemText";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
+import TextField from "@material-ui/core/TextField";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
+import type { AutocompleteChangeReason } from "@material-ui/lab/Autocomplete";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { css, StyleSheet } from "aphrodite";
 import React, { useState } from "react";
 
@@ -38,6 +36,11 @@ type Texter = {
   email: string;
   role: string;
   id: number;
+};
+
+type TexterOption = {
+  value: string;
+  label: string;
 };
 
 const formatTexter = (texter: Texter) => {
@@ -75,7 +78,9 @@ interface IncomingMessageActionsProps {
 const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
   props
 ) => {
-  const [selectedTexters, setSelectedTexters] = useState<Array<string>>([]);
+  const [selectedTexters, setSelectedTexters] = useState<Array<TexterOption>>(
+    []
+  );
   const [reassignDialogOpen, setReassignDialogOpen] = useState<boolean>(false);
   const [unassignDialogOpen, setUnassignDialogOpen] = useState<boolean>(false);
   const [showSection, setShowSection] = useState<boolean>(false);
@@ -86,7 +91,8 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
   };
 
   const onReassignmentClicked = () => {
-    props.onReassignRequested(selectedTexters);
+    const ids = selectedTexters.map(({ value }) => value);
+    props.onReassignRequested(ids);
   };
 
   const onUnassignClicked = () => {
@@ -102,10 +108,11 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
   };
 
   const handleTextersChanged = (
-    event: React.ChangeEvent<{ value: unknown }>,
-    _child: React.ReactNode
+    _event: React.ChangeEvent<any>,
+    value: TexterOption[],
+    _reason: AutocompleteChangeReason
   ) => {
-    setSelectedTexters(event.target.value as string[]);
+    setSelectedTexters(value);
   };
 
   const handleConfirmDialogCancel = () => {
@@ -115,7 +122,8 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
 
   const handleConfirmDialogReassign = () => {
     setReassignDialogOpen(false);
-    props.onReassignAllMatchingRequested(selectedTexters);
+    const ids = selectedTexters.map(({ value }) => value);
+    props.onReassignAllMatchingRequested(ids);
   };
 
   const handleConfirmDialogUnassign = () => {
@@ -123,8 +131,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
     props.onUnassignAllMatchingRequested();
   };
 
-  let texters = props.people ?? [];
-  texters = texters.map((texter) => ({
+  const texters: TexterOption[] = (props.people ?? []).map((texter) => ({
     value: texter.id,
     label: formatTexter(texter)
   }));
@@ -174,33 +181,21 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
             </Tabs>
           </AppBar>
           <TabPanel value={activeTab} index={0}>
-            <FormControl className={css(styles.fullWidth)}>
-              <InputLabel id="texter-reassign-input-label">
-                Select at least one texter
-              </InputLabel>
-              <Select
-                multiple
-                value={selectedTexters}
-                onChange={handleTextersChanged}
-                renderValue={(selected) =>
-                  (selected as string[])
-                    .map(
-                      (texterId) =>
-                        texters.find((texter) => texter.value === texterId)
-                          .label
-                    )
-                    .join(", ")
-                }
-              >
-                {texters.map(({ value, label }) => {
-                  return (
-                    <MenuItem key={value} value={value}>
-                      <ListItemText primary={label} />
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              multiple
+              fullWidth
+              options={texters}
+              getOptionLabel={(option) => option.label}
+              value={selectedTexters}
+              onChange={handleTextersChanged}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="standard"
+                  label="Select at least one texter"
+                />
+              )}
+            />
             <ButtonGroup color="primary" className={css(styles.buttonGroup)}>
               <Button
                 disabled={!contactsAreSelected || !hasSelectedTexters}
