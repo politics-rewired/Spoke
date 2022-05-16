@@ -1520,9 +1520,10 @@ CREATE VIEW public.assignable_campaigns AS
  SELECT campaign.id,
     campaign.title,
     campaign.organization_id,
-    campaign.limit_assignment_to_teams
+    campaign.limit_assignment_to_teams,
+    campaign.autosend_status
    FROM public.campaign
-  WHERE ((campaign.is_started = true) AND (campaign.is_archived = false) AND (campaign.is_autoassign_enabled = true));
+  WHERE ((campaign.is_started = true) AND (campaign.is_archived = false) AND (campaign.is_autoassign_enabled = true) AND ((campaign.texting_hours_end)::double precision > date_part('hour'::text, timezone(campaign.timezone, CURRENT_TIMESTAMP))));
 
 
 ALTER TABLE public.assignable_campaigns OWNER TO postgres;
@@ -1550,13 +1551,12 @@ CREATE VIEW public.assignable_campaigns_with_needs_message AS
  SELECT assignable_campaigns.id,
     assignable_campaigns.title,
     assignable_campaigns.organization_id,
-    assignable_campaigns.limit_assignment_to_teams
+    assignable_campaigns.limit_assignment_to_teams,
+    assignable_campaigns.autosend_status
    FROM public.assignable_campaigns
   WHERE ((EXISTS ( SELECT 1
            FROM public.assignable_needs_message
-          WHERE (assignable_needs_message.campaign_id = assignable_campaigns.id))) AND (NOT (EXISTS ( SELECT 1
-           FROM public.campaign
-          WHERE ((campaign.id = assignable_campaigns.id) AND (now() > date_trunc('day'::text, timezone(campaign.timezone, (campaign.due_by + '24:00:00'::interval)))))))));
+          WHERE (assignable_needs_message.campaign_id = assignable_campaigns.id))) AND (assignable_campaigns.autosend_status <> 'sending'::text));
 
 
 ALTER TABLE public.assignable_campaigns_with_needs_message OWNER TO postgres;
