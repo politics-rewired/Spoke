@@ -1,5 +1,6 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import { deepOrange } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -9,6 +10,7 @@ import React, { Component } from "react";
 
 import { CampaignContact } from "../../../../../api/campaign-contact";
 import { ContactActionInput } from "../../../../../api/types";
+import ColorButton from "../../../../../components/ColorButton";
 import { MutationMap } from "../../../../../network/types";
 import {
   formatErrorMessage,
@@ -155,24 +157,25 @@ class MessageOptOut extends Component<Props, State> {
           </p>
           <div style={{ flexShrink: 1 }}>
             {isOptedOut && (
-              <Button
+              <ColorButton
                 variant="contained"
-                style={{ float: "right", backgroundColor: "#ff0033" }}
+                style={{ float: "right" }}
+                backgroundColor="#ff0033"
                 disabled={this.state.isMakingRequest}
                 onClick={this.openOptInConfirmation}
               >
                 Opt-In
-              </Button>
+              </ColorButton>
             )}
             {!isOptedOut && (
-              <Button
+              <ColorButton
                 variant="contained"
-                color="secondary"
+                backgroundColor={deepOrange[500]}
                 disabled={this.state.isMakingRequest}
                 onClick={this.handleClickOptOut}
               >
                 Opt-Out
-              </Button>
+              </ColorButton>
             )}
           </div>
         </div>
