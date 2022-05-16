@@ -31,6 +31,11 @@ import { schema as trollbotSchema } from "./trollbot";
 import { schema as userSchema } from "./user";
 
 const rootSchema = `
+  enum CampaignBuilderMode {
+    BASIC
+    ADVANCED
+  }
+
   input BulkUpdateScriptInput {
     searchString: String!
     replaceString: String!
