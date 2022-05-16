@@ -149,7 +149,7 @@ export const schema = `
     sentMessagesCount: Int
     receivedMessagesCount: Int
     optOutsCount: Int
-    needsMessageOptOutsCount: Int
+    needsMessageOptOutsCount: Int!
     percentUnhandledReplies: Float!
     countMessagedContacts: Int!
     countNeedsMessageContacts: Int!
