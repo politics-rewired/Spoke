@@ -118,7 +118,6 @@
     "graphql-date": "^1.0.3",
     "graphql-type-json": "^0.3.2",
     "graphql-upload": "^13.0.0",
-    "h": "^1.0.0",
     "history": "^5.0.0",
     "hot-shots": "^8.3.0",
     "humps": "^1.1.0",
