@@ -5,6 +5,7 @@ query GetCampaignBuilderSettings($organizationId: String!) {
       id
       confirmationClickForScriptLinks
       startCampaignRequiresApproval
+      defaultCampaignBuilderMode
     }
   }
 }
@@ -13,17 +14,20 @@ mutation UpdateCampaignBuilderSettings(
   $organizationId: String!
   $confirmationClicks: Boolean
   $requiresApproval: Boolean
+  $builderMode: CampaignBuilderMode
 ) {
   editOrganizationSettings(
     id: $organizationId
     input: {
       confirmationClickForScriptLinks: $confirmationClicks
       startCampaignRequiresApproval: $requiresApproval
+      defaultCampaignBuilderMode: $builderMode
     }
   ) {
     id
     confirmationClickForScriptLinks
     startCampaignRequiresApproval
+    defaultCampaignBuilderMode
   }
 }
 
@@ -43,12 +47,9 @@ mutation UpdateMessageReviewSettings(
 ) {
   editOrganizationSettings(
     id: $organizationId
-    input: {
-      scriptPreviewForSupervolunteers: $forSupervols
-    }
+    input: { scriptPreviewForSupervolunteers: $forSupervols }
   ) {
     id
     scriptPreviewForSupervolunteers
   }
 }
-

@@ -5,7 +5,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import FormControl from "@material-ui/core/FormControl";
 import Grid from "@material-ui/core/Grid";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
 import { withTheme } from "@material-ui/core/styles";
 import CancelIcon from "@material-ui/icons/Cancel";
 import DoneIcon from "@material-ui/icons/Done";
@@ -22,6 +26,8 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { compose } from "recompose";
 
+import { CampaignBuilderMode } from "../../../libs/spoke-codegen/src/generated";
+import { withSpokeContext } from "../../client/spoke-context";
 import { withAuthzContext } from "../../components/AuthzProvider";
 import CampaignNavigation from "../../components/CampaignNavigation";
 import { camelCase, dataTest } from "../../lib/attributes";
@@ -70,7 +76,8 @@ class AdminCampaignEdit extends React.Component {
       campaignFormValues: { ...props.campaignData.campaign },
       startingCampaign: false,
       isWorking: false,
-      requestError: undefined
+      requestError: undefined,
+      builderMode: props.orgSettings.defaultCampaignBuilderMode
     };
   }
 
@@ -312,6 +319,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Basics",
         content: CampaignBasicsForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
         keys: [
           "title",
           "description",
@@ -331,6 +339,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Campaign Groups",
         content: CampaignGroupsForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Advanced],
         keys: ["campaignGroups"],
         exclude: !window.ENABLE_CAMPAIGN_GROUPS,
         checkCompleted: () => true,
@@ -343,6 +352,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Texting Hours",
         content: CampaignTextingHoursForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Advanced],
         keys: ["textingHoursStart", "textingHoursEnd", "timezone"],
         checkCompleted: () => true,
         blocksStarting: false,
@@ -353,6 +363,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Integration",
         content: CampaignIntegrationForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
         keys: ["externalSystem"],
         checkCompleted: () => true,
         blocksStarting: false,
@@ -363,6 +374,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Contacts",
         content: CampaignContactsForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
         keys: [
           "contacts",
           "contactsCount",
@@ -417,6 +429,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Filtering Landlines",
         content: CampaignFilterLandlinesForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
         keys: ["landlinesFiltered"],
         checkCompleted: () => true,
         blocksStarting: false,
@@ -429,6 +442,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Contact Overlap Management",
         content: CampaignOverlapManager,
+        showForModes: [CampaignBuilderMode.Advanced],
         keys: [],
         blockStarting: false,
         expandAfterCampaignStarts: true,
@@ -438,6 +452,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Teams",
         content: CampaignTeamsForm,
+        showForModes: [CampaignBuilderMode.Advanced],
         keys: ["teams", "isAssignmentLimitedToTeams"],
         checkSaved: () => {
           const {
@@ -468,6 +483,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Texters",
         content: CampaignTextersForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Advanced],
         keys: ["texters", "contactsCount", "useDynamicAssignment"],
         checkCompleted: () =>
           (this.state.campaignFormValues.texters.length > 0 &&
@@ -485,6 +501,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Interactions",
         content: CampaignInteractionStepsForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
         keys: ["interactionSteps"],
         checkCompleted: () =>
           this.props.campaignData.campaign.readiness.interactions,
@@ -500,6 +517,7 @@ class AdminCampaignEdit extends React.Component {
         title: "Canned Responses",
         content: CampaignCannedResponsesForm,
         isStandalone: true,
+        showForModes: [CampaignBuilderMode.Advanced],
         keys: ["cannedResponses"],
         checkCompleted: () => true,
         blocksStarting: true,
@@ -512,6 +530,7 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Autoassign Mode",
         content: CampaignAutoassignModeForm,
+        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
         isStandalone: true,
         keys: ["isAutoassignEnabled"],
         checkCompleted: () => true,
@@ -521,7 +540,11 @@ class AdminCampaignEdit extends React.Component {
       }
     ];
 
-    return sections.filter((section) => !section.exclude);
+    return sections.filter(
+      (section) =>
+        !section.exclude &&
+        section.showForModes.includes(this.state.builderMode)
+    );
   };
 
   sectionSaveStatus = (section) => {
@@ -645,6 +668,27 @@ class AdminCampaignEdit extends React.Component {
             <Button variant="contained" onClick={this.handleNavigateToStats}>
               Details
             </Button>
+          </Grid>
+          <Grid item>
+            <FormControl style={{ width: 120 }}>
+              <InputLabel id="campaign-builder-mode-label">
+                Builder Mode
+              </InputLabel>
+              <Select
+                labelId="campaign-builder-mode-label"
+                id="campaign-builder-mode-select"
+                fullWidth
+                value={this.state.builderMode}
+                onChange={(event) => {
+                  this.setState({ builderMode: event.target.value });
+                }}
+              >
+                <MenuItem value={CampaignBuilderMode.Basic}>Basic</MenuItem>
+                <MenuItem value={CampaignBuilderMode.Advanced}>
+                  Advanced
+                </MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item>
             <CampaignNavigation
@@ -926,7 +970,8 @@ AdminCampaignEdit.propTypes = {
   isAdmin: PropTypes.bool.isRequired,
   location: PropTypes.object,
   pendingJobsData: PropTypes.object,
-  availableActionsData: PropTypes.object
+  availableActionsData: PropTypes.object,
+  orgSettings: PropTypes.object
 };
 
 const queries = {
@@ -998,6 +1043,7 @@ const mutations = {
 
 export default compose(
   withTheme,
+  withSpokeContext,
   withAuthzContext,
   loadData({
     queries,

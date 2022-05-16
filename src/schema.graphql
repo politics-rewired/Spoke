@@ -1,4 +1,9 @@
 
+enum CampaignBuilderMode {
+  BASIC
+  ADVANCED
+}
+
 input BulkUpdateScriptInput {
   searchString: String!
   replaceString: String!
@@ -420,6 +425,7 @@ input OrganizationSettingsInput {
   numbersApiKey: String
   trollbotWebhookUrl: String
   scriptPreviewForSupervolunteers: Boolean
+  defaultCampaignBuilderMode: CampaignBuilderMode
 
   # Superadmin
   startCampaignRequiresApproval: Boolean
@@ -437,6 +443,7 @@ type OrganizationSettings {
   # Supervolunteer
   startCampaignRequiresApproval: Boolean
   scriptPreviewForSupervolunteers: Boolean
+  defaultCampaignBuilderMode: CampaignBuilderMode
 
   # Owner
   defaulTexterApprovalStatus: RequestAutoApprove
