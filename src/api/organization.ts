@@ -112,6 +112,7 @@ export const schema = `
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
     messagingServices(after: Cursor, first: Int): MessagingServicePage!
     campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
+    templateCampaigns(after: Cursor, first: Int): CampaignPage!
   }
 
   input EditOrganizationInput {

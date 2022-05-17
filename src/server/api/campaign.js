@@ -396,6 +396,8 @@ export const resolvers = {
     ]),
     isApproved: (campaign) =>
       isNil(campaign.is_approved) ? false : campaign.is_approved,
+    isTemplate: (campaign) =>
+      isNil(campaign.is_template) ? false : campaign.is_template,
     timezone: (campaign) => parseIanaZone(campaign.timezone),
     readiness: (campaign) => campaign,
     repliesStaleAfter: (campaign) => campaign.replies_stale_after_minutes,

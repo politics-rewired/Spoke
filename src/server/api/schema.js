@@ -942,7 +942,7 @@ const rootMutations = {
       { id, campaign: campaignEdits },
       { user, loaders }
     ) => {
-      const origCampaign = await r.knex("campaign").where({ id }).first();
+      const origCampaign = await r.knex("all_campaign").where({ id }).first();
       const { features } = await loaders.organization.load(
         origCampaign.organization_id
       );

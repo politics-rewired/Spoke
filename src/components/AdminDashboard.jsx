@@ -68,6 +68,7 @@ class AdminDashboard extends React.Component {
 
     const sections = [
       { name: "Campaigns", path: "campaigns", role: "ADMIN" },
+      { name: "Template Campaigns", path: "template-campaigns", role: "ADMIN" },
       { name: "Campaign Groups", path: "campaign-groups", role: "ADMIN" },
       { name: "People", path: "people", role: "ADMIN" },
       { name: "Teams", path: "teams", role: "ADMIN" },

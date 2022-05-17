@@ -51,7 +51,7 @@ const clear = async (id) => {
 
 const loadDeep = async (id) => {
   if (r.redis) {
-    const campaign = await r.reader("campaign").where({ id }).first();
+    const campaign = await r.reader("all_campaign").where({ id }).first();
     if (campaign.is_archived) {
       // do not cache archived campaigns
       await clear(id);
@@ -95,7 +95,7 @@ export const campaignCache = {
         return campaign;
       }
     }
-    return r.reader("campaign").where({ id }).first();
+    return r.reader("all_campaign").where({ id }).first();
   },
   reload: loadDeep,
   dbCustomFields,

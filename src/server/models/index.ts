@@ -48,7 +48,7 @@ const createLoader = <T = unknown>(
 const createLoaders = (context: SpokeContext) => ({
   assignment: createLoader(context, "assignment"),
   assignmentRequest: createLoader(context, "assignment_request"),
-  campaign: createLoader(context, "campaign", {
+  campaign: createLoader(context, "all_campaign", {
     cacheObj: cacheableData.campaign
   }),
   campaignContact: createLoader(context, "campaign_contact"),

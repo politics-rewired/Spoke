@@ -48,6 +48,15 @@ export const resolvers = {
       filter.organizationId = organization.id;
       return getCampaignsRelay({ first, after, filter });
     },
+    templateCampaigns: async (organization, { first, after }, { user }) => {
+      await accessRequired(user, organization.id, "SUPERVOLUNTEER");
+      const query = r
+        .reader("all_campaign")
+        .where({ is_template: true })
+        .select("*");
+      const pagerOptions = { first, after };
+      return formatPage(query, pagerOptions);
+    },
     uuid: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
       const result = await r

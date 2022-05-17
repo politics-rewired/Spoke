@@ -1,0 +1,47 @@
+fragment TemplateCampaign on Campaign {
+  id
+  title
+  description
+  introHtml
+  primaryColor
+  logoImageUrl
+  teams {
+    id
+    title
+  }
+  isAssignmentLimitedToTeams
+  campaignGroups {
+    pageInfo {
+      totalCount
+    }
+  }
+  createdAt
+  creator {
+    id
+    email
+    displayName
+  }
+}
+
+query GetTemplateCampaigns($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    templateCampaigns {
+      pageInfo {
+        startCursor
+        hasNextPage
+      }
+      edges {
+        node {
+          ...TemplateCampaign
+        }
+      }
+    }
+  }
+}
+
+mutation CreateTemplateCampaign($organizationId: String!) {
+  createTemplateCampaign(organizationId: $organizationId) {
+    ...TemplateCampaign
+  }
+}

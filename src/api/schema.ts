@@ -34,6 +34,7 @@ const rootSchema = `
   enum CampaignBuilderMode {
     BASIC
     ADVANCED
+    TEMPLATE
   }
 
   input BulkUpdateScriptInput {
@@ -242,6 +243,7 @@ const rootSchema = `
   type RootMutation {
     createInvite(invite:InviteInput!): Invite
     createCampaign(campaign:CampaignInput!): Campaign
+    createTemplateCampaign(organizationId: String!): Campaign!
     editCampaign(id:String!, campaign:CampaignInput!): Campaign
     saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
     deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!
