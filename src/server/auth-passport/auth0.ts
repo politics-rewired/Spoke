@@ -51,7 +51,7 @@ export function setupAuth0Passport() {
       }
 
       // eslint-disable-next-line no-underscore-dangle
-      const userJson = req.user._json;
+      const userJson = auth0User._json;
       const userMetadata =
         userJson["https://spoke/user_metadata"] || userJson.user_metadata || {};
       const userData = {
