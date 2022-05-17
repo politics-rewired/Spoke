@@ -11,8 +11,8 @@ exports.up = function up(knex) {
         );
       `
     )
-    .then(() => {
-      return knex.schema.raw(`
+    .then(() =>
+      knex.schema.raw(`
         create or replace view assignable_campaigns_with_needs_message as (
           select *
           from assignable_campaigns
@@ -30,8 +30,8 @@ exports.up = function up(knex) {
             )
             and autosend_status <> 'sending'
         );
-      `);
-    });
+      `)
+    );
 };
 
 exports.down = function down(knex) {
