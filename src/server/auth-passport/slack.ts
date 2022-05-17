@@ -139,7 +139,7 @@ export function setupSlackPassport() {
       return redirectPostSignIn(req, res, true);
     }
 
-    if (existingUser.is_suspended) {
+    if (existingUser.is_suspended === true) {
       await handleSuspendedUser(req, res);
       return;
     }
