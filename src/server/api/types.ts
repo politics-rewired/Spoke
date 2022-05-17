@@ -56,6 +56,7 @@ export interface UserRecord {
   is_superadmin: boolean | null;
   terms: boolean;
   updated_at: string;
+  is_suspended: boolean;
 }
 
 export interface OrganizationRecord {

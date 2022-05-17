@@ -1,4 +1,5 @@
 import passport from "@passport-next/passport";
+import type { NextFunction, Response } from "express";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -7,14 +8,13 @@ import { config } from "../../config";
 import { contextForRequest } from "../contexts";
 import localAuthHelpers, {
   hashPassword,
-  LocalAuthError,
-  SuspendedUserError
+  LocalAuthError
 } from "../local-auth-helpers";
 import sendEmail from "../mail";
 import { r } from "../models";
-import { userLoggedIn } from "../models/cacheable_queries";
 import type { SpokeRequest } from "../types";
-import type { PassportCallback } from "./util";
+import type { PassportCallback, UserWithStatus } from "./util";
+import { passportCallback } from "./util";
 
 export function setupLocalAuthPassport() {
   const strategy = new LocalStrategy(
@@ -49,7 +49,7 @@ export function setupLocalAuthPassport() {
       }
 
       try {
-        const user = await localAuthHelpers[authType]({
+        const user: UserWithStatus = await localAuthHelpers[authType]({
           db,
           lowerCaseEmail,
           password,
@@ -58,48 +58,32 @@ export function setupLocalAuthPassport() {
           uuidMatch,
           reqBody: req.body
         });
-        if (user?.is_suspended === true) {
-          return done(new SuspendedUserError());
+        if (authType === "signup") {
+          user.isNew = true;
         }
         return done(null, user);
-      } catch (error) {
+      } catch (error: any) {
         return done(error);
       }
     }
   );
   passport.use(strategy);
 
-  passport.serializeUser((user: any, done: any) => done(null, user.id));
-  passport.deserializeUser((id: string, done: any) =>
-    userLoggedIn(parseInt(id, 10))
-      .then((user: any) => done(null, user || false))
-      .catch((error: any) => done(error))
-  );
-
   const app = express();
 
-  app.post("/login-callback", (req, res, next) => {
-    // See: http://www.passportjs.org/docs/authenticate/#custom-callback
-    passport.authenticate("local", (err: any, user: any, _info: any) => {
-      // Check custom property rather than using instanceof because errors are being passed as
-      // objects, not classes
+  app.post(
+    "/login-callback",
+    (req: SpokeRequest, res: Response, next: NextFunction) => {
+      const callback = passportCallback(req, res, next);
+      passport.authenticate("local", callback)(req, res, next);
+    },
+    (err: any, req: SpokeRequest, res: Response, next: NextFunction) => {
       if (err && err.errorType === "LocalAuthError") {
         return res.status(400).send({ success: false, message: err.message });
       }
-      if (err) {
-        // System error
-        return next(err);
-      }
-
-      // Default behavior
-      (<any>req).logIn(user, (logInErr: any) => {
-        if (logInErr) {
-          return next(logInErr);
-        }
-        return res.redirect(req.body.nextUrl || "/");
-      });
-    })(req, res, next);
-  });
+      return next(err);
+    }
+  );
 
   const resetRateLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour window

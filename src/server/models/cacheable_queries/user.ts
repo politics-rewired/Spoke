@@ -9,10 +9,10 @@ import thinky from "../thinky";
 
 const { r } = thinky;
 
-export const getUserByAuth0Id = memoizer.memoize(
+const getUserByAuth0Id = memoizer.memoize(
   async ({ auth0Id }: { auth0Id: string | number }) => {
     const userAuth = await r
-      .reader<UserRecord>("user")
+      .reader("user")
       .where("auth0_id", auth0Id)
       .first("*");
 
