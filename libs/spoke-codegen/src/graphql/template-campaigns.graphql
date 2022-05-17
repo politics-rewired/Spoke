@@ -45,3 +45,10 @@ mutation CreateTemplateCampaign($organizationId: String!) {
     ...TemplateCampaign
   }
 }
+
+mutation CreateCampaignFromTemplate($templateId: String!, $quantity: Int!) {
+  copyCampaigns(sourceCampaignId: $templateId, quantity: $quantity) {
+    id
+    title
+  }
+}

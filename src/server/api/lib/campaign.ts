@@ -140,134 +140,145 @@ export interface CopyCampaignOptions {
   db: SpokeDbContext;
   campaignId: number;
   userId: number;
+  quantity?: number;
 }
 
 export const copyCampaign = async (options: CopyCampaignOptions) => {
-  const { db, campaignId, userId } = options;
+  const { db, campaignId, userId, quantity = 1 } = options;
 
   const result = await db.primary.transaction(async (trx) => {
-    // Copy campaign
-    const {
-      rows: [newCampaign]
-    } = await trx.raw<QueryResult<CampaignRecord>>(
-      `
-        insert into campaign (
-          organization_id,
-          title,
-          description,
-          is_approved,
-          is_started,
-          is_archived,
-          due_by,
-          logo_image_url,
-          intro_html,
-          primary_color,
-          texting_hours_start,
-          texting_hours_end,
-          timezone,
-          creator_id,
-          is_autoassign_enabled,
-          limit_assignment_to_teams,
-          replies_stale_after_minutes,
-          external_system_id
-        )
-        select
-          organization_id,
-          'COPY - ' || title,
-          description,
-          false as is_approved,
-          false as is_started,
-          false as is_archived,
-          due_by,
-          logo_image_url,
-          intro_html,
-          primary_color,
-          texting_hours_start,
-          texting_hours_end,
-          timezone,
-          ? as creator_id,
-          false as is_autoassign_enabled,
-          limit_assignment_to_teams,
-          replies_stale_after_minutes,
-          external_system_id
-        from campaign
-        where id = ?
-        returning *
-      `,
-      [userId, campaignId]
-    );
-
-    // Copy interactions
-    const interactions = await trx<InteractionStepRecord>("interaction_step")
-      .where({
-        campaign_id: campaignId,
-        is_deleted: false
-      })
-      .then((interactionSteps) =>
-        interactionSteps.map<InteractionStepRecord | { id: string }>(
-          (interactionStep) => ({
-            id: `new${interactionStep.id}`,
-            questionText: interactionStep.question,
-            scriptOptions: interactionStep.script_options,
-            answerOption: interactionStep.answer_option,
-            answerActions: interactionStep.answer_actions,
-            isDeleted: interactionStep.is_deleted,
-            campaign_id: newCampaign.id,
-            parentInteractionId: interactionStep.parent_interaction_id
-              ? `new${interactionStep.parent_interaction_id}`
-              : interactionStep.parent_interaction_id
-          })
-        )
+    const cloneSingle = async (count: number) => {
+      // Copy campaign
+      const {
+        rows: [newCampaign]
+      } = await trx.raw<QueryResult<CampaignRecord>>(
+        `
+          insert into campaign (
+            organization_id,
+            title,
+            description,
+            is_approved,
+            is_started,
+            is_archived,
+            due_by,
+            logo_image_url,
+            intro_html,
+            primary_color,
+            texting_hours_start,
+            texting_hours_end,
+            timezone,
+            creator_id,
+            is_autoassign_enabled,
+            limit_assignment_to_teams,
+            replies_stale_after_minutes,
+            external_system_id
+          )
+          select
+            organization_id,
+            (case
+              when is_template then replace(concat('COPY - ', title), '#', ?::text)
+              else 'COPY - ' || title
+            end),
+            description,
+            false as is_approved,
+            false as is_started,
+            false as is_archived,
+            due_by,
+            logo_image_url,
+            intro_html,
+            primary_color,
+            texting_hours_start,
+            texting_hours_end,
+            timezone,
+            ? as creator_id,
+            false as is_autoassign_enabled,
+            limit_assignment_to_teams,
+            replies_stale_after_minutes,
+            external_system_id
+          from all_campaign
+          where id = ?
+          returning *
+        `,
+        [count, userId, campaignId]
       );
 
-    await persistInteractionStepTree(
-      newCampaign.id,
-      makeTree(interactions, null /* id */),
-      { is_started: false },
-      trx
-    );
+      // Copy interactions
+      const interactions = await trx<InteractionStepRecord>("interaction_step")
+        .where({
+          campaign_id: campaignId,
+          is_deleted: false
+        })
+        .then((interactionSteps) =>
+          interactionSteps.map<InteractionStepRecord | { id: string }>(
+            (interactionStep) => ({
+              id: `new${interactionStep.id}`,
+              questionText: interactionStep.question,
+              scriptOptions: interactionStep.script_options,
+              answerOption: interactionStep.answer_option,
+              answerActions: interactionStep.answer_actions,
+              isDeleted: interactionStep.is_deleted,
+              campaign_id: newCampaign.id,
+              parentInteractionId: interactionStep.parent_interaction_id
+                ? `new${interactionStep.parent_interaction_id}`
+                : interactionStep.parent_interaction_id
+            })
+          )
+        );
 
-    // Copy canned responses
-    await trx.raw(
-      `
-        insert into canned_response (campaign_id, title, text)
-        select
-          ? as campaign_id,
-          title,
-          text
-        from canned_response
-        where campaign_id = ?
-      `,
-      [newCampaign.id, campaignId]
-    );
+      await persistInteractionStepTree(
+        newCampaign.id,
+        makeTree(interactions, null /* id */),
+        { is_started: false },
+        trx
+      );
 
-    // Copy Teams
-    await trx.raw(
-      `
-        insert into campaign_team (campaign_id, team_id)
-        select
-          ? as campaign_id,
-          team_id
-        from campaign_team
-        where campaign_id = ?
-      `,
-      [newCampaign.id, campaignId]
-    );
+      // Copy canned responses
+      await trx.raw(
+        `
+          insert into canned_response (campaign_id, title, text)
+          select
+            ? as campaign_id,
+            title,
+            text
+          from canned_response
+          where campaign_id = ?
+        `,
+        [newCampaign.id, campaignId]
+      );
 
-    // Copy Campaign Groups
-    await trx.raw(
-      `
-        insert into campaign_group_campaign (campaign_id, campaign_group_id)
-        select
-          ? as campaign_id,
-          campaign_group_id
-        from campaign_group_campaign
-        where campaign_id = ?
-      `,
-      [newCampaign.id, campaignId]
-    );
+      // Copy Teams
+      await trx.raw(
+        `
+          insert into campaign_team (campaign_id, team_id)
+          select
+            ? as campaign_id,
+            team_id
+          from campaign_team
+          where campaign_id = ?
+        `,
+        [newCampaign.id, campaignId]
+      );
 
-    return newCampaign;
+      // Copy Campaign Groups
+      await trx.raw(
+        `
+          insert into campaign_group_campaign (campaign_id, campaign_group_id)
+          select
+            ? as campaign_id,
+            campaign_group_id
+          from campaign_group_campaign
+          where campaign_id = ?
+        `,
+        [newCampaign.id, campaignId]
+      );
+
+      return newCampaign;
+    };
+
+    const newCampaigns = await Promise.all(
+      [...Array(quantity)].map((_, idx) => cloneSingle(idx + 1))
+    );
+    return newCampaigns;
   });
 
   return result;

@@ -834,7 +834,7 @@ const rootMutations = {
       const campaign = await loaders.campaign.load(campaignId);
       await accessRequired(user, campaign.organization_id, "ADMIN");
 
-      const result = await copyCampaign({
+      const [result] = await copyCampaign({
         db,
         campaignId,
         userId: parseInt(user.id, 10)
@@ -845,6 +845,29 @@ const rootMutations = {
       });
 
       return result;
+    },
+
+    copyCampaigns: async (
+      _root,
+      { sourceCampaignId, quantity },
+      { user, loaders, db }
+    ) => {
+      const campaignId = parseInt(sourceCampaignId, 10);
+      const campaign = await loaders.campaign.load(campaignId);
+      await accessRequired(user, campaign.organization_id, "ADMIN");
+
+      const newCampaigns = await copyCampaign({
+        db,
+        campaignId,
+        userId: parseInt(user.id, 10),
+        quantity
+      });
+
+      await memoizer.invalidate(cacheOpts.CampaignsList.key, {
+        organizationId: newCampaigns[0].organization_id
+      });
+
+      return newCampaigns;
     },
 
     unarchiveCampaign: async (_root, { id }, { user, loaders }) => {
