@@ -57,11 +57,6 @@ export function setupAuth0Passport() {
       .where({ auth0_id: auth0Id })
       .first();
 
-    if (existingUser.is_suspended) {
-      await handleSuspendedUser(req, res);
-      return;
-    }
-
     if (!existingUser) {
       // eslint-disable-next-line no-underscore-dangle
       const userJson = req.user._json;
@@ -79,6 +74,11 @@ export function setupAuth0Passport() {
       await db.primary("user").insert(userData);
 
       return redirectPostSignIn(req, res, true);
+    }
+
+    if (existingUser.is_suspended === true) {
+      await handleSuspendedUser(req, res);
+      return;
     }
 
     return redirectPostSignIn(req, res, false);
