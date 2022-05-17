@@ -95,7 +95,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
       ),
       campaign_breakdown as (
         select c.id as campaign_id, a.id as assignment_id,
-          ( select count(*) from jobs_queued where payload->>'campaignId' = c.id::text ) as count_queued,
+          ( select count(*) from jobs_queued where payload->>'campaignId' = c.id::text and attempts = 0) as count_queued,
           ( select count(*) from assignments_upserted ) as assignments_upserted_count,
           ( select array_agg(campaign_id) from contacts_to_queue ) as campaigns_contacts_queued_on
         from campaign c 

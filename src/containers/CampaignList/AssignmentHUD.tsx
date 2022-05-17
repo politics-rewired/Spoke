@@ -44,7 +44,7 @@ const AssignmentHUD: React.FC<Props> = (props) => {
                 style={disabledStyle}
               />
             )}
-            <Chip className={css(styles.chip)}>{target.teamTitle}</Chip>
+            <Chip className={css(styles.chip)} label={target.teamTitle} />
             <div className={css(styles.prefix)}>{target.type} &#8594;</div>
             <div className={css(styles.title)}>
               {target.campaign.id}: {target.campaign.title}

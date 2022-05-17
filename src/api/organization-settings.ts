@@ -45,6 +45,7 @@ export const schema = `
     numbersApiKey: String
     trollbotWebhookUrl: String
     scriptPreviewForSupervolunteers: Boolean
+    defaultCampaignBuilderMode: CampaignBuilderMode
 
     # Superadmin
     startCampaignRequiresApproval: Boolean
@@ -62,6 +63,7 @@ export const schema = `
     # Supervolunteer
     startCampaignRequiresApproval: Boolean
     scriptPreviewForSupervolunteers: Boolean
+    defaultCampaignBuilderMode: CampaignBuilderMode
 
     # Owner
     defaulTexterApprovalStatus: RequestAutoApprove

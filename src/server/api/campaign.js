@@ -196,6 +196,29 @@ export const resolvers = {
       });
     },
 
+    needsMessageOptOutsCount: async (campaign) => {
+      const getNeedsMessageOptOutsCount = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          return r.getCount(
+            r
+              .reader("campaign_contact")
+              .where({
+                is_opted_out: true,
+                campaign_id: campaignId,
+                message_status: "needsMessage"
+              })
+              .whereRaw(`archived = ${archived}`) // partial index friendly
+          );
+        },
+        cacheOpts.CampaignNeedsMessageOptOutsCount
+      );
+
+      return getNeedsMessageOptOutsCount({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
+    },
+
     countMessagedContacts: async (campaign) => {
       const getCountMessagedContacts = memoizer.memoize(
         async ({ campaignId, archived }) => {
@@ -213,10 +236,36 @@ export const resolvers = {
           const [{ count_messaged_contacts: result }] = rows;
           return result;
         },
-        cacheOpts.PercentUnhandledReplies
+        cacheOpts.CountMessagedContacts
       );
 
       return getCountMessagedContacts({
+        campaignId: campaign.id,
+        archived: campaign.is_archived
+      });
+    },
+
+    countNeedsMessageContacts: async (campaign) => {
+      const getCountNeedsMessageContacts = memoizer.memoize(
+        async ({ campaignId, archived }) => {
+          const { rows } = await r.reader.raw(
+            `
+              select count(*) as count_needs_message_contacts
+              from campaign_contact
+              where message_status = 'needsMessage'
+                and archived = ${archived}
+                and campaign_id = ?
+            `,
+            [campaignId]
+          );
+
+          const [{ count_needs_message_contacts: result }] = rows;
+          return result;
+        },
+        cacheOpts.CountNeedsMessageContacts
+      );
+
+      return getCountNeedsMessageContacts({
         campaignId: campaign.id,
         archived: campaign.is_archived
       });

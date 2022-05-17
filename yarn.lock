@@ -13479,14 +13479,6 @@ gzip-size@5.1.1:
     duplexer "^0.1.1"
     pify "^4.0.1"
 
-h@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/h/-/h-1.0.0.tgz#a637773a89b3c07d316bdbda87d4a65b2a5f8cf4"
-  integrity sha512-nxC1orTrM/gMBsMyWnFqLe2kzqD/iVIVoBIdpOtQc9hyKzWWPuuCiXGwi0o3TwC+3SyhIR5d73WGg6KlcokWzw==
-  dependencies:
-    cssesc "^3.0.0"
-    html-escape "^2.0.0"
-
 handle-thing@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/handle-thing/-/handle-thing-2.0.0.tgz#0e039695ff50c93fc288557d696f3c1dc6776754"
@@ -13838,11 +13830,6 @@ html-entities@^2.1.0, html-entities@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-2.3.2.tgz#760b404685cb1d794e4f4b744332e3b00dcfe488"
   integrity sha512-c3Ab/url5ksaT0WyleslpBEthOzWhrjQbg75y7XUsfSzi3Dgzt0l8w5e7DylRn15MTlMMD58dTfzddNS2kcAjQ==
-
-html-escape@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/html-escape/-/html-escape-2.0.0.tgz#60c8ddd465edf0cae02af9e99fdf5f883b09be49"
-  integrity sha1-YMjd1GXt8MrgKvnpn99fiDsJvkk=
 
 html-escaper@^2.0.0:
   version "2.0.2"

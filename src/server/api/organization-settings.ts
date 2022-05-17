@@ -8,6 +8,11 @@ import { r } from "../models";
 import { organizationCache } from "../models/cacheable_queries/organization";
 import { accessRequired, roleIndex } from "./errors";
 
+export enum CampaignBuilderMode {
+  Basic = "BASIC",
+  Advanced = "ADVANCED"
+}
+
 interface IOrganizationSettings {
   defaulTexterApprovalStatus: string;
   optOutMessage: string;
@@ -18,6 +23,7 @@ interface IOrganizationSettings {
   confirmationClickForScriptLinks: boolean;
   startCampaignRequiresApproval: boolean;
   scriptPreviewForSupervolunteers: boolean;
+  defaultCampaignBuilderMode: CampaignBuilderMode;
 }
 
 const SETTINGS_PERMISSIONS: {
@@ -29,6 +35,7 @@ const SETTINGS_PERMISSIONS: {
   confirmationClickForScriptLinks: UserRoleType.TEXTER,
   startCampaignRequiresApproval: UserRoleType.SUPERVOLUNTEER,
   scriptPreviewForSupervolunteers: UserRoleType.SUPERVOLUNTEER,
+  defaultCampaignBuilderMode: UserRoleType.SUPERVOLUNTEER,
   defaulTexterApprovalStatus: UserRoleType.OWNER,
   numbersApiKey: UserRoleType.OWNER,
   trollbotWebhookUrl: UserRoleType.OWNER
@@ -45,6 +52,7 @@ const SETTINGS_WRITE_PERMISSIONS: {
   numbersApiKey: UserRoleType.OWNER,
   trollbotWebhookUrl: UserRoleType.OWNER,
   scriptPreviewForSupervolunteers: UserRoleType.OWNER,
+  defaultCampaignBuilderMode: UserRoleType.OWNER,
   startCampaignRequiresApproval: UserRoleType.SUPERADMIN
 };
 
@@ -63,7 +71,8 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   showContactCell: false,
   confirmationClickForScriptLinks: true,
   startCampaignRequiresApproval: false,
-  scriptPreviewForSupervolunteers: false
+  scriptPreviewForSupervolunteers: false,
+  defaultCampaignBuilderMode: CampaignBuilderMode.Advanced
 };
 
 const SETTINGS_TRANSFORMERS: Partial<
@@ -88,6 +97,16 @@ const SETTINGS_VALIDATORS: {
   trollbotWebhookUrl: (value: string) => {
     if (!stringIsAValidUrl(value)) {
       throw new Error("TrollBot webhook URL must be a valid URL");
+    }
+  },
+  defaultCampaignBuilderMode: (value: string) => {
+    if (
+      ![
+        CampaignBuilderMode.Basic as string,
+        CampaignBuilderMode.Advanced as string
+      ].includes(value)
+    ) {
+      throw new Error("Invalid campaign builder mode");
     }
   }
 };
@@ -146,7 +165,8 @@ export const resolvers = {
       "showContactCell",
       "confirmationClickForScriptLinks",
       "startCampaignRequiresApproval",
-      "scriptPreviewForSupervolunteers"
+      "scriptPreviewForSupervolunteers",
+      "defaultCampaignBuilderMode"
     ])
   }
 };

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unused-state */
 import Button from "@material-ui/core/Button";
-import { blueGrey, grey } from "@material-ui/core/colors";
+import { blueGrey, deepOrange, grey } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import LocalOfferIcon from "@material-ui/icons/LocalOffer";
@@ -22,6 +22,7 @@ import * as yup from "yup";
 import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
 import BulkSendButton from "../../components/BulkSendButton";
 import CannedResponseMenu from "../../components/CannedResponseMenu";
+import ColorButton from "../../components/ColorButton";
 import Empty from "../../components/Empty";
 import GSForm from "../../components/forms/GSForm";
 import MessageLengthInfo from "../../components/MessageLengthInfo";
@@ -662,14 +663,14 @@ export class AssignmentTexterContact extends React.Component {
           }}
         >
           <Tooltip title="Opt out this contact">
-            <Button
+            <ColorButton
               {...dataTest("optOut")}
               variant="contained"
-              color="secondary"
+              backgroundColor={deepOrange[500]}
               onClick={this.handleOpenOptOutDialog}
             >
               Opt out
-            </Button>
+            </ColorButton>
           </Tooltip>
           <Button
             variant="contained"
@@ -720,14 +721,14 @@ export class AssignmentTexterContact extends React.Component {
               >
                 Canned responses
               </Button>
-              <Button
+              <ColorButton
                 {...dataTest("optOut")}
                 variant="contained"
-                color="secondary"
+                backgroundColor={deepOrange[500]}
                 onClick={this.handleOpenOptOutDialog}
               >
                 Opt out
-              </Button>
+              </ColorButton>
               <Button
                 variant="contained"
                 style={{ backgroundColor: blueGrey[100] }}

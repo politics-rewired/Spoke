@@ -1,12 +1,18 @@
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
+import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormGroup from "@material-ui/core/FormGroup";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import type { SelectInputProps } from "@material-ui/core/Select/SelectInput";
 import Switch from "@material-ui/core/Switch";
 import React from "react";
 
 import {
+  CampaignBuilderMode,
   useGetCampaignBuilderSettingsQuery,
   useUpdateCampaignBuilderSettingsMutation
 } from "../../../../libs/spoke-codegen/src";
@@ -65,6 +71,21 @@ export const CampaignBuilderSettingsCard: React.FC<CampaignBuilderSettingsCardPr
     });
   };
 
+  const handleChangeBuilderMode: SelectInputProps["onChange"] = async (
+    event
+  ) => {
+    if (working) return;
+
+    const builderMode = event.target.value as CampaignBuilderMode;
+
+    await setRequiresApproval({
+      variables: {
+        organizationId,
+        builderMode
+      }
+    });
+  };
+
   return (
     <Card style={style}>
       <CardHeader title="Campaign Builder Settings" disableTypography />
@@ -94,6 +115,23 @@ export const CampaignBuilderSettingsCard: React.FC<CampaignBuilderSettingsCardPr
               authz.isSuperadmin ? "" : "(superadmin-only)"
             }`}
           />
+        </FormGroup>
+        <FormGroup row>
+          <FormControl style={{ width: 200 }}>
+            <InputLabel id="campaign-builder-mode-label">
+              Default Builder Mode
+            </InputLabel>
+            <Select
+              labelId="campaign-builder-mode-label"
+              id="campaign-builder-mode-select"
+              fullWidth
+              value={settings?.defaultCampaignBuilderMode}
+              onChange={handleChangeBuilderMode}
+            >
+              <MenuItem value={CampaignBuilderMode.Basic}>Basic</MenuItem>
+              <MenuItem value={CampaignBuilderMode.Advanced}>Advanced</MenuItem>
+            </Select>
+          </FormControl>
         </FormGroup>
       </CardContent>
     </Card>

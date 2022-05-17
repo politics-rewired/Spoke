@@ -144,6 +144,16 @@ export interface InteractionStepRecord {
   updated_at: string;
 }
 
+export interface CannedResponseRecord {
+  id: number;
+  campaign_id: number;
+  text: string;
+  title: string;
+  user_id?: number | null;
+  created_at: Date;
+  updated_at?: Date | null;
+}
+
 export interface QuestionResponseRecord {
   id: number;
   campaign_contact_id: number;
