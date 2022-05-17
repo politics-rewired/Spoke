@@ -192,10 +192,10 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: campaign; Type: TABLE; Schema: public; Owner: postgres
+-- Name: all_campaign; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.campaign (
+CREATE TABLE public.all_campaign (
     id integer NOT NULL,
     organization_id integer NOT NULL,
     title text DEFAULT ''::text NOT NULL,
@@ -221,17 +221,18 @@ CREATE TABLE public.campaign (
     is_approved boolean DEFAULT false NOT NULL,
     autosend_status text DEFAULT 'unstarted'::text,
     autosend_user_id integer,
+    is_template boolean DEFAULT false NOT NULL,
     CONSTRAINT campaign_autosend_status_check CHECK ((autosend_status = ANY (ARRAY['unstarted'::text, 'sending'::text, 'paused'::text, 'complete'::text])))
 );
 
 
-ALTER TABLE public.campaign OWNER TO postgres;
+ALTER TABLE public.all_campaign OWNER TO postgres;
 
 --
 -- Name: campaigns_in_group(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.campaigns_in_group(group_id integer) RETURNS SETOF public.campaign
+CREATE FUNCTION public.campaigns_in_group(group_id integer) RETURNS SETOF public.all_campaign
     LANGUAGE sql STABLE
     AS $$
       select *
@@ -252,7 +253,7 @@ ALTER FUNCTION public.campaigns_in_group(group_id integer) OWNER TO postgres;
 -- Name: campaigns_in_group(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.campaigns_in_group(group_name text) RETURNS SETOF public.campaign
+CREATE FUNCTION public.campaigns_in_group(group_name text) RETURNS SETOF public.all_campaign
     LANGUAGE sql STABLE
     AS $$
       select *
@@ -1429,6 +1430,42 @@ CREATE TABLE public.all_tag (
 ALTER TABLE public.all_tag OWNER TO postgres;
 
 --
+-- Name: campaign; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.campaign AS
+ SELECT all_campaign.id,
+    all_campaign.organization_id,
+    all_campaign.title,
+    all_campaign.description,
+    all_campaign.is_started,
+    all_campaign.due_by,
+    all_campaign.created_at,
+    all_campaign.is_archived,
+    all_campaign.use_dynamic_assignment,
+    all_campaign.logo_image_url,
+    all_campaign.intro_html,
+    all_campaign.primary_color,
+    all_campaign.texting_hours_start,
+    all_campaign.texting_hours_end,
+    all_campaign.timezone,
+    all_campaign.creator_id,
+    all_campaign.is_autoassign_enabled,
+    all_campaign.limit_assignment_to_teams,
+    all_campaign.updated_at,
+    all_campaign.replies_stale_after_minutes,
+    all_campaign.landlines_filtered,
+    all_campaign.external_system_id,
+    all_campaign.is_approved,
+    all_campaign.autosend_status,
+    all_campaign.autosend_user_id
+   FROM public.all_campaign
+  WHERE (all_campaign.is_template = false);
+
+
+ALTER TABLE public.campaign OWNER TO postgres;
+
+--
 -- Name: campaign_contact; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1471,6 +1508,32 @@ CREATE TABLE public.campaign_contact_tag (
 ALTER TABLE public.campaign_contact_tag OWNER TO postgres;
 
 --
+-- Name: tag; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.tag AS
+ SELECT all_tag.id,
+    all_tag.organization_id,
+    all_tag.title,
+    all_tag.description,
+    all_tag.text_color,
+    all_tag.background_color,
+    all_tag.author_id,
+    all_tag.confirmation_steps,
+    all_tag.on_apply_script,
+    all_tag.webhook_url,
+    all_tag.is_assignable,
+    all_tag.is_system,
+    all_tag.created_at,
+    all_tag.updated_at,
+    all_tag.deleted_at
+   FROM public.all_tag
+  WHERE (all_tag.deleted_at IS NULL);
+
+
+ALTER TABLE public.tag OWNER TO postgres;
+
+--
 -- Name: assignable_campaign_contacts; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -1484,8 +1547,8 @@ CREATE VIEW public.assignable_campaign_contacts AS
      JOIN public.campaign ON ((campaign_contact.campaign_id = campaign.id)))
   WHERE ((campaign_contact.assignment_id IS NULL) AND (campaign_contact.is_opted_out = false) AND (campaign_contact.archived = false) AND (NOT (EXISTS ( SELECT 1
            FROM (public.campaign_contact_tag
-             JOIN public.all_tag ON ((campaign_contact_tag.tag_id = all_tag.id)))
-          WHERE ((all_tag.is_assignable = false) AND (campaign_contact_tag.campaign_contact_id = campaign_contact.id))))));
+             JOIN public.tag ON ((campaign_contact_tag.tag_id = tag.id)))
+          WHERE ((tag.is_assignable = false) AND (campaign_contact_tag.campaign_contact_id = campaign_contact.id))))));
 
 
 ALTER TABLE public.assignable_campaign_contacts OWNER TO postgres;
@@ -1806,7 +1869,7 @@ ALTER TABLE public.campaign_id_seq OWNER TO postgres;
 -- Name: campaign_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.campaign_id_seq OWNED BY public.campaign.id;
+ALTER SEQUENCE public.campaign_id_seq OWNED BY public.all_campaign.id;
 
 
 --
@@ -2797,32 +2860,6 @@ ALTER SEQUENCE public.question_response_id_seq OWNED BY public.all_question_resp
 
 
 --
--- Name: tag; Type: VIEW; Schema: public; Owner: postgres
---
-
-CREATE VIEW public.tag AS
- SELECT all_tag.id,
-    all_tag.organization_id,
-    all_tag.title,
-    all_tag.description,
-    all_tag.text_color,
-    all_tag.background_color,
-    all_tag.author_id,
-    all_tag.confirmation_steps,
-    all_tag.on_apply_script,
-    all_tag.webhook_url,
-    all_tag.is_assignable,
-    all_tag.is_system,
-    all_tag.created_at,
-    all_tag.updated_at,
-    all_tag.deleted_at
-   FROM public.all_tag
-  WHERE (all_tag.deleted_at IS NULL);
-
-
-ALTER TABLE public.tag OWNER TO postgres;
-
---
 -- Name: tag_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -3214,6 +3251,13 @@ CREATE TABLE public.zip_code (
 ALTER TABLE public.zip_code OWNER TO postgres;
 
 --
+-- Name: all_campaign id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.all_campaign ALTER COLUMN id SET DEFAULT nextval('public.campaign_id_seq'::regclass);
+
+
+--
 -- Name: all_question_response id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3239,13 +3283,6 @@ ALTER TABLE ONLY public.assignment ALTER COLUMN id SET DEFAULT nextval('public.a
 --
 
 ALTER TABLE ONLY public.assignment_request ALTER COLUMN id SET DEFAULT nextval('public.assignment_request_id_seq'::regclass);
-
-
---
--- Name: campaign id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.campaign ALTER COLUMN id SET DEFAULT nextval('public.campaign_id_seq'::regclass);
 
 
 --
@@ -3534,10 +3571,10 @@ ALTER TABLE ONLY public.campaign_group
 
 
 --
--- Name: campaign campaign_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: all_campaign campaign_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.campaign
+ALTER TABLE ONLY public.all_campaign
     ADD CONSTRAINT campaign_pkey PRIMARY KEY (id);
 
 
@@ -4066,28 +4103,28 @@ CREATE INDEX campaign_contact_tag_tag_idx ON public.campaign_contact_tag USING b
 -- Name: campaign_creator_id_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX campaign_creator_id_index ON public.campaign USING btree (creator_id);
+CREATE INDEX campaign_creator_id_index ON public.all_campaign USING btree (creator_id);
 
 
 --
 -- Name: campaign_external_system_id_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX campaign_external_system_id_index ON public.campaign USING btree (external_system_id);
+CREATE INDEX campaign_external_system_id_index ON public.all_campaign USING btree (external_system_id);
 
 
 --
 -- Name: campaign_limit_assignment_to_teams_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX campaign_limit_assignment_to_teams_index ON public.campaign USING btree (limit_assignment_to_teams);
+CREATE INDEX campaign_limit_assignment_to_teams_index ON public.all_campaign USING btree (limit_assignment_to_teams);
 
 
 --
 -- Name: campaign_organization_id_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX campaign_organization_id_index ON public.campaign USING btree (organization_id);
+CREATE INDEX campaign_organization_id_index ON public.all_campaign USING btree (organization_id);
 
 
 --
@@ -4546,10 +4583,10 @@ CREATE TRIGGER _500_campaign_contact_updated_at BEFORE UPDATE ON public.campaign
 
 
 --
--- Name: campaign _500_campaign_external_system_id; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: all_campaign _500_campaign_external_system_id; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER _500_campaign_external_system_id BEFORE INSERT OR UPDATE ON public.campaign FOR EACH ROW EXECUTE FUNCTION public.tg_campaign_check_exteral_system_id();
+CREATE TRIGGER _500_campaign_external_system_id BEFORE INSERT OR UPDATE ON public.all_campaign FOR EACH ROW EXECUTE FUNCTION public.tg_campaign_check_exteral_system_id();
 
 
 --
@@ -4560,10 +4597,10 @@ CREATE TRIGGER _500_campaign_team_updated_at BEFORE UPDATE ON public.campaign_te
 
 
 --
--- Name: campaign _500_campaign_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: all_campaign _500_campaign_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER _500_campaign_updated_at BEFORE UPDATE ON public.campaign FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+CREATE TRIGGER _500_campaign_updated_at BEFORE UPDATE ON public.all_campaign FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
 
 
 --
@@ -4574,10 +4611,10 @@ CREATE TRIGGER _500_canned_response_updated_at BEFORE UPDATE ON public.canned_re
 
 
 --
--- Name: campaign _500_cascade_archived_campaign; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: all_campaign _500_cascade_archived_campaign; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER _500_cascade_archived_campaign AFTER UPDATE ON public.campaign FOR EACH ROW WHEN ((new.is_archived IS DISTINCT FROM old.is_archived)) EXECUTE FUNCTION public.cascade_archived_to_campaign_contacts();
+CREATE TRIGGER _500_cascade_archived_campaign AFTER UPDATE ON public.all_campaign FOR EACH ROW WHEN ((new.is_archived IS DISTINCT FROM old.is_archived)) EXECUTE FUNCTION public.cascade_archived_to_campaign_contacts();
 
 
 --
@@ -4810,7 +4847,7 @@ ALTER TABLE ONLY public.all_external_sync_question_response_configuration
 --
 
 ALTER TABLE ONLY public.all_external_sync_question_response_configuration
-    ADD CONSTRAINT all_external_sync_question_response_configurat_campaign_id_fkey FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT all_external_sync_question_response_configurat_campaign_id_fkey FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
@@ -4826,7 +4863,7 @@ ALTER TABLE ONLY public.all_external_sync_question_response_configuration
 --
 
 ALTER TABLE ONLY public.assignment
-    ADD CONSTRAINT assignment_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT assignment_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
@@ -4838,10 +4875,10 @@ ALTER TABLE ONLY public.assignment
 
 
 --
--- Name: campaign campaign_autosend_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: all_campaign campaign_autosend_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.campaign
+ALTER TABLE ONLY public.all_campaign
     ADD CONSTRAINT campaign_autosend_user_id_fkey FOREIGN KEY (autosend_user_id) REFERENCES public."user"(id);
 
 
@@ -4858,7 +4895,7 @@ ALTER TABLE ONLY public.campaign_contact
 --
 
 ALTER TABLE ONLY public.campaign_contact
-    ADD CONSTRAINT campaign_contact_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT campaign_contact_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
@@ -4886,18 +4923,18 @@ ALTER TABLE ONLY public.campaign_contact_tag
 
 
 --
--- Name: campaign campaign_creator_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: all_campaign campaign_creator_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.campaign
+ALTER TABLE ONLY public.all_campaign
     ADD CONSTRAINT campaign_creator_id_foreign FOREIGN KEY (creator_id) REFERENCES public."user"(id);
 
 
 --
--- Name: campaign campaign_external_system_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: all_campaign campaign_external_system_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.campaign
+ALTER TABLE ONLY public.all_campaign
     ADD CONSTRAINT campaign_external_system_id_fkey FOREIGN KEY (external_system_id) REFERENCES public.external_system(id);
 
 
@@ -4914,7 +4951,7 @@ ALTER TABLE ONLY public.campaign_group_campaign
 --
 
 ALTER TABLE ONLY public.campaign_group_campaign
-    ADD CONSTRAINT campaign_group_campaign_campaign_id_fkey FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT campaign_group_campaign_campaign_id_fkey FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
@@ -4926,10 +4963,10 @@ ALTER TABLE ONLY public.campaign_group
 
 
 --
--- Name: campaign campaign_organization_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: all_campaign campaign_organization_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.campaign
+ALTER TABLE ONLY public.all_campaign
     ADD CONSTRAINT campaign_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organization(id);
 
 
@@ -4938,7 +4975,7 @@ ALTER TABLE ONLY public.campaign
 --
 
 ALTER TABLE ONLY public.campaign_team
-    ADD CONSTRAINT campaign_team_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id) ON DELETE CASCADE;
+    ADD CONSTRAINT campaign_team_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id) ON DELETE CASCADE;
 
 
 --
@@ -4954,7 +4991,7 @@ ALTER TABLE ONLY public.campaign_team
 --
 
 ALTER TABLE ONLY public.canned_response
-    ADD CONSTRAINT canned_response_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT canned_response_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
@@ -5066,7 +5103,7 @@ ALTER TABLE ONLY public.external_sync_opt_out_configuration
 --
 
 ALTER TABLE ONLY public.interaction_step
-    ADD CONSTRAINT interaction_step_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT interaction_step_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
@@ -5082,7 +5119,7 @@ ALTER TABLE ONLY public.interaction_step
 --
 
 ALTER TABLE ONLY public.job_request
-    ADD CONSTRAINT job_request_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT job_request_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
@@ -5122,7 +5159,7 @@ ALTER TABLE ONLY public.monthly_organization_message_usages
 --
 
 ALTER TABLE ONLY public.notification
-    ADD CONSTRAINT notification_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.campaign(id);
+    ADD CONSTRAINT notification_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
