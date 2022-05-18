@@ -70,6 +70,7 @@ export const EditCampaignFragment = gql`
     isStarted
     isApproved
     isArchived
+    isTemplate
     contactsCount
     datawarehouseAvailable
     customFields

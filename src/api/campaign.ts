@@ -76,7 +76,7 @@ export interface CampaignInput {
   isAssignmentLimitedToTeams: boolean | null;
   teamIds: string[];
   campaignGroupIds: string[] | null;
-  texters: TexterInput;
+  texters: TexterInput | null;
   interactionSteps: InteractionStepWithChildren;
   cannedResponses: CannedResponseInput[];
   textingHoursStart: number | null;
@@ -212,6 +212,7 @@ export const schema = `
     isApproved: Boolean!
     isStarted: Boolean
     isArchived: Boolean
+    isTemplate: Boolean!
     creator: User
     texters: [User]
     assignments(assignmentsFilter: AssignmentsFilter): [Assignment]

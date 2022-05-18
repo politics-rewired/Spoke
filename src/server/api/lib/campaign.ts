@@ -282,13 +282,35 @@ export const editCampaign = async (
   requiresApproval = false
 ) => {
   const unstartIfNecessary = async () => {
-    if (!user.is_superadmin && requiresApproval) {
+    if (
+      !origCampaignRecord.is_template &&
+      !user.is_superadmin &&
+      requiresApproval
+    ) {
       await r
         .knex("campaign")
         .update({ is_started: false, is_approved: false })
         .where({ id });
     }
   };
+
+  // Prevent editing protected template fields
+  if (origCampaignRecord.is_template) {
+    // Texting hours
+    campaign.textingHoursStart = null;
+    campaign.textingHoursEnd = null;
+    campaign.timezone = null;
+    // Contacts
+    campaign.externalListId = null;
+    campaign.contactsFile = null;
+    campaign.contacts = null;
+    campaign.contactSql = null;
+    // Texters
+    campaign.texters = null;
+    // Autoassignment
+    campaign.isAutoassignEnabled = null;
+    campaign.repliesStaleAfter = null;
+  }
 
   const {
     title,
@@ -431,7 +453,7 @@ export const editCampaign = async (
     Object.prototype.hasOwnProperty.call(campaign, "isAssignmentLimitedToTeams")
   ) {
     await r
-      .knex("campaign")
+      .knex("all_campaign")
       .update({
         limit_assignment_to_teams: campaign.isAssignmentLimitedToTeams
       })
@@ -484,7 +506,10 @@ export const editCampaign = async (
       );
     });
   }
-  if (Object.prototype.hasOwnProperty.call(campaign, "texters")) {
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "texters") &&
+    campaign.texters
+  ) {
     const { assignmentInputs, ignoreAfterDate } = campaign.texters;
     await addAssignTexters({
       campaignId: id,
@@ -543,7 +568,7 @@ export const editCampaign = async (
   }
 
   const [newCampaign] = await r
-    .knex("campaign")
+    .knex("all_campaign")
     .update(campaignUpdates)
     .where({ id })
     .returning("*");

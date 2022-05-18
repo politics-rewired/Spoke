@@ -27,6 +27,7 @@ import AdminShortLinkDomains from "./containers/AdminShortLinkDomains";
 import AdminTagEditor from "./containers/AdminTagEditor";
 import AdminTeamEditor from "./containers/AdminTeamEditor";
 import TeamEditorDetail from "./containers/AdminTeamEditor/TeamEditorDetail";
+import AdminTemplateCampaigns from "./containers/AdminTemplateCampaigns";
 import AdminTrollAlarms from "./containers/AdminTrollAlarms";
 import CreateOrganization from "./containers/CreateOrganization";
 import DashboardLoader from "./containers/DashboardLoader";
@@ -120,6 +121,21 @@ const AdminTeamRoutes = () => {
   );
 };
 
+const AdminTemplateCampaignRoutes = () => {
+  // Use full path over props.match.path to get access to organizationId param
+  const templatesPath = "/admin/:organizationId/template-campaigns";
+  return (
+    <Switch>
+      <Route path={templatesPath} exact component={AdminTemplateCampaigns} />
+      <Route
+        path={`${templatesPath}/:campaignId`}
+        component={AdminCampaignEdit}
+      />
+      <Redirect to={templatesPath} />
+    </Switch>
+  );
+};
+
 const AdminOrganizationRoutes = (props) => {
   // Use full path over props.match.path to get access to organizationId param
   const organizationPath = "/admin/:organizationId";
@@ -131,6 +147,10 @@ const AdminOrganizationRoutes = (props) => {
           <Route
             path={`${organizationPath}/campaigns`}
             component={AdminCampaignListRoutes}
+          />
+          <Route
+            path={`${organizationPath}/template-campaigns`}
+            component={AdminTemplateCampaignRoutes}
           />
           <Route
             path={`${organizationPath}/campaign-groups`}

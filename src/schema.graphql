@@ -2,6 +2,7 @@
 enum CampaignBuilderMode {
   BASIC
   ADVANCED
+  TEMPLATE
 }
 
 input BulkUpdateScriptInput {
@@ -210,6 +211,7 @@ input SecondPassInput {
 type RootMutation {
   createInvite(invite:InviteInput!): Invite
   createCampaign(campaign:CampaignInput!): Campaign
+  createTemplateCampaign(organizationId: String!): Campaign!
   editCampaign(id:String!, campaign:CampaignInput!): Campaign
   saveCampaignGroups(organizationId: String!, campaignGroups: [CampaignGroupInput!]!): [CampaignGroup!]!
   deleteCampaignGroup(organizationId: String!, campaignGroupId: String!): Boolean!
@@ -387,6 +389,7 @@ type Organization {
   externalSystems(after: Cursor, first: Int): ExternalSystemPage!
   messagingServices(after: Cursor, first: Int): MessagingServicePage!
   campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
+  templateCampaigns(after: Cursor, first: Int): CampaignPage!
 }
 
 input EditOrganizationInput {
@@ -571,6 +574,7 @@ type Campaign {
   isApproved: Boolean!
   isStarted: Boolean
   isArchived: Boolean
+  isTemplate: Boolean!
   creator: User
   texters: [User]
   assignments(assignmentsFilter: AssignmentsFilter): [Assignment]

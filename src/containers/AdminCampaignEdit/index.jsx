@@ -77,7 +77,9 @@ class AdminCampaignEdit extends React.Component {
       startingCampaign: false,
       isWorking: false,
       requestError: undefined,
-      builderMode: props.orgSettings.defaultCampaignBuilderMode
+      builderMode: props.campaignData.campaign.isTemplate
+        ? CampaignBuilderMode.Template
+        : props.orgSettings.defaultCampaignBuilderMode
     };
   }
 
@@ -319,7 +321,11 @@ class AdminCampaignEdit extends React.Component {
         title: "Basics",
         content: CampaignBasicsForm,
         isStandalone: true,
-        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
+        showForModes: [
+          CampaignBuilderMode.Basic,
+          CampaignBuilderMode.Advanced,
+          CampaignBuilderMode.Template
+        ],
         keys: [
           "title",
           "description",
@@ -339,7 +345,10 @@ class AdminCampaignEdit extends React.Component {
         title: "Campaign Groups",
         content: CampaignGroupsForm,
         isStandalone: true,
-        showForModes: [CampaignBuilderMode.Advanced],
+        showForModes: [
+          CampaignBuilderMode.Advanced,
+          CampaignBuilderMode.Template
+        ],
         keys: ["campaignGroups"],
         exclude: !window.ENABLE_CAMPAIGN_GROUPS,
         checkCompleted: () => true,
@@ -363,7 +372,11 @@ class AdminCampaignEdit extends React.Component {
         title: "Integration",
         content: CampaignIntegrationForm,
         isStandalone: true,
-        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
+        showForModes: [
+          CampaignBuilderMode.Basic,
+          CampaignBuilderMode.Advanced,
+          CampaignBuilderMode.Template
+        ],
         keys: ["externalSystem"],
         checkCompleted: () => true,
         blocksStarting: false,
@@ -452,7 +465,10 @@ class AdminCampaignEdit extends React.Component {
       {
         title: "Teams",
         content: CampaignTeamsForm,
-        showForModes: [CampaignBuilderMode.Advanced],
+        showForModes: [
+          CampaignBuilderMode.Advanced,
+          CampaignBuilderMode.Template
+        ],
         keys: ["teams", "isAssignmentLimitedToTeams"],
         checkSaved: () => {
           const {
@@ -501,7 +517,11 @@ class AdminCampaignEdit extends React.Component {
         title: "Interactions",
         content: CampaignInteractionStepsForm,
         isStandalone: true,
-        showForModes: [CampaignBuilderMode.Basic, CampaignBuilderMode.Advanced],
+        showForModes: [
+          CampaignBuilderMode.Basic,
+          CampaignBuilderMode.Advanced,
+          CampaignBuilderMode.Template
+        ],
         keys: ["interactionSteps"],
         checkCompleted: () =>
           this.props.campaignData.campaign.readiness.interactions,
@@ -517,7 +537,10 @@ class AdminCampaignEdit extends React.Component {
         title: "Canned Responses",
         content: CampaignCannedResponsesForm,
         isStandalone: true,
-        showForModes: [CampaignBuilderMode.Advanced],
+        showForModes: [
+          CampaignBuilderMode.Advanced,
+          CampaignBuilderMode.Template
+        ],
         keys: ["cannedResponses"],
         checkCompleted: () => true,
         blocksStarting: true,
@@ -635,7 +658,7 @@ class AdminCampaignEdit extends React.Component {
 
   renderHeader = () => {
     const {
-      campaign: { dueBy, isStarted, title } = {}
+      campaign: { dueBy, isStarted, title, isTemplate } = {}
     } = this.props.campaignData;
 
     const isOverdue = DateTime.local() >= DateTime.fromISO(dueBy);
@@ -663,44 +686,52 @@ class AdminCampaignEdit extends React.Component {
           fontSize: 16
         }}
       >
-        <Grid container justifyContent="space-between">
-          <Grid item>
-            <Button variant="contained" onClick={this.handleNavigateToStats}>
-              Details
-            </Button>
-          </Grid>
-          <Grid item>
-            <FormControl style={{ width: 120 }}>
-              <InputLabel id="campaign-builder-mode-label">
-                Builder Mode
-              </InputLabel>
-              <Select
-                labelId="campaign-builder-mode-label"
-                id="campaign-builder-mode-select"
-                fullWidth
-                value={this.state.builderMode}
-                onChange={(event) => {
-                  this.setState({ builderMode: event.target.value });
-                }}
-              >
-                <MenuItem value={CampaignBuilderMode.Basic}>Basic</MenuItem>
-                <MenuItem value={CampaignBuilderMode.Advanced}>
-                  Advanced
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item>
-            <CampaignNavigation
-              prevCampaignClicked={this.prevCampaignClicked}
-              nextCampaignClicked={this.nextCampaignClicked}
-              campaignId={this.props.campaignData.campaign.id}
-            />
-          </Grid>
-        </Grid>
-        <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+        {!isTemplate && (
+          <>
+            <Grid container justifyContent="space-between">
+              <Grid item>
+                <Button
+                  variant="contained"
+                  onClick={this.handleNavigateToStats}
+                >
+                  Details
+                </Button>
+              </Grid>
+              <Grid item>
+                <FormControl style={{ width: 120 }}>
+                  <InputLabel id="campaign-builder-mode-label">
+                    Builder Mode
+                  </InputLabel>
+                  <Select
+                    labelId="campaign-builder-mode-label"
+                    id="campaign-builder-mode-select"
+                    fullWidth
+                    value={this.state.builderMode}
+                    onChange={(event) => {
+                      this.setState({ builderMode: event.target.value });
+                    }}
+                  >
+                    <MenuItem value={CampaignBuilderMode.Basic}>Basic</MenuItem>
+                    <MenuItem value={CampaignBuilderMode.Advanced}>
+                      Advanced
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item>
+                <CampaignNavigation
+                  prevCampaignClicked={this.prevCampaignClicked}
+                  nextCampaignClicked={this.nextCampaignClicked}
+                  campaignId={this.props.campaignData.campaign.id}
+                />
+              </Grid>
+            </Grid>
+
+            <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+          </>
+        )}
         {title && <h1> {title} </h1>}
-        {this.state.startingCampaign ? (
+        {!isTemplate && this.state.startingCampaign && (
           <div style={{ color: theme.colors.gray }}>
             <CircularProgress
               size={0.5}
@@ -711,9 +742,8 @@ class AdminCampaignEdit extends React.Component {
             />
             Starting your campaign...
           </div>
-        ) : (
-          notStarting
         )}
+        {!isTemplate && !this.state.startingCampaign && notStarting}
       </div>
     );
   };
