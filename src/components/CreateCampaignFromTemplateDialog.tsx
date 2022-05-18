@@ -7,6 +7,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import {
+  GetAdminCampaignsDocument,
   TemplateCampaignFragment,
   useCreateCampaignFromTemplateMutation,
   useGetTemplateCampaignsQuery
@@ -33,7 +34,9 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
   const [
     createFromTemplate,
     { loading: working }
-  ] = useCreateCampaignFromTemplateMutation();
+  ] = useCreateCampaignFromTemplateMutation({
+    refetchQueries: [GetAdminCampaignsDocument]
+  });
 
   const templates =
     data?.organization?.templateCampaigns?.edges?.map(({ node }) => node) ?? [];
@@ -74,8 +77,7 @@ export const CreateCampaignFromTemplateDialog: React.FC<CreateCampaignFromTempla
     if (!(quantity !== null && selectedTemplate !== null && !working)) return;
 
     await createFromTemplate({
-      variables: { templateId: selectedTemplate.id, quantity },
-      refetchQueries: ["adminGetCampaigns"]
+      variables: { templateId: selectedTemplate.id, quantity }
     });
     props.onClose?.();
   }, [quantity, selectedTemplate, createFromTemplate, props.onClose]);
