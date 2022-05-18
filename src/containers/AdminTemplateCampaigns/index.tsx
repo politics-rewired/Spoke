@@ -2,6 +2,7 @@ import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import AddIcon from "@material-ui/icons/Add";
 import {
+  GetTemplateCampaignsDocument,
   useCreateTemplateCampaignMutation,
   useGetTemplateCampaignsQuery
 } from "@spoke/spoke-codegen";
@@ -33,15 +34,26 @@ export const AdminTemplateCampaigns: React.FC = () => {
   const [
     createTemplateCampaign,
     { loading: createTemplateLoading }
-  ] = useCreateTemplateCampaignMutation();
+  ] = useCreateTemplateCampaignMutation({
+    refetchQueries: [
+      { query: GetTemplateCampaignsDocument, variables: { organizationId } }
+    ]
+  });
 
   const templateCampaigns = (
     data?.organization?.templateCampaigns?.edges ?? []
   ).map(({ node }) => node);
 
   const handleClickCreateTemplate = useCallback(async () => {
-    await createTemplateCampaign({ variables: { organizationId } });
-  }, [createTemplateCampaign]);
+    const result = await createTemplateCampaign({
+      variables: { organizationId }
+    });
+    if (result.errors) throw result.errors[0];
+    const newTemplateId = result.data?.createTemplateCampaign.id;
+    history.push(
+      `/admin/${organizationId}/template-campaigns/${newTemplateId}`
+    );
+  }, [createTemplateCampaign, history]);
 
   const createHandleClickEdit = (templateCampaignId: string) => () => {
     history.push(
