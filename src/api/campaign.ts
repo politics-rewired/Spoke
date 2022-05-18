@@ -232,7 +232,7 @@ export const schema = `
     primaryColor: String
     logoImageUrl: String
     editors: String
-    teams: [Team]!
+    teams: [Team!]!
     campaignGroups: CampaignGroupPage
     textingHoursStart: Int
     textingHoursEnd: Int

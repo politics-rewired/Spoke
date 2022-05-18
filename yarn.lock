@@ -4459,6 +4459,11 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
+"@rooks/use-intersection-observer-ref@^4.11.2":
+  version "4.11.2"
+  resolved "https://registry.yarnpkg.com/@rooks/use-intersection-observer-ref/-/use-intersection-observer-ref-4.11.2.tgz#d83a9279c1192d7aae221388985457f7491c6333"
+  integrity sha512-9RJYT21Fll1b1oiiMAc6oUOyH5bS1P+nKTIpUUGeQO6+AOP7OflVaPAoULxe+rMnu9ue8LxYZJ6N/pbEcFQu7A==
+
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/@samverschueren/stream-to-observable/-/stream-to-observable-0.3.1.tgz#a21117b19ee9be70c379ec1877537ef2e1c63301"
