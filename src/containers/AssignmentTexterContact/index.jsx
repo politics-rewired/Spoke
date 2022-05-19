@@ -269,12 +269,17 @@ export class AssignmentTexterContact extends React.Component {
   getMessageTextFromScript = (script) => {
     const { campaign, contact, texter } = this.props;
 
+    const campaignVariables = campaign.campaignVariables.edges.map(
+      ({ node }) => node
+    );
+
     return script
       ? applyScript({
           contact,
           texter,
           script,
-          customFields: campaign.customFields
+          customFields: campaign.customFields,
+          campaignVariables
         })
       : "";
   };

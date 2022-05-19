@@ -95,6 +95,7 @@ class GSScriptOptionsField extends GSFormField {
     const {
       name,
       customFields,
+      campaignVariables,
       value: scriptVersions,
       integrationSourced,
       orgSettings
@@ -151,6 +152,7 @@ class GSScriptOptionsField extends GSFormField {
             name={name}
             scriptText={scriptDraft}
             scriptFields={scriptFields}
+            campaignVariables={campaignVariables}
             integrationSourced={integrationSourced}
             receiveFocus
             expandable
@@ -216,6 +218,13 @@ class GSScriptOptionsField extends GSFormField {
 GSScriptOptionsField.propTypes = {
   value: PropTypes.arrayOf(PropTypes.string),
   customFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  campaignVariables: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      value: PropTypes.string
+    })
+  ).isRequired,
   name: PropTypes.string,
   className: PropTypes.string,
   hintText: PropTypes.string,

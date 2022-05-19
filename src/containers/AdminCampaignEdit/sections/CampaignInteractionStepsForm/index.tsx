@@ -1,5 +1,6 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import { CampaignVariablePage } from "@spoke/spoke-codegen";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
@@ -61,6 +62,7 @@ interface HocProps {
       "id" | "isStarted" | "customFields" | "externalSystem"
     > & {
       interactionSteps: InteractionStepWithLocalState[];
+      campaignVariables: CampaignVariablePage;
     };
   };
   availableActions: {
@@ -264,13 +266,20 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     isNew,
     saveLabel,
     data: {
-      campaign: { customFields, externalSystem } = {
+      campaign: {
+        customFields,
+        campaignVariables: { edges: campaignVariableEdges },
+        externalSystem
+      } = {
         customFields: [],
+        campaignVariables: { edges: [] },
         externalSystem: null
       }
     },
     availableActions: { availableActions }
   } = props;
+
+  const campaignVariables = campaignVariableEdges.map(({ node }) => node);
 
   const {
     interactionSteps,
@@ -331,6 +340,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}
+        campaignVariables={campaignVariables}
         integrationSourced={externalSystem !== null}
         availableActions={availableActions}
         hasBlockCopied={hasBlockCopied}

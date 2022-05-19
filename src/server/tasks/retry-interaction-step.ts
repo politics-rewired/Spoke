@@ -60,6 +60,12 @@ export const retryInteractionStep: Task = async (
 
   const { campaign_contact, interaction_step, assignment_id, user } = record;
 
+  const { rows: campaignVariables } = await helpers.query<
+    CampaignVariableRecord
+  >("select * from campaign_variable where campaign_id = ?", [
+    campaign_contact.campaign_id
+  ]);
+
   const script = sample(interaction_step.script_options)!;
   const contact = recordToCamelCase<CampaignContact>(campaign_contact);
   const texter = recordToCamelCase<User>(user);
@@ -69,6 +75,7 @@ export const retryInteractionStep: Task = async (
     script,
     contact,
     customFields,
+    campaignVariables,
     texter
   });
 

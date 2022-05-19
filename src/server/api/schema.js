@@ -1663,6 +1663,10 @@ const rootMutations = {
       );
       const customFields = Object.keys(JSON.parse(contacts[0].custom_fields));
 
+      const campaignVariables = await r
+        .knex("campaign_variable")
+        .where({ campaign_id: assignment.campaign_id });
+
       const _contactMessages = await contacts.map(async (contact) => {
         const script = await campaignContactResolvers.CampaignContact.currentInteractionStepScript(
           contact
@@ -1672,7 +1676,8 @@ const rootMutations = {
           contact: camelCaseKeys(contact),
           texter,
           script,
-          customFields
+          customFields,
+          campaignVariables
         });
         const contactMessage = {
           contactNumber: contact.cell,

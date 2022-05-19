@@ -1,7 +1,10 @@
 /* eslint-disable no-unused-vars */
 import type { CampaignContactInput } from "./campaign-contact";
 import type { CampaignGroupPage } from "./campaign-group";
-import type { CampaignVariableInput } from "./campaign-variable";
+import type {
+  CampaignVariableInput,
+  CampaignVariablePage
+} from "./campaign-variable";
 import type { CannedResponseInput } from "./canned-response";
 import type { ExternalSystem } from "./external-system";
 import type {
@@ -116,6 +119,7 @@ export interface Campaign {
   hasUnhandledMessages?: boolean | null;
   teams: Team[];
   campaignGroups?: CampaignGroupPage | null;
+  campaignVariables: CampaignVariablePage;
   externalSystem?: ExternalSystem | null;
   creator?: User | null;
   deliverabilityStats: CampaignDeliverabilityStats;

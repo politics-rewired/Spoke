@@ -88,6 +88,7 @@ interface ApplyScriptOptions {
   script: string;
   contact: CampaignContact;
   customFields: string[];
+  campaignVariables: { name: string; value: string }[];
   texter: User;
 }
 
@@ -95,6 +96,7 @@ export const applyScript = ({
   script,
   contact,
   customFields,
+  campaignVariables,
   texter
 }: ApplyScriptOptions) => {
   const scriptFields = allScriptFields(customFields);
@@ -107,6 +109,12 @@ export const applyScript = ({
       getScriptFieldValue(contact, texter, field)
     );
   }
+
+  for (const field of campaignVariables) {
+    const re = new RegExp(escapeRegExp(delimit(field.name)), "g");
+    appliedScript = appliedScript.replace(re, field.value);
+  }
+
   return appliedScript;
 };
 
