@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.27.0](https://github.com/politics-rewired/spoke/compare/v4.26.3...v4.27.0) (2022-05-19)
+
+
+### Features
+
+* add template campaigns ([#1214](https://github.com/politics-rewired/spoke/issues/1214)) ([0afa835](https://github.com/politics-rewired/spoke/commit/0afa835dabbdacf5627ae65317b3d100874aac22))
+* **campaign-builder:** add basic mode ([#1209](https://github.com/politics-rewired/spoke/issues/1209)) ([d6a434f](https://github.com/politics-rewired/spoke/commit/d6a434ff37fe589f312434765563637dee37f72c))
+
+
+### Bug Fixes
+
+* **session:** handle suspension check when no user is found ([#1212](https://github.com/politics-rewired/spoke/issues/1212)) ([825cb5d](https://github.com/politics-rewired/spoke/commit/825cb5d76701f8f82f94709ab80194a9b1c71386))
+* bring assign loop into alignment with assignment targets ([#1204](https://github.com/politics-rewired/spoke/issues/1204)) ([3307e2b](https://github.com/politics-rewired/spoke/commit/3307e2b95d941dff4f6195d64a42db80d4a2d987))
+* cleanup autosending counts ([#1202](https://github.com/politics-rewired/spoke/issues/1202)) ([b0172ca](https://github.com/politics-rewired/spoke/commit/b0172ca1594397dafc04775c7daa858234b5724f))
+* fix csv header validation ([#1190](https://github.com/politics-rewired/spoke/issues/1190)) ([218671f](https://github.com/politics-rewired/spoke/commit/218671f1bf7697d062b9b47e49d69b61e201a755))
+* fix how label is passed to chip ([#1203](https://github.com/politics-rewired/spoke/issues/1203)) ([d932b5a](https://github.com/politics-rewired/spoke/commit/d932b5af3948d702e491b53270e71d4abe7f61c3))
+* make opt out button orange again ([#1206](https://github.com/politics-rewired/spoke/issues/1206)) ([a1f6fac](https://github.com/politics-rewired/spoke/commit/a1f6fac27ce921814d681d16989b0228f3fd6898))
+* pass assignmentPriority as Int ([#1195](https://github.com/politics-rewired/spoke/issues/1195)) ([8f1d760](https://github.com/politics-rewired/spoke/commit/8f1d76077defe189e50f635b600f23079e860206))
+* rewrite campaign preview ([#1173](https://github.com/politics-rewired/spoke/issues/1173)) ([c47feaf](https://github.com/politics-rewired/spoke/commit/c47feafb0eb13f24fb809ee1ad7b1e68d3d0417d))
+* use autocomplete for texter select ([#1210](https://github.com/politics-rewired/spoke/issues/1210)) ([490a577](https://github.com/politics-rewired/spoke/commit/490a577c33f8adc8585a72bbd60064328ffcbf5d))
+
 ### [4.26.3](https://github.com/politics-rewired/spoke/compare/v4.26.2...v4.26.3) (2022-05-13)
 
 
