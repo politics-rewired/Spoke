@@ -47,6 +47,7 @@ import {
   queryCampaignOverlapCount,
   queryCampaignOverlaps
 } from "./campaign-overlap";
+import { resolvers as campaignVariableResolvers } from "./campaign-variable";
 import { resolvers as cannedResponseResolvers } from "./canned-response";
 import {
   getCampaignIdMessageIdsAndCampaignIdContactIdsMapsChunked,
@@ -3792,6 +3793,7 @@ export const resolvers = {
   ...optOutResolvers,
   ...messageResolvers,
   ...campaignGroupResolvers,
+  ...campaignVariableResolvers,
   ...campaignContactResolvers,
   ...cannedResponseResolvers,
   ...questionResponseResolvers,

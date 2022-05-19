@@ -1912,6 +1912,44 @@ ALTER SEQUENCE public.campaign_team_id_seq OWNED BY public.campaign_team.id;
 
 
 --
+-- Name: campaign_variable; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.campaign_variable (
+    id integer NOT NULL,
+    campaign_id integer NOT NULL,
+    name text NOT NULL,
+    value text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.campaign_variable OWNER TO postgres;
+
+--
+-- Name: campaign_variable_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.campaign_variable_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.campaign_variable_id_seq OWNER TO postgres;
+
+--
+-- Name: campaign_variable_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.campaign_variable_id_seq OWNED BY public.campaign_variable.id;
+
+
+--
 -- Name: canned_response; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3316,6 +3354,13 @@ ALTER TABLE ONLY public.campaign_team ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: campaign_variable id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_variable ALTER COLUMN id SET DEFAULT nextval('public.campaign_variable_id_seq'::regclass);
+
+
+--
 -- Name: canned_response id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3594,6 +3639,14 @@ ALTER TABLE ONLY public.campaign_team
 
 ALTER TABLE ONLY public.campaign_team
     ADD CONSTRAINT campaign_team_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: campaign_variable campaign_variable_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_variable
+    ADD CONSTRAINT campaign_variable_pkey PRIMARY KEY (id);
 
 
 --
@@ -3956,6 +4009,14 @@ ALTER TABLE ONLY public.troll_trigger
 
 ALTER TABLE ONLY public.unhealthy_link_domain
     ADD CONSTRAINT unhealthy_link_domain_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: campaign_variable unique_name_per_campaign; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_variable
+    ADD CONSTRAINT unique_name_per_campaign UNIQUE (campaign_id, name);
 
 
 --
@@ -4606,6 +4667,13 @@ CREATE TRIGGER _500_campaign_updated_at BEFORE UPDATE ON public.all_campaign FOR
 
 
 --
+-- Name: campaign_variable _500_campaign_variable_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER _500_campaign_variable_updated_at BEFORE UPDATE ON public.campaign_variable FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+
+
+--
 -- Name: canned_response _500_canned_response_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -4986,6 +5054,14 @@ ALTER TABLE ONLY public.campaign_team
 
 ALTER TABLE ONLY public.campaign_team
     ADD CONSTRAINT campaign_team_team_id_foreign FOREIGN KEY (team_id) REFERENCES public.team(id) ON DELETE CASCADE;
+
+
+--
+-- Name: campaign_variable campaign_variable_campaign_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campaign_variable
+    ADD CONSTRAINT campaign_variable_campaign_id_fkey FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --

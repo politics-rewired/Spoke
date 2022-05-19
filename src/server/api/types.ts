@@ -133,6 +133,15 @@ export interface CampaignContactRecord {
   archived: boolean;
 }
 
+export interface CampaignVariableRecord {
+  id: number;
+  campaign_id: number;
+  name: string;
+  value: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface InteractionStepRecord {
   id: number;
   campaign_id: number;

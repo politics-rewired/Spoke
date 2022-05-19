@@ -1,0 +1,58 @@
+fragment CampaignVariableInfo on CampaignVariable {
+  id
+  name
+  value
+}
+
+query GetCampaignVariables($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    campaignVariables {
+      edges {
+        node {
+          ...CampaignVariableInfo
+        }
+      }
+    }
+  }
+}
+
+query GetAssignmentCampaignVariables($assignmentId: String!) {
+  assignment(id: $assignmentId) {
+    campaign {
+      id
+      campaignVariables {
+        edges {
+          node {
+            ...CampaignVariableInfo
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation EditCampaignVariables(
+  $campaignId: String!
+  $campaignVariables: [CampaignVariableInput!]!
+) {
+  editCampaign(
+    id: $campaignId
+    campaign: { campaignVariables: $campaignVariables }
+  ) {
+    id
+    campaignVariables {
+      edges {
+        node {
+          ...CampaignVariableInfo
+        }
+      }
+    }
+    isStarted
+    isApproved
+    readiness {
+      id
+      campaignVariables
+    }
+  }
+}

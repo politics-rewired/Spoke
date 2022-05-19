@@ -554,6 +554,7 @@ type CampaignReadiness {
   autoassign: Boolean!
   cannedResponses: Boolean!
   campaignGroups: Boolean!
+  campaignVariables: Boolean!
   interactions: Boolean!
   texters: Boolean!
 }
@@ -597,6 +598,7 @@ type Campaign {
   editors: String
   teams: [Team!]!
   campaignGroups: CampaignGroupPage
+  campaignVariables: CampaignVariablePage!
   textingHoursStart: Int
   textingHoursEnd: Int
   isAutoassignEnabled: Boolean!
@@ -668,6 +670,7 @@ input CampaignInput {
   isAssignmentLimitedToTeams: Boolean
   teamIds: [ID]
   campaignGroupIds: [String!]
+  campaignVariables: [CampaignVariableInput!]
   texters: TexterInput
   interactionSteps: InteractionStepInput
   cannedResponses: [CannedResponseInput]
@@ -868,6 +871,32 @@ type CampaignGroupEdge {
 
 type CampaignGroupPage {
   edges: [CampaignGroupEdge!]!
+  pageInfo: RelayPageInfo!
+}
+
+
+
+input CampaignVariableInput {
+  id: String
+  name: String!
+  value: String
+}
+
+type CampaignVariable {
+  id: ID!
+  name: String!
+  value: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type CampaignVariableEdge {
+  cursor: Cursor!
+  node: CampaignVariable!
+}
+
+type CampaignVariablePage {
+  edges: [CampaignVariableEdge!]!
   pageInfo: RelayPageInfo!
 }
 

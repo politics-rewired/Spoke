@@ -274,6 +274,20 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
         [newCampaign.id, campaignId]
       );
 
+      // Copy Campaign Variables
+      await trx.raw(
+        `
+          insert into campaign_variable (campaign_id, name, value)
+          select
+            ? as campaign_id,
+            name,
+            value
+          from campaign_variable
+          where campaign_id = ?
+        `,
+        [newCampaign.id, campaignId]
+      );
+
       return newCampaign;
     };
 
@@ -528,6 +542,47 @@ export const editCampaign = async (
       campaignId: id,
       assignmentInputs,
       ignoreAfterDate
+    });
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "campaignVariables") &&
+    campaign.campaignVariables
+  ) {
+    const cleanedPayload = campaign.campaignVariables
+      .map(({ name, value }) => ({
+        name: name.trim(),
+        value: value?.trim() ? value?.trim() : null
+      }))
+      .filter(({ name }) => !!name);
+
+    const payload = JSON.stringify(cleanedPayload);
+
+    await r.knex.transaction(async (trx) => {
+      await trx.raw(
+        `
+          with payload as (
+            select * from json_populate_recordset(null::campaign_variable, ?::json)
+          ),
+          new_variable_ids as (
+            insert into campaign_variable (campaign_id, name, value)
+            select ?, name, value
+            from payload
+            on conflict (campaign_id, name) do update
+              set value = EXCLUDED.value
+            returning id
+          ),
+          deleted_ids as (
+            delete from campaign_variable
+            where
+              campaign_id = ?
+              and id not in ( select id from new_variable_ids )
+            returning id
+          )
+          select count(*) from deleted_ids
+        `,
+        [payload, id, id]
+      );
     });
   }
 
