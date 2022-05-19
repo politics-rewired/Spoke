@@ -225,12 +225,14 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           )
         );
 
-      await persistInteractionStepTree(
-        newCampaign.id,
-        makeTree(interactions, null /* id */),
-        { is_started: false },
-        trx
-      );
+      if (interactions.length > 0) {
+        await persistInteractionStepTree(
+          newCampaign.id,
+          makeTree(interactions, null /* id */),
+          { is_started: false },
+          trx
+        );
+      }
 
       // Copy canned responses
       await trx.raw(
