@@ -131,3 +131,85 @@ export const isAttachmentImage = async (text: string) => {
 
   return true;
 };
+
+export enum ScriptTokenType {
+  Text = "Text",
+  CustomField = "CustomField",
+  UndefinedField = "UndefinedField"
+}
+
+export interface ScriptToElemsOptions {
+  script: string;
+  customFields: string[];
+}
+
+export type ScriptToken = { type: ScriptTokenType; text: string };
+
+export interface ScriptToElemsPayload {
+  tokens: ScriptToken[];
+  customFieldsUsed: string[];
+  undefinedFieldsUsed: string[];
+}
+
+export const scriptToTokens = (
+  options: ScriptToElemsOptions
+): ScriptToElemsPayload => {
+  const { script, customFields } = options;
+
+  if (script.trim().length === 0) {
+    return {
+      tokens: [],
+      customFieldsUsed: [],
+      undefinedFieldsUsed: []
+    };
+  }
+
+  const customFieldTags = allScriptFields(customFields).map(
+    (customField) => `{${customField}}`
+  );
+
+  const tokenRegExp = /(\{[a-zA-Z0-9\s]+\})/g;
+  const scriptTokens = script.split(tokenRegExp).filter(Boolean);
+
+  const scriptElems = scriptTokens.reduce<ScriptToElemsPayload>(
+    (acc, token) => {
+      if (customFieldTags.includes(token)) {
+        const newToken = {
+          type: ScriptTokenType.CustomField,
+          text: token
+        };
+        return {
+          ...acc,
+          tokens: [...acc.tokens, newToken],
+          customFieldsUsed: [...acc.customFieldsUsed, token]
+        };
+      }
+      if (/\{[a-zA-Z0-9\s]+\}/.test(token)) {
+        const newToken = {
+          type: ScriptTokenType.UndefinedField,
+          text: token
+        };
+        return {
+          ...acc,
+          tokens: [...acc.tokens, newToken],
+          undefinedFieldsUsed: [...acc.undefinedFieldsUsed, token]
+        };
+      }
+      const newToken = {
+        type: ScriptTokenType.Text,
+        text: token
+      };
+      return {
+        ...acc,
+        tokens: [...acc.tokens, newToken]
+      };
+    },
+    {
+      tokens: [],
+      customFieldsUsed: [],
+      undefinedFieldsUsed: []
+    }
+  );
+
+  return scriptElems;
+};

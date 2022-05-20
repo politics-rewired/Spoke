@@ -5,10 +5,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import CreateIcon from "@material-ui/icons/Create";
-import DeleteIcon from "@material-ui/icons/Delete";
 import InfoIcon from "@material-ui/icons/Info";
-import pick from "lodash/pick";
-import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -17,6 +14,7 @@ import { dataTest } from "../../lib/attributes";
 import { allScriptFields } from "../../lib/scripts";
 import ScriptEditor from "../ScriptEditor";
 import ScriptLinkWarningDialog from "../ScriptLinkWarningDialog";
+import ScriptOptionBlock from "../ScriptOptionBlock";
 import GSFormField from "./GSFormField";
 import { getWarningContextForScript } from "./utils";
 
@@ -176,18 +174,7 @@ class GSScriptOptionsField extends GSFormField {
 
   render() {
     // The "errors" prop is an empty object and is not mentioned in yum or react-formal documentation
-    const scriptVersions = this.props.value;
-    const passThroughProps = pick(this.props, [
-      "className",
-      "fullWidth",
-      "hintText",
-      "label",
-      "multiLine",
-      "name",
-      "data-test",
-      "onBlur"
-      // We manage onChange ourselves so don't pass it though
-    ]);
+    const { customFields, value: scriptVersions } = this.props;
 
     const canDelete = scriptVersions.length > 1;
     const emptyVersionExists =
@@ -204,36 +191,14 @@ class GSScriptOptionsField extends GSFormField {
           <InfoIcon fontSize="small" />
         </Tooltip>
         {scriptVersions.map((scriptVersion, index) => (
-          <div
+          <ScriptOptionBlock
             key={scriptVersion}
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            <TextField
-              key={scriptVersion}
-              value={scriptVersion}
-              floatingLabelText={`Script Version ${index + 1}`}
-              floatingLabelStyle={{ zIndex: 0 }}
-              errorText={
-                scriptVersion.trim().length === 0
-                  ? "Script cannot be empty"
-                  : undefined
-              }
-              multiLine
-              onClick={this.createDialogHandler(scriptVersion)}
-              {...passThroughProps}
-            />
-            {canDelete && (
-              <IconButton
-                tooltip="Deleting will not take effect until you save!"
-                tooltipPosition="top-left"
-                iconStyle={{ width: 20, height: 20, color: "red" }}
-                style={{ width: 40, height: 40, padding: 10 }}
-                onClick={this.createDeleteHandler(scriptVersion)}
-              >
-                <DeleteIcon />
-              </IconButton>
-            )}
-          </div>
+            label={`Script Version ${index + 1}`}
+            customFields={customFields}
+            script={scriptVersion}
+            onEditScript={this.createDialogHandler(scriptVersion)}
+            onDelete={canDelete && this.createDeleteHandler(scriptVersion)}
+          />
         ))}
         <Button
           color="primary"
