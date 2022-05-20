@@ -14,6 +14,7 @@ import logger from "../logger";
 import { fulfillPendingRequestFor } from "./api/assignment";
 import pgPool from "./db";
 import appRenderer from "./middleware/app-renderer";
+import { userLoggedIn } from "./models/cacheable_queries";
 import {
   assembleRouter,
   authRouter,
@@ -74,6 +75,16 @@ export const createApp = async () => {
   );
   app.use(passport.initialize());
   app.use(passport.session());
+
+  passport.serializeUser(({ id }: { id: string }, done: any) => {
+    done(null, id);
+  });
+
+  passport.deserializeUser((userId: any, done: any) =>
+    userLoggedIn(userId, "id")
+      .then((user: any) => done(null, user || false))
+      .catch((error: any) => done(error))
+  );
 
   if (PUBLIC_DIR) {
     app.use(express.static(PUBLIC_DIR, { maxAge: "180 days" }));
