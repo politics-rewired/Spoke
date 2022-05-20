@@ -278,9 +278,10 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
       // Copy Campaign Variables
       await trx.raw(
         `
-          insert into campaign_variable (campaign_id, name, value)
+          insert into campaign_variable (campaign_id, display_order, name, value)
           select
             ? as campaign_id,
+            display_order,
             campaign_variable.name,
             (case
               when all_campaign.is_template then null
@@ -288,7 +289,9 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
             end)
           from campaign_variable
           join all_campaign on all_campaign.id = campaign_variable.campaign_id
-          where campaign_id = ?
+          where
+            campaign_id = ?
+            and deleted_at is null
         `,
         [newCampaign.id, campaignId]
       );
