@@ -343,7 +343,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       />
       <Button
         {...dataTest("interactionSubmit")}
-        variant="containted"
+        variant="contained"
         color="primary"
         disabled={isSaveDisabled}
         onClick={handleSave}
