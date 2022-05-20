@@ -4,10 +4,13 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import AddIcon from "@material-ui/icons/Add";
+import CreateIcon from "@material-ui/icons/Create";
+import FileCopyIcon from "@material-ui/icons/FileCopyOutlined";
+import SpeedDial from "@material-ui/lab/SpeedDial";
+import SpeedDialAction from "@material-ui/lab/SpeedDialAction";
+import SpeedDialIcon from "@material-ui/lab/SpeedDialIcon";
 import { TextField, Toggle } from "material-ui";
 import DropDownMenu from "material-ui/DropDownMenu";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import { MenuItem } from "material-ui/Menu";
 import PropTypes from "prop-types";
 import React from "react";
@@ -15,8 +18,8 @@ import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import { withAuthzContext } from "../components/AuthzProvider";
+import CreateCampaignFromTemplateDialog from "../components/CreateCampaignFromTemplateDialog";
 import LoadingIndicator from "../components/LoadingIndicator";
-import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
 import CampaignList from "./CampaignList";
 import { loadData } from "./hoc/with-operations";
@@ -35,6 +38,8 @@ const DEFAULT_PAGE_SIZE = 10;
 
 class AdminCampaignList extends React.Component {
   state = {
+    speedDialOpen: false,
+    createFromTemplateOpen: false,
     isCreating: false,
     campaignsFilter: {
       isArchived: false
@@ -260,14 +265,32 @@ class AdminCampaignList extends React.Component {
         )}
 
         {isAdmin ? (
-          <FloatingActionButton
-            {...dataTest("addCampaign")}
+          <SpeedDial
+            ariaLabel="SpeedDial example"
             style={theme.components.floatingButton}
-            onClick={this.handleClickNewButton}
+            icon={<SpeedDialIcon />}
+            onClose={() => this.setState({ speedDialOpen: false })}
+            onOpen={() => this.setState({ speedDialOpen: true })}
+            open={this.state.speedDialOpen}
+            direction="up"
           >
-            <AddIcon />
-          </FloatingActionButton>
+            <SpeedDialAction
+              icon={<CreateIcon />}
+              tooltipTitle="Create Blank"
+              onClick={this.handleClickNewButton}
+            />
+            <SpeedDialAction
+              icon={<FileCopyIcon />}
+              tooltipTitle="Create from Template"
+              onClick={() => this.setState({ createFromTemplateOpen: true })}
+            />
+          </SpeedDial>
         ) : null}
+        <CreateCampaignFromTemplateDialog
+          organizationId={organizationId}
+          open={this.state.createFromTemplateOpen}
+          onClose={() => this.setState({ createFromTemplateOpen: false })}
+        />
       </div>
     );
   }
