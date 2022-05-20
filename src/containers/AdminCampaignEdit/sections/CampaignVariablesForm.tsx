@@ -16,6 +16,7 @@ import {
 import React, { useCallback } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
+import { allScriptFields } from "../../../lib/scripts";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import { asSection, FullComponentProps } from "../components/SectionWrapper";
 
@@ -151,7 +152,15 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
                       <Controller
                         name={`campaignVariables.${index}.name`}
                         control={control}
-                        rules={{ required: "Variable name is required!" }}
+                        rules={{
+                          required: "Variable name is required!",
+                          validate: (value) => {
+                            if (allScriptFields([]).includes(value)) {
+                              return "Required CSV field names cannot be used for variable names!";
+                            }
+                            return true;
+                          }
+                        }}
                         render={({ field, fieldState: { error } }) => (
                           <TextField
                             {...field}

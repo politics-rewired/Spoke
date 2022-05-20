@@ -13,6 +13,7 @@ import { RelayPaginatedResponse } from "../../../api/pagination";
 import { config } from "../../../config";
 import { gzip, makeTree } from "../../../lib";
 import { parseIanaZone } from "../../../lib/datetime";
+import { allScriptFields } from "../../../lib/scripts";
 import {
   loadContactsFromDataWarehouse,
   uploadContacts
@@ -559,6 +560,16 @@ export const editCampaign = async (
         value: value?.trim() ? value?.trim() : null
       }))
       .filter(({ name }) => !!name);
+
+    if (
+      cleanedPayload.findIndex(({ name }) =>
+        allScriptFields([]).includes(name)
+      ) >= 0
+    ) {
+      throw new Error(
+        "Required CSV field names cannot be used for variable names!"
+      );
+    }
 
     const payload = JSON.stringify(cleanedPayload);
 
