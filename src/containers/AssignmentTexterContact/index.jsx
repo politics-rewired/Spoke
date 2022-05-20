@@ -1,4 +1,5 @@
 /* eslint-disable react/no-unused-state */
+import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import { blueGrey, deepOrange, grey } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
@@ -580,21 +581,25 @@ export class AssignmentTexterContact extends React.Component {
     let button = null;
     if (messageStatus === "closed") {
       button = (
-        <Button
-          variant="contained"
-          onClick={() => this.handleEditMessageStatus("needsResponse")}
-        >
-          Reopen
-        </Button>
+        <Box m={2}>
+          <Button
+            variant="contained"
+            onClick={() => this.handleEditMessageStatus("needsResponse")}
+          >
+            Reopen
+          </Button>
+        </Box>
       );
     } else if (messageStatus === "needsResponse") {
       button = (
-        <Button
-          variant="contained"
-          onClick={this.handleClickCloseContactButton}
-        >
-          Skip Reply
-        </Button>
+        <Box m={2}>
+          <Button
+            variant="contained"
+            onClick={this.handleClickCloseContactButton}
+          >
+            Skip Reply
+          </Button>
+        </Box>
       );
     }
 
@@ -663,22 +668,26 @@ export class AssignmentTexterContact extends React.Component {
           }}
         >
           <Tooltip title="Opt out this contact">
-            <ColorButton
-              {...dataTest("optOut")}
-              variant="contained"
-              backgroundColor={deepOrange[500]}
-              onClick={this.handleOpenOptOutDialog}
-            >
-              Opt out
-            </ColorButton>
+            <Box m={2}>
+              <ColorButton
+                {...dataTest("optOut")}
+                variant="contained"
+                backgroundColor={deepOrange[500]}
+                onClick={this.handleOpenOptOutDialog}
+              >
+                Opt out
+              </ColorButton>
+            </Box>
           </Tooltip>
-          <Button
-            variant="contained"
-            onClick={this.handleOpenPopover}
-            disabled={!isCannedResponseEnabled}
-          >
-            Canned replies
-          </Button>
+          <Box m={2}>
+            <Button
+              variant="contained"
+              onClick={this.handleOpenPopover}
+              disabled={!isCannedResponseEnabled}
+            >
+              Canned replies
+            </Button>
+          </Box>
           {this.renderNeedsResponseToggleButton(contact)}
           <div style={{ flexGrow: 1, textAlign: "center" }}>
             {navigationToolbarChildren}
@@ -708,36 +717,44 @@ export class AssignmentTexterContact extends React.Component {
         <div>
           <Toolbar style={inlineStyles.actionToolbarFirst}>
             <ToolbarGroup>
-              <SendButton
-                threeClickEnabled={campaign.organization.threeClickEnabled}
-                onFinalTouchTap={this.handleClickSendMessageButton}
-                disabled={this.state.disabled}
-              />
+              <Box m={2}>
+                <SendButton
+                  threeClickEnabled={campaign.organization.threeClickEnabled}
+                  onFinalTouchTap={this.handleClickSendMessageButton}
+                  disabled={this.state.disabled}
+                />
+              </Box>
               {this.renderNeedsResponseToggleButton(contact)}
-              <Button
-                variant="contained"
-                onClick={this.handleOpenPopover}
-                disabled={!isCannedResponseEnabled}
-              >
-                Canned responses
-              </Button>
-              <ColorButton
-                {...dataTest("optOut")}
-                variant="contained"
-                backgroundColor={deepOrange[500]}
-                onClick={this.handleOpenOptOutDialog}
-              >
-                Opt out
-              </ColorButton>
-              <Button
-                variant="contained"
-                style={{ backgroundColor: blueGrey[100] }}
-                endIcon={<LocalOfferIcon />}
-                disabled={tags.length === 0}
-                onClick={() => this.setState({ isTagEditorOpen: true })}
-              >
-                Manage Tags
-              </Button>
+              <Box m={2}>
+                <Button
+                  variant="contained"
+                  onClick={this.handleOpenPopover}
+                  disabled={!isCannedResponseEnabled}
+                >
+                  Canned responses
+                </Button>
+              </Box>
+              <Box m={2}>
+                <ColorButton
+                  {...dataTest("optOut")}
+                  variant="contained"
+                  backgroundColor={deepOrange[500]}
+                  onClick={this.handleOpenOptOutDialog}
+                >
+                  Opt out
+                </ColorButton>
+              </Box>
+              <Box m={2}>
+                <Button
+                  variant="contained"
+                  style={{ backgroundColor: blueGrey[100] }}
+                  endIcon={<LocalOfferIcon />}
+                  disabled={tags.length === 0}
+                  onClick={() => this.setState({ isTagEditorOpen: true })}
+                >
+                  Manage Tags
+                </Button>
+              </Box>
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
               </div>
