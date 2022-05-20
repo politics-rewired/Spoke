@@ -829,6 +829,32 @@ const rootMutations = {
       );
     },
 
+    createTemplateCampaign: async (_root, { organizationId }, { user }) => {
+      await accessRequired(
+        user,
+        organizationId,
+        "ADMIN",
+        /* allowSuperadmin= */ true
+      );
+
+      const [templateCampaign] = await r
+        .knex("all_campaign")
+        .insert({
+          organization_id: organizationId,
+          creator_id: user.id,
+          title: "New Template Campaign",
+          description: "",
+          is_started: false,
+          is_archived: false,
+          is_approved: false,
+          is_template: true
+        })
+        .returning("*");
+
+      cacheableData.campaign.reload(templateCampaign.id);
+      return templateCampaign;
+    },
+
     copyCampaign: async (_root, { id }, { user, loaders, db }) => {
       const campaignId = parseInt(id, 10);
       const campaign = await loaders.campaign.load(campaignId);
