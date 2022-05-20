@@ -140,10 +140,10 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
       />
       {fetchLoading && (
         <Grid container spacing={3}>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <Skeleton variant="rect" animation="wave" height={40} />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={10}>
             <Skeleton variant="rect" animation="wave" height={40} />
           </Grid>
         </Grid>
