@@ -384,6 +384,7 @@ export const resolvers = {
         .reader("campaign_variable")
         .where({ campaign_id: campaign.id })
         .whereNull("value")
+        .whereNull("deleted_at")
         .count()
         .then(([{ count }]) => parseInt(count, 10) === 0)
   },
