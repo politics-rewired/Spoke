@@ -230,7 +230,7 @@ const mutations = {
 const queries = {
   data: {
     query: gql`
-      query adminGetCampaigns($organizationId: String!) {
+      query GetAdminAssignmentTargets($organizationId: String!) {
         organization(id: $organizationId) {
           id
           currentAssignmentTargets {

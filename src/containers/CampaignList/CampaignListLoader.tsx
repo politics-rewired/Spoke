@@ -1,66 +1,14 @@
-import { gql } from "@apollo/client";
+import useIntersectionObserverRef from "@rooks/use-intersection-observer-ref";
+import type {
+  GetAdminCampaignsQuery,
+  GetAdminCampaignsQueryVariables
+} from "@spoke/spoke-codegen";
+import { useGetAdminCampaignsQuery } from "@spoke/spoke-codegen";
 import React from "react";
 
-import { Campaign, CampaignsFilter } from "../../api/campaign";
+import { CampaignsFilter } from "../../api/campaign";
 import LoadingIndicator from "../../components/LoadingIndicator";
-import apolloClient from "../../network/apollo-client-singleton";
 import CampaignList from "./CampaignList";
-
-const query = gql`
-  query adminGetCampaigns(
-    $organizationId: String!
-    $limit: Int
-    $after: Cursor
-    $filter: CampaignsFilter
-  ) {
-    organization(id: $organizationId) {
-      id
-      campaignsRelay(first: $limit, after: $after, filter: $filter) {
-        pageInfo {
-          totalCount
-          endCursor
-          hasNextPage
-        }
-        edges {
-          cursor
-          node {
-            id
-            title
-            isStarted
-            isApproved
-            isArchived
-            isAutoassignEnabled
-            hasUnassignedContacts
-            hasUnsentInitialMessages
-            hasUnhandledMessages
-            description
-            dueBy
-            creator {
-              displayName
-            }
-            teams {
-              id
-              title
-            }
-            campaignGroups {
-              edges {
-                node {
-                  id
-                  name
-                }
-              }
-            }
-            externalSystem {
-              id
-              type
-              name
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 interface Props {
   organizationId: string;
@@ -72,129 +20,73 @@ interface Props {
   unarchiveCampaign: (...args: any[]) => any;
 }
 
-interface State {
-  cursor?: string;
-  hasNextPage: boolean;
-  campaigns: Campaign[];
-  loading: boolean;
-  prevY: number;
-  error?: string;
-}
+const CampaignListLoader: React.FC<Props> = (props) => {
+  const {
+    organizationId,
+    campaignsFilter,
+    pageSize,
+    isAdmin,
+    startOperation,
+    archiveCampaign,
+    unarchiveCampaign
+  } = props;
+  const { data, loading, error, fetchMore } = useGetAdminCampaignsQuery({
+    variables: { organizationId, limit: pageSize, filter: campaignsFilter },
+    fetchPolicy: "network-only"
+  });
 
-export class CampaignListLoader extends React.Component<Props, State> {
-  observer?: IntersectionObserver;
+  const callback: IntersectionObserverCallback = (entries) => {
+    if (entries && entries[0]) {
+      const { isIntersecting } = entries[0];
+      const hasNextPage =
+        data?.organization?.campaignsRelay.pageInfo.hasNextPage ?? false;
+      if (isIntersecting && hasNextPage && !loading) {
+        const cursor = data?.organization?.campaignsRelay.pageInfo.endCursor;
+        fetchMore<GetAdminCampaignsQuery, GetAdminCampaignsQueryVariables>({
+          variables: {
+            organizationId,
+            limit: pageSize,
+            filter: campaignsFilter,
+            after: cursor
+          },
+          updateQuery: (previousResult, { fetchMoreResult }) => {
+            if (!fetchMoreResult) return previousResult;
 
-  loadingRef: any;
-
-  state: State = {
-    campaigns: [],
-    prevY: 0,
-    hasNextPage: false,
-    loading: false
-  };
-
-  componentDidMount() {
-    this.getCampaigns();
-
-    const options = {
-      root: null,
-      rootMargin: "0px",
-      threshold: 1.0
-    };
-
-    this.observer = new IntersectionObserver(this.handleObserver, options);
-    this.observer.observe(this.loadingRef);
-  }
-
-  componentDidUpdate(prevProps: Props) {
-    if (
-      prevProps.organizationId !== this.props.organizationId ||
-      prevProps.campaignsFilter.isArchived !==
-        this.props.campaignsFilter.isArchived ||
-      prevProps.pageSize !== this.props.pageSize
-    ) {
-      // eslint-disable-next-line react/no-direct-mutation-state
-      this.state.campaigns = [];
-      this.getCampaigns();
-    }
-  }
-
-  handleObserver = (entities: any[], _observer: IntersectionObserver) => {
-    const { prevY, hasNextPage, cursor, loading } = this.state;
-    const { y } = entities[0].boundingClientRect;
-    if (prevY > y && hasNextPage && !loading) {
-      this.getCampaigns(cursor);
-    }
-    this.setState({ prevY: y });
-  };
-
-  getCampaigns = async (after?: string) => {
-    this.setState({ loading: true, error: undefined });
-
-    try {
-      const {
-        pageSize,
-        organizationId,
-        campaignsFilter: { isArchived }
-      } = this.props;
-
-      const result = await apolloClient.query({
-        query,
-        variables: {
-          ...(pageSize > 0 ? { limit: pageSize } : {}),
-          organizationId,
-          after,
-          filter: {
-            isArchived
+            fetchMoreResult.organization!.campaignsRelay.edges = [
+              ...previousResult.organization!.campaignsRelay.edges,
+              ...fetchMoreResult.organization!.campaignsRelay.edges
+            ];
+            return { ...fetchMoreResult };
           }
-        },
-        fetchPolicy: "network-only"
-      });
-      const {
-        edges,
-        pageInfo: { endCursor, hasNextPage }
-      } = result.data.organization.campaignsRelay;
-      const newCampaigns = edges.map(({ node }: { node: Campaign }) => node);
-      const campaigns = [...this.state.campaigns, ...newCampaigns];
-      this.setState({ campaigns, cursor: endCursor, hasNextPage });
-    } catch (err) {
-      this.setState({ error: err.message });
-    } finally {
-      this.setState({ loading: false });
+        });
+      }
     }
   };
 
-  render() {
-    const {
-      organizationId,
-      isAdmin,
-      startOperation,
-      archiveCampaign,
-      unarchiveCampaign
-    } = this.props;
+  const [loadingRef] = useIntersectionObserverRef(callback, {
+    root: null,
+    rootMargin: "0px",
+    threshold: 1.0
+  });
 
-    const { campaigns, loading, error } = this.state;
+  const campaigns =
+    data?.organization?.campaignsRelay.edges?.map(({ node }) => node) ?? [];
 
-    return (
-      <div>
-        {error && <p>Error fetching campaigns: {error}</p>}
-        <CampaignList
-          organizationId={organizationId}
-          campaigns={campaigns}
-          isAdmin={isAdmin}
-          startOperation={startOperation}
-          archiveCampaign={archiveCampaign}
-          unarchiveCampaign={unarchiveCampaign}
-        />
-        {loading && <LoadingIndicator />}
-        <div
-          ref={(loadingRef) => {
-            this.loadingRef = loadingRef;
-          }}
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      {error && <p>Error fetching campaigns: {error}</p>}
+      <CampaignList
+        organizationId={organizationId}
+        campaigns={campaigns}
+        isAdmin={isAdmin}
+        startOperation={startOperation}
+        archiveCampaign={archiveCampaign}
+        unarchiveCampaign={unarchiveCampaign}
+      />
+      {loading && <LoadingIndicator />}
+      <div ref={loadingRef} />
+    </div>
+  );
+};
 
 export default CampaignListLoader;

@@ -8,13 +8,14 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import { useTheme } from "@material-ui/core/styles";
 import WarningIcon from "@material-ui/icons/Warning";
+import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-import { Campaign } from "../../api/campaign";
 import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
-import CampaignListMenu, { CampaignOperations } from "./CampaignListMenu";
+import type { CampaignOperations } from "./CampaignListMenu";
+import CampaignListMenu from "./CampaignListMenu";
 
 const inlineStyles = {
   chipWrapper: {
@@ -34,7 +35,7 @@ const inlineStyles = {
 interface Props extends CampaignOperations {
   organizationId: string;
   isAdmin: boolean;
-  campaign: Campaign;
+  campaign: CampaignListEntryFragment;
 }
 
 export const CampaignListRow: React.FC<Props> = (props) => {

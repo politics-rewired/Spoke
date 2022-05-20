@@ -1,0 +1,57 @@
+fragment CampaignListEntry on Campaign {
+  id
+  title
+  isStarted
+  isApproved
+  isArchived
+  isAutoassignEnabled
+  hasUnassignedContacts
+  hasUnsentInitialMessages
+  hasUnhandledMessages
+  description
+  dueBy
+  creator {
+    displayName
+  }
+  teams {
+    id
+    title
+  }
+  campaignGroups {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+  externalSystem {
+    id
+    type
+    name
+  }
+}
+
+query GetAdminCampaigns(
+  $organizationId: String!
+  $limit: Int
+  $after: Cursor
+  $filter: CampaignsFilter
+) {
+  organization(id: $organizationId) {
+    id
+    campaignsRelay(first: $limit, after: $after, filter: $filter) {
+      pageInfo {
+        totalCount
+        endCursor
+        hasNextPage
+      }
+      edges {
+        cursor
+        node {
+          ...CampaignListEntry
+        }
+      }
+    }
+  }
+}

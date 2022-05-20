@@ -2,18 +2,17 @@ import IconButton from "@material-ui/core/IconButton";
 import ArchiveIcon from "@material-ui/icons/Archive";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import UnarchiveIcon from "@material-ui/icons/Unarchive";
+import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
 import React from "react";
-
-import { Campaign } from "../../api/campaign";
 
 type ClickHandler = () => void | Promise<void>;
 
 export interface CampaignOperations {
   startOperation: (
     action: string,
-    campaign: Campaign,
+    campaign: CampaignListEntryFragment,
     payload?: any
   ) => ClickHandler;
   archiveCampaign: (campaignId: string) => ClickHandler;
@@ -21,7 +20,7 @@ export interface CampaignOperations {
 }
 
 interface Props extends CampaignOperations {
-  campaign: Campaign;
+  campaign: CampaignListEntryFragment;
 }
 
 export const CampaignListMenu: React.FC<Props> = (props) => {

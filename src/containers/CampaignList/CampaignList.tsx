@@ -1,15 +1,15 @@
 import List from "@material-ui/core/List";
 import SpeakerNotesIcon from "@material-ui/icons/SpeakerNotes";
+import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
 import React from "react";
 
-import { Campaign } from "../../api/campaign";
 import Empty from "../../components/Empty";
 import { CampaignOperations } from "./CampaignListMenu";
 import CampaignListRow from "./CampaignListRow";
 
 interface Props extends CampaignOperations {
   organizationId: string;
-  campaigns: Campaign[];
+  campaigns: CampaignListEntryFragment[];
   isAdmin: boolean;
 }
 
