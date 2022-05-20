@@ -9,7 +9,8 @@ exports.up = function up(knex) {
         value text,
         created_at timestamptz not null default now(),
         updated_at timestamptz not null default now(),
-        deleted_at timestamptz
+        deleted_at timestamptz,
+        constraint check_name check (name ~ '^[a-zA-Z0-9 \\-_]+$')
       );
 
       create unique index campaign_variable_unique_name_per_campaign

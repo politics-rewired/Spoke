@@ -1923,7 +1923,8 @@ CREATE TABLE public.campaign_variable (
     value text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    deleted_at timestamp with time zone
+    deleted_at timestamp with time zone,
+    CONSTRAINT check_name CHECK ((name ~ '^[a-zA-Z0-9 \-_]+$'::text))
 );
 
 

@@ -19,7 +19,7 @@ import sortBy from "lodash/sortBy";
 import React, { useCallback } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
-import { allScriptFields } from "../../../lib/scripts";
+import { allScriptFields, VARIABLE_NAME_REGEXP } from "../../../lib/scripts";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
 import { asSection, FullComponentProps } from "../components/SectionWrapper";
 
@@ -176,6 +176,9 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
                           validate: (value) => {
                             if (allScriptFields([]).includes(value)) {
                               return "Required CSV field names cannot be used for variable names!";
+                            }
+                            if (!VARIABLE_NAME_REGEXP.test(value)) {
+                              return "Special characters cannot be used for variable names!";
                             }
                             return true;
                           }

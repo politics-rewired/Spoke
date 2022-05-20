@@ -15,6 +15,10 @@ export const delimit = (text: string) => {
   return `${startDelimiter}${text}${endDelimiter}`;
 };
 
+export const VARIABLE_NAME_REGEXP = /^[a-zA-Z0-9 \-_]+$/;
+export const TOKEN_REGEXP = /\{[a-zA-Z0-9 \-_]+\}/g;
+export const TOKEN_SPLIT_REGEXP = /(\{[a-zA-Z0-9 \-_]+\})/g;
+
 // const REQUIRED_UPLOAD_FIELDS = ['firstName', 'lastName', 'cell']
 const TOP_LEVEL_UPLOAD_FIELDS = [
   "firstName",
@@ -205,8 +209,7 @@ export const scriptToTokens = (
     { validVariables: [], invalidVariables: [] }
   );
 
-  const tokenRegExp = /(\{[a-zA-Z0-9\s]+\})/g;
-  const scriptTokens = script.split(tokenRegExp).filter(Boolean);
+  const scriptTokens = script.split(TOKEN_SPLIT_REGEXP).filter(Boolean);
 
   const scriptElems = scriptTokens.reduce<ScriptToElemsPayload>(
     (acc, token) => {
@@ -246,7 +249,7 @@ export const scriptToTokens = (
           ]
         };
       }
-      if (/\{[a-zA-Z0-9\s]+\}/.test(token)) {
+      if (TOKEN_REGEXP.test(token)) {
         const newToken = {
           type: ScriptTokenType.UndefinedField,
           text: token
