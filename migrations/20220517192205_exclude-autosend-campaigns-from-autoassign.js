@@ -38,6 +38,10 @@ exports.down = function down(knex) {
   return knex.schema
     .raw(
       `
+        drop view assignable_campaigns_with_needs_message;
+        drop view assignable_campaigns_with_needs_reply;
+        drop view assignable_campaigns;
+
         create or replace view assignable_campaigns as (
           select id, title, organization_id, limit_assignment_to_teams
           from campaign
@@ -64,6 +68,16 @@ exports.down = function down(knex) {
               where campaign.id = assignable_campaigns.id
                 and now() > date_trunc('day', (due_by + interval '24 hours') at time zone campaign.timezone)
             )
+        );
+
+        create or replace view assignable_campaigns_with_needs_reply as (
+          select *
+          from assignable_campaigns
+          where exists (
+            select 1
+            from assignable_needs_reply
+            where campaign_id = assignable_campaigns.id
+          )
         );
       `);
     });
