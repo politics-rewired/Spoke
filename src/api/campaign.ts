@@ -146,9 +146,9 @@ export const schema = `
   }
 
   type CampaignStats {
-    sentMessagesCount: Int
-    receivedMessagesCount: Int
-    optOutsCount: Int
+    sentMessagesCount: Int!
+    receivedMessagesCount: Int!
+    optOutsCount: Int!
     needsMessageOptOutsCount: Int!
     percentUnhandledReplies: Float!
     countMessagedContacts: Int!
