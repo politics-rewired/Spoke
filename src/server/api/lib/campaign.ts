@@ -280,9 +280,13 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           insert into campaign_variable (campaign_id, name, value)
           select
             ? as campaign_id,
-            name,
-            value
+            campaign_variable.name,
+            (case
+              when all_campaign.is_template then null
+              else campaign_variable.value
+            end)
           from campaign_variable
+          join all_campaign on all_campaign.id = campaign_variable.campaign_id
           where campaign_id = ?
         `,
         [newCampaign.id, campaignId]
