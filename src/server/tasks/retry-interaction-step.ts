@@ -70,6 +70,7 @@ export const retryInteractionStep: Task = async (
   const contact = recordToCamelCase<CampaignContact>(campaign_contact);
   const texter = recordToCamelCase<User>(user);
   const customFields = Object.keys(JSON.parse(contact.customFields));
+  const campaignVariableIds = campaignVariables.map(({ id }) => id);
 
   const body = applyScript({
     script,
@@ -84,7 +85,8 @@ export const retryInteractionStep: Task = async (
     contactNumber: campaign_contact.cell,
     assignmentId: assignment_id,
     userId: `${user.id}`,
-    versionHash: md5(script)
+    versionHash: md5(script),
+    campaignVariableIds
   };
 
   await r.knex.transaction(async (trx) => {

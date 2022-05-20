@@ -324,15 +324,19 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   createMessageToContact = (text) => {
-    const { texter, assignment } = this.props;
+    const { texter, campaign, assignment } = this.props;
     const { contact } = this.props;
+    const campaignVariableIds = campaign.campaignVariables.edges.map(
+      ({ node: { id } }) => id
+    );
 
     return {
       contactNumber: contact.cell,
       userId: texter.id,
       text,
       assignmentId: assignment.id,
-      versionHash: this.state.messageVersionHash
+      versionHash: this.state.messageVersionHash,
+      campaignVariableIds
     };
   };
 
