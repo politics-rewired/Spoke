@@ -3,6 +3,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
 import CreateIcon from "@material-ui/icons/Create";
 import DeleteIcon from "@material-ui/icons/Delete";
 import InfoIcon from "@material-ui/icons/Info";
@@ -195,15 +196,13 @@ class GSScriptOptionsField extends GSFormField {
     return (
       <div>
         Scripts
-        <IconButton
-          tooltip="For best deliverability results add a few versions of the script with
+        <Tooltip
+          title="For best deliverability results add a few versions of the script with
           different wordings. This makes your texts look more natural."
-          tooltipPosition="top-right"
-          iconStyle={{ width: 20, height: 20 }}
-          style={{ width: 40, height: 40, padding: 10 }}
+          placement="right-start"
         >
-          <InfoIcon />
-        </IconButton>
+          <InfoIcon fontSize="small" />
+        </Tooltip>
         {scriptVersions.map((scriptVersion, index) => (
           <div
             key={scriptVersion}
