@@ -175,7 +175,11 @@ class GSScriptOptionsField extends GSFormField {
 
   render() {
     // The "errors" prop is an empty object and is not mentioned in yum or react-formal documentation
-    const { customFields, value: scriptVersions } = this.props;
+    const {
+      customFields,
+      campaignVariables,
+      value: scriptVersions
+    } = this.props;
 
     const canDelete = scriptVersions.length > 1;
     const emptyVersionExists =
@@ -196,6 +200,7 @@ class GSScriptOptionsField extends GSFormField {
             key={scriptVersion}
             label={`Script Version ${index + 1}`}
             customFields={customFields}
+            campaignVariables={campaignVariables}
             script={scriptVersion}
             onEditScript={this.createDialogHandler(scriptVersion)}
             onDelete={canDelete && this.createDeleteHandler(scriptVersion)}

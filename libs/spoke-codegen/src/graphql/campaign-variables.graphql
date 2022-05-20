@@ -53,6 +53,7 @@ mutation EditCampaignVariables(
     readiness {
       id
       campaignVariables
+      interactions
     }
   }
 }
