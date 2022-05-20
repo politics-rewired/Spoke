@@ -356,12 +356,14 @@ export const resolvers = {
               where
                 campaign_id = ?
                 and value is null
+                and deleted_at is null
             ),
             interactions as (
               select unnest(script_options) as script_option
               from interaction_step
               where
                 campaign_id = ?
+                and is_deleted = false
             )
             select exists (
               select 1
@@ -751,6 +753,7 @@ export const resolvers = {
       const query = r
         .reader("campaign_variable")
         .where({ campaign_id: campaign.id })
+        .whereNull("deleted_at")
         .select("*");
       const result = await formatPage(query, { after, first });
       return result;

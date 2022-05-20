@@ -555,7 +555,8 @@ export const editCampaign = async (
     campaign.campaignVariables
   ) {
     const cleanedPayload = campaign.campaignVariables
-      .map(({ name, value }) => ({
+      .map(({ order, name, value }) => ({
+        display_order: order,
         name: name.trim(),
         value: value?.trim() ? value?.trim() : null
       }))
@@ -578,20 +579,41 @@ export const editCampaign = async (
         `
           with payload as (
             select * from json_populate_recordset(null::campaign_variable, ?::json)
+          )
+          update campaign_variable
+          set deleted_at = now()
+          from payload
+          where
+            campaign_variable.campaign_id = ?
+            and payload.name = campaign_variable.name
+            and payload.value is distinct from campaign_variable.value
+          returning *
+        `,
+        [payload, id]
+      );
+
+      await trx.raw(
+        `
+          with payload as (
+            select * from json_populate_recordset(null::campaign_variable, ?::json)
           ),
           new_variable_ids as (
-            insert into campaign_variable (campaign_id, name, value)
-            select ?, name, value
+            insert into campaign_variable (campaign_id, display_order, name, value)
+            select ?, display_order, name, value
             from payload
-            on conflict (campaign_id, name) do update
-              set value = EXCLUDED.value
+            on conflict (campaign_id, name) where deleted_at is null
+              do update set
+                display_order = EXCLUDED.display_order,
+                value = EXCLUDED.value
             returning id
           ),
           deleted_ids as (
-            delete from campaign_variable
+            update campaign_variable
+            set deleted_at = now()
             where
-              campaign_id = ?
+              campaign_variable.campaign_id = ?
               and id not in ( select id from new_variable_ids )
+              and deleted_at is null
             returning id
           )
           select count(*) from deleted_ids

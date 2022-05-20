@@ -1918,10 +1918,12 @@ ALTER SEQUENCE public.campaign_team_id_seq OWNED BY public.campaign_team.id;
 CREATE TABLE public.campaign_variable (
     id integer NOT NULL,
     campaign_id integer NOT NULL,
+    display_order integer NOT NULL,
     name text NOT NULL,
     value text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    deleted_at timestamp with time zone
 );
 
 
@@ -2620,6 +2622,7 @@ CREATE TABLE public.message (
     error_codes text[],
     num_segments smallint,
     num_media smallint,
+    campaign_variable_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
     CONSTRAINT message_send_status_check CHECK ((send_status = ANY (ARRAY['QUEUED'::text, 'SENDING'::text, 'SENT'::text, 'DELIVERED'::text, 'ERROR'::text, 'PAUSED'::text, 'NOT_ATTEMPTED'::text])))
 )
 WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='50');
@@ -4012,14 +4015,6 @@ ALTER TABLE ONLY public.unhealthy_link_domain
 
 
 --
--- Name: campaign_variable unique_name_per_campaign; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.campaign_variable
-    ADD CONSTRAINT unique_name_per_campaign UNIQUE (campaign_id, name);
-
-
---
 -- Name: canned_response unique_per_campaign; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4188,6 +4183,13 @@ CREATE INDEX campaign_limit_assignment_to_teams_index ON public.all_campaign USI
 --
 
 CREATE INDEX campaign_organization_id_index ON public.all_campaign USING btree (organization_id);
+
+
+--
+-- Name: campaign_variable_unique_name_per_campaign; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX campaign_variable_unique_name_per_campaign ON public.campaign_variable USING btree (campaign_id, name) WHERE (deleted_at IS NULL);
 
 
 --

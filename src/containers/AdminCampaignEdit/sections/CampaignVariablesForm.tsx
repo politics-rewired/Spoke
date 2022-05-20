@@ -7,12 +7,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import DeleteIcon from "@material-ui/icons/Delete";
+import Alert from "@material-ui/lab/Alert";
+import AlertTitle from "@material-ui/lab/AlertTitle";
 import Skeleton from "@material-ui/lab/Skeleton";
 import {
   GetCampaignVariablesDocument,
   useEditCampaignVariablesMutation,
   useGetCampaignVariablesQuery
 } from "@spoke/spoke-codegen";
+import sortBy from "lodash/sortBy";
 import React, { useCallback } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
@@ -70,10 +73,15 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
     onCompleted: (data) => {
       const nodes =
         data?.campaign?.campaignVariables.edges.map(({ node }) => node) ?? [];
-      const campaignVariables = nodes.map((thing) => ({
-        name: thing.name,
-        value: thing.value ?? ""
-      }));
+      const campaignVariables = sortBy(
+        nodes.map((thing) => ({
+          order: thing.order,
+          name: thing.name,
+          value: thing.value ?? ""
+        })),
+        ["order"]
+      );
+
       // Wait for useForm's subscription to be ready before reset() sends a signal to flush form state update
       setTimeout(() => {
         reset({ campaignVariables });
@@ -82,7 +90,7 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
   });
   const [
     editVariables,
-    { loading: saveLoading }
+    { loading: saveLoading, error: saveError }
   ] = useEditCampaignVariablesMutation({
     refetchQueries: [
       { query: GetCampaignVariablesDocument, variables: { campaignId } }
@@ -111,7 +119,9 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
 
   const handleSave = useCallback(
     async (formValues: FormValues) => {
-      const payload = formValues.campaignVariables.filter(({ name }) => !!name);
+      const payload = formValues.campaignVariables
+        .filter(({ name }) => !!name)
+        .map((variable, index) => ({ ...variable, order: index }));
       await editVariables({
         variables: { campaignId, campaignVariables: payload }
       });
@@ -139,7 +149,16 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
         </Grid>
       )}
       {fetchError && (
-        <p>Error fetching campaign variables: {fetchError.message}</p>
+        <Alert severity="error">
+          <AlertTitle>Error fetching Campaign Variables</AlertTitle>
+          {fetchError.message}
+        </Alert>
+      )}
+      {saveError && (
+        <Alert severity="error">
+          <AlertTitle>Error saving Campaign Variables</AlertTitle>
+          {saveError.message}
+        </Alert>
       )}
       <form onSubmit={handleSubmit(handleSave)}>
         {!fetchLoading && !fetchError && (
