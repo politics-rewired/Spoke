@@ -281,6 +281,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     filterDeleted: true,
     stripLocals: true
   });
+
   const isSaveDisabled =
     isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
   const finalSaveLabel = isWorking ? "Working..." : saveLabel;
