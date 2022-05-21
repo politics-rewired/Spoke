@@ -2638,6 +2638,7 @@ CREATE TABLE public.message (
     error_codes text[],
     num_segments smallint,
     num_media smallint,
+    campaign_variable_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
     CONSTRAINT message_send_status_check CHECK ((send_status = ANY (ARRAY['QUEUED'::text, 'SENDING'::text, 'SENT'::text, 'DELIVERED'::text, 'ERROR'::text, 'PAUSED'::text, 'NOT_ATTEMPTED'::text])))
 )
 WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='50');

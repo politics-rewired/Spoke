@@ -359,12 +359,44 @@ export const resolvers = {
       );
       return use_dynamic_assignment || is_fully_assigned;
     },
-    interactions: (campaign) =>
-      r
+    interactions: async (campaign) => {
+      const hasSteps = await r
         .reader("interaction_step")
         .where({ campaign_id: campaign.id })
         .count()
-        .then(([{ count }]) => count > 0),
+        .then(([{ count }]) => parseInt(count, 10) > 0);
+
+      const hasIncompleteSteps = await r.reader
+        .raw(
+          `
+            with incomplete_variables as (
+              select concat('{', name, '}') as name
+              from campaign_variable
+              where
+                campaign_id = ?
+                and value is null
+                and deleted_at is null
+            ),
+            interactions as (
+              select unnest(script_options) as script_option
+              from interaction_step
+              where
+                campaign_id = ?
+                and is_deleted = false
+            )
+            select exists (
+              select 1
+              from interactions
+              cross join incomplete_variables
+              where interactions.script_option like concat('%', incomplete_variables.name, '%')
+            ) as uses_incomplete_step
+          `,
+          [campaign.id, campaign.id]
+        )
+        .then(({ rows: [{ uses_incomplete_step }] }) => uses_incomplete_step);
+
+      return hasSteps && !hasIncompleteSteps;
+    },
     campaignGroups: () => true,
     campaignVariables: (campaign) =>
       r

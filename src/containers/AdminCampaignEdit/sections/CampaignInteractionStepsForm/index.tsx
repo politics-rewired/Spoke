@@ -1,6 +1,7 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
+import { CampaignVariablePage } from "@spoke/spoke-codegen";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
@@ -18,6 +19,7 @@ import ScriptPreviewButton from "../../../../components/ScriptPreviewButton";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
+import { scriptToTokens } from "../../../../lib/scripts";
 import { MutationMap, QueryMap } from "../../../../network/types";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
@@ -63,6 +65,7 @@ interface HocProps {
       "id" | "isStarted" | "customFields" | "externalSystem"
     > & {
       interactionSteps: InteractionStepWithLocalState[];
+      campaignVariables: CampaignVariablePage;
     };
   };
   availableActions: {
@@ -266,13 +269,20 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     isNew,
     saveLabel,
     data: {
-      campaign: { customFields, externalSystem } = {
+      campaign: {
+        customFields,
+        campaignVariables: { edges: campaignVariableEdges },
+        externalSystem
+      } = {
         customFields: [],
+        campaignVariables: { edges: [] },
         externalSystem: null
       }
     },
     availableActions: { availableActions }
   } = props;
+
+  const campaignVariables = campaignVariableEdges.map(({ node }) => node);
 
   const {
     interactionSteps,
@@ -284,8 +294,24 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     stripLocals: true
   });
 
+  const hasInvalidFields = interactionSteps.reduce<boolean>((acc, step) => {
+    let result = acc;
+    for (const scriptOption of step.scriptOptions) {
+      const { invalidCampaignVariablesUsed } = scriptToTokens({
+        script: scriptOption ?? "",
+        customFields,
+        campaignVariables
+      });
+      result = result || invalidCampaignVariablesUsed.length > 0;
+    }
+    return result;
+  }, false);
+
   const isSaveDisabled =
-    isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
+    isWorking ||
+    hasEmptyScripts ||
+    hasInvalidFields ||
+    (!isNew && !hasPendingChanges);
   const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
   const tree = makeTree(interactionSteps);
@@ -337,6 +363,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}
+        campaignVariables={campaignVariables}
         integrationSourced={externalSystem !== null}
         availableActions={availableActions}
         hasBlockCopied={hasBlockCopied}
@@ -359,6 +386,11 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       </Button>
       {hasEmptyScripts && (
         <p style={{ color: "#DD0000" }}>You have one or more empty scripts!</p>
+      )}
+      {hasInvalidFields && (
+        <p style={{ color: "#DD0000" }}>
+          You have one or more scripts using variables without values!
+        </p>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { CampaignVariable } from "@spoke/spoke-codegen";
 import axios from "axios";
 import escapeRegExp from "lodash/escapeRegExp";
 
@@ -15,6 +16,8 @@ export const delimit = (text: string) => {
 };
 
 export const VARIABLE_NAME_REGEXP = /^[a-zA-Z0-9 \-_]+$/;
+export const TOKEN_REGEXP = /\{[a-zA-Z0-9 \-_]+\}/g;
+export const TOKEN_SPLIT_REGEXP = /(\{[a-zA-Z0-9 \-_]+\})/g;
 
 // const REQUIRED_UPLOAD_FIELDS = ['firstName', 'lastName', 'cell']
 const TOP_LEVEL_UPLOAD_FIELDS = [
@@ -90,6 +93,7 @@ interface ApplyScriptOptions {
   script: string;
   contact: CampaignContact;
   customFields: string[];
+  campaignVariables: { name: string; value: string }[];
   texter: User;
 }
 
@@ -97,6 +101,7 @@ export const applyScript = ({
   script,
   contact,
   customFields,
+  campaignVariables,
   texter
 }: ApplyScriptOptions) => {
   const scriptFields = allScriptFields(customFields);
@@ -109,6 +114,12 @@ export const applyScript = ({
       getScriptFieldValue(contact, texter, field)
     );
   }
+
+  for (const field of campaignVariables) {
+    const re = new RegExp(escapeRegExp(delimit(field.name)), "g");
+    appliedScript = appliedScript.replace(re, field.value);
+  }
+
   return appliedScript;
 };
 
@@ -137,12 +148,15 @@ export const isAttachmentImage = async (text: string) => {
 export enum ScriptTokenType {
   Text = "Text",
   CustomField = "CustomField",
-  UndefinedField = "UndefinedField"
+  UndefinedField = "UndefinedField",
+  ValidCampaignVariable = "ValidCampaignVariable",
+  InvalidCampaignVariable = "InvalidCampaignVariable"
 }
 
 export interface ScriptToElemsOptions {
   script: string;
   customFields: string[];
+  campaignVariables: CampaignVariable[];
 }
 
 export type ScriptToken = { type: ScriptTokenType; text: string };
@@ -151,27 +165,51 @@ export interface ScriptToElemsPayload {
   tokens: ScriptToken[];
   customFieldsUsed: string[];
   undefinedFieldsUsed: string[];
+  validCampaignVariablesUsed: string[];
+  invalidCampaignVariablesUsed: string[];
 }
 
 export const scriptToTokens = (
   options: ScriptToElemsOptions
 ): ScriptToElemsPayload => {
-  const { script, customFields } = options;
+  const { script, customFields, campaignVariables } = options;
 
   if (script.trim().length === 0) {
     return {
       tokens: [],
       customFieldsUsed: [],
-      undefinedFieldsUsed: []
+      undefinedFieldsUsed: [],
+      validCampaignVariablesUsed: [],
+      invalidCampaignVariablesUsed: []
     };
   }
 
   const customFieldTags = allScriptFields(customFields).map(
     (customField) => `{${customField}}`
   );
+  const { validVariables, invalidVariables } = campaignVariables.reduce<{
+    validVariables: string[];
+    invalidVariables: string[];
+  }>(
+    (acc, campaignVariable) => {
+      if (campaignVariable.value === null) {
+        return {
+          ...acc,
+          invalidVariables: [
+            ...acc.invalidVariables,
+            `{${campaignVariable.name}}`
+          ]
+        };
+      }
+      return {
+        ...acc,
+        validVariables: [...acc.validVariables, `{${campaignVariable.name}}`]
+      };
+    },
+    { validVariables: [], invalidVariables: [] }
+  );
 
-  const tokenRegExp = /(\{[a-zA-Z0-9\s]+\})/g;
-  const scriptTokens = script.split(tokenRegExp).filter(Boolean);
+  const scriptTokens = script.split(TOKEN_SPLIT_REGEXP).filter(Boolean);
 
   const scriptElems = scriptTokens.reduce<ScriptToElemsPayload>(
     (acc, token) => {
@@ -186,7 +224,32 @@ export const scriptToTokens = (
           customFieldsUsed: [...acc.customFieldsUsed, token]
         };
       }
-      if (/\{[a-zA-Z0-9\s]+\}/.test(token)) {
+      if (validVariables.includes(token)) {
+        const newToken = {
+          type: ScriptTokenType.ValidCampaignVariable,
+          text: token
+        };
+        return {
+          ...acc,
+          tokens: [...acc.tokens, newToken],
+          validCampaignVariablesUsed: [...acc.validCampaignVariablesUsed, token]
+        };
+      }
+      if (invalidVariables.includes(token)) {
+        const newToken = {
+          type: ScriptTokenType.InvalidCampaignVariable,
+          text: token
+        };
+        return {
+          ...acc,
+          tokens: [...acc.tokens, newToken],
+          invalidCampaignVariablesUsed: [
+            ...acc.invalidCampaignVariablesUsed,
+            token
+          ]
+        };
+      }
+      if (TOKEN_REGEXP.test(token)) {
         const newToken = {
           type: ScriptTokenType.UndefinedField,
           text: token
@@ -209,7 +272,9 @@ export const scriptToTokens = (
     {
       tokens: [],
       customFieldsUsed: [],
-      undefinedFieldsUsed: []
+      undefinedFieldsUsed: [],
+      validCampaignVariablesUsed: [],
+      invalidCampaignVariablesUsed: []
     }
   );
 
