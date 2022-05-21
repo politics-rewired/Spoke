@@ -286,7 +286,8 @@ export const sendMessage = async (
     is_from_contact: false,
     queued_at: new Date(),
     send_before: sendBefore,
-    script_version_hash: message.versionHash
+    script_version_hash: message.versionHash,
+    campaign_variable_ids: message.campaignVariableIds
   };
 
   const messageSavePromise = trx("message")

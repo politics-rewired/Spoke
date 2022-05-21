@@ -33,6 +33,15 @@ export const GET_CAMPAIGN_INTERACTIONS = gql`
         ...EditInteractionStep
       }
       customFields
+      campaignVariables {
+        edges {
+          node {
+            id
+            name
+            value
+          }
+        }
+      }
       externalSystem {
         id
       }

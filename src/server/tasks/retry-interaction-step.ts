@@ -61,15 +61,24 @@ export const retryInteractionStep: Task = async (
 
   const { campaign_contact, interaction_step, assignment_id, user } = record;
 
+  const { rows: campaignVariables } = await helpers.query<
+    CampaignVariableRecord
+  >(
+    "select * from campaign_variable where campaign_id = $1 and deleted_at is null",
+    [campaign_contact.campaign_id]
+  );
+
   const script = sample(interaction_step.script_options)!;
   const contact = recordToCamelCase<CampaignContact>(campaign_contact);
   const texter = recordToCamelCase<User>(user);
   const customFields = Object.keys(JSON.parse(contact.customFields));
+  const campaignVariableIds = campaignVariables.map(({ id }) => id);
 
   const body = applyScript({
     script,
     contact,
     customFields,
+    campaignVariables,
     texter
   });
 
@@ -78,7 +87,8 @@ export const retryInteractionStep: Task = async (
     contactNumber: campaign_contact.cell,
     assignmentId: assignment_id,
     userId: `${user.id}`,
-    versionHash: md5(script)
+    versionHash: md5(script),
+    campaignVariableIds
   };
 
   await r.knex.transaction(async (trx) => {
