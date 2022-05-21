@@ -49,7 +49,7 @@ export const sendEmail = async (options: SendMailOptions) => {
     return null;
   }
 
-  if (!params.text || !params.html) {
+  if (!params.text && !params.html) {
     throw new Error("Empty email body!");
   }
 
