@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.28.0](https://github.com/politics-rewired/spoke/compare/v4.27.0...v4.28.0) (2022-05-21)
+
+
+### Features
+
+* add option to create campaign(s) from template ([#1224](https://github.com/politics-rewired/spoke/issues/1224)) ([1354599](https://github.com/politics-rewired/spoke/commit/135459946a8e5f0036a78606de475c7a4d306e53))
+
+
+### Bug Fixes
+
+* **template-campaigns:** add missing resolver ([#1225](https://github.com/politics-rewired/spoke/issues/1225)) ([0c992e6](https://github.com/politics-rewired/spoke/commit/0c992e6d25bc1d6d4f6836d87da7e735c590d54f))
+* match mui v0 styling with v4 buttons ([#1223](https://github.com/politics-rewired/spoke/issues/1223)) ([77e54ae](https://github.com/politics-rewired/spoke/commit/77e54aeb9ff50ab76af2d943f466abf42d7dcae8))
+* require returning non null campaign stats ([#1222](https://github.com/politics-rewired/spoke/issues/1222)) ([0046f31](https://github.com/politics-rewired/spoke/commit/0046f317847c698493aa13d81b169a339cbaeff7))
+* turn off initial autoassignment for campaigns that are autosending ([#1208](https://github.com/politics-rewired/spoke/issues/1208)) ([2c154a3](https://github.com/politics-rewired/spoke/commit/2c154a3cb55e6e159509349cd63a53755a668331))
+* **passport:** standardize on spoke user ([#1215](https://github.com/politics-rewired/spoke/issues/1215)) ([dd56bd3](https://github.com/politics-rewired/spoke/commit/dd56bd33af25988bf39abf8dcbbb758de6f0d811))
+
 ## [4.27.0](https://github.com/politics-rewired/spoke/compare/v4.26.3...v4.27.0) (2022-05-19)
 
 
