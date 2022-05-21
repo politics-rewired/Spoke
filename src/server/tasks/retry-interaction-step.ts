@@ -62,9 +62,10 @@ export const retryInteractionStep: Task = async (
 
   const { rows: campaignVariables } = await helpers.query<
     CampaignVariableRecord
-  >("select * from campaign_variable where campaign_id = ?", [
-    campaign_contact.campaign_id
-  ]);
+  >(
+    "select * from campaign_variable where campaign_id = $1 and deleted_at is null",
+    [campaign_contact.campaign_id]
+  );
 
   const script = sample(interaction_step.script_options)!;
   const contact = recordToCamelCase<CampaignContact>(campaign_contact);
