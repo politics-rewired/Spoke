@@ -1,4 +1,5 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
@@ -58,7 +59,7 @@ interface HocProps {
   data: {
     campaign: Pick<
       Campaign,
-      "id" | "isStarted" | "customFields" | "externalSystem"
+      "id" | "isStarted" | "customFields" | "externalSystem" | "previewUrl"
     > & {
       interactionSteps: InteractionStepWithLocalState[];
     };
@@ -264,9 +265,10 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     isNew,
     saveLabel,
     data: {
-      campaign: { customFields, externalSystem } = {
+      campaign: { customFields, externalSystem, previewUrl } = {
         customFields: [],
-        externalSystem: null
+        externalSystem: null,
+        previewUrl: null
       }
     },
     availableActions: { availableActions }
@@ -325,8 +327,18 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       </Dialog>
       <CampaignFormSectionHeading
         title="What do you want to discuss?"
-        subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
+        subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity. Click the Script Preview button below to view an outline of your script."
       />
+      <Box m={2}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            window.open(`/preview/${previewUrl}`, "_blank");
+          }}
+        >
+          Script Preview
+        </Button>
+      </Box>
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}
@@ -404,6 +416,7 @@ const mutations: MutationMap<FullComponentProps> = {
             id
             interactions
           }
+          previewUrl
         }
       }
       ${EditInteractionStepFragment}
