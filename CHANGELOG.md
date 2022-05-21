@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.28.1](https://github.com/politics-rewired/spoke/compare/v4.28.0...v4.28.1) (2022-05-21)
+
+
+### Bug Fixes
+
+* fix check for blank email ([94e5848](https://github.com/politics-rewired/spoke/commit/94e58481f063299e95d3be5157745ee69e404397))
+
 ## [4.28.0](https://github.com/politics-rewired/spoke/compare/v4.27.0...v4.28.0) (2022-05-21)
 
 
