@@ -13,6 +13,7 @@ import { RelayPaginatedResponse } from "../../../api/pagination";
 import { config } from "../../../config";
 import { gzip, makeTree } from "../../../lib";
 import { parseIanaZone } from "../../../lib/datetime";
+import { allScriptFields } from "../../../lib/scripts";
 import {
   loadContactsFromDataWarehouse,
   uploadContacts
@@ -274,6 +275,27 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
         [newCampaign.id, campaignId]
       );
 
+      // Copy Campaign Variables
+      await trx.raw(
+        `
+          insert into campaign_variable (campaign_id, display_order, name, value)
+          select
+            ? as campaign_id,
+            display_order,
+            campaign_variable.name,
+            (case
+              when all_campaign.is_template then null
+              else campaign_variable.value
+            end)
+          from campaign_variable
+          join all_campaign on all_campaign.id = campaign_variable.campaign_id
+          where
+            campaign_id = ?
+            and deleted_at is null
+        `,
+        [newCampaign.id, campaignId]
+      );
+
       return newCampaign;
     };
 
@@ -528,6 +550,79 @@ export const editCampaign = async (
       campaignId: id,
       assignmentInputs,
       ignoreAfterDate
+    });
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(campaign, "campaignVariables") &&
+    campaign.campaignVariables
+  ) {
+    const cleanedPayload = campaign.campaignVariables
+      .map(({ order, name, value }) => ({
+        display_order: order,
+        name: name.trim(),
+        value: value?.trim() ? value?.trim() : null
+      }))
+      .filter(({ name }) => !!name);
+
+    if (
+      cleanedPayload.findIndex(({ name }) =>
+        allScriptFields([]).includes(name)
+      ) >= 0
+    ) {
+      throw new Error(
+        "Required CSV field names cannot be used for variable names!"
+      );
+    }
+
+    const payload = JSON.stringify(cleanedPayload);
+
+    await r.knex.transaction(async (trx) => {
+      await trx.raw(
+        `
+          with payload as (
+            select * from json_populate_recordset(null::campaign_variable, ?::json)
+          )
+          update campaign_variable
+          set deleted_at = now()
+          from payload
+          where
+            campaign_variable.campaign_id = ?
+            and payload.name = campaign_variable.name
+            and payload.value is distinct from campaign_variable.value
+          returning *
+        `,
+        [payload, id]
+      );
+
+      await trx.raw(
+        `
+          with payload as (
+            select * from json_populate_recordset(null::campaign_variable, ?::json)
+          ),
+          new_variable_ids as (
+            insert into campaign_variable (campaign_id, display_order, name, value)
+            select ?, display_order, name, value
+            from payload
+            on conflict (campaign_id, name) where deleted_at is null
+              do update set
+                display_order = EXCLUDED.display_order,
+                value = EXCLUDED.value
+            returning id
+          ),
+          deleted_ids as (
+            update campaign_variable
+            set deleted_at = now()
+            where
+              campaign_variable.campaign_id = ?
+              and id not in ( select id from new_variable_ids )
+              and deleted_at is null
+            returning id
+          )
+          select count(*) from deleted_ids
+        `,
+        [payload, id, id]
+      );
     });
   }
 

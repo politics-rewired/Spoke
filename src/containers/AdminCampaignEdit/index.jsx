@@ -59,6 +59,7 @@ import CampaignOverlapManager from "./sections/CampaignOverlapManager";
 import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
 import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
+import CampaignVariablesForm from "./sections/CampaignVariablesForm";
 
 const extractStageAndStatus = (percentComplete) => {
   if (percentComplete > 100) {
@@ -512,6 +513,22 @@ class AdminCampaignEdit extends React.Component {
         blocksStarting: false,
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true
+      },
+      {
+        title: "Campaign Variables",
+        content: CampaignVariablesForm,
+        isStandalone: true,
+        showForModes: [
+          CampaignBuilderMode.Basic,
+          CampaignBuilderMode.Advanced,
+          CampaignBuilderMode.Template
+        ],
+        keys: ["campaignVariables"],
+        checkCompleted: () => true,
+        blocksStarting: false,
+        expandAfterCampaignStarts: true,
+        expandableBySuperVolunteers: false,
+        extraProps: {}
       },
       {
         title: "Interactions",
