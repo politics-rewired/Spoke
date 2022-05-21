@@ -1,4 +1,5 @@
 import { useTheme } from "@material-ui/core";
+import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -107,6 +108,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
   const stepCanHaveChildren = isRootStep || answerOption;
   const isAbleToAddResponse =
     stepHasQuestion && stepHasScript && stepCanHaveChildren;
+  const childStepsLength = childSteps?.length;
 
   const clipboardEnabled = supportsClipboard();
 
@@ -145,10 +147,17 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
               : "Enter a script for your texter along with the question you want the texter be able to answer on behalf of the contact."
           }
           action={
-            childSteps?.length > 0 && (
-              <IconButton onClick={handleToggleExpanded}>
-                {expanded ? <ExpandLess /> : <ExpandMore />}
-              </IconButton>
+            childStepsLength > 0 && (
+              <Badge
+                badgeContent={childStepsLength}
+                color="primary"
+                overlap="circular"
+                invisible={expanded}
+              >
+                <IconButton onClick={handleToggleExpanded}>
+                  {expanded ? <ExpandLess /> : <ExpandMore />}
+                </IconButton>
+              </Badge>
             )
           }
         />
