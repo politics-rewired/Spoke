@@ -346,7 +346,15 @@ export const resolvers = {
         .where({ campaign_id: campaign.id })
         .count()
         .then(([{ count }]) => count > 0),
-    campaignGroups: () => true
+    campaignGroups: () => true,
+    campaignVariables: (campaign) =>
+      r
+        .reader("campaign_variable")
+        .where({ campaign_id: campaign.id })
+        .whereNull("value")
+        .whereNull("deleted_at")
+        .count()
+        .then(([{ count }]) => parseInt(count, 10) === 0)
   },
   CampaignsReturn: {
     __resolveType(obj, _context, _) {
@@ -704,6 +712,18 @@ export const resolvers = {
           "campaign_group.id"
         )
         .where({ campaign_id: campaign.id });
+      const result = await formatPage(query, { after, first });
+      return result;
+    },
+    campaignVariables: async (campaign, { after, first }, { user }) => {
+      const organizationId = parseInt(campaign.organization_id, 10);
+      await accessRequired(user, organizationId, UserRoleType.TEXTER);
+
+      const query = r
+        .reader("campaign_variable")
+        .where({ campaign_id: campaign.id })
+        .whereNull("deleted_at")
+        .select("*");
       const result = await formatPage(query, { after, first });
       return result;
     }

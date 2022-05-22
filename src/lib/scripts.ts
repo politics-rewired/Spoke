@@ -14,6 +14,8 @@ export const delimit = (text: string) => {
   return `${startDelimiter}${text}${endDelimiter}`;
 };
 
+export const VARIABLE_NAME_REGEXP = /^[a-zA-Z0-9 \-_]+$/;
+
 // const REQUIRED_UPLOAD_FIELDS = ['firstName', 'lastName', 'cell']
 const TOP_LEVEL_UPLOAD_FIELDS = [
   "firstName",

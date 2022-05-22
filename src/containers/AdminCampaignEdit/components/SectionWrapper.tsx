@@ -239,6 +239,7 @@ const makeQueries = (jobTypes: string[]) => ({
             interactions
             texters
             campaignGroups
+            campaignVariables
           }
         }
       }

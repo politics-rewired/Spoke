@@ -3,6 +3,7 @@ import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as campaignSchema } from "./campaign";
 import { schema as campaignContactSchema } from "./campaign-contact";
 import { schema as campaignGroupSchema } from "./campaign-group";
+import { schema as campaignVariableSchema } from "./campaign-variable";
 import { schema as cannedResponseSchema } from "./canned-response";
 import { schema as conversationSchema } from "./conversations";
 import { schema as externalActivistCodeSchema } from "./external-activist-code";
@@ -358,6 +359,7 @@ export const schema = [
   noticeSchema,
   campaignContactSchema,
   campaignGroupSchema,
+  campaignVariableSchema,
   cannedResponseSchema,
   questionResponseSchema,
   questionSchema,

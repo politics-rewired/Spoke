@@ -1,6 +1,10 @@
 /* eslint-disable no-unused-vars */
 import type { CampaignContactInput } from "./campaign-contact";
 import type { CampaignGroupPage } from "./campaign-group";
+import type {
+  CampaignVariableInput,
+  CampaignVariablePage
+} from "./campaign-variable";
 import type { CannedResponseInput } from "./canned-response";
 import type { ExternalSystem } from "./external-system";
 import type {
@@ -77,6 +81,7 @@ export interface CampaignInput {
   teamIds: string[];
   campaignGroupIds: string[] | null;
   texters: TexterInput | null;
+  campaignVariables: CampaignVariableInput[] | null;
   interactionSteps: InteractionStepWithChildren;
   cannedResponses: CannedResponseInput[];
   textingHoursStart: number | null;
@@ -114,6 +119,7 @@ export interface Campaign {
   hasUnhandledMessages?: boolean | null;
   teams: Team[];
   campaignGroups?: CampaignGroupPage | null;
+  campaignVariables: CampaignVariablePage;
   externalSystem?: ExternalSystem | null;
   creator?: User | null;
   deliverabilityStats: CampaignDeliverabilityStats;
@@ -191,6 +197,7 @@ export const schema = `
     autoassign: Boolean!
     cannedResponses: Boolean!
     campaignGroups: Boolean!
+    campaignVariables: Boolean!
     interactions: Boolean!
     texters: Boolean!
   }
@@ -234,6 +241,7 @@ export const schema = `
     editors: String
     teams: [Team!]!
     campaignGroups: CampaignGroupPage
+    campaignVariables: CampaignVariablePage!
     textingHoursStart: Int
     textingHoursEnd: Int
     isAutoassignEnabled: Boolean!
@@ -305,6 +313,7 @@ export const schema = `
     isAssignmentLimitedToTeams: Boolean
     teamIds: [ID]
     campaignGroupIds: [String!]
+    campaignVariables: [CampaignVariableInput!]
     texters: TexterInput
     interactionSteps: InteractionStepInput
     cannedResponses: [CannedResponseInput]

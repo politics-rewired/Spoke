@@ -7,4 +7,5 @@ export interface CampaignReadinessType {
   cannedResponses: boolean;
   interactions: boolean;
   texters: boolean;
+  campaignVariables: boolean;
 }
