@@ -270,6 +270,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     saveLabel,
     data: {
       campaign: {
+        isTemplate,
         customFields,
         campaignVariables: { edges: campaignVariableEdges },
         externalSystem
@@ -310,7 +311,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const isSaveDisabled =
     isWorking ||
     hasEmptyScripts ||
-    hasInvalidFields ||
+    (!isTemplate && hasInvalidFields) ||
     (!isNew && !hasPendingChanges);
   const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
@@ -387,7 +388,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       {hasEmptyScripts && (
         <p style={{ color: "#DD0000" }}>You have one or more empty scripts!</p>
       )}
-      {hasInvalidFields && (
+      {!isTemplate && hasInvalidFields && (
         <p style={{ color: "#DD0000" }}>
           You have one or more scripts using variables without values!
         </p>
