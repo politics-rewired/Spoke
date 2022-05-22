@@ -8,6 +8,7 @@ fragment CampaignVariableInfo on CampaignVariable {
 query GetCampaignVariables($campaignId: String!) {
   campaign(id: $campaignId) {
     id
+    isTemplate
     campaignVariables {
       edges {
         node {

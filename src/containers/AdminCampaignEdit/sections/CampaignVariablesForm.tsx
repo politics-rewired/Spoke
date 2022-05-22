@@ -16,7 +16,7 @@ import {
   useGetCampaignVariablesQuery
 } from "@spoke/spoke-codegen";
 import sortBy from "lodash/sortBy";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { allScriptFields, VARIABLE_NAME_REGEXP } from "../../../lib/scripts";
@@ -66,6 +66,7 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
 
   // Apollo
   const {
+    data: campaignData,
     loading: fetchLoading,
     error: fetchError
   } = useGetCampaignVariablesQuery({
@@ -95,6 +96,10 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
       { query: GetCampaignVariablesDocument, variables: { campaignId } }
     ]
   });
+
+  const isTemplate = useMemo(() => campaignData?.campaign?.isTemplate, [
+    campaignData
+  ]);
 
   // UX
   const classes = useStyles();
@@ -201,8 +206,13 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
                           <TextField
                             {...field}
                             label="Variable value"
-                            error={error !== undefined}
-                            helperText={error?.message}
+                            error={error !== undefined && isTemplate !== true}
+                            helperText={
+                              isTemplate
+                                ? "Cannot set values on template campaigns"
+                                : error?.message
+                            }
+                            disabled={isTemplate}
                             fullWidth
                             multiline
                           />
