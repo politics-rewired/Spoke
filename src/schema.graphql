@@ -877,14 +877,14 @@ type CampaignGroupPage {
 
 
 input CampaignVariableInput {
-  order: Int!
+  displayOrder: Int!
   name: String!
   value: String
 }
 
 type CampaignVariable {
   id: ID!
-  order: Int!
+  displayOrder: Int!
   name: String!
   value: String
   createdAt: String!

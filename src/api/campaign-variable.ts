@@ -1,7 +1,7 @@
 import type { RelayEdge, RelayPaginatedResponse } from "./pagination";
 
 export interface CampaignVariableInput {
-  order: number;
+  displayOrder: number;
   name: string;
   value?: string | null;
 }
@@ -9,6 +9,7 @@ export interface CampaignVariableInput {
 export interface CampaignVariable {
   id: string;
   organization_id: string;
+  displayOrder: number;
   name: string;
   description: string;
   created_at: string;
@@ -21,14 +22,14 @@ export type CampaignVariablePage = RelayPaginatedResponse<CampaignVariable>;
 
 export const schema = `
   input CampaignVariableInput {
-    order: Int!
+    displayOrder: Int!
     name: String!
     value: String
   }
 
   type CampaignVariable {
     id: ID!
-    order: Int!
+    displayOrder: Int!
     name: String!
     value: String
     createdAt: String!

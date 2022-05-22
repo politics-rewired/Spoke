@@ -1,6 +1,6 @@
 fragment CampaignVariableInfo on CampaignVariable {
   id
-  order
+  displayOrder
   name
   value
 }

@@ -74,12 +74,11 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
       const nodes =
         data?.campaign?.campaignVariables.edges.map(({ node }) => node) ?? [];
       const campaignVariables = sortBy(
-        nodes.map((thing) => ({
-          order: thing.order,
-          name: thing.name,
-          value: thing.value ?? ""
+        nodes.map((campaignVariable) => ({
+          ...campaignVariable,
+          value: campaignVariable.value ?? ""
         })),
-        ["order"]
+        ["displayOrder"]
       );
 
       // Wait for useForm's subscription to be ready before reset() sends a signal to flush form state update
@@ -121,7 +120,7 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
     async (formValues: FormValues) => {
       const payload = formValues.campaignVariables
         .filter(({ name }) => !!name)
-        .map((variable, index) => ({ ...variable, order: index }));
+        .map((variable, index) => ({ ...variable, displayOrder: index }));
       await editVariables({
         variables: { campaignId, campaignVariables: payload }
       });
