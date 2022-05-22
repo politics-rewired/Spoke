@@ -76,7 +76,8 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
         data?.campaign?.campaignVariables.edges.map(({ node }) => node) ?? [];
       const campaignVariables = sortBy(
         nodes.map((campaignVariable) => ({
-          ...campaignVariable,
+          displayOrder: campaignVariable.displayOrder,
+          name: campaignVariable.name,
           value: campaignVariable.value ?? ""
         })),
         ["displayOrder"]

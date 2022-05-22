@@ -558,8 +558,8 @@ export const editCampaign = async (
     campaign.campaignVariables
   ) {
     const cleanedPayload = campaign.campaignVariables
-      .map(({ order, name, value }) => ({
-        display_order: order,
+      .map(({ displayOrder, name, value }) => ({
+        display_order: displayOrder,
         name: name.trim(),
         value: value?.trim() ? value?.trim() : null
       }))
