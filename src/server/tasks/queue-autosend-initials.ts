@@ -49,7 +49,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
           --    and graphile_worker.jobs.key = cc.id::text
           -- )
         -- ordering by campaign id and cell should be fastest since theres a compound key on them
-        order by assignment_id nulls last, cc.campaign_id, cc.cell asc
+        order by cc.campaign_id asc, assignment_id nulls first, cc.cell asc
         limit $1
       ),
       assignments_upserted as (
