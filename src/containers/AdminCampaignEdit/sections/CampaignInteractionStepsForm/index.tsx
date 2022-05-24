@@ -416,7 +416,6 @@ const mutations: MutationMap<FullComponentProps> = {
             id
             interactions
           }
-          previewUrl
         }
       }
       ${EditInteractionStepFragment}
