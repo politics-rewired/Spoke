@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.30.1](https://github.com/politics-rewired/spoke/compare/v4.30.0...v4.30.1) (2022-05-25)
+
+
+### Bug Fixes
+
+* fix early marking of autosend campaign as complete ([#1241](https://github.com/politics-rewired/spoke/issues/1241)) ([5c8e420](https://github.com/politics-rewired/spoke/commit/5c8e420e50ac58b8cb6ab860042969542489379e))
+
 ## [4.30.0](https://github.com/politics-rewired/spoke/compare/v4.21.1...v4.30.0) (2022-05-25)
 
 
