@@ -125,6 +125,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         and c.is_started = true
         and c.autosend_status = 'sending'
         and message_status = 'needsMessage'
+        and is_opted_out = false
       group by 1
     `
   );
