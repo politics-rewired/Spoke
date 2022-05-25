@@ -2,6 +2,116 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.30.0](https://github.com/politics-rewired/spoke/compare/v4.21.1...v4.30.0) (2022-05-25)
+
+
+### Features
+
+* add campaign variable management ([#1231](https://github.com/politics-rewired/spoke/issues/1231)) ([a959b81](https://github.com/politics-rewired/spoke/commit/a959b81cfe20d6a70f5dbe5c0a174ccee768a77b))
+* add canned responses to message review ([#1142](https://github.com/politics-rewired/spoke/issues/1142)) ([50f9a37](https://github.com/politics-rewired/spoke/commit/50f9a37b28ad101e23c25c190ed032c64ba61253))
+* add contact name and campaign title to message review ([#1141](https://github.com/politics-rewired/spoke/issues/1141)) ([3b19f08](https://github.com/politics-rewired/spoke/commit/3b19f08950a1720795dcf412a88cacab08be156c))
+* add option to create campaign(s) from template ([#1224](https://github.com/politics-rewired/spoke/issues/1224)) ([1354599](https://github.com/politics-rewired/spoke/commit/135459946a8e5f0036a78606de475c7a4d306e53))
+* add script styling to interaction step ([#1227](https://github.com/politics-rewired/spoke/issues/1227)) ([fc66542](https://github.com/politics-rewired/spoke/commit/fc665424064d68585abb42c7f5d23f8c3014d74e))
+* add template campaigns ([#1214](https://github.com/politics-rewired/spoke/issues/1214)) ([0afa835](https://github.com/politics-rewired/spoke/commit/0afa835dabbdacf5627ae65317b3d100874aac22))
+* **campaign-builder:** add basic mode ([#1209](https://github.com/politics-rewired/spoke/issues/1209)) ([d6a434f](https://github.com/politics-rewired/spoke/commit/d6a434ff37fe589f312434765563637dee37f72c))
+* **notifications:** allow texters to configure notification frequency ([#1131](https://github.com/politics-rewired/spoke/issues/1131)) ([8800ee2](https://github.com/politics-rewired/spoke/commit/8800ee2410b580a0eef06bfdbf1d34f55106e6bd))
+* add script preview to message review ([#1059](https://github.com/politics-rewired/spoke/issues/1059)) ([712c5e9](https://github.com/politics-rewired/spoke/commit/712c5e9c6b7f05954b2e09a1346a64f7831e298f))
+* allow collapsing interaction steps ([#1137](https://github.com/politics-rewired/spoke/issues/1137)) ([f008792](https://github.com/politics-rewired/spoke/commit/f00879224e8b0adf2b7651aff1a1286d3ff6c878))
+* allow navigation to campaign stats page from campaign edit page ([#1139](https://github.com/politics-rewired/spoke/issues/1139)) ([2702100](https://github.com/politics-rewired/spoke/commit/2702100e0754107c2e1c6253cfd0aeacbbbbfc28))
+* allowing suspending users ([#1116](https://github.com/politics-rewired/spoke/issues/1116)) ([8099f8c](https://github.com/politics-rewired/spoke/commit/8099f8caaa80899bfb88feee87abfbb745c7f4fd))
+* autosend initials ([#1128](https://github.com/politics-rewired/spoke/issues/1128)) ([842ea75](https://github.com/politics-rewired/spoke/commit/842ea759db9415f9a95e2d8a63d4c40219769221))
+* support user session management ([#1157](https://github.com/politics-rewired/spoke/issues/1157)) ([96f88f3](https://github.com/politics-rewired/spoke/commit/96f88f378e86ad1345723bf20f332b5d779c5243))
+* use worker to process notifications ([#1126](https://github.com/politics-rewired/spoke/issues/1126)) ([8f1d5e6](https://github.com/politics-rewired/spoke/commit/8f1d5e6fe73370963e9d2a7d8a00e7066055f61d))
+
+
+### Bug Fixes
+
+* order autosend contacts by campaign id first ([#1235](https://github.com/politics-rewired/spoke/issues/1235)) ([5a50ffb](https://github.com/politics-rewired/spoke/commit/5a50ffb9173cd1f2db4bcbedb8cb4abf2084b7dc))
+* **campaign-variables:** fix display order rename ([b568757](https://github.com/politics-rewired/spoke/commit/b568757055b5efbecb56deb2db4791c8c737b883))
+* add campaign id to conversation rows ([#1148](https://github.com/politics-rewired/spoke/issues/1148)) ([f0de0c4](https://github.com/politics-rewired/spoke/commit/f0de0c49fdc0feeacf6ba2d91d87600cd6017ca0)), closes [#831](https://github.com/politics-rewired/spoke/issues/831)
+* cleanup autosending ([#1186](https://github.com/politics-rewired/spoke/issues/1186)) ([635a7f3](https://github.com/politics-rewired/spoke/commit/635a7f317c918781d9eb6b8ee79a18bd1d403a23))
+* disable secure cookies ([#1192](https://github.com/politics-rewired/spoke/issues/1192)) ([a106173](https://github.com/politics-rewired/spoke/commit/a10617361984441922d2c70040db3c76ddfe5779))
+* don't create a contacts upload job if contacts doesn't exist ([#1147](https://github.com/politics-rewired/spoke/issues/1147)) ([b2266ff](https://github.com/politics-rewired/spoke/commit/b2266ff9a6fbd5a1abb47b0c5884dafb137874f5)), closes [#678](https://github.com/politics-rewired/spoke/issues/678)
+* fix check for blank email ([94e5848](https://github.com/politics-rewired/spoke/commit/94e58481f063299e95d3be5157745ee69e404397))
+* fix how label is passed to chip ([#1203](https://github.com/politics-rewired/spoke/issues/1203)) ([d932b5a](https://github.com/politics-rewired/spoke/commit/d932b5af3948d702e491b53270e71d4abe7f61c3))
+* fix scripts tooltip ([#1226](https://github.com/politics-rewired/spoke/issues/1226)) ([2a58185](https://github.com/politics-rewired/spoke/commit/2a58185a1cf495991ee21849a509f8be6cabe67b))
+* **passport:** standardize on spoke user ([#1215](https://github.com/politics-rewired/spoke/issues/1215)) ([dd56bd3](https://github.com/politics-rewired/spoke/commit/dd56bd33af25988bf39abf8dcbbb758de6f0d811))
+* **template-campaigns:** add missing resolver ([#1225](https://github.com/politics-rewired/spoke/issues/1225)) ([0c992e6](https://github.com/politics-rewired/spoke/commit/0c992e6d25bc1d6d4f6836d87da7e735c590d54f))
+* bring assign loop into alignment with assignment targets ([#1204](https://github.com/politics-rewired/spoke/issues/1204)) ([3307e2b](https://github.com/politics-rewired/spoke/commit/3307e2b95d941dff4f6195d64a42db80d4a2d987))
+* cleanup autosending counts ([#1202](https://github.com/politics-rewired/spoke/issues/1202)) ([b0172ca](https://github.com/politics-rewired/spoke/commit/b0172ca1594397dafc04775c7daa858234b5724f))
+* fix csv header validation ([#1190](https://github.com/politics-rewired/spoke/issues/1190)) ([218671f](https://github.com/politics-rewired/spoke/commit/218671f1bf7697d062b9b47e49d69b61e201a755))
+* fix errors in down migrations ([#1168](https://github.com/politics-rewired/spoke/issues/1168)) ([001f8de](https://github.com/politics-rewired/spoke/commit/001f8de1b6953bded8760761b63884fa25dbf4d6))
+* fix fetching canned responses by texters ([#1150](https://github.com/politics-rewired/spoke/issues/1150)) ([63dde87](https://github.com/politics-rewired/spoke/commit/63dde872515ae28360a84bb4aa02566152de7912))
+* fix permissions in script preview url resolver ([#1127](https://github.com/politics-rewired/spoke/issues/1127)) ([167ba91](https://github.com/politics-rewired/spoke/commit/167ba91dd66a7908639637b69bbae1b3a7d1d976))
+* make opt out button orange again ([#1206](https://github.com/politics-rewired/spoke/issues/1206)) ([a1f6fac](https://github.com/politics-rewired/spoke/commit/a1f6fac27ce921814d681d16989b0228f3fd6898))
+* match mui v0 styling with v4 buttons ([#1223](https://github.com/politics-rewired/spoke/issues/1223)) ([77e54ae](https://github.com/politics-rewired/spoke/commit/77e54aeb9ff50ab76af2d943f466abf42d7dcae8))
+* pass assignmentPriority as Int ([#1195](https://github.com/politics-rewired/spoke/issues/1195)) ([8f1d760](https://github.com/politics-rewired/spoke/commit/8f1d76077defe189e50f635b600f23079e860206))
+* remove header element styling from interaction step titles ([#1149](https://github.com/politics-rewired/spoke/issues/1149)) ([00db0bb](https://github.com/politics-rewired/spoke/commit/00db0bbef27f6ef80ad4b802470236c42bdcc97d))
+* remove quotes around campaign preview script values ([#1172](https://github.com/politics-rewired/spoke/issues/1172)) ([633d900](https://github.com/politics-rewired/spoke/commit/633d9005c32ef8dd7d18c5da244c7f93eac1949b))
+* require returning non null campaign stats ([#1222](https://github.com/politics-rewired/spoke/issues/1222)) ([0046f31](https://github.com/politics-rewired/spoke/commit/0046f317847c698493aa13d81b169a339cbaeff7))
+* rewrite campaign preview ([#1173](https://github.com/politics-rewired/spoke/issues/1173)) ([c47feaf](https://github.com/politics-rewired/spoke/commit/c47feafb0eb13f24fb809ee1ad7b1e68d3d0417d))
+* turn off initial autoassignment for campaigns that are autosending ([#1208](https://github.com/politics-rewired/spoke/issues/1208)) ([2c154a3](https://github.com/politics-rewired/spoke/commit/2c154a3cb55e6e159509349cd63a53755a668331))
+* **mui:** ignore tooltips within gsform ([#1188](https://github.com/politics-rewired/spoke/issues/1188)) ([e036dbb](https://github.com/politics-rewired/spoke/commit/e036dbb58ee44910cf1dcf400793253c706e9f04))
+* **session:** handle suspension check when no user is found ([#1212](https://github.com/politics-rewired/spoke/issues/1212)) ([825cb5d](https://github.com/politics-rewired/spoke/commit/825cb5d76701f8f82f94709ab80194a9b1c71386))
+* throw error and retry on empty email ([#1187](https://github.com/politics-rewired/spoke/issues/1187)) ([edd01eb](https://github.com/politics-rewired/spoke/commit/edd01ebc7f52879398bcc80f4050e0c79a1f8b89))
+* update spoke portal hostname ([1de8d14](https://github.com/politics-rewired/spoke/commit/1de8d14b83982cfee385bd6eae581e47299cf3c9))
+* use autocomplete for texter select ([#1210](https://github.com/politics-rewired/spoke/issues/1210)) ([490a577](https://github.com/politics-rewired/spoke/commit/490a577c33f8adc8585a72bbd60064328ffcbf5d))
+
+## [4.29.0](https://github.com/politics-rewired/spoke/compare/v4.21.1...v4.29.0) (2022-05-25)
+
+
+### Features
+
+* add campaign variable management ([#1231](https://github.com/politics-rewired/spoke/issues/1231)) ([a959b81](https://github.com/politics-rewired/spoke/commit/a959b81cfe20d6a70f5dbe5c0a174ccee768a77b))
+* add canned responses to message review ([#1142](https://github.com/politics-rewired/spoke/issues/1142)) ([50f9a37](https://github.com/politics-rewired/spoke/commit/50f9a37b28ad101e23c25c190ed032c64ba61253))
+* add contact name and campaign title to message review ([#1141](https://github.com/politics-rewired/spoke/issues/1141)) ([3b19f08](https://github.com/politics-rewired/spoke/commit/3b19f08950a1720795dcf412a88cacab08be156c))
+* add option to create campaign(s) from template ([#1224](https://github.com/politics-rewired/spoke/issues/1224)) ([1354599](https://github.com/politics-rewired/spoke/commit/135459946a8e5f0036a78606de475c7a4d306e53))
+* add script styling to interaction step ([#1227](https://github.com/politics-rewired/spoke/issues/1227)) ([fc66542](https://github.com/politics-rewired/spoke/commit/fc665424064d68585abb42c7f5d23f8c3014d74e))
+* add template campaigns ([#1214](https://github.com/politics-rewired/spoke/issues/1214)) ([0afa835](https://github.com/politics-rewired/spoke/commit/0afa835dabbdacf5627ae65317b3d100874aac22))
+* **campaign-builder:** add basic mode ([#1209](https://github.com/politics-rewired/spoke/issues/1209)) ([d6a434f](https://github.com/politics-rewired/spoke/commit/d6a434ff37fe589f312434765563637dee37f72c))
+* **notifications:** allow texters to configure notification frequency ([#1131](https://github.com/politics-rewired/spoke/issues/1131)) ([8800ee2](https://github.com/politics-rewired/spoke/commit/8800ee2410b580a0eef06bfdbf1d34f55106e6bd))
+* add script preview to message review ([#1059](https://github.com/politics-rewired/spoke/issues/1059)) ([712c5e9](https://github.com/politics-rewired/spoke/commit/712c5e9c6b7f05954b2e09a1346a64f7831e298f))
+* allow collapsing interaction steps ([#1137](https://github.com/politics-rewired/spoke/issues/1137)) ([f008792](https://github.com/politics-rewired/spoke/commit/f00879224e8b0adf2b7651aff1a1286d3ff6c878))
+* allow navigation to campaign stats page from campaign edit page ([#1139](https://github.com/politics-rewired/spoke/issues/1139)) ([2702100](https://github.com/politics-rewired/spoke/commit/2702100e0754107c2e1c6253cfd0aeacbbbbfc28))
+* allowing suspending users ([#1116](https://github.com/politics-rewired/spoke/issues/1116)) ([8099f8c](https://github.com/politics-rewired/spoke/commit/8099f8caaa80899bfb88feee87abfbb745c7f4fd))
+* autosend initials ([#1128](https://github.com/politics-rewired/spoke/issues/1128)) ([842ea75](https://github.com/politics-rewired/spoke/commit/842ea759db9415f9a95e2d8a63d4c40219769221))
+* support user session management ([#1157](https://github.com/politics-rewired/spoke/issues/1157)) ([96f88f3](https://github.com/politics-rewired/spoke/commit/96f88f378e86ad1345723bf20f332b5d779c5243))
+* use worker to process notifications ([#1126](https://github.com/politics-rewired/spoke/issues/1126)) ([8f1d5e6](https://github.com/politics-rewired/spoke/commit/8f1d5e6fe73370963e9d2a7d8a00e7066055f61d))
+
+
+### Bug Fixes
+
+* order autosend contacts by campaign id first ([#1235](https://github.com/politics-rewired/spoke/issues/1235)) ([5a50ffb](https://github.com/politics-rewired/spoke/commit/5a50ffb9173cd1f2db4bcbedb8cb4abf2084b7dc))
+* **campaign-variables:** fix display order rename ([b568757](https://github.com/politics-rewired/spoke/commit/b568757055b5efbecb56deb2db4791c8c737b883))
+* add campaign id to conversation rows ([#1148](https://github.com/politics-rewired/spoke/issues/1148)) ([f0de0c4](https://github.com/politics-rewired/spoke/commit/f0de0c49fdc0feeacf6ba2d91d87600cd6017ca0)), closes [#831](https://github.com/politics-rewired/spoke/issues/831)
+* cleanup autosending ([#1186](https://github.com/politics-rewired/spoke/issues/1186)) ([635a7f3](https://github.com/politics-rewired/spoke/commit/635a7f317c918781d9eb6b8ee79a18bd1d403a23))
+* disable secure cookies ([#1192](https://github.com/politics-rewired/spoke/issues/1192)) ([a106173](https://github.com/politics-rewired/spoke/commit/a10617361984441922d2c70040db3c76ddfe5779))
+* don't create a contacts upload job if contacts doesn't exist ([#1147](https://github.com/politics-rewired/spoke/issues/1147)) ([b2266ff](https://github.com/politics-rewired/spoke/commit/b2266ff9a6fbd5a1abb47b0c5884dafb137874f5)), closes [#678](https://github.com/politics-rewired/spoke/issues/678)
+* fix check for blank email ([94e5848](https://github.com/politics-rewired/spoke/commit/94e58481f063299e95d3be5157745ee69e404397))
+* fix how label is passed to chip ([#1203](https://github.com/politics-rewired/spoke/issues/1203)) ([d932b5a](https://github.com/politics-rewired/spoke/commit/d932b5af3948d702e491b53270e71d4abe7f61c3))
+* fix scripts tooltip ([#1226](https://github.com/politics-rewired/spoke/issues/1226)) ([2a58185](https://github.com/politics-rewired/spoke/commit/2a58185a1cf495991ee21849a509f8be6cabe67b))
+* **passport:** standardize on spoke user ([#1215](https://github.com/politics-rewired/spoke/issues/1215)) ([dd56bd3](https://github.com/politics-rewired/spoke/commit/dd56bd33af25988bf39abf8dcbbb758de6f0d811))
+* **template-campaigns:** add missing resolver ([#1225](https://github.com/politics-rewired/spoke/issues/1225)) ([0c992e6](https://github.com/politics-rewired/spoke/commit/0c992e6d25bc1d6d4f6836d87da7e735c590d54f))
+* bring assign loop into alignment with assignment targets ([#1204](https://github.com/politics-rewired/spoke/issues/1204)) ([3307e2b](https://github.com/politics-rewired/spoke/commit/3307e2b95d941dff4f6195d64a42db80d4a2d987))
+* cleanup autosending counts ([#1202](https://github.com/politics-rewired/spoke/issues/1202)) ([b0172ca](https://github.com/politics-rewired/spoke/commit/b0172ca1594397dafc04775c7daa858234b5724f))
+* fix csv header validation ([#1190](https://github.com/politics-rewired/spoke/issues/1190)) ([218671f](https://github.com/politics-rewired/spoke/commit/218671f1bf7697d062b9b47e49d69b61e201a755))
+* fix errors in down migrations ([#1168](https://github.com/politics-rewired/spoke/issues/1168)) ([001f8de](https://github.com/politics-rewired/spoke/commit/001f8de1b6953bded8760761b63884fa25dbf4d6))
+* fix fetching canned responses by texters ([#1150](https://github.com/politics-rewired/spoke/issues/1150)) ([63dde87](https://github.com/politics-rewired/spoke/commit/63dde872515ae28360a84bb4aa02566152de7912))
+* fix permissions in script preview url resolver ([#1127](https://github.com/politics-rewired/spoke/issues/1127)) ([167ba91](https://github.com/politics-rewired/spoke/commit/167ba91dd66a7908639637b69bbae1b3a7d1d976))
+* make opt out button orange again ([#1206](https://github.com/politics-rewired/spoke/issues/1206)) ([a1f6fac](https://github.com/politics-rewired/spoke/commit/a1f6fac27ce921814d681d16989b0228f3fd6898))
+* match mui v0 styling with v4 buttons ([#1223](https://github.com/politics-rewired/spoke/issues/1223)) ([77e54ae](https://github.com/politics-rewired/spoke/commit/77e54aeb9ff50ab76af2d943f466abf42d7dcae8))
+* pass assignmentPriority as Int ([#1195](https://github.com/politics-rewired/spoke/issues/1195)) ([8f1d760](https://github.com/politics-rewired/spoke/commit/8f1d76077defe189e50f635b600f23079e860206))
+* remove header element styling from interaction step titles ([#1149](https://github.com/politics-rewired/spoke/issues/1149)) ([00db0bb](https://github.com/politics-rewired/spoke/commit/00db0bbef27f6ef80ad4b802470236c42bdcc97d))
+* remove quotes around campaign preview script values ([#1172](https://github.com/politics-rewired/spoke/issues/1172)) ([633d900](https://github.com/politics-rewired/spoke/commit/633d9005c32ef8dd7d18c5da244c7f93eac1949b))
+* require returning non null campaign stats ([#1222](https://github.com/politics-rewired/spoke/issues/1222)) ([0046f31](https://github.com/politics-rewired/spoke/commit/0046f317847c698493aa13d81b169a339cbaeff7))
+* rewrite campaign preview ([#1173](https://github.com/politics-rewired/spoke/issues/1173)) ([c47feaf](https://github.com/politics-rewired/spoke/commit/c47feafb0eb13f24fb809ee1ad7b1e68d3d0417d))
+* turn off initial autoassignment for campaigns that are autosending ([#1208](https://github.com/politics-rewired/spoke/issues/1208)) ([2c154a3](https://github.com/politics-rewired/spoke/commit/2c154a3cb55e6e159509349cd63a53755a668331))
+* **mui:** ignore tooltips within gsform ([#1188](https://github.com/politics-rewired/spoke/issues/1188)) ([e036dbb](https://github.com/politics-rewired/spoke/commit/e036dbb58ee44910cf1dcf400793253c706e9f04))
+* **session:** handle suspension check when no user is found ([#1212](https://github.com/politics-rewired/spoke/issues/1212)) ([825cb5d](https://github.com/politics-rewired/spoke/commit/825cb5d76701f8f82f94709ab80194a9b1c71386))
+* throw error and retry on empty email ([#1187](https://github.com/politics-rewired/spoke/issues/1187)) ([edd01eb](https://github.com/politics-rewired/spoke/commit/edd01ebc7f52879398bcc80f4050e0c79a1f8b89))
+* update spoke portal hostname ([1de8d14](https://github.com/politics-rewired/spoke/commit/1de8d14b83982cfee385bd6eae581e47299cf3c9))
+* use autocomplete for texter select ([#1210](https://github.com/politics-rewired/spoke/issues/1210)) ([490a577](https://github.com/politics-rewired/spoke/commit/490a577c33f8adc8585a72bbd60064328ffcbf5d))
+
 ### [4.28.1](https://github.com/politics-rewired/spoke/compare/v4.28.0...v4.28.1) (2022-05-21)
 
 
