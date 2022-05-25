@@ -111,12 +111,12 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
     [contactsToQueueInOneMinute, config.AUTOSEND_MESSAGES_PER_SECOND]
   );
 
-  const { rows: countToSendLater } = await helpers.query<{
+  const { rows: totalCountToSend } = await helpers.query<{
     campaign_id: string;
-    count_to_send_later: string;
+    total_count_to_send: string;
   }>(
     `
-      select cc.campaign_id, count(*) as count_to_send_later
+      select cc.campaign_id, count(*) as total_count_to_send
       from campaign_contact cc
       join campaign c on cc.campaign_id = c.id
       where true
@@ -124,34 +124,23 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         and c.is_archived = false
         and c.is_started = true
         and c.autosend_status = 'sending'
-        -- NOT is here - these are only people outside of sending hours
-        and not (
-            ( cc.timezone is null
-              and extract(hour from CURRENT_TIMESTAMP at time zone c.timezone) < c.texting_hours_end
-              and extract(hour from CURRENT_TIMESTAMP at time zone c.timezone) >= c.texting_hours_start
-            )
-          or 
-            ( c.texting_hours_end > extract(hour from (CURRENT_TIMESTAMP at time zone cc.timezone) + interval '10 minutes')
-              and c.texting_hours_start <= extract(hour from (CURRENT_TIMESTAMP at time zone cc.timezone ))
-            )
-        )
+        and message_status = 'needsMessage'
       group by 1
     `
   );
 
-  const toSendLaterMap = fromPairs(
-    countToSendLater.map(({ campaign_id, count_to_send_later }) => [
+  const countToSendMap = fromPairs(
+    totalCountToSend.map(({ campaign_id, total_count_to_send }) => [
       campaign_id,
-      count_to_send_later
+      total_count_to_send
     ])
   );
 
   const toMarkAsDoneSending = contactsQueued
     .filter((campaign) => {
-      const countQueued = parseInt(campaign.count_queued, 10);
-      const countToSendLaterForCampaign =
-        toSendLaterMap[campaign.campaign_id] || 0;
-      return countQueued === 0 && countToSendLaterForCampaign === 0;
+      const totalCountToSendForCampaign =
+        countToSendMap[campaign.campaign_id] || 0;
+      return totalCountToSendForCampaign === 0;
     })
     .map((campaign) => campaign.campaign_id);
 
