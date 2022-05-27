@@ -1,4 +1,5 @@
 import Chip from "@material-ui/core/Chip";
+import Grid from "@material-ui/core/Grid";
 import uniqBy from "lodash/uniqBy";
 import ChipInput from "material-ui-chip-input";
 import MenuItem from "material-ui/MenuItem";
@@ -98,63 +99,61 @@ const AssignmentRow: React.FC<Props> = (props) => {
     isRowDisabled || !isAssignmentEnabled || id === "general";
 
   return (
-    <div style={{ display: "flex", alignItems: "center" }}>
-      <div style={{ minWidth: "200px" }}>
-        <Chip
-          label={title}
-          style={{ display: "inline-block", color: textColor, backgroundColor }}
-        />
-      </div>
-      <div>
+    <Grid container spacing={2} wrap="nowrap" alignItems="center">
+      <Grid item>
+        <Chip label={title} style={{ color: textColor, backgroundColor }} />
+      </Grid>
+      <Grid item>
         <Toggle
           label="Enable assignment?"
           labelPosition="right"
           toggled={isAssignmentEnabled}
           disabled={isRowDisabled}
-          style={{ display: "inline-block" }}
           onToggle={handleToggleIsEnabled}
         />
-      </div>
-      <div style={{ flex: 1 }} />
-      <SelectField
-        style={{ marginLeft: "20px" }}
-        floatingLabelText="Assignment Type"
-        value={assignmentType}
-        disabled={isRowDisabled || !isAssignmentEnabled}
-        onChange={handleChangeAssignmentType}
-      >
-        <MenuItem
-          value={TextRequestType.UNSENT}
-          primaryText="Unsent Initial Messages"
+      </Grid>
+      <Grid item>
+        <SelectField
+          floatingLabelText="Assignment Type"
+          value={assignmentType}
+          disabled={isRowDisabled || !isAssignmentEnabled}
+          onChange={handleChangeAssignmentType}
+        >
+          <MenuItem
+            value={TextRequestType.UNSENT}
+            primaryText="Unsent Initial Messages"
+          />
+          <MenuItem
+            value={TextRequestType.UNREPLIED}
+            primaryText="Unhandled Replies"
+          />
+        </SelectField>
+      </Grid>
+      <Grid item>
+        <TextField
+          floatingLabelText="Max to request at once"
+          type="number"
+          value={maxRequestCount}
+          disabled={isRowDisabled || !isAssignmentEnabled}
+          onChange={handleChangeMaxCount}
         />
-        <MenuItem
-          value={TextRequestType.UNREPLIED}
-          primaryText="Unhandled Replies"
+      </Grid>
+      <Grid item>
+        <ChipInput
+          floatingLabelText={
+            id === "general" ? "N/A" : "Custom escalation tags"
+          }
+          openOnFocus
+          dataSource={escalationTagList}
+          dataSourceConfig={{ text: "title", value: "id" }}
+          value={escalationTags}
+          onBeforeRequestAdd={handleCheckEscalationTag}
+          onRequestAdd={handleAddEscalationTag}
+          onRequestDelete={handleRemoveEscalationTag}
+          disabled={isSaveDisabled}
         />
-      </SelectField>
-      <TextField
-        style={{ marginLeft: "10px" }}
-        floatingLabelText="Max to request at once"
-        type="number"
-        value={maxRequestCount}
-        disabled={isRowDisabled || !isAssignmentEnabled}
-        onChange={handleChangeMaxCount}
-      />
-      <ChipInput
-        style={{
-          marginLeft: "10px"
-        }}
-        floatingLabelText={id === "general" ? "N/A" : "Custom escalation tags"}
-        openOnFocus
-        dataSource={escalationTagList}
-        dataSourceConfig={{ text: "title", value: "id" }}
-        value={escalationTags}
-        onBeforeRequestAdd={handleCheckEscalationTag}
-        onRequestAdd={handleAddEscalationTag}
-        onRequestDelete={handleRemoveEscalationTag}
-        disabled={isSaveDisabled}
-      />
-    </div>
+      </Grid>
+    </Grid>
   );
 };
 
