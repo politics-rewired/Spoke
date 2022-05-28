@@ -1,6 +1,7 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
+import Tooltip from "@material-ui/core/Tooltip";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
@@ -335,20 +336,22 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       </Dialog>
       <CampaignFormSectionHeading
         title="What do you want to discuss?"
-        subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity. Click the Script Preview button below to view an outline of your script."
+        subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
       />
       {showScriptPreview ? (
         // Open script preview
         <Box m={2}>
-          <Button
-            key="open-script-preview"
-            variant="contained"
-            onClick={() => {
-              window.open(`/preview/${previewUrl}`, "_blank");
-            }}
-          >
-            Open Script Preview
-          </Button>
+          <Tooltip title="View an outline of your script" placement="top">
+            <Button
+              key="open-script-preview"
+              variant="contained"
+              onClick={() => {
+                window.open(`/preview/${previewUrl}`, "_blank");
+              }}
+            >
+              Open Script Preview
+            </Button>
+          </Tooltip>
         </Box>
       ) : null}
       <InteractionStepCard

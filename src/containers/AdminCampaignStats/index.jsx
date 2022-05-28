@@ -2,6 +2,7 @@ import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import Grid from "@material-ui/core/Grid";
+import Tooltip from "@material-ui/core/Tooltip";
 import { css, StyleSheet } from "aphrodite";
 import Divider from "material-ui/Divider";
 import Snackbar from "material-ui/Snackbar";
@@ -229,18 +230,23 @@ class AdminCampaignStats extends React.Component {
                   ) : null}
                   {showScriptPreview ? (
                     // Open script preview
-                    <Button
-                      key="open-script-preview"
-                      variant="contained"
-                      onClick={() => {
-                        window.open(
-                          `/preview/${campaign.previewUrl}`,
-                          "_blank"
-                        );
-                      }}
+                    <Tooltip
+                      title="View an outline of your script"
+                      placement="top"
                     >
-                      Open Script Preview
-                    </Button>
+                      <Button
+                        key="open-script-preview"
+                        variant="contained"
+                        onClick={() => {
+                          window.open(
+                            `/preview/${campaign.previewUrl}`,
+                            "_blank"
+                          );
+                        }}
+                      >
+                        Open Script Preview
+                      </Button>
+                    </Tooltip>
                   ) : null}
                   {isAdmin
                     ? [

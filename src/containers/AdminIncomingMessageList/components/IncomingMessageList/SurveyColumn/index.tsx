@@ -1,6 +1,7 @@
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Snackbar from "@material-ui/core/Snackbar";
+import Tooltip from "@material-ui/core/Tooltip";
 import CloseIcon from "@material-ui/icons/Close";
 import { useCloseConversationMutation } from "@spoke/spoke-codegen";
 import React, { useCallback, useState } from "react";
@@ -67,16 +68,18 @@ const SurveyColumn: React.FC<Props> = (props) => {
       <div style={{ display: "flex" }}>
         <div style={styles.spacer} />
         {showScriptPreview ? (
-          <Button
-            key="open-script-preview"
-            variant="contained"
-            style={{ marginRight: "10px" }}
-            onClick={() => {
-              window.open(`/preview/${campaign.previewUrl}`, "_blank");
-            }}
-          >
-            Open Script Preview
-          </Button>
+          <Tooltip title="View an outline of your script" placement="top">
+            <Button
+              key="open-script-preview"
+              variant="contained"
+              style={{ marginRight: "10px" }}
+              onClick={() => {
+                window.open(`/preview/${campaign.previewUrl}`, "_blank");
+              }}
+            >
+              Open Script Preview
+            </Button>
+          </Tooltip>
         ) : null}
         <Button
           variant="contained"
