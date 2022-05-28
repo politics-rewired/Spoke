@@ -14,6 +14,8 @@ import {
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
 import { readClipboardText, writeClipboardText } from "../../../../client/lib";
+import { useSpokeContext } from "../../../../client/spoke-context";
+import { useAuthzContext } from "../../../../components/AuthzProvider";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
@@ -75,6 +77,9 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const [isWorking, setIsWorking] = useState(false);
   const [hasBlockCopied, setHasBlockCopied] = useState(false);
   const [confirmingRootPaste, setConfirmingRootPaste] = useState(false);
+
+  const { orgSettings } = useSpokeContext();
+  const { isAdmin } = useAuthzContext();
 
   const updateClipboardHasBlock = async () => {
     const clipboardText = await readClipboardText();
@@ -287,6 +292,9 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
   const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
+  const showScriptPreview =
+    isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
+
   const tree = makeTree(interactionSteps);
   const finalFree: InteractionStepWithChildren = isEqual(tree, {
     interactionSteps: []
@@ -329,16 +337,20 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
         title="What do you want to discuss?"
         subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity. Click the Script Preview button below to view an outline of your script."
       />
-      <Box m={2}>
-        <Button
-          variant="contained"
-          onClick={() => {
-            window.open(`/preview/${previewUrl}`, "_blank");
-          }}
-        >
-          Script Preview
-        </Button>
-      </Box>
+      {showScriptPreview ? (
+        // Open script preview
+        <Box m={2}>
+          <Button
+            key="open-script-preview"
+            variant="contained"
+            onClick={() => {
+              window.open(`/preview/${previewUrl}`, "_blank");
+            }}
+          >
+            Open Script Preview
+          </Button>
+        </Box>
+      ) : null}
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}

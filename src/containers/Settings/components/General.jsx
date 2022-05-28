@@ -23,8 +23,8 @@ import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
-import MessageReviewSettingsCard from "./MessageReviewSettingsCard";
 import Review10DlcInfo from "./Review10DlcInfo";
+import ScriptPreviewSettingsCard from "./ScriptPreviewSettingsCard";
 
 const styles = StyleSheet.create({
   sectionCard: {
@@ -420,7 +420,7 @@ class Settings extends React.Component {
           style={{ marginBottom: 20 }}
         />
 
-        <MessageReviewSettingsCard
+        <ScriptPreviewSettingsCard
           organizationId={organization.id}
           style={{ marginBottom: 20 }}
         />
