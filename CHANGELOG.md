@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.31.0](https://github.com/politics-rewired/spoke/compare/v4.30.1...v4.31.0) (2022-06-01)
+
+
+### Features
+
+* add interaction step badge ([#1238](https://github.com/politics-rewired/spoke/issues/1238)) ([f83edc6](https://github.com/politics-rewired/spoke/commit/f83edc620d193a2b9f6faebf5b7c308716ddf6f2))
+
+
+### Bug Fixes
+
+* **autosend:** dont queue opted out contacts for sending ([#1244](https://github.com/politics-rewired/spoke/issues/1244)) ([8497219](https://github.com/politics-rewired/spoke/commit/8497219e5b0029d8b9dc96f1b797098d784125c4))
+* fix assignment control layout ([#1236](https://github.com/politics-rewired/spoke/issues/1236)) ([1bab2c1](https://github.com/politics-rewired/spoke/commit/1bab2c123ae0d0c80397e532e15959fcc1215581))
+
 ### [4.30.1](https://github.com/politics-rewired/spoke/compare/v4.30.0...v4.30.1) (2022-05-25)
 
 
