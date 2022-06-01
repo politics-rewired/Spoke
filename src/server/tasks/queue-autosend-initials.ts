@@ -25,6 +25,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
           -- contact requirements
           and cc.archived = false
           and cc.message_status = 'needsMessage'
+          and cc.is_opted_out = false
           -- campaign requirements for autosending
           and c.is_archived = false
           and c.is_started = true
