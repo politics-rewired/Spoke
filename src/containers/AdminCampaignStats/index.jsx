@@ -2,6 +2,7 @@ import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import Grid from "@material-ui/core/Grid";
+import Tooltip from "@material-ui/core/Tooltip";
 import { css, StyleSheet } from "aphrodite";
 import Divider from "material-ui/Divider";
 import Snackbar from "material-ui/Snackbar";
@@ -11,6 +12,7 @@ import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
+import { withSpokeContext } from "../../client/spoke-context";
 import { withAuthzContext } from "../../components/AuthzProvider";
 import CampaignNavigation from "../../components/CampaignNavigation";
 import { dataTest } from "../../lib/attributes";
@@ -136,7 +138,7 @@ class AdminCampaignStats extends React.Component {
       disableVanExportButton,
       disableVanSyncButton
     } = this.state;
-    const { data, match, isAdmin } = this.props;
+    const { data, match, isAdmin, orgSettings } = this.props;
     const { organizationId, campaignId } = match.params;
     const { campaign } = data;
     const { pendingJobs } = campaign;
@@ -175,6 +177,8 @@ class AdminCampaignStats extends React.Component {
     const isOverdue = DateTime.local() >= DateTime.fromISO(campaign.dueBy);
 
     const newTitle = `${this.props.organizationData.organization.name} - Campaigns - ${campaignId}: ${campaign.title}`;
+    const showScriptPreview =
+      isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
 
     return (
       <div>
@@ -223,6 +227,26 @@ class AdminCampaignStats extends React.Component {
                     >
                       Edit
                     </Button>
+                  ) : null}
+                  {showScriptPreview ? (
+                    // Open script preview
+                    <Tooltip
+                      title="View an outline of your script"
+                      placement="top"
+                    >
+                      <Button
+                        key="open-script-preview"
+                        variant="contained"
+                        onClick={() => {
+                          window.open(
+                            `/preview/${campaign.previewUrl}`,
+                            "_blank"
+                          );
+                        }}
+                      >
+                        Open Script Preview
+                      </Button>
+                    </Tooltip>
                   ) : null}
                   {isAdmin
                     ? [
@@ -277,19 +301,6 @@ class AdminCampaignStats extends React.Component {
                             Archive
                           </Button>
                         ) : null,
-                        // Open script preview
-                        <Button
-                          key="open-script-preview"
-                          variant="contained"
-                          onClick={() => {
-                            window.open(
-                              `/preview/${campaign.previewUrl}`,
-                              "_blank"
-                            );
-                          }}
-                        >
-                          Open Script Preview
-                        </Button>,
                         // Copy
                         <Button
                           key="copy"
@@ -463,6 +474,7 @@ const mutations = {
 export default compose(
   withRouter,
   withAuthzContext,
+  withSpokeContext,
   loadData({
     queries,
     mutations

@@ -31,7 +31,7 @@ mutation UpdateCampaignBuilderSettings(
   }
 }
 
-query GetMessageReviewSettings($organizationId: String!) {
+query GetScriptPreviewSettings($organizationId: String!) {
   organization(id: $organizationId) {
     id
     settings {
@@ -41,7 +41,7 @@ query GetMessageReviewSettings($organizationId: String!) {
   }
 }
 
-mutation UpdateMessageReviewSettings(
+mutation UpdateScriptPreviewSettings(
   $organizationId: String!
   $forSupervols: Boolean
 ) {

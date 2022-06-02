@@ -123,6 +123,7 @@ export interface Campaign {
   externalSystem?: ExternalSystem | null;
   creator?: User | null;
   deliverabilityStats: CampaignDeliverabilityStats;
+  previewUrl?: string | null;
 }
 
 export interface PaginatedCampaigns {

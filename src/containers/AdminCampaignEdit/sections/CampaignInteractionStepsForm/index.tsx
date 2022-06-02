@@ -1,5 +1,7 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
+import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
+import Tooltip from "@material-ui/core/Tooltip";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
@@ -13,6 +15,8 @@ import {
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
 import { readClipboardText, writeClipboardText } from "../../../../client/lib";
+import { useSpokeContext } from "../../../../client/spoke-context";
+import { useAuthzContext } from "../../../../components/AuthzProvider";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
@@ -58,7 +62,7 @@ interface HocProps {
   data: {
     campaign: Pick<
       Campaign,
-      "id" | "isStarted" | "customFields" | "externalSystem"
+      "id" | "isStarted" | "customFields" | "externalSystem" | "previewUrl"
     > & {
       interactionSteps: InteractionStepWithLocalState[];
     };
@@ -74,6 +78,9 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const [isWorking, setIsWorking] = useState(false);
   const [hasBlockCopied, setHasBlockCopied] = useState(false);
   const [confirmingRootPaste, setConfirmingRootPaste] = useState(false);
+
+  const { orgSettings } = useSpokeContext();
+  const { isAdmin } = useAuthzContext();
 
   const updateClipboardHasBlock = async () => {
     const clipboardText = await readClipboardText();
@@ -264,9 +271,10 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     isNew,
     saveLabel,
     data: {
-      campaign: { customFields, externalSystem } = {
+      campaign: { customFields, externalSystem, previewUrl } = {
         customFields: [],
-        externalSystem: null
+        externalSystem: null,
+        previewUrl: null
       }
     },
     availableActions: { availableActions }
@@ -285,6 +293,9 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const isSaveDisabled =
     isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
   const finalSaveLabel = isWorking ? "Working..." : saveLabel;
+
+  const showScriptPreview =
+    isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
 
   const tree = makeTree(interactionSteps);
   const finalFree: InteractionStepWithChildren = isEqual(tree, {
@@ -328,6 +339,22 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
         title="What do you want to discuss?"
         subtitle="You can add scripts and questions and your texters can indicate responses from your contacts. For example, you might want to collect RSVPs to an event or find out whether to follow up about a different volunteer activity."
       />
+      {showScriptPreview ? (
+        // Open script preview
+        <Box m={2}>
+          <Tooltip title="View an outline of your script" placement="top">
+            <Button
+              key="open-script-preview"
+              variant="contained"
+              onClick={() => {
+                window.open(`/preview/${previewUrl}`, "_blank");
+              }}
+            >
+              Open Script Preview
+            </Button>
+          </Tooltip>
+        </Box>
+      ) : null}
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}

@@ -7,29 +7,29 @@ import Switch from "@material-ui/core/Switch";
 import React from "react";
 
 import {
-  useGetMessageReviewSettingsQuery,
-  useUpdateMessageReviewSettingsMutation
+  useGetScriptPreviewSettingsQuery,
+  useUpdateScriptPreviewSettingsMutation
 } from "../../../../libs/spoke-codegen/src";
 
-export interface MessageReviewSettingsCardProps {
+export interface ScriptPreviewSettingsCardProps {
   organizationId: string;
   style?: React.CSSProperties;
 }
 
-export const MessageReviewSettingsCard: React.FC<MessageReviewSettingsCardProps> = (
+export const ScriptPreviewSettingsCard: React.FC<ScriptPreviewSettingsCardProps> = (
   props
 ) => {
   const { organizationId, style } = props;
 
-  const getSettingsState = useGetMessageReviewSettingsQuery({
+  const getSettingsState = useGetScriptPreviewSettingsQuery({
     variables: { organizationId }
   });
   const settings = getSettingsState?.data?.organization?.settings;
 
   const [
-    setScriptPreview,
+    setForSupervols,
     updateState
-  ] = useUpdateMessageReviewSettingsMutation();
+  ] = useUpdateScriptPreviewSettingsMutation();
 
   const working = getSettingsState.loading || updateState.loading;
   const errorMsg =
@@ -41,7 +41,7 @@ export const MessageReviewSettingsCard: React.FC<MessageReviewSettingsCardProps>
   ) => {
     if (working) return;
 
-    await setScriptPreview({
+    await setForSupervols({
       variables: {
         organizationId,
         forSupervols
@@ -51,7 +51,7 @@ export const MessageReviewSettingsCard: React.FC<MessageReviewSettingsCardProps>
 
   return (
     <Card style={style}>
-      <CardHeader title="Message Review Settings" disableTypography />
+      <CardHeader title="Script Preview Settings" disableTypography />
       <CardContent>
         {errorMsg && <p>Error: {errorMsg}</p>}
         <FormGroup row>
@@ -62,7 +62,7 @@ export const MessageReviewSettingsCard: React.FC<MessageReviewSettingsCardProps>
                 onChange={handleToggleScriptPreviewClick}
               />
             }
-            label="Allow Supervolunteers to see Script Preview in Message Review?"
+            label="Allow Supervolunteers to see Script Preview?"
           />
         </FormGroup>
       </CardContent>
@@ -70,4 +70,4 @@ export const MessageReviewSettingsCard: React.FC<MessageReviewSettingsCardProps>
   );
 };
 
-export default MessageReviewSettingsCard;
+export default ScriptPreviewSettingsCard;
