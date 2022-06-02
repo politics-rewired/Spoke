@@ -80,6 +80,11 @@ export const retryInteractionStep: Task = async (
     versionHash: md5(script)
   };
 
+  const expectedErrors = [
+    "Skipped sending because this contact was already opted out",
+    "Outside permitted texting time for this recipient"
+  ];
+
   await r.knex.transaction(async (trx) => {
     try {
       await sendMessage(trx, user, `${campaignContactId}`, message);
@@ -91,7 +96,7 @@ export const retryInteractionStep: Task = async (
           .where({ id: payload.campaignContactId });
       }
     } catch (ex) {
-      console.error(ex);
+      if (!expectedErrors.includes(ex.message)) throw ex;
     }
   });
 };
