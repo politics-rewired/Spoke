@@ -73,7 +73,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         where id in ( select id from contacts_to_queue )
         returning id
       ),
-      jobs_queued as (
+      new_jobs_queued as (
         insert into graphile_worker.jobs (task_identifier, payload, key, queue_name, max_attempts, run_at)
         select 
           'retry-interaction-step' as task_identifier, 
@@ -89,14 +89,21 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         from contacts_to_queue
         -- this line doesn't modify the result at all, it just forces the execution of the intermediate CTE
         where id in ( select id from contacts_assigned )
-        on conflict (key)
-        do update set 
-          run_at = excluded.run_at
-        returning *
+        on conflict (key) do nothing
+        returning id, payload->>'campaignId' as campaign_id, attempts
+      ),
+      all_jobs_queued as (
+        select * from new_jobs_queued
+        union
+        select id, payload->>'campaignId' as campaign_id, attempts
+        from graphile_worker.jobs
+        where
+          task_identifier = 'retry-interaction-step'
+          and key in ( select id::text from contacts_assigned )
       ),
       campaign_breakdown as (
         select c.id as campaign_id, a.id as assignment_id,
-          ( select count(*) from jobs_queued where payload->>'campaignId' = c.id::text and attempts = 0) as count_queued,
+          ( select count(*) from all_jobs_queued where campaign_id = c.id::text and attempts = 0) as count_queued,
           ( select count(*) from assignments_upserted ) as assignments_upserted_count,
           ( select array_agg(campaign_id) from contacts_to_queue ) as campaigns_contacts_queued_on
         from campaign c 
