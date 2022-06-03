@@ -14,6 +14,7 @@ import {
   UserRecord
 } from "../api/types";
 import { r } from "../models";
+import { SendTimeMessagingError } from "../send-message-errors";
 
 export interface RetryInteractionStepPayload {
   campaignContactId: number;
@@ -80,11 +81,6 @@ export const retryInteractionStep: Task = async (
     versionHash: md5(script)
   };
 
-  const expectedErrors = [
-    "Skipped sending because this contact was already opted out",
-    "Outside permitted texting time for this recipient"
-  ];
-
   await r.knex.transaction(async (trx) => {
     try {
       await sendMessage(trx, user, `${campaignContactId}`, message);
@@ -95,8 +91,8 @@ export const retryInteractionStep: Task = async (
           .update({ assignment_id: null })
           .where({ id: payload.campaignContactId });
       }
-    } catch (ex) {
-      if (!expectedErrors.includes(ex.message)) throw ex;
+    } catch (err) {
+      if (!(err instanceof SendTimeMessagingError)) throw err;
     }
   });
 };

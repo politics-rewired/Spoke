@@ -2,6 +2,10 @@
 import { GraphQLError } from "graphql/error";
 import { Knex } from "knex";
 import escapeRegExp from "lodash/escapeRegExp";
+import {
+  ContactOptedOutError,
+  OutsideTextingHoursError
+} from "src/server/send-message-errors";
 import request from "superagent";
 
 import { UserRoleType } from "../../../api/organization-membership";
@@ -236,9 +240,7 @@ export const sendMessage = async (
   }
 
   if (checkOptOut && !!record.is_opted_out) {
-    throw new GraphQLError(
-      "Skipped sending because this contact was already opted out"
-    );
+    throw new ContactOptedOutError();
   }
 
   const {
@@ -251,7 +253,7 @@ export const sendMessage = async (
   const isValidSendTime = isNowBetween(timezone, startHour, endHour);
 
   if (!isValidSendTime) {
-    throw new GraphQLError("Outside permitted texting time for this recipient");
+    throw new OutsideTextingHoursError();
   }
 
   const sendBefore = getSendBeforeUtc(timezone, endHour, DateTime.local());
