@@ -1,3 +1,4 @@
+import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -53,17 +54,14 @@ interface Props {
   mutations: {
     createExternalSystem: (
       input: ExternalSystemInput
-    ) => Promise<{
-      data: { createExternalSystem: ExternalSystem };
-      errors: any;
-    }>;
+    ) => Promise<ApolloQueryResult<{ createExternalSystem: ExternalSystem }>>;
     editExternalSystem: (
       id: string,
       input: ExternalSystemInput
-    ) => Promise<{ data: { editExternalSystem: ExternalSystem }; errors: any }>;
+    ) => Promise<ApolloQueryResult<{ editExternalSystem: ExternalSystem }>>;
     refreshSystem: (
       externalSystemId: string
-    ) => Promise<{ data: boolean; errors: any }>;
+    ) => Promise<ApolloQueryResult<boolean>>;
   };
   data: {
     externalSystems: RelayPaginatedResponse<ExternalSystem>;
@@ -106,11 +104,15 @@ class AdminExternalSystems extends Component<Props, State> {
     });
   };
 
-  makeHandleRefreshExternalSystem = (systemId: string) => () => {
-    this.props.mutations
-      .refreshSystem(systemId)
-      .catch((error) => this.setState({ error: error.message }));
-    this.setState({ syncInitiatedForId: systemId });
+  makeHandleRefreshExternalSystem = (systemId: string) => async () => {
+    try {
+      const response = await this.props.mutations.refreshSystem(systemId);
+      if (response.errors) throw response.errors[0];
+    } catch (err: any) {
+      this.setState({ error: err.message });
+    } finally {
+      this.setState({ syncInitiatedForId: systemId });
+    }
   };
 
   handleDismissSyncSnackbar = (_systemId: string) => async () =>
@@ -137,20 +139,21 @@ class AdminExternalSystems extends Component<Props, State> {
     );
   };
 
-  saveExternalSystem = () => {
-    if (this.state.editingExternalSystem === "new") {
-      this.props.mutations
-        .createExternalSystem(this.state.externalSystem)
-        .catch((error) => this.setState({ error: error.message }))
-        .then(this.cancelEditingExternalSystem);
-    } else {
-      this.props.mutations
-        .editExternalSystem(
-          this.state.editingExternalSystem!,
-          this.state.externalSystem
-        )
-        .catch((error) => this.setState({ error: error.message }))
-        .then(this.cancelEditingExternalSystem);
+  saveExternalSystem = async () => {
+    const { editingExternalSystem, externalSystem } = this.state;
+    try {
+      const response =
+        editingExternalSystem === "new"
+          ? await this.props.mutations.createExternalSystem(externalSystem)
+          : await this.props.mutations.editExternalSystem(
+              editingExternalSystem!,
+              externalSystem
+            );
+      if (response.errors) throw response.errors[0];
+    } catch (err: any) {
+      this.setState({ error: err.message });
+    } finally {
+      this.cancelEditingExternalSystem();
     }
   };
 
