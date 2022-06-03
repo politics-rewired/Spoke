@@ -14,6 +14,7 @@ import {
   UserRecord
 } from "../api/types";
 import { r } from "../models";
+import { SendTimeMessagingError } from "../send-message-errors";
 
 export interface RetryInteractionStepPayload {
   campaignContactId: number;
@@ -81,13 +82,17 @@ export const retryInteractionStep: Task = async (
   };
 
   await r.knex.transaction(async (trx) => {
-    await sendMessage(trx, user, `${campaignContactId}`, message);
+    try {
+      await sendMessage(trx, user, `${campaignContactId}`, message);
 
-    // if false or undefined, dont execute
-    if (payload.unassignAfterSend === true) {
-      await trx("campaign_contact")
-        .update({ assignment_id: null })
-        .where({ id: payload.campaignContactId });
+      // if false or undefined, dont execute
+      if (payload.unassignAfterSend === true) {
+        await trx("campaign_contact")
+          .update({ assignment_id: null })
+          .where({ id: payload.campaignContactId });
+      }
+    } catch (err) {
+      if (!(err instanceof SendTimeMessagingError)) throw err;
     }
   });
 };
