@@ -3048,9 +3048,9 @@ const rootMutations = {
         username: externalSystem.username
       };
 
-      const savedSystemApiKeySecret = await getWorker().then((worker) => {
-        return worker.getSecret(savedSystem.api_key_ref);
-      });
+      const savedSystemApiKeySecret = await getWorker()
+        .then((worker) => worker.getSecret(savedSystem.api_key_ref))
+        .catch(() => undefined);
 
       const [
         savedSystemApiKey,
