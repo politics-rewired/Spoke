@@ -18,10 +18,10 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import type { AutocompleteChangeReason } from "@material-ui/lab/Autocomplete";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import { useSearchUsersQuery } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 
-import { useSearchUsersQuery } from "../../../../libs/spoke-codegen/src";
 import { UserRoleType } from "../../../api/organization-membership";
 
 const styles = StyleSheet.create({
@@ -51,7 +51,7 @@ const TabPanel: React.FC<TabPanelProps> = (props) => {
 };
 
 type Texter = {
-  id: number;
+  id: string;
   displayName: string;
   role: string;
   email: string;
@@ -77,9 +77,8 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
   const [unassignDialogOpen, setUnassignDialogOpen] = useState<boolean>(false);
   const [showSection, setShowSection] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [texterOptions, setTexterOptions] = useState<Array<Texter>>([]);
 
-  const { data: getTexters, loading: textersLoading } = useSearchUsersQuery({
+  const { data: getTexters } = useSearchUsersQuery({
     variables: {
       organizationId: props.organizationId,
       filter: {
@@ -94,29 +93,25 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
     }
   });
 
-  const formatTexters = (texters: Array<any>) => {
-    return texters.map((texter) => {
-      return {
-        id: parseInt(texter.node.id, 10),
-        displayName: texter.node.user.displayName,
-        role: texter.node.role,
-        email: texter.node.user.email
-      };
-    });
-  };
-
-  useEffect(() => {
-    const texters = getTexters?.organization?.memberships?.edges ?? [];
-
-    setTexterOptions(formatTexters(texters));
-  }, [textersLoading]);
+  const texterOptions = useMemo(
+    () =>
+      (getTexters?.organization?.memberships?.edges ?? []).map(
+        ({ node: membership }) => ({
+          id: membership.id,
+          displayName: membership.user.displayName,
+          role: membership.role,
+          email: membership.user.email
+        })
+      ),
+    [getTexters?.organization?.memberships?.edges]
+  );
 
   const handleExpandChange = () => {
     setShowSection(!showSection);
   };
 
   const onReassignmentClicked = () => {
-    const ids = selectedTexters.map(({ id }) => id.toString());
+    const ids = selectedTexters.map(({ id }) => id);
     props.onReassignRequested(ids);
   };
 
@@ -147,7 +142,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
 
   const handleConfirmDialogReassign = () => {
     setReassignDialogOpen(false);
-    const ids = selectedTexters.map(({ id }) => id.toString());
+    const ids = selectedTexters.map(({ id }) => id);
     props.onReassignAllMatchingRequested(ids);
   };
 

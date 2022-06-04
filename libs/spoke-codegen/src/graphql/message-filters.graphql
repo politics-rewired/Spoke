@@ -1,16 +1,20 @@
+fragment MembershipSearchRecord on OrganizationMembership {
+  id
+  user {
+    id
+    displayName
+    email
+  }
+  role
+}
+
 query SearchUsers($organizationId: String! $filter: MembershipFilter) {
   organization(id: $organizationId) {
     id
     memberships(filter: $filter) {
       edges {
         node {
-          id
-          user {
-            id
-            displayName
-            email
-          }
-          role
+          ...MembershipSearchRecord
         }
       }
     }

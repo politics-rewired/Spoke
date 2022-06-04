@@ -19,18 +19,15 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import Autocomplete, {
   AutocompleteChangeReason
 } from "@material-ui/lab/Autocomplete";
-import { css, StyleSheet } from "aphrodite";
-import debounce from "lodash/debounce";
-import isEmpty from "lodash/isEmpty";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-
 import {
   useGetTagsQuery,
-  useSearchCampaignsLazyQuery,
   useSearchCampaignsQuery,
-  useSearchUsersLazyQuery,
   useSearchUsersQuery
-} from "../../../../libs/spoke-codegen/src";
+} from "@spoke/spoke-codegen";
+import { css, StyleSheet } from "aphrodite";
+import React, { useRef, useState } from "react";
+import { useDebounce } from "use-debounce";
+
 import { nameComponents } from "../../../lib/attributes";
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../../lib/constants";
 
@@ -133,36 +130,39 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [cellNumber, setCellNumber] = useState<string>();
   const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
   const [showSection, setShowSection] = useState<boolean>(false);
-  const [campaignOptions, setCampaignOptions] = useState<Array<Campaign>>([]);
-  const [texterOptions, setTexterOptions] = useState<Array<Texter>>([]);
-  const [tagOptions, setTagOptions] = useState<Array<Tag>>([]);
   const [campaignSearchInput, setCampaignSearchInput] = useState<string>();
+  const [campaignSearchInputDebounced] = useDebounce(campaignSearchInput, 500);
   const [texterSearchInput, setTexterSearchInput] = useState<string>();
+  const [texterSearchInputDebounced] = useDebounce(texterSearchInput, 500);
   const timeoutId = useRef<NodeJS.Timeout | null>(null);
 
-  const { data: getTags, loading: tagsLoading } = useGetTagsQuery({
+  const { data: getTags } = useGetTagsQuery({
     variables: { organizationId: props.organizationId }
   });
 
-  const {
-    data: getCampaigns,
-    loading: campaignsLoading
-  } = useSearchCampaignsQuery({
-    variables: { organizationId: props.organizationId }
+  const { data: getCampaigns } = useSearchCampaignsQuery({
+    variables: {
+      organizationId: props.organizationId,
+      campaignsFilter:
+        campaignSearchInputDebounced?.length > 0
+          ? {
+              campaignTitle: campaignSearchInputDebounced
+            }
+          : undefined
+    }
   });
 
-  const { data: getTexters, loading: textersLoading } = useSearchUsersQuery({
-    variables: { organizationId: props.organizationId }
+  const { data: getTexters } = useSearchUsersQuery({
+    variables: {
+      organizationId: props.organizationId,
+      filter:
+        texterSearchInputDebounced?.length > 0
+          ? {
+              nameSearch: texterSearchInputDebounced
+            }
+          : undefined
+    }
   });
-
-  const [
-    searchCampaigns,
-    { data: searchCampaignsData, loading: searchCampaignLoading }
-  ] = useSearchCampaignsLazyQuery();
-  const [
-    searchTexters,
-    { data: searchTextersData, loading: searchTexterLoading }
-  ] = useSearchUsersLazyQuery();
 
   const formatTags = (tags: Array<any>) => {
     return tags.map((tag) => {
@@ -193,81 +193,13 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     return TEXTER_FILTERS.concat(formattedTexters);
   };
 
-  const searchCampaignsDebounced = useCallback(
-    debounce((campaignSearchText) => {
-      searchCampaigns({
-        variables: {
-          organizationId: props.organizationId,
-          campaignsFilter: {
-            campaignTitle: campaignSearchText
-          }
-        }
-      });
-    }, 500),
-    []
+  const campaignOptions: Campaign[] = formatCampaigns(
+    getCampaigns?.campaigns?.campaigns ?? []
   );
-
-  const searchTextersDebounced = useCallback(
-    debounce((texterSearchText) => {
-      searchTexters({
-        variables: {
-          organizationId: props.organizationId,
-          filter: {
-            nameSearch: texterSearchText
-          }
-        }
-      });
-    }, 500),
-    []
+  const tagOptions: Tag[] = formatTags(getTags?.organization?.tagList ?? []);
+  const texterOptions: Texter[] = formatTexters(
+    getTexters?.organization?.memberships?.edges ?? []
   );
-
-  useEffect(() => {
-    if (!tagsLoading && !campaignsLoading && !textersLoading) {
-      const tags = getTags?.organization?.tagList ?? [];
-      const campaigns = getCampaigns?.campaigns?.campaigns ?? [];
-      const texters = getTexters?.organization?.memberships?.edges ?? [];
-
-      setTagOptions(formatTags(tags));
-      setCampaignOptions(formatCampaigns(campaigns));
-      setTexterOptions(formatTexters(texters));
-    }
-  }, [tagsLoading, campaignsLoading, textersLoading]);
-
-  useEffect(() => {
-    if (!isEmpty(campaignSearchInput)) {
-      searchCampaignsDebounced(campaignSearchInput);
-    } else {
-      setCampaignOptions(
-        formatCampaigns(getCampaigns?.campaigns?.campaigns ?? [])
-      );
-    }
-  }, [campaignSearchInput]);
-
-  useEffect(() => {
-    if (!searchCampaignLoading) {
-      setCampaignOptions(
-        formatCampaigns(searchCampaignsData?.campaigns?.campaigns ?? [])
-      );
-    }
-  }, [searchCampaignLoading]);
-
-  useEffect(() => {
-    if (!isEmpty(texterSearchInput)) {
-      searchTextersDebounced(texterSearchInput);
-    } else {
-      setTexterOptions(
-        formatTexters(getTexters?.organization?.memberships?.edges ?? [])
-      );
-    }
-  }, [texterSearchInput]);
-
-  useEffect(() => {
-    if (!searchTexterLoading) {
-      setTexterOptions(
-        formatTexters(searchTextersData?.organization?.memberships?.edges ?? [])
-      );
-    }
-  }, [searchTexterLoading]);
 
   const onMessageFilterSelectChanged = (
     event: React.ChangeEvent<{ value: unknown }>,
