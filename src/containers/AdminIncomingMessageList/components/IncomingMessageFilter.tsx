@@ -86,7 +86,7 @@ type Campaign = {
 };
 
 type Tag = {
-  id: number;
+  id: string;
   title: string;
 };
 
@@ -167,7 +167,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const formatTags = (tags: Array<any>) => {
     return tags.map((tag) => {
       return {
-        id: parseInt(tag.id, 10),
+        id: tag.id,
         title: tag.title
       };
     });
