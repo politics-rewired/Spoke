@@ -72,7 +72,10 @@ class UserEdit extends React.Component {
     switch (this.props.authType) {
       case UserEditMode.Edit: {
         const result = await this.props.mutations.editUser(formData);
-        this.setState({ user: result.data.editUser });
+        this.setState({
+          user: result.data.editUser,
+          snackbarOpen: true
+        });
         if (this.props.onRequestClose) {
           this.props.onRequestClose();
         }
@@ -155,7 +158,6 @@ class UserEdit extends React.Component {
         break;
       }
     }
-    this.setState({ snackbarOpen: true });
   };
 
   handleClick = () => this.setState({ changePasswordDialog: true });
