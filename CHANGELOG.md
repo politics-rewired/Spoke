@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.32.0](https://github.com/politics-rewired/spoke/compare/v4.31.0...v4.32.0) (2022-06-05)
+
+
+### Features
+
+* add script preview to interactions section ([#1237](https://github.com/politics-rewired/spoke/issues/1237)) ([9180159](https://github.com/politics-rewired/spoke/commit/91801594f089a2fd5300d909cb487f74fa125ec9))
+
+
+### Bug Fixes
+
+* fix post-login redirect behavior for local auth ([#1256](https://github.com/politics-rewired/spoke/issues/1256)) ([1cb2b60](https://github.com/politics-rewired/spoke/commit/1cb2b604ba201e68d50c8df7ac5294bdaa6fd414))
+* show notification settings alert only on user edit ([#1257](https://github.com/politics-rewired/spoke/issues/1257)) ([db5dbac](https://github.com/politics-rewired/spoke/commit/db5dbac3caa189e29da4e0bf1cc129440c084ab2))
+* **autosend:** return on expected errors ([#1248](https://github.com/politics-rewired/spoke/issues/1248)) ([e0c8980](https://github.com/politics-rewired/spoke/commit/e0c89807e808ceefb40ec5f7f6b3262fb67796fd))
+* **autosending:** preserve run_at when queuing messages ([#1255](https://github.com/politics-rewired/spoke/issues/1255)) ([3dcf483](https://github.com/politics-rewired/spoke/commit/3dcf483624845166055cfab6f17144372b32f74a))
+* **external-system:** fix displaying errors ([#1254](https://github.com/politics-rewired/spoke/issues/1254)) ([fa8558f](https://github.com/politics-rewired/spoke/commit/fa8558f807b774804af58b1c472568ebcbf2940e))
+* **external-system:** fix saving credentials ([#1253](https://github.com/politics-rewired/spoke/issues/1253)) ([db03817](https://github.com/politics-rewired/spoke/commit/db0381713db0de04d0da87c5e60ab30cde0d75ab))
+
 ## [4.31.0](https://github.com/politics-rewired/spoke/compare/v4.30.1...v4.31.0) (2022-06-01)
 
 
