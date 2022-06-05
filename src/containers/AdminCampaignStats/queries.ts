@@ -14,7 +14,6 @@ export const GET_CAMPAIGN = gql`
         assigned
         status
       }
-      previewUrl
     }
   }
 `;

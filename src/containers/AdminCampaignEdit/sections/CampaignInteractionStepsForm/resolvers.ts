@@ -36,7 +36,6 @@ export const GET_CAMPAIGN_INTERACTIONS = gql`
       externalSystem {
         id
       }
-      previewUrl
     }
   }
   ${EditInteractionStepFragment}

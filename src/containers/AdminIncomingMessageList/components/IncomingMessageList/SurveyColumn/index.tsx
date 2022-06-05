@@ -1,13 +1,11 @@
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Snackbar from "@material-ui/core/Snackbar";
-import Tooltip from "@material-ui/core/Tooltip";
 import CloseIcon from "@material-ui/icons/Close";
 import { useCloseConversationMutation } from "@spoke/spoke-codegen";
 import React, { useCallback, useState } from "react";
+import ScriptPreviewButton from "src/components/ScriptPreviewButton";
 
-import { useSpokeContext } from "../../../../../client/spoke-context";
-import { useAuthzContext } from "../../../../../components/AuthzProvider";
 import ManageSurveyResponses from "./ManageSurveyResponses";
 import ManageTags from "./ManageTags";
 
@@ -33,8 +31,6 @@ const SurveyColumn: React.FC<Props> = (props) => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   );
-  const { orgSettings } = useSpokeContext();
-  const { isAdmin } = useAuthzContext();
 
   const [closeConversation] = useCloseConversationMutation({
     refetchQueries: ["getContactTags"]
@@ -58,29 +54,13 @@ const SurveyColumn: React.FC<Props> = (props) => {
     setErrorMessage
   ]);
 
-  const showScriptPreview =
-    isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
-
   return (
     <div style={styles.container}>
       <ManageSurveyResponses contact={contact} campaign={campaign} />
       <div style={styles.spacer} />
       <div style={{ display: "flex" }}>
         <div style={styles.spacer} />
-        {showScriptPreview ? (
-          <Tooltip title="View an outline of your script" placement="top">
-            <Button
-              key="open-script-preview"
-              variant="contained"
-              style={{ marginRight: "10px" }}
-              onClick={() => {
-                window.open(`/preview/${campaign.previewUrl}`, "_blank");
-              }}
-            >
-              Open Script Preview
-            </Button>
-          </Tooltip>
-        ) : null}
+        <ScriptPreviewButton campaignId={campaign.id} />
         <Button
           variant="contained"
           disabled={isWorking}
