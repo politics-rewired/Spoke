@@ -12,8 +12,6 @@ import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 import Form from "react-formal";
-import { withRouter } from "react-router-dom";
-import { compose } from "recompose";
 import * as yup from "yup";
 
 import { NotificationFrequencyType } from "../api/user";
@@ -143,9 +141,12 @@ class UserEdit extends React.Component {
           body: JSON.stringify(allData),
           headers: { "Content-Type": "application/json" }
         });
-        const { headers, status } = loginRes;
-        if (loginRes.ok) {
-          this.props.history.push(this.props.nextUrl || "");
+        const { redirected, headers, status } = loginRes;
+        if (redirected) {
+          const { origin } = window.location;
+          const pathName = this.props.nextUrl || "";
+          const newLocation = `${origin}${pathName}`;
+          window.location = newLocation;
         } else if (status === 401) {
           throw new Error(headers.get("www-authenticate") || "");
         } else if (status === 400) {
@@ -494,10 +495,7 @@ const mutations = {
   })
 };
 
-export default compose(
-  withRouter,
-  loadData({
-    queries,
-    mutations
-  })
-)(UserEdit);
+export default loadData({
+  queries,
+  mutations
+})(UserEdit);
