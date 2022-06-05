@@ -7,7 +7,6 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import isEqual from "lodash/isEqual";
 import omit from "lodash/omit";
-import pick from "lodash/pick";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
@@ -15,8 +14,6 @@ import { compose } from "recompose";
 
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../lib/constants";
 import { loadData } from "../hoc/with-operations";
-import PaginatedCampaignsRetriever from "../PaginatedCampaignsRetriever";
-import PaginatedUsersRetriever from "../PaginatedUsersRetriever";
 import IncomingMessageActions from "./components/IncomingMessageActions";
 import IncomingMessageFilter from "./components/IncomingMessageFilter";
 import IncomingMessageList from "./components/IncomingMessageList";
@@ -106,11 +103,6 @@ export class AdminIncomingMessageList extends Component {
       tagsFilter,
       contactNameFilter: undefined,
       needsRender: false,
-      campaigns: [],
-      tags: [],
-      reassignmentTexters: [],
-      campaignTexters: [],
-      campaignTextersLoadedFraction: 0,
       includeArchivedCampaigns: false,
       conversationCount: 0,
       includeActiveCampaigns: true,
@@ -312,22 +304,6 @@ export class AdminIncomingMessageList extends Component {
     });
   };
 
-  handleCampaignsReceived = async (campaigns) => {
-    this.setState({ campaigns, needsRender: true });
-  };
-
-  handleTagsReceived = async (tagList) => {
-    this.setState({ tags: tagList });
-  };
-
-  handleCampaignTextersReceived = async (campaignTexters) => {
-    this.setState({ campaignTexters, needsRender: true });
-  };
-
-  handleReassignmentTextersReceived = async (reassignmentTexters) => {
-    this.setState({ reassignmentTexters, needsRender: true });
-  };
-
   handleNotOptedOutConversationsToggled = async () => {
     if (
       this.state.includeNotOptedOutConversations &&
@@ -434,10 +410,6 @@ export class AdminIncomingMessageList extends Component {
     );
   };
 
-  setCampaignTextersLoadedFraction = (percent) => {
-    this.setState({ campaignTextersLoadedFraction: percent });
-  };
-
   render() {
     const {
       selectedRows,
@@ -460,33 +432,8 @@ export class AdminIncomingMessageList extends Component {
 
     return (
       <div>
-        <PaginatedUsersRetriever
-          organizationId={organizationId}
-          onUsersReceived={this.handleReassignmentTextersReceived}
-          pageSize={1000}
-          filterSuspended
-        />
-        <PaginatedUsersRetriever
-          organizationId={organizationId}
-          onUsersReceived={this.handleCampaignTextersReceived}
-          setCampaignTextersLoadedFraction={
-            this.setCampaignTextersLoadedFraction
-          }
-          pageSize={1000}
-          campaignsFilter={this.state.campaignsFilter}
-        />
-        <PaginatedCampaignsRetriever
-          organizationId={organizationId}
-          campaignsFilter={pick(this.state.campaignsFilter, "isArchived")}
-          onCampaignsReceived={this.handleCampaignsReceived}
-          onTagsReceived={this.handleTagsReceived}
-          pageSize={1000}
-        />
         <IncomingMessageFilter
-          campaigns={this.state.campaigns}
-          texters={this.state.campaignTexters}
-          textersLoadedFraction={this.state.campaignTextersLoadedFraction}
-          tags={this.state.tags}
+          organizationId={organizationId}
           onCampaignChanged={this.handleCampaignChanged}
           onTexterChanged={this.handleTexterChanged}
           includeEscalated={includeEscalated}
@@ -515,7 +462,7 @@ export class AdminIncomingMessageList extends Component {
         />
         <br />
         <IncomingMessageActions
-          people={this.state.reassignmentTexters}
+          organizationId={organizationId}
           onReassignRequested={this.handleReassignRequested}
           onReassignAllMatchingRequested={
             this.handleReassignAllMatchingRequested

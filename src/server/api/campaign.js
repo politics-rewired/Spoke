@@ -37,6 +37,13 @@ export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
         parseInt(campaignsFilter.campaignId, 10)
       );
     }
+
+    if ("campaignTitle" in campaignsFilter) {
+      query = query.whereRaw(`"title" ilike ?`, [
+        `%${campaignsFilter.campaignTitle}%`
+      ]);
+    }
+
     if (resultSize && !pageSize) {
       query = query.limit(resultSize);
     }

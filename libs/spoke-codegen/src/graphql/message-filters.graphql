@@ -1,0 +1,43 @@
+fragment MembershipSearchRecord on OrganizationMembership {
+  id
+  user {
+    id
+    displayName
+    email
+  }
+  role
+}
+
+query SearchUsers($organizationId: String! $filter: MembershipFilter) {
+  organization(id: $organizationId) {
+    id
+    memberships(filter: $filter) {
+      edges {
+        node {
+          ...MembershipSearchRecord
+        }
+      }
+    }
+  }
+}
+
+query SearchCampaigns($organizationId: String! $campaignsFilter: CampaignsFilter) {
+  campaigns(organizationId: $organizationId campaignsFilter: $campaignsFilter) {
+    ... on CampaignsList
+    {
+      campaigns {
+        id
+        title
+      }
+    }
+  }
+}
+
+query GetTags($organizationId: String!) {
+  organization(id: $organizationId) {
+    tagList {
+      id
+      title
+    }
+  }
+}
