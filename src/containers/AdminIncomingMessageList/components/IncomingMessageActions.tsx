@@ -59,14 +59,12 @@ type Texter = {
 
 interface IncomingMessageActionsProps {
   organizationId: string;
-  people: Array<any>;
   contactsAreSelected: boolean;
   conversationCount: number;
   onReassignRequested(texterIds: string[]): void;
   onReassignAllMatchingRequested(texterIds: string[]): void;
   onUnassignRequested(): void;
   onUnassignAllMatchingRequested(): void;
-  markForSecondPass(): void;
 }
 
 const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (

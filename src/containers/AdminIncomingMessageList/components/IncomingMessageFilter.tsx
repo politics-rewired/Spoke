@@ -109,7 +109,6 @@ interface IncomingMessageFilterProps {
   includeOptedOutConversations: boolean;
   includeArchivedCampaigns: boolean;
   includeActiveCampaigns: boolean;
-  assignmentsFilter: { texterId: number };
   tagsFilter: Array<string>;
   organizationId: string;
   onCampaignChanged(campaignId: number): void;
