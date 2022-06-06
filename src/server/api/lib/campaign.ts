@@ -215,12 +215,15 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
           .knex("messaging_service")
           .where({ organization_id: campaign.organization_id, active: true })
           .first();
-        messagingServiceSid = messagingService.messaging_service_sid;
+        messagingServiceSid = messagingService?.messaging_service_sid;
       }
 
-      await trx("campaign")
-        .update({ messaging_service_sid: messagingServiceSid })
-        .where({ id: newCampaign.id });
+      // Can't find a valid messaging service to use
+      if (messagingServiceSid) {
+        await trx("campaign")
+          .update({ messaging_service_sid: messagingServiceSid })
+          .where({ id: newCampaign.id });
+      }
 
       // Copy interactions
       const interactions = await trx<InteractionStepRecord>("interaction_step")

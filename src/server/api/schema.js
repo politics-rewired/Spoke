@@ -822,7 +822,7 @@ const rootMutations = {
           is_started: false,
           is_archived: false,
           is_approved: false,
-          messaging_service_sid: messagingService.messaging_service_sid
+          messaging_service_sid: messagingService?.messaging_service_sid
         })
         .returning("*");
 
