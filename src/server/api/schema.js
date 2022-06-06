@@ -802,6 +802,11 @@ const rootMutations = {
         features
       );
 
+      const messagingService = await r
+        .knex("messaging_service")
+        .where({ organization_id: campaign.organizationId, active: true })
+        .first();
+
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
       });
@@ -816,7 +821,8 @@ const rootMutations = {
           due_by: campaign.dueBy,
           is_started: false,
           is_archived: false,
-          is_approved: false
+          is_approved: false,
+          messaging_service_sid: messagingService.messaging_service_sid
         })
         .returning("*");
 

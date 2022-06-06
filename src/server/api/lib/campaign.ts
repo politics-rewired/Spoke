@@ -203,6 +203,25 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
         [count, userId, campaignId]
       );
 
+      // Copy Messaging Service OR use active one
+      const campaign = await r
+        .knex("campaign")
+        .where({ id: campaignId })
+        .first();
+      let messagingServiceSid = campaign.messaging_service_sid;
+
+      if (!messagingServiceSid) {
+        const messagingService = await r
+          .knex("messaging_service")
+          .where({ organization_id: campaign.organization_id, active: true })
+          .first();
+        messagingServiceSid = messagingService.messaging_service_sid;
+      }
+
+      await trx("campaign")
+        .update({ messaging_service_sid: messagingServiceSid })
+        .where({ id: newCampaign.id });
+
       // Copy interactions
       const interactions = await trx<InteractionStepRecord>("interaction_step")
         .where({
