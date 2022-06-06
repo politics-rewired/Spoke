@@ -614,6 +614,7 @@ type Campaign {
   externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
   deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
   autosendStatus: String!
+  messagingServiceSid: String
 }
 
 type CampaignEdge {

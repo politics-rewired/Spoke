@@ -122,6 +122,21 @@ export const getContactMessagingService = async (
   if (config.DEFAULT_SERVICE === "fakeservice")
     return { service_type: "fakeservice" };
 
+  const campaignData = await r
+    .reader("campaign")
+    .join(
+      "campaign_contact",
+      "campaign.id",
+      "=",
+      "campaign_contact.campaign_id"
+    )
+    .where({ "campaign_contact.id": campaignContactId })
+    .first();
+
+  if (campaignData.messaging_service_sid) {
+    return getMessagingServiceById(campaignData.messaging_service_sid);
+  }
+
   const {
     rows: [existingMessagingService]
   } = await r.reader.raw(

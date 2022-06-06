@@ -407,7 +407,8 @@ export const resolvers = {
       "isAutoassignEnabled",
       "createdAt",
       "landlinesFiltered",
-      "autosendStatus"
+      "autosendStatus",
+      "messagingServiceSid"
     ]),
     isApproved: (campaign) =>
       isNil(campaign.is_approved) ? false : campaign.is_approved,
