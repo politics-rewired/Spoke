@@ -388,7 +388,7 @@ type Organization {
   escalationTagList: [Tag]
   teams: [Team]!
   externalSystems(after: Cursor, first: Int): ExternalSystemPage!
-  messagingServices(after: Cursor, first: Int): MessagingServicePage!
+  messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage!
   campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
   templateCampaigns(after: Cursor, first: Int): CampaignPage!
 }
@@ -549,6 +549,7 @@ type JobRequest {
 type CampaignReadiness {
   id: ID!
   basics: Boolean!
+  messagingService: Boolean!
   textingHours: Boolean!
   integration: Boolean!
   contacts: Boolean!
@@ -681,6 +682,7 @@ input CampaignInput {
   isAutoassignEnabled: Boolean
   timezone: String
   repliesStaleAfter: Int
+  messagingServiceSid: String
 }
 
 
@@ -765,6 +767,8 @@ type MessagingService {
   serviceType: MessagingServiceType!
   updatedAt: String!
   tcrBrandRegistrationLink: String
+  name: String
+  active: Boolean!
 }
 
 type MessagingServiceEdge {

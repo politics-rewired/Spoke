@@ -317,6 +317,18 @@ export const resolvers = {
   CampaignReadiness: {
     id: ({ id }) => id,
     basics: (campaign) => campaign.title !== "" && campaign.description !== "",
+    messagingService: async (campaign) => {
+      if (campaign.messaging_service_sid === null) {
+        return false;
+      }
+
+      const messagingService = await r
+        .reader("messaging_service")
+        .where({ messaging_service_sid: campaign.messaging_service_sid })
+        .first();
+
+      return messagingService.active;
+    },
     textingHours: (campaign) =>
       campaign.textingHoursStart !== null &&
       campaign.textingHoursEnd !== null &&

@@ -6,6 +6,33 @@ query GetCampaignStatus($campaignId: String!) {
   }
 }
 
+query GetOrganizationMessagingServices($organizationId: String!) {
+  organization(id: $organizationId) {
+    messagingServices(active: true) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+query GetCampaignMessagingServiceData($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    messagingServiceSid
+  }
+}
+
+mutation EditCampaignMessagingService($campaignId: String!, $payload: CampaignInput!) {
+  editCampaign(id: $campaignId, campaign: $payload) {
+    id
+    messagingServiceSid
+  }
+}
+
 mutation SetCampaignApproved($campaignId: String!, $approved: Boolean!) {
   setCampaignApproved(id: $campaignId, approved: $approved) {
     id

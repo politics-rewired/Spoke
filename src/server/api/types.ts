@@ -104,6 +104,7 @@ export interface CampaignRecord {
   replies_stale_after_minutes: number | null;
   landlines_filtered: boolean;
   external_system_id: string | null;
+  messaging_service_sid: string | null;
 }
 
 export interface AssignmentRecord {

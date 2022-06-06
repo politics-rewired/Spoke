@@ -430,13 +430,22 @@ export const resolvers = {
         .where({ organization_id: organizationId });
       return formatPage(query, { after, first });
     },
-    messagingServices: async (organization, { after, first }, { user }) => {
+    messagingServices: async (
+      organization,
+      { after, first, active },
+      { user }
+    ) => {
       const organizationId = parseInt(organization.id, 10);
       await accessRequired(user, organizationId, "OWNER", true);
 
-      const query = r
+      let query = r
         .reader("messaging_service")
         .where({ organization_id: organizationId });
+
+      if (active) {
+        query = query.where({ active });
+      }
+
       return formatPage(query, {
         after,
         first,

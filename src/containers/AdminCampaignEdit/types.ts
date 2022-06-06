@@ -1,5 +1,6 @@
 export interface CampaignReadinessType {
   basics: boolean;
+  messagingService: boolean;
   textingHours: boolean;
   integration: boolean;
   contacts: boolean;

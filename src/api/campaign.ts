@@ -89,6 +89,7 @@ export interface CampaignInput {
   isAutoassignEnabled: boolean | null;
   timezone: string | null;
   repliesStaleAfter: number | null;
+  messagingServiceSid: string | null;
 }
 
 export interface Campaign {
@@ -194,6 +195,7 @@ export const schema = `
   type CampaignReadiness {
     id: ID!
     basics: Boolean!
+    messagingService: Boolean!
     textingHours: Boolean!
     integration: Boolean!
     contacts: Boolean!
@@ -326,5 +328,6 @@ export const schema = `
     isAutoassignEnabled: Boolean
     timezone: String
     repliesStaleAfter: Int
+    messagingServiceSid: String
   }
 `;
