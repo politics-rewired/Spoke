@@ -95,7 +95,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
     () =>
       (getTexters?.organization?.memberships?.edges ?? []).map(
         ({ node: membership }) => ({
-          id: membership.id,
+          id: membership.user.id,
           displayName: membership.user.displayName,
           role: membership.role,
           email: membership.user.email
