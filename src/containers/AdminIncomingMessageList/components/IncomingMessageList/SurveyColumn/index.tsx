@@ -4,8 +4,8 @@ import Snackbar from "@material-ui/core/Snackbar";
 import CloseIcon from "@material-ui/icons/Close";
 import { useCloseConversationMutation } from "@spoke/spoke-codegen";
 import React, { useCallback, useState } from "react";
-import ScriptPreviewButton from "src/components/ScriptPreviewButton";
 
+import ScriptPreviewButton from "../../../../../components/ScriptPreviewButton";
 import ManageSurveyResponses from "./ManageSurveyResponses";
 import ManageTags from "./ManageTags";
 

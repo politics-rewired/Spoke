@@ -6,7 +6,6 @@ import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
 import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
-import ScriptPreviewButton from "src/components/ScriptPreviewButton";
 
 import { Campaign } from "../../../../api/campaign";
 import {
@@ -15,6 +14,7 @@ import {
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
 import { readClipboardText, writeClipboardText } from "../../../../client/lib";
+import ScriptPreviewButton from "../../../../components/ScriptPreviewButton";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";

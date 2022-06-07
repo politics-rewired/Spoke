@@ -10,9 +10,9 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
-import ScriptPreviewButton from "src/components/ScriptPreviewButton";
 
 import CampaignNavigation from "../../components/CampaignNavigation";
+import ScriptPreviewButton from "../../components/ScriptPreviewButton";
 import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
