@@ -17,13 +17,15 @@ export const ScriptPreviewButton: React.FC<ScriptPreviewButtonProps> = (
   const { orgSettings } = useSpokeContext();
   const { isAdmin } = useAuthzContext();
 
-  const showScriptPreview =
-    isAdmin || orgSettings?.scriptPreviewForSupervolunteers;
-
   const { data } = useGetCampaignScriptPreviewQuery({
-    variables: { campaignId }
+    variables: { campaignId },
+    skip: campaignId === undefined
   });
   const previewUrl = data?.campaign?.previewUrl;
+
+  const showScriptPreview =
+    (isAdmin || orgSettings?.scriptPreviewForSupervolunteers) &&
+    previewUrl !== undefined;
 
   return showScriptPreview ? (
     <Tooltip title="View an outline of your script" placement="top">
