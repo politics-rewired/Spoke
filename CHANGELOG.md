@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.32.2](https://github.com/politics-rewired/spoke/compare/v4.32.1...v4.32.2) (2022-06-07)
+
+
+### Bug Fixes
+
+* **message-review:** fix user id ([#1261](https://github.com/politics-rewired/spoke/issues/1261)) ([da92bd0](https://github.com/politics-rewired/spoke/commit/da92bd048ca8da2613fd446094af43821fb2adfa))
+
 ### [4.32.1](https://github.com/politics-rewired/spoke/compare/v4.32.0...v4.32.1) (2022-06-06)
 
 
