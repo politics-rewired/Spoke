@@ -222,6 +222,7 @@ CREATE TABLE public.all_campaign (
     autosend_status text DEFAULT 'unstarted'::text,
     autosend_user_id integer,
     is_template boolean DEFAULT false NOT NULL,
+    messaging_service_sid text,
     CONSTRAINT campaign_autosend_status_check CHECK ((autosend_status = ANY (ARRAY['unstarted'::text, 'sending'::text, 'paused'::text, 'complete'::text])))
 );
 
@@ -382,7 +383,9 @@ CREATE TABLE public.messaging_service (
     account_sid text DEFAULT ''::text NOT NULL,
     encrypted_auth_token text DEFAULT ''::text NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    service_type public.messaging_service_type NOT NULL
+    service_type public.messaging_service_type NOT NULL,
+    name character varying(255) DEFAULT ''::character varying NOT NULL,
+    active boolean DEFAULT true NOT NULL
 );
 
 
@@ -1458,7 +1461,8 @@ CREATE VIEW public.campaign AS
     all_campaign.external_system_id,
     all_campaign.is_approved,
     all_campaign.autosend_status,
-    all_campaign.autosend_user_id
+    all_campaign.autosend_user_id,
+    all_campaign.messaging_service_sid
    FROM public.all_campaign
   WHERE (all_campaign.is_template = false);
 
@@ -4361,6 +4365,13 @@ CREATE INDEX message_user_number_index ON public.message USING btree (user_numbe
 
 
 --
+-- Name: messaging_service_active_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX messaging_service_active_index ON public.messaging_service USING btree (active);
+
+
+--
 -- Name: messaging_service_organization_id_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -4904,6 +4915,14 @@ CREATE TRIGGER _500_user_team_updated_at BEFORE UPDATE ON public.user_team FOR E
 --
 
 CREATE TRIGGER _500_user_updated_at BEFORE UPDATE ON public."user" FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+
+
+--
+-- Name: all_campaign all_campaign_messaging_service_sid_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.all_campaign
+    ADD CONSTRAINT all_campaign_messaging_service_sid_foreign FOREIGN KEY (messaging_service_sid) REFERENCES public.messaging_service(messaging_service_sid);
 
 
 --
