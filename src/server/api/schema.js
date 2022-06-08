@@ -802,10 +802,13 @@ const rootMutations = {
         features
       );
 
-      const messagingService = await r
+      const messagingServices = await r
         .knex("messaging_service")
-        .where({ organization_id: campaign.organizationId, active: true })
-        .first();
+        .where({ organization_id: campaign.organizationId, active: true });
+
+      if (messagingServices.length === 0) {
+        throw new Error("No active messaging services found");
+      }
 
       await memoizer.invalidate(cacheOpts.CampaignsList.key, {
         organizationId: campaign.organizationId
@@ -822,7 +825,7 @@ const rootMutations = {
           is_started: false,
           is_archived: false,
           is_approved: false,
-          messaging_service_sid: messagingService?.messaging_service_sid
+          messaging_service_sid: messagingServices[0].messaging_service_sid
         })
         .returning("*");
 
