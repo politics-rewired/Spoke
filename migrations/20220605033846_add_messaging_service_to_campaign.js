@@ -224,7 +224,8 @@ exports.down = function down(knex) {
             and all_values.interaction_step_id = aqrc.interaction_step_id
             and all_values.value = aqrc.question_response_value
         );
-`)
+`
+    )
     .then(() => {
       return knex.schema.alterTable("all_campaign", (table) => {
         table.dropColumn("messaging_service_sid");
