@@ -29,7 +29,22 @@ const descriptions: Record<string, string> = {
   "30005": "Unknown destination handset",
   "30006": "Landline or unreachable carrier",
   "30007": "Blocked as spam",
-  "30008": "Unknown error"
+  "30008": "Unknown error",
+  "4405": "Unreachable sending phone number", // this one shouldn't happen
+  "4406": "Unreachable phone number",
+  "4432": "Unreachable country",
+  "4434": "Unreachable toll-free number",
+  "4700": "Landline or unreachable carrier",
+  "4720": "Unreachable phone number",
+  "4730": "Unreachable phone number (recipient maybe roaming)",
+  "4740": "Unreachable sending phone number", // this one shouldn't happen, but has happening
+  "4750": "Carrier rejected (maybe spam)",
+  "4770": "Blocked as spam",
+  "4780": "Carrier rejected (sending rates exceeded)",
+  "5106": "Unroutable (can be retried)",
+  "5620": "Carrier outage",
+  "9902": "Delivery receipt expired",
+  "9999": "Unknown error"
 };
 
 const styles = StyleSheet.create({
