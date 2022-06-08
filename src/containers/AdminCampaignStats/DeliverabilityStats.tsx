@@ -37,7 +37,7 @@ const descriptions: Record<string, string> = {
   "4700": "Landline or unreachable carrier",
   "4720": "Unreachable phone number",
   "4730": "Unreachable phone number (recipient maybe roaming)",
-  "4740": "Unreachable sending phone number", // this one shouldn't happen, but has happening
+  "4740": "Unreachable sending phone number", // this one shouldn't happen, but has happened
   "4750": "Carrier rejected (maybe spam)",
   "4770": "Blocked as spam",
   "4780": "Carrier rejected (sending rates exceeded)",
