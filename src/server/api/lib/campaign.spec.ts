@@ -9,6 +9,7 @@ import {
   createCampaign,
   createCompleteCampaign,
   createMessage,
+  createMessagingService,
   createOrganization,
   createUser,
   createUserOrganization
@@ -134,6 +135,11 @@ describe("create / edit campaign", () => {
         userId: user.id,
         organizationId: organization.id,
         role: UserRoleType.OWNER
+      });
+
+      await createMessagingService(client, {
+        organizationId: organization.id,
+        active: true
       });
       cookies = await createSession({ agent, email: user.email, password });
     });

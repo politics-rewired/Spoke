@@ -122,6 +122,21 @@ export const getContactMessagingService = async (
   if (config.DEFAULT_SERVICE === "fakeservice")
     return { service_type: "fakeservice" };
 
+  const campaignData = await r
+    .reader("campaign")
+    .join(
+      "campaign_contact",
+      "campaign.id",
+      "=",
+      "campaign_contact.campaign_id"
+    )
+    .where({ "campaign_contact.id": campaignContactId })
+    .first();
+
+  if (campaignData.messaging_service_sid) {
+    return getMessagingServiceById(campaignData.messaging_service_sid);
+  }
+
   const {
     rows: [existingMessagingService]
   } = await r.reader.raw(
@@ -339,9 +354,13 @@ export async function getCampaignContactAndAssignmentForIncomingMessage({
       on message.campaign_contact_id = campaign_contact_option.id
     where
       message.is_from_contact = false
+      and (
+        campaign.messaging_service_sid IS NULL
+        or campaign.messaging_service_sid = ?
+      )
     order by created_at desc
     limit 1`,
-    [messaging_service_sid, contactNumber]
+    [messaging_service_sid, contactNumber, messaging_service_sid]
   );
 
   return rows[0];

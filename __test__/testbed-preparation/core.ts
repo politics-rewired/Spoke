@@ -369,6 +369,32 @@ export const createCompleteCampaign = async (
   return { organization, campaign, texters, assignments, contacts };
 };
 
+export type CreateMessagingServiceOptions = {
+  organizationId: number;
+  active: boolean;
+};
+
+export const createMessagingService = async (
+  client: PoolClient,
+  options: CreateMessagingServiceOptions
+) =>
+  client.query(
+    `
+insert into public.messaging_service (messaging_service_sid, organization_id, account_sid, encrypted_auth_token, service_type, name, active)
+values ($1, $2, $3, $4, $5, $6, $7)
+returning *;
+`,
+    [
+      faker.random.uuid(),
+      options.organizationId,
+      faker.random.alphaNumeric(15),
+      faker.random.alphaNumeric(15),
+      "assemble-numbers",
+      faker.name.firstName(),
+      options.active
+    ]
+  );
+
 export type CreateInteractionStepOptions = {
   campaignId: number;
 } & Partial<

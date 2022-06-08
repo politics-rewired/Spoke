@@ -124,6 +124,7 @@ export interface Campaign {
   creator?: User | null;
   deliverabilityStats: CampaignDeliverabilityStats;
   previewUrl?: string | null;
+  messagingServiceSid?: string | null;
 }
 
 export interface PaginatedCampaigns {
@@ -258,6 +259,7 @@ export const schema = `
     externalSyncConfigurations(after: Cursor, first: Int): ExternalSyncQuestionResponseConfigPage!
     deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
     autosendStatus: String!
+    messagingServiceSid: String
   }
 
   type CampaignEdge {
