@@ -222,6 +222,7 @@ CREATE TABLE public.all_campaign (
     autosend_status text DEFAULT 'unstarted'::text,
     autosend_user_id integer,
     is_template boolean DEFAULT false NOT NULL,
+    messaging_service_sid text,
     CONSTRAINT campaign_autosend_status_check CHECK ((autosend_status = ANY (ARRAY['unstarted'::text, 'sending'::text, 'paused'::text, 'complete'::text])))
 );
 
@@ -382,7 +383,9 @@ CREATE TABLE public.messaging_service (
     account_sid text DEFAULT ''::text NOT NULL,
     encrypted_auth_token text DEFAULT ''::text NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    service_type public.messaging_service_type NOT NULL
+    service_type public.messaging_service_type NOT NULL,
+    name character varying(255) DEFAULT ''::character varying NOT NULL,
+    active boolean DEFAULT true NOT NULL
 );
 
 
@@ -444,43 +447,54 @@ CREATE FUNCTION public.get_trollbot_matches(organization_id integer, troll_inter
     LANGUAGE plpgsql STABLE SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
-  begin
-    return query
-      with troll_tokens as (
-        select token, mode, compiled_tsquery
-        from troll_trigger
-        where troll_trigger.organization_id = get_trollbot_matches.organization_id
-      ),
-      ts_queries as (
-        select mode, to_tsquery('(' || array_to_string(array_agg(token), ') | (') || ')') as tsquery
-        from troll_trigger
-        where troll_trigger.organization_id = get_trollbot_matches.organization_id
-        group by 1
-      ),
-      bad_messages as (
-        select distinct on (message.id) message.id, mode, text, is_from_contact
-        from message
-        join campaign_contact
-          on campaign_contact.id = message.campaign_contact_id
-        join campaign
-          on campaign.id = campaign_contact.campaign_id
-        join ts_queries on to_tsvector(regconfig_mode(mode), message.text) @@ ts_queries.tsquery
-        where true
-          and message.created_at >= now() - get_trollbot_matches.troll_interval
-          and message.is_from_contact = false
-          and campaign.organization_id = get_trollbot_matches.organization_id
-        order by message.id, mode
-      ),
-      messages_with_match as (
-        select bad_messages.id, bad_messages.text, token
-        from bad_messages
-        join troll_tokens on to_tsvector(regconfig_mode(troll_tokens.mode), bad_messages.text) @@ troll_tokens.compiled_tsquery
-        where troll_tokens.mode = bad_messages.mode
-      )
-      select id, token::text as trigger_token
-      from messages_with_match;
-  end;
-  $$;
+    begin
+      return query
+        with troll_tokens as (
+          select token, mode, compiled_tsquery
+          from troll_trigger
+          where troll_trigger.organization_id = get_trollbot_matches.organization_id
+        ),
+        ts_queries as (
+          select mode, to_tsquery('(' || array_to_string(array_agg(token), ') | (') || ')') as tsquery
+          from troll_trigger
+          where troll_trigger.organization_id = get_trollbot_matches.organization_id
+          group by 1
+        ),
+        messages_to_consider as materialized (
+          select message.id, text, is_from_contact, campaign_contact_id
+          from message
+          join campaign_contact
+              on campaign_contact.id = message.campaign_contact_id
+          join campaign
+            on campaign.id = campaign_contact.campaign_id
+          where true
+            and campaign.organization_id = get_trollbot_matches.organization_id
+            and message.created_at >= now() - get_trollbot_matches.troll_interval 
+            and message.is_from_contact = false
+            -- exclude initial messages
+            and exists (
+              select 1
+              from message earlier_message 
+              where earlier_message.campaign_contact_id = message.campaign_contact_id
+                and earlier_message.created_at < message.created_at
+            )
+        ),
+        bad_messages as (
+          select distinct on (m.id) m.id, mode, text, is_from_contact
+          from messages_to_consider m
+          join ts_queries on to_tsvector(regconfig_mode(mode), m.text) @@ ts_queries.tsquery
+          order by m.id, mode
+        ),
+        messages_with_match as (
+          select bad_messages.id, bad_messages.text, token
+          from bad_messages
+          join troll_tokens on to_tsvector(regconfig_mode(troll_tokens.mode), bad_messages.text) @@ troll_tokens.compiled_tsquery
+          where troll_tokens.mode = bad_messages.mode
+        )
+        select id, token::text as trigger_token
+        from messages_with_match;
+    end;
+    $$;
 
 
 ALTER FUNCTION public.get_trollbot_matches(organization_id integer, troll_interval interval) OWNER TO postgres;
@@ -1458,7 +1472,8 @@ CREATE VIEW public.campaign AS
     all_campaign.external_system_id,
     all_campaign.is_approved,
     all_campaign.autosend_status,
-    all_campaign.autosend_user_id
+    all_campaign.autosend_user_id,
+    all_campaign.messaging_service_sid
    FROM public.all_campaign
   WHERE (all_campaign.is_template = false);
 
@@ -4361,6 +4376,13 @@ CREATE INDEX message_user_number_index ON public.message USING btree (user_numbe
 
 
 --
+-- Name: messaging_service_active_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX messaging_service_active_index ON public.messaging_service USING btree (active);
+
+
+--
 -- Name: messaging_service_organization_id_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -4904,6 +4926,14 @@ CREATE TRIGGER _500_user_team_updated_at BEFORE UPDATE ON public.user_team FOR E
 --
 
 CREATE TRIGGER _500_user_updated_at BEFORE UPDATE ON public."user" FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+
+
+--
+-- Name: all_campaign all_campaign_messaging_service_sid_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.all_campaign
+    ADD CONSTRAINT all_campaign_messaging_service_sid_foreign FOREIGN KEY (messaging_service_sid) REFERENCES public.messaging_service(messaging_service_sid);
 
 
 --
