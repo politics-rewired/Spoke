@@ -236,16 +236,16 @@ ALTER TABLE public.all_campaign OWNER TO postgres;
 CREATE FUNCTION public.campaigns_in_group(group_id integer) RETURNS SETOF public.all_campaign
     LANGUAGE sql STABLE
     AS $$
-      select *
-      from campaign
-      where exists (
-        select 1
-        from campaign_group_campaign
-        join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
-        where campaign_group_campaign.campaign_id = campaign.id
-          and campaign_group.id = campaigns_in_group.group_id
-      )
-    $$;
+        select *
+        from all_campaign
+        where exists (
+          select 1
+          from campaign_group_campaign
+          join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
+          where campaign_group_campaign.campaign_id = all_campaign.id
+            and campaign_group.id = campaigns_in_group.group_id
+        )
+      $$;
 
 
 ALTER FUNCTION public.campaigns_in_group(group_id integer) OWNER TO postgres;
@@ -257,16 +257,16 @@ ALTER FUNCTION public.campaigns_in_group(group_id integer) OWNER TO postgres;
 CREATE FUNCTION public.campaigns_in_group(group_name text) RETURNS SETOF public.all_campaign
     LANGUAGE sql STABLE
     AS $$
-      select *
-      from campaign
-      where exists (
-        select 1
-        from campaign_group_campaign
-        join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
-        where campaign_group_campaign.campaign_id = campaign.id
-          and campaign_group.name = campaigns_in_group.group_name
-      )
-    $$;
+        select *
+        from all_campaign
+        where exists (
+          select 1
+          from campaign_group_campaign
+          join campaign_group on campaign_group.id = campaign_group_campaign.campaign_group_id
+          where campaign_group_campaign.campaign_id = all_campaign.id
+            and campaign_group.name = campaigns_in_group.group_name
+        )
+      $$;
 
 
 ALTER FUNCTION public.campaigns_in_group(group_name text) OWNER TO postgres;
