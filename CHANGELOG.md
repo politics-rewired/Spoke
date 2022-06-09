@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.33.0-0](https://github.com/politics-rewired/spoke/compare/v4.32.2...v4.33.0-0) (2022-06-09)
+
+
+### Features
+
+* add bandwidth error codes ([#1263](https://github.com/politics-rewired/spoke/issues/1263)) ([8aae1f0](https://github.com/politics-rewired/spoke/commit/8aae1f08f48725cd7edabfd446bfc651bfdfe401))
+* allow campaign to pick messaging service ([#1260](https://github.com/politics-rewired/spoke/issues/1260)) ([2c02b8e](https://github.com/politics-rewired/spoke/commit/2c02b8eef7f5b46b24821088cf0934b833d8eea9))
+
+
+### Bug Fixes
+
+* **message-review:** fix passing user ID ([#1267](https://github.com/politics-rewired/spoke/issues/1267)) ([1226abb](https://github.com/politics-rewired/spoke/commit/1226abbd7e72ef68e13be810d98119adc30e6903))
+* fix return type in campaign group functions ([#1262](https://github.com/politics-rewired/spoke/issues/1262)) ([7739b17](https://github.com/politics-rewired/spoke/commit/7739b17b0e54dcecb46baf373621cd1aabc79569))
+* improve trollbot performance ([#1265](https://github.com/politics-rewired/spoke/issues/1265)) ([c4e897d](https://github.com/politics-rewired/spoke/commit/c4e897d94a6ef5e9a3cadb1409b3eb80d876e539))
+
 ### [4.32.2](https://github.com/politics-rewired/spoke/compare/v4.32.1...v4.32.2) (2022-06-07)
 
 
