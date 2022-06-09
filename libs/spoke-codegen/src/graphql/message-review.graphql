@@ -30,7 +30,6 @@ fragment ConversationInfo on Conversation {
   campaign {
     id
     title
-    previewUrl
   }
 }
 

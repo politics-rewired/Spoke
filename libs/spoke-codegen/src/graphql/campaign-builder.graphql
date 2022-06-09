@@ -6,6 +6,13 @@ query GetCampaignStatus($campaignId: String!) {
   }
 }
 
+query GetCampaignScriptPreview($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    previewUrl
+  }
+}
+
 mutation SetCampaignApproved($campaignId: String!, $approved: Boolean!) {
   setCampaignApproved(id: $campaignId, approved: $approved) {
     id
