@@ -184,7 +184,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const formatTexters = (texters: Array<any>) => {
     const formattedTexters: Texter[] = texters.map((texter) => {
       return {
-        id: parseInt(texter.node.id, 10),
+        id: parseInt(texter.node.user.id, 10),
         displayName: texter.node.user.displayName
       };
     });
