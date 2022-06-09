@@ -193,10 +193,10 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
     setTagsFilter(newTagsFilter);
   };
 
-  const handleMessageFilterChange = async (messagesFilter: Array<string>) => {
+  const handleMessageFilterChange = (messageFilter: string) => {
     const newContactsFilter = Object.assign(
       omit(contactsFilter, ["messageStatus"]),
-      { messageStatus: messagesFilter }
+      { messageStatus: messageFilter }
     );
 
     setContactsFilter(newContactsFilter);
