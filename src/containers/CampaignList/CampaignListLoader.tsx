@@ -77,16 +77,18 @@ const CampaignListLoader: React.FC<Props> = (props) => {
 
   // authz.isSupervol will be true for owner and admin so check NOT admin instead
   const isOnlySupervol = !authz.isAdmin;
-  const unexpectedErrors =
-    error?.graphQLErrors.filter(
+  const unexpectedErrors = [
+    ...(error?.graphQLErrors.filter(
       (gqlError) => !(isOnlySupervol && isSupervolPermissionError(gqlError))
-    ) ?? [];
-
+    ) ?? []),
+    ...(error?.clientErrors ?? []),
+    ...(error?.networkError ? [error?.networkError] : [])
+  ];
   return (
     <div>
       {unexpectedErrors.length > 0 && (
         <div>
-          <p>Errors fetching campaigns:</p>
+          <p>Error(s) fetching campaigns:</p>
           <ul>
             {unexpectedErrors.map((err, i) => (
               // eslint-disable-next-line react/no-array-index-key
