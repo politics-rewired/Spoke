@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.33.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.33.0-0...v4.33.0-rc.0) (2022-06-14)
+
+
+### Bug Fixes
+
+* **reply handling:** fix messaging_service_sid check in the incorrect section ([#1268](https://github.com/politics-rewired/spoke/issues/1268)) ([62ca8a0](https://github.com/politics-rewired/spoke/commit/62ca8a0a78a654d5a1b3e537d6f8c8a4a70ef2d3))
+
 ## [4.33.0-0](https://github.com/politics-rewired/spoke/compare/v4.32.2...v4.33.0-0) (2022-06-09)
 
 
