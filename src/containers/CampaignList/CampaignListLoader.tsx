@@ -10,7 +10,7 @@ import { CampaignsFilter } from "../../api/campaign";
 import { useAuthzContext } from "../../components/AuthzProvider";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import CampaignList from "./CampaignList";
-import { isSupervolPermissionError } from "./utils";
+import { isCampaignGroupsPermissionError } from "./utils";
 
 interface Props {
   organizationId: string;
@@ -79,7 +79,8 @@ const CampaignListLoader: React.FC<Props> = (props) => {
   const isOnlySupervol = !authz.isAdmin;
   const unexpectedErrors = [
     ...(error?.graphQLErrors.filter(
-      (gqlError) => !(isOnlySupervol && isSupervolPermissionError(gqlError))
+      (gqlError) =>
+        !(isOnlySupervol && isCampaignGroupsPermissionError(gqlError))
     ) ?? []),
     ...(error?.clientErrors ?? []),
     ...(error?.networkError ? [error?.networkError] : [])
