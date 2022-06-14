@@ -7,8 +7,10 @@ import { useGetAdminCampaignsQuery } from "@spoke/spoke-codegen";
 import React from "react";
 
 import { CampaignsFilter } from "../../api/campaign";
+import { useAuthzContext } from "../../components/AuthzProvider";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import CampaignList from "./CampaignList";
+import { isSupervolPermissionError } from "./utils";
 
 interface Props {
   organizationId: string;
@@ -34,6 +36,7 @@ const CampaignListLoader: React.FC<Props> = (props) => {
     variables: { organizationId, limit: pageSize, filter: campaignsFilter },
     fetchPolicy: "network-only"
   });
+  const authz = useAuthzContext();
 
   const callback: IntersectionObserverCallback = (entries) => {
     if (entries && entries[0]) {
@@ -72,9 +75,26 @@ const CampaignListLoader: React.FC<Props> = (props) => {
   const campaigns =
     data?.organization?.campaignsRelay.edges?.map(({ node }) => node) ?? [];
 
+  // authz.isSupervol will be true for owner and admin so check NOT admin instead
+  const isOnlySupervol = !authz.isAdmin;
+  const unexpectedErrors =
+    error?.graphQLErrors.filter(
+      (gqlError) => !(isOnlySupervol && isSupervolPermissionError(gqlError))
+    ) ?? [];
+
   return (
     <div>
-      {error && <p>Error fetching campaigns: {error}</p>}
+      {unexpectedErrors.length > 0 && (
+        <div>
+          <p>Errors fetching campaigns:</p>
+          <ul>
+            {unexpectedErrors.map((err, i) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <li key={i}>{err.message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <CampaignList
         organizationId={organizationId}
         campaigns={campaigns}
