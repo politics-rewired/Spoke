@@ -10,10 +10,16 @@ export interface Location {
 }
 
 export interface ContactsFilter {
-  messageStatus: string;
-  isOptedOut: boolean;
-  validTimezone: boolean;
-  includePastDue: boolean;
+  messageStatus?: string;
+  isOptedOut?: boolean;
+  validTimezone?: boolean;
+  includePastDue?: boolean;
+}
+
+export interface ContactNameFilter {
+  firstName?: string;
+  lastName?: string;
+  cellNumber?: string;
 }
 
 export interface CampaignContact {

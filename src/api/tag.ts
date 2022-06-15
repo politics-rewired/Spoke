@@ -19,6 +19,12 @@ export interface Tag {
   externalSyncConfigurations: RelayPaginatedResponse<ExternalSyncTagConfig>;
 }
 
+export interface TagsFilter {
+  excludeEscalated?: boolean;
+  escalatedConvosOnly?: boolean;
+  specificTagIds?: string[];
+}
+
 export const schema = `
   type Tag {
     id: ID!
