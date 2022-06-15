@@ -8,6 +8,11 @@ export interface TexterAssignmentInput {
   contactsCount: number;
 }
 
+export interface AssignmentsFilter {
+  texterId?: number;
+  includeEscalated?: boolean;
+}
+
 export interface Assignment {
   id: string;
   texter: User;

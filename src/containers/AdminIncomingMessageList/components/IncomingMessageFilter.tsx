@@ -28,6 +28,7 @@ import { css, StyleSheet } from "aphrodite";
 import React, { useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 
+import { AssignmentsFilter } from "../../../api/assignment";
 import { nameComponents } from "../../../lib/attributes";
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../../lib/constants";
 
@@ -109,7 +110,7 @@ interface IncomingMessageFilterProps {
   includeOptedOutConversations: boolean;
   includeArchivedCampaigns: boolean;
   includeActiveCampaigns: boolean;
-  assignmentsFilter: any;
+  assignmentsFilter: AssignmentsFilter;
   tagsFilter: Array<string>;
   organizationId: string;
   onCampaignChanged(campaignId: number): void;
