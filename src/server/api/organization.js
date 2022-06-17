@@ -33,7 +33,7 @@ export const getEscalationUserId = async (organizationId) => {
 
 export const resolvers = {
   Organization: {
-    ...sqlResolvers(["id", "name"]),
+    ...sqlResolvers(["id", "name", "defaultTextingTz"]),
     settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");

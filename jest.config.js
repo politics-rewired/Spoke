@@ -17,7 +17,6 @@ module.exports = {
     JOBS_SAME_PROCESS: "1",
     RETHINK_KNEX_NOREFS: "1", // avoids db race conditions
     DEFAULT_SERVICE: "fakeservice",
-    DST_REFERENCE_TIMEZONE: "America/New_York",
     DATABASE_SETUP_TEARDOWN_TIMEOUT: 60000,
     PASSPORT_STRATEGY: "localauthexperimental",
     SESSION_SECRET: "it is JUST a test! -- it better be!",
