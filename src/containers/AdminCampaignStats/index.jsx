@@ -11,6 +11,7 @@ import { Helmet } from "react-helmet";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
+import { withAuthzContext } from "../../components/AuthzProvider";
 import CampaignNavigation from "../../components/CampaignNavigation";
 import ScriptPreviewButton from "../../components/ScriptPreviewButton";
 import { dataTest } from "../../lib/attributes";
@@ -453,5 +454,6 @@ export default compose(
   loadData({
     queries,
     mutations
-  })
+  }),
+  withAuthzContext
 )(AdminCampaignStats);
