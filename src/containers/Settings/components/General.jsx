@@ -66,7 +66,8 @@ class Settings extends React.Component {
     approvalLevel: undefined,
     trollbotWebhookUrl: undefined,
     isWorking: false,
-    error: undefined
+    error: undefined,
+    doNotAssignMessage: undefined
   };
 
   editSettings = async (name, input) => {
@@ -124,6 +125,11 @@ class Settings extends React.Component {
     this.editSettings("Opt Out Message", { optOutMessage });
   };
 
+  handleSaveDoNotAssignMessage = () => {
+    const { doNotAssignMessage } = this.state;
+    this.editSettings("Do Not Assign Message", { doNotAssignMessage });
+  };
+
   handleSaveTrollbotUrl = () => {
     const { trollbotWebhookUrl } = this.state;
     this.editSettings("TrollBot Webhook URL", { trollbotWebhookUrl });
@@ -140,6 +146,11 @@ class Settings extends React.Component {
     });
 
   handleDismissError = () => this.setState({ error: undefined });
+
+  handleToggleShowDoNotAssignMessage = async (event, isToggled) =>
+    this.editSettings("Do Not Assign Message Toggle", {
+      showDoNotAssignMessage: isToggled
+    });
 
   renderTextingHoursForm() {
     const { organization } = this.props.data;
@@ -203,6 +214,7 @@ class Settings extends React.Component {
     const { isWorking, error } = this.state;
     const { organization } = this.props.data;
     const {
+      showDoNotAssignMessage,
       defaulTexterApprovalStatus,
       showContactLastName,
       showContactCell
@@ -210,6 +222,10 @@ class Settings extends React.Component {
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
+    });
+
+    const doNotAssignSchema = yup.object({
+      doNotAssignMessage: yup.string().required()
     });
 
     const numbersApiKeySchema = yup.object({
@@ -226,6 +242,10 @@ class Settings extends React.Component {
 
     const optOutMessage =
       this.state.optOutMessage || organization.settings.optOutMessage;
+
+    const doNotAssignMessage =
+      this.state.doNotAssignMessage || organization.settings.doNotAssignMessage;
+
     const noMessageChange =
       optOutMessage === organization.settings.optOutMessage;
     const isOptOutSaveDisabled = isWorking || noMessageChange;
@@ -289,6 +309,49 @@ class Settings extends React.Component {
             </Button>
           </CardActions>
         </Card>
+
+        <Card className={css(styles.sectionCard)}>
+          <CardHeader title="Rejected Texters Message" />
+          <CardText>
+            <Toggle
+              toggled={showDoNotAssignMessage}
+              label="Show different message when user has do not assign?"
+              onToggle={this.handleToggleShowDoNotAssignMessage}
+            />
+            {showDoNotAssignMessage ? (
+              <GSForm
+                schema={doNotAssignSchema}
+                value={{
+                  doNotAssignMessage
+                }}
+                onChange={({ doNotAssignMessage: newValue }) =>
+                  this.setState({
+                    doNotAssignMessage: newValue
+                  })
+                }
+              >
+                <CardHeader title="Do Not Assign Message" />
+                <CardText>
+                  <SpokeFormField
+                    label="Do Not Assign Message"
+                    name="doNotAssignMessage"
+                    fullWidth
+                  />
+                </CardText>
+                <CardActions>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={this.handleSaveDoNotAssignMessage}
+                  >
+                    Save Do Not Assign Message
+                  </Button>
+                </CardActions>
+              </GSForm>
+            ) : null}
+          </CardText>
+        </Card>
+
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={formSchema}
@@ -539,6 +602,8 @@ const mutations = {
           defaulTexterApprovalStatus
           showContactLastName
           showContactCell
+          showDoNotAssignMessage
+          doNotAssignMessage
         }
       }
     `,
@@ -563,6 +628,8 @@ const queries = {
             id
             optOutMessage
             numbersApiKey
+            showDoNotAssignMessage
+            doNotAssignMessage
             trollbotWebhookUrl
             defaulTexterApprovalStatus
             showContactLastName

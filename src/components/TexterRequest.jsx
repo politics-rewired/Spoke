@@ -7,6 +7,7 @@ import TextField from "material-ui/TextField";
 import React from "react";
 import * as yup from "yup";
 
+import { RequestAutoApproveType } from "../api/organization-membership";
 import { loadData } from "../containers/hoc/with-operations";
 import GSForm from "./forms/GSForm";
 import LoadingIndicator from "./LoadingIndicator";
@@ -97,12 +98,22 @@ class TexterRequest extends React.Component {
     });
   };
 
+  userCanRequest = (memberships) => {
+    const membership = memberships.edges[0].node;
+    return (
+      membership.requestAutoApprove !== RequestAutoApproveType.DO_NOT_APPROVE
+    );
+  };
+
   render() {
     if (this.props.data.loading) {
       return <LoadingIndicator />;
     }
 
-    const { myCurrentAssignmentTargets } = this.props.data.organization;
+    const {
+      myCurrentAssignmentTargets,
+      settings
+    } = this.props.data.organization;
 
     const textsAvailable = myCurrentAssignmentTargets.length > 0;
 
@@ -117,6 +128,20 @@ class TexterRequest extends React.Component {
               You requested {amount} texts. Hold on, someone will approve them
               soon!
             </p>
+          </div>
+        </Paper>
+      );
+    }
+
+    if (
+      !this.userCanRequest(this.props.data.currentUser.memberships) &&
+      settings.showDoNotAssignMessage
+    ) {
+      return (
+        <Paper>
+          <div style={{ padding: "20px" }}>
+            <h3>Not allowed to request</h3>
+            <p>{settings.doNotAssignMessage}</p>
           </div>
         </Paper>
       );
@@ -248,6 +273,14 @@ const queries = {
             status
             amount
           }
+          memberships {
+            edges {
+              node {
+                id
+                requestAutoApprove
+              }
+            }
+          }
         }
         organization(id: $organizationId) {
           id
@@ -256,6 +289,10 @@ const queries = {
             maxRequestCount
             teamTitle
             teamId
+          }
+          settings {
+            showDoNotAssignMessage
+            doNotAssignMessage
           }
         }
       }
