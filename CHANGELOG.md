@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.33.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.0...v4.33.0-rc.1) (2022-06-21)
+
+
+### Bug Fixes
+
+* fix superadmin login ([#1272](https://github.com/politics-rewired/spoke/issues/1272)) ([09814e2](https://github.com/politics-rewired/spoke/commit/09814e2b0ac4bc293d4c8acb89f3602c1861da73))
+* **authz:** handle supervol permission errors ([#1271](https://github.com/politics-rewired/spoke/issues/1271)) ([de0a673](https://github.com/politics-rewired/spoke/commit/de0a6739c650c7ebb7deeeeb347bebb6c8991892))
+* **campaign stats:** use authz for button rendering ([#1278](https://github.com/politics-rewired/spoke/issues/1278)) ([7a46226](https://github.com/politics-rewired/spoke/commit/7a4622635ed3ff591e81e6dc0c63bc17830db4d7))
+
 ## [4.33.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.33.0-0...v4.33.0-rc.0) (2022-06-14)
 
 
