@@ -1,6 +1,9 @@
 exports.up = function up(knex) {
   return knex.schema.alterTable("organization", (table) => {
-    table.string("default_texting_tz").notNullable().default("US/Eastern");
+    table
+      .string("default_texting_tz")
+      .notNullable()
+      .default("America/New_York");
   });
 };
 

@@ -19,7 +19,7 @@ import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
-import { DateTime } from "../../../lib/datetime";
+import { DateTime, parseIanaZone } from "../../../lib/datetime";
 import { timezones } from "../../../lib/timezones";
 import { loadData } from "../../hoc/with-operations";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
@@ -339,8 +339,8 @@ class Settings extends React.Component {
             >
               {timezones.map((timezone) => (
                 <MenuItem
-                  key={timezone}
-                  value={timezone}
+                  key={parseIanaZone(timezone)}
+                  value={parseIanaZone(timezone)}
                   primaryText={timezone}
                 />
               ))}
@@ -360,7 +360,7 @@ class Settings extends React.Component {
                   {formatTextingHours(organization.textingHoursStart)} to{" "}
                   {formatTextingHours(organization.textingHoursEnd)}
                 </span>{" "}
-                in your organisations local time. Timezone {defaultTextingTz}.
+                in your organization's local time. Timezone {defaultTextingTz}.
               </div>
             )}
           </CardText>
