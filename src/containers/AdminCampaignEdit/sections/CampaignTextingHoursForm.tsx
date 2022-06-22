@@ -10,6 +10,7 @@ import GSForm from "../../../components/forms/GSForm";
 import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { dataSourceItem, DataSourceItemType } from "../../../components/utils";
 import { DateTime, parseIanaZone } from "../../../lib/datetime";
+import { timezones } from "../../../lib/timezones";
 import { difference } from "../../../lib/utils";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
@@ -33,24 +34,7 @@ const hourChoices = [...Array(24)].map((_, hour) =>
   dataSourceItem(formatHour(hour), hour)
 );
 
-const timezones = [
-  "US/Alaska",
-  "US/Aleutian",
-  "US/Arizona",
-  "US/Central",
-  "US/East-Indiana",
-  "US/Eastern",
-  "US/Hawaii",
-  "US/Indiana-Starke",
-  "US/Michigan",
-  "US/Mountain",
-  "US/Pacific",
-  "US/Samoa",
-  "America/Puerto_Rico",
-  "America/Virgin"
-];
-
-const timezoneChoices = timezones.map((timezone) =>
+const timezoneChoices = timezones.map((timezone: string) =>
   dataSourceItem(timezone, parseIanaZone(timezone))
 );
 

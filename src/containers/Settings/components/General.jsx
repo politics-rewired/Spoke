@@ -19,7 +19,8 @@ import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
-import { DateTime } from "../../../lib/datetime";
+import { DateTime, parseIanaZone } from "../../../lib/datetime";
+import { timezones } from "../../../lib/timezones";
 import { loadData } from "../../hoc/with-operations";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
@@ -112,6 +113,10 @@ class Settings extends React.Component {
     if (!success) {
       this.setState({ approvalLevel: undefined });
     }
+  };
+
+  handleDefaultTextingTzChange = async (_event, _index, textingTz) => {
+    return this.props.mutations.updateDefaultTextingTimezone(textingTz);
   };
 
   handleSaveNumbersApiKey = () => {
@@ -207,6 +212,8 @@ class Settings extends React.Component {
       showContactLastName,
       showContactCell
     } = organization.settings;
+
+    const { defaultTextingTz } = organization;
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
@@ -325,6 +332,19 @@ class Settings extends React.Component {
         <Card className={css(styles.sectionCard)}>
           <CardHeader title="Texting Hours" />
           <CardText>
+            <p>Default Texting Timezone</p>
+            <DropDownMenu
+              value={defaultTextingTz}
+              onChange={this.handleDefaultTextingTzChange}
+            >
+              {timezones.map((timezone) => (
+                <MenuItem
+                  key={parseIanaZone(timezone)}
+                  value={parseIanaZone(timezone)}
+                  primaryText={timezone}
+                />
+              ))}
+            </DropDownMenu>
             <Toggle
               toggled={organization.textingHoursEnforced}
               label="Enforce texting hours?"
@@ -339,10 +359,8 @@ class Settings extends React.Component {
                 <span className={css(styles.textingHoursSpan)}>
                   {formatTextingHours(organization.textingHoursStart)} to{" "}
                   {formatTextingHours(organization.textingHoursEnd)}
-                </span>
-                {window.TZ
-                  ? ` in your organisations local time. Timezone ${window.TZ}`
-                  : " in contacts local time (or 12pm-6pm EST if timezone is unknown)"}
+                </span>{" "}
+                in your organization's local time. Timezone {defaultTextingTz}.
               </div>
             )}
           </CardText>
@@ -525,6 +543,26 @@ const mutations = {
       textingHoursEnforced
     }
   }),
+  updateDefaultTextingTimezone: (ownProps) => (defaultTextingTz) => ({
+    mutation: gql`
+      mutation updateDefaultTextingTimezone(
+        $organizationId: String!
+        $defaultTextingTz: String!
+      ) {
+        updateDefaultTextingTimezone(
+          defaultTextingTz: $defaultTextingTz
+          organizationId: $organizationId
+        ) {
+          id
+          defaultTextingTz
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.match.params.organizationId,
+      defaultTextingTz
+    }
+  }),
   editSettings: (ownProps) => (input) => ({
     mutation: gql`
       mutation editOrganizationSettings(
@@ -556,6 +594,7 @@ const queries = {
         organization(id: $organizationId) {
           id
           name
+          defaultTextingTz
           textingHoursEnforced
           textingHoursStart
           textingHoursEnd

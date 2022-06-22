@@ -9,7 +9,6 @@ interface Window {
   MAX_MESSAGE_LENGTH: number;
   PASSPORT_STRATEGY: string;
   TZ: string;
-  DST_REFERENCE_TIMEZONE: string;
   RENDERED_CLASS_NAMES: string[];
   NOT_IN_USA: boolean;
   ALLOW_SEND_ALL: boolean;
