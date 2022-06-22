@@ -23,6 +23,7 @@ import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
+import RejectedTextersMessageCard from "./RejectedTextersMessageCard";
 import Review10DlcInfo from "./Review10DlcInfo";
 import ScriptPreviewSettingsCard from "./ScriptPreviewSettingsCard";
 
@@ -125,10 +126,8 @@ class Settings extends React.Component {
     this.editSettings("Opt Out Message", { optOutMessage });
   };
 
-  handleSaveDoNotAssignMessage = () => {
-    const { doNotAssignMessage } = this.state;
+  handleSaveDoNotAssignMessage = (doNotAssignMessage) =>
     this.editSettings("Do Not Assign Message", { doNotAssignMessage });
-  };
 
   handleSaveTrollbotUrl = () => {
     const { trollbotWebhookUrl } = this.state;
@@ -224,10 +223,6 @@ class Settings extends React.Component {
       optOutMessage: yup.string().required()
     });
 
-    const doNotAssignSchema = yup.object({
-      doNotAssignMessage: yup.string().required()
-    });
-
     const numbersApiKeySchema = yup.object({
       numbersApiKey: yup.string().nullable()
     });
@@ -310,47 +305,13 @@ class Settings extends React.Component {
           </CardActions>
         </Card>
 
-        <Card className={css(styles.sectionCard)}>
-          <CardHeader title="Rejected Texters Message" />
-          <CardText>
-            <Toggle
-              toggled={showDoNotAssignMessage}
-              label="Show different message when user has do not assign?"
-              onToggle={this.handleToggleShowDoNotAssignMessage}
-            />
-            {showDoNotAssignMessage ? (
-              <GSForm
-                schema={doNotAssignSchema}
-                value={{
-                  doNotAssignMessage
-                }}
-                onChange={({ doNotAssignMessage: newValue }) =>
-                  this.setState({
-                    doNotAssignMessage: newValue
-                  })
-                }
-              >
-                <CardHeader title="Do Not Assign Message" />
-                <CardText>
-                  <SpokeFormField
-                    label="Do Not Assign Message"
-                    name="doNotAssignMessage"
-                    fullWidth
-                  />
-                </CardText>
-                <CardActions>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={this.handleSaveDoNotAssignMessage}
-                  >
-                    Save Do Not Assign Message
-                  </Button>
-                </CardActions>
-              </GSForm>
-            ) : null}
-          </CardText>
-        </Card>
+        <RejectedTextersMessageCard
+          showDoNotAssignMessage={showDoNotAssignMessage}
+          doNotAssignMessage={doNotAssignMessage}
+          onToggleShowDoNotAssign={this.handleToggleShowDoNotAssignMessage}
+          onSaveDoNotAssignMessage={this.handleSaveDoNotAssignMessage}
+          style={{ marginBottom: 20 }}
+        />
 
         <Card className={css(styles.sectionCard)}>
           <GSForm

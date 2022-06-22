@@ -99,7 +99,10 @@ class TexterRequest extends React.Component {
   };
 
   userCanRequest = (memberships) => {
-    const membership = memberships.edges[0].node;
+    const { organizationId } = this.props;
+    const membership = memberships.edges.find(
+      ({ node }) => node.id === organizationId
+    ).node;
     return (
       membership.requestAutoApprove !== RequestAutoApproveType.DO_NOT_APPROVE
     );
@@ -140,7 +143,7 @@ class TexterRequest extends React.Component {
       return (
         <Paper>
           <div style={{ padding: "20px" }}>
-            <h3>Not allowed to request</h3>
+            <h3>Assignment Request Disabled</h3>
             <p>{settings.doNotAssignMessage}</p>
           </div>
         </Paper>
