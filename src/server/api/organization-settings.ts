@@ -80,7 +80,7 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   scriptPreviewForSupervolunteers: false,
   showDoNotAssignMessage: false,
   doNotAssignMessage:
-  "Your ability to request texts has been put on hold. Please a contact a text team leader for more information.",
+    "Your ability to request texts has been put on hold. Please a contact a text team leader for more information.",
   defaultCampaignBuilderMode: CampaignBuilderMode.Advanced
 };
 
