@@ -14,6 +14,7 @@ import {
 } from "../../api/organization-membership";
 import { CampaignExportType, TextRequestType } from "../../api/types";
 import { config } from "../../config";
+import { parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { replaceAll } from "../../lib/utils";
@@ -701,6 +702,24 @@ const rootMutations = {
       return campaign;
     },
 
+    updateDefaultTextingTimezone: async (
+      _root,
+      { organizationId, defaultTextingTz },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "OWNER");
+
+      await r
+        .knex("organization")
+        .update({
+          default_texting_tz: defaultTextingTz
+        })
+        .where({ id: organizationId });
+      cacheableData.organization.clear(organizationId);
+
+      return r.knex("organization").where({ id: organizationId }).first();
+    },
+
     updateTextingHours: async (
       _root,
       { organizationId, textingHoursStart, textingHoursEnd },
@@ -794,9 +813,11 @@ const rootMutations = {
         "ADMIN",
         /* allowSuperadmin= */ true
       );
-      const { features } = await loaders.organization.load(
+      const organization = await loaders.organization.load(
         campaign.organizationId
       );
+      const { features } = organization;
+
       const requiresApproval = getOrgFeature(
         "startCampaignRequiresApproval",
         features
@@ -822,6 +843,7 @@ const rootMutations = {
           title: campaign.title,
           description: campaign.description,
           due_by: campaign.dueBy,
+          timezone: parseIanaZone(organization.default_texting_tz),
           is_started: false,
           is_archived: false,
           is_approved: false,

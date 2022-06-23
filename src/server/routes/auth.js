@@ -2,7 +2,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 
 import { config } from "../../config";
-import authStrategies, { sessionUserMap } from "../auth-passport";
+import authStrategies from "../auth-passport";
 import { r } from "../models";
 
 const router = express.Router();
@@ -47,8 +47,7 @@ router.post(
     const user = await userQuery;
 
     if (user) {
-      const passportUser = sessionUserMap[config.PASSPORT_STRATEGY](user);
-      return req.login(passportUser, (err) => {
+      return req.login(user, (err) => {
         if (err) return next(err);
 
         return res.status(200).send({ message: "Success" });

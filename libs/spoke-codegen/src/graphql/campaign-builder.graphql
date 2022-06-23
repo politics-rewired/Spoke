@@ -30,6 +30,13 @@ query GetCampaignMessagingServiceData($campaignId: String!) {
   }
 }
 
+query GetCampaignScriptPreview($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    previewUrl
+  }
+}
+
 mutation EditCampaignMessagingService($campaignId: String!, $payload: CampaignInput!) {
   editCampaign(id: $campaignId, campaign: $payload) {
     id

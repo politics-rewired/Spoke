@@ -34,6 +34,7 @@ export interface Organization {
   optOuts: OptOut[];
   threeClickEnabled: boolean;
   optOutMessage: string;
+  defaultTextingTz: string;
   textingHoursEnforced: boolean;
   textingHoursStart: number;
   textingHoursEnd: number;
@@ -90,6 +91,7 @@ export const schema = `
     optOuts: [OptOut]
     threeClickEnabled: Boolean
     optOutMessage: String
+    defaultTextingTz: String!
     textingHoursEnforced: Boolean
     textingHoursStart: Int
     textingHoursEnd: Int

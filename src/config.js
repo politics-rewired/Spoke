@@ -307,13 +307,6 @@ const validators = {
     devDefault: 8090,
     default: undefined
   }),
-  DST_REFERENCE_TIMEZONE: str({
-    desc:
-      "Timezone to use to determine whether DST is in effect. If it's DST in this timezone, we assume it's DST everywhere. Note that DST is opposite in the northern and souther hemispheres.",
-    example: "Australia/Sydney",
-    default: "America/New_York",
-    isClient: true
-  }),
   DISABLE_ASSIGNMENT_PAGE: bool({
     desc: "Whether to disable the Assignments admin page.",
     default: false,
