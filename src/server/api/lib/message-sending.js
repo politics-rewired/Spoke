@@ -346,6 +346,10 @@ export async function getCampaignContactAndAssignmentForIncomingMessage({
         campaign.organization_id in (
           select organization_id from chosen_organization
         )
+        and (
+          campaign.messaging_service_sid IS NULL
+          or campaign.messaging_service_sid = ?
+        )
         and campaign_contact.cell = ?
     )
     select campaign_contact_id, assignment_id
@@ -354,13 +358,9 @@ export async function getCampaignContactAndAssignmentForIncomingMessage({
       on message.campaign_contact_id = campaign_contact_option.id
     where
       message.is_from_contact = false
-      and (
-        campaign.messaging_service_sid IS NULL
-        or campaign.messaging_service_sid = ?
-      )
     order by created_at desc
     limit 1`,
-    [messaging_service_sid, contactNumber, messaging_service_sid]
+    [messaging_service_sid, messaging_service_sid, contactNumber]
   );
 
   return rows[0];
