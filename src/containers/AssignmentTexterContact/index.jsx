@@ -586,7 +586,7 @@ export class AssignmentTexterContact extends React.Component {
             variant="contained"
             onClick={() => this.handleEditMessageStatus("needsResponse")}
           >
-            Reopen
+            Reopen Conversation
           </Button>
         </Box>
       );
@@ -597,7 +597,7 @@ export class AssignmentTexterContact extends React.Component {
             variant="contained"
             onClick={this.handleClickCloseContactButton}
           >
-            Skip Reply
+            End Conversation
           </Button>
         </Box>
       );
