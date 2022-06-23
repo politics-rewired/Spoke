@@ -48,16 +48,11 @@ const CampaignMessagingServiceForm = (props: FullComponentProps) => {
     ) {
       setMessagingServiceSid(campaignData?.campaign?.messagingServiceSid ?? "");
     }
-  }, [campaignLoading, messagingServicesLoading]);
+  }, [campaignLoading, messagingServicesLoading, campaignData]);
 
   const messagingServices =
     messagingServicesData?.organization?.messagingServices?.edges.map(
-      (node) => {
-        return {
-          id: node.node.id,
-          name: node.node.name
-        };
-      }
+      ({ node }) => node
     ) ?? [];
 
   const messagingServiceChanged = (

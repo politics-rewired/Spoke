@@ -1,3 +1,8 @@
+fragment ActiveMessagingService on MessagingService {
+  id
+  name
+}
+
 query GetCampaignStatus($campaignId: String!) {
   campaign(id: $campaignId) {
     id
@@ -11,8 +16,7 @@ query GetOrganizationMessagingServices($organizationId: String!) {
     messagingServices(active: true) {
       edges {
         node {
-          id
-          name
+          ...ActiveMessagingService
         }
       }
     }
