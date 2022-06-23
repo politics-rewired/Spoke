@@ -432,6 +432,8 @@ input OrganizationSettingsInput {
   trollbotWebhookUrl: String
   scriptPreviewForSupervolunteers: Boolean
   defaultCampaignBuilderMode: CampaignBuilderMode
+  showDoNotAssignMessage: Boolean
+  doNotAssignMessage: String
 
   # Superadmin
   startCampaignRequiresApproval: Boolean
@@ -445,6 +447,8 @@ type OrganizationSettings {
   showContactLastName: Boolean!
   showContactCell: Boolean!
   confirmationClickForScriptLinks: Boolean!
+  showDoNotAssignMessage: Boolean!
+  doNotAssignMessage: String!
 
   # Supervolunteer
   startCampaignRequiresApproval: Boolean

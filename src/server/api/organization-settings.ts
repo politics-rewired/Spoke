@@ -23,6 +23,8 @@ interface IOrganizationSettings {
   confirmationClickForScriptLinks: boolean;
   startCampaignRequiresApproval: boolean;
   scriptPreviewForSupervolunteers: boolean;
+  showDoNotAssignMessage: boolean;
+  doNotAssignMessage: string;
   defaultCampaignBuilderMode: CampaignBuilderMode;
 }
 
@@ -33,6 +35,8 @@ const SETTINGS_PERMISSIONS: {
   showContactLastName: UserRoleType.TEXTER,
   showContactCell: UserRoleType.TEXTER,
   confirmationClickForScriptLinks: UserRoleType.TEXTER,
+  showDoNotAssignMessage: UserRoleType.TEXTER,
+  doNotAssignMessage: UserRoleType.TEXTER,
   startCampaignRequiresApproval: UserRoleType.SUPERVOLUNTEER,
   scriptPreviewForSupervolunteers: UserRoleType.SUPERVOLUNTEER,
   defaultCampaignBuilderMode: UserRoleType.SUPERVOLUNTEER,
@@ -53,6 +57,8 @@ const SETTINGS_WRITE_PERMISSIONS: {
   trollbotWebhookUrl: UserRoleType.OWNER,
   scriptPreviewForSupervolunteers: UserRoleType.OWNER,
   defaultCampaignBuilderMode: UserRoleType.OWNER,
+  showDoNotAssignMessage: UserRoleType.OWNER,
+  doNotAssignMessage: UserRoleType.OWNER,
   startCampaignRequiresApproval: UserRoleType.SUPERADMIN
 };
 
@@ -72,6 +78,9 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   confirmationClickForScriptLinks: true,
   startCampaignRequiresApproval: false,
   scriptPreviewForSupervolunteers: false,
+  showDoNotAssignMessage: false,
+  doNotAssignMessage:
+    "Your ability to request texts has been put on hold. Please a contact a text team leader for more information.",
   defaultCampaignBuilderMode: CampaignBuilderMode.Advanced
 };
 
@@ -166,7 +175,9 @@ export const resolvers = {
       "confirmationClickForScriptLinks",
       "startCampaignRequiresApproval",
       "scriptPreviewForSupervolunteers",
-      "defaultCampaignBuilderMode"
+      "defaultCampaignBuilderMode",
+      "showDoNotAssignMessage",
+      "doNotAssignMessage"
     ])
   }
 };

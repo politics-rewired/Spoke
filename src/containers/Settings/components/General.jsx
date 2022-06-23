@@ -24,6 +24,7 @@ import { timezones } from "../../../lib/timezones";
 import { loadData } from "../../hoc/with-operations";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
+import RejectedTextersMessageCard from "./RejectedTextersMessageCard";
 import Review10DlcInfo from "./Review10DlcInfo";
 import ScriptPreviewSettingsCard from "./ScriptPreviewSettingsCard";
 
@@ -67,7 +68,8 @@ class Settings extends React.Component {
     approvalLevel: undefined,
     trollbotWebhookUrl: undefined,
     isWorking: false,
-    error: undefined
+    error: undefined,
+    doNotAssignMessage: undefined
   };
 
   editSettings = async (name, input) => {
@@ -129,6 +131,9 @@ class Settings extends React.Component {
     this.editSettings("Opt Out Message", { optOutMessage });
   };
 
+  handleSaveDoNotAssignMessage = (doNotAssignMessage) =>
+    this.editSettings("Do Not Assign Message", { doNotAssignMessage });
+
   handleSaveTrollbotUrl = () => {
     const { trollbotWebhookUrl } = this.state;
     this.editSettings("TrollBot Webhook URL", { trollbotWebhookUrl });
@@ -145,6 +150,11 @@ class Settings extends React.Component {
     });
 
   handleDismissError = () => this.setState({ error: undefined });
+
+  handleToggleShowDoNotAssignMessage = async (event, isToggled) =>
+    this.editSettings("Do Not Assign Message Toggle", {
+      showDoNotAssignMessage: isToggled
+    });
 
   renderTextingHoursForm() {
     const { organization } = this.props.data;
@@ -208,6 +218,7 @@ class Settings extends React.Component {
     const { isWorking, error } = this.state;
     const { organization } = this.props.data;
     const {
+      showDoNotAssignMessage,
       defaulTexterApprovalStatus,
       showContactLastName,
       showContactCell
@@ -233,6 +244,10 @@ class Settings extends React.Component {
 
     const optOutMessage =
       this.state.optOutMessage || organization.settings.optOutMessage;
+
+    const doNotAssignMessage =
+      this.state.doNotAssignMessage || organization.settings.doNotAssignMessage;
+
     const noMessageChange =
       optOutMessage === organization.settings.optOutMessage;
     const isOptOutSaveDisabled = isWorking || noMessageChange;
@@ -296,6 +311,15 @@ class Settings extends React.Component {
             </Button>
           </CardActions>
         </Card>
+
+        <RejectedTextersMessageCard
+          showDoNotAssignMessage={showDoNotAssignMessage}
+          doNotAssignMessage={doNotAssignMessage}
+          onToggleShowDoNotAssign={this.handleToggleShowDoNotAssignMessage}
+          onSaveDoNotAssignMessage={this.handleSaveDoNotAssignMessage}
+          style={{ marginBottom: 20 }}
+        />
+
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={formSchema}
@@ -577,6 +601,8 @@ const mutations = {
           defaulTexterApprovalStatus
           showContactLastName
           showContactCell
+          showDoNotAssignMessage
+          doNotAssignMessage
         }
       }
     `,
@@ -602,6 +628,8 @@ const queries = {
             id
             optOutMessage
             numbersApiKey
+            showDoNotAssignMessage
+            doNotAssignMessage
             trollbotWebhookUrl
             defaulTexterApprovalStatus
             showContactLastName
