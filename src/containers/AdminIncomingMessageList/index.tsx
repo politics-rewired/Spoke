@@ -108,7 +108,7 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
     megaBulkReassignCampaignContacts
   ] = useMegaBulkReassignCampaignContactsMutation();
 
-  const { organizationId } = useParams();
+  const { organizationId } = useParams<{ organizationId: string }>();
 
   const handleCampaignChanged = async (campaignId: number) => {
     const newCampaignsFilter = getCampaignsFilterForCampaignArchiveStatus(
