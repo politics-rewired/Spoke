@@ -10,54 +10,16 @@ import {
 } from "@spoke/spoke-codegen";
 import omit from "lodash/omit";
 import React, { useState } from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../lib/constants";
 import IncomingMessageActions from "./components/IncomingMessageActions";
 import IncomingMessageFilter from "./components/IncomingMessageFilter";
 import IncomingMessageList from "./components/IncomingMessageList";
-
-function getCampaignsFilterForCampaignArchiveStatus(
-  includeActiveCampaigns: boolean,
-  includeArchivedCampaigns: boolean
-): Record<string, any> {
-  let isArchived;
-  if (!includeActiveCampaigns && includeArchivedCampaigns) {
-    isArchived = true;
-  } else if (
-    (includeActiveCampaigns && !includeArchivedCampaigns) ||
-    (!includeActiveCampaigns && !includeArchivedCampaigns)
-  ) {
-    isArchived = false;
-  }
-
-  if (isArchived !== undefined) {
-    return { isArchived };
-  }
-
-  return {};
-}
-
-function getContactsFilterForConversationOptOutStatus(
-  includeNotOptedOutConversations: boolean,
-  includeOptedOutConversations: boolean
-) {
-  let isOptedOut;
-  if (!includeNotOptedOutConversations && includeOptedOutConversations) {
-    isOptedOut = true;
-  } else if (
-    (includeNotOptedOutConversations && !includeOptedOutConversations) ||
-    (!includeNotOptedOutConversations && !includeOptedOutConversations)
-  ) {
-    isOptedOut = false;
-  }
-
-  if (isOptedOut !== undefined) {
-    return { isOptedOut };
-  }
-
-  return {};
-}
+import {
+  getCampaignsFilterForCampaignArchiveStatus,
+  getContactsFilterForConversationOptOutStatus
+} from "./filter-utils";
 
 /* Initialized as objects to later facillitate shallow comparison */
 const initialCampaignsFilter = { isArchived: false };
@@ -69,8 +31,7 @@ const initialTagsFilter = {
   specificTagIds: []
 };
 
-interface AdminIncomingMessageListProps
-  extends RouteComponentProps<{ organizationId: string }> {
+interface AdminIncomingMessageListProps {
   escalatedConvosOnly?: boolean;
 }
 
@@ -147,7 +108,7 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
     megaBulkReassignCampaignContacts
   ] = useMegaBulkReassignCampaignContactsMutation();
 
-  const { organizationId } = props.match.params;
+  const { organizationId } = useParams();
 
   const handleCampaignChanged = async (campaignId: number) => {
     const newCampaignsFilter = getCampaignsFilterForCampaignArchiveStatus(
@@ -476,4 +437,4 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
   );
 };
 
-export default withRouter(AdminIncomingMessageList);
+export default AdminIncomingMessageList;

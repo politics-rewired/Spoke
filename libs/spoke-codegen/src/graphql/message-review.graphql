@@ -72,7 +72,7 @@ mutation CloseConversation($campaignContactId: String!) {
   }
 }
 
-mutation MegaReassignCampaignContacts($organizationId: String! $campaignIdsContactIds: [CampaignIdContactId]! $newTexterUserIds: [String]) {
+mutation MegaReassignCampaignContacts($organizationId: String! $campaignIdsContactIds: [CampaignIdContactId!]! $newTexterUserIds: [String]) {
   megaReassignCampaignContacts(
     organizationId: $organizationId
     campaignIdsContactIds: $campaignIdsContactIds
