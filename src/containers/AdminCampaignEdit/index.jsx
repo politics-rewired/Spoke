@@ -55,6 +55,7 @@ import CampaignFilterLandlinesForm from "./sections/CampaignFilterLandlinesForm"
 import CampaignGroupsForm from "./sections/CampaignGroupsForm";
 import CampaignIntegrationForm from "./sections/CampaignIntegrationForm";
 import CampaignInteractionStepsForm from "./sections/CampaignInteractionStepsForm";
+import CampaignMessagingServiceForm from "./sections/CampaignMessagingServiceForm";
 import CampaignOverlapManager from "./sections/CampaignOverlapManager";
 import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
@@ -357,6 +358,20 @@ class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: false,
         extraProps: {}
+      },
+      {
+        title: "Messaging Service",
+        content: CampaignMessagingServiceForm,
+        isStandalone: true,
+        showForModes: [CampaignBuilderMode.Advanced],
+        keys: ["messagingServiceSid"],
+        checkCompleted: () => true,
+        blocksStarting: true,
+        expandAfterCampaignStarts: false,
+        expandableBySuperVolunteers: false,
+        exclude:
+          this.props.organizationData?.organization?.messagingServices?.edges
+            ?.length <= 1
       },
       {
         title: "Texting Hours",

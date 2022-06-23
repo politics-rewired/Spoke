@@ -5,7 +5,7 @@ import { MessagingServiceRecord, MessagingServiceType } from "./types";
 export const resolvers = {
   MessagingService: {
     id: (service: MessagingServiceRecord) => service.messaging_service_sid,
-    ...sqlResolvers(["messagingServiceSid", "updatedAt"]),
+    ...sqlResolvers(["messagingServiceSid", "name", "active", "updatedAt"]),
     serviceType: (service: MessagingServiceRecord) =>
       service.service_type === MessagingServiceType.AssembleNumbers
         ? GraphQLMessagingServiceType.ASSEMBLE_NUMBERS

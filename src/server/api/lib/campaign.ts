@@ -365,6 +365,8 @@ export const editCampaign = async (
     // Autoassignment
     campaign.isAutoassignEnabled = null;
     campaign.repliesStaleAfter = null;
+    // Messaging Service
+    campaign.messagingServiceSid = null;
   }
 
   const {
@@ -380,7 +382,8 @@ export const editCampaign = async (
     isAutoassignEnabled,
     repliesStaleAfter,
     timezone,
-    externalSystemId
+    externalSystemId,
+    messagingServiceSid
   } = campaign;
 
   const organizationId = origCampaignRecord.organization_id;
@@ -400,7 +403,8 @@ export const editCampaign = async (
     is_autoassign_enabled: isAutoassignEnabled ?? undefined,
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
     timezone: timezone ? parseIanaZone(timezone) : undefined,
-    external_system_id: externalSystemId
+    external_system_id: externalSystemId,
+    messaging_service_sid: messagingServiceSid ?? undefined
   };
 
   Object.keys(campaignUpdates).forEach((key) => {
