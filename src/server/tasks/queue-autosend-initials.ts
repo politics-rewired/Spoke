@@ -17,8 +17,8 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
     count_queued: string;
   }>(
     `
-      with contacts_to_queue as (
-        select cc.id, cc.cell, cc.campaign_id, row_number() over (partition by 1) as n
+      with selected_contacts as (
+        select cc.id, cc.cell, cc.campaign_id
         from campaign_contact cc
         join campaign c on cc.campaign_id = c.id 
         where true
@@ -52,6 +52,10 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         -- ordering by campaign id and cell should be fastest since theres a compound key on them
         order by cc.campaign_id asc, assignment_id nulls first, cc.cell asc
         limit $1
+      ),
+      contacts_to_queue as (
+        select *, row_number() over (partition by 1) as n
+        from selected_contacts
       ),
       assignments_upserted as (
         insert into assignment (campaign_id, user_id)
