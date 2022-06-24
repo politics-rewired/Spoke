@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.33.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.1...v4.33.0-rc.2) (2022-06-24)
+
+
+### Features
+
+* **campaign builder:** allow picking messaging service for campaign  ([#1264](https://github.com/politics-rewired/spoke/issues/1264)) ([b26d880](https://github.com/politics-rewired/spoke/commit/b26d880ef7f8e72ae8a1f59a656e93021b3a7369))
+* default texting timezone for organization ([#1279](https://github.com/politics-rewired/spoke/issues/1279)) ([8ce77ef](https://github.com/politics-rewired/spoke/commit/8ce77ef8315afbd66100bf8fe1d3be15449339fc))
+* display tailored message for do not assign texters ([#1280](https://github.com/politics-rewired/spoke/issues/1280)) ([0eb01a6](https://github.com/politics-rewired/spoke/commit/0eb01a6f48cbb79330b067e13ada2d038c455c85)), closes [#828](https://github.com/politics-rewired/spoke/issues/828)
+
+
+### Bug Fixes
+
+* **queue-autosend-initials:** fix row_number order by conflict ([#1291](https://github.com/politics-rewired/spoke/issues/1291)) ([e0d7ad0](https://github.com/politics-rewired/spoke/commit/e0d7ad0ec5d734b5b4946013e8851087e2c78068))
+* editing question response should update value in UI ([#1281](https://github.com/politics-rewired/spoke/issues/1281)) ([5a3d814](https://github.com/politics-rewired/spoke/commit/5a3d81424dee07f5c425d0029f7bffb93181e4a7))
+
 ## [4.33.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.0...v4.33.0-rc.1) (2022-06-21)
 
 
