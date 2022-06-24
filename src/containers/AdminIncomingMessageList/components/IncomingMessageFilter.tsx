@@ -109,10 +109,11 @@ interface IncomingMessageFilterProps {
   includeOptedOutConversations: boolean;
   includeArchivedCampaigns: boolean;
   includeActiveCampaigns: boolean;
+  assignmentsFilter: any;
   tagsFilter: Array<string>;
   organizationId: string;
   onCampaignChanged(campaignId: number): void;
-  onTagsChanged(): void;
+  onTagsChanged(event: React.ChangeEvent<{ value: any }>): void;
   onTexterChanged(texterId: number): void;
   onIncludeEscalatedChanged(): void;
   onActiveCampaignsToggled(): void;
