@@ -1,3 +1,10 @@
+import {
+  AssignmentsFilter,
+  CampaignsFilter,
+  ContactNameFilter,
+  ContactsFilter,
+  TagsFilter
+} from "@spoke/spoke-codegen";
 import { identity, pickBy } from "lodash";
 import {
   decodeDelimitedArray,
@@ -5,11 +12,6 @@ import {
   encodeDelimitedArray,
   encodeObject
 } from "use-query-params";
-
-import { AssignmentsFilter } from "../../api/assignment";
-import { CampaignsFilter } from "../../api/campaign";
-import { ContactNameFilter, ContactsFilter } from "../../api/campaign-contact";
-import { TagsFilter } from "../../api/tag";
 
 export const ContactsFilterParam = {
   encode: (filter: ContactsFilter | undefined): string | null | undefined => {
@@ -27,10 +29,17 @@ export const ContactsFilterParam = {
     const contactsFilter: ContactsFilter = {};
 
     for (const [key, value] of Object.entries(decodedObject)) {
-      if (["isOptedOut", "validTimeZone", "includePastDue"].includes(key)) {
-        contactsFilter[key] = value === "true";
-      } else {
-        contactsFilter[key] = value;
+      switch (key) {
+        case "isOptedOut":
+        case "validTimezone":
+        case "includePastDue":
+          contactsFilter[key] = value === "true";
+          break;
+        case "messageStatus":
+          contactsFilter[key] = value;
+          break;
+        default:
+          contactsFilter[key] = value;
       }
     }
     return contactsFilter;
@@ -64,10 +73,22 @@ export const CampaignsFilterParam = {
     const filter: CampaignsFilter = {};
 
     for (const [key, value] of Object.entries(decodedObject)) {
-      if (key === "isArchived") {
-        filter[key] = value === "true";
-      } else {
-        filter[key] = parseInt(value, 10);
+      switch (key) {
+        case "isArchived":
+        case "isStarted":
+          filter[key] = value === "true";
+          break;
+        case "campaignId":
+        case "listSize":
+        case "organizationId":
+        case "pageSize":
+          filter[key] = parseInt(value, 10);
+          break;
+        case "campaignTitle":
+          filter[key] = value;
+          break;
+        default:
+          filter[key] = value;
       }
     }
 
@@ -93,10 +114,15 @@ export const AssignmentsFilterParam = {
     const filter: AssignmentsFilter = {};
 
     for (const [key, value] of Object.entries(decodedObject)) {
-      if (key === "includeEscalated") {
-        filter[key] = value === "true";
-      } else {
-        filter[key] = parseInt(value, 10);
+      switch (key) {
+        case "includeEscalated":
+          filter[key] = value === "true";
+          break;
+        case "texterId":
+          filter[key] = parseInt(value, 10);
+          break;
+        default:
+          filter[key] = value;
       }
     }
 
@@ -123,10 +149,16 @@ export const TagsFilterParam = {
     const filter: TagsFilter = {};
 
     for (const [key, value] of Object.entries(decodedObject)) {
-      if (["excludeEscalated", "escalatedConvosOnly"].includes(key)) {
-        filter[key] = value === "true";
-      } else if (key === "specificTagIds") {
-        filter[key] = decodeDelimitedArray(value, ",");
+      switch (key) {
+        case "excludeEscalated":
+        case "escalatedConvosOnly":
+          filter[key] = value === "true";
+          break;
+        case "specificTagIds":
+          filter[key] = decodeDelimitedArray(value, ",");
+          break;
+        default:
+          filter[key] = value;
       }
     }
 
