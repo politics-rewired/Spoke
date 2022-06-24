@@ -1,7 +1,9 @@
 import { gql } from "@apollo/client";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import { green, grey } from "@material-ui/core/colors";
 import Avatar from "material-ui/Avatar";
-import { Card, CardHeader, CardText } from "material-ui/Card";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
 import React from "react";
@@ -40,7 +42,7 @@ export const ExternalSystemsSource: React.SFC<Props> = (props) => {
     <Card expandable={false} expanded={false}>
       <CardHeader
         title={externalSystem.name}
-        subtitle={`Lists last pulled: ${
+        subheader={`Lists last pulled: ${
           externalSystem.syncedAt
             ? DateTime.fromISO(externalSystem.syncedAt).toRelative()
             : "never"
@@ -60,7 +62,7 @@ export const ExternalSystemsSource: React.SFC<Props> = (props) => {
       />
 
       {externalSystem.lists.pageInfo.totalCount > 0 && (
-        <CardText>
+        <CardContent>
           Choose a list:
           <br />
           <DropDownMenu
@@ -76,7 +78,7 @@ export const ExternalSystemsSource: React.SFC<Props> = (props) => {
               />
             ))}
           </DropDownMenu>
-        </CardText>
+        </CardContent>
       )}
     </Card>
   );

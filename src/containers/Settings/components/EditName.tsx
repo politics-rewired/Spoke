@@ -1,6 +1,9 @@
 import { ApolloQueryResult } from "@apollo/client";
 import Button from "@material-ui/core/Button";
-import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import TextField from "material-ui/TextField";
 import React, { useState } from "react";
 import { compose } from "recompose";
@@ -63,15 +66,18 @@ const EditName: React.FC<InnerProps> = (props) => {
 
   return (
     <Card style={style}>
-      <CardHeader title="Organization Name" />
-      <CardText>
+      <CardHeader
+        titleTypographyProps={{ variant: "body1" }}
+        title="Organization Name"
+      />
+      <CardContent>
         {errorMsg && <p>Error: {errorMsg}</p>}
         <TextField
           floatingLabelText="Organization Name"
           value={value}
           onChange={handleNameChange}
         />
-      </CardText>
+      </CardContent>
       <CardActions>
         <Button
           variant="contained"

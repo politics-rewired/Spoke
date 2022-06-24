@@ -6,7 +6,8 @@ import { mount } from 'enzyme'
 import { StyleSheetTestUtils } from 'aphrodite'
 import each from 'jest-each'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-import { CardActions, CardTitle } from 'material-ui/Card'
+import CardActions from "@material-ui/core/CardActions";
+import CardHeader from "@material-ui/core/CardHeader";
 import { AssignmentSummary } from '../src/components/AssignmentSummary'
 import Badge from 'material-ui/Badge/Badge'
 import RaisedButton from 'material-ui/RaisedButton/RaisedButton'
@@ -48,9 +49,9 @@ describe('AssignmentSummary text', function t() {
     (notInUSA, allowSendAll) => {
       window.NOT_IN_USA = notInUSA
       window.ALLOW_SEND_ALL = allowSendAll
-      const title = this.summary.find(CardTitle)
+      const title = this.summary.find(CardHeader)
       expect(title.prop('title')).toBe('New Campaign')
-      // expect(title.find(CardTitle).prop('subtitle')).toBe('asdf - Jan 31 2018')
+      // expect(title.find(CardHeader).prop('subtitle')).toBe('asdf - Jan 31 2018')
 
       const htmlWrapper = this.summary.findWhere(
         d => d.length && d.type() === 'div' && d.prop('dangerouslySetInnerHTML')

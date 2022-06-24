@@ -1,7 +1,9 @@
 import { useTheme } from "@material-ui/core";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardHeader from "@material-ui/core/CardHeader";
+import Divider from "@material-ui/core/Divider";
 import { css, StyleSheet } from "aphrodite";
-import { Card, CardActions, CardTitle } from "material-ui/Card";
-import Divider from "material-ui/Divider";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
@@ -119,15 +121,15 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
   return (
     <div className={css(styles.container)}>
       <Card key={assignment.id}>
-        <CardTitle
+        <CardHeader
           title={title}
-          subtitle={subtitle}
+          subheader={subtitle}
           style={{ backgroundColor: primaryColor }}
         >
           {logoImageUrl && (
             <img src={logoImageUrl} className={css(styles.image)} />
           )}
-        </CardTitle>
+        </CardHeader>
         <Divider />
         <div style={{ margin: "20px" }}>
           <div dangerouslySetInnerHTML={{ __html: introHtml || "" }} />

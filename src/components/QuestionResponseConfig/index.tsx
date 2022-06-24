@@ -1,5 +1,8 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import { green, grey, orange, red } from "@material-ui/core/colors";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import BrokenImageIcon from "@material-ui/icons/BrokenImage";
@@ -10,7 +13,6 @@ import NotificationsPausedIcon from "@material-ui/icons/NotificationsPaused";
 import WarningIcon from "@material-ui/icons/Warning";
 import cloneDeep from "lodash/cloneDeep";
 import Avatar from "material-ui/Avatar";
-import { Card, CardHeader, CardText } from "material-ui/Card";
 import { List } from "material-ui/List";
 import React from "react";
 import { compose } from "recompose";
@@ -138,7 +140,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
       >
         <CardHeader
           title={questionResponseValue}
-          subtitle={questionText}
+          subheader={questionText}
           avatar={avatar}
           showExpandableButton
           closeIcon={
@@ -150,7 +152,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
           }
         />
         {!isMissing && targets !== null && (
-          <CardText>
+          <CardContent>
             {targets.length > 0 && (
               <List>
                 {targets.map((target) => {
@@ -209,7 +211,7 @@ class QuestionResponseConfig extends React.Component<InnerProps> {
             >
               Add Mapping
             </Button>
-          </CardText>
+          </CardContent>
         )}
         <AddMapping
           config={this.state.isAddMappingOpen ? config : undefined}

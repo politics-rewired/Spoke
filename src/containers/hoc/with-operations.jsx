@@ -1,5 +1,7 @@
 import { graphql, withApollo } from "@apollo/client/react/hoc";
-import { Card, CardHeader, CardText } from "material-ui/Card";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import React from "react";
 import { branch, compose, renderComponent, withProps } from "recompose";
 
@@ -80,13 +82,13 @@ export const PrettyErrors = ({ errors }) => {
   return (
     <Card style={{ margin: "10px" }}>
       <CardHeader title="Encountered errors" />
-      <CardText>
+      <CardContent>
         <ul>
           {errors.map((err) => {
             return <li key={err.message}>{formatErrorMessage(err.message)}</li>;
           })}
         </ul>
-      </CardText>
+      </CardContent>
     </Card>
   );
 };

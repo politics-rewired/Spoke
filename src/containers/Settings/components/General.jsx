@@ -1,12 +1,15 @@
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { css, StyleSheet } from "aphrodite";
-import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
 import Toggle from "material-ui/Toggle";
@@ -281,8 +284,11 @@ class Settings extends React.Component {
           style={{ marginBottom: 20 }}
         />
         <Card className={css(styles.sectionCard)}>
-          <CardHeader title="Default Text Request Auto-Approval Level" />
-          <CardText>
+          <CardHeader
+            titleTypographyProps={{ variant: "body1" }}
+            title="Default Text Request Auto-Approval Level"
+          />
+          <CardContent>
             <p>
               When a new texter joins your organization they will be given this
               auto-approval level for requesting text assignments.
@@ -299,7 +305,7 @@ class Settings extends React.Component {
                 />
               ))}
             </DropDownMenu>
-          </CardText>
+          </CardContent>
           <CardActions>
             <Button
               variant="contained"
@@ -332,14 +338,17 @@ class Settings extends React.Component {
               })
             }
           >
-            <CardHeader title="Opt Out Message" />
-            <CardText>
+            <CardHeader
+              titleTypographyProps={{ variant: "body1" }}
+              title="Opt Out Message"
+            />
+            <CardContent>
               <SpokeFormField
                 label="Default Opt-Out Message"
                 name="optOutMessage"
                 fullWidth
               />
-            </CardText>
+            </CardContent>
             <CardActions>
               <Button
                 variant="contained"
@@ -354,8 +363,11 @@ class Settings extends React.Component {
         </Card>
 
         <Card className={css(styles.sectionCard)}>
-          <CardHeader title="Texting Hours" />
-          <CardText>
+          <CardHeader
+            titleTypographyProps={{ variant: "body1" }}
+            title="Texting Hours"
+          />
+          <CardContent>
             <p>Default Texting Timezone</p>
             <DropDownMenu
               value={defaultTextingTz}
@@ -387,7 +399,7 @@ class Settings extends React.Component {
                 in your organization's local time. Timezone {defaultTextingTz}.
               </div>
             )}
-          </CardText>
+          </CardContent>
           <CardActions>
             {organization.textingHoursEnforced && (
               <Button
@@ -414,8 +426,11 @@ class Settings extends React.Component {
               numbersApiKey
             }}
           >
-            <CardHeader title="Assemble Numbers API Key" />
-            <CardText>
+            <CardHeader
+              titleTypographyProps={{ variant: "body1" }}
+              title="Assemble Numbers API Key"
+            />
+            <CardContent>
               To enable automatic filtering of landline phone numbers, you will
               need to put in your Assemble Numbers API Key here.
               <SpokeFormField
@@ -423,7 +438,7 @@ class Settings extends React.Component {
                 name="numbersApiKey"
                 fullWidth
               />
-            </CardText>
+            </CardContent>
             <CardActions>
               <Button
                 variant="contained"
@@ -438,8 +453,11 @@ class Settings extends React.Component {
         </Card>
 
         <Card className={css(styles.sectionCard)}>
-          <CardHeader title="Contact Information Display" />
-          <CardText>
+          <CardHeader
+            titleTypographyProps={{ variant: "body1" }}
+            title="Contact Information Display"
+          />
+          <CardContent>
             <p>
               Choose how much information about a contact is displayed to the
               texter.
@@ -454,7 +472,7 @@ class Settings extends React.Component {
               label="Show contact's cell phone number?"
               onToggle={this.handleEditShowContactCell}
             />
-          </CardText>
+          </CardContent>
         </Card>
 
         <CampaignBuilderSettingsCard
@@ -478,8 +496,11 @@ class Settings extends React.Component {
                 })
               }
             >
-              <CardHeader title="TrollBot" />
-              <CardText>
+              <CardHeader
+                titleTypographyProps={{ variant: "body1" }}
+                title="TrollBot"
+              />
+              <CardContent>
                 If set, a payload will be sent to this URL for every TrollBot
                 alarm.
                 <SpokeFormField
@@ -487,7 +508,7 @@ class Settings extends React.Component {
                   name="trollbotWebhookUrl"
                   fullWidth
                 />
-              </CardText>
+              </CardContent>
               <CardActions>
                 <Button
                   variant="contained"

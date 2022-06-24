@@ -1,13 +1,17 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import { useTheme } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
+import Collapse from "@material-ui/core/Collapse";
 import CancelIcon from "@material-ui/icons/Cancel";
 import DoneIcon from "@material-ui/icons/Done";
 import WarningIcon from "@material-ui/icons/Warning";
 import Avatar from "material-ui/Avatar";
-import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
-import React from "react";
+import React, { useState } from "react";
 import { compose, withProps } from "recompose";
 
 import {
@@ -108,10 +112,21 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
   const { jobId, savePercent, jobMessage, isSaving } = unpackJob(pendingJob);
   const { progressPercent, progressMessage } = unpackStatus(savePercent);
 
+  const isExpanded = active && isExpandable && !isSaving;
+  const [showSection, setShowSection] = useState<boolean>(isExpanded);
+
+  const handleExpandChange = () => {
+    if (isExpandable) {
+      setShowSection(!showSection);
+    }
+  };
+
   let avatar = null;
   const cardHeaderStyle: React.CSSProperties = {
-    backgroundColor: theme.colors.lightGray
+    backgroundColor: theme.colors.lightGray,
+    cursor: "pointer"
   };
+
   const avatarStyle = {
     display: "inline-block",
     verticalAlign: "middle"
@@ -170,10 +185,11 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
     }
   };
 
+  console.log(props);
+
   return (
     <Card
       {...dataTest(camelCase(title))}
-      expanded={active && isExpandable && !isSaving}
       expandable={isExpandable}
       onExpandChange={onExpandChange}
       style={inlineStyles.card}
@@ -182,26 +198,27 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
         title={title}
         titleStyle={inlineStyles.title}
         style={cardHeaderStyle}
-        actAsExpander={isExpandable}
-        showExpandableButton={isExpandable}
         avatar={avatar}
+        onClick={handleExpandChange}
       />
-      <CardText expandable>{children}</CardText>
-      {isSaving && isAdmin && (
-        <CardActions>
-          <div>Current Status: {progressMessage}</div>
-          {jobMessage && jobMessage !== "{}" && (
-            <div>Message: {jobMessage}</div>
-          )}
-          <Button
-            variant="contained"
-            endIcon={<CancelIcon />}
-            onClick={handleDiscardJob}
-          >
-            Discard Job
-          </Button>
-        </CardActions>
-      )}
+      <Collapse in={showSection}>
+        <CardContent>{children}</CardContent>
+        {isSaving && isAdmin && (
+          <CardActions>
+            <div>Current Status: {progressMessage}</div>
+            {jobMessage && jobMessage !== "{}" && (
+              <div>Message: {jobMessage}</div>
+            )}
+            <Button
+              variant="contained"
+              endIcon={<CancelIcon />}
+              onClick={handleDiscardJob}
+            >
+              Discard Job
+            </Button>
+          </CardActions>
+        )}
+      </Collapse>
     </Card>
   );
 };
