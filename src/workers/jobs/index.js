@@ -152,13 +152,7 @@ export async function uploadContacts(job) {
 
   const orgFeatures = JSON.parse(organization.features || "{}");
 
-  await Promise.all([
-    r.knex("campaign_contact").where({ campaign_id: campaignId }).del(),
-    r
-      .knex("campaign")
-      .update({ landlines_filtered: false })
-      .where({ id: campaignId })
-  ]);
+  await r.knex("campaign_contact").where({ campaign_id: campaignId }).del();
 
   let jobPayload = await gunzip(Buffer.from(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
@@ -617,6 +611,11 @@ export async function loadContactsFromDataWarehouse(job) {
     .knex("campaign_contact")
     .where("campaign_id", job.campaign_id)
     .delete();
+
+  await r
+    .knex("campaign")
+    .where({ id: campaign.id })
+    .update({ landlines_filtered: false });
 
   await loadContactsFromDataWarehouseFragment({
     jobId: job.id,
