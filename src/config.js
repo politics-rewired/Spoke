@@ -400,6 +400,10 @@ const validators = {
     choices: ["s3", "gs-json"], // eventually add support for GCP w/ HMAC interoperability: ["gs"]
     default: "s3"
   }),
+  EXPORT_CAMPAIGN_CHUNK_SIZE: num({
+    desc: "Chunk size to use for exporting campaign contacts and messages.",
+    default: 1000
+  }),
   FIX_ORGLESS: bool({
     desc:
       "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
