@@ -1,0 +1,48 @@
+query GetCurrentUserFormInfo($organizationId: String!) {
+  currentUser {
+    id
+    currentRequest(organizationId: $organizationId) {
+      id
+      status
+      amount
+    }
+    memberships {
+      edges {
+        node {
+          id
+          requestAutoApprove
+          organization {
+            id
+          }
+        }
+      }
+    }
+  }
+  organization(id: $organizationId) {
+    id
+    myCurrentAssignmentTargets {
+      type
+      maxRequestCount
+      teamTitle
+      teamId
+    }
+    settings {
+      showDoNotAssignMessage
+      doNotAssignMessage
+    }
+  }
+}
+
+mutation RequestTexts(
+  $count: Int!
+  $email: String!
+  $organizationId: String!
+  $preferredTeamId: String!
+) {
+  requestTexts(
+    count: $count
+    email: $email
+    organizationId: $organizationId
+    preferredTeamId: $preferredTeamId
+  )
+}

@@ -100,9 +100,9 @@ export const schema = `
     textRequestMaxCount: Int
     textsAvailable: Boolean
     pendingAssignmentRequestCount: Int!
-    currentAssignmentTargets: [AssignmentTarget]!
+    currentAssignmentTargets: [AssignmentTarget!]!
     myCurrentAssignmentTarget: AssignmentTarget
-    myCurrentAssignmentTargets: [AssignmentTarget]!
+    myCurrentAssignmentTargets: [AssignmentTarget!]!
     escalatedConversationCount: Int!
     linkDomains: [LinkDomain]!
     unhealthyLinkDomains: [UnhealthyLinkDomain]!
