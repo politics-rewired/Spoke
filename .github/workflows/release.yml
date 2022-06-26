@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    # tags:
-    #   - "v*"
+    tags:
+      - "v*"
 
 jobs:
   cut-gh-release:
@@ -18,46 +18,19 @@ jobs:
         id: semver_parser_prerelease
         uses: booxmedialtd/ws-action-parse-semver@v1
         with:
-          # input_string: ${{ github.ref }}
-          # version_extractor_regex: '\/v(.*)$'
-          input_string: "4.33.0-rc.3"
-      - name: Use parsed semver
-        run: |
-          echo "major: ${{ steps.semver_parser_prerelease.outputs.major }}"
-          echo "minor: ${{ steps.semver_parser_prerelease.outputs.minor }}"
-          echo "patch: ${{ steps.semver_parser_prerelease.outputs.patch }}"
-          echo "prerelease: ${{ steps.semver_parser_prerelease.outputs.prerelease }}"
-          echo "build: ${{ steps.semver_parser_prerelease.outputs.build }}"
-          echo "fullversion: ${{ steps.semver_parser_prerelease.outputs.fullversion }}"
-          echo "Pre-release boolean: ${{ !!steps.semver_parser_prerelease.outputs.prerelease }}"
-      - name: Parse semver string
-        id: semver_parser
-        uses: booxmedialtd/ws-action-parse-semver@v1
+          input_string: ${{ github.ref }}
+          version_extractor_regex: '\/v(.*)$'
+      - name: Generate Docker image tag
+        run: 'echo "Docker image: \`$DOCKER_IMAGE:${{ steps.semver_parser.outputs.fullversion }}\`" > $BODY_PATH'
+      - name: Generate Changelog
+        run: awk "/[#]{2,3} \[${{ steps.semver_parser.outputs.fullversion }}/{flag=1; next} /[#]{2,3} \[/{flag=0} flag" CHANGELOG.md >> $BODY_PATH
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
-          # input_string: ${{ github.ref }}
-          # version_extractor_regex: '\/v(.*)$'
-          input_string: "4.33.0"
-      - name: Use parsed semver
-        run: |
-          echo "major: ${{ steps.semver_parser.outputs.major }}"
-          echo "minor: ${{ steps.semver_parser.outputs.minor }}"
-          echo "patch: ${{ steps.semver_parser.outputs.patch }}"
-          echo "prerelease: ${{ steps.semver_parser.outputs.prerelease }}"
-          echo "build: ${{ steps.semver_parser.outputs.build }}"
-          echo "fullversion: ${{ steps.semver_parser.outputs.fullversion }}"
-          echo "Pre-release boolean: ${{ !!steps.semver_parser.outputs.prerelease }}"
-
-      # - name: Generate Docker image tag
-      #   run: 'echo "Docker image: \`$DOCKER_IMAGE:${{ steps.semver_parser.outputs.fullversion }}\`" > $BODY_PATH'
-      # - name: Generate Changelog
-      #   run: awk "/[#]{2,3} \[${{ steps.semver_parser.outputs.fullversion }}/{flag=1; next} /[#]{2,3} \[/{flag=0} flag" CHANGELOG.md >> $BODY_PATH
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   with:
-      #     name: Version ${{ steps.semver_parser.outputs.fullversion }}
-      #     tag_name: v${{ steps.semver_parser.outputs.fullversion }}
-      #     body_path: ${{ env.BODY_PATH }}
-      #     prerelease: ${{ steps.semver_parser.outputs.fullversion }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: Version ${{ steps.semver_parser.outputs.fullversion }}
+          tag_name: v${{ steps.semver_parser.outputs.fullversion }}
+          body_path: ${{ env.BODY_PATH }}
+          prerelease: ${{ !!steps.semver_parser.outputs.prerelease }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
