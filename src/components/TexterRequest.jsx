@@ -100,9 +100,9 @@ class TexterRequest extends React.Component {
 
   userCanRequest = (memberships) => {
     const { organizationId } = this.props;
-    const membership = memberships.edges.find(
-      ({ node }) => node.id === organizationId
-    ).node;
+    const membership = memberships.edges
+      .map(({ node }) => node)
+      .find(({ organization }) => organization.id === organizationId);
     return (
       membership.requestAutoApprove !== RequestAutoApproveType.DO_NOT_APPROVE
     );
@@ -281,6 +281,9 @@ const queries = {
               node {
                 id
                 requestAutoApprove
+                organization {
+                  id
+                }
               }
             }
           }
