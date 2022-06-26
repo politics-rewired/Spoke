@@ -20,6 +20,7 @@ import Autocomplete, {
   AutocompleteChangeReason
 } from "@material-ui/lab/Autocomplete";
 import {
+  AssignmentsFilter,
   useGetTagsQuery,
   useSearchCampaignsQuery,
   useSearchUsersQuery
@@ -109,7 +110,7 @@ interface IncomingMessageFilterProps {
   includeOptedOutConversations: boolean;
   includeArchivedCampaigns: boolean;
   includeActiveCampaigns: boolean;
-  assignmentsFilter: any;
+  assignmentsFilter: AssignmentsFilter;
   tagsFilter: Array<string>;
   organizationId: string;
   onCampaignChanged(campaignId: number): void;
