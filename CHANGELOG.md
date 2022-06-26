@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.33.0-rc.3](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.2...v4.33.0-rc.3) (2022-06-26)
+
+
+### Features
+
+* support overriding van contact type ([#1295](https://github.com/politics-rewired/spoke/issues/1295)) ([0ca4e1d](https://github.com/politics-rewired/spoke/commit/0ca4e1d01819df9b8ca057e6259d9cb322981d01)), closes [#1277](https://github.com/politics-rewired/spoke/issues/1277)
+* support setting custom campaign export chunk size ([#1296](https://github.com/politics-rewired/spoke/issues/1296)) ([a0518cb](https://github.com/politics-rewired/spoke/commit/a0518cb4ecd08de2613a5ea838c569652e62037b))
+* **message review:** use url to store filters ([#1288](https://github.com/politics-rewired/spoke/issues/1288)) ([5c74c82](https://github.com/politics-rewired/spoke/commit/5c74c82cbffd154ca85007e437c6349d664a605d))
+
+
+### Bug Fixes
+
+* fix copy campaign mutation ([#1285](https://github.com/politics-rewired/spoke/issues/1285)) ([7d5af9f](https://github.com/politics-rewired/spoke/commit/7d5af9f424ab069c40f5d8c95847ea7b3267e1ba))
+* fix texter request form ([#1294](https://github.com/politics-rewired/spoke/issues/1294)) ([760f2c7](https://github.com/politics-rewired/spoke/commit/760f2c7bc2ef0da7966f38e0ecdf75c76abc46d4))
+
 ## [4.33.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.1...v4.33.0-rc.2) (2022-06-24)
 
 
