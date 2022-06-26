@@ -744,6 +744,11 @@ const validators = {
       "The numeric coding of the VAN list export type. The default is the Hustle format.",
     default: 8
   }),
+  VAN_CONTACT_TYPE_ID: num({
+    desc:
+      "The numeric coding of the contact type to use for syncing VAN canvass results. Default is 'SMS Text'.",
+    default: 37
+  }),
   WAREHOUSE_DB_TYPE: str({
     desc:
       "Enables ability to load contacts directly from a SQL query from a separate data-warehouse db -- only is_superadmin-marked users will see the interface",
