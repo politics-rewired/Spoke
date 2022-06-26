@@ -23,12 +23,12 @@ jobs:
           input_string: "4.33.0-rc.3"
       - name: Use parsed semver
         run: |
-          echo "major: v${{ steps.semver_parser_prerelease.outputs.major }}"
-          echo "minor: v${{ steps.semver_parser_prerelease.outputs.minor }}"
-          echo "patch: v${{ steps.semver_parser_prerelease.outputs.patch }}"
-          echo "prerelease: v${{ steps.semver_parser_prerelease.outputs.prerelease }}"
-          echo "build: v${{ steps.semver_parser_prerelease.outputs.build }}"
-          echo "fullversion: v${{ steps.semver_parser_prerelease.outputs.fullversion }}"
+          echo "major: ${{ steps.semver_parser_prerelease.outputs.major }}"
+          echo "minor: ${{ steps.semver_parser_prerelease.outputs.minor }}"
+          echo "patch: ${{ steps.semver_parser_prerelease.outputs.patch }}"
+          echo "prerelease: ${{ steps.semver_parser_prerelease.outputs.prerelease }}"
+          echo "build: ${{ steps.semver_parser_prerelease.outputs.build }}"
+          echo "fullversion: ${{ steps.semver_parser_prerelease.outputs.fullversion }}"
           echo "Pre-release boolean: ${{ !!steps.semver_parser_prerelease.outputs.prerelease }}"
       - name: Parse semver string
         id: semver_parser
@@ -36,15 +36,15 @@ jobs:
         with:
           # input_string: ${{ github.ref }}
           # version_extractor_regex: '\/v(.*)$'
-          input_string: "4.33.0-rc.3"
+          input_string: "4.33.0"
       - name: Use parsed semver
         run: |
-          echo "major: v${{ steps.semver_parser.outputs.major }}"
-          echo "minor: v${{ steps.semver_parser.outputs.minor }}"
-          echo "patch: v${{ steps.semver_parser.outputs.patch }}"
-          echo "prerelease: v${{ steps.semver_parser.outputs.prerelease }}"
-          echo "build: v${{ steps.semver_parser.outputs.build }}"
-          echo "fullversion: v${{ steps.semver_parser.outputs.fullversion }}"
+          echo "major: ${{ steps.semver_parser.outputs.major }}"
+          echo "minor: ${{ steps.semver_parser.outputs.minor }}"
+          echo "patch: ${{ steps.semver_parser.outputs.patch }}"
+          echo "prerelease: ${{ steps.semver_parser.outputs.prerelease }}"
+          echo "build: ${{ steps.semver_parser.outputs.build }}"
+          echo "fullversion: ${{ steps.semver_parser.outputs.fullversion }}"
           echo "Pre-release boolean: ${{ !!steps.semver_parser.outputs.prerelease }}"
 
       # - name: Generate Docker image tag
