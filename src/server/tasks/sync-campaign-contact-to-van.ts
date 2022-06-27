@@ -3,6 +3,7 @@ import { PoolClient } from "pg";
 import { Task } from "pg-compose";
 import { post } from "superagent";
 
+import { config } from "../../config";
 import { VanAuthPayload, withVan } from "../lib/external-systems";
 
 class VANSyncError extends Error {
@@ -18,8 +19,6 @@ class VANSyncError extends Error {
 }
 
 export const CANVASSED_TAG_NAME = "Canvassed";
-
-export const VAN_SMS_TEXT_CONTACT_TYPE_ID = 37;
 
 export interface VANCanvassContextPhone {
   dialingPrefix: "1";
@@ -290,7 +289,7 @@ export const formatCanvassResponsePayload = ({
       canvassContext: {
         phoneId,
         phone: formatPhone(phoneNumber),
-        contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
+        contactTypeId: config.VAN_CONTACT_TYPE_ID,
         dateCanvassed
       },
       resultCodeId: mappedResultCodeId,
@@ -303,7 +302,7 @@ export const formatCanvassResponsePayload = ({
       canvassContext: {
         phoneId,
         phone: formatPhone(phoneNumber),
-        contactTypeId: VAN_SMS_TEXT_CONTACT_TYPE_ID,
+        contactTypeId: config.VAN_CONTACT_TYPE_ID,
         dateCanvassed
       },
       resultCodeId: optOutResultCode,
