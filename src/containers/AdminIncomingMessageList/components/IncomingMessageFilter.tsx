@@ -18,19 +18,20 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import Autocomplete, {
   AutocompleteChangeReason
+  // createFilterOptions
 } from "@material-ui/lab/Autocomplete";
 import {
   AssignmentsFilter,
   useGetTagsQuery,
-  useSearchCampaignsQuery,
   useSearchUsersQuery
 } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 
 import { nameComponents } from "../../../lib/attributes";
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../../lib/constants";
+import { useFetchAllCampaigns } from "../hooks/fetch-all-campaigns";
 
 type MessageStatus = {
   name: string;
@@ -102,6 +103,11 @@ type SearchByContactName = {
   cellNumber?: string | undefined;
 };
 
+// const filterOptions = createFilterOptions<Campaign>({
+//   matchFrom: "start",
+//   stringify: (option) => option.title
+// });
+
 interface IncomingMessageFilterProps {
   isTexterFilterable: boolean;
   isIncludeEscalatedFilterable: boolean;
@@ -131,26 +137,17 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [cellNumber, setCellNumber] = useState<string>();
   const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
   const [showSection, setShowSection] = useState<boolean>(false);
-  const [campaignSearchInput, setCampaignSearchInput] = useState<string>();
-  const [campaignSearchInputDebounced] = useDebounce(campaignSearchInput, 500);
+  const [campaignSearchInput, setCampaignSearchInput] = useState<string>("");
   const [texterSearchInput, setTexterSearchInput] = useState<string>();
   const [texterSearchInputDebounced] = useDebounce(texterSearchInput, 500);
   const timeoutId = useRef<NodeJS.Timeout | null>(null);
 
+  const { loading, campaigns, error } = useFetchAllCampaigns(
+    props.organizationId
+  );
+
   const { data: getTags } = useGetTagsQuery({
     variables: { organizationId: props.organizationId }
-  });
-
-  const { data: getCampaigns } = useSearchCampaignsQuery({
-    variables: {
-      organizationId: props.organizationId,
-      campaignsFilter:
-        campaignSearchInputDebounced?.length > 0
-          ? {
-              campaignTitle: campaignSearchInputDebounced
-            }
-          : undefined
-    }
   });
 
   const { data: getTexters } = useSearchUsersQuery({
@@ -174,14 +171,23 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     });
   };
 
-  const formatCampaigns = (campaigns: Array<any>) => {
+  const campaignOptions = useMemo(() => {
     return CAMPAIGN_TYPE_FILTERS.concat(
-      campaigns.map((campaign) => {
+      (campaigns ?? []).map((campaign) => {
         const title = `${campaign.id}: ${campaign.title}`;
         return { id: parseInt(campaign.id, 10), title };
       })
     );
-  };
+  }, [campaigns]);
+
+  // const formatCampaigns = (campaigns: Array<any>) => {
+  //   return CAMPAIGN_TYPE_FILTERS.concat(
+  //     campaigns.map((campaign) => {
+  //       const title = `${campaign.id}: ${campaign.title}`;
+  //       return { id: parseInt(campaign.id, 10), title };
+  //     })
+  //   );
+  // };
 
   const formatTexters = (texters: Array<any>) => {
     const formattedTexters: Texter[] = texters.map((texter) => {
@@ -194,9 +200,9 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     return TEXTER_FILTERS.concat(formattedTexters);
   };
 
-  const campaignOptions: Campaign[] = formatCampaigns(
-    getCampaigns?.campaigns?.campaigns ?? []
-  );
+  // const campaignOptions: Campaign[] = formatCampaigns(
+  //   getCampaigns?.campaigns?.campaigns ?? []
+  // );
   const tagOptions: Tag[] = formatTags(getTags?.organization?.tagList ?? []);
   const texterOptions: Texter[] = formatTexters(
     getTexters?.organization?.memberships?.edges ?? []
@@ -411,6 +417,8 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
               <Autocomplete
                 options={campaignOptions}
                 getOptionLabel={(campaign) => campaign.title}
+                // filterOptions={filterOptions}
+                inputValue={campaignSearchInput ?? ""}
                 onInputChange={(_event, newValue) => {
                   setCampaignSearchInput(newValue);
                 }}

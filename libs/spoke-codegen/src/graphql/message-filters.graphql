@@ -8,10 +8,20 @@ fragment MembershipSearchRecord on OrganizationMembership {
   role
 }
 
-query SearchUsers($organizationId: String! $filter: MembershipFilter) {
+query SearchUsers(
+  $organizationId: String!
+  $after: Cursor
+  $first: Int!
+  $filter: MembershipFilter
+) {
   organization(id: $organizationId) {
     id
-    memberships(filter: $filter) {
+    memberships(after: $after, first: $first, filter: $filter) {
+      pageInfo {
+        totalCount
+        hasNextPage
+        endCursor
+      }
       edges {
         node {
           ...MembershipSearchRecord
@@ -21,10 +31,22 @@ query SearchUsers($organizationId: String! $filter: MembershipFilter) {
   }
 }
 
-query SearchCampaigns($organizationId: String! $campaignsFilter: CampaignsFilter) {
-  campaigns(organizationId: $organizationId campaignsFilter: $campaignsFilter) {
-    ... on CampaignsList
-    {
+query FetchCampaignPage(
+  $organizationId: String!
+  $cursor: OffsetLimitCursor
+  $campaignsFilter: CampaignsFilter
+) {
+  campaigns(
+    organizationId: $organizationId
+    cursor: $cursor
+    campaignsFilter: $campaignsFilter
+  ) {
+    ... on PaginatedCampaigns {
+      pageInfo {
+        offset
+        limit
+        total
+      }
       campaigns {
         id
         title
