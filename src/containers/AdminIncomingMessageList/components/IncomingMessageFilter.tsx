@@ -365,10 +365,11 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
       <CardHeader
         title="Message Filter"
         action={
-          <IconButton onClick={handleExpandChange}>
+          <IconButton>
             {showSection ? <ExpandLess /> : <ExpandMore />}
           </IconButton>
         }
+        onClick={handleExpandChange}
       />
       <Collapse in={showSection}>
         <CardContent>
