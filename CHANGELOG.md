@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.33.0-rc.4](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.3...v4.33.0-rc.4) (2022-06-30)
+
+
+### Bug Fixes
+
+* **message-review:** include campaign id in title search ([#1301](https://github.com/politics-rewired/spoke/issues/1301)) ([30faba8](https://github.com/politics-rewired/spoke/commit/30faba872c13c5396deec8623306ad1cd7ef144f))
+* **message-review:** listen for clicks on entire card header ([#1299](https://github.com/politics-rewired/spoke/issues/1299)) ([a294dd1](https://github.com/politics-rewired/spoke/commit/a294dd1f05f4afbc0f9633f1e1a7bc44089ca8af))
+
 ## [4.33.0-rc.3](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.2...v4.33.0-rc.3) (2022-06-26)
 
 
