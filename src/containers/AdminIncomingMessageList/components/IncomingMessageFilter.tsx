@@ -130,7 +130,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [lastName, setLastName] = useState<string>();
   const [cellNumber, setCellNumber] = useState<string>();
   const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
-  const [showSection, setShowSection] = useState<boolean>(false);
+  const [showSection, setShowSection] = useState<boolean>(true);
   const [campaignSearchInput, setCampaignSearchInput] = useState<string>();
   const [campaignSearchInputDebounced] = useDebounce(campaignSearchInput, 500);
   const [texterSearchInput, setTexterSearchInput] = useState<string>();
