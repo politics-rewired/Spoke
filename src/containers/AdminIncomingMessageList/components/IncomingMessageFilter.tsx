@@ -369,6 +369,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             {showSection ? <ExpandLess /> : <ExpandMore />}
           </IconButton>
         }
+        style={{ cursor: "pointer" }}
         onClick={handleExpandChange}
       />
       <Collapse in={showSection}>

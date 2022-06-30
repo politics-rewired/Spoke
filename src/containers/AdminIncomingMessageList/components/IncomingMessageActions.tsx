@@ -179,6 +179,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
             {showSection ? <ExpandLess /> : <ExpandMore />}
           </IconButton>
         }
+        style={{ cursor: "pointer" }}
         onClick={handleExpandChange}
       />
       <Collapse in={showSection}>
