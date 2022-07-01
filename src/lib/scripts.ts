@@ -120,6 +120,14 @@ export const applyScript = ({
     appliedScript = appliedScript.replace(re, field.value);
   }
 
+  for (const field of campaignVariables) {
+    const re = new RegExp(
+      escapeRegExp(delimit(field.name.replace("cv:", ""))),
+      "g"
+    );
+    appliedScript = appliedScript.replace(re, field.value);
+  }
+
   return appliedScript;
 };
 
