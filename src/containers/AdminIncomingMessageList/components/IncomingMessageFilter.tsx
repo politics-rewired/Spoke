@@ -20,13 +20,14 @@ import Autocomplete, {
   AutocompleteChangeReason
 } from "@material-ui/lab/Autocomplete";
 import {
-  AssignmentsFilter,
+  ContactNameFilter,
   useGetTagsQuery,
   useSearchCampaignsQuery,
   useSearchUsersQuery
 } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
-import React, { useRef, useState } from "react";
+import { isEmpty } from "lodash";
+import React, { useEffect, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 
 import { nameComponents } from "../../../lib/attributes";
@@ -96,12 +97,6 @@ type Texter = {
   displayName: string;
 };
 
-type SearchByContactName = {
-  firstName?: string | undefined;
-  lastName?: string | undefined;
-  cellNumber?: string | undefined;
-};
-
 interface IncomingMessageFilterProps {
   isTexterFilterable: boolean;
   isIncludeEscalatedFilterable: boolean;
@@ -110,9 +105,11 @@ interface IncomingMessageFilterProps {
   includeOptedOutConversations: boolean;
   includeArchivedCampaigns: boolean;
   includeActiveCampaigns: boolean;
-  assignmentsFilter: AssignmentsFilter;
   tagsFilter: Array<string>;
   organizationId: string;
+  campaignId: number | null;
+  texterId: number | null;
+  contactNameFilter: ContactNameFilter | null | undefined;
   onCampaignChanged(campaignId: number): void;
   onTagsChanged(event: React.ChangeEvent<{ value: any }>): void;
   onTexterChanged(texterId: number): void;
@@ -122,19 +119,31 @@ interface IncomingMessageFilterProps {
   onNotOptedOutConversationsToggled(): void;
   onOptedOutConversationsToggled(): void;
   onMessageFilterChanged(messageStatuesString: string): void;
-  searchByContactName(contactDetails: SearchByContactName): void;
+  searchByContactName(contactDetails: ContactNameFilter): void;
 }
 
 const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
-  const [firstName, setFirstName] = useState<string>();
-  const [lastName, setLastName] = useState<string>();
-  const [cellNumber, setCellNumber] = useState<string>();
+  const [firstName, setFirstName] = useState<string | undefined>(
+    props.contactNameFilter?.firstName ?? ""
+  );
+  const [lastName, setLastName] = useState<string | undefined>(
+    props.contactNameFilter?.lastName ?? ""
+  );
+  const [cellNumber, setCellNumber] = useState<string | undefined>(
+    props.contactNameFilter?.cellNumber ?? ""
+  );
   const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
   const [showSection, setShowSection] = useState<boolean>(true);
-  const [campaignSearchInput, setCampaignSearchInput] = useState<string>();
+  const [campaignSearchInput, setCampaignSearchInput] = useState<string>("");
   const [campaignSearchInputDebounced] = useDebounce(campaignSearchInput, 500);
-  const [texterSearchInput, setTexterSearchInput] = useState<string>();
+  const [texterSearchInput, setTexterSearchInput] = useState<string>("");
   const [texterSearchInputDebounced] = useDebounce(texterSearchInput, 500);
+  const [campaignOption, setCampaignOption] = useState<
+    Campaign | undefined | null
+  >(CAMPAIGN_TYPE_FILTERS[0]);
+  const [texterOption, setTexterOption] = useState<Texter | undefined | null>(
+    TEXTER_FILTERS[1]
+  );
   const timeoutId = useRef<NodeJS.Timeout | null>(null);
 
   const { data: getTags } = useGetTagsQuery({
@@ -202,6 +211,19 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     getTexters?.organization?.memberships?.edges ?? []
   );
 
+  useEffect(() => {
+    if (!isEmpty(campaignOptions) && props.campaignId) {
+      setCampaignOption(
+        campaignOptions.find((campaign) => campaign.id === props.campaignId)
+      );
+    }
+    if (!isEmpty(texterOptions) && props.texterId) {
+      setTexterOption(
+        texterOptions.find((texter) => texter.id === props.texterId)
+      );
+    }
+  }, [getCampaigns, getTexters]);
+
   const onMessageFilterSelectChanged = (
     event: React.ChangeEvent<{ value: unknown }>,
     _child: React.ReactNode
@@ -227,13 +249,14 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     value: Campaign | null,
     _reason: AutocompleteChangeReason
   ) => {
-    let campaignId;
+    let newCampaignId;
     if (value === null) {
-      campaignId = -1;
+      newCampaignId = -1;
     } else {
-      campaignId = value.id;
+      newCampaignId = value.id;
     }
-    props.onCampaignChanged(campaignId as number);
+    setCampaignOption(value);
+    props.onCampaignChanged(newCampaignId as number);
   };
 
   const onTexterSelected = (
@@ -241,13 +264,14 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     value: Texter | null,
     _reason: AutocompleteChangeReason
   ) => {
-    let texterId;
+    let newTexterId;
     if (value === null) {
-      texterId = -1;
+      newTexterId = -1;
     } else {
-      texterId = value.id;
+      newTexterId = value.id;
     }
-    props.onTexterChanged(texterId as number);
+    setTexterOption(value);
+    props.onTexterChanged(newTexterId as number);
   };
 
   const searchByNewContactName = () => {
@@ -360,6 +384,14 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     );
   };
 
+  let contactFilterDefault = firstName ?? "";
+  if (lastName) {
+    contactFilterDefault = contactFilterDefault.concat(" ", lastName);
+  }
+  if (cellNumber) {
+    contactFilterDefault = contactFilterDefault.concat(" ", cellNumber);
+  }
+
   return (
     <Card>
       <CardHeader
@@ -411,8 +443,11 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             </Grid>
             <Grid item xs={4}>
               <Autocomplete
+                defaultValue={campaignOption}
+                value={campaignOption}
                 options={campaignOptions}
                 getOptionLabel={(campaign) => campaign.title}
+                inputValue={campaignSearchInput}
                 onInputChange={(_event, newValue) => {
                   setCampaignSearchInput(newValue);
                 }}
@@ -429,8 +464,11 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             <Grid item xs={4}>
               {props.isTexterFilterable && (
                 <Autocomplete
+                  defaultValue={texterOption}
+                  value={texterOption}
                   options={texterOptions}
                   getOptionLabel={(texter) => texter.displayName}
+                  inputValue={texterSearchInput}
                   onInputChange={(_event, newValue) => {
                     setTexterSearchInput(newValue);
                   }}
@@ -449,6 +487,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
           <TextField
             className={css(styles.fullWidth)}
             onChange={onContactNameChanged}
+            defaultValue={contactFilterDefault}
             fullWidth
             label="Filter contacts"
             helperText="Filter by Contact Name or Number"
