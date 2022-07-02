@@ -85,7 +85,7 @@ export const schema = `
     assignmentId: String
     updatedAt: Date
 
-    contactTags: [Tag]
+    contactTags: [CampaignContactTag]
   }
 
   input CampaignContactInput {

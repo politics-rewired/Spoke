@@ -2,6 +2,7 @@ import { schema as assignmentSchema } from "./assignment";
 import { schema as assignmentRequestSchema } from "./assignment-request";
 import { schema as campaignSchema } from "./campaign";
 import { schema as campaignContactSchema } from "./campaign-contact";
+import { schema as campaignContactTagSchema } from "./campaign-contact-tag";
 import { schema as campaignGroupSchema } from "./campaign-group";
 import { schema as cannedResponseSchema } from "./canned-response";
 import { schema as conversationSchema } from "./conversations";
@@ -346,6 +347,7 @@ export const schema = [
   messagingServiceSchema,
   noticeSchema,
   campaignContactSchema,
+  campaignContactTagSchema,
   campaignGroupSchema,
   cannedResponseSchema,
   questionResponseSchema,

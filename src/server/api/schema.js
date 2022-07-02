@@ -41,6 +41,7 @@ import {
 import { resolvers as assignmentRequestResolvers } from "./assignment-request";
 import { getCampaigns, resolvers as campaignResolvers } from "./campaign";
 import { resolvers as campaignContactResolvers } from "./campaign-contact";
+import { resolvers as campaignContactTagResolvers } from "./campaign-contact-tag";
 import { resolvers as campaignGroupResolvers } from "./campaign-group";
 import {
   queryCampaignOverlapCount,
@@ -1258,7 +1259,7 @@ const rootMutations = {
       const tags = shouldFetchTagsAndQuestionResponses
         ? await r
             .knex("tag")
-            .select("tag.*")
+            .select("tag.*", "user.*")
             .select("campaign_contact_id")
             .join(
               "campaign_contact_tag",
@@ -1266,6 +1267,7 @@ const rootMutations = {
               "=",
               "tag.id"
             )
+            .join("user", "user.id", "campaign_contact_tag.tagger_id")
             .whereIn("campaign_contact_tag.campaign_contact_id", contactIds)
         : [];
 
@@ -3709,6 +3711,7 @@ export const resolvers = {
   ...messageResolvers,
   ...campaignGroupResolvers,
   ...campaignContactResolvers,
+  ...campaignContactTagResolvers,
   ...cannedResponseResolvers,
   ...questionResponseResolvers,
   ...inviteResolvers,

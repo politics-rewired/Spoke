@@ -238,13 +238,14 @@ export const resolvers = {
 
       return r
         .reader("tag")
-        .select("tag.*")
+        .select("user.first_name", "user.last_name", "tag.*")
         .join(
           "campaign_contact_tag",
           "campaign_contact_tag.tag_id",
           "=",
           "tag.id"
         )
+        .join("user", "campaign_contact_tag.tagger_id", "=", "user.id")
         .where(
           "campaign_contact_tag.campaign_contact_id",
           "=",

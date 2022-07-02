@@ -70,6 +70,8 @@ class ManageTags extends Component {
     const { tagList } = this.props.organizationTags.organization;
     const { tags: contactTags } = this.props.contactTags.contact;
     const { isTagEditorOpen, selectedTags, isWorking, error } = this.state;
+    console.log(contactTags);
+    console.log(selectedTags);
 
     const actions = [
       <RaisedButton
@@ -105,6 +107,13 @@ class ManageTags extends Component {
         />
         <Dialog open={isTagEditorOpen} onClose={this.handleCloseTagManager}>
           <DialogTitle>Manage Tags</DialogTitle>
+          {selectedTags.map((contactTag) => {
+            return (
+              <DialogContentText key={contactTag.id}>
+                {contactTag.title} - {contactTag.applier.firstName}
+              </DialogContentText>
+            );
+          })}
           <DialogContent>
             <TagSelector
               dataSource={tagList}
@@ -173,13 +182,20 @@ const queries = {
           id
           tags: contactTags {
             id
-            title
-            description
-            confirmationSteps
-            onApplyScript
-            isSystem
-            isAssignable
-            createdAt
+            tag {
+              id
+              title
+              description
+              confirmationSteps
+              onApplyScript
+              isSystem
+              isAssignable
+              createdAt
+            }
+            applier {
+              firstName
+              lastName
+            }
           }
         }
       }
