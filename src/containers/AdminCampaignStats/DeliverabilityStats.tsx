@@ -1,10 +1,11 @@
 import { gql } from "@apollo/client";
+import { Grid } from "@material-ui/core";
 import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { Campaign } from "../../api/campaign";
-import { asPercentWithTotal } from "../../lib/utils";
+import { asPercent, asPercentWithTotal } from "../../lib/utils";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import CampaignStat from "./CampaignStat";
@@ -88,28 +89,35 @@ const DeliverabilityStats = (props: {
 
   const total = deliveredCount + sendingCount + sentCount + errorCount;
 
+  const highErrorPercent = 25;
+  const campaignErrorPercent = asPercent(errorCount, total);
+  const errorHighlight =
+    campaignErrorPercent !== undefined &&
+    campaignErrorPercent > highErrorPercent;
+
   return (
     <div>
-      <div className={css(styles.container)}>
-        <div className={css(styles.flexColumn, styles.spacer)}>
+      <Grid container spacing={2} justifyContent="center">
+        <Grid item xs={4}>
           <CampaignStat
             title="Delivered"
             count={asPercentWithTotal(deliveredCount, total)}
           />
-        </div>
-        <div className={css(styles.flexColumn, styles.spacer)}>
+        </Grid>
+        <Grid item xs={4}>
           <CampaignStat
             title="Sending"
             count={asPercentWithTotal(sendingCount + sentCount, total)}
           />
-        </div>
-        <div className={css(styles.flexColumn, styles.spacer)}>
+        </Grid>
+        <Grid item xs={4}>
           <CampaignStat
             title="Error"
             count={asPercentWithTotal(errorCount, total)}
+            highlight={errorHighlight}
           />
-        </div>
-      </div>
+        </Grid>
+      </Grid>
 
       <div className={css(styles.secondaryHeader)}>Top errors:</div>
       {specificErrors
