@@ -1,4 +1,9 @@
 
+enum AutosendControlsMode {
+  BASIC
+  DETAILED
+}
+
 enum CampaignBuilderMode {
   BASIC
   ADVANCED

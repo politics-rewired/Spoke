@@ -19,14 +19,22 @@ import {
   usePauseAutosendingMutation,
   useStartAutosendingMutation
 } from "@spoke/spoke-codegen";
+import { css, StyleSheet } from "aphrodite";
 import { sortBy } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BooleanParam, useQueryParam, withDefault } from "use-query-params";
 
+import { AutosendControlsMode } from "../../../libs/spoke-codegen/src/generated";
 import LoadingIndicator from "../../components/LoadingIndicator";
+import AutosendingBasicTargetRow from "./components/AutosendingBasicTargetRow";
+import AutosendingBasicUnstartedTargetRow from "./components/AutosendingBasicUnstartedTargetRow";
 import AutosendingTargetRow from "./components/AutosendingTargetRow";
 import AutosendingUnstartedTargetRow from "./components/AutosendingUnstartedTargetRow";
+
+const inlineStyles = StyleSheet.create({
+  select: { width: 200, marginRight: 10 }
+});
 
 const AdminAutosending: React.FC = () => {
   const { organizationId } = useParams<{ organizationId: string }>();
@@ -34,13 +42,18 @@ const AdminAutosending: React.FC = () => {
     "isStarted",
     withDefault(BooleanParam, true)
   );
+  const [isBasic = false, setIsBasic] = useQueryParam(
+    "isBasic",
+    withDefault(BooleanParam, false)
+  );
 
   const {
     data,
     loading,
-    error: getCampaignsError
+    error: getCampaignsError,
+    refetch: refetchCampaigns
   } = useCampaignsEligibleForAutosendingQuery({
-    variables: { organizationId, isStarted },
+    variables: { organizationId, isStarted, isBasic },
     pollInterval: 10 * 1000
   });
 
@@ -70,7 +83,7 @@ const AdminAutosending: React.FC = () => {
       setAlertErrorMessage(pauseAutosendingError.message);
   }, [pauseAutosendingError?.message]);
 
-  const handleChangeFilter = useCallback(
+  const handleChangeStartedFilter = useCallback(
     (
       event: React.ChangeEvent<{
         name?: string | undefined;
@@ -78,6 +91,26 @@ const AdminAutosending: React.FC = () => {
       }>
     ) => setIsStarted(event.target.value === "started"),
     [setIsStarted]
+  );
+
+  const handleChangeModeFilter = useCallback(
+    (
+      event: React.ChangeEvent<{
+        name?: string | undefined;
+        value: unknown;
+      }>
+    ) => {
+      // need to refetch for additional data when switched to detailed
+      const isChangeToBasic = event.target.value === AutosendControlsMode.Basic;
+      if (isChangeToBasic) setIsBasic(isChangeToBasic);
+      else
+        refetchCampaigns({
+          organizationId,
+          isStarted,
+          isBasic: false
+        }).then(() => setIsBasic(isChangeToBasic));
+    },
+    [setIsBasic]
   );
 
   const handleDismissAlert = useCallback(
@@ -115,7 +148,6 @@ const AdminAutosending: React.FC = () => {
   );
 
   const sortedCampaigns = activeCampaigns.concat(inactiveCampaigns);
-
   const actionsDisabled = isStartingAutosending || isPausingAutosending;
 
   return (
@@ -133,51 +165,98 @@ const AdminAutosending: React.FC = () => {
         title="Autosending Controls"
         subtitle="Campaigns will send in order of ID"
         action={
-          <FormControl>
-            <InputLabel id="is-started-select-label">
-              Campaign Status
-            </InputLabel>
-            <Select
-              labelId="is-started-select-label"
-              id="is-started-select"
-              value={isStarted ? "started" : "unstarted"}
-              style={{ width: 200, marginRight: 10 }}
-              onChange={handleChangeFilter}
-            >
-              <MenuItem value="started">Started</MenuItem>
-              <MenuItem value="unstarted">Unstarted</MenuItem>
-            </Select>
-          </FormControl>
+          <>
+            <FormControl>
+              <InputLabel id="is-started-select-label">
+                Campaign Status
+              </InputLabel>
+              <Select
+                labelId="is-started-select-label"
+                id="is-started-select"
+                value={isStarted ? "started" : "unstarted"}
+                className={css(inlineStyles.select)}
+                onChange={handleChangeStartedFilter}
+              >
+                <MenuItem value="started">Started</MenuItem>
+                <MenuItem value="unstarted">Unstarted</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <InputLabel id="is-started-select-label">
+                Campaign Status
+              </InputLabel>
+              <Select
+                labelId="autosend-controls-mode-select-label"
+                id="autosend-controls-mode-select"
+                value={
+                  isBasic
+                    ? AutosendControlsMode.Basic
+                    : AutosendControlsMode.Detailed
+                }
+                className={css(inlineStyles.select)}
+                onChange={handleChangeModeFilter}
+              >
+                <MenuItem value={AutosendControlsMode.Basic}>Basic</MenuItem>
+                <MenuItem value={AutosendControlsMode.Detailed}>
+                  Detailed
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </>
         }
       />
       <CardContent>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow>
-                <TableCell colSpan={3} />
-                <TableCell colSpan={5}>Progress</TableCell>
-                <TableCell colSpan={2}>Engagement</TableCell>
-                <TableCell />
-              </TableRow>
+              {isBasic ? null : (
+                <TableRow>
+                  <TableCell colSpan={3} />
+                  <TableCell colSpan={5}>Progress</TableCell>
+                  <TableCell colSpan={2}>Engagement</TableCell>
+                  <TableCell />
+                </TableRow>
+              )}
               <TableRow>
                 <TableCell>Campaign</TableCell>
                 <TableCell>Autosending Status</TableCell>
                 {/* Actions */}
                 <TableCell />
-                <TableCell>Contacts</TableCell>
-                <TableCell>Delivered</TableCell>
-                <TableCell>Waiting to Send</TableCell>
-                <TableCell>Waiting to Deliver</TableCell>
-                <TableCell>Failed</TableCell>
-                <TableCell>Replies</TableCell>
-                <TableCell>Opt Outs</TableCell>
+                {isBasic ? null : (
+                  <>
+                    <TableCell>Contacts</TableCell>
+                    <TableCell>Delivered</TableCell>
+                    <TableCell>Waiting to Send</TableCell>
+                    <TableCell>Waiting to Deliver</TableCell>
+                    <TableCell>Failed</TableCell>
+                    <TableCell>Replies</TableCell>
+                    <TableCell>Opt Outs</TableCell>
+                  </>
+                )}
                 <TableCell>More Info</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedCampaigns.map((c) =>
-                c.isStarted ? (
+              {sortedCampaigns.map((c) => {
+                if (isBasic) {
+                  return c.isStarted ? (
+                    <AutosendingBasicTargetRow
+                      key={c.id}
+                      target={c}
+                      organizationId={organizationId}
+                      disabled={actionsDisabled}
+                      onStart={handlePlayFactory(c!.id!)}
+                      onPause={handlePauseFactory(c!.id!)}
+                    />
+                  ) : (
+                    <AutosendingBasicUnstartedTargetRow
+                      key={c.id}
+                      target={c}
+                      organizationId={organizationId}
+                    />
+                  );
+                }
+                return c.isStarted ? (
                   <AutosendingTargetRow
                     key={c.id}
                     target={c}
@@ -192,8 +271,8 @@ const AdminAutosending: React.FC = () => {
                     target={c}
                     organizationId={organizationId}
                   />
-                )
-              )}
+                );
+              })}
               {sortedCampaigns.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={11} style={{ textAlign: "center" }}>
