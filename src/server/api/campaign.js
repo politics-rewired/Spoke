@@ -9,7 +9,7 @@ import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { accessRequired } from "./errors";
-import { getDeliverabilityStats } from "./lib/campaign";
+import { getDeliverabilityStats, invalidScriptFields } from "./lib/campaign";
 import { symmetricEncrypt } from "./lib/crypto";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
@@ -395,7 +395,9 @@ export const resolvers = {
         )
         .then(({ rows: [{ uses_incomplete_step }] }) => uses_incomplete_step);
 
-      return hasSteps && !hasIncompleteSteps;
+      const invalidFields = await invalidScriptFields(campaign.id);
+
+      return hasSteps && !hasIncompleteSteps && invalidFields.length === 0;
     },
     campaignGroups: () => true,
     campaignVariables: (campaign) =>
