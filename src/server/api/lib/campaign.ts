@@ -730,6 +730,7 @@ WHERE campaign_id = ?`,
   const campaignVariables = await r
     .knex("campaign_variable")
     .where({ campaign_id: campaignId })
+    .whereNull("deleted_at")
     .pluck("name");
   const validFields = allScriptFields(customFields).concat(campaignVariables);
 

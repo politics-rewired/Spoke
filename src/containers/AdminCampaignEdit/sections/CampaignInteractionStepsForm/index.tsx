@@ -21,6 +21,7 @@ import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
 import { scriptToTokens } from "../../../../lib/scripts";
 import { MutationMap, QueryMap } from "../../../../network/types";
+import theme from "../../../../styles/theme";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
@@ -272,6 +273,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       campaign: {
         isTemplate,
         customFields,
+        invalidScriptFields,
         campaignVariables: { edges: campaignVariableEdges },
         externalSystem
       } = {
@@ -333,6 +335,25 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     : tree;
   const campaignId = props.data?.campaign?.id;
 
+  const renderInvalidScriptFields = () => {
+    if (invalidScriptFields.length === 0) {
+      return null;
+    }
+    return (
+      <div>
+        <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
+          Warning: Variable values are not all present for this script. You can
+          continue working on your script but you cannot start this campaign.
+          The following variables do not have values and will not populate in
+          your script:
+        </p>
+        <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
+          {invalidScriptFields.map((field: string) => `{${field}}`).join(", ")}
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div onFocus={updateClipboardHasBlock} onClick={updateClipboardHasBlock}>
       <Dialog
@@ -361,6 +382,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       <Box m={2}>
         <ScriptPreviewButton campaignId={campaignId} />
       </Box>
+      {renderInvalidScriptFields()}
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}
@@ -437,6 +459,7 @@ const mutations: MutationMap<FullComponentProps> = {
           interactionSteps {
             ...EditInteractionStep
           }
+          invalidScriptFields
           isStarted
           isApproved
           customFields

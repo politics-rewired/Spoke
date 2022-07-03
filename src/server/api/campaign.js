@@ -524,6 +524,7 @@ export const resolvers = {
 
       return getInteractionSteps({ campaignId: campaign.id });
     },
+    invalidScriptFields: async (campaign) => invalidScriptFields(campaign.id),
     cannedResponses: async (campaign, { userId: userIdArg }) => {
       const getCannedResponses = memoizer.memoize(
         ({ campaignId, userId }) =>

@@ -34,6 +34,7 @@ export const GET_CAMPAIGN_INTERACTIONS = gql`
         ...EditInteractionStep
       }
       customFields
+      invalidScriptFields
       campaignVariables {
         edges {
           node {

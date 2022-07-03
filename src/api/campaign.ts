@@ -110,6 +110,7 @@ export interface Campaign {
   syncReadiness: ExternalSyncReadinessState;
   pendingJobs: JobRequest[];
   interactionSteps: InteractionStep[];
+  invalidScriptFields: string[];
   customFields: string[];
   hasUnassignedContacts?: boolean | null;
   primaryColor?: string | null;
@@ -229,6 +230,7 @@ export const schema = `
     texters: [User]
     assignments(assignmentsFilter: AssignmentsFilter): [Assignment]
     interactionSteps: [InteractionStep]
+    invalidScriptFields: [String!]
     contacts: [CampaignContact]
     contactsCount: Int
     hasUnassignedContacts: Boolean
