@@ -123,7 +123,7 @@ export const ScriptOptionBlock: React.FC<ScriptOptionBlockProps> = (props) => {
       )}
       {invalidCampaignVariablesUsed.length > 0 && (
         <div className={classes.errorLabel}>
-          Script cannot use a campaign variable without a variable:{" "}
+          Script cannot use a campaign variable without a value:{" "}
           {invalidCampaignVariablesUsed.join(", ")}
         </div>
       )}
