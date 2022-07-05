@@ -22,9 +22,14 @@ export interface CampaignStatProps {
 }
 
 export const CampaignStat: React.FC<CampaignStatProps> = (props) => {
-  // shrink text if large number
+  // shrink text if large top line number
+  const maxLargeNumberLength = 4;
+  const count = props.count && props.count.toString();
   const heading =
-    !Number.isNaN(props.count) && props.count >= 1e4 ? "h4" : "h3";
+    count && !count.includes("%") && count.length > maxLargeNumberLength
+      ? "h4"
+      : "h3";
+
   const countStyle = props.highlight
     ? css(inlineStyles.cardContent, inlineStyles.colorRed)
     : css(inlineStyles.cardContent);
