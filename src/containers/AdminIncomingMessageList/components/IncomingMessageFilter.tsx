@@ -27,7 +27,7 @@ import {
 } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import { isEmpty } from "lodash";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
 import { nameComponents } from "../../../lib/attributes";
@@ -80,7 +80,7 @@ export const TEXTER_FILTERS: Texter[] = [
   { id: ALL_TEXTERS, displayName: "All Texters" }
 ];
 
-const IDLE_KEY_TIME = 500;
+const DEBOUNCE_TIME = 500;
 
 type Campaign = {
   id: number;
@@ -124,27 +124,45 @@ interface IncomingMessageFilterProps {
 
 const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [firstName, setFirstName] = useState<string | undefined>(
-    props.contactNameFilter?.firstName ?? ""
+    props.contactNameFilter?.firstName ?? undefined
   );
   const [lastName, setLastName] = useState<string | undefined>(
-    props.contactNameFilter?.lastName ?? ""
+    props.contactNameFilter?.lastName ?? undefined
   );
   const [cellNumber, setCellNumber] = useState<string | undefined>(
-    props.contactNameFilter?.cellNumber ?? ""
+    props.contactNameFilter?.cellNumber ?? undefined
   );
   const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
   const [showSection, setShowSection] = useState<boolean>(true);
-  const [campaignSearchInput, setCampaignSearchInput] = useState<string>("");
-  const [campaignSearchInputDebounced] = useDebounce(campaignSearchInput, 500);
-  const [texterSearchInput, setTexterSearchInput] = useState<string>("");
-  const [texterSearchInputDebounced] = useDebounce(texterSearchInput, 500);
   const [campaignOption, setCampaignOption] = useState<
     Campaign | undefined | null
   >(CAMPAIGN_TYPE_FILTERS[0]);
   const [texterOption, setTexterOption] = useState<Texter | undefined | null>(
     TEXTER_FILTERS[1]
   );
-  const timeoutId = useRef<NodeJS.Timeout | null>(null);
+
+  const [campaignSearchInput, setCampaignSearchInput] = useState<string>();
+  const [campaignSearchInputDebounced] = useDebounce(
+    campaignSearchInput,
+    DEBOUNCE_TIME
+  );
+  const [texterSearchInput, setTexterSearchInput] = useState<string>();
+  const [texterSearchInputDebounced] = useDebounce(
+    texterSearchInput,
+    DEBOUNCE_TIME
+  );
+
+  const [firstNameDebounced] = useDebounce(firstName, DEBOUNCE_TIME);
+  const [lastNameDebounced] = useDebounce(lastName, DEBOUNCE_TIME);
+  const [cellNumberDebounced] = useDebounce(cellNumber, DEBOUNCE_TIME);
+
+  useEffect(() => {
+    props.searchByContactName({
+      firstName: firstNameDebounced,
+      lastName: lastNameDebounced,
+      cellNumber: cellNumberDebounced
+    });
+  }, [firstNameDebounced, lastNameDebounced, cellNumberDebounced]);
 
   const { data: getTags } = useGetTagsQuery({
     variables: { organizationId: props.organizationId }
@@ -274,11 +292,6 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     props.onTexterChanged(newTexterId as number);
   };
 
-  const searchByNewContactName = () => {
-    props.searchByContactName({ firstName, lastName, cellNumber });
-    timeoutId.current = null;
-  };
-
   const onContactNameChanged = (
     event: React.ChangeEvent<{ value: string }>
   ) => {
@@ -288,17 +301,10 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
       lastName: newLastName,
       cellNumber: newCellNumber
     } = nameComponents(name);
+
     setFirstName(newFirstName);
     setLastName(newLastName);
     setCellNumber(newCellNumber);
-
-    if (timeoutId.current) clearTimeout(timeoutId.current as NodeJS.Timeout);
-    const submitNameUpdateTimeout = setTimeout(
-      searchByNewContactName,
-      IDLE_KEY_TIME
-    );
-
-    timeoutId.current = submitNameUpdateTimeout;
   };
 
   const handleExpandChange = () => {
@@ -384,7 +390,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     );
   };
 
-  const contactFilter = useMemo(() => {
+  const contactFilterDefault = useMemo(() => {
     let contactName = firstName ?? "";
     if (lastName) {
       contactName = contactName.concat(" ", lastName);
@@ -489,7 +495,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
           <TextField
             className={css(styles.fullWidth)}
             onChange={onContactNameChanged}
-            value={contactFilter}
+            defaultValue={contactFilterDefault}
             fullWidth
             label="Filter contacts"
             helperText="Filter by Contact Name or Number"
