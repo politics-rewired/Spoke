@@ -27,7 +27,7 @@ import {
 } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import { isEmpty } from "lodash";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 
 import { nameComponents } from "../../../lib/attributes";
@@ -384,13 +384,17 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     );
   };
 
-  let contactFilterDefault = firstName ?? "";
-  if (lastName) {
-    contactFilterDefault = contactFilterDefault.concat(" ", lastName);
-  }
-  if (cellNumber) {
-    contactFilterDefault = contactFilterDefault.concat(" ", cellNumber);
-  }
+  const contactFilter = useMemo(() => {
+    let contactName = firstName ?? "";
+    if (lastName) {
+      contactName = contactName.concat(" ", lastName);
+    }
+    if (cellNumber) {
+      contactName = contactName.concat(" ", cellNumber);
+    }
+
+    return contactName;
+  }, [firstName, lastName, cellNumber]);
 
   return (
     <Card>
@@ -443,7 +447,6 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             </Grid>
             <Grid item xs={4}>
               <Autocomplete
-                defaultValue={campaignOption}
                 value={campaignOption}
                 options={campaignOptions}
                 getOptionLabel={(campaign) => campaign.title}
@@ -464,7 +467,6 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             <Grid item xs={4}>
               {props.isTexterFilterable && (
                 <Autocomplete
-                  defaultValue={texterOption}
                   value={texterOption}
                   options={texterOptions}
                   getOptionLabel={(texter) => texter.displayName}
@@ -487,7 +489,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
           <TextField
             className={css(styles.fullWidth)}
             onChange={onContactNameChanged}
-            defaultValue={contactFilterDefault}
+            value={contactFilter}
             fullWidth
             label="Filter contacts"
             helperText="Filter by Contact Name or Number"
