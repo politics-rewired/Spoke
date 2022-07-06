@@ -7,7 +7,7 @@ import {
   GridSelectionModel
 } from "@mui/x-data-grid";
 import { useGetConversationsForMessageReviewQuery } from "@spoke/spoke-codegen";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import LoadingIndicator from "../../../../components/LoadingIndicator";
 import { MESSAGE_STATUSES } from "../IncomingMessageFilter";
@@ -266,8 +266,10 @@ const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
     next: allConversations[activeConversationIndex + 1] !== undefined
   };
 
+  const height = useMemo(() => 100 + tableData.length * 54, [tableData]);
+
   return (
-    <div style={{ height: 650, width: "100%", background: "#fff" }}>
+    <div style={{ height, width: "100%", background: "#fff" }}>
       <DataGrid
         rows={tableData}
         columns={columns}
