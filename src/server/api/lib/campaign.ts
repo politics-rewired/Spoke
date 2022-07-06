@@ -413,6 +413,10 @@ export const editCampaign = async (
     campaign.externalListId
   ) {
     await r.knex("campaign_contact").where({ campaign_id: id }).del();
+    await r
+      .knex("campaign")
+      .where({ id })
+      .update({ landlines_filtered: false });
     await r.knex.raw(
       `select * from public.queue_load_list_into_campaign(?, ?)`,
       [id, parseInt(campaign.externalListId, 10)]
@@ -437,10 +441,12 @@ export const editCampaign = async (
     await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
 
     // Uploading contacts from a CSV invalidates external system configuration
+    // and invalidates filtered landlines
     await r
       .knex("campaign")
       .update({
-        external_system_id: null
+        external_system_id: null,
+        landlines_filtered: false
       })
       .where({ id });
 
@@ -487,6 +493,13 @@ export const editCampaign = async (
     datawarehouse &&
     user.is_superadmin
   ) {
+    await r
+      .knex("campaign")
+      .update({
+        external_system_id: null,
+        landlines_filtered: false
+      })
+      .where({ id });
     await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
     const [job] = await r
       .knex("job_request")
