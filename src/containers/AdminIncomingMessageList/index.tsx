@@ -407,6 +407,7 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
         contactNameFilter={contactNameFilter}
         campaignId={campaignsFilter.campaignId}
         texterId={assignmentsFilter.texterId}
+        messageStatusFilter={contactsFilter.messageStatus}
         onActiveCampaignsToggled={handleActiveCampaignsToggled}
         onArchivedCampaignsToggled={handleArchivedCampaignsToggled}
         includeActiveCampaigns={includeActiveCampaigns}

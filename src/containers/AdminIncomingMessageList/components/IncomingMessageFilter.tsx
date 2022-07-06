@@ -109,6 +109,7 @@ interface IncomingMessageFilterProps {
   organizationId: string;
   campaignId: number | null;
   texterId: number | null;
+  messageStatusFilter: string | null;
   contactNameFilter: ContactNameFilter | null | undefined;
   onCampaignChanged(campaignId: number): void;
   onTagsChanged(event: React.ChangeEvent<{ value: any }>): void;
@@ -132,7 +133,6 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [cellNumber, setCellNumber] = useState<string | undefined>(
     props.contactNameFilter?.cellNumber ?? undefined
   );
-  const [messageFilter, setMessageFilter] = useState<Array<any>>([]);
   const [showSection, setShowSection] = useState<boolean>(true);
   const [campaignOption, setCampaignOption] = useState<
     Campaign | undefined | null
@@ -155,6 +155,14 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [firstNameDebounced] = useDebounce(firstName, DEBOUNCE_TIME);
   const [lastNameDebounced] = useDebounce(lastName, DEBOUNCE_TIME);
   const [cellNumberDebounced] = useDebounce(cellNumber, DEBOUNCE_TIME);
+
+  const defaultMessageFilter = props.messageStatusFilter
+    ? props.messageStatusFilter.split(",")
+    : [];
+
+  const [messageFilter, setMessageFilter] = useState<Array<any>>(
+    defaultMessageFilter
+  );
 
   useEffect(() => {
     props.searchByContactName({
