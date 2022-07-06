@@ -132,21 +132,21 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const [cellNumber, setCellNumber] = useState<string | undefined>(
     props.contactNameFilter?.cellNumber ?? undefined
   );
-  const [messageFilter, setMessageFilter] = useState<Array<any>>(["all"]);
+  const [messageFilter, setMessageFilter] = useState<Array<any>>([]);
   const [showSection, setShowSection] = useState<boolean>(true);
   const [campaignOption, setCampaignOption] = useState<
     Campaign | undefined | null
-  >(CAMPAIGN_TYPE_FILTERS[0]);
+  >(null);
   const [texterOption, setTexterOption] = useState<Texter | undefined | null>(
-    TEXTER_FILTERS[1]
+    null
   );
 
-  const [campaignSearchInput, setCampaignSearchInput] = useState<string>();
+  const [campaignSearchInput, setCampaignSearchInput] = useState<string>("");
   const [campaignSearchInputDebounced] = useDebounce(
     campaignSearchInput,
     DEBOUNCE_TIME
   );
-  const [texterSearchInput, setTexterSearchInput] = useState<string>();
+  const [texterSearchInput, setTexterSearchInput] = useState<string>("");
   const [texterSearchInputDebounced] = useDebounce(
     texterSearchInput,
     DEBOUNCE_TIME
@@ -460,6 +460,9 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
                 onInputChange={(_event, newValue) => {
                   setCampaignSearchInput(newValue);
                 }}
+                getOptionSelected={(option: Campaign, value: Campaign) =>
+                  option?.id === value?.id
+                }
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -480,6 +483,9 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
                   onInputChange={(_event, newValue) => {
                     setTexterSearchInput(newValue);
                   }}
+                  getOptionSelected={(option: Texter, value: Texter) =>
+                    option?.id === value?.id
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
