@@ -612,11 +612,6 @@ export async function loadContactsFromDataWarehouse(job) {
     .where("campaign_id", job.campaign_id)
     .delete();
 
-  await r
-    .knex("campaign")
-    .where({ id: campaign.id })
-    .update({ landlines_filtered: false });
-
   await loadContactsFromDataWarehouseFragment({
     jobId: job.id,
     query: sqlQuery,

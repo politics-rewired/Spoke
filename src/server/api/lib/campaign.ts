@@ -498,6 +498,13 @@ export const editCampaign = async (
     datawarehouse &&
     user.is_superadmin
   ) {
+    await r
+      .knex("campaign")
+      .update({
+        external_system_id: null,
+        landlines_filtered: false
+      })
+      .where({ id });
     await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
     const [job] = await r
       .knex("job_request")
