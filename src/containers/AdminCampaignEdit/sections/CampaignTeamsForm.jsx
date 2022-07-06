@@ -48,7 +48,11 @@ class CampaignTeamsForm extends React.Component {
     const teams = this.props.formValues.teams.filter(
       (team) => team.id !== deleteTeamId
     );
-    this.props.onChange({ teams });
+    if (teams.length === 0) {
+      this.props.onChange({ teams, isAssignmentLimitedToTeams: false });
+    } else {
+      this.props.onChange({ teams });
+    }
   };
 
   render() {
@@ -59,6 +63,8 @@ class CampaignTeamsForm extends React.Component {
       orgTeams,
       onChange
     } = this.props;
+
+    const teamsAdded = formValues.teams.length > 0;
 
     return (
       <div>
@@ -84,11 +90,17 @@ class CampaignTeamsForm extends React.Component {
 
           <SpokeFormField
             name="isAssignmentLimitedToTeams"
+            disabled={!teamsAdded}
             type={Toggle}
             toggled={formValues.isAssignmentLimitedToTeams}
             label="Restrict assignment solely to members of these teams?"
             onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
           />
+          {teamsAdded ? null : (
+            <p style={{ fontSize: "0.9em" }}>
+              Select teams before being able to restrict assignments to teams.
+            </p>
+          )}
         </GSForm>
         <Button
           variant="contained"
