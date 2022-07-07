@@ -1,8 +1,10 @@
 /* eslint-disable import/prefer-default-export */
 
 export const catchError = (response: any) => {
-  if (response.errors) {
-    throw new Error(response.errors);
+  const { errors } = response;
+  if (errors) {
+    const errorMessages = errors.map((error) => error.message).join(", ");
+    throw new Error(errorMessages);
   }
   return response;
 };
