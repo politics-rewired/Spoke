@@ -1,4 +1,5 @@
 import Button from "@material-ui/core/Button";
+import Tooltip from "@material-ui/core/Tooltip";
 import differenceBy from "lodash/differenceBy";
 import ChipInput from "material-ui-chip-input";
 import Toggle from "material-ui/Toggle";
@@ -88,19 +89,21 @@ class CampaignTeamsForm extends React.Component {
 
           <br />
 
-          <SpokeFormField
-            name="isAssignmentLimitedToTeams"
-            disabled={!teamsAdded}
-            type={Toggle}
-            toggled={formValues.isAssignmentLimitedToTeams}
-            label="Restrict assignment solely to members of these teams?"
-            onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
-          />
-          {teamsAdded ? null : (
-            <p style={{ fontSize: "0.9em" }}>
-              Select teams before being able to restrict assignments to teams.
-            </p>
-          )}
+          <Tooltip
+            title="Select a team in order to restrict assignments solely to members of those teams"
+            placement="top-start"
+          >
+            <span>
+              <SpokeFormField
+                name="isAssignmentLimitedToTeams"
+                disabled={!teamsAdded}
+                type={Toggle}
+                toggled={formValues.isAssignmentLimitedToTeams}
+                label="Restrict assignment solely to members of these teams?"
+                onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
+              />
+            </span>
+          </Tooltip>
         </GSForm>
         <Button
           variant="contained"
