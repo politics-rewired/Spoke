@@ -153,8 +153,10 @@ class ApplyTagDialog extends Component {
             )}
             {hasNonAssignableTag ? (
               <p style={{ color: theme.colors.red }}>
-                You've selected a tag that will cause the conversation to become
-                unassigned, and you will not be able to send a follow up.
+                You've selected a tag that will unassign this conversation from
+                you and reassign it to the appropriate team. You will not be
+                able to apply additional tags or send a follow up message. Apply
+                this tag as your last step!
               </p>
             ) : null}
             <TagSelector
