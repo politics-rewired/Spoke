@@ -1,4 +1,5 @@
 import Button from "@material-ui/core/Button";
+import Tooltip from "@material-ui/core/Tooltip";
 import differenceBy from "lodash/differenceBy";
 import ChipInput from "material-ui-chip-input";
 import Toggle from "material-ui/Toggle";
@@ -48,7 +49,11 @@ class CampaignTeamsForm extends React.Component {
     const teams = this.props.formValues.teams.filter(
       (team) => team.id !== deleteTeamId
     );
-    this.props.onChange({ teams });
+    if (teams.length === 0) {
+      this.props.onChange({ teams, isAssignmentLimitedToTeams: false });
+    } else {
+      this.props.onChange({ teams });
+    }
   };
 
   render() {
@@ -59,6 +64,8 @@ class CampaignTeamsForm extends React.Component {
       orgTeams,
       onChange
     } = this.props;
+
+    const teamsAdded = formValues.teams.length > 0;
 
     return (
       <div>
@@ -82,13 +89,24 @@ class CampaignTeamsForm extends React.Component {
 
           <br />
 
-          <SpokeFormField
-            name="isAssignmentLimitedToTeams"
-            type={Toggle}
-            toggled={formValues.isAssignmentLimitedToTeams}
-            label="Restrict assignment solely to members of these teams?"
-            onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
-          />
+          <Tooltip
+            title="Select a team in order to restrict assignments solely to members of those teams"
+            disableFocusListener={teamsAdded}
+            disableHoverListener={teamsAdded}
+            disableTouchListener={teamsAdded}
+            placement="top-start"
+          >
+            <span>
+              <SpokeFormField
+                name="isAssignmentLimitedToTeams"
+                disabled={!teamsAdded}
+                type={Toggle}
+                toggled={formValues.isAssignmentLimitedToTeams}
+                label="Restrict assignment solely to members of these teams?"
+                onToggle={this.onIsAssignmentLimitedToTeamsDidToggle}
+              />
+            </span>
+          </Tooltip>
         </GSForm>
         <Button
           variant="contained"
