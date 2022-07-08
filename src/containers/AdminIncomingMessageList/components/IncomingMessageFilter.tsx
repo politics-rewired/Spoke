@@ -26,7 +26,6 @@ import {
   useSearchUsersQuery
 } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
-import { isEmpty } from "lodash";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
@@ -72,18 +71,18 @@ export const MESSAGE_STATUSES: Record<string, MessageStatus> = {
 };
 
 export const CAMPAIGN_TYPE_FILTERS: Campaign[] = [
-  { id: -1, title: "All Campaigns" }
+  { id: "-1", title: "All Campaigns" }
 ];
 
 export const TEXTER_FILTERS: Texter[] = [
-  { id: UNASSIGNED_TEXTER, displayName: "Unassigned" },
-  { id: ALL_TEXTERS, displayName: "All Texters" }
+  { id: UNASSIGNED_TEXTER.toString(), displayName: "Unassigned" },
+  { id: ALL_TEXTERS.toString(), displayName: "All Texters" }
 ];
 
 const DEBOUNCE_TIME = 500;
 
 type Campaign = {
-  id: number;
+  id: string;
   title: string;
 };
 
@@ -93,7 +92,7 @@ type Tag = {
 };
 
 type Texter = {
-  id: number;
+  id: string;
   displayName: string;
 };
 
@@ -134,11 +133,11 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     props.contactNameFilter?.cellNumber ?? undefined
   );
   const [showSection, setShowSection] = useState<boolean>(true);
-  const [campaignOption, setCampaignOption] = useState<
-    Campaign | undefined | null
-  >(null);
-  const [texterOption, setTexterOption] = useState<Texter | undefined | null>(
-    null
+  const [campaignId, setCampaignId] = useState<string | undefined | null>(
+    props?.campaignId?.toString() ?? null
+  );
+  const [texterId, setTexterId] = useState<string | undefined | null>(
+    props?.texterId?.toString() ?? null
   );
 
   const [campaignSearchInput, setCampaignSearchInput] = useState<string>("");
@@ -213,7 +212,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     return CAMPAIGN_TYPE_FILTERS.concat(
       campaigns.map((campaign) => {
         const title = `${campaign.id}: ${campaign.title}`;
-        return { id: parseInt(campaign.id, 10), title };
+        return { id: campaign.id, title };
       })
     );
   };
@@ -221,7 +220,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
   const formatTexters = (texters: Array<any>) => {
     const formattedTexters: Texter[] = texters.map((texter) => {
       return {
-        id: parseInt(texter.node.user.id, 10),
+        id: texter.node.user.id,
         displayName: texter.node.user.displayName
       };
     });
@@ -229,26 +228,26 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     return TEXTER_FILTERS.concat(formattedTexters);
   };
 
-  const campaignOptions: Campaign[] = formatCampaigns(
+  const formattedCampaigns = formatCampaigns(
     getCampaigns?.campaigns?.campaigns ?? []
   );
-  const tagOptions: Tag[] = formatTags(getTags?.organization?.tagList ?? []);
-  const texterOptions: Texter[] = formatTexters(
+  const formattedTexters = formatTexters(
     getTexters?.organization?.memberships?.edges ?? []
   );
 
-  useEffect(() => {
-    if (!isEmpty(campaignOptions) && props.campaignId) {
-      setCampaignOption(
-        campaignOptions.find((campaign) => campaign.id === props.campaignId)
-      );
-    }
-    if (!isEmpty(texterOptions) && props.texterId) {
-      setTexterOption(
-        texterOptions.find((texter) => texter.id === props.texterId)
-      );
-    }
-  }, [getCampaigns, getTexters]);
+  const campaignsMap = useMemo(
+    () => new Map(formattedCampaigns.map((c) => [c.id, c.title])),
+    [formattedCampaigns]
+  );
+
+  const textersMap = useMemo(
+    () => new Map(formattedTexters.map((t) => [t.id, t.displayName])),
+    [formattedTexters]
+  );
+
+  const campaignOptions: string[] = formattedCampaigns.map((op) => op.id);
+  const tagOptions: Tag[] = formatTags(getTags?.organization?.tagList ?? []);
+  const texterOptions: string[] = formattedTexters.map((op) => op.id);
 
   const onMessageFilterSelectChanged = (
     event: React.ChangeEvent<{ value: unknown }>,
@@ -272,31 +271,31 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
 
   const onCampaignSelected = (
     _event: React.ChangeEvent<any>,
-    value: Campaign | null,
+    value: string | null,
     _reason: AutocompleteChangeReason
   ) => {
     let newCampaignId;
     if (value === null) {
       newCampaignId = -1;
     } else {
-      newCampaignId = value.id;
+      newCampaignId = value;
     }
-    setCampaignOption(value);
+    setCampaignId(value);
     props.onCampaignChanged(newCampaignId as number);
   };
 
   const onTexterSelected = (
     _event: React.ChangeEvent<any>,
-    value: Texter | null,
+    value: string | null,
     _reason: AutocompleteChangeReason
   ) => {
     let newTexterId;
     if (value === null) {
       newTexterId = -1;
     } else {
-      newTexterId = value.id;
+      newTexterId = value;
     }
-    setTexterOption(value);
+    setTexterId(value);
     props.onTexterChanged(newTexterId as number);
   };
 
@@ -461,16 +460,13 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             </Grid>
             <Grid item xs={4}>
               <Autocomplete
-                value={campaignOption}
+                value={campaignId}
                 options={campaignOptions}
-                getOptionLabel={(campaign) => campaign.title}
                 inputValue={campaignSearchInput}
+                getOptionLabel={(option) => campaignsMap.get(option)}
                 onInputChange={(_event, newValue) => {
                   setCampaignSearchInput(newValue);
                 }}
-                getOptionSelected={(option: Campaign, value: Campaign) =>
-                  option?.id === value?.id
-                }
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -484,16 +480,13 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
             <Grid item xs={4}>
               {props.isTexterFilterable && (
                 <Autocomplete
-                  value={texterOption}
+                  value={texterId}
                   options={texterOptions}
-                  getOptionLabel={(texter) => texter.displayName}
                   inputValue={texterSearchInput}
+                  getOptionLabel={(option) => textersMap.get(option)}
                   onInputChange={(_event, newValue) => {
                     setTexterSearchInput(newValue);
                   }}
-                  getOptionSelected={(option: Texter, value: Texter) =>
-                    option?.id === value?.id
-                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
