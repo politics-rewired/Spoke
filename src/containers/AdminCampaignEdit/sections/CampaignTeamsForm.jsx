@@ -91,6 +91,9 @@ class CampaignTeamsForm extends React.Component {
 
           <Tooltip
             title="Select a team in order to restrict assignments solely to members of those teams"
+            disableFocusListener={teamsAdded}
+            disableHoverListener={teamsAdded}
+            disableTouchListener={teamsAdded}
             placement="top-start"
           >
             <span>
