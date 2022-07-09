@@ -49,20 +49,6 @@ const descriptions: Record<string, string> = {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    ...theme.layouts.multiColumn.container,
-    marginBottom: 40,
-    justifyContent: "space-around",
-    flexWrap: "wrap"
-  },
-  flexColumn: {
-    flex: 1,
-    textAlign: "right",
-    display: "flex"
-  },
-  spacer: {
-    marginRight: 20
-  },
   secondaryHeader: {
     ...theme.text.secondaryHeader
   }
