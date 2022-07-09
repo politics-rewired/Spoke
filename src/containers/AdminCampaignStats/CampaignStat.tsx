@@ -1,5 +1,8 @@
-import { Card, CardContent, CardHeader } from "@material-ui/core";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import { css, StyleSheet } from "aphrodite";
+import isNil from "lodash/isNil";
 import React from "react";
 
 import LoadingIndicator from "../../components/LoadingIndicator";
@@ -42,7 +45,7 @@ export const CampaignStat: React.FC<CampaignStatProps> = (props) => {
           {props.error}
         </CardContent>
       )}
-      {props.count !== undefined && (
+      {!isNil(props.count) && (
         <CardHeader
           title={props.count}
           titleTypographyProps={{ variant: heading }}
