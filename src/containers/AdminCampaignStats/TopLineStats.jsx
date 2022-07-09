@@ -210,7 +210,12 @@ const queries = {
           }
         }
       }
-    `
+    `,
+    options: (ownProps) => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+    })
   }
 };
 
