@@ -262,15 +262,17 @@ class AssignmentTexter extends React.Component {
         key="previous"
         onClick={this.handleNavigatePrevious}
         disabled={!this.hasPrevious()}
+        style={{ fontSize: "0.9em" }}
       >
-        <NavigateBeforeIcon />
+        <NavigateBeforeIcon /> PREV
       </IconButton>,
       <IconButton
         key="next"
         onClick={this.handleNavigateNext}
         disabled={!this.hasNext()}
+        style={{ fontSize: "0.9em" }}
       >
-        <NavigateNextIcon />
+        NEXT <NavigateNextIcon />
       </IconButton>
     ];
   };

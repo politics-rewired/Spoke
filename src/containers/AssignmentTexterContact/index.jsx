@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unused-state */
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
-import { blueGrey, deepOrange, grey } from "@material-ui/core/colors";
+import { blue, blueGrey, deepOrange, grey } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import LocalOfferIcon from "@material-ui/icons/LocalOffer";
@@ -597,7 +597,7 @@ export class AssignmentTexterContact extends React.Component {
             variant="contained"
             onClick={this.handleClickCloseContactButton}
           >
-            Skip Reply
+            Close
           </Button>
         </Box>
       );
@@ -683,9 +683,10 @@ export class AssignmentTexterContact extends React.Component {
             <Button
               variant="contained"
               onClick={this.handleOpenPopover}
+              style={{ backgroundColor: blue[100] }}
               disabled={!isCannedResponseEnabled}
             >
-              Canned replies
+              Canned Responses
             </Button>
           </Box>
           {this.renderNeedsResponseToggleButton(contact)}
@@ -724,11 +725,11 @@ export class AssignmentTexterContact extends React.Component {
                   disabled={this.state.disabled}
                 />
               </Box>
-              {this.renderNeedsResponseToggleButton(contact)}
               <Box m={2}>
                 <Button
                   variant="contained"
                   onClick={this.handleOpenPopover}
+                  style={{ backgroundColor: blue[100] }}
                   disabled={!isCannedResponseEnabled}
                 >
                   Canned responses
@@ -755,6 +756,7 @@ export class AssignmentTexterContact extends React.Component {
                   Manage Tags
                 </Button>
               </Box>
+              {this.renderNeedsResponseToggleButton(contact)}
               <div style={{ float: "right", marginLeft: 20 }}>
                 {navigationToolbarChildren}
               </div>
