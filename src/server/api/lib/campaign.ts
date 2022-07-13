@@ -412,7 +412,8 @@ export const editCampaign = async (
     Object.prototype.hasOwnProperty.call(campaign, "externalListId") &&
     campaign.externalListId
   ) {
-    await r.knex("campaign_contact").where({ campaign_id: id }).del();
+    await r.knex("campaign_contact").where({ campaign_id: id }).delete();
+    await r.knex("filtered_contact").where({ campaign_id: id }).delete();
     await r
       .knex("campaign")
       .where({ id })

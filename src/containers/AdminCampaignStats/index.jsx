@@ -18,6 +18,7 @@ import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
+import CampaignExportModal from "./CampaignExportModal";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import DeliverabilityStats from "./DeliverabilityStats";
 import { GET_CAMPAIGN, GET_ORGANIZATION_DATA } from "./queries";
@@ -73,6 +74,7 @@ const styles = StyleSheet.create({
 class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
+    exportDialogOpen: false,
     exportVanOpen: false,
     syncVanOpen: false,
     disableExportButton: false,
@@ -92,10 +94,24 @@ class AdminCampaignStats extends React.Component {
 
   handleOnClickExport = async () => {
     this.setState({
+      exportDialogOpen: true,
+      disableExportButton: true
+    });
+  };
+
+  handleCloseCampaignExport = async () => {
+    this.setState({
+      exportDialogOpen: false,
+      disableExportButton: false
+    });
+  };
+
+  handleCompleteCampaignExport = async () => {
+    this.setState({
+      exportDialogOpen: false,
       exportMessageOpen: true,
       disableExportButton: true
     });
-    await this.props.mutations.exportCampaign();
   };
 
   handleOnClickVanExport = () => this.setState({ exportVanOpen: true });
@@ -355,6 +371,12 @@ class AdminCampaignStats extends React.Component {
               copyCampaignError: undefined
             });
           }}
+        />
+        <CampaignExportModal
+          campaignId={campaignId}
+          open={this.state.exportDialogOpen}
+          onClose={this.handleCloseCampaignExport}
+          onComplete={this.handleCompleteCampaignExport}
         />
         <VanExportModal
           campaignId={campaignId}

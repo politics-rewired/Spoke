@@ -152,7 +152,8 @@ export async function uploadContacts(job) {
 
   const orgFeatures = JSON.parse(organization.features || "{}");
 
-  await r.knex("campaign_contact").where({ campaign_id: campaignId }).del();
+  await r.knex("campaign_contact").where({ campaign_id: campaignId }).delete();
+  await r.knex("filtered_contact").where({ campaign_id: campaignId }).delete();
 
   let jobPayload = await gunzip(Buffer.from(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
@@ -217,6 +218,48 @@ export async function uploadContacts(job) {
     }
 
     try {
+      await trx.raw(
+        `insert into filtered_contact (
+           campaign_id,
+           assignment_id,
+           external_id,
+           first_name,
+           last_name,
+           cell,
+           zip,
+           custom_fields,
+           created_at,
+           updated_at,
+           message_status,
+           is_opted_out,
+           timezone,
+           archived,
+           filtered_reason
+         )
+         select
+           campaign_id,
+           assignment_id,
+           external_id,
+           first_name,
+           last_name,
+           cell,
+           zip,
+           custom_fields,
+           created_at,
+           updated_at,
+           message_status,
+           is_opted_out,
+           timezone,
+           archived,
+           'OPTEDOUT'
+         from campaign_contact
+         where campaign_id = ? and cell in (${getOptOutSubQuery(
+           campaign.organization_id
+         ).toString()})
+`,
+        [campaignId]
+      );
+
       const deleteOptOutCells = await trx("campaign_contact")
         .whereIn("cell", getOptOutSubQuery(campaign.organization_id))
         .where("campaign_id", campaignId)
@@ -609,6 +652,11 @@ export async function loadContactsFromDataWarehouse(job) {
 
   await r
     .knex("campaign_contact")
+    .where("campaign_id", job.campaign_id)
+    .delete();
+
+  await r
+    .knex("filtered_contact")
     .where("campaign_id", job.campaign_id)
     .delete();
 

@@ -75,8 +75,49 @@ export const filterLandlines: ProgressTask<ProgressJobPayload> = async (
 
   let landlinesFilteredOut = 0;
 
-  const deleteNumbers = async (numbers: { phoneNumber: string }[]) => {
+  const deleteNumbers = (reason: string) => async (
+    numbers: { phoneNumber: string }[]
+  ) => {
     landlinesFilteredOut += numbers.length;
+    await helpers.query(
+      `insert into filtered_contact (
+         campaign_id,
+         assignment_id,
+         external_id,
+         first_name,
+         last_name,
+         cell,
+         zip,
+         custom_fields,
+         created_at,
+         updated_at,
+         message_status,
+         is_opted_out,
+         timezone,
+         archived,
+         filtered_reason
+       )
+       select
+         campaign_id,
+         assignment_id,
+         external_id,
+         first_name,
+         last_name,
+         cell,
+         zip,
+         custom_fields,
+         created_at,
+         updated_at,
+         message_status,
+         is_opted_out,
+         timezone,
+         archived,
+         $3
+       from campaign_contact
+       where campaign_id = $1 and cell = any ($2)
+         `,
+      [campaignId, numbers.map((n) => n.phoneNumber), reason]
+    );
     await helpers.query(
       `
         delete from campaign_contact
@@ -89,15 +130,15 @@ export const filterLandlines: ProgressTask<ProgressJobPayload> = async (
   };
 
   await numbersRequest.landlines.eachPage({
-    onPage: deleteNumbers
+    onPage: deleteNumbers("LANDLINE")
   });
 
   await numbersRequest.invalids.eachPage({
-    onPage: deleteNumbers
+    onPage: deleteNumbers("INVALID")
   });
 
   await numbersRequest.voips.eachPage({
-    onPage: deleteNumbers
+    onPage: deleteNumbers("VOIP")
   });
 
   // Setting result_message marks the job as complete

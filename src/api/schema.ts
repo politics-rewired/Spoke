@@ -188,9 +188,17 @@ const rootSchema = `
     vanIdField: String!
   }
 
+  input ExportForSpokeInput {
+    campaign: Boolean!
+    messages: Boolean!
+    optOuts: Boolean!
+    filteredContacts: Boolean!
+  }
+
   input CampaignExportInput {
     campaignId: String!
     exportType: CampaignExportType!
+    spokeOptions: ExportForSpokeInput
     vanOptions: ExportForVanInput
   }
 
