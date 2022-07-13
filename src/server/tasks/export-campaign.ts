@@ -137,6 +137,7 @@ const processFilteredContactsChunk = async (
 
   const contacts = filteredRows.map((contact) => {
     const contactRow: { [key: string]: any } = {
+      "contact[filtered_reason]": contact.filtered_reason,
       campaignId,
       campaign: campaignTitle,
       "contact[firstName]": contact.first_name,
@@ -146,7 +147,7 @@ const processFilteredContactsChunk = async (
       "contact[city]": contact.city || null,
       "contact[state]": contact.state || null,
       "contact[optOut]": contact.is_opted_out,
-      "contact[messageStatus]": contact.message_status,
+      "contact[messageStatus]": "removed",
       "contact[external_id]": contact.external_id
     };
 
@@ -155,8 +156,6 @@ const processFilteredContactsChunk = async (
     Object.keys(customFields).forEach((fieldName) => {
       contactRow[`contact[${fieldName}]`] = customFields[fieldName];
     });
-
-    contactRow["contact[filtered_reason]"] = contact.filtered_reason;
 
     return contactRow;
   });
