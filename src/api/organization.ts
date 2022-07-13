@@ -112,7 +112,7 @@ export const schema = `
     escalationTagList: [Tag]
     teams: [Team]!
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
-    messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage!
+    messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
     campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
     templateCampaigns(after: Cursor, first: Int): CampaignPage!
   }

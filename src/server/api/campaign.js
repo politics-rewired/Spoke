@@ -39,7 +39,7 @@ export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
     }
 
     if ("campaignTitle" in campaignsFilter) {
-      query = query.whereRaw(`"title" ilike ?`, [
+      query = query.whereRaw(`concat("id", ': ', "title") ilike ?`, [
         `%${campaignsFilter.campaignTitle}%`
       ]);
     }

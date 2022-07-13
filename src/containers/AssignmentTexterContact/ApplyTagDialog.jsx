@@ -8,6 +8,7 @@ import React, { Component } from "react";
 
 import ApplyTagConfirmationDialog from "../../components/ApplyTagConfirmationDialog";
 import TagSelector from "../../components/TagSelector";
+import theme from "../../styles/theme";
 
 const isEscalateTag = (t) => t.title === "Escalated" || t.title === "Escalate";
 const isNonAssignableTagApplied = (appliedTags) =>
@@ -95,10 +96,19 @@ class ApplyTagDialog extends Component {
     const escalateTag = allTags.find(isEscalateTag);
     const tagsWithoutEscalated = allTags.filter((t) => !isEscalateTag(t));
 
-    const shouldAllowUserToMoveOn = isNonAssignableTagApplied(selectedTags);
+    const hasNonAssignableTag = isNonAssignableTagApplied(selectedTags);
 
-    const saveActions = shouldAllowUserToMoveOn
+    const saveActions = hasNonAssignableTag
       ? [
+          <Button
+            key="save-without-message"
+            color="primary"
+            onClick={this.handleApplyTagsAndMoveOn}
+          >
+            Save and Move On Without a Message
+          </Button>
+        ]
+      : [
           <Button
             key="save-with-message"
             color="primary"
@@ -112,11 +122,6 @@ class ApplyTagDialog extends Component {
             onClick={this.handleApplyTagsAndMoveOn}
           >
             Save and Move On Without a Message
-          </Button>
-        ]
-      : [
-          <Button key="save" color="primary" onClick={this.handleApplyTags}>
-            Save
           </Button>
         ];
 
@@ -146,6 +151,14 @@ class ApplyTagDialog extends Component {
                 Escalate Conversation
               </Button>
             )}
+            {hasNonAssignableTag ? (
+              <p style={{ color: theme.colors.red }}>
+                You've selected a tag that will unassign this conversation from
+                you and reassign it to the appropriate team. You will not be
+                able to apply additional tags or send a follow up message. Apply
+                this tag as your last step!
+              </p>
+            ) : null}
             <TagSelector
               value={selectedTags}
               dataSource={tagsWithoutEscalated}

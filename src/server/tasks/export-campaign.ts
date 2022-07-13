@@ -2,6 +2,7 @@
 import { format } from "fast-csv";
 import _ from "lodash";
 
+import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
 import { getDownloadUrl, getUploadStream } from "../../workers/exports/upload";
 import {
@@ -17,7 +18,7 @@ import { addProgressJob, ProgressTask } from "./utils";
 
 export const TASK_IDENTIFIER = "export-campaign";
 
-const CHUNK_SIZE = 1000;
+const CHUNK_SIZE = config.EXPORT_CAMPAIGN_CHUNK_SIZE;
 
 interface ExportChunk {
   lastContactId: number;

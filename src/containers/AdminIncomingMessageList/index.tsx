@@ -11,6 +11,7 @@ import {
 import omit from "lodash/omit";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { NumberParam, useQueryParam, withDefault } from "use-query-params";
 
 import { ALL_TEXTERS, UNASSIGNED_TEXTER } from "../../lib/constants";
 import IncomingMessageActions from "./components/IncomingMessageActions";
@@ -20,6 +21,13 @@ import {
   getCampaignsFilterForCampaignArchiveStatus,
   getContactsFilterForConversationOptOutStatus
 } from "./filter-utils";
+import {
+  AssignmentsFilterParam,
+  CampaignsFilterParam,
+  ContactNameParam,
+  ContactsFilterParam,
+  TagsFilterParam
+} from "./types";
 
 /* Initialized as objects to later facillitate shallow comparison */
 const initialCampaignsFilter = { isArchived: false };
@@ -63,34 +71,56 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
       }
     : initialContactsFilter;
 
-  const [page, setPage] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [campaignsFilter, setCampaignsFilter] = useState<any>(
-    initialCampaignsFilter
+  // Query Params
+  const [assignmentsFilter, setAssignmentsFilter] = useQueryParam(
+    "assignmentsFilter",
+    withDefault(AssignmentsFilterParam, initialAssignmentsFilter)
   );
-  const [contactsFilter, setContactsFilter] = useState<any>(
-    defaultContactsFilter
+  const [campaignsFilter, setCampaignsFilter] = useQueryParam(
+    "campaignsFilter",
+    withDefault(CampaignsFilterParam, initialCampaignsFilter)
   );
-  const [assignmentsFilter, setAssignmentsFilter] = useState<any>(
-    initialAssignmentsFilter
+  const [contactsFilter, setContactsFilter] = useQueryParam(
+    "contactsFilter",
+    withDefault(ContactsFilterParam, defaultContactsFilter)
   );
-  const [tagsFilter, setTagsFilter] = useState<any>(defaultTagsFilter);
-  const [contactNameFilter, setContactNameFilter] = useState<any>(undefined);
+  const [tagsFilter, setTagsFilter] = useQueryParam(
+    "tagsFilter",
+    withDefault(TagsFilterParam, defaultTagsFilter)
+  );
+  const [contactNameFilter, setContactNameFilter] = useQueryParam(
+    "nameFilter",
+    ContactNameParam
+  );
+
+  const [page, setPage] = useQueryParam("page", withDefault(NumberParam, 0));
+  const [pageSize, setPageSize] = useQueryParam(
+    "pageSize",
+    withDefault(NumberParam, 10)
+  );
+
+  // Get or Compute Default states
+  const defaultArchivedCampaigns = campaignsFilter.isArchived ?? true;
+  const defaultActiveCampaigns = !campaignsFilter.isArchived ?? true;
+  const defaultIncludeNotOptedOut = contactsFilter.isOptedOut ?? true;
+  const defaultIncludeOptedOut = !contactsFilter.isOptedOut ?? true;
+
+  // State to help filter formations
   const [includeArchivedCampaigns, setIncludeArchivedCampaigns] = useState<
     boolean
-  >(false);
-  const [conversationCount, setConversationCount] = useState<number>(0);
+  >(defaultArchivedCampaigns);
   const [includeActiveCampaigns, setIncludeActiveCampaigns] = useState<boolean>(
-    true
+    defaultActiveCampaigns
   );
+  const [conversationCount, setConversationCount] = useState<number>(0);
   const [
     includeNotOptedOutConversations,
     setIncludeNotOptedOutConversations
-  ] = useState<boolean>(true);
+  ] = useState<boolean>(defaultIncludeOptedOut);
   const [
     includeOptedOutConversations,
     setIncludeOptedOutConversations
-  ] = useState<boolean>(false);
+  ] = useState<boolean>(defaultIncludeNotOptedOut);
   const [selectedRows, setSelectedRows] = useState<
     Array<any> | string | undefined
   >([]);
@@ -373,8 +403,11 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
         onMessageFilterChanged={handleMessageFilterChange}
         onTagsChanged={handleTagsChanged}
         searchByContactName={searchByContactName}
-        assignmentsFilter={assignmentsFilter}
         tagsFilter={tagsFilter.specificTagIds}
+        contactNameFilter={contactNameFilter}
+        campaignId={campaignsFilter.campaignId}
+        texterId={assignmentsFilter.texterId}
+        messageStatusFilter={contactsFilter.messageStatus}
         onActiveCampaignsToggled={handleActiveCampaignsToggled}
         onArchivedCampaignsToggled={handleArchivedCampaignsToggled}
         includeActiveCampaigns={includeActiveCampaigns}
