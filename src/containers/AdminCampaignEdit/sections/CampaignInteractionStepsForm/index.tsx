@@ -271,7 +271,6 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     saveLabel,
     data: {
       campaign: {
-        isTemplate,
         customFields,
         invalidScriptFields,
         campaignVariables: { edges: campaignVariableEdges },
@@ -297,24 +296,24 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     stripLocals: true
   });
 
-  const hasInvalidFields = interactionSteps.reduce<boolean>((acc, step) => {
-    let result = acc;
-    for (const scriptOption of step.scriptOptions) {
-      const { invalidCampaignVariablesUsed } = scriptToTokens({
-        script: scriptOption ?? "",
-        customFields,
-        campaignVariables
-      });
-      result = result || invalidCampaignVariablesUsed.length > 0;
-    }
-    return result;
-  }, false);
+  const invalidCampaignVariables = interactionSteps.reduce<Array<string>>(
+    (acc, step) => {
+      let result = acc;
+      for (const scriptOption of step.scriptOptions) {
+        const { invalidCampaignVariablesUsed } = scriptToTokens({
+          script: scriptOption ?? "",
+          customFields,
+          campaignVariables
+        });
+        result = result.concat(invalidCampaignVariablesUsed);
+      }
+      return result;
+    },
+    []
+  );
 
   const isSaveDisabled =
-    isWorking ||
-    hasEmptyScripts ||
-    (!isTemplate && hasInvalidFields) ||
-    (!isNew && !hasPendingChanges);
+    isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
   const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
   const tree = makeTree(interactionSteps);
@@ -339,6 +338,9 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     if (invalidScriptFields.length === 0) {
       return null;
     }
+    const invalidFields = invalidCampaignVariables.concat(
+      invalidScriptFields.map((field: string) => `{${field}}`)
+    );
     return (
       <div>
         <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
@@ -348,7 +350,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
           your script:
         </p>
         <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
-          {invalidScriptFields.map((field: string) => `{${field}}`).join(", ")}
+          {invalidFields.join(", ")}
         </p>
       </div>
     );
@@ -409,11 +411,6 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       </Button>
       {hasEmptyScripts && (
         <p style={{ color: "#DD0000" }}>You have one or more empty scripts!</p>
-      )}
-      {!isTemplate && hasInvalidFields && (
-        <p style={{ color: "#DD0000" }}>
-          You have one or more scripts using variables without values!
-        </p>
       )}
     </div>
   );

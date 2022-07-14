@@ -17,7 +17,7 @@ export const delimit = (text: string) => {
 
 export const VARIABLE_NAME_REGEXP = /^[a-zA-Z0-9 \-_]+$/;
 export const TOKEN_REGEXP = /\{[a-zA-Z0-9 \-_]+\}/g;
-export const TOKEN_SPLIT_REGEXP = /(\{[a-zA-Z0-9 \-_]+\})/g;
+export const TOKEN_SPLIT_REGEXP = /(\{[:a-zA-Z0-9 \-_]+\})/g;
 
 // const REQUIRED_UPLOAD_FIELDS = ['firstName', 'lastName', 'cell']
 const TOP_LEVEL_UPLOAD_FIELDS = [
