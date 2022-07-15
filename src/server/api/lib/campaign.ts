@@ -734,7 +734,10 @@ WHERE campaign_id = ?`,
     .where({ message_status: "needsMessage", campaign_id: campaignId })
     .orderBy("updated_at")
     .first();
-  const customFields = Object.keys(JSON.parse(campaignContact.custom_fields));
+
+  const customFields = campaignContact
+    ? Object.keys(JSON.parse(campaignContact.custom_fields))
+    : [];
   const campaignVariables = await r
     .knex("campaign_variable")
     .where({ campaign_id: campaignId })
