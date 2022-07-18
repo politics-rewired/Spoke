@@ -100,9 +100,9 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
   );
 
   // Get or Compute Default states
-  const defaultArchivedCampaigns = campaignsFilter.isArchived ?? false;
+  const defaultArchivedCampaigns = campaignsFilter.isArchived ?? true;
   const defaultActiveCampaigns = !campaignsFilter.isArchived ?? true;
-  const defaultIncludeNotOptedOut = contactsFilter.isOptedOut ?? false;
+  const defaultIncludeNotOptedOut = contactsFilter.isOptedOut ?? true;
   const defaultIncludeOptedOut = !contactsFilter.isOptedOut ?? true;
 
   // State to help filter formations
@@ -403,8 +403,11 @@ const AdminIncomingMessageList: React.FC<AdminIncomingMessageListProps> = (
         onMessageFilterChanged={handleMessageFilterChange}
         onTagsChanged={handleTagsChanged}
         searchByContactName={searchByContactName}
-        assignmentsFilter={assignmentsFilter}
         tagsFilter={tagsFilter.specificTagIds}
+        contactNameFilter={contactNameFilter}
+        campaignId={campaignsFilter.campaignId}
+        texterId={assignmentsFilter.texterId}
+        messageStatusFilter={contactsFilter.messageStatus}
         onActiveCampaignsToggled={handleActiveCampaignsToggled}
         onArchivedCampaignsToggled={handleArchivedCampaignsToggled}
         includeActiveCampaigns={includeActiveCampaigns}

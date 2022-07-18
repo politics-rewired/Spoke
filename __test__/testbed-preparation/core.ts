@@ -202,6 +202,67 @@ export const createCampaign = async (
     .then(({ rows: [campaign] }) => campaign);
 };
 
+export const createTemplate = async (
+  client: PoolClient,
+  options: CreateCampaignOptions
+) => {
+  return client
+    .query<CampaignRecord>(
+      `
+      insert into public.all_campaign (
+        organization_id,
+        title,
+        description,
+        is_approved,
+        is_started,
+        is_archived,
+        use_dynamic_assignment,
+        logo_image_url,
+        intro_html,
+        primary_color,
+        texting_hours_start,
+        texting_hours_end,
+        timezone,
+        creator_id,
+        is_autoassign_enabled,
+        limit_assignment_to_teams,
+        replies_stale_after_minutes,
+        landlines_filtered,
+        external_system_id,
+        autosend_status,
+        autosend_user_id,
+        is_template
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+      returning *
+    `,
+      [
+        options.organizationId,
+        options.title ?? faker.company.companyName(),
+        options.description ?? faker.lorem.sentence(),
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        options.textingHoursStart ?? 9,
+        options.textingHoursEnd ?? 21,
+        options.timezone ?? faker.address.timeZone(),
+        options.creatorId ?? null,
+        options.isAutoassignEnabled ?? false,
+        options.isAssignmentLimitedToTeams ?? false,
+        options.repliesStaleAfterMinutes ?? null,
+        options.landlinesFiltered ?? false,
+        options.externalSystemId ?? null,
+        options.autosendStatus ?? null,
+        options.autosendUserId ?? null,
+        true
+      ]
+    )
+    .then(({ rows: [template] }) => template);
+};
+
 export type CreateCampaignContactOptions = Partial<
   Pick<
     CampaignContact,

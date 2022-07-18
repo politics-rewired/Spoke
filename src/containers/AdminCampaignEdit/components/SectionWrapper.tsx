@@ -1,11 +1,9 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import { useTheme } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
-import Collapse from "@material-ui/core/Collapse";
 import CancelIcon from "@material-ui/icons/Cancel";
 import DoneIcon from "@material-ui/icons/Done";
 import WarningIcon from "@material-ui/icons/Warning";
@@ -18,7 +16,7 @@ import {
   AuthzContextType,
   withAuthzContext
 } from "../../../components/AuthzProvider";
-import { camelCase, dataTest } from "../../../lib/attributes";
+import CollapsibleCard from "../../../components/CollapsibleCard";
 import theme from "../../../styles/theme";
 import { MuiThemeProviderProps } from "../../../styles/types";
 import { loadData } from "../../hoc/with-operations";
@@ -123,8 +121,7 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
 
   let avatar = null;
   const cardHeaderStyle: React.CSSProperties = {
-    backgroundColor: theme.colors.lightGray,
-    cursor: "pointer"
+    backgroundColor: theme.colors.lightGray
   };
 
   const avatarStyle = {
@@ -185,41 +182,37 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
     }
   };
 
-  console.log(props);
-
   return (
-    <Card
-      {...dataTest(camelCase(title))}
-      expandable={isExpandable}
-      onExpandChange={onExpandChange}
+    <CollapsibleCard
+      disableExpand={!isExpandable}
       style={inlineStyles.card}
+      onExpandChange={onExpandChange}
     >
       <CardHeader
         title={title}
         titleStyle={inlineStyles.title}
+        titleTypographyProps={{ variant: "body1" }}
         style={cardHeaderStyle}
         avatar={avatar}
         onClick={handleExpandChange}
       />
-      <Collapse in={showSection}>
-        <CardContent>{children}</CardContent>
-        {isSaving && isAdmin && (
-          <CardActions>
-            <div>Current Status: {progressMessage}</div>
-            {jobMessage && jobMessage !== "{}" && (
-              <div>Message: {jobMessage}</div>
-            )}
-            <Button
-              variant="contained"
-              endIcon={<CancelIcon />}
-              onClick={handleDiscardJob}
-            >
-              Discard Job
-            </Button>
-          </CardActions>
-        )}
-      </Collapse>
-    </Card>
+      <CardContent>{children}</CardContent>
+      {isSaving && isAdmin && (
+        <CardActions>
+          <div>Current Status: {progressMessage}</div>
+          {jobMessage && jobMessage !== "{}" && (
+            <div>Message: {jobMessage}</div>
+          )}
+          <Button
+            variant="contained"
+            endIcon={<CancelIcon />}
+            onClick={handleDiscardJob}
+          >
+            Discard Job
+          </Button>
+        </CardActions>
+      )}
+    </CollapsibleCard>
   );
 };
 

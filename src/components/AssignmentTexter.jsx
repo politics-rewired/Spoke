@@ -14,7 +14,7 @@ import { compose } from "recompose";
 
 import AssignmentTexterContact from "../containers/AssignmentTexterContact";
 import { loadData } from "../containers/hoc/with-operations";
-import { catchError } from "../network/utils";
+import { aggregateGraphQLErrors } from "../network/utils";
 import Empty from "./Empty";
 import LoadingIndicator from "./LoadingIndicator";
 
@@ -294,7 +294,7 @@ class AssignmentTexter extends React.Component {
 
     this.props.mutations
       .handleConversation(contact_id, handleConversationPayload)
-      .then(catchError)
+      .then(aggregateGraphQLErrors)
       .then((response) => {
         if (payload.message) {
           const { id, messages } = response.data.handleConversation;
@@ -312,7 +312,9 @@ class AssignmentTexter extends React.Component {
   };
 
   addTagToContact = (contact_id, tag) => {
-    this.props.mutations.tagContact(contact_id, tag).then(catchError);
+    this.props.mutations
+      .tagContact(contact_id, tag)
+      .then(aggregateGraphQLErrors);
   };
 
   goBackToTodos = () => {
