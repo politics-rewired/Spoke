@@ -6,50 +6,27 @@ import {
   GridRenderCellParams,
   GridSelectionModel
 } from "@mui/x-data-grid";
-import { useGetConversationsForMessageReviewQuery } from "@spoke/spoke-codegen";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CampaignContact,
+  Conversation,
+  Message,
+  PageInfo,
+  useGetConversationsForMessageReviewQuery
+} from "@spoke/spoke-codegen";
+import React, { useEffect } from "react";
+import { DateTime } from "src/lib/datetime";
+import { NumberParam, useQueryParam, withDefault } from "use-query-params";
 
 import LoadingIndicator from "../../../../components/LoadingIndicator";
 import { MESSAGE_STATUSES } from "../IncomingMessageFilter";
 import ConversationPreviewModal from "./ConversationPreviewModal";
 
-type PageInfo = {
-  limit: number;
-  offset: number;
-  total: number;
-};
-
 type Conversations = {
-  conversations: Array<any>;
+  conversations: Array<Conversation>;
   pageInfo: PageInfo;
 };
 
-type Message = {
-  id: number;
-  text: string;
-  isFromContact: boolean;
-  createdAt: string;
-  userId: number;
-  sendStatus: string;
-};
-
-type OptOut = {
-  cell: string;
-};
-
-type Contact = {
-  id: number;
-  assignmentId: number;
-  firstName: string;
-  lastName: string;
-  cell: string;
-  messageStatus: string;
-  messages: Message[];
-  optOut: OptOut;
-  updatedAt: string;
-};
-
-const formatContactName = (contact: Contact) => {
+const formatContactName = (contact: CampaignContact) => {
   const { firstName, lastName, optOut } = contact;
   const suffix = optOut && optOut.cell ? " ⛔" : "";
   return `${firstName} ${lastName}${suffix}`;
@@ -100,10 +77,10 @@ interface IncomingMessageListProps {
 }
 
 const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
-  const [activeConversationIndex, setActiveConversationIndex] = useState<
-    number
-  >(-1);
-  const conversationRef = useRef<number>();
+  const [activeConversationIndex, setActiveConversationIndex] = useQueryParam(
+    "activeConversation",
+    withDefault(NumberParam, -1)
+  );
 
   const {
     data: conversationsData,
@@ -121,14 +98,11 @@ const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
   });
 
   const conversations = conversationsData?.conversations as Conversations;
+  const conversationsCount = conversations?.pageInfo?.total ?? 0;
 
   useEffect(() => {
-    const total = conversations?.pageInfo?.total ?? 0;
-    if (conversationRef.current !== total) {
-      conversationRef.current = total;
-      props.onConversationCountChanged(total);
-    }
-  }, [conversations]);
+    props.onConversationCountChanged(conversationsCount);
+  }, [conversationsCount]);
 
   const handlePageChanged = (page: number) => props.onPageChanged(page);
 
@@ -157,7 +131,6 @@ const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
   };
 
   const handleRequestNextConversation = () => {
-    const conversationsCount = conversations?.conversations?.length ?? 0;
     if (activeConversationIndex < conversationsCount) {
       setActiveConversationIndex(activeConversationIndex + 1);
     }
@@ -194,9 +167,8 @@ const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
       field: "updatedAt",
       headerName: "Last Updated At",
       flex: 3,
-      renderCell: (params: GridRenderCellParams) => {
-        return new Date(params.row.updatedAt).toLocaleString();
-      }
+      renderCell: (params: GridRenderCellParams) =>
+        new DateTime(params.row.updatedAt).toLocaleString(DateTime.DATETIME_MED)
     },
     {
       field: "latestMessage",
@@ -242,7 +214,7 @@ const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
         <IconButton
           onClick={(event) => {
             event.stopPropagation();
-            handleOpenConversation(params.row.index);
+            handleOpenConversation(params.row.id);
           }}
         >
           <OpenInNewIcon />
@@ -266,11 +238,10 @@ const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
     next: allConversations[activeConversationIndex + 1] !== undefined
   };
 
-  const height = useMemo(() => 100 + tableData.length * 54, [tableData]);
-
   return (
-    <div style={{ height, width: "100%", background: "#fff" }}>
+    <div style={{ width: "100%", background: "#fff" }}>
       <DataGrid
+        autoHeight
         rows={tableData}
         columns={columns}
         checkboxSelection
