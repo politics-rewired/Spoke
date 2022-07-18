@@ -436,8 +436,11 @@ export const resolvers = {
       { user }
     ) => {
       const organizationId = parseInt(organization.id, 10);
-      await accessRequired(user, organizationId, "OWNER", true);
-
+      try {
+        await accessRequired(user, organizationId, "OWNER", true);
+      } catch {
+        return null;
+      }
       let query = r
         .reader("messaging_service")
         .where({ organization_id: organizationId });
