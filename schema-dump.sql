@@ -1075,6 +1075,8 @@ CREATE FUNCTION public.queue_sync_campaign_to_van(campaign_id integer) RETURNS v
         graphile_worker.add_job(
           'van-sync-campaign-contact',
           payload,
+          -- VAN API docs suggest 60 req/s for post canvass results; we'll use 30 req/s to be safe
+          -- Ref: https://docs.ngpvan.com/docs/throttling-guidelines#suggested-throttling
           run_at => now() + (interval '1 second' / 30) * n,
           priority => 10
         )
