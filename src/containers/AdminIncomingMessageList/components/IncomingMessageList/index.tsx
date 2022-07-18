@@ -1,11 +1,11 @@
 import IconButton from "@material-ui/core/IconButton";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import {
-  DataGrid,
+  DataGridPro,
   GridColDef,
   GridRenderCellParams,
   GridSelectionModel
-} from "@mui/x-data-grid";
+} from "@mui/x-data-grid-pro";
 import {
   CampaignContact,
   Conversation,
@@ -240,7 +240,7 @@ const IncomingMessageList: React.FC<IncomingMessageListProps> = (props) => {
 
   return (
     <div style={{ width: "100%", background: "#fff" }}>
-      <DataGrid
+      <DataGridPro
         autoHeight
         rows={tableData}
         columns={columns}

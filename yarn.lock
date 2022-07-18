@@ -4175,15 +4175,25 @@
     prop-types "^15.7.2"
     react-is "^17.0.2"
 
-"@mui/x-data-grid@4":
+"@mui/x-data-grid-pro@4":
   version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-4.0.2.tgz#5345e74630dff2efcb9a1efa04c6c8facfd8c80a"
-  integrity sha512-8FSupNcHgq4tu+27hxal1EK2r/3WeBYuMT++RXkOebm8XW1EmY+RVW6Gz/YSb6dpEyoTJH6gbHzAA/VrajdIXQ==
+  resolved "https://registry.yarnpkg.com/@mui/x-data-grid-pro/-/x-data-grid-pro-4.0.2.tgz#3ec31bea8be5d1f4306520df0dc647e67f2dff25"
+  integrity sha512-BK/zXY/lOVP3IUHm4wcbTcJM/9O+jeOSv4NDG3gemeB0G0wL1rq5czOuZvjVaOhs5MUlULOqUq72k5oMNwmJjQ==
   dependencies:
     "@material-ui/utils" "^5.0.0-beta.4"
-    clsx "^1.1.1"
+    "@mui/x-license-pro" "4.0.2"
+    clsx "^1.0.4"
     prop-types "^15.7.2"
     reselect "^4.0.0"
+
+"@mui/x-license-pro@4", "@mui/x-license-pro@4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@mui/x-license-pro/-/x-license-pro-4.0.2.tgz#0bd7b016d63d1f712b559844e7962b7f846dbe17"
+  integrity sha512-e9qXJDoAKiB/IQ7m7o7is5DcQpEVvvuQOtZIdhRmyl78wYVvgjLIJfZM6pBnE7UYsAbSnhE0E8yeWQfjamczaw==
+  dependencies:
+    "@material-ui/utils" "^5.0.0-beta.4"
+    esm "^3.2.25"
+    yargs "^17.0.1"
 
 "@n1ru4l/graphql-live-query@^0.9.0":
   version "0.9.0"
@@ -8638,7 +8648,7 @@ clone@^1.0.0, clone@^1.0.2:
   resolved "https://registry.yarnpkg.com/clone/-/clone-1.0.4.tgz#da309cc263df15994c688ca902179ca3c7cd7c7e"
   integrity sha1-2jCcwmPfFZlMaIypAheco8fNfH4=
 
-clsx@^1.0.4, clsx@^1.1.1:
+clsx@^1.0.4:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.1.1.tgz#98b3134f9abbdf23b2663491ace13c5c03a73188"
   integrity sha512-6/bPho624p3S2pMyvP5kKBPXnI3ufHLObBFCfgx+LkeR5lg2XYy2hqZqUf45ypD8COn2bhgGJSUE+l5dhNBieA==
@@ -26677,6 +26687,19 @@ yargs@^17.0.0:
   version "17.3.1"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.3.1.tgz#da56b28f32e2fd45aefb402ed9c26f42be4c07b9"
   integrity sha512-WUANQeVgjLbNsEmGk20f+nlHgOqzRFpiGWVaBrYGYIGANIIu3lWjoyi0fNlFmJkvfhCZ6BXINe7/W2O2bV4iaA==
+  dependencies:
+    cliui "^7.0.2"
+    escalade "^3.1.1"
+    get-caller-file "^2.0.5"
+    require-directory "^2.1.1"
+    string-width "^4.2.3"
+    y18n "^5.0.5"
+    yargs-parser "^21.0.0"
+
+yargs@^17.0.1:
+  version "17.5.1"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.5.1.tgz#e109900cab6fcb7fd44b1d8249166feb0b36e58e"
+  integrity sha512-t6YAJcxDkNX7NFYiVtKvWUz8l+PaKTLiL63mJYWR2GnHq2gjEWISzsLp9wg3aY36dY1j+gfIEL3pIF+XlJJfbA==
   dependencies:
     cliui "^7.0.2"
     escalade "^3.1.1"
