@@ -77,9 +77,7 @@ const DeliverabilityStats = (props: {
 
   const highErrorPercent = 25;
   const campaignErrorPercent = asPercent(errorCount, total);
-  const errorHighlight =
-    campaignErrorPercent !== undefined &&
-    campaignErrorPercent > highErrorPercent;
+  const errorHighlight = campaignErrorPercent > highErrorPercent;
 
   return (
     <div>
