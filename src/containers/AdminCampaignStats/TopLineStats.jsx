@@ -19,11 +19,8 @@ export const TopLineStats = (props) => {
 
   const highUnhandledReplyPercent = 25;
   const campaignPercent =
-    percentUnhandledReplies.campaign &&
-    percentUnhandledReplies.campaign.stats.percentUnhandledReplies;
-  const replyHighlight =
-    campaignPercent !== undefined &&
-    campaignPercent > highUnhandledReplyPercent;
+    percentUnhandledReplies.campaign?.stats.percentUnhandledReplies;
+  const replyHighlight = campaignPercent > highUnhandledReplyPercent;
 
   return (
     <Grid container spacing={2} justifyContent="center">

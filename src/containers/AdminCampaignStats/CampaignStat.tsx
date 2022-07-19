@@ -27,7 +27,7 @@ export interface CampaignStatProps {
 export const CampaignStat: React.FC<CampaignStatProps> = (props) => {
   // shrink text if large top line number
   const maxLargeNumberLength = 4;
-  const count = props.count && props.count.toString();
+  const count = props.count?.toString();
   const heading =
     count && !count.includes("%") && count.length > maxLargeNumberLength
       ? "h4"
