@@ -1,8 +1,9 @@
 /* eslint-disable react/no-unused-state */
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
-import { blue, blueGrey, deepOrange, grey } from "@material-ui/core/colors";
+import { blueGrey, deepOrange, grey } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
+import { withTheme } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
 import LocalOfferIcon from "@material-ui/icons/LocalOffer";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
@@ -18,6 +19,7 @@ import md5 from "md5";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";
+import { compose } from "recompose";
 import * as yup from "yup";
 
 import AssignmentTexterSurveys from "../../components/AssignmentTexterSurveys";
@@ -613,7 +615,8 @@ export class AssignmentTexterContact extends React.Component {
       tags,
       assignment,
       navigationToolbarChildren,
-      onFinishContact
+      onFinishContact,
+      theme
     } = this.props;
     const { userCannedResponses, campaignCannedResponses } = assignment;
     const isCannedResponseEnabled =
@@ -683,7 +686,7 @@ export class AssignmentTexterContact extends React.Component {
             <Button
               variant="contained"
               onClick={this.handleOpenPopover}
-              style={{ backgroundColor: blue[100] }}
+              style={{ backgroundColor: theme.palette.info.light }}
               disabled={!isCannedResponseEnabled}
             >
               Canned Responses
@@ -729,7 +732,7 @@ export class AssignmentTexterContact extends React.Component {
                 <Button
                   variant="contained"
                   onClick={this.handleOpenPopover}
-                  style={{ backgroundColor: blue[100] }}
+                  style={{ backgroundColor: theme.palette.info.light }}
                   disabled={!isCannedResponseEnabled}
                 >
                   Canned responses
@@ -951,4 +954,4 @@ AssignmentTexterContact.propTypes = {
   onRefreshAssignmentContacts: PropTypes.func
 };
 
-export default withRouter(AssignmentTexterContact);
+export default compose(withTheme, withRouter)(AssignmentTexterContact);
