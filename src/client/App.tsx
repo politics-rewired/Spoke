@@ -1,4 +1,5 @@
 import { ApolloProvider } from "@apollo/client";
+import { LicenseInfo } from "@mui/x-license-pro";
 import { css, StyleSheet } from "aphrodite";
 import React from "react";
 import { BrowserRouter, Route } from "react-router-dom";
@@ -10,6 +11,8 @@ import { SpokeThemeProvider } from "../styles/spoke-theme-context";
 import baseTheme from "../styles/theme";
 import { SpokeContextProvider } from "./spoke-context";
 import VersionNotifier from "./VersionNotifier";
+
+LicenseInfo.setLicenseKey(window.MUI_PRO_KEY);
 
 const styles = StyleSheet.create({
   root: {

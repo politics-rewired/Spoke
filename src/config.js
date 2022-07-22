@@ -484,6 +484,11 @@ const validators = {
     choices: Object.values(ServerMode),
     default: ServerMode.Dual
   }),
+  MUI_PRO_KEY: str({
+    desc: "MUI Pro Key",
+    default: undefined,
+    isClient: true
+  }),
   NEXMO_API_KEY: str({
     desc: "Nexmo API key. Required if using Nexmo.",
     default: undefined
