@@ -230,7 +230,7 @@ export const schema = `
     texters: [User]
     assignments(assignmentsFilter: AssignmentsFilter): [Assignment]
     interactionSteps: [InteractionStep]
-    invalidScriptFields: [String!]
+    invalidScriptFields: [String!]!
     contacts: [CampaignContact]
     contactsCount: Int
     hasUnassignedContacts: Boolean
