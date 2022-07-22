@@ -6,7 +6,11 @@ import IconButton from "@material-ui/core/IconButton";
 import { withTheme } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
 import LocalOfferIcon from "@material-ui/icons/LocalOffer";
+import MailIcon from "@material-ui/icons/Mail";
+import MarkunreadIcon from "@material-ui/icons/Markunread";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import NotInterestedIcon from "@material-ui/icons/NotInterested";
+import ReplyIcon from "@material-ui/icons/Reply";
 import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
 import sortBy from "lodash/sortBy";
@@ -608,6 +612,28 @@ export class AssignmentTexterContact extends React.Component {
     return button;
   }
 
+  renderNeedsResponseToggleMenuItem(contact) {
+    const { messageStatus } = contact;
+    if (messageStatus === "closed") {
+      return (
+        <MenuItem
+          leftIcon={<MarkunreadIcon />}
+          primaryText="Reopen"
+          onClick={() => this.handleEditMessageStatus("needsResponse")}
+        />
+      );
+    }
+    if (messageStatus === "needsResponse") {
+      return (
+        <MenuItem
+          leftIcon={<MailIcon />}
+          primaryText="Close"
+          onClick={this.handleClickCloseContactButton}
+        />
+      );
+    }
+  }
+
   renderActionToolbar() {
     const {
       contact,
@@ -657,8 +683,88 @@ export class AssignmentTexterContact extends React.Component {
         </div>
       );
     }
-    if (size < 450) {
+    if (size < 768) {
       // for needsResponse or messaged or convo
+      return (
+        <div
+          style={{
+            padding: "5px 5px 0 5px",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            backgroundColor: "white",
+            fontSize: size < 500 ? "0.9em" : "1em"
+          }}
+        >
+          {size > 400 && (
+            <Tooltip title="Opt out this contact">
+              <Box m={2}>
+                <ColorButton
+                  {...dataTest("optOut")}
+                  variant="contained"
+                  backgroundColor={deepOrange[500]}
+                  onClick={this.handleOpenOptOutDialog}
+                >
+                  Opt out
+                </ColorButton>
+              </Box>
+            </Tooltip>
+          )}
+          {size > 500 && (
+            <Box m={2}>
+              <Button
+                variant="contained"
+                onClick={this.handleOpenPopover}
+                style={{ backgroundColor: theme.palette.info.light }}
+                disabled={!isCannedResponseEnabled}
+              >
+                Canned Responses
+              </Button>
+            </Box>
+          )}
+          {size > 400 && this.renderNeedsResponseToggleButton(contact)}
+          <div style={{ flexGrow: 1, textAlign: "center" }}>
+            {navigationToolbarChildren}
+          </div>
+          <IconMenu
+            iconButtonElement={
+              <IconButton>
+                <MoreVertIcon />
+              </IconButton>
+            }
+            anchorOrigin={{ horizontal: "right", vertical: "top" }}
+            targetOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+            {size <= 400 && this.renderNeedsResponseToggleMenuItem(contact)}
+            {size <= 400 && (
+              <MenuItem
+                primaryText="Opt Out"
+                onClick={this.handleOpenOptOutDialog}
+                leftIcon={<NotInterestedIcon />}
+              />
+            )}
+            {size <= 500 && (
+              <MenuItem
+                primaryText="Canned Responses"
+                disabled={!isCannedResponseEnabled}
+                onClick={this.handleOpenPopover}
+                leftIcon={<ReplyIcon />}
+              />
+            )}
+            <MenuItem
+              primaryText="Manage Tags"
+              leftIcon={<LocalOfferIcon />}
+              disabled={tags.length === 0}
+              onClick={() => this.setState({ isTagEditorOpen: true })}
+            />
+          </IconMenu>
+        </div>
+      );
+    }
+    if (size < 1080) {
+      // for needsResponse or messaged
+      // size < 1080, and > 768
       return (
         <div
           style={{
@@ -670,6 +776,13 @@ export class AssignmentTexterContact extends React.Component {
             backgroundColor: "white"
           }}
         >
+          <Box m={2}>
+            <SendButton
+              threeClickEnabled={campaign.organization.threeClickEnabled}
+              onFinalTouchTap={this.handleClickSendMessageButton}
+              disabled={this.state.disabled}
+            />
+          </Box>
           <Tooltip title="Opt out this contact">
             <Box m={2}>
               <ColorButton
@@ -682,16 +795,18 @@ export class AssignmentTexterContact extends React.Component {
               </ColorButton>
             </Box>
           </Tooltip>
-          <Box m={2}>
-            <Button
-              variant="contained"
-              onClick={this.handleOpenPopover}
-              style={{ backgroundColor: theme.palette.info.light }}
-              disabled={!isCannedResponseEnabled}
-            >
-              Canned Responses
-            </Button>
-          </Box>
+          {size > 840 && (
+            <Box m={2}>
+              <Button
+                variant="contained"
+                onClick={this.handleOpenPopover}
+                style={{ backgroundColor: theme.palette.info.light }}
+                disabled={!isCannedResponseEnabled}
+              >
+                Canned Responses
+              </Button>
+            </Box>
+          )}
           {this.renderNeedsResponseToggleButton(contact)}
           <div style={{ flexGrow: 1, textAlign: "center" }}>
             {navigationToolbarChildren}
@@ -705,6 +820,14 @@ export class AssignmentTexterContact extends React.Component {
             anchorOrigin={{ horizontal: "right", vertical: "top" }}
             targetOrigin={{ horizontal: "right", vertical: "bottom" }}
           >
+            {size <= 840 && (
+              <MenuItem
+                primaryText="CannedResponses"
+                disabled={!isCannedResponseEnabled}
+                onClick={this.handleOpenPopover}
+                leftIcon={<ReplyIcon />}
+              />
+            )}
             <MenuItem
               primaryText="Manage Tags"
               leftIcon={<LocalOfferIcon />}
@@ -715,60 +838,58 @@ export class AssignmentTexterContact extends React.Component {
         </div>
       );
     }
-    if (size >= 768) {
-      // for needsResponse or messaged
-      return (
-        <div>
-          <Toolbar style={inlineStyles.actionToolbarFirst}>
-            <ToolbarGroup>
-              <Box m={2}>
-                <SendButton
-                  threeClickEnabled={campaign.organization.threeClickEnabled}
-                  onFinalTouchTap={this.handleClickSendMessageButton}
-                  disabled={this.state.disabled}
-                />
-              </Box>
-              <Box m={2}>
-                <Button
-                  variant="contained"
-                  onClick={this.handleOpenPopover}
-                  style={{ backgroundColor: theme.palette.info.light }}
-                  disabled={!isCannedResponseEnabled}
-                >
-                  Canned responses
-                </Button>
-              </Box>
-              <Box m={2}>
-                <ColorButton
-                  {...dataTest("optOut")}
-                  variant="contained"
-                  backgroundColor={deepOrange[500]}
-                  onClick={this.handleOpenOptOutDialog}
-                >
-                  Opt out
-                </ColorButton>
-              </Box>
-              <Box m={2}>
-                <Button
-                  variant="contained"
-                  style={{ backgroundColor: blueGrey[100] }}
-                  endIcon={<LocalOfferIcon />}
-                  disabled={tags.length === 0}
-                  onClick={() => this.setState({ isTagEditorOpen: true })}
-                >
-                  Manage Tags
-                </Button>
-              </Box>
-              {this.renderNeedsResponseToggleButton(contact)}
-              <div style={{ float: "right", marginLeft: 20 }}>
-                {navigationToolbarChildren}
-              </div>
-            </ToolbarGroup>
-          </Toolbar>
-        </div>
-      );
-    }
-    return "";
+    // for needsResponse or messaged
+    // size > 1080 px, optimal size with new button changes
+    return (
+      <div>
+        <Toolbar style={inlineStyles.actionToolbarFirst}>
+          <ToolbarGroup>
+            <Box m={2}>
+              <SendButton
+                threeClickEnabled={campaign.organization.threeClickEnabled}
+                onFinalTouchTap={this.handleClickSendMessageButton}
+                disabled={this.state.disabled}
+              />
+            </Box>
+            <Box m={2}>
+              <Button
+                variant="contained"
+                onClick={this.handleOpenPopover}
+                style={{ backgroundColor: theme.palette.info.light }}
+                disabled={!isCannedResponseEnabled}
+              >
+                Canned responses
+              </Button>
+            </Box>
+            <Box m={2}>
+              <ColorButton
+                {...dataTest("optOut")}
+                variant="contained"
+                backgroundColor={deepOrange[500]}
+                onClick={this.handleOpenOptOutDialog}
+              >
+                Opt out
+              </ColorButton>
+            </Box>
+            <Box m={2}>
+              <Button
+                variant="contained"
+                style={{ backgroundColor: blueGrey[100] }}
+                endIcon={<LocalOfferIcon />}
+                disabled={tags.length === 0}
+                onClick={() => this.setState({ isTagEditorOpen: true })}
+              >
+                Manage Tags
+              </Button>
+            </Box>
+            {this.renderNeedsResponseToggleButton(contact)}
+            <div style={{ float: "right", marginLeft: 20 }}>
+              {navigationToolbarChildren}
+            </div>
+          </ToolbarGroup>
+        </Toolbar>
+      </div>
+    );
   }
 
   renderCannedResponsePopover() {
