@@ -5,6 +5,7 @@ import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
 import React, { useEffect, useState } from "react";
+import useClipboard from "react-hook-clipboard";
 import { compose } from "recompose";
 
 import { Campaign } from "../../../../api/campaign";
@@ -13,7 +14,6 @@ import {
   InteractionStepWithChildren
 } from "../../../../api/interaction-step";
 import { Action } from "../../../../api/types";
-import { readClipboardText, writeClipboardText } from "../../../../client/lib";
 import ScriptPreviewButton from "../../../../components/ScriptPreviewButton";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
@@ -76,10 +76,10 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const [isWorking, setIsWorking] = useState(false);
   const [hasBlockCopied, setHasBlockCopied] = useState(false);
   const [confirmingRootPaste, setConfirmingRootPaste] = useState(false);
+  const [clipboard, copyToClipboard] = useClipboard();
 
   const updateClipboardHasBlock = async () => {
-    const clipboardText = await readClipboardText();
-    setHasBlockCopied(isBlock(clipboardText));
+    setHasBlockCopied(isBlock(clipboard));
   };
 
   useEffect(() => {
@@ -168,38 +168,34 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
   const createPasteBlockHandler = (
     parentInteractionId: string | null
   ) => () => {
-    readClipboardText().then((text) => {
-      if (!isBlock(text)) return;
+    if (!isBlock(clipboard)) return;
 
-      const idMap: Record<string, string> = {};
+    const idMap: Record<string, string> = {};
 
-      const newBlocks: InteractionStep[] = JSON.parse(text);
+    const newBlocks: InteractionStep[] = JSON.parse(clipboard);
 
-      newBlocks.forEach((interactionStep) => {
-        idMap[interactionStep.id] = generateId();
-      });
-
-      const mappedBlocks: InteractionStep[] = newBlocks.map(
-        (interactionStep) => {
-          // Prepend new to force it to create a new one, even if it was already new
-          return {
-            ...interactionStep,
-            id: idMap[interactionStep.id],
-            parentInteractionId: interactionStep.parentInteractionId
-              ? idMap[interactionStep.parentInteractionId]
-              : parentInteractionId
-          };
-        }
-      );
-
-      if (parentInteractionId === null) {
-        props.mutations.stageClearInteractionSteps();
-      }
-
-      mappedBlocks.forEach((newStep) =>
-        props.mutations.stageAddInteractionStep(newStep)
-      );
+    newBlocks.forEach((interactionStep) => {
+      idMap[interactionStep.id] = generateId();
     });
+
+    const mappedBlocks: InteractionStep[] = newBlocks.map((interactionStep) => {
+      // Prepend new to force it to create a new one, even if it was already new
+      return {
+        ...interactionStep,
+        id: idMap[interactionStep.id],
+        parentInteractionId: interactionStep.parentInteractionId
+          ? idMap[interactionStep.parentInteractionId]
+          : parentInteractionId
+      };
+    });
+
+    if (parentInteractionId === null) {
+      props.mutations.stageClearInteractionSteps();
+    }
+
+    mappedBlocks.forEach((newStep) =>
+      props.mutations.stageAddInteractionStep(newStep)
+    );
   };
 
   const confirmRootPaste = () => {
@@ -258,7 +254,7 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       }
     }
 
-    await writeClipboardText(JSON.stringify(block));
+    await copyToClipboard(JSON.stringify(block));
     await updateClipboardHasBlock();
   };
 

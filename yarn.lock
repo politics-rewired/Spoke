@@ -21252,6 +21252,11 @@ react-helmet@^6.1.0:
     react-fast-compare "^3.1.1"
     react-side-effect "^2.1.0"
 
+react-hook-clipboard@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/react-hook-clipboard/-/react-hook-clipboard-1.0.3.tgz#f0aeaa8b5cde67be9269e5a12ed67cc6095a8e08"
+  integrity sha512-LuvMPkvX9FWhudrkjQ/AJGtnRkGdjbF6F2OySukMb29KLCXKhocxEzCRu0vQu8rC8pn2bwFyfR67rHnbcYbexg==
+
 react-hook-form@^7.31.1:
   version "7.31.1"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.31.1.tgz#16c357dd366bc226172e6acbb5a1672873bbfb28"
