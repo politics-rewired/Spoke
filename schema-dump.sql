@@ -2788,7 +2788,8 @@ CREATE TABLE public.organization (
     texting_hours_start integer DEFAULT 9,
     texting_hours_end integer DEFAULT 21,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    monthly_message_limit bigint
+    monthly_message_limit bigint,
+    default_texting_tz character varying(255) DEFAULT 'America/New_York'::character varying NOT NULL
 );
 
 

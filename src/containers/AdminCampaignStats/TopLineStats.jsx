@@ -1,49 +1,38 @@
 import { gql } from "@apollo/client";
-import { css, StyleSheet } from "aphrodite";
+import { Grid } from "@material-ui/core";
 import PropTypes from "prop-types";
 import React from "react";
 
-import theme from "../../styles/theme";
 import { withQueries } from "../hoc/with-operations";
 import CampaignStat from "./CampaignStat";
-
-const styles = StyleSheet.create({
-  container: {
-    ...theme.layouts.multiColumn.container,
-    marginBottom: 40,
-    justifyContent: "space-around",
-    flexWrap: "wrap"
-  },
-  flexColumn: {
-    flex: 1,
-    textAlign: "right",
-    display: "flex"
-  },
-  spacer: {
-    marginRight: 20
-  }
-});
 
 export const TopLineStats = (props) => {
   const {
     contactsCount,
     assignments,
+    needsMessageCount,
     sentMessagesCount,
     receivedMessagesCount,
-    optOutsCount
+    optOutsCount,
+    percentUnhandledReplies
   } = props;
 
+  const highUnhandledReplyPercent = 25;
+  const campaignPercent =
+    percentUnhandledReplies.campaign?.stats.percentUnhandledReplies;
+  const replyHighlight = campaignPercent > highUnhandledReplyPercent;
+
   return (
-    <div className={css(styles.container)}>
-      <div className={css(styles.flexColumn, styles.spacer)}>
+    <Grid container spacing={2} justifyContent="center">
+      <Grid item xs={2}>
         <CampaignStat
           title="Contacts"
           loading={contactsCount.loading}
           error={contactsCount.errors && contactsCount.errors.message}
           count={contactsCount.campaign && contactsCount.campaign.contactsCount}
         />
-      </div>
-      <div className={css(styles.flexColumn, styles.spacer)}>
+      </Grid>
+      <Grid item xs={2}>
         <CampaignStat
           title="Texters"
           loading={assignments.loading}
@@ -52,8 +41,19 @@ export const TopLineStats = (props) => {
             assignments.campaign && assignments.campaign.assignments.length
           }
         />
-      </div>
-      <div className={css(styles.flexColumn, styles.spacer)}>
+      </Grid>
+      <Grid item xs={2}>
+        <CampaignStat
+          title="Initials To Send"
+          loading={needsMessageCount.loading}
+          error={needsMessageCount.errors && needsMessageCount.errors.message}
+          count={
+            needsMessageCount.campaign &&
+            needsMessageCount.campaign.stats.countNeedsMessageContacts
+          }
+        />
+      </Grid>
+      <Grid item xs={2}>
         <CampaignStat
           title="Sent"
           loading={sentMessagesCount.loading}
@@ -63,8 +63,8 @@ export const TopLineStats = (props) => {
             sentMessagesCount.campaign.stats.sentMessagesCount
           }
         />
-      </div>
-      <div className={css(styles.flexColumn, styles.spacer)}>
+      </Grid>
+      <Grid item xs={2}>
         <CampaignStat
           title="Replies"
           loading={receivedMessagesCount.loading}
@@ -75,9 +75,10 @@ export const TopLineStats = (props) => {
             receivedMessagesCount.campaign &&
             receivedMessagesCount.campaign.stats.receivedMessagesCount
           }
+          highlight={replyHighlight}
         />
-      </div>
-      <div className={css(styles.flexColumn)}>
+      </Grid>
+      <Grid item xs={2}>
         <CampaignStat
           title="Opt-outs"
           loading={optOutsCount.loading}
@@ -86,8 +87,8 @@ export const TopLineStats = (props) => {
             optOutsCount.campaign && optOutsCount.campaign.stats.optOutsCount
           }
         />
-      </div>
-    </div>
+      </Grid>
+    </Grid>
   );
 };
 
@@ -118,6 +119,23 @@ const queries = {
           id
           assignments {
             id
+          }
+        }
+      }
+    `,
+    options: (ownProps) => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+    })
+  },
+  needsMessageCount: {
+    query: gql`
+      query getCampaign($campaignId: String!) {
+        campaign(id: $campaignId) {
+          id
+          stats {
+            countNeedsMessageContacts
           }
         }
       }
@@ -169,6 +187,23 @@ const queries = {
           id
           stats {
             optOutsCount
+          }
+        }
+      }
+    `,
+    options: (ownProps) => ({
+      variables: {
+        campaignId: ownProps.campaignId
+      }
+    })
+  },
+  percentUnhandledReplies: {
+    query: gql`
+      query getCampaign($campaignId: String!) {
+        campaign(id: $campaignId) {
+          id
+          stats {
+            percentUnhandledReplies
           }
         }
       }

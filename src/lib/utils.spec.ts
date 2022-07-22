@@ -1,4 +1,9 @@
-import { asPercentWithTotal, replaceAll, stringIsAValidUrl } from "./utils";
+import {
+  asPercent,
+  asPercentWithTotal,
+  replaceAll,
+  stringIsAValidUrl
+} from "./utils";
 
 describe("stringIsAValidUrl", () => {
   test("recognizes valid URL", () => {
@@ -31,6 +36,16 @@ describe("replaceAll", () => {
     expect(replaceAll(`what about \\ characters?`, `\\`, `?`)).toBe(
       "what about ? characters?"
     );
+  });
+});
+
+describe("asPercent", () => {
+  test("handles 0 denominator correctly", () => {
+    expect(asPercent(10, 0)).toBe(0);
+  });
+
+  test("handles 100% correctly", () => {
+    expect(asPercent(10, 10)).toBe(100);
   });
 });
 
