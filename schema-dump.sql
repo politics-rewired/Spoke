@@ -1939,7 +1939,7 @@ CREATE TABLE public.campaign_variable (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     deleted_at timestamp with time zone,
-    CONSTRAINT check_name CHECK ((name ~ '^[a-zA-Z0-9 \-_]+$'::text))
+    CONSTRAINT check_name CHECK ((name ~ '^cv:[a-zA-Z0-9 \-_]+$'::text))
 );
 
 
@@ -2638,6 +2638,7 @@ CREATE TABLE public.message (
     error_codes text[],
     num_segments smallint,
     num_media smallint,
+    campaign_variable_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
     CONSTRAINT message_send_status_check CHECK ((send_status = ANY (ARRAY['QUEUED'::text, 'SENDING'::text, 'SENT'::text, 'DELIVERED'::text, 'ERROR'::text, 'PAUSED'::text, 'NOT_ATTEMPTED'::text])))
 )
 WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='50');

@@ -32,6 +32,7 @@ export interface MessageInput {
   assignmentId?: string | null;
   userId?: string | null;
   versionHash?: string | null;
+  campaignVariableIds?: number[] | null;
 }
 
 export interface ContactActionInput {
