@@ -5,9 +5,10 @@ import _ from "lodash";
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
 import { getDownloadUrl, getUploadStream } from "../../workers/exports/upload";
-import getExportContent from "../api/export";
+import getExportCampaignContent from "../api/export-campaign";
 import {
   CampaignContactRecord,
+  FilteredContactRecord,
   InteractionStepRecord,
   MessageRecord,
   UserRecord
@@ -111,10 +112,9 @@ export const fetchExportData = async (
   };
 };
 
-interface FilteredContactsRow extends CampaignContactRecord {
+interface FilteredContactsRow extends FilteredContactRecord {
   city: string;
   state: string;
-  filtered_reason: string;
 }
 
 const processFilteredContactsChunk = async (
@@ -131,9 +131,9 @@ const processFilteredContactsChunk = async (
     .orderBy("filtered_contact.id", "asc")
     .limit(CHUNK_SIZE);
 
-  if (filteredRows.length === 0) return false;
+  const newLastContactId = filteredRows?.at(-1)?.id ?? 0;
 
-  lastContactId = filteredRows?.at(-1)?.id ?? 0;
+  if (newLastContactId === 0) return false;
 
   const contacts = filteredRows.map((contact) => {
     const contactRow: { [key: string]: any } = {
@@ -160,7 +160,7 @@ const processFilteredContactsChunk = async (
     return contactRow;
   });
 
-  return { lastContactId, contacts };
+  return { lastContactId: newLastContactId, contacts };
 };
 
 interface ContactExportRow extends CampaignContactRecord {
@@ -365,7 +365,7 @@ interface UploadCampaignContacts {
   contactsCount: number;
   campaignId: number;
   helpers: ProgressTaskHelpers;
-  campaignContactsKey: string;
+  fileNameKey: string;
   onlyOptOuts: boolean;
 }
 
@@ -375,10 +375,14 @@ const processAndUploadCampaignContacts = async ({
   contactsCount,
   campaignId,
   helpers,
-  campaignContactsKey,
+  fileNameKey,
   onlyOptOuts
 }: UploadCampaignContacts): Promise<string> => {
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
+
+  const campaignContactsKey = onlyOptOuts
+    ? fileNameKey
+    : `${fileNameKey}-optouts`;
 
   const campaignContactsUploadStream = await getUploadStream(
     `${campaignContactsKey}.csv`
@@ -431,7 +435,8 @@ const processAndUploadCampaignContacts = async ({
       );
       processed += CHUNK_SIZE;
       await helpers.updateStatus(
-        Math.round((processed / contactsCount / 2) * 100) + 50
+        Math.round((processed / contactsCount / 4) * 100) +
+          (onlyOptOuts ? 75 : 25)
       );
       for (const c of chunkContactResult.contacts) {
         campaignContactsWriteStream.write(c);
@@ -447,19 +452,19 @@ const processAndUploadCampaignContacts = async ({
 };
 
 interface UploadCampaignMessages {
-  campaignContactsKey: string;
+  fileNameKey: string;
   contactsCount: number;
   helpers: ProgressTaskHelpers;
   campaignId: number;
 }
 
 const processAndUploadCampaignMessages = async ({
-  campaignContactsKey,
+  fileNameKey,
   contactsCount,
   helpers,
   campaignId
 }: UploadCampaignMessages): Promise<string> => {
-  const messagesKey = `${campaignContactsKey}-messages`;
+  const messagesKey = `${fileNameKey}-messages`;
   const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
   const messagesWriteStream = format({
     headers: true,
@@ -497,7 +502,7 @@ const processAndUploadCampaignMessages = async ({
       );
       processed += CHUNK_SIZE;
       await helpers.updateStatus(
-        Math.round((processed / contactsCount / 2) * 100)
+        Math.round((processed / contactsCount / 4) * 100)
       );
       for (const m of chunkMessageResult.messages) {
         messagesWriteStream.write(m);
@@ -513,19 +518,19 @@ const processAndUploadCampaignMessages = async ({
 };
 
 interface UploadFilteredContacts {
-  campaignContactsKey: string;
+  fileNameKey: string;
   helpers: ProgressTaskHelpers;
   campaignId: number;
   campaignTitle: string;
 }
 
 const processAndUploadFilteredContacts = async ({
-  campaignContactsKey,
+  fileNameKey,
   helpers,
   campaignId,
   campaignTitle
 }: UploadFilteredContacts): Promise<string> => {
-  const filteredContactsKey = `${campaignContactsKey}-filteredContacts`;
+  const filteredContactsKey = `${fileNameKey}-filteredContacts`;
   const filteredContactsUploadStream = await getUploadStream(
     `${filteredContactsKey}.csv`
   );
@@ -578,7 +583,7 @@ const processAndUploadFilteredContacts = async ({
       );
       processed += CHUNK_SIZE;
       await helpers.updateStatus(
-        Math.round((processed / contactsCount / 2) * 100) + 50
+        Math.round((processed / contactsCount / 4) * 100) + 75
       );
       for (const c of chunkContactResult.contacts) {
         filteredContactsWriteStream.write(c);
@@ -628,13 +633,11 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
   const contactsCount = countQueryResult[0].count as number;
 
   // Attempt upload to cloud storage
-  let campaignContactsKey = campaignTitle
-    .replace(/ /g, "_")
-    .replace(/\//g, "_");
+  let fileNameKey = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
 
   if (!isAutomatedExport) {
     const timestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
-    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
+    fileNameKey = `${fileNameKey}-${timestamp}`;
   }
 
   const {
@@ -646,7 +649,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
 
   const campaignExportUrl = shouldExportCampaign
     ? await processAndUploadCampaignContacts({
-        campaignContactsKey,
+        fileNameKey,
         campaignId,
         campaignTitle,
         contactsCount,
@@ -658,7 +661,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
 
   const campaignOptOutsExportUrl = shouldExportOptOuts
     ? await processAndUploadCampaignContacts({
-        campaignContactsKey: `${campaignContactsKey}-optouts`,
+        fileNameKey,
         campaignId,
         campaignTitle,
         contactsCount,
@@ -670,7 +673,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
 
   const campaignMessagesExportUrl = shouldExportMessages
     ? await processAndUploadCampaignMessages({
-        campaignContactsKey,
+        fileNameKey,
         campaignId,
         contactsCount,
         helpers
@@ -679,7 +682,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
 
   const campaignFilteredContactsExportUrl = shouldExportFilteredContacts
     ? await processAndUploadFilteredContacts({
-        campaignContactsKey,
+        fileNameKey,
         campaignId,
         campaignTitle,
         helpers
@@ -690,15 +693,14 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
 
   try {
     if (!isAutomatedExport) {
-      const exportContent = await getExportContent(
+      const exportContent = await getExportCampaignContent(
         {
           campaignExportUrl,
           campaignFilteredContactsExportUrl,
           campaignOptOutsExportUrl,
           campaignMessagesExportUrl
         },
-        campaignTitle,
-        campaignId
+        campaignTitle
       );
       await sendEmail({
         to: notificationEmail,

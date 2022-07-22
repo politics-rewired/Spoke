@@ -11,13 +11,11 @@ export type ExportURLs = {
 interface ExportProps {
   exportUrls: ExportURLs;
   campaignTitle: string;
-  organizationName: string;
 }
 
-const Export: React.FC<ExportProps> = ({
+const ExportCampaign: React.FC<ExportProps> = ({
   exportUrls,
-  campaignTitle,
-  organizationName
+  campaignTitle
 }) => {
   const {
     campaignExportUrl,
@@ -45,22 +43,17 @@ const Export: React.FC<ExportProps> = ({
         </p>
       )}
       <br />
-      -- The {organizationName} Team
+      -- The Spoke Rewired Team
     </div>
   );
 };
 
 export const getContent = async (
   exportUrls: ExportURLs,
-  campaignTitle: string,
-  organizationName: string
+  campaignTitle: string
 ) => {
   const template = (
-    <Export
-      campaignTitle={campaignTitle}
-      exportUrls={exportUrls}
-      organizationName={organizationName}
-    />
+    <ExportCampaign campaignTitle={campaignTitle} exportUrls={exportUrls} />
   );
 
   return ReactDOMServer.renderToStaticMarkup(template);

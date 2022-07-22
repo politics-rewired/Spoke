@@ -218,10 +218,19 @@ export async function uploadContacts(job) {
     }
 
     try {
-      await trx.raw(
-        `insert into filtered_contact (
+      const optOutSubQuery = getOptOutSubQuery(
+        campaign.organization_id
+      ).toString();
+      const { rowCount: deleteOptOutCells } = await trx.raw(
+        `with deleted_contacts as (
+          delete from campaign_contact
+          where
+            campaign_id = ?
+            and cell in (${optOutSubQuery})
+          returning *
+        )
+        insert into filtered_contact (
            campaign_id,
-           assignment_id,
            external_id,
            first_name,
            last_name,
@@ -230,15 +239,11 @@ export async function uploadContacts(job) {
            custom_fields,
            created_at,
            updated_at,
-           message_status,
-           is_opted_out,
            timezone,
-           archived,
            filtered_reason
          )
          select
            campaign_id,
-           assignment_id,
            external_id,
            first_name,
            last_name,
@@ -247,23 +252,12 @@ export async function uploadContacts(job) {
            custom_fields,
            created_at,
            updated_at,
-           message_status,
-           is_opted_out,
            timezone,
-           archived,
            'OPTEDOUT'
-         from campaign_contact
-         where campaign_id = ? and cell in (${getOptOutSubQuery(
-           campaign.organization_id
-         ).toString()})
+         from deleted_contacts
 `,
         [campaignId]
       );
-
-      const deleteOptOutCells = await trx("campaign_contact")
-        .whereIn("cell", getOptOutSubQuery(campaign.organization_id))
-        .where("campaign_id", campaignId)
-        .delete();
 
       if (deleteOptOutCells) {
         resultMessages.push(

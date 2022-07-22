@@ -2,9 +2,10 @@ import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import Grid from "@material-ui/core/Grid";
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "@material-ui/lab/Alert";
 import { css, StyleSheet } from "aphrodite";
 import Divider from "material-ui/Divider";
-import Snackbar from "material-ui/Snackbar";
 import PropTypes from "prop-types";
 import React from "react";
 import { Helmet } from "react-helmet";
@@ -83,7 +84,9 @@ class AdminCampaignStats extends React.Component {
     copyingCampaign: false,
     campaignJustCopied: false,
     copiedCampaignId: undefined,
-    copyCampaignError: undefined
+    copyCampaignError: undefined,
+    exportCampaignOpen: false,
+    exportCampaignError: undefined
   };
 
   handleNavigateToEdit = () => {
@@ -111,6 +114,14 @@ class AdminCampaignStats extends React.Component {
       exportDialogOpen: false,
       exportMessageOpen: true,
       disableExportButton: true
+    });
+  };
+
+  handleErrorCampaignExport = async (errorMessage) => {
+    this.setState({
+      exportCampaignError: errorMessage,
+      exportCampaignOpen: true,
+      exportDialogOpen: false
     });
   };
 
@@ -352,7 +363,7 @@ class AdminCampaignStats extends React.Component {
           open={this.state.exportMessageOpen}
           message="Export started - we'll e-mail you when it's done"
           autoHideDuration={5000}
-          onRequestClose={() => {
+          onClose={() => {
             this.setState({ exportMessageOpen: false });
           }}
         />
@@ -364,7 +375,7 @@ class AdminCampaignStats extends React.Component {
               : `Campaign successfully copied to campaign ${this.state.copiedCampaignId}`
           }
           autoHideDuration={5000}
-          onRequestClose={() => {
+          onClose={() => {
             this.setState({
               campaignJustCopied: false,
               copiedCampaignId: undefined,
@@ -377,7 +388,20 @@ class AdminCampaignStats extends React.Component {
           open={this.state.exportDialogOpen}
           onClose={this.handleCloseCampaignExport}
           onComplete={this.handleCompleteCampaignExport}
+          onError={this.handleErrorCampaignExport}
         />
+        <Snackbar
+          open={this.state.exportCampaignOpen}
+          autoHideDuration={5000}
+          onClose={() => {
+            this.setState({
+              exportCampaignOpen: false,
+              exportCampaignError: undefined
+            });
+          }}
+        >
+          <Alert severity="error">{this.state.exportCampaignError}</Alert>
+        </Snackbar>
         <VanExportModal
           campaignId={campaignId}
           open={this.state.exportVanOpen}

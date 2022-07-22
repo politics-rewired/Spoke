@@ -14,12 +14,13 @@ import React, { useState } from "react";
 interface CampaignExportModalProps {
   open: boolean;
   campaignId: string;
+  onError(errorMessage: string): void;
   onClose(): void;
   onComplete(): void;
 }
 
 const CampaignExportModal: React.FC<CampaignExportModalProps> = (props) => {
-  const { campaignId, open, onClose, onComplete } = props;
+  const { campaignId, open, onClose, onComplete, onError } = props;
   const [exportCampaign, setExportCampaign] = useState<boolean>(true);
   const [exportMessages, setExportMessages] = useState<boolean>(true);
   const [exportOptOut, setExportOptOut] = useState<boolean>(false);
@@ -33,8 +34,8 @@ const CampaignExportModal: React.FC<CampaignExportModalProps> = (props) => {
 
   const [exportCampaignMutation] = useExportCampaignMutation();
 
-  const handleExportClick = () => {
-    exportCampaignMutation({
+  const handleExportClick = async () => {
+    const result = await exportCampaignMutation({
       variables: {
         options: {
           campaignId,
@@ -48,6 +49,11 @@ const CampaignExportModal: React.FC<CampaignExportModalProps> = (props) => {
         }
       }
     });
+    if (result.errors) {
+      const message = result.errors.map((e) => e.message).join(", ");
+      onError(message);
+      return;
+    }
     onComplete();
   };
 
