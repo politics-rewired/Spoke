@@ -2353,7 +2353,6 @@ ALTER TABLE public.external_sync_question_response_configuration OWNER TO postgr
 CREATE TABLE public.filtered_contact (
     id integer NOT NULL,
     campaign_id integer NOT NULL,
-    assignment_id integer,
     external_id text NOT NULL,
     first_name text NOT NULL,
     last_name text NOT NULL,
@@ -2362,12 +2361,9 @@ CREATE TABLE public.filtered_contact (
     custom_fields text NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    message_status text NOT NULL,
-    is_opted_out boolean DEFAULT false,
     timezone character varying(255),
-    archived boolean DEFAULT false,
     filtered_reason text NOT NULL,
-    CONSTRAINT filtered_reason_check CHECK ((filtered_reason = ANY (ARRAY['INVALID'::text, 'LANDLINE'::text, 'VOIP'::text, 'OPTEDOUT'::text])))
+    CONSTRAINT filtered_contact_filtered_reason_check CHECK ((filtered_reason = ANY (ARRAY['INVALID'::text, 'LANDLINE'::text, 'VOIP'::text, 'OPTEDOUT'::text])))
 );
 
 
@@ -5286,14 +5282,6 @@ ALTER TABLE ONLY public.external_sync_opt_out_configuration
 
 ALTER TABLE ONLY public.external_sync_opt_out_configuration
     ADD CONSTRAINT external_sync_opt_out_configuration_system_id_fkey FOREIGN KEY (system_id) REFERENCES public.external_system(id);
-
-
---
--- Name: filtered_contact filtered_contact_assignment_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.filtered_contact
-    ADD CONSTRAINT filtered_contact_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES public.assignment(id);
 
 
 --
