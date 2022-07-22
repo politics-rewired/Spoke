@@ -39,12 +39,11 @@ export const stringIsAValidUrl = (s) => {
   }
 };
 
+export const asPercent = (numerator, denominator) =>
+  denominator === 0 ? 0 : (numerator / denominator) * 100;
+
 export const asPercentWithTotal = (numerator, denominator) =>
-  `${
-    denominator === 0
-      ? 0
-      : ((numerator / denominator) * 100).toString().slice(0, 4)
-  }%(${numerator})`;
+  `${asPercent(numerator, denominator).toString().slice(0, 4)}%(${numerator})`;
 
 export const replaceAll = (str, find, replace) =>
   str.replace(new RegExp(escapeRegExp(find), "g"), replace);
