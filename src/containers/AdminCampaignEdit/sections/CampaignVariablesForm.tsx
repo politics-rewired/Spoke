@@ -127,7 +127,6 @@ const CampaignVariablesForm: React.FC<FullComponentProps> = (props) => {
       const payload = formValues.campaignVariables
         .filter(({ name }) => !!name)
         .map((variable, index) => {
-          console.log(variable);
           const name = variable.name.trim().startsWith("cv:")
             ? variable.name
             : `cv:${variable.name.trim()}`;
