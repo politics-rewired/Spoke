@@ -1074,6 +1074,14 @@ CREATE FUNCTION public.queue_sync_campaign_to_van(campaign_id integer) RETURNS v
       perform
         graphile_worker.add_job(
           'van-sync-campaign-contact',
+          payload,
+          -- VAN API docs suggest 60 req/s for post canvass results; we'll use 30 req/s to be safe
+          -- Ref: https://docs.ngpvan.com/docs/throttling-guidelines#suggested-throttling
+          run_at => now() + (interval '1 second' / 30) * n,
+          priority => 10
+        )
+      from (
+        select 
           json_build_object(
             'username', v_username,
             'api_key', json_build_object('__secret', v_api_key_ref),
@@ -1088,14 +1096,12 @@ CREATE FUNCTION public.queue_sync_campaign_to_van(campaign_id integer) RETURNS v
               'job_request_id', v_job_request_id,
               'contact_count', v_contact_count
             )
-          ),
-          'van-api',
-          priority => 10
-        )
-      from public.campaign_contact cc
-      where
-        cc.campaign_id = queue_sync_campaign_to_van.campaign_id
-      ;
+          ) as payload,
+          row_number() over (partition by 1) as n
+        from public.campaign_contact cc
+        where
+          cc.campaign_id = queue_sync_campaign_to_van.campaign_id
+      ) payloads;
     end;
     $$;
 
