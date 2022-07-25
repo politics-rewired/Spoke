@@ -1065,7 +1065,7 @@ type Team {
   backgroundColor: String!
   author: User
   isAssignmentEnabled: Boolean!
-  assignmentPriority: Int!
+  assignmentPriority: Int
   assignmentType: TextRequestType
   maxRequestCount: Int
   createdAt: Date!
