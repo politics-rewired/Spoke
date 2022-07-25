@@ -822,7 +822,7 @@ export class AssignmentTexterContact extends React.Component {
           >
             {size <= 840 && (
               <MenuItem
-                primaryText="CannedResponses"
+                primaryText="Canned Responses"
                 disabled={!isCannedResponseEnabled}
                 onClick={this.handleOpenPopover}
                 leftIcon={<ReplyIcon />}
