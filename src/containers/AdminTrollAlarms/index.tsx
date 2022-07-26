@@ -10,6 +10,7 @@ import Paper from "material-ui/Paper";
 import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
 import React, { useState } from "react";
+import useClipboard from "react-hook-clipboard";
 import { RouteChildrenProps } from "react-router-dom";
 import {
   BooleanParam,
@@ -64,6 +65,8 @@ const AdminTrollAlarms: React.FC<Props> = (props) => {
   const [page, setPage] = useQueryParam("page", NumberParam);
   const [dismissed, setDismissed] = useQueryParam("dismissed", BooleanParam);
   const [token, setToken] = useQueryParam("token", StringParam);
+
+  const [_clipboard, copyToClipboard] = useClipboard();
 
   const handleOnCancelError = () => setError(undefined);
 
@@ -145,7 +148,7 @@ const AdminTrollAlarms: React.FC<Props> = (props) => {
     ].join("\n");
 
     try {
-      navigator.clipboard.writeText(clipboardContents);
+      copyToClipboard(clipboardContents);
       setCopiedAlarmID(alarm.id);
     } catch (err) {
       setError(err.message);
