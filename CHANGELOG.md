@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.34.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.34.0-rc.0...v4.34.0-rc.1) (2022-07-26)
+
+
+### Features
+
+* **texter conversation:** update button in line with design doc ([#1321](https://github.com/politics-rewired/spoke/issues/1321)) ([beb7287](https://github.com/politics-rewired/spoke/commit/beb7287c0d7aa860de2390281f0fd39ae7c415f1))
+
+
+### Bug Fixes
+
+* **clipboard:** fix safari paste popup ([#1326](https://github.com/politics-rewired/spoke/issues/1326)) ([a9b753c](https://github.com/politics-rewired/spoke/commit/a9b753cfbb7059074191f07f9826a44e46c463b7))
+
 ## [4.34.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.33.0...v4.34.0-rc.0) (2022-07-25)
 
 
