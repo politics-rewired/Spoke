@@ -41,8 +41,7 @@ const rootSchema = `
   input BulkUpdateScriptInput {
     searchString: String!
     replaceString: String!
-    includeArchived: Boolean!
-    campaignTitlePrefixes: [String]!
+    campaignIds: [String!]!
   }
 
   input ContactActionInput {
@@ -168,6 +167,13 @@ const rootSchema = `
     data: String!
   }
 
+  type ScriptUpdateChange {
+    id: String!
+    campaignId: String!
+    campaignName: String!
+    script: String!
+  }
+
   type ScriptUpdateResult {
     campaignId: String!
     found: String!
@@ -235,6 +241,7 @@ const rootSchema = `
     notices(organizationId: String): NoticePage!
     campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
     campaignNavigation(campaignId: String!): CampaignNavigation!
+    bulkUpdateScriptChanges(organizationId: String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateChange!]!
   }
 
   input SecondPassInput {

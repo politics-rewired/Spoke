@@ -1,0 +1,46 @@
+query GetCampaignsBulkScriptEditor(
+  $organizationId: String!
+  $campaignsFilter: CampaignsFilter!
+) {
+  organization(id: $organizationId) {
+    id
+    campaigns(
+      cursor: { offset: 0, limit: 10000 }
+      campaignsFilter: $campaignsFilter
+    ) {
+      campaigns {
+        id
+        title
+      }
+    }
+  }
+}
+
+query GetScriptUpdateChanges(
+  $organizationId: String!
+  $findAndReplace: BulkUpdateScriptInput!
+) {
+  bulkUpdateScriptChanges(
+    organizationId: $organizationId
+    findAndReplace: $findAndReplace
+  ) {
+    id
+    campaignId
+    campaignName
+    script
+  }
+}
+
+mutation BulkUpdateScript(
+  $organizationId: String!
+  $findAndReplace: BulkUpdateScriptInput!
+) {
+  bulkUpdateScript(
+    organizationId: $organizationId
+    findAndReplace: $findAndReplace
+  ) {
+    campaignId
+    found
+    replaced
+  }
+}
