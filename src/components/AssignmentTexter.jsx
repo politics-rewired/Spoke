@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unused-state */
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
-import ButtonGroup from "@material-ui/core/ButtonGroup";
+import IconButton from "@material-ui/core/IconButton";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
@@ -258,31 +258,20 @@ class AssignmentTexter extends React.Component {
         className={css(styles.navigationToolbarTitle)}
         text={title}
       />,
-      <ButtonGroup
-        variant="outlined"
-        key="navButtons"
-        style={{ marginTop: 5, display: "inline" }}
+      <IconButton
+        key="previous"
+        onClick={this.handleNavigatePrevious}
+        disabled={!this.hasPrevious()}
       >
-        <Button
-          key="previous"
-          style={{ width: 75, alignItems: "flex-start" }}
-          onClick={this.handleNavigatePrevious}
-          disabled={!this.hasPrevious()}
-          startIcon={<NavigateBeforeIcon />}
-        >
-          PREV
-        </Button>
-        ,
-        <Button
-          key="next"
-          style={{ width: 75, alignItems: "flex-start" }}
-          onClick={this.handleNavigateNext}
-          disabled={!this.hasNext()}
-          endIcon={<NavigateNextIcon />}
-        >
-          NEXT
-        </Button>
-      </ButtonGroup>
+        <NavigateBeforeIcon />
+      </IconButton>,
+      <IconButton
+        key="next"
+        onClick={this.handleNavigateNext}
+        disabled={!this.hasNext()}
+      >
+        <NavigateNextIcon />
+      </IconButton>
     ];
   };
 
