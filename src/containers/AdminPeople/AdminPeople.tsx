@@ -148,8 +148,9 @@ interface AdminPeopleExtensionProps
   mutations: AdminPeopleMutations;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface AdminPeopleProps {}
+interface AdminPeopleProps {
+  organizationId?: string;
+}
 
 type AdminPeopleExtendedProps = AdminPeopleExtensionProps & AdminPeopleProps;
 
@@ -324,7 +325,9 @@ class AdminPeople extends React.Component<
   };
 
   handleResetPassword = async (userId: string) => {
-    const { organizationId } = this.props.match.params;
+    const { organizationId: organizationIdParams } = this.props.match.params;
+    const { organizationId: organizationIdProps } = this.props;
+    const organizationId = organizationIdProps ?? organizationIdParams;
     if (!organizationId) return;
     const { currentUser } = this.props.userData;
     if (currentUser.id !== userId) {
@@ -496,11 +499,12 @@ const queries: QueryMap<AdminPeopleExtendedProps> = {
     `,
     options: ({
       match: {
-        params: { organizationId }
-      }
+        params: { organizationId: organizationIdParams }
+      },
+      organizationId: organizationIdProps
     }: AdminPeopleExtendedProps) => ({
       variables: {
-        organizationId
+        organizationId: organizationIdProps ?? organizationIdParams
       }
     })
   },
@@ -524,11 +528,12 @@ const queries: QueryMap<AdminPeopleExtendedProps> = {
     `,
     options: ({
       match: {
-        params: { organizationId }
-      }
+        params: { organizationId: organizationIdParams }
+      },
+      organizationId: organizationIdProps
     }: AdminPeopleExtendedProps) => ({
       variables: {
-        organizationId
+        organizationId: organizationIdProps ?? organizationIdParams
       }
     })
   }

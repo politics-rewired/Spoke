@@ -23,15 +23,15 @@ const styles = StyleSheet.create({
 export interface NavigationSection {
   name: string;
   path: string;
-  role: string;
+  role?: string;
   badge?: { count: number };
-  url: string;
+  url?: string;
 }
 
 interface Props {
   sections: NavigationSection[];
   onToggleMenu: () => React.MouseEventHandler<unknown>;
-  switchListItem: JSX.Element;
+  switchListItem?: JSX.Element;
   showMenu?: boolean;
 }
 

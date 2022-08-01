@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client";
 import { common } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -10,9 +9,7 @@ import { Link } from "react-router-dom";
 import { compose } from "recompose";
 
 import { Organization } from "../api/organization";
-import { withOperations } from "../containers/hoc/with-operations";
 import UserMenu from "../containers/UserMenu";
-import { QueryMap } from "../network/types";
 import baseTheme from "../styles/theme";
 import { MuiThemeProviderProps } from "../styles/types";
 
@@ -50,16 +47,21 @@ const styles = StyleSheet.create({
 interface OuterProps {
   backToURL?: string;
   title: string;
-  orgId: string;
+  orgId?: string;
+  sectionTitle: string;
 }
 
 interface InnerProps extends OuterProps, MuiThemeProviderProps {
   data: { organization?: Pick<Organization, "id" | "name"> };
 }
 
-const TopNav: React.FC<InnerProps> = (props) => {
-  const { backToURL, orgId, title, muiTheme } = props;
-
+const TopNav: React.FC<InnerProps> = ({
+  backToURL,
+  orgId,
+  title,
+  sectionTitle,
+  muiTheme
+}) => {
   const overrides = {
     container: {
       backgroundColor:
@@ -67,14 +69,12 @@ const TopNav: React.FC<InnerProps> = (props) => {
     }
   };
 
-  const orgTitle = props.data?.organization
-    ? `${props.data.organization.name} - ${title}`
-    : "";
+  const pageTitle = `${sectionTitle} - ${title}`;
 
   return (
     <div className={css(styles.container)} style={overrides.container}>
       <Helmet>
-        <title>{orgTitle}</title>
+        <title>{pageTitle}</title>
       </Helmet>
       <div className={css(styles.flexColumn)}>
         <div className={css(styles.inline)}>
@@ -86,7 +86,7 @@ const TopNav: React.FC<InnerProps> = (props) => {
             </Link>
           )}
         </div>
-        <div className={css(styles.inline, styles.header)}>{orgTitle}</div>
+        <div className={css(styles.inline, styles.header)}>{pageTitle}</div>
       </div>
       <div className={css(styles.userMenu)}>
         <UserMenu orgId={orgId} />
@@ -95,25 +95,4 @@ const TopNav: React.FC<InnerProps> = (props) => {
   );
 };
 
-const queries: QueryMap<OuterProps> = {
-  data: {
-    query: gql`
-      query getOrganizationName($id: String!) {
-        organization(id: $id) {
-          id
-          name
-        }
-      }
-    `,
-    options: (ownProps) => ({
-      variables: {
-        id: ownProps.orgId
-      }
-    })
-  }
-};
-
-export default compose<InnerProps, OuterProps>(
-  muiThemeable(),
-  withOperations({ queries })
-)(TopNav);
+export default compose<InnerProps, OuterProps>(muiThemeable())(TopNav);

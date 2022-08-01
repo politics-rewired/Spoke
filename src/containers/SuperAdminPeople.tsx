@@ -1,0 +1,47 @@
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import { useGetOrganizationsQuery } from "@spoke/spoke-codegen";
+import React, { useState } from "react";
+
+import AdminPeople from "./AdminPeople";
+
+const SuperAdminPeople: React.FC = (_props) => {
+  const [organization, setOrganization] = useState<number>();
+  const {
+    data: organizationsData,
+    loading: orgsLoading
+  } = useGetOrganizationsQuery();
+  if (orgsLoading) {
+    return <div>"Loading..."</div>;
+  }
+
+  const handleOrgChanged = (event: React.ChangeEvent<{ value: number }>) => {
+    setOrganization(event.target.value);
+  };
+
+  const organizations = organizationsData?.organizations ?? [];
+  return (
+    <div>
+      <FormControl>
+        <InputLabel id="organization-label">Organization</InputLabel>
+        <Select
+          style={{ width: 300 }}
+          labelId="organization-label"
+          value={organization}
+          onChange={handleOrgChanged}
+        >
+          {organizations.map((org) => (
+            <MenuItem key={org.id} value={org.id}>
+              {org.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {organization && <AdminPeople organizationId={organization} />}
+    </div>
+  );
+};
+
+export default SuperAdminPeople;

@@ -74,6 +74,8 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
       }
     } else if (value === "home") {
       history.push(`/app/${orgId}/todos`);
+    } else if (value === "superadmin") {
+      history.push(`/superadmin`);
     } else if (value === "docs") {
       window.open("https://docs.spokerewired.com", "_blank");
     }
@@ -134,7 +136,15 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
               {currentUser.email}
             </MenuItem>
             <Divider />
-            <MenuItem {...dataTest("home")} primaryText="Home" value="home" />
+            <MenuItem
+              disabled={!orgId}
+              {...dataTest("home")}
+              primaryText="Home"
+              value="home"
+            />
+            {currentUser.isSuperadmin && (
+              <MenuItem primaryText="Superadmin" value="superadmin" />
+            )}
             <Divider />
             <Subheader>Teams</Subheader>
             {currentUser.organizations.map((organization) => (
@@ -174,6 +184,7 @@ const queries: QueryMap<Props> = {
           id
           displayName
           email
+          isSuperadmin
           organizations {
             id
             name
