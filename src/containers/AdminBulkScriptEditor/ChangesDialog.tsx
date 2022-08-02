@@ -81,12 +81,12 @@ const ChangesDialog: React.FC<ChangesDialogProps> = ({
       <DialogContent>
         {changes.map((changeList) => (
           <div key={changeList[0].campaignId}>
-            <p style={{ fontSize: "1.2em" }}>
+            <p style={{ fontSize: "1.2em", marginBottom: 20 }}>
               {changeList[0].campaignId}: {changeList[0].campaignName}
             </p>
             <ul key={changeList[0].campaignId}>
               {changeList.map(({ id, script }) => (
-                <li key={id}>
+                <li key={id} style={{ marginBottom: 20 }}>
                   <span style={{ fontWeight: 600 }}>Found:</span>{" "}
                   {colorOriginal(script)}
                   <br />

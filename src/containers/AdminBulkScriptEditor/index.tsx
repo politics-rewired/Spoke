@@ -8,11 +8,13 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Paper from "@material-ui/core/Paper";
 import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
-import Autocomplete, {
-  AutocompleteChangeReason
-} from "@material-ui/lab/Autocomplete";
 import {
-  Campaign,
+  DataGridPro,
+  GridColDef,
+  GridLinkOperator,
+  GridSelectionModel
+} from "@mui/x-data-grid-pro";
+import {
   useBulkUpdateScriptMutation,
   useGetCampaignsBulkScriptEditorQuery,
   useGetScriptUpdateChangesLazyQuery
@@ -54,9 +56,9 @@ const AdminBulkScriptEditor: React.FC = (props) => {
   const [searchString, setSearchString] = useState<string>("");
   const [replaceString, setReplaceString] = useState<string>("");
   const [includeArchived, setIncludeArchived] = useState<boolean>(false);
-  const [selectedCampaigns, setSelectedCampaigns] = useState<Array<Campaign>>(
-    []
-  );
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [filterText, setFilterText] = useState<string | null | undefined>();
+  const [selectedCampaigns, setSelectedCampaigns] = useState<Array<string>>([]);
 
   const campaignsFilter = includeArchived
     ? {}
@@ -64,19 +66,24 @@ const AdminBulkScriptEditor: React.FC = (props) => {
         isArchived: false
       };
 
-  const { data: campaignsList } = useGetCampaignsBulkScriptEditorQuery({
+  const {
+    data: campaignsList,
+    loading: campaignsLoading
+  } = useGetCampaignsBulkScriptEditorQuery({
     variables: {
       campaignsFilter,
       organizationId: props.match.params.organizationId
     }
   });
 
+  const campaigns = campaignsList?.organization?.campaigns?.campaigns ?? [];
+
   const [getScriptUpdateChanges] = useGetScriptUpdateChangesLazyQuery({
     variables: {
       findAndReplace: {
         searchString,
         replaceString,
-        campaignIds: selectedCampaigns.map((c) => c.id)
+        campaignIds: selectedCampaigns
       },
       organizationId: props.match.params.organizationId
     }
@@ -87,7 +94,7 @@ const AdminBulkScriptEditor: React.FC = (props) => {
       findAndReplace: {
         replaceString,
         searchString,
-        campaignIds: selectedCampaigns.map((c) => c.id)
+        campaignIds: selectedCampaigns
       },
       organizationId: props.match.params.organizationId
     }
@@ -163,13 +170,8 @@ const AdminBulkScriptEditor: React.FC = (props) => {
     setChangesList(null);
   };
 
-  const handleCampaignIdsChanged = (
-    _event: React.ChangeEvent,
-    value: Array<Campaign>,
-    _reason: AutocompleteChangeReason
-  ) => {
-    setSelectedCampaigns(value);
-  };
+  const handleCampaignsSelected = (rowsSelected: GridSelectionModel) =>
+    setSelectedCampaigns(rowsSelected as Array<string>);
 
   const isSubmitDisabled =
     isSubmitting || isEmpty(searchString) || isEmpty(replaceString);
@@ -187,6 +189,19 @@ const AdminBulkScriptEditor: React.FC = (props) => {
     <Button key="ok" color="primary" onClick={handleClose}>
       OK
     </Button>
+  ];
+
+  const columns: GridColDef[] = [
+    {
+      field: "id",
+      headerName: "Campaign ID",
+      flex: 1
+    },
+    {
+      field: "title",
+      headerName: "Campaign Name",
+      flex: 3
+    }
   ];
 
   return (
@@ -238,23 +253,42 @@ const AdminBulkScriptEditor: React.FC = (props) => {
             />
           }
         />
-        <p>Restrict to campaigns beginning with text (optional):</p>
-        <Autocomplete
-          disableCloseOnSelect
-          multiple
+        <TextField
+          label="Filter campaigns"
+          value={filterText}
           fullWidth
-          options={campaignsList?.organization?.campaigns?.campaigns ?? []}
-          getOptionLabel={(option) => `${option.id}: ${option.title}`}
-          getOptionSelected={(option, selected) => option.id === selected.id}
-          onChange={handleCampaignIdsChanged}
-          value={selectedCampaigns}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              label="Select campaigns to restrict to"
-            />
-          )}
+          disabled={isSubmitting}
+          onChange={(event) => setFilterText(event.target.value)}
+        />
+        <p>Restrict to campaigns:</p>
+        <DataGridPro
+          autoHeight
+          checkboxSelection
+          pagination
+          pageSize={pageSize}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+          rowsPerPageOptions={[10, 30, 50, 100, 500, 1000, 2000]}
+          loading={campaignsLoading}
+          columns={columns}
+          rows={campaigns}
+          filterModel={{
+            items: [
+              {
+                id: 1,
+                columnField: "title",
+                operatorValue: "contains",
+                value: filterText
+              },
+              {
+                id: 2,
+                columnField: "id",
+                operatorValue: "contains",
+                value: filterText
+              }
+            ],
+            linkOperator: GridLinkOperator.Or
+          }}
+          onSelectionModelChange={handleCampaignsSelected}
         />
       </Paper>
       <Button
