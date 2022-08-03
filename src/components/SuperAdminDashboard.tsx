@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { RouterProps, withRouter } from "react-router-dom";
 
 import theme from "../styles/theme";
+import { useAuthzContext } from "./AuthzProvider";
 import Navigation from "./Navigation";
 import TopNav from "./TopNav";
 
@@ -29,6 +30,8 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   location,
   children
 }) => {
+  const { isSuperadmin } = useAuthzContext();
+
   const classes = useStyles();
   const [showMenu, setShowMenu] = useState<boolean>(true);
 
@@ -39,7 +42,8 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const currentSection = sections
     .filter((section) => location.pathname.match(`/${section.path}`))
     .at(0);
-  return (
+
+  return isSuperadmin ? (
     <div>
       <TopNav
         sectionTitle="SuperAdmin"
@@ -55,6 +59,14 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         </div>
         <div className={classes.content}>{children}</div>
       </div>
+    </div>
+  ) : (
+    <div>
+      <TopNav
+        sectionTitle="SuperAdmin"
+        title={currentSection?.name ?? "SuperAdmin"}
+      />
+      <h1>You don't have permission to access this page</h1>
     </div>
   );
 };

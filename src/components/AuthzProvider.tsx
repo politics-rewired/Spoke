@@ -1,4 +1,7 @@
-import { useCurrentUserOrganizationRolesQuery } from "@spoke/spoke-codegen";
+import {
+  useCurrentUserOrganizationRolesQuery,
+  useCurrentUserSuperAdminQuery
+} from "@spoke/spoke-codegen";
 import React, { useContext, useEffect } from "react";
 
 import { UserRoleType } from "../api/organization-membership";
@@ -23,11 +26,15 @@ export const AuthzContext = React.createContext<AuthzContextType>({
   isSupervol: false
 });
 
-export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
-  const { data, loading, error } = useCurrentUserOrganizationRolesQuery({
-    variables: { organizationId: props.organizationId },
-    skip: props.organizationId === undefined
-  });
+export const AuthzProvider: React.FC<{ organizationId?: string }> = ({
+  organizationId,
+  children
+}) => {
+  const { data, loading, error } = organizationId
+    ? useCurrentUserOrganizationRolesQuery({
+        variables: { organizationId }
+      })
+    : useCurrentUserSuperAdminQuery();
   const roles = (data?.currentUser?.roles ?? []) as UserRoleType[];
   const isSuperadmin = data?.currentUser?.isSuperadmin ?? false;
   const hasAdminPermissions =
@@ -36,8 +43,8 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
   const { setOrganizationId } = useSpokeContext();
 
   useEffect(() => {
-    setOrganizationId(props.organizationId);
-  }, [props.organizationId]);
+    setOrganizationId(organizationId);
+  }, [organizationId]);
 
   useEffect(() => {
     if (!loading && error !== undefined) {
@@ -53,7 +60,7 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
       hasRole: (role: UserRoleType) => hasRole(role, roles),
       isSuperadmin,
       isOwner: hasRole(UserRoleType.OWNER, roles),
-      isAdmin: hasRole(UserRoleType.ADMIN, roles),
+      isAdmin: hasAdminPermissions,
       isSupervol: hasRole(UserRoleType.SUPERVOLUNTEER, roles)
     }),
     [roles]
@@ -61,9 +68,7 @@ export const AuthzProvider: React.FC<{ organizationId: string }> = (props) => {
 
   if (loading) return null;
   return (
-    <AuthzContext.Provider value={value}>
-      {props.children}
-    </AuthzContext.Provider>
+    <AuthzContext.Provider value={value}>{children}</AuthzContext.Provider>
   );
 };
 

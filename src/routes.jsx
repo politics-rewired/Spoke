@@ -246,10 +246,16 @@ const AdminRoutes = ({ match }) => (
 
 const SuperAdminRoutes = ({ match }) => (
   <Switch>
-    <SuperAdminDashboard>
-      <Route path={`${match.path}/people`} exact component={SuperAdminPeople} />
-      <Redirect to={`${match.path}/people`} />
-    </SuperAdminDashboard>
+    <AuthzProvider>
+      <SuperAdminDashboard>
+        <Route
+          path={`${match.path}/people`}
+          exact
+          component={SuperAdminPeople}
+        />
+        <Redirect to={`${match.path}/people`} />
+      </SuperAdminDashboard>
+    </AuthzProvider>
   </Switch>
 );
 
