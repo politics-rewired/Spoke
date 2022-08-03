@@ -731,8 +731,7 @@ WHERE campaign_id = ?`,
 
   const campaignContact = await r
     .knex("campaign_contact")
-    .where({ message_status: "needsMessage", campaign_id: campaignId })
-    .orderBy("updated_at")
+    .where({ campaign_id: campaignId })
     .first();
 
   const customFields = campaignContact
