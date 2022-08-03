@@ -45,10 +45,12 @@ async function doGetUsers({
   campaignsFilter = {},
   role
 }) {
-  const query = r
-    .knex("user")
-    .innerJoin("user_organization", "user_organization.user_id", "user.id")
-    .where({ "user_organization.organization_id": organizationId });
+  const query = r.knex("user");
+  if (organizationId) {
+    query
+      .innerJoin("user_organization", "user_organization.user_id", "user.id")
+      .where({ "user_organization.organization_id": organizationId });
+  }
 
   if (role) {
     query.where({ role });
@@ -165,7 +167,8 @@ export const resolvers = {
       "isSuspended"
     ]),
     isSuperadmin: (userRecord, _, { user: authUser }) => {
-      if (userRecord.id !== authUser.id) throw new ForbiddenError();
+      if (userRecord.id !== authUser.id && !authUser.is_superadmin)
+        throw new ForbiddenError();
       return userRecord.is_superadmin;
     },
     displayName: (user) => `${user.first_name} ${user.last_name}`,

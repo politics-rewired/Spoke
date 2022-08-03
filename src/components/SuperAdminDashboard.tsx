@@ -37,7 +37,10 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   const onToggleMenu = () => setShowMenu(!showMenu);
 
-  const sections = [{ name: "People", path: "people" }];
+  const sections = [
+    { name: "People", path: "people", url: "/superadmin/people" },
+    { name: "SuperAdmins", path: "superadmins", url: "/superadmin/superadmins" }
+  ];
 
   const currentSection = sections
     .filter((section) => location.pathname.match(`/${section.path}`))

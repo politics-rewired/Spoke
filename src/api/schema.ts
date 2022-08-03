@@ -222,7 +222,7 @@ const rootSchema = `
     availableActions(organizationId:String!): [Action]
     conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
     campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
-    people(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
+    people(organizationId:String, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
     peopleByUserIds(userIds:[String], organizationId:String!): UsersList
     fetchCampaignOverlaps(input: FetchCampaignOverlapInput!): [FetchCampaignOverlapResult]!
     assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
@@ -235,6 +235,7 @@ const rootSchema = `
     notices(organizationId: String): NoticePage!
     campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
     campaignNavigation(campaignId: String!): CampaignNavigation!
+    superadmins: [User!]
   }
 
   input SecondPassInput {
@@ -333,6 +334,7 @@ const rootSchema = `
     syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
     editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
     unassignTextsFromUser(membershipId: String!): Boolean!
+    editSuperAdminStatus(userEmail: String!, superAdminStatus: Boolean!): Boolean!
   }
 
   schema {
