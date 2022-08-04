@@ -732,7 +732,7 @@ WHERE campaign_id = ?`,
   const campaignContact = await r
     .knex("campaign_contact")
     .where({ campaign_id: campaignId })
-    .first();
+    .first(["custom_fields"]);
 
   const customFields = campaignContact
     ? Object.keys(JSON.parse(campaignContact.custom_fields))
