@@ -5,7 +5,8 @@
 !/package.json
 !/yarn.lock
 !/webpack.config.ts
-!/webpack/build-config.js
+!/webpack/build-config.ts
+!/tsconfig.json
 !/babel.config.js
 !/knexfile.env.js
 !/dev-tools/babel-run
