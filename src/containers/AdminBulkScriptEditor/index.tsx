@@ -138,7 +138,7 @@ const AdminBulkScriptEditor: React.FC = (props) => {
     setIsSubmitting(true);
     try {
       const response = await bulkUpdateScript();
-      if (response.errors) throw response.errors;
+      if (response.errors) throw response.errors[0];
       setResult(response?.data?.bulkUpdateScript);
     } catch (mutationError: any) {
       setError(formatErrorMessage(mutationError.message));

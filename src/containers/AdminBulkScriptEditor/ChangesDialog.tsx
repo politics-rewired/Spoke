@@ -5,17 +5,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { ScriptUpdateChange } from "@spoke/spoke-codegen";
+import isEmpty from "lodash/isEmpty";
 import React from "react";
 
-type ChangesList = {
-  id: string;
-  campaignId: string;
-  campaignName: string;
-  script: string;
-};
-
 interface ChangesDialogProps {
-  changesList: Array<Array<ChangesList>>;
+  changesList: { [key: string]: Array<ScriptUpdateChange> };
   open: boolean;
   searchString: string;
   replaceString: string;
@@ -34,6 +29,9 @@ const ChangesDialog: React.FC<ChangesDialogProps> = ({
   const theme = useTheme();
 
   const colorOriginal = (script: string) => {
+    // Using split with the search string in brackets,
+    // keeps the search string as part of the splits,
+    // so we update the span of the split part with the color
     const expression = new RegExp(`(${searchString})`, "g");
     const scriptParts = script.split(expression);
     return (
@@ -67,8 +65,6 @@ const ChangesDialog: React.FC<ChangesDialogProps> = ({
     );
   };
 
-  const changes = Object.values(changesList);
-
   return (
     <Dialog
       open={open}
@@ -79,13 +75,13 @@ const ChangesDialog: React.FC<ChangesDialogProps> = ({
     >
       <DialogTitle>Confirm changes to campaign scripts:</DialogTitle>
       <DialogContent>
-        {changes.map((changeList) => (
-          <div key={changeList[0].campaignId}>
+        {Object.entries(changesList).map(([campaignId, changes]) => (
+          <div key={campaignId}>
             <p style={{ fontSize: "1.2em", marginBottom: 20 }}>
-              {changeList[0].campaignId}: {changeList[0].campaignName}
+              {campaignId}: {changes[0].campaignName}
             </p>
-            <ul key={changeList[0].campaignId}>
-              {changeList.map(({ id, script }) => (
+            <ul key={campaignId}>
+              {changes.map(({ id, script }) => (
                 <li key={id} style={{ marginBottom: 20 }}>
                   <span style={{ fontWeight: 600 }}>Found:</span>{" "}
                   {colorOriginal(script)}
@@ -99,7 +95,7 @@ const ChangesDialog: React.FC<ChangesDialogProps> = ({
             </ul>
           </div>
         ))}
-        {changes.length === 0 && (
+        {isEmpty(changesList) && (
           <DialogContentText>
             No occurences were found. Check your search parameters and try
             again.
@@ -114,7 +110,7 @@ const ChangesDialog: React.FC<ChangesDialogProps> = ({
           color="primary"
           variant="contained"
           onClick={onSubmit}
-          disabled={changes.length === 0}
+          disabled={isEmpty(changesList)}
         >
           Confirm
         </Button>
