@@ -1,17 +1,14 @@
+import { useTheme } from "@material-ui/core";
 import { common } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { css, StyleSheet } from "aphrodite";
-import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
-import { compose } from "recompose";
 
-import { Organization } from "../api/organization";
 import UserMenu from "../containers/UserMenu";
 import baseTheme from "../styles/theme";
-import { MuiThemeProviderProps } from "../styles/types";
 
 const styles = StyleSheet.create({
   container: {
@@ -44,28 +41,24 @@ const styles = StyleSheet.create({
   }
 });
 
-interface OuterProps {
+interface TopNavProps {
   backToURL?: string;
   title: string;
   orgId?: string;
   sectionTitle: string;
 }
 
-interface InnerProps extends OuterProps, MuiThemeProviderProps {
-  data: { organization?: Pick<Organization, "id" | "name"> };
-}
-
-const TopNav: React.FC<InnerProps> = ({
+const TopNav: React.FC<TopNavProps> = ({
   backToURL,
   orgId,
   title,
-  sectionTitle,
-  muiTheme
+  sectionTitle
 }) => {
+  const theme = useTheme();
+
   const overrides = {
     container: {
-      backgroundColor:
-        muiTheme?.palette?.primary1Color ?? baseTheme.colors.green
+      backgroundColor: theme.palette.primary.main
     }
   };
 
@@ -95,4 +88,4 @@ const TopNav: React.FC<InnerProps> = ({
   );
 };
 
-export default compose<InnerProps, OuterProps>(muiThemeable())(TopNav);
+export default TopNav;

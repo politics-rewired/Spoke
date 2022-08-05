@@ -157,7 +157,15 @@ const AdminOrganizationRoutes = (props) => {
             path={`${organizationPath}/campaign-groups`}
             component={AdminCampaignGroupEditor}
           />
-          <Route path={`${organizationPath}/people`} component={AdminPeople} />
+          <Route
+            path={`${organizationPath}/people`}
+            render={(componentProps) => (
+              <AdminPeople
+                organizationId={organizationId}
+                {...componentProps}
+              />
+            )}
+          />
           <Route
             path={`${organizationPath}/teams`}
             component={AdminTeamRoutes}
