@@ -74,6 +74,7 @@ import { resolvers as externalSystemResolvers } from "./external-system";
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
 import { notifyAssignmentCreated, notifyOnTagConversation } from "./lib/alerts";
+import { getStepsToUpdate } from "./lib/bulk-script-editor";
 import { copyCampaign, editCampaign } from "./lib/campaign";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import { formatPage } from "./lib/pagination";
@@ -1102,40 +1103,12 @@ const rootMutations = {
       await accessRequired(user, organizationId, "OWNER");
 
       const scriptUpdatesResult = await r.knex.transaction(async (trx) => {
-        const {
-          searchString,
-          replaceString,
-          includeArchived,
-          campaignTitlePrefixes
-        } = findAndReplace;
+        const { searchString, replaceString } = findAndReplace;
 
-        let campaignIdQuery = r
-          .knex("campaign")
-          .transacting(trx)
-          .where({ organization_id: organizationId })
-          .pluck("id");
-        if (!includeArchived) {
-          campaignIdQuery = campaignIdQuery.where({ is_archived: false });
-        }
-        if (campaignTitlePrefixes.length > 0) {
-          campaignIdQuery = campaignIdQuery.where(function subquery() {
-            for (const prefix of campaignTitlePrefixes) {
-              this.orWhere("title", "like", `${prefix}%`);
-            }
-          });
-        }
-        // TODO - MySQL Specific. This should be an inline subquery
-        const campaignIds = await campaignIdQuery;
-
-        // Using array_to_string is easier and faster than using unnest(script_options) (https://stackoverflow.com/a/7222285)
-        const interactionStepsToChange = await r
-          .knex("interaction_step")
-          .transacting(trx)
-          .select(["id", "campaign_id", "script_options"])
-          .whereRaw("array_to_string(script_options, '||') like ?", [
-            `%${searchString}%`
-          ])
-          .whereIn("campaign_id", campaignIds);
+        const interactionStepsToChange = await getStepsToUpdate(
+          trx,
+          findAndReplace
+        );
 
         const scriptUpdates = [];
         for (const step of interactionStepsToChange) {
@@ -3815,6 +3788,26 @@ const rootResolvers = {
         prevCampaignId,
         nextCampaignId
       };
+    },
+    bulkUpdateScriptChanges: async (
+      _root,
+      { organizationId, findAndReplace },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "OWNER");
+
+      const steps = await r.knex.transaction((trx) => {
+        return getStepsToUpdate(trx, findAndReplace);
+      });
+
+      return steps.map((step) => {
+        return {
+          id: step.id,
+          campaignId: step.campaign_id,
+          campaignName: step.title,
+          script: step.script_options.join(" | ")
+        };
+      });
     }
   }
 };
