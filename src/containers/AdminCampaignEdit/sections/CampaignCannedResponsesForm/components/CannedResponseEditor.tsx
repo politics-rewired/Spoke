@@ -4,6 +4,7 @@ import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
 
+import { CampaignVariable } from "../../../../../api/campaign-variable";
 import { CannedResponse } from "../../../../../api/canned-response";
 import GSForm from "../../../../../components/forms/GSForm";
 import SpokeFormField from "../../../../../components/forms/SpokeFormField";
@@ -23,6 +24,7 @@ const modelSchema = yup.object({
 export interface CannedResponseEditorProps {
   editingResponse: CannedResponse;
   customFields: string[];
+  campaignVariables: CampaignVariable[];
   integrationSourced: boolean;
   onSave(...args: any[]): void;
   onCancel(): void;
@@ -31,6 +33,7 @@ export interface CannedResponseEditorProps {
 const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
   const {
     customFields,
+    campaignVariables,
     integrationSourced,
     editingResponse,
     onSave,
@@ -56,6 +59,7 @@ const CannedResponseEditor: React.SFC<CannedResponseEditorProps> = (props) => {
       <SpokeFormField
         {...dataTest("editorResponse")}
         customFields={customFields}
+        campaignVariables={campaignVariables}
         integrationSourced={integrationSourced}
         name="text"
         context="responseEditor"

@@ -76,6 +76,7 @@ const rootSchema = `
     assignmentId: String
     userId: String
     versionHash: String
+    campaignVariableIds: [String!]
   }
 
   input InviteInput {

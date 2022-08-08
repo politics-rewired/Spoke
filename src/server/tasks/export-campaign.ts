@@ -104,10 +104,17 @@ export const fetchExportData = async (
       "user.assigned_cell"
     );
 
+  const campaignVariableNames: string[] = await r
+    .reader<{ name: string }>("campaign_variable")
+    .where("campaign_id", campaignId)
+    .distinct("name")
+    .then((rows) => rows.map(({ name }) => name));
+
   return {
     campaignTitle,
     notificationEmail,
     interactionSteps,
+    campaignVariableNames,
     assignments
   };
 };
@@ -284,10 +291,12 @@ interface MessageExportRow
     Pick<UserRecord, "first_name" | "last_name" | "email"> {
   error_codes: string;
   user_cell: string;
+  campaign_variables: Record<string, string>;
 }
 
 export const processMessagesChunk = async (
   campaignId: number,
+  campaignVariableNames: string[],
   lastContactId = 0
 ): Promise<MessagesChunk | false> => {
   const { rows }: { rows: MessageExportRow[] } = await r.reader.raw(
@@ -307,7 +316,12 @@ export const processMessagesChunk = async (
         public.user.first_name,
         public.user.last_name,
         public.user.email,
-        public.user.cell as user_cell
+        public.user.cell as user_cell,
+        (
+          select json_object(array_agg(name), array_agg(value))
+          from campaign_variable
+          where id = ANY(message.campaign_variable_ids)
+        )  as campaign_variables
       from message
       left join public.user
         on message.user_id = public.user.id
@@ -338,6 +352,16 @@ export const processMessagesChunk = async (
 
   lastContactId = rows[rows.length - 1].campaign_contact_id;
 
+  const campaignVariableColumns = (message: MessageExportRow) =>
+    campaignVariableNames.reduce<Record<string, string>>(
+      (acc, variableName) => ({
+        ...acc,
+        [`campaignVariable[${variableName}]`]:
+          message.campaign_variables[variableName] ?? null
+      }),
+      {}
+    );
+
   const messages = rows.map((message) => ({
     assignmentId: message.assignment_id,
     userNumber: message.user_number,
@@ -353,7 +377,8 @@ export const processMessagesChunk = async (
     "texter[firstName]": message.first_name,
     "texter[lastName]": message.last_name,
     "texter[email]": message.email,
-    "texter[cell]": message.user_cell
+    "texter[cell]": message.user_cell,
+    ...campaignVariableColumns(message)
   }));
 
   return { lastContactId, messages };
@@ -493,6 +518,7 @@ const processAndUploadCampaignMessages = async ({
     while (
       (chunkMessageResult = await processMessagesChunk(
         campaignId,
+        campaignVariableNames,
         lastContactId
       ))
     ) {

@@ -1,8 +1,9 @@
-import { green, grey, orange, red } from "@material-ui/core/colors";
+import { blue, green, grey, orange, red } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from "@material-ui/icons/Delete";
+import { CampaignVariable } from "@spoke/spoke-codegen";
 import React from "react";
 
 import { ScriptToken, ScriptTokenType, scriptToTokens } from "../lib/scripts";
@@ -20,6 +21,18 @@ const tokensToElems = (tokens: ScriptToken[]) =>
       case ScriptTokenType.UndefinedField:
         return (
           <span key={key} style={{ color: red[500] }}>
+            {token.text}
+          </span>
+        );
+      case ScriptTokenType.ValidCampaignVariable:
+        return (
+          <span key={key} style={{ color: blue[500] }}>
+            {token.text}
+          </span>
+        );
+      case ScriptTokenType.InvalidCampaignVariable:
+        return (
+          <span key={key} style={{ color: orange[500] }}>
             {token.text}
           </span>
         );
@@ -55,6 +68,7 @@ const useStyles = makeStyles({
 interface ScriptOptionBlockProps extends React.HTMLProps<HTMLDivElement> {
   script: string;
   customFields: string[];
+  campaignVariables: CampaignVariable[];
   placeholder?: string;
   label?: string;
   onEditScript?: () => Promise<void> | void;
@@ -66,6 +80,7 @@ export const ScriptOptionBlock: React.FC<ScriptOptionBlockProps> = (props) => {
     label,
     script,
     customFields,
+    campaignVariables,
     placeholder = "Enter a script...",
     onEditScript,
     onDelete,
@@ -76,10 +91,11 @@ export const ScriptOptionBlock: React.FC<ScriptOptionBlockProps> = (props) => {
 
   const emptyScript = script.trim().length === 0;
 
-  const { tokens, undefinedFieldsUsed } = scriptToTokens({
-    script,
-    customFields
-  });
+  const {
+    tokens,
+    invalidCampaignVariablesUsed,
+    undefinedFieldsUsed
+  } = scriptToTokens({ script, customFields, campaignVariables });
 
   const scriptElems = emptyScript ? (
     <div style={{ color: grey[500] }}>{placeholder}</div>
@@ -104,6 +120,12 @@ export const ScriptOptionBlock: React.FC<ScriptOptionBlockProps> = (props) => {
       </div>
       {emptyScript && (
         <div className={classes.errorLabel}>Script cannot be empty</div>
+      )}
+      {invalidCampaignVariablesUsed.length > 0 && (
+        <div className={classes.errorLabel}>
+          Script cannot use a campaign variable without a value:{" "}
+          {invalidCampaignVariablesUsed.join(", ")}
+        </div>
       )}
       {undefinedFieldsUsed.length > 0 && (
         <div className={classes.warnLabel}>

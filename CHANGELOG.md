@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.34.1](https://github.com/politics-rewired/spoke/compare/v4.34.0...v4.34.1) (2022-08-07)
+
+
+### Bug Fixes
+
+* **perf:** fetch campaign ([#1336](https://github.com/politics-rewired/spoke/issues/1336)) ([faa99b7](https://github.com/politics-rewired/spoke/commit/faa99b7a90df0d6af77db06c9ffc9f506c4fdaeb))
+
+## [4.34.0](https://github.com/politics-rewired/spoke/compare/v4.34.0-rc.2...v4.34.0) (2022-08-03)
+
+## [4.34.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.34.0-rc.1...v4.34.0-rc.2) (2022-07-28)
+
+## [4.34.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.34.0-rc.0...v4.34.0-rc.1) (2022-07-26)
+
+
+### Features
+
+* **texter conversation:** update button in line with design doc ([#1321](https://github.com/politics-rewired/spoke/issues/1321)) ([beb7287](https://github.com/politics-rewired/spoke/commit/beb7287c0d7aa860de2390281f0fd39ae7c415f1))
+
+
+### Bug Fixes
+
+* **clipboard:** fix safari paste popup ([#1326](https://github.com/politics-rewired/spoke/issues/1326)) ([a9b753c](https://github.com/politics-rewired/spoke/commit/a9b753cfbb7059074191f07f9826a44e46c463b7))
+
+## [4.34.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.33.0...v4.34.0-rc.0) (2022-07-25)
+
+
+### Features
+
+* support campaign variables in scripts ([#1234](https://github.com/politics-rewired/spoke/issues/1234)) ([20c806b](https://github.com/politics-rewired/spoke/commit/20c806b79cf4d312b5fa335ecf3a33c44355ffa7))
+
+
+### Bug Fixes
+
+* fix saving empty team priority ([#1327](https://github.com/politics-rewired/spoke/issues/1327)) ([77fa660](https://github.com/politics-rewired/spoke/commit/77fa660e7fb4eb1e696b3696d77b1337a11ad9e4))
+* **queue_sync_campaign_to_van:** use run at ([#1322](https://github.com/politics-rewired/spoke/issues/1322)) ([35e30c6](https://github.com/politics-rewired/spoke/commit/35e30c61d01c24a8e498651fae12c79f67238e0f))
+* advance from conversation on unassignable tag ([#1312](https://github.com/politics-rewired/spoke/issues/1312)) ([2879523](https://github.com/politics-rewired/spoke/commit/2879523b747e9b207b7621cd6bcf6c3f5daf6ebe))
+* handle response errors correctly ([#1314](https://github.com/politics-rewired/spoke/issues/1314)) ([3d7f588](https://github.com/politics-rewired/spoke/commit/3d7f588273762711267a4c8e1cd56b1a4d2a97af))
+
 ## [4.33.0](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.5...v4.33.0) (2022-07-13)
 
 ## [4.33.0-rc.5](https://github.com/politics-rewired/spoke/compare/v4.33.0-rc.4...v4.33.0-rc.5) (2022-07-11)

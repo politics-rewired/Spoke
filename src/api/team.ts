@@ -11,7 +11,7 @@ export interface Team {
   backgroundColor: string;
   author: User;
   isAssignmentEnabled: boolean;
-  assignmentPriority: number;
+  assignmentPriority: number | null;
   assignmentType: TextRequestType;
   maxRequestCount: number;
   createdAt: string;
@@ -43,7 +43,7 @@ export const schema = `
     backgroundColor: String!
     author: User
     isAssignmentEnabled: Boolean!
-    assignmentPriority: Int!
+    assignmentPriority: Int
     assignmentType: TextRequestType
     maxRequestCount: Int
     createdAt: Date!

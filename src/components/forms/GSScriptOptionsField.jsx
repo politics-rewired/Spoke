@@ -95,6 +95,7 @@ class GSScriptOptionsField extends GSFormField {
     const {
       name,
       customFields,
+      campaignVariables,
       value: scriptVersions,
       integrationSourced,
       orgSettings
@@ -151,6 +152,7 @@ class GSScriptOptionsField extends GSFormField {
             name={name}
             scriptText={scriptDraft}
             scriptFields={scriptFields}
+            campaignVariables={campaignVariables}
             integrationSourced={integrationSourced}
             receiveFocus
             expandable
@@ -173,7 +175,11 @@ class GSScriptOptionsField extends GSFormField {
 
   render() {
     // The "errors" prop is an empty object and is not mentioned in yum or react-formal documentation
-    const { customFields, value: scriptVersions } = this.props;
+    const {
+      customFields,
+      campaignVariables,
+      value: scriptVersions
+    } = this.props;
 
     const canDelete = scriptVersions.length > 1;
     const emptyVersionExists =
@@ -194,6 +200,7 @@ class GSScriptOptionsField extends GSFormField {
             key={scriptVersion}
             label={`Script Version ${index + 1}`}
             customFields={customFields}
+            campaignVariables={campaignVariables}
             script={scriptVersion}
             onEditScript={this.createDialogHandler(scriptVersion)}
             onDelete={canDelete && this.createDeleteHandler(scriptVersion)}
@@ -216,6 +223,13 @@ class GSScriptOptionsField extends GSFormField {
 GSScriptOptionsField.propTypes = {
   value: PropTypes.arrayOf(PropTypes.string),
   customFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  campaignVariables: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      value: PropTypes.string
+    })
+  ).isRequired,
   name: PropTypes.string,
   className: PropTypes.string,
   hintText: PropTypes.string,
