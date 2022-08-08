@@ -10,7 +10,7 @@ import isEmpty from "lodash/isEmpty";
 import React from "react";
 
 interface ChangesDialogProps {
-  changesList: { [key: string]: Array<ScriptUpdateChange> };
+  changesList: Record<string, Array<ScriptUpdateChange>>;
   open: boolean;
   searchString: string;
   replaceString: string;
