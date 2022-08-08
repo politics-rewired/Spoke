@@ -48,6 +48,7 @@ class ScriptList extends React.Component {
       onSelectCannedResponse,
       showAddScriptButton,
       customFields,
+      campaignVariables,
       integrationSourced,
       campaignId,
       texterId
@@ -119,6 +120,7 @@ class ScriptList extends React.Component {
             <CannedResponseForm
               onSaveCannedResponse={onSaveCannedResponse}
               customFields={customFields}
+              campaignVariables={campaignVariables}
               integrationSourced={integrationSourced}
               script={this.state.script}
             />
@@ -142,7 +144,14 @@ ScriptList.propTypes = {
   subheader: PropTypes.element,
   onSelectCannedResponse: PropTypes.func,
   showAddScriptButton: PropTypes.bool,
-  customFields: PropTypes.array,
+  customFields: PropTypes.array.isRequired,
+  campaignVariables: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      value: PropTypes.string
+    })
+  ).isRequired,
   integrationSourced: PropTypes.bool,
   campaignId: PropTypes.string,
   mutations: PropTypes.object,

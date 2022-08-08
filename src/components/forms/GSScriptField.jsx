@@ -84,7 +84,13 @@ class GSScriptField extends GSFormField {
   };
 
   renderDialog() {
-    const { name, customFields, integrationSourced, orgSettings } = this.props;
+    const {
+      name,
+      customFields,
+      campaignVariables,
+      integrationSourced,
+      orgSettings
+    } = this.props;
     const { open, scriptWarningOpen, script } = this.state;
     const scriptFields = allScriptFields(customFields);
     const warningContext =
@@ -108,6 +114,7 @@ class GSScriptField extends GSFormField {
             name={name}
             scriptText={this.state.script}
             scriptFields={scriptFields}
+            campaignVariables={campaignVariables}
             integrationSourced={integrationSourced}
             expandable
             onChange={(val) => this.setState({ script: val })}
@@ -175,6 +182,13 @@ class GSScriptField extends GSFormField {
 GSScriptField.propTypes = {
   value: PropTypes.string.isRequired,
   customFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  campaignVariables: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      value: PropTypes.string
+    })
+  ).isRequired,
   name: PropTypes.string,
   className: PropTypes.string,
   hintText: PropTypes.string,

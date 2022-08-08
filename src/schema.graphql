@@ -43,6 +43,7 @@ input MessageInput {
   assignmentId: String
   userId: String
   versionHash: String
+  campaignVariableIds: [String!]
 }
 
 input InviteInput {
@@ -589,6 +590,7 @@ type Campaign {
   texters: [User]
   assignments(assignmentsFilter: AssignmentsFilter): [Assignment]
   interactionSteps: [InteractionStep]
+  invalidScriptFields: [String!]!
   contacts: [CampaignContact]
   contactsCount: Int
   hasUnassignedContacts: Boolean
@@ -1063,7 +1065,7 @@ type Team {
   backgroundColor: String!
   author: User
   isAssignmentEnabled: Boolean!
-  assignmentPriority: Int!
+  assignmentPriority: Int
   assignmentType: TextRequestType
   maxRequestCount: Int
   createdAt: Date!

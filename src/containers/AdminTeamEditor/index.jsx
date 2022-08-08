@@ -64,7 +64,9 @@ class AdminTeamEditor extends Component {
       "assignmentPriority"
     ]);
     if ("assignmentPriority" in team) {
-      team.assignmentPriority = parseInt(team.assignmentPriority, 10);
+      const rawPriority = team.assignmentPriority;
+      team.assignmentPriority =
+        rawPriority === "" ? 500 : parseInt(rawPriority, 10);
     }
 
     this.setState({ isWorking: true });

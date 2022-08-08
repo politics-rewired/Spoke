@@ -1,6 +1,7 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
+import { CampaignVariablePage } from "@spoke/spoke-codegen";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
@@ -18,7 +19,9 @@ import ScriptPreviewButton from "../../../../components/ScriptPreviewButton";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
+import { scriptToTokens } from "../../../../lib/scripts";
 import { MutationMap, QueryMap } from "../../../../network/types";
+import theme from "../../../../styles/theme";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
 import {
@@ -63,6 +66,7 @@ interface HocProps {
       "id" | "isStarted" | "customFields" | "externalSystem"
     > & {
       interactionSteps: InteractionStepWithLocalState[];
+      campaignVariables: CampaignVariablePage;
     };
   };
   availableActions: {
@@ -266,13 +270,21 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     isNew,
     saveLabel,
     data: {
-      campaign: { customFields, externalSystem } = {
+      campaign: {
+        customFields,
+        invalidScriptFields,
+        campaignVariables: { edges: campaignVariableEdges },
+        externalSystem
+      } = {
         customFields: [],
+        campaignVariables: { edges: [] },
         externalSystem: null
       }
     },
     availableActions: { availableActions }
   } = props;
+
+  const campaignVariables = campaignVariableEdges.map(({ node }) => node);
 
   const {
     interactionSteps,
@@ -283,6 +295,22 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
     filterDeleted: true,
     stripLocals: true
   });
+
+  const invalidCampaignVariables = interactionSteps.reduce<Array<string>>(
+    (acc, step) => {
+      let result = acc;
+      for (const scriptOption of step.scriptOptions) {
+        const { invalidCampaignVariablesUsed } = scriptToTokens({
+          script: scriptOption ?? "",
+          customFields,
+          campaignVariables
+        });
+        result = result.concat(invalidCampaignVariablesUsed);
+      }
+      return result;
+    },
+    []
+  );
 
   const isSaveDisabled =
     isWorking || hasEmptyScripts || (!isNew && !hasPendingChanges);
@@ -305,6 +333,28 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       }
     : tree;
   const campaignId = props.data?.campaign?.id;
+
+  const renderInvalidScriptFields = () => {
+    if (invalidScriptFields.length === 0) {
+      return null;
+    }
+    const invalidFields = invalidCampaignVariables.concat(
+      invalidScriptFields.map((field: string) => `{${field}}`)
+    );
+    return (
+      <div>
+        <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
+          Warning: Variable values are not all present for this script. You can
+          continue working on your script but you cannot start this campaign.
+          The following variables do not have values and will not populate in
+          your script:
+        </p>
+        <p style={{ color: theme.colors.red, fontSize: "1.2em" }}>
+          {invalidFields.join(", ")}
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div onFocus={updateClipboardHasBlock} onClick={updateClipboardHasBlock}>
@@ -334,9 +384,11 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
       <Box m={2}>
         <ScriptPreviewButton campaignId={campaignId} />
       </Box>
+      {renderInvalidScriptFields()}
       <InteractionStepCard
         interactionStep={finalFree}
         customFields={customFields}
+        campaignVariables={campaignVariables}
         integrationSourced={externalSystem !== null}
         availableActions={availableActions}
         hasBlockCopied={hasBlockCopied}
@@ -404,6 +456,7 @@ const mutations: MutationMap<FullComponentProps> = {
           interactionSteps {
             ...EditInteractionStep
           }
+          invalidScriptFields
           isStarted
           isApproved
           customFields

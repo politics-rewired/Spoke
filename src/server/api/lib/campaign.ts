@@ -715,3 +715,38 @@ export const editCampaign = async (
   cacheableData.campaign.reload(id);
   return newCampaign || loaders.campaign.load(id);
 };
+
+export const invalidScriptFields = async (campaignId: string) => {
+  const { rows: variables } = await r.knex.raw(
+    // eslint-disable-next-line no-useless-escape
+    `SELECT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
+FROM interaction_step
+WHERE campaign_id = ?`,
+    [campaignId]
+  );
+
+  const parsedVariables = variables
+    .map((v: { variable: string }) => v.variable)
+    .flat();
+
+  const campaignContact = await r
+    .knex("campaign_contact")
+    .where({ campaign_id: campaignId })
+    .first(["custom_fields"]);
+
+  const customFields = campaignContact
+    ? Object.keys(JSON.parse(campaignContact.custom_fields))
+    : [];
+  const campaignVariables = await r
+    .knex("campaign_variable")
+    .where({ campaign_id: campaignId })
+    .whereNull("deleted_at")
+    .pluck("name");
+  const validFields = allScriptFields(customFields).concat(campaignVariables);
+
+  const invalidFields = parsedVariables.filter(
+    (variable: string) => !validFields.includes(variable)
+  );
+
+  return invalidFields;
+};

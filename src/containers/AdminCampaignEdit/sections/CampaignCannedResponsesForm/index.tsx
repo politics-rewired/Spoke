@@ -6,6 +6,7 @@ import uniqBy from "lodash/uniqBy";
 import React from "react";
 import { compose } from "recompose";
 
+import { CampaignVariablePage } from "../../../../api/campaign-variable";
 import { CannedResponse } from "../../../../api/canned-response";
 import { LargeList } from "../../../../components/LargeList";
 import { dataTest } from "../../../../lib/attributes";
@@ -33,6 +34,7 @@ interface HocProps {
     campaign: {
       id: string;
       cannedResponses: CannedResponse[];
+      campaignVariables: CampaignVariablePage;
       isStarted: boolean;
       customFields: string[];
       externalSystem: { id: string } | null;
@@ -161,9 +163,15 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const { shouldShowEditor, editingResponse } = this.state;
     const {
       data: {
-        campaign: { customFields, externalSystem }
+        campaign: {
+          customFields,
+          campaignVariables: { edges: campaignVariableEdges },
+          externalSystem
+        }
       }
     } = this.props;
+
+    const campaignVariables = campaignVariableEdges.map(({ node }) => node);
 
     const context = editingResponse
       ? ResponseEditorContext.EditingResponse
@@ -177,6 +185,7 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
         open={shouldShowEditor}
         context={context}
         customFields={customFields}
+        campaignVariables={campaignVariables}
         integrationSourced={externalSystem !== null}
         editingResponse={editingResponse!}
         onCancel={this.handleOnCancelResponseEdit}
@@ -257,6 +266,15 @@ const queries: QueryMap<InnerProps> = {
           isStarted
           isApproved
           customFields
+          campaignVariables {
+            edges {
+              node {
+                id
+                name
+                value
+              }
+            }
+          }
           externalSystem {
             id
           }

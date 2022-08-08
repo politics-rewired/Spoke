@@ -1074,6 +1074,14 @@ CREATE FUNCTION public.queue_sync_campaign_to_van(campaign_id integer) RETURNS v
       perform
         graphile_worker.add_job(
           'van-sync-campaign-contact',
+          payload,
+          -- VAN API docs suggest 60 req/s for post canvass results; we'll use 30 req/s to be safe
+          -- Ref: https://docs.ngpvan.com/docs/throttling-guidelines#suggested-throttling
+          run_at => now() + (interval '1 second' / 30) * n,
+          priority => 10
+        )
+      from (
+        select 
           json_build_object(
             'username', v_username,
             'api_key', json_build_object('__secret', v_api_key_ref),
@@ -1088,14 +1096,12 @@ CREATE FUNCTION public.queue_sync_campaign_to_van(campaign_id integer) RETURNS v
               'job_request_id', v_job_request_id,
               'contact_count', v_contact_count
             )
-          ),
-          'van-api',
-          priority => 10
-        )
-      from public.campaign_contact cc
-      where
-        cc.campaign_id = queue_sync_campaign_to_van.campaign_id
-      ;
+          ) as payload,
+          row_number() over (partition by 1) as n
+        from public.campaign_contact cc
+        where
+          cc.campaign_id = queue_sync_campaign_to_van.campaign_id
+      ) payloads;
     end;
     $$;
 
@@ -1939,7 +1945,7 @@ CREATE TABLE public.campaign_variable (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     deleted_at timestamp with time zone,
-    CONSTRAINT check_name CHECK ((name ~ '^[a-zA-Z0-9 \-_]+$'::text))
+    CONSTRAINT check_name CHECK ((name ~ '^cv:[a-zA-Z0-9 \-_]+$'::text))
 );
 
 
@@ -2638,6 +2644,7 @@ CREATE TABLE public.message (
     error_codes text[],
     num_segments smallint,
     num_media smallint,
+    campaign_variable_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
     CONSTRAINT message_send_status_check CHECK ((send_status = ANY (ARRAY['QUEUED'::text, 'SENDING'::text, 'SENT'::text, 'DELIVERED'::text, 'ERROR'::text, 'PAUSED'::text, 'NOT_ATTEMPTED'::text])))
 )
 WITH (autovacuum_vacuum_scale_factor='0', autovacuum_vacuum_threshold='20000', fillfactor='50');

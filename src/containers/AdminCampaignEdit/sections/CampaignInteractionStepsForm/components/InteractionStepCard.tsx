@@ -11,6 +11,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import HelpIconOutline from "@material-ui/icons/HelpOutline";
+import { CampaignVariable } from "@spoke/spoke-codegen";
 import isNil from "lodash/isNil";
 import React, { useCallback, useState } from "react";
 import * as yup from "yup";
@@ -54,6 +55,7 @@ type BlockHandlerFactory = (stepId: string) => () => Promise<void> | void;
 interface Props {
   interactionStep: InteractionStepWithChildren;
   customFields: string[];
+  campaignVariables: CampaignVariable[];
   integrationSourced: boolean;
   availableActions: any[];
   hasBlockCopied: boolean;
@@ -74,6 +76,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
   const {
     interactionStep,
     customFields,
+    campaignVariables,
     integrationSourced,
     availableActions,
     hasBlockCopied,
@@ -241,6 +244,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
               label="Script"
               hintText="This is what your texters will send to your contacts. E.g. Hi, {firstName}. It's {texterFirstName} here."
               customFields={customFields}
+              campaignVariables={campaignVariables}
               integrationSourced={integrationSourced}
               fullWidth
               multiLine
@@ -290,6 +294,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
                 title={`Question: ${questionText}`}
                 interactionStep={childStep}
                 customFields={customFields}
+                campaignVariables={campaignVariables}
                 integrationSourced={integrationSourced}
                 availableActions={availableActions}
                 hasBlockCopied={hasBlockCopied}
