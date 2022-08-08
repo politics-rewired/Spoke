@@ -60,7 +60,7 @@ export const AuthzProvider: React.FC<{ organizationId?: string }> = ({
       hasRole: (role: UserRoleType) => hasRole(role, roles),
       isSuperadmin,
       isOwner: hasRole(UserRoleType.OWNER, roles),
-      isAdmin: hasAdminPermissions,
+      isAdmin: hasRole(UserRoleType.ADMIN, roles),
       isSupervol: hasRole(UserRoleType.SUPERVOLUNTEER, roles)
     }),
     [roles]
