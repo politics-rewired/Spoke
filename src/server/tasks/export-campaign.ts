@@ -5,8 +5,10 @@ import _ from "lodash";
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
 import { getDownloadUrl, getUploadStream } from "../../workers/exports/upload";
+import getExportCampaignContent from "../api/export-campaign";
 import {
   CampaignContactRecord,
+  FilteredContactRecord,
   InteractionStepRecord,
   MessageRecord,
   UserRecord
@@ -14,7 +16,7 @@ import {
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
-import { addProgressJob, ProgressTask } from "./utils";
+import { addProgressJob, ProgressTask, ProgressTaskHelpers } from "./utils";
 
 export const TASK_IDENTIFIER = "export-campaign";
 
@@ -117,6 +119,57 @@ export const fetchExportData = async (
   };
 };
 
+interface FilteredContactsRow extends FilteredContactRecord {
+  city: string;
+  state: string;
+}
+
+const processFilteredContactsChunk = async (
+  campaignId: number,
+  campaignTitle: string,
+  lastContactId = 0
+): Promise<ContactsChunk | false> => {
+  const filteredRows: FilteredContactsRow[] = await r
+    .reader("filtered_contact")
+    .select("filtered_contact.*", "zip_code.city", "zip_code.state")
+    .leftJoin("zip_code", "filtered_contact.zip", "zip_code.zip")
+    .where({ campaign_id: campaignId })
+    .whereRaw("filtered_contact.id > ?", [lastContactId])
+    .orderBy("filtered_contact.id", "asc")
+    .limit(CHUNK_SIZE);
+
+  const newLastContactId = filteredRows?.at(-1)?.id ?? 0;
+
+  if (newLastContactId === 0) return false;
+
+  const contacts = filteredRows.map((contact) => {
+    const contactRow: { [key: string]: any } = {
+      "contact[filtered_reason]": contact.filtered_reason,
+      campaignId,
+      campaign: campaignTitle,
+      "contact[firstName]": contact.first_name,
+      "contact[lastName]": contact.last_name,
+      "contact[cell]": contact.cell,
+      "contact[zip]": contact.zip,
+      "contact[city]": contact.city || null,
+      "contact[state]": contact.state || null,
+      "contact[optOut]": contact.is_opted_out,
+      "contact[messageStatus]": "removed",
+      "contact[external_id]": contact.external_id
+    };
+
+    // Append columns for custom fields
+    const customFields = JSON.parse(contact.custom_fields);
+    Object.keys(customFields).forEach((fieldName) => {
+      contactRow[`contact[${fieldName}]`] = customFields[fieldName];
+    });
+
+    return contactRow;
+  });
+
+  return { lastContactId: newLastContactId, contacts };
+};
+
 interface ContactExportRow extends CampaignContactRecord {
   city: string;
   state: string;
@@ -129,7 +182,8 @@ export const processContactsChunk = async (
   campaignId: number,
   campaignTitle: string,
   questionsById: { [key: string]: string },
-  lastContactId = 0
+  lastContactId = 0,
+  onlyOptOuts = false
 ): Promise<ContactsChunk | false> => {
   const { rows }: { rows: ContactExportRow[] } = await r.reader.raw(
     `
@@ -139,6 +193,7 @@ export const processContactsChunk = async (
         where
           campaign_id = ?
           and id > ?
+          ${onlyOptOuts ? "and is_opted_out = true" : ""}
         order by
           campaign_contact.id asc
         limit ?
@@ -329,46 +384,35 @@ export const processMessagesChunk = async (
   return { lastContactId, messages };
 };
 
-export interface ExportCampaignPayload {
+interface UploadCampaignContacts {
+  campaignTitle: string;
+  interactionSteps: Array<any>;
+  contactsCount: number;
   campaignId: number;
-  requesterId: number;
-  isAutomatedExport?: boolean;
+  helpers: ProgressTaskHelpers;
+  fileNameKey: string;
+  onlyOptOuts: boolean;
 }
 
-export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
-  payload,
-  helpers
-) => {
-  const { campaignId, requesterId, isAutomatedExport = false } = payload;
-  const {
-    campaignTitle,
-    notificationEmail,
-    interactionSteps,
-    campaignVariableNames
-  } = await fetchExportData(campaignId, requesterId);
-
-  const countQueryResult = await r
-    .reader("campaign_contact")
-    .count("*")
-    .where({ campaign_id: campaignId });
-  const contactsCount = countQueryResult[0].count as number;
-
+const processAndUploadCampaignContacts = async ({
+  campaignTitle,
+  interactionSteps,
+  contactsCount,
+  campaignId,
+  helpers,
+  fileNameKey,
+  onlyOptOuts
+}: UploadCampaignContacts): Promise<string> => {
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
-  // Attempt upload to cloud storage
-  let campaignContactsKey = campaignTitle
-    .replace(/ /g, "_")
-    .replace(/\//g, "_");
-
-  if (!isAutomatedExport) {
-    const timestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
-    campaignContactsKey = `${campaignContactsKey}-${timestamp}`;
-  }
-  const messagesKey = `${campaignContactsKey}-messages`;
+  const campaignContactsKey = onlyOptOuts
+    ? fileNameKey
+    : `${fileNameKey}-optouts`;
 
   const campaignContactsUploadStream = await getUploadStream(
     `${campaignContactsKey}.csv`
   );
+
   const campaignContactsWriteStream = format({
     headers: true,
     writeHeaders: true
@@ -380,6 +424,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
       errToObj(err)
     );
   });
+
   campaignContactsWriteStream.on("error", (err) => {
     helpers.logger.error(
       "error in campaignContactsWriteStream: ",
@@ -393,6 +438,58 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
 
   campaignContactsWriteStream.pipe(campaignContactsUploadStream);
 
+  // Contact rows
+  let lastContactId;
+  let processed = 0;
+  try {
+    let chunkContactResult: ContactsChunk | false;
+    lastContactId = 0;
+    processed = 0;
+    while (
+      (chunkContactResult = await processContactsChunk(
+        campaignId,
+        campaignTitle,
+        uniqueQuestionsByStepId,
+        lastContactId,
+        onlyOptOuts
+      ))
+    ) {
+      lastContactId = chunkContactResult.lastContactId;
+      helpers.logger.debug(
+        `Processing contact export for ${campaignId} chunk part ${lastContactId}`
+      );
+      processed += CHUNK_SIZE;
+      await helpers.updateStatus(
+        Math.round((processed / contactsCount / 4) * 100) +
+          (onlyOptOuts ? 75 : 25)
+      );
+      for (const c of chunkContactResult.contacts) {
+        campaignContactsWriteStream.write(c);
+      }
+    }
+  } finally {
+    campaignContactsWriteStream.end();
+  }
+
+  await campaignContactsUploadPromise;
+
+  return getDownloadUrl(`${campaignContactsKey}.csv`);
+};
+
+interface UploadCampaignMessages {
+  fileNameKey: string;
+  contactsCount: number;
+  helpers: ProgressTaskHelpers;
+  campaignId: number;
+}
+
+const processAndUploadCampaignMessages = async ({
+  fileNameKey,
+  contactsCount,
+  helpers,
+  campaignId
+}: UploadCampaignMessages): Promise<string> => {
+  const messagesKey = `${fileNameKey}-messages`;
   const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
   const messagesWriteStream = format({
     headers: true,
@@ -431,7 +528,7 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
       );
       processed += CHUNK_SIZE;
       await helpers.updateStatus(
-        Math.round((processed / contactsCount / 2) * 100)
+        Math.round((processed / contactsCount / 4) * 100)
       );
       for (const m of chunkMessageResult.messages) {
         messagesWriteStream.write(m);
@@ -441,51 +538,200 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
     messagesWriteStream.end();
   }
 
-  // Contact rows
+  await messagesUploadPromise;
+
+  return getDownloadUrl(`${messagesKey}.csv`);
+};
+
+interface UploadFilteredContacts {
+  fileNameKey: string;
+  helpers: ProgressTaskHelpers;
+  campaignId: number;
+  campaignTitle: string;
+}
+
+const processAndUploadFilteredContacts = async ({
+  fileNameKey,
+  helpers,
+  campaignId,
+  campaignTitle
+}: UploadFilteredContacts): Promise<string> => {
+  const filteredContactsKey = `${fileNameKey}-filteredContacts`;
+  const filteredContactsUploadStream = await getUploadStream(
+    `${filteredContactsKey}.csv`
+  );
+  const filteredContactsWriteStream = format({
+    headers: true,
+    writeHeaders: true
+  });
+
+  filteredContactsUploadStream.on("error", (err) => {
+    helpers.logger.error(
+      "error in filteredContactsUploadStream: ",
+      errToObj(err)
+    );
+  });
+  filteredContactsWriteStream.on("error", (err) => {
+    helpers.logger.error(
+      "error in filteredContactsWriteStream: ",
+      errToObj(err)
+    );
+  });
+
+  const filteredContactsUploadPromise = new Promise((resolve) => {
+    filteredContactsUploadStream.on("finish", resolve);
+  });
+
+  const countQuery = await r
+    .reader("filtered_contact")
+    .count("*")
+    .where({ campaign_id: campaignId });
+  const contactsCount = countQuery[0].count as number;
+
+  filteredContactsWriteStream.pipe(filteredContactsUploadStream);
+
+  let lastContactId;
+  let processed = 0;
   try {
     let chunkContactResult: ContactsChunk | false;
     lastContactId = 0;
     processed = 0;
     while (
-      (chunkContactResult = await processContactsChunk(
+      (chunkContactResult = await processFilteredContactsChunk(
         campaignId,
         campaignTitle,
-        uniqueQuestionsByStepId,
         lastContactId
       ))
     ) {
       lastContactId = chunkContactResult.lastContactId;
       helpers.logger.debug(
-        `Processing contact export for ${campaignId} chunk part ${lastContactId}`
+        `Processing filtered contact export for ${campaignId} chunk part ${lastContactId}`
       );
       processed += CHUNK_SIZE;
       await helpers.updateStatus(
-        Math.round((processed / contactsCount / 2) * 100) + 50
+        Math.round((processed / contactsCount / 4) * 100) + 75
       );
       for (const c of chunkContactResult.contacts) {
-        campaignContactsWriteStream.write(c);
+        filteredContactsWriteStream.write(c);
       }
     }
   } finally {
-    campaignContactsWriteStream.end();
+    filteredContactsWriteStream.end();
   }
 
+  await filteredContactsUploadPromise;
+
+  return getDownloadUrl(`${filteredContactsKey}.csv`);
+};
+
+export interface ExportCampaignPayload {
+  campaignId: number;
+  requesterId: number;
+  isAutomatedExport?: boolean;
+  spokeOptions: {
+    campaign: boolean;
+    messages: boolean;
+    optOuts: boolean;
+    filteredContacts: boolean;
+  };
+}
+
+export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
+  payload,
+  helpers
+) => {
+  const {
+    campaignId,
+    requesterId,
+    isAutomatedExport = false,
+    spokeOptions
+  } = payload;
+  const {
+    campaignTitle,
+    notificationEmail,
+    interactionSteps
+  } = await fetchExportData(campaignId, requesterId);
+
+  const countQueryResult = await r
+    .reader("campaign_contact")
+    .count("*")
+    .where({ campaign_id: campaignId });
+  const contactsCount = countQueryResult[0].count as number;
+
+  // Attempt upload to cloud storage
+  let fileNameKey = campaignTitle.replace(/ /g, "_").replace(/\//g, "_");
+
+  if (!isAutomatedExport) {
+    const timestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
+    fileNameKey = `${fileNameKey}-${timestamp}`;
+  }
+
+  const {
+    campaign: shouldExportCampaign,
+    filteredContacts: shouldExportFilteredContacts,
+    messages: shouldExportMessages,
+    optOuts: shouldExportOptOuts
+  } = spokeOptions;
+
+  const campaignExportUrl = shouldExportCampaign
+    ? await processAndUploadCampaignContacts({
+        fileNameKey,
+        campaignId,
+        campaignTitle,
+        contactsCount,
+        helpers,
+        interactionSteps,
+        onlyOptOuts: false
+      })
+    : null;
+
+  const campaignOptOutsExportUrl = shouldExportOptOuts
+    ? await processAndUploadCampaignContacts({
+        fileNameKey,
+        campaignId,
+        campaignTitle,
+        contactsCount,
+        helpers,
+        interactionSteps,
+        onlyOptOuts: true
+      })
+    : null;
+
+  const campaignMessagesExportUrl = shouldExportMessages
+    ? await processAndUploadCampaignMessages({
+        fileNameKey,
+        campaignId,
+        contactsCount,
+        helpers
+      })
+    : null;
+
+  const campaignFilteredContactsExportUrl = shouldExportFilteredContacts
+    ? await processAndUploadFilteredContacts({
+        fileNameKey,
+        campaignId,
+        campaignTitle,
+        helpers
+      })
+    : null;
+
   helpers.logger.debug("Waiting for streams to finish");
-  await Promise.all([campaignContactsUploadPromise, messagesUploadPromise]);
 
   try {
-    const [campaignExportUrl, campaignMessagesExportUrl] = await Promise.all([
-      getDownloadUrl(`${campaignContactsKey}.csv`),
-      getDownloadUrl(`${messagesKey}.csv`)
-    ]);
     if (!isAutomatedExport) {
+      const exportContent = await getExportCampaignContent(
+        {
+          campaignExportUrl,
+          campaignFilteredContactsExportUrl,
+          campaignOptOutsExportUrl,
+          campaignMessagesExportUrl
+        },
+        campaignTitle
+      );
       await sendEmail({
         to: notificationEmail,
         subject: `Export ready for ${campaignTitle}`,
-        text:
-          `Your Spoke exports are ready! These URLs will be valid for 24 hours.` +
-          `\n\nCampaign export:\n${campaignExportUrl}` +
-          `\n\nMessage export:\n${campaignMessagesExportUrl}`
+        html: exportContent
       });
     }
     helpers.logger.info(`Successfully exported ${campaignId}`);

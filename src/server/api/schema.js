@@ -333,10 +333,14 @@ const rootMutations = {
     },
 
     exportCampaign: async (_root, { options }, { user, loaders }) => {
-      const { campaignId, exportType, vanOptions } = options;
+      const { campaignId, exportType, vanOptions, spokeOptions } = options;
 
       if (exportType === CampaignExportType.VAN && !vanOptions) {
         throw new Error("Input must include vanOptions when exporting as VAN!");
+      }
+
+      if (exportType === CampaignExportType.SPOKE && !spokeOptions) {
+        throw new Error("Input must include valid spokeOptions when exporting");
       }
 
       const campaign = await loaders.campaign.load(campaignId);
@@ -346,7 +350,8 @@ const rootMutations = {
       if (exportType === CampaignExportType.SPOKE) {
         return addExportCampaign({
           campaignId,
-          requesterId: user.id
+          requesterId: user.id,
+          spokeOptions
         });
       }
 

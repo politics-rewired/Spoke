@@ -2353,6 +2353,51 @@ UNION
 ALTER TABLE public.external_sync_question_response_configuration OWNER TO postgres;
 
 --
+-- Name: filtered_contact; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.filtered_contact (
+    id integer NOT NULL,
+    campaign_id integer NOT NULL,
+    external_id text NOT NULL,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
+    cell text NOT NULL,
+    zip text NOT NULL,
+    custom_fields text NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    timezone character varying(255),
+    filtered_reason text NOT NULL,
+    CONSTRAINT filtered_contact_filtered_reason_check CHECK ((filtered_reason = ANY (ARRAY['INVALID'::text, 'LANDLINE'::text, 'VOIP'::text, 'OPTEDOUT'::text])))
+);
+
+
+ALTER TABLE public.filtered_contact OWNER TO postgres;
+
+--
+-- Name: filtered_contact_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.filtered_contact_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.filtered_contact_id_seq OWNER TO postgres;
+
+--
+-- Name: filtered_contact_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.filtered_contact_id_seq OWNED BY public.filtered_contact.id;
+
+
+--
 -- Name: instance_setting; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3401,6 +3446,13 @@ ALTER TABLE ONLY public.deliverability_report ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: filtered_contact id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.filtered_contact ALTER COLUMN id SET DEFAULT nextval('public.filtered_contact_id_seq'::regclass);
+
+
+--
 -- Name: interaction_step id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3817,6 +3869,22 @@ ALTER TABLE ONLY public.external_sync_opt_out_configuration
 
 ALTER TABLE ONLY public.external_system
     ADD CONSTRAINT external_system_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: filtered_contact filtered_contact_cell_campaign_id_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.filtered_contact
+    ADD CONSTRAINT filtered_contact_cell_campaign_id_unique UNIQUE (cell, campaign_id);
+
+
+--
+-- Name: filtered_contact filtered_contact_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.filtered_contact
+    ADD CONSTRAINT filtered_contact_pkey PRIMARY KEY (id);
 
 
 --
@@ -4290,6 +4358,13 @@ CREATE INDEX deliverability_report_period_starts_at_index ON public.deliverabili
 --
 
 CREATE INDEX deliverability_report_url_path_index ON public.deliverability_report USING btree (url_path);
+
+
+--
+-- Name: filtered_contact_campaign_id_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX filtered_contact_campaign_id_index ON public.filtered_contact USING btree (campaign_id);
 
 
 --
@@ -5214,6 +5289,14 @@ ALTER TABLE ONLY public.external_sync_opt_out_configuration
 
 ALTER TABLE ONLY public.external_sync_opt_out_configuration
     ADD CONSTRAINT external_sync_opt_out_configuration_system_id_fkey FOREIGN KEY (system_id) REFERENCES public.external_system(id);
+
+
+--
+-- Name: filtered_contact filtered_contact_campaign_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.filtered_contact
+    ADD CONSTRAINT filtered_contact_campaign_id_foreign FOREIGN KEY (campaign_id) REFERENCES public.all_campaign(id);
 
 
 --
