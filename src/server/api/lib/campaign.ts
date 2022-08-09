@@ -720,7 +720,7 @@ export const editCampaign = async (
 export const invalidScriptFields = async (campaignId: string) => {
   const { rows: variables } = await r.knex.raw(
     // eslint-disable-next-line no-useless-escape
-    `SELECT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
+    `SELECT DISTINCT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
 FROM interaction_step
 WHERE campaign_id = ?`,
     [campaignId]
