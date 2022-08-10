@@ -1,6 +1,6 @@
 exports.up = function up(knex) {
   return knex.schema.raw(`
-    CREATE EXTENSION "uuid-ossp" with schema "public";
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp" with schema "public";
 
     CREATE TABLE "public"."external_system" ();
     ALTER TABLE "public"."external_system" add column id uuid NOT NULL DEFAULT uuid_generate_v1mc();
