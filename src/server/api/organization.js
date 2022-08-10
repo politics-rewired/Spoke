@@ -33,7 +33,7 @@ export const getEscalationUserId = async (organizationId) => {
 
 export const resolvers = {
   Organization: {
-    ...sqlResolvers(["id", "name", "defaultTextingTz"]),
+    ...sqlResolvers(["id", "name", "defaultTextingTz", "deletedAt"]),
     settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
@@ -464,6 +464,8 @@ export const resolvers = {
         .where({ organization_id: organizationId });
       const result = await formatPage(query, { after, first });
       return result;
-    }
+    },
+    deletedBy: async (organization) =>
+      r.reader("user").where({ id: organization.deleted_by })
   }
 };

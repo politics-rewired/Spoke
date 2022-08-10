@@ -3409,6 +3409,34 @@ const rootMutations = {
         .update({ is_superadmin: superAdminStatus });
 
       return true;
+    },
+    editOrganizationActive: async (
+      _root,
+      { organizationId, active },
+      { user }
+    ) => {
+      await superAdminRequired(user);
+
+      if (active) {
+        await r
+          .knex("organization")
+          .where({ id: organizationId })
+          .update({ deleted_at: null, deleted_by: null });
+      } else {
+        await r
+          .knex("organization")
+          .where({ id: organizationId })
+          .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
+
+        // Suspend all users except owners (so superadmins can access these orgs and their settings)
+        await r
+          .knex("user_organization")
+          .where({ organization_id: organizationId })
+          .whereNot({ role: UserRoleType.OWNER })
+          .update({ role: UserRoleType.SUSPENDED });
+      }
+
+      return true;
     }
   }
 };
@@ -3488,9 +3516,13 @@ const rootResolvers = {
       );
       return contact;
     },
-    organizations: async (_root, { id: _id }, { user }) => {
+    organizations: async (_root, { active }, { user }) => {
       await superAdminRequired(user);
-      return r.reader("organization");
+      const query = r.reader("organization");
+      if (active) {
+        query.whereNull("deleted_at");
+      }
+      return query;
     },
     availableActions: (_root, { organizationId }, { user: _user }) => {
       if (!config.ACTION_HANDLERS) {

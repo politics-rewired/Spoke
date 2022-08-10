@@ -2796,7 +2796,9 @@ CREATE TABLE public.organization (
     texting_hours_end integer DEFAULT 21,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     monthly_message_limit bigint,
-    default_texting_tz character varying(255) DEFAULT 'America/New_York'::character varying NOT NULL
+    default_texting_tz character varying(255) DEFAULT 'America/New_York'::character varying NOT NULL,
+    deleted_at timestamp with time zone,
+    deleted_by integer
 );
 
 
@@ -4461,6 +4463,13 @@ CREATE INDEX opt_out_organization_id_index ON public.opt_out USING btree (organi
 
 
 --
+-- Name: organization_deleted_at_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX organization_deleted_at_index ON public.organization USING btree (deleted_at);
+
+
+--
 -- Name: password_reset_request_token_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -5310,6 +5319,14 @@ ALTER TABLE ONLY public.opt_out
 
 ALTER TABLE ONLY public.opt_out
     ADD CONSTRAINT opt_out_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: organization organization_deleted_by_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT organization_deleted_by_foreign FOREIGN KEY (deleted_by) REFERENCES public."user"(id);
 
 
 --

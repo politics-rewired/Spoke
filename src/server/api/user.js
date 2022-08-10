@@ -211,23 +211,29 @@ export const resolvers = {
       }
       return formatPage(query, { after, first });
     },
-    organizations: async (user, { role }) => {
+    organizations: async (user, { role, active }) => {
       if (!user || !user.id) {
         return [];
       }
 
       const getOrganizationsForUserWithRole = memoizer.memoize(
         async ({ userId, role: userRole }) => {
-          return r.reader("organization").whereExists(function subquery() {
-            const whereClause = { user_id: userId };
-            if (userRole) {
-              whereClause.role = userRole;
-            }
-            this.select(r.reader.raw("1"))
-              .from("user_organization")
-              .whereRaw("user_organization.organization_id = organization.id")
-              .where(whereClause);
-          });
+          const query = r
+            .reader("organization")
+            .whereExists(function subquery() {
+              const whereClause = { user_id: userId };
+              if (userRole) {
+                whereClause.role = userRole;
+              }
+              this.select(r.reader.raw("1"))
+                .from("user_organization")
+                .whereRaw("user_organization.organization_id = organization.id")
+                .where(whereClause);
+            });
+          if (active) {
+            query.whereNull("deleted_at");
+          }
+          return query;
         },
         cacheOpts.UserOrganizations
       );

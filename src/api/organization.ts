@@ -57,6 +57,8 @@ export interface Organization {
   externalSystems: RelayPaginatedResponse<ExternalSystem>;
   messagingServices: MessagingServicePage;
   campaignGroups: CampaignGroupPage;
+  deletedAt: string;
+  deletedBy: User;
 }
 
 export interface EditOrganizationInput {
@@ -115,6 +117,8 @@ export const schema = `
     messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
     campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
     templateCampaigns(after: Cursor, first: Int): CampaignPage!
+    deletedAt: String
+    deletedBy: User
   }
 
   input EditOrganizationInput {

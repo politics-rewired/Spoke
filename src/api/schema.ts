@@ -218,7 +218,7 @@ const rootSchema = `
     contact(id:String!): CampaignContact
     assignment(id:String!): Assignment
     team(id: String!): Team!
-    organizations: [Organization]
+    organizations(active: Boolean): [Organization]
     availableActions(organizationId:String!): [Action]
     conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
     campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
@@ -335,6 +335,7 @@ const rootSchema = `
     editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
     unassignTextsFromUser(membershipId: String!): Boolean!
     editSuperAdminStatus(userEmail: String!, superAdminStatus: Boolean!): Boolean!
+    editOrganizationActive(organizationId: String!, active: Boolean!): Boolean!
   }
 
   schema {

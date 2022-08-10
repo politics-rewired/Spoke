@@ -39,7 +39,16 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   const sections = [
     { name: "People", path: "people", url: "/superadmin/people" },
-    { name: "SuperAdmins", path: "superadmins", url: "/superadmin/superadmins" }
+    {
+      name: "SuperAdmins",
+      path: "superadmins",
+      url: "/superadmin/superadmins"
+    },
+    {
+      name: "Organizations",
+      path: "organizations",
+      url: "/superadmin/organizations"
+    }
   ];
 
   const currentSection = sections
