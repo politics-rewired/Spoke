@@ -437,7 +437,7 @@ export const resolvers = {
     ) => {
       const organizationId = parseInt(organization.id, 10);
       try {
-        await accessRequired(user, organizationId, "OWNER", true);
+        await accessRequired(user, organizationId, "ADMIN", true);
       } catch {
         return null;
       }
