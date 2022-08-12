@@ -19,11 +19,13 @@ import { RequestAutoApproveType } from "../../../api/organization-membership";
 import GSForm from "../../../components/forms/GSForm";
 import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
-import { DateTime } from "../../../lib/datetime";
+import { DateTime, parseIanaZone } from "../../../lib/datetime";
+import { timezones } from "../../../lib/timezones";
 import { loadData } from "../../hoc/with-operations";
 import AutosendingSettingsCard from "./AutosendingSettingsCard";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
+import RejectedTextersMessageCard from "./RejectedTextersMessageCard";
 import Review10DlcInfo from "./Review10DlcInfo";
 import ScriptPreviewSettingsCard from "./ScriptPreviewSettingsCard";
 
@@ -67,7 +69,8 @@ class Settings extends React.Component {
     approvalLevel: undefined,
     trollbotWebhookUrl: undefined,
     isWorking: false,
-    error: undefined
+    error: undefined,
+    doNotAssignMessage: undefined
   };
 
   editSettings = async (name, input) => {
@@ -115,6 +118,10 @@ class Settings extends React.Component {
     }
   };
 
+  handleDefaultTextingTzChange = async (_event, _index, textingTz) => {
+    return this.props.mutations.updateDefaultTextingTimezone(textingTz);
+  };
+
   handleSaveNumbersApiKey = () => {
     const { numbersApiKey } = this.state;
     this.editSettings("Numbers API Key", { numbersApiKey });
@@ -124,6 +131,9 @@ class Settings extends React.Component {
     const { optOutMessage } = this.state;
     this.editSettings("Opt Out Message", { optOutMessage });
   };
+
+  handleSaveDoNotAssignMessage = (doNotAssignMessage) =>
+    this.editSettings("Do Not Assign Message", { doNotAssignMessage });
 
   handleSaveTrollbotUrl = () => {
     const { trollbotWebhookUrl } = this.state;
@@ -141,6 +151,11 @@ class Settings extends React.Component {
     });
 
   handleDismissError = () => this.setState({ error: undefined });
+
+  handleToggleShowDoNotAssignMessage = async (event, isToggled) =>
+    this.editSettings("Do Not Assign Message Toggle", {
+      showDoNotAssignMessage: isToggled
+    });
 
   renderTextingHoursForm() {
     const { organization } = this.props.data;
@@ -204,10 +219,13 @@ class Settings extends React.Component {
     const { isWorking, error } = this.state;
     const { organization } = this.props.data;
     const {
+      showDoNotAssignMessage,
       defaulTexterApprovalStatus,
       showContactLastName,
       showContactCell
     } = organization.settings;
+
+    const { defaultTextingTz } = organization;
 
     const formSchema = yup.object({
       optOutMessage: yup.string().required()
@@ -227,6 +245,10 @@ class Settings extends React.Component {
 
     const optOutMessage =
       this.state.optOutMessage || organization.settings.optOutMessage;
+
+    const doNotAssignMessage =
+      this.state.doNotAssignMessage || organization.settings.doNotAssignMessage;
+
     const noMessageChange =
       optOutMessage === organization.settings.optOutMessage;
     const isOptOutSaveDisabled = isWorking || noMessageChange;
@@ -290,6 +312,15 @@ class Settings extends React.Component {
             </Button>
           </CardActions>
         </Card>
+
+        <RejectedTextersMessageCard
+          showDoNotAssignMessage={showDoNotAssignMessage}
+          doNotAssignMessage={doNotAssignMessage}
+          onToggleShowDoNotAssign={this.handleToggleShowDoNotAssignMessage}
+          onSaveDoNotAssignMessage={this.handleSaveDoNotAssignMessage}
+          style={{ marginBottom: 20 }}
+        />
+
         <Card className={css(styles.sectionCard)}>
           <GSForm
             schema={formSchema}
@@ -326,6 +357,19 @@ class Settings extends React.Component {
         <Card className={css(styles.sectionCard)}>
           <CardHeader title="Texting Hours" />
           <CardText>
+            <p>Default Texting Timezone</p>
+            <DropDownMenu
+              value={defaultTextingTz}
+              onChange={this.handleDefaultTextingTzChange}
+            >
+              {timezones.map((timezone) => (
+                <MenuItem
+                  key={parseIanaZone(timezone)}
+                  value={parseIanaZone(timezone)}
+                  primaryText={timezone}
+                />
+              ))}
+            </DropDownMenu>
             <Toggle
               toggled={organization.textingHoursEnforced}
               label="Enforce texting hours?"
@@ -340,10 +384,8 @@ class Settings extends React.Component {
                 <span className={css(styles.textingHoursSpan)}>
                   {formatTextingHours(organization.textingHoursStart)} to{" "}
                   {formatTextingHours(organization.textingHoursEnd)}
-                </span>
-                {window.TZ
-                  ? ` in your organisations local time. Timezone ${window.TZ}`
-                  : " in contacts local time (or 12pm-6pm EST if timezone is unknown)"}
+                </span>{" "}
+                in your organization's local time. Timezone {defaultTextingTz}.
               </div>
             )}
           </CardText>
@@ -531,6 +573,26 @@ const mutations = {
       textingHoursEnforced
     }
   }),
+  updateDefaultTextingTimezone: (ownProps) => (defaultTextingTz) => ({
+    mutation: gql`
+      mutation updateDefaultTextingTimezone(
+        $organizationId: String!
+        $defaultTextingTz: String!
+      ) {
+        updateDefaultTextingTimezone(
+          defaultTextingTz: $defaultTextingTz
+          organizationId: $organizationId
+        ) {
+          id
+          defaultTextingTz
+        }
+      }
+    `,
+    variables: {
+      organizationId: ownProps.match.params.organizationId,
+      defaultTextingTz
+    }
+  }),
   editSettings: (ownProps) => (input) => ({
     mutation: gql`
       mutation editOrganizationSettings(
@@ -545,6 +607,8 @@ const mutations = {
           defaulTexterApprovalStatus
           showContactLastName
           showContactCell
+          showDoNotAssignMessage
+          doNotAssignMessage
         }
       }
     `,
@@ -562,6 +626,7 @@ const queries = {
         organization(id: $organizationId) {
           id
           name
+          defaultTextingTz
           textingHoursEnforced
           textingHoursStart
           textingHoursEnd
@@ -569,6 +634,8 @@ const queries = {
             id
             optOutMessage
             numbersApiKey
+            showDoNotAssignMessage
+            doNotAssignMessage
             trollbotWebhookUrl
             defaulTexterApprovalStatus
             showContactLastName

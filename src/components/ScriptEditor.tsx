@@ -1,4 +1,5 @@
-import { green, grey, red } from "@material-ui/core/colors";
+import { blue, green, grey, orange, red } from "@material-ui/core/colors";
+import { CampaignVariable } from "@spoke/spoke-codegen";
 import { getCharCount } from "@trt2/gsm-charset-utils";
 import {
   CompositeDecorator,
@@ -24,7 +25,7 @@ type DecoratorStrategy = (
   contentState: ContentState
 ) => void;
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   editor: {
     border: "1px solid #ddd",
     cursor: "text",
@@ -35,22 +36,33 @@ const styles = {
     marginTop: 10,
     textAlign: "center"
   },
-  goodField: {
-    color: green[500],
+  validField: {
     direction: "ltr",
     unicodeBidi: "bidi-override"
+  },
+  validCustomField: {
+    color: green[500]
+  },
+  validCampaignVariableField: {
+    color: blue[600]
+  },
+  invalidCampaignVariableField: {
+    color: orange[600]
   },
   badField: {
     color: red[400]
   },
   scriptFieldButton: {
     fontSize: "11px",
-    color: green[600],
     textTransform: "none",
     backgroundColor: grey[100],
-    // margin: '5px 10px',
     cursor: "pointer"
-    // display: 'inline-block',
+  },
+  customField: {
+    color: green[600]
+  },
+  campaignVariableField: {
+    color: blue[600]
   },
   scriptFieldButtonSection: {
     marginTop: 10,
@@ -73,8 +85,26 @@ function findWithRegex(
   }
 }
 
-const RecognizedField: React.FC = (props) => (
-  <span {...props} style={styles.goodField}>
+const CustomField: React.FC = (props) => (
+  <span {...props} style={{ ...styles.validField, ...styles.validCustomField }}>
+    {props.children}
+  </span>
+);
+
+const ValidCampaignVariableField: React.FC = (props) => (
+  <span
+    {...props}
+    style={{ ...styles.validField, ...styles.validCampaignVariableField }}
+  >
+    {props.children}
+  </span>
+);
+
+const InvalidCampaignVariableField: React.FC = (props) => (
+  <span
+    {...props}
+    style={{ ...styles.validField, ...styles.invalidCampaignVariableField }}
+  >
     {props.children}
   </span>
 );
@@ -88,6 +118,7 @@ const UnrecognizedField: React.FC = (props) => (
 interface Props {
   scriptText: string;
   scriptFields: string[];
+  campaignVariables: CampaignVariable[];
   integrationSourced: boolean;
   onChange: (value: string) => Promise<void> | void;
   receiveFocus?: boolean;
@@ -126,9 +157,12 @@ class ScriptEditor extends React.Component<Props, State> {
   }
 
   UNSAFE_componentWillReceiveProps() {
-    const { scriptFields } = this.props;
+    const { scriptFields, campaignVariables } = this.props;
     const { editorState } = this.state;
-    const decorator = this.getCompositeDecorator(scriptFields);
+    const decorator = this.getCompositeDecorator(
+      scriptFields,
+      campaignVariables
+    );
     EditorState.set(editorState, { decorator });
 
     // this.setState({ editorState: this.getEditorState() })
@@ -149,9 +183,12 @@ class ScriptEditor extends React.Component<Props, State> {
   };
 
   getEditorState() {
-    const { scriptFields, scriptText } = this.props;
+    const { scriptFields, scriptText, campaignVariables } = this.props;
 
-    const decorator = this.getCompositeDecorator(scriptFields);
+    const decorator = this.getCompositeDecorator(
+      scriptFields,
+      campaignVariables
+    );
     let editorState;
     if (scriptText) {
       editorState = EditorState.createWithContent(
@@ -170,13 +207,44 @@ class ScriptEditor extends React.Component<Props, State> {
     return replaceEasyGsmWins(editorState.getCurrentContent().getPlainText());
   }
 
-  getCompositeDecorator = (scriptFields: string[]) => {
-    const recognizedFieldStrategy: DecoratorStrategy = (
+  getCompositeDecorator = (
+    scriptFields: string[],
+    campaignVariables: CampaignVariable[]
+  ) => {
+    const recognizedCustomFieldStrategy: DecoratorStrategy = (
       contentBlock,
       callback
     ) => {
       const regex = new RegExp(
         `{(${scriptFields.map(escapeRegExp).join("|")})}`,
+        "g"
+      );
+      return findWithRegex(regex, contentBlock, callback);
+    };
+
+    const validCampaignVariableStrategy: DecoratorStrategy = (
+      contentBlock,
+      callback
+    ) => {
+      const validVariables = campaignVariables
+        .filter(({ value }) => value !== null)
+        .map(({ name }) => name);
+      const regex = new RegExp(
+        `{(${validVariables.map(escapeRegExp).join("|")})}`,
+        "g"
+      );
+      return findWithRegex(regex, contentBlock, callback);
+    };
+
+    const invalidCampaignVariableStrategy: DecoratorStrategy = (
+      contentBlock,
+      callback
+    ) => {
+      const validVariables = campaignVariables
+        .filter(({ value }) => value === null)
+        .map(({ name }) => name);
+      const regex = new RegExp(
+        `{(${validVariables.map(escapeRegExp).join("|")})}`,
         "g"
       );
       return findWithRegex(regex, contentBlock, callback);
@@ -189,8 +257,16 @@ class ScriptEditor extends React.Component<Props, State> {
 
     return new CompositeDecorator([
       {
-        strategy: recognizedFieldStrategy,
-        component: RecognizedField
+        strategy: recognizedCustomFieldStrategy,
+        component: CustomField
+      },
+      {
+        strategy: validCampaignVariableStrategy,
+        component: ValidCampaignVariableField
+      },
+      {
+        strategy: invalidCampaignVariableStrategy,
+        component: InvalidCampaignVariableField
       },
       {
         strategy: unrecognizedFieldStrategy,
@@ -245,15 +321,28 @@ class ScriptEditor extends React.Component<Props, State> {
   }
 
   renderCustomFields() {
-    const { scriptFields } = this.props;
+    const { scriptFields, campaignVariables } = this.props;
     return (
       <div style={styles.scriptFieldButtonSection}>
         {scriptFields.map((field) => (
           <Chip
             key={field}
-            style={styles.scriptFieldButton}
+            style={{ ...styles.scriptFieldButton, ...styles.customField }}
             text={delimit(field)}
             onClick={() => this.addCustomField(field)}
+          />
+        ))}
+        {campaignVariables.map((field) => (
+          <Chip
+            key={field.id}
+            style={{
+              ...styles.scriptFieldButton,
+              ...(field.value === null
+                ? styles.invalidCampaignVariableField
+                : styles.validCampaignVariableField)
+            }}
+            text={delimit(field.name)}
+            onClick={() => this.addCustomField(field.name)}
           />
         ))}
       </div>

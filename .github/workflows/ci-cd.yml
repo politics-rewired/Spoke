@@ -44,7 +44,6 @@ jobs:
 
       BASE_URL: "localhost:3000"
       SESSION_SECRET: "SuperSecret"
-      DST_REFERENCE_TIMEZONE: "America/New_York"
       PHONE_NUMBER_COUNTRY: US
       SUPPRESS_SELF_INVITE: "false"
       JOBS_SAME_PROCESS: "1"

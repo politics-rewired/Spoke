@@ -17,6 +17,13 @@ export const GET_ORGANIZATION_DATA = gql`
         displayName
       }
       numbersApiKey
+      messagingServices(active: true) {
+        edges {
+          node {
+            name
+          }
+        }
+      }
       campaigns(cursor: { offset: 0, limit: 5000 }) {
         campaigns {
           id
@@ -87,6 +94,7 @@ export const EditCampaignFragment = gql`
       id
       title
     }
+    messagingServiceSid
     editors
     readiness {
       basics

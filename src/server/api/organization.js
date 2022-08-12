@@ -33,7 +33,7 @@ export const getEscalationUserId = async (organizationId) => {
 
 export const resolvers = {
   Organization: {
-    ...sqlResolvers(["id", "name"]),
+    ...sqlResolvers(["id", "name", "defaultTextingTz"]),
     settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
@@ -430,13 +430,25 @@ export const resolvers = {
         .where({ organization_id: organizationId });
       return formatPage(query, { after, first });
     },
-    messagingServices: async (organization, { after, first }, { user }) => {
+    messagingServices: async (
+      organization,
+      { after, first, active },
+      { user }
+    ) => {
       const organizationId = parseInt(organization.id, 10);
-      await accessRequired(user, organizationId, "OWNER", true);
-
-      const query = r
+      try {
+        await accessRequired(user, organizationId, "OWNER", true);
+      } catch {
+        return null;
+      }
+      let query = r
         .reader("messaging_service")
         .where({ organization_id: organizationId });
+
+      if (active) {
+        query = query.where({ active });
+      }
+
       return formatPage(query, {
         after,
         first,

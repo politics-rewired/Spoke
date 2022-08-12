@@ -175,10 +175,12 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
       <CardHeader
         title="Message Actions"
         action={
-          <IconButton onClick={handleExpandChange}>
+          <IconButton>
             {showSection ? <ExpandLess /> : <ExpandMore />}
           </IconButton>
         }
+        style={{ cursor: "pointer" }}
+        onClick={handleExpandChange}
       />
       <Collapse in={showSection}>
         <CardContent>

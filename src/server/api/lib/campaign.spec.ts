@@ -11,6 +11,7 @@ import {
   createMessage,
   createMessagingService,
   createOrganization,
+  createTemplate,
   createUser,
   createUserOrganization
 } from "../../../../__test__/testbed-preparation/core";
@@ -171,13 +172,41 @@ describe("create / edit campaign", () => {
           mutation createBlankCampaign($campaign: CampaignInput!) {
             createCampaign(campaign: $campaign) {
               id
+              isTemplate
             }
           }
         `
       });
-
     expect(response.ok).toBeTruthy();
-    expect(response.body.data.createCampaign).toHaveProperty("id");
+
+    const campaign = response.body.data.createCampaign;
+    expect(campaign).toHaveProperty("id");
+    expect(campaign.isTemplate).toBe(false);
+  });
+
+  it("creates a template", async () => {
+    const response = await agent
+      .post(`/graphql`)
+      .set(cookies)
+      .send({
+        operationName: "createTemplateCampaign",
+        variables: {
+          organizationId: `${organization.id}`
+        },
+        query: `
+          mutation createTemplateCampaign($organizationId: String!) {
+            createTemplateCampaign(organizationId: $organizationId) {
+              id
+              isTemplate
+            }
+          }
+        `
+      });
+    expect(response.ok).toBeTruthy();
+
+    const template = response.body.data.createTemplateCampaign;
+    expect(template).toHaveProperty("id");
+    expect(template.isTemplate).toBe(true);
   });
 
   const mockCampaign = async (args: {
@@ -193,6 +222,12 @@ describe("create / edit campaign", () => {
         role,
         orgOptions: { features: { startCampaignRequiresApproval } }
       });
+
+      await createMessagingService(client, {
+        organizationId: result.organization.id,
+        active: true
+      });
+
       const campaign = await createCampaign(client, {
         organizationId: result.organization.id,
         isStarted,
@@ -370,5 +405,147 @@ describe("create / edit campaign", () => {
     expect(editCampaign.interactionSteps[0].scriptOptions[0]).toEqual(
       campaignEdits.scriptOption
     );
+  });
+
+  const makeCopy = async (
+    cookiesForEdit: Record<string, string>,
+    campaignId: number
+  ) => {
+    const response = await agent
+      .post(`/graphql`)
+      .set(cookiesForEdit)
+      .send({
+        operationName: "copyCampaign",
+        variables: {
+          campaignId: `${campaignId}`
+        },
+        query: `
+          mutation copyCampaign($campaignId: String!) {
+            copyCampaign(id: $campaignId) {
+              id
+            }
+          }
+        `
+      });
+    return response;
+  };
+
+  it("copies campaign", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.ADMIN,
+      startCampaignRequiresApproval: false,
+      isStarted: false,
+      isApproved: false
+    });
+
+    const response = await makeCopy(mocks.cookies, mocks.campaign.id);
+    expect(response.ok).toBe(true);
+    expect(response.body.data.copyCampaign).toHaveProperty("id");
+  });
+
+  const makeCopies = async (
+    cookiesForEdit: Record<string, string>,
+    campaignId: number,
+    quantity: number
+  ) => {
+    const response = await agent
+      .post(`/graphql`)
+      .set(cookiesForEdit)
+      .send({
+        operationName: "copyCampaigns",
+        variables: {
+          campaignId: `${campaignId}`,
+          quantity
+        },
+        query: `
+          mutation copyCampaigns($campaignId: String!, $quantity: Int!) {
+            copyCampaigns(sourceCampaignId: $campaignId, quantity: $quantity) {
+              id
+            }
+          }
+        `
+      });
+    return response;
+  };
+
+  it("creates multiple copies from campaign", async () => {
+    const mocks = await mockCampaign({
+      role: UserRoleType.ADMIN,
+      startCampaignRequiresApproval: false,
+      isStarted: false,
+      isApproved: false
+    });
+
+    const quantity = 5;
+    const response = await makeCopies(
+      mocks.cookies,
+      mocks.campaign.id,
+      quantity
+    );
+
+    expect(response.ok).toBe(true);
+    expect(response.body.data.copyCampaigns.length).toBe(quantity);
+  });
+
+  const mockTemplate = async () => {
+    const mocks = await withClient(pool, async (client) => {
+      const result = await createOrgAndSession(client, {
+        agent,
+        role: UserRoleType.ADMIN
+      });
+
+      const orgId = result.organization.id;
+
+      await createMessagingService(client, {
+        organizationId: orgId,
+        active: true
+      });
+
+      const template = await createTemplate(client, {
+        organizationId: result.organization.id
+      });
+      return { ...result, template };
+    });
+    return mocks;
+  };
+
+  const makeCampaignsFromTemplate = async (
+    cookiesForEdit: Record<string, string>,
+    templateId: number,
+    quantity: number
+  ) => {
+    const response = await agent
+      .post(`/graphql`)
+      .set(cookiesForEdit)
+      .send({
+        operationName: "createCampaignFromTemplate",
+        variables: {
+          templateId: `${templateId}`,
+          quantity
+        },
+        query: `
+          mutation createCampaignFromTemplate($templateId: String!, $quantity: Int!) {
+            copyCampaigns(sourceCampaignId: $templateId, quantity: $quantity) {
+              id
+              title
+            }
+          }
+        `
+      });
+    return response;
+  };
+
+  it("creates campaigns from template", async () => {
+    const mocks = await mockTemplate();
+
+    const quantity = 5;
+    const response = await makeCampaignsFromTemplate(
+      mocks.cookies,
+      mocks.template.id,
+      quantity
+    );
+
+    expect(response.ok).toBe(true);
+    expect(response.body.data.copyCampaigns.length).toBe(quantity);
   });
 });

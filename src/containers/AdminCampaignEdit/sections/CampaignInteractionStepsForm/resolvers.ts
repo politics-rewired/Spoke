@@ -29,10 +29,21 @@ export const GET_CAMPAIGN_INTERACTIONS = gql`
       id
       isStarted
       isApproved
+      isTemplate
       interactionSteps {
         ...EditInteractionStep
       }
       customFields
+      invalidScriptFields
+      campaignVariables {
+        edges {
+          node {
+            id
+            name
+            value
+          }
+        }
+      }
       externalSystem {
         id
       }

@@ -152,13 +152,8 @@ export async function uploadContacts(job) {
 
   const orgFeatures = JSON.parse(organization.features || "{}");
 
-  await Promise.all([
-    r.knex("campaign_contact").where({ campaign_id: campaignId }).del(),
-    r
-      .knex("campaign")
-      .update({ landlines_filtered: false })
-      .where({ id: campaignId })
-  ]);
+  await r.knex("campaign_contact").where({ campaign_id: campaignId }).delete();
+  await r.knex("filtered_contact").where({ campaign_id: campaignId }).delete();
 
   let jobPayload = await gunzip(Buffer.from(job.payload, "base64"));
   jobPayload = JSON.parse(jobPayload);
@@ -223,10 +218,46 @@ export async function uploadContacts(job) {
     }
 
     try {
-      const deleteOptOutCells = await trx("campaign_contact")
-        .whereIn("cell", getOptOutSubQuery(campaign.organization_id))
-        .where("campaign_id", campaignId)
-        .delete();
+      const optOutSubQuery = getOptOutSubQuery(
+        campaign.organization_id
+      ).toString();
+      const { rowCount: deleteOptOutCells } = await trx.raw(
+        `with deleted_contacts as (
+          delete from campaign_contact
+          where
+            campaign_id = ?
+            and cell in (${optOutSubQuery})
+          returning *
+        )
+        insert into filtered_contact (
+           campaign_id,
+           external_id,
+           first_name,
+           last_name,
+           cell,
+           zip,
+           custom_fields,
+           created_at,
+           updated_at,
+           timezone,
+           filtered_reason
+         )
+         select
+           campaign_id,
+           external_id,
+           first_name,
+           last_name,
+           cell,
+           zip,
+           custom_fields,
+           created_at,
+           updated_at,
+           timezone,
+           'OPTEDOUT'
+         from deleted_contacts
+`,
+        [campaignId]
+      );
 
       if (deleteOptOutCells) {
         resultMessages.push(
@@ -615,6 +646,11 @@ export async function loadContactsFromDataWarehouse(job) {
 
   await r
     .knex("campaign_contact")
+    .where("campaign_id", job.campaign_id)
+    .delete();
+
+  await r
+    .knex("filtered_contact")
     .where("campaign_id", job.campaign_id)
     .delete();
 

@@ -307,13 +307,6 @@ const validators = {
     devDefault: 8090,
     default: undefined
   }),
-  DST_REFERENCE_TIMEZONE: str({
-    desc:
-      "Timezone to use to determine whether DST is in effect. If it's DST in this timezone, we assume it's DST everywhere. Note that DST is opposite in the northern and souther hemispheres.",
-    example: "Australia/Sydney",
-    default: "America/New_York",
-    isClient: true
-  }),
   DISABLE_ASSIGNMENT_PAGE: bool({
     desc: "Whether to disable the Assignments admin page.",
     default: false,
@@ -407,6 +400,10 @@ const validators = {
     choices: ["s3", "gs-json"], // eventually add support for GCP w/ HMAC interoperability: ["gs"]
     default: "s3"
   }),
+  EXPORT_CAMPAIGN_CHUNK_SIZE: num({
+    desc: "Chunk size to use for exporting campaign contacts and messages.",
+    default: 1000
+  }),
   FIX_ORGLESS: bool({
     desc:
       "Set to true only if you want to run the job that automatically assigns the default org (see DEFAULT_ORG) to new users who have no assigned org.",
@@ -486,6 +483,11 @@ const validators = {
     desc: "Server mode",
     choices: Object.values(ServerMode),
     default: ServerMode.Dual
+  }),
+  MUI_PRO_KEY: str({
+    desc: "MUI Pro Key",
+    default: undefined,
+    isClient: true
   }),
   NEXMO_API_KEY: str({
     desc: "Nexmo API key. Required if using Nexmo.",
@@ -746,6 +748,11 @@ const validators = {
     desc:
       "The numeric coding of the VAN list export type. The default is the Hustle format.",
     default: 8
+  }),
+  VAN_CONTACT_TYPE_ID: num({
+    desc:
+      "The numeric coding of the contact type to use for syncing VAN canvass results. Default is 'SMS Text'.",
+    default: 37
   }),
   WAREHOUSE_DB_TYPE: str({
     desc:

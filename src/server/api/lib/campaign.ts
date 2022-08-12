@@ -204,14 +204,9 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
       );
 
       // Copy Messaging Service OR use active one
-      const campaign = await r
-        .knex("campaign")
-        .where({ id: campaignId })
-        .first();
-
       const messagingServices = await r
         .knex("messaging_service")
-        .where({ organization_id: campaign.organization_id, active: true });
+        .where({ organization_id: newCampaign.organization_id, active: true });
 
       if (messagingServices.length === 0) {
         throw new Error("No active messaging services found");
@@ -365,6 +360,8 @@ export const editCampaign = async (
     // Autoassignment
     campaign.isAutoassignEnabled = null;
     campaign.repliesStaleAfter = null;
+    // Messaging Service
+    campaign.messagingServiceSid = null;
   }
 
   const {
@@ -380,7 +377,8 @@ export const editCampaign = async (
     isAutoassignEnabled,
     repliesStaleAfter,
     timezone,
-    externalSystemId
+    externalSystemId,
+    messagingServiceSid
   } = campaign;
 
   const organizationId = origCampaignRecord.organization_id;
@@ -400,7 +398,8 @@ export const editCampaign = async (
     is_autoassign_enabled: isAutoassignEnabled ?? undefined,
     replies_stale_after_minutes: repliesStaleAfter, // this is null to unset it - it must be null, not undefined
     timezone: timezone ? parseIanaZone(timezone) : undefined,
-    external_system_id: externalSystemId
+    external_system_id: externalSystemId,
+    messaging_service_sid: messagingServiceSid ?? undefined
   };
 
   Object.keys(campaignUpdates).forEach((key) => {
@@ -413,7 +412,12 @@ export const editCampaign = async (
     Object.prototype.hasOwnProperty.call(campaign, "externalListId") &&
     campaign.externalListId
   ) {
-    await r.knex("campaign_contact").where({ campaign_id: id }).del();
+    await r.knex("campaign_contact").where({ campaign_id: id }).delete();
+    await r.knex("filtered_contact").where({ campaign_id: id }).delete();
+    await r
+      .knex("campaign")
+      .where({ id })
+      .update({ landlines_filtered: false });
     await r.knex.raw(
       `select * from public.queue_load_list_into_campaign(?, ?)`,
       [id, parseInt(campaign.externalListId, 10)]
@@ -438,10 +442,12 @@ export const editCampaign = async (
     await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
 
     // Uploading contacts from a CSV invalidates external system configuration
+    // and invalidates filtered landlines
     await r
       .knex("campaign")
       .update({
-        external_system_id: null
+        external_system_id: null,
+        landlines_filtered: false
       })
       .where({ id });
 
@@ -488,6 +494,13 @@ export const editCampaign = async (
     datawarehouse &&
     user.is_superadmin
   ) {
+    await r
+      .knex("campaign")
+      .update({
+        external_system_id: null,
+        landlines_filtered: false
+      })
+      .where({ id });
     await accessRequired(user, organizationId, "ADMIN", /* superadmin */ true);
     const [job] = await r
       .knex("job_request")
@@ -702,4 +715,39 @@ export const editCampaign = async (
     .returning("*");
   cacheableData.campaign.reload(id);
   return newCampaign || loaders.campaign.load(id);
+};
+
+export const invalidScriptFields = async (campaignId: string) => {
+  const { rows: variables } = await r.knex.raw(
+    // eslint-disable-next-line no-useless-escape
+    `SELECT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
+FROM interaction_step
+WHERE campaign_id = ?`,
+    [campaignId]
+  );
+
+  const parsedVariables = variables
+    .map((v: { variable: string }) => v.variable)
+    .flat();
+
+  const campaignContact = await r
+    .knex("campaign_contact")
+    .where({ campaign_id: campaignId })
+    .first(["custom_fields"]);
+
+  const customFields = campaignContact
+    ? Object.keys(JSON.parse(campaignContact.custom_fields))
+    : [];
+  const campaignVariables = await r
+    .knex("campaign_variable")
+    .where({ campaign_id: campaignId })
+    .whereNull("deleted_at")
+    .pluck("name");
+  const validFields = allScriptFields(customFields).concat(campaignVariables);
+
+  const invalidFields = parsedVariables.filter(
+    (variable: string) => !validFields.includes(variable)
+  );
+
+  return invalidFields;
 };

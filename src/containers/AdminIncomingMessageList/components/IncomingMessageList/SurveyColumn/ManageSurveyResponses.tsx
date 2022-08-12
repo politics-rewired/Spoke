@@ -106,6 +106,9 @@ export const ManageSurveyResponses: React.FC<ManageSurveyResponsesProps> = (
       const { contact } = props;
       const affectedSteps = getResponsesFrom(iStepId);
 
+      const initialQuestionResponses = questionResponses;
+      let updatedQuestionResponses;
+
       try {
         // Delete response for this and all children (unless this is a single question change)
         if (affectedSteps.length > 1 || !value) {
@@ -115,13 +118,12 @@ export const ManageSurveyResponses: React.FC<ManageSurveyResponsesProps> = (
             contact.id
           );
           if (response.errors) throw response.errors;
-          setQuestionResponses(
-            Object.fromEntries(
-              Object.entries(questionResponses).filter(
-                ([stepId]) => !affectedIStepIds.includes(stepId)
-              )
+          updatedQuestionResponses = Object.fromEntries(
+            Object.entries(questionResponses).filter(
+              ([stepId]) => !affectedIStepIds.includes(stepId)
             )
           );
+          setQuestionResponses(updatedQuestionResponses);
         }
 
         if (value) {
@@ -132,13 +134,18 @@ export const ManageSurveyResponses: React.FC<ManageSurveyResponsesProps> = (
           };
           const response = await updateQuestionResponses([input], contact.id);
           if (response.errors) throw response.errors;
-          setQuestionResponses({ ...questionResponses, [iStepId]: value });
+          updatedQuestionResponses =
+            updatedQuestionResponses ?? questionResponses;
+          setQuestionResponses({
+            ...updatedQuestionResponses,
+            [iStepId]: value
+          });
         }
       } catch (error) {
         setRequestError(formatErrorMessage(error.message));
+        setQuestionResponses(initialQuestionResponses);
       } finally {
         setIsMakingRequest(false);
-        setQuestionResponses(questionResponses);
       }
     };
   };

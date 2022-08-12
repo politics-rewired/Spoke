@@ -147,6 +147,15 @@ const queries = {
               optOutMessage
             }
             customFields
+            campaignVariables {
+              edges {
+                node {
+                  id
+                  name
+                  value
+                }
+              }
+            }
             interactionSteps {
               id
               parentInteractionId

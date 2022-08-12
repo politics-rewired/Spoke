@@ -89,6 +89,7 @@ export interface CampaignInput {
   isAutoassignEnabled: boolean | null;
   timezone: string | null;
   repliesStaleAfter: number | null;
+  messagingServiceSid: string | null;
 }
 
 export interface Campaign {
@@ -109,6 +110,7 @@ export interface Campaign {
   syncReadiness: ExternalSyncReadinessState;
   pendingJobs: JobRequest[];
   interactionSteps: InteractionStep[];
+  invalidScriptFields: string[];
   customFields: string[];
   hasUnassignedContacts?: boolean | null;
   primaryColor?: string | null;
@@ -194,6 +196,7 @@ export const schema = `
   type CampaignReadiness {
     id: ID!
     basics: Boolean!
+    messagingService: Boolean!
     textingHours: Boolean!
     integration: Boolean!
     contacts: Boolean!
@@ -227,6 +230,7 @@ export const schema = `
     texters: [User]
     assignments(assignmentsFilter: AssignmentsFilter): [Assignment]
     interactionSteps: [InteractionStep]
+    invalidScriptFields: [String!]!
     contacts: [CampaignContact]
     contactsCount: Int
     hasUnassignedContacts: Boolean
@@ -326,5 +330,6 @@ export const schema = `
     isAutoassignEnabled: Boolean
     timezone: String
     repliesStaleAfter: Int
+    messagingServiceSid: String
   }
 `;

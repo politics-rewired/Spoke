@@ -46,8 +46,7 @@ const rootSchema = `
   input BulkUpdateScriptInput {
     searchString: String!
     replaceString: String!
-    includeArchived: Boolean!
-    campaignTitlePrefixes: [String]!
+    campaignIds: [String!]!
   }
 
   input ContactActionInput {
@@ -81,6 +80,7 @@ const rootSchema = `
     assignmentId: String
     userId: String
     versionHash: String
+    campaignVariableIds: [String!]
   }
 
   input InviteInput {
@@ -172,6 +172,13 @@ const rootSchema = `
     data: String!
   }
 
+  type ScriptUpdateChange {
+    id: String!
+    campaignId: String!
+    campaignName: String!
+    script: String!
+  }
+
   type ScriptUpdateResult {
     campaignId: String!
     found: String!
@@ -193,9 +200,17 @@ const rootSchema = `
     vanIdField: String!
   }
 
+  input ExportForSpokeInput {
+    campaign: Boolean!
+    messages: Boolean!
+    optOuts: Boolean!
+    filteredContacts: Boolean!
+  }
+
   input CampaignExportInput {
     campaignId: String!
     exportType: CampaignExportType!
+    spokeOptions: ExportForSpokeInput
     vanOptions: ExportForVanInput
   }
 
@@ -239,6 +254,7 @@ const rootSchema = `
     notices(organizationId: String): NoticePage!
     campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
     campaignNavigation(campaignId: String!): CampaignNavigation!
+    bulkUpdateScriptChanges(organizationId: String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateChange!]!
   }
 
   input SecondPassInput {
@@ -271,6 +287,7 @@ const rootSchema = `
     changeUserPassword(userId: String!, formData: UserPasswordChange): User
     setUserSuspended(userId: String!, isSuspended: Boolean!): User!
     clearUserSessions(userId: String!): User!
+    updateDefaultTextingTimezone(organizationId: String!, defaultTextingTz: String!): Organization!
     updateTextingHours( organizationId: String!, textingHoursStart: Int!, textingHoursEnd: Int!): Organization
     updateTextingHoursEnforcement( organizationId: String!, textingHoursEnforced: Boolean!): Organization
     updateTextRequestFormSettings(organizationId: String!, textRequestFormEnabled: Boolean!, textRequestType: String!, textRequestMaxCount: Int!): Organization

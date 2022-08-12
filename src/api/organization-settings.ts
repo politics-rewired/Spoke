@@ -12,6 +12,8 @@ export interface OrganizationSettingsInput {
   numbersApiKey: string | null;
   trollbotWebhookUrl: string | null;
   scriptPreviewForSupervolunteers: boolean | null;
+  showDoNotAssignMessage: boolean | null;
+  doNotAssignMessage: string | null;
   defaultAutosendingControlsMode: AutosendingControlsMode | null;
 
   // Superadmin
@@ -26,6 +28,8 @@ export interface OrganizationSettings {
   showContactLastName: boolean;
   showContactCell: boolean;
   confirmationClickForScriptLinks: boolean;
+  showDoNotAssignMessage: boolean;
+  doNotAssignMessage: string;
 
   // Supervolunteer
   startCampaignRequiresApproval: boolean | null;
@@ -52,6 +56,8 @@ export const schema = `
     trollbotWebhookUrl: String
     scriptPreviewForSupervolunteers: Boolean
     defaultCampaignBuilderMode: CampaignBuilderMode
+    showDoNotAssignMessage: Boolean
+    doNotAssignMessage: String
     defaultAutosendingControlsMode: AutosendingControlsMode
 
     # Superadmin
@@ -66,6 +72,8 @@ export const schema = `
     showContactLastName: Boolean!
     showContactCell: Boolean!
     confirmationClickForScriptLinks: Boolean!
+    showDoNotAssignMessage: Boolean!
+    doNotAssignMessage: String!
 
     # Supervolunteer
     startCampaignRequiresApproval: Boolean

@@ -9,7 +9,7 @@ import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { currentEditors } from "../models/cacheable_queries";
 import { accessRequired } from "./errors";
-import { getDeliverabilityStats } from "./lib/campaign";
+import { getDeliverabilityStats, invalidScriptFields } from "./lib/campaign";
 import { symmetricEncrypt } from "./lib/crypto";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
@@ -39,7 +39,7 @@ export function addCampaignsFilterToQuery(queryParam, campaignsFilter) {
     }
 
     if ("campaignTitle" in campaignsFilter) {
-      query = query.whereRaw(`"title" ilike ?`, [
+      query = query.whereRaw(`concat("id", ': ', "title") ilike ?`, [
         `%${campaignsFilter.campaignTitle}%`
       ]);
     }
@@ -317,6 +317,18 @@ export const resolvers = {
   CampaignReadiness: {
     id: ({ id }) => id,
     basics: (campaign) => campaign.title !== "" && campaign.description !== "",
+    messagingService: async (campaign) => {
+      if (campaign.messaging_service_sid === null) {
+        return false;
+      }
+
+      const messagingService = await r
+        .reader("messaging_service")
+        .where({ messaging_service_sid: campaign.messaging_service_sid })
+        .first();
+
+      return messagingService.active;
+    },
     textingHours: (campaign) =>
       campaign.textingHoursStart !== null &&
       campaign.textingHoursEnd !== null &&
@@ -347,12 +359,46 @@ export const resolvers = {
       );
       return use_dynamic_assignment || is_fully_assigned;
     },
-    interactions: (campaign) =>
-      r
+    interactions: async (campaign) => {
+      const hasSteps = await r
         .reader("interaction_step")
         .where({ campaign_id: campaign.id })
         .count()
-        .then(([{ count }]) => count > 0),
+        .then(([{ count }]) => parseInt(count, 10) > 0);
+
+      const hasIncompleteSteps = await r.reader
+        .raw(
+          `
+            with incomplete_variables as (
+              select concat('{', name, '}') as name
+              from campaign_variable
+              where
+                campaign_id = ?
+                and value is null
+                and deleted_at is null
+            ),
+            interactions as (
+              select unnest(script_options) as script_option
+              from interaction_step
+              where
+                campaign_id = ?
+                and is_deleted = false
+            )
+            select exists (
+              select 1
+              from interactions
+              cross join incomplete_variables
+              where interactions.script_option like concat('%', incomplete_variables.name, '%')
+            ) as uses_incomplete_step
+          `,
+          [campaign.id, campaign.id]
+        )
+        .then(({ rows: [{ uses_incomplete_step }] }) => uses_incomplete_step);
+
+      const invalidFields = await invalidScriptFields(campaign.id);
+
+      return hasSteps && !hasIncompleteSteps && invalidFields.length === 0;
+    },
     campaignGroups: () => true,
     campaignVariables: (campaign) =>
       r
@@ -477,6 +523,7 @@ export const resolvers = {
 
       return getInteractionSteps({ campaignId: campaign.id });
     },
+    invalidScriptFields: async (campaign) => invalidScriptFields(campaign.id),
     cannedResponses: async (campaign, { userId: userIdArg }) => {
       const getCannedResponses = memoizer.memoize(
         ({ campaignId, userId }) =>

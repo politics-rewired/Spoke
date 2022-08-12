@@ -1,5 +1,22 @@
 import { DateTime, Interval } from "./datetime";
 
+export const timezones = [
+  "US/Alaska",
+  "US/Aleutian",
+  "US/Arizona",
+  "US/Central",
+  "US/East-Indiana",
+  "US/Eastern",
+  "US/Hawaii",
+  "US/Indiana-Starke",
+  "US/Michigan",
+  "US/Mountain",
+  "US/Pacific",
+  "US/Samoa",
+  "America/Puerto_Rico",
+  "America/Virgin"
+];
+
 /**
  * Returns true if it is currently between the start and end hours in the specified timezone.
  *

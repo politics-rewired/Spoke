@@ -34,6 +34,7 @@ export interface Organization {
   optOuts: OptOut[];
   threeClickEnabled: boolean;
   optOutMessage: string;
+  defaultTextingTz: string;
   textingHoursEnforced: boolean;
   textingHoursStart: number;
   textingHoursEnd: number;
@@ -90,6 +91,7 @@ export const schema = `
     optOuts: [OptOut]
     threeClickEnabled: Boolean
     optOutMessage: String
+    defaultTextingTz: String!
     textingHoursEnforced: Boolean
     textingHoursStart: Int
     textingHoursEnd: Int
@@ -110,7 +112,7 @@ export const schema = `
     escalationTagList: [Tag]
     teams: [Team]!
     externalSystems(after: Cursor, first: Int): ExternalSystemPage!
-    messagingServices(after: Cursor, first: Int): MessagingServicePage!
+    messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
     campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
     templateCampaigns(after: Cursor, first: Int): CampaignPage!
   }

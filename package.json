@@ -1,6 +1,6 @@
 {
   "name": "spoke",
-  "version": "4.33.0-0",
+  "version": "4.35.0-rc.0",
   "description": "Spoke",
   "main": "src/server",
   "engines": {
@@ -76,6 +76,8 @@
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.61",
+    "@mui/x-data-grid-pro": "4",
+    "@mui/x-license-pro": "4",
     "@passport-next/passport": "^3.1.0",
     "@rewired/passport-slack": "^1.0.6",
     "@rooks/use-intersection-observer-ref": "^4.11.2",
