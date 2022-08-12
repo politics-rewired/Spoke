@@ -1597,17 +1597,34 @@ CREATE VIEW public.assignable_campaign_contacts_with_escalation_tags AS
 ALTER TABLE public.assignable_campaign_contacts_with_escalation_tags OWNER TO postgres;
 
 --
--- Name: assignable_campaigns; Type: VIEW; Schema: public; Owner: postgres
+-- Name: sendable_campaigns; Type: VIEW; Schema: public; Owner: postgres
 --
 
-CREATE VIEW public.assignable_campaigns AS
+CREATE VIEW public.sendable_campaigns AS
  SELECT campaign.id,
     campaign.title,
     campaign.organization_id,
     campaign.limit_assignment_to_teams,
-    campaign.autosend_status
+    campaign.autosend_status,
+    campaign.is_autoassign_enabled
    FROM public.campaign
-  WHERE ((campaign.is_started = true) AND (campaign.is_archived = false) AND (campaign.is_autoassign_enabled = true));
+  WHERE (campaign.is_started AND (NOT campaign.is_archived));
+
+
+ALTER TABLE public.sendable_campaigns OWNER TO postgres;
+
+--
+-- Name: assignable_campaigns; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.assignable_campaigns AS
+ SELECT sendable_campaigns.id,
+    sendable_campaigns.title,
+    sendable_campaigns.organization_id,
+    sendable_campaigns.limit_assignment_to_teams,
+    sendable_campaigns.autosend_status
+   FROM public.sendable_campaigns
+  WHERE sendable_campaigns.is_autoassign_enabled;
 
 
 ALTER TABLE public.assignable_campaigns OWNER TO postgres;
@@ -1670,7 +1687,8 @@ CREATE VIEW public.assignable_campaigns_with_needs_reply AS
  SELECT assignable_campaigns.id,
     assignable_campaigns.title,
     assignable_campaigns.organization_id,
-    assignable_campaigns.limit_assignment_to_teams
+    assignable_campaigns.limit_assignment_to_teams,
+    assignable_campaigns.autosend_status
    FROM public.assignable_campaigns
   WHERE (EXISTS ( SELECT 1
            FROM public.assignable_needs_reply
@@ -1775,6 +1793,27 @@ ALTER TABLE public.assignment_request_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.assignment_request_id_seq OWNED BY public.assignment_request.id;
 
+
+--
+-- Name: autosend_campaigns_to_send; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.autosend_campaigns_to_send AS
+ SELECT sendable_campaigns.id,
+    sendable_campaigns.title,
+    sendable_campaigns.organization_id,
+    sendable_campaigns.limit_assignment_to_teams,
+    sendable_campaigns.autosend_status,
+    sendable_campaigns.is_autoassign_enabled
+   FROM public.sendable_campaigns
+  WHERE ((EXISTS ( SELECT 1
+           FROM public.assignable_needs_message
+          WHERE (assignable_needs_message.campaign_id = sendable_campaigns.id))) AND (NOT (EXISTS ( SELECT 1
+           FROM public.campaign
+          WHERE ((campaign.id = sendable_campaigns.id) AND (now() > date_trunc('day'::text, timezone(campaign.timezone, (campaign.due_by + '24:00:00'::interval)))))))) AND (sendable_campaigns.autosend_status = 'sending'::text));
+
+
+ALTER TABLE public.autosend_campaigns_to_send OWNER TO postgres;
 
 --
 -- Name: campaign_contact_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
