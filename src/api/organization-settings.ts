@@ -1,3 +1,5 @@
+import { AutosendingControlsMode } from "@spoke/spoke-codegen";
+
 import type { RequestAutoApproveType } from "./organization-membership";
 
 export interface OrganizationSettingsInput {
@@ -10,6 +12,7 @@ export interface OrganizationSettingsInput {
   numbersApiKey: string | null;
   trollbotWebhookUrl: string | null;
   scriptPreviewForSupervolunteers: boolean | null;
+  defaultAutosendingControlsMode: AutosendingControlsMode | null;
 
   // Superadmin
   startCampaignRequiresApproval: boolean | null;
@@ -27,6 +30,9 @@ export interface OrganizationSettings {
   // Supervolunteer
   startCampaignRequiresApproval: boolean | null;
   scriptPreviewForSupervolunteers: boolean | null;
+
+  // Admin
+  defaultAutosendingControlsMode: AutosendingControlsMode;
 
   // Owner
   defaulTexterApprovalStatus: RequestAutoApproveType | null;
@@ -46,6 +52,7 @@ export const schema = `
     trollbotWebhookUrl: String
     scriptPreviewForSupervolunteers: Boolean
     defaultCampaignBuilderMode: CampaignBuilderMode
+    defaultAutosendingControlsMode: AutosendingControlsMode
 
     # Superadmin
     startCampaignRequiresApproval: Boolean
@@ -64,6 +71,9 @@ export const schema = `
     startCampaignRequiresApproval: Boolean
     scriptPreviewForSupervolunteers: Boolean
     defaultCampaignBuilderMode: CampaignBuilderMode
+
+    # Admin
+    defaultAutosendingControlsMode: AutosendingControlsMode
 
     # Owner
     defaulTexterApprovalStatus: RequestAutoApprove

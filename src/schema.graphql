@@ -1,5 +1,5 @@
 
-enum AutosendControlsMode {
+enum AutosendingControlsMode {
   BASIC
   DETAILED
 }
@@ -435,6 +435,7 @@ input OrganizationSettingsInput {
   trollbotWebhookUrl: String
   scriptPreviewForSupervolunteers: Boolean
   defaultCampaignBuilderMode: CampaignBuilderMode
+  defaultAutosendingControlsMode: AutosendingControlsMode
 
   # Superadmin
   startCampaignRequiresApproval: Boolean
@@ -453,6 +454,9 @@ type OrganizationSettings {
   startCampaignRequiresApproval: Boolean
   scriptPreviewForSupervolunteers: Boolean
   defaultCampaignBuilderMode: CampaignBuilderMode
+
+  # Admin
+  defaultAutosendingControlsMode: AutosendingControlsMode
 
   # Owner
   defaulTexterApprovalStatus: RequestAutoApprove

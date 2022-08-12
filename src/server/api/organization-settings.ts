@@ -1,3 +1,5 @@
+import { AutosendingControlsMode } from "@spoke/spoke-codegen";
+
 import {
   RequestAutoApproveType,
   UserRoleType
@@ -24,6 +26,7 @@ interface IOrganizationSettings {
   startCampaignRequiresApproval: boolean;
   scriptPreviewForSupervolunteers: boolean;
   defaultCampaignBuilderMode: CampaignBuilderMode;
+  defaultAutosendingControlsMode: AutosendingControlsMode;
 }
 
 const SETTINGS_PERMISSIONS: {
@@ -36,6 +39,7 @@ const SETTINGS_PERMISSIONS: {
   startCampaignRequiresApproval: UserRoleType.SUPERVOLUNTEER,
   scriptPreviewForSupervolunteers: UserRoleType.SUPERVOLUNTEER,
   defaultCampaignBuilderMode: UserRoleType.SUPERVOLUNTEER,
+  defaultAutosendingControlsMode: UserRoleType.ADMIN,
   defaulTexterApprovalStatus: UserRoleType.OWNER,
   numbersApiKey: UserRoleType.OWNER,
   trollbotWebhookUrl: UserRoleType.OWNER
@@ -53,6 +57,7 @@ const SETTINGS_WRITE_PERMISSIONS: {
   trollbotWebhookUrl: UserRoleType.OWNER,
   scriptPreviewForSupervolunteers: UserRoleType.OWNER,
   defaultCampaignBuilderMode: UserRoleType.OWNER,
+  defaultAutosendingControlsMode: UserRoleType.OWNER,
   startCampaignRequiresApproval: UserRoleType.SUPERADMIN
 };
 
@@ -72,7 +77,8 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   confirmationClickForScriptLinks: true,
   startCampaignRequiresApproval: false,
   scriptPreviewForSupervolunteers: false,
-  defaultCampaignBuilderMode: CampaignBuilderMode.Advanced
+  defaultCampaignBuilderMode: CampaignBuilderMode.Advanced,
+  defaultAutosendingControlsMode: AutosendingControlsMode.Detailed
 };
 
 const SETTINGS_TRANSFORMERS: Partial<
@@ -166,7 +172,8 @@ export const resolvers = {
       "confirmationClickForScriptLinks",
       "startCampaignRequiresApproval",
       "scriptPreviewForSupervolunteers",
-      "defaultCampaignBuilderMode"
+      "defaultCampaignBuilderMode",
+      "defaultAutosendingControlsMode"
     ])
   }
 };

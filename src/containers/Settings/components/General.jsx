@@ -21,6 +21,7 @@ import SpokeFormField from "../../../components/forms/SpokeFormField";
 import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime } from "../../../lib/datetime";
 import { loadData } from "../../hoc/with-operations";
+import AutosendingSettingsCard from "./AutosendingSettingsCard";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
 import Review10DlcInfo from "./Review10DlcInfo";
@@ -421,6 +422,11 @@ class Settings extends React.Component {
         />
 
         <ScriptPreviewSettingsCard
+          organizationId={organization.id}
+          style={{ marginBottom: 20 }}
+        />
+
+        <AutosendingSettingsCard
           organizationId={organization.id}
           style={{ marginBottom: 20 }}
         />

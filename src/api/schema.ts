@@ -32,7 +32,7 @@ import { schema as trollbotSchema } from "./trollbot";
 import { schema as userSchema } from "./user";
 
 const rootSchema = `
-  enum AutosendControlsMode {
+  enum AutosendingControlsMode {
     BASIC
     DETAILED
   }

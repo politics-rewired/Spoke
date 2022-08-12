@@ -25,7 +25,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BooleanParam, useQueryParam, withDefault } from "use-query-params";
 
-import { AutosendControlsMode } from "../../../libs/spoke-codegen/src/generated";
+import { AutosendingControlsMode } from "../../../libs/spoke-codegen/src/generated";
+import { useSpokeContext } from "../../client/spoke-context";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import AutosendingBasicTargetRow from "./components/AutosendingBasicTargetRow";
 import AutosendingBasicUnstartedTargetRow from "./components/AutosendingBasicUnstartedTargetRow";
@@ -38,13 +39,18 @@ const inlineStyles = StyleSheet.create({
 
 const AdminAutosending: React.FC = () => {
   const { organizationId } = useParams<{ organizationId: string }>();
+  const { orgSettings } = useSpokeContext();
+  const defaultBasic =
+    orgSettings?.defaultAutosendingControlsMode ===
+    AutosendingControlsMode.Basic;
+
   const [isStarted = true, setIsStarted] = useQueryParam(
     "isStarted",
     withDefault(BooleanParam, true)
   );
-  const [isBasic = false, setIsBasic] = useQueryParam(
+  const [isBasic = defaultBasic, setIsBasic] = useQueryParam(
     "isBasic",
-    withDefault(BooleanParam, false)
+    withDefault(BooleanParam, defaultBasic)
   );
 
   const {
@@ -101,7 +107,8 @@ const AdminAutosending: React.FC = () => {
       }>
     ) => {
       // need to refetch for additional data when switched to detailed
-      const isChangeToBasic = event.target.value === AutosendControlsMode.Basic;
+      const isChangeToBasic =
+        event.target.value === AutosendingControlsMode.Basic;
       if (isChangeToBasic) setIsBasic(isChangeToBasic);
       else
         refetchCampaigns({
@@ -190,14 +197,14 @@ const AdminAutosending: React.FC = () => {
                 id="autosend-controls-mode-select"
                 value={
                   isBasic
-                    ? AutosendControlsMode.Basic
-                    : AutosendControlsMode.Detailed
+                    ? AutosendingControlsMode.Basic
+                    : AutosendingControlsMode.Detailed
                 }
                 className={css(inlineStyles.select)}
                 onChange={handleChangeModeFilter}
               >
-                <MenuItem value={AutosendControlsMode.Basic}>Basic</MenuItem>
-                <MenuItem value={AutosendControlsMode.Detailed}>
+                <MenuItem value={AutosendingControlsMode.Basic}>Basic</MenuItem>
+                <MenuItem value={AutosendingControlsMode.Detailed}>
                   Detailed
                 </MenuItem>
               </Select>

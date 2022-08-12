@@ -53,3 +53,26 @@ mutation UpdateScriptPreviewSettings(
     scriptPreviewForSupervolunteers
   }
 }
+
+query GetAutosendingSettings($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    settings {
+      id
+      defaultAutosendingControlsMode
+    }
+  }
+}
+
+mutation UpdateAutosendingSettings(
+  $organizationId: String!
+  $controlsMode: AutosendingControlsMode
+) {
+  editOrganizationSettings(
+    id: $organizationId
+    input: { defaultAutosendingControlsMode: $controlsMode }
+  ) {
+    id
+    defaultAutosendingControlsMode
+  }
+}

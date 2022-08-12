@@ -1,4 +1,7 @@
-import { OrganizationSettingsInput } from "@spoke/spoke-codegen";
+import {
+  AutosendingControlsMode,
+  OrganizationSettingsInput
+} from "@spoke/spoke-codegen";
 import { Pool } from "pg";
 import supertest from "supertest";
 
@@ -33,6 +36,7 @@ describe("get organization settings", () => {
     confirmationClickForScriptLinks: true,
     startCampaignRequiresApproval: false,
     scriptPreviewForSupervolunteers: false,
+    defaultAutosendingControlsMode: AutosendingControlsMode.Basic,
     defaulTexterApprovalStatus: RequestAutoApproveType.APPROVAL_REQUIRED,
     numbersApiKey: "SomethingSecret",
     trollbotWebhookUrl: "https://rewired.coop/trolls"
@@ -62,6 +66,7 @@ describe("get organization settings", () => {
                 confirmationClickForScriptLinks
                 startCampaignRequiresApproval
                 scriptPreviewForSupervolunteers
+                defaultAutosendingControlsMode
                 defaulTexterApprovalStatus
                 numbersApiKey
                 trollbotWebhookUrl
@@ -123,6 +128,9 @@ describe("get organization settings", () => {
     );
     expect(settings.scriptPreviewForSupervolunteers).toEqual(
       features.scriptPreviewForSupervolunteers
+    );
+    expect(settings.defaultAutosendingControlsMode).toEqual(
+      features.defaultAutosendingControlsMode
     );
     expect(settings.defaulTexterApprovalStatus).toEqual(
       features.defaulTexterApprovalStatus
