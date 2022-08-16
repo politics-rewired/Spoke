@@ -4,6 +4,7 @@ import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
 import * as webpack from "webpack";
 import { WebpackManifestPlugin } from "webpack-manifest-plugin";
+import { InjectManifest } from "workbox-webpack-plugin";
 
 import config from "./webpack/build-config";
 
@@ -39,6 +40,18 @@ if (config.isProduction) {
     new WebpackManifestPlugin({
       fileName: config.ASSETS_MAP_FILE,
       publicPath: ""
+    })
+  );
+
+  plugins.push(
+    new InjectManifest({
+      swSrc: "./client/service-worker",
+      dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
+      exclude: [/\.map$/, /asset-manifest\.json$/, /LICENSE/],
+      // Bump up the default maximum size (2mb) that's precached,
+      // to make lazy-loading failure scenarios less likely.
+      // See https://github.com/cra-template/pwa/issues/13#issuecomment-722667270
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
     })
   );
 }

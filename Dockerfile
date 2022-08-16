@@ -34,7 +34,6 @@ ENV NODE_ENV="production" \
 COPY . .
 RUN yarn run build
 
-
 ### Slim Deploy
 ### -------------------------
 FROM node:16.14.0
@@ -66,6 +65,7 @@ ENV NODE_ENV="production" \
 COPY package.json knexfile.env.js ./
 COPY migrations ./migrations
 COPY seeds ./seeds
+RUN cp ./build/client/assets/service-worker.js ./build/client/
 
 # Run the production compiled code
 EXPOSE 3000
