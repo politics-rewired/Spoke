@@ -34,23 +34,14 @@ interface AutosendingTargetRowProps {
   disabled?: boolean;
   onStart?: () => Promise<unknown> | unknown;
   onPause?: () => Promise<unknown> | unknown;
-  upNext?: boolean;
 }
 
 export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
   props
 ) => {
-  const {
-    target,
-    organizationId,
-    disabled = false,
-    onStart,
-    onPause,
-    upNext
-  } = props;
-
+  const { target, organizationId, disabled = false, onStart, onPause } = props;
   const chipClasses = useStyles();
-  const statusChipDisplay = upNext ? "up next" : target.autosendStatus;
+  const statusChipDisplay = target.autosendStatus;
 
   const chipRootClass =
     statusChipDisplay === "sending"
@@ -71,7 +62,8 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       </TableCell>
       <TableCell>
         {target.autosendStatus ===
-        "complete" ? undefined : target.autosendStatus === "sending" ? (
+        "complete" ? undefined : target.autosendStatus === "sending" ||
+          target.autosendStatus === "holding" ? (
           <Button
             variant="contained"
             startIcon={<PauseIcon />}

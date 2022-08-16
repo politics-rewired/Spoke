@@ -128,18 +128,18 @@ const AdminAutosending: React.FC = () => {
   );
 
   const campaigns = data?.organization?.campaigns.campaigns ?? [];
+  const activeStatus = ["paused", "sending", "holding"];
+
   const activeCampaigns = sortBy(
     campaigns.filter(
-      (c) =>
-        c.autosendStatus && ["paused", "sending"].includes(c.autosendStatus)
+      (c) => c.autosendStatus && activeStatus.includes(c.autosendStatus)
     ),
     (c) => c.id
   );
 
   const inactiveCampaigns = sortBy(
     campaigns.filter(
-      (c) =>
-        c.autosendStatus && !["paused", "sending"].includes(c.autosendStatus)
+      (c) => c.autosendStatus && !activeStatus.includes(c.autosendStatus)
     ),
     (c) => c.id
   );

@@ -787,9 +787,11 @@ export const resolvers = {
       } = await r.reader.raw(
         `
           select case
-            when autosend_status = 'sending'
-              and id <> (select min(id) from autosend_campaigns_to_send)
-              then 'holding'
+            when autosend_status = 'sending' and (
+              id <> (select min(id) from autosend_campaigns_to_send)
+              -- if no campaigns to send exist (ex. after texting hours) the condition above fails
+              or not exists (select id from autosend_campaigns_to_send)
+            ) then 'holding'
             else autosend_status
           end autosend_status
           from campaign c

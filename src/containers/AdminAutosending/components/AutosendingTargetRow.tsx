@@ -42,17 +42,8 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
   const { target, organizationId, disabled = false, onStart, onPause } = props;
 
   const chipClasses = useStyles();
-
   const totalSent = target.stats?.countMessagedContacts;
-
-  const statusChipDisplay =
-    target.stats?.countNeedsMessageContacts === 0
-      ? "complete"
-      : target.autosendStatus === "sending"
-      ? totalSent === 0
-        ? "up next"
-        : target.autosendStatus
-      : target.autosendStatus;
+  const statusChipDisplay = target.autosendStatus;
 
   const chipRootClass =
     statusChipDisplay === "sending"
@@ -82,7 +73,8 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       </TableCell>
       <TableCell>
         {target.autosendStatus ===
-        "complete" ? undefined : target.autosendStatus === "sending" ? (
+        "complete" ? undefined : target.autosendStatus === "sending" ||
+          target.autosendStatus === "holding" ? (
           <Button
             variant="contained"
             startIcon={<PauseIcon />}
