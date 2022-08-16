@@ -15,17 +15,17 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Alert from "@material-ui/lab/Alert";
 import {
+  AutosendingControlsMode,
   useCampaignsEligibleForAutosendingQuery,
   usePauseAutosendingMutation,
   useStartAutosendingMutation
 } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
-import { sortBy } from "lodash";
+import { isNil, sortBy } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BooleanParam, useQueryParam, withDefault } from "use-query-params";
 
-import { AutosendingControlsMode } from "../../../libs/spoke-codegen/src/generated";
 import { useSpokeContext } from "../../client/spoke-context";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import AutosendingBasicTargetRow from "./components/AutosendingBasicTargetRow";
@@ -44,11 +44,11 @@ const AdminAutosending: React.FC = () => {
     orgSettings?.defaultAutosendingControlsMode ===
     AutosendingControlsMode.Basic;
 
-  const [isStarted = true, setIsStarted] = useQueryParam(
+  const [isStarted, setIsStarted] = useQueryParam(
     "isStarted",
     withDefault(BooleanParam, true)
   );
-  const [isBasic = defaultBasic, setIsBasic] = useQueryParam(
+  const [isBasic, setIsBasic] = useQueryParam(
     "isBasic",
     withDefault(BooleanParam, defaultBasic)
   );
@@ -56,8 +56,7 @@ const AdminAutosending: React.FC = () => {
   const {
     data,
     loading,
-    error: getCampaignsError,
-    refetch: refetchCampaigns
+    error: getCampaignsError
   } = useCampaignsEligibleForAutosendingQuery({
     variables: { organizationId, isStarted, isBasic },
     pollInterval: 10 * 1000
@@ -106,16 +105,7 @@ const AdminAutosending: React.FC = () => {
         value: unknown;
       }>
     ) => {
-      // need to refetch for additional data when switched to detailed
-      const isChangeToBasic =
-        event.target.value === AutosendingControlsMode.Basic;
-      if (isChangeToBasic) setIsBasic(isChangeToBasic);
-      else
-        refetchCampaigns({
-          organizationId,
-          isStarted,
-          isBasic: false
-        }).then(() => setIsBasic(isChangeToBasic));
+      setIsBasic(event.target.value === AutosendingControlsMode.Basic);
     },
     [setIsBasic]
   );
@@ -189,7 +179,7 @@ const AdminAutosending: React.FC = () => {
               </Select>
             </FormControl>
             <FormControl>
-              <InputLabel id="is-started-select-label">
+              <InputLabel id="autosend-controls-mode-select-label">
                 Campaign Status
               </InputLabel>
               <Select
@@ -245,7 +235,7 @@ const AdminAutosending: React.FC = () => {
             </TableHead>
             <TableBody>
               {sortedCampaigns.map((c) => {
-                if (isBasic) {
+                if (isNil(c.deliverabilityStats?.sendingCount)) {
                   return c.isStarted ? (
                     <AutosendingBasicTargetRow
                       key={c.id}
