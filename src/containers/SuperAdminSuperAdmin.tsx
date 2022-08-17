@@ -10,6 +10,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+import Skeleton from "@material-ui/lab/Skeleton";
 import {
   DataGridPro,
   GridColDef,
@@ -17,7 +18,8 @@ import {
 } from "@mui/x-data-grid-pro";
 import {
   useEditSuperAdminStatusMutation,
-  useGetSuperAdminsQuery
+  useGetSuperAdminsQuery,
+  User
 } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 
@@ -47,11 +49,16 @@ const SuperAdminSuperAdmin: React.FC = (_props) => {
   ] = useState<boolean>(false);
 
   const {
-    data: superadmins,
+    data: superadminsData,
     loading,
     refetch: refetchSuperAdmins
   } = useGetSuperAdminsQuery();
   const [editSuperAdminStatus] = useEditSuperAdminStatusMutation();
+
+  const superadmins = superadminsData?.superadmins ?? [];
+  const superadmin = removeSuperAdminEmail
+    ? superadmins.find((s) => s.email === removeSuperAdminEmail)
+    : ({} as User);
 
   const classes = useStyles();
 
@@ -119,15 +126,17 @@ const SuperAdminSuperAdmin: React.FC = (_props) => {
       )
     }
   ];
-  return loading ? (
-    <div>Loading...</div>
-  ) : (
+
+  if (loading) {
+    return <Skeleton variant="rect" width="800" height="300" />;
+  }
+  return (
     <div>
       <Paper>
         <DataGridPro
           autoHeight
           columns={columns}
-          rows={superadmins?.superadmins ?? []}
+          rows={superadmins}
           pagination
           pageSize={pageSize}
           rowsPerPageOptions={[10, 30, 50]}
@@ -155,7 +164,8 @@ const SuperAdminSuperAdmin: React.FC = (_props) => {
         <DialogTitle>Confirm remove superadmin</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to remove the superadmin?
+            Are you sure you want to remove the superadmin (
+            {superadmin?.displayName} [{superadmin?.email}])?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
