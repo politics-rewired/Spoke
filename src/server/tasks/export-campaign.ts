@@ -481,13 +481,15 @@ interface UploadCampaignMessages {
   contactsCount: number;
   helpers: ProgressTaskHelpers;
   campaignId: number;
+  campaignVariableNames: string[];
 }
 
 const processAndUploadCampaignMessages = async ({
   fileNameKey,
   contactsCount,
   helpers,
-  campaignId
+  campaignId,
+  campaignVariableNames
 }: UploadCampaignMessages): Promise<string> => {
   const messagesKey = `${fileNameKey}-messages`;
   const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
@@ -649,7 +651,8 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
   const {
     campaignTitle,
     notificationEmail,
-    interactionSteps
+    interactionSteps,
+    campaignVariableNames
   } = await fetchExportData(campaignId, requesterId);
 
   const countQueryResult = await r
@@ -702,7 +705,8 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
         fileNameKey,
         campaignId,
         contactsCount,
-        helpers
+        helpers,
+        campaignVariableNames
       })
     : null;
 
