@@ -153,7 +153,6 @@ const processFilteredContactsChunk = async (
       "contact[zip]": contact.zip,
       "contact[city]": contact.city || null,
       "contact[state]": contact.state || null,
-      "contact[optOut]": contact.is_opted_out,
       "contact[messageStatus]": "removed",
       "contact[external_id]": contact.external_id
     };
@@ -406,8 +405,8 @@ const processAndUploadCampaignContacts = async ({
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
   const campaignContactsKey = onlyOptOuts
-    ? fileNameKey
-    : `${fileNameKey}-optouts`;
+    ? `${fileNameKey}-optouts`
+    : fileNameKey;
 
   const campaignContactsUploadStream = await getUploadStream(
     `${campaignContactsKey}.csv`
@@ -481,13 +480,15 @@ interface UploadCampaignMessages {
   contactsCount: number;
   helpers: ProgressTaskHelpers;
   campaignId: number;
+  campaignVariableNames: string[];
 }
 
 const processAndUploadCampaignMessages = async ({
   fileNameKey,
   contactsCount,
   helpers,
-  campaignId
+  campaignId,
+  campaignVariableNames
 }: UploadCampaignMessages): Promise<string> => {
   const messagesKey = `${fileNameKey}-messages`;
   const messagesUploadStream = await getUploadStream(`${messagesKey}.csv`);
@@ -649,7 +650,8 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
   const {
     campaignTitle,
     notificationEmail,
-    interactionSteps
+    interactionSteps,
+    campaignVariableNames
   } = await fetchExportData(campaignId, requesterId);
 
   const countQueryResult = await r
@@ -702,7 +704,8 @@ export const exportCampaign: ProgressTask<ExportCampaignPayload> = async (
         fileNameKey,
         campaignId,
         contactsCount,
-        helpers
+        helpers,
+        campaignVariableNames
       })
     : null;
 
