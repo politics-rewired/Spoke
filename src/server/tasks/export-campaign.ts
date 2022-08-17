@@ -405,8 +405,8 @@ const processAndUploadCampaignContacts = async ({
   const uniqueQuestionsByStepId = getUniqueQuestionsByStepId(interactionSteps);
 
   const campaignContactsKey = onlyOptOuts
-    ? fileNameKey
-    : `${fileNameKey}-optouts`;
+    ? `${fileNameKey}-optouts`
+    : fileNameKey;
 
   const campaignContactsUploadStream = await getUploadStream(
     `${campaignContactsKey}.csv`
