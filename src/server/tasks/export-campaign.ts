@@ -153,7 +153,6 @@ const processFilteredContactsChunk = async (
       "contact[zip]": contact.zip,
       "contact[city]": contact.city || null,
       "contact[state]": contact.state || null,
-      "contact[optOut]": contact.is_opted_out,
       "contact[messageStatus]": "removed",
       "contact[external_id]": contact.external_id
     };
