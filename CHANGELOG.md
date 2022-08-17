@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.35.1](https://github.com/politics-rewired/spoke/compare/v4.35.0...v4.35.1) (2022-08-17)
+
+
+### Bug Fixes
+
+* **export:** fix campaign campaign error ([#1355](https://github.com/politics-rewired/spoke/issues/1355)) ([dac0171](https://github.com/politics-rewired/spoke/commit/dac0171e42dbab1e98eeae87994f53996e6903c1))
+
 ## [4.35.0](https://github.com/politics-rewired/spoke/compare/v4.35.0-rc.1...v4.35.0) (2022-08-17)
 
 ## [4.35.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.35.0-rc.0...v4.35.0-rc.1) (2022-08-16)
