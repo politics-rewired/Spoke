@@ -1,6 +1,4 @@
 import Chip from "@material-ui/core/Chip";
-import grey from "@material-ui/core/colors/grey";
-import { makeStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import MoreIcon from "@material-ui/icons/ArrowForward";
@@ -8,11 +6,7 @@ import { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { Link } from "react-router-dom";
 
-const useStyles = makeStyles({
-  unstarted: {
-    backgroundColor: grey[300]
-  }
-});
+import useChipStyles from "./chipStyles";
 
 interface AutosendingUnstartedTargetRowProps {
   target: AutosendingTargetFragment;
@@ -24,7 +18,7 @@ export const AutosendingUnstartedTargetRow: React.FC<AutosendingUnstartedTargetR
   props
 ) => {
   const { target, organizationId } = props;
-  const chipClasses = useStyles();
+  const chipClasses = useChipStyles();
 
   return (
     <TableRow>

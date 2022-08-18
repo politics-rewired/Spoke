@@ -7,13 +7,13 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import type { SelectInputProps } from "@material-ui/core/Select/SelectInput";
-import React from "react";
-
+import Alert from "@material-ui/lab/Alert";
 import {
   AutosendingControlsMode,
   useGetAutosendingSettingsQuery,
   useUpdateAutosendingSettingsMutation
-} from "../../../../libs/spoke-codegen/src";
+} from "@spoke/spoke-codegen";
+import React from "react";
 
 export interface AutosendingSettingsCardProps {
   organizationId: string;
@@ -58,7 +58,7 @@ export const AutosendingSettingsCard: React.FC<AutosendingSettingsCardProps> = (
     <Card style={style}>
       <CardHeader title="Autosending Settings" disableTypography />
       <CardContent>
-        {errorMsg && <p>Error: {errorMsg}</p>}
+        {errorMsg && <Alert severity="error">Error: {errorMsg}</Alert>}
         <FormGroup row>
           <FormControl style={{ width: 260 }}>
             <InputLabel id="autosending-controls-mode-label">

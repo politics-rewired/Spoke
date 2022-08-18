@@ -7,6 +7,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Paper from "@material-ui/core/Paper";
 import Select from "@material-ui/core/Select";
 import Snackbar from "@material-ui/core/Snackbar";
+import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -20,7 +21,6 @@ import {
   usePauseAutosendingMutation,
   useStartAutosendingMutation
 } from "@spoke/spoke-codegen";
-import { css, StyleSheet } from "aphrodite";
 import { isNil, sortBy } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -33,8 +33,8 @@ import AutosendingBasicUnstartedTargetRow from "./components/AutosendingBasicUns
 import AutosendingTargetRow from "./components/AutosendingTargetRow";
 import AutosendingUnstartedTargetRow from "./components/AutosendingUnstartedTargetRow";
 
-const inlineStyles = StyleSheet.create({
-  select: { width: 200, marginRight: 10 }
+const useStyles = makeStyles({
+  select: { width: 150, marginRight: 10 }
 });
 
 const AdminAutosending: React.FC = () => {
@@ -146,6 +146,7 @@ const AdminAutosending: React.FC = () => {
 
   const sortedCampaigns = activeCampaigns.concat(inactiveCampaigns);
   const actionsDisabled = isStartingAutosending || isPausingAutosending;
+  const inlineStyles = useStyles();
 
   return (
     <Card>
@@ -171,7 +172,7 @@ const AdminAutosending: React.FC = () => {
                 labelId="is-started-select-label"
                 id="is-started-select"
                 value={isStarted ? "started" : "unstarted"}
-                className={css(inlineStyles.select)}
+                classes={{ root: inlineStyles.select }}
                 onChange={handleChangeStartedFilter}
               >
                 <MenuItem value="started">Started</MenuItem>
@@ -180,7 +181,7 @@ const AdminAutosending: React.FC = () => {
             </FormControl>
             <FormControl>
               <InputLabel id="autosend-controls-mode-select-label">
-                Campaign Status
+                Display Mode
               </InputLabel>
               <Select
                 labelId="autosend-controls-mode-select-label"
@@ -190,7 +191,7 @@ const AdminAutosending: React.FC = () => {
                     ? AutosendingControlsMode.Basic
                     : AutosendingControlsMode.Detailed
                 }
-                className={css(inlineStyles.select)}
+                classes={{ root: inlineStyles.select }}
                 onChange={handleChangeModeFilter}
               >
                 <MenuItem value={AutosendingControlsMode.Basic}>Basic</MenuItem>
