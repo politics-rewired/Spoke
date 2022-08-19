@@ -466,6 +466,8 @@ export const resolvers = {
       return result;
     },
     deletedBy: async (organization) =>
-      r.reader("user").where({ id: organization.deleted_by })
+      organization.deleted_by
+        ? r.reader("user").where({ id: organization.deleted_by })
+        : null
   }
 };

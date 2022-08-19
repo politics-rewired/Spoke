@@ -71,6 +71,12 @@ export const schema = `
     UNREPLIED
   }
 
+  enum DeactivateMode {
+    NOSUSPEND
+    SUSPENDALL
+    DELETEALL
+  }
+
   type AssignmentTarget {
     type: String!
     campaign: Campaign

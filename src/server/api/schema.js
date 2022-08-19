@@ -1,3 +1,4 @@
+import { DeactivateMode } from "@spoke/spoke-codegen";
 import { ForbiddenError } from "apollo-server-errors";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
@@ -3412,7 +3413,7 @@ const rootMutations = {
     },
     editOrganizationActive: async (
       _root,
-      { organizationId, active },
+      { organizationId, active, deactivateMode },
       { user }
     ) => {
       await superAdminRequired(user);
@@ -3428,14 +3429,26 @@ const rootMutations = {
           .where({ id: organizationId })
           .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
 
-        // Suspend all users except owners (so superadmins can access these orgs and their settings)
-        await r
-          .knex("user_organization")
-          .where({ organization_id: organizationId })
-          .whereNot({ role: UserRoleType.OWNER })
-          .update({ role: UserRoleType.SUSPENDED });
+        switch (deactivateMode) {
+          case DeactivateMode.Nosuspend:
+            break;
+          case DeactivateMode.Suspendall:
+            await r
+              .knex("user_organization")
+              .where({ organization_id: organizationId })
+              .whereNot({ role: UserRoleType.OWNER })
+              .update({ role: UserRoleType.SUSPENDED });
+            break;
+          case DeactivateMode.Deleteall:
+            await r
+              .knex("user_organization")
+              .where({ organization_id: organizationId })
+              .delete();
+            break;
+          default:
+            break;
+        }
       }
-
       return true;
     }
   }

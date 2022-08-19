@@ -302,7 +302,7 @@ type RootMutation {
   editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
   unassignTextsFromUser(membershipId: String!): Boolean!
   editSuperAdminStatus(userEmail: String!, superAdminStatus: Boolean!): Boolean!
-  editOrganizationActive(organizationId: String!, active: Boolean!): Boolean!
+  editOrganizationActive(organizationId: String!, active: Boolean!, deactivateMode: DeactivateMode): Boolean!
 }
 
 schema {
@@ -349,6 +349,12 @@ union UsersReturn = PaginatedUsers | UsersList
 enum TextRequestType {
   UNSENT
   UNREPLIED
+}
+
+enum DeactivateMode {
+  NOSUSPEND
+  SUSPENDALL
+  DELETEALL
 }
 
 type AssignmentTarget {

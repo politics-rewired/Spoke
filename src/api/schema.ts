@@ -335,7 +335,7 @@ const rootSchema = `
     editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
     unassignTextsFromUser(membershipId: String!): Boolean!
     editSuperAdminStatus(userEmail: String!, superAdminStatus: Boolean!): Boolean!
-    editOrganizationActive(organizationId: String!, active: Boolean!): Boolean!
+    editOrganizationActive(organizationId: String!, active: Boolean!, deactivateMode: DeactivateMode): Boolean!
   }
 
   schema {

@@ -211,7 +211,7 @@ export const resolvers = {
       }
       return formatPage(query, { after, first });
     },
-    organizations: async (user, { role, active }) => {
+    organizations: async (user, { role, active = true }) => {
       if (!user || !user.id) {
         return [];
       }
