@@ -107,7 +107,16 @@ export const persistInteractionStepTree = async (
     .where({ campaign_id: campaignId })
     .whereNotIn("id", stepIds);
 
-  if (origCampaignRecord.is_started) {
+  const messagedContacts = await r
+    .reader("campaign_contact")
+    .select("id")
+    .where({ campaign_id: campaignId })
+    .whereNot({ message_status: "needsMessage" })
+    .limit(1);
+
+  // if a campaign has been unstarted when using the superadmin approval feature,
+  // there can be messaged contacts on an unstarted campaign
+  if (origCampaignRecord.is_started || messagedContacts.length > 0) {
     await delQuery.update({ is_deleted: true });
   } else {
     await delQuery.del();
