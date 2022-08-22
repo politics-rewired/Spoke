@@ -775,6 +775,7 @@ type Message {
   campaignId: String
   userId: ID
   sendStatus: String
+  errorCodes: [String!]
 }
 
 
