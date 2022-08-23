@@ -27,6 +27,7 @@ import {
   getOrgLevelNotifications
 } from "../lib/notices";
 import { change } from "../local-auth-helpers";
+import { sendEmail } from "../mail";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { getUserById } from "../models/cacheable_queries";
@@ -3440,10 +3441,23 @@ const rootMutations = {
               .update({ role: UserRoleType.SUSPENDED });
             break;
           case DeactivateMode.Deleteall:
-            await r
-              .knex("user_organization")
-              .where({ organization_id: organizationId })
-              .delete();
+            {
+              await r
+                .knex("user_organization")
+                .where({ organization_id: organizationId })
+                .delete();
+
+              const org = await r
+                .knex("organization")
+                .where({ id: organizationId })
+                .first();
+
+              await sendEmail({
+                to: "support@spokerewired.com",
+                subject: "Automated organization shutdown request",
+                text: `This is an automated org shutdown request triggered through the superadmin. Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`
+              });
+            }
             break;
           default:
             break;

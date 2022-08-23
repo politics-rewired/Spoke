@@ -157,7 +157,7 @@ const SuperAdminOrganizations: React.FC = (_props) => {
   ];
 
   if (loading) {
-    <Skeleton variant="rect" width="800" height="200" />;
+    return <Skeleton variant="rect" width="800" height="200" />;
   }
   return (
     <div>
