@@ -6,8 +6,8 @@ import { Redirect, Route, Switch, withRouter } from "react-router-dom";
 import AdminDashboard from "./components/AdminDashboard";
 import { AuthzProvider } from "./components/AuthzProvider";
 import Login from "./components/Login";
+import SuperAdminDashboard from "./components/SuperAdminDashboard";
 import TexterDashboard from "./components/TexterDashboard";
-import TopNav from "./components/TopNav";
 import AdminAssignmentControl from "./containers/AdminAssignmentControl";
 import AdminAssignmentRequest from "./containers/AdminAssignmentRequest";
 import AdminAutosending from "./containers/AdminAutosending";
@@ -34,6 +34,7 @@ import DashboardLoader from "./containers/DashboardLoader";
 import Home from "./containers/Home";
 import JoinTeam from "./containers/JoinTeam";
 import SettingsRouter from "./containers/Settings";
+import SuperAdminPeople from "./containers/SuperAdminPeople";
 import Terms from "./containers/Terms";
 import TexterTodo from "./containers/TexterTodo";
 import TexterTodoList from "./containers/TexterTodoList";
@@ -156,7 +157,15 @@ const AdminOrganizationRoutes = (props) => {
             path={`${organizationPath}/campaign-groups`}
             component={AdminCampaignGroupEditor}
           />
-          <Route path={`${organizationPath}/people`} component={AdminPeople} />
+          <Route
+            path={`${organizationPath}/people`}
+            render={(componentProps) => (
+              <AdminPeople
+                organizationId={organizationId}
+                {...componentProps}
+              />
+            )}
+          />
           <Route
             path={`${organizationPath}/teams`}
             component={AdminTeamRoutes}
@@ -243,15 +252,30 @@ const AdminRoutes = ({ match }) => (
   </Switch>
 );
 
+const SuperAdminRoutes = ({ match }) => (
+  <Switch>
+    <AuthzProvider>
+      <SuperAdminDashboard>
+        <Route
+          path={`${match.path}/people`}
+          exact
+          component={SuperAdminPeople}
+        />
+        <Redirect to={`${match.path}/people`} />
+      </SuperAdminDashboard>
+    </AuthzProvider>
+  </Switch>
+);
+
 const TexterDashboardRoute = (props) => {
-  const { children, main, topNav, fullScreen, ...rest } = props;
+  const { children, main, topNavTitle, fullScreen, ...rest } = props;
   return (
     <Route
       {...rest}
       render={(routeProps) => (
         <TexterDashboard
           main={main}
-          topNav={topNav}
+          topNavTitle={topNavTitle}
           fullScreen={fullScreen}
           {...routeProps}
         >
@@ -278,28 +302,28 @@ const TexterAssignmentRoutes = () => {
         fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsResponse" {...routeProups} />
         )}
-        topNav={undefined}
+        topNavTitle={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/stale`}
         fullScreen={(routeProups) => (
           <TexterTodo messageStatus="convo" {...routeProups} />
         )}
-        topNav={undefined}
+        topNavTitle={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/skipped`}
         fullScreen={(routeProups) => (
           <TexterTodo messageStatus="closed" {...routeProups} />
         )}
-        topNav={undefined}
+        topNavTitle={undefined}
       />
       <TexterDashboardRoute
         path={`${assignmentPath}/all`}
         fullScreen={(routeProups) => (
           <TexterTodo messageStatus="needsMessageOrResponse" {...routeProups} />
         )}
-        topNav={undefined}
+        topNavTitle={undefined}
       />
       <Redirect to={`${assignmentPath}/text`} />
     </Switch>
@@ -315,9 +339,7 @@ const TexterTodoRoutes = () => {
         path={todosPath}
         exact
         main={TexterTodoList}
-        topNav={({ match }) => (
-          <TopNav title="Texting" orgId={match.params.organizationId} />
-        )}
+        topNavTitle="Texting"
       />
       <Route
         path={`${todosPath}/:assignmentId`}
@@ -342,9 +364,7 @@ const TexterOrganizationRoutes = (props) => {
               organizationId={match.params.organizationId}
             />
           )}
-          topNav={({ match }) => (
-            <TopNav title="Account" orgId={match.params.organizationId} />
-          )}
+          topNavTitle="Account"
         />
 
         <Route
@@ -386,6 +406,7 @@ const AppRoutes = () => (
     />
     <Route path="/email-reset" component={Login} />
     <AuthenticatedRoute path="/admin" component={AdminRoutes} />
+    <AuthenticatedRoute path="/superadmin" component={SuperAdminRoutes} />
     <AuthenticatedRoute path="/app" component={TexterRoutes} />
     <AuthenticatedRoute
       path="/invite/:inviteId"
