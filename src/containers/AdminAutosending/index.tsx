@@ -21,7 +21,8 @@ import {
   usePauseAutosendingMutation,
   useStartAutosendingMutation
 } from "@spoke/spoke-codegen";
-import { isNil, sortBy } from "lodash";
+import isNil from "lodash/isNil";
+import sortBy from "lodash/sortBy";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BooleanParam, useQueryParam, withDefault } from "use-query-params";
