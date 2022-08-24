@@ -3373,6 +3373,20 @@ const rootMutations = {
         .del();
 
       return true;
+    },
+    editSuperAdminStatus: async (
+      _root,
+      { userEmail, superAdminStatus },
+      { user }
+    ) => {
+      await superAdminRequired(user);
+
+      await r
+        .knex("user")
+        .where({ email: userEmail })
+        .update({ is_superadmin: superAdminStatus });
+
+      return true;
     }
   }
 };
@@ -3519,7 +3533,13 @@ const rootResolvers = {
       { organizationId, cursor, campaignsFilter, role },
       { user }
     ) => {
-      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      if (organizationId) {
+        await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      } else if (!user.is_superadmin) {
+        throw new ForbiddenError(
+          "You are not authorized to access that resource"
+        );
+      }
       return getUsers(organizationId, cursor, campaignsFilter, role);
     },
     peopleByUserIds: async (_root, { organizationId, userIds }, { user }) => {
@@ -3808,6 +3828,14 @@ const rootResolvers = {
           script: step.script_options.join(" | ")
         };
       });
+    },
+    superadmins: async (_root, _options, { user }) => {
+      if (user.is_superadmin) {
+        return r.reader("user").where({ is_superadmin: true });
+      }
+      throw new ForbiddenError(
+        "You are not authorized to access that resource"
+      );
     }
   }
 };

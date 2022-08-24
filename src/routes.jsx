@@ -35,6 +35,7 @@ import Home from "./containers/Home";
 import JoinTeam from "./containers/JoinTeam";
 import SettingsRouter from "./containers/Settings";
 import SuperAdminPeople from "./containers/SuperAdminPeople";
+import SuperAdminSuperAdmin from "./containers/SuperAdminSuperAdmin";
 import Terms from "./containers/Terms";
 import TexterTodo from "./containers/TexterTodo";
 import TexterTodoList from "./containers/TexterTodoList";
@@ -260,6 +261,11 @@ const SuperAdminRoutes = ({ match }) => (
           path={`${match.path}/people`}
           exact
           component={SuperAdminPeople}
+        />
+        <Route
+          exact
+          path={`${match.path}/superadmins`}
+          component={SuperAdminSuperAdmin}
         />
         <Redirect to={`${match.path}/people`} />
       </SuperAdminDashboard>
