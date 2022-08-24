@@ -19,4 +19,5 @@ fragment OrganizationSettingsInfo on OrganizationSettings {
   startCampaignRequiresApproval
   scriptPreviewForSupervolunteers
   defaultCampaignBuilderMode
+  defaultAutosendingControlsMode
 }

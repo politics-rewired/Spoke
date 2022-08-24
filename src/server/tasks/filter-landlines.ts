@@ -1,3 +1,4 @@
+import { FilteredContactReason } from "../api/types";
 import { makeNumbersClient } from "../lib/assemble-numbers";
 import { addProgressJob, ProgressJobPayload, ProgressTask } from "./utils";
 
@@ -75,29 +76,60 @@ export const filterLandlines: ProgressTask<ProgressJobPayload> = async (
 
   let landlinesFilteredOut = 0;
 
-  const deleteNumbers = async (numbers: { phoneNumber: string }[]) => {
+  const deleteNumbers = (reason: string) => async (
+    numbers: { phoneNumber: string }[]
+  ) => {
     landlinesFilteredOut += numbers.length;
     await helpers.query(
       `
+      with deleted_contacts as (
         delete from campaign_contact
         where
           campaign_id = $1
           and cell = any ($2)
-      `,
-      [campaignId, numbers.map((n) => n.phoneNumber)]
+        returning *
+      )
+      insert into filtered_contact (
+         campaign_id,
+         external_id,
+         first_name,
+         last_name,
+         cell,
+         zip,
+         custom_fields,
+         created_at,
+         updated_at,
+         timezone,
+         filtered_reason
+       )
+       select
+         campaign_id,
+         external_id,
+         first_name,
+         last_name,
+         cell,
+         zip,
+         custom_fields,
+         created_at,
+         updated_at,
+         timezone,
+         $3
+       from deleted_contacts
+         `,
+      [campaignId, numbers.map((n) => n.phoneNumber), reason]
     );
   };
 
   await numbersRequest.landlines.eachPage({
-    onPage: deleteNumbers
+    onPage: deleteNumbers(FilteredContactReason.Landline)
   });
 
   await numbersRequest.invalids.eachPage({
-    onPage: deleteNumbers
+    onPage: deleteNumbers(FilteredContactReason.Invalid)
   });
 
   await numbersRequest.voips.eachPage({
-    onPage: deleteNumbers
+    onPage: deleteNumbers(FilteredContactReason.VOIP)
   });
 
   // Setting result_message marks the job as complete

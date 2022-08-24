@@ -412,7 +412,8 @@ export const editCampaign = async (
     Object.prototype.hasOwnProperty.call(campaign, "externalListId") &&
     campaign.externalListId
   ) {
-    await r.knex("campaign_contact").where({ campaign_id: id }).del();
+    await r.knex("campaign_contact").where({ campaign_id: id }).delete();
+    await r.knex("filtered_contact").where({ campaign_id: id }).delete();
     await r
       .knex("campaign")
       .where({ id })
@@ -719,7 +720,7 @@ export const editCampaign = async (
 export const invalidScriptFields = async (campaignId: string) => {
   const { rows: variables } = await r.knex.raw(
     // eslint-disable-next-line no-useless-escape
-    `SELECT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
+    `SELECT DISTINCT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
 FROM interaction_step
 WHERE campaign_id = ?`,
     [campaignId]
@@ -731,9 +732,8 @@ WHERE campaign_id = ?`,
 
   const campaignContact = await r
     .knex("campaign_contact")
-    .where({ message_status: "needsMessage", campaign_id: campaignId })
-    .orderBy("updated_at")
-    .first();
+    .where({ campaign_id: campaignId })
+    .first(["custom_fields"]);
 
   const customFields = campaignContact
     ? Object.keys(JSON.parse(campaignContact.custom_fields))

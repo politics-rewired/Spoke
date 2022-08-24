@@ -79,6 +79,13 @@ export enum MessageStatusType {
   Closed = "closed"
 }
 
+export enum FilteredContactReason {
+  Invalid = "INVALID",
+  Landline = "LANDLINE",
+  VOIP = "VOIP",
+  OptedOut = "OPTEDOUT"
+}
+
 export interface CampaignRecord {
   id: number;
   organization_id: number;
@@ -132,6 +139,21 @@ export interface CampaignContactRecord {
   is_opted_out: boolean;
   timezone: string;
   archived: boolean;
+}
+
+export interface FilteredContactRecord {
+  id: number;
+  campaign_id: number;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  cell: string;
+  zip: string;
+  custom_fields: string;
+  created_at: string;
+  updated_at: string;
+  timezone: string;
+  filtered_reason: boolean;
 }
 
 export interface CampaignVariableRecord {

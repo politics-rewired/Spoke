@@ -25,7 +25,7 @@ export interface NavigationSection {
   path: string;
   role?: string;
   badge?: { count: number };
-  url: string;
+  url?: string;
 }
 
 interface Props {
