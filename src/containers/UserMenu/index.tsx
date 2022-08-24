@@ -186,7 +186,7 @@ const queries: QueryMap<Props> = {
           id
           displayName
           email
-          organizations {
+          organizations(active: true) {
             id
             name
           }

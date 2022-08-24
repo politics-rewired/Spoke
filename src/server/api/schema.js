@@ -1,3 +1,4 @@
+import { DeactivateMode } from "@spoke/spoke-codegen";
 import { ForbiddenError } from "apollo-server-errors";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
@@ -26,6 +27,7 @@ import {
   getOrgLevelNotifications
 } from "../lib/notices";
 import { change } from "../local-auth-helpers";
+import { sendEmail } from "../mail";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { getUserById } from "../models/cacheable_queries";
@@ -3387,6 +3389,59 @@ const rootMutations = {
         .update({ is_superadmin: superAdminStatus });
 
       return true;
+    },
+    editOrganizationActive: async (
+      _root,
+      { organizationId, active, deactivateMode },
+      { user }
+    ) => {
+      await superAdminRequired(user);
+
+      if (active) {
+        await r
+          .knex("organization")
+          .where({ id: organizationId })
+          .update({ deleted_at: null, deleted_by: null });
+      } else {
+        await r
+          .knex("organization")
+          .where({ id: organizationId })
+          .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
+
+        switch (deactivateMode) {
+          case DeactivateMode.Nosuspend:
+            break;
+          case DeactivateMode.Suspendall:
+            await r
+              .knex("user_organization")
+              .where({ organization_id: organizationId })
+              .whereNot({ role: UserRoleType.OWNER })
+              .update({ role: UserRoleType.SUSPENDED });
+            break;
+          case DeactivateMode.Deleteall:
+            {
+              await r
+                .knex("user_organization")
+                .where({ organization_id: organizationId })
+                .delete();
+
+              const org = await r
+                .knex("organization")
+                .where({ id: organizationId })
+                .first();
+
+              await sendEmail({
+                to: "support@spokerewired.com",
+                subject: "Automated organization shutdown request",
+                text: `This is an automated org shutdown request triggered through the superadmin. Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`
+              });
+            }
+            break;
+          default:
+            break;
+        }
+      }
+      return true;
     }
   }
 };
@@ -3466,9 +3521,13 @@ const rootResolvers = {
       );
       return contact;
     },
-    organizations: async (_root, { id: _id }, { user }) => {
+    organizations: async (_root, { active }, { user }) => {
       await superAdminRequired(user);
-      return r.reader("organization");
+      const query = r.reader("organization");
+      if (active) {
+        query.whereNull("deleted_at");
+      }
+      return query;
     },
     availableActions: (_root, { organizationId }, { user: _user }) => {
       if (!config.ACTION_HANDLERS) {

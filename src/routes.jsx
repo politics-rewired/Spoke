@@ -34,6 +34,7 @@ import DashboardLoader from "./containers/DashboardLoader";
 import Home from "./containers/Home";
 import JoinTeam from "./containers/JoinTeam";
 import SettingsRouter from "./containers/Settings";
+import SuperAdminOrganizations from "./containers/SuperAdminOrganizations";
 import SuperAdminPeople from "./containers/SuperAdminPeople";
 import SuperAdminSuperAdmin from "./containers/SuperAdminSuperAdmin";
 import Terms from "./containers/Terms";
@@ -266,6 +267,11 @@ const SuperAdminRoutes = ({ match }) => (
           exact
           path={`${match.path}/superadmins`}
           component={SuperAdminSuperAdmin}
+        />
+        <Route
+          exact
+          path={`${match.path}/organizations`}
+          component={SuperAdminOrganizations}
         />
         <Redirect to={`${match.path}/people`} />
       </SuperAdminDashboard>
