@@ -1,4 +1,9 @@
 
+enum AutosendingControlsMode {
+  BASIC
+  DETAILED
+}
+
 enum CampaignBuilderMode {
   BASIC
   ADVANCED
@@ -450,6 +455,7 @@ input OrganizationSettingsInput {
   defaultCampaignBuilderMode: CampaignBuilderMode
   showDoNotAssignMessage: Boolean
   doNotAssignMessage: String
+  defaultAutosendingControlsMode: AutosendingControlsMode
 
   # Superadmin
   startCampaignRequiresApproval: Boolean
@@ -470,6 +476,9 @@ type OrganizationSettings {
   startCampaignRequiresApproval: Boolean
   scriptPreviewForSupervolunteers: Boolean
   defaultCampaignBuilderMode: CampaignBuilderMode
+
+  # Admin
+  defaultAutosendingControlsMode: AutosendingControlsMode
 
   # Owner
   defaulTexterApprovalStatus: RequestAutoApprove

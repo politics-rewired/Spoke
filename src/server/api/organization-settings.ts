@@ -1,3 +1,5 @@
+import { AutosendingControlsMode } from "@spoke/spoke-codegen";
+
 import {
   RequestAutoApproveType,
   UserRoleType
@@ -26,6 +28,7 @@ interface IOrganizationSettings {
   showDoNotAssignMessage: boolean;
   doNotAssignMessage: string;
   defaultCampaignBuilderMode: CampaignBuilderMode;
+  defaultAutosendingControlsMode: AutosendingControlsMode;
 }
 
 const SETTINGS_PERMISSIONS: {
@@ -40,6 +43,7 @@ const SETTINGS_PERMISSIONS: {
   startCampaignRequiresApproval: UserRoleType.SUPERVOLUNTEER,
   scriptPreviewForSupervolunteers: UserRoleType.SUPERVOLUNTEER,
   defaultCampaignBuilderMode: UserRoleType.SUPERVOLUNTEER,
+  defaultAutosendingControlsMode: UserRoleType.ADMIN,
   defaulTexterApprovalStatus: UserRoleType.OWNER,
   numbersApiKey: UserRoleType.OWNER,
   trollbotWebhookUrl: UserRoleType.OWNER
@@ -59,6 +63,7 @@ const SETTINGS_WRITE_PERMISSIONS: {
   defaultCampaignBuilderMode: UserRoleType.OWNER,
   showDoNotAssignMessage: UserRoleType.OWNER,
   doNotAssignMessage: UserRoleType.OWNER,
+  defaultAutosendingControlsMode: UserRoleType.OWNER,
   startCampaignRequiresApproval: UserRoleType.SUPERADMIN
 };
 
@@ -81,7 +86,8 @@ const SETTINGS_DEFAULTS: IOrganizationSettings = {
   showDoNotAssignMessage: false,
   doNotAssignMessage:
     "Your ability to request texts has been put on hold. Please a contact a text team leader for more information.",
-  defaultCampaignBuilderMode: CampaignBuilderMode.Advanced
+  defaultCampaignBuilderMode: CampaignBuilderMode.Advanced,
+  defaultAutosendingControlsMode: AutosendingControlsMode.Detailed
 };
 
 const SETTINGS_TRANSFORMERS: Partial<
@@ -177,7 +183,8 @@ export const resolvers = {
       "scriptPreviewForSupervolunteers",
       "defaultCampaignBuilderMode",
       "showDoNotAssignMessage",
-      "doNotAssignMessage"
+      "doNotAssignMessage",
+      "defaultAutosendingControlsMode"
     ])
   }
 };

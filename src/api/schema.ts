@@ -32,6 +32,11 @@ import { schema as trollbotSchema } from "./trollbot";
 import { schema as userSchema } from "./user";
 
 const rootSchema = `
+  enum AutosendingControlsMode {
+    BASIC
+    DETAILED
+  }
+
   enum CampaignBuilderMode {
     BASIC
     ADVANCED

@@ -22,6 +22,7 @@ import { snakeToTitleCase } from "../../../lib/attributes";
 import { DateTime, parseIanaZone } from "../../../lib/datetime";
 import { timezones } from "../../../lib/timezones";
 import { loadData } from "../../hoc/with-operations";
+import AutosendingSettingsCard from "./AutosendingSettingsCard";
 import CampaignBuilderSettingsCard from "./CampaignBuilderSettingsCard";
 import EditName from "./EditName";
 import RejectedTextersMessageCard from "./RejectedTextersMessageCard";
@@ -463,6 +464,11 @@ class Settings extends React.Component {
         />
 
         <ScriptPreviewSettingsCard
+          organizationId={organization.id}
+          style={{ marginBottom: 20 }}
+        />
+
+        <AutosendingSettingsCard
           organizationId={organization.id}
           style={{ marginBottom: 20 }}
         />
