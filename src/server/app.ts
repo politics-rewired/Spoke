@@ -3,6 +3,7 @@ import passport from "@passport-next/passport";
 import bodyParser from "body-parser";
 import connectDatadog from "connect-datadog-graphql";
 import pgSession from "connect-pg-simple";
+import cors from "cors";
 import express from "express";
 import basicAuth from "express-basic-auth";
 import expressSession from "express-session";
@@ -52,6 +53,14 @@ export const createApp = async () => {
   const PgSession = pgSession(expressSession);
 
   app.enable("trust proxy"); // Don't rate limit heroku
+  app.use(
+    cors({
+      origin: config.BASE_URL,
+      preflightContinue: true,
+      credentials: true
+    })
+  );
+  app.options("*", cors());
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(
