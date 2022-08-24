@@ -11,7 +11,8 @@ export const resolvers = {
       "contactNumber",
       "isFromContact",
       "sendStatus",
-      "createdAt"
+      "createdAt",
+      "errorCodes"
     ])
   }
 };

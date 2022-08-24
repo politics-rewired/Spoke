@@ -2,9 +2,10 @@ import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import Grid from "@material-ui/core/Grid";
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "@material-ui/lab/Alert";
 import { css, StyleSheet } from "aphrodite";
 import Divider from "material-ui/Divider";
-import Snackbar from "material-ui/Snackbar";
 import PropTypes from "prop-types";
 import React from "react";
 import { Helmet } from "react-helmet";
@@ -18,6 +19,7 @@ import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
+import CampaignExportModal from "./CampaignExportModal";
 import CampaignSurveyStats from "./CampaignSurveyStats";
 import DeliverabilityStats from "./DeliverabilityStats";
 import { GET_CAMPAIGN, GET_ORGANIZATION_DATA } from "./queries";
@@ -73,6 +75,7 @@ const styles = StyleSheet.create({
 class AdminCampaignStats extends React.Component {
   state = {
     exportMessageOpen: false,
+    exportDialogOpen: false,
     exportVanOpen: false,
     syncVanOpen: false,
     disableExportButton: false,
@@ -81,7 +84,9 @@ class AdminCampaignStats extends React.Component {
     copyingCampaign: false,
     campaignJustCopied: false,
     copiedCampaignId: undefined,
-    copyCampaignError: undefined
+    copyCampaignError: undefined,
+    exportCampaignOpen: false,
+    exportCampaignError: undefined
   };
 
   handleNavigateToEdit = () => {
@@ -92,10 +97,32 @@ class AdminCampaignStats extends React.Component {
 
   handleOnClickExport = async () => {
     this.setState({
+      exportDialogOpen: true,
+      disableExportButton: true
+    });
+  };
+
+  handleCloseCampaignExport = async () => {
+    this.setState({
+      exportDialogOpen: false,
+      disableExportButton: false
+    });
+  };
+
+  handleCompleteCampaignExport = async () => {
+    this.setState({
+      exportDialogOpen: false,
       exportMessageOpen: true,
       disableExportButton: true
     });
-    await this.props.mutations.exportCampaign();
+  };
+
+  handleErrorCampaignExport = async (errorMessage) => {
+    this.setState({
+      exportCampaignError: errorMessage,
+      exportCampaignOpen: true,
+      exportDialogOpen: false
+    });
   };
 
   handleOnClickVanExport = () => this.setState({ exportVanOpen: true });
@@ -336,7 +363,7 @@ class AdminCampaignStats extends React.Component {
           open={this.state.exportMessageOpen}
           message="Export started - we'll e-mail you when it's done"
           autoHideDuration={5000}
-          onRequestClose={() => {
+          onClose={() => {
             this.setState({ exportMessageOpen: false });
           }}
         />
@@ -348,7 +375,7 @@ class AdminCampaignStats extends React.Component {
               : `Campaign successfully copied to campaign ${this.state.copiedCampaignId}`
           }
           autoHideDuration={5000}
-          onRequestClose={() => {
+          onClose={() => {
             this.setState({
               campaignJustCopied: false,
               copiedCampaignId: undefined,
@@ -356,6 +383,25 @@ class AdminCampaignStats extends React.Component {
             });
           }}
         />
+        <CampaignExportModal
+          campaignId={campaignId}
+          open={this.state.exportDialogOpen}
+          onClose={this.handleCloseCampaignExport}
+          onComplete={this.handleCompleteCampaignExport}
+          onError={this.handleErrorCampaignExport}
+        />
+        <Snackbar
+          open={this.state.exportCampaignOpen}
+          autoHideDuration={5000}
+          onClose={() => {
+            this.setState({
+              exportCampaignOpen: false,
+              exportCampaignError: undefined
+            });
+          }}
+        >
+          <Alert severity="error">{this.state.exportCampaignError}</Alert>
+        </Snackbar>
         <VanExportModal
           campaignId={campaignId}
           open={this.state.exportVanOpen}

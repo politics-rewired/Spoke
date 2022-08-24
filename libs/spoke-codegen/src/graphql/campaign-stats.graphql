@@ -1,0 +1,5 @@
+mutation ExportCampaign($options: CampaignExportInput!) {
+  exportCampaign(options: $options) {
+    id
+  }
+}

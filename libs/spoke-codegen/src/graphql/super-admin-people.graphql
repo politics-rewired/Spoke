@@ -1,4 +1,4 @@
-fragment Users on UsersList {
+fragment SuperAdmins on UsersList {
   users {
     id
     displayName
@@ -27,7 +27,7 @@ query GetSuperAdmins {
 
 query GetPeople {
   people {
-    ...Users
+    ...SuperAdmins
   }
 }
 

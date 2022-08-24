@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.35.1](https://github.com/politics-rewired/spoke/compare/v4.35.0...v4.35.1) (2022-08-17)
+
+
+### Bug Fixes
+
+* **export:** fix campaign campaign error ([#1355](https://github.com/politics-rewired/spoke/issues/1355)) ([dac0171](https://github.com/politics-rewired/spoke/commit/dac0171e42dbab1e98eeae87994f53996e6903c1))
+
+## [4.35.0](https://github.com/politics-rewired/spoke/compare/v4.35.0-rc.1...v4.35.0) (2022-08-17)
+
+## [4.35.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.35.0-rc.0...v4.35.0-rc.1) (2022-08-16)
+
+
+### Bug Fixes
+
+* allow admins to enumerate messaging services ([#1345](https://github.com/politics-rewired/spoke/issues/1345)) ([8a75df7](https://github.com/politics-rewired/spoke/commit/8a75df7c8e4616432b39662d904b6108993e514c))
+* **interactions:** dont show duplicate warnings ([#1346](https://github.com/politics-rewired/spoke/issues/1346)) ([32bb35b](https://github.com/politics-rewired/spoke/commit/32bb35b505cf06d3549054e072f0eef55f657f66))
+
+## [4.35.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.34.1...v4.35.0-rc.0) (2022-08-08)
+
+
+### Features
+
+* **bulk editor:** confirm changes before updating ([#1329](https://github.com/politics-rewired/spoke/issues/1329)) ([913faa9](https://github.com/politics-rewired/spoke/commit/913faa96f89cb029de668ac3188dc78baa7eb23e))
+* **texter conversation:** update button in line with design doc ([#1340](https://github.com/politics-rewired/spoke/issues/1340)) ([0114bad](https://github.com/politics-rewired/spoke/commit/0114bad5aca44adac4d163b54141a837412553b4))
+* store and export filtered contacts ([#1320](https://github.com/politics-rewired/spoke/issues/1320)) ([058cd03](https://github.com/politics-rewired/spoke/commit/058cd031248b2f7e417664e71edb58e7f8e15b64))
+
+### [4.34.1](https://github.com/politics-rewired/spoke/compare/v4.34.0...v4.34.1) (2022-08-07)
+
+
+### Bug Fixes
+
+* **perf:** fetch campaign ([#1336](https://github.com/politics-rewired/spoke/issues/1336)) ([faa99b7](https://github.com/politics-rewired/spoke/commit/faa99b7a90df0d6af77db06c9ffc9f506c4fdaeb))
+
+## [4.34.0](https://github.com/politics-rewired/spoke/compare/v4.34.0-rc.2...v4.34.0) (2022-08-03)
+
+## [4.34.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.34.0-rc.1...v4.34.0-rc.2) (2022-07-28)
+
 ## [4.34.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.34.0-rc.0...v4.34.0-rc.1) (2022-07-26)
 
 

@@ -13,6 +13,7 @@ interface AutosendingUnstartedTargetRowProps {
   organizationId: string;
 }
 
+// eslint-disable-next-line max-len
 export const AutosendingUnstartedTargetRow: React.FC<AutosendingUnstartedTargetRowProps> = (
   props
 ) => {
@@ -31,13 +32,6 @@ export const AutosendingUnstartedTargetRow: React.FC<AutosendingUnstartedTargetR
         />
       </TableCell>
       <TableCell />
-      <TableCell>{target.contactsCount}</TableCell>
-      <TableCell>&mdash;</TableCell>
-      <TableCell>&mdash;</TableCell>
-      <TableCell>&mdash;</TableCell>
-      <TableCell>&mdash;</TableCell>
-      <TableCell>&mdash;</TableCell>
-      <TableCell>&mdash;</TableCell>
       <TableCell>
         <Link to={`/admin/${organizationId}/campaigns/${target.id}`}>
           <MoreIcon />

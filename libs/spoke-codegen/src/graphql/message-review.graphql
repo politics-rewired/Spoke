@@ -5,6 +5,7 @@ fragment ConversationMessage on Message {
   createdAt
   userId
   sendStatus
+  errorCodes
 }
 
 fragment ConversationInfo on Conversation {

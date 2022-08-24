@@ -171,6 +171,7 @@ const mutations: MutationMap<InnerProps> = {
             userId
             text
             isFromContact
+            errorCodes
           }
         }
       }

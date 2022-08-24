@@ -4,11 +4,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
+import TextField from "@material-ui/core/TextField";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { useGetPeopleQuery, User } from "@spoke/spoke-codegen";
+import isEmpty from "lodash/isEmpty";
+import isNil from "lodash/isNil";
 import React, { useState } from "react";
 
 interface AddSuperAdminDialogProps {
@@ -22,22 +22,25 @@ const AddSuperAdminDialog: React.FC<AddSuperAdminDialogProps> = ({
   onClose,
   onSubmit
 }) => {
-  const [userEmail, setUserEmail] = useState<string | null | undefined>();
+  const [user, setUser] = useState<User | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
 
-  const { data: peopleData, loading } = useGetPeopleQuery({
-    skip: !open
-  });
+  const { data: peopleData, loading } = useGetPeopleQuery();
 
   const usersData = (peopleData?.people?.users ?? []) as Array<User>;
-  const users = usersData.filter((user) => !user.isSuperadmin);
+  const users = usersData.filter((u) => !u.isSuperadmin);
 
-  const handleUserChanged = (event: React.ChangeEvent<{ value: string }>) => {
-    setUserEmail(event.target.value);
+  const handleUserChanged = (
+    _event: React.ChangeEvent<unknown>,
+    value: User | null
+  ) => {
+    setUser(value);
   };
   const handleSubmit = () => {
+    if (isEmpty(user) || isNil(user)) return;
     setConfirmDialogOpen(false);
-    onSubmit(userEmail as string);
+    onSubmit(user?.email as string);
+    setUser(null);
   };
   const handleConfirmDialogOpen = () => {
     onClose();
@@ -49,7 +52,7 @@ const AddSuperAdminDialog: React.FC<AddSuperAdminDialogProps> = ({
 
   return (
     <div>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open} onClose={onClose} fullWidth>
         <DialogTitle>Add SuperAdmin</DialogTitle>
         {loading ? (
           <DialogContent>
@@ -61,21 +64,16 @@ const AddSuperAdminDialog: React.FC<AddSuperAdminDialogProps> = ({
               <DialogContentText>
                 Select user to promote to superadmin
               </DialogContentText>
-              <FormControl>
-                <InputLabel id="add-superadmin-label">Pick User</InputLabel>
-                <Select
-                  style={{ width: 500 }}
-                  labelId="add-superadmin-label"
-                  value={userEmail}
-                  onChange={handleUserChanged}
-                >
-                  {users.map((user: User) => (
-                    <MenuItem key={user.id} value={user.email}>
-                      {user.displayName} [{user.email}]
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                options={users}
+                getOptionLabel={(u) => `${u.displayName} [${u.email}]`}
+                value={user}
+                onChange={handleUserChanged}
+                fullWidth
+                renderInput={(params) => (
+                  <TextField {...params} label="Pick User" />
+                )}
+              />
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
@@ -90,7 +88,8 @@ const AddSuperAdminDialog: React.FC<AddSuperAdminDialogProps> = ({
         <DialogTitle>Confirm add superadmin?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to make this user ({userEmail}) a superadmin?
+            Are you sure you want to make this user ({user?.displayName} [
+            {user?.email}]) a superadmin?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
