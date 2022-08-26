@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.36.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.0...v4.36.0-rc.1) (2022-08-26)
+
+
+### Features
+
+* add cors ([#1193](https://github.com/politics-rewired/spoke/issues/1193)) ([121f923](https://github.com/politics-rewired/spoke/commit/121f9234ad5f3ed1a8712548840b07b7e4beba6e))
+
+
+### Bug Fixes
+
+* fix refresh integration button hidden ([#1360](https://github.com/politics-rewired/spoke/issues/1360)) ([a94ba9e](https://github.com/politics-rewired/spoke/commit/a94ba9e6925a49d8bc88fe85f00fa4da82dc57a0))
+
 ## [4.36.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.35.1...v4.36.0-rc.0) (2022-08-24)
 
 
