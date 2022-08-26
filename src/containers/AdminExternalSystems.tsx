@@ -223,7 +223,7 @@ class AdminExternalSystems extends Component<Props, State> {
           onClick={this.handleRefreshSystems}
           style={{ marginTop: 15, marginBottom: 15 }}
         >
-          Refresh Lists
+          Refresh List
         </Button>
 
         <TableContainer component={Paper}>
