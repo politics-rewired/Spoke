@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.36.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.1...v4.36.0-rc.2) (2022-08-26)
+
+
+### Bug Fixes
+
+* import server-defined type ([#1365](https://github.com/politics-rewired/spoke/issues/1365)) ([2353b84](https://github.com/politics-rewired/spoke/commit/2353b843ccc409d9cddcf6fcc7cb487bfddf8203))
+
 ## [4.36.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.0...v4.36.0-rc.1) (2022-08-26)
 
 
