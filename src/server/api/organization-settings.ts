@@ -1,5 +1,3 @@
-import { AutosendingControlsMode } from "@spoke/spoke-codegen";
-
 import {
   RequestAutoApproveType,
   UserRoleType
@@ -9,6 +7,7 @@ import { stringIsAValidUrl } from "../../lib/utils";
 import { r } from "../models";
 import { organizationCache } from "../models/cacheable_queries/organization";
 import { accessRequired, roleIndex } from "./errors";
+import { AutosendingControlsMode } from "./types";
 
 export enum CampaignBuilderMode {
   Basic = "BASIC",

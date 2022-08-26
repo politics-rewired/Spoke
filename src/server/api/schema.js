@@ -1,4 +1,3 @@
-import { DeactivateMode } from "@spoke/spoke-codegen";
 import { ForbiddenError } from "apollo-server-errors";
 import camelCaseKeys from "camelcase-keys";
 import GraphQLDate from "graphql-date";
@@ -101,6 +100,7 @@ import { resolvers as questionResponseResolvers } from "./question-response";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
+import { DeactivateMode } from "./types";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 
 const uuidv4 = require("uuid").v4;
