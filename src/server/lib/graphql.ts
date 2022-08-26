@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { FieldNode, SelectionNode } from "graphql";
+import type { FieldNode, SelectionNode } from "graphql";
 
 export const selectionsByType = (node: FieldNode) => {
   const selections = node.selectionSet?.selections ?? [];

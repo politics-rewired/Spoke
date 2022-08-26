@@ -8,7 +8,7 @@ import { createTheme } from "@material-ui/core/styles"; // v4.x
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 import baseTheme from "./theme";
-import { CustomTheme } from "./types";
+import type { CustomTheme } from "./types";
 
 export const createMuiThemev0 = (theme: Partial<CustomTheme> = {}) =>
   getMuiTheme(

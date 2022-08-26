@@ -1,4 +1,5 @@
-import { createStyles, makeStyles, Theme } from "@material-ui/core";
+import type { Theme } from "@material-ui/core";
+import { createStyles, makeStyles } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -11,15 +12,12 @@ import Paper from "@material-ui/core/Paper";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import Skeleton from "@material-ui/lab/Skeleton";
-import {
-  DataGridPro,
-  GridColDef,
-  GridRenderCellParams
-} from "@mui/x-data-grid-pro";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid-pro";
+import { DataGridPro } from "@mui/x-data-grid-pro";
+import type { User } from "@spoke/spoke-codegen";
 import {
   useEditSuperAdminStatusMutation,
-  useGetSuperAdminsQuery,
-  User
+  useGetSuperAdminsQuery
 } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 

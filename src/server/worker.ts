@@ -1,5 +1,7 @@
-import { LogFunctionFactory, Logger } from "graphile-worker";
-import { loadYaml, PgComposeWorker, run } from "pg-compose";
+import type { LogFunctionFactory } from "graphile-worker";
+import { Logger } from "graphile-worker";
+import type { PgComposeWorker } from "pg-compose";
+import { loadYaml, run } from "pg-compose";
 
 import { config } from "../config";
 import { sleep } from "../lib";

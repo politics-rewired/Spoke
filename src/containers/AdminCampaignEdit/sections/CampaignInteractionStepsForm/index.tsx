@@ -1,41 +1,44 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
-import { CampaignVariablePage } from "@spoke/spoke-codegen";
+import type { CampaignVariablePage } from "@spoke/spoke-codegen";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
 import { Dialog } from "material-ui";
 import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
 
-import { Campaign } from "../../../../api/campaign";
-import {
+import type { Campaign } from "../../../../api/campaign";
+import type {
   InteractionStep,
   InteractionStepWithChildren
 } from "../../../../api/interaction-step";
-import { Action } from "../../../../api/types";
+import type { Action } from "../../../../api/types";
 import { readClipboardText, writeClipboardText } from "../../../../client/lib";
 import ScriptPreviewButton from "../../../../components/ScriptPreviewButton";
 import { dataTest } from "../../../../lib/attributes";
 import { DateTime } from "../../../../lib/datetime";
 import { makeTree } from "../../../../lib/interaction-step-helpers";
 import { scriptToTokens } from "../../../../lib/scripts";
-import { MutationMap, QueryMap } from "../../../../network/types";
+import type { MutationMap, QueryMap } from "../../../../network/types";
 import theme from "../../../../styles/theme";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import { asSection } from "../../components/SectionWrapper";
 import InteractionStepCard from "./components/InteractionStepCard";
-import {
+import type {
   AddInteractionStepPayload,
+  UpdateInteractionStepPayload
+} from "./resolvers";
+import {
   EditInteractionStepFragment,
   generateId,
-  GET_CAMPAIGN_INTERACTIONS,
-  UpdateInteractionStepPayload
+  GET_CAMPAIGN_INTERACTIONS
 } from "./resolvers";
 import { isBlock } from "./utils";
 

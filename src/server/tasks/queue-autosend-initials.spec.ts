@@ -1,5 +1,6 @@
 import faker from "faker";
-import { runTaskListOnce, WorkerOptions } from "graphile-worker";
+import type { WorkerOptions } from "graphile-worker";
+import { runTaskListOnce } from "graphile-worker";
 import { Pool } from "pg";
 
 import {
@@ -11,7 +12,7 @@ import {
   createTexter
 } from "../../../__test__/testbed-preparation/core";
 import { config } from "../../config";
-import {
+import type {
   CampaignContactRecord,
   OrganizationRecord,
   UserRecord

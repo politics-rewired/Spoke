@@ -1,5 +1,6 @@
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import { WithTheme, withTheme } from "@material-ui/core/styles";
+import type { WithTheme } from "@material-ui/core/styles";
+import { withTheme } from "@material-ui/core/styles";
 import Switch from "@material-ui/core/Switch";
 import { css, StyleSheet } from "aphrodite";
 import React from "react";

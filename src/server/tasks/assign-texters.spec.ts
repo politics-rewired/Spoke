@@ -1,4 +1,5 @@
-import { Pool, PoolClient } from "pg";
+import type { PoolClient } from "pg";
+import { Pool } from "pg";
 
 import {
   createCompleteCampaign,
@@ -6,10 +7,11 @@ import {
 } from "../../../__test__/testbed-preparation/core";
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
-import { AssignmentRecord, MessageStatusType } from "../api/types";
+import type { AssignmentRecord } from "../api/types";
+import { MessageStatusType } from "../api/types";
 import { withClient, withTransaction } from "../utils";
+import type { AssignmentTarget } from "./assign-texters";
 import {
-  AssignmentTarget,
   assignPayloads,
   ensureAssignments,
   freeUpTexters,

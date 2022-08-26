@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { GraphQLError } from "graphql/error";
-import { Knex } from "knex";
+import type { Knex } from "knex";
 import escapeRegExp from "lodash/escapeRegExp";
 import {
   ContactOptedOutError,
@@ -9,7 +9,7 @@ import {
 import request from "superagent";
 
 import { UserRoleType } from "../../../api/organization-membership";
-import { MessageInput } from "../../../api/types";
+import type { MessageInput } from "../../../api/types";
 import { config } from "../../../config";
 import { replaceCurlyApostrophes } from "../../../lib/charset-utils";
 import { DateTime } from "../../../lib/datetime";
@@ -19,7 +19,7 @@ import { getSendBeforeUtc } from "../../../lib/tz-helpers";
 import logger from "../../../logger";
 import { eventBus, EventType } from "../../event-bus";
 import { r } from "../../models";
-import { UserRecord } from "../types";
+import type { UserRecord } from "../types";
 import { getContactMessagingService } from "./message-sending";
 import serviceMap from "./services";
 

@@ -1,5 +1,5 @@
 import { fromPairs } from "lodash";
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 
 import { config } from "../../config";
 

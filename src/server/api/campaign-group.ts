@@ -2,7 +2,7 @@ import { r } from "../models";
 import { accessRequired } from "./errors";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
-import { RelayPageArgs } from "./types";
+import type { RelayPageArgs } from "./types";
 
 interface CampaignGroup {
   id: string;

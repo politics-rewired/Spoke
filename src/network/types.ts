@@ -1,5 +1,9 @@
-import { ApolloCache, ApolloClient, MutationOptions } from "@apollo/client";
-import { OperationOption } from "@apollo/client/react/hoc";
+import type {
+  ApolloCache,
+  ApolloClient,
+  MutationOptions
+} from "@apollo/client";
+import type { OperationOption } from "@apollo/client/react/hoc";
 
 export interface QueryMap<OuterProps> {
   [key: string]: { query: any } & OperationOption<OuterProps, any, any, any>;

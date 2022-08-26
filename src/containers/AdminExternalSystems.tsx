@@ -17,7 +17,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import CreateIcon from "@material-ui/icons/Create";
 import RefreshIcon from "@material-ui/icons/Refresh";
-import { History } from "history";
+import type { History } from "history";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
@@ -27,15 +27,14 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import {
+import type {
   ExternalSystem,
-  ExternalSystemInput,
-  ExternalSystemType,
-  VanOperationMode
+  ExternalSystemInput
 } from "../api/external-system";
-import { RelayPaginatedResponse } from "../api/pagination";
+import { ExternalSystemType, VanOperationMode } from "../api/external-system";
+import type { RelayPaginatedResponse } from "../api/pagination";
 import { DateTime } from "../lib/datetime";
-import { MutationMap, QueryMap } from "../network/types";
+import type { MutationMap, QueryMap } from "../network/types";
 import theme from "../styles/theme";
 import { loadData } from "./hoc/with-operations";
 

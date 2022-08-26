@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { useTheme } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import CancelIcon from "@material-ui/icons/Cancel";
@@ -10,15 +11,13 @@ import CircularProgress from "material-ui/CircularProgress";
 import React from "react";
 import { compose, withProps } from "recompose";
 
-import {
-  AuthzContextType,
-  withAuthzContext
-} from "../../../components/AuthzProvider";
+import type { AuthzContextType } from "../../../components/AuthzProvider";
+import { withAuthzContext } from "../../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../../lib/attributes";
 import theme from "../../../styles/theme";
-import { MuiThemeProviderProps } from "../../../styles/types";
+import type { MuiThemeProviderProps } from "../../../styles/types";
 import { loadData } from "../../hoc/with-operations";
-import { CampaignReadinessType } from "../types";
+import type { CampaignReadinessType } from "../types";
 
 export interface PendingJobType {
   id: string;

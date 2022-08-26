@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { DateTime as LuxonDateTime, Zone, ZoneOptions } from "luxon";
+import type { Zone, ZoneOptions } from "luxon";
+import { DateTime as LuxonDateTime } from "luxon";
 
 export { Interval } from "luxon";
 

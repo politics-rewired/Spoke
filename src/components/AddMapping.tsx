@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unused-state */
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { blueGrey } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
@@ -13,26 +14,24 @@ import SelectField from "material-ui/SelectField";
 import React from "react";
 import { compose } from "recompose";
 
-import { ExternalActivistCode } from "../api/external-activist-code";
-import {
-  ExternalResultCode,
-  resultCodeWarning
-} from "../api/external-result-code";
-import { ExternalSurveyQuestion } from "../api/external-survey-question";
-import {
+import type { ExternalActivistCode } from "../api/external-activist-code";
+import type { ExternalResultCode } from "../api/external-result-code";
+import { resultCodeWarning } from "../api/external-result-code";
+import type { ExternalSurveyQuestion } from "../api/external-survey-question";
+import type {
   ExternalSyncConfigTarget,
-  ExternalSyncQuestionResponseConfig,
+  ExternalSyncQuestionResponseConfig
+} from "../api/external-sync-config";
+import {
   isActivistCode,
   isResponseOption,
   isResultCode
 } from "../api/external-sync-config";
-import { RelayPaginatedResponse } from "../api/pagination";
-import {
-  ExternalDataCollectionStatus,
-  QuestionResponseSyncTargetInput
-} from "../api/types";
+import type { RelayPaginatedResponse } from "../api/pagination";
+import type { QuestionResponseSyncTargetInput } from "../api/types";
+import { ExternalDataCollectionStatus } from "../api/types";
 import { loadData } from "../containers/hoc/with-operations";
-import { MutationMap } from "../network/types";
+import type { MutationMap } from "../network/types";
 import { GET_SYNC_CONFIGS } from "./SyncConfigurationModal/queries";
 
 enum MappingType {

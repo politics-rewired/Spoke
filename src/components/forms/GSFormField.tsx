@@ -1,7 +1,7 @@
 import { Component } from "react";
-import { FieldProps } from "react-formal/Field";
+import type { FieldProps } from "react-formal/Field";
 
-import { TruthyString } from "../../lib/js-types";
+import type { TruthyString } from "../../lib/js-types";
 
 export interface GSFormFieldProps extends FieldProps {
   floatingLabelText: TruthyString;

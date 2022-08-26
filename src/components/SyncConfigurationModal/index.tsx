@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -9,14 +10,12 @@ import cloneDeep from "lodash/cloneDeep";
 import React from "react";
 import { compose } from "recompose";
 
-import {
-  ExternalSyncQuestionResponseConfig,
-  FullListRefreshFragment
-} from "../../api/external-sync-config";
-import { ExternalSystem } from "../../api/external-system";
-import { RelayPaginatedResponse } from "../../api/pagination";
+import type { ExternalSyncQuestionResponseConfig } from "../../api/external-sync-config";
+import { FullListRefreshFragment } from "../../api/external-sync-config";
+import type { ExternalSystem } from "../../api/external-system";
+import type { RelayPaginatedResponse } from "../../api/pagination";
 import { loadData } from "../../containers/hoc/with-operations";
-import { MutationMap, QueryMap } from "../../network/types";
+import type { MutationMap, QueryMap } from "../../network/types";
 import QuestionResponseConfig from "../QuestionResponseConfig";
 import { GET_SYNC_CONFIGS, GET_SYNC_TARGETS } from "./queries";
 

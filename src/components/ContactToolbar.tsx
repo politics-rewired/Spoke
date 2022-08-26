@@ -2,9 +2,9 @@ import { grey } from "@material-ui/core/colors";
 import { Toolbar, ToolbarGroup, ToolbarTitle } from "material-ui/Toolbar";
 import React from "react";
 
-import { Campaign } from "../api/campaign";
-import { CampaignContact } from "../api/campaign-contact";
-import { OrganizationSettings } from "../api/organization-settings";
+import type { Campaign } from "../api/campaign";
+import type { CampaignContact } from "../api/campaign-contact";
+import type { OrganizationSettings } from "../api/organization-settings";
 import { DateTime } from "../lib/datetime";
 
 const inlineStyles = {

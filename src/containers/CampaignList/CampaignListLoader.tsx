@@ -6,7 +6,7 @@ import type {
 import { useGetAdminCampaignsQuery } from "@spoke/spoke-codegen";
 import React from "react";
 
-import { CampaignsFilter } from "../../api/campaign";
+import type { CampaignsFilter } from "../../api/campaign";
 import { useAuthzContext } from "../../components/AuthzProvider";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import CampaignList from "./CampaignList";

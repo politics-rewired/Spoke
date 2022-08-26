@@ -5,7 +5,7 @@ import request from "superagent";
 
 import App from "./App";
 import { createAuthService } from "./auth-service";
-import { InstanceSettings } from "./spoke-context";
+import type { InstanceSettings } from "./spoke-context";
 
 const main = (settings: InstanceSettings) => {
   window.AuthService = createAuthService(settings);

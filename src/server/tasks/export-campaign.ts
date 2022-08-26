@@ -6,7 +6,7 @@ import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
 import { getDownloadUrl, getUploadStream } from "../../workers/exports/upload";
 import getExportCampaignContent from "../api/export-campaign";
-import {
+import type {
   CampaignContactRecord,
   FilteredContactRecord,
   InteractionStepRecord,
@@ -16,7 +16,8 @@ import {
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
-import { addProgressJob, ProgressTask, ProgressTaskHelpers } from "./utils";
+import type { ProgressTask, ProgressTaskHelpers } from "./utils";
+import { addProgressJob } from "./utils";
 
 export const TASK_IDENTIFIER = "export-campaign";
 

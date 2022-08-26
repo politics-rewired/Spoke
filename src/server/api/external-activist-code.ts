@@ -1,5 +1,5 @@
 import { sqlResolvers } from "./lib/utils";
-import { ExternalDataCollectionStatus } from "./types";
+import type { ExternalDataCollectionStatus } from "./types";
 
 export interface ExternalActivistCode {
   id: string;
