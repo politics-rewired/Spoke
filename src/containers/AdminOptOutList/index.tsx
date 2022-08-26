@@ -5,6 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "@material-ui/lab/Alert";
+import Skeleton from "@material-ui/lab/Skeleton";
 import type { GridColDef } from "@mui/x-data-grid-pro";
 import { DataGridPro } from "@mui/x-data-grid-pro";
 import {
@@ -109,6 +110,10 @@ const AdminOptOutList: React.FC = (props) => {
         return "";
     }
   };
+
+  if (loading) {
+    return <Skeleton variant="rect" width="600" height="300" />;
+  }
 
   return (
     <div>
