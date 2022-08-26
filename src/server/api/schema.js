@@ -78,6 +78,7 @@ import { notifyAssignmentCreated, notifyOnTagConversation } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
 import { copyCampaign, editCampaign } from "./lib/campaign";
 import { saveNewIncomingMessage } from "./lib/message-sending";
+import { processNumbers } from "./lib/opt-out";
 import { formatPage } from "./lib/pagination";
 import { sendMessage } from "./lib/send-message";
 import { graphileSecretRef } from "./lib/utils";
@@ -3442,6 +3443,39 @@ const rootMutations = {
         }
       }
       return true;
+    },
+    bulkOptOut: async (
+      _root,
+      { organizationId, csvFile, numbersList },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const processedNumbers = await processNumbers(csvFile, numbersList);
+
+      await cacheableData.optOut.saveMany(r.knex, {
+        cells: processedNumbers,
+        organizationId,
+        reason: "Manually Uploaded"
+      });
+
+      return processedNumbers.length;
+    },
+    bulkOptIn: async (
+      _root,
+      { organizationId, csvFile, numbersList },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const processedNumbers = await processNumbers(csvFile, numbersList);
+
+      await cacheableData.optOut.deleteMany(r.knex, {
+        cells: processedNumbers,
+        organizationId
+      });
+
+      return processedNumbers.length;
     }
   }
 };
@@ -3895,6 +3929,51 @@ const rootResolvers = {
       throw new ForbiddenError(
         "You are not authorized to access that resource"
       );
+    },
+    optOuts: async (_root, { organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      // We select `max(opt_out.id)` for DataGrid to have
+      // an ID to work with. Required for DataGrid
+      const query = r
+        .knex("opt_out")
+        .leftJoin("assignment", "assignment.id", "assignment_id")
+        .leftJoin("campaign", "campaign.id", "assignment.campaign_id")
+        .leftJoin("organization", "organization.id", "opt_out.organization_id")
+        .groupBy("campaign.id", "campaign.title", "organization.name")
+        .select(
+          "campaign.id as campaignId",
+          "campaign.title as campaignTitle",
+          "organization.name as orgName"
+        )
+        .max("opt_out.id as id")
+        .count("*");
+
+      if (!config.OPTOUTS_SHARE_ALL_ORGS) {
+        query.where({ "opt_out.organization_id": organizationId });
+      }
+
+      const results = await query;
+
+      return results.map((result) => {
+        let title;
+
+        if (result.campaignId) {
+          title = config.OPTOUTS_SHARE_ALL_ORGS
+            ? `${result.orgName} : ${result.campaignTitle}`
+            : result.campaignTitle;
+        } else {
+          title = config.OPTOUTS_SHARE_ALL_ORGS
+            ? `${result.orgName} : Manually Uploaded`
+            : "Manually Uploaded";
+        }
+
+        return {
+          id: result.id,
+          title,
+          count: result.count
+        };
+      });
     }
   }
 };

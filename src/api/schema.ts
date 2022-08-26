@@ -229,6 +229,12 @@ const rootSchema = `
     campaignId: String!
   }
 
+  type OptOutByCampaign {
+    id: String!
+    title: String!
+    count: String!
+  }
+
   type RootQuery {
     currentUser: User
     organization(id:String!, utc:String): Organization
@@ -256,6 +262,7 @@ const rootSchema = `
     campaignNavigation(campaignId: String!): CampaignNavigation!
     bulkUpdateScriptChanges(organizationId: String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateChange!]!
     superadmins: [User!]
+    optOuts(organizationId: String!): [OptOutByCampaign!]!
   }
 
   input SecondPassInput {
@@ -356,6 +363,8 @@ const rootSchema = `
     unassignTextsFromUser(membershipId: String!): Boolean!
     editSuperAdminStatus(userEmail: String!, superAdminStatus: Boolean!): Boolean!
     editOrganizationActive(organizationId: String!, active: Boolean!, deactivateMode: DeactivateMode): Boolean!
+    bulkOptOut(organizationId: String!, csvFile: Upload, numbersList: String): Int!
+    bulkOptIn(organizationId: String!, csvFile: Upload, numbersList: String): Int!
   }
 
   schema {

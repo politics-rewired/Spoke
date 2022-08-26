@@ -1,0 +1,31 @@
+query GetOptOutsByCampaign($organizationId: String!) {
+  optOuts(organizationId: $organizationId) {
+    id
+    title
+    count
+  }
+}
+
+mutation BulkOptOut(
+  $organizationId: String!
+  $csvFile: Upload
+  $numbersList: String
+) {
+  bulkOptOut(
+    organizationId: $organizationId
+    csvFile: $csvFile
+    numbersList: $numbersList
+  )
+}
+
+mutation BulkOptIn(
+  $organizationId: String!
+  $csvFile: Upload
+  $numbersList: String
+) {
+  bulkOptIn(
+    organizationId: $organizationId
+    csvFile: $csvFile
+    numbersList: $numbersList
+  )
+}
