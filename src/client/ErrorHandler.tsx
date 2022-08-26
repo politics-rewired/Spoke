@@ -5,7 +5,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { eventBus, EventTypes } from "./events";
 
 const ErrorHandler: React.FC = () => {
-  const errorCount = useRef(0);
+  const errorCount = useRef<number>(0);
+  const timerRef = useRef<NodeJS.Timeout>();
   const [open, setOpen] = useState<boolean>(false);
 
   const handleNewEvent = () => {
@@ -16,7 +17,7 @@ const ErrorHandler: React.FC = () => {
       // Set timeout to expire count after 30 seconds
       // so a few events over a long period of time
       // don't set off the snackbar
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         errorCount.current = 0;
       }, 30 * 1000);
     }
@@ -32,7 +33,11 @@ const ErrorHandler: React.FC = () => {
 
   useEffect(() => {
     eventBus.on(EventTypes.GraphQLServerError, handleNewEvent);
-  }, []);
+    return () => {
+      eventBus.removeListener(EventTypes.GraphQLServerError, handleNewEvent);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [handleNewEvent]);
 
   return (
     <Snackbar
