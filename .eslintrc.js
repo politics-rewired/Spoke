@@ -168,6 +168,22 @@ module.exports = {
         "@typescript-eslint/no-shadow": "error",
         "no-unused-vars": "off" // JS `no-unused-vars` rule doesn't handle typescript correctly
       }
+    },
+    {
+      files: ["src/server/**/*"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@spoke/spoke-codegen",
+                message: "Client codegen may not be used in the server."
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 };
