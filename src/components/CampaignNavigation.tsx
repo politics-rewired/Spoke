@@ -1,8 +1,7 @@
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
+import { useGetCampaignNavigationQuery } from "@spoke/spoke-codegen";
 import React from "react";
-
-import { useGetCampaignNavigationQuery } from "../../libs/spoke-codegen/src";
 
 interface Props {
   prevCampaignClicked(campaignId: string | null): void;
