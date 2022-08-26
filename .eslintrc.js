@@ -100,6 +100,10 @@ module.exports = {
         ],
         patterns: [
           {
+            group: ["**/spoke-codegen/src"],
+            message: "Please use @spoke/spoke-codegen instead."
+          },
+          {
             group: ["material-ui/svg-icons/*"],
             message: "Please use @material-ui/icons instead."
           },

@@ -1,11 +1,11 @@
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip";
-import React, { useCallback } from "react";
-
 import {
   useGetCampaignStatusQuery,
   useSetCampaignApprovedMutation
-} from "../../../../libs/spoke-codegen/src";
+} from "@spoke/spoke-codegen";
+import React, { useCallback } from "react";
+
 import { useSpokeContext } from "../../../client/spoke-context";
 import { useAuthzContext } from "../../../components/AuthzProvider";
 
