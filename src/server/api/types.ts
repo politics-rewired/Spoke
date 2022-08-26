@@ -280,3 +280,9 @@ export interface NotificationRecord {
   campaign_id?: number | null;
   sent_at?: Date | null;
 }
+
+export enum DeactivateMode {
+  Deleteall = "DELETEALL",
+  Nosuspend = "NOSUSPEND",
+  Suspendall = "SUSPENDALL"
+}
