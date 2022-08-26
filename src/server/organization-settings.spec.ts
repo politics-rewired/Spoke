@@ -1,7 +1,4 @@
-import {
-  AutosendingControlsMode,
-  OrganizationSettingsInput
-} from "@spoke/spoke-codegen";
+import type { OrganizationSettingsInput } from "@spoke/spoke-codegen";
 import { Pool } from "pg";
 import supertest from "supertest";
 
@@ -12,6 +9,7 @@ import {
 } from "../api/organization-membership";
 import { config } from "../config";
 import { writePermissionRequired } from "./api/organization-settings";
+import { AutosendingControlsMode } from "./api/types";
 import { createApp } from "./app";
 import { withClient } from "./utils";
 

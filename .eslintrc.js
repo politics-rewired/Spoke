@@ -84,7 +84,8 @@ module.exports = {
     "@typescript-eslint/no-non-null-assertion": "off",
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error",
-    "no-restricted-imports": [
+    "no-restricted-imports": "off",
+    "@typescript-eslint/no-restricted-imports": [
       "error",
       {
         paths: [
@@ -172,13 +173,14 @@ module.exports = {
     {
       files: ["src/server/**/*"],
       rules: {
-        "no-restricted-imports": [
+        "@typescript-eslint/no-restricted-imports": [
           "error",
           {
             paths: [
               {
                 name: "@spoke/spoke-codegen",
-                message: "Client codegen may not be used in the server."
+                message: "Client codegen may not be used in the server.",
+                allowTypeImports: true
               }
             ]
           }

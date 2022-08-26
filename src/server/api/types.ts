@@ -286,3 +286,8 @@ export enum DeactivateMode {
   Nosuspend = "NOSUSPEND",
   Suspendall = "SUSPENDALL"
 }
+
+export enum AutosendingControlsMode {
+  Basic = "BASIC",
+  Detailed = "DETAILED"
+}
