@@ -103,22 +103,37 @@ export const persistInteractionStepTree = async (
     temporaryIdMap
   );
 
-  const delQuery = knexTrx("interaction_step")
-    .where({ campaign_id: campaignId })
-    .whereNotIn("id", stepIds);
+  const delQuery = knexTrx.raw(
+    `
+      with steps_to_delete as (
+        select id,
+          (exists(select 1 from question_response where interaction_step_id = ins.id) 
+            or exists(select 1 from all_external_sync_question_response_configuration 
+              where interaction_step_id = ins.id)
+          ) for_update
+        from interaction_step ins
+        where campaign_id = ?
+        and id <> all (?)
+      ),
 
-  const messagedContacts = await r
-    .reader("campaign_contact")
-    .select("id")
-    .where({ campaign_id: campaignId })
-    .whereNot({ message_status: "needsMessage" })
-    .limit(1);
+      delete_steps as (
+        delete from interaction_step ins
+        using steps_to_delete del
+        where ins.id = del.id and not for_update
+        returning *
+      ),
 
-  // if a campaign has been unstarted when using the superadmin approval feature,
-  // there can be messaged contacts on an unstarted campaign
-  if (origCampaignRecord.is_started || messagedContacts.length > 0) {
-    await delQuery.update({ is_deleted: true });
-  } else {
-    await delQuery.del();
-  }
+      update_steps as (
+        update interaction_step ins
+        set is_deleted = true
+        from steps_to_delete del
+        where ins.id = del.id and for_update
+        returning *
+      )
+
+      select count(*) from delete_steps union select count(*) from update_steps
+    `,
+    [campaignId, stepIds]
+  );
+  await delQuery;
 };
