@@ -3,6 +3,8 @@ import IconButton from "@material-ui/core/IconButton";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
+import TableCell from "@material-ui/core/TableCell";
+import TableRow from "@material-ui/core/TableRow";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography";
 import BlockIcon from "@material-ui/icons/Block";
@@ -12,12 +14,7 @@ import LockIcon from "@material-ui/icons/Lock";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
-import {
-  DropDownMenu,
-  MenuItem as MenuItemV0,
-  TableRow,
-  TableRowColumn
-} from "material-ui";
+import { DropDownMenu, MenuItem as MenuItemV0 } from "material-ui";
 import React, { useCallback, useState } from "react";
 import { useAuthzContext } from "src/components/AuthzProvider";
 
@@ -207,8 +204,8 @@ const PeopleRow: React.FC<PeopleRowExtendedProps> = ({
   ]);
 
   return (
-    <TableRow>
-      <TableRowColumn style={{ verticalAlign: "middle" }}>
+    <TableRow hover>
+      <TableCell style={{ verticalAlign: "middle" }}>
         <Typography variant="body2" className={classes.wrapIcon}>
           {row.user.isSuspended && (
             <Tooltip title="Suspended">
@@ -218,16 +215,16 @@ const PeopleRow: React.FC<PeopleRowExtendedProps> = ({
           &nbsp;
           {row.user.displayName}
         </Typography>
-      </TableRowColumn>
-      <TableRowColumn>{row.user.email}</TableRowColumn>
-      <TableRowColumn>
+      </TableCell>
+      <TableCell>{row.user.email}</TableCell>
+      <TableCell>
         <RoleSelect context={context} onSelect={handleEditRole} />
-      </TableRowColumn>
+      </TableCell>
 
-      <TableRowColumn>
+      <TableCell>
         <AutoApproveSelect context={context} onChange={handleEditAutoApprove} />
-      </TableRowColumn>
-      <TableRowColumn>
+      </TableCell>
+      <TableCell>
         <IconButton aria-label="people-row-menu" onClick={handleClickMenu}>
           <MoreVertIcon />
         </IconButton>
@@ -276,7 +273,7 @@ const PeopleRow: React.FC<PeopleRowExtendedProps> = ({
             </MenuItem>
           )}
         </Menu>
-      </TableRowColumn>
+      </TableCell>
     </TableRow>
   );
 };
