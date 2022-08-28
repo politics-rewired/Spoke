@@ -1,0 +1,37 @@
+fragment OrganizationMembershipItem on OrganizationMembership {
+  id
+  user {
+    id
+    firstName
+    lastName
+    displayName
+    email
+    isSuspended
+  }
+  role
+  requestAutoApprove
+}
+
+query GetOrganizationPeople(
+  $organizationId: String!
+  $after: Cursor
+  $first: Int
+  $filter: MembershipFilter
+) {
+  organization(id: $organizationId) {
+    id
+    peopleCount
+    memberships(first: $first, after: $after, filter: $filter) {
+      edges {
+        node {
+          ...OrganizationMembershipItem
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+        totalCount
+      }
+    }
+  }
+}
