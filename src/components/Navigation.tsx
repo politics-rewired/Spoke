@@ -66,6 +66,7 @@ const Navigation: React.FC<Props> = (props) => {
           <List>
             {sections.map((section) => (
               <ListItem
+                button
                 {...dataTest(camelCase(`nav ${section.path}`))}
                 key={section.name}
                 onClick={() => section.url && history.push(section.url)}

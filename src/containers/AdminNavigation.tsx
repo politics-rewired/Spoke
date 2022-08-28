@@ -32,6 +32,7 @@ const AdminNavigation: React.FC<AdminNavigationProps> = (props) => {
       }))}
       switchListItem={
         <ListItem
+          button
           {...dataTest("navSwitchToTexter")}
           onClick={() => history.push(`/app/${organizationId}/todos`)}
         >

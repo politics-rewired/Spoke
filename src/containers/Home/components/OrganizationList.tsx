@@ -118,6 +118,7 @@ export const OrganizationList: React.FC<OrganizationListProps> = (props) => {
             return (
               <ListItem
                 key={membership.organization.id}
+                button
                 onClick={handleSelectOrg(membership)}
               >
                 <ListItemIcon>{leftIcon}</ListItemIcon>
