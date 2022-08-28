@@ -5,9 +5,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import pick from "lodash/pick";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import TextField from "material-ui/TextField";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -140,13 +140,14 @@ class AdminTeamEditor extends Component {
           oEditTeam={this.handleEditTeam}
           onDeleteTeam={this.handleDeleteTeam}
         />
-        <FloatingActionButton
+        <Fab
+          color="primary"
           style={theme.components.floatingButton}
           disabled={isWorking}
           onClick={this.handleClickAddTeam}
         >
           <AddIcon />
-        </FloatingActionButton>
+        </Fab>
         {editingTeam && (
           <Dialog open onClose={this.handleCancelEditTeam}>
             <DialogTitle>{`${teamVerb} Team`}</DialogTitle>
