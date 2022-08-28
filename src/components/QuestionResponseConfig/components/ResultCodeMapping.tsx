@@ -1,8 +1,11 @@
 import { green } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
 import DeleteIcon from "@material-ui/icons/Delete";
 import InputIcon from "@material-ui/icons/Input";
-import { ListItem } from "material-ui/List";
 import React from "react";
 
 import { ExternalResultCode } from "../../../api/external-result-code";
@@ -15,16 +18,17 @@ interface Props {
 
 export const ResultCodeMapping: React.FC<Props> = (props) => {
   return (
-    <ListItem
-      primaryText={props.resultCode.name}
-      secondaryText={props.warning}
-      leftIcon={<InputIcon style={{ color: green[200] }} />}
-      rightIconButton={
+    <ListItem>
+      <ListItemIcon>
+        <InputIcon style={{ color: green[200] }} />
+      </ListItemIcon>
+      <ListItemText primary={props.resultCode.name} secondary={props.warning} />
+      <ListItemSecondaryAction>
         <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />
         </IconButton>
-      }
-    />
+      </ListItemSecondaryAction>
+    </ListItem>
   );
 };
 

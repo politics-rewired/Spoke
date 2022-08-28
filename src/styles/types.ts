@@ -89,10 +89,12 @@ declare module "@material-ui/core/styles/createPalette" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Palette {
     badge?: Palette["primary"];
+    inboundMessageBg?: Palette["primary"];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface PaletteOptions {
     badge?: PaletteOptions["primary"];
+    inboundMessageBg?: PaletteOptions["primary"];
   }
 }

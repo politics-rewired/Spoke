@@ -1,13 +1,26 @@
 import { gql } from "@apollo/client";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
 import NotInterestedIcon from "@material-ui/icons/NotInterested";
-import { List, ListItem } from "material-ui/List";
-import PropTypes from "prop-types";
+import { OptOut } from "@spoke/spoke-codegen";
 import React from "react";
+import { match } from "react-router-dom";
 
 import Empty from "../components/Empty";
+import { QueryMap } from "../network/types";
 import { loadData } from "./hoc/with-operations";
 
-const AdminOptOutList = function AdminOptOutList(props) {
+interface AdminOptOutListProps {
+  data: {
+    organization: {
+      optOuts: OptOut[];
+    };
+  };
+  match: match<{ organizationId: string }>;
+}
+
+const AdminOptOutList: React.FC<AdminOptOutListProps> = (props) => {
   const { data } = props;
   const { optOuts } = data.organization;
   return (
@@ -20,7 +33,9 @@ const AdminOptOutList = function AdminOptOutList(props) {
       ) : (
         <List>
           {optOuts.map((optOut) => (
-            <ListItem key={optOut.id} primaryText={optOut.cell} />
+            <ListItem key={optOut.id}>
+              <ListItemText primary={optOut.cell} />
+            </ListItem>
           ))}
         </List>
       )}
@@ -28,11 +43,7 @@ const AdminOptOutList = function AdminOptOutList(props) {
   );
 };
 
-AdminOptOutList.propTypes = {
-  data: PropTypes.object
-};
-
-const queries = {
+const queries: QueryMap<AdminOptOutListProps> = {
   data: {
     query: gql`
       query getOptOuts($organizationId: String!) {

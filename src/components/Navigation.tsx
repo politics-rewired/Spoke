@@ -1,24 +1,32 @@
+import Avatar from "@material-ui/core/Avatar";
+import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
-import { useTheme } from "@material-ui/core/styles";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
+import Paper from "@material-ui/core/Paper";
+import { makeStyles } from "@material-ui/core/styles";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
-import { css, StyleSheet } from "aphrodite";
 import camelCase from "lodash/camelCase";
-import Avatar from "material-ui/Avatar";
-import Divider from "material-ui/Divider";
-import { List, ListItem } from "material-ui/List";
-import Paper from "material-ui/Paper";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
 import { dataTest } from "../lib/attributes";
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   sideBarWithMenu: {
     width: 256,
-    height: "100%"
+    height: "100%",
+    backgroundColor: theme.palette.background.paper
+  },
+  badge: {
+    backgroundColor: theme.palette.badge?.main,
+    width: theme.spacing(3),
+    height: theme.spacing(3)
   }
-});
+}));
 
 export interface NavigationSection {
   name: string;
@@ -36,16 +44,16 @@ interface Props {
 }
 
 const Navigation: React.FC<Props> = (props) => {
-  const theme = useTheme();
   const history = useHistory();
+  const classes = useStyles();
   const { sections, switchListItem } = props;
 
   if (props.showMenu) {
     return (
-      <div className={css(styles.sideBarWithMenu)}>
+      <div className={classes.sideBarWithMenu}>
         <Paper
-          rounded={false}
-          zDepth={2}
+          elevation={2}
+          square
           style={{
             height: "100%"
           }}
@@ -60,19 +68,17 @@ const Navigation: React.FC<Props> = (props) => {
               <ListItem
                 {...dataTest(camelCase(`nav ${section.path}`))}
                 key={section.name}
-                primaryText={section.name}
-                onClick={() => history.push(section.url)}
-                rightAvatar={
-                  section.badge && (
-                    <Avatar
-                      backgroundColor={theme.palette.badge.main}
-                      size={30}
-                    >
-                      {section.badge.count}
+                onClick={() => section.url && history.push(section.url)}
+              >
+                <ListItemText primary={section.name} />
+                {section.badge && (
+                  <ListItemSecondaryAction>
+                    <Avatar className={classes.badge}>
+                      {section.badge?.count}
                     </Avatar>
-                  )
-                }
-              />
+                  </ListItemSecondaryAction>
+                )}
+              </ListItem>
             ))}
             <Divider />
             {switchListItem}

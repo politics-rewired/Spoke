@@ -95,7 +95,14 @@ module.exports = {
           },
           {
             name: "material-ui",
-            importNames: ["Chip", "IconButton", "FlatButton", "RaisedButton"],
+            importNames: [
+              "Chip",
+              "List",
+              "ListItem",
+              "IconButton",
+              "FlatButton",
+              "RaisedButton"
+            ],
             message: "Please use @material-ui/core instead."
           }
         ],
@@ -115,6 +122,8 @@ module.exports = {
           {
             group: [
               "material-ui/Chip",
+              "material-ui/List",
+              "material-ui/ListItem",
               "material-ui/IconButton",
               "material-ui/FlatButton",
               "material-ui/RaisedButton"

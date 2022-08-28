@@ -1,6 +1,7 @@
 import { ApolloQueryResult, gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { green, grey, orange, red } from "@material-ui/core/colors";
+import List from "@material-ui/core/List";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import BrokenImageIcon from "@material-ui/icons/BrokenImage";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -11,7 +12,6 @@ import WarningIcon from "@material-ui/icons/Warning";
 import cloneDeep from "lodash/cloneDeep";
 import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import { List } from "material-ui/List";
 import React from "react";
 import { compose } from "recompose";
 

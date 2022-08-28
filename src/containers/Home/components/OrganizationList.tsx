@@ -1,15 +1,15 @@
 import { gql } from "@apollo/client";
+import { ListItemIcon, ListItemText } from "@material-ui/core";
 import { amber, grey } from "@material-ui/core/colors";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Paper from "@material-ui/core/Paper";
 import MarkunreadMailboxIcon from "@material-ui/icons/MarkunreadMailbox";
 import NotificationsPausedIcon from "@material-ui/icons/NotificationsPaused";
 import { css, StyleSheet } from "aphrodite";
-import { History } from "history";
 import sortBy from "lodash/sortBy";
-import { List, ListItem } from "material-ui/List";
-import Paper from "material-ui/Paper";
 import React from "react";
-import { Redirect, withRouter } from "react-router-dom";
-import { compose } from "recompose";
+import { Redirect, useHistory } from "react-router-dom";
 
 import { RelayPaginatedResponse } from "../../../api/pagination";
 import theme from "../../../styles/theme";
@@ -43,11 +43,11 @@ export interface OrganizationListProps {
     };
     refetch(): void;
   };
-  history: History;
 }
 
-export const OrganizationList: React.SFC<OrganizationListProps> = (props) => {
+export const OrganizationList: React.FC<OrganizationListProps> = (props) => {
   const { currentUser } = props.data;
+  const history = useHistory();
 
   const handleSelectOrg = (membership: MembershipType) => () => {
     const {
@@ -55,9 +55,9 @@ export const OrganizationList: React.SFC<OrganizationListProps> = (props) => {
       organization: { id: orgId }
     } = membership;
     if (role === "TEXTER") {
-      return props.history.push(`/app/${orgId}`);
+      return history.push(`/app/${orgId}`);
     }
-    return props.history.push(`/admin/${orgId}`);
+    return history.push(`/admin/${orgId}`);
   };
 
   const { edges: memberships } = currentUser.memberships;
@@ -117,11 +117,12 @@ export const OrganizationList: React.SFC<OrganizationListProps> = (props) => {
             ) : undefined;
             return (
               <ListItem
-                leftIcon={leftIcon}
                 key={membership.organization.id}
-                primaryText={membership.organization.name}
                 onClick={handleSelectOrg(membership)}
-              />
+              >
+                <ListItemIcon>{leftIcon}</ListItemIcon>
+                <ListItemText primary={membership.organization.name} />
+              </ListItem>
             );
           })}
         </List>
@@ -157,4 +158,4 @@ const queries = {
   }
 };
 
-export default compose(loadData({ queries }), withRouter)(OrganizationList);
+export default loadData({ queries })(OrganizationList);
