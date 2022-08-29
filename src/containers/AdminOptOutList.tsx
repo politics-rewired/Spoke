@@ -3,12 +3,12 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import NotInterestedIcon from "@material-ui/icons/NotInterested";
-import { OptOut } from "@spoke/spoke-codegen";
+import type { OptOut } from "@spoke/spoke-codegen";
 import React from "react";
-import { match } from "react-router-dom";
+import type { match } from "react-router-dom";
 
 import Empty from "../components/Empty";
-import { QueryMap } from "../network/types";
+import type { QueryMap } from "../network/types";
 import { loadData } from "./hoc/with-operations";
 
 interface AdminOptOutListProps {

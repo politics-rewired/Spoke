@@ -6,7 +6,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { makeStyles } from "@material-ui/core/styles";
 import NotInterestedIcon from "@material-ui/icons/NotInterested";
-import { CampaignContact } from "@spoke/spoke-codegen";
+import type { CampaignContact } from "@spoke/spoke-codegen";
 import clsx from "clsx";
 import React from "react";
 
