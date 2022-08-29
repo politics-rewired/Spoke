@@ -11,7 +11,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import React from "react";
 
-import { CampaignGroup } from "../../api/campaign-group";
+import type { CampaignGroup } from "../../api/campaign-group";
 
 const useStyles = makeStyles({
   table: {

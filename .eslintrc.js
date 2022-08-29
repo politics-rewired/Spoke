@@ -85,6 +85,10 @@ module.exports = {
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error",
     "no-restricted-imports": "off",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      { prefer: "type-imports" }
+    ],
     "@typescript-eslint/no-restricted-imports": [
       "error",
       {

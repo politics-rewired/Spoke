@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
@@ -7,17 +8,18 @@ import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import React from "react";
 import Form from "react-formal";
-import { Link, RouteComponentProps, withRouter } from "react-router-dom";
+import type { RouteComponentProps } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 import * as yup from "yup";
 
-import { Invite } from "../api/invite";
-import { Organization } from "../api/organization";
-import { User } from "../api/user";
+import type { Invite } from "../api/invite";
+import type { Organization } from "../api/organization";
+import type { User } from "../api/user";
 import GSForm from "../components/forms/GSForm";
 import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";
-import { MutationMap, QueryMap } from "../network/types";
+import type { MutationMap, QueryMap } from "../network/types";
 import { loadData } from "./hoc/with-operations";
 
 interface HocProps extends RouteComponentProps<{ inviteId: string }> {

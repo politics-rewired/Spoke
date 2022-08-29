@@ -1,5 +1,5 @@
-import { Tag } from "../../api/tag";
-import { Team, TeamInput } from "../../api/team";
+import type { Tag } from "../../api/tag";
+import type { Team, TeamInput } from "../../api/team";
 
 export type TagWithTitle = Pick<Tag, "id" | "title">;
 

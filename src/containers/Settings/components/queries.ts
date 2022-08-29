@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-import { Organization } from "../../../api/organization";
+import type { Organization } from "../../../api/organization";
 
 export interface OrganizationNameType {
   organization: Pick<Organization, "id" | "name">;

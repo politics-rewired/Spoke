@@ -4,10 +4,10 @@ import {
   createCompleteCampaign,
   createInteractionStep
 } from "../../../../__test__/testbed-preparation/core";
-import { InteractionStepWithChildren } from "../../../api/interaction-step";
+import type { InteractionStepWithChildren } from "../../../api/interaction-step";
 import { config } from "../../../config";
 import { withClient } from "../../utils";
-import { InteractionStepRecord } from "../types";
+import type { InteractionStepRecord } from "../types";
 import { persistInteractionStepTree } from "./interaction-steps";
 
 const emptyStep = {

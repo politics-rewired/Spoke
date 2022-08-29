@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 
 import { getTopMostParent } from "../../../../../lib/interaction-step-helpers";
-import {
+import type {
   CampaignRecord,
   CannedResponseRecord,
   InteractionStepRecord

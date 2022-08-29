@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import AddIcon from "@material-ui/icons/Add";
 import { css, StyleSheet } from "aphrodite";
@@ -10,16 +11,14 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { Campaign, CampaignsList } from "../../api/campaign";
-import {
-  RequestAutoApproveType,
-  UserRoleType
-} from "../../api/organization-membership";
+import type { Campaign, CampaignsList } from "../../api/campaign";
+import type { RequestAutoApproveType } from "../../api/organization-membership";
+import { UserRoleType } from "../../api/organization-membership";
 import { dataTest } from "../../lib/attributes";
-import { MutationMap, QueryMap } from "../../network/types";
+import type { MutationMap, QueryMap } from "../../network/types";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
-import {
+import type {
   AdminPeopleContext,
   CurrentUser,
   PeopleRowEventHandlers

@@ -1,6 +1,6 @@
-import { Campaign } from "./campaign";
-import { CampaignContact } from "./campaign-contact";
-import { User } from "./user";
+import type { Campaign } from "./campaign";
+import type { CampaignContact } from "./campaign-contact";
+import type { User } from "./user";
 
 export interface Conversation {
   texter: User;

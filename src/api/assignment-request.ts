@@ -1,5 +1,5 @@
-import { Organization } from "./organization";
-import { User } from "./user";
+import type { Organization } from "./organization";
+import type { User } from "./user";
 
 export interface AssignmentRequest {
   id: string;

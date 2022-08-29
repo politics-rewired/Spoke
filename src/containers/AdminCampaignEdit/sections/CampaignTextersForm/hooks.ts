@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 
 import { DateTime } from "../../../../lib/datetime";
-import { OrgTexter, Texter } from "./types";
+import type { OrgTexter, Texter } from "./types";
 
 const getStagedTexters = (
   savedTexters: Texter[],

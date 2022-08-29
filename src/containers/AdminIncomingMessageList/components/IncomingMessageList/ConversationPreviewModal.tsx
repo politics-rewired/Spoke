@@ -6,7 +6,7 @@ import Paper from "@material-ui/core/Paper";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
 import CloseIcon from "@material-ui/icons/Close";
-import { ConversationInfoFragment } from "@spoke/spoke-codegen";
+import type { ConversationInfoFragment } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import React from "react";
 

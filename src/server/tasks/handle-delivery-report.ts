@@ -1,8 +1,9 @@
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 
 import { processDeliveryReportBody as processAssembleDeliveryReport } from "../api/lib/assemble-numbers";
 import { processDeliveryReportBody as processTwilioDeliveryReport } from "../api/lib/twilio";
-import { LogRecord, MessagingServiceType } from "../api/types";
+import type { LogRecord } from "../api/types";
+import { MessagingServiceType } from "../api/types";
 import { withTransaction } from "../utils";
 
 export const handleDeliveryReport: Task = async (

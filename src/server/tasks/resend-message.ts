@@ -1,8 +1,8 @@
 /* eslint-disable import/prefer-default-export */
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 
 import { sendMessage } from "../api/lib/assemble-numbers";
-import { SendMessagePayload } from "../api/lib/types";
+import type { SendMessagePayload } from "../api/lib/types";
 
 /*
 To create these jobs, run:

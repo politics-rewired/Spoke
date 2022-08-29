@@ -2,7 +2,7 @@ import { VanOperationMode } from "../../api/external-system";
 import { r } from "../models";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
-import { RelayPageArgs } from "./types";
+import type { RelayPageArgs } from "./types";
 
 export enum ExternalSystemType {
   Van = "van"

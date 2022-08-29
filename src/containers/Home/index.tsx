@@ -1,16 +1,17 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
-import { History } from "history";
+import type { History } from "history";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import SuperAdminLogin from "../../components/SuperAdminLogin";
-import { MutationMap, QueryMap } from "../../network/types";
+import type { MutationMap, QueryMap } from "../../network/types";
 import { useSpokeTheme } from "../../styles/spoke-theme-context";
 import theme from "../../styles/theme";
-import { MuiThemeProviderProps } from "../../styles/types";
+import type { MuiThemeProviderProps } from "../../styles/types";
 import { loadData } from "../hoc/with-operations";
 import OrganizationList from "./components/OrganizationList";
 

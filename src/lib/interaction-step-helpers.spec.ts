@@ -1,4 +1,4 @@
-import { InteractionStep } from "../api/interaction-step";
+import type { InteractionStep } from "../api/interaction-step";
 import { makeTree } from "./interaction-step-helpers";
 
 const baseEmptyStep = {

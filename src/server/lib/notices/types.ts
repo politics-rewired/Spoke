@@ -1,4 +1,4 @@
-import { Notice } from "../../../api/notice";
+import type { Notice } from "../../../api/notice";
 
 export type OrgLevelNotificationGetter = (
   userId: string,

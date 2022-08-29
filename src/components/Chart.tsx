@@ -1,5 +1,5 @@
 import { css, StyleSheet } from "aphrodite";
-import { ChartData } from "chart.js";
+import type { ChartData } from "chart.js";
 import palette from "google-palette";
 import React from "react";
 import { Pie } from "react-chartjs-2";

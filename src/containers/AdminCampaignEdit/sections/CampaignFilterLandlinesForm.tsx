@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import ErrorIcon from "@material-ui/icons/Error";
@@ -8,12 +9,12 @@ import { compose } from "recompose";
 
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   PendingJobType,
   RequiredComponentProps
 } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 const parseJobResultMessage = (
   job?: PendingJobType

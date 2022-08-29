@@ -1,4 +1,4 @@
-import { RelayEdge, RelayPaginatedResponse } from "./pagination";
+import type { RelayEdge, RelayPaginatedResponse } from "./pagination";
 
 export enum MessagingServiceType {
   TWILIO = "TWILIO",

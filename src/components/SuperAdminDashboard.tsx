@@ -1,6 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import React, { useState } from "react";
-import { RouterProps, withRouter } from "react-router-dom";
+import type { RouterProps } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 
 import theme from "../styles/theme";
 import { useAuthzContext } from "./AuthzProvider";

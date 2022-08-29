@@ -1,7 +1,5 @@
-import {
-  OrganizationSettingsInfoFragment,
-  useGetOrganizationSettingsQuery
-} from "@spoke/spoke-codegen";
+import type { OrganizationSettingsInfoFragment } from "@spoke/spoke-codegen";
+import { useGetOrganizationSettingsQuery } from "@spoke/spoke-codegen";
 import React, { useContext, useMemo, useState } from "react";
 
 export interface InstanceSettings {

@@ -1,9 +1,10 @@
-import { gql, Resolver, Resolvers } from "@apollo/client";
+import type { Resolver, Resolvers } from "@apollo/client";
+import { gql } from "@apollo/client";
 import produce from "immer";
 
-import { InteractionStep } from "../../../../api/interaction-step";
+import type { InteractionStep } from "../../../../api/interaction-step";
 import { DateTime } from "../../../../lib/datetime";
-import { LocalResolverContext } from "../../../../network/types";
+import type { LocalResolverContext } from "../../../../network/types";
 
 export const generateId = () =>
   `new${Math.random()

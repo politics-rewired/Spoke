@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import auth0 from "auth0-js";
 
-import { InstanceSettings } from "./spoke-context";
+import type { InstanceSettings } from "./spoke-context";
 
 export const createAuthService = (settings: InstanceSettings) => ({
   login: (nextUrl?: string) => {

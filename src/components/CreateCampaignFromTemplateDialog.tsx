@@ -6,9 +6,9 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import type { TemplateCampaignFragment } from "@spoke/spoke-codegen";
 import {
   GetAdminCampaignsDocument,
-  TemplateCampaignFragment,
   useCreateCampaignFromTemplateMutation,
   useGetTemplateCampaignsQuery
 } from "@spoke/spoke-codegen";

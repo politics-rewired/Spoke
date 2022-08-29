@@ -4,7 +4,7 @@ import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { Campaign } from "../../api/campaign";
+import type { Campaign } from "../../api/campaign";
 import errorCodeDescriptions from "../../lib/telco-error-codes";
 import { asPercent, asPercentWithTotal } from "../../lib/utils";
 import theme from "../../styles/theme";

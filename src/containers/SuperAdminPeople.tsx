@@ -2,7 +2,8 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
-import { Organization, useGetOrganizationsQuery } from "@spoke/spoke-codegen";
+import type { Organization } from "@spoke/spoke-codegen";
+import { useGetOrganizationsQuery } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 
 import AdminPeople from "./AdminPeople";

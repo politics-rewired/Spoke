@@ -1,9 +1,11 @@
-import { DatePicker, DatePickerProps } from "material-ui";
+import type { DatePickerProps } from "material-ui";
+import { DatePicker } from "material-ui";
 import React from "react";
 
 import { DateTime } from "../../lib/datetime";
-import { ISODateString } from "../../lib/js-types";
-import { GSFormField, GSFormFieldProps } from "./GSFormField";
+import type { ISODateString } from "../../lib/js-types";
+import type { GSFormFieldProps } from "./GSFormField";
+import { GSFormField } from "./GSFormField";
 
 interface GSDateFieldProps {
   onChange: (d: ISODateString | null) => void;

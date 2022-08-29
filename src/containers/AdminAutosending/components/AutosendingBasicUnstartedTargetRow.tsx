@@ -2,7 +2,7 @@ import Chip from "@material-ui/core/Chip";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import MoreIcon from "@material-ui/icons/ArrowForward";
-import { AutosendingTargetFragment } from "@spoke/spoke-codegen";
+import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { Link } from "react-router-dom";
 

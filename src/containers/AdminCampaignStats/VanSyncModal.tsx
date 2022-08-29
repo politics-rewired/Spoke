@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { green, red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
@@ -6,18 +7,15 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { History } from "history";
+import type { History } from "history";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import {
-  Campaign,
-  ExternalSyncReadinessState,
-  JobRequest
-} from "../../api/campaign";
+import type { Campaign, JobRequest } from "../../api/campaign";
+import { ExternalSyncReadinessState } from "../../api/campaign";
 import SyncConfigurationModal from "../../components/SyncConfigurationModal";
-import { MutationMap, QueryMap } from "../../network/types";
+import type { MutationMap, QueryMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
 
 interface JobRequestResult {

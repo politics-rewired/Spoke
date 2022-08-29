@@ -1,11 +1,8 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 
-import {
-  CampaignRecord,
-  NotificationTypes,
-  OrganizationRecord
-} from "../../api/types";
+import type { CampaignRecord, OrganizationRecord } from "../../api/types";
+import { NotificationTypes } from "../../api/types";
 
 interface FormattedNotification {
   notificationType: NotificationTypes;

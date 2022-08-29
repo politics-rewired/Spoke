@@ -1,9 +1,9 @@
 import faker from "faker";
-import { PoolClient } from "pg";
+import type { PoolClient } from "pg";
 
-import { ExternalResultCode } from "../../src/api/external-result-code";
-import { ExternalSystem } from "../../src/api/external-system";
-import {
+import type { ExternalResultCode } from "../../src/api/external-result-code";
+import type { ExternalSystem } from "../../src/api/external-system";
+import type {
   ExternalResultCodeRecord,
   ExternalSystemRecord
 } from "../../src/server/api/types";

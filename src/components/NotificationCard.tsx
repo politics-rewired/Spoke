@@ -9,13 +9,10 @@ import OpenInNew from "@material-ui/icons/OpenInNew";
 import Warning from "@material-ui/icons/Warning";
 import React from "react";
 
-import {
-  isRegister10DlcBrandNotice,
-  NoticePage,
-  Register10DlcBrandNotice
-} from "../api/notice";
+import type { NoticePage, Register10DlcBrandNotice } from "../api/notice";
+import { isRegister10DlcBrandNotice } from "../api/notice";
 import { withOperations } from "../containers/hoc/with-operations";
-import { QueryMap } from "../network/types";
+import type { QueryMap } from "../network/types";
 
 interface InnerProps {
   organizationId: string;
