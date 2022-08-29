@@ -25,23 +25,25 @@ router.get("/settings/theme", async (req, res) => {
     settings.find(({ name }) => name === settingName)?.value;
 
   const customTheme: CustomTheme = {
-    canvassColor: getSetting("theme.canvassColor") ?? "#EFEBDF",
+    canvassColor: getSetting("theme.canvassColor"),
     primaryTextColor: getSetting("theme.primaryTextColor"),
     secondaryTextColor: getSetting("theme.secondaryTextColor") ?? "#333333",
     primaryColor: getSetting("theme.primaryColor") ?? "#001F2E",
-    secondaryColor: getSetting("theme.secondaryColor") ?? "#FF0000",
+    secondaryColor: getSetting("theme.secondaryColor") ?? "#001F2E",
     infoColor: getSetting("theme.infoColor") ?? "#FF781D",
     successColor: getSetting("theme.successColor"),
     warningColor: getSetting("theme.warningColor"),
     errorColor: getSetting("theme.errorColor"),
-    badgeColor: getSetting("theme.badgeColor") ?? "#FFD215",
+    badgeColor: getSetting("theme.badgeColor") ?? "#E10000",
     disabledTextColor: getSetting("theme.disabledTextColor"),
     disabledBackgroundColor: getSetting("theme.disabledBackgroundColor"),
     defaultCampaignColor: getSetting("theme.defaultCampaignColor"),
     defaultCampaignLogo: getSetting("theme.defaultCampaignLogo"),
     logoUrl: getSetting("theme.logoUrl"),
     firstMessageIconUrl: getSetting("theme.firstMessageIconUrl"),
-    welcomeText: getSetting("theme.welcomeText")
+    welcomeText: getSetting("theme.welcomeText"),
+    tabBackgroundColor: getSetting("theme.tabBackgroundColor") ?? "white",
+    tabTextColor: getSetting("theme.tabTextColor") ?? "black"
   };
   return res.json(customTheme);
 });

@@ -65,6 +65,8 @@ export interface CustomTheme {
   logoUrl?: string;
   firstMessageIconUrl?: string;
   welcomeText?: string;
+  tabBackgroundColor?: string;
+  tabTextColor?: string;
 }
 
 export interface MuiThemeProviderProps {
