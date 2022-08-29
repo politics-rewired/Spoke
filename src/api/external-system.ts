@@ -1,9 +1,9 @@
-import { ExternalActivistCode } from "./external-activist-code";
-import { ExternalList } from "./external-list";
-import { ExternalResultCode } from "./external-result-code";
-import { ExternalSurveyQuestion } from "./external-survey-question";
-import { ExternalResultCodeTarget } from "./external-sync-config";
-import { RelayPaginatedResponse } from "./pagination";
+import type { ExternalActivistCode } from "./external-activist-code";
+import type { ExternalList } from "./external-list";
+import type { ExternalResultCode } from "./external-result-code";
+import type { ExternalSurveyQuestion } from "./external-survey-question";
+import type { ExternalResultCodeTarget } from "./external-sync-config";
+import type { RelayPaginatedResponse } from "./pagination";
 
 export enum ExternalSystemType {
   VAN = "VAN"

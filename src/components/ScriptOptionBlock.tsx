@@ -3,10 +3,11 @@ import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
 import DeleteIcon from "@material-ui/icons/Delete";
-import { CampaignVariable } from "@spoke/spoke-codegen";
+import type { CampaignVariable } from "@spoke/spoke-codegen";
 import React from "react";
 
-import { ScriptToken, ScriptTokenType, scriptToTokens } from "../lib/scripts";
+import type { ScriptToken } from "../lib/scripts";
+import { ScriptTokenType, scriptToTokens } from "../lib/scripts";
 
 const tokensToElems = (tokens: ScriptToken[]) =>
   tokens.map((token, index) => {

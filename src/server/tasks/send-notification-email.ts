@@ -1,5 +1,5 @@
 import groupBy from "lodash/groupBy";
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 
 import logger from "../../logger";
 import {

@@ -1,6 +1,6 @@
-import { Notice } from "../../../api/notice";
+import type { Notice } from "../../../api/notice";
 import { get10DlcBrandNotices } from "./register-10dlc-brand";
-import { OrgLevelNotificationGetter } from "./types";
+import type { OrgLevelNotificationGetter } from "./types";
 
 export const getInstanceNotifications = (_userId: string): Notice[] => [];
 

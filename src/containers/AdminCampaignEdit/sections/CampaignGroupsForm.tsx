@@ -1,20 +1,21 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import ChipInput from "material-ui-chip-input";
 import React, { useState } from "react";
 import { compose } from "recompose";
 
-import { Campaign } from "../../../api/campaign";
-import { CampaignGroup } from "../../../api/campaign-group";
-import { Organization } from "../../../api/organization";
-import { MutationMap, QueryMap } from "../../../network/types";
+import type { Campaign } from "../../../api/campaign";
+import type { CampaignGroup } from "../../../api/campaign-group";
+import type { Organization } from "../../../api/organization";
+import type { MutationMap, QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 type GroupSelect = Pick<CampaignGroup, "id" | "name">;
 

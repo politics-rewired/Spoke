@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { FetchResult } from "@apollo/client";
+import type { FetchResult } from "@apollo/client";
 
 export const aggregateGraphQLErrors = <T>(response: FetchResult<T>) => {
   const { errors } = response;

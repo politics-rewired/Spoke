@@ -5,7 +5,7 @@ import TableRow from "@material-ui/core/TableRow";
 import MoreIcon from "@material-ui/icons/ArrowForward";
 import PauseIcon from "@material-ui/icons/Pause";
 import PlayIcon from "@material-ui/icons/PlayArrow";
-import { AutosendingTargetFragment } from "@spoke/spoke-codegen";
+import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { Link } from "react-router-dom";
 

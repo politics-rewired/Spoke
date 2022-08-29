@@ -1,10 +1,10 @@
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 import request from "superagent";
 
 import { config } from "../../config";
 import { stringIsAValidUrl } from "../../lib/utils";
-import { TrollAlarmRecord } from "../api/trollbot";
-import { OrganizationRecord } from "../api/types";
+import type { TrollAlarmRecord } from "../api/trollbot";
+import type { OrganizationRecord } from "../api/types";
 
 export interface TrollPatrolForOrganizationPayload {
   organization_id: number;

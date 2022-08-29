@@ -1,14 +1,14 @@
 import sample from "lodash/sample";
 import md5 from "md5";
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 
-import { CampaignContact } from "../../api/campaign-contact";
-import { MessageInput } from "../../api/types";
-import { User } from "../../api/user";
+import type { CampaignContact } from "../../api/campaign-contact";
+import type { MessageInput } from "../../api/types";
+import type { User } from "../../api/user";
 import { recordToCamelCase } from "../../lib/attributes";
 import { applyScript } from "../../lib/scripts";
 import { sendMessage } from "../api/lib/send-message";
-import {
+import type {
   CampaignContactRecord,
   InteractionStepRecord,
   UserRecord

@@ -1,4 +1,4 @@
-import { JobHelpers, Task } from "pg-compose";
+import type { JobHelpers, Task } from "pg-compose";
 
 import { config } from "../../config";
 

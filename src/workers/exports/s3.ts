@@ -3,7 +3,7 @@ import stream from "stream";
 
 import { config } from "../../config";
 import logger from "../../logger";
-import { StorageBackend } from "./types";
+import type { StorageBackend } from "./types";
 
 const { AWS_ENDPOINT: awsEndpoint } = config;
 

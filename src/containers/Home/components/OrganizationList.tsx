@@ -11,7 +11,7 @@ import sortBy from "lodash/sortBy";
 import React from "react";
 import { Redirect, useHistory } from "react-router-dom";
 
-import { RelayPaginatedResponse } from "../../../api/pagination";
+import type { RelayPaginatedResponse } from "../../../api/pagination";
 import theme from "../../../styles/theme";
 import { loadData } from "../../hoc/with-operations";
 

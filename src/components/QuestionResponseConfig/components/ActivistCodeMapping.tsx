@@ -8,7 +8,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import LocalActivityIcon from "@material-ui/icons/LocalActivity";
 import React from "react";
 
-import { ExternalActivistCode } from "../../../api/external-activist-code";
+import type { ExternalActivistCode } from "../../../api/external-activist-code";
 import { ExternalDataCollectionStatus } from "../../../api/types";
 
 interface Props {

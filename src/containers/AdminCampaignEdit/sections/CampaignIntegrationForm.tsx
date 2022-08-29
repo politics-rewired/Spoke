@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import isEmpty from "lodash/isEmpty";
 import MenuItem from "material-ui/MenuItem";
@@ -6,20 +7,20 @@ import SelectField from "material-ui/SelectField";
 import React from "react";
 import { compose } from "recompose";
 
-import { ExternalSystem } from "../../../api/external-system";
-import { RelayPaginatedResponse } from "../../../api/pagination";
+import type { ExternalSystem } from "../../../api/external-system";
+import type { RelayPaginatedResponse } from "../../../api/pagination";
 import {
   GET_SYNC_CONFIGS,
   GET_SYNC_TARGETS
 } from "../../../components/SyncConfigurationModal/queries";
-import { MutationMap, QueryMap } from "../../../network/types";
+import type { MutationMap, QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 interface IntegrationValues {
   externalSystemId?: string | null;

@@ -1,4 +1,4 @@
-import { ExternalDataCollectionStatus } from "./types";
+import type { ExternalDataCollectionStatus } from "./types";
 
 export interface ExternalActivistCode {
   id: string;

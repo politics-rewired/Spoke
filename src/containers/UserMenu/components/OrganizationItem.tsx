@@ -1,11 +1,12 @@
-import { ApolloClient, gql } from "@apollo/client";
+import type { ApolloClient } from "@apollo/client";
+import { gql } from "@apollo/client";
 import MenuItem from "material-ui/MenuItem";
 import React from "react";
-import { RouterProps } from "react-router-dom";
+import type { RouterProps } from "react-router-dom";
 
-import { Organization } from "../../../api/organization";
+import type { Organization } from "../../../api/organization";
 import { UserRoleType } from "../../../api/organization-membership";
-import { User } from "../../../api/user";
+import type { User } from "../../../api/user";
 import { hasRole } from "../../../lib/permissions";
 
 // Accept history as passed prop because we cannot use withRouter within UserMenu's Popover

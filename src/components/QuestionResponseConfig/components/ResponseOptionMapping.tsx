@@ -8,9 +8,9 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import PollIcon from "@material-ui/icons/Poll";
 import React from "react";
 
-import { ExternalSurveyQuestion } from "../../../api/external-survey-question";
-import { ExternalSurveyQuestionResponseOption } from "../../../api/external-survey-question-response-option";
-import { RelayPaginatedResponse } from "../../../api/pagination";
+import type { ExternalSurveyQuestion } from "../../../api/external-survey-question";
+import type { ExternalSurveyQuestionResponseOption } from "../../../api/external-survey-question-response-option";
+import type { RelayPaginatedResponse } from "../../../api/pagination";
 import { ExternalDataCollectionStatus } from "../../../api/types";
 
 interface Props {

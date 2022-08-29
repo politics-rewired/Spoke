@@ -10,7 +10,8 @@ import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
 
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import { asSection, FullComponentProps } from "../components/SectionWrapper";
+import type { FullComponentProps } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 const CampaignMessagingServiceForm = (props: FullComponentProps) => {
   const [messagingServiceSid, setMessagingServiceSid] = useState<string>("");

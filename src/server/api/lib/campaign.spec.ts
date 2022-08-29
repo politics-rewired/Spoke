@@ -19,7 +19,7 @@ import { UserRoleType } from "../../../api/organization-membership";
 import { config } from "../../../config";
 import { createApp } from "../../app";
 import { withClient } from "../../utils";
-import { OrganizationRecord } from "../types";
+import type { OrganizationRecord } from "../types";
 import { getDeliverabilityStats } from "./campaign";
 
 describe("getDeliverabilityStats", () => {

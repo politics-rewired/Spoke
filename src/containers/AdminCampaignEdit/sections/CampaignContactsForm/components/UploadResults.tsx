@@ -11,7 +11,7 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import React, { useState } from "react";
 
 import { dataTest } from "../../../../../lib/attributes";
-import { PendingJobType } from "../../../components/SectionWrapper";
+import type { PendingJobType } from "../../../components/SectionWrapper";
 
 const GreenCheck = () => {
   const theme = useTheme();

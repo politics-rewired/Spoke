@@ -7,12 +7,10 @@ import OpenInNew from "@material-ui/icons/OpenInNew";
 import React from "react";
 import { compose } from "recompose";
 
-import { QueryMap } from "../../../network/types";
+import type { QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
-import {
-  GET_MESSAGING_SERVICES,
-  OrganizationMessagingServicesType
-} from "./queries";
+import type { OrganizationMessagingServicesType } from "./queries";
+import { GET_MESSAGING_SERVICES } from "./queries";
 
 interface HocProps {
   data: OrganizationMessagingServicesType;

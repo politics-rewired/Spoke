@@ -6,7 +6,7 @@ import DropDownMenu from "material-ui/DropDownMenu";
 import MenuItem from "material-ui/MenuItem";
 import React from "react";
 
-import { ExternalSystem } from "../../../../../api/external-system";
+import type { ExternalSystem } from "../../../../../api/external-system";
 import { DateTime } from "../../../../../lib/datetime";
 import { loadData } from "../../../../hoc/with-operations";
 

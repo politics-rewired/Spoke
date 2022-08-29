@@ -1,18 +1,18 @@
 import IconButton from "@material-ui/core/IconButton";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import {
-  DataGridPro,
+import type {
   GridColDef,
   GridRenderCellParams,
   GridSelectionModel
 } from "@mui/x-data-grid-pro";
-import {
+import { DataGridPro } from "@mui/x-data-grid-pro";
+import type {
   CampaignContact,
   Conversation,
   Message,
-  PageInfo,
-  useGetConversationsForMessageReviewQuery
+  PageInfo
 } from "@spoke/spoke-codegen";
+import { useGetConversationsForMessageReviewQuery } from "@spoke/spoke-codegen";
 import React, { useEffect } from "react";
 import { DateTime } from "src/lib/datetime";
 import { NumberParam, useQueryParam, withDefault } from "use-query-params";

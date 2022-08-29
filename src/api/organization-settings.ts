@@ -1,4 +1,4 @@
-import { AutosendingControlsMode } from "@spoke/spoke-codegen";
+import type { AutosendingControlsMode } from "@spoke/spoke-codegen";
 
 import type { RequestAutoApproveType } from "./organization-membership";
 

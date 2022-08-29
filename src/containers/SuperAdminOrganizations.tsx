@@ -1,4 +1,5 @@
-import { Theme, withStyles } from "@material-ui/core";
+import type { Theme } from "@material-ui/core";
+import { withStyles } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -16,14 +17,11 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash";
 import Skeleton from "@material-ui/lab/Skeleton";
-import {
-  DataGridPro,
-  GridColDef,
-  GridRenderCellParams
-} from "@mui/x-data-grid-pro";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid-pro";
+import { DataGridPro } from "@mui/x-data-grid-pro";
+import type { Organization } from "@spoke/spoke-codegen";
 import {
   DeactivateMode,
-  Organization,
   useEditOrganizationActiveMutation,
   useGetOrganizationsQuery
 } from "@spoke/spoke-codegen";

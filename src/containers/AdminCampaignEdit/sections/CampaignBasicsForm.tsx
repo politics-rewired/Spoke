@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -16,11 +17,11 @@ import { DateTime } from "../../../lib/datetime";
 import { difference } from "../../../lib/utils";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 interface BasicsValues {
   title?: string;

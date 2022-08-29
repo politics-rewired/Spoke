@@ -1,5 +1,5 @@
-import { CampaignContact } from "./campaign-contact";
-import { User } from "./user";
+import type { CampaignContact } from "./campaign-contact";
+import type { User } from "./user";
 
 export enum TrollTriggerMode {
   Simple = "SIMPLE",

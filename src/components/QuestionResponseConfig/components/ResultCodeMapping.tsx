@@ -8,7 +8,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import InputIcon from "@material-ui/icons/Input";
 import React from "react";
 
-import { ExternalResultCode } from "../../../api/external-result-code";
+import type { ExternalResultCode } from "../../../api/external-result-code";
 
 interface Props {
   resultCode: ExternalResultCode;

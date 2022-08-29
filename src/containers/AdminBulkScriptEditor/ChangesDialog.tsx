@@ -5,7 +5,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { ScriptUpdateChange } from "@spoke/spoke-codegen";
+import type { ScriptUpdateChange } from "@spoke/spoke-codegen";
 import isEmpty from "lodash/isEmpty";
 import React from "react";
 
