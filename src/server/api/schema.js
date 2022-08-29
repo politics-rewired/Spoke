@@ -26,6 +26,7 @@ import {
   getOrgLevelNotifications
 } from "../lib/notices";
 import { change } from "../local-auth-helpers";
+import { sendEmail } from "../mail";
 import { cacheOpts, memoizer } from "../memoredis";
 import { cacheableData, r } from "../models";
 import { getUserById } from "../models/cacheable_queries";
@@ -99,6 +100,7 @@ import { resolvers as questionResponseResolvers } from "./question-response";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
+import { DeactivateMode } from "./types";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 
 const uuidv4 = require("uuid").v4;
@@ -3373,6 +3375,73 @@ const rootMutations = {
         .del();
 
       return true;
+    },
+    editSuperAdminStatus: async (
+      _root,
+      { userEmail, superAdminStatus },
+      { user }
+    ) => {
+      await superAdminRequired(user);
+
+      await r
+        .knex("user")
+        .where({ email: userEmail })
+        .update({ is_superadmin: superAdminStatus });
+
+      return true;
+    },
+    editOrganizationActive: async (
+      _root,
+      { organizationId, active, deactivateMode },
+      { user }
+    ) => {
+      await superAdminRequired(user);
+
+      if (active) {
+        await r
+          .knex("organization")
+          .where({ id: organizationId })
+          .update({ deleted_at: null, deleted_by: null });
+      } else {
+        await r
+          .knex("organization")
+          .where({ id: organizationId })
+          .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
+
+        switch (deactivateMode) {
+          case DeactivateMode.Nosuspend:
+            break;
+          case DeactivateMode.Suspendall:
+            await r
+              .knex("user_organization")
+              .where({ organization_id: organizationId })
+              .whereNot({ role: UserRoleType.OWNER })
+              .update({ role: UserRoleType.SUSPENDED });
+            break;
+          case DeactivateMode.Deleteall:
+            {
+              await r
+                .knex("user_organization")
+                .where({ organization_id: organizationId })
+                .delete();
+
+              const org = await r
+                .knex("organization")
+                .where({ id: organizationId })
+                .first();
+
+              await sendEmail({
+                to: "support@spokerewired.com",
+                subject: "Automated organization shutdown request",
+                text: `This is an automated org shutdown request triggered through the superadmin. Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`
+              });
+            }
+            break;
+          default:
+            break;
+        }
+      }
+      return true;
     }
   }
 };
@@ -3452,9 +3521,13 @@ const rootResolvers = {
       );
       return contact;
     },
-    organizations: async (_root, { id: _id }, { user }) => {
+    organizations: async (_root, { active }, { user }) => {
       await superAdminRequired(user);
-      return r.reader("organization");
+      const query = r.reader("organization");
+      if (active) {
+        query.whereNull("deleted_at");
+      }
+      return query;
     },
     availableActions: (_root, { organizationId }, { user: _user }) => {
       if (!config.ACTION_HANDLERS) {
@@ -3519,7 +3592,13 @@ const rootResolvers = {
       { organizationId, cursor, campaignsFilter, role },
       { user }
     ) => {
-      await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      if (organizationId) {
+        await accessRequired(user, organizationId, "SUPERVOLUNTEER");
+      } else if (!user.is_superadmin) {
+        throw new ForbiddenError(
+          "You are not authorized to access that resource"
+        );
+      }
       return getUsers(organizationId, cursor, campaignsFilter, role);
     },
     peopleByUserIds: async (_root, { organizationId, userIds }, { user }) => {
@@ -3808,6 +3887,14 @@ const rootResolvers = {
           script: step.script_options.join(" | ")
         };
       });
+    },
+    superadmins: async (_root, _options, { user }) => {
+      if (user.is_superadmin) {
+        return r.reader("user").where({ is_superadmin: true });
+      }
+      throw new ForbiddenError(
+        "You are not authorized to access that resource"
+      );
     }
   }
 };

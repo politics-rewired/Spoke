@@ -6,6 +6,13 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Paper from "@material-ui/core/Paper";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 import AddIcon from "@material-ui/icons/Add";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import CreateIcon from "@material-ui/icons/Create";
@@ -15,14 +22,6 @@ import FloatingActionButton from "material-ui/FloatingActionButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import Snackbar from "material-ui/Snackbar";
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn
-} from "material-ui/Table";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
@@ -222,54 +221,57 @@ class AdminExternalSystems extends Component<Props, State> {
           variant="contained"
           endIcon={<RefreshIcon />}
           onClick={this.handleRefreshSystems}
+          style={{ marginTop: 15, marginBottom: 15 }}
         >
-          Refresh
+          Refresh List
         </Button>
 
-        <Table selectable={false} onCellClick={this.handleCellClick}>
-          <TableHeader displaySelectAll={false} enableSelectAll={false}>
-            <TableRow>
-              {/* Make sure to update ACTIONS_COLUMN_INDEX when changing columns! */}
-              <TableHeaderColumn>Name</TableHeaderColumn>
-              <TableHeaderColumn>Type</TableHeaderColumn>
-              <TableHeaderColumn>Sync Options Last Fetched</TableHeaderColumn>
-              <TableHeaderColumn>Actions</TableHeaderColumn>
-            </TableRow>
-          </TableHeader>
-          <TableBody displayRowCheckbox={false} showRowHover>
-            {externalSystems.edges.map(({ node: system }) => (
-              <TableRow key={system.id}>
-                <TableRowColumn>{system.name}</TableRowColumn>
-                <TableRowColumn>{system.type}</TableRowColumn>
-                <TableRowColumn>
-                  {system.syncedAt
-                    ? DateTime.fromISO(system.syncedAt).toRelative()
-                    : "never"}
-                </TableRowColumn>
-                <TableRowColumn>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    endIcon={<CreateIcon />}
-                    style={{ marginRight: 10 }}
-                    onClick={this.makeStartEditExternalSystem(system.id)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="contained"
-                    endIcon={<CloudDownloadIcon />}
-                    style={{ marginRight: 10 }}
-                    disabled={this.state.syncInitiatedForId === system.id}
-                    onClick={this.makeHandleRefreshExternalSystem(system.id)}
-                  >
-                    Refresh Sync Options
-                  </Button>
-                </TableRowColumn>
+        <TableContainer component={Paper}>
+          <Table selectable={false} onCellClick={this.handleCellClick}>
+            <TableHead displaySelectAll={false} enableSelectAll={false}>
+              <TableRow>
+                {/* Make sure to update ACTIONS_COLUMN_INDEX when changing columns! */}
+                <TableCell>Name</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Sync Options Last Fetched</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody displayRowCheckbox={false} showRowHover>
+              {externalSystems.edges.map(({ node: system }) => (
+                <TableRow key={system.id}>
+                  <TableCell>{system.name}</TableCell>
+                  <TableCell>{system.type}</TableCell>
+                  <TableCell>
+                    {system.syncedAt
+                      ? DateTime.fromISO(system.syncedAt).toRelative()
+                      : "never"}
+                  </TableCell>
+                  <TableCell style={{ textOverflow: "clip" }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      endIcon={<CreateIcon />}
+                      style={{ marginRight: 10 }}
+                      onClick={this.makeStartEditExternalSystem(system.id)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      endIcon={<CloudDownloadIcon />}
+                      style={{ marginRight: 10 }}
+                      disabled={this.state.syncInitiatedForId === system.id}
+                      onClick={this.makeHandleRefreshExternalSystem(system.id)}
+                    >
+                      Sync
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         <Dialog
           open={editingExternalSystem !== undefined}

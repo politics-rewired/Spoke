@@ -45,10 +45,12 @@ async function doGetUsers({
   campaignsFilter = {},
   role
 }) {
-  const query = r
-    .knex("user")
-    .innerJoin("user_organization", "user_organization.user_id", "user.id")
-    .where({ "user_organization.organization_id": organizationId });
+  const query = r.knex("user");
+  if (organizationId) {
+    query
+      .innerJoin("user_organization", "user_organization.user_id", "user.id")
+      .where({ "user_organization.organization_id": organizationId });
+  }
 
   if (role) {
     query.where({ role });
@@ -165,7 +167,8 @@ export const resolvers = {
       "isSuspended"
     ]),
     isSuperadmin: (userRecord, _, { user: authUser }) => {
-      if (userRecord.id !== authUser.id) throw new ForbiddenError();
+      if (userRecord.id !== authUser.id && !authUser.is_superadmin)
+        throw new ForbiddenError();
       return userRecord.is_superadmin;
     },
     displayName: (user) => `${user.first_name} ${user.last_name}`,
@@ -208,23 +211,29 @@ export const resolvers = {
       }
       return formatPage(query, { after, first });
     },
-    organizations: async (user, { role }) => {
+    organizations: async (user, { role, active = true }) => {
       if (!user || !user.id) {
         return [];
       }
 
       const getOrganizationsForUserWithRole = memoizer.memoize(
         async ({ userId, role: userRole }) => {
-          return r.reader("organization").whereExists(function subquery() {
-            const whereClause = { user_id: userId };
-            if (userRole) {
-              whereClause.role = userRole;
-            }
-            this.select(r.reader.raw("1"))
-              .from("user_organization")
-              .whereRaw("user_organization.organization_id = organization.id")
-              .where(whereClause);
-          });
+          const query = r
+            .reader("organization")
+            .whereExists(function subquery() {
+              const whereClause = { user_id: userId };
+              if (userRole) {
+                whereClause.role = userRole;
+              }
+              this.select(r.reader.raw("1"))
+                .from("user_organization")
+                .whereRaw("user_organization.organization_id = organization.id")
+                .where(whereClause);
+            });
+          if (active) {
+            query.whereNull("deleted_at");
+          }
+          return query;
         },
         cacheOpts.UserOrganizations
       );

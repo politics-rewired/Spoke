@@ -1,0 +1,6 @@
+query GetOrganizationName($organizationId: String!) {
+  organization(id: $organizationId) {
+    id
+    name
+  }
+}

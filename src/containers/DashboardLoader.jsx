@@ -34,7 +34,7 @@ const queries = {
       query getCurrentUserForLoader {
         currentUser {
           id
-          organizations {
+          organizations(active: true) {
             id
           }
         }

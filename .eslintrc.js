@@ -84,7 +84,8 @@ module.exports = {
     "@typescript-eslint/no-non-null-assertion": "off",
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error",
-    "no-restricted-imports": [
+    "no-restricted-imports": "off",
+    "@typescript-eslint/no-restricted-imports": [
       "error",
       {
         paths: [
@@ -99,6 +100,10 @@ module.exports = {
           }
         ],
         patterns: [
+          {
+            group: ["**/spoke-codegen/src"],
+            message: "Please use @spoke/spoke-codegen instead."
+          },
           {
             group: ["material-ui/svg-icons/*"],
             message: "Please use @material-ui/icons instead."
@@ -167,6 +172,23 @@ module.exports = {
         "no-shadow": "off", // JS `no-shadow` rule doesn't handle enums correctly
         "@typescript-eslint/no-shadow": "error",
         "no-unused-vars": "off" // JS `no-unused-vars` rule doesn't handle typescript correctly
+      }
+    },
+    {
+      files: ["src/server/**/*"],
+      rules: {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@spoke/spoke-codegen",
+                message: "Client codegen may not be used in the server.",
+                allowTypeImports: true
+              }
+            ]
+          }
+        ]
       }
     }
   ]

@@ -7,7 +7,7 @@ import { DropDownMenu, MenuItem, Snackbar } from "material-ui";
 import FloatingActionButton from "material-ui/FloatingActionButton";
 import queryString from "query-string";
 import React from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import { Campaign, CampaignsList } from "../../api/campaign";
@@ -129,12 +129,7 @@ export interface AdminPeopleMutations {
   >;
 }
 
-interface AdminPeopleRouteParams {
-  organizationId?: string;
-}
-
-interface AdminPeopleExtensionProps
-  extends RouteComponentProps<AdminPeopleRouteParams> {
+interface AdminPeopleExtensionProps {
   organizationData: {
     organization: {
       id: string;
@@ -148,8 +143,9 @@ interface AdminPeopleExtensionProps
   mutations: AdminPeopleMutations;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface AdminPeopleProps {}
+interface AdminPeopleProps {
+  organizationId: string;
+}
 
 type AdminPeopleExtendedProps = AdminPeopleExtensionProps & AdminPeopleProps;
 
@@ -324,7 +320,7 @@ class AdminPeople extends React.Component<
   };
 
   handleResetPassword = async (userId: string) => {
-    const { organizationId } = this.props.match.params;
+    const { organizationId } = this.props;
     if (!organizationId) return;
     const { currentUser } = this.props.userData;
     if (currentUser.id !== userId) {
@@ -494,11 +490,7 @@ const queries: QueryMap<AdminPeopleExtendedProps> = {
         }
       }
     `,
-    options: ({
-      match: {
-        params: { organizationId }
-      }
-    }: AdminPeopleExtendedProps) => ({
+    options: ({ organizationId }: AdminPeopleExtendedProps) => ({
       variables: {
         organizationId
       }
@@ -522,11 +514,7 @@ const queries: QueryMap<AdminPeopleExtendedProps> = {
         }
       }
     `,
-    options: ({
-      match: {
-        params: { organizationId }
-      }
-    }: AdminPeopleExtendedProps) => ({
+    options: ({ organizationId }: AdminPeopleExtendedProps) => ({
       variables: {
         organizationId
       }

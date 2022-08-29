@@ -9,13 +9,13 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import type { SelectInputProps } from "@material-ui/core/Select/SelectInput";
 import Switch from "@material-ui/core/Switch";
-import React from "react";
-
 import {
   CampaignBuilderMode,
   useGetCampaignBuilderSettingsQuery,
   useUpdateCampaignBuilderSettingsMutation
-} from "../../../../libs/spoke-codegen/src";
+} from "@spoke/spoke-codegen";
+import React from "react";
+
 import { useAuthzContext } from "../../../components/AuthzProvider";
 
 export interface CampaignBuilderSettingsCardProps {

@@ -4,6 +4,13 @@ query GetCurrentUserId {
   }
 }
 
+query CurrentUserSuperAdmin {
+  currentUser {
+    id
+    isSuperadmin
+  }
+}
+
 query CurrentUserOrganizationRoles($organizationId: String!) {
   currentUser {
     id

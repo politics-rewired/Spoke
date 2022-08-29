@@ -2,7 +2,7 @@ import {
   createCampaign,
   createCampaignContact
 } from "__test__/testbed-preparation/core";
-import { campaign as CampaignRecord } from "@spoke/spoke-codegen";
+import type { campaign as CampaignRecord } from "@spoke/spoke-codegen";
 import { Pool } from "pg";
 import { UserRoleType } from "src/api/organization-membership";
 import supertest from "supertest";

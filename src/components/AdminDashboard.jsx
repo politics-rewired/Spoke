@@ -59,7 +59,7 @@ class AdminDashboard extends React.Component {
   }
 
   render() {
-    const { location, children, match } = this.props;
+    const { location, children, match, organizationData } = this.props;
     const { roles } = this.props.data.currentUser;
     const { escalatedConversationCount, pendingAssignmentRequestCount } =
       (this.props.badgeCounts || {}).organization || {};
@@ -147,6 +147,7 @@ class AdminDashboard extends React.Component {
           title={title}
           backToURL={backToURL}
           orgId={match.params.organizationId}
+          sectionTitle={organizationData.organization.name}
         />
         <div className={css(styles.container)}>
           {this.renderNavigation(
@@ -177,6 +178,21 @@ const queries = {
         currentUser {
           id
           roles(organizationId: $organizationId)
+        }
+      }
+    `,
+    options: ({ match }) => ({
+      variables: {
+        organizationId: match.params.organizationId
+      }
+    })
+  },
+  organizationData: {
+    query: gql`
+      query getOrganizationName($organizationId: String!) {
+        organization(id: $organizationId) {
+          id
+          name
         }
       }
     `,

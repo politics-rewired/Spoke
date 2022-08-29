@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 
-import { BulkUpdateScriptInput } from "@spoke/spoke-codegen";
+import type { BulkUpdateScriptInput } from "@spoke/spoke-codegen";
 import { Knex } from "knex";
 
 import { r } from "../../models";
