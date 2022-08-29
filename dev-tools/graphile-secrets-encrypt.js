@@ -1,6 +1,6 @@
 // Run this script from the top level directory to encrypt a value:
 //
-//    node ./dev-tools/graphile-secrets-encrypt.js ValueToBeDecrypted
+//    node ./dev-tools/graphile-secrets-encrypt.js ValueToBeEncrypted
 
 require("dotenv").config();
 const Cryptr = require("cryptr");
