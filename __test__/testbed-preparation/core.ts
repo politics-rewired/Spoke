@@ -18,6 +18,7 @@ import type {
   InteractionStepRecord,
   MessageRecord,
   OrganizationRecord,
+  QuestionResponseRecord,
   UserRecord
 } from "../../src/server/api/types";
 import {
@@ -497,3 +498,24 @@ export const createInteractionStep = async (
       ]
     )
     .then(({ rows: [message] }) => message);
+
+export type CreateQuestionResponseOptions = {
+  value: string;
+  campaignContactId: number;
+  interactionStepId: number;
+};
+
+export const createQuestionResponse = async (
+  client: PoolClient,
+  options: CreateQuestionResponseOptions
+) =>
+  client
+    .query<QuestionResponseRecord>(
+      `
+        insert into public.question_response (value, campaign_contact_id, interaction_step_id)
+        values ($1, $2, $3)
+        returning *
+      `,
+      [options.value, options.campaignContactId, options.interactionStepId]
+    )
+    .then(({ rows: [questionResponse] }) => questionResponse);
