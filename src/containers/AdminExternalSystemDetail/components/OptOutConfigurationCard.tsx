@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -11,9 +12,9 @@ import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React from "react";
 
-import { ExternalSystem } from "../../../api/external-system";
+import type { ExternalSystem } from "../../../api/external-system";
 import { sleep } from "../../../lib/utils";
-import { MutationMap, QueryMap } from "../../../network/types";
+import type { MutationMap, QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
 
 interface Props {

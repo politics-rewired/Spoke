@@ -4,8 +4,8 @@ import React from "react";
 import Form from "react-formal";
 import * as yup from "yup";
 
-import { CampaignVariable } from "../../../../../api/campaign-variable";
-import { CannedResponse } from "../../../../../api/canned-response";
+import type { CampaignVariable } from "../../../../../api/campaign-variable";
+import type { CannedResponse } from "../../../../../api/canned-response";
 import GSForm from "../../../../../components/forms/GSForm";
 import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import { dataTest } from "../../../../../lib/attributes";

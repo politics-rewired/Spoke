@@ -10,7 +10,7 @@ import Paper from "material-ui/Paper";
 import Snackbar from "material-ui/Snackbar";
 import Toggle from "material-ui/Toggle";
 import React, { useState } from "react";
-import { RouteChildrenProps } from "react-router-dom";
+import type { RouteChildrenProps } from "react-router-dom";
 import {
   BooleanParam,
   NumberParam,
@@ -18,9 +18,10 @@ import {
   useQueryParam
 } from "use-query-params";
 
-import { TrollAlarm } from "../../api/trollbot";
-import { dataSourceItem, DataSourceItemType } from "../../components/utils";
-import { MutationMap, QueryMap } from "../../network/types";
+import type { TrollAlarm } from "../../api/trollbot";
+import type { DataSourceItemType } from "../../components/utils";
+import { dataSourceItem } from "../../components/utils";
+import type { MutationMap, QueryMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
 import TrollAlarmList from "./components/TrollAlarmList";
 

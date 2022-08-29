@@ -6,7 +6,8 @@ import { uploadToCloud } from "../../workers/exports/upload";
 import { sendEmail } from "../mail";
 import { r } from "../models";
 import { errToObj } from "../utils";
-import { addProgressJob, ProgressTask } from "./utils";
+import type { ProgressTask } from "./utils";
+import { addProgressJob } from "./utils";
 
 export const TASK_IDENTIFIER = "export-for-van";
 

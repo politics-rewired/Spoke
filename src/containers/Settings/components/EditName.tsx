@@ -1,17 +1,14 @@
-import { ApolloQueryResult } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import TextField from "material-ui/TextField";
 import React, { useState } from "react";
 import { compose } from "recompose";
 
-import { MutationMap, QueryMap } from "../../../network/types";
+import type { MutationMap, QueryMap } from "../../../network/types";
 import { loadData } from "../../hoc/with-operations";
-import {
-  EDIT_ORGANIZATION_NAME,
-  GET_ORGANIZATION_NAME,
-  OrganizationNameType
-} from "./queries";
+import type { OrganizationNameType } from "./queries";
+import { EDIT_ORGANIZATION_NAME, GET_ORGANIZATION_NAME } from "./queries";
 
 interface HocProps {
   data: OrganizationNameType;

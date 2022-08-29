@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { CampaignsList } from "../../api/campaign";
-import {
+import type { CampaignsList } from "../../api/campaign";
+import type {
   RequestAutoApproveType,
   UserRoleType
 } from "../../api/organization-membership";

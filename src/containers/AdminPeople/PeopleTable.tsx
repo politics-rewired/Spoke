@@ -7,14 +7,14 @@ import PeopleIcon from "@material-ui/icons/People";
 import { GetOrganizationPeopleDocument } from "@spoke/spoke-codegen";
 import React from "react";
 
-import {
+import type {
   MembershipFilter,
   OrganizationMembership
 } from "../../api/organization-membership";
-import { RelayPaginatedResponse } from "../../api/pagination";
+import type { RelayPaginatedResponse } from "../../api/pagination";
 import Empty from "../../components/Empty";
 import InfiniteRelayList from "../../components/InfiniteRelayList";
-import { AdminPeopleContext, PeopleRowEventHandlers } from "./context";
+import type { AdminPeopleContext, PeopleRowEventHandlers } from "./context";
 import PeopleRow from "./PeopleRow";
 
 const PAGE_SIZE = 20;

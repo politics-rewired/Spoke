@@ -1,11 +1,12 @@
-import { Pool, PoolClient } from "pg";
+import type { Pool, PoolClient } from "pg";
 
-import { TexterAssignmentInput } from "../../api/assignment";
+import type { TexterAssignmentInput } from "../../api/assignment";
 import { DateTime } from "../../lib/datetime";
-import { CampaignRecord } from "../api/types";
+import type { CampaignRecord } from "../api/types";
 import { Notifications, sendUserNotification } from "../notifications";
 import { withTransaction } from "../utils";
-import { addProgressJob, ProgressTask } from "./utils";
+import type { ProgressTask } from "./utils";
+import { addProgressJob } from "./utils";
 
 export const TASK_IDENTIFIER = "assign-texters";
 

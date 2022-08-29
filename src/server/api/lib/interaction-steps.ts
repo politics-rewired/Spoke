@@ -1,10 +1,10 @@
 /* eslint-disable import/prefer-default-export */
-import { Knex } from "knex";
+import type { Knex } from "knex";
 
-import { InteractionStepWithChildren } from "../../../api/interaction-step";
+import type { InteractionStepWithChildren } from "../../../api/interaction-step";
 import { cacheOpts, memoizer } from "../../memoredis";
 import { r } from "../../models";
-import { CampaignRecord } from "../types";
+import type { CampaignRecord } from "../types";
 
 export const persistInteractionStepNode = async (
   campaignId: number,

@@ -18,15 +18,15 @@ import { DropDownMenu, MenuItem as MenuItemV0 } from "material-ui";
 import React, { useCallback, useState } from "react";
 import { useAuthzContext } from "src/components/AuthzProvider";
 
+import type { OrganizationMembership } from "../../api/organization-membership";
 import {
-  OrganizationMembership,
   RequestAutoApproveType,
   UserRoleType
 } from "../../api/organization-membership";
-import { User } from "../../api/user";
+import type { User } from "../../api/user";
 import { snakeToTitleCase, titleCase } from "../../lib/attributes";
 import { hasRoleAtLeast } from "../../lib/permissions";
-import {
+import type {
   AdminPeopleContext,
   CurrentUser,
   PeopleRowEventHandlers

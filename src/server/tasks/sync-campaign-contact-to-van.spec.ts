@@ -1,4 +1,5 @@
-import { Pool, PoolClient } from "pg";
+import type { PoolClient } from "pg";
+import { Pool } from "pg";
 
 import {
   createCompleteCampaign,
@@ -11,14 +12,16 @@ import {
 import { config } from "../../config";
 import { MessageStatusType } from "../api/types";
 import { withClient, withTransaction } from "../utils";
+import type {
+  CanvassResultRow,
+  VANCanvassResponse
+} from "./sync-campaign-contact-to-van";
 import {
   CANVASSED_TAG_NAME,
-  CanvassResultRow,
   fetchCanvassResponses,
   fetchOptOutCode,
   formatCanvassResponsePayload,
-  hasPayload,
-  VANCanvassResponse
+  hasPayload
 } from "./sync-campaign-contact-to-van";
 
 const createCampaignWithSystem = async (client: PoolClient) => {

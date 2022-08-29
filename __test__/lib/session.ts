@@ -1,10 +1,10 @@
-import { PoolClient } from "pg";
-import { SuperAgentTest } from "supertest";
+import type { PoolClient } from "pg";
+import type { SuperAgentTest } from "supertest";
 
 import { UserRoleType } from "../../src/api/organization-membership";
+import type { CreateOrganizationOptions } from "../testbed-preparation/core";
 import {
   createOrganization,
-  CreateOrganizationOptions,
   createUser,
   createUserOrganization
 } from "../testbed-preparation/core";

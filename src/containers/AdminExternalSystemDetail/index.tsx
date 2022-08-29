@@ -1,14 +1,14 @@
 import { gql } from "@apollo/client";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { History } from "history";
+import type { History } from "history";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import React from "react";
 import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { ExternalSystem } from "../../api/external-system";
-import { QueryMap } from "../../network/types";
+import type { ExternalSystem } from "../../api/external-system";
+import type { QueryMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
 import OptOutConfigurationCard from "./components/OptOutConfigurationCard";
 

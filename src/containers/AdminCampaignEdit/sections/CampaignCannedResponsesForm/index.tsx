@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import CreateIcon from "@material-ui/icons/Create";
 import isEqual from "lodash/isEqual";
@@ -6,18 +7,18 @@ import uniqBy from "lodash/uniqBy";
 import React from "react";
 import { compose } from "recompose";
 
-import { CampaignVariablePage } from "../../../../api/campaign-variable";
-import { CannedResponse } from "../../../../api/canned-response";
+import type { CampaignVariablePage } from "../../../../api/campaign-variable";
+import type { CannedResponse } from "../../../../api/canned-response";
 import { LargeList } from "../../../../components/LargeList";
 import { dataTest } from "../../../../lib/attributes";
-import { MutationMap, QueryMap } from "../../../../network/types";
+import type { MutationMap, QueryMap } from "../../../../network/types";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import { asSection } from "../../components/SectionWrapper";
 import CannedResponseDialog from "./components/CannedResponseDialog";
 import CannedResponseRow from "./components/CannedResponseRow";
 import { ResponseEditorContext } from "./interfaces";

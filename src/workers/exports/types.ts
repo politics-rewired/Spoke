@@ -1,4 +1,4 @@
-import stream from "stream";
+import type stream from "stream";
 
 export interface StorageBackend {
   upload(bucket: string, key: string, payload: any): Promise<any>;

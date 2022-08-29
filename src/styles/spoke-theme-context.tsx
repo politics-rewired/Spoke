@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import request from "superagent";
 
 import { createMuiThemev0, createMuiThemev1 } from "./mui-theme";
-import { CustomTheme } from "./types";
+import type { CustomTheme } from "./types";
 
 export const SpokeThemeContext = React.createContext<CustomTheme>({});
 

@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
 
-import { ExternalActivistCode } from "./external-activist-code";
-import { ExternalResultCode } from "./external-result-code";
-import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
-import { GraphQLType } from "./types";
+import type { ExternalActivistCode } from "./external-activist-code";
+import type { ExternalResultCode } from "./external-result-code";
+import type { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
+import type { GraphQLType } from "./types";
 
 export interface ExternalResultCodeTarget {
   id: string;

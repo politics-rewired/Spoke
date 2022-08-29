@@ -3,7 +3,7 @@ import { amber, grey } from "@material-ui/core/colors";
 import MarkunreadMailboxIcon from "@material-ui/icons/MarkunreadMailbox";
 import NotificationsPausedIcon from "@material-ui/icons/NotificationsPaused";
 import { css, StyleSheet } from "aphrodite";
-import { History } from "history";
+import type { History } from "history";
 import sortBy from "lodash/sortBy";
 import { List, ListItem } from "material-ui/List";
 import Paper from "material-ui/Paper";
@@ -11,7 +11,7 @@ import React from "react";
 import { Redirect, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { RelayPaginatedResponse } from "../../../api/pagination";
+import type { RelayPaginatedResponse } from "../../../api/pagination";
 import theme from "../../../styles/theme";
 import { loadData } from "../../hoc/with-operations";
 

@@ -1,6 +1,6 @@
-import { JobHelpers, TaskSpec } from "graphile-worker";
+import type { JobHelpers, TaskSpec } from "graphile-worker";
 
-import { JobRequestRecord } from "../api/types";
+import type { JobRequestRecord } from "../api/types";
 import { r } from "../models";
 
 const addGraphileJob = async (

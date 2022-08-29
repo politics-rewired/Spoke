@@ -1,10 +1,11 @@
 import isNil from "lodash/isNil";
-import { PoolClient } from "pg";
-import { Task } from "pg-compose";
+import type { PoolClient } from "pg";
+import type { Task } from "pg-compose";
 import { post } from "superagent";
 
 import { config } from "../../config";
-import { VanAuthPayload, withVan } from "../lib/external-systems";
+import type { VanAuthPayload } from "../lib/external-systems";
+import { withVan } from "../lib/external-systems";
 
 class VANSyncError extends Error {
   status: number;

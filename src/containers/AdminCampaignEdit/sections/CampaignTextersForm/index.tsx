@@ -1,5 +1,6 @@
-import { ApolloQueryResult } from "@apollo/client";
-import { withApollo, WithApolloClient } from "@apollo/client/react/hoc";
+import type { ApolloQueryResult } from "@apollo/client";
+import type { WithApolloClient } from "@apollo/client/react/hoc";
+import { withApollo } from "@apollo/client/react/hoc";
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
@@ -10,19 +11,21 @@ import orderBy from "lodash/orderBy";
 import React, { useState } from "react";
 import { compose } from "recompose";
 
-import { TexterAssignmentInput } from "../../../../api/assignment";
-import { Campaign } from "../../../../api/campaign";
-import { User } from "../../../../api/user";
+import type { TexterAssignmentInput } from "../../../../api/assignment";
+import type { Campaign } from "../../../../api/campaign";
+import type { User } from "../../../../api/user";
 import { DateTime } from "../../../../lib/datetime";
-import { MutationMap, QueryMap } from "../../../../network/types";
+import type { MutationMap, QueryMap } from "../../../../network/types";
 import theme from "../../../../styles/theme";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
+import type {
+  FullComponentProps,
+  RequiredComponentProps
+} from "../../components/SectionWrapper";
 import {
   asSection,
-  FullComponentProps,
-  GET_CAMPAIGN_JOBS_QUERY,
-  RequiredComponentProps
+  GET_CAMPAIGN_JOBS_QUERY
 } from "../../components/SectionWrapper";
 import AddRemoveTexters from "./components/AddRemoveTexters";
 import TexterAssignmentHeaderRow from "./components/TexterAssignmentHeaderRow";
@@ -34,7 +37,7 @@ import {
   GET_CAMPAIGN_TEXTERS,
   GET_ORGANIZATION_TEXTERS
 } from "./queries";
-import { OrgTexter, Texter } from "./types";
+import type { OrgTexter, Texter } from "./types";
 
 const JOB_QUEUE_NAMES = ["assign-texters"];
 

@@ -16,11 +16,10 @@ import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import Autocomplete, {
-  AutocompleteChangeReason
-} from "@material-ui/lab/Autocomplete";
+import type { AutocompleteChangeReason } from "@material-ui/lab/Autocomplete";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import type { ContactNameFilter } from "@spoke/spoke-codegen";
 import {
-  ContactNameFilter,
   useGetTagsQuery,
   useSearchCampaignsQuery,
   useSearchUsersQuery

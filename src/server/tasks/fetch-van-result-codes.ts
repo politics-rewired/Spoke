@@ -1,7 +1,8 @@
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 import { get } from "superagent";
 
-import { VanAuthPayload, withVan } from "../lib/external-systems";
+import type { VanAuthPayload } from "../lib/external-systems";
+import { withVan } from "../lib/external-systems";
 
 interface GetResultCodesPayload extends VanAuthPayload {
   van_system_id: string;

@@ -1,28 +1,30 @@
 import faker from "faker";
 import AuthHasher from "passport-local-authenticate";
-import { PoolClient } from "pg";
+import type { PoolClient } from "pg";
 
-import { Assignment } from "../../src/api/assignment";
-import { Campaign } from "../../src/api/campaign";
-import { CampaignContact } from "../../src/api/campaign-contact";
-import { InteractionStep } from "../../src/api/interaction-step";
-import { Message } from "../../src/api/message";
-import { Organization } from "../../src/api/organization";
+import type { Assignment } from "../../src/api/assignment";
+import type { Campaign } from "../../src/api/campaign";
+import type { CampaignContact } from "../../src/api/campaign-contact";
+import type { InteractionStep } from "../../src/api/interaction-step";
+import type { Message } from "../../src/api/message";
+import type { Organization } from "../../src/api/organization";
 import { UserRoleType } from "../../src/api/organization-membership";
-import { User } from "../../src/api/user";
+import type { User } from "../../src/api/user";
 import { DateTime } from "../../src/lib/datetime";
-import {
+import type {
   AssignmentRecord,
   CampaignContactRecord,
   CampaignRecord,
   InteractionStepRecord,
   MessageRecord,
-  MessageSendStatus,
-  MessageStatusType,
   OrganizationRecord,
   UserRecord
 } from "../../src/server/api/types";
-import { HashedPassword } from "../../src/server/local-auth-helpers";
+import {
+  MessageSendStatus,
+  MessageStatusType
+} from "../../src/server/api/types";
+import type { HashedPassword } from "../../src/server/local-auth-helpers";
 
 export type CreateOrganizationOptions = Partial<
   Pick<Organization, "name"> & { uuid: string; features: Record<string, any> }
