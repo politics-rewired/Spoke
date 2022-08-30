@@ -1597,17 +1597,34 @@ CREATE VIEW public.assignable_campaign_contacts_with_escalation_tags AS
 ALTER TABLE public.assignable_campaign_contacts_with_escalation_tags OWNER TO postgres;
 
 --
--- Name: assignable_campaigns; Type: VIEW; Schema: public; Owner: postgres
+-- Name: sendable_campaigns; Type: VIEW; Schema: public; Owner: postgres
 --
 
-CREATE VIEW public.assignable_campaigns AS
+CREATE VIEW public.sendable_campaigns AS
  SELECT campaign.id,
     campaign.title,
     campaign.organization_id,
     campaign.limit_assignment_to_teams,
-    campaign.autosend_status
+    campaign.autosend_status,
+    campaign.is_autoassign_enabled
    FROM public.campaign
-  WHERE ((campaign.is_started = true) AND (campaign.is_archived = false) AND (campaign.is_autoassign_enabled = true));
+  WHERE (campaign.is_started AND (NOT campaign.is_archived));
+
+
+ALTER TABLE public.sendable_campaigns OWNER TO postgres;
+
+--
+-- Name: assignable_campaigns; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.assignable_campaigns AS
+ SELECT sendable_campaigns.id,
+    sendable_campaigns.title,
+    sendable_campaigns.organization_id,
+    sendable_campaigns.limit_assignment_to_teams,
+    sendable_campaigns.autosend_status
+   FROM public.sendable_campaigns
+  WHERE sendable_campaigns.is_autoassign_enabled;
 
 
 ALTER TABLE public.assignable_campaigns OWNER TO postgres;
@@ -1670,7 +1687,8 @@ CREATE VIEW public.assignable_campaigns_with_needs_reply AS
  SELECT assignable_campaigns.id,
     assignable_campaigns.title,
     assignable_campaigns.organization_id,
-    assignable_campaigns.limit_assignment_to_teams
+    assignable_campaigns.limit_assignment_to_teams,
+    assignable_campaigns.autosend_status
    FROM public.assignable_campaigns
   WHERE (EXISTS ( SELECT 1
            FROM public.assignable_needs_reply
@@ -1775,6 +1793,27 @@ ALTER TABLE public.assignment_request_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.assignment_request_id_seq OWNED BY public.assignment_request.id;
 
+
+--
+-- Name: autosend_campaigns_to_send; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.autosend_campaigns_to_send AS
+ SELECT sendable_campaigns.id,
+    sendable_campaigns.title,
+    sendable_campaigns.organization_id,
+    sendable_campaigns.limit_assignment_to_teams,
+    sendable_campaigns.autosend_status,
+    sendable_campaigns.is_autoassign_enabled
+   FROM public.sendable_campaigns
+  WHERE ((EXISTS ( SELECT 1
+           FROM public.assignable_needs_message
+          WHERE (assignable_needs_message.campaign_id = sendable_campaigns.id))) AND (NOT (EXISTS ( SELECT 1
+           FROM public.campaign
+          WHERE ((campaign.id = sendable_campaigns.id) AND (now() > date_trunc('day'::text, timezone(campaign.timezone, (campaign.due_by + '24:00:00'::interval)))))))) AND (sendable_campaigns.autosend_status = 'sending'::text));
+
+
+ALTER TABLE public.autosend_campaigns_to_send OWNER TO postgres;
 
 --
 -- Name: campaign_contact_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -2841,7 +2880,9 @@ CREATE TABLE public.organization (
     texting_hours_end integer DEFAULT 21,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     monthly_message_limit bigint,
-    default_texting_tz character varying(255) DEFAULT 'America/New_York'::character varying NOT NULL
+    default_texting_tz character varying(255) DEFAULT 'America/New_York'::character varying NOT NULL,
+    deleted_at timestamp with time zone,
+    deleted_by integer
 );
 
 
@@ -4536,6 +4577,13 @@ CREATE INDEX opt_out_organization_id_index ON public.opt_out USING btree (organi
 
 
 --
+-- Name: organization_deleted_at_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX organization_deleted_at_index ON public.organization USING btree (deleted_at);
+
+
+--
 -- Name: password_reset_request_token_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -5393,6 +5441,14 @@ ALTER TABLE ONLY public.opt_out
 
 ALTER TABLE ONLY public.opt_out
     ADD CONSTRAINT opt_out_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: organization organization_deleted_by_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT organization_deleted_by_foreign FOREIGN KEY (deleted_by) REFERENCES public."user"(id);
 
 
 --

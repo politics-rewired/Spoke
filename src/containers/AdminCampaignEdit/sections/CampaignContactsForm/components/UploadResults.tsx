@@ -5,7 +5,7 @@ import React from "react";
 
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
-import { PendingJobType } from "../../../components/SectionWrapper";
+import type { PendingJobType } from "../../../components/SectionWrapper";
 
 const GreenCheck = () => (
   <CheckCircleIcon style={{ color: theme.colors.green }} />

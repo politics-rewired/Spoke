@@ -1,0 +1,3 @@
+mutation EditOrganizationActive($organizationId: String!, $active: Boolean!, $deactivateMode: DeactivateMode) {
+  editOrganizationActive(organizationId: $organizationId, active: $active, deactivateMode: $deactivateMode)
+}

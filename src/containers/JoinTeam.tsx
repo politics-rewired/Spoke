@@ -1,14 +1,16 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import { css, StyleSheet } from "aphrodite/no-important";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
-import { RouteChildrenProps, withRouter } from "react-router-dom";
+import type { RouteChildrenProps } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { Organization } from "../api/organization";
-import { MutationMap } from "../network/types";
+import type { Organization } from "../api/organization";
+import type { MutationMap } from "../network/types";
 import theme from "../styles/theme";
-import { MuiThemeProviderProps } from "../styles/types";
+import type { MuiThemeProviderProps } from "../styles/types";
 import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({

@@ -1,4 +1,4 @@
-import {
+import type {
   campaign as CampaignRecord,
   user as UserRecord
 } from "@spoke/spoke-codegen";

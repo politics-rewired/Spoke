@@ -3,18 +3,18 @@ import { css, StyleSheet } from "aphrodite/no-important";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 import Form from "react-formal";
-import { match } from "react-router-dom";
+import type { match } from "react-router-dom";
 import { compose } from "recompose";
 import * as yup from "yup";
 
-import { CampaignContact } from "../api/campaign-contact";
-import { Message } from "../api/message";
+import type { CampaignContact } from "../api/campaign-contact";
+import type { Message } from "../api/message";
 import GSForm from "../components/forms/GSForm";
 import SpokeFormField from "../components/forms/SpokeFormField";
 import { dataTest } from "../lib/attributes";
-import { MutationMap, QueryMap } from "../network/types";
+import type { MutationMap, QueryMap } from "../network/types";
 import baseTheme from "../styles/theme";
-import { MuiThemeProviderProps } from "../styles/types";
+import type { MuiThemeProviderProps } from "../styles/types";
 import { loadData } from "./hoc/with-operations";
 
 const styles = StyleSheet.create({

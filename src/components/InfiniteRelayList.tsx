@@ -1,9 +1,11 @@
-import { FetchPolicy } from "@apollo/client";
+import type { FetchPolicy } from "@apollo/client";
 import { Query } from "@apollo/client/react/components";
-import produce, { Draft } from "immer";
+import type { Draft } from "immer";
+import produce from "immer";
 import React from "react";
 
-import { emptyRelayPage, RelayPaginatedResponse } from "../api/pagination";
+import type { RelayPaginatedResponse } from "../api/pagination";
+import { emptyRelayPage } from "../api/pagination";
 import ChildOnly from "./ChildOnly";
 import WhenSeen from "./WhenSeen";
 

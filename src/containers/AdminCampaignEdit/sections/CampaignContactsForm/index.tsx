@@ -1,18 +1,19 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React from "react";
 import { compose } from "recompose";
 
-import { RelayPaginatedResponse } from "../../../../api/pagination";
+import type { RelayPaginatedResponse } from "../../../../api/pagination";
 import { loadData } from "../../../hoc/with-operations";
 import CampaignFormSectionHeading from "../../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../../components/SectionWrapper";
+import { asSection } from "../../components/SectionWrapper";
 import ContactsSqlForm from "./components/ContactsSqlForm";
 import CSVForm from "./components/CSVForm";
 import ExternalSystemsSource from "./components/ExternalSystemsSource";

@@ -14,6 +14,7 @@ import { withTheme } from "@material-ui/core/styles";
 import CancelIcon from "@material-ui/icons/Cancel";
 import DoneIcon from "@material-ui/icons/Done";
 import WarningIcon from "@material-ui/icons/Warning";
+import { CampaignBuilderMode } from "@spoke/spoke-codegen";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
 import Avatar from "material-ui/Avatar";
@@ -26,7 +27,6 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { compose } from "recompose";
 
-import { CampaignBuilderMode } from "../../../libs/spoke-codegen/src/generated";
 import { withSpokeContext } from "../../client/spoke-context";
 import { withAuthzContext } from "../../components/AuthzProvider";
 import CampaignNavigation from "../../components/CampaignNavigation";

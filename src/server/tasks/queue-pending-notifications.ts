@@ -1,4 +1,4 @@
-import { Task } from "pg-compose";
+import type { Task } from "pg-compose";
 
 import { NotificationFrequencyType } from "../../api/user";
 import { r } from "../models";

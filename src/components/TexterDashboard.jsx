@@ -1,9 +1,11 @@
+import { useGetOrganizationNameQuery } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import PropTypes from "prop-types";
 import React from "react";
 import { withRouter } from "react-router-dom";
 
 import theme from "../styles/theme";
+import TopNav from "./TopNav";
 
 const styles = StyleSheet.create({
   container: {
@@ -20,7 +22,7 @@ const styles = StyleSheet.create({
 const TexterDashboard = (props) => {
   const {
     main: MainComponent,
-    topNav: TopNavComponent,
+    topNavTitle,
     fullScreen: FullScreenComponent,
     ...rest
   } = props;
@@ -28,9 +30,26 @@ const TexterDashboard = (props) => {
   if (FullScreenComponent) {
     return <FullScreenComponent {...rest} />;
   }
+
+  const { data: organization, loading } = useGetOrganizationNameQuery({
+    variables: {
+      organizationId: props.match.params.organizationId
+    }
+  });
+
+  const sectionTitle = loading ? "Spoke" : organization?.organization?.name;
+
+  const TopNavComponent = topNavTitle ? (
+    <TopNav
+      sectionTitle={sectionTitle}
+      title={topNavTitle}
+      orgId={props.match.params.organizationId}
+    />
+  ) : undefined;
+
   return (
     <div>
-      {TopNavComponent && <TopNavComponent {...rest} />}
+      {TopNavComponent}
       <div className={css(styles.container)}>
         <div className={css(styles.content)}>
           <MainComponent {...rest} />

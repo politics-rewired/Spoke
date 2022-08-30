@@ -3,7 +3,7 @@ import CreateIcon from "@material-ui/icons/Create";
 import DeleteIcon from "@material-ui/icons/Delete";
 import React from "react";
 
-import { CannedResponse } from "../../../../../api/canned-response";
+import type { CannedResponse } from "../../../../../api/canned-response";
 import { LargeListItem } from "../../../../../components/LargeList";
 import { dataTest } from "../../../../../lib/attributes";
 

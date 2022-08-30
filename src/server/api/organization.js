@@ -33,7 +33,7 @@ export const getEscalationUserId = async (organizationId) => {
 
 export const resolvers = {
   Organization: {
-    ...sqlResolvers(["id", "name", "defaultTextingTz"]),
+    ...sqlResolvers(["id", "name", "defaultTextingTz", "deletedAt"]),
     settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
@@ -437,7 +437,7 @@ export const resolvers = {
     ) => {
       const organizationId = parseInt(organization.id, 10);
       try {
-        await accessRequired(user, organizationId, "OWNER", true);
+        await accessRequired(user, organizationId, "ADMIN", true);
       } catch {
         return null;
       }
@@ -464,6 +464,10 @@ export const resolvers = {
         .where({ organization_id: organizationId });
       const result = await formatPage(query, { after, first });
       return result;
-    }
+    },
+    deletedBy: async (organization) =>
+      organization.deleted_by
+        ? r.reader("user").where({ id: organization.deleted_by })
+        : null
   }
 };

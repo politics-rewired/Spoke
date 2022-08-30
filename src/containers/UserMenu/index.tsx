@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client";
-import { withApollo, WithApolloClient } from "@apollo/client/react/hoc";
+import type { WithApolloClient } from "@apollo/client/react/hoc";
+import { withApollo } from "@apollo/client/react/hoc";
 import IconButton from "@material-ui/core/IconButton";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import Avatar from "material-ui/Avatar";
@@ -9,13 +10,15 @@ import MenuItem from "material-ui/MenuItem";
 import Popover from "material-ui/Popover";
 import Subheader from "material-ui/Subheader";
 import React, { Component } from "react";
-import { RouterProps, withRouter } from "react-router-dom";
+import type { RouterProps } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
-import { Organization } from "../../api/organization";
-import { User } from "../../api/user";
+import type { Organization } from "../../api/organization";
+import type { User } from "../../api/user";
+import { withAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";
-import { QueryMap } from "../../network/types";
+import type { QueryMap } from "../../network/types";
 import { withOperations } from "../hoc/with-operations";
 import OrganizationItem from "./components/OrganizationItem";
 
@@ -27,6 +30,7 @@ type CurrentUser = Pick<User, "id" | "displayName" | "email"> & {
 
 interface Props extends Pick<RouterProps, "history"> {
   orgId: string;
+  isSuperadmin: string;
   data: {
     currentUser: CurrentUser;
   };
@@ -74,6 +78,8 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
       }
     } else if (value === "home") {
       history.push(`/app/${orgId}/todos`);
+    } else if (value === "superadmin") {
+      history.push(`/superadmin/people`);
     } else if (value === "docs") {
       window.open("https://docs.spokerewired.com", "_blank");
     }
@@ -95,7 +101,7 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
   };
 
   render() {
-    const { orgId, data, history, client } = this.props;
+    const { orgId, data, history, client, isSuperadmin } = this.props;
     const { currentUser } = data;
 
     if (!currentUser) {
@@ -134,7 +140,15 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
               {currentUser.email}
             </MenuItem>
             <Divider />
-            <MenuItem {...dataTest("home")} primaryText="Home" value="home" />
+            <MenuItem
+              disabled={!orgId}
+              {...dataTest("home")}
+              primaryText="Home"
+              value="home"
+            />
+            {isSuperadmin && (
+              <MenuItem primaryText="Superadmin" value="superadmin" />
+            )}
             <Divider />
             <Subheader>Teams</Subheader>
             {currentUser.organizations.map((organization) => (
@@ -174,7 +188,7 @@ const queries: QueryMap<Props> = {
           id
           displayName
           email
-          organizations {
+          organizations(active: true) {
             id
             name
           }
@@ -190,5 +204,6 @@ const queries: QueryMap<Props> = {
 export default compose(
   withApollo,
   withRouter,
+  withAuthzContext,
   withOperations({ queries })
 )(UserMenu);

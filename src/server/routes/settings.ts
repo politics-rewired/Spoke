@@ -1,7 +1,7 @@
 import express from "express";
 
 import { clientConfig } from "../../config";
-import { CustomTheme } from "../../styles/types";
+import type { CustomTheme } from "../../styles/types";
 import { r } from "../models";
 
 const router = express.Router();

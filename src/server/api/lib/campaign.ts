@@ -2,14 +2,14 @@
 import isEmpty from "lodash/isEmpty";
 import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
-import { QueryResult } from "pg";
+import type { QueryResult } from "pg";
 
-import {
+import type {
   Campaign,
   CampaignInput,
   CampaignsFilter
 } from "../../../api/campaign";
-import { RelayPaginatedResponse } from "../../../api/pagination";
+import type { RelayPaginatedResponse } from "../../../api/pagination";
 import { config } from "../../../config";
 import { gzip, makeTree } from "../../../lib";
 import { parseIanaZone } from "../../../lib/datetime";
@@ -23,7 +23,11 @@ import { cacheOpts, memoizer } from "../../memoredis";
 import { cacheableData, datawarehouse, r } from "../../models";
 import { addAssignTexters } from "../../tasks/assign-texters";
 import { accessRequired } from "../errors";
-import { CampaignRecord, InteractionStepRecord, UserRecord } from "../types";
+import type {
+  CampaignRecord,
+  InteractionStepRecord,
+  UserRecord
+} from "../types";
 import { processContactsFile } from "./edit-campaign";
 import { persistInteractionStepTree } from "./interaction-steps";
 import { formatPage } from "./pagination";
@@ -720,7 +724,7 @@ export const editCampaign = async (
 export const invalidScriptFields = async (campaignId: string) => {
   const { rows: variables } = await r.knex.raw(
     // eslint-disable-next-line no-useless-escape
-    `SELECT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
+    `SELECT DISTINCT regexp_matches(array_to_string(script_options, ','), '\{([^\{]*)\}', 'g') as variable
 FROM interaction_step
 WHERE campaign_id = ?`,
     [campaignId]

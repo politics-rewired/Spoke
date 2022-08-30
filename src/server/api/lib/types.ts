@@ -1,4 +1,4 @@
-import { MessagingServiceType } from "../types";
+import type { MessagingServiceType } from "../types";
 
 export enum SpokeSendStatus {
   Queued = "QUEUED",

@@ -1,8 +1,8 @@
 import request from "superagent";
 
-import { Register10DlcBrandNotice } from "../../../api/notice";
+import type { Register10DlcBrandNotice } from "../../../api/notice";
 import { r } from "../../models";
-import { OrgLevelNotificationGetter } from "./types";
+import type { OrgLevelNotificationGetter } from "./types";
 
 const graphqlQuery = `
   query AnonGetTcr10DlcSurvey($switchboardProfileId: String!) {

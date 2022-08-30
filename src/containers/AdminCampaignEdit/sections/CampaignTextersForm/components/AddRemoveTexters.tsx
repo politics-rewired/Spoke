@@ -4,7 +4,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import React from "react";
 
 import { dataTest } from "../../../../../lib/attributes";
-import { OrgTexter, Texter } from "../types";
+import type { OrgTexter, Texter } from "../types";
 
 const inlineStyles = {
   autocomplete: {

@@ -11,6 +11,7 @@ export interface Message {
   campaignId: string;
   userId: string;
   sendStatus: string;
+  errorCodes: string[];
 }
 
 export const schema = `
@@ -25,5 +26,6 @@ export const schema = `
     campaignId: String
     userId: ID
     sendStatus: String
+    errorCodes: [String!]
   }
 `;

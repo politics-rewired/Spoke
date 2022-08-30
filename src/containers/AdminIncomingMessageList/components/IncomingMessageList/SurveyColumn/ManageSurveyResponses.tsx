@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -9,11 +10,11 @@ import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import React, { useEffect, useState } from "react";
 
-import { Campaign } from "../../../../../api/campaign";
-import { CampaignContact } from "../../../../../api/campaign-contact";
-import { InteractionStep } from "../../../../../api/interaction-step";
+import type { Campaign } from "../../../../../api/campaign";
+import type { CampaignContact } from "../../../../../api/campaign-contact";
+import type { InteractionStep } from "../../../../../api/interaction-step";
 import LoadingIndicator from "../../../../../components/LoadingIndicator";
-import { MutationMap, QueryMap } from "../../../../../network/types";
+import type { MutationMap, QueryMap } from "../../../../../network/types";
 import {
   formatErrorMessage,
   PrettyErrors,

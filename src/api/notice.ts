@@ -1,5 +1,5 @@
-import { RelayEdge, RelayPaginatedResponse } from "./pagination";
-import { GraphQLType } from "./types";
+import type { RelayEdge, RelayPaginatedResponse } from "./pagination";
+import type { GraphQLType } from "./types";
 
 export interface Register10DlcBrandNotice {
   id: string;

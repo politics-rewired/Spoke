@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -8,14 +9,14 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import React, { Component } from "react";
 import * as yup from "yup";
 
-import { Conversation } from "../../../../../api/conversations";
-import { Message } from "../../../../../api/message";
-import { MessageInput } from "../../../../../api/types";
+import type { Conversation } from "../../../../../api/conversations";
+import type { Message } from "../../../../../api/message";
+import type { MessageInput } from "../../../../../api/types";
 import GSForm from "../../../../../components/forms/GSForm";
 import SpokeFormField from "../../../../../components/forms/SpokeFormField";
 import MessageLengthInfo from "../../../../../components/MessageLengthInfo";
 import SendButton from "../../../../../components/SendButton";
-import { MutationMap } from "../../../../../network/types";
+import type { MutationMap } from "../../../../../network/types";
 import { loadData } from "../../../../hoc/with-operations";
 
 interface InnerProps {
@@ -171,6 +172,7 @@ const mutations: MutationMap<InnerProps> = {
             userId
             text
             isFromContact
+            errorCodes
           }
         }
       }

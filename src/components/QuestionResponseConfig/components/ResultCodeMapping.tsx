@@ -5,7 +5,7 @@ import InputIcon from "@material-ui/icons/Input";
 import { ListItem } from "material-ui/List";
 import React from "react";
 
-import { ExternalResultCode } from "../../../api/external-result-code";
+import type { ExternalResultCode } from "../../../api/external-result-code";
 
 interface Props {
   resultCode: ExternalResultCode;

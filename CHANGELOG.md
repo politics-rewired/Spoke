@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.36.0-rc.3](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.2...v4.36.0-rc.3) (2022-08-29)
+
+
+### Bug Fixes
+
+* **campaign builder:** fix deleting interaction steps ([#1357](https://github.com/politics-rewired/spoke/issues/1357)) ([685c66f](https://github.com/politics-rewired/spoke/commit/685c66f7dac8daa03940a3453ce21e062ae18da6))
+
+## [4.36.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.1...v4.36.0-rc.2) (2022-08-26)
+
+
+### Bug Fixes
+
+* import server-defined type ([#1365](https://github.com/politics-rewired/spoke/issues/1365)) ([2353b84](https://github.com/politics-rewired/spoke/commit/2353b843ccc409d9cddcf6fcc7cb487bfddf8203))
+
+## [4.36.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.0...v4.36.0-rc.1) (2022-08-26)
+
+
+### Features
+
+* add cors ([#1193](https://github.com/politics-rewired/spoke/issues/1193)) ([121f923](https://github.com/politics-rewired/spoke/commit/121f9234ad5f3ed1a8712548840b07b7e4beba6e))
+
+
+### Bug Fixes
+
+* fix refresh integration button hidden ([#1360](https://github.com/politics-rewired/spoke/issues/1360)) ([a94ba9e](https://github.com/politics-rewired/spoke/commit/a94ba9e6925a49d8bc88fe85f00fa4da82dc57a0))
+
+## [4.36.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.35.1...v4.36.0-rc.0) (2022-08-24)
+
+
+### Features
+
+* allow superadmins to manage organizations ([#1348](https://github.com/politics-rewired/spoke/issues/1348)) ([cd665d2](https://github.com/politics-rewired/spoke/commit/cd665d2edd89214ba85a584e78a58a75b1bd92cc))
+* **autosend:** add basic autosend page ([#1350](https://github.com/politics-rewired/spoke/issues/1350)) ([b6a6325](https://github.com/politics-rewired/spoke/commit/b6a6325362bfc0099c3b58368516c7cd463ec49b))
+* **superadmin:** allow managing other superadmins ([#1347](https://github.com/politics-rewired/spoke/issues/1347)) ([d0c98dc](https://github.com/politics-rewired/spoke/commit/d0c98dc8191af32e34ae7db262c2c999638c486f))
+* add a superadmin page, add people management ([#1334](https://github.com/politics-rewired/spoke/issues/1334)) ([fcb6004](https://github.com/politics-rewired/spoke/commit/fcb6004c47949fa155b97ea6b7bea7ecd61fa1ef))
+
+
+### Bug Fixes
+
+* **message-review:** display accurate error description ([#1351](https://github.com/politics-rewired/spoke/issues/1351)) ([012f629](https://github.com/politics-rewired/spoke/commit/012f629699d4c194aa3b6dff0519c329ee599fd2))
+
+### [4.35.1](https://github.com/politics-rewired/spoke/compare/v4.35.0...v4.35.1) (2022-08-17)
+
+
+### Bug Fixes
+
+* **export:** fix campaign campaign error ([#1355](https://github.com/politics-rewired/spoke/issues/1355)) ([dac0171](https://github.com/politics-rewired/spoke/commit/dac0171e42dbab1e98eeae87994f53996e6903c1))
+
+## [4.35.0](https://github.com/politics-rewired/spoke/compare/v4.35.0-rc.1...v4.35.0) (2022-08-17)
+
+## [4.35.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.35.0-rc.0...v4.35.0-rc.1) (2022-08-16)
+
+
+### Bug Fixes
+
+* allow admins to enumerate messaging services ([#1345](https://github.com/politics-rewired/spoke/issues/1345)) ([8a75df7](https://github.com/politics-rewired/spoke/commit/8a75df7c8e4616432b39662d904b6108993e514c))
+* **interactions:** dont show duplicate warnings ([#1346](https://github.com/politics-rewired/spoke/issues/1346)) ([32bb35b](https://github.com/politics-rewired/spoke/commit/32bb35b505cf06d3549054e072f0eef55f657f66))
+
 ## [4.35.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.34.1...v4.35.0-rc.0) (2022-08-08)
 
 

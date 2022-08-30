@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
@@ -23,10 +24,11 @@ import AddIcon from "@material-ui/icons/Add";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import sortBy from "lodash/sortBy";
 import React, { useState } from "react";
-import { RouteChildrenProps } from "react-router-dom";
+import type { RouteChildrenProps } from "react-router-dom";
 
-import { TrollTrigger, TrollTriggerMode } from "../../../api/trollbot";
-import { MutationMap, QueryMap } from "../../../network/types";
+import type { TrollTrigger } from "../../../api/trollbot";
+import { TrollTriggerMode } from "../../../api/trollbot";
+import type { MutationMap, QueryMap } from "../../../network/types";
 import theme from "../../../styles/theme";
 import { loadData } from "../../hoc/with-operations";
 

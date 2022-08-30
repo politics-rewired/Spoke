@@ -1,6 +1,6 @@
-import { CSSProperties as AphroditeCSSProperties } from "aphrodite";
-import { MuiTheme } from "material-ui/styles";
-import { CSSProperties } from "react";
+import type { CSSProperties as AphroditeCSSProperties } from "aphrodite";
+import type { MuiTheme } from "material-ui/styles";
+import type { CSSProperties } from "react";
 
 type CSSPropertiesNoColors = Omit<AphroditeCSSProperties, "backgroundColor">;
 

@@ -9,7 +9,7 @@ import Slider from "../../../../../components/Slider";
 import { dataTest } from "../../../../../lib/attributes";
 import theme from "../../../../../styles/theme";
 import { useDebouncedValue } from "../hooks";
-import { Texter } from "../types";
+import type { Texter } from "../types";
 import rowStyles from "./rowStyles";
 
 interface Props {

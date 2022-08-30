@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { TextField } from "material-ui";
 import Toggle from "material-ui/Toggle";
@@ -7,11 +8,11 @@ import { compose } from "recompose";
 
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 interface AutoassignValues {
   isAutoassignEnabled: boolean;

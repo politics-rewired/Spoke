@@ -1,0 +1,42 @@
+fragment SuperAdmins on UsersList {
+  users {
+    id
+    displayName
+    email
+    isSuperadmin
+  }
+}
+
+query GetOrganizations {
+  organizations {
+    id
+    name
+    deletedAt
+  }
+}
+
+query GetSuperAdmins {
+  superadmins {
+    id
+    displayName
+    email
+    isSuperadmin
+    isSuspended
+  }
+}
+
+query GetPeople {
+  people {
+    ...SuperAdmins
+  }
+}
+
+mutation EditSuperAdminStatus(
+  $userEmail: String!
+  $superAdminStatus: Boolean!
+) {
+  editSuperAdminStatus(
+    userEmail: $userEmail
+    superAdminStatus: $superAdminStatus
+  )
+}

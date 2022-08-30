@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import isEmpty from "lodash/isEmpty";
 import Autocomplete from "material-ui/AutoComplete";
@@ -8,17 +9,18 @@ import * as yup from "yup";
 
 import GSForm from "../../../components/forms/GSForm";
 import SpokeFormField from "../../../components/forms/SpokeFormField";
-import { dataSourceItem, DataSourceItemType } from "../../../components/utils";
+import type { DataSourceItemType } from "../../../components/utils";
+import { dataSourceItem } from "../../../components/utils";
 import { DateTime, parseIanaZone } from "../../../lib/datetime";
 import { timezones } from "../../../lib/timezones";
 import { difference } from "../../../lib/utils";
 import { loadData } from "../../hoc/with-operations";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import {
-  asSection,
+import type {
   FullComponentProps,
   RequiredComponentProps
 } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 // Constants
 

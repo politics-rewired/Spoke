@@ -1,5 +1,5 @@
-import { Question } from "./question";
-import { QuestionResponse } from "./question-response";
+import type { Question } from "./question";
+import type { QuestionResponse } from "./question-response";
 
 export interface InteractionStep {
   id: string;

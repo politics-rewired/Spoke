@@ -4,7 +4,8 @@ import { config } from "../../config";
 import getDigestContent from "../lib/templates/digest";
 import getNotificationContent from "../lib/templates/notification";
 import { r } from "../models";
-import { NotificationRecord, NotificationTypes } from "./types";
+import type { NotificationRecord } from "./types";
+import { NotificationTypes } from "./types";
 
 interface AssignmentCreatedNotification extends NotificationRecord {
   notification_type: NotificationTypes.AssignmentCreated;

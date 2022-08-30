@@ -1,8 +1,11 @@
-fragment AutosendingTarget on Campaign {
+fragment BasicAutosendingTarget on Campaign {
   id
   title
   isStarted
   autosendStatus
+}
+
+fragment DetailedAutosendingTarget on Campaign {
   contactsCount
   stats {
     optOutsCount
@@ -20,9 +23,15 @@ fragment AutosendingTarget on Campaign {
   }
 }
 
+fragment AutosendingTarget on Campaign {
+  ...BasicAutosendingTarget
+  ...DetailedAutosendingTarget
+}
+
 query CampaignsEligibleForAutosending(
   $organizationId: String!
   $isStarted: Boolean!
+  $isBasic: Boolean!
 ) {
   organization(id: $organizationId) {
     id
@@ -31,7 +40,8 @@ query CampaignsEligibleForAutosending(
       cursor: { offset: 0, limit: 5000 }
     ) {
       campaigns {
-        ...AutosendingTarget
+        ...BasicAutosendingTarget
+        ...DetailedAutosendingTarget @skip (if: $isBasic)
       }
     }
   }

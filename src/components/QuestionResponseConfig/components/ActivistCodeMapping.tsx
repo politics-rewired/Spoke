@@ -5,7 +5,7 @@ import LocalActivityIcon from "@material-ui/icons/LocalActivity";
 import { ListItem } from "material-ui/List";
 import React from "react";
 
-import { ExternalActivistCode } from "../../../api/external-activist-code";
+import type { ExternalActivistCode } from "../../../api/external-activist-code";
 import { ExternalDataCollectionStatus } from "../../../api/types";
 
 interface Props {

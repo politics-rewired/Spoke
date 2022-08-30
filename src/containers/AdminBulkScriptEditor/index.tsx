@@ -8,12 +8,8 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Paper from "@material-ui/core/Paper";
 import Switch from "@material-ui/core/Switch";
 import TextField from "@material-ui/core/TextField";
-import {
-  DataGridPro,
-  GridColDef,
-  GridLinkOperator,
-  GridSelectionModel
-} from "@mui/x-data-grid-pro";
+import type { GridColDef, GridSelectionModel } from "@mui/x-data-grid-pro";
+import { DataGridPro, GridLinkOperator } from "@mui/x-data-grid-pro";
 import {
   useBulkUpdateScriptMutation,
   useGetCampaignsBulkScriptEditorQuery,
