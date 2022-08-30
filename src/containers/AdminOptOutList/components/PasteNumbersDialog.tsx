@@ -50,7 +50,11 @@ const PasteNumbersDialog: React.FC<PasteNumbersDialogProps> = ({
       <DialogTitle>{dialogTitle()}</DialogTitle>
       <DialogContent style={{ maxHeight: "70vh" }}>
         <DialogContentText>
-          Paste the numbers below with a single number per line.
+          Paste the phone numbers you would like to opt out below. Numbers can
+          be separated by a new line or a comma.
+          <br /> <br />
+          Phone numbers in all conventional formats are permitted; non-numeric
+          characters (e.g. dashes and parentheses) can be optionally included.
         </DialogContentText>
         <TextareaAutosize
           value={numbers}

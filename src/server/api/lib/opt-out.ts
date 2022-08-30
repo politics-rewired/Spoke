@@ -16,7 +16,7 @@ export const processNumbers = async (csvFile: Upload, numbersList: string) => {
 
   // .filter(Boolean) first to remove empty lines
   // and then again to remove any invalid phone numbers
-  // getFormmated returns an empty string for invalid numbers
+  // getFormatted returns an empty string for invalid numbers
   if (numbersList) {
     const numbersArray = numbersList.split(/\r|\n|,/).filter(Boolean);
     numbers = numbersArray
