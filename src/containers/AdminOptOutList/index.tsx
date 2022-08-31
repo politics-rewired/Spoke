@@ -10,7 +10,7 @@ import { DataGridPro } from "@mui/x-data-grid-pro";
 import {
   useBulkOptInMutation,
   useBulkOptOutMutation,
-  useGetOptOutsByCampaignQuery
+  useGetOptOutsByCampaignForOrganizationQuery
 } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 
@@ -40,7 +40,7 @@ const AdminOptOutList: React.FC = (props) => {
     data: optOutsData,
     loading,
     refetch: refetchOptOuts
-  } = useGetOptOutsByCampaignQuery({
+  } = useGetOptOutsByCampaignForOrganizationQuery({
     variables: {
       organizationId
     }

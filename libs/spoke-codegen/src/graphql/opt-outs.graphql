@@ -1,4 +1,4 @@
-query GetOptOutsByCampaign($organizationId: String!) {
+query GetOptOutsByCampaignForOrganization($organizationId: String!) {
   optOuts(organizationId: $organizationId) {
     id
     title
