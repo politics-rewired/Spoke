@@ -1,7 +1,10 @@
 /* eslint-disable react/no-unstable-nested-components */
-import { gql } from "@apollo/client";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
 import PeopleIcon from "@material-ui/icons/People";
-import { Table, TableBody } from "material-ui/Table";
+import { GetOrganizationPeopleDocument } from "@spoke/spoke-codegen";
 import React from "react";
 
 import type {
@@ -15,42 +18,6 @@ import type { AdminPeopleContext, PeopleRowEventHandlers } from "./context";
 import PeopleRow from "./PeopleRow";
 
 const PAGE_SIZE = 20;
-
-const query = gql`
-  query getPeople(
-    $organizationId: String!
-    $after: Cursor
-    $first: Int
-    $filter: MembershipFilter
-  ) {
-    organization(id: $organizationId) {
-      id
-      peopleCount
-      memberships(first: $first, after: $after, filter: $filter) {
-        edges {
-          node {
-            id
-            user {
-              id
-              firstName
-              lastName
-              displayName
-              email
-              isSuspended
-            }
-            role
-            requestAutoApprove
-          }
-        }
-        pageInfo {
-          endCursor
-          hasNextPage
-          totalCount
-        }
-      }
-    }
-  }
-`;
 
 interface PeopleData {
   organization: {
@@ -88,10 +55,17 @@ const PeopleTable: React.FC<PeopleTableProps> = ({
     )?.title || "";
 
   return (
-    <Table selectable={false} style={{ width: "inherit", margin: "auto" }}>
-      <TableBody displayRowCheckbox={false} showRowHover>
+    <Table>
+      <TableHead>
+        <TableCell>Name</TableCell>
+        <TableCell>Email</TableCell>
+        <TableCell>Role</TableCell>
+        <TableCell>Autoassignment Status</TableCell>
+        <TableCell>Actions</TableCell>
+      </TableHead>
+      <TableBody>
         <InfiniteRelayList<PeopleData, OrganizationMembership, PeopleVariables>
-          query={query}
+          query={GetOrganizationPeopleDocument}
           queryVars={{
             organizationId: context.organization.id,
             first: PAGE_SIZE,

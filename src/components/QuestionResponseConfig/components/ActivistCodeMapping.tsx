@@ -1,8 +1,11 @@
 import { green, orange } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
 import DeleteIcon from "@material-ui/icons/Delete";
 import LocalActivityIcon from "@material-ui/icons/LocalActivity";
-import { ListItem } from "material-ui/List";
 import React from "react";
 
 import type { ExternalActivistCode } from "../../../api/external-activist-code";
@@ -18,20 +21,22 @@ export const ActivistCodeMapping: React.SFC<Props> = (props) => {
     props.activistCode.status === ExternalDataCollectionStatus.ACTIVE;
 
   return (
-    <ListItem
-      primaryText={props.activistCode.name}
-      secondaryText={props.activistCode.type}
-      leftIcon={
+    <ListItem>
+      <ListItemIcon>
         <LocalActivityIcon
           style={{ color: isActive ? green[200] : orange[200] }}
         />
-      }
-      rightIconButton={
+      </ListItemIcon>
+      <ListItemText
+        primary={props.activistCode.name}
+        secondary={props.activistCode.type}
+      />
+      <ListItemSecondaryAction>
         <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />
         </IconButton>
-      }
-    />
+      </ListItemSecondaryAction>
+    </ListItem>
   );
 };
 

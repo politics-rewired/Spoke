@@ -47,6 +47,7 @@ export const createMuiThemev1 = (theme: Partial<CustomTheme> = {}) => {
       primary: { main: primaryColor },
       secondary: { main: secondaryColor },
       badge: { main: badgeColor },
+      inboundMessageBg: { main: blue[500] },
       success: { main: theme.successColor || green[500], light: green[100] },
       warning: { main: theme.warningColor || baseTheme.colors.orange },
       error: { main: theme.errorColor || red[200] },

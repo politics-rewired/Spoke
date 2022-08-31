@@ -1,19 +1,19 @@
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { green, red } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
+import Paper from "@material-ui/core/Paper";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Tooltip from "@material-ui/core/Tooltip";
 import AssignmentTurnedInIcon from "@material-ui/icons/AssignmentTurnedIn";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import CircularProgress from "material-ui/CircularProgress";
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn
-} from "material-ui/Table";
-import PropTypes from "prop-types";
+import type { AssignmentRequest } from "@spoke/spoke-codegen";
 import React from "react";
 
 import { DateTime } from "../../lib/datetime";
@@ -27,7 +27,7 @@ export const RowWorkStatus = Object.freeze({
   Denied: "rejected"
 });
 
-const rowStyleForStatus = (rowStatus) => {
+const rowStyleForStatus = (rowStatus: string) => {
   const baseStyle = {
     "-webkit-transition": "opacity 2s ease-in-out",
     "-moz-transition": "opacity 2s ease-in-out",
@@ -55,7 +55,17 @@ const styles = {
   }
 };
 
-const AssignmentRequestTable = (props) => {
+interface AssignmentRequestTableProps {
+  isAdmin: boolean;
+  assignmentRequests: AssignmentRequest[];
+  onApproveRequest: (requestId: string) => Promise<void> | void;
+  onAutoApproveRequest: (requestId: string) => Promise<void> | void;
+  onDenyRequest: (requestId: string) => Promise<void> | void;
+}
+
+const AssignmentRequestTable: React.FC<AssignmentRequestTableProps> = (
+  props
+) => {
   const {
     isAdmin,
     assignmentRequests,
@@ -64,21 +74,24 @@ const AssignmentRequestTable = (props) => {
     onDenyRequest
   } = props;
 
-  const handleAutoApproveRow = (requestId) => () =>
+  const handleAutoApproveRow = (requestId: string) => () =>
     onAutoApproveRequest(requestId);
-  const handleApproveRow = (requestId) => () => onApproveRequest(requestId);
-  const handleDenyRow = (requestId) => () => onDenyRequest(requestId);
+  const handleApproveRow = (requestId: string) => () =>
+    onApproveRequest(requestId);
+  const handleDenyRow = (requestId: string) => () => onDenyRequest(requestId);
 
   return (
-    <div>
-      <Table selectable={false}>
-        <TableHeader enableSelectAll={false} displaySelectAll={false}>
-          <TableHeaderColumn>Texter</TableHeaderColumn>
-          <TableHeaderColumn>Request Amount</TableHeaderColumn>
-          <TableHeaderColumn>Requested At</TableHeaderColumn>
-          <TableHeaderColumn>Actions</TableHeaderColumn>
-        </TableHeader>
-        <TableBody displayRowCheckbox={false}>
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Texter</TableCell>
+            <TableCell>Request Amount</TableCell>
+            <TableCell>Requested At</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {assignmentRequests.map((request) => {
             const { user, createdAt, id: requestId, status } = request;
             const showActions =
@@ -86,35 +99,31 @@ const AssignmentRequestTable = (props) => {
               status === RowWorkStatus.Error;
             return (
               <TableRow key={requestId} style={rowStyleForStatus(status)}>
-                <TableRowColumn>
+                <TableCell>
                   {user.firstName} {user.lastName}
-                </TableRowColumn>
-                <TableRowColumn>{request.amount}</TableRowColumn>
-                <TableRowColumn>
+                </TableCell>
+                <TableCell>{request.amount}</TableCell>
+                <TableCell>
                   {DateTime.fromISO(createdAt).toRelative()}
-                </TableRowColumn>
-                <TableRowColumn>
+                </TableCell>
+                <TableCell>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     {status === RowWorkStatus.Error && (
                       <span style={styles.errorText}>Error. Try again.</span>
                     )}
                     {showActions && (
-                      <IconButton
-                        tooltip="Deny"
-                        tooltipPosition="top-center"
-                        onClick={handleDenyRow(requestId)}
-                      >
-                        <HighlightOffIcon style={{ color: red[500] }} />
-                      </IconButton>
+                      <Tooltip title="Deny" placement="top">
+                        <IconButton onClick={handleDenyRow(requestId)}>
+                          <HighlightOffIcon style={{ color: red[500] }} />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     {showActions && (
-                      <IconButton
-                        tooltip="Approve"
-                        tooltipPosition="top-center"
-                        onClick={handleApproveRow(requestId)}
-                      >
-                        <CheckCircleIcon style={{ color: green[300] }} />
-                      </IconButton>
+                      <Tooltip title="Approve" placement="top">
+                        <IconButton onClick={handleApproveRow(requestId)}>
+                          <CheckCircleIcon style={{ color: green[300] }} />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     {showActions && isAdmin && (
                       <Button
@@ -133,33 +142,14 @@ const AssignmentRequestTable = (props) => {
                       <CircularProgress size={25} />
                     )}
                   </div>
-                </TableRowColumn>
+                </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-    </div>
+    </TableContainer>
   );
-};
-
-AssignmentRequestTable.propTypes = {
-  isAdmin: PropTypes.bool.isRequired,
-  assignmentRequests: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      user: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        firstName: PropTypes.string.isRequired,
-        lastName: PropTypes.string.isRequired
-      }).isRequired,
-      amount: PropTypes.number.isRequired,
-      createdAt: PropTypes.string.isRequired,
-      status: PropTypes.string.isRequired
-    })
-  ),
-  onApproveRequest: PropTypes.func.isRequired,
-  onDenyRequest: PropTypes.func.isRequired
 };
 
 export default AssignmentRequestTable;
