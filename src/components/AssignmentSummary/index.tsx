@@ -148,7 +148,6 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
                   (useDynamicAssignment && maxContacts === 0) ||
                   undefined,
                 contactsFilter: "text",
-                style: { backgroundColor: theme.palette.success.main },
                 hideIfZero: !useDynamicAssignment
               })}
           {window.NOT_IN_USA && window.ALLOW_SEND_ALL

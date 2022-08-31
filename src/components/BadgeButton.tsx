@@ -1,21 +1,8 @@
+import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
-import Badge from "material-ui/Badge";
 import React from "react";
 
 import { dataTest } from "../lib/attributes";
-
-const inlineStyles = {
-  badge: {
-    fontSize: 12,
-    top: 20,
-    right: 20,
-    padding: "4px 2px 0px 2px",
-    width: 20,
-    textAlign: "center",
-    verticalAlign: "middle",
-    height: 20
-  }
-};
 
 export interface BadgeButtonProps {
   title: string;
@@ -24,7 +11,6 @@ export interface BadgeButtonProps {
   dataTestText?: string;
   primary?: boolean;
   disabled?: boolean;
-  style?: any;
   onClick?: React.MouseEventHandler<unknown>;
 }
 
@@ -33,13 +19,19 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
     return null;
   }
 
+  const buttonColor = props.disabled
+    ? "default"
+    : props.primary
+    ? "primary"
+    : "secondary";
+
   if (props.badgeCount === 0) {
     return (
       <Button
         {...dataTest(props.dataTestText)}
         variant="contained"
         disabled={props.disabled}
-        color={props.primary && !props.disabled ? "primary" : "default"}
+        color={buttonColor}
         onClick={props.onClick}
       >
         {props.title}
@@ -50,15 +42,14 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
   return (
     <Badge
       key={props.title}
-      badgeStyle={{ ...inlineStyles.badge, ...(props.style || {}) }}
       badgeContent={props.badgeCount || ""}
-      primary={props.primary && !props.disabled}
-      secondary={!props.primary && !props.disabled}
+      color="error"
     >
       <Button
         {...dataTest(props.dataTestText)}
         variant="contained"
         disabled={props.disabled}
+        color={buttonColor}
         onClick={props.onClick}
       >
         {props.title}
