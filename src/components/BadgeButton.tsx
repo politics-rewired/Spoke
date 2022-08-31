@@ -1,8 +1,11 @@
+import type { Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
 import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
 import React from "react";
 
 import { dataTest } from "../lib/attributes";
+import theme from "../styles/theme";
 
 export interface BadgeButtonProps {
   title: string;
@@ -12,9 +15,18 @@ export interface BadgeButtonProps {
   primary?: boolean;
   disabled?: boolean;
   onClick?: React.MouseEventHandler<unknown>;
+  color?: string;
 }
 
+const useStyles = makeStyles<Theme, BadgeButtonProps>({
+  badge: {
+    backgroundColor: (props) => props.color ?? theme.colors.yellow
+  }
+});
+
 export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
+  const classes = useStyles(props);
+
   if (props.badgeCount === 0 && props.hideIfZero) {
     return null;
   }
@@ -43,7 +55,7 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
     <Badge
       key={props.title}
       badgeContent={props.badgeCount || ""}
-      color="error"
+      classes={{ badge: classes.badge }}
     >
       <Button
         {...dataTest(props.dataTestText)}

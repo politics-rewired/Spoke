@@ -1,6 +1,7 @@
 import { useTheme } from "@material-ui/core";
+import CardActions from "@material-ui/core/CardActions";
 import { css, StyleSheet } from "aphrodite";
-import { Card, CardActions, CardTitle } from "material-ui/Card";
+import { Card, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -62,7 +63,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
     disabled,
     contactsFilter,
     hideIfZero,
-    style
+    color
   }: {
     assignment: Pick<Assignment, "id">;
     contactsFilter: string | null;
@@ -72,7 +73,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
     dataTestText?: string;
     primary?: boolean;
     disabled?: boolean;
-    style?: any;
+    color?: string;
   }) => {
     return (
       <BadgeButton
@@ -82,7 +83,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
         primary={primary}
         disabled={disabled}
         dataTestText={dataTestText}
-        style={style}
+        color={color}
         onClick={makeGoToTodosHandler(contactsFilter, assignment.id)}
       />
     );
@@ -148,6 +149,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
                   (useDynamicAssignment && maxContacts === 0) ||
                   undefined,
                 contactsFilter: "text",
+                color: theme.palette.success.main,
                 hideIfZero: !useDynamicAssignment
               })}
           {window.NOT_IN_USA && window.ALLOW_SEND_ALL
