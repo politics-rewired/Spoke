@@ -105,7 +105,13 @@ module.exports = {
               "ListItem",
               "IconButton",
               "FlatButton",
-              "RaisedButton"
+              "RaisedButton",
+              "Table",
+              "TableHeader",
+              "TableHeaderColumn",
+              "TableBody",
+              "TableRow",
+              "TableRowColumn"
             ],
             message: "Please use @material-ui/core instead."
           }
@@ -130,7 +136,13 @@ module.exports = {
               "material-ui/ListItem",
               "material-ui/IconButton",
               "material-ui/FlatButton",
-              "material-ui/RaisedButton"
+              "material-ui/RaisedButton",
+              "material-ui/Table",
+              "material-ui/TableHeader",
+              "material-ui/TableHeaderColumn",
+              "material-ui/TableBody",
+              "material-ui/TableRow",
+              "material-ui/TableRowColumn"
             ],
             message: "Please use @material-ui/core instead."
           }
