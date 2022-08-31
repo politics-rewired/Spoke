@@ -26,7 +26,7 @@ const colors: SpokeColors = {
   lightYellow: "rgb(252, 214, 120)"
 };
 
-const defaultFont = "Poppins";
+const defaultFont = "Karla";
 
 const text: TextStyles = {
   body: {

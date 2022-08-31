@@ -16,7 +16,7 @@ export const createMuiThemev0 = (theme: Partial<CustomTheme> = {}) => {
 
   return getMuiTheme(
     {
-      fontFamily: "Poppins",
+      fontFamily: "Karla",
       palette: {
         primary1Color: primaryColor,
         textColor: theme.primaryTextColor || blueGrey[800],
