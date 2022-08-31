@@ -1,5 +1,9 @@
-import type { FetchPolicy } from "@apollo/client";
-import { Query } from "@apollo/client/react/components";
+import type {
+  DocumentNode,
+  FetchPolicy,
+  TypedDocumentNode
+} from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import type { Draft } from "immer";
 import produce from "immer";
 import React from "react";
@@ -23,7 +27,7 @@ export type UpdateQuery<TData, TVariables> = (
 ) => void;
 
 interface InfiniteRelayListProps<TData, TNode, TVariables> {
-  query: any;
+  query: DocumentNode | TypedDocumentNode<TData, TVariables>;
   queryVars: TVariables;
   nextQueryVars(cursor: string | null): TVariables;
   updateQuery: UpdateQuery<TData, TVariables>;
@@ -51,51 +55,49 @@ const InfiniteRelayList = <TData, TNode, TVariables>(
   const Empty = props.empty || DefaultEmpty;
   const cliffHanger = props.cliffHanger || DefaultCliffhanger;
 
+  const { data, loading, fetchMore } = useQuery<TData, TVariables>(
+    props.query,
+    {
+      variables: props.queryVars,
+      fetchPolicy: props.fetchPolicy || "network-only"
+    }
+  );
+
+  if (loading || !data) return <div />;
+
+  const relayPage = data ? props.toRelay(data) : emptyRelayPage<TNode>();
+
+  if (relayPage.edges.length === 0 && !loading) {
+    return <Empty />;
+  }
+
+  const onLoadMore = () =>
+    fetchMore({
+      variables: {
+        ...props.queryVars,
+        ...props.nextQueryVars(relayPage.pageInfo.endCursor)
+      },
+      updateQuery: (previousQueryResult, options) =>
+        produce(previousQueryResult, (nextResult) => {
+          props.updateQuery(nextResult, options);
+        })
+    });
+
   return (
-    <Query<TData, TVariables>
-      query={props.query}
-      variables={props.queryVars}
-      fetchPolicy={props.fetchPolicy || "network-only"}
-    >
-      {({ data, loading, fetchMore }): React.ReactNode => {
-        if (loading || !data) return <div />;
-
-        const relayPage = data ? props.toRelay(data) : emptyRelayPage<TNode>();
-
-        if (relayPage.edges.length === 0 && !loading) {
-          return <Empty />;
+    <>
+      {relayPage.edges.map(({ node }, idx) => (
+        <ChildOnly key={(props.keyFunc || ((_, i) => i))(node, idx)}>
+          {props.renderNode(node, idx)}
+        </ChildOnly>
+      ))}
+      <WhenSeen
+        onSeenChange={(isSeen) =>
+          isSeen && relayPage.pageInfo.hasNextPage && onLoadMore()
         }
-
-        const onLoadMore = () =>
-          fetchMore({
-            variables: {
-              ...props.queryVars,
-              ...props.nextQueryVars(relayPage.pageInfo.endCursor)
-            },
-            updateQuery: (previousQueryResult, options) =>
-              produce(previousQueryResult, (nextResult) => {
-                props.updateQuery(nextResult, options);
-              })
-          });
-
-        return (
-          <div>
-            {relayPage.edges.map(({ node }, idx) => (
-              <ChildOnly key={(props.keyFunc || ((_, i) => i))(node, idx)}>
-                {props.renderNode(node, idx)}
-              </ChildOnly>
-            ))}
-            <WhenSeen
-              onSeenChange={(isSeen) =>
-                isSeen && relayPage.pageInfo.hasNextPage && onLoadMore()
-              }
-            >
-              {cliffHanger(relayPage.pageInfo.hasNextPage, relayPage)}
-            </WhenSeen>
-          </div>
-        );
-      }}
-    </Query>
+      >
+        {cliffHanger(relayPage.pageInfo.hasNextPage, relayPage)}
+      </WhenSeen>
+    </>
   );
 };
 
