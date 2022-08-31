@@ -11,14 +11,9 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import { withTheme } from "@material-ui/core/styles";
-import CancelIcon from "@material-ui/icons/Cancel";
-import DoneIcon from "@material-ui/icons/Done";
-import WarningIcon from "@material-ui/icons/Warning";
 import { CampaignBuilderMode } from "@spoke/spoke-codegen";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
-import Avatar from "material-ui/Avatar";
-import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import CircularProgress from "material-ui/CircularProgress";
 import Divider from "material-ui/Divider";
 import PropTypes from "prop-types";
@@ -30,11 +25,12 @@ import { compose } from "recompose";
 import { withSpokeContext } from "../../client/spoke-context";
 import { withAuthzContext } from "../../components/AuthzProvider";
 import CampaignNavigation from "../../components/CampaignNavigation";
-import { camelCase, dataTest } from "../../lib/attributes";
+import { dataTest } from "../../lib/attributes";
 import { DateTime } from "../../lib/datetime";
 import theme from "../../styles/theme";
 import { loadData } from "../hoc/with-operations";
 import ApproveCampaignButton from "./components/ApproveCampaignButton";
+import { SectionWrapper } from "./components/SectionWrapper";
 import StartCampaignButton from "./components/StartCampaignButton";
 import {
   ARCHIVE_CAMPAIGN,
@@ -61,13 +57,6 @@ import CampaignTeamsForm from "./sections/CampaignTeamsForm";
 import CampaignTextersForm from "./sections/CampaignTextersForm";
 import CampaignTextingHoursForm from "./sections/CampaignTextingHoursForm";
 import CampaignVariablesForm from "./sections/CampaignVariablesForm";
-
-const extractStageAndStatus = (percentComplete) => {
-  if (percentComplete > 100) {
-    return `Filtering out landlines. ${percentComplete - 100}% complete`;
-  }
-  return `Uploading. ${percentComplete}% complete`;
-};
 
 class AdminCampaignEdit extends React.Component {
   constructor(props) {
@@ -633,6 +622,7 @@ class AdminCampaignEdit extends React.Component {
       jobId = relatedJob.id;
     }
     return {
+      relatedJob,
       sectionIsSaving,
       savePercent,
       jobMessage,
@@ -866,7 +856,7 @@ class AdminCampaignEdit extends React.Component {
   render() {
     const sections = this.sections();
     const { expandedSection, requestError } = this.state;
-    const { isAdmin, match, theme: stableMuiTheme } = this.props;
+    const { isAdmin, match } = this.props;
     const { campaignId } = match.params;
     const isNew = this.isNew();
     const saveLabel = isNew ? "Save and goto next section" : "Save";
@@ -905,107 +895,31 @@ class AdminCampaignEdit extends React.Component {
             this.checkSectionCompleted(section) &&
             this.checkSectionSaved(section);
           const sectionIsExpanded = sectionIndex === expandedSection;
-          let avatar = null;
-          const cardHeaderStyle = {
-            backgroundColor: theme.colors.lightGray
-          };
-          const titleStyle = {
-            width: "100%"
-          };
-          const avatarStyle = {
-            display: "inline-block",
-            verticalAlign: "middle"
-          };
 
-          const {
-            sectionIsSaving,
-            savePercent,
-            jobMessage,
-            jobId
-          } = this.sectionSaveStatus(section);
+          const { sectionIsSaving, relatedJob, jobId } = this.sectionSaveStatus(
+            section
+          );
           const sectionCanExpandOrCollapse =
             (section.expandAfterCampaignStarts ||
               !this.props.campaignData.campaign.isStarted) &&
             (isAdmin || section.expandableBySuperVolunteers);
 
-          if (sectionIsSaving) {
-            avatar = <CircularProgress style={avatarStyle} size={25} />;
-            cardHeaderStyle.background = theme.colors.lightGray;
-            cardHeaderStyle.width = `${
-              savePercent > 100 ? savePercent - 100 : savePercent
-            }%`;
-          } else if (sectionIsExpanded && sectionCanExpandOrCollapse) {
-            cardHeaderStyle.backgroundColor =
-              stableMuiTheme.palette.warning.main;
-            titleStyle.color = stableMuiTheme.palette.text.primary;
-          } else if (!sectionCanExpandOrCollapse) {
-            cardHeaderStyle.backgroundColor = theme.colors.lightGray;
-            titleStyle.color = stableMuiTheme.palette.text.primary;
-          } else if (sectionIsDone) {
-            avatar = (
-              <Avatar
-                icon={<DoneIcon style={{ color: theme.colors.darkGreen }} />}
-                style={avatarStyle}
-                size={25}
-              />
-            );
-            cardHeaderStyle.backgroundColor =
-              stableMuiTheme.palette.primary.main;
-            titleStyle.color = stableMuiTheme.palette.text.secondary;
-          } else if (!sectionIsDone) {
-            avatar = (
-              <Avatar
-                icon={<WarningIcon style={{ color: theme.colors.orange }} />}
-                style={avatarStyle}
-                size={25}
-              />
-            );
-            cardHeaderStyle.backgroundColor =
-              stableMuiTheme.palette.warning.main;
-            titleStyle.color = stableMuiTheme.palette.text.primary;
-          }
           return (
-            <Card
-              {...dataTest(camelCase(`${section.title}`))}
+            <SectionWrapper
               key={section.title}
-              expanded={sectionIsExpanded && sectionCanExpandOrCollapse}
-              expandable={sectionCanExpandOrCollapse}
-              onExpandChange={(newExpandedState) =>
-                this.onExpandChange(sectionIndex, newExpandedState)
-              }
-              style={{
-                marginTop: 1
-              }}
+              campaignId={campaignId}
+              active={sectionIsExpanded && sectionCanExpandOrCollapse}
+              onExpandChange={this.handleExpandChange(sectionIndex)}
+              onError={this.handleSectionError}
+              title={section.title}
+              isAdmin={isAdmin}
+              pendingJob={relatedJob}
+              isExpandable={!sectionIsSaving && sectionCanExpandOrCollapse}
+              sectionIsDone={sectionIsDone}
+              deleteJob={() => this.handleDeleteJob(jobId)}
             >
-              <CardHeader
-                title={section.title}
-                titleStyle={titleStyle}
-                style={cardHeaderStyle}
-                actAsExpander={!sectionIsSaving && sectionCanExpandOrCollapse}
-                showExpandableButton={
-                  !sectionIsSaving && sectionCanExpandOrCollapse
-                }
-                avatar={avatar}
-              />
-              <CardText expandable>
-                {this.renderCampaignFormSection(section, sectionIsSaving)}
-              </CardText>
-              {sectionIsSaving && isAdmin ? (
-                <CardActions>
-                  <div>
-                    Current Status: {extractStageAndStatus(savePercent)}
-                  </div>
-                  {jobMessage ? <div>Message: {jobMessage}</div> : null}
-                  <Button
-                    variant="contained"
-                    endIcon={<CancelIcon />}
-                    onClick={() => this.handleDeleteJob(jobId)}
-                  >
-                    Discard Job
-                  </Button>
-                </CardActions>
-              ) : null}
-            </Card>
+              {this.renderCampaignFormSection(section, sectionIsSaving)}
+            </SectionWrapper>
           );
         })}
         <Dialog
