@@ -68,7 +68,8 @@ const useStyles = makeStyles((theme) => ({
     borderColor: theme.palette.grey[500]
   },
   cardHeader: {
-    backgroundColor: theme.palette.grey[50]
+    backgroundColor: theme.palette.grey[50],
+    cursor: "pointer"
   },
   cardTitle: {
     width: "100%"
@@ -82,7 +83,8 @@ const useStyles = makeStyles((theme) => ({
   },
   unexpandable: {
     backgroundColor: theme.palette.grey[50],
-    color: theme.palette.text.primary
+    color: theme.palette.text.primary,
+    cursor: "default"
   },
   done: {
     backgroundColor: theme.palette.primary.main,
@@ -230,7 +232,6 @@ export const SectionWrapper: React.FC<WrapperProps> = (props) => {
                 className={clsx(classes.expand, {
                   [classes.expandOpen]: expanded
                 })}
-                onClick={() => onExpandChange(!expanded)}
               >
                 <ExpandMoreIcon
                   className={clsx({ [classes.expandClosedText]: !expanded })}
@@ -238,6 +239,7 @@ export const SectionWrapper: React.FC<WrapperProps> = (props) => {
               </IconButton>
             )
           }
+          onClick={() => onExpandChange(!expanded)}
         />
       </div>
       <Collapse in={expanded}>
