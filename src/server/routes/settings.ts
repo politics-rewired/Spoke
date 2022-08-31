@@ -41,9 +41,7 @@ router.get("/settings/theme", async (req, res) => {
     defaultCampaignLogo: getSetting("theme.defaultCampaignLogo"),
     logoUrl: getSetting("theme.logoUrl"),
     firstMessageIconUrl: getSetting("theme.firstMessageIconUrl"),
-    welcomeText: getSetting("theme.welcomeText"),
-    tabBackgroundColor: getSetting("theme.tabBackgroundColor") ?? "white",
-    tabTextColor: getSetting("theme.tabTextColor") ?? "black"
+    welcomeText: getSetting("theme.welcomeText")
   };
   return res.json(customTheme);
 });

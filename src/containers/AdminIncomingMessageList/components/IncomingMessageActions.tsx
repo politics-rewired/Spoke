@@ -1,5 +1,4 @@
 import AppBar from "@material-ui/core/AppBar";
-import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Card from "@material-ui/core/Card";
@@ -23,22 +22,14 @@ import { useSearchUsersQuery } from "@spoke/spoke-codegen";
 import React, { useMemo, useState } from "react";
 
 import { UserRoleType } from "../../../api/organization-membership";
-import { useSpokeTheme } from "../../../styles/spoke-theme-context";
+import TabPanel from "../../../components/TabPanel";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-const TabPanel: React.FC<TabPanelProps> = (props) => {
-  const { children, value, index } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index}>
-      <Box p={3}>{children}</Box>
-    </div>
-  );
-};
+const useStyles = makeStyles({
+  buttonGroup: {
+    marginTop: 20,
+    width: "50%"
+  }
+});
 
 type Texter = {
   id: string;
@@ -60,20 +51,7 @@ interface IncomingMessageActionsProps {
 const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
   props
 ) => {
-  const spokeTheme = useSpokeTheme();
-  const styles = makeStyles({
-    fullWidth: {
-      width: "100%"
-    },
-    buttonGroup: {
-      marginTop: 20,
-      width: "50%"
-    },
-    tabs: {
-      backgroundColor: spokeTheme.tabBackgroundColor,
-      color: spokeTheme.tabTextColor
-    }
-  })();
+  const styles = useStyles();
 
   const [selectedTexters, setSelectedTexters] = useState<Array<Texter>>([]);
   const [reassignDialogOpen, setReassignDialogOpen] = useState<boolean>(false);
@@ -190,12 +168,10 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
       />
       <Collapse in={showSection}>
         <CardContent>
-          <AppBar position="static">
+          <AppBar color="transparent" position="static">
             <Tabs
-              classes={{ root: styles.tabs }}
               value={activeTab}
               onChange={onChangeActiveTab}
-              indicatorColor="secondary"
               variant="fullWidth"
             >
               <Tab label="Reassign" />
