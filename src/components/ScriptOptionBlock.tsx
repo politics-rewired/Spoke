@@ -42,7 +42,7 @@ const tokensToElems = (tokens: ScriptToken[]) =>
     }
   });
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   label: {
     fontSize: "0.8em"
   },
@@ -52,7 +52,8 @@ const useStyles = makeStyles({
   },
   scriptField: {
     borderBottom: "1px solid #cccccc",
-    paddingBottom: "3px",
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(1),
     cursor: "pointer",
     flexGrow: 1
   },
@@ -64,7 +65,7 @@ const useStyles = makeStyles({
     fontSize: "0.8em",
     color: red[600]
   }
-});
+}));
 
 interface ScriptOptionBlockProps extends React.HTMLProps<HTMLDivElement> {
   script: string;
