@@ -3,10 +3,12 @@ import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
+import Divider from "@material-ui/core/Divider";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListSubheader from "@material-ui/core/ListSubheader";
 import CreateIcon from "@material-ui/icons/Create";
-import Divider from "material-ui/Divider";
-import { List, ListItem } from "material-ui/List";
-import Subheader from "material-ui/Subheader";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -82,23 +84,20 @@ class ScriptList extends React.Component {
       }
     };
 
-    const rightIconButton = null;
     const listItems = scripts.map((script) => (
-      <ListItem
-        value={script.text}
-        onClick={() => onSelectCannedResponse(script)}
-        key={script.id}
-        primaryText={script.title}
-        secondaryText={script.text}
-        rightIconButton={rightIconButton}
-        secondaryTextLines={2}
-      />
+      <ListItem key={script.id} onClick={() => onSelectCannedResponse(script)}>
+        <ListItemText
+          primary={script.title}
+          secondary={script.text}
+          // secondaryTextLines={2}
+        />
+      </ListItem>
     ));
 
     const list =
       scripts.length === 0 ? null : (
         <List>
-          <Subheader>{subheader}</Subheader>,{listItems}
+          <ListSubheader>{subheader}</ListSubheader>,{listItems}
           <Divider />
         </List>
       );
