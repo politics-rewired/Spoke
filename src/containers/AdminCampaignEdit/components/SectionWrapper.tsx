@@ -22,6 +22,7 @@ import { compose, withProps } from "recompose";
 import type { AuthzContextType } from "../../../components/AuthzProvider";
 import { withAuthzContext } from "../../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../../lib/attributes";
+import assemblePalette from "../../../styles/assemble-palette";
 import type { MuiThemeProviderProps } from "../../../styles/types";
 import { loadData } from "../../hoc/with-operations";
 import type { CampaignReadinessType } from "../types";
@@ -78,27 +79,29 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.grey[400]
   },
   active: {
-    backgroundColor: theme.palette.warning.main,
-    color: theme.palette.text.primary
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.getContrastText(theme.palette.primary.main)
   },
   unexpandable: {
-    backgroundColor: theme.palette.grey[50],
+    backgroundColor: assemblePalette.common.lightGrey,
     color: theme.palette.text.primary,
     cursor: "default"
   },
   done: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.getContrastText(theme.palette.primary.main)
+    backgroundColor: theme.palette.getContrastText(theme.palette.primary.main),
+    color: theme.palette.primary.main
   },
   notDone: {
     backgroundColor: theme.palette.warning.main,
     color: theme.palette.text.primary
   },
   cardAvatar: {
-    display: "inline-block",
-    verticalAlign: "middle",
-    width: 25,
-    height: 25
+    backgroundColor: assemblePalette.common.lightGrey,
+    width: theme.spacing(4),
+    height: theme.spacing(4)
+  },
+  cardAvatarEmpty: {
+    backgroundColor: "transparent"
   },
   doneIcon: {
     color: theme.palette.success.main
@@ -114,10 +117,11 @@ const useStyles = makeStyles((theme) => ({
     })
   },
   expandOpen: {
-    transform: "rotate(180deg)"
+    transform: "rotate(180deg)",
+    color: theme.palette.getContrastText(theme.palette.primary.main)
   },
   expandClosedText: {
-    color: theme.palette.getContrastText(theme.palette.primary.main)
+    color: theme.palette.primary.main
   }
 }));
 
@@ -168,12 +172,16 @@ export const SectionWrapper: React.FC<WrapperProps> = (props) => {
   const expandable = !isSaving && isExpandable;
   const expanded = active && expandable;
 
-  let avatar = <div style={{ width: 25 }} />;
+  let avatar = (
+    <Avatar className={clsx(classes.cardAvatar, classes.cardAvatarEmpty)}>
+      &nbsp;
+    </Avatar>
+  );
   const classNames: string[] = [classes.cardHeader];
   const cardHeaderStyle: React.CSSProperties = {};
 
   if (isSaving) {
-    avatar = <CircularProgress className={classes.cardAvatar} size={25} />;
+    avatar = <CircularProgress className={classes.cardAvatar} />;
     classNames.push(classes.saving);
     cardHeaderStyle.width = `${progressPercent}%`;
   } else if (active && expandable) {

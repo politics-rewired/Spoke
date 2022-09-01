@@ -12,6 +12,9 @@ export const assemblePalette = {
   tertiary: {
     darkBlue: "#004B70",
     lightBlue: "#0085C0"
+  },
+  common: {
+    lightGrey: "#F5F5F6"
   }
 };
 
