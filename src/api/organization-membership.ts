@@ -60,7 +60,7 @@ export const schema = `
 
   input MembershipFilter {
     nameSearch: String
-    campaignId: Int
+    campaignId: String
     campaignArchived: Boolean
     roles: [String!]
   }

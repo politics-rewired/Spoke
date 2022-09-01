@@ -147,7 +147,7 @@ export const resolvers = {
         query.whereExists(function subquery() {
           this.select(this.client.raw("1"))
             .from("assignment")
-            .whereRaw('"assignment"."user_id" = "user"."id"')
+            .whereRaw('"assignment"."user_id" = "user_organization"."user_id"')
             .where({ campaign_id: campaignIdInt });
         });
       } else if (campaignArchived === true || campaignArchived === false) {
