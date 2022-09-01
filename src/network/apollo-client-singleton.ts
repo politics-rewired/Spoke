@@ -13,6 +13,12 @@ const uploadLink = createUploadLink({
   credentials: "same-origin"
 });
 
+enum GraphQLErrors {
+  Unathenticated = "UNAUTHENTICATED",
+  GraphQLParseFailed = "GRAPHQL_PARSE_FAILED",
+  InternalServerError = "INTERNAL_SERVER_ERROR"
+}
+
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError && "statusCode" in networkError) {
     switch (networkError.statusCode) {
@@ -31,8 +37,12 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     for (const err of graphQLErrors) {
       switch (err.extensions.code) {
-        case "UNAUTHENTICATED":
+        case GraphQLErrors.Unathenticated:
           window.location.href = `/login?nextUrl=${window.location.pathname}`;
+          break;
+        case GraphQLErrors.GraphQLParseFailed:
+        case GraphQLErrors.InternalServerError:
+          eventBus.emit(EventTypes.GraphQLServerError);
           break;
         // no default
       }
