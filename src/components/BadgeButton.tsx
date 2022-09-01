@@ -2,10 +2,12 @@ import type { Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
 import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
+import { yellow } from "@material-ui/core/colors";
 import React from "react";
 
 import { dataTest } from "../lib/attributes";
-import theme from "../styles/theme";
+
+export type MessageType = "initial" | "reply" | "past";
 
 export interface BadgeButtonProps {
   title: string;
@@ -15,14 +17,19 @@ export interface BadgeButtonProps {
   primary?: boolean;
   disabled?: boolean;
   onClick?: React.MouseEventHandler<unknown>;
-  color?: string;
+  type?: MessageType;
 }
 
-const useStyles = makeStyles<Theme, BadgeButtonProps>({
+const useStyles = makeStyles<Theme, BadgeButtonProps>((theme) => ({
   badge: {
-    backgroundColor: (props) => props.color ?? theme.colors.yellow
+    backgroundColor: ({ type: messageType = "past" }) =>
+      messageType === "initial"
+        ? theme.palette.success.light
+        : messageType === "reply"
+        ? yellow[600]
+        : theme.palette.error.light
   }
-});
+}));
 
 export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
   const classes = useStyles(props);
@@ -59,7 +66,7 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
     >
       <Button
         {...dataTest(props.dataTestText)}
-        variant="contained"
+        variant="outlined"
         disabled={props.disabled}
         color={buttonColor}
         onClick={props.onClick}
