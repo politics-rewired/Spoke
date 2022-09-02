@@ -1,25 +1,26 @@
 import { gql } from "@apollo/client";
-import { ListItemIcon, ListItemText } from "@material-ui/core";
+import {
+  ListItemIcon,
+  ListItemText,
+  makeStyles,
+  Typography
+} from "@material-ui/core";
 import { amber, grey } from "@material-ui/core/colors";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import Paper from "@material-ui/core/Paper";
 import MarkunreadMailboxIcon from "@material-ui/icons/MarkunreadMailbox";
 import NotificationsPausedIcon from "@material-ui/icons/NotificationsPaused";
-import { css, StyleSheet } from "aphrodite";
 import sortBy from "lodash/sortBy";
 import React from "react";
 import { Redirect, useHistory } from "react-router-dom";
 
 import type { RelayPaginatedResponse } from "../../../api/pagination";
-import theme from "../../../styles/theme";
 import { loadData } from "../../hoc/with-operations";
 
-const styles = StyleSheet.create({
-  header: {
-    ...theme.text.header,
-    marginBottom: 15,
-    color: theme.colors.white
+const useStyles = makeStyles({
+  orgText: {
+    textAlign: "center"
   }
 });
 
@@ -48,6 +49,7 @@ export interface OrganizationListProps {
 export const OrganizationList: React.FC<OrganizationListProps> = (props) => {
   const { currentUser } = props.data;
   const history = useHistory();
+  const classes = useStyles();
 
   const handleSelectOrg = (membership: MembershipType) => () => {
     const {
@@ -64,9 +66,9 @@ export const OrganizationList: React.FC<OrganizationListProps> = (props) => {
   if (memberships.length === 0) {
     return (
       <div>
-        <div className={css(styles.header)}>
+        <Typography variant="h4" gutterBottom>
           You currently aren't part of any organization!
-        </div>
+        </Typography>
         <div>
           If you got sent a link by somebody to start texting, ask that person
           to send you the link to join their organization. Then, come back here
@@ -98,7 +100,9 @@ export const OrganizationList: React.FC<OrganizationListProps> = (props) => {
 
   return (
     <div>
-      <div className={css(styles.header)}>Select your organization</div>
+      <Typography variant="h4" gutterBottom>
+        Select your organization
+      </Typography>
       {showIcons && (
         <p>
           Organizations with available assignments are marked with an amber
@@ -122,7 +126,10 @@ export const OrganizationList: React.FC<OrganizationListProps> = (props) => {
                 onClick={handleSelectOrg(membership)}
               >
                 <ListItemIcon>{leftIcon}</ListItemIcon>
-                <ListItemText primary={membership.organization.name} />
+                <ListItemText
+                  primary={membership.organization.name}
+                  primaryTypographyProps={{ className: classes.orgText }}
+                />
               </ListItem>
             );
           })}
