@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.37.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.36.0...v4.37.0-rc.0) (2022-09-02)
+
+
+### Features
+
+* show a snackbar on mulitple graphql server errors ([#1362](https://github.com/politics-rewired/spoke/issues/1362)) ([1ef811d](https://github.com/politics-rewired/spoke/commit/1ef811da85d2554a3747fc04496bf498006133fe))
+
+
+### Bug Fixes
+
+* **people:** add missing join on user table ([#1368](https://github.com/politics-rewired/spoke/issues/1368)) ([29e9d88](https://github.com/politics-rewired/spoke/commit/29e9d888078636f7018adbb0aab581a3cc8b449e))
+
 ## [4.36.0](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.3...v4.36.0) (2022-08-31)
 
 ## [4.36.0-rc.3](https://github.com/politics-rewired/spoke/compare/v4.36.0-rc.2...v4.36.0-rc.3) (2022-08-29)
