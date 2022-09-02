@@ -125,7 +125,7 @@ export const OrganizationList: React.FC<OrganizationListProps> = (props) => {
                 button
                 onClick={handleSelectOrg(membership)}
               >
-                <ListItemIcon>{leftIcon}</ListItemIcon>
+                {showIcons && <ListItemIcon>{leftIcon}</ListItemIcon>}
                 <ListItemText
                   primary={membership.organization.name}
                   primaryTypographyProps={{ className: classes.orgText }}
