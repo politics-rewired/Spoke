@@ -12,7 +12,7 @@ CONTAINER_ID=$(docker container run -d  \
   -e POSTGRES_DB=postgres \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=zalando \
-  registry.opensource.zalan.do/acid/spilo-13:2.0-p6)
+  registry.opensource.zalan.do/acid/spilo-14:2.1-p6)
 
 
 retVal=$?

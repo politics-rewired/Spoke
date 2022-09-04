@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.2 (Ubuntu 13.2-1.pgdg18.04+1)
--- Dumped by pg_dump version 13.2 (Ubuntu 13.2-1.pgdg18.04+1)
+-- Dumped from database version 14.4 (Ubuntu 14.4-1.pgdg18.04+1)
+-- Dumped by pg_dump version 14.4 (Ubuntu 14.4-1.pgdg18.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -100,7 +100,7 @@ ALTER FUNCTION public.all_question_response_before_update() OWNER TO postgres;
 -- Name: backfill_all_segment_info(bigint, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
-CREATE PROCEDURE public.backfill_all_segment_info(initial_min bigint, batch_size bigint)
+CREATE PROCEDURE public.backfill_all_segment_info(IN initial_min bigint, IN batch_size bigint)
     LANGUAGE plpgsql
     AS $$
     declare
@@ -128,7 +128,7 @@ CREATE PROCEDURE public.backfill_all_segment_info(initial_min bigint, batch_size
     $$;
 
 
-ALTER PROCEDURE public.backfill_all_segment_info(initial_min bigint, batch_size bigint) OWNER TO postgres;
+ALTER PROCEDURE public.backfill_all_segment_info(IN initial_min bigint, IN batch_size bigint) OWNER TO postgres;
 
 --
 -- Name: backfill_current_month_organization_message_usages(); Type: FUNCTION; Schema: public; Owner: postgres
@@ -1639,7 +1639,7 @@ CREATE VIEW public.assignable_needs_message AS
     acc.message_status
    FROM (public.assignable_campaign_contacts acc
      JOIN public.campaign ON ((campaign.id = acc.campaign_id)))
-  WHERE ((acc.message_status = 'needsMessage'::text) AND (((acc.contact_timezone IS NULL) AND (date_part('hour'::text, timezone(campaign.timezone, CURRENT_TIMESTAMP)) < (campaign.texting_hours_end)::double precision) AND (date_part('hour'::text, timezone(campaign.timezone, CURRENT_TIMESTAMP)) >= (campaign.texting_hours_start)::double precision)) OR (((campaign.texting_hours_end)::double precision > date_part('hour'::text, (timezone(acc.contact_timezone, CURRENT_TIMESTAMP) + '00:10:00'::interval))) AND ((campaign.texting_hours_start)::double precision <= date_part('hour'::text, timezone(acc.contact_timezone, CURRENT_TIMESTAMP))))));
+  WHERE ((acc.message_status = 'needsMessage'::text) AND (((acc.contact_timezone IS NULL) AND (EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE campaign.timezone)) < (campaign.texting_hours_end)::numeric) AND (EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE campaign.timezone)) >= (campaign.texting_hours_start)::numeric)) OR (((campaign.texting_hours_end)::numeric > EXTRACT(hour FROM ((CURRENT_TIMESTAMP AT TIME ZONE acc.contact_timezone) + '00:10:00'::interval))) AND ((campaign.texting_hours_start)::numeric <= EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE acc.contact_timezone))))));
 
 
 ALTER TABLE public.assignable_needs_message OWNER TO postgres;
@@ -1659,7 +1659,7 @@ CREATE VIEW public.assignable_campaigns_with_needs_message AS
            FROM public.assignable_needs_message
           WHERE (assignable_needs_message.campaign_id = assignable_campaigns.id))) AND (NOT (EXISTS ( SELECT 1
            FROM public.campaign
-          WHERE ((campaign.id = assignable_campaigns.id) AND (now() > date_trunc('day'::text, timezone(campaign.timezone, (campaign.due_by + '24:00:00'::interval)))))))) AND (assignable_campaigns.autosend_status <> 'sending'::text));
+          WHERE ((campaign.id = assignable_campaigns.id) AND (now() > date_trunc('day'::text, ((campaign.due_by + '24:00:00'::interval) AT TIME ZONE campaign.timezone))))))) AND (assignable_campaigns.autosend_status <> 'sending'::text));
 
 
 ALTER TABLE public.assignable_campaigns_with_needs_message OWNER TO postgres;
@@ -1674,7 +1674,7 @@ CREATE VIEW public.assignable_needs_reply AS
     acc.message_status
    FROM (public.assignable_campaign_contacts acc
      JOIN public.campaign ON ((campaign.id = acc.campaign_id)))
-  WHERE ((acc.message_status = 'needsResponse'::text) AND (((acc.contact_timezone IS NULL) AND (date_part('hour'::text, timezone(campaign.timezone, CURRENT_TIMESTAMP)) < (campaign.texting_hours_end)::double precision) AND (date_part('hour'::text, timezone(campaign.timezone, CURRENT_TIMESTAMP)) >= (campaign.texting_hours_start)::double precision)) OR (((campaign.texting_hours_end)::double precision > date_part('hour'::text, (timezone(acc.contact_timezone, CURRENT_TIMESTAMP) + '00:02:00'::interval))) AND ((campaign.texting_hours_start)::double precision <= date_part('hour'::text, timezone(acc.contact_timezone, CURRENT_TIMESTAMP))))));
+  WHERE ((acc.message_status = 'needsResponse'::text) AND (((acc.contact_timezone IS NULL) AND (EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE campaign.timezone)) < (campaign.texting_hours_end)::numeric) AND (EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE campaign.timezone)) >= (campaign.texting_hours_start)::numeric)) OR (((campaign.texting_hours_end)::numeric > EXTRACT(hour FROM ((CURRENT_TIMESTAMP AT TIME ZONE acc.contact_timezone) + '00:02:00'::interval))) AND ((campaign.texting_hours_start)::numeric <= EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE acc.contact_timezone))))));
 
 
 ALTER TABLE public.assignable_needs_reply OWNER TO postgres;
@@ -1708,7 +1708,7 @@ CREATE VIEW public.assignable_needs_reply_with_escalation_tags AS
     acc.applied_escalation_tags
    FROM (public.assignable_campaign_contacts_with_escalation_tags acc
      JOIN public.campaign ON ((campaign.id = acc.campaign_id)))
-  WHERE ((acc.message_status = 'needsResponse'::text) AND (((acc.contact_timezone IS NULL) AND (date_part('hour'::text, timezone(campaign.timezone, CURRENT_TIMESTAMP)) < (campaign.texting_hours_end)::double precision) AND (date_part('hour'::text, timezone(campaign.timezone, CURRENT_TIMESTAMP)) >= (campaign.texting_hours_start)::double precision)) OR (((campaign.texting_hours_end)::double precision > date_part('hour'::text, (timezone(acc.contact_timezone, CURRENT_TIMESTAMP) + '00:02:00'::interval))) AND ((campaign.texting_hours_start)::double precision <= date_part('hour'::text, timezone(acc.contact_timezone, CURRENT_TIMESTAMP))))));
+  WHERE ((acc.message_status = 'needsResponse'::text) AND (((acc.contact_timezone IS NULL) AND (EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE campaign.timezone)) < (campaign.texting_hours_end)::numeric) AND (EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE campaign.timezone)) >= (campaign.texting_hours_start)::numeric)) OR (((campaign.texting_hours_end)::numeric > EXTRACT(hour FROM ((CURRENT_TIMESTAMP AT TIME ZONE acc.contact_timezone) + '00:02:00'::interval))) AND ((campaign.texting_hours_start)::numeric <= EXTRACT(hour FROM (CURRENT_TIMESTAMP AT TIME ZONE acc.contact_timezone))))));
 
 
 ALTER TABLE public.assignable_needs_reply_with_escalation_tags OWNER TO postgres;
@@ -1810,7 +1810,7 @@ CREATE VIEW public.autosend_campaigns_to_send AS
            FROM public.assignable_needs_message
           WHERE (assignable_needs_message.campaign_id = sendable_campaigns.id))) AND (NOT (EXISTS ( SELECT 1
            FROM public.campaign
-          WHERE ((campaign.id = sendable_campaigns.id) AND (now() > date_trunc('day'::text, timezone(campaign.timezone, (campaign.due_by + '24:00:00'::interval)))))))) AND (sendable_campaigns.autosend_status = 'sending'::text));
+          WHERE ((campaign.id = sendable_campaigns.id) AND (now() > date_trunc('day'::text, ((campaign.due_by + '24:00:00'::interval) AT TIME ZONE campaign.timezone))))))) AND (sendable_campaigns.autosend_status = 'sending'::text));
 
 
 ALTER TABLE public.autosend_campaigns_to_send OWNER TO postgres;
