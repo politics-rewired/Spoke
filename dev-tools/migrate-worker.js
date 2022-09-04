@@ -31,6 +31,32 @@ const main = async () => {
       },
       client
     );
+
+    await client.query(`create schema if not exists graphile_secrets`);
+    await client.query(`
+      create table if not exists graphile_secrets.secrets (
+        ref text primary key,
+        encrypted_secret text
+      )
+    `);
+    await client.query(`
+      CREATE OR REPLACE FUNCTION graphile_secrets.set_secret(ref text, unencrypted_secret text)
+        RETURNS text
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path TO 'graphile_secrets'
+      AS $$
+      begin
+        insert into secrets (ref)
+        values (set_secret.ref);
+
+        insert into unencrypted_secrets (ref, unencrypted_secret)
+        values (set_secret.secret_ref, set_secret.unencrypted_secret);
+
+        return ref;
+      end;
+      $$;
+    `);
   } finally {
     client.release();
   }
