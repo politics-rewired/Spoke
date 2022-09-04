@@ -1,7 +1,7 @@
 import type { WebAPICallError, WebAPICallResult } from "@slack/web-api";
 import { ErrorCode } from "@slack/web-api";
+import type { JobHelpers, Task } from "graphile-worker";
 import isEmpty from "lodash/isEmpty";
-import type { JobHelpers, Task } from "pg-compose";
 import promiseRetry from "promise-retry";
 
 import { config } from "../../config";

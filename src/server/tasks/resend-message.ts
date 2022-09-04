@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import type { Task } from "pg-compose";
+import type { Task } from "graphile-worker";
 
 import { sendMessage } from "../api/lib/assemble-numbers";
 import type { SendMessagePayload } from "../api/lib/types";

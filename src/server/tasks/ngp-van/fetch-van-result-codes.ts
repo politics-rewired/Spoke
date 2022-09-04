@@ -1,8 +1,10 @@
-import type { Task } from "pg-compose";
+import type { Task } from "graphile-worker";
 import { get } from "superagent";
 
-import type { VanAuthPayload } from "../lib/external-systems";
-import { withVan } from "../lib/external-systems";
+import type { VanAuthPayload } from "./lib";
+import { handleResult, withVan } from "./lib";
+
+export const TASK_IDENTIFIER = "van-get-result-codes";
 
 interface GetResultCodesPayload extends VanAuthPayload {
   van_system_id: string;
@@ -17,7 +19,7 @@ export interface VANResultCode {
 
 export const fetchVANResultCodes: Task = async (
   payload: GetResultCodesPayload,
-  _helpers: any
+  helpers
 ) => {
   // Result Codes are not paginated
   const response = await get("/canvassResponses/resultCodes").use(
@@ -25,13 +27,15 @@ export const fetchVANResultCodes: Task = async (
   );
   const resultCodes: VANResultCode[] = response.body;
 
-  return resultCodes.map((sq) => ({
+  const result = resultCodes.map((sq) => ({
     van_system_id: payload.van_system_id,
     result_code_id: sq.resultCodeId,
     name: sq.name,
     medium_name: sq.mediumName,
     short_name: sq.shortName
   }));
+
+  await handleResult(helpers, payload, result);
 };
 
 export default fetchVANResultCodes;

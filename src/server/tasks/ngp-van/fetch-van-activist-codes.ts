@@ -1,11 +1,11 @@
-import type { Task } from "pg-compose";
+import type { Task } from "graphile-worker";
 import { get } from "superagent";
 
-import type {
-  VanAuthPayload,
-  VANDataCollectionStatus
-} from "../lib/external-systems";
-import { withVan } from "../lib/external-systems";
+import type { VANDataCollectionStatus } from "../../lib/external-systems";
+import type { VanAuthPayload } from "./lib";
+import { handleResult, withVan } from "./lib";
+
+export const TASK_IDENTIFIER = "van-get-activist-codes";
 
 interface GetActivistCodesPayload extends VanAuthPayload {
   van_system_id: string;
@@ -24,7 +24,7 @@ export interface VANActivistCode {
 
 export const fetchVANActivistCodes: Task = async (
   payload: GetActivistCodesPayload,
-  _helpers: any
+  helpers
 ) => {
   const limit = 50;
   let offset = 0;
@@ -43,7 +43,7 @@ export const fetchVANActivistCodes: Task = async (
     surveyQuestions = surveyQuestions.concat(body.items);
   } while (hasNextPage);
 
-  return surveyQuestions.map((sq) => ({
+  const result = surveyQuestions.map((sq) => ({
     van_system_id: payload.van_system_id,
     activist_code_id: sq.activistCodeId,
     type: sq.type,
@@ -54,6 +54,8 @@ export const fetchVANActivistCodes: Task = async (
     script_question: sq.scriptQuestion,
     status: sq.status.toLowerCase()
   }));
+
+  await handleResult(helpers, payload, result);
 };
 
 export default fetchVANActivistCodes;

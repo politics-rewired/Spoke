@@ -10,7 +10,7 @@ import { createApp } from "./app";
 import { r } from "./models";
 import { setupUserNotificationObservers } from "./notifications";
 import { errToObj } from "./utils";
-import { getWorker } from "./worker";
+import { getScheduler, getWorker } from "./worker";
 
 process.on("uncaughtException", (ex) => {
   logger.error("uncaughtException: ", ex);
@@ -69,12 +69,19 @@ if (config.MODE === ServerMode.Server || config.MODE === ServerMode.Dual) {
 }
 
 if (config.MODE === ServerMode.Worker || config.MODE === ServerMode.Dual) {
-  // Launch pg-compose worker
+  // Launch graphile worker
   lightship.queueBlockingTask(getWorker());
   lightship.registerShutdownHandler(async () => {
     const worker = await getWorker();
     await worker.stop();
     logger.info("Tore down Graphile runner");
+  });
+
+  lightship.queueBlockingTask(getScheduler());
+  lightship.registerShutdownHandler(async () => {
+    const scheduler = await getScheduler();
+    await scheduler.stop();
+    logger.info("Tore down Graphile Scheduler");
   });
 }
 

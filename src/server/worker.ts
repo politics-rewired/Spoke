@@ -1,7 +1,7 @@
-import type { LogFunctionFactory } from "graphile-worker";
-import { Logger } from "graphile-worker";
-import type { PgComposeWorker } from "pg-compose";
-import { loadYaml, run } from "pg-compose";
+import type { Runner as Scheduler, ScheduleConfig } from "graphile-scheduler";
+import { run as runScheduler } from "graphile-scheduler";
+import type { LogFunctionFactory, Runner, TaskList } from "graphile-worker";
+import { Logger, run } from "graphile-worker";
 
 import { config } from "../config";
 import { sleep } from "../lib";
@@ -19,15 +19,13 @@ import {
   exportForVan,
   TASK_IDENTIFIER as exportForVanIdentifier
 } from "./tasks/export-for-van";
-import fetchVANActivistCodes from "./tasks/fetch-van-activist-codes";
-import fetchVANResultCodes from "./tasks/fetch-van-result-codes";
-import fetchVANSurveyQuestions from "./tasks/fetch-van-survey-questions";
 import {
   filterLandlines,
   TASK_IDENTIFIER as filterLandlinesIdentifier
 } from "./tasks/filter-landlines";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
+import { taskList as ngpVanTaskList } from "./tasks/ngp-van";
 import queueAutoSendInitials from "./tasks/queue-autosend-initials";
 import {
   queueDailyNotifications,
@@ -55,107 +53,107 @@ const logFactory: LogFunctionFactory = (scope) => (level, message, meta) =>
 
 const graphileLogger = new Logger(logFactory);
 
-let worker: PgComposeWorker | undefined;
+let worker: Runner | undefined;
 let workerSemaphore = false;
 
-export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
+export const getWorker = async (attempt = 0): Promise<Runner> => {
   if (worker) return worker;
 
-  const m = await loadYaml({ include: `${__dirname}/pg-compose/**/*.yaml` });
+  const taskList: TaskList = {
+    "handle-autoassignment-request": handleAutoassignmentRequest,
+    "release-stale-replies": releaseStaleReplies,
+    "handle-delivery-report": handleDeliveryReport,
+    "troll-patrol": trollPatrol,
+    "troll-patrol-for-org": trollPatrolForOrganization,
+    "sync-slack-team-members": syncSlackTeamMembers,
+    "van-sync-campaign-contact": syncCampaignContactToVAN,
+    "update-van-sync-statuses": updateVanSyncStatuses,
+    "update-org-message-usage": updateOrgMessageUsage,
+    "resend-message": resendMessage,
+    "retry-interaction-step": retryInteractionStep,
+    "queue-pending-notifications": queuePendingNotifications,
+    "queue-periodic-notifications": queuePeriodicNotifications,
+    "queue-daily-notifications": queueDailyNotifications,
+    "send-notification-email": sendNotificationEmail,
+    "send-notification-digest": sendNotificationDigestForUser,
+    "queue-autosend-initials": queueAutoSendInitials,
+    [exportCampaignIdentifier]: wrapProgressTask(exportCampaign, {
+      removeOnComplete: true
+    }),
+    [exportForVanIdentifier]: wrapProgressTask(exportForVan, {
+      removeOnComplete: true
+    }),
+    [filterLandlinesIdentifier]: wrapProgressTask(filterLandlines, {
+      removeOnComplete: false
+    }),
+    [assignTextersIdentifier]: wrapProgressTask(assignTexters, {
+      removeOnComplete: true
+    }),
+    ...ngpVanTaskList
+  };
 
-  m.taskList!["handle-autoassignment-request"] = handleAutoassignmentRequest;
-  m.taskList!["release-stale-replies"] = releaseStaleReplies;
-  m.taskList!["handle-delivery-report"] = handleDeliveryReport;
-  m.taskList!["troll-patrol"] = trollPatrol;
-  m.taskList!["troll-patrol-for-org"] = trollPatrolForOrganization;
-  m.taskList!["sync-slack-team-members"] = syncSlackTeamMembers;
-  m.taskList!["van-get-survey-questions"] = fetchVANSurveyQuestions;
-  m.taskList!["van-get-activist-codes"] = fetchVANActivistCodes;
-  m.taskList!["van-get-result-codes"] = fetchVANResultCodes;
-  m.taskList!["van-sync-campaign-contact"] = syncCampaignContactToVAN;
-  m.taskList!["update-van-sync-statuses"] = updateVanSyncStatuses;
-  m.taskList!["update-org-message-usage"] = updateOrgMessageUsage;
-  m.taskList!["resend-message"] = resendMessage;
-  m.taskList!["retry-interaction-step"] = retryInteractionStep;
-  m.taskList!["queue-pending-notifications"] = queuePendingNotifications;
-  m.taskList!["queue-periodic-notifications"] = queuePeriodicNotifications;
-  m.taskList!["queue-daily-notifications"] = queueDailyNotifications;
-  m.taskList!["send-notification-email"] = sendNotificationEmail;
-  m.taskList!["send-notification-digest"] = sendNotificationDigestForUser;
-  m.taskList!["queue-autosend-initials"] = queueAutoSendInitials;
-  m.taskList![exportCampaignIdentifier] = wrapProgressTask(exportCampaign, {
-    removeOnComplete: true
-  });
-  m.taskList![exportForVanIdentifier] = wrapProgressTask(exportForVan, {
-    removeOnComplete: true
-  });
-  m.taskList![filterLandlinesIdentifier] = wrapProgressTask(filterLandlines, {
-    removeOnComplete: false
-  });
-  m.taskList![assignTextersIdentifier] = wrapProgressTask(assignTexters, {
-    removeOnComplete: true
-  });
+  const schedules: ScheduleConfig[] = [
+    {
+      name: "release-stale-replies",
+      taskIdentifier: "release-stale-replies",
+      pattern: "*/5 * * * *",
+      timeZone: config.TZ
+    },
 
-  m.cronJobs!.push({
-    name: "release-stale-replies",
-    task_name: "release-stale-replies",
-    pattern: "*/5 * * * *",
-    time_zone: config.TZ
-  });
+    {
+      name: "update-van-sync-statuses",
+      taskIdentifier: "update-van-sync-statuses",
+      pattern: "* * * * *",
+      timeZone: config.TZ
+    },
 
-  m.cronJobs!.push({
-    name: "update-van-sync-statuses",
-    task_name: "update-van-sync-statuses",
-    pattern: "* * * * *",
-    time_zone: config.TZ
-  });
+    {
+      name: "queue-pending-notifications",
+      taskIdentifier: "queue-pending-notifications",
+      pattern: "* * * * *",
+      timeZone: config.TZ
+    },
 
-  m.cronJobs!.push({
-    name: "queue-pending-notifications",
-    task_name: "queue-pending-notifications",
-    pattern: "* * * * *",
-    time_zone: config.TZ
-  });
+    {
+      name: "queue-periodic-notifications",
+      taskIdentifier: "queue-periodic-notifications",
+      pattern: "0 9,13,16,20 * * *",
+      timeZone: config.TZ
+    },
 
-  m.cronJobs!.push({
-    name: "queue-periodic-notifications",
-    task_name: "queue-periodic-notifications",
-    pattern: "0 9,13,16,20 * * *",
-    time_zone: config.TZ
-  });
-
-  m.cronJobs!.push({
-    name: "queue-daily-notifications",
-    task_name: "queue-daily-notifications",
-    pattern: "0 9 * * *",
-    time_zone: config.TZ
-  });
+    {
+      name: "queue-daily-notifications",
+      taskIdentifier: "queue-daily-notifications",
+      pattern: "0 9 * * *",
+      timeZone: config.TZ
+    }
+  ];
 
   if (config.ENABLE_AUTOSENDING) {
-    m.cronJobs!.push({
+    schedules.push({
       name: "queue-autosend-initials",
-      task_name: "queue-autosend-initials",
+      taskIdentifier: "queue-autosend-initials",
       pattern: "*/1 * * * *",
-      time_zone: config.TZ
+      timeZone: config.TZ
     });
   }
 
   if (config.ENABLE_MONTHLY_ORG_MESSAGE_LIMITS) {
-    m.cronJobs!.push({
+    schedules.push({
       name: "update-org-message-usage",
-      task_name: "update-org-message-usage",
+      taskIdentifier: "update-org-message-usage",
       pattern: "*/5 * * * *",
-      time_zone: config.TZ
+      timeZone: config.TZ
     });
   }
 
   if (config.SLACK_SYNC_CHANNELS) {
     if (config.SLACK_TOKEN) {
-      m.cronJobs!.push({
+      schedules.push({
         name: "sync-slack-team-members",
-        task_name: "sync-slack-team-members",
+        taskIdentifier: "sync-slack-team-members",
         pattern: config.SLACK_SYNC_CHANNELS_CRONTAB,
-        time_zone: config.TZ
+        timeZone: config.TZ
       });
     } else {
       logger.error(
@@ -166,20 +164,20 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
 
   if (config.ENABLE_TROLLBOT) {
     const jobInterval = config.TROLL_ALERT_PERIOD_MINUTES - 1;
-    m.cronJobs!.push({
+    schedules.push({
       name: "troll-patrol",
-      task_name: "troll-patrol",
+      taskIdentifier: "troll-patrol",
       pattern: `*/${jobInterval} * * * *`,
-      time_zone: config.TZ
+      timeZone: config.TZ
     });
   }
 
   if (!workerSemaphore) {
     workerSemaphore = true;
 
-    worker = await run(m, {
+    worker = await run({
       pgPool,
-      encryptionSecret: config.SESSION_SECRET,
+      taskList,
       concurrency: config.WORKER_CONCURRENCY,
       logger: graphileLogger,
       // Signals are handled by Terminus
@@ -194,6 +192,110 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   if (attempt >= 20) throw new Error("getWorker() took too long to resolve");
   await sleep(100);
   return getWorker(attempt + 1);
+};
+
+let scheduler: Scheduler | undefined;
+let schedulerSemaphore = false;
+
+export const getScheduler = async (attempt = 0): Promise<Scheduler> => {
+  if (scheduler) return scheduler;
+
+  const schedules: ScheduleConfig[] = [
+    {
+      name: "release-stale-replies",
+      taskIdentifier: "release-stale-replies",
+      pattern: "*/5 * * * *",
+      timeZone: config.TZ
+    },
+
+    {
+      name: "update-van-sync-statuses",
+      taskIdentifier: "update-van-sync-statuses",
+      pattern: "* * * * *",
+      timeZone: config.TZ
+    },
+
+    {
+      name: "queue-pending-notifications",
+      taskIdentifier: "queue-pending-notifications",
+      pattern: "* * * * *",
+      timeZone: config.TZ
+    },
+
+    {
+      name: "queue-periodic-notifications",
+      taskIdentifier: "queue-periodic-notifications",
+      pattern: "0 9,13,16,20 * * *",
+      timeZone: config.TZ
+    },
+
+    {
+      name: "queue-daily-notifications",
+      taskIdentifier: "queue-daily-notifications",
+      pattern: "0 9 * * *",
+      timeZone: config.TZ
+    }
+  ];
+
+  if (config.ENABLE_AUTOSENDING) {
+    schedules.push({
+      name: "queue-autosend-initials",
+      taskIdentifier: "queue-autosend-initials",
+      pattern: "*/1 * * * *",
+      timeZone: config.TZ
+    });
+  }
+
+  if (config.ENABLE_MONTHLY_ORG_MESSAGE_LIMITS) {
+    schedules.push({
+      name: "update-org-message-usage",
+      taskIdentifier: "update-org-message-usage",
+      pattern: "*/5 * * * *",
+      timeZone: config.TZ
+    });
+  }
+
+  if (config.SLACK_SYNC_CHANNELS) {
+    if (config.SLACK_TOKEN) {
+      schedules.push({
+        name: "sync-slack-team-members",
+        taskIdentifier: "sync-slack-team-members",
+        pattern: config.SLACK_SYNC_CHANNELS_CRONTAB,
+        timeZone: config.TZ
+      });
+    } else {
+      logger.error(
+        "Could not enable slack channel sync. No SLACK_TOKEN present."
+      );
+    }
+  }
+
+  if (config.ENABLE_TROLLBOT) {
+    const jobInterval = config.TROLL_ALERT_PERIOD_MINUTES - 1;
+    schedules.push({
+      name: "troll-patrol",
+      taskIdentifier: "troll-patrol",
+      pattern: `*/${jobInterval} * * * *`,
+      timeZone: config.TZ
+    });
+  }
+
+  if (!schedulerSemaphore) {
+    schedulerSemaphore = true;
+
+    scheduler = await runScheduler({
+      pgPool,
+      schedules,
+      logger: graphileLogger as any
+    });
+
+    return scheduler;
+  }
+
+  // Someone beat us to the punch of initializing the runner
+  if (attempt >= 20) throw new Error("getScheduler() took too long to resolve");
+  await sleep(100);
+  return getScheduler(attempt + 1);
 };
 
 export default getWorker;

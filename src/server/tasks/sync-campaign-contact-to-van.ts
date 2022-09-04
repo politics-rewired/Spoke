@@ -1,6 +1,6 @@
+import type { Task } from "graphile-worker";
 import isNil from "lodash/isNil";
 import type { PoolClient } from "pg";
-import type { Task } from "pg-compose";
 import { post } from "superagent";
 
 import { config } from "../../config";

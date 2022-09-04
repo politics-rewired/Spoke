@@ -1,6 +1,6 @@
 import { Pool } from "pg";
-import { runMigrations } from "pg-compose";
-import { Logger } from "graphile-worker";
+import { Logger, runMigrations } from "graphile-worker";
+import { migrate as migrateScheduler } from "graphile-scheduler/dist/migrate";
 
 import { config } from "../src/config";
 import logger from "../src/logger";
@@ -23,15 +23,27 @@ const main = async () => {
     logger: graphileLogger
   });
 
+  const client = await pool.connect();
+  try {
+    await migrateScheduler(
+      {
+        logger: graphileLogger
+      },
+      client
+    );
+  } finally {
+    client.release();
+  }
+
   await pool.end();
 };
 
 main()
   .then((result) => {
-    logger.info("Finished migrating pg-compose", { result });
+    logger.info("Finished migrating graphile-worker", { result });
     process.exit(0);
   })
   .catch((err) => {
-    logger.error("Error migrating pg-compose", err);
+    logger.error("Error migrating graphile-worker", err);
     process.exit(1);
   });
