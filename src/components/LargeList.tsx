@@ -33,6 +33,7 @@ const largeListItemStyles: { [key: string]: React.CSSProperties } = {
     margin: "5px 0 0 0",
     padding: 0,
     fontFamily: "Poppins",
+    whiteSpace: "pre-wrap",
     fontSize: "14px",
     color: grey[600]
   }

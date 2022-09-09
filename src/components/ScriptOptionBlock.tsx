@@ -54,6 +54,7 @@ const useStyles = makeStyles({
     borderBottom: "1px solid #cccccc",
     paddingBottom: "3px",
     cursor: "pointer",
+    whiteSpace: "pre-wrap",
     flexGrow: 1
   },
   warnLabel: {
