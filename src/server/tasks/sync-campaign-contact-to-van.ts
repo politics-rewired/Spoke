@@ -4,8 +4,9 @@ import type { PoolClient } from "pg";
 import { post } from "superagent";
 
 import { config } from "../../config";
-import type { VanAuthPayload } from "../lib/external-systems";
+import type { VanSecretAuthPayload } from "../lib/external-systems";
 import { withVan } from "../lib/external-systems";
+import { getVanAuth } from "./ngp-van/lib";
 
 class VANSyncError extends Error {
   status: number;
@@ -321,7 +322,7 @@ export const hasPayload = (canvassResponse: VANCanvassResponse) => {
   return hasResponses || hasResultCode;
 };
 
-export interface SyncCampaignContactToVANPayload extends VanAuthPayload {
+export interface SyncCampaignContactToVANPayload extends VanSecretAuthPayload {
   system_id: string;
   contact_id: number;
   cc_created_at: string;
@@ -334,6 +335,8 @@ export const syncCampaignContactToVAN: Task = async (
   payload: SyncCampaignContactToVANPayload,
   helpers
 ) => {
+  const auth = await getVanAuth(helpers, payload);
+
   const {
     system_id: systemId,
     contact_id: contactId,
@@ -382,7 +385,7 @@ export const syncCampaignContactToVAN: Task = async (
 
   for (const canvassResponse of canvassResponses) {
     const response = await post(`/people/${vanId}/canvassResponses`)
-      .use(withVan(payload))
+      .use(withVan(auth))
       .send(canvassResponse);
 
     if (response.status !== 204) {

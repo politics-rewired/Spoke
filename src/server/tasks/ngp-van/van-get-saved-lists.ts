@@ -1,14 +1,15 @@
 import type { Task } from "graphile-worker";
 import { get } from "superagent";
 
-import type { VanAuthPayload } from "./lib";
-import { handleResult, withVan } from "./lib";
+import type { VanSecretAuthPayload } from "../../lib/external-systems";
+import { withVan } from "../../lib/external-systems";
+import { getVanAuth, handleResult } from "./lib";
 
 export const TASK_IDENTIFIER = "van-get-saved-lists";
 
 const VAN_SAVED_LISTS_MAX_PAGE_SIZE = 100;
 
-interface GetSavedListsPayload extends VanAuthPayload {
+interface GetSavedListsPayload extends VanSecretAuthPayload {
   van_system_id: string;
 }
 
@@ -24,6 +25,8 @@ export const getSavedLists: Task = async (
   payload: GetSavedListsPayload,
   helpers
 ) => {
+  const auth = await getVanAuth(helpers, payload);
+
   let offset = 0;
   let returnCount = 0;
   let savedLists: VanSavedList[] = [];
@@ -33,7 +36,7 @@ export const getSavedLists: Task = async (
         $top: VAN_SAVED_LISTS_MAX_PAGE_SIZE,
         $skip: offset
       })
-      .use(withVan(payload));
+      .use(withVan(auth));
     const { body } = response;
     returnCount = body.items.length;
     offset += VAN_SAVED_LISTS_MAX_PAGE_SIZE;

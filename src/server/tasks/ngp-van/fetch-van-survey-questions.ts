@@ -1,13 +1,16 @@
 import type { Task } from "graphile-worker";
 import { get } from "superagent";
 
-import type { VANDataCollectionStatus } from "../../lib/external-systems";
-import type { VanAuthPayload } from "./lib";
-import { handleResult, withVan } from "./lib";
+import type {
+  VANDataCollectionStatus,
+  VanSecretAuthPayload
+} from "../../lib/external-systems";
+import { withVan } from "../../lib/external-systems";
+import { getVanAuth, handleResult } from "./lib";
 
 export const TASK_IDENTIFIER = "van-get-survey-questions";
 
-interface GetSurveyQuestionsPayload extends VanAuthPayload {
+interface GetSurveyQuestionsPayload extends VanSecretAuthPayload {
   van_system_id: string;
 }
 
@@ -34,6 +37,8 @@ export const fetchVANSurveyQuestions: Task = async (
   payload: GetSurveyQuestionsPayload,
   helpers
 ) => {
+  const auth = await getVanAuth(helpers, payload);
+
   const limit = 50;
   let offset = 0;
   let hasNextPage = false;
@@ -44,7 +49,7 @@ export const fetchVANSurveyQuestions: Task = async (
         $top: limit,
         $skip: offset
       })
-      .use(withVan(payload));
+      .use(withVan(auth));
     const { body } = response;
     hasNextPage = body.nextPageLink !== null;
     offset += limit;

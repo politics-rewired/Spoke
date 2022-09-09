@@ -7,9 +7,10 @@ import type { SuperAgentRequest } from "superagent";
 import { get, post } from "superagent";
 
 import { config } from "../../../config";
+import type { VanSecretAuthPayload } from "../../lib/external-systems";
+import { withVan } from "../../lib/external-systems";
 import { withTransaction } from "../../utils";
-import type { VanAuthPayload } from "./lib";
-import { handleResult, normalizedPhoneOrNull, withVan } from "./lib";
+import { getVanAuth, handleResult, normalizedPhoneOrNull } from "./lib";
 
 export const TASK_IDENTIFIER = "van-fetch-saved-list";
 
@@ -160,7 +161,7 @@ const maybeExtractPhoneType = (
   };
 };
 
-interface FetchSavedListsPayload extends VanAuthPayload {
+interface FetchSavedListsPayload extends VanSecretAuthPayload {
   saved_list_id: number;
   handler: string;
   row_merge: any;
@@ -173,7 +174,9 @@ export const fetchSavedList: Task = async (
   payload: FetchSavedListsPayload,
   helpers: JobHelpers
 ) => {
-  const response = await post("/exportJobs").use(withVan(payload)).send({
+  const auth = await getVanAuth(helpers, payload);
+
+  const response = await post("/exportJobs").use(withVan(auth)).send({
     savedListId: payload.saved_list_id,
     type: config.VAN_EXPORT_TYPE,
     webhookUrl: config.EXPORT_JOB_WEBHOOK

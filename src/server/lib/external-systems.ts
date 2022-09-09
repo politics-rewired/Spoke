@@ -5,6 +5,11 @@ import { r } from "../models";
 
 const DEFAULT_MODE = "0"; // VoterFile mode
 
+export interface VanSecretAuthPayload {
+  username: string;
+  api_key: { __secret: string };
+}
+
 export interface VanAuthPayload {
   username: string;
   api_key: string;

@@ -1,12 +1,13 @@
 import type { Task } from "graphile-worker";
 import { get } from "superagent";
 
-import type { VanAuthPayload } from "./lib";
-import { handleResult, withVan } from "./lib";
+import type { VanSecretAuthPayload } from "../../lib/external-systems";
+import { withVan } from "../../lib/external-systems";
+import { getVanAuth, handleResult } from "./lib";
 
 export const TASK_IDENTIFIER = "van-get-result-codes";
 
-interface GetResultCodesPayload extends VanAuthPayload {
+interface GetResultCodesPayload extends VanSecretAuthPayload {
   van_system_id: string;
 }
 
@@ -21,9 +22,11 @@ export const fetchVANResultCodes: Task = async (
   payload: GetResultCodesPayload,
   helpers
 ) => {
+  const auth = await getVanAuth(helpers, payload);
+
   // Result Codes are not paginated
   const response = await get("/canvassResponses/resultCodes").use(
-    withVan(payload)
+    withVan(auth)
   );
   const resultCodes: VANResultCode[] = response.body;
 
