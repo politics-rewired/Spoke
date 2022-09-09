@@ -3879,14 +3879,37 @@ const rootResolvers = {
         return getStepsToUpdate(trx, findAndReplace);
       });
 
-      return steps.map((step) => {
-        return {
+      const { searchString } = findAndReplace;
+
+      const stepsToChange = steps.map((step) => {
+        const script = step.script_options.filter((option) =>
+          option.includes(searchString)
+        );
+        const stepData = {
           id: step.id,
           campaignId: step.campaign_id,
-          campaignName: step.title,
-          script: step.script_options.join(" | ")
+          campaignName: step.title
         };
+
+        if (script.length === 1) {
+          // Script is a single array, convert to string before returning
+          return {
+            ...stepData,
+            script: script.toString()
+          };
+        }
+        // IDs get index added to it to not have multiple of the same IDs
+        // causes an issue with GraphQL is IDs are the same
+        return script.map((scriptOption, index) => ({
+          ...stepData,
+          id: `${stepData.id}-${index}`,
+          script: scriptOption
+        }));
       });
+
+      // Flatten array since some scripts might have multiple options changing
+      // for which we return an array of objects instead of a single array
+      return stepsToChange.flat();
     },
     superadmins: async (_root, _options, { user }) => {
       if (user.is_superadmin) {
