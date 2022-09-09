@@ -15,7 +15,7 @@ const tokensToElems = (tokens: ScriptToken[]) =>
     switch (token.type) {
       case ScriptTokenType.CustomField:
         return (
-          <span key={key} style={{ color: green[500] }}>
+          <span key={key} style={{ color: green[800] }}>
             {token.text}
           </span>
         );

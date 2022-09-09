@@ -53,7 +53,7 @@ export const createMuiThemev1 = (theme: Partial<CustomTheme> = {}) => {
       success: { main: theme.successColor || green[500], light: green[100] },
       warning: { main: theme.warningColor || baseTheme.colors.orange },
       error: { main: theme.errorColor || red[200] },
-      info: { main: infoColor, light: blue[100] },
+      info: { main: infoColor, light: blue[100], dark: blue[900] },
       text: {
         primary: theme.primaryTextColor || blueGrey[800],
         // Do not provide default of grey[50] here -- v0 and v1 behave differently

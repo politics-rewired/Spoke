@@ -1,7 +1,6 @@
 import Avatar from "@material-ui/core/Avatar";
 import Chip from "@material-ui/core/Chip";
 import blue from "@material-ui/core/colors/blue";
-import grey from "@material-ui/core/colors/grey";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
@@ -60,16 +59,16 @@ export const CampaignListRow: React.FC<Props> = (props) => {
     listItemStyle = inlineStyles.past;
   } else if (!isStarted || hasUnassignedContacts) {
     listItemStyle = {
-      color: theme.palette.warning.main
+      color: theme.palette.warning.dark
     };
     leftIcon = <WarningIcon />;
   } else if (hasUnsentInitialMessages) {
     listItemStyle = {
-      color: theme.palette.info.main
+      color: theme.palette.info.dark
     };
   } else {
     listItemStyle = {
-      color: theme.palette.success.main
+      color: theme.palette.success.dark
     };
   }
   const dueBy = DateTime.fromISO(campaign.dueBy || "");
@@ -78,7 +77,7 @@ export const CampaignListRow: React.FC<Props> = (props) => {
   if (DateTime.local() >= dueBy) {
     tags.push({
       title: "Overdue",
-      color: grey[900],
+      color: theme.palette.grey[900],
       backgroundColor: theme.palette.error.main
     });
   }
