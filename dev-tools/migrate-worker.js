@@ -40,22 +40,28 @@ const main = async () => {
       )
     `);
     await client.query(`
-      CREATE OR REPLACE FUNCTION graphile_secrets.set_secret(ref text, unencrypted_secret text)
-        RETURNS text
-        LANGUAGE plpgsql
-        SECURITY DEFINER
-        SET search_path TO 'graphile_secrets'
-      AS $$
+      do $do$
       begin
-        insert into secrets (ref)
-        values (set_secret.ref);
+        CREATE FUNCTION graphile_secrets.set_secret(ref text, unencrypted_secret text)
+          RETURNS text
+          LANGUAGE plpgsql
+          SECURITY DEFINER
+          SET search_path TO 'graphile_secrets'
+        AS $$
+        begin
+          insert into secrets (ref)
+          values (set_secret.ref);
 
-        insert into unencrypted_secrets (ref, unencrypted_secret)
-        values (set_secret.secret_ref, set_secret.unencrypted_secret);
+          insert into unencrypted_secrets (ref, unencrypted_secret)
+          values (set_secret.secret_ref, set_secret.unencrypted_secret);
 
-        return ref;
-      end;
-      $$;
+          return ref;
+        end;
+        $$;
+        exception
+          when duplicate_function then
+          null;
+      end; $do$
     `);
   } finally {
     client.release();
