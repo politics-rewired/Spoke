@@ -8,7 +8,7 @@ import { createTheme } from "@material-ui/core/styles"; // v4.x
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 import baseTheme from "./theme";
-import { CustomTheme } from "./types";
+import type { CustomTheme } from "./types";
 
 export const createMuiThemev0 = (theme: Partial<CustomTheme> = {}) =>
   getMuiTheme(
@@ -38,7 +38,8 @@ export const createMuiThemev1 = (theme: Partial<CustomTheme> = {}) =>
       primary: { main: theme.primaryColor || baseTheme.colors.green },
       secondary: { main: theme.secondaryColor || baseTheme.colors.green },
       badge: { main: theme.badgeColor || yellow[700] },
-      success: { main: theme.successColor || green[500] },
+      inboundMessageBg: { main: blue[500] },
+      success: { main: theme.successColor || green[500], light: green[100] },
       warning: { main: theme.warningColor || baseTheme.colors.orange },
       error: { main: theme.errorColor || red[200] },
       info: { main: theme.infoColor || blue[800], light: blue[100] },

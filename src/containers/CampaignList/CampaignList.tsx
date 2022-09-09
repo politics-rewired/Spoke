@@ -4,7 +4,7 @@ import type { CampaignListEntryFragment } from "@spoke/spoke-codegen";
 import React from "react";
 
 import Empty from "../../components/Empty";
-import { CampaignOperations } from "./CampaignListMenu";
+import type { CampaignOperations } from "./CampaignListMenu";
 import CampaignListRow from "./CampaignListRow";
 
 interface Props extends CampaignOperations {

@@ -1,4 +1,4 @@
-import { PoolClient } from "pg";
+import type { PoolClient } from "pg";
 
 import { config } from "../../../config";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format";
@@ -7,11 +7,8 @@ import logger from "../../../logger";
 import { makeNumbersClient } from "../../lib/assemble-numbers";
 import { r } from "../../models";
 import { errToObj } from "../../utils";
-import {
-  MessagingServiceRecord,
-  MessagingServiceType,
-  RequestHandlerFactory
-} from "../types";
+import type { MessagingServiceRecord, RequestHandlerFactory } from "../types";
+import { MessagingServiceType } from "../types";
 import { symmetricDecrypt } from "./crypto";
 import {
   getCampaignContactAndAssignmentForIncomingMessage,
@@ -21,7 +18,7 @@ import {
   saveNewIncomingMessage,
   SpokeSendStatus
 } from "./message-sending";
-import { SendMessagePayload } from "./types";
+import type { SendMessagePayload } from "./types";
 
 export enum NumbersSendStatus {
   Queued = "queued",

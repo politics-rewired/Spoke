@@ -1,4 +1,5 @@
-import { runTaskListOnce, WorkerOptions } from "graphile-worker";
+import type { WorkerOptions } from "graphile-worker";
+import { runTaskListOnce } from "graphile-worker";
 import { Pool } from "pg";
 
 import { mockDeliveryReportBody as mockSwitchboardDeliveryReportBody } from "../../../__mocks__/assemble-numbers";
@@ -12,7 +13,8 @@ import {
   createTexter
 } from "../../../__test__/testbed-preparation/core";
 import { config } from "../../config";
-import { MessageRecord, MessagingServiceType } from "../api/types";
+import type { MessageRecord } from "../api/types";
+import { MessagingServiceType } from "../api/types";
 import { withClient } from "../utils";
 import { handleDeliveryReport } from "./handle-delivery-report";
 

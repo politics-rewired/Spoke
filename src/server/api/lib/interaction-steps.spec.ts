@@ -1,13 +1,15 @@
 import { Pool } from "pg";
 
 import {
+  createCampaignContact,
   createCompleteCampaign,
-  createInteractionStep
+  createInteractionStep,
+  createQuestionResponse
 } from "../../../../__test__/testbed-preparation/core";
-import { InteractionStepWithChildren } from "../../../api/interaction-step";
+import type { InteractionStepWithChildren } from "../../../api/interaction-step";
 import { config } from "../../../config";
 import { withClient } from "../../utils";
-import { InteractionStepRecord } from "../types";
+import type { InteractionStepRecord } from "../types";
 import { persistInteractionStepTree } from "./interaction-steps";
 
 const emptyStep = {
@@ -82,8 +84,7 @@ describe("persistInteractionStepTree", () => {
         [rootStep.id]
       );
 
-      expect(deletedStep).toHaveProperty("is_deleted");
-      expect(deletedStep.is_deleted).toBe(true);
+      expect(deletedStep).toBeUndefined();
     });
   });
 
@@ -208,7 +209,7 @@ describe("persistInteractionStepTree", () => {
     });
   });
 
-  test("soft deletes steps for a started campaign", async () => {
+  test("soft deletes steps that have question response referenced", async () => {
     await withClient(pool, async (client) => {
       const { campaign } = await createCompleteCampaign(client, {
         campaign: { isStarted: true }
@@ -219,6 +220,14 @@ describe("persistInteractionStepTree", () => {
       const childStep = await createInteractionStep(client, {
         campaignId: campaign.id,
         parentInteractionId: rootStep.id
+      });
+      const newContact = await createCampaignContact(client, {
+        campaignId: campaign.id
+      });
+      await createQuestionResponse(client, {
+        value: childStep.answer_option,
+        campaignContactId: newContact.id,
+        interactionStepId: childStep.id
       });
 
       const stepToPersist: InteractionStepWithChildren = {

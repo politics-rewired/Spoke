@@ -84,7 +84,12 @@ module.exports = {
     "@typescript-eslint/no-non-null-assertion": "off",
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error",
-    "no-restricted-imports": [
+    "no-restricted-imports": "off",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      { prefer: "type-imports" }
+    ],
+    "@typescript-eslint/no-restricted-imports": [
       "error",
       {
         paths: [
@@ -94,11 +99,28 @@ module.exports = {
           },
           {
             name: "material-ui",
-            importNames: ["Chip", "IconButton", "FlatButton", "RaisedButton"],
+            importNames: [
+              "Chip",
+              "List",
+              "ListItem",
+              "IconButton",
+              "FlatButton",
+              "RaisedButton",
+              "Table",
+              "TableHeader",
+              "TableHeaderColumn",
+              "TableBody",
+              "TableRow",
+              "TableRowColumn"
+            ],
             message: "Please use @material-ui/core instead."
           }
         ],
         patterns: [
+          {
+            group: ["**/spoke-codegen/src"],
+            message: "Please use @spoke/spoke-codegen instead."
+          },
           {
             group: ["material-ui/svg-icons/*"],
             message: "Please use @material-ui/icons instead."
@@ -110,9 +132,17 @@ module.exports = {
           {
             group: [
               "material-ui/Chip",
+              "material-ui/List",
+              "material-ui/ListItem",
               "material-ui/IconButton",
               "material-ui/FlatButton",
-              "material-ui/RaisedButton"
+              "material-ui/RaisedButton",
+              "material-ui/Table",
+              "material-ui/TableHeader",
+              "material-ui/TableHeaderColumn",
+              "material-ui/TableBody",
+              "material-ui/TableRow",
+              "material-ui/TableRowColumn"
             ],
             message: "Please use @material-ui/core instead."
           }
@@ -167,6 +197,23 @@ module.exports = {
         "no-shadow": "off", // JS `no-shadow` rule doesn't handle enums correctly
         "@typescript-eslint/no-shadow": "error",
         "no-unused-vars": "off" // JS `no-unused-vars` rule doesn't handle typescript correctly
+      }
+    },
+    {
+      files: ["src/server/**/*"],
+      rules: {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@spoke/spoke-codegen",
+                message: "Client codegen may not be used in the server.",
+                allowTypeImports: true
+              }
+            ]
+          }
+        ]
       }
     }
   ]

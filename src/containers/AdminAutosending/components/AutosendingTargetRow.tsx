@@ -1,32 +1,16 @@
 import Button from "@material-ui/core/Button";
 import Chip from "@material-ui/core/Chip";
-import green from "@material-ui/core/colors/green";
-import grey from "@material-ui/core/colors/grey";
 import red from "@material-ui/core/colors/red";
-import { makeStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import MoreIcon from "@material-ui/icons/ArrowForward";
 import PauseIcon from "@material-ui/icons/Pause";
 import PlayIcon from "@material-ui/icons/PlayArrow";
-import { AutosendingTargetFragment } from "@spoke/spoke-codegen";
+import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { Link } from "react-router-dom";
 
-const useStyles = makeStyles({
-  unstarted: {
-    backgroundColor: grey[200]
-  },
-  sending: {
-    backgroundColor: green[400]
-  },
-  paused: {
-    backgroundColor: red[200]
-  },
-  complete: {
-    backgroundColor: green[100]
-  }
-});
+import useChipStyles from "./chipStyles";
 
 interface AutosendingTargetRowProps {
   target: AutosendingTargetFragment;
@@ -41,18 +25,9 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
 ) => {
   const { target, organizationId, disabled = false, onStart, onPause } = props;
 
-  const chipClasses = useStyles();
-
+  const chipClasses = useChipStyles();
   const totalSent = target.stats?.countMessagedContacts;
-
-  const statusChipDisplay =
-    target.stats?.countNeedsMessageContacts === 0
-      ? "complete"
-      : target.autosendStatus === "sending"
-      ? totalSent === 0
-        ? "up next"
-        : target.autosendStatus
-      : target.autosendStatus;
+  const statusChipDisplay = target.autosendStatus;
 
   const chipRootClass =
     statusChipDisplay === "sending"
@@ -82,7 +57,8 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
       </TableCell>
       <TableCell>
         {target.autosendStatus ===
-        "complete" ? undefined : target.autosendStatus === "sending" ? (
+        "complete" ? undefined : target.autosendStatus === "sending" ||
+          target.autosendStatus === "holding" ? (
           <Button
             variant="contained"
             startIcon={<PauseIcon />}

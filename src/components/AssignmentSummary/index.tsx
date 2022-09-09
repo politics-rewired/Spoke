@@ -5,7 +5,7 @@ import Divider from "material-ui/Divider";
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-import { Assignment } from "../../api/assignment";
+import type { Assignment } from "../../api/assignment";
 import { useSpokeContext } from "../../client/spoke-context";
 import { DateTime } from "../../lib/datetime";
 import BadgeButton from "../BadgeButton";

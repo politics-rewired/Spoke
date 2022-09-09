@@ -1,20 +1,18 @@
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import Checkbox from "@material-ui/core/Checkbox";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import AutoComplete from "material-ui/AutoComplete";
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn
-} from "material-ui/Table";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -57,12 +55,35 @@ class TeamEditorDetail extends React.Component {
   isUserSelected = (userId) =>
     this.state.selectedUserIds.indexOf(userId) !== -1;
 
-  handleRowSelection = async (selectedRowIndexes) => {
-    const { users } = this.props.team.team;
-    const selectedUserIds = selectedRowIndexes.map(
-      (rowIndex) => users[rowIndex].id
-    );
-    return this.setState({ selectedUserIds });
+  handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const { users } = this.props.team.team;
+      const selectedUserIds = users.map((user) => user.id);
+      this.setState({ selectedUserIds });
+      return;
+    }
+    this.setState({ selectedUserIds: [] });
+  };
+
+  handleClick = (userId) => () => {
+    const { selectedUserIds } = this.state;
+    const selectedIndex = selectedUserIds.indexOf(userId);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selectedUserIds, userId);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selectedUserIds.slice(1));
+    } else if (selectedIndex === selectedUserIds.length - 1) {
+      newSelected = newSelected.concat(selectedUserIds.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selectedUserIds.slice(0, selectedIndex),
+        selectedUserIds.slice(selectedIndex + 1)
+      );
+    }
+
+    this.setState({ selectedUserIds: newSelected });
   };
 
   handleRemoveSelected = async () => {
@@ -94,6 +115,9 @@ class TeamEditorDetail extends React.Component {
     const teamMemberIds = new Set(users.map((user) => user.id));
     const nonMembers = people.filter(({ id }) => !teamMemberIds.has(id));
 
+    const numSelected = selectedUserIds.length;
+    const rowCount = users.length;
+
     const errorActions = [
       <Button
         key="ok"
@@ -123,34 +147,46 @@ class TeamEditorDetail extends React.Component {
           <div style={styles.spacer} />
           <Button
             variant="contained"
-            disabled={selectedUserIds.length === 0}
+            disabled={numSelected === 0}
             onClick={this.handleRemoveSelected}
           >
             Remove Selected
           </Button>
         </div>
-        <Table
-          selectable
-          multiSelectable
-          onRowSelection={this.handleRowSelection}
-        >
-          <TableHeader
-            displaySelectAll={false}
-            enableSelectAll={false}
-            adjustForCheckbox
-          >
+        <Table>
+          <TableHead>
             <TableRow>
-              <TableHeaderColumn>Name</TableHeaderColumn>
-              <TableHeaderColumn>Email</TableHeaderColumn>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={numSelected > 0 && numSelected < rowCount}
+                  checked={rowCount > 0 && numSelected === rowCount}
+                  onChange={this.handleSelectAllClick}
+                />
+              </TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody showRowHover deselectOnClickaway={false}>
-            {users.map((user) => (
-              <TableRow key={user.id} selected={this.isUserSelected(user.id)}>
-                <TableRowColumn>{user.displayName}</TableRowColumn>
-                <TableRowColumn>{user.email}</TableRowColumn>
-              </TableRow>
-            ))}
+          </TableHead>
+          <TableBody>
+            {users.map((user) => {
+              const isUserSelected = this.isUserSelected(user.id);
+              return (
+                <TableRow
+                  key={user.id}
+                  hover
+                  role="checkbox"
+                  tabIndex={-1}
+                  selected={isUserSelected}
+                  onClick={this.handleClick(user.id)}
+                >
+                  <TableCell padding="checkbox">
+                    <Checkbox checked={isUserSelected} />
+                  </TableCell>
+                  <TableCell>{user.displayName}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
         <Dialog

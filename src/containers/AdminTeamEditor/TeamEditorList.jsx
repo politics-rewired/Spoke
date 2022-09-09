@@ -1,36 +1,36 @@
 import Button from "@material-ui/core/Button";
 import { red } from "@material-ui/core/colors";
+import Paper from "@material-ui/core/Paper";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 import CreateIcon from "@material-ui/icons/Create";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn
-} from "material-ui/Table";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
-
-const ACTIONS_COLUMN_INDEX = 3;
 
 const styles = {
   row: { cursor: "pointer" }
 };
 
 class TeamEditorList extends Component {
-  createHandleEditTeam = (teamId) => () => this.props.oEditTeam(teamId);
+  createHandleEditTeam = (teamId) => (event) => {
+    event.stopPropagation();
+    this.props.oEditTeam(teamId);
+  };
 
-  createHandleDeleteTeam = (teamId) => () => this.props.onDeleteTeam(teamId);
+  createHandleDeleteTeam = (teamId) => (event) => {
+    event.stopPropagation();
+    this.props.onDeleteTeam(teamId);
+  };
 
-  handleCellClick = (rowIndex, columnIndex) => {
-    if (columnIndex === ACTIONS_COLUMN_INDEX) return;
-
-    const { organizationId, teams, history } = this.props;
-    const team = teams[rowIndex];
-    const teamPagePath = `/admin/${organizationId}/teams/${team.id}`;
+  handleClickFactory = (teamId) => () => {
+    const { organizationId, history } = this.props;
+    const teamPagePath = `/admin/${organizationId}/teams/${teamId}`;
     history.push(teamPagePath);
   };
 
@@ -38,57 +38,56 @@ class TeamEditorList extends Component {
     const { teams } = this.props;
 
     return (
-      <Table
-        selectable={false}
-        multiSelectable={false}
-        onCellClick={this.handleCellClick}
-      >
-        <TableHeader
-          enableSelectAll={false}
-          displaySelectAll={false}
-          adjustForCheckbox={false}
-        >
-          <TableRow>
-            <TableHeaderColumn>Priority</TableHeaderColumn>
-            <TableHeaderColumn>Name</TableHeaderColumn>
-            <TableHeaderColumn>Description</TableHeaderColumn>
-            <TableHeaderColumn>Actions</TableHeaderColumn>
-          </TableRow>
-        </TableHeader>
-        <TableBody displayRowCheckbox={false} showRowHover>
-          {teams.map((team) => (
-            <TableRow key={team.id} selectable style={styles.row}>
-              <TableRowColumn>{team.assignmentPriority}</TableRowColumn>
-              <TableRowColumn>{team.title}</TableRowColumn>
-              <TableRowColumn>{team.description}</TableRowColumn>
-              <TableRowColumn>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={team.isSystem}
-                  endIcon={<CreateIcon />}
-                  style={{ marginRight: 10 }}
-                  onClick={this.createHandleEditTeam(team.id)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="contained"
-                  disabled={team.isSystem}
-                  endIcon={
-                    <DeleteForeverIcon
-                      style={{ color: !team.isSystem ? red[500] : undefined }}
-                    />
-                  }
-                  onClick={this.createHandleDeleteTeam(team.id)}
-                >
-                  Delete
-                </Button>
-              </TableRowColumn>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Priority</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {teams.map((team) => (
+              <TableRow
+                key={team.id}
+                hover
+                style={styles.row}
+                onClick={this.handleClickFactory(team.id)}
+              >
+                <TableCell>{team.assignmentPriority}</TableCell>
+                <TableCell>{team.title}</TableCell>
+                <TableCell>{team.description}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={team.isSystem}
+                    endIcon={<CreateIcon />}
+                    style={{ marginRight: 10 }}
+                    onClick={this.createHandleEditTeam(team.id)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    disabled={team.isSystem}
+                    endIcon={
+                      <DeleteForeverIcon
+                        style={{ color: !team.isSystem ? red[500] : undefined }}
+                      />
+                    }
+                    onClick={this.createHandleDeleteTeam(team.id)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     );
   }
 }

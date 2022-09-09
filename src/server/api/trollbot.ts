@@ -1,6 +1,6 @@
 import { r } from "../models";
 import { sqlResolvers } from "./lib/utils";
-import { CampaignContactRecord, UserRecord } from "./types";
+import type { CampaignContactRecord, UserRecord } from "./types";
 
 export interface TrollAlarmRecord {
   message_id: number;

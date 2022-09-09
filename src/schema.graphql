@@ -1,4 +1,9 @@
 
+enum AutosendingControlsMode {
+  BASIC
+  DETAILED
+}
+
 enum CampaignBuilderMode {
   BASIC
   ADVANCED
@@ -199,11 +204,11 @@ type RootQuery {
   contact(id:String!): CampaignContact
   assignment(id:String!): Assignment
   team(id: String!): Team!
-  organizations: [Organization]
+  organizations(active: Boolean): [Organization]
   availableActions(organizationId:String!): [Action]
   conversations(cursor:OffsetLimitCursor!, organizationId:String!, campaignsFilter:CampaignsFilter, assignmentsFilter:AssignmentsFilter, tagsFilter: TagsFilter, contactsFilter:ContactsFilter, contactNameFilter:ContactNameFilter): PaginatedConversations
   campaigns(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
-  people(organizationId:String!, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
+  people(organizationId:String, cursor:OffsetLimitCursor, campaignsFilter:CampaignsFilter, role: String, userIds:[String]): UsersReturn
   peopleByUserIds(userIds:[String], organizationId:String!): UsersList
   fetchCampaignOverlaps(input: FetchCampaignOverlapInput!): [FetchCampaignOverlapResult]!
   assignmentRequests(organizationId: String!, status: String): [AssignmentRequest]
@@ -217,6 +222,7 @@ type RootQuery {
   campaignGroups(organizationId: String! after: Cursor, first: Int): CampaignGroupPage!
   campaignNavigation(campaignId: String!): CampaignNavigation!
   bulkUpdateScriptChanges(organizationId: String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateChange!]!
+  superadmins: [User!]
 }
 
 input SecondPassInput {
@@ -315,6 +321,8 @@ type RootMutation {
   syncCampaignToSystem(input: SyncCampaignToSystemInput!): Boolean!
   editExternalOptOutSyncConfig(systemId: String!, targetId: String): ExternalSystem!
   unassignTextsFromUser(membershipId: String!): Boolean!
+  editSuperAdminStatus(userEmail: String!, superAdminStatus: Boolean!): Boolean!
+  editOrganizationActive(organizationId: String!, active: Boolean!, deactivateMode: DeactivateMode): Boolean!
 }
 
 schema {
@@ -332,7 +340,7 @@ type User {
   email: String
   cell: String
   memberships(organizationId: String, after: Cursor, first: Int): OrganizationMembershipPage
-  organizations(role: String): [Organization]
+  organizations(active: Boolean, role: String): [Organization]
   todos(organizationId: String): [Assignment]
   roles(organizationId: String!): [String!]!
   teams(organizationId: String!): [Team]!
@@ -361,6 +369,12 @@ union UsersReturn = PaginatedUsers | UsersList
 enum TextRequestType {
   UNSENT
   UNREPLIED
+}
+
+enum DeactivateMode {
+  NOSUSPEND
+  SUSPENDALL
+  DELETEALL
 }
 
 type AssignmentTarget {
@@ -409,6 +423,8 @@ type Organization {
   messagingServices(after: Cursor, first: Int, active: Boolean): MessagingServicePage
   campaignGroups(after: Cursor, first: Int): CampaignGroupPage!
   templateCampaigns(after: Cursor, first: Int): CampaignPage!
+  deletedAt: String
+  deletedBy: User
 }
 
 input EditOrganizationInput {
@@ -450,6 +466,7 @@ input OrganizationSettingsInput {
   defaultCampaignBuilderMode: CampaignBuilderMode
   showDoNotAssignMessage: Boolean
   doNotAssignMessage: String
+  defaultAutosendingControlsMode: AutosendingControlsMode
 
   # Superadmin
   startCampaignRequiresApproval: Boolean
@@ -470,6 +487,9 @@ type OrganizationSettings {
   startCampaignRequiresApproval: Boolean
   scriptPreviewForSupervolunteers: Boolean
   defaultCampaignBuilderMode: CampaignBuilderMode
+
+  # Admin
+  defaultAutosendingControlsMode: AutosendingControlsMode
 
   # Owner
   defaulTexterApprovalStatus: RequestAutoApprove
@@ -496,7 +516,7 @@ enum RequestAutoApprove {
 
 input MembershipFilter {
   nameSearch: String
-  campaignId: Int
+  campaignId: String
   campaignArchived: Boolean
   roles: [String!]
 }
@@ -775,6 +795,7 @@ type Message {
   campaignId: String
   userId: ID
   sendStatus: String
+  errorCodes: [String!]
 }
 
 

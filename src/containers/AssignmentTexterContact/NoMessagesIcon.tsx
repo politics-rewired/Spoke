@@ -3,7 +3,7 @@ import muiThemeable from "material-ui/styles/muiThemeable";
 import React from "react";
 
 import { useSpokeTheme } from "../../styles/spoke-theme-context";
-import { MuiThemeProviderProps } from "../../styles/types";
+import type { MuiThemeProviderProps } from "../../styles/types";
 
 const NoMessagesIcon: React.FC<MuiThemeProviderProps> = ({
   muiTheme,

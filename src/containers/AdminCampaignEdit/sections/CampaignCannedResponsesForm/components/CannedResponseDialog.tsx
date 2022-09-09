@@ -4,9 +4,8 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import React from "react";
 
 import { ResponseEditorContext } from "../interfaces";
-import CannedResponseEditor, {
-  CannedResponseEditorProps
-} from "./CannedResponseEditor";
+import type { CannedResponseEditorProps } from "./CannedResponseEditor";
+import CannedResponseEditor from "./CannedResponseEditor";
 
 export interface CannedResponseDialogProps extends CannedResponseEditorProps {
   open: boolean;

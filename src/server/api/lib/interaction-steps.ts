@@ -1,10 +1,10 @@
 /* eslint-disable import/prefer-default-export */
-import { Knex } from "knex";
+import type { Knex } from "knex";
 
-import { InteractionStepWithChildren } from "../../../api/interaction-step";
+import type { InteractionStepWithChildren } from "../../../api/interaction-step";
 import { cacheOpts, memoizer } from "../../memoredis";
 import { r } from "../../models";
-import { CampaignRecord } from "../types";
+import type { CampaignRecord } from "../types";
 
 export const persistInteractionStepNode = async (
   campaignId: number,
@@ -103,13 +103,37 @@ export const persistInteractionStepTree = async (
     temporaryIdMap
   );
 
-  const delQuery = knexTrx("interaction_step")
-    .where({ campaign_id: campaignId })
-    .whereNotIn("id", stepIds);
+  const delQuery = knexTrx.raw(
+    `
+      with steps_to_delete as (
+        select id,
+          (exists(select 1 from question_response where interaction_step_id = ins.id) 
+            or exists(select 1 from all_external_sync_question_response_configuration 
+              where interaction_step_id = ins.id)
+          ) for_update
+        from interaction_step ins
+        where campaign_id = ?
+        and id <> all (?)
+      ),
 
-  if (origCampaignRecord.is_started) {
-    await delQuery.update({ is_deleted: true });
-  } else {
-    await delQuery.del();
-  }
+      delete_steps as (
+        delete from interaction_step ins
+        using steps_to_delete del
+        where ins.id = del.id and not for_update
+        returning *
+      ),
+
+      update_steps as (
+        update interaction_step ins
+        set is_deleted = true
+        from steps_to_delete del
+        where ins.id = del.id and for_update
+        returning *
+      )
+
+      select count(*) from delete_steps union select count(*) from update_steps
+    `,
+    [campaignId, stepIds]
+  );
+  await delQuery;
 };

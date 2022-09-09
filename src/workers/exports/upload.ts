@@ -2,7 +2,7 @@ import { config } from "../../config";
 import logger from "../../logger";
 import gsJson from "./gs-json";
 import s3 from "./s3";
-import { StorageBackend } from "./types";
+import type { StorageBackend } from "./types";
 
 const validAwsCredentials =
   config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY;

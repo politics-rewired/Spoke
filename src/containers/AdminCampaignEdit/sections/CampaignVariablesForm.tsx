@@ -21,7 +21,8 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { allScriptFields, VARIABLE_NAME_REGEXP } from "../../../lib/scripts";
 import CampaignFormSectionHeading from "../components/CampaignFormSectionHeading";
-import { asSection, FullComponentProps } from "../components/SectionWrapper";
+import type { FullComponentProps } from "../components/SectionWrapper";
+import { asSection } from "../components/SectionWrapper";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {

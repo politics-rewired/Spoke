@@ -1,7 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 
 import { config } from "../../config";
-import { StorageBackend } from "./types";
+import type { StorageBackend } from "./types";
 
 const fetchKeys = () => {
   const keysEnvVar = config.GOOGLE_APPLICATION_CREDENTIALS;

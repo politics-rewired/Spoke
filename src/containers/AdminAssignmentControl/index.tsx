@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -7,14 +8,18 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
 import React, { useState } from "react";
-import { match } from "react-router-dom";
+import type { match } from "react-router-dom";
 
-import { Organization } from "../../api/organization";
-import { TeamInput } from "../../api/team";
-import { MutationMap, QueryMap } from "../../network/types";
+import type { Organization } from "../../api/organization";
+import type { TeamInput } from "../../api/team";
+import type { MutationMap, QueryMap } from "../../network/types";
 import { loadData } from "../hoc/with-operations";
 import AssignmentRow from "./AssignmentRow";
-import { TagWithTitle, TeamForAssignment, TeamInputWithTags } from "./types";
+import type {
+  TagWithTitle,
+  TeamForAssignment,
+  TeamInputWithTags
+} from "./types";
 
 interface OuterProps {
   match: match<{ organizationId: string }>;

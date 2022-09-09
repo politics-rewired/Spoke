@@ -1,6 +1,7 @@
 import { MessagingServiceType as GraphQLMessagingServiceType } from "../../api/messaging-service";
 import { sqlResolvers } from "./lib/utils";
-import { MessagingServiceRecord, MessagingServiceType } from "./types";
+import type { MessagingServiceRecord } from "./types";
+import { MessagingServiceType } from "./types";
 
 export const resolvers = {
   MessagingService: {

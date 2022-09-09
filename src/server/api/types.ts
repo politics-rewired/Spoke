@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import type { RequestHandler } from "express";
 
 export interface RelayPageArgs {
   after: string | null;
@@ -279,4 +279,15 @@ export interface NotificationRecord {
   organization_id?: number | null;
   campaign_id?: number | null;
   sent_at?: Date | null;
+}
+
+export enum DeactivateMode {
+  Deleteall = "DELETEALL",
+  Nosuspend = "NOSUSPEND",
+  Suspendall = "SUSPENDALL"
+}
+
+export enum AutosendingControlsMode {
+  Basic = "BASIC",
+  Detailed = "DETAILED"
 }

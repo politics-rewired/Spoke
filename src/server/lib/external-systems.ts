@@ -1,4 +1,4 @@
-import { SuperAgentRequest } from "superagent";
+import type { SuperAgentRequest } from "superagent";
 
 import { config } from "../../config";
 import { r } from "../models";

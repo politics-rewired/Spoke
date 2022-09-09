@@ -1,5 +1,5 @@
-import { Assignment } from "../../../../api/assignment";
-import { User } from "../../../../api/user";
+import type { Assignment } from "../../../../api/assignment";
+import type { User } from "../../../../api/user";
 
 export type TexterAssignment = Pick<
   Assignment,

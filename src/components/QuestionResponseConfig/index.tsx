@@ -1,6 +1,8 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { green, grey, orange, red } from "@material-ui/core/colors";
+import List from "@material-ui/core/List";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import BrokenImageIcon from "@material-ui/icons/BrokenImage";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -11,25 +13,22 @@ import WarningIcon from "@material-ui/icons/Warning";
 import cloneDeep from "lodash/cloneDeep";
 import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import { List } from "material-ui/List";
 import React from "react";
 import { compose } from "recompose";
 
-import { ExternalActivistCode } from "../../api/external-activist-code";
+import type { ExternalActivistCode } from "../../api/external-activist-code";
+import type { ExternalResultCode } from "../../api/external-result-code";
+import { resultCodeWarning } from "../../api/external-result-code";
+import type { ExternalSurveyQuestion } from "../../api/external-survey-question";
+import type { ExternalSyncQuestionResponseConfig } from "../../api/external-sync-config";
 import {
-  ExternalResultCode,
-  resultCodeWarning
-} from "../../api/external-result-code";
-import { ExternalSurveyQuestion } from "../../api/external-survey-question";
-import {
-  ExternalSyncQuestionResponseConfig,
   isActivistCode,
   isResponseOption,
   isResultCode
 } from "../../api/external-sync-config";
-import { RelayPaginatedResponse } from "../../api/pagination";
+import type { RelayPaginatedResponse } from "../../api/pagination";
 import { loadData } from "../../containers/hoc/with-operations";
-import { MutationMap } from "../../network/types";
+import type { MutationMap } from "../../network/types";
 import AddMapping from "../AddMapping";
 import { GET_SYNC_CONFIGS } from "../SyncConfigurationModal/queries";
 import { ActivistCodeMapping } from "./components/ActivistCodeMapping";

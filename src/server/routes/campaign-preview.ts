@@ -1,7 +1,7 @@
 import express from "express";
 
 import { symmetricDecrypt } from "../api/lib/crypto";
-import {
+import type {
   CampaignRecord,
   CannedResponseRecord,
   InteractionStepRecord

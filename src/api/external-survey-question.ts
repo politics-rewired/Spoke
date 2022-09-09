@@ -1,6 +1,6 @@
-import { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
-import { RelayPaginatedResponse } from "./pagination";
-import { ExternalDataCollectionStatus } from "./types";
+import type { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
+import type { RelayPaginatedResponse } from "./pagination";
+import type { ExternalDataCollectionStatus } from "./types";
 
 export interface ExternalSurveyQuestion {
   id: string;

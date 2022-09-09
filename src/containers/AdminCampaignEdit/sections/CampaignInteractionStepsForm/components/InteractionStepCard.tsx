@@ -11,12 +11,12 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import HelpIconOutline from "@material-ui/icons/HelpOutline";
-import { CampaignVariable } from "@spoke/spoke-codegen";
+import type { CampaignVariable } from "@spoke/spoke-codegen";
 import isNil from "lodash/isNil";
 import React, { useCallback, useState } from "react";
 import * as yup from "yup";
 
-import {
+import type {
   InteractionStep,
   InteractionStepWithChildren
 } from "../../../../../api/interaction-step";

@@ -1,6 +1,7 @@
 import { FilteredContactReason } from "../api/types";
 import { makeNumbersClient } from "../lib/assemble-numbers";
-import { addProgressJob, ProgressJobPayload, ProgressTask } from "./utils";
+import type { ProgressJobPayload, ProgressTask } from "./utils";
+import { addProgressJob } from "./utils";
 
 export const TASK_IDENTIFIER = "filter-landlines";
 

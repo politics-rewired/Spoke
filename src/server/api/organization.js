@@ -33,7 +33,7 @@ export const getEscalationUserId = async (organizationId) => {
 
 export const resolvers = {
   Organization: {
-    ...sqlResolvers(["id", "name", "defaultTextingTz"]),
+    ...sqlResolvers(["id", "name", "defaultTextingTz", "deletedAt"]),
     settings: (organization) => organization,
     campaigns: async (organization, { cursor, campaignsFilter }, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER");
@@ -147,7 +147,7 @@ export const resolvers = {
         query.whereExists(function subquery() {
           this.select(this.client.raw("1"))
             .from("assignment")
-            .whereRaw('"assignment"."user_id" = "user"."id"')
+            .whereRaw('"assignment"."user_id" = "user_organization"."user_id"')
             .where({ campaign_id: campaignIdInt });
         });
       } else if (campaignArchived === true || campaignArchived === false) {
@@ -464,6 +464,10 @@ export const resolvers = {
         .where({ organization_id: organizationId });
       const result = await formatPage(query, { after, first });
       return result;
-    }
+    },
+    deletedBy: async (organization) =>
+      organization.deleted_by
+        ? r.reader("user").where({ id: organization.deleted_by })
+        : null
   }
 };

@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { GraphQLError } from "graphql";
+import type { GraphQLError } from "graphql";
 
 export const isCampaignGroupsPermissionError = (gqlError: GraphQLError) => {
   return (

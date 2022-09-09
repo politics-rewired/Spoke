@@ -1,7 +1,7 @@
 import { r } from "../models";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
-import { ExternalDataCollectionStatus, RelayPageArgs } from "./types";
+import type { ExternalDataCollectionStatus, RelayPageArgs } from "./types";
 
 export interface ExternalSurveyQuestion {
   id: string;

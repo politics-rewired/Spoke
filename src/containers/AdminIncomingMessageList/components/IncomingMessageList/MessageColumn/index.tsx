@@ -1,6 +1,6 @@
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import {
+import type {
   ConversationInfoFragment,
   ConversationMessageFragment
 } from "@spoke/spoke-codegen";

@@ -1,10 +1,12 @@
 import { gql } from "@apollo/client";
+import type { Message, User } from "@spoke/spoke-codegen";
 import { css, StyleSheet } from "aphrodite";
 import React, { Component } from "react";
+import errorCodeDescriptions from "src/lib/telco-error-codes";
+import { MessageSendStatus } from "src/server/api/types";
 
-import { Message } from "../../../../../api/message";
 import { DateTime } from "../../../../../lib/datetime";
-import { QueryMap } from "../../../../../network/types";
+import type { QueryMap } from "../../../../../network/types";
 import { loadData } from "../../../../hoc/with-operations";
 
 const styles: Record<string, React.CSSProperties> = StyleSheet.create({
@@ -21,6 +23,25 @@ interface Props {
   userNames: any;
   messages: Message[];
 }
+
+const footerText = (message: Message, sender: User) => {
+  const senderName = sender ? sender.displayName : "Unknown";
+
+  const sentAgoRelative = DateTime.fromISO(message.createdAt).toRelative();
+
+  if (message.isFromContact) {
+    return `Received ${sentAgoRelative}`;
+  }
+
+  if (message.sendStatus === MessageSendStatus.Error) {
+    const errorCode = (message.errorCodes ?? [])[0];
+
+    const errorDesc = errorCodeDescriptions[errorCode] ?? "Unknown error";
+    return `Sent by ${senderName} ${sentAgoRelative}. Error: ${errorDesc}.`;
+  }
+
+  return `Sent by ${senderName} ${sentAgoRelative}`;
+};
 
 class MessageList extends Component<Props> {
   messageWindow: HTMLDivElement | null = null;
@@ -88,26 +109,13 @@ class MessageList extends Component<Props> {
           const sender = this.props.userNames.peopleByUserIds.users.filter(
             (user: any) => user.id === message.userId
           )[0];
-          const senderName = sender ? sender.displayName : "Unknown";
 
           return (
             <div key={message.id} style={containerStyle}>
               <p className={css(styles.conversationRow)} style={messageStyle}>
                 {message.text}
               </p>
-              <p style={senderInfoStyle}>
-                {message.isFromContact
-                  ? `Received at ${DateTime.fromISO(
-                      message.createdAt
-                    ).toRelative()}`
-                  : message.sendStatus === "ERROR"
-                  ? `Carrier rejected this message sent by ${senderName} at ${DateTime.fromISO(
-                      message.createdAt
-                    ).toRelative()}`
-                  : `Sent by ${senderName} ${DateTime.fromISO(
-                      message.createdAt
-                    ).toRelative()}`}
-              </p>
+              <p style={senderInfoStyle}>{footerText(message, sender)}</p>
             </div>
           );
         })}

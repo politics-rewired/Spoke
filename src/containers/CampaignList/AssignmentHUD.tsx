@@ -4,7 +4,7 @@ import { css, StyleSheet } from "aphrodite";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import React from "react";
 
-import { AssignmentTarget } from "../../api/organization";
+import type { AssignmentTarget } from "../../api/organization";
 
 const styles = StyleSheet.create({
   row: { display: "flex", alignItems: "baseline", marginBottom: "10px" },

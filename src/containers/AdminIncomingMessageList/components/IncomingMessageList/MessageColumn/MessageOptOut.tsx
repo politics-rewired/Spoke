@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql } from "@apollo/client";
+import type { ApolloQueryResult } from "@apollo/client";
+import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
 import { deepOrange } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
@@ -8,10 +9,10 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import React, { Component } from "react";
 
-import { CampaignContact } from "../../../../../api/campaign-contact";
-import { ContactActionInput } from "../../../../../api/types";
+import type { CampaignContact } from "../../../../../api/campaign-contact";
+import type { ContactActionInput } from "../../../../../api/types";
 import ColorButton from "../../../../../components/ColorButton";
-import { MutationMap } from "../../../../../network/types";
+import type { MutationMap } from "../../../../../network/types";
 import {
   formatErrorMessage,
   withOperations

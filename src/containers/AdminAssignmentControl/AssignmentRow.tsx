@@ -9,7 +9,7 @@ import Toggle from "material-ui/Toggle";
 import React from "react";
 
 import { TextRequestType } from "../../api/types";
-import { TagWithTitle, TeamForAssignment } from "./types";
+import type { TagWithTitle, TeamForAssignment } from "./types";
 
 type TagChip = {
   id: string;

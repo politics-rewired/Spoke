@@ -1,13 +1,16 @@
 import { green, orange } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PollIcon from "@material-ui/icons/Poll";
-import { ListItem } from "material-ui/List";
 import React from "react";
 
-import { ExternalSurveyQuestion } from "../../../api/external-survey-question";
-import { ExternalSurveyQuestionResponseOption } from "../../../api/external-survey-question-response-option";
-import { RelayPaginatedResponse } from "../../../api/pagination";
+import type { ExternalSurveyQuestion } from "../../../api/external-survey-question";
+import type { ExternalSurveyQuestionResponseOption } from "../../../api/external-survey-question-response-option";
+import type { RelayPaginatedResponse } from "../../../api/pagination";
 import { ExternalDataCollectionStatus } from "../../../api/types";
 
 interface Props {
@@ -29,18 +32,20 @@ export const ResponseOptionMapping: React.SFC<Props> = (props) => {
   const primaryText = `${prefix}${props.responseOption.name}`;
 
   return (
-    <ListItem
-      primaryText={primaryText}
-      secondaryText={question && question.node.scriptQuestion}
-      leftIcon={
+    <ListItem>
+      <ListItemIcon>
         <PollIcon style={{ color: isActive ? green[200] : orange[200] }} />
-      }
-      rightIconButton={
+      </ListItemIcon>
+      <ListItemText
+        primary={primaryText}
+        secondary={question && question.node.scriptQuestion}
+      />
+      <ListItemSecondaryAction>
         <IconButton onClick={props.onClickDelete}>
           <DeleteIcon />
         </IconButton>
-      }
-    />
+      </ListItemSecondaryAction>
+    </ListItem>
   );
 };
 

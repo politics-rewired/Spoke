@@ -2,12 +2,13 @@ import { css, StyleSheet } from "aphrodite/no-important";
 import muiThemeable from "material-ui/styles/muiThemeable";
 import queryString from "query-string";
 import React from "react";
-import { RouteChildrenProps, withRouter } from "react-router-dom";
+import type { RouteChildrenProps } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import UserEdit, { UserEditMode } from "../containers/UserEdit";
 import theme from "../styles/theme";
-import { MuiThemeProviderProps } from "../styles/types";
+import type { MuiThemeProviderProps } from "../styles/types";
 import UserPasswordReset from "./UserPasswordReset";
 
 const styles = StyleSheet.create({

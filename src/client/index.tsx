@@ -7,7 +7,7 @@ import App from "./App";
 import { createAuthService } from "./auth-service";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-import { InstanceSettings } from "./spoke-context";
+import type { InstanceSettings } from "./spoke-context";
 
 const main = (settings: InstanceSettings) => {
   window.AuthService = createAuthService(settings);

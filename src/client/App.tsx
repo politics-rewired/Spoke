@@ -9,6 +9,7 @@ import ApolloClientSingleton from "../network/apollo-client-singleton";
 import AppRoutes from "../routes";
 import { SpokeThemeProvider } from "../styles/spoke-theme-context";
 import baseTheme from "../styles/theme";
+import ErrorHandler from "./ErrorHandler";
 import { SpokeContextProvider } from "./spoke-context";
 import VersionNotifier from "./VersionNotifier";
 
@@ -30,6 +31,7 @@ const App: React.FC = () => {
             <SpokeThemeProvider>
               <div className={css(styles.root)}>
                 <VersionNotifier />
+                <ErrorHandler />
                 <AppRoutes />
               </div>
             </SpokeThemeProvider>

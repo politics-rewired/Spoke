@@ -1,9 +1,9 @@
 import { blue, green, grey, orange, red } from "@material-ui/core/colors";
-import { CampaignVariable } from "@spoke/spoke-codegen";
+import type { CampaignVariable } from "@spoke/spoke-codegen";
 import { getCharCount } from "@trt2/gsm-charset-utils";
+import type { ContentBlock } from "draft-js";
 import {
   CompositeDecorator,
-  ContentBlock,
   ContentState,
   Editor,
   EditorState,

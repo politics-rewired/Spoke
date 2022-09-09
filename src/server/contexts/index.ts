@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { Request } from "express";
+import type { Request } from "express";
 import createMemoizer from "memoredis";
 
 import { config } from "../../config";
