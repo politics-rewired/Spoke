@@ -7,12 +7,13 @@ echo "Spinning up Postgres Docker container..."
 
 # Start the container in the background
 CONTAINER_ID=$(docker container run -d  \
+  --platform linux/amd64 \
   -p $PG_HOST_PORT:5432  \
   -e ALLOW_NOSSL=true \
   -e POSTGRES_DB=postgres \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=zalando \
-  registry.opensource.zalan.do/acid/spilo-13:2.0-p6)
+  registry.opensource.zalan.do/acid/spilo-14:2.1-p6)
 
 
 retVal=$?
