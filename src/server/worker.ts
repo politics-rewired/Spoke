@@ -25,7 +25,10 @@ import {
 } from "./tasks/filter-landlines";
 import handleAutoassignmentRequest from "./tasks/handle-autoassignment-request";
 import handleDeliveryReport from "./tasks/handle-delivery-report";
-import { taskList as ngpVanTaskList } from "./tasks/ngp-van";
+import {
+  schedules as ngpVanSchedules,
+  taskList as ngpVanTaskList
+} from "./tasks/ngp-van";
 import queueAutoSendInitials from "./tasks/queue-autosend-initials";
 import {
   queueDailyNotifications,
@@ -39,10 +42,6 @@ import {
   sendNotificationDigestForUser,
   sendNotificationEmail
 } from "./tasks/send-notification-email";
-import {
-  syncCampaignContactToVAN,
-  updateVanSyncStatuses
-} from "./tasks/sync-campaign-contact-to-van";
 import syncSlackTeamMembers from "./tasks/sync-slack-team-members";
 import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
 import updateOrgMessageUsage from "./tasks/update-org-message-usage";
@@ -66,8 +65,6 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     "troll-patrol": trollPatrol,
     "troll-patrol-for-org": trollPatrolForOrganization,
     "sync-slack-team-members": syncSlackTeamMembers,
-    "van-sync-campaign-contact": syncCampaignContactToVAN,
-    "update-van-sync-statuses": updateVanSyncStatuses,
     "update-org-message-usage": updateOrgMessageUsage,
     "resend-message": resendMessage,
     "retry-interaction-step": retryInteractionStep,
@@ -121,17 +118,11 @@ export const getScheduler = async (attempt = 0): Promise<Scheduler> => {
   if (scheduler) return scheduler;
 
   const schedules: ScheduleConfig[] = [
+    ...ngpVanSchedules,
     {
       name: "release-stale-replies",
       taskIdentifier: "release-stale-replies",
       pattern: "*/5 * * * *",
-      timeZone: config.TZ
-    },
-
-    {
-      name: "update-van-sync-statuses",
-      taskIdentifier: "update-van-sync-statuses",
-      pattern: "* * * * *",
       timeZone: config.TZ
     },
 

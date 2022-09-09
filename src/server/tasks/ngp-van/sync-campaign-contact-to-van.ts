@@ -3,22 +3,13 @@ import isNil from "lodash/isNil";
 import type { PoolClient } from "pg";
 import { post } from "superagent";
 
-import { config } from "../../config";
-import type { VanSecretAuthPayload } from "../lib/external-systems";
-import { withVan } from "../lib/external-systems";
-import { getVanAuth } from "./ngp-van/lib";
+import { config } from "../../../config";
+import type { VanSecretAuthPayload } from "../../lib/external-systems";
+import { withVan } from "../../lib/external-systems";
+import { getVanAuth } from "./lib";
+import VANSyncError from "./VANSyncError";
 
-class VANSyncError extends Error {
-  status: number;
-
-  body: string;
-
-  constructor(status: number, body: string) {
-    super("sync_campaign_to_van__incorrect_response_code");
-    this.status = status;
-    this.body = body;
-  }
-}
+export const TASK_IDENTIFIER = "van-sync-campaign-contact";
 
 export const CANVASSED_TAG_NAME = "Canvassed";
 
@@ -398,10 +389,4 @@ export const syncCampaignContactToVAN: Task = async (
       throw new VANSyncError(response.status, response.body);
     }
   }
-};
-
-export const updateVanSyncStatuses: Task = async (_payload, helpers) => {
-  await helpers.query(
-    `select * from public.update_van_sync_job_request_status()`
-  );
 };

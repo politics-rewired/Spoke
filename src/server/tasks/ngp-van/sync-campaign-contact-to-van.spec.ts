@@ -4,14 +4,14 @@ import { Pool } from "pg";
 import {
   createCompleteCampaign,
   createMessage
-} from "../../../__test__/testbed-preparation/core";
+} from "../../../../__test__/testbed-preparation/core";
 import {
   createExternalResultCode,
   createExternalSystem
-} from "../../../__test__/testbed-preparation/external-systems";
-import { config } from "../../config";
-import { MessageStatusType } from "../api/types";
-import { withClient, withTransaction } from "../utils";
+} from "../../../../__test__/testbed-preparation/external-systems";
+import { config } from "../../../config";
+import { MessageStatusType } from "../../api/types";
+import { withClient, withTransaction } from "../../utils";
 import type {
   CanvassResultRow,
   VANCanvassResponse
