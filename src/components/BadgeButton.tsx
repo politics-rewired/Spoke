@@ -2,7 +2,6 @@ import type { Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
 import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
-import { yellow } from "@material-ui/core/colors";
 import React from "react";
 
 import { dataTest } from "../lib/attributes";
@@ -20,14 +19,19 @@ export interface BadgeButtonProps {
   type?: MessageType;
 }
 
+const badgeColor = (messageType: MessageType, theme: Theme) =>
+  messageType === "initial"
+    ? theme.palette.success.light
+    : messageType === "reply"
+    ? theme.palette.repliesBadge!.main
+    : theme.palette.error.light;
+
 const useStyles = makeStyles<Theme, BadgeButtonProps>((theme) => ({
   badge: {
     backgroundColor: ({ type: messageType = "past" }) =>
-      messageType === "initial"
-        ? theme.palette.success.light
-        : messageType === "reply"
-        ? yellow[600]
-        : theme.palette.error.light
+      badgeColor(messageType, theme),
+    color: ({ type: messageType = "past" }) =>
+      theme.palette.getContrastText(badgeColor(messageType, theme))
   }
 }));
 

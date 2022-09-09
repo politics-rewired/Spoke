@@ -90,11 +90,13 @@ declare module "@material-ui/core/styles/createPalette" {
   interface Palette {
     badge?: Palette["primary"];
     inboundMessageBg?: Palette["primary"];
+    repliesBadge?: Palette["primary"];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface PaletteOptions {
     badge?: PaletteOptions["primary"];
     inboundMessageBg?: PaletteOptions["primary"];
+    repliesBadge?: PaletteOptions["primary"];
   }
 }
