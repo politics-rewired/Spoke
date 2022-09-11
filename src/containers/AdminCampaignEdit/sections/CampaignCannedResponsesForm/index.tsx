@@ -160,19 +160,30 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     this.setState({ editingResponse: undefined, shouldShowEditor: false });
   };
 
-  renderCannedResponseDialog() {
-    const { shouldShowEditor, editingResponse } = this.state;
+  scriptVariables = () => {
     const {
       data: {
         campaign: {
           customFields,
-          campaignVariables: { edges: campaignVariableEdges },
-          externalSystem
+          campaignVariables: { edges: campaignVariableEdges }
         }
       }
     } = this.props;
 
     const campaignVariables = campaignVariableEdges.map(({ node }) => node);
+
+    return { customFields, campaignVariables };
+  };
+
+  renderCannedResponseDialog() {
+    const { shouldShowEditor, editingResponse } = this.state;
+    const {
+      data: {
+        campaign: { externalSystem }
+      }
+    } = this.props;
+
+    const { customFields, campaignVariables } = this.scriptVariables();
 
     const context = editingResponse
       ? ResponseEditorContext.EditingResponse
@@ -206,6 +217,8 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
     const isSaveDisabled = isWorking || (!isNew && !hasPendingChanges);
     const finalSaveLabel = isWorking ? "Working..." : saveLabel;
 
+    const { customFields, campaignVariables } = this.scriptVariables();
+
     return (
       <div>
         <CampaignFormSectionHeading
@@ -218,6 +231,8 @@ class CampaignCannedResponsesForm extends React.Component<InnerProps, State> {
               <CannedResponseRow
                 key={cannedResponse.id}
                 cannedResponse={cannedResponse}
+                customFields={customFields}
+                campaignVariables={campaignVariables}
                 onDelete={this.createHandleOnDelete(cannedResponse.id)}
                 onToggleResponseEditor={this.makeHandleToggleResponseDialog(
                   cannedResponse.id

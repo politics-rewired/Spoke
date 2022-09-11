@@ -40,7 +40,7 @@ const largeListItemStyles: { [key: string]: React.CSSProperties } = {
 
 export interface LargeListItemProps {
   primaryText?: string;
-  secondaryText?: string;
+  secondaryText?: React.ReactNode;
   rightActionMenu?: React.ReactNode;
 }
 
