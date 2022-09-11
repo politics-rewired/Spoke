@@ -53,7 +53,6 @@ export const createApp = async () => {
 
   const PgSession = pgSession(expressSession);
 
-  app.set("etag", false);
   app.enable("trust proxy"); // Don't rate limit heroku
   app.use(
     cors({
