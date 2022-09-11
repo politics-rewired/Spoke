@@ -1,0 +1,309 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spoke Rewired</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <style>
+        /* https://www.muicss.com/ */
+        .mui-container {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            margin-right: auto;
+            margin-left: auto;
+            padding-left: 15px;
+            padding-right: 15px
+        }
+
+        .mui-container:after,.mui-container:before {
+            content: " ";
+            display: table
+        }
+
+        .mui-container:after {
+            clear: both
+        }
+
+        @media (min-width: 544px) {
+            .mui-container {
+                max-width:570px
+            }
+        }
+
+        @media (min-width: 768px) {
+            .mui-container {
+                max-width:740px
+            }
+        }
+
+        @media (min-width: 992px) {
+            .mui-container {
+                max-width:960px
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .mui-container {
+                max-width:1170px
+            }
+        }
+        .mui-appbar {
+            background-color: #001F2E;
+            color: #FFF;
+            min-height: 56px;
+        }
+        .mui--z1,.mui-dropdown__menu,.mui-select__menu {
+            -webkit-box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+            box-shadow: 0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24)
+        }
+        .mui--appbar-height {
+            height: 56px
+        }
+        .mui--text-title,h3 {
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 28px
+        }
+        .mui--text-center {
+            text-align: center!important
+        }
+        .mui-panel {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0;
+            background-color: #FFF;
+            -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12);
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12)
+        }
+
+        .mui-panel:after,.mui-panel:before {
+            content: " ";
+            display: table
+        }
+
+        .mui-panel:after {
+            clear: both
+        }
+
+        @media all and (-ms-high-contrast:none),(-ms-high-contrast:active) {
+            .mui-panel {
+                -webkit-box-shadow: 0 -1px 2px 0 rgba(0,0,0,.12),-1px 0 2px 0 rgba(0,0,0,.12),0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12);
+                box-shadow: 0 -1px 2px 0 rgba(0,0,0,.12),-1px 0 2px 0 rgba(0,0,0,.12),0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12)
+            }
+        }
+
+        @supports (-ms-ime-align:auto) {
+            .mui-panel {
+                -webkit-box-shadow: 0 -1px 2px 0 rgba(0,0,0,.12),-1px 0 2px 0 rgba(0,0,0,.12),0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12);
+                box-shadow: 0 -1px 2px 0 rgba(0,0,0,.12),-1px 0 2px 0 rgba(0,0,0,.12),0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12)
+            }
+        }
+
+        .mui--text-display3 {
+            font-weight: 400;
+            font-size: 56px;
+            line-height: 56px
+        }
+
+        .mui--text-body1 {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px
+        }
+
+        .mui-btn {
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 18px;
+            text-transform: uppercase;
+            color: rgba(0,0,0,.87);
+            background-color: #FFF;
+            -webkit-transition: all .2s ease-in-out;
+            transition: all .2s ease-in-out;
+            display: inline-block;
+            height: 36px;
+            padding: 0 26px;
+            margin: 6px 0;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            -ms-touch-action: manipulation;
+            touch-action: manipulation;
+            background-image: none;
+            text-align: center;
+            line-height: 36px;
+            vertical-align: middle;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            font-size: 14px;
+            font-family: inherit;
+            letter-spacing: .03em;
+            position: relative;
+            overflow: hidden
+        }
+
+        .mui-btn:active,.mui-btn:focus,.mui-btn:hover {
+            color: rgba(0,0,0,.87);
+            background-color: #fff
+        }
+
+        .mui-btn[disabled]:active,.mui-btn[disabled]:focus,.mui-btn[disabled]:hover {
+            color: rgba(0,0,0,.87);
+            background-color: #FFF
+        }
+
+        .mui-btn.mui-btn--flat {
+            color: rgba(0,0,0,.87);
+            background-color: transparent
+        }
+
+        .mui-btn.mui-btn--flat:active,.mui-btn.mui-btn--flat:focus,.mui-btn.mui-btn--flat:hover {
+            color: rgba(0,0,0,.87);
+            background-color: #f2f2f2
+        }
+
+        .mui-btn.mui-btn--flat[disabled]:active,.mui-btn.mui-btn--flat[disabled]:focus,.mui-btn.mui-btn--flat[disabled]:hover {
+            color: rgba(0,0,0,.87);
+            background-color: transparent
+        }
+
+        .mui-btn:active,.mui-btn:focus,.mui-btn:hover {
+            outline: 0;
+            text-decoration: none;
+            color: rgba(0,0,0,.87)
+        }
+
+        .mui-btn:focus,.mui-btn:hover {
+            -webkit-box-shadow: 0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2);
+            box-shadow: 0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2)
+        }
+
+        @media all and (-ms-high-contrast:none),(-ms-high-contrast:active) {
+            .mui-btn:focus,.mui-btn:hover {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2)
+            }
+        }
+
+        @supports (-ms-ime-align:auto) {
+            .mui-btn:focus,.mui-btn:hover {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2)
+            }
+        }
+
+        .mui-btn:active:hover {
+            -webkit-box-shadow: 0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2);
+            box-shadow: 0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2)
+        }
+
+        @media all and (-ms-high-contrast:none),(-ms-high-contrast:active) {
+            .mui-btn:active:hover {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2)
+            }
+        }
+
+        @supports (-ms-ime-align:auto) {
+            .mui-btn:active:hover {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2)
+            }
+        }
+
+        .mui-btn--fab,.mui-btn--raised {
+            -webkit-box-shadow: 0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2);
+            box-shadow: 0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2)
+        }
+
+        @media all and (-ms-high-contrast:none),(-ms-high-contrast:active) {
+            .mui-btn--fab,.mui-btn--raised {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2)
+            }
+        }
+
+        @supports (-ms-ime-align:auto) {
+            .mui-btn--fab,.mui-btn--raised {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2)
+            }
+        }
+
+        .mui-btn--fab:active,.mui-btn--raised:active {
+            -webkit-box-shadow: 0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2);
+            box-shadow: 0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2)
+        }
+
+        @media all and (-ms-high-contrast:none),(-ms-high-contrast:active) {
+            .mui-btn--fab:active,.mui-btn--raised:active {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2)
+            }
+        }
+
+        @supports (-ms-ime-align:auto) {
+            .mui-btn--fab:active,.mui-btn--raised:active {
+                -webkit-box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2);
+                box-shadow: 0 -1px 2px rgba(0,0,0,.12),-1px 0 2px rgba(0,0,0,.12),0 0 4px rgba(0,0,0,.12),1px 3px 4px rgba(0,0,0,.2)
+            }
+        }
+
+        .mui-btn.mui--is-disabled,.mui-btn:disabled {
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: .6;
+            -webkit-box-shadow: none;
+            box-shadow: none
+        }
+
+        .mui-btn+.mui-btn {
+            margin-left: 8px
+        }
+    </style>
+    <style>
+        body {
+            color: #001F2E;
+            background-color: #F5F5F6;
+            margin: 0;
+            font-family: "Karla";
+        }
+
+        .btn-reload {
+            background-color: #001F2E;
+            color: #EFEBDF;
+        }
+    </style>
+  </head>
+  <body>
+    <header class="mui-appbar mui--z1">
+      <div class="mui-container">
+        <table>
+          <tr class="mui--appbar-height">
+            <td class="mui--text-title">Spoke Rewired</td>
+          </tr>
+        </table>
+      </div>
+    </header>
+    <div id="content-wrapper" class="mui--text-center">
+      <div class="mui--appbar-height"></div>
+      <br>
+      <br>
+      <div class="mui-panel" style="display: inline-block; margin: 0 auto">
+        <div class="mui--text-display3">Network is unavailable</div>
+        <br>
+        <div class="mui--text-body1">We are currently unable to reach Spoke Rewired. Please try reconnecting in a moment.</div>
+        <br>
+        <button class="mui-btn mui-btn--raised btn-reload" onclick="window.location.reload()">Reconnect</button>
+      </div>
+    </div>
+  </body>
+</html>
