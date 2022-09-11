@@ -44,8 +44,6 @@ const OPERATION_MODE_OPTS: [string, string][] = [
   ["MyCampaign", VanOperationMode.MYCAMPAIGN]
 ];
 
-const ACTIONS_COLUMN_INDEX = 3;
-
 interface Props {
   match: any;
   history: History;
@@ -163,13 +161,6 @@ class AdminExternalSystems extends Component<Props, State> {
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
 
-  handleCellClick = (row: number, columnIndex: number) => {
-    if (columnIndex === ACTIONS_COLUMN_INDEX) return;
-
-    const systemId = this.props.data.externalSystems.edges[row].node.id;
-    this.navigateToSystemDetail(systemId);
-  };
-
   handleSelectOperationMode = (
     _event: any,
     _index: number,
@@ -226,8 +217,8 @@ class AdminExternalSystems extends Component<Props, State> {
         </Button>
 
         <TableContainer component={Paper}>
-          <Table selectable={false} onCellClick={this.handleCellClick}>
-            <TableHead displaySelectAll={false} enableSelectAll={false}>
+          <Table>
+            <TableHead>
               <TableRow>
                 {/* Make sure to update ACTIONS_COLUMN_INDEX when changing columns! */}
                 <TableCell>Name</TableCell>
@@ -236,12 +227,22 @@ class AdminExternalSystems extends Component<Props, State> {
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody displayRowCheckbox={false} showRowHover>
+            <TableBody>
               {externalSystems.edges.map(({ node: system }) => (
                 <TableRow key={system.id}>
-                  <TableCell>{system.name}</TableCell>
-                  <TableCell>{system.type}</TableCell>
-                  <TableCell>
+                  <TableCell
+                    onClick={() => this.navigateToSystemDetail(system.id)}
+                  >
+                    {system.name}
+                  </TableCell>
+                  <TableCell
+                    onClick={() => this.navigateToSystemDetail(system.id)}
+                  >
+                    {system.type}
+                  </TableCell>
+                  <TableCell
+                    onClick={() => this.navigateToSystemDetail(system.id)}
+                  >
                     {system.syncedAt
                       ? DateTime.fromISO(system.syncedAt).toRelative()
                       : "never"}
