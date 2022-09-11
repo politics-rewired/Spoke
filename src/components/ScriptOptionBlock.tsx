@@ -9,7 +9,7 @@ import React from "react";
 import type { ScriptToken } from "../lib/scripts";
 import { ScriptTokenType, scriptToTokens } from "../lib/scripts";
 
-const tokensToElems = (tokens: ScriptToken[]) =>
+export const tokensToElems = (tokens: ScriptToken[]) =>
   tokens.map((token, index) => {
     const key = `${index}-${token.text}`;
     switch (token.type) {
@@ -96,7 +96,12 @@ export const ScriptOptionBlock: React.FC<ScriptOptionBlockProps> = (props) => {
     tokens,
     invalidCampaignVariablesUsed,
     undefinedFieldsUsed
-  } = scriptToTokens({ script, customFields, campaignVariables });
+  } = scriptToTokens({
+    script,
+    customFields,
+    campaignVariables,
+    hydrate: true
+  });
 
   const scriptElems = emptyScript ? (
     <div style={{ color: grey[500] }}>{placeholder}</div>
