@@ -3887,7 +3887,7 @@ const rootResolvers = {
         );
 
         // IDs get index added to it to not have multiple of the same IDs
-        // causes an issue with GraphQL is IDs are the same
+        // causes an issue with GraphQL if IDs are the same
         return scriptOptions.map((scriptOption, index) => ({
           id: `${step.id}-${index}`,
           campaignId: step.campaign_id,
