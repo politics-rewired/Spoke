@@ -25,6 +25,12 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 const OFFLINE_URL = "/assets/offline.html";
 
+const GATEWAY_ERR_CODES = [
+  502, // Bad Gateway -- received an invalid response from the upstream server
+  503, // Service Unavailable -- server cannot handle the request
+  504 // Gateway Timeout -- did not receive a timely response from the upstream server
+];
+
 const networkOnly = new NetworkOnly();
 
 const networkOnlyHandlerWithGatewayErrorFallback: RouteHandler = async (
@@ -32,7 +38,7 @@ const networkOnlyHandlerWithGatewayErrorFallback: RouteHandler = async (
 ) => {
   try {
     let response = await networkOnly.handle(params);
-    const isGatewayErr = [502, 503].includes(response.status);
+    const isGatewayErr = GATEWAY_ERR_CODES.includes(response.status);
     if (isGatewayErr && params.request.mode === "navigate") {
       response = (await caches.match(OFFLINE_URL)) ?? response;
     }
