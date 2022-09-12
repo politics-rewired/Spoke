@@ -1678,30 +1678,36 @@ const rootMutations = {
         .knex("campaign_variable")
         .where({ campaign_id: assignment.campaign_id });
 
-      const _contactMessages = await contacts.map(async (contact) => {
-        const script = await campaignContactResolvers.CampaignContact.currentInteractionStepScript(
-          contact
-        );
-        contact.customFields = contact.custom_fields;
-        const text = applyScript({
-          contact: camelCaseKeys(contact),
-          texter,
-          script,
-          customFields,
-          campaignVariables
-        });
-        const contactMessage = {
-          contactNumber: contact.cell,
-          userId: assignment.user_id,
-          text,
-          assignmentId
-        };
-        await rootMutations.RootMutation.sendMessage(
-          _,
-          { message: contactMessage, campaignContactId: contact.id },
-          loaders
-        );
-      });
+      await Promise.all(
+        contacts.map(async (contactRecord) => {
+          const script = await campaignContactResolvers.CampaignContact.currentInteractionStepScript(
+            contactRecord
+          );
+          const { external_id, ...restOfContact } = contactRecord;
+          const contact = {
+            ...camelCaseKeys(restOfContact),
+            external_id
+          };
+          const text = applyScript({
+            contact,
+            texter,
+            script,
+            customFields,
+            campaignVariables
+          });
+          const contactMessage = {
+            contactNumber: contactRecord.cell,
+            userId: assignment.user_id,
+            text,
+            assignmentId
+          };
+          await rootMutations.RootMutation.sendMessage(
+            _,
+            { message: contactMessage, campaignContactId: contactRecord.id },
+            loaders
+          );
+        })
+      );
 
       return [];
     },
