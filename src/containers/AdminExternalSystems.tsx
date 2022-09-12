@@ -6,6 +6,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Fab from "@material-ui/core/Fab";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -18,7 +19,6 @@ import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import CreateIcon from "@material-ui/icons/Create";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import type { History } from "history";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import Snackbar from "material-ui/Snackbar";
@@ -209,12 +209,13 @@ class AdminExternalSystems extends Component<Props, State> {
 
     return (
       <div>
-        <FloatingActionButton
+        <Fab
+          color="primary"
           style={theme.components.floatingButton}
           onClick={this.startCreateExternalSystem}
         >
           <AddIcon />
-        </FloatingActionButton>
+        </Fab>
 
         <Button
           variant="contained"

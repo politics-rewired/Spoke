@@ -1,11 +1,11 @@
 import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import { css, StyleSheet } from "aphrodite";
 import isString from "lodash/fp/isString";
 import { DropDownMenu, MenuItem, Snackbar } from "material-ui";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import queryString from "query-string";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -39,13 +39,14 @@ const styles = StyleSheet.create({
 const AddPersonButton: React.StatelessComponent<{ onClick: () => void }> = ({
   onClick
 }) => (
-  <FloatingActionButton
+  <Fab
     {...dataTest("addPerson")}
+    color="primary"
     style={theme.components.floatingButton}
     onClick={onClick}
   >
     <AddIcon />
-  </FloatingActionButton>
+  </Fab>
 );
 
 interface CampaignSelectorProps {

@@ -5,9 +5,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 
@@ -149,13 +149,14 @@ class AdminShortLinkDomains extends Component {
           onManualDisableToggle={this.handleManualDisableToggle}
           onDeleteDomain={this.handleConfirmDeleteDomain}
         />
-        <FloatingActionButton
+        <Fab
+          color="primary"
           style={theme.components.floatingButton}
           disabled={addDomainIsWorking}
           onClick={this.handleAddDomainClick}
         >
           {addDomainIsWorking ? <CloudUploadIcon /> : <AddIcon />}
-        </FloatingActionButton>
+        </Fab>
         <AddDomainDialog
           open={showAddDomainDialog}
           onRequestClose={this.handleAddDomainDialogClose}

@@ -41,7 +41,7 @@ const styles: Record<string, React.CSSProperties> = {
     unicodeBidi: "bidi-override"
   },
   validCustomField: {
-    color: green[500]
+    color: green[800]
   },
   validCampaignVariableField: {
     color: blue[600]
@@ -59,7 +59,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer"
   },
   customField: {
-    color: green[600]
+    color: green[800]
   },
   campaignVariableField: {
     color: blue[600]
