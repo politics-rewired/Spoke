@@ -8,6 +8,7 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 
+import type { RouteHandler } from "workbox-core";
 import { clientsClaim } from "workbox-core";
 import { precacheAndRoute } from "workbox-precaching";
 import { offlineFallback, warmStrategyCache } from "workbox-recipes";
@@ -21,6 +22,26 @@ clientsClaim();
 
 // Precache all webpack-generated assets
 precacheAndRoute(self.__WB_MANIFEST);
+
+const OFFLINE_URL = "/assets/offline.html";
+
+const networkOnly = new NetworkOnly();
+
+const networkOnlyHandlerWithGatewayErrorFallback: RouteHandler = async (
+  params
+) => {
+  try {
+    let response = await networkOnly.handle(params);
+    const isGatewayErr = [502, 503].includes(response.status);
+    if (isGatewayErr && params.request.mode === "navigate") {
+      response = (await caches.match(OFFLINE_URL)) ?? response;
+    }
+    return response;
+  } catch (workboxErr) {
+    console.error("workbox err", workboxErr);
+    throw workboxErr;
+  }
+};
 
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
@@ -38,9 +59,9 @@ const urls = [
 warmStrategyCache({ urls, strategy });
 
 // Bypass the cache for non-webpack assets (e.g. everything else)
-setDefaultHandler(new NetworkOnly());
+setDefaultHandler(networkOnlyHandlerWithGatewayErrorFallback);
 
 // Fall back to static page
 offlineFallback({
-  pageFallback: "/assets/offline.html"
+  pageFallback: OFFLINE_URL
 });
