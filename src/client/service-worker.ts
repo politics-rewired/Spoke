@@ -41,4 +41,6 @@ warmStrategyCache({ urls, strategy });
 setDefaultHandler(new NetworkOnly());
 
 // Fall back to static page
-offlineFallback();
+offlineFallback({
+  pageFallback: "/assets/offline.html"
+});

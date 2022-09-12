@@ -270,6 +270,7 @@
     "eslint-plugin-simple-import-sort": "^5.0.3",
     "faker": "^5.1.0",
     "foreman": "^3.0.1",
+    "html-webpack-plugin": "^5.5.0",
     "husky": "^4.2.3",
     "jest": "^27.4.7",
     "jest-each": "^27.0.6",

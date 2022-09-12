@@ -8,7 +8,6 @@ import express from "express";
 import basicAuth from "express-basic-auth";
 import expressSession from "express-session";
 import StatsD from "hot-shots";
-import path from "path";
 
 import { config } from "../config";
 import requestLogging from "../lib/request-logging";
@@ -99,18 +98,6 @@ export const createApp = async () => {
   if (PUBLIC_DIR) {
     app.use(express.static(PUBLIC_DIR, { maxAge: "180 days" }));
   }
-
-  // Serve service worker from root for complete SW scope
-  app.get("/service-worker.js", (req, res) =>
-    res.sendFile("service-worker.js", { root: config.ASSETS_DIR })
-  );
-
-  // Serve offline page
-  app.get("/offline.html", (req, res) =>
-    res.sendFile("offline.html", {
-      root: path.join(__dirname, "../client")
-    })
-  );
 
   if (config.DD_AGENT_HOST && config.DD_DOGSTATSD_PORT) {
     const datadogOptions = {
