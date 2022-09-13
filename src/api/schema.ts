@@ -365,6 +365,7 @@ const rootSchema = `
     editOrganizationActive(organizationId: String!, active: Boolean!, deactivateMode: DeactivateMode): Boolean!
     bulkOptOut(organizationId: String!, csvFile: Upload, numbersList: String): Int!
     bulkOptIn(organizationId: String!, csvFile: Upload, numbersList: String): Int!
+    exportOptOuts(organizationId: String!, campaignIds: [String!]): Boolean!
   }
 
   schema {

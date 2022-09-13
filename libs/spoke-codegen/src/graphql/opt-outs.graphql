@@ -29,3 +29,7 @@ mutation BulkOptIn(
     numbersList: $numbersList
   )
 }
+
+mutation ExportOptOuts($organizationId: String!, $campaignIds: [String!]) {
+  exportOptOuts(organizationId: $organizationId, campaignIds: $campaignIds)
+}

@@ -19,6 +19,10 @@ import {
   exportForVan,
   TASK_IDENTIFIER as exportForVanIdentifier
 } from "./tasks/export-for-van";
+import {
+  exportOptOuts,
+  TASK_IDENTIFIER as exportOptOutsIdentifier
+} from "./tasks/export-opt-outs";
 import fetchVANActivistCodes from "./tasks/fetch-van-activist-codes";
 import fetchVANResultCodes from "./tasks/fetch-van-result-codes";
 import fetchVANSurveyQuestions from "./tasks/fetch-van-survey-questions";
@@ -95,6 +99,7 @@ export const getWorker = async (attempt = 0): Promise<PgComposeWorker> => {
   m.taskList![assignTextersIdentifier] = wrapProgressTask(assignTexters, {
     removeOnComplete: true
   });
+  m.taskList![exportOptOutsIdentifier] = exportOptOuts;
 
   m.cronJobs!.push({
     name: "release-stale-replies",

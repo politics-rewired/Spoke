@@ -33,6 +33,7 @@ import { getUserById } from "../models/cacheable_queries";
 import { Notifications, sendUserNotification } from "../notifications";
 import { addExportCampaign } from "../tasks/export-campaign";
 import { addExportForVan } from "../tasks/export-for-van";
+import { TASK_IDENTIFIER as exportOptOutsIdentifier } from "../tasks/export-opt-outs";
 import { addFilterLandlines } from "../tasks/filter-landlines";
 import { errToObj } from "../utils";
 import { getWorker } from "../worker";
@@ -3482,6 +3483,17 @@ const rootMutations = {
       });
 
       return processedNumbers.length;
+    },
+    exportOptOuts: async (_root, { campaignIds, organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const worker = await getWorker();
+      await worker.addJob(exportOptOutsIdentifier, {
+        campaignIds,
+        requesterEmail: user.email
+      });
+
+      return true;
     }
   }
 };
@@ -3949,8 +3961,6 @@ const rootResolvers = {
     optOuts: async (_root, { organizationId }, { user }) => {
       await accessRequired(user, organizationId, "ADMIN");
 
-      // We select `max(opt_out.id)` for DataGrid to have
-      // an ID to work with. Required for DataGrid
       const query = r
         .knex("opt_out")
         .leftJoin("assignment", "assignment.id", "assignment_id")
@@ -3962,7 +3972,6 @@ const rootResolvers = {
           "campaign.title as campaignTitle",
           "organization.name as orgName"
         )
-        .max("opt_out.id as id")
         .count("*");
 
       if (!config.OPTOUTS_SHARE_ALL_ORGS) {
@@ -3973,20 +3982,23 @@ const rootResolvers = {
 
       return results.map((result) => {
         let title;
+        let campaignId;
 
         if (result.campaignId) {
+          campaignId = result.campaignId;
           title = config.OPTOUTS_SHARE_ALL_ORGS
             ? `${result.orgName} : ${result.campaignTitle}`
             : result.campaignTitle;
         } else {
+          campaignId = "-1";
           title = config.OPTOUTS_SHARE_ALL_ORGS
             ? `${result.orgName} : Manually Uploaded`
             : "Manually Uploaded";
         }
 
         return {
-          id: result.id,
           title,
+          id: campaignId,
           count: result.count
         };
       });
