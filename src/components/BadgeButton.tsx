@@ -23,8 +23,8 @@ const badgeColor = (messageType: MessageType, theme: Theme) =>
   messageType === "initial"
     ? theme.palette.success.light
     : messageType === "reply"
-    ? theme.palette.repliesBadge!.main
-    : theme.palette.error.light;
+    ? theme.palette.error.light
+    : theme.palette.convoMessageBadge!.main;
 
 const useStyles = makeStyles<Theme, BadgeButtonProps>((theme) => ({
   badge: {
