@@ -154,7 +154,7 @@ export const createApp = async () => {
           req.body.slack_id
         );
         return res.json({ numberAssigned });
-      } catch (err) {
+      } catch (err: any) {
         logger.error("Error handling autoassignment request: ", err);
         return err.isFatal
           ? res.status(500).json({ error: err.message })
