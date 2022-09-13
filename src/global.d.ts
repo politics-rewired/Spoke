@@ -14,6 +14,7 @@ interface Window {
   ALLOW_SEND_ALL: boolean;
   NODE_ENV: string;
   BASE_URL: string;
+  ENABLE_TROLLBOT: boolean;
 
   AuthService: any;
 }

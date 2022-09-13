@@ -1,20 +1,28 @@
 import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
-import { useTheme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
+import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Collapse from "@material-ui/core/Collapse";
+import IconButton from "@material-ui/core/IconButton";
 import CancelIcon from "@material-ui/icons/Cancel";
 import DoneIcon from "@material-ui/icons/Done";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import WarningIcon from "@material-ui/icons/Warning";
-import Avatar from "material-ui/Avatar";
-import { Card, CardActions, CardHeader, CardText } from "material-ui/Card";
-import CircularProgress from "material-ui/CircularProgress";
+import clsx from "clsx";
+import isNil from "lodash/isNil";
 import React from "react";
 import { compose, withProps } from "recompose";
 
 import type { AuthzContextType } from "../../../components/AuthzProvider";
 import { withAuthzContext } from "../../../components/AuthzProvider";
 import { camelCase, dataTest } from "../../../lib/attributes";
-import theme from "../../../styles/theme";
+import assemblePalette from "../../../styles/assemble-palette";
 import type { MuiThemeProviderProps } from "../../../styles/types";
 import { loadData } from "../../hoc/with-operations";
 import type { CampaignReadinessType } from "../types";
@@ -50,18 +58,72 @@ interface WrapperProps {
   deleteJob: DeleteJobType;
 }
 
-const inlineStyles: Record<string, React.CSSProperties> = {
+const useStyles = makeStyles((theme) => ({
   card: {
-    marginTop: 1
+    marginTop: theme.spacing(1)
   },
-  title: {
+  cardHeaderWrapper: {
+    border: "1px solid",
+    borderTopRightRadius: theme.shape.borderRadius,
+    borderTopLeftRadius: theme.shape.borderRadius,
+    borderColor: theme.palette.grey[500]
+  },
+  cardHeader: {
+    backgroundColor: theme.palette.grey[50],
+    cursor: "pointer"
+  },
+  cardTitle: {
     width: "100%"
   },
-  avatarStyle: {
-    display: "inline-block",
-    verticalAlign: "middle"
+  saving: {
+    backgroundColor: theme.palette.grey[400]
+  },
+  active: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.getContrastText(theme.palette.primary.main)
+  },
+  unexpandable: {
+    backgroundColor: assemblePalette.common.lightGrey,
+    color: theme.palette.text.primary,
+    cursor: "default"
+  },
+  done: {
+    backgroundColor: theme.palette.getContrastText(theme.palette.primary.main),
+    color: theme.palette.primary.main
+  },
+  notDone: {
+    backgroundColor: theme.palette.warning.main,
+    color: theme.palette.text.primary
+  },
+  cardAvatar: {
+    backgroundColor: assemblePalette.common.lightGrey,
+    width: theme.spacing(4),
+    height: theme.spacing(4)
+  },
+  cardAvatarEmpty: {
+    backgroundColor: "transparent"
+  },
+  doneIcon: {
+    color: theme.palette.success.main
+  },
+  warningIcon: {
+    color: theme.palette.warning.main
+  },
+  expand: {
+    transform: "rotate(0deg)",
+    marginLeft: "auto",
+    transition: theme.transitions.create("transform", {
+      duration: theme.transitions.duration.shortest
+    })
+  },
+  expandOpen: {
+    transform: "rotate(180deg)",
+    color: theme.palette.getContrastText(theme.palette.primary.main)
+  },
+  expandClosedText: {
+    color: theme.palette.primary.main
   }
-};
+}));
 
 const unpackStatus = (percentComplete: number) => {
   const progressPercent =
@@ -74,16 +136,14 @@ const unpackStatus = (percentComplete: number) => {
   return { progressPercent, progressMessage };
 };
 
-const unpackJob = (job?: PendingJobType) => ({
+const unpackJob = (job?: PendingJobType | null) => ({
   jobId: job ? job.id : null,
   savePercent: job ? job.status : 0,
   jobMessage: job ? job.resultMessage : "",
-  isSaving:
-    job !== undefined && (!job.resultMessage || job.resultMessage === "{}")
+  isSaving: !isNil(job) && (!job.resultMessage || job.resultMessage === "{}")
 });
 
-const SectionWrapper: React.FC<WrapperProps> = (props) => {
-  const stableMuiTheme = useTheme();
+export const SectionWrapper: React.FC<WrapperProps> = (props) => {
   const {
     // Required props
     active,
@@ -104,48 +164,44 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
     deleteJob
   } = props;
 
-  const { jobId, savePercent, jobMessage, isSaving } = unpackJob(pendingJob);
-  const { progressPercent, progressMessage } = unpackStatus(savePercent);
+  const classes = useStyles();
 
-  let avatar = null;
-  const cardHeaderStyle: React.CSSProperties = {
-    backgroundColor: theme.colors.lightGray
-  };
-  const avatarStyle = {
-    display: "inline-block",
-    verticalAlign: "middle"
-  };
+  const { jobId, savePercent, jobMessage, isSaving } = unpackJob(pendingJob);
+  const { progressMessage, progressPercent } = unpackStatus(savePercent);
+
+  const expandable = !isSaving && isExpandable;
+  const expanded = active && expandable;
+
+  let avatar = (
+    <Avatar className={clsx(classes.cardAvatar, classes.cardAvatarEmpty)}>
+      &nbsp;
+    </Avatar>
+  );
+  const classNames: string[] = [classes.cardHeader];
+  const cardHeaderStyle: React.CSSProperties = {};
 
   if (isSaving) {
-    avatar = <CircularProgress style={avatarStyle} size={25} />;
-    cardHeaderStyle.background = theme.colors.lightGray;
+    avatar = <CircularProgress className={classes.cardAvatar} />;
+    classNames.push(classes.saving);
     cardHeaderStyle.width = `${progressPercent}%`;
-  } else if (active && isExpandable) {
-    cardHeaderStyle.backgroundColor = stableMuiTheme.palette.warning.main;
-    inlineStyles.title.color = stableMuiTheme.palette.text.primary;
-  } else if (!isExpandable) {
-    cardHeaderStyle.backgroundColor = theme.colors.lightGray;
-    inlineStyles.title.color = stableMuiTheme.palette.text.primary;
+  } else if (active && expandable) {
+    classNames.push(classes.active);
+  } else if (!expandable) {
+    classNames.push(classes.unexpandable);
   } else if (sectionIsDone) {
     avatar = (
-      <Avatar
-        icon={<DoneIcon style={{ color: theme.colors.darkGreen }} />}
-        style={avatarStyle}
-        size={25}
-      />
+      <Avatar className={classes.cardAvatar}>
+        <DoneIcon className={classes.doneIcon} />
+      </Avatar>
     );
-    cardHeaderStyle.backgroundColor = stableMuiTheme.palette.primary.main;
-    inlineStyles.title.color = stableMuiTheme.palette.text.secondary;
+    classNames.push(classes.done);
   } else if (!sectionIsDone) {
     avatar = (
-      <Avatar
-        icon={<WarningIcon style={{ color: theme.colors.orange }} />}
-        style={avatarStyle}
-        size={25}
-      />
+      <Avatar className={classes.cardAvatar}>
+        <WarningIcon className={classes.warningIcon} />
+      </Avatar>
     );
-    cardHeaderStyle.backgroundColor = stableMuiTheme.palette.warning.main;
-    inlineStyles.title.color = stableMuiTheme.palette.text.primary;
+    classNames.push(classes.notDone);
   }
 
   const handleDiscardJob = async () => {
@@ -164,28 +220,39 @@ const SectionWrapper: React.FC<WrapperProps> = (props) => {
       const response = await deleteJob(jobId);
       if (response.errors)
         throw new Error(response.errors.map((err) => `${err}`).join("\n"));
-    } catch (err) {
+    } catch (err: any) {
       onError(err.message);
     }
   };
 
   return (
-    <Card
-      {...dataTest(camelCase(title))}
-      expanded={active && isExpandable && !isSaving}
-      expandable={isExpandable}
-      onExpandChange={onExpandChange}
-      style={inlineStyles.card}
-    >
-      <CardHeader
-        title={title}
-        titleStyle={inlineStyles.title}
-        style={cardHeaderStyle}
-        actAsExpander={isExpandable}
-        showExpandableButton={isExpandable}
-        avatar={avatar}
-      />
-      <CardText expandable>{children}</CardText>
+    <Card {...dataTest(camelCase(title))} className={classes.card}>
+      <div className={clsx({ [classes.cardHeaderWrapper]: isSaving })}>
+        <CardHeader
+          title={title}
+          titleTypographyProps={{ variant: "body1" }}
+          className={clsx(...classNames)}
+          style={cardHeaderStyle}
+          avatar={avatar}
+          action={
+            expandable && (
+              <IconButton
+                className={clsx(classes.expand, {
+                  [classes.expandOpen]: expanded
+                })}
+              >
+                <ExpandMoreIcon
+                  className={clsx({ [classes.expandClosedText]: !expanded })}
+                />
+              </IconButton>
+            )
+          }
+          onClick={() => onExpandChange(!expanded)}
+        />
+      </div>
+      <Collapse in={expanded}>
+        <CardContent>{children}</CardContent>
+      </Collapse>
       {isSaving && isAdmin && (
         <CardActions>
           <div>Current Status: {progressMessage}</div>
@@ -377,7 +444,6 @@ export const asSection = (options: SectionOptions) => (
 
       // Authz HOC
       isAdmin,
-      muiTheme,
 
       // withProps HOC
       pendingJob,
@@ -400,7 +466,6 @@ export const asSection = (options: SectionOptions) => (
         isExpandable={isExpandable}
         sectionIsDone={sectionIsDone}
         deleteJob={deleteJob}
-        muiTheme={muiTheme}
       >
         <Component
           organizationId={organizationId}

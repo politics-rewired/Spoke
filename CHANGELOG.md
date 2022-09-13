@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.37.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.0...v4.37.0-rc.1) (2022-09-12)
+
+
+### Features
+
+* use rewired/assemble brand palette ([#1228](https://github.com/politics-rewired/spoke/issues/1228)) ([af2a86b](https://github.com/politics-rewired/spoke/commit/af2a86b9ec1dbdcba493096ee01ef3dddd3f3316))
+
 ## [4.37.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.36.0...v4.37.0-rc.0) (2022-09-02)
 
 

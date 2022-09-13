@@ -9,6 +9,7 @@ import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
+import clsx from "clsx";
 import camelCase from "lodash/camelCase";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -22,9 +23,15 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper
   },
   badge: {
-    backgroundColor: theme.palette.badge?.main,
-    width: theme.spacing(3),
-    height: theme.spacing(3)
+    backgroundColor: theme.palette.info.light,
+    color: theme.palette.getContrastText(theme.palette.info.light),
+    fontSize: "1em",
+    width: theme.spacing(4),
+    height: theme.spacing(4)
+  },
+  actionableBadge: {
+    backgroundColor: theme.palette.error.light,
+    color: theme.palette.getContrastText(theme.palette.error.light)
   }
 }));
 
@@ -74,7 +81,11 @@ const Navigation: React.FC<Props> = (props) => {
                 <ListItemText primary={section.name} />
                 {section.badge && (
                   <ListItemSecondaryAction>
-                    <Avatar className={classes.badge}>
+                    <Avatar
+                      className={clsx(classes.badge, {
+                        [classes.actionableBadge]: section.badge.count > 0
+                      })}
+                    >
                       {section.badge?.count}
                     </Avatar>
                   </ListItemSecondaryAction>
