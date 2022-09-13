@@ -90,7 +90,8 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
           null as queue_name,
           1 as max_attempts,
           now() + ((n / $2::float) * interval '1 second') as run_at,
-          1 as priority
+          -- prioritize in order as: autoassignment, autosending, handle delivery reports
+          4 as priority
         from contacts_to_queue
         -- this line doesn't modify the result at all, it just forces the execution of the intermediate CTE
         where id in ( select id from contacts_assigned )
