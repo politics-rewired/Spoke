@@ -24,7 +24,7 @@ import SelectField from "material-ui/SelectField";
 import Snackbar from "material-ui/Snackbar";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import type {
@@ -128,13 +128,6 @@ class AdminExternalSystems extends Component<Props, State> {
       }
     });
 
-  navigateToSystemDetail = (systemId: string) => {
-    const { organizationId } = this.props.match.params;
-    this.props.history.push(
-      `/admin/${organizationId}/integrations/${systemId}`
-    );
-  };
-
   saveExternalSystem = async () => {
     const { editingExternalSystem, externalSystem } = this.state;
     try {
@@ -228,47 +221,45 @@ class AdminExternalSystems extends Component<Props, State> {
               </TableRow>
             </TableHead>
             <TableBody>
-              {externalSystems.edges.map(({ node: system }) => (
-                <TableRow key={system.id}>
-                  <TableCell
-                    onClick={() => this.navigateToSystemDetail(system.id)}
-                  >
-                    {system.name}
-                  </TableCell>
-                  <TableCell
-                    onClick={() => this.navigateToSystemDetail(system.id)}
-                  >
-                    {system.type}
-                  </TableCell>
-                  <TableCell
-                    onClick={() => this.navigateToSystemDetail(system.id)}
-                  >
-                    {system.syncedAt
-                      ? DateTime.fromISO(system.syncedAt).toRelative()
-                      : "never"}
-                  </TableCell>
-                  <TableCell style={{ textOverflow: "clip" }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      endIcon={<CreateIcon />}
-                      style={{ marginRight: 10 }}
-                      onClick={this.makeStartEditExternalSystem(system.id)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="contained"
-                      endIcon={<CloudDownloadIcon />}
-                      style={{ marginRight: 10 }}
-                      disabled={this.state.syncInitiatedForId === system.id}
-                      onClick={this.makeHandleRefreshExternalSystem(system.id)}
-                    >
-                      Sync
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {externalSystems.edges.map(({ node: system }) => {
+                const { organizationId } = this.props.match.params;
+                const detailURL = `/admin/${organizationId}/integrations/${system.id}`;
+                return (
+                  <TableRow key={system.id}>
+                    <TableCell>
+                      <Link to={detailURL}>{system.name}</Link>
+                    </TableCell>
+                    <TableCell>{system.type}</TableCell>
+                    <TableCell>
+                      {system.syncedAt
+                        ? DateTime.fromISO(system.syncedAt).toRelative()
+                        : "never"}
+                    </TableCell>
+                    <TableCell style={{ textOverflow: "clip" }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<CreateIcon />}
+                        style={{ marginRight: 10 }}
+                        onClick={this.makeStartEditExternalSystem(system.id)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="contained"
+                        endIcon={<CloudDownloadIcon />}
+                        style={{ marginRight: 10 }}
+                        disabled={this.state.syncInitiatedForId === system.id}
+                        onClick={this.makeHandleRefreshExternalSystem(
+                          system.id
+                        )}
+                      >
+                        Sync
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
