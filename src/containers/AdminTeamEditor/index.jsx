@@ -137,7 +137,7 @@ class AdminTeamEditor extends Component {
         <TeamEditorList
           organizationId={organizationId}
           teams={teams}
-          oEditTeam={this.handleEditTeam}
+          onEditTeam={this.handleEditTeam}
           onDeleteTeam={this.handleDeleteTeam}
         />
         <Fab
