@@ -191,6 +191,8 @@ class AdminExternalSystems extends Component<Props, State> {
       </Button>
     ];
 
+    const { organizationId } = this.props.match.params;
+
     return (
       <div>
         <FloatingActionButton
@@ -222,10 +224,9 @@ class AdminExternalSystems extends Component<Props, State> {
             </TableHead>
             <TableBody>
               {externalSystems.edges.map(({ node: system }) => {
-                const { organizationId } = this.props.match.params;
                 const detailURL = `/admin/${organizationId}/integrations/${system.id}`;
                 return (
-                  <TableRow key={system.id}>
+                  <TableRow key={system.id} hover>
                     <TableCell>
                       <Link to={detailURL}>{system.name}</Link>
                     </TableCell>
