@@ -13,6 +13,7 @@ interface Window {
   NOT_IN_USA: boolean;
   ALLOW_SEND_ALL: boolean;
   NODE_ENV: string;
+  BASE_URL: string;
   ENABLE_TROLLBOT: boolean;
 
   AuthService: any;
