@@ -181,7 +181,11 @@ export const SectionWrapper: React.FC<WrapperProps> = (props) => {
   const cardHeaderStyle: React.CSSProperties = {};
 
   if (isSaving) {
-    avatar = <CircularProgress className={classes.cardAvatar} />;
+    avatar = (
+      <CircularProgress
+        className={clsx(classes.cardAvatar, classes.cardAvatarEmpty)}
+      />
+    );
     classNames.push(classes.saving);
     cardHeaderStyle.width = `${progressPercent}%`;
   } else if (active && expandable) {
