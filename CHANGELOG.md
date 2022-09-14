@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.37.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.1...v4.37.0-rc.2) (2022-09-14)
+
+
+### Features
+
+* add service worker to cache client bundles ([#1359](https://github.com/politics-rewired/spoke/issues/1359)) ([4cf8ed1](https://github.com/politics-rewired/spoke/commit/4cf8ed131c5df044051cb4d03f17eeb8c32e6314)), closes [#1411](https://github.com/politics-rewired/spoke/issues/1411)
+
+
+### Bug Fixes
+
+* remove readiness check for texters section ([#1418](https://github.com/politics-rewired/spoke/issues/1418)) ([9fd7822](https://github.com/politics-rewired/spoke/commit/9fd78225117fa91ca2dc9a07f2b3801abf53fcb5))
+* swap replies and convo colors ([#1419](https://github.com/politics-rewired/spoke/issues/1419)) ([4380c40](https://github.com/politics-rewired/spoke/commit/4380c40a6e6d703747a3d8afd12c7d25db50c838))
+
 ## [4.37.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.0...v4.37.0-rc.1) (2022-09-12)
 
 
