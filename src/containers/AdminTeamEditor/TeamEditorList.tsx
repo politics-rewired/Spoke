@@ -13,10 +13,6 @@ import { Link, withRouter } from "react-router-dom";
 
 import type { Team } from "../../api/team";
 
-const styles = {
-  row: { cursor: "pointer" }
-};
-
 export interface TeamEditorListProps {
   organizationId: string;
   teams: Team[];
@@ -42,7 +38,7 @@ const TeamEditorList: React.FC<TeamEditorListProps> = (props) => {
           {teams.map((team) => {
             const teamURL = `/admin/${organizationId}/teams/${team.id}`;
             return (
-              <TableRow key={team.id} hover style={styles.row}>
+              <TableRow key={team.id} hover>
                 <TableCell>{team.assignmentPriority}</TableCell>
                 <TableCell>
                   <Link to={teamURL}>{team.title}</Link>
