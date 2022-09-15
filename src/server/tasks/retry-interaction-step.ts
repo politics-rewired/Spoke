@@ -10,6 +10,7 @@ import { applyScript } from "../../lib/scripts";
 import { sendMessage } from "../api/lib/send-message";
 import type {
   CampaignContactRecord,
+  CampaignVariableRecord,
   InteractionStepRecord,
   UserRecord
 } from "../api/types";
@@ -62,14 +63,21 @@ export const retryInteractionStep: Task = async (
   const { campaign_contact, interaction_step, assignment_id, user } = record;
 
   const { rows: campaignVariables } = await helpers.query<
-    CampaignVariableRecord
+    Pick<CampaignVariableRecord, "id" | "name"> & {
+      value: NonNullable<CampaignVariableRecord["value"]>;
+    }
   >(
     "select * from campaign_variable where campaign_id = $1 and deleted_at is null",
     [campaign_contact.campaign_id]
   );
 
+  const { external_id, ...restOfContact } = campaign_contact;
+
   const script = sample(interaction_step.script_options)!;
-  const contact = recordToCamelCase<CampaignContact>(campaign_contact);
+  const contact: CampaignContact = {
+    ...recordToCamelCase<Omit<CampaignContact, "external_id">>(restOfContact),
+    external_id
+  };
   const texter = recordToCamelCase<User>(user);
   const customFields = Object.keys(JSON.parse(contact.customFields));
   const campaignVariableIds = campaignVariables.map(({ id }) => id);
