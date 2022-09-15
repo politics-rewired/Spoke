@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.37.0](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.2...v4.37.0) (2022-09-15)
+
+
+### Features
+
+* update offline page text ([#1424](https://github.com/politics-rewired/spoke/issues/1424)) ([d010f17](https://github.com/politics-rewired/spoke/commit/d010f172fc6a91903e92175a98338babb6cbf923))
+
+
+### Bug Fixes
+
+* set transparent background for progress indicator ([#1423](https://github.com/politics-rewired/spoke/issues/1423)) ([ccbf786](https://github.com/politics-rewired/spoke/commit/ccbf786b5d8046dee33686aa3fc6f469ac607723))
+
 ## [4.37.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.1...v4.37.0-rc.2) (2022-09-14)
 
 
