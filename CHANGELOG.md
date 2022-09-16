@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.37.1-rc.0](https://github.com/politics-rewired/spoke/compare/v4.37.0...v4.37.1-rc.0) (2022-09-16)
+
+
+### Features
+
+* disable 10dlc notices ([#1415](https://github.com/politics-rewired/spoke/issues/1415)) ([06a2c92](https://github.com/politics-rewired/spoke/commit/06a2c92cf82d50aa942e87430cc27455178690a0))
+
+
+### Bug Fixes
+
+* fix integration cell click handling ([#1413](https://github.com/politics-rewired/spoke/issues/1413)) ([a654de0](https://github.com/politics-rewired/spoke/commit/a654de0c602acc2bede8d2107ff9c2d6e95039b1))
+* handle external_id field correctly in scripts ([#1414](https://github.com/politics-rewired/spoke/issues/1414)) ([64b5840](https://github.com/politics-rewired/spoke/commit/64b5840e0182f04c265c0abb6aa9185f9244ff9d))
+
 ## [4.37.0](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.2...v4.37.0) (2022-09-15)
 
 
