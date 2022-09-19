@@ -203,3 +203,41 @@ export async function notifyOnTagConversation(
     )
   );
 }
+export async function notifyLargeCampaignEvent(
+  campaignId: number,
+  event: "upload" | "start",
+  url = config.LARGE_CAMPAIGN_WEBHOOK
+) {
+  if (!url) return;
+
+  const campaignInfo = await r
+    .knex("campaign")
+    .join("organization", "organization.id", "=", "campaign.organization_id")
+    .where({ id: campaignId })
+    .first([
+      "organization.id as org_id",
+      "organization.name as org_name",
+      "campaign.id as campaign_id",
+      "campaign.title as campaign_title"
+    ]);
+
+  const [{ count }] = await r
+    .knex("campaign_contact")
+    .where({ campaign_id: campaignId })
+    .count("id");
+
+  if (count < config.LARGE_CAMPAIGN_THRESHOLD) return;
+
+  const payload = {
+    instance: config.BASE_URL,
+    organizationId: campaignInfo.org_id,
+    organizationName: campaignInfo.org_name,
+    campaignId,
+    campaignTitle: campaignInfo.campaign_title,
+    campaignUrl: `${config.BASE_URL}/admin/${campaignInfo.org_id}/campaigns/${campaignId}`,
+    event,
+    contactCount: count
+  };
+
+  await request.post(url).send(payload);
+}
