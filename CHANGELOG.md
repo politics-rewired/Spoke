@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.37.1-rc.1](https://github.com/politics-rewired/spoke/compare/v4.37.1-rc.0...v4.37.1-rc.1) (2022-09-19)
+
+
+### Bug Fixes
+
+* display line breaks in scripts ([#1409](https://github.com/politics-rewired/spoke/issues/1409)) ([73bc883](https://github.com/politics-rewired/spoke/commit/73bc883c093f5b87879956acfbbcccc2442588d1))
+
 ### [4.37.1-rc.0](https://github.com/politics-rewired/spoke/compare/v4.37.0...v4.37.1-rc.0) (2022-09-16)
 
 
