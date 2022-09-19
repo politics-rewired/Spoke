@@ -76,7 +76,11 @@ import { resolvers as externalSyncConfigResolvers } from "./external-sync-config
 import { resolvers as externalSystemResolvers } from "./external-system";
 import { resolvers as interactionStepResolvers } from "./interaction-step";
 import { resolvers as inviteResolvers } from "./invite";
-import { notifyAssignmentCreated, notifyOnTagConversation } from "./lib/alerts";
+import {
+  notifyAssignmentCreated,
+  notifyLargeCampaignEvent,
+  notifyOnTagConversation
+} from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
 import { copyCampaign, editCampaign } from "./lib/campaign";
 import { saveNewIncomingMessage } from "./lib/message-sending";
@@ -1021,10 +1025,13 @@ const rootMutations = {
         .where({ id })
         .returning("*");
 
-      await sendUserNotification({
-        type: Notifications.CAMPAIGN_STARTED,
-        campaignId: id
-      });
+      await Promise.all([
+        sendUserNotification({
+          type: Notifications.CAMPAIGN_STARTED,
+          campaignId: id
+        }),
+        notifyLargeCampaignEvent(id, "start")
+      ]);
 
       return campaign;
     },
