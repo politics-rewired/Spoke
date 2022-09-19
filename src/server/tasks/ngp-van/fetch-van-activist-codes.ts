@@ -1,4 +1,4 @@
-import type { Task } from "graphile-worker";
+import type { JobHelpers, Task } from "graphile-worker";
 import { get } from "superagent";
 
 import type {
@@ -27,7 +27,7 @@ export interface VANActivistCode {
 
 export const fetchVANActivistCodes: Task = async (
   payload: GetActivistCodesPayload,
-  helpers
+  helpers: JobHelpers
 ) => {
   const limit = 50;
   let offset = 0;

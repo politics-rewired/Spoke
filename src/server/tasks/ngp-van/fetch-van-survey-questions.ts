@@ -1,4 +1,4 @@
-import type { Task } from "graphile-worker";
+import type { JobHelpers, Task } from "graphile-worker";
 import { get } from "superagent";
 
 import type {
@@ -35,7 +35,7 @@ export interface VANSurveyQuestion {
 
 export const fetchVANSurveyQuestions: Task = async (
   payload: GetSurveyQuestionsPayload,
-  helpers
+  helpers: JobHelpers
 ) => {
   const auth = await getVanAuth(helpers, payload);
 

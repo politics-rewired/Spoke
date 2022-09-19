@@ -1,4 +1,4 @@
-import type { Task } from "graphile-worker";
+import type { JobHelpers, Task } from "graphile-worker";
 import { get } from "superagent";
 
 import type { VanSecretAuthPayload } from "../../lib/external-systems";
@@ -23,7 +23,7 @@ interface VanSavedList {
 
 export const getSavedLists: Task = async (
   payload: GetSavedListsPayload,
-  helpers
+  helpers: JobHelpers
 ) => {
   const auth = await getVanAuth(helpers, payload);
 

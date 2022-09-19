@@ -1,4 +1,4 @@
-import type { Task } from "graphile-worker";
+import type { JobHelpers, Task } from "graphile-worker";
 import isNil from "lodash/isNil";
 import type { PoolClient } from "pg";
 import { post } from "superagent";
@@ -324,7 +324,7 @@ export interface SyncCampaignContactToVANPayload extends VanSecretAuthPayload {
 
 export const syncCampaignContactToVAN: Task = async (
   payload: SyncCampaignContactToVANPayload,
-  helpers
+  helpers: JobHelpers
 ) => {
   const auth = await getVanAuth(helpers, payload);
 
