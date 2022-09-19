@@ -4,10 +4,27 @@ import request from "superagent";
 import { config } from "../../../config";
 import logger from "../../../logger";
 import { r } from "../../models";
+import { MessageSendStatus } from "../types";
 
 const THRESHOLD = 0.2;
 
-const notifyAssignmentCreated = async (options) => {
+interface NotifyAssignmentCreatedOptions {
+  organizationId: number;
+  userId: number;
+  count: number;
+}
+
+type NotifyAssignmentCreatedPayload = {
+  organizationId: number | string;
+  organizationName: string;
+  count: number | string;
+  email: string;
+  externalUserId?: number | string;
+};
+
+export const notifyAssignmentCreated = async (
+  options: NotifyAssignmentCreatedOptions
+) => {
   const { organizationId, userId, count } = options;
 
   if (!config.ASSIGNMENT_REQUESTED_URL) return;
@@ -22,7 +39,12 @@ const notifyAssignmentCreated = async (options) => {
     .where({ id: organizationId })
     .first(["name"]);
 
-  let payload = { organizationId, organizationName, count, email };
+  let payload: NotifyAssignmentCreatedPayload = {
+    organizationId,
+    organizationName,
+    count,
+    email
+  };
 
   if (["slack"].includes(config.PASSPORT_STRATEGY)) {
     payload.externalUserId = externalUserId;
@@ -31,7 +53,7 @@ const notifyAssignmentCreated = async (options) => {
   if (config.WEBHOOK_PAYLOAD_ALL_STRINGS) {
     payload = Object.fromEntries(
       Object.entries(payload).map(([key, value]) => [key, `${value}`])
-    );
+    ) as NotifyAssignmentCreatedPayload;
   }
 
   const webhookRequest = request
@@ -51,7 +73,13 @@ const notifyAssignmentCreated = async (options) => {
   });
 };
 
-async function checkForBadDeliverability() {
+type DeliverabilityRow = {
+  domain: string;
+  send_status: MessageSendStatus;
+  count: number;
+};
+
+export async function checkForBadDeliverability() {
   if (config.DELIVERABILITY_ALERT_ENDPOINT === undefined) return null;
   logger.info("Running deliverability check");
   /*
@@ -75,10 +103,13 @@ async function checkForBadDeliverability() {
     group by domain, link_message.send_status;
   `);
 
-  const byDomain = _.groupBy(results.rows, (x) => x.domain);
+  const byDomain = _.groupBy(
+    results.rows as DeliverabilityRow[],
+    (x) => x.domain
+  );
 
   for (const domain of Object.keys(byDomain)) {
-    const fetchCountBySendStatus = (status) => {
+    const fetchCountBySendStatus = (status: string) => {
       for (const foundStatus of byDomain[domain]) {
         if (foundStatus.send_status === status) {
           return foundStatus.count;
@@ -87,9 +118,9 @@ async function checkForBadDeliverability() {
       return 0;
     };
 
-    const deliveredCount = fetchCountBySendStatus("DELIVERED");
-    const sentCount = fetchCountBySendStatus("SENT");
-    const errorCount = fetchCountBySendStatus("ERROR");
+    const deliveredCount = fetchCountBySendStatus(MessageSendStatus.Delivered);
+    const sentCount = fetchCountBySendStatus(MessageSendStatus.Sent);
+    const errorCount = fetchCountBySendStatus(MessageSendStatus.Error);
 
     const errorPercent = errorCount / (deliveredCount + sentCount);
     if (errorPercent > THRESHOLD) {
@@ -104,7 +135,11 @@ async function checkForBadDeliverability() {
   }
 }
 
-async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
+export async function notifyOnTagConversation(
+  campaignContactId: string,
+  userId: string,
+  webhookUrls: string[]
+) {
   const promises = {
     mostRecentlyReceivedMessage: (async () => {
       const message = await r
@@ -168,9 +203,3 @@ async function notifyOnTagConversation(campaignContactId, userId, webhookUrls) {
     )
   );
 }
-
-export {
-  checkForBadDeliverability,
-  notifyOnTagConversation,
-  notifyAssignmentCreated
-};
