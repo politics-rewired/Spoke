@@ -215,7 +215,7 @@ export async function notifyLargeCampaignEvent(
   const campaignInfo = await r
     .knex("campaign")
     .join("organization", "organization.id", "=", "campaign.organization_id")
-    .where({ id: campaignId })
+    .where({ "campaign.id": campaignId })
     .first([
       "organization.id as org_id",
       "organization.name as org_name",
