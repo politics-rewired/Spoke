@@ -1,5 +1,4 @@
 import AppBar from "@material-ui/core/AppBar";
-import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Card from "@material-ui/core/Card";
@@ -11,6 +10,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import IconButton from "@material-ui/core/IconButton";
+import { makeStyles } from "@material-ui/core/styles";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
 import TextField from "@material-ui/core/TextField";
@@ -19,36 +19,17 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import type { AutocompleteChangeReason } from "@material-ui/lab/Autocomplete";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { useSearchUsersQuery } from "@spoke/spoke-codegen";
-import { css, StyleSheet } from "aphrodite";
 import React, { useMemo, useState } from "react";
 
 import { UserRoleType } from "../../../api/organization-membership";
+import TabPanel from "../../../components/TabPanel";
 
-const styles = StyleSheet.create({
-  fullWidth: {
-    width: "100%"
-  },
+const useStyles = makeStyles({
   buttonGroup: {
     marginTop: 20,
     width: "50%"
   }
 });
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-const TabPanel: React.FC<TabPanelProps> = (props) => {
-  const { children, value, index } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index}>
-      <Box p={3}>{children}</Box>
-    </div>
-  );
-};
 
 type Texter = {
   id: string;
@@ -70,6 +51,8 @@ interface IncomingMessageActionsProps {
 const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
   props
 ) => {
+  const styles = useStyles();
+
   const [selectedTexters, setSelectedTexters] = useState<Array<Texter>>([]);
   const [reassignDialogOpen, setReassignDialogOpen] = useState<boolean>(false);
   const [unassignDialogOpen, setUnassignDialogOpen] = useState<boolean>(false);
@@ -170,6 +153,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
 
   const { contactsAreSelected, conversationCount } = props;
   const hasSelectedTexters = selectedTexters.length > 0;
+
   return (
     <Card>
       <CardHeader
@@ -184,11 +168,10 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
       />
       <Collapse in={showSection}>
         <CardContent>
-          <AppBar position="static">
+          <AppBar color="transparent" position="static">
             <Tabs
               value={activeTab}
               onChange={onChangeActiveTab}
-              indicatorColor="secondary"
               variant="fullWidth"
             >
               <Tab label="Reassign" />
@@ -213,7 +196,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
                 />
               )}
             />
-            <ButtonGroup color="primary" className={css(styles.buttonGroup)}>
+            <ButtonGroup color="primary" classes={{ root: styles.buttonGroup }}>
               <Button
                 disabled={!contactsAreSelected || !hasSelectedTexters}
                 onClick={onReassignmentClicked}
@@ -229,7 +212,7 @@ const IncomingMessageActions: React.FC<IncomingMessageActionsProps> = (
             </ButtonGroup>
           </TabPanel>
           <TabPanel value={activeTab} index={1}>
-            <ButtonGroup color="primary" className={css(styles.buttonGroup)}>
+            <ButtonGroup color="primary" classes={{ root: styles.buttonGroup }}>
               <Button
                 disabled={!contactsAreSelected}
                 onClick={onUnassignClicked}

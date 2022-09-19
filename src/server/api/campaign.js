@@ -343,22 +343,7 @@ export const resolvers = {
         .then((records) => records.length > 0),
     autoassign: () => true,
     cannedResponses: () => true,
-    texters: async (campaign) => {
-      const { id, use_dynamic_assignment } = campaign;
-      const {
-        rows: [{ is_fully_assigned }]
-      } = await r.knex.raw(
-        `
-          select not exists (
-            select 1
-            from campaign_contact
-            where campaign_id = ? and assignment_id is null
-          ) as is_fully_assigned
-        `,
-        [id]
-      );
-      return use_dynamic_assignment || is_fully_assigned;
-    },
+    texters: () => true,
     interactions: async (campaign) => {
       const hasSteps = await r
         .reader("interaction_step")

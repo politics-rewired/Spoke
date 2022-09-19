@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.37.1-rc.0](https://github.com/politics-rewired/spoke/compare/v4.37.0...v4.37.1-rc.0) (2022-09-16)
+
+
+### Features
+
+* disable 10dlc notices ([#1415](https://github.com/politics-rewired/spoke/issues/1415)) ([06a2c92](https://github.com/politics-rewired/spoke/commit/06a2c92cf82d50aa942e87430cc27455178690a0))
+
+
+### Bug Fixes
+
+* fix integration cell click handling ([#1413](https://github.com/politics-rewired/spoke/issues/1413)) ([a654de0](https://github.com/politics-rewired/spoke/commit/a654de0c602acc2bede8d2107ff9c2d6e95039b1))
+* handle external_id field correctly in scripts ([#1414](https://github.com/politics-rewired/spoke/issues/1414)) ([64b5840](https://github.com/politics-rewired/spoke/commit/64b5840e0182f04c265c0abb6aa9185f9244ff9d))
+
+## [4.37.0](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.2...v4.37.0) (2022-09-15)
+
+
+### Features
+
+* update offline page text ([#1424](https://github.com/politics-rewired/spoke/issues/1424)) ([d010f17](https://github.com/politics-rewired/spoke/commit/d010f172fc6a91903e92175a98338babb6cbf923))
+
+
+### Bug Fixes
+
+* set transparent background for progress indicator ([#1423](https://github.com/politics-rewired/spoke/issues/1423)) ([ccbf786](https://github.com/politics-rewired/spoke/commit/ccbf786b5d8046dee33686aa3fc6f469ac607723))
+
+## [4.37.0-rc.2](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.1...v4.37.0-rc.2) (2022-09-14)
+
+
+### Features
+
+* add service worker to cache client bundles ([#1359](https://github.com/politics-rewired/spoke/issues/1359)) ([4cf8ed1](https://github.com/politics-rewired/spoke/commit/4cf8ed131c5df044051cb4d03f17eeb8c32e6314)), closes [#1411](https://github.com/politics-rewired/spoke/issues/1411)
+
+
+### Bug Fixes
+
+* remove readiness check for texters section ([#1418](https://github.com/politics-rewired/spoke/issues/1418)) ([9fd7822](https://github.com/politics-rewired/spoke/commit/9fd78225117fa91ca2dc9a07f2b3801abf53fcb5))
+* swap replies and convo colors ([#1419](https://github.com/politics-rewired/spoke/issues/1419)) ([4380c40](https://github.com/politics-rewired/spoke/commit/4380c40a6e6d703747a3d8afd12c7d25db50c838))
+
+## [4.37.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.37.0-rc.0...v4.37.0-rc.1) (2022-09-12)
+
+
+### Features
+
+* use rewired/assemble brand palette ([#1228](https://github.com/politics-rewired/spoke/issues/1228)) ([af2a86b](https://github.com/politics-rewired/spoke/commit/af2a86b9ec1dbdcba493096ee01ef3dddd3f3316))
+
 ## [4.37.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.36.0...v4.37.0-rc.0) (2022-09-02)
 
 

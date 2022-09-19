@@ -15,6 +15,7 @@ const contactDataFragment = `
         lastName
         cell
         zip
+        external_id
         customFields
         optOut {
           id
