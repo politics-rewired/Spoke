@@ -203,9 +203,11 @@ export async function notifyOnTagConversation(
     )
   );
 }
+
 export async function notifyLargeCampaignEvent(
   campaignId: number,
   event: "upload" | "start",
+  threshold = config.LARGE_CAMPAIGN_THRESHOLD,
   url = config.LARGE_CAMPAIGN_WEBHOOK
 ) {
   if (!url) return;
@@ -226,7 +228,7 @@ export async function notifyLargeCampaignEvent(
     .where({ campaign_id: campaignId })
     .count("id");
 
-  if (count < config.LARGE_CAMPAIGN_THRESHOLD) return;
+  if (count < threshold) return;
 
   const payload = {
     instance: config.BASE_URL,
