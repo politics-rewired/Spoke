@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(1),
     cursor: "pointer",
+    whiteSpace: "pre-wrap",
     flexGrow: 1
   },
   warnLabel: {
