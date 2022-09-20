@@ -1,5 +1,5 @@
+import type { Task } from "graphile-worker";
 import { fromPairs } from "lodash";
-import type { Task } from "pg-compose";
 
 import { config } from "../../config";
 

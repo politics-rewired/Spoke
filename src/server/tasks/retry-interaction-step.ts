@@ -1,6 +1,6 @@
+import type { Task } from "graphile-worker";
 import sample from "lodash/sample";
 import md5 from "md5";
-import type { Task } from "pg-compose";
 
 import type { CampaignContact } from "../../api/campaign-contact";
 import type { MessageInput } from "../../api/types";
