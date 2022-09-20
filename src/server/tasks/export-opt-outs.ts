@@ -56,9 +56,9 @@ export const exportOptOuts = async (
     { campaignIdsParsed }
   );
 
-  const fileName = `optOutsExport-${DateTime.local().toFormat(
-    "y-mm-d-hh-mm-ss"
-  )}.csv`;
+  const exportTimestamp = DateTime.local().toFormat("y-mm-d-hh-mm-ss");
+  const fileName = `optOutsExport-${exportTimestamp}.csv`;
+
   const optOutsUploadStream = await getUploadStream(fileName);
   const optOutsWriteStream = format({ headers: true, writeHeaders: true });
 
@@ -86,7 +86,7 @@ export const exportOptOuts = async (
   await optOutsUploadPromise;
   const fileUploadedUrl = await getDownloadUrl(fileName);
 
-  sendEmail({
+  await sendEmail({
     to: requesterEmail,
     subject: `Opts Out Export Ready`,
     text: `Your opt outs export is ready. You can download it from here: ${fileUploadedUrl}`

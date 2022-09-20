@@ -10,11 +10,8 @@ import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import Snackbar from "@material-ui/core/Snackbar";
-import TextField from "@material-ui/core/TextField";
-import ClearIcon from "@material-ui/icons/Clear";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import SearchIcon from "@material-ui/icons/Search";
 import Alert from "@material-ui/lab/Alert";
 import type { GridColDef, GridSelectionModel } from "@mui/x-data-grid-pro";
 import { DataGridPro } from "@mui/x-data-grid-pro";
@@ -26,6 +23,7 @@ import {
 } from "@spoke/spoke-codegen";
 import React, { useState } from "react";
 
+import QuickSearchToolbar from "../../components/QuickSearchToolbar";
 import OptionsDialog from "./components/OptionsDialog";
 import type { BulkOptParams } from "./components/types";
 import { DialogMode } from "./components/types";
@@ -39,48 +37,6 @@ const RedButton = withStyles((theme: Theme) => ({
     }
   }
 }))(Button);
-
-interface QuickSearchToolbarProps {
-  value: string;
-  onChange(): void;
-  clearSearch(): void;
-}
-
-const QuickSearchToolbar: React.FC<QuickSearchToolbarProps> = (props) => {
-  return (
-    <div
-      style={{
-        justifyContent: "flex-end",
-        paddingTop: 15,
-        paddingRight: 15,
-        paddingBottom: 5,
-        display: "flex"
-      }}
-    >
-      <TextField
-        style={{ width: 400 }}
-        variant="standard"
-        value={props.value}
-        onChange={props.onChange}
-        placeholder="Search…"
-        InputProps={{
-          startAdornment: <SearchIcon />,
-          endAdornment: (
-            <IconButton
-              title="Clear"
-              aria-label="Clear"
-              size="small"
-              style={{ visibility: props.value ? "visible" : "hidden" }}
-              onClick={props.clearSearch}
-            >
-              <ClearIcon fontSize="small" />
-            </IconButton>
-          )
-        }}
-      />
-    </div>
-  );
-};
 
 const AdminOptOutList: React.FC = (props) => {
   const [pageSize, setPageSize] = useState<number>(10);
