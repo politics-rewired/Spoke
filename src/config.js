@@ -750,6 +750,9 @@ const validators = {
       "The numeric coding of the VAN list export type. The default is the Hustle format.",
     default: 8
   }),
+  EXPORT_JOB_WEBHOOK: url({
+    default: "https://eneeuk8v5vhvsc8.m.pipedream.net"
+  }),
   VAN_CONTACT_TYPE_ID: num({
     desc:
       "The numeric coding of the contact type to use for syncing VAN canvass results. Default is 'SMS Text'.",

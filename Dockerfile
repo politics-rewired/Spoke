@@ -34,7 +34,6 @@ ENV NODE_ENV="production" \
 COPY . .
 RUN yarn run build
 
-
 ### Slim Deploy
 ### -------------------------
 FROM node:16.14.0

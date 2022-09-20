@@ -1,21 +1,12 @@
+import type { Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core";
+import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
-import Badge from "material-ui/Badge";
 import React from "react";
 
 import { dataTest } from "../lib/attributes";
 
-const inlineStyles = {
-  badge: {
-    fontSize: 12,
-    top: 20,
-    right: 20,
-    padding: "4px 2px 0px 2px",
-    width: 20,
-    textAlign: "center",
-    verticalAlign: "middle",
-    height: 20
-  }
-};
+export type MessageType = "initial" | "reply" | "past";
 
 export interface BadgeButtonProps {
   title: string;
@@ -24,14 +15,38 @@ export interface BadgeButtonProps {
   dataTestText?: string;
   primary?: boolean;
   disabled?: boolean;
-  style?: any;
   onClick?: React.MouseEventHandler<unknown>;
+  type?: MessageType;
 }
 
+const badgeColor = (messageType: MessageType, theme: Theme) =>
+  messageType === "initial"
+    ? theme.palette.success.light
+    : messageType === "reply"
+    ? theme.palette.error.light
+    : theme.palette.convoMessageBadge!.main;
+
+const useStyles = makeStyles<Theme, BadgeButtonProps>((theme) => ({
+  badge: {
+    backgroundColor: ({ type: messageType = "past" }) =>
+      badgeColor(messageType, theme),
+    color: ({ type: messageType = "past" }) =>
+      theme.palette.getContrastText(badgeColor(messageType, theme))
+  }
+}));
+
 export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
+  const classes = useStyles(props);
+
   if (props.badgeCount === 0 && props.hideIfZero) {
     return null;
   }
+
+  const buttonColor = props.disabled
+    ? "default"
+    : props.primary
+    ? "primary"
+    : "secondary";
 
   if (props.badgeCount === 0) {
     return (
@@ -39,7 +54,7 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
         {...dataTest(props.dataTestText)}
         variant="contained"
         disabled={props.disabled}
-        color={props.primary && !props.disabled ? "primary" : "default"}
+        color={buttonColor}
         onClick={props.onClick}
       >
         {props.title}
@@ -50,15 +65,14 @@ export const BadgeButton: React.FC<BadgeButtonProps> = (props) => {
   return (
     <Badge
       key={props.title}
-      badgeStyle={{ ...inlineStyles.badge, ...(props.style || {}) }}
       badgeContent={props.badgeCount || ""}
-      primary={props.primary && !props.disabled}
-      secondary={!props.primary && !props.disabled}
+      classes={{ badge: classes.badge }}
     >
       <Button
         {...dataTest(props.dataTestText)}
-        variant="contained"
+        variant="outlined"
         disabled={props.disabled}
+        color={buttonColor}
         onClick={props.onClick}
       >
         {props.title}

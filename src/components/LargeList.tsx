@@ -25,14 +25,15 @@ const largeListItemStyles: { [key: string]: React.CSSProperties } = {
   primaryText: {
     margin: "10px 0 0 0",
     padding: 0,
-    fontFamily: "Poppins",
+    fontFamily: "Karla",
     fontSize: "16px",
     color: grey[900]
   },
   secondaryText: {
     margin: "5px 0 0 0",
     padding: 0,
-    fontFamily: "Poppins",
+    fontFamily: "Karla",
+    whiteSpace: "pre-wrap",
     fontSize: "14px",
     color: grey[600]
   }

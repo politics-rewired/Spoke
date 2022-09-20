@@ -32,6 +32,8 @@ export const fieldAliases = {
   lastName: ["last_name", "lastname"]
 };
 
+export const onlyCellFields = ["cell"];
+
 export const requiredUploadFields = ["firstName", "lastName", "cell"];
 
 export const topLevelUploadFields = [
@@ -131,13 +133,15 @@ export const gunzip = (buf) =>
     });
   });
 
-export const validateCsv = ({ data, meta }) => {
+export const validateCsv = ({ data, meta, onlyCell }) => {
   const { fields } = meta;
 
   const missingFields = [];
   const useAliases = {};
 
-  for (const field of requiredUploadFields) {
+  const requiredFields = onlyCell ? onlyCellFields : requiredUploadFields;
+
+  for (const field of requiredFields) {
     if (!fields.includes(field)) {
       let fieldFoundViaAlias = false;
       for (const alias of fieldAliases[field] || []) {

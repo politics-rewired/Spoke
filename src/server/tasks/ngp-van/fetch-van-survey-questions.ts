@@ -1,13 +1,16 @@
-import type { Task } from "pg-compose";
+import type { JobHelpers, Task } from "graphile-worker";
 import { get } from "superagent";
 
 import type {
-  VanAuthPayload,
-  VANDataCollectionStatus
-} from "../lib/external-systems";
-import { withVan } from "../lib/external-systems";
+  VANDataCollectionStatus,
+  VanSecretAuthPayload
+} from "../../lib/external-systems";
+import { withVan } from "../../lib/external-systems";
+import { getVanAuth, handleResult } from "./lib";
 
-interface GetSurveyQuestionsPayload extends VanAuthPayload {
+export const TASK_IDENTIFIER = "van-get-survey-questions";
+
+interface GetSurveyQuestionsPayload extends VanSecretAuthPayload {
   van_system_id: string;
 }
 
@@ -32,8 +35,10 @@ export interface VANSurveyQuestion {
 
 export const fetchVANSurveyQuestions: Task = async (
   payload: GetSurveyQuestionsPayload,
-  _helpers: any
+  helpers: JobHelpers
 ) => {
+  const auth = await getVanAuth(helpers, payload);
+
   const limit = 50;
   let offset = 0;
   let hasNextPage = false;
@@ -44,14 +49,14 @@ export const fetchVANSurveyQuestions: Task = async (
         $top: limit,
         $skip: offset
       })
-      .use(withVan(payload));
+      .use(withVan(auth));
     const { body } = response;
     hasNextPage = body.nextPageLink !== null;
     offset += limit;
     surveyQuestions = surveyQuestions.concat(body.items);
   } while (hasNextPage);
 
-  return surveyQuestions.map((sq) => ({
+  const result = surveyQuestions.map((sq) => ({
     van_system_id: payload.van_system_id,
     survey_question_id: sq.surveyQuestionId,
     type: sq.type,
@@ -68,6 +73,8 @@ export const fetchVANSurveyQuestions: Task = async (
       short_name: sqro.shortName
     }))
   }));
+
+  await handleResult(helpers, payload, result);
 };
 
 export default fetchVANSurveyQuestions;

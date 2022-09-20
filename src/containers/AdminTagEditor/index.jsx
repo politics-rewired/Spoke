@@ -5,10 +5,10 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import pick from "lodash/pick";
 import ColorPicker from "material-ui-color-picker";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import PropTypes from "prop-types";
@@ -202,13 +202,14 @@ class AdminTagEditor extends Component {
           oEditTag={this.handleEditTag}
           onDeleteTag={this.handleDeleteTag}
         />
-        <FloatingActionButton
+        <Fab
+          color="primary"
           style={theme.components.floatingButton}
           disabled={isWorking}
           onClick={this.handleClickAddTag}
         >
           <AddIcon />
-        </FloatingActionButton>
+        </Fab>
         {editingTag && (
           <div>
             <Dialog open onClose={this.handleCancelEditTag}>

@@ -7,6 +7,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Fab from "@material-ui/core/Fab";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -22,7 +23,6 @@ import TextField from "@material-ui/core/TextField";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import sortBy from "lodash/sortBy";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import React, { useState } from "react";
 import type { RouteChildrenProps } from "react-router-dom";
 
@@ -214,13 +214,14 @@ const TrollTokenSettings: React.FC<Props> = (props) => {
         </TableContainer>
       )}
       {isActive && (
-        <FloatingActionButton
+        <Fab
+          color="primary"
           style={theme.components.floatingButton}
           disabled={isWorking}
           onClick={handleAddToken}
         >
           <AddIcon />
-        </FloatingActionButton>
+        </Fab>
       )}
       <Dialog open={addToken !== undefined} onClose={handleOnCancelAddToken}>
         <DialogTitle>Add Trigger Token</DialogTitle>

@@ -1,6 +1,6 @@
-import { useTheme } from "@material-ui/core";
-import { css, StyleSheet } from "aphrodite";
-import { Card, CardActions, CardTitle } from "material-ui/Card";
+import { makeStyles } from "@material-ui/core";
+import CardActions from "@material-ui/core/CardActions";
+import { Card, CardTitle } from "material-ui/Card";
 import Divider from "material-ui/Divider";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -8,9 +8,15 @@ import { useHistory } from "react-router-dom";
 import type { Assignment } from "../../api/assignment";
 import { useSpokeContext } from "../../client/spoke-context";
 import { DateTime } from "../../lib/datetime";
+import type { MessageType } from "../BadgeButton";
 import BadgeButton from "../BadgeButton";
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
+  cardActions: {
+    "& > :not(:first-child)": {
+      marginLeft: theme.spacing(2)
+    }
+  },
   container: {
     margin: "20px 0"
   },
@@ -20,7 +26,7 @@ const styles = StyleSheet.create({
     top: "20px",
     right: "20px"
   }
-});
+}));
 
 interface Props {
   organizationId: string;
@@ -36,7 +42,6 @@ interface Props {
 }
 
 export const AssignmentSummary: React.FC<Props> = (props) => {
-  const theme = useTheme();
   const history = useHistory();
   const context = useSpokeContext();
 
@@ -62,7 +67,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
     disabled,
     contactsFilter,
     hideIfZero,
-    style
+    type
   }: {
     assignment: Pick<Assignment, "id">;
     contactsFilter: string | null;
@@ -72,7 +77,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
     dataTestText?: string;
     primary?: boolean;
     disabled?: boolean;
-    style?: any;
+    type?: MessageType;
   }) => {
     return (
       <BadgeButton
@@ -82,7 +87,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
         primary={primary}
         disabled={disabled}
         dataTestText={dataTestText}
-        style={style}
+        type={type}
         onClick={makeGoToTodosHandler(contactsFilter, assignment.id)}
       />
     );
@@ -112,33 +117,30 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
     : "No Due Date";
   const subtitle = `${description} - ${dueByText}`;
 
-  const pastMsgStyle = {
-    backgroundColor: theme.palette.badge?.main
-  };
+  const classes = useStyles();
 
   return (
-    <div className={css(styles.container)}>
+    <div className={classes.container}>
       <Card key={assignment.id}>
         <CardTitle
           title={title}
           subtitle={subtitle}
           style={{ backgroundColor: primaryColor }}
         >
-          {logoImageUrl && (
-            <img src={logoImageUrl} className={css(styles.image)} />
-          )}
+          {logoImageUrl && <img src={logoImageUrl} className={classes.image} />}
         </CardTitle>
         <Divider />
         <div style={{ margin: "20px" }}>
           <div dangerouslySetInnerHTML={{ __html: introHtml || "" }} />
         </div>
-        <CardActions>
+        <CardActions className={classes.cardActions}>
           {window.NOT_IN_USA && window.ALLOW_SEND_ALL
             ? ""
             : renderBadgedButton({
                 dataTestText: "sendFirstTexts",
                 assignment,
                 title: "Send first texts",
+                type: "initial",
                 count: unmessagedCount,
                 primary: true,
                 disabled:
@@ -148,7 +150,6 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
                   (useDynamicAssignment && maxContacts === 0) ||
                   undefined,
                 contactsFilter: "text",
-                style: { backgroundColor: theme.palette.success.main },
                 hideIfZero: !useDynamicAssignment
               })}
           {window.NOT_IN_USA && window.ALLOW_SEND_ALL
@@ -157,6 +158,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
                 dataTestText: "sendReplies",
                 assignment,
                 title: "Send replies",
+                type: "reply",
                 count: unrepliedCount,
                 primary: false,
                 disabled: false,
@@ -166,8 +168,8 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
           {renderBadgedButton({
             assignment,
             title: "Past Messages",
+            type: "past",
             count: pastMessagesCount,
-            style: pastMsgStyle,
             primary: false,
             disabled: false,
             contactsFilter: "stale",
@@ -176,8 +178,8 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
           {renderBadgedButton({
             assignment,
             title: "Skipped Messages",
+            type: "past",
             count: skippedMessagesCount,
-            style: pastMsgStyle,
             primary: false,
             disabled: false,
             contactsFilter: "skipped",
@@ -187,6 +189,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
             ? renderBadgedButton({
                 assignment,
                 title: "Send messages",
+                type: "initial",
                 primary: true,
                 disabled: false,
                 contactsFilter: "all",
@@ -197,6 +200,7 @@ export const AssignmentSummary: React.FC<Props> = (props) => {
           {renderBadgedButton({
             assignment,
             title: "Send later",
+            type: "initial",
             count: badTimezoneCount,
             primary: false,
             disabled: true,
