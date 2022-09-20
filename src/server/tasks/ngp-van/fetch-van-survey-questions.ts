@@ -4,8 +4,8 @@ import { get } from "superagent";
 import type {
   VANDataCollectionStatus,
   VanSecretAuthPayload
-} from "../../lib/external-systems";
-import { withVan } from "../../lib/external-systems";
+} from "../../external-systems/van";
+import { withVan } from "../../external-systems/van";
 import { getVanAuth, handleResult } from "./lib";
 
 export const TASK_IDENTIFIER = "van-get-survey-questions";

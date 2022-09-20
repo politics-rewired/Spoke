@@ -90,6 +90,7 @@ export const optOutCache = {
     trx = r.knex,
     { cell, organizationId, assignmentId, reason }
   ) => {
+    let optOutId;
     const updateQueryParams = { "campaign_contact.cell": cell };
     if (!sharingOptOuts) {
       updateQueryParams["campaign.organization_id"] = organizationId;
@@ -104,12 +105,16 @@ export const optOutCache = {
     }
     // database
     try {
-      await trx("opt_out").insert({
-        assignment_id: assignmentId,
-        organization_id: organizationId,
-        reason_code: reason,
-        cell
-      });
+      const [opttedOutId] = await trx("opt_out")
+        .insert({
+          assignment_id: assignmentId,
+          organization_id: organizationId,
+          reason_code: reason,
+          cell
+        })
+        .returning(["id"]);
+
+      optOutId = opttedOutId.id;
     } catch (error) {
       logger.error("Error creating opt-out: ", error);
     }
@@ -125,6 +130,8 @@ export const optOutCache = {
     await trx("campaign_contact").whereIn("id", contactIds).update({
       is_opted_out: true
     });
+
+    return optOutId;
   },
   saveMany: async (
     // eslint-disable-next-line default-param-last

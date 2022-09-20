@@ -2,7 +2,9 @@ import groupBy from "lodash/groupBy";
 
 import { config } from "../../../config";
 import { eventBus, EventType } from "../../event-bus";
+import { queueExternalSyncForAction } from "../../lib/external-systems";
 import { cacheableData, r } from "../../models";
+import { ActionType } from "../types";
 
 export const SpokeSendStatus = Object.freeze({
   Queued: "QUEUED",
@@ -393,12 +395,14 @@ export async function saveNewIncomingMessage(messageInstance) {
       .join("assignment", "campaign_id", "=", "campaign.id")
       .where({ "assignment.id": assignment_id });
 
-    await cacheableData.optOut.save(r.knex, {
+    const optOutId = await cacheableData.optOut.save(r.knex, {
       cell: contact_number,
       reason: "Automatic OptOut",
       assignmentId: assignment_id,
       organizationId
     });
+
+    await queueExternalSyncForAction(ActionType.OptOut, optOutId);
   } else {
     updateQuery = updateQuery.update({ message_status: "needsResponse" });
   }

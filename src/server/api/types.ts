@@ -1,4 +1,5 @@
 import type { RequestHandler } from "express";
+import type { JobHelpers } from "graphile-worker";
 
 export interface RelayPageArgs {
   after: string | null;
@@ -290,4 +291,24 @@ export enum DeactivateMode {
 export enum AutosendingControlsMode {
   Basic = "BASIC",
   Detailed = "DETAILED"
+}
+
+export interface IExternalSystem {
+  queueQuestionResponse(
+    payload: Record<string, any>,
+    helpers: JobHelpers
+  ): Promise<void>;
+  queueOptOut(payload: Record<string, any>, helpers: JobHelpers): Promise<void>;
+  syncQuestionResponse(payload: Record<string, any>): Promise<void>;
+  syncOptOut(payload: Record<string, any>): Promise<void>;
+}
+
+export enum ActionType {
+  QuestionReponse = "question_response",
+  OptOut = "opt_out"
+}
+
+export enum ExternalSystemType {
+  Van = "van",
+  Dummy = "dummy"
 }

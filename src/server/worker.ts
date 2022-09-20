@@ -33,6 +33,7 @@ import {
   schedules as ngpVanSchedules,
   taskList as ngpVanTaskList
 } from "./tasks/ngp-van";
+import queueActionExternalSync from "./tasks/queue-action-external-sync";
 import queueAutoSendInitials from "./tasks/queue-autosend-initials";
 import {
   queueDailyNotifications,
@@ -46,6 +47,8 @@ import {
   sendNotificationDigestForUser,
   sendNotificationEmail
 } from "./tasks/send-notification-email";
+import syncContactOptOut from "./tasks/sync-contact-opt-out";
+import syncContactQuestionResponse from "./tasks/sync-contact-question-response";
 import syncSlackTeamMembers from "./tasks/sync-slack-team-members";
 import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
 import updateOrgMessageUsage from "./tasks/update-org-message-usage";
@@ -78,6 +81,9 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     "send-notification-email": sendNotificationEmail,
     "send-notification-digest": sendNotificationDigestForUser,
     "queue-autosend-initials": queueAutoSendInitials,
+    "queue-action-external-sync": queueActionExternalSync,
+    "sync-contact-question-response": syncContactQuestionResponse,
+    "sync-contact-opt-out": syncContactOptOut,
     [exportCampaignIdentifier]: wrapProgressTask(exportCampaign, {
       removeOnComplete: true
     }),

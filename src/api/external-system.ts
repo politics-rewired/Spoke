@@ -6,7 +6,8 @@ import type { ExternalResultCodeTarget } from "./external-sync-config";
 import type { RelayPaginatedResponse } from "./pagination";
 
 export enum ExternalSystemType {
-  VAN = "VAN"
+  VAN = "VAN",
+  DUMMY = "DUMMY"
 }
 
 export enum VanOperationMode {
