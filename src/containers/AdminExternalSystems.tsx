@@ -6,6 +6,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Fab from "@material-ui/core/Fab";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -18,13 +19,12 @@ import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import CreateIcon from "@material-ui/icons/Create";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import type { History } from "history";
-import FloatingActionButton from "material-ui/FloatingActionButton";
 import MenuItem from "material-ui/MenuItem";
 import SelectField from "material-ui/SelectField";
 import Snackbar from "material-ui/Snackbar";
 import TextField from "material-ui/TextField";
 import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import type {
@@ -43,8 +43,6 @@ const OPERATION_MODE_OPTS: [string, string][] = [
   ["Voterfile", VanOperationMode.VOTERFILE],
   ["MyCampaign", VanOperationMode.MYCAMPAIGN]
 ];
-
-const ACTIONS_COLUMN_INDEX = 3;
 
 interface Props {
   match: any;
@@ -130,13 +128,6 @@ class AdminExternalSystems extends Component<Props, State> {
       }
     });
 
-  navigateToSystemDetail = (systemId: string) => {
-    const { organizationId } = this.props.match.params;
-    this.props.history.push(
-      `/admin/${organizationId}/integrations/${systemId}`
-    );
-  };
-
   saveExternalSystem = async () => {
     const { editingExternalSystem, externalSystem } = this.state;
     try {
@@ -162,13 +153,6 @@ class AdminExternalSystems extends Component<Props, State> {
     this.setState((prevState) => ({
       externalSystem: { ...prevState.externalSystem, ...{ [prop]: newVal } }
     }));
-
-  handleCellClick = (row: number, columnIndex: number) => {
-    if (columnIndex === ACTIONS_COLUMN_INDEX) return;
-
-    const systemId = this.props.data.externalSystems.edges[row].node.id;
-    this.navigateToSystemDetail(systemId);
-  };
 
   handleSelectOperationMode = (
     _event: any,
@@ -207,14 +191,17 @@ class AdminExternalSystems extends Component<Props, State> {
       </Button>
     ];
 
+    const { organizationId } = this.props.match.params;
+
     return (
       <div>
-        <FloatingActionButton
+        <Fab
+          color="primary"
           style={theme.components.floatingButton}
           onClick={this.startCreateExternalSystem}
         >
           <AddIcon />
-        </FloatingActionButton>
+        </Fab>
 
         <Button
           variant="contained"
@@ -226,8 +213,8 @@ class AdminExternalSystems extends Component<Props, State> {
         </Button>
 
         <TableContainer component={Paper}>
-          <Table selectable={false} onCellClick={this.handleCellClick}>
-            <TableHead displaySelectAll={false} enableSelectAll={false}>
+          <Table>
+            <TableHead>
               <TableRow>
                 {/* Make sure to update ACTIONS_COLUMN_INDEX when changing columns! */}
                 <TableCell>Name</TableCell>
@@ -236,38 +223,45 @@ class AdminExternalSystems extends Component<Props, State> {
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody displayRowCheckbox={false} showRowHover>
-              {externalSystems.edges.map(({ node: system }) => (
-                <TableRow key={system.id}>
-                  <TableCell>{system.name}</TableCell>
-                  <TableCell>{system.type}</TableCell>
-                  <TableCell>
-                    {system.syncedAt
-                      ? DateTime.fromISO(system.syncedAt).toRelative()
-                      : "never"}
-                  </TableCell>
-                  <TableCell style={{ textOverflow: "clip" }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      endIcon={<CreateIcon />}
-                      style={{ marginRight: 10 }}
-                      onClick={this.makeStartEditExternalSystem(system.id)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="contained"
-                      endIcon={<CloudDownloadIcon />}
-                      style={{ marginRight: 10 }}
-                      disabled={this.state.syncInitiatedForId === system.id}
-                      onClick={this.makeHandleRefreshExternalSystem(system.id)}
-                    >
-                      Sync
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+            <TableBody>
+              {externalSystems.edges.map(({ node: system }) => {
+                const detailURL = `/admin/${organizationId}/integrations/${system.id}`;
+                return (
+                  <TableRow key={system.id} hover>
+                    <TableCell>
+                      <Link to={detailURL}>{system.name}</Link>
+                    </TableCell>
+                    <TableCell>{system.type}</TableCell>
+                    <TableCell>
+                      {system.syncedAt
+                        ? DateTime.fromISO(system.syncedAt).toRelative()
+                        : "never"}
+                    </TableCell>
+                    <TableCell style={{ textOverflow: "clip" }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        endIcon={<CreateIcon />}
+                        style={{ marginRight: 10 }}
+                        onClick={this.makeStartEditExternalSystem(system.id)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="contained"
+                        endIcon={<CloudDownloadIcon />}
+                        style={{ marginRight: 10 }}
+                        disabled={this.state.syncInitiatedForId === system.id}
+                        onClick={this.makeHandleRefreshExternalSystem(
+                          system.id
+                        )}
+                      >
+                        Sync
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>

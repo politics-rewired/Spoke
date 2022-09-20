@@ -1,5 +1,5 @@
+import type { Task } from "graphile-worker";
 import { fromPairs } from "lodash";
-import type { Task } from "pg-compose";
 
 import { config } from "../../config";
 
@@ -78,7 +78,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         returning id
       ),
       new_jobs_queued as (
-        insert into graphile_worker.jobs (task_identifier, payload, key, queue_name, max_attempts, run_at)
+        insert into graphile_worker.jobs (task_identifier, payload, key, queue_name, max_attempts, run_at, priority)
         select 
           'retry-interaction-step' as task_identifier, 
           json_build_object(
@@ -89,7 +89,9 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
           id::text as key,
           null as queue_name,
           1 as max_attempts,
-          now() + ((n / $2::float) * interval '1 second') as run_at
+          now() + ((n / $2::float) * interval '1 second') as run_at,
+          -- prioritize in order as: autoassignment, autosending, handle delivery reports
+          4 as priority
         from contacts_to_queue
         -- this line doesn't modify the result at all, it just forces the execution of the intermediate CTE
         where id in ( select id from contacts_assigned )

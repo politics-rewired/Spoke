@@ -75,6 +75,7 @@ class AdminDashboard extends React.Component {
       { name: "Assignment Control", path: "assignment-control", role: "ADMIN" },
       { name: "Autosending", path: "autosending", role: "ADMIN" },
       { name: "Tags", path: "tag-editor", role: "ADMIN" },
+      { name: "Opt Outs", path: "optouts", role: "ADMIN" },
       { name: "Message Review", path: "incoming", role: "SUPERVOLUNTEER" },
       {
         name: "Escalated Convos",

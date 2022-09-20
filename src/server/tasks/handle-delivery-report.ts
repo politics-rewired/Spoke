@@ -1,4 +1,4 @@
-import type { Task } from "pg-compose";
+import type { Task } from "graphile-worker";
 
 import { processDeliveryReportBody as processAssembleDeliveryReport } from "../api/lib/assemble-numbers";
 import { processDeliveryReportBody as processTwilioDeliveryReport } from "../api/lib/twilio";

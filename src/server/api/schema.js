@@ -19,8 +19,10 @@ import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { replaceAll } from "../../lib/utils";
 import logger from "../../logger";
+import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
 import { refreshExternalSystem } from "../lib/external-systems";
+import { getSecretPool, setSecretPool } from "../lib/graphile-secrets";
 import {
   getInstanceNotifications,
   getOrgLevelNotifications
@@ -78,6 +80,7 @@ import { notifyAssignmentCreated, notifyOnTagConversation } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
 import { copyCampaign, editCampaign } from "./lib/campaign";
 import { saveNewIncomingMessage } from "./lib/message-sending";
+import { processNumbers } from "./lib/opt-out";
 import { formatPage } from "./lib/pagination";
 import { sendMessage } from "./lib/send-message";
 import { graphileSecretRef } from "./lib/utils";
@@ -1678,30 +1681,36 @@ const rootMutations = {
         .knex("campaign_variable")
         .where({ campaign_id: assignment.campaign_id });
 
-      const _contactMessages = await contacts.map(async (contact) => {
-        const script = await campaignContactResolvers.CampaignContact.currentInteractionStepScript(
-          contact
-        );
-        contact.customFields = contact.custom_fields;
-        const text = applyScript({
-          contact: camelCaseKeys(contact),
-          texter,
-          script,
-          customFields,
-          campaignVariables
-        });
-        const contactMessage = {
-          contactNumber: contact.cell,
-          userId: assignment.user_id,
-          text,
-          assignmentId
-        };
-        await rootMutations.RootMutation.sendMessage(
-          _,
-          { message: contactMessage, campaignContactId: contact.id },
-          loaders
-        );
-      });
+      await Promise.all(
+        contacts.map(async (contactRecord) => {
+          const script = await campaignContactResolvers.CampaignContact.currentInteractionStepScript(
+            contactRecord
+          );
+          const { external_id, ...restOfContact } = contactRecord;
+          const contact = {
+            ...camelCaseKeys(restOfContact),
+            external_id
+          };
+          const text = applyScript({
+            contact,
+            texter,
+            script,
+            customFields,
+            campaignVariables
+          });
+          const contactMessage = {
+            contactNumber: contactRecord.cell,
+            userId: assignment.user_id,
+            text,
+            assignmentId
+          };
+          await rootMutations.RootMutation.sendMessage(
+            _,
+            { message: contactMessage, campaignContactId: contactRecord.id },
+            loaders
+          );
+        })
+      );
 
       return [];
     },
@@ -3026,8 +3035,10 @@ const rootMutations = {
       const apiKeyRef =
         graphileSecretRef(organizationId, truncatedKey) + apiKeyAppendage;
 
-      await getWorker().then((worker) =>
-        worker.setSecret(apiKeyRef, externalSystem.apiKey + apiKeyAppendage)
+      await setSecretPool(
+        pgPool,
+        apiKeyRef,
+        externalSystem.apiKey + apiKeyAppendage
       );
 
       const [created] = await r
@@ -3064,9 +3075,10 @@ const rootMutations = {
         username: externalSystem.username
       };
 
-      const savedSystemApiKeySecret = await getWorker()
-        .then((worker) => worker.getSecret(savedSystem.api_key_ref))
-        .catch(() => undefined);
+      const savedSystemApiKeySecret = await getSecretPool(
+        pgPool,
+        savedSystem.api_key_ref
+      );
 
       const [
         savedSystemApiKey,
@@ -3104,14 +3116,10 @@ const rootMutations = {
           .where({ ref: savedSystem.api_key_ref })
           .del();
 
-        await getWorker().then((worker) =>
-          worker.setSecret(
-            apiKeyRef,
-            (externalSystem.apiKey.includes("*")
-              ? savedSystemApiKey
-              : externalSystem.apiKey) + apiKeyAppendage
-          )
-        );
+        const apiKey = externalSystem.apiKey.includes("*")
+          ? savedSystemApiKey
+          : externalSystem.apiKey;
+        await setSecretPool(pgPool, apiKeyRef, apiKey + apiKeyAppendage);
       }
 
       const [updated] = await r
@@ -3442,6 +3450,39 @@ const rootMutations = {
         }
       }
       return true;
+    },
+    bulkOptOut: async (
+      _root,
+      { organizationId, csvFile, numbersList },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const processedNumbers = await processNumbers(csvFile, numbersList);
+
+      await cacheableData.optOut.saveMany(r.knex, {
+        cells: processedNumbers,
+        organizationId,
+        reason: "Manually Uploaded"
+      });
+
+      return processedNumbers.length;
+    },
+    bulkOptIn: async (
+      _root,
+      { organizationId, csvFile, numbersList },
+      { user }
+    ) => {
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const processedNumbers = await processNumbers(csvFile, numbersList);
+
+      await cacheableData.optOut.deleteMany(r.knex, {
+        cells: processedNumbers,
+        organizationId
+      });
+
+      return processedNumbers.length;
     }
   }
 };
@@ -3879,14 +3920,24 @@ const rootResolvers = {
         return getStepsToUpdate(trx, findAndReplace);
       });
 
-      return steps.map((step) => {
-        return {
-          id: step.id,
+      const { searchString } = findAndReplace;
+
+      const stepsToChange = steps.flatMap((step) => {
+        const scriptOptions = step.script_options.filter((option) =>
+          option.includes(searchString)
+        );
+
+        // IDs get index added to it to not have multiple of the same IDs
+        // causes an issue with GraphQL if IDs are the same
+        return scriptOptions.map((scriptOption, index) => ({
+          id: `${step.id}-${index}`,
           campaignId: step.campaign_id,
           campaignName: step.title,
-          script: step.script_options.join(" | ")
-        };
+          script: scriptOption
+        }));
       });
+
+      return stepsToChange;
     },
     superadmins: async (_root, _options, { user }) => {
       if (user.is_superadmin) {
@@ -3895,6 +3946,51 @@ const rootResolvers = {
       throw new ForbiddenError(
         "You are not authorized to access that resource"
       );
+    },
+    optOuts: async (_root, { organizationId }, { user }) => {
+      await accessRequired(user, organizationId, "ADMIN");
+
+      // We select `max(opt_out.id)` for DataGrid to have
+      // an ID to work with. Required for DataGrid
+      const query = r
+        .knex("opt_out")
+        .leftJoin("assignment", "assignment.id", "assignment_id")
+        .leftJoin("campaign", "campaign.id", "assignment.campaign_id")
+        .leftJoin("organization", "organization.id", "opt_out.organization_id")
+        .groupBy("campaign.id", "campaign.title", "organization.name")
+        .select(
+          "campaign.id as campaignId",
+          "campaign.title as campaignTitle",
+          "organization.name as orgName"
+        )
+        .max("opt_out.id as id")
+        .count("*");
+
+      if (!config.OPTOUTS_SHARE_ALL_ORGS) {
+        query.where({ "opt_out.organization_id": organizationId });
+      }
+
+      const results = await query;
+
+      return results.map((result) => {
+        let title;
+
+        if (result.campaignId) {
+          title = config.OPTOUTS_SHARE_ALL_ORGS
+            ? `${result.orgName} : ${result.campaignTitle}`
+            : result.campaignTitle;
+        } else {
+          title = config.OPTOUTS_SHARE_ALL_ORGS
+            ? `${result.orgName} : Manually Uploaded`
+            : "Manually Uploaded";
+        }
+
+        return {
+          id: result.id,
+          title,
+          count: result.count
+        };
+      });
     }
   }
 };

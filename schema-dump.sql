@@ -2833,7 +2833,7 @@ ALTER SEQUENCE public.notification_id_seq OWNED BY public.notification.id;
 CREATE TABLE public.opt_out (
     id integer NOT NULL,
     cell text NOT NULL,
-    assignment_id integer NOT NULL,
+    assignment_id integer,
     organization_id integer NOT NULL,
     reason_code text DEFAULT ''::text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,

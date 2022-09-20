@@ -1,4 +1,4 @@
-import type { Task } from "pg-compose";
+import type { Task } from "graphile-worker";
 import request from "superagent";
 
 import { config } from "../../config";
