@@ -3919,14 +3919,24 @@ const rootResolvers = {
         return getStepsToUpdate(trx, findAndReplace);
       });
 
-      return steps.map((step) => {
-        return {
-          id: step.id,
+      const { searchString } = findAndReplace;
+
+      const stepsToChange = steps.flatMap((step) => {
+        const scriptOptions = step.script_options.filter((option) =>
+          option.includes(searchString)
+        );
+
+        // IDs get index added to it to not have multiple of the same IDs
+        // causes an issue with GraphQL if IDs are the same
+        return scriptOptions.map((scriptOption, index) => ({
+          id: `${step.id}-${index}`,
           campaignId: step.campaign_id,
           campaignName: step.title,
-          script: step.script_options.join(" | ")
-        };
+          script: scriptOption
+        }));
       });
+
+      return stepsToChange;
     },
     superadmins: async (_root, _options, { user }) => {
       if (user.is_superadmin) {
