@@ -32,7 +32,7 @@ const sanitizeRawContact = (rawContact) => {
   return { ...contact, customFields };
 };
 
-export const processContactsFile = async (file) => {
+export const processContactsFile = async (file, onlyCell = false) => {
   const { createReadStream } = await file;
   const stream = createReadStream()
     .pipe(new AutoDetectDecoderStream())
@@ -58,7 +58,11 @@ export const processContactsFile = async (file) => {
         // Exit early on bad header
         if (resultMeta === undefined) {
           resultMeta = meta;
-          missingFields = missingHeaderFields(meta.fields);
+          if (onlyCell) {
+            missingFields = meta.fields.includes("cell");
+          } else {
+            missingFields = missingHeaderFields(meta.fields);
+          }
           if (missingFields.length > 0) {
             parser.abort();
           }
@@ -70,7 +74,8 @@ export const processContactsFile = async (file) => {
         if (aborted) return reject(`CSV missing fields: ${missingFields}`);
         const { contacts, validationStats } = validateCsv({
           data: resultData,
-          meta: resultMeta
+          meta: resultMeta,
+          onlyCell
         });
         return resolve({ contacts, validationStats });
       },

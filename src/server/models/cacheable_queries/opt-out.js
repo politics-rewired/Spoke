@@ -1,3 +1,5 @@
+import chunk from "lodash/chunk";
+
 import { config } from "../../../config";
 import logger from "../../../logger";
 import thinky from "../thinky";
@@ -12,6 +14,8 @@ const orgCacheKey = (orgId) =>
     ? `${config.CACHE_PREFIX}optouts`
     : `${config.CACHE_PREFIX}optouts-${orgId}`;
 
+const CHUNK_SIZE = 100;
+
 const sharingOptOuts = config.OPTOUTS_SHARE_ALL_ORGS;
 
 const loadMany = async (organizationId) => {
@@ -23,15 +27,15 @@ const loadMany = async (organizationId) => {
     const dbResult = await dbQuery;
     const cellOptOuts = dbResult.map((rec) => rec.cell);
     const hashKey = orgCacheKey(organizationId);
-    // save 100 at a time
+    // save CHUNK_SIZE at a time
     for (
-      let i100 = 0, l100 = Math.ceil(cellOptOuts.length / 100);
+      let i100 = 0, l100 = Math.ceil(cellOptOuts.length / CHUNK_SIZE);
       i100 < l100;
       i100 += 1
     ) {
       await r.redis.saddAsync(
         hashKey,
-        cellOptOuts.slice(100 * i100, 100 * i100 + 100)
+        cellOptOuts.slice(CHUNK_SIZE * i100, CHUNK_SIZE * i100 + CHUNK_SIZE)
       );
     }
     await r.redis.expire(hashKey, 86400);
@@ -121,6 +125,71 @@ export const optOutCache = {
     await trx("campaign_contact").whereIn("id", contactIds).update({
       is_opted_out: true
     });
+  },
+  saveMany: async (
+    // eslint-disable-next-line default-param-last
+    trx = r.knex,
+    { cells: cellsList, organizationId, assignmentId, reason }
+  ) => {
+    const cellsChunks = chunk(cellsList, CHUNK_SIZE);
+
+    for (const cells of cellsChunks) {
+      if (r.redis) {
+        const hashKey = orgCacheKey(organizationId);
+        const exists = await r.redis.existsAsync(hashKey);
+        if (exists) {
+          await r.redis.saddAsync(hashKey, cells);
+        }
+      }
+
+      const optOuts = cells.map((cell) => ({
+        cell,
+        assignment_id: assignmentId,
+        organization_id: organizationId,
+        reason_code: reason
+      }));
+
+      await trx("opt_out").insert(optOuts);
+
+      const contactIdsQuery = r
+        .reader("campaign_contact")
+        .leftJoin("campaign", "campaign_contact.campaign_id", "campaign.id")
+        .whereIn("campaign_contact.cell", cells)
+        .pluck("campaign_contact.id");
+
+      if (!sharingOptOuts)
+        contactIdsQuery.where({ "campaign.organization_id": organizationId });
+
+      const contactIds = await contactIdsQuery;
+
+      await trx("campaign_contact").whereIn("id", contactIds).update({
+        is_opted_out: true
+      });
+    }
+  },
+  deleteMany: async (
+    // eslint-disable-next-line default-param-last
+    trx = r.knex,
+    { cells: cellsList, organizationId }
+  ) => {
+    const cellsChunks = chunk(cellsList, CHUNK_SIZE);
+
+    for (const cells of cellsChunks) {
+      if (r.redis) {
+        const hashKey = orgCacheKey(organizationId);
+        const exists = await r.redis.existsAsync(hashKey);
+        if (exists) {
+          await r.redis.srem(hashKey, cells);
+        }
+      }
+
+      const deleteQuery = trx("opt_out").whereIn("cell", cells);
+
+      if (!sharingOptOuts)
+        deleteQuery.where({ organization_id: organizationId });
+
+      await deleteQuery.delete();
+    }
   },
   loadMany
 };
