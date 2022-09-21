@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.38.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.37.1...v4.38.0-rc.0) (2022-09-21)
+
+
+### Features
+
+* **opt outs:** allow exporting all or selected campaigns ([#1417](https://github.com/politics-rewired/spoke/issues/1417)) ([6ee1b1f](https://github.com/politics-rewired/spoke/commit/6ee1b1f5a1eb036bf7fbdd0921baa8416978de21))
+* add opt outs page, and allow opt in ([#1395](https://github.com/politics-rewired/spoke/issues/1395)) ([f309f88](https://github.com/politics-rewired/spoke/commit/f309f8877ffb6e96c4537fc064384497285dd2b6))
+* display campaign variable values in script previews ([#1412](https://github.com/politics-rewired/spoke/issues/1412)) ([c3c479b](https://github.com/politics-rewired/spoke/commit/c3c479b89c0a93f850e76fe75ed37143bbcfd140))
+
+
+### Bug Fixes
+
+* **bulk script editor:** only show versions being changed ([#1408](https://github.com/politics-rewired/spoke/issues/1408)) ([9fc769a](https://github.com/politics-rewired/spoke/commit/9fc769a968a5304dda9b0ccb5227a80969c51201))
+
 ### [4.37.1](https://github.com/politics-rewired/spoke/compare/v4.37.1-rc.1...v4.37.1) (2022-09-20)
 
 ### [4.37.1-rc.1](https://github.com/politics-rewired/spoke/compare/v4.37.1-rc.0...v4.37.1-rc.1) (2022-09-19)
