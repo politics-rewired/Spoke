@@ -19,8 +19,10 @@ import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import { replaceAll } from "../../lib/utils";
 import logger from "../../logger";
+import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
 import { refreshExternalSystem } from "../lib/external-systems";
+import { getSecretPool, setSecretPool } from "../lib/graphile-secrets";
 import {
   getInstanceNotifications,
   getOrgLevelNotifications
@@ -3034,8 +3036,10 @@ const rootMutations = {
       const apiKeyRef =
         graphileSecretRef(organizationId, truncatedKey) + apiKeyAppendage;
 
-      await getWorker().then((worker) =>
-        worker.setSecret(apiKeyRef, externalSystem.apiKey + apiKeyAppendage)
+      await setSecretPool(
+        pgPool,
+        apiKeyRef,
+        externalSystem.apiKey + apiKeyAppendage
       );
 
       const [created] = await r
@@ -3072,9 +3076,10 @@ const rootMutations = {
         username: externalSystem.username
       };
 
-      const savedSystemApiKeySecret = await getWorker()
-        .then((worker) => worker.getSecret(savedSystem.api_key_ref))
-        .catch(() => undefined);
+      const savedSystemApiKeySecret = await getSecretPool(
+        pgPool,
+        savedSystem.api_key_ref
+      );
 
       const [
         savedSystemApiKey,
@@ -3112,14 +3117,10 @@ const rootMutations = {
           .where({ ref: savedSystem.api_key_ref })
           .del();
 
-        await getWorker().then((worker) =>
-          worker.setSecret(
-            apiKeyRef,
-            (externalSystem.apiKey.includes("*")
-              ? savedSystemApiKey
-              : externalSystem.apiKey) + apiKeyAppendage
-          )
-        );
+        const apiKey = externalSystem.apiKey.includes("*")
+          ? savedSystemApiKey
+          : externalSystem.apiKey;
+        await setSecretPool(pgPool, apiKeyRef, apiKey + apiKeyAppendage);
       }
 
       const [updated] = await r

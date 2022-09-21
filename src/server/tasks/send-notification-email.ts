@@ -1,5 +1,5 @@
+import type { Task } from "graphile-worker";
 import groupBy from "lodash/groupBy";
-import type { Task } from "pg-compose";
 
 import logger from "../../logger";
 import {

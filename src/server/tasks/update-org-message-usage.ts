@@ -1,4 +1,4 @@
-import type { JobHelpers, Task } from "pg-compose";
+import type { JobHelpers, Task } from "graphile-worker";
 
 import { config } from "../../config";
 

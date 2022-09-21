@@ -1,6 +1,7 @@
 import type { CampaignVariable } from "@spoke/spoke-codegen";
 import axios from "axios";
 import escapeRegExp from "lodash/escapeRegExp";
+import isNil from "lodash/isNil";
 
 import type { CampaignContact } from "../api/campaign-contact";
 import type { User } from "../api/user";
@@ -164,7 +165,8 @@ export enum ScriptTokenType {
 export interface ScriptToElemsOptions {
   script: string;
   customFields: string[];
-  campaignVariables: CampaignVariable[];
+  campaignVariables: Pick<CampaignVariable, "name" | "value">[];
+  hydrate?: boolean;
 }
 
 export type ScriptToken = { type: ScriptTokenType; text: string };
@@ -180,7 +182,7 @@ export interface ScriptToElemsPayload {
 export const scriptToTokens = (
   options: ScriptToElemsOptions
 ): ScriptToElemsPayload => {
-  const { script, customFields, campaignVariables } = options;
+  const { script, customFields, campaignVariables, hydrate = false } = options;
 
   if (script.trim().length === 0) {
     return {
@@ -195,12 +197,17 @@ export const scriptToTokens = (
   const customFieldTags = allScriptFields(customFields).map(
     (customField) => `{${customField}}`
   );
-  const { validVariables, invalidVariables } = campaignVariables.reduce<{
+  const {
+    validVariables,
+    validVariableValues,
+    invalidVariables
+  } = campaignVariables.reduce<{
     validVariables: string[];
+    validVariableValues: Record<string, string>;
     invalidVariables: string[];
   }>(
     (acc, campaignVariable) => {
-      if (campaignVariable.value === null) {
+      if (isNil(campaignVariable.value)) {
         return {
           ...acc,
           invalidVariables: [
@@ -211,10 +218,14 @@ export const scriptToTokens = (
       }
       return {
         ...acc,
-        validVariables: [...acc.validVariables, `{${campaignVariable.name}}`]
+        validVariables: [...acc.validVariables, `{${campaignVariable.name}}`],
+        validVariableValues: {
+          ...acc.validVariableValues,
+          [`{${campaignVariable.name}}`]: campaignVariable.value
+        }
       };
     },
-    { validVariables: [], invalidVariables: [] }
+    { validVariables: [], validVariableValues: {}, invalidVariables: [] }
   );
 
   const scriptTokens = script.split(TOKEN_SPLIT_REGEXP).filter(Boolean);
@@ -235,7 +246,8 @@ export const scriptToTokens = (
       if (validVariables.includes(token)) {
         const newToken = {
           type: ScriptTokenType.ValidCampaignVariable,
-          text: token
+          text: hydrate ? validVariableValues[token] : token,
+          value: validVariableValues[token]
         };
         return {
           ...acc,

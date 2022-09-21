@@ -1,4 +1,4 @@
-import type { Task } from "pg-compose";
+import type { Task } from "graphile-worker";
 
 import { NotificationFrequencyType } from "../../api/user";
 import { r } from "../models";
