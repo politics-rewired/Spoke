@@ -20,6 +20,10 @@ import {
   TASK_IDENTIFIER as exportForVanIdentifier
 } from "./tasks/export-for-van";
 import {
+  exportOptOuts,
+  TASK_IDENTIFIER as exportOptOutsIdentifier
+} from "./tasks/export-opt-outs";
+import {
   filterLandlines,
   TASK_IDENTIFIER as filterLandlinesIdentifier
 } from "./tasks/filter-landlines";
@@ -86,6 +90,7 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     [assignTextersIdentifier]: wrapProgressTask(assignTexters, {
       removeOnComplete: true
     }),
+    [exportOptOutsIdentifier]: exportOptOuts,
     ...ngpVanTaskList
   };
 
