@@ -23,6 +23,7 @@ export const errorCodeDescriptions: Record<string, string> = {
   "4406": "Unreachable phone number",
   "4432": "Unreachable country",
   "4434": "Unreachable toll-free number",
+  "4470": "Blocked as spam by telecom provider (block can be contested)",
   "4700": "Landline or unreachable carrier",
   "4720": "Unreachable phone number",
   "4730": "Unreachable phone number (recipient maybe roaming)",
