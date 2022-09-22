@@ -7,6 +7,7 @@ import { gunzip } from "../../lib";
 import { getFormattedPhoneNumber } from "../../lib/phone-format";
 import { isValidTimezone } from "../../lib/tz-helpers";
 import logger from "../../logger";
+import { notifyLargeCampaignEvent } from "../../server/api/lib/alerts";
 import {
   assignMissingMessagingServices,
   // eslint-disable-next-line import/named
@@ -351,6 +352,8 @@ export async function uploadContacts(job) {
       .update({ result_message: message });
   }
 
+  await notifyLargeCampaignEvent(campaignId, "upload");
+
   await cacheableData.campaign.reload(campaignId);
 }
 
@@ -555,6 +558,7 @@ export async function loadContactsFromDataWarehouseFragment(jobEvent) {
         });
     }
     await r.knex("job_request").where({ id: jobEvent.jobId }).del();
+    await notifyLargeCampaignEvent(jobEvent.campaignId, "upload");
     await cacheableData.campaign.reload(jobEvent.campaignId);
     return { completed: 1, validationStats };
   } else if (jobEvent.part < jobEvent.totalParts - 1) {

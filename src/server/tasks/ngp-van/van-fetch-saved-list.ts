@@ -7,6 +7,7 @@ import type { SuperAgentRequest } from "superagent";
 import { get, post } from "superagent";
 
 import { config } from "../../../config";
+import { notifyLargeCampaignEvent } from "../../api/lib/alerts";
 import type { VanSecretAuthPayload } from "../../lib/external-systems";
 import { withVan } from "../../lib/external-systems";
 import { withTransaction } from "../../utils";
@@ -168,6 +169,9 @@ interface FetchSavedListsPayload extends VanSecretAuthPayload {
   column_config: ColumnConfig;
   first_n_rows: number;
   extract_phone_type: VanPhoneType | null;
+  __context: {
+    campaign_id: number;
+  };
 }
 
 export const fetchSavedList: Task = async (
@@ -244,4 +248,6 @@ export const fetchSavedList: Task = async (
   });
 
   await handleResult(helpers, payload, {});
+
+  await notifyLargeCampaignEvent(payload.__context.campaign_id, "upload");
 };

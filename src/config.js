@@ -444,6 +444,14 @@ const validators = {
     desc: "When true, log each lambda event to the console.",
     default: false
   }),
+  LARGE_CAMPAIGN_THRESHOLD: num({
+    desc: 'Threshold for what qualifies as a "large campaign"',
+    default: 100 * 1000
+  }),
+  LARGE_CAMPAIGN_WEBHOOK: url({
+    desc: "URL to send webhook to when large campaign is uploaded or started",
+    default: undefined
+  }),
   LOGGING_MONGODB_URI: url({
     desc: "If present, requestLogger will send logs events to MongoDB.",
     default: undefined
