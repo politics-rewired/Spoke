@@ -12,6 +12,10 @@ import {
   TASK_IDENTIFIER as assignTextersIdentifier
 } from "./tasks/assign-texters";
 import {
+  schedules as campaignBuilderSchedules,
+  taskList as campaignBuilderTaskList
+} from "./tasks/campaign-builder";
+import {
   exportCampaign,
   TASK_IDENTIFIER as exportCampaignIdentifier
 } from "./tasks/export-campaign";
@@ -91,7 +95,8 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
       removeOnComplete: true
     }),
     [exportOptOutsIdentifier]: exportOptOuts,
-    ...ngpVanTaskList
+    ...ngpVanTaskList,
+    ...campaignBuilderTaskList
   };
 
   if (!workerSemaphore) {
@@ -124,6 +129,7 @@ export const getScheduler = async (attempt = 0): Promise<Scheduler> => {
 
   const schedules: ScheduleConfig[] = [
     ...ngpVanSchedules,
+    ...campaignBuilderSchedules,
     {
       name: "release-stale-replies",
       taskIdentifier: "release-stale-replies",
