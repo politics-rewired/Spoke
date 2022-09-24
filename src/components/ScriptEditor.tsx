@@ -119,6 +119,7 @@ interface Props {
   scriptText: string;
   scriptFields: string[];
   campaignVariables: CampaignVariable[];
+  isRootStep: boolean;
   integrationSourced: boolean;
   onChange: (value: string) => Promise<void> | void;
   receiveFocus?: boolean;
@@ -320,6 +321,34 @@ class ScriptEditor extends React.Component<Props, State> {
     }
   }
 
+  renderOptOutLanguageWarning() {
+    const text = this.state.editorState
+      .getCurrentContent()
+      .getPlainText()
+      .toLowerCase();
+
+    // 2022-09-24 - stop as a separate word is best for avoiding spam blocks
+    if (this.props.isRootStep && text.length > 0 && !text.includes(" stop "))
+      return (
+        <div style={{ color: baseTheme.colors.red }}>
+          <br />
+          WARNING! This script does not include opt out language. You must let
+          the recipient know they can opt out of receiving future texts, or your
+          messages are very likely to be blocked as spam. We recommend a phrase
+          with the individual word STOP, such as "Reply STOP to quit." Please
+          see our{" "}
+          <a
+            href="https://docs.spokerewired.com/article/168-spoke-101-tips-for-a-successful-mass-text"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            deliverability checklist
+          </a>{" "}
+          for other best practices for improving deliverability.
+        </div>
+      );
+  }
+
   renderCustomFields() {
     const { scriptFields, campaignVariables } = this.props;
     return (
@@ -376,6 +405,7 @@ class ScriptEditor extends React.Component<Props, State> {
         {this.renderCustomFields()}
         <div>
           {this.renderAttachmentWarning()}
+          {this.renderOptOutLanguageWarning()}
           <br />
           Estimated Segments: {info.msgCount} <br />
           Characters left in current segment:{" "}
