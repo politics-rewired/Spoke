@@ -32,7 +32,7 @@ export {
   isRoleGreater
 } from "./permissions";
 
-export const gzip = (str) =>
+export const gzip = (str: string) =>
   new Promise((resolve, reject) => {
     zlib.gzip(str, (err, res) => {
       if (err) {
@@ -43,7 +43,7 @@ export const gzip = (str) =>
     });
   });
 
-export const gunzip = (buf) =>
+export const gunzip = (buf: zlib.InputType) =>
   new Promise((resolve, reject) => {
     zlib.gunzip(buf, (err, res) => {
       if (err) {
