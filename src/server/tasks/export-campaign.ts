@@ -353,11 +353,12 @@ export const processMessagesChunk = async (
   lastContactId = rows[rows.length - 1].campaign_contact_id;
 
   const campaignVariableColumns = (message: MessageExportRow) =>
-    campaignVariableNames.reduce<Record<string, string>>(
+    campaignVariableNames.reduce<Record<string, string | null>>(
       (acc, variableName) => ({
         ...acc,
-        [`campaignVariable[${variableName}]`]:
-          message.campaign_variables[variableName] ?? null
+        [`campaignVariable[${variableName}]`]: message.campaign_variables
+          ? message.campaign_variables[variableName] ?? null
+          : null
       }),
       {}
     );
