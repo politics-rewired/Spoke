@@ -322,13 +322,17 @@ class ScriptEditor extends React.Component<Props, State> {
   }
 
   renderOptOutLanguageWarning() {
-    const text = this.state.editorState
+    const lowercaseText = this.state.editorState
       .getCurrentContent()
       .getPlainText()
       .toLowerCase();
 
     // 2022-09-24 - stop as a separate word is best for avoiding spam blocks
-    if (this.props.isRootStep && text.length > 0 && !text.includes(" stop "))
+    if (
+      this.props.isRootStep &&
+      lowercaseText.length > 0 &&
+      !lowercaseText.includes("stop ")
+    )
       return (
         <div style={{ color: baseTheme.colors.red }}>
           <br />
