@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.38.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.38.0-rc.0...v4.38.0-rc.1) (2022-09-26)
+
+
+### Features
+
+* send webhook on large campaign event ([#1427](https://github.com/politics-rewired/spoke/issues/1427)) ([80084c9](https://github.com/politics-rewired/spoke/commit/80084c95ad1d0e73a464aef8659c43e0026e4beb))
+
+
+### Bug Fixes
+
+* **export-campaign:** allow null campaign variables ([#1431](https://github.com/politics-rewired/spoke/issues/1431)) ([2722597](https://github.com/politics-rewired/spoke/commit/27225979d2df9e811ec2d8e419dc9268f20f21cb))
+* add bandwidth 4470 error code ([#1428](https://github.com/politics-rewired/spoke/issues/1428)) ([6f30c85](https://github.com/politics-rewired/spoke/commit/6f30c859437f22704e2164937fd5bfaf159cedbb))
+
+
+### Backend Changes
+
+* list chore in changelog and release docs ([#1430](https://github.com/politics-rewired/spoke/issues/1430)) ([7aaf1f5](https://github.com/politics-rewired/spoke/commit/7aaf1f52b30d4ae7240621c9480cc30b21ba83ad))
+
 ## [4.38.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.37.1...v4.38.0-rc.0) (2022-09-21)
 
 
