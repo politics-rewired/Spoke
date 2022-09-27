@@ -3419,43 +3419,58 @@ const rootMutations = {
           .where({ id: organizationId })
           .update({ deleted_at: null, deleted_by: null });
       } else {
-        await r
-          .knex("organization")
-          .where({ id: organizationId })
-          .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
+        await r.knex.transaction(async (trx) => {
+          await trx("organization")
+            .where({ id: organizationId })
+            .update({ deleted_at: r.knex.fn.now(), deleted_by: user.id });
 
-        switch (deactivateMode) {
-          case DeactivateMode.Nosuspend:
-            break;
-          case DeactivateMode.Suspendall:
-            await r
-              .knex("user_organization")
-              .where({ organization_id: organizationId })
-              .whereNot({ role: UserRoleType.OWNER })
-              .update({ role: UserRoleType.SUSPENDED });
-            break;
-          case DeactivateMode.Deleteall:
-            {
-              await r
-                .knex("user_organization")
+          switch (deactivateMode) {
+            case DeactivateMode.Nosuspend:
+              break;
+            case DeactivateMode.Suspendall:
+              await trx("user_organization")
                 .where({ organization_id: organizationId })
-                .delete();
+                .whereNot({ role: UserRoleType.OWNER })
+                .update({ role: UserRoleType.SUSPENDED });
+              break;
+            case DeactivateMode.Deleteall:
+              {
+                await trx("user_organization")
+                  .where({ organization_id: organizationId })
+                  .delete();
 
-              const org = await r
-                .knex("organization")
-                .where({ id: organizationId })
-                .first();
+                const org = await r
+                  .reader("organization")
+                  .where({ id: organizationId })
+                  .first(["name"]);
 
-              await sendEmail({
-                to: "support@spokerewired.com",
-                subject: "Automated organization shutdown request",
-                text: `This is an automated org shutdown request triggered through the superadmin. Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`
-              });
-            }
-            break;
-          default:
-            break;
-        }
+                const messagingServices = await r
+                  .reader("messaging_service")
+                  .where({ organization_id: organizationId })
+                  .select("messaging_service_sid");
+
+                const messagingServiceSids = messagingServices
+                  .map(({ messaging_service_sid }) => messaging_service_sid)
+                  .join("\n");
+                const switchboard = config.SWITCHBOARD_BASE_URL ?? "[default]";
+
+                const text = [
+                  "This is an automated org shutdown request triggered through the superadmin.",
+                  `Organization id: ${organizationId}, name: ${org.name}, from instance hosted at ${config.BASE_URL}.`,
+                  `Switchboard ${switchboard}, profiles:\n${messagingServiceSids}`
+                ].join("\n\n");
+
+                await sendEmail({
+                  to: "support@spokerewired.com",
+                  subject: "Automated organization shutdown request",
+                  text
+                });
+              }
+              break;
+            default:
+              break;
+          }
+        });
       }
       return true;
     },
