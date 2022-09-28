@@ -22,7 +22,13 @@ const OPT_OUT_TRIGGERS = [
   "unsubscribe",
   "cancel",
   "end",
-  "quit"
+  "quit",
+  "stop2quit",
+  "stop 2 quit",
+  "stop=quit",
+  "stop = quit",
+  "stop to quit",
+  "stoptoquit"
 ];
 
 /**
