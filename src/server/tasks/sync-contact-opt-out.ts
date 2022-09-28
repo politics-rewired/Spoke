@@ -7,7 +7,7 @@ const syncContactOptOut: Task = async (
   payload: Record<string, any>,
   helpers: JobHelpers
 ) => {
-  switch (payload.externalSystem) {
+  switch (payload.externalSystemType) {
     case ExternalSystemType.Van:
       VAN.syncOptOut(payload);
       break;

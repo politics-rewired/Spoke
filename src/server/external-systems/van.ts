@@ -41,13 +41,28 @@ const VAN: IExternalSystem = {
     payload: Record<string, any>,
     helpers: JobHelpers
   ): Promise<void> {
-    const { campaignContactId, syncId } = payload;
+    const { campaignContactId, syncId, externalSystemId } = payload;
+
+    const externalSyncOptOutConfig = await r
+      .knex("external_sync_opt_out_configuration")
+      .where({ system_id: externalSystemId })
+      .first();
+
+    if (isNil(externalSyncOptOutConfig)) {
+      await r
+        .knex("action_external_system_sync")
+        .update({ sync_status: "SKIPPED", sync_error: "No Mapping Found" })
+        .where({ id: syncId });
+      return;
+    }
+
     await helpers.addJob(
       "sync-contact-opt-out",
       {
-        externalSystem: ExternalSystemType.Van,
+        externalSystemType: ExternalSystemType.Van,
         syncId,
-        campaignContactId
+        campaignContactId,
+        externalSystemId
       },
       {
         jobKey: `sync-contact-opt-out-${campaignContactId}`,
@@ -56,6 +71,7 @@ const VAN: IExternalSystem = {
         runAt: DateTime.local().plus({ minutes: 1 }).toJSDate()
       }
     );
+
     await r
       .knex("action_external_system_sync")
       .update({ sync_status: "SYNC_QUEUED" })
@@ -66,7 +82,7 @@ const VAN: IExternalSystem = {
     payload: Record<string, any>,
     helpers: JobHelpers
   ): Promise<void> {
-    const { campaignContactId, syncId } = payload;
+    const { campaignContactId, syncId, externalSystemId } = payload;
     const actionData = await r
       .knex("action_external_system_sync")
       .join(
@@ -96,26 +112,29 @@ const VAN: IExternalSystem = {
         .knex("action_external_system_sync")
         .update({ sync_status: "SKIPPED", sync_error: "No Mapping Found" })
         .where({ id: syncId });
-    } else {
-      await helpers.addJob(
-        "sync-contact-question-response",
-        {
-          externalSystem: ExternalSystemType.Van,
-          syncId,
-          campaignContactId
-        },
-        {
-          jobKey: `sync-contact-question-response-${campaignContactId}`,
-          jobKeyMode: "replace",
-          maxAttempts: 5,
-          runAt: DateTime.local().plus({ minutes: 1 }).toJSDate()
-        }
-      );
-      await r
-        .knex("action_external_system_sync")
-        .update({ sync_status: "SYNC_QUEUED" })
-        .where({ id: syncId });
+      return;
     }
+
+    await helpers.addJob(
+      "sync-contact-question-response",
+      {
+        externalSystemType: ExternalSystemType.Van,
+        syncId,
+        campaignContactId,
+        externalSystemId
+      },
+      {
+        jobKey: `sync-contact-question-response-${campaignContactId}`,
+        jobKeyMode: "replace",
+        maxAttempts: 5,
+        runAt: DateTime.local().plus({ minutes: 1 }).toJSDate()
+      }
+    );
+
+    await r
+      .knex("action_external_system_sync")
+      .update({ sync_status: "SYNC_QUEUED" })
+      .where({ id: syncId });
   },
 
   async syncQuestionResponse(payload: Record<string, any>): Promise<void> {

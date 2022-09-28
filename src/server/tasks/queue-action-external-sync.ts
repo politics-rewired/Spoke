@@ -27,11 +27,13 @@ const queueActionExternalSync: Task = async (
     .join("campaign", "campaign.external_system_id", "external_system.id")
     .join("campaign_contact", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": campaignContactId })
+    .select(["external_system.id", "external_system.type"])
     .first();
 
   const payload = {
     syncId,
-    campaignContactId
+    campaignContactId,
+    externalSystemId: externalSystem.id
   };
 
   if (externalSystem.type === ExternalSystemType.Van) {

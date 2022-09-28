@@ -7,7 +7,7 @@ const syncContactQuestionResponse: Task = async (
   payload: Record<string, any>,
   helpers: JobHelpers
 ) => {
-  switch (payload.externalSystem) {
+  switch (payload.externalSystemType) {
     case ExternalSystemType.Van:
       VAN.syncQuestionResponse(payload);
       break;
