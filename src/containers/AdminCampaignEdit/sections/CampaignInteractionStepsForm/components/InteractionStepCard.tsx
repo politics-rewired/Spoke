@@ -245,6 +245,7 @@ export const InteractionStepCard: React.FC<Props> = (props) => {
               hintText="This is what your texters will send to your contacts. E.g. Hi, {firstName}. It's {texterFirstName} here."
               customFields={customFields}
               campaignVariables={campaignVariables}
+              isRootStep={isRootStep}
               integrationSourced={integrationSourced}
               fullWidth
               multiLine

@@ -96,6 +96,7 @@ class GSScriptOptionsField extends GSFormField {
       name,
       customFields,
       campaignVariables,
+      isRootStep,
       value: scriptVersions,
       integrationSourced,
       orgSettings
@@ -154,6 +155,7 @@ class GSScriptOptionsField extends GSFormField {
             scriptFields={scriptFields}
             campaignVariables={campaignVariables}
             integrationSourced={integrationSourced}
+            isRootStep={isRootStep}
             receiveFocus
             expandable
             onChange={(val) => this.setState({ scriptDraft: val.trim() })}
@@ -230,6 +232,7 @@ GSScriptOptionsField.propTypes = {
       value: PropTypes.string
     })
   ).isRequired,
+  isRootStep: PropTypes.bool.isRequired,
   name: PropTypes.string,
   className: PropTypes.string,
   hintText: PropTypes.string,
