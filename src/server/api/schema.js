@@ -231,8 +231,6 @@ async function createOptOut(trx, campaignContactId, optOut, loaders, user) {
     organizationId
   });
 
-  await queueExternalSyncForAction(ActionType.OptOut, optOutId);
-
   if (message) {
     const checkOptOut = false;
     try {
@@ -244,8 +242,12 @@ async function createOptOut(trx, campaignContactId, optOut, loaders, user) {
   }
 
   // Force reload with updated `is_opted_out` status
-  loaders.campaignContact.clear(campaignContactId);
-  return loaders.campaignContact.load(campaignContactId);
+  await loaders.campaignContact.clear(campaignContactId);
+  const campaignContact = await loaders.campaignContact.load(campaignContactId);
+  return {
+    campaignContact,
+    optOutId
+  };
 }
 
 async function editCampaignContactMessageStatus(
@@ -1567,7 +1569,17 @@ const rootMutations = {
       { optOut, campaignContactId },
       { loaders, user }
     ) => {
-      return createOptOut(r.knex, campaignContactId, optOut, loaders, user);
+      const result = await createOptOut(
+        r.knex,
+        campaignContactId,
+        optOut,
+        loaders,
+        user
+      );
+
+      await queueExternalSyncForAction(ActionType.OptOut, result.optOutId);
+
+      return result.campaignContact;
     },
 
     removeOptOut: async (_root, { cell }, { user }) => {
@@ -1754,6 +1766,7 @@ const rootMutations = {
       { loaders, user }
     ) => {
       const promises = [];
+      let optOutId;
 
       await r.knex.transaction(async (trx) => {
         if (message) {
@@ -1785,7 +1798,11 @@ const rootMutations = {
 
         if (optOut) {
           promises.push(
-            createOptOut(trx, campaignContactId, optOut, loaders, user)
+            createOptOut(trx, campaignContactId, optOut, loaders, user).then(
+              (result) => {
+                optOutId = result.optOutId;
+              }
+            )
           );
         }
 
@@ -1803,6 +1820,10 @@ const rootMutations = {
 
         await Promise.all(promises);
       });
+
+      if (optOut && optOutId) {
+        await queueExternalSyncForAction(ActionType.OptOut, optOutId);
+      }
 
       const contact = await loaders.campaignContact.load(campaignContactId);
       return contact;

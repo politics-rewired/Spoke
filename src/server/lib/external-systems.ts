@@ -20,6 +20,7 @@ export const queueExternalSyncForAction = async (
           "interaction_step.id"
         )
         .where({ "all_question_response.id": actionId })
+        .select(["external_system_id", "campaign_contact_id"])
         .first();
       break;
     case ActionType.OptOut:
@@ -27,7 +28,16 @@ export const queueExternalSyncForAction = async (
         .knex("campaign")
         .join("assignment", "assignment.campaign_id", "campaign.id")
         .join("opt_out", "opt_out.assignment_id", "assignment.id")
+        .join(
+          "campaign_contact",
+          "campaign_contact.assignment_id",
+          "opt_out.assignment_id"
+        )
         .where({ "opt_out.id": actionId })
+        .select([
+          "external_system_id",
+          "campaign_contact.id as campaign_contact_id"
+        ])
         .first();
       break;
     default:

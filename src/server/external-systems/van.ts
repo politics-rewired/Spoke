@@ -56,6 +56,10 @@ const VAN: IExternalSystem = {
         runAt: DateTime.local().plus({ minutes: 1 }).toJSDate()
       }
     );
+    await r
+      .knex("action_external_system_sync")
+      .update({ sync_status: "SYNC_QUEUED" })
+      .where({ id: syncId });
   },
 
   async queueQuestionResponse(
