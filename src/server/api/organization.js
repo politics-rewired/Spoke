@@ -305,12 +305,11 @@ export const resolvers = {
 
       const countQuery = r
         .reader("campaign_contact")
-        .whereNull("assignment_id")
         .where({
           archived: false,
-          is_opted_out: false
+          is_opted_out: false,
+          message_status: "needsResponse"
         })
-        .whereNot({ message_status: "closed" })
         .whereExists(function subquery() {
           this.select("campaign_contact_tag.campaign_contact_id")
             .from("campaign_contact_tag")
