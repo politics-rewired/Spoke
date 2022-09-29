@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.38.0](https://github.com/politics-rewired/spoke/compare/v4.38.0-rc.1...v4.38.0) (2022-09-29)
+
+
+### Features
+
+* **script editor:** add opt out language warning ([#1436](https://github.com/politics-rewired/spoke/issues/1436)) ([f2127da](https://github.com/politics-rewired/spoke/commit/f2127daa8d3d2d299045a22fdc0bd3ce7e3fd817))
+
+
+### Bug Fixes
+
+* add additional common stop phrases ([#1435](https://github.com/politics-rewired/spoke/issues/1435)) ([d614427](https://github.com/politics-rewired/spoke/commit/d61442730537698f7b2959a969ee5347991558bb))
+
 ## [4.38.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.38.0-rc.0...v4.38.0-rc.1) (2022-09-26)
 
 
