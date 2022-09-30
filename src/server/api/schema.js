@@ -1927,7 +1927,7 @@ const rootMutations = {
 
         const taskIdentifier = "queue-autosend-organization-initials";
         await trx.raw(
-          `select graphile_worker.add_job(?, json_build_object('organization_id', ?))`,
+          `select graphile_worker.add_job(1?, json_build_object('organization_id', 2?))`,
           [taskIdentifier, organizationId]
         );
 
