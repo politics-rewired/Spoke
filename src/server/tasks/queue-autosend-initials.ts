@@ -4,11 +4,40 @@ import { fromPairs } from "lodash";
 import { config } from "../../config";
 
 interface Payload {
-  fireDate: string;
+  organization_id: number;
 }
+export const queueAutoSendInitials: Task = async (payload, helpers) => {
+  await helpers.query(
+    `
+      select graphile_worker.add_job('queue=autosend-organization-initials', json_build_object('organization_id', organization.id))
+      from organization
+      where autosending_mps is not null
+    `
+  );
+};
 
-const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
-  const contactsToQueueInOneMinute = config.AUTOSEND_MESSAGES_PER_SECOND * 60;
+export const queueAutoSendOrganizationInitials: Task = async (
+  payload: Payload,
+  helpers
+) => {
+  const organizationId = payload.organization_id;
+
+  const {
+    rows: [org]
+  } = await helpers.query<{ autosending_mps: number }>(
+    "select autosending_mps from organization where id = $1",
+    [organizationId]
+  );
+
+  const autosendingMps = org?.autosending_mps;
+
+  if (!autosendingMps) {
+    throw new Error(
+      `queueAutoSendInitials was queued for organization ${organizationId} but autosending_mps is ${autosendingMps}`
+    );
+  }
+
+  const contactsToQueueInOneMinute = autosendingMps * 60;
 
   const restrictTimezone = config.isTest ? "true or" : "";
 
@@ -22,6 +51,8 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         from campaign_contact cc
         join campaign c on cc.campaign_id = c.id 
         where true
+          -- organization requirements
+          and c.organization_id = $3
           -- contact requirements
           and cc.archived = false
           and cc.message_status = 'needsMessage'
@@ -122,7 +153,7 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
       )
       select * from campaign_breakdown
     `,
-    [contactsToQueueInOneMinute, config.AUTOSEND_MESSAGES_PER_SECOND]
+    [contactsToQueueInOneMinute, autosendingMps, organizationId]
   );
 
   const { rows: totalCountToSend } = await helpers.query<{
@@ -134,6 +165,8 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
       from campaign_contact cc
       join campaign c on cc.campaign_id = c.id
       where true
+        -- organization requirements for autosending
+        and c.organization_id = $1
         -- campaign requirements for autosending
         and c.is_archived = false
         and c.is_started = true
@@ -141,7 +174,8 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
         and message_status = 'needsMessage'
         and is_opted_out = false
       group by 1
-    `
+    `,
+    [organizationId]
   );
 
   const countToSendMap = fromPairs(
@@ -164,5 +198,3 @@ const queueAutoSendInitials: Task = async (payload: Payload, helpers) => {
     [toMarkAsDoneSending]
   );
 };
-
-export default queueAutoSendInitials;

@@ -1925,8 +1925,11 @@ const rootMutations = {
           .where({ id })
           .returning("*");
 
-        const taskIdentifier = "queue-autosend-initials";
-        await trx.raw(`select graphile_worker.add_job(?)`, [taskIdentifier]);
+        const taskIdentifier = "queue-autosend-organization-initials";
+        await trx.raw(
+          `select graphile_worker.add_job(?, json_build_object('organization_id', ?))`,
+          [taskIdentifier, organizationId]
+        );
 
         return updatedCampaign;
       });

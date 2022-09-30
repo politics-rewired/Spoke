@@ -33,7 +33,10 @@ import {
   schedules as ngpVanSchedules,
   taskList as ngpVanTaskList
 } from "./tasks/ngp-van";
-import queueAutoSendInitials from "./tasks/queue-autosend-initials";
+import {
+  queueAutoSendInitials,
+  queueAutoSendOrganizationInitials
+} from "./tasks/queue-autosend-initials";
 import {
   queueDailyNotifications,
   queuePendingNotifications,
@@ -78,6 +81,7 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     "send-notification-email": sendNotificationEmail,
     "send-notification-digest": sendNotificationDigestForUser,
     "queue-autosend-initials": queueAutoSendInitials,
+    "queue=autosend-organization-initials": queueAutoSendOrganizationInitials,
     [exportCampaignIdentifier]: wrapProgressTask(exportCampaign, {
       removeOnComplete: true
     }),
