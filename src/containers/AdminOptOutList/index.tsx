@@ -43,7 +43,7 @@ const AdminOptOutList: React.FC = (props) => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [dialogMode, setDialogMode] = useState<DialogMode>(DialogMode.None);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-  const [showSection, setShowSection] = useState<boolean>(false);
+  const [showSection, setShowSection] = useState<boolean>(true);
   const [exportingOptOuts, setExportingOptOuts] = useState<boolean>(false);
   const [searchText, setSearchText] = React.useState("");
   const [selectedCampaignIds, setSelectedCampaignIds] = useState<Array<string>>(
