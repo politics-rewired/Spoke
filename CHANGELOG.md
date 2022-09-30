@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.39.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.38.0...v4.39.0-rc.0) (2022-09-30)
+
+
+### Bug Fixes
+
+* **trollbot:** fix token search ([#1445](https://github.com/politics-rewired/spoke/issues/1445)) ([db985b2](https://github.com/politics-rewired/spoke/commit/db985b2ece66d4358fbf0df4b11eadd3ce4dd042))
+* add messaging service sids to org shutdown email ([#1440](https://github.com/politics-rewired/spoke/issues/1440)) ([3b16274](https://github.com/politics-rewired/spoke/commit/3b162748282ea5e14580e61e07a9652c1ac54bca))
+* fix escalate badge count ([#1439](https://github.com/politics-rewired/spoke/issues/1439)) ([f0b1e7b](https://github.com/politics-rewired/spoke/commit/f0b1e7bce6a2a997fdc06504ce890f5c6f3a81df))
+* reset dialog values when submitting ([#1444](https://github.com/politics-rewired/spoke/issues/1444)) ([c537ea4](https://github.com/politics-rewired/spoke/commit/c537ea4327602668c2484e8c46a8c704f1607b5c))
+
 ## [4.38.0](https://github.com/politics-rewired/spoke/compare/v4.38.0-rc.1...v4.38.0) (2022-09-29)
 
 
