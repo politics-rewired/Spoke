@@ -34,6 +34,8 @@ import {
   taskList as ngpVanTaskList
 } from "./tasks/ngp-van";
 import {
+  QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
+  QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
   queueAutoSendInitials,
   queueAutoSendOrganizationInitials
 } from "./tasks/queue-autosend-initials";
@@ -80,8 +82,10 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     "queue-daily-notifications": queueDailyNotifications,
     "send-notification-email": sendNotificationEmail,
     "send-notification-digest": sendNotificationDigestForUser,
-    "queue-autosend-initials": queueAutoSendInitials,
-    "queue=autosend-organization-initials": queueAutoSendOrganizationInitials,
+    [QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER]: queueAutoSendInitials,
+    // prettier and eslint are fighting here
+    // eslint-disable-next-line max-len
+    [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]: queueAutoSendOrganizationInitials,
     [exportCampaignIdentifier]: wrapProgressTask(exportCampaign, {
       removeOnComplete: true
     }),
@@ -159,8 +163,8 @@ export const getScheduler = async (attempt = 0): Promise<Scheduler> => {
 
   if (config.ENABLE_AUTOSENDING) {
     schedules.push({
-      name: "queue-autosend-initials",
-      taskIdentifier: "queue-autosend-initials",
+      name: QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
+      taskIdentifier: QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
       pattern: "*/1 * * * *",
       timeZone: config.TZ
     });

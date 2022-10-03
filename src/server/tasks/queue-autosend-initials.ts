@@ -6,13 +6,24 @@ import { config } from "../../config";
 interface Payload {
   organization_id: number;
 }
+
+export const QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER =
+  "queue-autosend-initials";
+export const QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER =
+  "queue-autosend-organization-initials";
+
 export const queueAutoSendInitials: Task = async (payload, helpers) => {
   await helpers.query(
     `
-      select graphile_worker.add_job('queue=autosend-organization-initials', json_build_object('organization_id', organization.id))
+      select graphile_worker.add_job(
+        $1, 
+        json_build_object('organization_id', organization.id),
+        job_key := format('%s|%s', $1, organization.id)
+      )
       from organization
       where autosending_mps is not null
-    `
+    `,
+    [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]
   );
 };
 
@@ -117,7 +128,7 @@ export const queueAutoSendOrganizationInitials: Task = async (
             'campaignId', campaign_id,
             'unassignAfterSend', true
           ) as payload,
-          id::text as key,
+          format('%s|%s', 'retry-interaction-step', id) as key,
           null as queue_name,
           1 as max_attempts,
           now() + ((n / $2::float) * interval '1 second') as run_at,

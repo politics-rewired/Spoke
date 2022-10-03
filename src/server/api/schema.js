@@ -37,6 +37,7 @@ import { addExportCampaign } from "../tasks/export-campaign";
 import { addExportForVan } from "../tasks/export-for-van";
 import { TASK_IDENTIFIER as exportOptOutsIdentifier } from "../tasks/export-opt-outs";
 import { addFilterLandlines } from "../tasks/filter-landlines";
+import { QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER } from "../tasks/queue-autosend-initials";
 import { errToObj } from "../utils";
 import { getWorker } from "../worker";
 import {
@@ -1925,11 +1926,11 @@ const rootMutations = {
           .where({ id })
           .returning("*");
 
-        const taskIdentifier = "queue-autosend-organization-initials";
-        await trx.raw(
-          `select graphile_worker.add_job(?, json_build_object('organization_id', ?::text))`,
-          [taskIdentifier, organizationId]
-        );
+        const taskIdentifier = QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER;
+        await trx.raw(`select graphile_worker.add_job(?, ?)`, [
+          taskIdentifier,
+          { organization_id: organizationId }
+        ]);
 
         return updatedCampaign;
       });
