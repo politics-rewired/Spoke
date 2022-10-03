@@ -65,10 +65,10 @@ describe("queue-autosend-organization-initials", () => {
         )
       );
 
-      await client.query(
-        `select graphile_worker.add_job($1, json_build_object('organization_id', $2))`,
-        ["queue-autosend-organization-initials", organization.id]
-      );
+      await client.query(`select graphile_worker.add_job($1, $2)`, [
+        "queue-autosend-organization-initials",
+        { organization_id: organization.id }
+      ]);
 
       await runTaskListOnce(
         workerOptions,
@@ -125,10 +125,10 @@ describe("queue-autosend-organization-initials", () => {
         )
       );
 
-      await client.query(
-        `select graphile_worker.add_job($1, json_build_object('organization_id', $2))`,
-        ["queue-autosend-organization-initials", organization.id]
-      );
+      await client.query(`select graphile_worker.add_job($1, $2)`, [
+        "queue-autosend-organization-initials",
+        { organization_id: organization.id }
+      ]);
 
       await runTaskListOnce(
         workerOptions,
@@ -193,10 +193,10 @@ describe("queue-autosend-organization-initials", () => {
       );
 
       const runQueueAutoSendInitials = async () => {
-        await client.query(
-          `select graphile_worker.add_job($1, json_build_object('organization_id', $2))`,
-          ["queue-autosend-organization-initials", organization.id]
-        );
+        await client.query(`select graphile_worker.add_job($1, $2)`, [
+          "queue-autosend-organization-initials",
+          { organization_id: organization.id }
+        ]);
 
         await runTaskListOnce(
           workerOptions,
