@@ -93,17 +93,27 @@ export interface ImportContactCsvFromUrlPayload {
   campaignId: number;
   signedDownloadUrl: string;
   columnMapping: ColumnMapping;
+  limit?: number;
+  offset?: number;
 }
 
 export const importContactCsvFromUrl: Task = async (
   payload: ImportContactCsvFromUrlPayload,
   helpers: JobHelpers
 ) => {
-  const { campaignId, signedDownloadUrl, columnMapping } = payload;
+  const {
+    campaignId,
+    signedDownloadUrl,
+    columnMapping,
+    offset,
+    limit
+  } = payload;
 
   const options: ParserOptionsArgs = {
     headers: true,
-    trim: true
+    trim: true,
+    skipRows: offset ?? undefined,
+    maxRows: limit ?? undefined
   };
 
   const transformRow = transformRowFactory(campaignId, columnMapping);
