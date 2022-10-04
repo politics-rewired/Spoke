@@ -73,7 +73,7 @@ const transformRowFactory = (
   return {
     campaign_id: campaignId,
     first_name: row[columnMapping.firstName],
-    last_name: columnMapping.lastName ? row[columnMapping.lastName] : null,
+    last_name: columnMapping.lastName ? row[columnMapping.lastName] : "",
     cell: row[columnMapping.cell],
     external_id: columnMapping.externalId
       ? row[columnMapping.externalId]
