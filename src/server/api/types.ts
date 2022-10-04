@@ -293,7 +293,7 @@ export enum AutosendingControlsMode {
   Detailed = "DETAILED"
 }
 
-export interface IExternalSystem {
+export interface ExternalSystem {
   queueQuestionResponse(
     payload: Record<string, any>,
     helpers: JobHelpers

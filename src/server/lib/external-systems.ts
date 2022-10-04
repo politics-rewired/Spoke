@@ -3,11 +3,16 @@ import isNil from "lodash/isNil";
 import { ActionType } from "../api/types";
 import { r } from "../models";
 
+interface CampaignData {
+  external_system_id: string;
+  campaign_contact_id: number;
+}
+
 export const queueExternalSyncForAction = async (
   actionType: ActionType,
   actionId: number
 ) => {
-  let campaign;
+  let campaign: CampaignData | null;
 
   switch (actionType) {
     case ActionType.QuestionReponse:
@@ -49,12 +54,12 @@ export const queueExternalSyncForAction = async (
   const payload = {
     actionType,
     actionId,
-    campaignContactId: campaign.campaign_contact_id
+    campaignContactId: campaign?.campaign_contact_id
   };
 
   await r.knex.raw(
     `
-  SELECT graphile_worker.add_job('queue-action-external-sync', ?)
+  select graphile_worker.add_job('queue-action-external-sync', ?)
   `,
     [payload]
   );

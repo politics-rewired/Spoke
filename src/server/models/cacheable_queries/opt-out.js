@@ -90,7 +90,6 @@ export const optOutCache = {
     trx = r.knex,
     { cell, organizationId, assignmentId, reason }
   ) => {
-    let optOutId;
     const updateQueryParams = { "campaign_contact.cell": cell };
     if (!sharingOptOuts) {
       updateQueryParams["campaign.organization_id"] = organizationId;
@@ -104,20 +103,16 @@ export const optOutCache = {
       }
     }
     // database
-    try {
-      const [opttedOutId] = await trx("opt_out")
-        .insert({
-          assignment_id: assignmentId,
-          organization_id: organizationId,
-          reason_code: reason,
-          cell
-        })
-        .returning(["id"]);
+    const [opttedOutId] = await trx("opt_out")
+      .insert({
+        assignment_id: assignmentId,
+        organization_id: organizationId,
+        reason_code: reason,
+        cell
+      })
+      .returning(["id"]);
 
-      optOutId = opttedOutId.id;
-    } catch (error) {
-      logger.error("Error creating opt-out: ", error);
-    }
+    const optOutId = opttedOutId.id;
 
     // update all organization's active campaigns as well
     // TODO - MySQL Specific. Getting contactIds can be done in subquery

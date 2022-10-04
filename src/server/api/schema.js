@@ -176,12 +176,14 @@ async function deleteQuestionResponses(
     .del()
     .returning(["id"]);
 
-  for (const deletedQuestionResponse of deletedQuestionResponses) {
-    await queueExternalSyncForAction(
-      ActionType.QuestionReponse,
-      deletedQuestionResponse.id
-    );
-  }
+  await Promise.all(
+    deletedQuestionResponses.map((deletedQuestionResponse) =>
+      queueExternalSyncForAction(
+        ActionType.QuestionReponse,
+        deletedQuestionResponse.id
+      )
+    )
+  );
 
   return contact;
 }

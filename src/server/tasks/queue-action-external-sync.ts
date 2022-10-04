@@ -27,8 +27,7 @@ const queueActionExternalSync: Task = async (
     .join("campaign", "campaign.external_system_id", "external_system.id")
     .join("campaign_contact", "campaign_contact.campaign_id", "campaign.id")
     .where({ "campaign_contact.id": campaignContactId })
-    .select(["external_system.id", "external_system.type"])
-    .first();
+    .first(["external_system.id", "external_system.type"]);
 
   const payload = {
     syncId,
@@ -45,10 +44,21 @@ const queueActionExternalSync: Task = async (
         await VAN.queueQuestionResponse(payload, helpers);
         break;
       default:
+        await r
+          .knex("action_external_system_sync")
+          .where({ id: syncId })
+          .update({
+            sync_status: "SYNC_FAILED",
+            sync_error: "Unsupported action type given"
+          });
         helpers.logger.error("Unsupported action type given");
     }
   } else {
-    helpers.logger.error("Unsupported external system found");
+    await r.knex("action_external_system_sync").where({ id: syncId }).update({
+      sync_status: "SYNC_FAILED",
+      sync_error: "Unsupported external system given"
+    });
+    helpers.logger.error("Unsupported external system given");
   }
 };
 

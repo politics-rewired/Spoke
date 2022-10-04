@@ -5,7 +5,7 @@ import { post } from "superagent";
 
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
-import type { IExternalSystem } from "../api/types";
+import type { ExternalSystem } from "../api/types";
 import { ExternalSystemType } from "../api/types";
 import { getSecret } from "../lib/graphile-secrets";
 import { r } from "../models";
@@ -236,7 +236,7 @@ const formatCanvassResponse = (
   ];
 };
 
-const VAN: IExternalSystem = {
+const VAN: ExternalSystem = {
   async queueOptOut(
     payload: Record<string, any>,
     helpers: JobHelpers
@@ -291,18 +291,16 @@ const VAN: IExternalSystem = {
         "action_external_system_sync.action_id"
       )
       .join("all_external_sync_question_response_configuration", function () {
-        this.on(function () {
-          this.on(
-            "all_external_sync_question_response_configuration.interaction_step_id",
-            "=",
-            "all_question_response.interaction_step_id"
-          );
-          this.andOn(
-            "all_external_sync_question_response_configuration.question_response_value",
-            "=",
-            "all_question_response.value"
-          );
-        });
+        this.on(
+          "all_external_sync_question_response_configuration.interaction_step_id",
+          "=",
+          "all_question_response.interaction_step_id"
+        );
+        this.andOn(
+          "all_external_sync_question_response_configuration.question_response_value",
+          "=",
+          "all_question_response.value"
+        );
       })
       .where({ "action_external_system_sync.id": syncId })
       .first();
