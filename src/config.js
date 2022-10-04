@@ -396,6 +396,10 @@ const validators = {
     choices: ["hex"],
     default: "hex"
   }),
+  EXPERIMENTAL_VAN_SYNC: bool({
+    desc: "Use experimental real-time VAN sync",
+    default: false
+  }),
   EXPORT_DRIVER: str({
     desc: "Which cloud storage driver to use for exports.",
     choices: ["s3", "gs-json"], // eventually add support for GCP w/ HMAC interoperability: ["gs"]

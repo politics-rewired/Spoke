@@ -1,5 +1,6 @@
 import isNil from "lodash/isNil";
 
+import { config } from "../../config";
 import { ActionType } from "../api/types";
 import { r } from "../models";
 
@@ -13,6 +14,8 @@ export const queueExternalSyncForAction = async (
   actionId: number
 ) => {
   let campaign: CampaignData | null;
+
+  if (!config.EXPERIMENTAL_VAN_SYNC) return;
 
   switch (actionType) {
     case ActionType.QuestionReponse:
