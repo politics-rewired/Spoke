@@ -9,7 +9,7 @@ const syncContactQuestionResponse: Task = async (
 ) => {
   switch (payload.externalSystemType) {
     case ExternalSystemType.Van:
-      VAN.syncQuestionResponse(payload);
+      VAN.syncQuestionResponse(payload, helpers);
       break;
     default:
       helpers.logger.error("Unsupported External System");

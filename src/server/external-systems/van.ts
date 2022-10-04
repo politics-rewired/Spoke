@@ -1,11 +1,13 @@
 import type { JobHelpers } from "graphile-worker";
 import isNil from "lodash/isNil";
 import type { SuperAgentRequest } from "superagent";
+import { post } from "superagent";
 
 import { config } from "../../config";
 import { DateTime } from "../../lib/datetime";
 import type { IExternalSystem } from "../api/types";
 import { ExternalSystemType } from "../api/types";
+import { getSecret } from "../lib/graphile-secrets";
 import { r } from "../models";
 
 const DEFAULT_MODE = "0"; // VoterFile mode
@@ -52,6 +54,24 @@ export interface VanAuthPayload {
   username: string;
   api_key: string;
 }
+
+const getVanAuth = async (externalSystemId: string, helpers: JobHelpers) => {
+  const vanCredentials = await r
+    .knex("external_system")
+    .where({
+      id: externalSystemId
+    })
+    .first("username", "api_key_ref");
+
+  const apiKey = await helpers.withPgClient((client) =>
+    getSecret(client, vanCredentials.api_key_ref)
+  );
+
+  return {
+    username: vanCredentials.username,
+    api_key: apiKey || ""
+  } as VanAuthPayload;
+};
 
 export const withVan = (van: VanAuthPayload) => (
   request: SuperAgentRequest
@@ -317,7 +337,10 @@ const VAN: IExternalSystem = {
       .where({ id: syncId });
   },
 
-  async syncQuestionResponse(payload: Record<string, any>): Promise<void> {
+  async syncQuestionResponse(
+    payload: Record<string, any>,
+    helpers: JobHelpers
+  ): Promise<void> {
     const { campaignContactId, externalSystemId } = payload;
 
     const campaignContact = await r
@@ -365,17 +388,44 @@ const VAN: IExternalSystem = {
         )
     );
 
-    // TODO: Post To Van
-    // Update sync status based on van response
+    const auth = await getVanAuth(externalSystemId, helpers);
+    const vanId = campaignContact.external_id;
 
-    console.log("***********************");
-    console.log(canvassResponsesRaw);
-    console.log(canvassResponses);
-    console.log(syncIds);
-    console.log("***********************");
+    for (const canvassResponse of canvassResponses) {
+      const response = await post(`/people/${vanId}/canvassResponses`)
+        .use(withVan(auth))
+        .send(canvassResponse);
+
+      if (response.status === 204) {
+        await r
+          .knex("action_external_system_sync")
+          .whereIn("id", syncIds)
+          .update({
+            sync_status: "SYNCED",
+            synced_at: r.knex.fn.now()
+          });
+      } else {
+        helpers.logger.error(`sync_campaign_to_van__incorrect_response_code`, {
+          response: {
+            status: response.status,
+            body: response.body
+          }
+        });
+        await r
+          .knex("action_external_system_sync")
+          .whereIn("id", syncIds)
+          .update({
+            sync_status: "SYNC_FAILED",
+            sync_error: response.body
+          });
+      }
+    }
   },
 
-  async syncOptOut(payload: Record<string, any>): Promise<void> {
+  async syncOptOut(
+    payload: Record<string, any>,
+    helpers: JobHelpers
+  ): Promise<void> {
     const { syncId, campaignContactId, externalSystemId } = payload;
 
     const campaignContact = await r
@@ -422,14 +472,30 @@ const VAN: IExternalSystem = {
       responses: null
     };
 
-    // TODO: Post To Van
-    // Update sync status based on van response
+    const auth = await getVanAuth(externalSystemId, helpers);
+    const vanId = campaignContact.external_id;
 
-    console.log("***********************");
-    console.log(campaignContact);
-    console.log(externalSystem);
-    console.log(canvassResponse);
-    console.log("***********************");
+    const response = await post(`/people/${vanId}/canvassResponses`)
+      .use(withVan(auth))
+      .send(canvassResponse);
+
+    if (response.status === 204) {
+      await r.knex("action_external_system_sync").where({ id: syncId }).update({
+        sync_status: "SYNCED",
+        synced_at: r.knex.fn.now()
+      });
+    } else {
+      helpers.logger.error(`sync_campaign_to_van__incorrect_response_code`, {
+        response: {
+          status: response.status,
+          body: response.body
+        }
+      });
+      await r.knex("action_external_system_sync").where({ id: syncId }).update({
+        sync_status: "SYNC_FAILED",
+        sync_error: response.body
+      });
+    }
   }
 };
 

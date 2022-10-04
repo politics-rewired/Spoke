@@ -299,8 +299,11 @@ export interface IExternalSystem {
     helpers: JobHelpers
   ): Promise<void>;
   queueOptOut(payload: Record<string, any>, helpers: JobHelpers): Promise<void>;
-  syncQuestionResponse(payload: Record<string, any>): Promise<void>;
-  syncOptOut(payload: Record<string, any>): Promise<void>;
+  syncQuestionResponse(
+    payload: Record<string, any>,
+    helpers: JobHelpers
+  ): Promise<void>;
+  syncOptOut(payload: Record<string, any>, helpers: JobHelpers): Promise<void>;
 }
 
 export enum ActionType {
