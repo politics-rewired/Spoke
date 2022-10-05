@@ -28,7 +28,11 @@ import {
 import type { HashedPassword } from "../../src/server/local-auth-helpers";
 
 export type CreateOrganizationOptions = Partial<
-  Pick<Organization, "name"> & { uuid: string; features: Record<string, any> }
+  Pick<Organization, "name"> & {
+    uuid: string;
+    features: Record<string, any>;
+    autosending_mps: number;
+  }
 >;
 
 export const createOrganization = async (
@@ -38,14 +42,15 @@ export const createOrganization = async (
   client
     .query<OrganizationRecord>(
       `
-        insert into organization (name, uuid, features)
-        values ($1, $2, $3)
+        insert into organization (name, uuid, features, autosending_mps)
+        values ($1, $2, $3, $4)
         returning *
       `,
       [
         options.name ?? faker.company.companyName(),
         options.uuid ?? faker.random.uuid(),
-        JSON.stringify(options.features ?? {})
+        JSON.stringify(options.features ?? {}),
+        options.autosending_mps || null
       ]
     )
     .then(({ rows: [organization] }) => organization);
