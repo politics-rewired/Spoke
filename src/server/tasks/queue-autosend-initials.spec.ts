@@ -18,9 +18,12 @@ import type {
   UserRecord
 } from "../api/types";
 import { withClient } from "../utils";
-import queueAutoSendInitials from "./queue-autosend-initials";
+import {
+  QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
+  queueAutoSendOrganizationInitials
+} from "./queue-autosend-initials";
 
-describe("queue-autosend-initials", () => {
+describe("queue-autosend-organization-initials", () => {
   let pool: Pool;
   let workerOptions: WorkerOptions;
   let texter: UserRecord;
@@ -32,7 +35,7 @@ describe("queue-autosend-initials", () => {
     await withClient(pool, async (client) => {
       // Set up campaign contact
       texter = await createTexter(client, {});
-      organization = await createOrganization(client, {});
+      organization = await createOrganization(client, { autosending_mps: 5 });
     });
   });
 
@@ -65,14 +68,15 @@ describe("queue-autosend-initials", () => {
         )
       );
 
-      await client.query(`select graphile_worker.add_job($1)`, [
-        "queue-autosend-initials"
+      await client.query(`select graphile_worker.add_job($1, $2)`, [
+        "queue-autosend-organization-initials",
+        { organization_id: organization.id }
       ]);
 
       await runTaskListOnce(
         workerOptions,
         {
-          "queue-autosend-initials": queueAutoSendInitials
+          "queue-autosend-organization-initials": queueAutoSendOrganizationInitials
         },
         client
       );
@@ -94,7 +98,7 @@ describe("queue-autosend-initials", () => {
 
       await pool.query(
         `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
-        [["queue-autosend-initials", "retry-interaction-step"]]
+        [["queue-autosend-organization-initials", "retry-interaction-step"]]
       );
     });
   });
@@ -124,14 +128,15 @@ describe("queue-autosend-initials", () => {
         )
       );
 
-      await client.query(`select graphile_worker.add_job($1)`, [
-        "queue-autosend-initials"
+      await client.query(`select graphile_worker.add_job($1, $2)`, [
+        QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
+        { organization_id: organization.id }
       ]);
 
       await runTaskListOnce(
         workerOptions,
         {
-          "queue-autosend-initials": queueAutoSendInitials
+          [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]: queueAutoSendOrganizationInitials
         },
         client
       );
@@ -156,7 +161,12 @@ describe("queue-autosend-initials", () => {
 
       await pool.query(
         `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
-        [["queue-autosend-initials", "retry-interaction-step"]]
+        [
+          [
+            QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
+            "retry-interaction-step"
+          ]
+        ]
       );
     });
   });
@@ -191,14 +201,15 @@ describe("queue-autosend-initials", () => {
       );
 
       const runQueueAutoSendInitials = async () => {
-        await client.query(`select graphile_worker.add_job($1)`, [
-          "queue-autosend-initials"
+        await client.query(`select graphile_worker.add_job($1, $2)`, [
+          QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
+          { organization_id: organization.id }
         ]);
 
         await runTaskListOnce(
           workerOptions,
           {
-            "queue-autosend-initials": queueAutoSendInitials
+            [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]: queueAutoSendOrganizationInitials
           },
           client
         );
@@ -217,7 +228,12 @@ describe("queue-autosend-initials", () => {
 
       await pool.query(
         `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
-        [["queue-autosend-initials", "retry-interaction-step"]]
+        [
+          [
+            QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
+            "retry-interaction-step"
+          ]
+        ]
       );
     });
   });
