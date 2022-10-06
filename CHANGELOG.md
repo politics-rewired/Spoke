@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.39.0-rc.1](https://github.com/politics-rewired/spoke/compare/v4.39.0-rc.0...v4.39.0-rc.1) (2022-10-06)
+
+
+### Features
+
+* add database backed per organization autosending ([#1446](https://github.com/politics-rewired/spoke/issues/1446)) ([d856ae2](https://github.com/politics-rewired/spoke/commit/d856ae2eeb960f4dccfa35df0bb592adb9cab507))
+* support importing contacts from arbitrary csv url ([#1434](https://github.com/politics-rewired/spoke/issues/1434)) ([1d85657](https://github.com/politics-rewired/spoke/commit/1d8565771c8d5b18de0d5fec56935252eb782488))
+
+
+### Bug Fixes
+
+* **bulk script editor:** grammar and spelling ([#1448](https://github.com/politics-rewired/spoke/issues/1448)) ([ac9aab1](https://github.com/politics-rewired/spoke/commit/ac9aab19ad1065416beab9cbc1ee3a0cbb898608))
+
 ## [4.39.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.38.0...v4.39.0-rc.0) (2022-09-30)
 
 
