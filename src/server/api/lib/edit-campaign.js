@@ -8,7 +8,7 @@ import {
   requiredUploadFields,
   topLevelUploadFields,
   validateCsv
-} from "../../../lib";
+} from "./contact-list";
 
 const missingHeaderFields = (fields) =>
   requiredUploadFields.reduce((missingFields, requiredField) => {
