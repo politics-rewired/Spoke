@@ -16,9 +16,9 @@ export const queueAutoSendInitials: Task = async (payload, helpers) => {
   await helpers.query(
     `
       select graphile_worker.add_job(
-        $1, 
+        $1::text,
         json_build_object('organization_id', organization.id),
-        job_key := format('%s|%s', $1, organization.id)
+        job_key := format('%s|%s', $1::text, organization.id)
       )
       from organization
       where autosending_mps is not null
@@ -205,7 +205,7 @@ export const queueAutoSendOrganizationInitials: Task = async (
     .map((campaign) => campaign.campaign_id);
 
   await helpers.query(
-    `update campaign set autosend_status = 'complete' where id = ANY($1)`,
+    `update campaign set autosend_status = 'complete' where id = ANY($1::integer[])`,
     [toMarkAsDoneSending]
   );
 };
