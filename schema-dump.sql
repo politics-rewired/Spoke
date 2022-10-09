@@ -2882,7 +2882,8 @@ CREATE TABLE public.organization (
     monthly_message_limit bigint,
     default_texting_tz character varying(255) DEFAULT 'America/New_York'::character varying NOT NULL,
     deleted_at timestamp with time zone,
-    deleted_by integer
+    deleted_by integer,
+    autosending_mps integer
 );
 
 
