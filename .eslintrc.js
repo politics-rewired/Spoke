@@ -111,7 +111,9 @@ module.exports = {
               "TableHeaderColumn",
               "TableBody",
               "TableRow",
-              "TableRowColumn"
+              "TableRowColumn",
+              "Tabs",
+              "Tab"
             ],
             message: "Please use @material-ui/core instead."
           }
@@ -142,7 +144,9 @@ module.exports = {
               "material-ui/TableHeaderColumn",
               "material-ui/TableBody",
               "material-ui/TableRow",
-              "material-ui/TableRowColumn"
+              "material-ui/TableRowColumn",
+              "material-ui/Tabs",
+              "material-ui/Tab"
             ],
             message: "Please use @material-ui/core instead."
           }
