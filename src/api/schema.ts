@@ -263,6 +263,7 @@ const rootSchema = `
     bulkUpdateScriptChanges(organizationId: String!, findAndReplace: BulkUpdateScriptInput!): [ScriptUpdateChange!]!
     superadmins: [User!]
     optOuts(organizationId: String!): [OptOutByCampaign!]!
+    isValidAttachment(fileUrl: String!): Boolean!
   }
 
   input SecondPassInput {

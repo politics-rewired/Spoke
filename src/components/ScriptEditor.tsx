@@ -1,3 +1,5 @@
+import { gql } from "@apollo/client";
+import { withApollo } from "@apollo/client/react/hoc";
 import { blue, green, grey, orange, red } from "@material-ui/core/colors";
 import type { CampaignVariable } from "@spoke/spoke-codegen";
 import { getCharCount } from "@trt2/gsm-charset-utils";
@@ -13,7 +15,7 @@ import escapeRegExp from "lodash/escapeRegExp";
 import React from "react";
 
 import { replaceEasyGsmWins } from "../lib/charset-utils";
-import { delimit, getMessageType, isAttachmentImage } from "../lib/scripts";
+import { delimit, getAttachmentLink, getMessageType } from "../lib/scripts";
 import baseTheme from "../styles/theme";
 import Chip from "./Chip";
 
@@ -130,6 +132,12 @@ interface State {
   validAttachment: boolean;
 }
 
+const VALID_ATTACHMENT_QUERY = gql`
+  query ValidAttachment($fileUrl: String!) {
+    isValidAttachment(fileUrl: $fileUrl)
+  }
+`;
+
 class ScriptEditor extends React.Component<Props, State> {
   private editorRef: Editor | null = null;
 
@@ -148,7 +156,8 @@ class ScriptEditor extends React.Component<Props, State> {
       const { editorState: oldState } = this.state;
       const editorState = EditorState.moveFocusToEnd(oldState);
       const text = editorState.getCurrentContent().getPlainText();
-      const validAttachment = await isAttachmentImage(text);
+      const attachmentUrl = getAttachmentLink(text);
+      const validAttachment = await this.isAttachmentImage(attachmentUrl);
 
       this.setState({
         editorState,
@@ -178,7 +187,8 @@ class ScriptEditor extends React.Component<Props, State> {
     });
 
     const text = editorState.getCurrentContent().getPlainText();
-    const validAttachment = await isAttachmentImage(text);
+    const attachmentUrl = getAttachmentLink(text);
+    const validAttachment = await this.isAttachmentImage(attachmentUrl);
 
     this.setState({ validAttachment });
   };
@@ -207,6 +217,20 @@ class ScriptEditor extends React.Component<Props, State> {
     const { editorState } = this.state;
     return replaceEasyGsmWins(editorState.getCurrentContent().getPlainText());
   }
+
+  isAttachmentImage = async (fileUrl: string | null) => {
+    // No attachment found, so attachment is "valid".
+    if (fileUrl === null) return true;
+
+    const response = await this.props.client.query({
+      query: VALID_ATTACHMENT_QUERY,
+      variables: {
+        fileUrl
+      }
+    });
+
+    return response.data.isValidAttachment;
+  };
 
   getCompositeDecorator = (
     scriptFields: string[],
@@ -433,4 +457,4 @@ class ScriptEditor extends React.Component<Props, State> {
   }
 }
 
-export default ScriptEditor;
+export default withApollo(ScriptEditor);

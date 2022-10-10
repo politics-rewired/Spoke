@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
 import * as webpack from "webpack";
@@ -28,7 +29,8 @@ const plugins: webpack.WebpackPluginInstance[] = [
     {
       tzdata: "tzdata"
     }
-  )
+  ),
+  new NodePolyfillPlugin()
 ];
 
 if (config.isDevelopment) {
@@ -79,7 +81,11 @@ const webpackConfig: WebpackConfiguration = {
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-    fallback: { path: require.resolve("path-browserify") }
+    fallback: {
+      fs: false,
+      net: false,
+      tls: false
+    }
   },
   module: {
     rules: [
