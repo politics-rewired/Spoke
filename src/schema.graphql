@@ -346,13 +346,13 @@ type User {
   id: ID
   firstName: String
   lastName: String
-  displayName: String
+  displayName: String!
   email: String
   cell: String
   memberships(organizationId: String, after: Cursor, first: Int): OrganizationMembershipPage
   organizations(active: Boolean, role: String): [Organization]
   todos(organizationId: String): [Assignment]
-  roles(organizationId: String!): [String!]!
+  roles(organizationId: String!): [UserRole!]!
   teams(organizationId: String!): [Team]!
   currentRequest(organizationId: String!): AssignmentRequest
   assignedCell: Phone

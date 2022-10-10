@@ -100,11 +100,13 @@ module.exports = {
           {
             name: "material-ui",
             importNames: [
+              "Avatar",
               "Chip",
               "List",
               "ListItem",
               "IconButton",
               "FlatButton",
+              "Popover",
               "RaisedButton",
               "Table",
               "TableHeader",
@@ -131,11 +133,13 @@ module.exports = {
           },
           {
             group: [
+              "material-ui/Avatar",
               "material-ui/Chip",
               "material-ui/List",
               "material-ui/ListItem",
               "material-ui/IconButton",
               "material-ui/FlatButton",
+              "material-ui/Popover",
               "material-ui/RaisedButton",
               "material-ui/Table",
               "material-ui/TableHeader",

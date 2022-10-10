@@ -82,7 +82,7 @@ const TopNav: React.FC<TopNavProps> = ({
         <div className={css(styles.inline, styles.header)}>{pageTitle}</div>
       </div>
       <div className={css(styles.userMenu)}>
-        <UserMenu orgId={orgId} />
+        <UserMenu organizationId={orgId} />
       </div>
     </div>
   );

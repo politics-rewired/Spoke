@@ -18,3 +18,22 @@ query CurrentUserOrganizationRoles($organizationId: String!) {
     roles(organizationId: $organizationId)
   }
 }
+
+query GetCurrentUserForMenu {
+  currentUser {
+    id
+    displayName
+    email
+    organizations(active: true) {
+      id
+      name
+    }
+  }
+}
+
+query GetCurrentUserRoles($organizationId: String!) {
+  currentUser {
+    id
+    roles(organizationId: $organizationId)
+  }
+}
