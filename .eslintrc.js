@@ -100,6 +100,7 @@ module.exports = {
           {
             name: "material-ui",
             importNames: [
+              "Badge",
               "Chip",
               "List",
               "ListItem",
@@ -131,6 +132,7 @@ module.exports = {
           },
           {
             group: [
+              "material-ui/Badge",
               "material-ui/Chip",
               "material-ui/List",
               "material-ui/ListItem",
