@@ -101,6 +101,8 @@ module.exports = {
             name: "material-ui",
             importNames: [
               "Chip",
+              "CircularProgress",
+              "LinearProgress",
               "List",
               "ListItem",
               "IconButton",
@@ -132,6 +134,8 @@ module.exports = {
           {
             group: [
               "material-ui/Chip",
+              "material-ui/CircularProgress",
+              "material-ui/LinearProgress",
               "material-ui/List",
               "material-ui/ListItem",
               "material-ui/IconButton",
