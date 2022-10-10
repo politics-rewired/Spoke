@@ -1,0 +1,6 @@
+mutation UserAgreeTerms($userId: String!) {
+  userAgreeTerms(userId: $userId) {
+    id
+    terms
+  }
+}
