@@ -1,11 +1,13 @@
 import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
+import Paper from "@material-ui/core/Paper";
+import Step from "@material-ui/core/Step";
+import StepLabel from "@material-ui/core/StepLabel";
+import Stepper from "@material-ui/core/Stepper";
 import {
   useGetCurrentUserProfileQuery,
   useUserAgreeTermsMutation
 } from "@spoke/spoke-codegen";
-import Divider from "material-ui/Divider";
-import Paper from "material-ui/Paper";
-import { Step, StepContent, StepLabel, Stepper } from "material-ui/Stepper";
 import queryString from "query-string";
 import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
@@ -89,14 +91,6 @@ const Terms: React.FC = () => {
                 <u>Inappropriate Behaviour</u>
               </div>
             </StepLabel>
-            <StepContent>
-              <p>
-                Occasionally someone might be rude or use inappropriate language
-                to you — please don’t engage or respond in kind. We will make
-                sure that person isn’t contacted again.
-              </p>
-              {renderStepActions(0)}
-            </StepContent>
           </Step>
           <Step>
             <StepLabel>
@@ -110,14 +104,6 @@ const Terms: React.FC = () => {
                 <u>Commit to Reply</u>
               </div>
             </StepLabel>
-            <StepContent>
-              <p>
-                Please commit to responding to people who reply to you. We're
-                attempting to grow trust and understanding in our community and
-                maintaining an open dialogue is key.
-              </p>
-              {renderStepActions(1)}
-            </StepContent>
           </Step>
           <Step>
             <StepLabel>
@@ -131,14 +117,38 @@ const Terms: React.FC = () => {
                 <u>Retention</u>
               </div>
             </StepLabel>
-            <StepContent>
+          </Step>
+        </Stepper>
+        <div>
+          {stepIndex === 0 && (
+            <>
+              <p>
+                Occasionally someone might be rude or use inappropriate language
+                to you — please don’t engage or respond in kind. We will make
+                sure that person isn’t contacted again.
+              </p>
+              {renderStepActions(0)}
+            </>
+          )}
+          {stepIndex === 1 && (
+            <>
+              <p>
+                Please commit to responding to people who reply to you. We're
+                attempting to grow trust and understanding in our community and
+                maintaining an open dialogue is key.
+              </p>
+              {renderStepActions(1)}
+            </>
+          )}
+          {stepIndex === 2 && (
+            <>
               <p>
                 We maintain a record of all conversations with this account.
               </p>
               {renderStepActions(2)}
-            </StepContent>
-          </Step>
-        </Stepper>
+            </>
+          )}
+        </div>
         {finished && (
           <p style={{ margin: "20px 0", textAlign: "center" }}>Thanks!</p>
         )}
