@@ -398,7 +398,8 @@ const validators = {
   }),
   EXPERIMENTAL_VAN_SYNC: bool({
     desc: "Use experimental real-time VAN sync",
-    default: false
+    default: false,
+    isClient: true
   }),
   EXPORT_DRIVER: str({
     desc: "Which cloud storage driver to use for exports.",

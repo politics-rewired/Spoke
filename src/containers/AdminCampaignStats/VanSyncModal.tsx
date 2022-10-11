@@ -138,6 +138,7 @@ class VanSyncModal extends React.Component<InnerProps, State> {
       : [];
 
     const isSyncDisabled =
+      window.EXPERIMENTAL_VAN_SYNC ||
       isWorking ||
       syncReadiness !== ExternalSyncReadinessState.READY ||
       isSyncing;
@@ -257,6 +258,12 @@ class VanSyncModal extends React.Component<InnerProps, State> {
               {new Date(latestSyncAttempt.updatedAt).toLocaleString()} -{" "}
               {messageFromJobRquest(latestSyncAttempt)}
             </DialogContentText>
+          )}
+          {window.EXPERIMENTAL_VAN_SYNC && (
+            <p>
+              This organization has experimental real time van sync enabled. You
+              don't need to manually sync to van. Sync button is hence disabled.
+            </p>
           )}
         </DialogContent>
         <DialogActions>{actions}</DialogActions>
