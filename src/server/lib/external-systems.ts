@@ -61,9 +61,7 @@ export const queueExternalSyncForAction = async (
   };
 
   await r.knex.raw(
-    `
-  select graphile_worker.add_job('queue-action-external-sync', ?)
-  `,
+    `select graphile_worker.add_job('queue-action-external-sync', ?)`,
     [payload]
   );
 };

@@ -95,7 +95,13 @@ const getCanvassResponsesRaw = (
 ) => {
   return r.knex.raw(
     `
-      with configured_response_values as (
+      with cc_timezone as (
+        select coalesce(cc.timezone, c.timezone) as timezone
+        from campaign_contact cc
+        join campaign c on c.id = cc.campaign_id
+        where cc.id = ?
+      ),
+      configured_response_values as (
         select
           qrc.id,
           all_question_response.created_at as canvassed_at
@@ -165,20 +171,20 @@ const getCanvassResponsesRaw = (
       ),
       first_message as (
         select
-          date_trunc('day', created_at) as canvassed_at,
+          date_trunc('day', created_at at time zone (select timezone from cc_timezone)) at time zone (select timezone from cc_timezone) as canvassed_at,
           '[]'::json as result_codes,
           '[]'::json as activist_codes,
           '[]'::json as response_options
         from message
         where
-          campaign_contact_id = $1
+          campaign_contact_id = ?
           and is_from_contact = false
         order by id asc
         limit 1
       ),
       canvass_responses as (
         select
-          date_trunc('day', canvassed_at) as canvassed_at,
+          date_trunc('day', canvassed_at at time zone (select timezone from cc_timezone)) at time zone (select timezone from cc_timezone) as canvassed_at,
           array_to_json(array_remove(array_agg(result_code), null)) as result_codes,
           array_to_json(array_remove(array_agg(activist_code), null)) as activist_codes,
           array_to_json(array_remove(array_agg(response_option), null)) as response_options
@@ -189,7 +195,13 @@ const getCanvassResponsesRaw = (
       union all
       select * from first_message where not exists (select 1 from canvass_responses)
     `,
-    [campaignContactId, externalSystemId, actionIds]
+    [
+      campaignContactId,
+      campaignContactId,
+      externalSystemId,
+      actionIds,
+      campaignContactId
+    ]
   );
 };
 
@@ -462,9 +474,9 @@ const VAN: ExternalSystem = {
         phoneId: contactCustomFields.phone_id,
         phone: formatPhone(campaignContact.cell),
         contactTypeId: config.VAN_CONTACT_TYPE_ID,
-        dateCanvassed: DateTime.fromJSDate(
-          new Date(syncAction.created_at)
-        ).toFormat("MM-dd-yyyy")
+        dateCanvassed: DateTime.fromSQL(syncAction.created_at).toFormat(
+          "MM-dd-yyyy"
+        )
       },
       resultCodeId: externalSystem.result_code_id,
       responses: null
