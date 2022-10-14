@@ -332,6 +332,7 @@ const rootSchema = `
     markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
     startAutosending(campaignId: String!): Campaign!
     pauseAutosending(campaignId: String!): Campaign!
+    updateCampaignAutosendingLimit(campaignId: String!, limit: Int): Campaign!
     unMarkForSecondPass(campaignId: String!): String!
     deleteNeedsMessage(campaignId: String!): String!
     insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!

@@ -1979,6 +1979,30 @@ const rootMutations = {
       return result;
     },
 
+    updateCampaignAutosendingLimit: async (
+      _ignore,
+      { campaignId },
+      { user },
+      { limit }
+    ) => {
+      const id = parseInt(campaignId, 10);
+
+      const campaign = await r
+        .knex("campaign")
+        .where({ id })
+        .first(["organization_id", "autosend_limit"]);
+
+      const organizationId = campaign.organization_id;
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const [result] = await r
+        .knex("campaign")
+        .update({ autosend_limit: limit })
+        .where({ id })
+        .returning("*");
+      return result;
+    },
+
     unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {
       // verify permissions
       const campaign = await r

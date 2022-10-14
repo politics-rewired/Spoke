@@ -1,3 +1,4 @@
+import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
@@ -15,6 +16,7 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Alert from "@material-ui/lab/Alert";
+// import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import {
   AutosendingControlsMode,
   useCampaignsEligibleForAutosendingQuery,
@@ -35,7 +37,8 @@ import AutosendingTargetRow from "./components/AutosendingTargetRow";
 import AutosendingUnstartedTargetRow from "./components/AutosendingUnstartedTargetRow";
 
 const useStyles = makeStyles({
-  select: { width: 150, marginRight: 10 }
+  select: { width: 150, marginRight: 10 },
+  button: { width: 100, height: 50, marginRight: 10 }
 });
 
 const AdminAutosending: React.FC = () => {
@@ -77,6 +80,10 @@ const AdminAutosending: React.FC = () => {
     string | undefined
   >(undefined);
 
+  // const [changeLimitTargets, setChangeLimitTargets] = useState<
+  //   Map<string, number>
+  // >(new Map<string, number>());
+
   useEffect(() => {
     if (getCampaignsError) setAlertErrorMessage(getCampaignsError.message);
   }, [getCampaignsError?.message]);
@@ -115,6 +122,19 @@ const AdminAutosending: React.FC = () => {
     () => setAlertErrorMessage(undefined),
     [setAlertErrorMessage]
   );
+
+  const handleLimitChange = () => {};
+  // const handleLimitChange = useCallback(
+  //   (campaignId: string, oldLimit?: number | null) => (
+  //     newLimit: number | null
+  //   ) => {
+  //     if (isNil(oldLimit) || isNil(newLimit) || newLimit > oldLimit)
+  //     const campaignLimit: Record<string, number> = { string: 1 };
+  //     setChangeLimitTargets(changeLimitTargets.push({ campaignId: newLimit }));
+  //     else
+  //   },
+  //   [0]
+  // );
 
   const handlePlayFactory = useCallback(
     (campaignId: string) => () =>
@@ -165,6 +185,13 @@ const AdminAutosending: React.FC = () => {
         subtitle="Campaigns will send in order of ID"
         action={
           <>
+            <Button
+              color="primary"
+              variant="contained"
+              classes={{ root: inlineStyles.button }}
+            >
+              Save Limits
+            </Button>
             <FormControl>
               <InputLabel id="is-started-select-label">
                 Campaign Status
@@ -210,7 +237,7 @@ const AdminAutosending: React.FC = () => {
             <TableHead>
               {isBasic ? null : (
                 <TableRow>
-                  <TableCell colSpan={3} />
+                  <TableCell colSpan={5} />
                   <TableCell colSpan={5}>Progress</TableCell>
                   <TableCell colSpan={2}>Engagement</TableCell>
                   <TableCell />
@@ -219,6 +246,7 @@ const AdminAutosending: React.FC = () => {
               <TableRow>
                 <TableCell>Campaign</TableCell>
                 <TableCell>Autosending Status</TableCell>
+                <TableCell>Autosending Limit</TableCell>
                 {/* Actions */}
                 <TableCell />
                 {isBasic ? null : (
@@ -246,6 +274,7 @@ const AdminAutosending: React.FC = () => {
                       disabled={actionsDisabled}
                       onStart={handlePlayFactory(c!.id!)}
                       onPause={handlePauseFactory(c!.id!)}
+                      onLimitChange={handleLimitChange(c!.id!, c.autosendLimit)}
                     />
                   ) : (
                     <AutosendingBasicUnstartedTargetRow
@@ -263,6 +292,7 @@ const AdminAutosending: React.FC = () => {
                     disabled={actionsDisabled}
                     onStart={handlePlayFactory(c!.id!)}
                     onPause={handlePauseFactory(c!.id!)}
+                    onLimitChange={handleLimitChange(c!.id!, c.autosendLimit)}
                   />
                 ) : (
                   <AutosendingUnstartedTargetRow

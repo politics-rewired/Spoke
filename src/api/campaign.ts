@@ -90,6 +90,7 @@ export interface CampaignInput {
   timezone: string | null;
   repliesStaleAfter: number | null;
   messagingServiceSid: string | null;
+  autosendLimit: number | null;
 }
 
 export interface Campaign {
@@ -127,6 +128,7 @@ export interface Campaign {
   deliverabilityStats: CampaignDeliverabilityStats;
   previewUrl?: string | null;
   messagingServiceSid?: string | null;
+  autosendLimit?: number | null;
 }
 
 export interface PaginatedCampaigns {
@@ -264,6 +266,7 @@ export const schema = `
     deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
     autosendStatus: String!
     messagingServiceSid: String
+    autosendLimit: Int
   }
 
   type CampaignEdge {
@@ -331,5 +334,6 @@ export const schema = `
     timezone: String
     repliesStaleAfter: Int
     messagingServiceSid: String
+    autosendLimit: Int
   }
 `;
