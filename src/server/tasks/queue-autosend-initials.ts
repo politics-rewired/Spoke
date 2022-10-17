@@ -221,6 +221,7 @@ export const queueAutoSendOrganizationInitials: Task = async (
         and organization_id = $1
         and campaign_summary.campaign_id = campaign.id
         and new_autosend_status is not null
+        and id = ANY($2::integer[])
     `,
     [organizationId, campaignIdsQueued]
   );
