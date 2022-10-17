@@ -1,6 +1,6 @@
 import faker from "faker";
-import type { WorkerOptions } from "graphile-worker";
 import { runTaskListOnce } from "graphile-worker";
+import type { PoolClient } from "pg";
 import { Pool } from "pg";
 
 import {
@@ -17,26 +17,117 @@ import type {
   OrganizationRecord,
   UserRecord
 } from "../api/types";
+import { AutosendStatus, MessageStatusType } from "../api/types";
 import { withClient } from "../utils";
 import {
   QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
   queueAutoSendOrganizationInitials
 } from "./queue-autosend-initials";
 
+const TASK_IDENTIFIER = QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER;
+
+interface SetUpAutosendingOptions {
+  organizationId: number;
+  autosendUserId: number;
+  autosendStatus: AutosendStatus;
+  unmessagedCount: number;
+  messagedCount?: number;
+}
+
+const setUpAutosending = async (
+  client: PoolClient,
+  options: SetUpAutosendingOptions
+) => {
+  const {
+    organizationId,
+    autosendUserId,
+    autosendStatus,
+    unmessagedCount,
+    messagedCount = 0
+  } = options;
+
+  const campaign = await createCampaign(client, {
+    organizationId,
+    isStarted: true,
+    autosendUserId,
+    autosendStatus
+  });
+  await createInteractionStep(client, {
+    campaignId: campaign.id,
+    scriptOptions: ["Have a text {firstName}"]
+  });
+  const assignment = await createAssignment(client, {
+    campaignId: campaign.id,
+    userId: autosendUserId
+  });
+  const messagedContacts = await Promise.all(
+    [...Array(messagedCount)].map(() =>
+      createCampaignContact(client, {
+        campaignId: campaign.id,
+        firstName: faker.name.firstName(),
+        messageStatus: MessageStatusType.Messaged
+      })
+    )
+  );
+  const unmessagedContacts = await Promise.all(
+    [...Array(unmessagedCount)].map(() =>
+      createCampaignContact(client, {
+        campaignId: campaign.id,
+        firstName: faker.name.firstName()
+      })
+    )
+  );
+
+  return { campaign, assignment, messagedContacts, unmessagedContacts };
+};
+
+interface RunQueueAutosendOptions {
+  client: PoolClient;
+  pool: Pool;
+  organizationId: number;
+}
+
+const runQueueAutosend = async ({
+  client,
+  pool,
+  organizationId
+}: RunQueueAutosendOptions) => {
+  await client.query(`select graphile_worker.add_job($1, $2)`, [
+    TASK_IDENTIFIER,
+    { organization_id: organizationId }
+  ]);
+
+  await runTaskListOnce(
+    { pgPool: pool },
+    { [TASK_IDENTIFIER]: queueAutoSendOrganizationInitials },
+    client
+  );
+};
+
+const cleanUp = async (pool: Pool) => {
+  const taskIdentifiers = [TASK_IDENTIFIER, "retry-interaction-step"];
+  await pool.query(
+    `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
+    [taskIdentifiers]
+  );
+};
+
 describe("queue-autosend-organization-initials", () => {
   let pool: Pool;
-  let workerOptions: WorkerOptions;
   let texter: UserRecord;
   let organization: OrganizationRecord;
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: config.TEST_DATABASE_URL });
-    workerOptions = { pgPool: pool };
     await withClient(pool, async (client) => {
       // Set up campaign contact
       texter = await createTexter(client, {});
       organization = await createOrganization(client, { autosending_mps: 5 });
     });
+  });
+
+  afterEach(async () => {
+    await cleanUp(pool);
   });
 
   afterAll(async () => {
@@ -45,41 +136,14 @@ describe("queue-autosend-organization-initials", () => {
 
   it("sends queues valid contacts when run", async () => {
     await withClient(pool, async (client) => {
-      const campaign = await createCampaign(client, {
+      const { campaign, assignment } = await setUpAutosending(client, {
         organizationId: organization.id,
-        isStarted: true,
         autosendUserId: texter.id,
-        autosendStatus: "sending"
+        autosendStatus: AutosendStatus.Sending,
+        unmessagedCount: 3
       });
-      await createInteractionStep(client, {
-        campaignId: campaign.id,
-        scriptOptions: ["Have a text {firstName}"]
-      });
-      const assignment = await createAssignment(client, {
-        campaignId: campaign.id,
-        userId: texter.id
-      });
-      await Promise.all(
-        [...Array(3)].map(() =>
-          createCampaignContact(client, {
-            campaignId: campaign.id,
-            firstName: faker.name.firstName()
-          })
-        )
-      );
 
-      await client.query(`select graphile_worker.add_job($1, $2)`, [
-        "queue-autosend-organization-initials",
-        { organization_id: organization.id }
-      ]);
-
-      await runTaskListOnce(
-        workerOptions,
-        {
-          "queue-autosend-organization-initials": queueAutoSendOrganizationInitials
-        },
-        client
-      );
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
 
       const { rows: contacts } = await client.query<CampaignContactRecord>(
         `select * from campaign_contact where campaign_id = $1`,
@@ -95,51 +159,19 @@ describe("queue-autosend-organization-initials", () => {
         [campaign.id]
       );
       expect(rowCount).toBe(3);
-
-      await pool.query(
-        `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
-        [["queue-autosend-organization-initials", "retry-interaction-step"]]
-      );
     });
   });
 
   it("does not queue invalid contacts when run", async () => {
     await withClient(pool, async (client) => {
-      const campaign = await createCampaign(client, {
+      const { campaign, assignment } = await setUpAutosending(client, {
         organizationId: organization.id,
-        isStarted: true,
         autosendUserId: texter.id,
-        autosendStatus: "unstarted"
+        autosendStatus: AutosendStatus.Unstarted,
+        unmessagedCount: 3
       });
-      await createInteractionStep(client, {
-        campaignId: campaign.id,
-        scriptOptions: ["Have a text {firstName}"]
-      });
-      const assignment = await createAssignment(client, {
-        campaignId: campaign.id,
-        userId: texter.id
-      });
-      await Promise.all(
-        [...Array(3)].map(() =>
-          createCampaignContact(client, {
-            campaignId: campaign.id,
-            firstName: faker.name.firstName()
-          })
-        )
-      );
 
-      await client.query(`select graphile_worker.add_job($1, $2)`, [
-        QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
-        { organization_id: organization.id }
-      ]);
-
-      await runTaskListOnce(
-        workerOptions,
-        {
-          [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]: queueAutoSendOrganizationInitials
-        },
-        client
-      );
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
 
       const { rows: contacts } = await client.query<CampaignContactRecord>(
         `select * from campaign_contact where campaign_id = $1`,
@@ -158,16 +190,6 @@ describe("queue-autosend-organization-initials", () => {
         [campaign.id]
       );
       expect(rowCount).toBe(0);
-
-      await pool.query(
-        `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
-        [
-          [
-            QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
-            "retry-interaction-step"
-          ]
-        ]
-      );
     });
   });
 
@@ -179,44 +201,15 @@ describe("queue-autosend-organization-initials", () => {
   // only relying on job_key
   it("does not double queue contacts after change to include assigned messages", async () => {
     await withClient(pool, async (client) => {
-      const campaign = await createCampaign(client, {
+      const { campaign } = await setUpAutosending(client, {
         organizationId: organization.id,
-        isStarted: true,
         autosendUserId: texter.id,
-        autosendStatus: "sending"
+        autosendStatus: AutosendStatus.Sending,
+        unmessagedCount: 6
       });
 
-      await createInteractionStep(client, {
-        campaignId: campaign.id,
-        scriptOptions: ["Have a text {firstName}"]
-      });
-
-      await Promise.all(
-        [...Array(6)].map(() =>
-          createCampaignContact(client, {
-            campaignId: campaign.id,
-            firstName: faker.name.firstName()
-          })
-        )
-      );
-
-      const runQueueAutoSendInitials = async () => {
-        await client.query(`select graphile_worker.add_job($1, $2)`, [
-          QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
-          { organization_id: organization.id }
-        ]);
-
-        await runTaskListOnce(
-          workerOptions,
-          {
-            [QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER]: queueAutoSendOrganizationInitials
-          },
-          client
-        );
-      };
-
-      await runQueueAutoSendInitials();
-      await runQueueAutoSendInitials();
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
 
       const {
         rowCount
@@ -225,16 +218,6 @@ describe("queue-autosend-organization-initials", () => {
         [campaign.id]
       );
       expect(rowCount).toBe(6);
-
-      await pool.query(
-        `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
-        [
-          [
-            QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
-            "retry-interaction-step"
-          ]
-        ]
-      );
     });
   });
 });
