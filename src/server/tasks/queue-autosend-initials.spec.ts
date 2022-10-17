@@ -265,11 +265,8 @@ describe("queue-autosend-organization-initials", () => {
 
       await runQueueAutosend({ client, pool, organizationId: organization.id });
 
-      const { rowCount } = await client.query<{ id: number }>(
-        `select id from graphile_worker.jobs where task_identigier = $1 and payload->>'campaignId' = $2`,
-        [RETRY_ISTEP_IDENTIFIER, campaign.id]
-      );
-      expect(rowCount).toBe(limit);
+      const taskCount = await fetchTaskCount(client, campaign.id);
+      expect(taskCount).toBe(limit);
 
       await runRetryInteractionSteps(client, campaign.id);
       await runQueueAutosend({ client, pool, organizationId: organization.id });
