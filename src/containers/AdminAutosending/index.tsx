@@ -35,8 +35,7 @@ import AutosendingTargetRow from "./components/AutosendingTargetRow";
 import AutosendingUnstartedTargetRow from "./components/AutosendingUnstartedTargetRow";
 
 const useStyles = makeStyles({
-  select: { width: 150, marginRight: 10 },
-  button: { width: 100, height: 50, marginRight: 10 }
+  select: { width: 150, marginRight: 10 }
 });
 
 const AdminAutosending: React.FC = () => {
@@ -211,7 +210,7 @@ const AdminAutosending: React.FC = () => {
             <TableHead>
               {isBasic ? null : (
                 <TableRow>
-                  <TableCell colSpan={5} />
+                  <TableCell colSpan={4} />
                   <TableCell colSpan={5}>Progress</TableCell>
                   <TableCell colSpan={2}>Engagement</TableCell>
                   <TableCell />

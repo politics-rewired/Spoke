@@ -83,7 +83,6 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
         )}
       </TableCell>
       <TableCell>{target.contactsCount}</TableCell>
-      <TableCell>94</TableCell>
       <TableCell>{target.deliverabilityStats.deliveredCount}</TableCell>
       <TableCell>
         {target.contactsCount! -
