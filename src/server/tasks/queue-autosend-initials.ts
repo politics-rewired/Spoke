@@ -1,5 +1,4 @@
 import type { Task } from "graphile-worker";
-import { fromPairs } from "lodash";
 
 import { config } from "../../config";
 
@@ -171,45 +170,56 @@ export const queueAutoSendOrganizationInitials: Task = async (
     [contactsToQueueInOneMinute, autosendingMps, organizationId]
   );
 
-  const { rows: totalCountToSend } = await helpers.query<{
-    campaign_id: string;
-    total_count_to_send: string;
-  }>(
-    `
-      select cc.campaign_id, count(*) as total_count_to_send
-      from campaign_contact cc
-      join campaign c on cc.campaign_id = c.id
-      where true
-        -- organization requirements for autosending
-        and c.organization_id = $1
-        -- campaign requirements for autosending
-        and c.is_archived = false
-        and c.is_started = true
-        and c.autosend_status = 'sending'
-        and message_status = 'needsMessage'
-        and is_opted_out = false
-      group by 1
-    `,
-    [organizationId]
-  );
-
-  const countToSendMap = fromPairs(
-    totalCountToSend.map(({ campaign_id, total_count_to_send }) => [
-      campaign_id,
-      total_count_to_send
-    ])
-  );
-
-  const toMarkAsDoneSending = contactsQueued
-    .filter((campaign) => {
-      const totalCountToSendForCampaign =
-        countToSendMap[campaign.campaign_id] || 0;
-      return totalCountToSendForCampaign === 0;
-    })
-    .map((campaign) => campaign.campaign_id);
+  const campaignIdsQueued = contactsQueued.map((cq) => cq.campaign_id);
 
   await helpers.query(
-    `update campaign set autosend_status = 'complete' where id = ANY($1::integer[])`,
-    [toMarkAsDoneSending]
+    `
+      with sendable_contacts as (
+        select id, campaign_id
+        from campaign_contact
+        where true
+          and archived = false
+          and message_status = 'needsMessage'
+          and is_opted_out = false
+      ),
+      campaign_summary_raw as (
+        select
+          c.id as campaign_id,
+          c.autosend_limit_max_contact_id,
+          count(cc.id) as total_count_to_send,
+          min(cc.id) as min_cc_id
+        from campaign c
+        left join sendable_contacts cc on cc.campaign_id = c.id
+        where true
+          -- organization requirements for autosending
+          and c.organization_id = $1
+          -- campaign requirements for autosending
+          and c.id = ANY ($2::integer[])
+          and c.is_archived = false
+          and c.is_started = true
+          and c.autosend_status = 'sending'
+        group by 1, 2
+      ),
+      campaign_summary as (
+        select
+          campaign_id,
+          (case
+            when total_count_to_send = 0 then 'complete'
+            when (
+              autosend_limit_max_contact_id is not null
+              and min_cc_id > autosend_limit_max_contact_id
+            ) then 'paused'
+            else null
+          end) as new_autosend_status
+        from campaign_summary_raw
+      )
+      update campaign
+      set autosend_status = new_autosend_status
+      from campaign_summary
+      where
+        campaign_summary.campaign_id = campaign.id
+        and new_autosend_status is not null
+    `,
+    [organizationId, campaignIdsQueued]
   );
 };
