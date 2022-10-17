@@ -1996,29 +1996,38 @@ const rootMutations = {
 
       const {
         rows: [updatedCampaign]
-      } = await r.knex.raw(
-        `
-          update all_campaign
-          set
-            autosend_limit = ?::int,
-            autosend_limit_max_contact_id = (case
-              when ?::int is not null then (
-                select max(id)
-                from (
-                  select id
-                  from campaign_contact
-                  where campaign_id = ?::int
-                  order by id asc
-                  limit ?::int
-                ) campaign_contact_ids
-              )
-              else null
-            end)
-          where id = ?::int
-          returning *
-        `,
-        [limit, limit, id, limit, id]
-      );
+      } =
+        limit === null
+          ? await r.knex.raw(
+              `
+                update all_campaign
+                set
+                  autosend_limit = null,
+                  autosend_limit_max_contact_id = null
+                where id = ?::int
+              `,
+              [id]
+            )
+          : await r.knex.raw(
+              `
+                update all_campaign
+                set
+                  autosend_limit = ?::int,
+                  autosend_limit_max_contact_id = (
+                    select max(id)
+                    from (
+                      select id
+                      from campaign_contact
+                      where campaign_id = ?::int
+                      order by id asc
+                      limit ?::int
+                    ) campaign_contact_ids
+                  )
+                where id = ?::int
+                returning *
+              `,
+              [limit, id, limit, id]
+            );
 
       return updatedCampaign;
     },
