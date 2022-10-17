@@ -26,15 +26,3 @@ export const emptyRelayPage = <T>(): RelayPaginatedResponse<T> => ({
   },
   edges: []
 });
-
-export const schema = `
-  scalar Cursor
-
-  type RelayPageInfo {
-    totalCount: Int!
-    hasNextPage: Boolean!
-    hasPreviousPage: Boolean!
-    startCursor: Cursor
-    endCursor: Cursor
-  }
-`;

@@ -1,13 +1,3 @@
-import type { Campaign } from "./campaign";
-import type { CampaignContact } from "./campaign-contact";
-import type { User } from "./user";
-
-export interface Conversation {
-  texter: User;
-  contact: CampaignContact;
-  campaign: Campaign;
-}
-
 export const schema = `
   input ConversationFilter {
     assignmentsFilter: AssignmentsFilter
@@ -26,3 +16,4 @@ export const schema = `
     pageInfo: PageInfo
   }
 `;
+export default schema;

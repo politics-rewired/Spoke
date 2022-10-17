@@ -5,10 +5,10 @@ import {
 import type { campaign as CampaignRecord } from "@spoke/spoke-codegen";
 import type { PoolClient } from "pg";
 import { Pool } from "pg";
-import { UserRoleType } from "src/api/organization-membership";
 import supertest from "supertest";
 
 import { createOrgAndSession } from "../../../../__test__/lib/session";
+import { UserRoleType } from "../../../api/organization-membership";
 import { config } from "../../../config";
 import { createApp } from "../../app";
 import { withClient } from "../../utils";

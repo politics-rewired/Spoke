@@ -1,23 +1,3 @@
-import type { ExternalSurveyQuestionResponseOption } from "./external-survey-question-response-option";
-import type { RelayPaginatedResponse } from "./pagination";
-import type { ExternalDataCollectionStatus } from "./types";
-
-export interface ExternalSurveyQuestion {
-  id: string;
-  systemId: string;
-  externalId: string;
-  type: string;
-  cycle: number;
-  name: string;
-  mediumName: string;
-  shortName: string;
-  scriptQuestion: string;
-  status: ExternalDataCollectionStatus;
-  createdAt: string;
-  updatedAt: string;
-  responseOptions: RelayPaginatedResponse<ExternalSurveyQuestionResponseOption>;
-}
-
 export const schema = `
   type ExternalSurveyQuestion {
     id: String!
@@ -45,3 +25,4 @@ export const schema = `
     pageInfo: RelayPageInfo!
   }
 `;
+export default schema;
