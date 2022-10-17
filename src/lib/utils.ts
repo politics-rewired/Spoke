@@ -1,9 +1,14 @@
+import Crypto from "crypto";
 import fs from "fs";
 import escapeRegExp from "lodash/escapeRegExp";
 import isEqual from "lodash/isEqual";
 import isObject from "lodash/isObject";
 import transform from "lodash/transform";
-import request from "request";
+import os from "os";
+import path from "path";
+import request from "superagent";
+
+export type TempDownloadHandler = <T>(filePath: string) => Promise<T> | T;
 
 export const VALID_CONTENT_TYPES = [
   "image/jpeg",
@@ -40,45 +45,51 @@ export function difference(object: Record<any, any>, base: Record<any, any>) {
 }
 
 export const downloadFromUrl = async (url: string, filePath: string) => {
+  let fileDownloaded = false;
   const file = fs.createWriteStream(filePath);
 
-  const downloadRequest = request.get(url);
+  file.on("error", () => {
+    fileDownloaded = false;
+    fs.unlinkSync(filePath);
+  });
 
   const fileWritePromise = new Promise((resolve) => {
-    downloadRequest.on("response", (response) => {
-      if (response.statusCode !== 200) {
-        // Status Code Not 200, delete file, and return false
-        // we failed to download attachment
-        fs.unlink(filePath, () => {
-          return false;
-        });
-        resolve(false);
-      }
-      downloadRequest.pipe(file);
-    });
     file.on("finish", () => {
+      fileDownloaded = true;
       file.close();
       resolve(true);
     });
   });
 
-  downloadRequest.on("error", () => {
-    fs.unlink(filePath, () => {
-      return false;
-    });
-    return false;
-  });
+  try {
+    const downloadRequest = request.get(url);
+    downloadRequest.pipe(file);
+    fileDownloaded = true;
+  } catch (e) {
+    fileDownloaded = false;
+    fs.unlinkSync(filePath);
+  }
 
-  file.on("error", () => {
-    fs.unlink(filePath, () => {
-      return false;
-    });
-    return false;
-  });
+  await fileWritePromise;
+  return fileDownloaded;
+};
 
-  // Return fileWritePromise which will return true for downloaded file
-  // false if file errors out
-  return fileWritePromise;
+export const withTempDownload = async (
+  fileUrl: string,
+  handler: TempDownloadHandler
+) => {
+  const tempFilePath = path.join(
+    os.tmpdir(),
+    `tempFile-${Crypto.randomBytes(16).toString("hex")}`
+  );
+  const fileDownloaded = await downloadFromUrl(fileUrl, tempFilePath);
+
+  if (!fileDownloaded) return false;
+
+  const result = await handler(tempFilePath);
+
+  fs.unlinkSync(tempFilePath);
+  return result;
 };
 
 export const stringIsAValidUrl = (s: string) => {

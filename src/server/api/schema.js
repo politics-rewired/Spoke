@@ -1,14 +1,11 @@
 import { ForbiddenError } from "apollo-server-errors";
 import camelCaseKeys from "camelcase-keys";
-import Crypto from "crypto";
 import GraphQLDate from "graphql-date";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLUpload } from "graphql-upload";
 import { GraphQLError } from "graphql/error";
 import _ from "lodash";
 import groupBy from "lodash/groupBy";
-import os from "os";
-import path from "path";
 
 import { VanOperationMode } from "../../api/external-system";
 import {
@@ -21,9 +18,9 @@ import { parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
 import {
-  downloadFromUrl,
   replaceAll,
-  VALID_CONTENT_TYPES
+  VALID_CONTENT_TYPES,
+  withTempDownload
 } from "../../lib/utils";
 import logger from "../../logger";
 import pgPool from "../db";
@@ -4043,18 +4040,12 @@ const rootResolvers = {
       });
     },
     isValidAttachment: async (_root, { fileUrl }, _context) => {
-      const filePath = path.join(
-        os.tmpdir(),
-        `image-${Crypto.randomBytes(16).toString("hex")}`
-      );
+      const handler = async (filePath) => {
+        const fileType = await getFileType(filePath);
 
-      const fileDownloaded = await downloadFromUrl(fileUrl, filePath);
-
-      if (!fileDownloaded) return false;
-
-      const fileType = await getFileType(filePath);
-
-      return VALID_CONTENT_TYPES.includes(fileType);
+        return VALID_CONTENT_TYPES.includes(fileType);
+      };
+      return withTempDownload(fileUrl, handler);
     }
   }
 };

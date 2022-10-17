@@ -1,7 +1,7 @@
-import { gql } from "@apollo/client";
 import { withApollo } from "@apollo/client/react/hoc";
 import { blue, green, grey, orange, red } from "@material-ui/core/colors";
 import type { CampaignVariable } from "@spoke/spoke-codegen";
+import { IsValidAttachmentDocument } from "@spoke/spoke-codegen";
 import { getCharCount } from "@trt2/gsm-charset-utils";
 import type { ContentBlock } from "draft-js";
 import {
@@ -132,12 +132,6 @@ interface State {
   validAttachment: boolean;
 }
 
-const VALID_ATTACHMENT_QUERY = gql`
-  query ValidAttachment($fileUrl: String!) {
-    isValidAttachment(fileUrl: $fileUrl)
-  }
-`;
-
 class ScriptEditor extends React.Component<Props, State> {
   private editorRef: Editor | null = null;
 
@@ -223,7 +217,7 @@ class ScriptEditor extends React.Component<Props, State> {
     if (fileUrl === null) return true;
 
     const response = await this.props.client.query({
-      query: VALID_ATTACHMENT_QUERY,
+      query: IsValidAttachmentDocument,
       variables: {
         fileUrl
       }
