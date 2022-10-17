@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.39.1-rc.1](https://github.com/politics-rewired/spoke/compare/v4.39.1-rc.0...v4.39.1-rc.1) (2022-10-17)
+
+
+### Bug Fixes
+
+* fix van truncated date alias ([#1472](https://github.com/politics-rewired/spoke/issues/1472)) ([fbe2f1a](https://github.com/politics-rewired/spoke/commit/fbe2f1aab2c809e6fc1f65bc7342ed09434bc67d))
+
 ### [4.39.1-rc.0](https://github.com/politics-rewired/spoke/compare/v4.39.0...v4.39.1-rc.0) (2022-10-17)
 
 
