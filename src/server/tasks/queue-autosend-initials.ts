@@ -163,6 +163,7 @@ export const queueAutoSendOrganizationInitials: Task = async (
           and c.is_archived = false
           and c.is_started = true
           and c.autosend_status = 'sending'
+          and c.organization_id = $3
         order by c.id asc
       )
       select * from campaign_breakdown
@@ -216,8 +217,9 @@ export const queueAutoSendOrganizationInitials: Task = async (
       update campaign
       set autosend_status = new_autosend_status
       from campaign_summary
-      where
-        campaign_summary.campaign_id = campaign.id
+      where true
+        and organization_id = $1
+        and campaign_summary.campaign_id = campaign.id
         and new_autosend_status is not null
     `,
     [organizationId, campaignIdsQueued]

@@ -132,12 +132,8 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     props.contactNameFilter?.cellNumber ?? undefined
   );
   const [showSection, setShowSection] = useState<boolean>(true);
-  const [campaignId, setCampaignId] = useState<string | undefined | null>(
-    props?.campaignId?.toString() ?? null
-  );
-  const [texterId, setTexterId] = useState<string | undefined | null>(
-    props?.texterId?.toString() ?? null
-  );
+  const [campaignId, setCampaignId] = useState<string | undefined | null>("");
+  const [texterId, setTexterId] = useState<string | undefined | null>("");
 
   const [campaignSearchInput, setCampaignSearchInput] = useState<string>("");
   const [campaignSearchInputDebounced] = useDebounce(
@@ -174,7 +170,10 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     variables: { organizationId: props.organizationId }
   });
 
-  const { data: getCampaigns } = useSearchCampaignsQuery({
+  const {
+    data: getCampaigns,
+    previousData: getCampaignsPreviousData
+  } = useSearchCampaignsQuery({
     variables: {
       organizationId: props.organizationId,
       campaignsFilter:
@@ -186,7 +185,16 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
     }
   });
 
-  const { data: getTexters } = useSearchUsersQuery({
+  useEffect(() => {
+    if (getCampaigns && !getCampaignsPreviousData) {
+      setCampaignId(props?.campaignId?.toString() ?? null);
+    }
+  }, [getCampaigns, getCampaignsPreviousData]);
+
+  const {
+    data: getTexters,
+    previousData: getTextersPreviousData
+  } = useSearchUsersQuery({
     variables: {
       organizationId: props.organizationId,
       filter:
@@ -197,6 +205,12 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
           : undefined
     }
   });
+
+  useEffect(() => {
+    if (getTexters && !getTextersPreviousData) {
+      setTexterId(props?.texterId?.toString() ?? null);
+    }
+  }, [getTexters, getTextersPreviousData]);
 
   const formatTags = (tags: Array<any>) => {
     return tags.map((tag) => {
@@ -462,7 +476,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
                 value={campaignId}
                 options={campaignOptions}
                 inputValue={campaignSearchInput}
-                getOptionLabel={(option) => campaignsMap.get(option)}
+                getOptionLabel={(option) => campaignsMap.get(option) ?? ""}
                 onInputChange={(_event, newValue) => {
                   setCampaignSearchInput(newValue);
                 }}
@@ -482,7 +496,7 @@ const IncomingMessageFilter: React.FC<IncomingMessageFilterProps> = (props) => {
                   value={texterId}
                   options={texterOptions}
                   inputValue={texterSearchInput}
-                  getOptionLabel={(option) => textersMap.get(option)}
+                  getOptionLabel={(option) => textersMap.get(option) ?? ""}
                   onInputChange={(_event, newValue) => {
                     setTexterSearchInput(newValue);
                   }}

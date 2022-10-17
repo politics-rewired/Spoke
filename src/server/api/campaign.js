@@ -119,7 +119,7 @@ export async function getCampaigns(organizationId, cursor, campaignsFilter) {
 
 const getCampaignOrganization = memoizer.memoize(async ({ campaignId }) => {
   const campaign = await r
-    .reader("campaign")
+    .reader("all_campaign")
     .where({ id: campaignId })
     .first("organization_id");
   return campaign.organization_id;
