@@ -68,6 +68,10 @@ export const queueAutoSendOrganizationInitials: Task = async (
           and cc.archived = false
           and cc.message_status = 'needsMessage'
           and cc.is_opted_out = false
+          and (
+            c.autosend_limit_max_contact_id is null
+            or cc.id <= c.autosend_limit_max_contact_id
+          )
           -- campaign requirements for autosending
           and c.is_archived = false
           and c.is_started = true
