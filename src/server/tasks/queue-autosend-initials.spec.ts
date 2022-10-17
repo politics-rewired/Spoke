@@ -23,6 +23,7 @@ import {
   QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
   queueAutoSendOrganizationInitials
 } from "./queue-autosend-initials";
+import { TASK_IDENTIFIER as RETRY_ISTEP_IDENTIFIER } from "./retry-interaction-step";
 
 const TASK_IDENTIFIER = QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER;
 
@@ -104,8 +105,16 @@ const runQueueAutosend = async ({
   );
 };
 
+const fetchTaskCount = async (client: PoolClient, campaignId: number) =>
+  client
+    .query(
+      `select * from graphile_worker.jobs where task_identifier = $1 and payload->>'campaignId' = $2`,
+      [RETRY_ISTEP_IDENTIFIER, campaignId]
+    )
+    .then(({ rowCount }) => rowCount);
+
 const cleanUp = async (pool: Pool) => {
-  const taskIdentifiers = [TASK_IDENTIFIER, "retry-interaction-step"];
+  const taskIdentifiers = [TASK_IDENTIFIER, RETRY_ISTEP_IDENTIFIER];
   await pool.query(
     `delete from graphile_worker.jobs where task_identifier = ANY($1)`,
     [taskIdentifiers]
@@ -152,13 +161,8 @@ describe("queue-autosend-organization-initials", () => {
       expect(contacts).toHaveLength(3);
       expect(contacts[0].assignment_id).toBe(assignment.id);
 
-      const {
-        rowCount
-      } = await client.query(
-        `select * from graphile_worker.jobs where payload->>'campaignId' = $1`,
-        [campaign.id]
-      );
-      expect(rowCount).toBe(3);
+      const taskCount = await fetchTaskCount(client, campaign.id);
+      expect(taskCount).toBe(3);
     });
   });
 
@@ -183,13 +187,8 @@ describe("queue-autosend-organization-initials", () => {
         expect(contact.assignment_id).toBeNull();
       }
 
-      const {
-        rowCount
-      } = await client.query(
-        `select * from graphile_worker.jobs where payload->>'campaignId' = $1`,
-        [campaign.id]
-      );
-      expect(rowCount).toBe(0);
+      const taskCount = await fetchTaskCount(client, campaign.id);
+      expect(taskCount).toBe(0);
     });
   });
 
@@ -211,13 +210,8 @@ describe("queue-autosend-organization-initials", () => {
       await runQueueAutosend({ client, pool, organizationId: organization.id });
       await runQueueAutosend({ client, pool, organizationId: organization.id });
 
-      const {
-        rowCount
-      } = await client.query(
-        `select * from graphile_worker.jobs where payload->>'campaignId' = $1`,
-        [campaign.id]
-      );
-      expect(rowCount).toBe(6);
+      const taskCount = await fetchTaskCount(client, campaign.id);
+      expect(taskCount).toBe(6);
     });
   });
 });

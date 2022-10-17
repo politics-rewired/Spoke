@@ -17,6 +17,8 @@ import type {
 import { r } from "../models";
 import { SendTimeMessagingError } from "../send-message-errors";
 
+export const TASK_IDENTIFIER = "retry-interaction-step";
+
 export interface RetryInteractionStepPayload {
   campaignContactId: number;
   unassignAfterSend?: boolean;
