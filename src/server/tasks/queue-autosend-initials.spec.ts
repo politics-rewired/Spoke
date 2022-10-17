@@ -14,6 +14,7 @@ import {
 import { config } from "../../config";
 import type {
   CampaignContactRecord,
+  CampaignRecord,
   OrganizationRecord,
   UserRecord
 } from "../api/types";
@@ -112,6 +113,27 @@ const fetchTaskCount = async (client: PoolClient, campaignId: number) =>
       [RETRY_ISTEP_IDENTIFIER, campaignId]
     )
     .then(({ rowCount }) => rowCount);
+
+const runRetryInteractionSteps = async (
+  client: PoolClient,
+  campaignId: number
+) => {
+  await client.query<{ id: number }>(
+    `
+      with cc_ids as (
+        delete from graphile_worker.jobs
+        where true
+          and task_identifier = $1
+          and payload->>'campaignId' = $2
+        returning (payload->>'campaignContactId')::integer as id
+      )
+      update campaign_contact
+      set message_status = 'messaged'
+      where id in (select id from cc_ids)
+    `,
+    [RETRY_ISTEP_IDENTIFIER, campaignId]
+  );
+};
 
 const cleanUp = async (pool: Pool) => {
   const taskIdentifiers = [TASK_IDENTIFIER, RETRY_ISTEP_IDENTIFIER];
@@ -212,6 +234,94 @@ describe("queue-autosend-organization-initials", () => {
 
       const taskCount = await fetchTaskCount(client, campaign.id);
       expect(taskCount).toBe(6);
+    });
+  });
+
+  it("only queues up to the limit and then pauses", async () => {
+    await withClient(pool, async (client) => {
+      const unmessagedCount = 10;
+      const limit = 5;
+
+      const { campaign, unmessagedContacts } = await setUpAutosending(client, {
+        organizationId: organization.id,
+        autosendUserId: texter.id,
+        autosendStatus: AutosendStatus.Sending,
+        unmessagedCount
+      });
+
+      const unmessagedContactIds = unmessagedContacts.map((cc) => cc.id);
+      unmessagedContactIds.sort();
+
+      await client.query(
+        `
+          update campaign
+          set
+            autosend_limit = $1,
+            autosend_limit_max_contact_id = $2
+          where id = $3
+        `,
+        [limit, unmessagedContactIds[limit - 1], campaign.id]
+      );
+
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
+
+      const { rowCount } = await client.query<{ id: number }>(
+        `select id from graphile_worker.jobs where task_identigier = $1 and payload->>'campaignId' = $2`,
+        [RETRY_ISTEP_IDENTIFIER, campaign.id]
+      );
+      expect(rowCount).toBe(limit);
+
+      await runRetryInteractionSteps(client, campaign.id);
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
+
+      const {
+        rows: [finalCampaign]
+      } = await client.query<CampaignRecord>(
+        `select autosend_status from campaign where id = $1`,
+        [campaign.id]
+      );
+      expect(finalCampaign.autosend_status).toBe(AutosendStatus.Paused);
+    });
+  });
+
+  it("marks completed campaign with autosend limit as completed", async () => {
+    await withClient(pool, async (client) => {
+      const messagedCount = 25;
+
+      const { campaign, messagedContacts } = await setUpAutosending(client, {
+        organizationId: organization.id,
+        autosendUserId: texter.id,
+        autosendStatus: AutosendStatus.Sending,
+        messagedCount,
+        unmessagedCount: 0
+      });
+
+      const maxMessagedContactId = Math.max(
+        ...messagedContacts.map((cc) => cc.id)
+      );
+
+      await client.query(
+        `
+          update campaign
+          set
+            autosend_limit = $1,
+            autosend_limit_max_contact_id = $2
+          where id = $3
+        `,
+        [messagedCount, maxMessagedContactId, campaign.id]
+      );
+
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
+      await runRetryInteractionSteps(client, campaign.id);
+      await runQueueAutosend({ client, pool, organizationId: organization.id });
+
+      const {
+        rows: [finalCampaign]
+      } = await client.query<CampaignRecord>(
+        `select * from campaign where id = $1`,
+        [campaign.id]
+      );
+      expect(finalCampaign.autosend_status).toBe(AutosendStatus.Complete);
     });
   });
 });
