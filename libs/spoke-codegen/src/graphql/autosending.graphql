@@ -42,7 +42,7 @@ query CampaignsEligibleForAutosending(
     ) {
       campaigns {
         ...BasicAutosendingTarget
-        ...DetailedAutosendingTarget @skip (if: $isBasic)
+        ...DetailedAutosendingTarget @skip(if: $isBasic)
       }
     }
   }

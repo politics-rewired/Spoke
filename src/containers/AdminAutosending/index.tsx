@@ -16,7 +16,6 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Alert from "@material-ui/lab/Alert";
-// import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import {
   AutosendingControlsMode,
   useCampaignsEligibleForAutosendingQuery,
@@ -80,10 +79,6 @@ const AdminAutosending: React.FC = () => {
     string | undefined
   >(undefined);
 
-  // const [changeLimitTargets, setChangeLimitTargets] = useState<
-  //   Map<string, number>
-  // >(new Map<string, number>());
-
   useEffect(() => {
     if (getCampaignsError) setAlertErrorMessage(getCampaignsError.message);
   }, [getCampaignsError?.message]);
@@ -124,18 +119,6 @@ const AdminAutosending: React.FC = () => {
   );
 
   const handleLimitChange = () => {};
-  // const handleLimitChange = useCallback(
-  //   (campaignId: string, oldLimit?: number | null) => (
-  //     newLimit: number | null
-  //   ) => {
-  //     if (isNil(oldLimit) || isNil(newLimit) || newLimit > oldLimit)
-  //     const campaignLimit: Record<string, number> = { string: 1 };
-  //     setChangeLimitTargets(changeLimitTargets.push({ campaignId: newLimit }));
-  //     else
-  //   },
-  //   [0]
-  // );
-
   const handlePlayFactory = useCallback(
     (campaignId: string) => () =>
       startAutosending({ variables: { campaignId } }),
