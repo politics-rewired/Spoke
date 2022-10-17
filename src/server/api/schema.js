@@ -1981,26 +1981,46 @@ const rootMutations = {
 
     updateCampaignAutosendingLimit: async (
       _ignore,
-      { campaignId },
-      { user },
-      { limit }
+      { campaignId, limit },
+      { user }
     ) => {
       const id = parseInt(campaignId, 10);
 
       const campaign = await r
-        .knex("campaign")
+        .knex("all_campaign")
         .where({ id })
-        .first(["organization_id", "autosend_limit"]);
+        .first(["organization_id"]);
 
       const organizationId = campaign.organization_id;
       await accessRequired(user, organizationId, "ADMIN", true);
 
-      const [result] = await r
-        .knex("campaign")
-        .update({ autosend_limit: limit })
-        .where({ id })
-        .returning("*");
-      return result;
+      const {
+        rows: [updatedCampaign]
+      } = await r.knex.raw(
+        `
+          update all_campaign
+          set
+            autosend_limit = ?::int,
+            autosend_limit_max_contact_id = (case
+              when ?::int is not null then (
+                select max(id)
+                from (
+                  select id
+                  from campaign_contact
+                  where campaign_id = ?::int
+                  order by id asc
+                  limit ?::int
+                ) campaign_contact_ids
+              )
+              else null
+            end)
+          where id = ?::int
+          returning *
+        `,
+        [limit, limit, id, limit, id]
+      );
+
+      return updatedCampaign;
     },
 
     unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {
