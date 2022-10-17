@@ -1,4 +1,3 @@
-import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
@@ -118,7 +117,6 @@ const AdminAutosending: React.FC = () => {
     [setAlertErrorMessage]
   );
 
-  const handleLimitChange = () => {};
   const handlePlayFactory = useCallback(
     (campaignId: string) => () =>
       startAutosending({ variables: { campaignId } }),
@@ -168,13 +166,6 @@ const AdminAutosending: React.FC = () => {
         subtitle="Campaigns will send in order of ID"
         action={
           <>
-            <Button
-              color="primary"
-              variant="contained"
-              classes={{ root: inlineStyles.button }}
-            >
-              Save Limits
-            </Button>
             <FormControl>
               <InputLabel id="is-started-select-label">
                 Campaign Status
@@ -257,7 +248,6 @@ const AdminAutosending: React.FC = () => {
                       disabled={actionsDisabled}
                       onStart={handlePlayFactory(c!.id!)}
                       onPause={handlePauseFactory(c!.id!)}
-                      onLimitChange={handleLimitChange(c!.id!, c.autosendLimit)}
                     />
                   ) : (
                     <AutosendingBasicUnstartedTargetRow
@@ -275,7 +265,6 @@ const AdminAutosending: React.FC = () => {
                     disabled={actionsDisabled}
                     onStart={handlePlayFactory(c!.id!)}
                     onPause={handlePauseFactory(c!.id!)}
-                    onLimitChange={handleLimitChange(c!.id!, c.autosendLimit)}
                   />
                 ) : (
                   <AutosendingUnstartedTargetRow

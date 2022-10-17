@@ -2,7 +2,6 @@ import Button from "@material-ui/core/Button";
 import Chip from "@material-ui/core/Chip";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
-import TextField from "@material-ui/core/TextField";
 import MoreIcon from "@material-ui/icons/ArrowForward";
 import PauseIcon from "@material-ui/icons/Pause";
 import PlayIcon from "@material-ui/icons/PlayArrow";
@@ -10,8 +9,8 @@ import type { AutosendingTargetFragment } from "@spoke/spoke-codegen";
 import React from "react";
 import { Link } from "react-router-dom";
 
+import AutosendingLimitField from "./AutosendingLimitField";
 import useChipStyles from "./chipStyles";
-import { convertValueToLimit } from "./utils";
 
 interface AutosendingTargetRowProps {
   target: AutosendingTargetFragment;
@@ -19,20 +18,12 @@ interface AutosendingTargetRowProps {
   disabled?: boolean;
   onStart: () => Promise<unknown> | unknown;
   onPause: () => Promise<unknown> | unknown;
-  onLimitChange: (inputLimit: number | null) => Promise<unknown> | unknown;
 }
 
 export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
   props
 ) => {
-  const {
-    target,
-    organizationId,
-    disabled = false,
-    onStart,
-    onPause,
-    onLimitChange
-  } = props;
+  const { target, organizationId, disabled = false, onStart, onPause } = props;
   const chipClasses = useChipStyles();
   const statusChipDisplay = target.autosendStatus;
 
@@ -54,14 +45,7 @@ export const AutosendingTargetRow: React.FC<AutosendingTargetRowProps> = (
         <Chip label={statusChipDisplay} classes={{ root: chipRootClass }} />
       </TableCell>
       <TableCell>
-        <TextField
-          type="number"
-          value={target.autosendLimit}
-          onChange={(event) =>
-            onLimitChange(convertValueToLimit(event.target.value))
-          }
-          style={{ width: "80px" }}
-        />
+        <AutosendingLimitField campaignId={target.id} />
       </TableCell>
       <TableCell>
         {target.autosendStatus ===

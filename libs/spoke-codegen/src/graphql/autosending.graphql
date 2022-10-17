@@ -29,6 +29,13 @@ fragment AutosendingTarget on Campaign {
   ...DetailedAutosendingTarget
 }
 
+query GetCampaignAutosendingLimit($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    autosendLimit
+  }
+}
+
 query CampaignsEligibleForAutosending(
   $organizationId: String!
   $isStarted: Boolean!
