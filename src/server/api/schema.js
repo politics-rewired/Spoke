@@ -2018,7 +2018,9 @@ const rootMutations = {
                     from (
                       select id
                       from campaign_contact
-                      where campaign_id = ?::int
+                      where true
+                        and campaign_id = ?::int
+                        and archived = false
                       order by id asc
                       limit ?::int
                     ) campaign_contact_ids
