@@ -2005,6 +2005,7 @@ const rootMutations = {
                   autosend_limit = null,
                   autosend_limit_max_contact_id = null
                 where id = ?::int
+                returning *
               `,
               [id]
             )
