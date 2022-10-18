@@ -8,7 +8,7 @@ import {
   useGetCampaignAutosendingLimitQuery,
   useUpdateCampaignAutosendingLimitMutation
 } from "@spoke/spoke-codegen";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export interface AutosendingLimitFieldProps {
@@ -33,11 +33,18 @@ export const AutosendingLimitField: React.FC<AutosendingLimitFieldProps> = ({
     updateAutosendingLimit({ variables: { campaignId, limit } });
   }, 300);
 
+  const countMessagedContacts = useMemo(
+    () => data?.campaign?.stats?.countMessagedContacts,
+    [data]
+  );
+
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-      setInputValue(event.target.value);
       const limitInt = parseInt(event.target.value, 10);
-      const limit = Number.isNaN(limitInt) ? null : limitInt;
+      const limit = Number.isNaN(limitInt)
+        ? null
+        : Math.max(limitInt, countMessagedContacts ?? 0);
+      setInputValue(event.target.value ?? "");
       debouncedUpdate(limit);
     },
     [debouncedUpdate]

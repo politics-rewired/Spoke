@@ -33,6 +33,9 @@ query GetCampaignAutosendingLimit($campaignId: String!) {
   campaign(id: $campaignId) {
     id
     autosendLimit
+    stats {
+      countMessagedContacts
+    }
   }
 }
 
