@@ -8,6 +8,7 @@ import {
   useGetCampaignAutosendingLimitQuery,
   useUpdateCampaignAutosendingLimitMutation
 } from "@spoke/spoke-codegen";
+import isNil from "lodash/isNil";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -44,10 +45,10 @@ export const AutosendingLimitField: React.FC<AutosendingLimitFieldProps> = ({
       const limit = Number.isNaN(limitInt)
         ? null
         : Math.max(limitInt, countMessagedContacts ?? 0);
-      setInputValue(event.target.value ?? "");
+      setInputValue(isNil(limit) ? "" : `${limit}`);
       debouncedUpdate(limit);
     },
-    [debouncedUpdate]
+    [debouncedUpdate, countMessagedContacts]
   );
 
   return (
