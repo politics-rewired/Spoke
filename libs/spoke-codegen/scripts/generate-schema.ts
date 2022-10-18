@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { schema as apiSchema } from "../../../src/gql-schema/schema";
 
 const SCHEMA_PATH = path.join(__dirname, "../../../src/schema.graphql");
