@@ -842,7 +842,11 @@ const rootMutations = {
 
       const messagingServices = await r
         .knex("messaging_service")
-        .where({ organization_id: campaign.organizationId, active: true });
+        .where({
+          organization_id: campaign.organizationId,
+          active: true
+        })
+        .orderByRaw(`is_default desc nulls last`);
 
       if (messagingServices.length === 0) {
         throw new Error("No active messaging services found");
