@@ -1,3 +1,14 @@
+query GetCurrentUserProfile {
+  currentUser {
+    id
+    email
+    firstName
+    lastName
+    displayName
+    terms
+  }
+}
+
 query GetCurrentUserId {
   currentUser {
     id
