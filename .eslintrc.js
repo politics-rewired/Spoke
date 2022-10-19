@@ -112,6 +112,8 @@ module.exports = {
               "TableBody",
               "TableRow",
               "TableRowColumn",
+              "Tabs",
+              "Tab"
               "FloatingActionButton"
             ],
             message: "Please use @material-ui/core instead."
@@ -144,6 +146,8 @@ module.exports = {
               "material-ui/TableBody",
               "material-ui/TableRow",
               "material-ui/TableRowColumn",
+              "material-ui/Tabs",
+              "material-ui/Tab"
               "material-ui/FloatingActionButton"
             ],
             message: "Please use @material-ui/core instead."
