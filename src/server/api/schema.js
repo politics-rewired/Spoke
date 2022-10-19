@@ -1998,17 +1998,13 @@ const rootMutations = {
         rows: [updatedCampaign]
       } =
         limit === null
-          ? await r.knex.raw(
-              `
-                update all_campaign
-                set
-                  autosend_limit = null,
-                  autosend_limit_max_contact_id = null
-                where id = ?::int
-                returning *
-              `,
-              [id]
-            )
+          ? await r
+              .knex("all_campaign")
+              .update({
+                autosend_limit: null,
+                autosend_limit_max_contact_id: null
+              })
+              .where({ id })
           : await r.knex.raw(
               `
                 update all_campaign
