@@ -112,6 +112,7 @@ module.exports = {
               "TableBody",
               "TableRow",
               "TableRowColumn",
+              "Dialog"
               "Tabs",
               "Tab"
               "FloatingActionButton"
@@ -146,6 +147,7 @@ module.exports = {
               "material-ui/TableBody",
               "material-ui/TableRow",
               "material-ui/TableRowColumn",
+              "material-ui/Dialog"
               "material-ui/Tabs",
               "material-ui/Tab"
               "material-ui/FloatingActionButton"
