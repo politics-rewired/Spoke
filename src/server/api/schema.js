@@ -1994,9 +1994,7 @@ const rootMutations = {
       const organizationId = campaign.organization_id;
       await accessRequired(user, organizationId, "ADMIN", true);
 
-      const {
-        rows: [updatedCampaign]
-      } =
+      const updatedCampaign =
         limit === null
           ? await r
               .knex("all_campaign")
@@ -2005,28 +2003,32 @@ const rootMutations = {
                 autosend_limit_max_contact_id: null
               })
               .where({ id })
-          : await r.knex.raw(
-              `
-                update all_campaign
-                set
-                  autosend_limit = ?::int,
-                  autosend_limit_max_contact_id = (
-                    select max(id)
-                    from (
-                      select id
-                      from campaign_contact
-                      where true
-                        and campaign_id = ?::int
-                        and archived = false
-                      order by id asc
-                      limit ?::int
-                    ) campaign_contact_ids
-                  )
-                where id = ?::int
-                returning *
-              `,
-              [limit, id, limit, id]
-            );
+              .returning("*")
+              .then((rows) => rows[0])
+          : await r.knex
+              .raw(
+                `
+                  update all_campaign
+                  set
+                    autosend_limit = ?::int,
+                    autosend_limit_max_contact_id = (
+                      select max(id)
+                      from (
+                        select id
+                        from campaign_contact
+                        where true
+                          and campaign_id = ?::int
+                          and archived = false
+                        order by id asc
+                        limit ?::int
+                      ) campaign_contact_ids
+                    )
+                  where id = ?::int
+                  returning *
+                `,
+                [limit, id, limit, id]
+              )
+              .then(({ rows }) => rows[0]);
 
       return updatedCampaign;
     },
