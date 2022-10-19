@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file,react/no-unused-state */
 import { gql } from "@apollo/client";
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import DataTable from "material-ui-datatables";
-import CircularProgress from "material-ui/CircularProgress";
 import TextField from "material-ui/TextField";
 import Toggle from "material-ui/Toggle";
 import React from "react";

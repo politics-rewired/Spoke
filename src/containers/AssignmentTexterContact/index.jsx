@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unused-state */
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { blueGrey, deepOrange, grey } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import { withTheme } from "@material-ui/core/styles";
@@ -14,7 +15,6 @@ import ReplyIcon from "@material-ui/icons/Reply";
 import { css, StyleSheet } from "aphrodite";
 import sample from "lodash/sample";
 import sortBy from "lodash/sortBy";
-import CircularProgress from "material-ui/CircularProgress";
 import IconMenu from "material-ui/IconMenu";
 import MenuItem from "material-ui/MenuItem";
 import Snackbar from "material-ui/Snackbar";

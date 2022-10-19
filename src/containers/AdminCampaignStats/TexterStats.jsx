@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import LinearProgress from "material-ui/LinearProgress";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import PropTypes from "prop-types";
 import React from "react";
 
