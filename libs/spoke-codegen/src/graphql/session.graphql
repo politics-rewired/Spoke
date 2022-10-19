@@ -1,3 +1,14 @@
+query GetCurrentUserProfile {
+  currentUser {
+    id
+    email
+    firstName
+    lastName
+    displayName
+    terms
+  }
+}
+
 query GetCurrentUserId {
   currentUser {
     id
@@ -15,6 +26,25 @@ query CurrentUserOrganizationRoles($organizationId: String!) {
   currentUser {
     id
     isSuperadmin
+    roles(organizationId: $organizationId)
+  }
+}
+
+query GetCurrentUserForMenu {
+  currentUser {
+    id
+    displayName
+    email
+    organizations(active: true) {
+      id
+      name
+    }
+  }
+}
+
+query GetCurrentUserRoles($organizationId: String!) {
+  currentUser {
+    id
     roles(organizationId: $organizationId)
   }
 }

@@ -17,7 +17,11 @@ import { config } from "../../config";
 import { parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
-import { replaceAll } from "../../lib/utils";
+import {
+  replaceAll,
+  VALID_CONTENT_TYPES,
+  withTempDownload
+} from "../../lib/utils";
 import logger from "../../logger";
 import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
@@ -85,6 +89,7 @@ import {
 } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
 import { copyCampaign, editCampaign } from "./lib/campaign";
+import { getFileType } from "./lib/file-type";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import { processNumbers } from "./lib/opt-out";
 import { formatPage } from "./lib/pagination";
@@ -842,7 +847,11 @@ const rootMutations = {
 
       const messagingServices = await r
         .knex("messaging_service")
-        .where({ organization_id: campaign.organizationId, active: true });
+        .where({
+          organization_id: campaign.organizationId,
+          active: true
+        })
+        .orderByRaw(`is_default desc nulls last`);
 
       if (messagingServices.length === 0) {
         throw new Error("No active messaging services found");
@@ -1977,6 +1986,60 @@ const rootMutations = {
 
       const result = updatedCampaign || campaign;
       return result;
+    },
+
+    updateCampaignAutosendingLimit: async (
+      _ignore,
+      { campaignId, limit },
+      { user }
+    ) => {
+      const id = parseInt(campaignId, 10);
+
+      const campaign = await r
+        .knex("all_campaign")
+        .where({ id })
+        .first(["organization_id"]);
+
+      const organizationId = campaign.organization_id;
+      await accessRequired(user, organizationId, "ADMIN", true);
+
+      const updatedCampaign =
+        limit === null
+          ? await r
+              .knex("all_campaign")
+              .update({
+                autosend_limit: null,
+                autosend_limit_max_contact_id: null
+              })
+              .where({ id })
+              .returning("*")
+              .then((rows) => rows[0])
+          : await r.knex
+              .raw(
+                `
+                  update all_campaign
+                  set
+                    autosend_limit = ?::int,
+                    autosend_limit_max_contact_id = (
+                      select max(id)
+                      from (
+                        select id
+                        from campaign_contact
+                        where true
+                          and campaign_id = ?::int
+                          and archived = false
+                        order by id asc
+                        limit ?::int
+                      ) campaign_contact_ids
+                    )
+                  where id = ?::int
+                  returning *
+                `,
+                [limit, id, limit, id]
+              )
+              .then(({ rows }) => rows[0]);
+
+      return updatedCampaign;
     },
 
     unMarkForSecondPass: async (_ignore, { campaignId }, { user }) => {
@@ -4029,6 +4092,14 @@ const rootResolvers = {
           count: result.count
         };
       });
+    },
+    isValidAttachment: async (_root, { fileUrl }, _context) => {
+      const handler = async (filePath) => {
+        const fileType = await getFileType(filePath);
+
+        return VALID_CONTENT_TYPES.includes(fileType);
+      };
+      return withTempDownload(fileUrl, handler);
     }
   }
 };

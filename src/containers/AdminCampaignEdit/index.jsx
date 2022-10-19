@@ -1,4 +1,5 @@
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { red } from "@material-ui/core/colors";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -14,7 +15,6 @@ import { withTheme } from "@material-ui/core/styles";
 import { CampaignBuilderMode } from "@spoke/spoke-codegen";
 import isEqual from "lodash/isEqual";
 import pick from "lodash/pick";
-import CircularProgress from "material-ui/CircularProgress";
 import Divider from "material-ui/Divider";
 import PropTypes from "prop-types";
 import queryString from "query-string";

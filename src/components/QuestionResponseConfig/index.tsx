@@ -1,5 +1,7 @@
 import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
+import { makeStyles } from "@material-ui/core";
+import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import { green, grey, orange, red } from "@material-ui/core/colors";
 import List from "@material-ui/core/List";
@@ -11,9 +13,8 @@ import InfoIcon from "@material-ui/icons/Info";
 import NotificationsPausedIcon from "@material-ui/icons/NotificationsPaused";
 import WarningIcon from "@material-ui/icons/Warning";
 import cloneDeep from "lodash/cloneDeep";
-import Avatar from "material-ui/Avatar";
 import { Card, CardHeader, CardText } from "material-ui/Card";
-import React from "react";
+import React, { useState } from "react";
 import { compose } from "recompose";
 
 import type { ExternalActivistCode } from "../../api/external-activist-code";
@@ -35,8 +36,30 @@ import { ActivistCodeMapping } from "./components/ActivistCodeMapping";
 import { ResponseOptionMapping } from "./components/ResponseOptionMapping";
 import { ResultCodeMapping } from "./components/ResultCodeMapping";
 
+const useStyles = makeStyles({
+  inactive: {
+    color: grey[900],
+    backgroundColor: orange[200]
+  },
+  required: {
+    color: grey[900],
+    backgroundColor: orange[200]
+  },
+  missing: {
+    color: grey[900],
+    backgroundColor: grey[400]
+  },
+  noTargets: {
+    color: grey[900],
+    backgroundColor: green[200]
+  },
+  hasTargets: {
+    color: grey[900],
+    backgroundColor: green[200]
+  }
+});
+
 interface HocProps {
-  data: Record<string, unknown>;
   mutations: {
     deleteTarget(targetId: string): ApolloQueryResult<string>;
   };
@@ -55,173 +78,150 @@ interface OuterProps {
 
 interface InnerProps extends OuterProps, HocProps {}
 
-interface State {
-  isAddMappingOpen: boolean;
-}
+const QuestionResponseConfig: React.FC<InnerProps> = (props) => {
+  const {
+    mutations,
+    config,
+    surveyQuestions,
+    activistCodes,
+    resultCodes,
+    style
+  } = props;
 
-class QuestionResponseConfig extends React.Component<InnerProps> {
-  state: State = {
-    isAddMappingOpen: false
-  };
+  const [isAddMappingOpen, setIsAddMappingOpen] = useState(false);
+  const styles = useStyles();
 
-  makeHandleOnClickDeleteTarget = (targetId: string) => async () => {
+  const makeHandleOnClickDeleteTarget = (targetId: string) => async () => {
     try {
-      const response = await this.props.mutations.deleteTarget(targetId);
+      const response = await mutations.deleteTarget(targetId);
       if (response.errors) throw response.errors;
     } catch (err) {
       console.error(err);
     }
   };
 
-  handleOnClickAddMapping = () => this.setState({ isAddMappingOpen: true });
+  const handleOnClickAddMapping = () => setIsAddMappingOpen(true);
 
-  handleOnDismissAddMapping = () => this.setState({ isAddMappingOpen: false });
+  const handleOnDismissAddMapping = () => setIsAddMappingOpen(false);
 
-  render() {
-    const {
-      config,
-      surveyQuestions,
-      activistCodes,
-      resultCodes,
-      style
-    } = this.props;
-    const {
-      questionResponseValue,
-      includesNotActive,
-      isMissing,
-      isRequired,
-      interactionStep: { questionText }
-    } = config;
+  const {
+    questionResponseValue,
+    includesNotActive,
+    isMissing,
+    isRequired,
+    interactionStep: { questionText }
+  } = config;
 
-    const { targets } = config;
+  const { targets } = config;
 
-    const avatar = includesNotActive ? (
-      <Avatar
-        icon={<BrokenImageIcon />}
-        color={grey[900]}
-        backgroundColor={orange[200]}
-      />
-    ) : isRequired ? (
-      <Avatar
-        icon={<WarningIcon />}
-        color={grey[900]}
-        backgroundColor={orange[200]}
-      />
-    ) : isMissing ? (
-      <Avatar
-        icon={<InfoIcon />}
-        color={grey[900]}
-        backgroundColor={grey[400]}
-      />
-    ) : targets && targets.length === 0 ? (
-      <Avatar
-        icon={<NotificationsPausedIcon />}
-        color={grey[900]}
-        backgroundColor={green[200]}
-      />
-    ) : (
-      <Avatar
-        icon={<DoneIcon />}
-        color={grey[900]}
-        backgroundColor={green[200]}
-      />
-    );
+  const avatar = includesNotActive ? (
+    <Avatar className={styles.inactive}>
+      <BrokenImageIcon />
+    </Avatar>
+  ) : isRequired ? (
+    <Avatar className={styles.required}>
+      <WarningIcon />
+    </Avatar>
+  ) : isMissing ? (
+    <Avatar className={styles.missing}>
+      <InfoIcon />
+    </Avatar>
+  ) : targets && targets.length === 0 ? (
+    <Avatar className={styles.noTargets}>
+      <NotificationsPausedIcon />
+    </Avatar>
+  ) : (
+    <Avatar className={styles.hasTargets}>
+      <DoneIcon />
+    </Avatar>
+  );
 
-    return (
-      <Card
-        expanded={false}
-        onExpandChange={
-          isMissing ? this.props.createConfig : this.props.deleteConfig
+  return (
+    <Card
+      expanded={false}
+      onExpandChange={isMissing ? props.createConfig : props.deleteConfig}
+      style={style}
+    >
+      <CardHeader
+        title={questionResponseValue}
+        subtitle={questionText}
+        avatar={avatar}
+        showExpandableButton
+        closeIcon={
+          isMissing ? (
+            <AddBoxIcon />
+          ) : (
+            <DeleteIcon style={{ color: red[600] }} />
+          )
         }
-        style={style}
-      >
-        <CardHeader
-          title={questionResponseValue}
-          subtitle={questionText}
-          avatar={avatar}
-          showExpandableButton
-          closeIcon={
-            isMissing ? (
-              <AddBoxIcon />
-            ) : (
-              <DeleteIcon style={{ color: red[600] }} />
-            )
-          }
-        />
-        {!isMissing && targets !== null && (
-          <CardText>
-            {targets.length > 0 && (
-              <List>
-                {targets.map((target) => {
-                  if (isResponseOption(target)) {
-                    return (
-                      <ResponseOptionMapping
-                        key={target.id}
-                        responseOption={target.responseOption}
-                        surveyQuestions={surveyQuestions}
-                        onClickDelete={this.makeHandleOnClickDeleteTarget(
-                          target.id
-                        )}
-                      />
-                    );
-                  }
-                  if (isActivistCode(target)) {
-                    return (
-                      <ActivistCodeMapping
-                        key={target.id}
-                        activistCode={target.activistCode}
-                        onClickDelete={this.makeHandleOnClickDeleteTarget(
-                          target.id
-                        )}
-                      />
-                    );
-                  }
-                  if (isResultCode(target)) {
-                    const warning = resultCodeWarning(target.resultCode);
-                    return (
-                      <ResultCodeMapping
-                        key={target.id}
-                        resultCode={target.resultCode}
-                        warning={warning}
-                        onClickDelete={this.makeHandleOnClickDeleteTarget(
-                          target.id
-                        )}
-                      />
-                    );
-                  }
+      />
+      {!isMissing && targets !== null && (
+        <CardText>
+          {targets.length > 0 && (
+            <List>
+              {targets.map((target) => {
+                if (isResponseOption(target)) {
+                  return (
+                    <ResponseOptionMapping
+                      key={target.id}
+                      responseOption={target.responseOption}
+                      surveyQuestions={surveyQuestions}
+                      onClickDelete={makeHandleOnClickDeleteTarget(target.id)}
+                    />
+                  );
+                }
+                if (isActivistCode(target)) {
+                  return (
+                    <ActivistCodeMapping
+                      key={target.id}
+                      activistCode={target.activistCode}
+                      onClickDelete={makeHandleOnClickDeleteTarget(target.id)}
+                    />
+                  );
+                }
+                if (isResultCode(target)) {
+                  const warning = resultCodeWarning(target.resultCode);
+                  return (
+                    <ResultCodeMapping
+                      key={target.id}
+                      resultCode={target.resultCode}
+                      warning={warning}
+                      onClickDelete={makeHandleOnClickDeleteTarget(target.id)}
+                    />
+                  );
+                }
 
-                  return null;
-                })}
-              </List>
-            )}
-            {targets.length === 0 && (
-              <p>
-                This is an explicitly empty mapping that will be skipped during
-                sync.
-              </p>
-            )}
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={targets.length === 3}
-              onClick={this.handleOnClickAddMapping}
-            >
-              Add Mapping
-            </Button>
-          </CardText>
-        )}
-        <AddMapping
-          config={this.state.isAddMappingOpen ? config : undefined}
-          surveyQuestions={surveyQuestions}
-          activistCodes={activistCodes}
-          resultCodes={resultCodes}
-          existingTargets={targets || []}
-          onRequestClose={this.handleOnDismissAddMapping}
-        />
-      </Card>
-    );
-  }
-}
+                return null;
+              })}
+            </List>
+          )}
+          {targets.length === 0 && (
+            <p>
+              This is an explicitly empty mapping that will be skipped during
+              sync.
+            </p>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={targets.length === 3}
+            onClick={handleOnClickAddMapping}
+          >
+            Add Mapping
+          </Button>
+        </CardText>
+      )}
+      <AddMapping
+        config={isAddMappingOpen ? config : undefined}
+        surveyQuestions={surveyQuestions}
+        activistCodes={activistCodes}
+        resultCodes={resultCodes}
+        existingTargets={targets || []}
+        onRequestClose={handleOnDismissAddMapping}
+      />
+    </Card>
+  );
+};
 
 const mutations: MutationMap<InnerProps> = {
   deleteTarget: (ownProps) => (targetId: string) => ({

@@ -1,4 +1,4 @@
-exports.up = function (knex) {
+exports.up = function up(knex) {
   return knex.schema.raw(`
     CREATE OR REPLACE FUNCTION public.get_trollbot_matches(organization_id integer, troll_interval interval) RETURNS TABLE(message_id integer, trigger_token text)
     LANGUAGE plpgsql STABLE SECURITY DEFINER
@@ -55,7 +55,7 @@ exports.up = function (knex) {
   `);
 };
 
-exports.down = function (knex) {
+exports.down = function down(knex) {
   return knex.schema.raw(`
     CREATE OR REPLACE FUNCTION public.get_trollbot_matches(organization_id integer, troll_interval interval) RETURNS TABLE(message_id integer, trigger_token text)
     LANGUAGE plpgsql STABLE SECURITY DEFINER

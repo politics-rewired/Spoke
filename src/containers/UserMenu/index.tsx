@@ -1,67 +1,51 @@
-import { gql } from "@apollo/client";
-import type { WithApolloClient } from "@apollo/client/react/hoc";
-import { withApollo } from "@apollo/client/react/hoc";
+import Avatar from "@material-ui/core/Avatar";
+import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import Avatar from "material-ui/Avatar";
-import Divider from "material-ui/Divider";
-import Menu from "material-ui/Menu";
-import MenuItem from "material-ui/MenuItem";
-import Popover from "material-ui/Popover";
-import Subheader from "material-ui/Subheader";
-import React, { Component } from "react";
-import type { RouterProps } from "react-router-dom";
-import { withRouter } from "react-router-dom";
-import { compose } from "recompose";
+import { useGetCurrentUserForMenuQuery } from "@spoke/spoke-codegen";
+import React, { useCallback, useRef, useState } from "react";
+import { useHistory } from "react-router-dom";
 
-import type { Organization } from "../../api/organization";
-import type { User } from "../../api/user";
-import { withAuthzContext } from "../../components/AuthzProvider";
+import { useAuthzContext } from "../../components/AuthzProvider";
 import { dataTest } from "../../lib/attributes";
-import type { QueryMap } from "../../network/types";
-import { withOperations } from "../hoc/with-operations";
 import OrganizationItem from "./components/OrganizationItem";
 
-const avatarSize = 28;
-
-type CurrentUser = Pick<User, "id" | "displayName" | "email"> & {
-  organizations: Pick<Organization, "id" | "name">[];
-};
-
-interface Props extends Pick<RouterProps, "history"> {
-  orgId: string;
-  isSuperadmin: string;
-  data: {
-    currentUser: CurrentUser;
-  };
+interface Props {
+  organizationId?: string;
 }
 
-interface State {
-  open: boolean;
-}
+const UserMenu: React.FC<Props> = (props) => {
+  const { organizationId } = props;
 
-class UserMenu extends Component<WithApolloClient<Props>, State> {
-  anchorRef: Element | undefined = undefined;
+  const [open, setOpen] = useState(false);
+  const { isSuperadmin } = useAuthzContext();
+  const anchorRef = useRef(null);
+  const { data } = useGetCurrentUserForMenuQuery({
+    fetchPolicy: "network-only"
+  });
+  const history = useHistory();
 
-  state: State = {
-    open: false
-  };
+  const currentUser = data?.currentUser;
 
   // Use `any` because of mismatch between @types/react versions
-  handleTouchTap = (event: any) => {
-    // This prevents ghost click.
-    event.preventDefault();
+  const handleClickMenuAnchor = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault();
+      setOpen(true);
+    },
+    [setOpen]
+  );
 
-    this.setState({ open: true });
-  };
+  const handleRequestClose = useCallback(() => setOpen(false), [setOpen]);
 
-  handleRequestClose = () => this.setState({ open: false });
-
-  handleMenuChange = (_e: React.SyntheticEvent<unknown>, value: any) => {
-    const { orgId, data, history } = this.props;
-    const { currentUser } = data;
-
-    this.handleRequestClose();
+  const onNavigateFactory = (value: string) => () => {
+    handleRequestClose();
 
     // Handle only named routes (org navigation is done in OrganizationItem
     // becase MenuItem change is only handled if it's a direct descendent of Menu)
@@ -73,11 +57,11 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
       // Let Passport handle the logout
       window.location.href = "/logout-callback";
     } else if (value === "account") {
-      if (orgId) {
-        history.push(`/app/${orgId}/account/${currentUser.id}`);
+      if (organizationId && currentUser) {
+        history.push(`/app/${organizationId}/account/${currentUser.id}`);
       }
     } else if (value === "home") {
-      history.push(`/app/${orgId}/todos`);
+      history.push(`/app/${organizationId}/todos`);
     } else if (value === "superadmin") {
       history.push(`/superadmin/people`);
     } else if (value === "docs") {
@@ -85,125 +69,84 @@ class UserMenu extends Component<WithApolloClient<Props>, State> {
     }
   };
 
-  renderAvatar = (user: CurrentUser, size: number) => {
-    // Material-UI seems to not be handling this correctly when doing serverside rendering
-    const inlineStyles = {
-      lineHeight: "1.25",
-      textAlign: "center",
-      color: "white",
-      padding: "5px"
-    };
-    return (
-      <Avatar style={inlineStyles} size={size}>
-        {user.displayName.charAt(0)}
-      </Avatar>
-    );
-  };
+  if (!currentUser) {
+    return <div />;
+  }
 
-  render() {
-    const { orgId, data, history, client, isSuperadmin } = this.props;
-    const { currentUser } = data;
+  const userInitals = currentUser.displayName
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
+    .slice(0, 2);
 
-    if (!currentUser) {
-      return <div />;
-    }
-
-    const { open } = this.state;
-
-    return (
-      <div
-        ref={(el) => {
-          this.anchorRef = el ?? undefined;
-        }}
+  return (
+    <>
+      <IconButton
+        ref={anchorRef}
+        {...dataTest("userMenuButton")}
+        onClick={handleClickMenuAnchor}
       >
-        <IconButton
-          {...dataTest("userMenuButton")}
-          onClick={this.handleTouchTap}
+        <Avatar>{userInitals}</Avatar>
+      </IconButton>
+      <Menu
+        open={open}
+        anchorEl={anchorRef.current}
+        anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
+        transformOrigin={{ horizontal: "left", vertical: "top" }}
+        onClose={handleRequestClose}
+      >
+        <MenuItem
+          disabled={!organizationId}
+          onClick={onNavigateFactory("account")}
         >
-          {this.renderAvatar(currentUser, avatarSize)}
-        </IconButton>
-        <Popover
-          open={open}
-          anchorEl={this.anchorRef}
-          anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
-          targetOrigin={{ horizontal: "left", vertical: "top" }}
-          onRequestClose={this.handleRequestClose}
+          <ListItemIcon>
+            <Avatar>{userInitals}</Avatar>
+          </ListItemIcon>
+          <ListItemText
+            primary={currentUser.displayName}
+            secondary={currentUser.email}
+          />
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          disabled={!organizationId}
+          onClick={onNavigateFactory("home")}
         >
-          <Menu onChange={this.handleMenuChange}>
-            <MenuItem
-              {...dataTest("userMenuDisplayName")}
-              primaryText={currentUser.displayName}
-              leftIcon={this.renderAvatar(currentUser, 40)}
-              disabled={!orgId}
-              value="account"
-            >
-              {currentUser.email}
-            </MenuItem>
-            <Divider />
-            <MenuItem
-              disabled={!orgId}
-              {...dataTest("home")}
-              primaryText="Home"
-              value="home"
-            />
-            {isSuperadmin && (
-              <MenuItem primaryText="Superadmin" value="superadmin" />
-            )}
-            <Divider />
-            <Subheader>Teams</Subheader>
-            {currentUser.organizations.map((organization) => (
-              <OrganizationItem
-                key={organization.id}
-                organization={organization}
-                client={client!}
-                history={history}
-              />
-            ))}
-            <Divider />
-            <Subheader>Help</Subheader>
-            <MenuItem
-              {...dataTest("docs")}
-              primaryText="Documentation"
-              value="docs"
-              rightIcon={<OpenInNewIcon />}
-            />
-            <Divider />
-            <MenuItem
-              {...dataTest("userMenuLogOut")}
-              primaryText="Log out"
-              value="logout"
-            />
-          </Menu>
-        </Popover>
-      </div>
-    );
-  }
-}
-
-const queries: QueryMap<Props> = {
-  data: {
-    query: gql`
-      query getCurrentUserForMenu {
-        currentUser {
-          id
-          displayName
-          email
-          organizations(active: true) {
-            id
-            name
-          }
-        }
-      }
-    `,
-    options: {
-      fetchPolicy: "network-only"
-    }
-  }
+          Home
+        </MenuItem>
+        {isSuperadmin && (
+          <MenuItem onClick={onNavigateFactory("superadmin")}>
+            Superadmin
+          </MenuItem>
+        )}
+        <Divider />
+        <ListSubheader>Teams</ListSubheader>
+        {currentUser?.organizations?.map((organization) => (
+          <OrganizationItem
+            key={organization!.id}
+            organizationId={organization!.id!}
+            organizationName={organization!.name!}
+            history={history}
+          />
+        ))}
+        <Divider />
+        <ListSubheader>Help</ListSubheader>
+        <MenuItem {...dataTest("docs")} onClick={onNavigateFactory("docs")}>
+          <ListItemText primary="Documentation" />
+          <ListItemSecondaryAction>
+            <OpenInNewIcon />
+          </ListItemSecondaryAction>
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          {...dataTest("userMenuLogOut")}
+          onClick={onNavigateFactory("logout")}
+        >
+          Log out
+        </MenuItem>
+      </Menu>
+    </>
+  );
 };
 
-export default compose(
-  withApollo,
-  withRouter,
-  withAuthzContext,
-  withOperations({ queries })
-)(UserMenu);
+export default UserMenu;

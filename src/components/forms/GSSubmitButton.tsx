@@ -1,8 +1,9 @@
+import { makeStyles } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
-import CircularProgress from "material-ui/CircularProgress";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import React from "react";
 
-const styles = {
+const useStyles = makeStyles({
   button: {
     display: "inline-block",
     marginTop: 15
@@ -11,7 +12,7 @@ const styles = {
     verticalAlign: "middle",
     display: "inline-block"
   }
-};
+});
 
 interface Props {
   isSubmitting: boolean;
@@ -19,11 +20,12 @@ interface Props {
 }
 
 const GSSubmitButton: React.FC<Props> = (props) => {
+  const styles = useStyles();
   const icon = props.isSubmitting ? (
-    <CircularProgress size={0.5} style={styles.progress} />
+    <CircularProgress size={0.5} className={styles.progress} />
   ) : null;
   return (
-    <div style={styles.button} {...props}>
+    <div className={styles.button} {...props}>
       <Button
         variant="contained"
         color="primary"

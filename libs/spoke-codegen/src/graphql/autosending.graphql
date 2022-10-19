@@ -3,6 +3,7 @@ fragment BasicAutosendingTarget on Campaign {
   title
   isStarted
   autosendStatus
+  autosendLimit
 }
 
 fragment DetailedAutosendingTarget on Campaign {
@@ -26,6 +27,16 @@ fragment DetailedAutosendingTarget on Campaign {
 fragment AutosendingTarget on Campaign {
   ...BasicAutosendingTarget
   ...DetailedAutosendingTarget
+}
+
+query GetCampaignAutosendingLimit($campaignId: String!) {
+  campaign(id: $campaignId) {
+    id
+    autosendLimit
+    stats {
+      countMessagedContacts
+    }
+  }
 }
 
 query CampaignsEligibleForAutosending(
@@ -59,5 +70,12 @@ mutation PauseAutosending($campaignId: String!) {
   pauseAutosending(campaignId: $campaignId) {
     id
     autosendStatus
+  }
+}
+
+mutation UpdateCampaignAutosendingLimit($campaignId: String!, $limit: Int) {
+  updateCampaignAutosendingLimit(campaignId: $campaignId, limit: $limit) {
+    id
+    autosendLimit
   }
 }

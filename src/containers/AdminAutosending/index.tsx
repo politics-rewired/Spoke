@@ -219,7 +219,7 @@ const AdminAutosending: React.FC = () => {
                 <TableHead>
                   {isBasic ? null : (
                     <TableRow>
-                      <TableCell colSpan={3} />
+                      <TableCell colSpan={4} />
                       <TableCell colSpan={5}>Progress</TableCell>
                       <TableCell colSpan={2}>Engagement</TableCell>
                       <TableCell />
@@ -228,6 +228,7 @@ const AdminAutosending: React.FC = () => {
                   <TableRow>
                     <TableCell>Campaign</TableCell>
                     <TableCell>Autosending Status</TableCell>
+                    <TableCell>Autosending Limit</TableCell>
                     {/* Actions */}
                     <TableCell />
                     {isBasic ? null : (
@@ -281,7 +282,7 @@ const AdminAutosending: React.FC = () => {
                       />
                     );
                   })}
-                  {sortedCampaigns.length === 0 && (
+                  {!loading && sortedCampaigns.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={11} style={{ textAlign: "center" }}>
                         No campaigns found
