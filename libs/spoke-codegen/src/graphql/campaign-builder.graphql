@@ -1,6 +1,8 @@
 fragment ActiveMessagingService on MessagingService {
   id
   name
+  serviceType
+  isDefault
 }
 
 query GetCampaignStatus($campaignId: String!) {

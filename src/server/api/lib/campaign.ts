@@ -210,7 +210,11 @@ export const copyCampaign = async (options: CopyCampaignOptions) => {
       // Copy Messaging Service OR use active one
       const messagingServices = await r
         .knex("messaging_service")
-        .where({ organization_id: newCampaign.organization_id, active: true });
+        .where({
+          organization_id: newCampaign.organization_id,
+          active: true
+        })
+        .orderByRaw(`is_default desc nulls last`);
 
       if (messagingServices.length === 0) {
         throw new Error("No active messaging services found");

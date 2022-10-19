@@ -823,6 +823,7 @@ type MessagingService {
   tcrBrandRegistrationLink: String
   name: String
   active: Boolean!
+  isDefault: Boolean
 }
 
 type MessagingServiceEdge {
