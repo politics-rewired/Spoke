@@ -24,7 +24,7 @@ router.get("/preview/:campaignId", async (req, res) => {
   }
 
   const campaign = await r
-    .reader<CampaignRecord>("campaign")
+    .reader<CampaignRecord>("all_campaign")
     .where({ id: campaignId })
     .first("*");
 

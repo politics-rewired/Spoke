@@ -160,6 +160,7 @@ export const queueAutoSendOrganizationInitials: Task = async (
           and c.is_archived = false
           and c.is_started = true
           and c.autosend_status = 'sending'
+          and c.organization_id = $3
         order by c.id asc
       )
       select * from campaign_breakdown
@@ -205,7 +206,7 @@ export const queueAutoSendOrganizationInitials: Task = async (
     .map((campaign) => campaign.campaign_id);
 
   await helpers.query(
-    `update campaign set autosend_status = 'complete' where id = ANY($1::integer[])`,
-    [toMarkAsDoneSending]
+    `update campaign set autosend_status = 'complete' where id = ANY($1::integer[]) and organization_id = $2`,
+    [toMarkAsDoneSending, organizationId]
   );
 };
