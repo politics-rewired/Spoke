@@ -160,130 +160,141 @@ const AdminAutosending: React.FC = () => {
           {alertErrorMessage?.replace("GraphQL error:", "")}
         </Alert>
       </Snackbar>
-      <CardHeader
-        title="Autosending Controls"
-        subtitle="Campaigns will send in order of ID"
-        action={
-          <>
-            <FormControl>
-              <InputLabel id="is-started-select-label">
-                Campaign Status
-              </InputLabel>
-              <Select
-                labelId="is-started-select-label"
-                id="is-started-select"
-                value={isStarted ? "started" : "unstarted"}
-                classes={{ root: inlineStyles.select }}
-                onChange={handleChangeStartedFilter}
-              >
-                <MenuItem value="started">Started</MenuItem>
-                <MenuItem value="unstarted">Unstarted</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl>
-              <InputLabel id="autosend-controls-mode-select-label">
-                Display Mode
-              </InputLabel>
-              <Select
-                labelId="autosend-controls-mode-select-label"
-                id="autosend-controls-mode-select"
-                value={
-                  isBasic
-                    ? AutosendingControlsMode.Basic
-                    : AutosendingControlsMode.Detailed
-                }
-                classes={{ root: inlineStyles.select }}
-                onChange={handleChangeModeFilter}
-              >
-                <MenuItem value={AutosendingControlsMode.Basic}>Basic</MenuItem>
-                <MenuItem value={AutosendingControlsMode.Detailed}>
-                  Detailed
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </>
-        }
-      />
-      <CardContent>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              {isBasic ? null : (
-                <TableRow>
-                  <TableCell colSpan={3} />
-                  <TableCell colSpan={5}>Progress</TableCell>
-                  <TableCell colSpan={2}>Engagement</TableCell>
-                  <TableCell />
-                </TableRow>
-              )}
-              <TableRow>
-                <TableCell>Campaign</TableCell>
-                <TableCell>Autosending Status</TableCell>
-                {/* Actions */}
-                <TableCell />
-                {isBasic ? null : (
-                  <>
-                    <TableCell>Contacts</TableCell>
-                    <TableCell>Delivered</TableCell>
-                    <TableCell>Waiting to Send</TableCell>
-                    <TableCell>Waiting to Deliver</TableCell>
-                    <TableCell>Failed</TableCell>
-                    <TableCell>Replies</TableCell>
-                    <TableCell>Opt Outs</TableCell>
-                  </>
-                )}
-                <TableCell>More Info</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedCampaigns.map((c) => {
-                if (isNil(c.deliverabilityStats?.sendingCount)) {
-                  return c.isStarted ? (
-                    <AutosendingBasicTargetRow
-                      key={c.id}
-                      target={c}
-                      organizationId={organizationId}
-                      disabled={actionsDisabled}
-                      onStart={handlePlayFactory(c!.id!)}
-                      onPause={handlePauseFactory(c!.id!)}
-                    />
-                  ) : (
-                    <AutosendingBasicUnstartedTargetRow
-                      key={c.id}
-                      target={c}
-                      organizationId={organizationId}
-                    />
-                  );
-                }
-                return c.isStarted ? (
-                  <AutosendingTargetRow
-                    key={c.id}
-                    target={c}
-                    organizationId={organizationId}
-                    disabled={actionsDisabled}
-                    onStart={handlePlayFactory(c!.id!)}
-                    onPause={handlePauseFactory(c!.id!)}
-                  />
-                ) : (
-                  <AutosendingUnstartedTargetRow
-                    key={c.id}
-                    target={c}
-                    organizationId={organizationId}
-                  />
-                );
-              })}
-              {sortedCampaigns.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={11} style={{ textAlign: "center" }}>
-                    No campaigns found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {loading && <LoadingIndicator />}
-      </CardContent>
+      {data?.organization && data.organization.autosendingMps === null ? (
+        <CardHeader
+          title="No autosending throughput has been allocated to this organization."
+          subheader="Please contact the administrator of your Spoke Rewired instance."
+        />
+      ) : (
+        <>
+          <CardHeader
+            title="Autosending Controls"
+            subtitle="Campaigns will send in order of ID"
+            action={
+              <>
+                <FormControl>
+                  <InputLabel id="is-started-select-label">
+                    Campaign Status
+                  </InputLabel>
+                  <Select
+                    labelId="is-started-select-label"
+                    id="is-started-select"
+                    value={isStarted ? "started" : "unstarted"}
+                    classes={{ root: inlineStyles.select }}
+                    onChange={handleChangeStartedFilter}
+                  >
+                    <MenuItem value="started">Started</MenuItem>
+                    <MenuItem value="unstarted">Unstarted</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl>
+                  <InputLabel id="autosend-controls-mode-select-label">
+                    Display Mode
+                  </InputLabel>
+                  <Select
+                    labelId="autosend-controls-mode-select-label"
+                    id="autosend-controls-mode-select"
+                    value={
+                      isBasic
+                        ? AutosendingControlsMode.Basic
+                        : AutosendingControlsMode.Detailed
+                    }
+                    classes={{ root: inlineStyles.select }}
+                    onChange={handleChangeModeFilter}
+                  >
+                    <MenuItem value={AutosendingControlsMode.Basic}>
+                      Basic
+                    </MenuItem>
+                    <MenuItem value={AutosendingControlsMode.Detailed}>
+                      Detailed
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </>
+            }
+          />
+          <CardContent>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  {isBasic ? null : (
+                    <TableRow>
+                      <TableCell colSpan={3} />
+                      <TableCell colSpan={5}>Progress</TableCell>
+                      <TableCell colSpan={2}>Engagement</TableCell>
+                      <TableCell />
+                    </TableRow>
+                  )}
+                  <TableRow>
+                    <TableCell>Campaign</TableCell>
+                    <TableCell>Autosending Status</TableCell>
+                    {/* Actions */}
+                    <TableCell />
+                    {isBasic ? null : (
+                      <>
+                        <TableCell>Contacts</TableCell>
+                        <TableCell>Delivered</TableCell>
+                        <TableCell>Waiting to Send</TableCell>
+                        <TableCell>Waiting to Deliver</TableCell>
+                        <TableCell>Failed</TableCell>
+                        <TableCell>Replies</TableCell>
+                        <TableCell>Opt Outs</TableCell>
+                      </>
+                    )}
+                    <TableCell>More Info</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedCampaigns.map((c) => {
+                    if (isNil(c.deliverabilityStats?.sendingCount)) {
+                      return c.isStarted ? (
+                        <AutosendingBasicTargetRow
+                          key={c.id}
+                          target={c}
+                          organizationId={organizationId}
+                          disabled={actionsDisabled}
+                          onStart={handlePlayFactory(c!.id!)}
+                          onPause={handlePauseFactory(c!.id!)}
+                        />
+                      ) : (
+                        <AutosendingBasicUnstartedTargetRow
+                          key={c.id}
+                          target={c}
+                          organizationId={organizationId}
+                        />
+                      );
+                    }
+                    return c.isStarted ? (
+                      <AutosendingTargetRow
+                        key={c.id}
+                        target={c}
+                        organizationId={organizationId}
+                        disabled={actionsDisabled}
+                        onStart={handlePlayFactory(c!.id!)}
+                        onPause={handlePauseFactory(c!.id!)}
+                      />
+                    ) : (
+                      <AutosendingUnstartedTargetRow
+                        key={c.id}
+                        target={c}
+                        organizationId={organizationId}
+                      />
+                    );
+                  })}
+                  {sortedCampaigns.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={11} style={{ textAlign: "center" }}>
+                        No campaigns found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            {loading && <LoadingIndicator />}
+          </CardContent>
+        </>
+      )}
     </Card>
   );
 };

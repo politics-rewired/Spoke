@@ -125,6 +125,7 @@ export const schema = `
     templateCampaigns(after: Cursor, first: Int): CampaignPage!
     deletedAt: String
     deletedBy: User
+    autosendingMps: Int
   }
 
   input EditOrganizationInput {
