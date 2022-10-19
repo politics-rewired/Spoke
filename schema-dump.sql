@@ -385,7 +385,9 @@ CREATE TABLE public.messaging_service (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     service_type public.messaging_service_type NOT NULL,
     name character varying(255) DEFAULT ''::character varying NOT NULL,
-    active boolean DEFAULT true NOT NULL
+    active boolean DEFAULT true NOT NULL,
+    is_default boolean,
+    CONSTRAINT no_inactive_default CHECK ((active OR (is_default <> true)))
 );
 
 
@@ -4505,6 +4507,13 @@ CREATE INDEX message_user_number_index ON public.message USING btree (user_numbe
 --
 
 CREATE INDEX messaging_service_active_index ON public.messaging_service USING btree (active);
+
+
+--
+-- Name: messaging_service_default_for_organization_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX messaging_service_default_for_organization_index ON public.messaging_service USING btree (organization_id, is_default) WHERE is_default;
 
 
 --

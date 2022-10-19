@@ -85,7 +85,13 @@ export const fetchCanvassResponses = async (
   client
     .query<CanvassResultRow>(
       `
-        with configured_response_values as (
+        with cc_timezone as (
+          select coalesce(cc.timezone, c.timezone) as timezone
+          from campaign_contact cc
+          join campaign c on c.id = cc.campaign_id
+          where cc.id = $1
+        ),
+        configured_response_values as (
           select
             qrc.id,
             question_response.created_at as canvassed_at
@@ -153,7 +159,7 @@ export const fetchCanvassResponses = async (
         ),
         first_message as (
           select
-            date_trunc('day', created_at) as canvassed_at,
+            date_trunc('day', created_at at time zone (select timezone from cc_timezone)) at time zone (select timezone from cc_timezone) as canvassed_at,
             '[]'::json as result_codes,
             '[]'::json as activist_codes,
             '[]'::json as response_options
@@ -166,7 +172,7 @@ export const fetchCanvassResponses = async (
         ),
         canvass_responses as (
           select
-            date_trunc('day', canvassed_at) as canvassed_at,
+            date_trunc('day', canvassed_at at time zone (select timezone from cc_timezone)) at time zone (select timezone from cc_timezone) as canvassed_at,
             array_to_json(array_remove(array_agg(result_code), null)) as result_codes,
             array_to_json(array_remove(array_agg(activist_code), null)) as activist_codes,
             array_to_json(array_remove(array_agg(response_option), null)) as response_options

@@ -101,6 +101,7 @@ module.exports = {
             name: "material-ui",
             importNames: [
               "Avatar",
+              "Badge",
               "Chip",
               "List",
               "ListItem",
@@ -113,7 +114,11 @@ module.exports = {
               "TableHeaderColumn",
               "TableBody",
               "TableRow",
-              "TableRowColumn"
+              "TableRowColumn",
+              "Dialog"
+              "Tabs",
+              "Tab"
+              "FloatingActionButton"
             ],
             message: "Please use @material-ui/core instead."
           }
@@ -134,6 +139,7 @@ module.exports = {
           {
             group: [
               "material-ui/Avatar",
+              "material-ui/Badge",
               "material-ui/Chip",
               "material-ui/List",
               "material-ui/ListItem",
@@ -146,7 +152,11 @@ module.exports = {
               "material-ui/TableHeaderColumn",
               "material-ui/TableBody",
               "material-ui/TableRow",
-              "material-ui/TableRowColumn"
+              "material-ui/TableRowColumn",
+              "material-ui/Dialog"
+              "material-ui/Tabs",
+              "material-ui/Tab"
+              "material-ui/FloatingActionButton"
             ],
             message: "Please use @material-ui/core instead."
           }

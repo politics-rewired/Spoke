@@ -1,6 +1,6 @@
 {
   "name": "spoke",
-  "version": "4.39.0-rc.2",
+  "version": "4.39.1",
   "description": "Spoke",
   "main": "src/server",
   "engines": {
@@ -152,7 +152,6 @@
     "path-browserify": "^1.0.1",
     "pg": "^8.5.1",
     "pg-promise": "^10.12.0",
-    "pgc-ngp-van": "^1.1.2",
     "promise-retry": "^2.0.1",
     "prop-types": "^15.6.0",
     "query-string": "^6.9.0",

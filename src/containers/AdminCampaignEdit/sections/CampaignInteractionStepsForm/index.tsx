@@ -2,10 +2,13 @@ import type { ApolloQueryResult } from "@apollo/client";
 import { gql } from "@apollo/client";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
 import type { CampaignVariablePage } from "@spoke/spoke-codegen";
 import produce from "immer";
 import isEqual from "lodash/isEqual";
-import { Dialog } from "material-ui";
 import React, { useEffect, useState } from "react";
 import { compose } from "recompose";
 
@@ -361,24 +364,26 @@ const CampaignInteractionStepsForm: React.FC<InnerProps> = (props) => {
 
   return (
     <div onFocus={updateClipboardHasBlock} onClick={updateClipboardHasBlock}>
-      <Dialog
-        open={confirmingRootPaste}
-        actions={[
+      <Dialog open={confirmingRootPaste}>
+        <DialogContent>
+          <DialogContentText>
+            Pasting over the initial message will overwrite the whole script and
+            you may need to change your sync configuration. Are you sure you
+            want to continue?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
           <Button
             key="cancel"
             color="primary"
             onClick={() => setConfirmingRootPaste(false)}
           >
             Cancel
-          </Button>,
+          </Button>
           <Button key="paste" color="primary" onClick={confirmRootPaste}>
             Paste
           </Button>
-        ]}
-      >
-        Pasting over the initial message will overwrite the whole script and you
-        may need to change your sync configuration. Are you sure you want to
-        continue?
+        </DialogActions>
       </Dialog>
       <CampaignFormSectionHeading
         title="What do you want to discuss?"
