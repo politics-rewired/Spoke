@@ -300,6 +300,7 @@ type RootMutation {
   markForSecondPass(campaignId: String!, input: SecondPassInput!): String!
   startAutosending(campaignId: String!): Campaign!
   pauseAutosending(campaignId: String!): Campaign!
+  updateCampaignAutosendingLimit(campaignId: String!, limit: Int): Campaign!
   unMarkForSecondPass(campaignId: String!): String!
   deleteNeedsMessage(campaignId: String!): String!
   insertLinkDomain(organizationId: String!, domain: String!, maxUsageCount: Int!): LinkDomain!
@@ -670,6 +671,7 @@ type Campaign {
   deliverabilityStats(filter: CampaignDeliverabilityStatsFilter): CampaignDeliverabilityStats!
   autosendStatus: String!
   messagingServiceSid: String
+  autosendLimit: Int
 }
 
 type CampaignEdge {
@@ -737,6 +739,7 @@ input CampaignInput {
   timezone: String
   repliesStaleAfter: Int
   messagingServiceSid: String
+  autosendLimit: Int
 }
 
 

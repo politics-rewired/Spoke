@@ -86,6 +86,13 @@ export enum FilteredContactReason {
   OptedOut = "OPTEDOUT"
 }
 
+export enum AutosendStatus {
+  Unstarted = "unstarted",
+  Sending = "sending",
+  Paused = "paused",
+  Complete = "complete"
+}
+
 export interface CampaignRecord {
   id: number;
   organization_id: number;
@@ -111,6 +118,8 @@ export interface CampaignRecord {
   replies_stale_after_minutes: number | null;
   landlines_filtered: boolean;
   external_system_id: string | null;
+  autosend_status: AutosendStatus;
+  autosend_user_id: number;
   messaging_service_sid: string | null;
 }
 

@@ -223,6 +223,8 @@ CREATE TABLE public.all_campaign (
     autosend_user_id integer,
     is_template boolean DEFAULT false NOT NULL,
     messaging_service_sid text,
+    autosend_limit integer,
+    autosend_limit_max_contact_id integer,
     CONSTRAINT campaign_autosend_status_check CHECK ((autosend_status = ANY (ARRAY['unstarted'::text, 'sending'::text, 'paused'::text, 'complete'::text])))
 );
 
@@ -1481,7 +1483,9 @@ CREATE VIEW public.campaign AS
     all_campaign.is_approved,
     all_campaign.autosend_status,
     all_campaign.autosend_user_id,
-    all_campaign.messaging_service_sid
+    all_campaign.messaging_service_sid,
+    all_campaign.autosend_limit,
+    all_campaign.autosend_limit_max_contact_id
    FROM public.all_campaign
   WHERE (all_campaign.is_template = false);
 
@@ -5067,6 +5071,14 @@ CREATE TRIGGER _500_user_team_updated_at BEFORE UPDATE ON public.user_team FOR E
 --
 
 CREATE TRIGGER _500_user_updated_at BEFORE UPDATE ON public."user" FOR EACH ROW EXECUTE FUNCTION public.universal_updated_at();
+
+
+--
+-- Name: all_campaign all_campaign_autosend_limit_max_contact_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.all_campaign
+    ADD CONSTRAINT all_campaign_autosend_limit_max_contact_id_foreign FOREIGN KEY (autosend_limit_max_contact_id) REFERENCES public.campaign_contact(id);
 
 
 --
