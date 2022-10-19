@@ -1,5 +1,4 @@
 import type { CampaignVariable } from "@spoke/spoke-codegen";
-import axios from "axios";
 import escapeRegExp from "lodash/escapeRegExp";
 import isNil from "lodash/isNil";
 
@@ -36,14 +35,6 @@ const TITLE_CASE_FIELDS = [
   "lastName",
   "texterFirstName",
   "texterLastName"
-];
-
-const VALID_CONTENT_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "video/3gpp",
-  "video/mp4"
 ];
 
 const mediaExtractor = /\[\s*(http[^\]\s]*)\s*\]/;
@@ -132,26 +123,16 @@ export const applyScript = ({
   return appliedScript;
 };
 
-export const getMessageType = (text: string) => {
-  return mediaExtractor.test(text) ? "MMS" : "SMS";
-};
-
-export const isAttachmentImage = async (text: string) => {
+export const getAttachmentLink = (text: string) => {
   const results = text.match(mediaExtractor);
   if (results) {
-    // eslint-disable-next-line prefer-destructuring
-    const mediaUrl = results[1];
-
-    try {
-      const response = await axios.head(mediaUrl);
-      return VALID_CONTENT_TYPES.includes(response.headers["content-type"]);
-    } catch (e) {
-      console.error("Unable to fetch details from URL");
-    }
-    return false;
+    return results[1];
   }
+  return null;
+};
 
-  return true;
+export const getMessageType = (text: string) => {
+  return mediaExtractor.test(text) ? "MMS" : "SMS";
 };
 
 export enum ScriptTokenType {

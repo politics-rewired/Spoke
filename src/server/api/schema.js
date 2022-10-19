@@ -17,7 +17,11 @@ import { config } from "../../config";
 import { parseIanaZone } from "../../lib/datetime";
 import { hasRole } from "../../lib/permissions";
 import { applyScript } from "../../lib/scripts";
-import { replaceAll } from "../../lib/utils";
+import {
+  replaceAll,
+  VALID_CONTENT_TYPES,
+  withTempDownload
+} from "../../lib/utils";
 import logger from "../../logger";
 import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
@@ -85,6 +89,7 @@ import {
 } from "./lib/alerts";
 import { getStepsToUpdate } from "./lib/bulk-script-editor";
 import { copyCampaign, editCampaign } from "./lib/campaign";
+import { getFileType } from "./lib/file-type";
 import { saveNewIncomingMessage } from "./lib/message-sending";
 import { processNumbers } from "./lib/opt-out";
 import { formatPage } from "./lib/pagination";
@@ -4033,6 +4038,14 @@ const rootResolvers = {
           count: result.count
         };
       });
+    },
+    isValidAttachment: async (_root, { fileUrl }, _context) => {
+      const handler = async (filePath) => {
+        const fileType = await getFileType(filePath);
+
+        return VALID_CONTENT_TYPES.includes(fileType);
+      };
+      return withTempDownload(fileUrl, handler);
     }
   }
 };

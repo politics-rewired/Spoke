@@ -25,6 +25,10 @@ query GetOrganizationMessagingServices($organizationId: String!) {
   }
 }
 
+query IsValidAttachment($fileUrl: String!) {
+  isValidAttachment(fileUrl: $fileUrl)
+}
+
 query GetCampaignMessagingServiceData($campaignId: String!) {
   campaign(id: $campaignId) {
     id
