@@ -13,7 +13,6 @@ import { r } from "../models";
 const DEFAULT_MODE = "0"; // VoterFile mode
 
 interface CanvassResultRow {
-  canvassed_at: string;
   result_codes: { result_code_id: number }[];
   activist_codes: { activist_code_id: number }[];
   response_options: {
@@ -95,16 +94,9 @@ const getCanvassResponsesRaw = (
 ) => {
   return r.knex.raw(
     `
-      with cc_timezone as (
-        select coalesce(cc.timezone, c.timezone) as timezone
-        from campaign_contact cc
-        join campaign c on c.id = cc.campaign_id
-        where cc.id = ?
-      ),
-      configured_response_values as (
+      with configured_response_values as (
         select
-          qrc.id,
-          all_question_response.created_at as canvassed_at
+          qrc.id
         from all_external_sync_question_response_configuration qrc
         join all_question_response
           on all_question_response.value = qrc.question_response_value
@@ -118,7 +110,6 @@ const getCanvassResponsesRaw = (
       points as (
         -- Result Codes
         select
-          configured_response_values.canvassed_at,
           json_build_object(
             'result_code_id', external_result_code.external_id
           )::jsonb as result_code,
@@ -134,7 +125,6 @@ const getCanvassResponsesRaw = (
 
         -- Activist Codes
         select
-          configured_response_values.canvassed_at,
           null::jsonb as result_code,
           json_build_object(
             'activist_code_id', external_activist_code.external_id
@@ -152,7 +142,6 @@ const getCanvassResponsesRaw = (
 
         -- Survey Question Response Options
         select
-          configured_response_values.canvassed_at,
           null::jsonb as result_code,
           null::jsonb as activist_code,
           json_build_object(
@@ -169,52 +158,26 @@ const getCanvassResponsesRaw = (
         where
           external_survey_question.status = 'active'
       ),
-      first_message as (
-        select
-          date_trunc('day', created_at at time zone (select timezone from cc_timezone)) at time zone (select timezone from cc_timezone) as canvassed_at,
-          '[]'::json as result_codes,
-          '[]'::json as activist_codes,
-          '[]'::json as response_options
-        from message
-        where
-          campaign_contact_id = ?
-          and is_from_contact = false
-        order by id asc
-        limit 1
-      ),
       canvass_responses as (
         select
-          date_trunc('day', canvassed_at at time zone (select timezone from cc_timezone)) at time zone (select timezone from cc_timezone) as canvassed_at,
           array_to_json(array_remove(array_agg(result_code), null)) as result_codes,
           array_to_json(array_remove(array_agg(activist_code), null)) as activist_codes,
           array_to_json(array_remove(array_agg(response_option), null)) as response_options
         from points
-        group by 1
       )
       select * from canvass_responses
-      union all
-      select * from first_message where not exists (select 1 from canvass_responses)
     `,
-    [
-      campaignContactId,
-      campaignContactId,
-      externalSystemId,
-      actionIds,
-      campaignContactId
-    ]
+    [campaignContactId, externalSystemId, actionIds]
   );
 };
 
 const formatCanvassResponse = (
   canvassResponse: CanvassResultRow,
   phoneId: number,
-  phoneNumber: string
+  phoneNumber: string,
+  canvassedAt: string
 ) => {
-  const {
-    canvassed_at: dateCanvassed,
-    response_options,
-    activist_codes
-  } = canvassResponse;
+  const { response_options, activist_codes } = canvassResponse;
 
   const surveyResponses: VANSurveyResponse[] = response_options.map(
     (option) => ({
@@ -240,7 +203,7 @@ const formatCanvassResponse = (
         phoneId,
         phone: formatPhone(phoneNumber),
         contactTypeId: config.VAN_CONTACT_TYPE_ID,
-        dateCanvassed
+        dateCanvassed: canvassedAt
       },
       resultCodeId: null,
       responses
@@ -371,15 +334,18 @@ const VAN: ExternalSystem = {
         sync_status: "SYNC_QUEUED",
         "all_question_response.campaign_contact_id": payload.campaignContactId
       })
+      .orderBy("action_external_system_sync.created_at", "desc")
       .select(
         "action_external_system_sync.id as sync_id",
-        "all_question_response.id as action_id"
+        "all_question_response.id as action_id",
+        "action_external_system_sync.created_at as canvassed_at"
       );
 
     // actionIds to fetch actions
     // syncIds to update sync status to completed
     const actionIds = pendingActionsToSync.map((a) => a.action_id);
     const syncIds = pendingActionsToSync.map((s) => s.sync_id);
+    const canvassedAt = pendingActionsToSync.at(0).canvassed_at;
 
     const { rows: canvassResponsesRaw } = await getCanvassResponsesRaw(
       campaignContactId,
@@ -394,7 +360,8 @@ const VAN: ExternalSystem = {
         formatCanvassResponse(
           cR,
           contactCustomFields.phone_id,
-          campaignContact.cell
+          campaignContact.cell,
+          canvassedAt
         )
     );
 
@@ -474,9 +441,7 @@ const VAN: ExternalSystem = {
         phoneId: contactCustomFields.phone_id,
         phone: formatPhone(campaignContact.cell),
         contactTypeId: config.VAN_CONTACT_TYPE_ID,
-        dateCanvassed: DateTime.fromSQL(syncAction.created_at).toFormat(
-          "MM-dd-yyyy"
-        )
+        dateCanvassed: syncAction.created_at
       },
       resultCodeId: externalSystem.result_code_id,
       responses: null
