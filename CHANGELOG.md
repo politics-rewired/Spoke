@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0-rc.0](https://github.com/politics-rewired/spoke/compare/v4.39.1...v5.0.0-rc.0) (2022-10-20)
+
+
+### Features
+
+* **van:** use real time sync ([#1442](https://github.com/politics-rewired/spoke/issues/1442)) ([fc1dcaf](https://github.com/politics-rewired/spoke/commit/fc1dcaf0564dbe5e6e65c5c2ce6efcc80dd4df7d))
+* support per-campaign autosend limit ([#1473](https://github.com/politics-rewired/spoke/issues/1473)) ([ceb7327](https://github.com/politics-rewired/spoke/commit/ceb7327bdb2c49b32c533fba152942d819c4d995))
+* support setting default messaging service for organization ([#1455](https://github.com/politics-rewired/spoke/issues/1455)) ([213f678](https://github.com/politics-rewired/spoke/commit/213f67834c581272150031cce4c86d91ee98c746))
+
+
+### Bug Fixes
+
+* fix eslint config ([#1481](https://github.com/politics-rewired/spoke/issues/1481)) ([6ad9ae8](https://github.com/politics-rewired/spoke/commit/6ad9ae8007d828c326ccce3439f6319be51360f2))
+* media attachment false positives ([#1468](https://github.com/politics-rewired/spoke/issues/1468)) ([3232d9a](https://github.com/politics-rewired/spoke/commit/3232d9a5b034617868ad9fb7c49d430cd399e753))
+* show no campaigns message only when not loading ([#1474](https://github.com/politics-rewired/spoke/issues/1474)) ([85b359c](https://github.com/politics-rewired/spoke/commit/85b359cd8c90b6f9cfad858315a3b97a3ebd1ed5))
+
+
+### Backend Changes
+
+* **mui:** update avatar and popover ([#1464](https://github.com/politics-rewired/spoke/issues/1464)) ([3922db1](https://github.com/politics-rewired/spoke/commit/3922db100a082afe881749fca56a5f33903b0453))
+* **mui:** update progress indicators to mui v4 ([#1467](https://github.com/politics-rewired/spoke/issues/1467)) ([f50c787](https://github.com/politics-rewired/spoke/commit/f50c787ca09c001899d1d0586b72deb06f901c2c))
+* **mui:** update Stepper to MUI v4 ([#1466](https://github.com/politics-rewired/spoke/issues/1466)) ([72b4b31](https://github.com/politics-rewired/spoke/commit/72b4b31eff8a54dfafb50a30d2dc480dcb8ee5e0))
+* **mui:** upgrade badges ([#1463](https://github.com/politics-rewired/spoke/issues/1463)) ([69f6fc0](https://github.com/politics-rewired/spoke/commit/69f6fc0c69be37f8de9878338ae030177006b71f))
+* **mui:** upgrade dialogs ([#1461](https://github.com/politics-rewired/spoke/issues/1461)) ([147e63e](https://github.com/politics-rewired/spoke/commit/147e63e283f107a9527ad154aa00da3abb627f9b))
+* **mui:** upgrade floating action buttongs ([#1459](https://github.com/politics-rewired/spoke/issues/1459)) ([729df25](https://github.com/politics-rewired/spoke/commit/729df25819d2327531b774c2e1a93368bb5b08ff))
+* **mui:** upgrade tabs ([#1460](https://github.com/politics-rewired/spoke/issues/1460)) ([0b86936](https://github.com/politics-rewired/spoke/commit/0b86936d3719b71fe208b39c9af7c528ad82c140))
+
 ### [4.39.1](https://github.com/politics-rewired/spoke/compare/v4.39.1-rc.1...v4.39.1) (2022-10-19)
 
 ### [4.39.1-rc.1](https://github.com/politics-rewired/spoke/compare/v4.39.1-rc.0...v4.39.1-rc.1) (2022-10-17)
