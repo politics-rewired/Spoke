@@ -1,8 +1,8 @@
 import type { JobHelpers, Task } from "graphile-worker";
 import { get } from "superagent";
 
-import type { VanSecretAuthPayload } from "../../lib/external-systems";
-import { withVan } from "../../lib/external-systems";
+import type { VanSecretAuthPayload } from "../../external-systems/van";
+import { withVan } from "../../external-systems/van";
 import { getVanAuth, handleResult } from "./lib";
 
 export const TASK_IDENTIFIER = "van-get-saved-lists";

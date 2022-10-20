@@ -4,8 +4,8 @@ import type { PoolClient } from "pg";
 import { post } from "superagent";
 
 import { config } from "../../../config";
-import type { VanSecretAuthPayload } from "../../lib/external-systems";
-import { withVan } from "../../lib/external-systems";
+import type { VanSecretAuthPayload } from "../../external-systems/van";
+import { withVan } from "../../external-systems/van";
 import { getVanAuth } from "./lib";
 import VANSyncError from "./VANSyncError";
 

@@ -4,7 +4,7 @@ import type { JobHelpers } from "graphile-worker";
 import type {
   VanAuthPayload,
   VanSecretAuthPayload
-} from "../../lib/external-systems";
+} from "../../external-systems/van";
 import { getSecret } from "../../lib/graphile-secrets";
 
 const phoneUtil = PhoneNumberUtil.getInstance();

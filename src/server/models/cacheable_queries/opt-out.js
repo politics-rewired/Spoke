@@ -103,16 +103,16 @@ export const optOutCache = {
       }
     }
     // database
-    try {
-      await trx("opt_out").insert({
+    const [opttedOutId] = await trx("opt_out")
+      .insert({
         assignment_id: assignmentId,
         organization_id: organizationId,
         reason_code: reason,
         cell
-      });
-    } catch (error) {
-      logger.error("Error creating opt-out: ", error);
-    }
+      })
+      .returning(["id"]);
+
+    const optOutId = opttedOutId.id;
 
     // update all organization's active campaigns as well
     // TODO - MySQL Specific. Getting contactIds can be done in subquery
@@ -125,6 +125,8 @@ export const optOutCache = {
     await trx("campaign_contact").whereIn("id", contactIds).update({
       is_opted_out: true
     });
+
+    return optOutId;
   },
   saveMany: async (
     // eslint-disable-next-line default-param-last

@@ -25,7 +25,10 @@ import {
 import logger from "../../logger";
 import pgPool from "../db";
 import { eventBus, EventType } from "../event-bus";
-import { refreshExternalSystem } from "../lib/external-systems";
+import {
+  queueExternalSyncForAction,
+  refreshExternalSystem
+} from "../lib/external-systems";
 import { getSecretPool, setSecretPool } from "../lib/graphile-secrets";
 import {
   getInstanceNotifications,
@@ -42,7 +45,6 @@ import { addExportForVan } from "../tasks/export-for-van";
 import { TASK_IDENTIFIER as exportOptOutsIdentifier } from "../tasks/export-opt-outs";
 import { addFilterLandlines } from "../tasks/filter-landlines";
 import { QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER } from "../tasks/queue-autosend-initials";
-import { errToObj } from "../utils";
 import { getWorker } from "../worker";
 import {
   giveUserMoreTexts,
@@ -114,7 +116,7 @@ import { resolvers as questionResponseResolvers } from "./question-response";
 import { resolvers as tagResolvers } from "./tag";
 import { resolvers as teamResolvers } from "./team";
 import { resolvers as trollbotResolvers } from "./trollbot";
-import { DeactivateMode } from "./types";
+import { ActionType, DeactivateMode } from "./types";
 import { getUsers, getUsersById, resolvers as userResolvers } from "./user";
 
 const uuidv4 = require("uuid").v4;
@@ -140,7 +142,6 @@ async function updateQuestionResponses(
       .del();
 
     // TODO: maybe undo action_handler if updated answer
-
     const [qr] = await trx("question_response")
       .insert({
         campaign_contact_id: campaignContactId,
@@ -149,31 +150,7 @@ async function updateQuestionResponses(
       })
       .returning("*");
 
-    const interactionStepResult = await trx("interaction_step")
-      // TODO: is this really parent_interaction_id or just interaction_id?
-      .where({
-        parent_interaction_id: interactionStepId,
-        answer_option: value
-      })
-      .whereNot("answer_actions", "")
-      .whereNotNull("answer_actions");
-
-    const interactionStepAction =
-      interactionStepResult.length && interactionStepResult[0].answer_actions;
-    if (interactionStepAction) {
-      // run interaction step handler
-      try {
-        // eslint-disable-next-line global-require,import/no-dynamic-require
-        const handler = require(`../action_handlers/${interactionStepAction}.js`);
-        handler.processAction(qr, interactionStepResult[0], campaignContactId);
-      } catch (err) {
-        logger.error("Handler for InteractionStep does not exist", {
-          error: errToObj(err),
-          interactionStepId,
-          interactionStepAction
-        });
-      }
-    }
+    await queueExternalSyncForAction(ActionType.QuestionReponse, qr.id);
   }
 
   const contact = loaders.campaignContact.load(campaignContactId);
@@ -199,10 +176,20 @@ async function deleteQuestionResponses(
     await accessRequired(user, organizationId, "SUPERVOLUNTEER");
   }
   // TODO: maybe undo action_handler
-  await trx("question_response")
+  const deletedQuestionResponses = await trx("question_response")
     .where({ campaign_contact_id: campaignContactId })
     .whereIn("interaction_step_id", interactionStepIds)
-    .del();
+    .del()
+    .returning(["id"]);
+
+  await Promise.all(
+    deletedQuestionResponses.map((deletedQuestionResponse) =>
+      queueExternalSyncForAction(
+        ActionType.QuestionReponse,
+        deletedQuestionResponse.id
+      )
+    )
+  );
 
   return contact;
 }
@@ -245,7 +232,7 @@ async function createOptOut(trx, campaignContactId, optOut, loaders, user) {
     }
   }
 
-  await cacheableData.optOut.save(trx, {
+  const optOutId = await cacheableData.optOut.save(trx, {
     cell,
     reason,
     assignmentId,
@@ -263,8 +250,12 @@ async function createOptOut(trx, campaignContactId, optOut, loaders, user) {
   }
 
   // Force reload with updated `is_opted_out` status
-  loaders.campaignContact.clear(campaignContactId);
-  return loaders.campaignContact.load(campaignContactId);
+  await loaders.campaignContact.clear(campaignContactId);
+  const campaignContact = await loaders.campaignContact.load(campaignContactId);
+  return {
+    campaignContact,
+    optOutId
+  };
 }
 
 async function editCampaignContactMessageStatus(
@@ -1590,7 +1581,17 @@ const rootMutations = {
       { optOut, campaignContactId },
       { loaders, user }
     ) => {
-      return createOptOut(r.knex, campaignContactId, optOut, loaders, user);
+      const result = await createOptOut(
+        r.knex,
+        campaignContactId,
+        optOut,
+        loaders,
+        user
+      );
+
+      await queueExternalSyncForAction(ActionType.OptOut, result.optOutId);
+
+      return result.campaignContact;
     },
 
     removeOptOut: async (_root, { cell }, { user }) => {
@@ -1777,6 +1778,7 @@ const rootMutations = {
       { loaders, user }
     ) => {
       const promises = [];
+      let optOutId;
 
       await r.knex.transaction(async (trx) => {
         if (message) {
@@ -1808,7 +1810,11 @@ const rootMutations = {
 
         if (optOut) {
           promises.push(
-            createOptOut(trx, campaignContactId, optOut, loaders, user)
+            createOptOut(trx, campaignContactId, optOut, loaders, user).then(
+              (result) => {
+                optOutId = result.optOutId;
+              }
+            )
           );
         }
 
@@ -1826,6 +1832,10 @@ const rootMutations = {
 
         await Promise.all(promises);
       });
+
+      if (optOut && optOutId) {
+        await queueExternalSyncForAction(ActionType.OptOut, optOutId);
+      }
 
       const contact = await loaders.campaignContact.load(campaignContactId);
       return contact;

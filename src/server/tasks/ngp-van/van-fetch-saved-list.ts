@@ -8,8 +8,8 @@ import { get, post } from "superagent";
 
 import { config } from "../../../config";
 import { notifyLargeCampaignEvent } from "../../api/lib/alerts";
-import type { VanSecretAuthPayload } from "../../lib/external-systems";
-import { withVan } from "../../lib/external-systems";
+import type { VanSecretAuthPayload } from "../../external-systems/van";
+import { withVan } from "../../external-systems/van";
 import { withTransaction } from "../../utils";
 import { getVanAuth, handleResult, normalizedPhoneOrNull } from "./lib";
 

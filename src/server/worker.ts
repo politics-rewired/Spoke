@@ -37,6 +37,7 @@ import {
   schedules as ngpVanSchedules,
   taskList as ngpVanTaskList
 } from "./tasks/ngp-van";
+import queueActionExternalSync from "./tasks/queue-action-external-sync";
 import {
   QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER,
   QUEUE_AUTOSEND_ORGANIZATION_INITIALS_TASK_IDENTIFIER,
@@ -55,6 +56,8 @@ import {
   sendNotificationDigestForUser,
   sendNotificationEmail
 } from "./tasks/send-notification-email";
+import syncContactOptOut from "./tasks/sync-contact-opt-out";
+import syncContactQuestionResponse from "./tasks/sync-contact-question-response";
 import syncSlackTeamMembers from "./tasks/sync-slack-team-members";
 import { trollPatrol, trollPatrolForOrganization } from "./tasks/troll-patrol";
 import updateOrgMessageUsage from "./tasks/update-org-message-usage";
@@ -86,6 +89,9 @@ export const getWorker = async (attempt = 0): Promise<Runner> => {
     "queue-daily-notifications": queueDailyNotifications,
     "send-notification-email": sendNotificationEmail,
     "send-notification-digest": sendNotificationDigestForUser,
+    "queue-action-external-sync": queueActionExternalSync,
+    "sync-contact-question-response": syncContactQuestionResponse,
+    "sync-contact-opt-out": syncContactOptOut,
     [QUEUE_AUTOSEND_INITIALS_TASK_IDENTIFIER]: queueAutoSendInitials,
     // prettier and eslint are fighting here
     // eslint-disable-next-line max-len

@@ -1,40 +1,69 @@
-import type { SuperAgentRequest } from "superagent";
+import isNil from "lodash/isNil";
 
 import { config } from "../../config";
+import { ActionType } from "../api/types";
 import { r } from "../models";
 
-const DEFAULT_MODE = "0"; // VoterFile mode
-
-export interface VanSecretAuthPayload {
-  username: string;
-  api_key: { __secret: string };
+interface CampaignData {
+  external_system_id: string;
+  campaign_contact_id: number;
 }
 
-export interface VanAuthPayload {
-  username: string;
-  api_key: string;
-}
-
-export enum VANDataCollectionStatus {
-  Active = "Active",
-  Archived = "Archived",
-  Inactive = "Inactive"
-}
-
-export interface PaginatedVanResponse<T> {
-  items: T[];
-  count: number;
-  nextPageLink: string;
-}
-
-export const withVan = (van: VanAuthPayload) => (
-  request: SuperAgentRequest
+export const queueExternalSyncForAction = async (
+  actionType: ActionType,
+  actionId: number
 ) => {
-  const [apiKey, existingMode] = van.api_key.split("|");
-  const mode = existingMode || DEFAULT_MODE;
-  request.auth(van.username, `${apiKey}|${mode}`, { type: "basic" });
-  request.url = `${config.VAN_BASE_URL}${request.url}`;
-  return request;
+  let campaign: CampaignData | null;
+
+  if (!config.EXPERIMENTAL_VAN_SYNC) return;
+
+  switch (actionType) {
+    case ActionType.QuestionReponse:
+      campaign = await r
+        .knex("campaign")
+        .join("interaction_step", "interaction_step.campaign_id", "campaign.id")
+        .join(
+          "all_question_response",
+          "all_question_response.interaction_step_id",
+          "interaction_step.id"
+        )
+        .where({ "all_question_response.id": actionId })
+        .select(["external_system_id", "campaign_contact_id"])
+        .first();
+      break;
+    case ActionType.OptOut:
+      campaign = await r
+        .knex("campaign")
+        .join("assignment", "assignment.campaign_id", "campaign.id")
+        .join("opt_out", "opt_out.assignment_id", "assignment.id")
+        .join(
+          "campaign_contact",
+          "campaign_contact.assignment_id",
+          "opt_out.assignment_id"
+        )
+        .where({ "opt_out.id": actionId })
+        .select([
+          "external_system_id",
+          "campaign_contact.id as campaign_contact_id"
+        ])
+        .first();
+      break;
+    default:
+      campaign = null;
+  }
+
+  if (isNil(campaign?.external_system_id)) return;
+
+  const payload = {
+    actionType,
+    actionId,
+    campaignContactId: campaign?.campaign_contact_id
+  };
+
+  await r.knex.raw(
+    `select graphile_worker.add_job('queue-action-external-sync', ?)`,
+    [payload]
+  );
 };
 
 export const refreshExternalSystem = (systemId: string) =>

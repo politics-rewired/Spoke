@@ -1,12 +1,9 @@
+/* eslint-disable import/prefer-default-export */
 import { VanOperationMode } from "../../api/external-system";
 import { r } from "../models";
 import { formatPage } from "./lib/pagination";
 import { sqlResolvers } from "./lib/utils";
-import type { RelayPageArgs } from "./types";
-
-export enum ExternalSystemType {
-  Van = "van"
-}
+import type { ExternalSystemType, RelayPageArgs } from "./types";
 
 interface ExternalSystem {
   id: string;
